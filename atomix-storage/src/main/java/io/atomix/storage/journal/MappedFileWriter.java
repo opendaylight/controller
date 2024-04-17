@@ -15,8 +15,6 @@
  */
 package io.atomix.storage.journal;
 
-import io.netty.util.internal.PlatformDependent;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
@@ -30,21 +28,15 @@ final class MappedFileWriter extends FileWriter {
     private final @NonNull MappedByteBuffer mappedBuffer;
     private final MappedFileReader reader;
     private final ByteBuffer buffer;
+    private volatile boolean updated;
 
-    MappedFileWriter(final Path path, final FileChannel channel, final int maxSegmentSize, final int maxEntrySize) {
+    MappedFileWriter(final Path path, final FileChannel channel, final MappedByteBuffer mappedBuffer,
+            final int maxSegmentSize, final int maxEntrySize) {
         super(path, channel, maxSegmentSize, maxEntrySize);
 
-        mappedBuffer = mapBuffer(channel, maxSegmentSize);
+        this.mappedBuffer = mappedBuffer;
         buffer = mappedBuffer.slice();
         reader = new MappedFileReader(path, mappedBuffer);
-    }
-
-    private static @NonNull MappedByteBuffer mapBuffer(final FileChannel channel, final int maxSegmentSize) {
-        try {
-            return channel.map(FileChannel.MapMode.READ_WRITE, 0, maxSegmentSize);
-        } catch (IOException e) {
-            throw new StorageException(e);
-        }
     }
 
     @Override
@@ -53,25 +45,10 @@ final class MappedFileWriter extends FileWriter {
     }
 
     @Override
-    MappedByteBuffer buffer() {
-        return mappedBuffer;
-    }
-
-    @Override
-    MappedFileWriter toMapped() {
-        return null;
-    }
-
-    @Override
-    DiskFileWriter toDisk() {
-        close();
-        return new DiskFileWriter(path, channel, maxSegmentSize, maxEntrySize);
-    }
-
-    @Override
     void writeEmptyHeader(final int position) {
         // Note: we issue a single putLong() instead of two putInt()s.
         buffer.putLong(position, 0L);
+        updated = true;
     }
 
     @Override
@@ -81,17 +58,22 @@ final class MappedFileWriter extends FileWriter {
 
     @Override
     void commitWrite(final int position, final ByteBuffer entry) {
-        // No-op, buffer is write-through
+        // indicate the data requires memory to file system sync
+        updated = true;
     }
 
     @Override
     void flush() {
-        mappedBuffer.force();
+        if (updated) {
+            // sync in-memory data with file storage if only there is new data
+            // NB extra call for mappedBuffer.force() may cause the msync exception
+            mappedBuffer.force();
+            updated = false;
+        }
     }
 
     @Override
     void close() {
         flush();
-        PlatformDependent.freeDirectBuffer(mappedBuffer);
     }
 }
