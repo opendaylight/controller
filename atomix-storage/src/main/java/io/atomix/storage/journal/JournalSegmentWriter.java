@@ -20,10 +20,8 @@ import static java.util.Objects.requireNonNull;
 
 import io.atomix.storage.journal.index.JournalIndex;
 import io.netty.buffer.ByteBuf;
-import java.nio.MappedByteBuffer;
 import java.util.zip.CRC32;
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -201,25 +199,5 @@ final class JournalSegmentWriter {
      */
     void close() {
         fileWriter.close();
-    }
-
-    /**
-     * Returns the mapped buffer underlying the segment writer, or {@code null} if the writer does not have such a
-     * buffer.
-     *
-     * @return the mapped buffer underlying the segment writer, or {@code null}.
-     */
-    @Nullable MappedByteBuffer buffer() {
-        return fileWriter.buffer();
-    }
-
-    @NonNull JournalSegmentWriter toMapped() {
-        final var newWriter = fileWriter.toMapped();
-        return newWriter == null ? this : new JournalSegmentWriter(this, newWriter);
-    }
-
-    @NonNull JournalSegmentWriter toFileChannel() {
-        final var newWriter = fileWriter.toDisk();
-        return newWriter == null ? this : new JournalSegmentWriter(this, newWriter);
     }
 }

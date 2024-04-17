@@ -19,48 +19,31 @@ import static io.atomix.storage.journal.SegmentEntry.HEADER_BYTES;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.file.Path;
 
 /**
  * A {@link StorageLevel#DISK} {@link FileWriter}.
  */
-final class DiskFileWriter extends FileWriter {
+final class DiskFileWriter implements FileWriter {
     private static final ByteBuffer ZERO_ENTRY_HEADER = ByteBuffer.wrap(new byte[HEADER_BYTES]);
 
+    private final FileChannel channel;
     private final DiskFileReader reader;
     private final ByteBuffer buffer;
 
-    DiskFileWriter(final Path path, final FileChannel channel, final int maxSegmentSize, final int maxEntrySize) {
-        super(path, channel, maxSegmentSize, maxEntrySize);
-        buffer = DiskFileReader.allocateBuffer(maxSegmentSize, maxEntrySize);
-        reader = new DiskFileReader(path, channel, buffer);
+    DiskFileWriter(final FileChannel channel, final int bufferSize) {
+        this.channel = channel;
+        this.buffer = ByteBuffer.allocate(bufferSize);
+        reader = new DiskFileReader(channel, buffer);
     }
 
     @Override
-    DiskFileReader reader() {
+    public FileReader reader() {
         return reader;
     }
 
     @Override
-    MappedByteBuffer buffer() {
-        return null;
-    }
-
-    @Override
-    MappedFileWriter toMapped() {
-        flush();
-        return new MappedFileWriter(path, channel, maxSegmentSize, maxEntrySize);
-    }
-
-    @Override
-    DiskFileWriter toDisk() {
-        return null;
-    }
-
-    @Override
-    void writeEmptyHeader(final int position) {
+    public void writeEmptyHeader(final int position) {
         try {
             channel.write(ZERO_ENTRY_HEADER.asReadOnlyBuffer(), position);
         } catch (IOException e) {
@@ -69,12 +52,12 @@ final class DiskFileWriter extends FileWriter {
     }
 
     @Override
-    ByteBuffer startWrite(final int position, final int size) {
+    public ByteBuffer startWrite(final int position, final int size) {
         return buffer.clear().slice(0, size);
     }
 
     @Override
-    void commitWrite(final int position, final ByteBuffer entry) {
+    public void commitWrite(final int position, final ByteBuffer entry) {
         try {
             channel.write(entry, position);
         } catch (IOException e) {
@@ -83,7 +66,7 @@ final class DiskFileWriter extends FileWriter {
     }
 
     @Override
-    void flush() {
+    public void flush() {
         if (channel.isOpen()) {
             try {
                 channel.force(true);
@@ -94,7 +77,7 @@ final class DiskFileWriter extends FileWriter {
     }
 
     @Override
-    void close() {
+    public void close() {
         flush();
     }
 }
