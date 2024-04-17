@@ -19,10 +19,8 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
 import java.nio.ByteBuffer;
-import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
-import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * An abstraction over how to write a {@link JournalSegmentFile}.
@@ -72,10 +70,4 @@ abstract sealed class FileWriter permits DiskFileWriter, MappedFileWriter {
     public final String toString() {
         return MoreObjects.toStringHelper(this).add("path", path).toString();
     }
-
-    abstract @Nullable MappedByteBuffer buffer();
-
-    abstract @Nullable MappedFileWriter toMapped();
-
-    abstract @Nullable DiskFileWriter toDisk();
 }
