@@ -15,27 +15,18 @@
  */
 package io.atomix.storage.journal;
 
-import static java.util.Objects.requireNonNull;
-
-import com.google.common.base.MoreObjects;
 import java.nio.ByteBuffer;
-import java.nio.file.Path;
 import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * An abstraction over how to read a {@link JournalSegmentFile}.
  */
-abstract sealed class FileReader permits DiskFileReader, MappedFileReader {
-    private final Path path;
-
-    FileReader(final Path path) {
-        this.path = requireNonNull(path);
-    }
+sealed interface FileReader permits DiskFileReader, MappedFileReader {
 
     /**
      * Invalidate any cache that is present, so that the next read is coherent with the backing file.
      */
-    abstract void invalidateCache();
+    void invalidateCache();
 
     /**
      * Read the some bytes as specified position. The sum of position and size is guaranteed not to exceed the maximum
@@ -45,10 +36,5 @@ abstract sealed class FileReader permits DiskFileReader, MappedFileReader {
      * @param size to read
      * @return resulting buffer
      */
-    abstract @NonNull ByteBuffer read(int position, int size);
-
-    @Override
-    public final String toString() {
-        return MoreObjects.toStringHelper(this).add("path", path).toString();
-    }
+    @NonNull ByteBuffer read(int position, int size);
 }

@@ -21,59 +21,37 @@ import static java.util.Objects.requireNonNull;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.file.Path;
 import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * A {@link StorageLevel#DISK} implementation of {@link FileReader}. Maintains an internal buffer.
  */
-final class DiskFileReader extends FileReader {
-    /**
-     * Just do not bother with IO smaller than this many bytes.
-     */
-    private static final int MIN_IO_SIZE = 8192;
-
+final class DiskFileReader implements FileReader {
     private final FileChannel channel;
     private final ByteBuffer buffer;
 
     // tracks where memory's first available byte maps to in terms of FileChannel.position()
     private int bufferPosition;
 
-    DiskFileReader(final Path path, final FileChannel channel, final int maxSegmentSize, final int maxEntrySize) {
-        this(path, channel, allocateBuffer(maxSegmentSize, maxEntrySize));
+    DiskFileReader(final FileChannel channel, final int bufferSize) {
+        this(channel, ByteBuffer.allocate(bufferSize));
     }
 
     // Note: take ownership of the buffer
-    DiskFileReader(final Path path, final FileChannel channel, final ByteBuffer buffer) {
-        super(path);
+    DiskFileReader(final FileChannel channel, final ByteBuffer buffer) {
         this.channel = requireNonNull(channel);
         this.buffer = buffer.flip();
         bufferPosition = 0;
     }
 
-    static ByteBuffer allocateBuffer(final int maxSegmentSize, final int maxEntrySize) {
-        return ByteBuffer.allocate(chooseBufferSize(maxSegmentSize, maxEntrySize));
-    }
-
-    private static int chooseBufferSize(final int maxSegmentSize, final int maxEntrySize) {
-        if (maxSegmentSize <= MIN_IO_SIZE) {
-            // just buffer the entire segment
-            return maxSegmentSize;
-        }
-
-        // one full entry plus its header, or MIN_IO_SIZE, which benefits the read of many small entries
-        final int minBufferSize = maxEntrySize + SegmentEntry.HEADER_BYTES;
-        return minBufferSize <= MIN_IO_SIZE ? MIN_IO_SIZE : minBufferSize;
-    }
-
     @Override
-    void invalidateCache() {
+    public void invalidateCache() {
         buffer.clear().flip();
         bufferPosition = 0;
     }
 
     @Override
-    ByteBuffer read(final int position, final int size) {
+    public ByteBuffer read(final int position, final int size) {
         // calculate logical seek distance between buffer's first byte and position and split flow between
         // forward-moving and backwards-moving code paths.
         final int seek = bufferPosition - position;

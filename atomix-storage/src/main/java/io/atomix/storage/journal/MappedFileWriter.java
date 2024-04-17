@@ -15,83 +15,60 @@
  */
 package io.atomix.storage.journal;
 
-import io.netty.util.internal.PlatformDependent;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.file.Path;
 import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * A {@link StorageLevel#MAPPED} {@link FileWriter}.
  */
-final class MappedFileWriter extends FileWriter {
+final class MappedFileWriter implements FileWriter {
     private final @NonNull MappedByteBuffer mappedBuffer;
     private final MappedFileReader reader;
     private final ByteBuffer buffer;
+    private volatile boolean updated;
 
-    MappedFileWriter(final Path path, final FileChannel channel, final int maxSegmentSize, final int maxEntrySize) {
-        super(path, channel, maxSegmentSize, maxEntrySize);
-
-        mappedBuffer = mapBuffer(channel, maxSegmentSize);
+    MappedFileWriter(final MappedByteBuffer mappedBuffer) {
+        this.mappedBuffer = mappedBuffer;
         buffer = mappedBuffer.slice();
-        reader = new MappedFileReader(path, mappedBuffer);
-    }
-
-    private static @NonNull MappedByteBuffer mapBuffer(final FileChannel channel, final int maxSegmentSize) {
-        try {
-            return channel.map(FileChannel.MapMode.READ_WRITE, 0, maxSegmentSize);
-        } catch (IOException e) {
-            throw new StorageException(e);
-        }
+        reader = new MappedFileReader(mappedBuffer);
     }
 
     @Override
-    MappedFileReader reader() {
+    public MappedFileReader reader() {
         return reader;
     }
 
     @Override
-    MappedByteBuffer buffer() {
-        return mappedBuffer;
-    }
-
-    @Override
-    MappedFileWriter toMapped() {
-        return null;
-    }
-
-    @Override
-    DiskFileWriter toDisk() {
-        close();
-        return new DiskFileWriter(path, channel, maxSegmentSize, maxEntrySize);
-    }
-
-    @Override
-    void writeEmptyHeader(final int position) {
+    public void writeEmptyHeader(final int position) {
         // Note: we issue a single putLong() instead of two putInt()s.
         buffer.putLong(position, 0L);
+        updated = true;
     }
 
     @Override
-    ByteBuffer startWrite(final int position, final int size) {
+    public ByteBuffer startWrite(final int position, final int size) {
         return buffer.slice(position, size);
     }
 
     @Override
-    void commitWrite(final int position, final ByteBuffer entry) {
-        // No-op, buffer is write-through
+    public void commitWrite(final int position, final ByteBuffer entry) {
+        // indicate the data requires memory to file system sync
+        updated = true;
     }
 
     @Override
-    void flush() {
-        mappedBuffer.force();
+    public void flush() {
+        if (updated) {
+            // sync in-memory data with file storage if only there is new data
+            // NB extra call for mappedBuffer.force() may cause the msync exception
+            mappedBuffer.force();
+            updated = false;
+        }
     }
 
     @Override
-    void close() {
+    public void close() {
         flush();
-        PlatformDependent.freeDirectBuffer(mappedBuffer);
     }
 }
