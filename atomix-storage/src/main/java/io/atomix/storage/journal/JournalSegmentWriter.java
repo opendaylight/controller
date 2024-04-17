@@ -20,7 +20,6 @@ import static java.util.Objects.requireNonNull;
 
 import com.esotericsoftware.kryo.KryoException;
 import io.atomix.storage.journal.index.JournalIndex;
-import java.nio.MappedByteBuffer;
 import java.util.zip.CRC32;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -226,25 +225,5 @@ final class JournalSegmentWriter<E> {
      */
     void close() {
         fileWriter.close();
-    }
-
-    /**
-     * Returns the mapped buffer underlying the segment writer, or {@code null} if the writer does not have such a
-     * buffer.
-     *
-     * @return the mapped buffer underlying the segment writer, or {@code null}.
-     */
-    @Nullable MappedByteBuffer buffer() {
-        return fileWriter.buffer();
-    }
-
-    @NonNull JournalSegmentWriter<E> toMapped() {
-        final var newWriter = fileWriter.toMapped();
-        return newWriter == null ? this : new JournalSegmentWriter<>(this, newWriter);
-    }
-
-    @NonNull JournalSegmentWriter<E> toFileChannel() {
-        final var newWriter = fileWriter.toDisk();
-        return newWriter == null ? this : new JournalSegmentWriter<>(this, newWriter);
     }
 }
