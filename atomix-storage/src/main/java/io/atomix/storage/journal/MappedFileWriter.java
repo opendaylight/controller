@@ -29,6 +29,8 @@ final class MappedFileWriter extends FileWriter {
     private final MappedFileReader reader;
     private final ByteBuffer buffer;
 
+    private boolean needForce;
+
     MappedFileWriter(final JournalSegmentFile file, final int maxEntrySize) {
         super(file, maxEntrySize);
 
@@ -66,6 +68,7 @@ final class MappedFileWriter extends FileWriter {
     void writeEmptyHeader(final int position) {
         // Note: we issue a single putLong() instead of two putInt()s.
         buffer.putLong(position, 0L);
+        needForce = true;
     }
 
     @Override
@@ -75,12 +78,17 @@ final class MappedFileWriter extends FileWriter {
 
     @Override
     void commitWrite(final int position, final ByteBuffer entry) {
-        // No-op, buffer is write-through
+        needForce = true;
     }
 
     @Override
     void flush() {
-        mappedBuffer.force();
+        // sync in-memory data with file storage if only there is new data
+        if (needForce) {
+            // NB extra call for mappedBuffer.force() may cause the msync(2) exception
+            needForce = false;
+            mappedBuffer.force();
+        }
     }
 
     @Override
