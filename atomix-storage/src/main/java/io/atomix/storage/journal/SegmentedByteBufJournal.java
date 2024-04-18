@@ -20,6 +20,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
+import io.netty.buffer.ByteBufAllocator;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
@@ -43,16 +44,17 @@ public final class SegmentedByteBufJournal implements ByteBufJournal {
 
     private final ConcurrentNavigableMap<Long, JournalSegment> segments = new ConcurrentSkipListMap<>();
     private final Collection<ByteBufReader> readers = ConcurrentHashMap.newKeySet();
-    private final String name;
-    private final StorageLevel storageLevel;
-    private final File directory;
+    private final @NonNull ByteBufAllocator allocator;
+    private final @NonNull StorageLevel storageLevel;
+    private final @NonNull File directory;
+    private final @NonNull String name;
+    private final @NonNull ByteBufWriter writer;
     private final int maxSegmentSize;
     private final int maxEntrySize;
     @Deprecated(forRemoval = true)
     private final int maxEntriesPerSegment;
     private final double indexDensity;
     private final boolean flushOnCommit;
-    private final @NonNull ByteBufWriter writer;
 
     // null when closed
     private JournalSegment currentSegment;
@@ -60,10 +62,11 @@ public final class SegmentedByteBufJournal implements ByteBufJournal {
 
     SegmentedByteBufJournal(final String name, final StorageLevel storageLevel, final File directory,
             final int maxSegmentSize, final int maxEntrySize, final int maxEntriesPerSegment, final double indexDensity,
-            final boolean flushOnCommit) {
+            final boolean flushOnCommit, final ByteBufAllocator allocator) {
         this.name = requireNonNull(name, "name cannot be null");
         this.storageLevel = requireNonNull(storageLevel, "storageLevel cannot be null");
         this.directory = requireNonNull(directory, "directory cannot be null");
+        this.allocator = requireNonNull(allocator, "allocator cannot be null");
         this.maxSegmentSize = maxSegmentSize;
         this.maxEntrySize = maxEntrySize;
         this.maxEntriesPerSegment = maxEntriesPerSegment;
@@ -256,7 +259,7 @@ public final class SegmentedByteBufJournal implements ByteBufJournal {
     private @NonNull JournalSegment createSegment(final long segmentId, final long firstIndex) {
         final JournalSegmentFile file;
         try {
-            file = JournalSegmentFile.createNew(name, directory, JournalSegmentDescriptor.builder()
+            file = JournalSegmentFile.createNew(name, directory, allocator, JournalSegmentDescriptor.builder()
                 .withId(segmentId)
                 .withIndex(firstIndex)
                 .withMaxSegmentSize(maxSegmentSize)
@@ -307,7 +310,7 @@ public final class SegmentedByteBufJournal implements ByteBufJournal {
             if (JournalSegmentFile.isSegmentFile(name, file)) {
                 final JournalSegmentFile segmentFile;
                 try {
-                    segmentFile = JournalSegmentFile.openExisting(file.toPath());
+                    segmentFile = JournalSegmentFile.openExisting(file.toPath(), allocator);
                 } catch (IOException e) {
                     throw new StorageException(e);
                 }
@@ -623,7 +626,7 @@ public final class SegmentedByteBufJournal implements ByteBufJournal {
          */
         public SegmentedByteBufJournal build() {
             return new SegmentedByteBufJournal(name, storageLevel, directory, maxSegmentSize, maxEntrySize,
-                maxEntriesPerSegment, indexDensity, flushOnCommit);
+                maxEntriesPerSegment, indexDensity, flushOnCommit, ByteBufAllocator.DEFAULT);
         }
     }
 }
