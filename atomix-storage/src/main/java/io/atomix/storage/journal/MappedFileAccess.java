@@ -17,41 +17,44 @@ package io.atomix.storage.journal;
 
 import static java.util.Objects.requireNonNull;
 
-import io.netty.util.internal.PlatformDependent;
-import java.io.UncheckedIOException;
-import java.nio.MappedByteBuffer;
-import org.eclipse.jdt.annotation.NonNullByDefault;
+import java.io.IOException;
+import java.nio.channels.FileChannel.MapMode;
+import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * {@link FileAccess} for {@link StorageLevel#MAPPED}.
  */
-@NonNullByDefault
 final class MappedFileAccess extends FileAccess {
-    private final MappedByteBuffer mappedBuffer;
+    private MappedByteBuf mappedBuf;
 
-    MappedFileAccess(final JournalSegmentFile file, final int maxEntrySize, final MappedByteBuffer mappedBuffer) {
+    private MappedFileAccess(final @NonNull JournalSegmentFile file, final int maxEntrySize,
+            final MappedByteBuf mappedBuf) {
         super(file, maxEntrySize);
-        this.mappedBuffer = requireNonNull(mappedBuffer);
+        this.mappedBuf = requireNonNull(mappedBuf);
+    }
+
+    static @NonNull MappedFileAccess of(final @NonNull JournalSegmentFile file, final int maxEntrySize)
+            throws IOException {
+        return new MappedFileAccess(file, maxEntrySize,
+            new MappedByteBuf(file.allocator(), file.channel().map(MapMode.READ_WRITE, 0, file.maxSize())));
     }
 
     @Override
     MappedFileReader newFileReader() {
-        return new MappedFileReader(file, mappedBuffer.slice());
+        return new MappedFileReader(file, mappedBuf.duplicate());
     }
 
     @Override
     MappedFileWriter newFileWriter() {
-        return new MappedFileWriter(file, maxEntrySize, mappedBuffer.slice(), () -> {
-           try {
-               mappedBuffer.force();
-           } catch (UncheckedIOException e) {
-               throw e.getCause();
-           }
-        });
+        return new MappedFileWriter(file, maxEntrySize, mappedBuf.duplicate(), mappedBuf);
     }
 
     @Override
     public void close() {
-        PlatformDependent.freeDirectBuffer(mappedBuffer);
+        final var toClose = mappedBuf;
+        if (toClose != null) {
+            mappedBuf = null;
+            toClose.release();
+        }
     }
 }

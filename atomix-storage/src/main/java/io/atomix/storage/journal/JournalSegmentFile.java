@@ -18,11 +18,11 @@ package io.atomix.storage.journal;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
+import io.netty.buffer.ByteBufAllocator;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
-import java.nio.channels.FileChannel.MapMode;
 import java.nio.file.Path;
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -37,19 +37,20 @@ final class JournalSegmentFile {
     private static final String EXTENSION = "log";
 
     private final @NonNull JournalSegmentDescriptor descriptor;
+    private final @NonNull ByteBufAllocator allocator;
+    private final @NonNull RandomAccessFile file;
     private final @NonNull Path path;
 
-    private final RandomAccessFile file;
-
-    private JournalSegmentFile(final Path path, final JournalSegmentDescriptor descriptor,
-            final RandomAccessFile file) {
+    private JournalSegmentFile(final Path path, final ByteBufAllocator allocator,
+            final JournalSegmentDescriptor descriptor, final RandomAccessFile file) {
         this.path = requireNonNull(path);
+        this.allocator = requireNonNull(allocator);
         this.descriptor = requireNonNull(descriptor);
         this.file = requireNonNull(file);
     }
 
     static @NonNull JournalSegmentFile createNew(final String name, final File directory,
-            final JournalSegmentDescriptor descriptor) throws IOException {
+            final ByteBufAllocator allocator, final JournalSegmentDescriptor descriptor) throws IOException {
         final var file = createSegmentFile(name, directory, descriptor.id());
         final var raf = new RandomAccessFile(file, "rw");
         try {
@@ -59,10 +60,11 @@ final class JournalSegmentFile {
             raf.close();
             throw e;
         }
-        return new JournalSegmentFile(file.toPath(), descriptor, raf);
+        return new JournalSegmentFile(file.toPath(), allocator, descriptor, raf);
     }
 
-    static @NonNull JournalSegmentFile openExisting(final Path path) throws IOException {
+    static @NonNull JournalSegmentFile openExisting(final Path path, final ByteBufAllocator allocator)
+            throws IOException {
         final var raf = new RandomAccessFile(path.toFile(), "rw");
         final JournalSegmentDescriptor descriptor;
         try {
@@ -72,16 +74,25 @@ final class JournalSegmentFile {
             raf.close();
             throw e;
         }
-        return new JournalSegmentFile(path, descriptor, raf);
+        return new JournalSegmentFile(path, allocator, descriptor, raf);
     }
 
     /**
-     * Returns the segment file.
+     * Returns the segment file path.
      *
-     * @return The segment file.
+     * @return The segment file path
      */
     @NonNull Path path() {
         return path;
+    }
+
+    /**
+     * Returns the {@link ByteBufAllocator} for this file.
+     *
+     * @return A {@link ByteBufAllocator}
+     */
+    @NonNull ByteBufAllocator allocator() {
+        return allocator;
     }
 
     /**
@@ -134,7 +145,7 @@ final class JournalSegmentFile {
     @NonNull FileAccess newAccess(final StorageLevel level, final int maxEntrySize) throws IOException {
         return switch (level) {
             case DISK -> new DiskFileAccess(this, maxEntrySize);
-            case MAPPED -> new MappedFileAccess(this, maxEntrySize, channel().map(MapMode.READ_WRITE, 0, maxSize()));
+            case MAPPED -> MappedFileAccess.of(this, maxEntrySize);
         };
     }
 
