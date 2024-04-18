@@ -22,7 +22,6 @@ import io.atomix.storage.journal.JournalSegment.Inactive;
 import io.atomix.storage.journal.StorageException.TooLarge;
 import io.atomix.storage.journal.index.JournalIndex;
 import io.atomix.storage.journal.index.Position;
-import io.netty.buffer.Unpooled;
 import java.io.EOFException;
 import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNull;
@@ -98,8 +97,8 @@ final class JournalSegmentWriter {
 
         // Allocate entry space
         final var diskEntry = fileWriter.startWrite(position, writeLimit + HEADER_BYTES);
-        // Create a ByteBuf covering the bytes. Note we do not use slice(), as Netty will do the equivalent.
-        final var bytes = Unpooled.wrappedBuffer(diskEntry.position(HEADER_BYTES));
+        // Create a ByteBuf covering the bytes
+        final var bytes = diskEntry.slice(HEADER_BYTES, writeLimit);
         try {
             mapper.objectToBytes(entry, bytes);
         } catch (EOFException e) {
@@ -117,14 +116,15 @@ final class JournalSegmentWriter {
             throw new StorageException(e);
         }
 
-        // Determine length, trim distEntry and compute checksum. We are okay with computeChecksum() consuming
-        // the buffer, as we rewind() it back.
+        // Determine length, trim disktEntry and compute checksum.
         final var length = bytes.readableBytes();
-        final var checksum = SegmentEntry.computeChecksum(
-            diskEntry.limit(HEADER_BYTES + length).position(HEADER_BYTES));
+        diskEntry.writerIndex(diskEntry.readerIndex() + HEADER_BYTES + length);
+
+        // Compute the checksum
+        final var checksum = SegmentEntry.computeChecksum(diskEntry.nioBuffer(HEADER_BYTES, length));
 
         // update the header and commit entry to file
-        fileWriter.commitWrite(position, diskEntry.rewind().putInt(0, length).putInt(Integer.BYTES, checksum));
+        fileWriter.commitWrite(position, diskEntry.setInt(0, length).setInt(Integer.BYTES, checksum));
 
         // Update the last entry with the correct index/term/length.
         currentPosition = bodyPosition + length;
