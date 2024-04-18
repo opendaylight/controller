@@ -18,7 +18,7 @@ package io.atomix.storage.journal;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
-import java.nio.ByteBuffer;
+import io.netty.buffer.ByteBuf;
 import org.eclipse.jdt.annotation.NonNull;
 
 /**
@@ -44,7 +44,7 @@ abstract sealed class FileReader permits DiskFileReader, MappedFileReader {
      * @param size to read
      * @return resulting buffer
      */
-    abstract @NonNull ByteBuffer read(int position, int size);
+    abstract @NonNull ByteBuf read(int position, int size);
 
     @Override
     public final String toString() {

@@ -15,7 +15,7 @@
  */
 package io.atomix.storage.journal;
 
-import java.nio.ByteBuffer;
+import io.netty.buffer.ByteBuf;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -34,12 +34,12 @@ final class DiskFileAccess extends FileAccess {
 
     @Override
     DiskFileReader newFileReader() {
-        return new DiskFileReader(file, allocateBuffer(maxEntrySize, file.maxSize()));
+        return new DiskFileReader(file, allocateBuffer(file, maxEntrySize));
     }
 
     @Override
     DiskFileWriter newFileWriter() {
-        return new DiskFileWriter(file, maxEntrySize, allocateBuffer(maxEntrySize, file.maxSize()));
+        return new DiskFileWriter(file, maxEntrySize, allocateBuffer(file, maxEntrySize));
     }
 
     @Override
@@ -47,8 +47,9 @@ final class DiskFileAccess extends FileAccess {
         // No-op
     }
 
-    private static ByteBuffer allocateBuffer(final int maxEntrySize, final int maxSegmentSize) {
-        return ByteBuffer.allocate(chooseBufferSize(maxEntrySize, maxSegmentSize));
+    private static ByteBuf allocateBuffer(final JournalSegmentFile file, final int maxEntrySize) {
+        final var bufferSize = chooseBufferSize(maxEntrySize, file.maxSize());
+        return file.allocator().heapBuffer(bufferSize, bufferSize);
     }
 
     private static int chooseBufferSize(final int maxEntrySize, final int maxSegmentSize) {
