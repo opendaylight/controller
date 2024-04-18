@@ -18,8 +18,8 @@ package io.atomix.storage.journal;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
+import io.netty.buffer.ByteBuf;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 
 /**
  * An abstraction over how to write a {@link JournalSegmentFile}.
@@ -57,15 +57,15 @@ abstract sealed class FileWriter permits DiskFileWriter, MappedFileWriter {
 
     /**
      * Allocate file space. Note that the allocated space may be a buffer disconnected from the file. Any modifications
-     * to the returned buffer need to be committed via {@link #commitWrite(int, ByteBuffer)}.
+     * to the returned buffer need to be committed via {@link #commitWrite(int, ByteBuf)}.
      *
      * @param position position to start from
      * @param size the size to allocate
-     * @return A {@link ByteBuffer} covering the allocated area
+     * @return A {@link ByteBuf} covering the allocated area
      */
-    abstract ByteBuffer startWrite(int position, int size);
+    abstract ByteBuf startWrite(int position, int size);
 
-    abstract void commitWrite(int position, ByteBuffer entry);
+    abstract void commitWrite(int position, ByteBuf entry);
 
     /**
      * Flushes written entries to disk.
