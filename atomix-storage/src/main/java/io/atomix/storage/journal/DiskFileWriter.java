@@ -17,19 +17,20 @@ package io.atomix.storage.journal;
 
 import static io.atomix.storage.journal.SegmentEntry.HEADER_BYTES;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
 /**
  * A {@link StorageLevel#DISK} {@link FileWriter}.
  */
 final class DiskFileWriter extends FileWriter {
-    private static final ByteBuffer ZERO_ENTRY_HEADER = ByteBuffer.wrap(new byte[HEADER_BYTES]);
+    private static final ByteBuf ZERO_ENTRY_HEADER = Unpooled.wrappedBuffer(new byte[HEADER_BYTES]);
 
     private final DiskFileReader reader;
     private final FileChannel channel;
-    private final ByteBuffer buffer;
+    private final ByteBuf buffer;
 
     DiskFileWriter(final JournalSegmentFile file, final int maxEntrySize) {
         super(file, maxEntrySize);
@@ -46,21 +47,21 @@ final class DiskFileWriter extends FileWriter {
     @Override
     void writeEmptyHeader(final int position) {
         try {
-            channel.write(ZERO_ENTRY_HEADER.asReadOnlyBuffer(), position);
+            ZERO_ENTRY_HEADER.getBytes(0, channel, position, HEADER_BYTES);
         } catch (IOException e) {
             throw new StorageException(e);
         }
     }
 
     @Override
-    ByteBuffer startWrite(final int position, final int size) {
+    ByteBuf startWrite(final int position, final int size) {
         return buffer.clear().slice(0, size);
     }
 
     @Override
-    void commitWrite(final int position, final ByteBuffer entry) {
+    void commitWrite(final int position, final ByteBuf entry) {
         try {
-            channel.write(entry, position);
+            entry.readBytes(channel, position, entry.readableBytes());
         } catch (IOException e) {
             throw new StorageException(e);
         }

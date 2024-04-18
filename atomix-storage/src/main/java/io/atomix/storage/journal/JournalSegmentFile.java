@@ -18,12 +18,12 @@ package io.atomix.storage.journal;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.channels.FileChannel.MapMode;
 import java.nio.file.Path;
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -139,7 +139,7 @@ final class JournalSegmentFile {
     @NonNull FileAccess newAccess(final StorageLevel level, final int maxEntrySize) throws IOException {
         return switch (level) {
             case DISK -> new DiskFileAccess(this, maxEntrySize);
-            case MAPPED -> new MappedFileAccess(this, maxEntrySize, channel().map(MapMode.READ_WRITE, 0, maxSize()));
+            case MAPPED -> MappedFileAccess.of(this, maxEntrySize);
         };
     }
 
@@ -147,8 +147,9 @@ final class JournalSegmentFile {
         file.close();
     }
 
-    ByteBuffer allocateBuffer(final int maxEntrySize) {
-        return ByteBuffer.allocate(chooseBufferSize(maxEntrySize));
+    ByteBuf allocateBuffer(final int maxEntrySize) {
+        final var bufferSize = chooseBufferSize(maxEntrySize);
+        return Unpooled.buffer(bufferSize, bufferSize);
     }
 
     @Override
