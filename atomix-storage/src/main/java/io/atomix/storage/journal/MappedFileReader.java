@@ -15,17 +15,17 @@
  */
 package io.atomix.storage.journal;
 
-import java.nio.ByteBuffer;
+import io.netty.buffer.ByteBuf;
 
 /**
  * A {@link StorageLevel#MAPPED} implementation of {@link FileReader}. Operates on direct mapping of the entire file.
  */
 final class MappedFileReader extends FileReader {
-    private final ByteBuffer buffer;
+    private final ByteBuf buffer;
 
-    MappedFileReader(final JournalSegmentFile file, final ByteBuffer buffer) {
+    MappedFileReader(final JournalSegmentFile file, final ByteBuf buffer) {
         super(file);
-        this.buffer = buffer.asReadOnlyBuffer();
+        this.buffer = buffer.asReadOnly();
     }
 
     @Override
@@ -34,7 +34,7 @@ final class MappedFileReader extends FileReader {
     }
 
     @Override
-    ByteBuffer read(final int position, final int size) {
+    ByteBuf read(final int position, final int size) {
         return buffer.slice(position, size);
     }
 }

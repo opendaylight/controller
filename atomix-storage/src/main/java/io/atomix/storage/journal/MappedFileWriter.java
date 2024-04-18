@@ -17,19 +17,19 @@ package io.atomix.storage.journal;
 
 import static java.util.Objects.requireNonNull;
 
+import io.netty.buffer.ByteBuf;
 import java.io.Flushable;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 
 /**
  * A {@link StorageLevel#MAPPED} {@link FileWriter}.
  */
 final class MappedFileWriter extends FileWriter {
     private final MappedFileReader reader;
-    private final ByteBuffer buffer;
+    private final ByteBuf buffer;
     private final Flushable flush;
 
-    MappedFileWriter(final JournalSegmentFile file, final int maxEntrySize, final ByteBuffer buffer,
+    MappedFileWriter(final JournalSegmentFile file, final int maxEntrySize, final ByteBuf buffer,
             final Flushable flush) {
         super(file, maxEntrySize);
         this.buffer = requireNonNull(buffer);
@@ -45,16 +45,16 @@ final class MappedFileWriter extends FileWriter {
     @Override
     void writeEmptyHeader(final int position) {
         // Note: we issue a single putLong() instead of two putInt()s.
-        buffer.putLong(position, 0L);
+        buffer.setLong(position, 0L);
     }
 
     @Override
-    ByteBuffer startWrite(final int position, final int size) {
+    ByteBuf startWrite(final int position, final int size) {
         return buffer.slice(position, size);
     }
 
     @Override
-    void commitWrite(final int position, final ByteBuffer entry) {
+    void commitWrite(final int position, final ByteBuf entry) {
         // No-op, buffer is write-through
     }
 

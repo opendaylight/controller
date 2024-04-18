@@ -19,7 +19,6 @@ import static com.google.common.base.Verify.verify;
 import static java.util.Objects.requireNonNull;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,7 +99,7 @@ final class JournalSegmentReader {
         // Slice off the entry's bytes
         final var entryBuffer = buffer.slice(SegmentEntry.HEADER_BYTES, length);
         // If the stored checksum does not equal the computed checksum, do not proceed further
-        final var computed = SegmentEntry.computeChecksum(entryBuffer);
+        final var computed = SegmentEntry.computeChecksum(entryBuffer.nioBuffer());
         if (checksum != computed) {
             LOG.warn("Expected checksum {}, computed {}", Integer.toHexString(checksum), Integer.toHexString(computed));
             invalidateCache();
@@ -111,7 +110,7 @@ final class JournalSegmentReader {
         position += SegmentEntry.HEADER_BYTES + length;
 
         // rewind and return
-        return Unpooled.wrappedBuffer(entryBuffer.rewind());
+        return entryBuffer;
     }
 
     /**
