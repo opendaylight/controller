@@ -48,8 +48,8 @@ final class JournalSegmentWriter<E> {
         this.namespace = requireNonNull(namespace);
         maxSegmentSize = segment.descriptor().maxSegmentSize();
         this.maxEntrySize = maxEntrySize;
-        // adjust lastEntry value
-        reset(0);
+        // recover position and last written
+        reset(JournalSegmentDescriptor.BYTES, segment.firstIndex(), Long.MAX_VALUE);
     }
 
     JournalSegmentWriter(final JournalSegmentWriter<E> previous, final FileWriter fileWriter) {
@@ -146,68 +146,57 @@ final class JournalSegmentWriter<E> {
         return ugly;
     }
 
-    /**
-     * Resets the head of the segment to the given index.
-     *
-     * @param index the index to which to reset the head of the segment
-     */
-    void reset(final long index) {
+    private void reset(final int startPosition, final long startIndex, final long endIndex) {
         // acquire ownership of cache and make sure reader does not see anything we've done once we're done
         final var fileReader = fileWriter.reader();
         try {
-            resetWithBuffer(fileReader, index);
+            reset(fileReader, startPosition, startIndex, endIndex);
         } finally {
             // Make sure reader does not see anything we've done
             fileReader.invalidateCache();
         }
     }
 
-    private void resetWithBuffer(final FileReader fileReader, final long index) {
-        long nextIndex = segment.firstIndex();
-
-        // Clear the buffer indexes and acquire ownership of the buffer
-        currentPosition = JournalSegmentDescriptor.BYTES;
+    private void reset(final FileReader fileReader, final int startPosition, final long startIndex,
+            final long endIndex) {
+        long currentIndex = startIndex;
+        currentPosition = startPosition;
         final var reader = new JournalSegmentReader<>(segment, fileReader, maxEntrySize, namespace);
-        reader.setPosition(JournalSegmentDescriptor.BYTES);
+        reader.setPosition(startPosition);
 
-        while (index == 0 || nextIndex <= index) {
-            final var entry = reader.readEntry(nextIndex);
-            if (entry == null) {
-                break;
-            }
-
+        Indexed<E> entry;
+        while (currentIndex <= endIndex && (entry = reader.readEntry(currentIndex)) != null) {
             lastEntry = entry;
-            this.index.index(nextIndex, currentPosition);
-            nextIndex++;
-
-            // Update the current position for indexing.
-            currentPosition = currentPosition + HEADER_BYTES + entry.size();
+            this.index.index(currentIndex++, currentPosition);
+            currentPosition += HEADER_BYTES + entry.size();
         }
     }
 
     /**
      * Truncates the log to the given index.
      *
-     * @param index The index to which to truncate the log.
+     * @param endIndex The index to which to truncate the log.
      */
-    void truncate(final long index) {
+    void truncate(final long endIndex) {
         // If the index is greater than or equal to the last index, skip the truncate.
-        if (index >= getLastIndex()) {
+        if (endIndex >= getLastIndex()) {
             return;
         }
 
-        // Reset the last entry.
+        // Reset the state
         lastEntry = null;
+        currentPosition = JournalSegmentDescriptor.BYTES;
 
-        // Truncate the index.
-        this.index.truncate(index);
+        // Truncate the index, find nearest indexed entry
+        final var nearest = index.truncate(endIndex);
 
-        if (index < segment.firstIndex()) {
-            // Reset the writer to the first entry.
-            currentPosition = JournalSegmentDescriptor.BYTES;
-        } else {
-            // Reset the writer to the given index.
-            reset(index);
+        // recover position and last written
+        if (endIndex >= segment.firstIndex()) {
+            if (nearest == null) {
+                reset(JournalSegmentDescriptor.BYTES, segment.firstIndex(), endIndex);
+            } else {
+                reset(nearest.position(), nearest.index(), endIndex);
+            }
         }
 
         // Zero the entry header at current channel position.
