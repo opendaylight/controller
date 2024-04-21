@@ -15,16 +15,19 @@
  */
 package io.atomix.storage.journal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * A {@link JournalReader} traversing only committed entries.
  */
+@NonNullByDefault
 final class CommitsSegmentJournalReader<E> extends SegmentedJournalReader<E> {
-    CommitsSegmentJournalReader(SegmentedJournal<E> journal, JournalSegment segment) {
+    CommitsSegmentJournalReader(final SegmentedJournal<E> journal, final JournalSegment segment) {
         super(journal, segment);
     }
 
     @Override
-    public Indexed<E> tryNext() {
-        return getNextIndex() <= journal.getCommitIndex() ? super.tryNext() : null;
+    public <T> T tryNext(final EntryMapper<E, T> mapper) {
+        return getNextIndex() <= journal.getCommitIndex() ? super.tryNext(mapper) : null;
     }
 }

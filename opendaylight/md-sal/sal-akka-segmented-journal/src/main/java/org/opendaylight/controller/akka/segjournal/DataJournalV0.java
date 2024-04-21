@@ -91,22 +91,22 @@ final class DataJournalV0 extends DataJournal {
     private void handleReplayMessages(final JournalReader<DataJournalEntry> reader, final ReplayMessages message) {
         int count = 0;
         while (count < message.max && reader.getNextIndex() <= message.toSequenceNr) {
-            final var next = reader.tryNext();
-            if (next == null) {
+            final var repr = reader.tryNext((index, entry, size) -> {
+                LOG.trace("{}: replay index={} entry={}", persistenceId, index, entry);
+                updateLargestSize(size);
+                if (entry instanceof FromPersistence fromPersistence) {
+                    return fromPersistence.toRepr(persistenceId, index);
+                }
+                throw new VerifyException("Unexpected entry " + entry);
+            });
+
+            if (repr == null) {
                 break;
             }
 
-            LOG.trace("{}: replay {}", persistenceId, next);
-            updateLargestSize(next.size());
-            final var entry = next.entry();
-            if (entry instanceof FromPersistence fromPersistence) {
-                final var repr = fromPersistence.toRepr(persistenceId, next.index());
-                LOG.debug("{}: replaying {}", persistenceId, repr);
-                message.replayCallback.accept(repr);
-                count++;
-            } else {
-                throw new VerifyException("Unexpected entry " + entry);
-            }
+            LOG.debug("{}: replaying {}", persistenceId, repr);
+            message.replayCallback.accept(repr);
+            count++;
         }
         LOG.debug("{}: successfully replayed {} entries", persistenceId, count);
     }
