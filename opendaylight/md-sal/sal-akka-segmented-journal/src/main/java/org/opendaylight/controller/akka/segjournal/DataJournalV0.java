@@ -90,9 +90,9 @@ final class DataJournalV0 extends DataJournal {
 
     private void handleReplayMessages(final JournalReader<DataJournalEntry> reader, final ReplayMessages message) {
         int count = 0;
-        while (count < message.max) {
+        while (count < message.max && reader.getNextIndex() <= message.toSequenceNr) {
             final var next = reader.tryNext();
-            if (next == null || next.index() > message.toSequenceNr) {
+            if (next == null) {
                 break;
             }
 
