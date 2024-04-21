@@ -226,7 +226,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
 
     // Forward reader to specified index
     long next = reader.getNextIndex();
-    while (index > next && reader.tryNext() != null) {
+    while (index > next && reader.tryAdvance()) {
         next = reader.getNextIndex();
     }
 

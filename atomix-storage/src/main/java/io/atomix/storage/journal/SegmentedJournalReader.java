@@ -18,10 +18,15 @@ package io.atomix.storage.journal;
 
 import static java.util.Objects.requireNonNull;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 /**
  * A {@link JournalReader} traversing all entries.
  */
 sealed class SegmentedJournalReader<E> implements JournalReader<E> permits CommitsSegmentJournalReader {
+    // Marker non-null object for tryAdvance()
+    private static final @NonNull Object ADVARNCED = new Object();
+
     final SegmentedJournal<E> journal;
 
     private JournalSegment currentSegment;
@@ -64,7 +69,7 @@ sealed class SegmentedJournalReader<E> implements JournalReader<E> permits Commi
         if (index < nextIndex) {
             rewind(index);
         } else if (index > nextIndex) {
-            while (index > nextIndex && tryNext() != null) {
+            while (index > nextIndex && tryAdvance()) {
                 // Nothing else
             }
         } else {
@@ -81,7 +86,7 @@ sealed class SegmentedJournalReader<E> implements JournalReader<E> permits Commi
             nextIndex = currentSegment.firstIndex();
             currentReader.setPosition(JournalSegmentDescriptor.BYTES);
         }
-        while (nextIndex < index && tryNext() != null) {
+        while (nextIndex < index && tryAdvance()) {
             // Nothing else
         }
     }
@@ -104,7 +109,7 @@ sealed class SegmentedJournalReader<E> implements JournalReader<E> permits Commi
     }
 
     @Override
-    public Indexed<E> tryNext() {
+    public <T> T tryNext(final EntryMapper<E, T> mapper) {
         final var index = nextIndex;
         var buf = currentReader.readBytes(index);
         if (buf == null) {
@@ -124,8 +129,14 @@ sealed class SegmentedJournalReader<E> implements JournalReader<E> permits Commi
         }
 
         final var entry = journal.serializer().deserialize(buf);
+        final var ret = requireNonNull(mapper.mapEntry(index, entry, buf.readableBytes()));
         nextIndex = index + 1;
-        return new Indexed<>(index, entry, buf.readableBytes());
+        return ret;
+    }
+
+    @Override
+    public final boolean tryAdvance() {
+        return tryNext((index, entry, size) -> ADVARNCED) != null;
     }
 
     @Override
