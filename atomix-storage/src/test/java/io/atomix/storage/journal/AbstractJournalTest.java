@@ -16,6 +16,7 @@
  */
 package io.atomix.storage.journal;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -119,14 +120,12 @@ public abstract class AbstractJournalTest {
             var entry1 = reader.tryNext();
             assertNotNull(entry1);
             assertEquals(1, entry1.index());
-            assertEquals(entry1, reader.getCurrentEntry());
 
             // Test reading a second entry
             assertEquals(2, reader.getNextIndex());
             var entry2 = reader.tryNext();
             assertNotNull(entry2);
             assertEquals(2, entry2.index());
-            assertEquals(entry2, reader.getCurrentEntry());
             assertEquals(3, reader.getNextIndex());
             assertNull(reader.tryNext());
 
@@ -135,13 +134,11 @@ public abstract class AbstractJournalTest {
             entry1 = reader.tryNext();
             assertNotNull(entry1);
             assertEquals(1, entry1.index());
-            assertEquals(entry1, reader.getCurrentEntry());
 
             assertEquals(2, reader.getNextIndex());
             entry2 = reader.tryNext();
             assertNotNull(entry2);
             assertEquals(2, entry2.index());
-            assertEquals(entry2, reader.getCurrentEntry());
             assertNull(reader.tryNext());
 
             // Reset the reader.
@@ -152,13 +149,11 @@ public abstract class AbstractJournalTest {
             entry1 = reader.tryNext();
             assertNotNull(entry1);
             assertEquals(1, entry1.index());
-            assertEquals(entry1, reader.getCurrentEntry());
 
             assertEquals(2, reader.getNextIndex());
             entry2 = reader.tryNext();
             assertNotNull(entry2);
             assertEquals(2, entry2.index());
-            assertEquals(entry2, reader.getCurrentEntry());
             assertNull(reader.tryNext());
 
             // Truncate the journal and write a different entry.
@@ -173,14 +168,10 @@ public abstract class AbstractJournalTest {
             // Reset the reader to a specific index and read the last entry again.
             reader.reset(2);
 
-            final var current = reader.getCurrentEntry();
-            assertNotNull(current);
-            assertEquals(1, current.index());
             assertEquals(2, reader.getNextIndex());
             entry2 = reader.tryNext();
             assertNotNull(entry2);
             assertEquals(2, entry2.index());
-            assertEquals(entry2, reader.getCurrentEntry());
             assertNull(reader.tryNext());
         }
     }
@@ -267,19 +258,17 @@ public abstract class AbstractJournalTest {
                 var entry = reader.tryNext();
                 assertNotNull(entry);
                 assertEquals(i, entry.index());
-                assertEquals(32, entry.entry().bytes().length);
+                assertArrayEquals(ENTRY.bytes(), entry.entry().bytes());
                 reader.reset(i);
                 entry = reader.tryNext();
                 assertNotNull(entry);
                 assertEquals(i, entry.index());
-                assertEquals(32, entry.entry().bytes().length);
+                assertArrayEquals(ENTRY.bytes(), entry.entry().bytes());
 
                 if (i > 6) {
                     reader.reset(i - 5);
-                    final var current = reader.getCurrentEntry();
-                    assertNotNull(current);
-                    assertEquals(i - 6, current.index());
                     assertEquals(i - 5, reader.getNextIndex());
+                    assertNotNull(reader.tryNext());
                     reader.reset(i + 1);
                 }
 
@@ -291,7 +280,7 @@ public abstract class AbstractJournalTest {
                 entry = reader.tryNext();
                 assertNotNull(entry);
                 assertEquals(i, entry.index());
-                assertEquals(32, entry.entry().bytes().length);
+                assertArrayEquals(ENTRY.bytes(), entry.entry().bytes());
             }
         }
     }
@@ -358,13 +347,11 @@ public abstract class AbstractJournalTest {
 
             journal.compact(entriesPerSegment * 5 + 1);
 
-            assertNull(uncommittedReader.getCurrentEntry());
             assertEquals(entriesPerSegment * 5 + 1, uncommittedReader.getNextIndex());
             var entry = uncommittedReader.tryNext();
             assertNotNull(entry);
             assertEquals(entriesPerSegment * 5 + 1, entry.index());
 
-            assertNull(committedReader.getCurrentEntry());
             assertEquals(entriesPerSegment * 5 + 1, committedReader.getNextIndex());
             entry = committedReader.tryNext();
             assertNotNull(entry);

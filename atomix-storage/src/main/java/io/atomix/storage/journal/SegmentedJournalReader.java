@@ -26,7 +26,6 @@ sealed class SegmentedJournalReader<E> implements JournalReader<E> permits Commi
 
     private JournalSegment currentSegment;
     private JournalSegmentReader currentReader;
-    private Indexed<E> currentEntry;
     private long nextIndex;
 
     SegmentedJournalReader(final SegmentedJournal<E> journal, final JournalSegment segment) {
@@ -34,17 +33,11 @@ sealed class SegmentedJournalReader<E> implements JournalReader<E> permits Commi
         currentSegment = requireNonNull(segment);
         currentReader = segment.createReader();
         nextIndex = currentSegment.firstIndex();
-        currentEntry = null;
     }
 
     @Override
     public final long getFirstIndex() {
         return journal.getFirstSegment().firstIndex();
-    }
-
-    @Override
-    public final Indexed<E> getCurrentEntry() {
-        return currentEntry;
     }
 
     @Override
@@ -59,7 +52,6 @@ sealed class SegmentedJournalReader<E> implements JournalReader<E> permits Commi
         currentSegment = journal.getFirstSegment();
         currentReader = currentSegment.createReader();
         nextIndex = currentSegment.firstIndex();
-        currentEntry = null;
     }
 
     @Override
@@ -113,10 +105,11 @@ sealed class SegmentedJournalReader<E> implements JournalReader<E> permits Commi
 
     @Override
     public Indexed<E> tryNext() {
-        var buf = currentReader.readBytes(nextIndex);
+        final var index = nextIndex;
+        var buf = currentReader.readBytes(index);
         if (buf == null) {
             final var nextSegment = journal.getNextSegment(currentSegment.firstIndex());
-            if (nextSegment == null || nextSegment.firstIndex() != nextIndex) {
+            if (nextSegment == null || nextSegment.firstIndex() != index) {
                 return null;
             }
 
@@ -124,15 +117,15 @@ sealed class SegmentedJournalReader<E> implements JournalReader<E> permits Commi
 
             currentSegment = nextSegment;
             currentReader = currentSegment.createReader();
-            buf = currentReader.readBytes(nextIndex);
+            buf = currentReader.readBytes(index);
             if (buf == null) {
                 return null;
             }
         }
 
         final var entry = journal.serializer().deserialize(buf);
-        currentEntry = new Indexed<>(nextIndex++, entry, buf.readableBytes());
-        return currentEntry;
+        nextIndex = index + 1;
+        return new Indexed<>(index, entry, buf.readableBytes());
     }
 
     @Override
