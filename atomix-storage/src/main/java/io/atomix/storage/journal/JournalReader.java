@@ -15,6 +15,7 @@
  */
 package io.atomix.storage.journal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
@@ -22,6 +23,7 @@ import org.eclipse.jdt.annotation.Nullable;
  *
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
+@NonNullByDefault
 public interface JournalReader<E> extends AutoCloseable {
     /**
      * Raft log reader mode.
@@ -35,6 +37,25 @@ public interface JournalReader<E> extends AutoCloseable {
          * Reads committed entries from the log.
          */
         COMMITS,
+    }
+
+    /**
+     * A journal entry processor. Responsible for transforming entries into their internal representation.
+     *
+     * @param <E> Entry type
+     * @param <T> Internal representation type
+     */
+    @FunctionalInterface
+    interface EntryMapper<E, T> {
+        /**
+         * Process an entry.
+         *
+         * @param index entry index
+         * @param entry entry itself
+         * @param size entry size
+         * @return resulting internal representation
+         */
+        T mapEntry(long index, E entry, int size);
     }
 
     /**
@@ -54,9 +75,19 @@ public interface JournalReader<E> extends AutoCloseable {
     /**
      * Try to move to the next entry.
      *
+     * @param mapper callback to be invoked for the entry
+     * @return processed entry, or {@code null}
+     */
+    <T> @Nullable T tryNext(EntryMapper<E, T> mapper);
+
+    /**
+     * Try to move to the next entry.
+     *
      * @return The next entry in the reader, or {@code null} if there is no next entry.
      */
-    @Nullable Indexed<E> tryNext();
+    default @Nullable Indexed<E> tryNext() {
+        return tryNext(Indexed::new);
+    }
 
     /**
      * Resets the reader to the start.

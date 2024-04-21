@@ -104,7 +104,7 @@ sealed class SegmentedJournalReader<E> implements JournalReader<E> permits Commi
     }
 
     @Override
-    public Indexed<E> tryNext() {
+    public <T> T tryNext(final EntryMapper<E, T> mapper) {
         final var index = nextIndex;
         var buf = currentReader.readBytes(index);
         if (buf == null) {
@@ -124,8 +124,9 @@ sealed class SegmentedJournalReader<E> implements JournalReader<E> permits Commi
         }
 
         final var entry = journal.serializer().deserialize(buf);
+        final var ret = requireNonNull(mapper.mapEntry(index, entry, buf.readableBytes()));
         nextIndex = index + 1;
-        return new Indexed<>(index, entry, buf.readableBytes());
+        return ret;
     }
 
     @Override

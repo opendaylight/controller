@@ -238,7 +238,7 @@ public abstract class AbstractJournalTest {
             assertEquals(i - 1, writer.append(new TestEntry(32)).index());
             assertEquals(i, writer.append(new TestEntry(32)).index());
 
-            Indexed<TestEntry> entry = reader.tryNext();
+            var entry = reader.tryNext();
             assertNotNull(entry);
             assertEquals(i - 1, entry.index());
             entry = reader.tryNext();
