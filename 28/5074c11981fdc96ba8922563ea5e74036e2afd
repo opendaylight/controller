@@ -1,0 +1,10 @@
+Code-Review+1: Oleksandr Zharov <oleksandr.zharov@pantheon.tech>
+Verified+1: jenkins-releng ODL
+Code-Review+1: Lubos Cicut <lubos.cicut@pantheon.tech>
+Code-Review+2: Robert Varga <nite@hq.sk>
+Verified+1: ODL Required.GHA <releng+odl.required.gha@linuxfoundation.org>
+Submitted-by: Robert Varga <nite@hq.sk>
+Submitted-at: Sun, 21 Apr 2024 11:10:33 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/c/controller/+/111143
+Project: controller
+Branch: refs/heads/master
