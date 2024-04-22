@@ -1,0 +1,77 @@
+/*
+ * Copyright (c) 2024 PANTHEON.tech s.r.o. and others. All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+package io.atomix.storage.journal;
+
+import io.netty.buffer.ByteBuf;
+import org.eclipse.jdt.annotation.Nullable;
+
+/**
+ * Byte journal reader.
+ */
+public interface ByteJournalReader extends AutoCloseable {
+    /**
+     * A journal entry processor. Responsible for transforming bytes into their internal representation.
+     *
+     * @param <T> Internal representation type
+     */
+    @FunctionalInterface
+    interface EntryMapper<T> {
+        /**
+         * Process an entry.
+         *
+         * @param index entry index
+         * @param bytes entry bytes
+         * @return resulting internal representation
+         */
+        T mapEntry(long index, ByteBuf bytes);
+    }
+
+    /**
+     * Returns the first index in the journal.
+     *
+     * @return The first index in the journal
+     */
+    long firstIndex();
+
+    /**
+     * Returns the last read index.
+     *
+     * @return The last read index
+     */
+    long lastIndex();
+
+    /**
+     * Returns the next reader index.
+     *
+     * @return The next reader index
+     */
+    long nextIndex();
+
+    /**
+     * Try to move to the next binary data block
+     *
+     * @param mapper callback to be invoked on binary data
+     * @return processed binary data, or {@code null}
+     */
+    <T> @Nullable T tryNext(EntryMapper<T> mapper);
+
+    /**
+     * Resets the reader to the start.
+     */
+    void reset();
+
+    /**
+     * Resets the reader to the given index.
+     *
+     * @param index The index to which to reset the reader
+     */
+    void reset(long index);
+
+    @Override
+    void close();
+}
