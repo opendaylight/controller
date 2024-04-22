@@ -31,13 +31,6 @@ public interface JournalWriter<E> {
     long getLastIndex();
 
     /**
-     * Returns the last entry written.
-     *
-     * @return The last entry written.
-     */
-    Indexed<E> getLastEntry();
-
-    /**
      * Returns the next index to be written.
      *
      * @return The next index to be written.

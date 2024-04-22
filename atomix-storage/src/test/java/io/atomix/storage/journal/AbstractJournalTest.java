@@ -186,19 +186,18 @@ public abstract class AbstractJournalTest {
             assertEquals(1, indexed.index());
             writer.reset(1);
             assertEquals(0, writer.getLastIndex());
-            writer.append(ENTRY);
+            indexed = writer.append(ENTRY);
             assertEquals(1, writer.getLastIndex());
-            assertEquals(1, writer.getLastEntry().index());
+            assertEquals(1, indexed.index());
 
             indexed = assertNext(reader);
             assertEquals(1, indexed.index());
 
             writer.truncate(0);
             assertEquals(0, writer.getLastIndex());
-            assertNull(writer.getLastEntry());
-            writer.append(ENTRY);
+            indexed = writer.append(ENTRY);
             assertEquals(1, writer.getLastIndex());
-            assertEquals(1, writer.getLastEntry().index());
+            assertEquals(1, indexed.index());
 
             indexed = assertNext(reader);
             assertEquals(1, indexed.index());

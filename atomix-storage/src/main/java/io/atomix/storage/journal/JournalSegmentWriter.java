@@ -38,7 +38,6 @@ final class JournalSegmentWriter {
 
     private int currentPosition;
     private Long lastIndex;
-    private ByteBuf lastWritten;
 
     JournalSegmentWriter(final FileWriter fileWriter, final JournalSegment segment, final int maxEntrySize,
             final JournalIndex index) {
@@ -56,7 +55,6 @@ final class JournalSegmentWriter {
         index = previous.index;
         maxSegmentSize = previous.maxSegmentSize;
         maxEntrySize = previous.maxEntrySize;
-        lastWritten = previous.lastWritten;
         lastIndex = previous.lastIndex;
         currentPosition = previous.currentPosition;
         this.fileWriter = requireNonNull(fileWriter);
@@ -67,17 +65,8 @@ final class JournalSegmentWriter {
      *
      * @return The last written index.
      */
-    final long getLastIndex() {
+    long getLastIndex() {
         return lastIndex != null ? lastIndex : segment.firstIndex() - 1;
-    }
-
-    /**
-     * Returns the last data written.
-     *
-     * @return The last data written.
-     */
-    final ByteBuf getLastWritten() {
-        return lastWritten == null ? null : lastWritten.slice();
     }
 
     /**
@@ -85,7 +74,7 @@ final class JournalSegmentWriter {
      *
      * @return The next index to be written.
      */
-    final long getNextIndex() {
+    long getNextIndex() {
         return lastIndex != null ? lastIndex + 1 : segment.firstIndex();
     }
 
@@ -95,7 +84,7 @@ final class JournalSegmentWriter {
      * @param buf binary data to append
      * @return The index of appended data, or {@code null} if segment has no space
      */
-    final Long append(final ByteBuf buf) {
+    Long append(final ByteBuf buf) {
         final var length = buf.readableBytes();
         if (length > maxEntrySize) {
             throw new StorageException.TooLarge("Serialized entry size exceeds maximum allowed bytes ("
@@ -127,7 +116,6 @@ final class JournalSegmentWriter {
 
         // Update the last entry with the correct index/term/length.
         currentPosition = nextPosition;
-        lastWritten = buf;
         lastIndex = index;
         this.index.index(index, position);
 
@@ -139,7 +127,7 @@ final class JournalSegmentWriter {
      *
      * @param index the index to which to reset the head of the segment
      */
-    final void reset(final long index) {
+    void reset(final long index) {
         // acquire ownership of cache and make sure reader does not see anything we've done once we're done
         final var fileReader = fileWriter.reader();
         try {
@@ -164,7 +152,6 @@ final class JournalSegmentWriter {
                 break;
             }
 
-            lastWritten = buf;
             lastIndex = nextIndex;
             this.index.index(nextIndex, currentPosition);
             nextIndex++;
@@ -179,7 +166,7 @@ final class JournalSegmentWriter {
      *
      * @param index The index to which to truncate the log.
      */
-    final void truncate(final long index) {
+    void truncate(final long index) {
         // If the index is greater than or equal to the last index, skip the truncate.
         if (index >= getLastIndex()) {
             return;
@@ -187,7 +174,6 @@ final class JournalSegmentWriter {
 
         // Reset the last written
         lastIndex = null;
-        lastWritten = null;
 
         // Truncate the index.
         this.index.truncate(index);
