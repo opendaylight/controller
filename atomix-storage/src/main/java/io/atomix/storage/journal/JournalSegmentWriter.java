@@ -144,7 +144,7 @@ final class JournalSegmentWriter {
         reader.setPosition(JournalSegmentDescriptor.BYTES);
 
         while (index == 0 || nextIndex <= index) {
-            final var buf = reader.readBytes(nextIndex);
+            final var buf = reader.readBytes();
             if (buf == null) {
                 break;
             }

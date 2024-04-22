@@ -15,19 +15,27 @@
  */
 package io.atomix.storage.journal;
 
+import io.netty.buffer.ByteBuf;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * A {@link JournalReader} traversing only committed entries.
+ * Support for serialization of {@link ByteBufJournal} entries.
  */
 @NonNullByDefault
-final class CommitsSegmentJournalReader<E> extends SegmentedJournalReader<E> {
-    CommitsSegmentJournalReader(final SegmentedJournal<E> journal, final JournalSegment segment) {
-        super(journal, segment);
-    }
+public interface ByteBufMapper<T> {
+    /**
+     * Converts an object into a series of bytes in a {@link ByteBuf}.
+     *
+     * @param obj the object
+     * @return resulting buffer
+     */
+    ByteBuf objectToBytes(T obj) ;
 
-    @Override
-    public <T> T tryNext(final EntryMapper<E, T> mapper) {
-        return getNextIndex() <= journal.getCommitIndex() ? super.tryNext(mapper) : null;
-    }
+    /**
+     * Converts the contents of a {@link ByteBuf} to an object.
+     *
+     * @param buf buffer to convert
+     * @return resulting object
+     */
+    T bytesToObject(ByteBuf buf);
 }

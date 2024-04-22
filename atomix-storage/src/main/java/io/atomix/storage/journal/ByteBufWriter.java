@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2022 Open Networking Foundation and others.  All rights reserved.
+ * Copyright (c) 2024 PANTHEON.tech, s.r.o. and others.  All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,35 +15,36 @@
  */
 package io.atomix.storage.journal;
 
-import org.eclipse.jdt.annotation.NonNull;
+import io.netty.buffer.ByteBuf;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * Log writer.
- *
- * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
+ * A writer of {@link ByteBufJournal} entries.
  */
-public interface JournalWriter<E> {
+@NonNullByDefault
+public interface ByteBufWriter {
     /**
      * Returns the last written index.
      *
-     * @return The last written index.
+     * @return The last written index
      */
-    long getLastIndex();
+    long lastIndex();
 
     /**
      * Returns the next index to be written.
      *
-     * @return The next index to be written.
+     * @return The next index to be written
      */
-    long getNextIndex();
+    long nextIndex();
 
     /**
      * Appends an entry to the journal.
      *
-     * @param entry The entry to append.
-     * @return The appended indexed entry.
+     * @param bytes Data block to append
+     * @return The index of appended data block
      */
-    <T extends E> @NonNull Indexed<T> append(T entry);
+    // FIXME: throws IOException
+    long append(ByteBuf bytes);
 
     /**
      * Commits entries up to the given index.
@@ -55,9 +56,10 @@ public interface JournalWriter<E> {
     /**
      * Resets the head of the journal to the given index.
      *
-     * @param index the index to which to reset the head of the journal
+     * @param index The index to which to reset the head of the journal
      */
     // FIXME: reconcile with reader's reset and truncate()
+    // FIXME: throws IOException
     void reset(long index);
 
     /**
@@ -66,10 +68,12 @@ public interface JournalWriter<E> {
      * @param index The index to which to truncate the log.
      */
     // FIXME: reconcile with reset()
+    // FIXME: throws IOException
     void truncate(long index);
 
     /**
      * Flushes written entries to disk.
      */
+    // FIXME: throws IOException
     void flush();
 }
