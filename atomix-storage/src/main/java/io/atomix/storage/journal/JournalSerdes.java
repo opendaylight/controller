@@ -19,6 +19,9 @@ package io.atomix.storage.journal;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import io.atomix.utils.serializer.KryoJournalSerdesBuilder;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -27,7 +30,7 @@ import java.nio.ByteBuffer;
 /**
  * Support for serialization of {@link Journal} entries.
  *
- * @deprecated due to dependency on outdated Kryo library, {@link JournalSerializer} to be used instead.
+ * @deprecated due to dependency on outdated Kryo library, {@link ByteBufMapper} to be used instead.
  */
 @Deprecated(forRemoval = true, since="9.0.3")
 public interface JournalSerdes {
@@ -109,6 +112,26 @@ public interface JournalSerdes {
      * @return deserialized Object
      */
     <T> T deserialize(final InputStream stream, final int bufferSize);
+
+    /**
+     * Returns a {@link ByteBufMapper} backed by this object.
+     *
+     * @return a {@link ByteBufMapper} backed by this object
+     */
+    default <T> ByteBufMapper<T> toMapper() {
+        return new ByteBufMapper<>() {
+            @Override
+            public ByteBuf objectToBytes(final T obj) {
+                return Unpooled.wrappedBuffer(serialize(obj));
+            }
+
+            @Override
+            public T bytesToObject(final ByteBuf buf) {
+                // FIXME: ByteBufUtil creates a copy -- we do not want to do that!
+                return deserialize(ByteBufUtil.getBytes(buf));
+            }
+        };
+    }
 
     /**
      * Creates a new {@link JournalSerdes} builder.
