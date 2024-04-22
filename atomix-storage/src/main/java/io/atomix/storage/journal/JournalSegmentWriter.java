@@ -144,14 +144,13 @@ final class JournalSegmentWriter {
         reader.setPosition(JournalSegmentDescriptor.BYTES);
 
         while (index == 0 || nextIndex <= index) {
-            final var buf = reader.readBytes(nextIndex);
+            final var buf = reader.readBytes();
             if (buf == null) {
                 break;
             }
 
-            lastIndex = nextIndex;
             this.index.index(nextIndex, currentPosition);
-            nextIndex++;
+            lastIndex = nextIndex++;
 
             // Update the current position for indexing.
             currentPosition += HEADER_BYTES + buf.readableBytes();

@@ -1,6 +1,6 @@
 /*
  * Copyright 2017-2022 Open Networking Foundation and others.  All rights reserved.
- * Copyright (c) 2024 PANTHEON.tech, s.r.o.
+ * Copyright (c) 2024 PANTHEON.tech, s.r.o. and others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,136 +16,49 @@
  */
 package io.atomix.storage.journal;
 
-import static java.util.Objects.requireNonNull;
-
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * A {@link JournalReader} traversing all entries.
  */
-sealed class SegmentedJournalReader<E> implements JournalReader<E> permits CommitsSegmentJournalReader {
-    // Marker non-null object for tryAdvance()
-    private static final @NonNull Object ADVANCED = new Object();
+final class SegmentedJournalReader<E> implements JournalReader<E> {
+    private final ByteJournalReader byteJournalReader;
+    private final JournalSerializer<E> serializer;
 
-    final SegmentedJournal<E> journal;
-
-    private JournalSegment currentSegment;
-    private JournalSegmentReader currentReader;
-    private long nextIndex;
-
-    SegmentedJournalReader(final SegmentedJournal<E> journal, final JournalSegment segment) {
-        this.journal = requireNonNull(journal);
-        currentSegment = requireNonNull(segment);
-        currentReader = segment.createReader();
-        nextIndex = currentSegment.firstIndex();
+    SegmentedJournalReader(final ByteJournalReader byteJournalReader, final JournalSerializer<E> serializer) {
+        this.byteJournalReader = byteJournalReader;
+        this.serializer = serializer;
     }
 
     @Override
-    public final long getFirstIndex() {
-        return journal.getFirstSegment().firstIndex();
+    public long getFirstIndex() {
+        return byteJournalReader.firstIndex();
     }
 
     @Override
-    public final long getNextIndex() {
-        return nextIndex;
+    public long getNextIndex() {
+        return byteJournalReader.nextIndex();
     }
 
     @Override
-    public final void reset() {
-        currentReader.close();
-
-        currentSegment = journal.getFirstSegment();
-        currentReader = currentSegment.createReader();
-        nextIndex = currentSegment.firstIndex();
+    public void reset() {
+        byteJournalReader.reset();
     }
 
     @Override
-    public final void reset(final long index) {
-        // If the current segment is not open, it has been replaced. Reset the segments.
-        if (!currentSegment.isOpen()) {
-            reset();
-        }
-
-        if (index < nextIndex) {
-            rewind(index);
-        } else if (index > nextIndex) {
-            while (index > nextIndex && tryAdvance()) {
-                // Nothing else
-            }
-        } else {
-            resetCurrentReader(index);
-        }
-    }
-
-    private void resetCurrentReader(final long index) {
-        final var position = currentSegment.lookup(index - 1);
-        if (position != null) {
-            nextIndex = position.index();
-            currentReader.setPosition(position.position());
-        } else {
-            nextIndex = currentSegment.firstIndex();
-            currentReader.setPosition(JournalSegmentDescriptor.BYTES);
-        }
-        while (nextIndex < index && tryAdvance()) {
-            // Nothing else
-        }
-    }
-
-    /**
-     * Rewinds the journal to the given index.
-     */
-    private void rewind(final long index) {
-        if (currentSegment.firstIndex() >= index) {
-            JournalSegment segment = journal.getSegment(index - 1);
-            if (segment != null) {
-                currentReader.close();
-
-                currentSegment = segment;
-                currentReader = currentSegment.createReader();
-            }
-        }
-
-        resetCurrentReader(index);
+    public void reset(final long index) {
+        byteJournalReader.reset(index);
     }
 
     @Override
-    public <T> T tryNext(final EntryMapper<E, T> mapper) {
-        final var index = nextIndex;
-        var buf = currentReader.readBytes(index);
-        if (buf == null) {
-            final var nextSegment = journal.getNextSegment(currentSegment.firstIndex());
-            if (nextSegment == null || nextSegment.firstIndex() != index) {
-                return null;
-            }
-
-            currentReader.close();
-
-            currentSegment = nextSegment;
-            currentReader = currentSegment.createReader();
-            buf = currentReader.readBytes(index);
-            if (buf == null) {
-                return null;
-            }
-        }
-
-        final var entry = journal.serializer().deserialize(buf);
-        final var ret = requireNonNull(mapper.mapEntry(index, entry, buf.readableBytes()));
-        nextIndex = index + 1;
-        return ret;
-    }
-
-    /**
-     * Try to move to the next entry.
-     *
-     * @return {@code true} if there was a next entry and this reader has moved to it
-     */
-    final boolean tryAdvance() {
-        return tryNext((index, entry, size) -> ADVANCED) != null;
+    public <T> @Nullable T tryNext(EntryMapper<E, T> mapper) {
+        return byteJournalReader.tryNext(
+            (index, buf, length) -> mapper.mapEntry(index, serializer.deserialize(buf), length)
+        );
     }
 
     @Override
-    public final void close() {
-        currentReader.close();
-        journal.closeReader(this);
+    public void close() {
+        byteJournalReader.close();
     }
 }
