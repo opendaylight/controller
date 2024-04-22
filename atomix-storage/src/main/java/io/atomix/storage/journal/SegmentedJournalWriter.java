@@ -37,16 +37,6 @@ final class SegmentedJournalWriter<E> implements JournalWriter<E> {
   }
 
   @Override
-  public Indexed<E> getLastEntry() {
-    final var lastWritten = currentWriter.getLastWritten();
-    if (lastWritten == null) {
-      return null;
-    }
-    final E deserialized = journal.serializer().deserialize(lastWritten);
-    return new Indexed<>(currentWriter.getLastIndex(), deserialized, lastWritten.readableBytes()) ;
-  }
-
-  @Override
   public long getNextIndex() {
     return currentWriter.getNextIndex();
   }
