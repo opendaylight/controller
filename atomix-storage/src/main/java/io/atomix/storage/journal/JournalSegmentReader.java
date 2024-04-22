@@ -72,10 +72,9 @@ final class JournalSegmentReader {
     /**
      * Reads the next binary data block
      *
-     * @param index entry index
      * @return The binary data, or {@code null}
      */
-    @Nullable ByteBuf readBytes(final long index) {
+    @Nullable ByteBuf readBytes() {
         // Check if there is enough in the buffer remaining
         final int remaining = maxSegmentSize - position - SegmentEntry.HEADER_BYTES;
         if (remaining < 0) {
@@ -112,7 +111,7 @@ final class JournalSegmentReader {
         position += SegmentEntry.HEADER_BYTES + length;
 
         // rewind and return
-        return Unpooled.buffer(length).writeBytes(entryBuffer.rewind());
+        return Unpooled.wrappedBuffer(entryBuffer.rewind());
     }
 
     /**
