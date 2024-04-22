@@ -118,7 +118,7 @@ final class JournalSegmentReader {
 
         // return bytes
         entryBuffer.rewind();
-        return Unpooled.buffer(length).writeBytes(entryBuffer);
+        return Unpooled.wrappedBuffer(entryBuffer);
     }
 
     /**
