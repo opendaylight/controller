@@ -15,6 +15,7 @@
  */
 package io.atomix.storage.journal;
 
+import io.netty.util.internal.PlatformDependent;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
@@ -91,10 +92,6 @@ final class MappedFileWriter extends FileWriter {
     @Override
     void close() {
         flush();
-        try {
-            BufferCleaner.freeBuffer(mappedBuffer);
-        } catch (IOException e) {
-            throw new StorageException(e);
-        }
+        PlatformDependent.freeDirectBuffer(mappedBuffer);
     }
 }
