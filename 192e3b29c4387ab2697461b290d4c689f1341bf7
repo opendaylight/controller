@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "fb669ec8_63edee5a",
+        "filename": "opendaylight/md-sal/sal-akka-segmented-journal/src/main/java/org/opendaylight/controller/akka/segjournal/SegmentedJournalActor.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 472,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2024-04-23T17:26:53Z",
+      "side": 1,
+      "message": "err... writtenMessages.complete() is called by onWrittenMessages(), which we are invoking right below ... why not pass the information down?",
+      "range": {
+        "startLine": 472,
+        "startChar": 8,
+        "endLine": 472,
+        "endChar": 34
+      },
+      "revId": "192e3b29c4387ab2697461b290d4c689f1341bf7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
