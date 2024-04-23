@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "aafc35f3_36dbe6b5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DistributedDataStoreRemotingIntegrationTest.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 1447,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2024-04-23T06:31:02Z",
+      "side": 1,
+      "message": "IMO we can use something like: `payloads.stream.count`",
+      "revId": "75228cdc0806d8b3f6c20737ea30ba379a5fa666",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
