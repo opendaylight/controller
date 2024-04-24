@@ -16,6 +16,24 @@
       "message": "Needs to be rebased on top of https://git.opendaylight.org/gerrit/c/controller/+/111472",
       "revId": "44f5154271cf4f4f16389821a50c38ae9670b66f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "fb7cca4e_27432bb3",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 8894
+      },
+      "writtenOn": "2024-04-24T12:24:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "94a9072b_a73c0e27",
+      "revId": "44f5154271cf4f4f16389821a50c38ae9670b66f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
