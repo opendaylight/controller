@@ -7,9 +7,11 @@
  */
 package org.opendaylight.controller.config.yang.netty.threadgroup;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.netty.channel.nio.NioEventLoopGroup;
 import java.util.concurrent.TimeUnit;
 
+@SuppressFBWarnings(value = "RI_REDUNDANT_INTERFACES", justification = "False positive?")
 abstract class AbstractGlobalGroup extends NioEventLoopGroup implements AutoCloseable {
     AbstractGlobalGroup(final int threadCount) {
         super(threadCount < 0 ? 0 : threadCount);
