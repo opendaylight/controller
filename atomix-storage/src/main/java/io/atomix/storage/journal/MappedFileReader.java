@@ -15,16 +15,18 @@
  */
 package io.atomix.storage.journal;
 
-import java.nio.ByteBuffer;
+import static io.atomix.storage.journal.BufUtils.validChecksum;
+
+import io.netty.buffer.ByteBuf;
 
 /**
  * A {@link StorageLevel#MAPPED} implementation of {@link FileReader}. Operates on direct mapping of the entire file.
  */
 final class MappedFileReader implements FileReader {
-    private final ByteBuffer buffer;
+    private final ByteBuf buffer;
 
-    MappedFileReader(final ByteBuffer buffer) {
-        this.buffer = buffer.slice().asReadOnlyBuffer();
+    MappedFileReader(final MappedByteBuf buffer) {
+        this.buffer = buffer.slice().asReadOnly();
     }
 
     @Override
@@ -33,7 +35,17 @@ final class MappedFileReader implements FileReader {
     }
 
     @Override
-    public ByteBuffer read(final int position, final int size) {
-        return buffer.slice(position, size);
+    public ByteBuf read(final int position) {
+        final int readableBytes  = buffer.maxCapacity() - position - SegmentEntry.HEADER_BYTES;
+        final int length = readableBytes > 0 ? buffer.getInt(position) : 0;
+        if (length < 1 || length > readableBytes) {
+            return null;
+        }
+        final var checksum = buffer.getInt(position + Integer.BYTES);
+        final var entry = buffer.slice(position + SegmentEntry.HEADER_BYTES, length);
+        if (!validChecksum(checksum, entry)){
+            return null;
+        }
+        return entry;
     }
 }
