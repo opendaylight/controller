@@ -19,8 +19,6 @@ import static com.google.common.base.Verify.verify;
 import static java.util.Objects.requireNonNull;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import java.util.zip.CRC32;
 import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,52 +71,19 @@ final class JournalSegmentReader {
     /**
      * Reads the next binary data block
      *
-     * @param index entry index
      * @return The binary data, or {@code null}
      */
-    @Nullable ByteBuf readBytes(final long index) {
-        // Check if there is enough in the buffer remaining
-        final int remaining = maxSegmentSize - position - SegmentEntry.HEADER_BYTES;
-        if (remaining < 0) {
-            // Not enough space in the segment, there can never be another entry
+    @Nullable ByteBuf readNext() {
+        if (position >= maxSegmentSize - SegmentEntry.HEADER_BYTES) {
+            // no data expected to read due to reaching segment end
             return null;
         }
-
-        // Calculate maximum entry length not exceeding file size nor maxEntrySize
-        final var maxLength = Math.min(remaining, maxEntrySize);
-        final var buffer = fileReader.read(position, maxLength + SegmentEntry.HEADER_BYTES);
-
-        // Read the entry length
-        final var length = buffer.getInt(0);
-        if (length < 1 || length > maxLength) {
-            // Invalid length, make sure next read re-tries
-            invalidateCache();
-            return null;
+        final var entry = fileReader.read(position);
+        if (entry != null) {
+            // update position
+            position += SegmentEntry.HEADER_BYTES + entry.readableBytes();
         }
-
-        // Read the entry checksum
-        final int checksum = buffer.getInt(Integer.BYTES);
-
-        // Slice off the entry's bytes
-        final var entryBuffer = buffer.slice(SegmentEntry.HEADER_BYTES, length);
-        // Compute the checksum for the entry bytes.
-        final var crc32 = new CRC32();
-        crc32.update(entryBuffer);
-
-        // If the stored checksum does not equal the computed checksum, do not proceed further
-        final var computed = (int) crc32.getValue();
-        if (checksum != computed) {
-            LOG.warn("Expected checksum {}, computed {}", Integer.toHexString(checksum), Integer.toHexString(computed));
-            invalidateCache();
-            return null;
-        }
-
-        // update position
-        position += SegmentEntry.HEADER_BYTES + length;
-
-        // return bytes
-        entryBuffer.rewind();
-        return Unpooled.buffer(length).writeBytes(entryBuffer);
+        return entry;
     }
 
     /**

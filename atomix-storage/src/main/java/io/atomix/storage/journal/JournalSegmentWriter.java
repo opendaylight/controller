@@ -20,7 +20,6 @@ import static java.util.Objects.requireNonNull;
 
 import io.atomix.storage.journal.index.JournalIndex;
 import io.netty.buffer.ByteBuf;
-import java.util.zip.CRC32;
 import org.eclipse.jdt.annotation.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,35 +87,24 @@ final class JournalSegmentWriter {
                 + maxEntrySize + ")");
         }
 
-        // Store the entry index.
-        final long index = getNextIndex();
-        final int position = currentPosition;
-
         // check space available
-        final int nextPosition = position + HEADER_BYTES + length;
+        final int nextPosition = currentPosition + HEADER_BYTES + length;
         if (nextPosition >= maxSegmentSize) {
-            LOG.trace("Not enough space for {} at {}", index, position);
+            LOG.trace("Not enough space for {} at {}", index, currentPosition);
             return null;
         }
 
-        // allocate buffer and write data
-        final var writeBuffer = fileWriter.startWrite(position, length + HEADER_BYTES).position(HEADER_BYTES);
-        writeBuffer.put(buf.nioBuffer());
-
-        // Compute the checksum for the entry.
-        final var crc32 = new CRC32();
-        crc32.update(writeBuffer.flip().position(HEADER_BYTES));
-
-        // Create a single byte[] in memory for the entire entry and write it as a batch to the underlying buffer.
-        writeBuffer.putInt(0, length).putInt(Integer.BYTES, (int) crc32.getValue());
-        fileWriter.commitWrite(position, writeBuffer.rewind());
+        final var appended = fileWriter.append(currentPosition, buf);
+        if (appended <= 0) {
+            return null;
+        }
 
         // Update the last entry with the correct index/term/length.
-        currentPosition = nextPosition;
-        lastIndex = index;
-        this.index.index(index, position);
+        lastIndex = getNextIndex();
+        this.index.index(lastIndex, currentPosition);
+        currentPosition += appended;
 
-        return index;
+        return lastIndex;
     }
 
     /**
@@ -144,7 +132,7 @@ final class JournalSegmentWriter {
         reader.setPosition(JournalSegmentDescriptor.BYTES);
 
         while (index == 0 || nextIndex <= index) {
-            final var buf = reader.readBytes(nextIndex);
+            final var buf = reader.readNext();
             if (buf == null) {
                 break;
             }

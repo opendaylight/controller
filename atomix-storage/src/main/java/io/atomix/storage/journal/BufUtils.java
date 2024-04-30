@@ -7,7 +7,15 @@
  */
 package io.atomix.storage.journal;
 
+import static java.lang.Integer.toHexString;
+
+import java.nio.ByteBuffer;
+import java.util.zip.CRC32;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 final class BufUtils {
+    private static final Logger LOG = LoggerFactory.getLogger(BufUtils.class);
     private static final int MIN_IO_BUFFER_SIZE = 8192;
 
     private BufUtils() {
@@ -23,5 +31,21 @@ final class BufUtils {
         // one full entry plus its header, or MIN_IO_SIZE, which benefits the read of many small entries
         final int minBufferSize = maxEntrySize + SegmentEntry.HEADER_BYTES;
         return minBufferSize <= MIN_IO_BUFFER_SIZE ? MIN_IO_BUFFER_SIZE : minBufferSize;
+    }
+
+    static boolean validChecksum(final int expected, final ByteBuffer buffer){
+        final var computed = computeChecksum(buffer);
+        boolean matches = expected == computed;
+        if (!matches) {
+            LOG.warn("Checksum mismatch: expected: {} <-> computed: {}", toHexString(expected), toHexString(computed));
+        }
+        return matches;
+    }
+
+    static int computeChecksum(final ByteBuffer buffer) {
+        final var crc32 = new CRC32();
+        crc32.update(buffer);
+        buffer.rewind();
+        return (int) crc32.getValue();
     }
 }

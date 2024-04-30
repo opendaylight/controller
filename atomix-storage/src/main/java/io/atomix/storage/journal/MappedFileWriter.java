@@ -15,6 +15,10 @@
  */
 package io.atomix.storage.journal;
 
+import static io.atomix.storage.journal.BufUtils.computeChecksum;
+import static io.atomix.storage.journal.SegmentEntry.HEADER_BYTES;
+
+import io.netty.buffer.ByteBuf;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import org.eclipse.jdt.annotation.NonNull;
@@ -47,14 +51,14 @@ final class MappedFileWriter implements FileWriter {
     }
 
     @Override
-    public ByteBuffer startWrite(final int position, final int size) {
-        return buffer.slice(position, size);
-    }
-
-    @Override
-    public void commitWrite(final int position, final ByteBuffer entry) {
-        // indicate the data requires memory to file system sync
+    public int append(final int position, final ByteBuf entry) {
+        final var entryBuf = entry.nioBuffer();
+        final var length = entry.readableBytes();
+        buffer.putInt(position, length);
+        buffer.putInt(position + Integer.BYTES, computeChecksum(entryBuf));
+        buffer.position(position + HEADER_BYTES).put(entryBuf);
         updated = true;
+        return buffer.position() - position;
     }
 
     @Override

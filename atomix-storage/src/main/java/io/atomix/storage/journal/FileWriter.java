@@ -15,7 +15,7 @@
  */
 package io.atomix.storage.journal;
 
-import java.nio.ByteBuffer;
+import io.netty.buffer.ByteBuf;
 
 /**
  * An abstraction over how to write a {@link JournalSegmentFile}.
@@ -36,9 +36,15 @@ sealed interface FileWriter permits DiskFileWriter, MappedFileWriter {
      */
     void writeEmptyHeader(int position);
 
-    ByteBuffer startWrite(int position, int size);
-
-    void commitWrite(int position, ByteBuffer entry);
+    /**
+     * Writes entry to specified position. Operation performs writing to entry header
+     * including data length and checksum. Returns number of bytes written.
+     *
+     * @param position position to the entry header
+     * @param entry entry content as {@link ByteBuf}
+     * @return total number of bytes written incl header bytes
+     */
+    int append(int position, ByteBuf entry);
 
     /**
      * Flushes written entries to disk.

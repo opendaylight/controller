@@ -15,8 +15,10 @@
  */
 package io.atomix.storage.journal;
 
+import static io.atomix.storage.journal.BufUtils.computeChecksum;
 import static io.atomix.storage.journal.SegmentEntry.HEADER_BYTES;
 
+import io.netty.buffer.ByteBuf;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -52,17 +54,20 @@ final class DiskFileWriter implements FileWriter {
     }
 
     @Override
-    public ByteBuffer startWrite(final int position, final int size) {
-        return buffer.clear().slice(0, size);
-    }
-
-    @Override
-    public void commitWrite(final int position, final ByteBuffer entry) {
+    public int append(final int position, final ByteBuf entry) {
+        final var entryBuf = entry.nioBuffer();
+        final var length = entry.readableBytes();
+        final var writeBuffer = buffer.clear();
+        writeBuffer.putInt(0, length);
+        writeBuffer.putInt(Integer.BYTES, computeChecksum(entryBuf));
+        writeBuffer.position(HEADER_BYTES).put(entryBuf);
+        final var appended = writeBuffer.position();
         try {
-            channel.write(entry, position);
+            channel.write(writeBuffer.slice(0, appended), position);
         } catch (IOException e) {
             throw new StorageException(e);
         }
+        return appended;
     }
 
     @Override
