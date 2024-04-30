@@ -15,23 +15,23 @@
  */
 package io.atomix.storage.journal;
 
-import java.nio.ByteBuffer;
-import java.nio.MappedByteBuffer;
+import static io.atomix.storage.journal.BufUtils.computeChecksum;
+import static io.atomix.storage.journal.SegmentEntry.HEADER_BYTES;
+
+import io.netty.buffer.ByteBuf;
 import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * A {@link StorageLevel#MAPPED} {@link FileWriter}.
  */
 final class MappedFileWriter implements FileWriter {
-    private final @NonNull MappedByteBuffer mappedBuffer;
+    private final @NonNull MappedByteBuf mappedByteBuf;
     private final MappedFileReader reader;
-    private final ByteBuffer buffer;
     private volatile boolean updated;
 
-    MappedFileWriter(final MappedByteBuffer mappedBuffer) {
-        this.mappedBuffer = mappedBuffer;
-        buffer = mappedBuffer.slice();
-        reader = new MappedFileReader(mappedBuffer);
+    MappedFileWriter(final MappedByteBuf mappedByteBuf) {
+        this.mappedByteBuf = mappedByteBuf;
+        reader = new MappedFileReader(mappedByteBuf);
     }
 
     @Override
@@ -42,19 +42,23 @@ final class MappedFileWriter implements FileWriter {
     @Override
     public void writeEmptyHeader(final int position) {
         // Note: we issue a single putLong() instead of two putInt()s.
-        buffer.putLong(position, 0L);
+        mappedByteBuf.setLong(position, 0L);
         updated = true;
     }
 
     @Override
-    public ByteBuffer startWrite(final int position, final int size) {
-        return buffer.slice(position, size);
-    }
-
-    @Override
-    public void commitWrite(final int position, final ByteBuffer entry) {
-        // indicate the data requires memory to file system sync
-        updated = true;
+    public int append(final int position, final ByteBuf entry) {
+        final var entryBuf = entry.nioBuffer();
+        final var length = entry.readableBytes();
+        try {
+            mappedByteBuf.setInt(position, length);
+            mappedByteBuf.setInt(position + Integer.BYTES, computeChecksum(entryBuf));
+            mappedByteBuf.setBytes(position + HEADER_BYTES, entryBuf);
+            updated = true;
+            return HEADER_BYTES + length;
+        } catch (IndexOutOfBoundsException e){
+            return 0;
+        }
     }
 
     @Override
@@ -62,7 +66,7 @@ final class MappedFileWriter implements FileWriter {
         if (updated) {
             // sync in-memory data with file storage if only there is new data
             // NB extra call for mappedBuffer.force() may cause the msync exception
-            mappedBuffer.force();
+            mappedByteBuf.force();
             updated = false;
         }
     }

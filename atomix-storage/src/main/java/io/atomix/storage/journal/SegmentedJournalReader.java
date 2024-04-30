@@ -111,7 +111,7 @@ sealed class SegmentedJournalReader<E> implements JournalReader<E> permits Commi
     @Override
     public <T> T tryNext(final EntryMapper<E, T> mapper) {
         final var index = nextIndex;
-        var buf = currentReader.readBytes(index);
+        var buf = currentReader.readNext();
         if (buf == null) {
             final var nextSegment = journal.getNextSegment(currentSegment.firstIndex());
             if (nextSegment == null || nextSegment.firstIndex() != index) {
@@ -122,7 +122,7 @@ sealed class SegmentedJournalReader<E> implements JournalReader<E> permits Commi
 
             currentSegment = nextSegment;
             currentReader = currentSegment.createReader();
-            buf = currentReader.readBytes(index);
+            buf = currentReader.readNext();
             if (buf == null) {
                 return null;
             }
