@@ -16,8 +16,12 @@
 package io.atomix.storage.journal;
 
 import static com.google.common.base.Verify.verify;
+import static io.atomix.storage.journal.BufUtils.validChecksum;
+import static io.atomix.storage.journal.SegmentEntry.HEADER_BYTES;
 import static java.util.Objects.requireNonNull;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -51,7 +55,23 @@ final class DiskFileReader implements FileReader {
     }
 
     @Override
-    public ByteBuffer read(final int position, final int size) {
+    public ByteBuf read(final int position) {
+        final var header = read(position, HEADER_BYTES);
+        final int length = header.getInt(0);
+        if (length < 1) {
+            invalidateCache();
+            return null;
+        }
+        final var checksum = header.getInt(Integer.BYTES);
+        final var entry = read(position + HEADER_BYTES, length);
+        if (!validChecksum(checksum, entry)){
+            invalidateCache();
+            return null;
+        }
+        return Unpooled.buffer(length).writeBytes(entry);
+    }
+
+    private ByteBuffer read(final int position, final int size) {
         // calculate logical seek distance between buffer's first byte and position and split flow between
         // forward-moving and backwards-moving code paths.
         final int seek = bufferPosition - position;
@@ -88,6 +108,8 @@ final class DiskFileReader implements FileReader {
         final int bytesRead;
         try {
             bytesRead = channel.read(buffer, readPosition);
+
+
         } catch (IOException e) {
             throw new StorageException(e);
         }

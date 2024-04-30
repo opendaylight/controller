@@ -52,4 +52,9 @@ public final class SparseJournalIndex implements JournalIndex {
         positions.tailMap(index, false).clear();
         return Position.ofNullable(positions.lastEntry());
     }
+
+    @Override
+    public String toString() {
+        return String.valueOf(positions);
+    }
 }

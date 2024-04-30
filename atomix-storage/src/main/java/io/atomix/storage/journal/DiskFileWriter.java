@@ -15,8 +15,11 @@
  */
 package io.atomix.storage.journal;
 
+import static io.atomix.storage.journal.BufUtils.appendBuf;
 import static io.atomix.storage.journal.SegmentEntry.HEADER_BYTES;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -52,17 +55,17 @@ final class DiskFileWriter implements FileWriter {
     }
 
     @Override
-    public ByteBuffer startWrite(final int position, final int size) {
-        return buffer.clear().slice(0, size);
-    }
-
-    @Override
-    public void commitWrite(final int position, final ByteBuffer entry) {
-        try {
-            channel.write(entry, position);
-        } catch (IOException e) {
-            throw new StorageException(e);
+    public int append(final int position, final ByteBuf entry) {
+        final var writeBuf = Unpooled.wrappedBuffer(buffer.clear().slice());
+        final var appended = appendBuf(writeBuf, entry, 0);
+        if (appended > 0) {
+            try {
+                channel.write(buffer.slice(0, appended), position);
+            } catch (IOException e) {
+                throw new StorageException(e);
+            }
         }
+        return appended;
     }
 
     @Override

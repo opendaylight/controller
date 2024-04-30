@@ -20,14 +20,9 @@ import static java.util.Objects.requireNonNull;
 
 import io.atomix.storage.journal.index.JournalIndex;
 import io.netty.buffer.ByteBuf;
-import java.util.zip.CRC32;
 import org.eclipse.jdt.annotation.NonNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 final class JournalSegmentWriter {
-    private static final Logger LOG = LoggerFactory.getLogger(JournalSegmentWriter.class);
-
     private final FileWriter fileWriter;
     final @NonNull JournalSegment segment;
     private final @NonNull JournalIndex index;
@@ -82,41 +77,30 @@ final class JournalSegmentWriter {
      * @return The index of appended data, or {@code null} if segment has no space
      */
     Long append(final ByteBuf buf) {
-        final var length = buf.readableBytes();
-        if (length > maxEntrySize) {
+        if (currentPosition + HEADER_BYTES >= maxSegmentSize) {
+            // no space available, don't try
+            return null;
+        }
+        final var appended = fileWriter.append(currentPosition, buf);
+        if (appended <= 0) {
+            return null;
+        }
+        if (appended > maxEntrySize) {
+            fileWriter.writeEmptyHeader(currentPosition);
             throw new StorageException.TooLarge("Serialized entry size exceeds maximum allowed bytes ("
                 + maxEntrySize + ")");
-        }
 
-        // Store the entry index.
-        final long index = getNextIndex();
-        final int position = currentPosition;
-
-        // check space available
-        final int nextPosition = position + HEADER_BYTES + length;
-        if (nextPosition >= maxSegmentSize) {
-            LOG.trace("Not enough space for {} at {}", index, position);
+        } else if (currentPosition + appended > maxSegmentSize) {
+            fileWriter.writeEmptyHeader(currentPosition);
             return null;
         }
 
-        // allocate buffer and write data
-        final var writeBuffer = fileWriter.startWrite(position, length + HEADER_BYTES).position(HEADER_BYTES);
-        writeBuffer.put(buf.nioBuffer());
-
-        // Compute the checksum for the entry.
-        final var crc32 = new CRC32();
-        crc32.update(writeBuffer.flip().position(HEADER_BYTES));
-
-        // Create a single byte[] in memory for the entire entry and write it as a batch to the underlying buffer.
-        writeBuffer.putInt(0, length).putInt(Integer.BYTES, (int) crc32.getValue());
-        fileWriter.commitWrite(position, writeBuffer.rewind());
-
         // Update the last entry with the correct index/term/length.
-        currentPosition = nextPosition;
-        lastIndex = index;
-        this.index.index(index, position);
+        lastIndex = getNextIndex();
+        this.index.index(lastIndex, currentPosition);
+        currentPosition += appended;
 
-        return index;
+        return lastIndex;
     }
 
     /**
@@ -144,7 +128,7 @@ final class JournalSegmentWriter {
         reader.setPosition(JournalSegmentDescriptor.BYTES);
 
         while (index == 0 || nextIndex <= index) {
-            final var buf = reader.readBytes(nextIndex);
+            final var buf = reader.readNext();
             if (buf == null) {
                 break;
             }

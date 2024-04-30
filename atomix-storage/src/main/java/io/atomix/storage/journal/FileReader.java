@@ -15,8 +15,8 @@
  */
 package io.atomix.storage.journal;
 
-import java.nio.ByteBuffer;
-import org.eclipse.jdt.annotation.NonNull;
+import io.netty.buffer.ByteBuf;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * An abstraction over how to read a {@link JournalSegmentFile}.
@@ -29,12 +29,12 @@ sealed interface FileReader permits DiskFileReader, MappedFileReader {
     void invalidateCache();
 
     /**
-     * Read the some bytes as specified position. The sum of position and size is guaranteed not to exceed the maximum
-     * segment size nor maximum entry size.
+     * Reads the entry from specified position. First reads the entry header (entry length and checksum),
+     * then the entry itself. Returns the entry content as {@link ByteBuf} object if the header contains
+     * non-zero length and header checksum matches calculated one, null otherwise.
      *
      * @param position position to the entry header
-     * @param size to read
-     * @return resulting buffer
+     * @return entry content as {@link ByteBuf} or null
      */
-    @NonNull ByteBuffer read(int position, int size);
+    @Nullable ByteBuf read(int position);
 }

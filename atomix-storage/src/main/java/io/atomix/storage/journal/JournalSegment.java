@@ -20,9 +20,7 @@ import com.google.common.base.MoreObjects;
 import io.atomix.storage.journal.index.JournalIndex;
 import io.atomix.storage.journal.index.Position;
 import io.atomix.storage.journal.index.SparseJournalIndex;
-import io.netty.util.internal.PlatformDependent;
 import java.io.IOException;
-import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
@@ -47,7 +45,7 @@ final class JournalSegment implements AutoCloseable {
   private final Set<JournalSegmentReader> readers = ConcurrentHashMap.newKeySet();
   private final AtomicInteger references = new AtomicInteger();
   private final FileChannel channel;
-  private final MappedByteBuffer mappedBuffer;
+  private final MappedByteBuf mappedByteBuf;
 
   private JournalSegmentWriter writer;
   private boolean open = true;
@@ -69,15 +67,15 @@ final class JournalSegment implements AutoCloseable {
     try {
       channel = FileChannel.open(file.file().toPath(),
         StandardOpenOption.CREATE, StandardOpenOption.READ, StandardOpenOption.WRITE);
-      mappedBuffer = storageLevel == StorageLevel.MAPPED
-          ? channel.map(FileChannel.MapMode.READ_WRITE, 0, maxSegmentSize) : null;
+      mappedByteBuf = storageLevel == StorageLevel.MAPPED
+          ? MappedByteBuf.fromFileChannel(channel, maxSegmentSize) : null;
     } catch (IOException e) {
       throw new StorageException(e);
     }
 
     final var fileWriter = switch (storageLevel) {
         case DISK -> new DiskFileWriter(channel, ioBufferSize);
-        case MAPPED -> new MappedFileWriter(mappedBuffer);
+        case MAPPED -> new MappedFileWriter(mappedByteBuf);
     };
     writer = new JournalSegmentWriter(fileWriter, this, journalIndex);
   }
@@ -204,7 +202,7 @@ final class JournalSegment implements AutoCloseable {
 
     final var fileReader = switch (storageLevel) {
       case DISK -> new DiskFileReader(channel, ioBufferSize);
-      case MAPPED -> new MappedFileReader(mappedBuffer);
+      case MAPPED -> new MappedFileReader(mappedByteBuf);
     };
     final var reader = new JournalSegmentReader(this, fileReader);
     reader.setPosition(JournalSegmentDescriptor.BYTES);
@@ -260,9 +258,6 @@ final class JournalSegment implements AutoCloseable {
   private void finishClose() {
     writer.close();
     try {
-      if (mappedBuffer != null) {
-        PlatformDependent.freeDirectBuffer(mappedBuffer);
-      }
       channel.close();
     } catch (IOException e) {
       throw new StorageException(e);
