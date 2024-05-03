@@ -52,7 +52,7 @@ final class AE implements Externalizable {
         final var entries = appendEntries.getEntries();
         out.writeInt(entries.size());
         for (var e : entries) {
-            WritableObjects.writeLongs(out, e.getIndex(), e.getTerm());
+            WritableObjects.writeLongs(out, e.index(), e.term());
             out.writeObject(e.getData());
         }
 

@@ -49,7 +49,7 @@ final class SS implements Externalizable {
         final var unAppliedEntries = snapshot.getUnAppliedEntries();
         out.writeInt(unAppliedEntries.size());
         for (var e : unAppliedEntries) {
-            WritableObjects.writeLongs(out, e.getIndex(), e.getTerm());
+            WritableObjects.writeLongs(out, e.index(), e.term());
             out.writeObject(e.getData());
         }
 

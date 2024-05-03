@@ -110,7 +110,7 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
 
         follower2Instance.stopDropMessages(AppendEntries.class);
         ApplyState applyState = expectFirstMatching(follower2CollectorActor, ApplyState.class);
-        assertEquals("Apply sate index", 0, applyState.getReplicatedLogEntry().getIndex());
+        assertEquals("Apply sate index", 0, applyState.getReplicatedLogEntry().index());
 
         // Now send the LeaderTransitioning to follower2 after it has received AppendEntries from the new leader.
         follower2Actor.tell(leaderTransitioning, ActorRef.noSender());
