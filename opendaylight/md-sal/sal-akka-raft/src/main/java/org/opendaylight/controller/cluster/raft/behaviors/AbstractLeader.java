@@ -386,13 +386,13 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                 // However we keep looping so we can make progress when new entries in the current term
                 // reach consensus, as per §5.4.1: "once an entry from the current term is committed by
                 // counting replicas, then all prior entries are committed indirectly".
-                if (replicatedLogEntry.getTerm() == currentTerm()) {
+                if (replicatedLogEntry.term() == currentTerm()) {
                     log.trace("{}: Setting commit index to {}", logName(), index);
                     context.setCommitIndex(index);
                 } else {
                     log.debug("{}: Not updating commit index to {} - retrieved log entry with index {}, "
                             + "term {} does not match the current term {}", logName(), index,
-                            replicatedLogEntry.getIndex(), replicatedLogEntry.getTerm(), currentTerm());
+                            replicatedLogEntry.index(), replicatedLogEntry.term(), currentTerm());
                 }
             } else {
                 log.trace("{}: minReplicationCount not reached, actual {} - breaking", logName(), replicatedCount);
@@ -463,7 +463,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         // If it does that means the leader wasn't dropped before the transaction applied.
         // That means that this transaction can be safely applied as a local transaction since we
         // have the ClientRequestTracker.
-        final var tracker = removeClientRequestTracker(entry.getIndex());
+        final var tracker = removeClientRequestTracker(entry.index());
         if (tracker != null) {
             return new ApplyState(tracker.clientActor(), tracker.identifier(), entry);
         }
@@ -792,7 +792,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
         // If an AppendEntries has already been serialized for the log index then reuse the
         // SharedFileBackedOutputStream.
-        final Long logIndex = firstEntry.getIndex();
+        final Long logIndex = firstEntry.index();
         SharedFileBackedOutputStream fileBackedStream = sharedSerializedAppendEntriesStreams.get(logIndex);
         if (fileBackedStream == null) {
             fileBackedStream = context.getFileBackedOutputStreamFactory().newSharedInstance();
@@ -902,7 +902,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             return true;
         }
 
-        boolean captureInitiated = context.getSnapshotManager().captureToInstall(context.getReplicatedLog().last(),
+        boolean captureInitiated = context.getSnapshotManager().captureToInstall(context.getReplicatedLog().lastMeta(),
             getReplicatedToAllIndex(), followerId);
         if (captureInitiated) {
             followerLogInfo.setLeaderInstallSnapshotState(new LeaderInstallSnapshotState(

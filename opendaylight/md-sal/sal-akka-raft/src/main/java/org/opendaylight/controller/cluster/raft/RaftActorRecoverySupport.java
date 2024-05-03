@@ -165,7 +165,7 @@ class RaftActorRecoverySupport {
     private void onRecoveredJournalLogEntry(final ReplicatedLogEntry logEntry) {
         if (log.isDebugEnabled()) {
             log.debug("{}: Received ReplicatedLogEntry for recovery: index: {}, size: {}", context.getId(),
-                    logEntry.getIndex(), logEntry.size());
+                    logEntry.index(), logEntry.size());
         }
 
         if (logEntry.getData() instanceof ServerConfigurationPayload payload) {
@@ -251,8 +251,8 @@ class RaftActorRecoverySupport {
         }
     }
 
-    private void takeRecoverySnapshot(final ReplicatedLogEntry logEntry) {
-        log.info("Time for recovery snapshot on entry with index {}", logEntry.getIndex());
+    private void takeRecoverySnapshot(final RaftEntryMeta logEntry) {
+        log.info("Time for recovery snapshot on entry with index {}", logEntry.index());
         final SnapshotManager snapshotManager = context.getSnapshotManager();
         if (snapshotManager.capture(logEntry, -1)) {
             log.info("Capturing snapshot, resetting timer for the next recovery snapshot interval.");
@@ -321,7 +321,7 @@ class RaftActorRecoverySupport {
         } else if (hasMigratedDataRecovered) {
             log.info("{}: Snapshot capture initiated after recovery due to migrated messages", context.getId());
 
-            context.getSnapshotManager().capture(replicatedLog().last(), -1);
+            context.getSnapshotManager().capture(replicatedLog().lastMeta(), -1);
         } else {
             possiblyRestoreFromSnapshot();
         }

@@ -76,8 +76,8 @@ public class AppendEntriesTest {
     }
 
     private static void verifyReplicatedLogEntry(final ReplicatedLogEntry expected, final ReplicatedLogEntry actual) {
-        assertEquals("getIndex", expected.getIndex(), actual.getIndex());
-        assertEquals("getTerm", expected.getTerm(), actual.getTerm());
+        assertEquals("getIndex", expected.index(), actual.index());
+        assertEquals("getTerm", expected.term(), actual.term());
         assertEquals("getData", expected.getData().toString(), actual.getData().toString());
     }
 }

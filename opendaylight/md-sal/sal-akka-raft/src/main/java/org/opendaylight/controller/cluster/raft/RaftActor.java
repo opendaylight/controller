@@ -444,14 +444,14 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     private void onGetOnDemandRaftStats() {
         // Debugging message to retrieve raft stats.
 
-        Map<String, String> peerAddresses = new HashMap<>();
-        Map<String, Boolean> peerVotingStates = new HashMap<>();
-        for (PeerInfo info: context.getPeers()) {
+        final var peerAddresses = new HashMap<String, String>();
+        final var peerVotingStates = new HashMap<String, Boolean>();
+        for (var info : context.getPeers()) {
             peerVotingStates.put(info.getId(), info.isVoting());
             peerAddresses.put(info.getId(), info.getAddress() != null ? info.getAddress() : "");
         }
 
-        final RaftActorBehavior currentBehavior = context.getCurrentBehavior();
+        final var currentBehavior = context.getCurrentBehavior();
         final var builder = newOnDemandRaftStateBuilder()
                 .commitIndex(context.getCommitIndex())
                 .currentTerm(context.getTermInformation().getCurrentTerm())
@@ -472,13 +472,12 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 .peerVotingStates(peerVotingStates)
                 .customRaftPolicyClassName(context.getConfigParams().getCustomRaftPolicyImplementationClass());
 
-        ReplicatedLogEntry lastLogEntry = replicatedLog().last();
+        final var lastLogEntry = replicatedLog().lastMeta();
         if (lastLogEntry != null) {
-            builder.lastLogIndex(lastLogEntry.getIndex());
-            builder.lastLogTerm(lastLogEntry.getTerm());
+            builder.lastLogIndex(lastLogEntry.index()).lastLogTerm(lastLogEntry.term());
         }
 
-        if (getCurrentBehavior() instanceof AbstractLeader leader) {
+        if (currentBehavior instanceof AbstractLeader leader) {
             builder.followerInfoList(leader.getFollowerIds().stream()
                 .map(leader::getFollower)
                 .map(info -> new FollowerInfo(info.getId(), info.getNextIndex(), info.getMatchIndex(),
@@ -489,7 +488,6 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         }
 
         sender().tell(builder.build(), self());
-
     }
 
     protected OnDemandRaftState.AbstractBuilder<?, ?> newOnDemandRaftStateBuilder() {
@@ -537,10 +535,11 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     private void handleApplyState(final ApplyState applyState) {
         long startTime = System.nanoTime();
 
-        Payload payload = applyState.getReplicatedLogEntry().getData();
+        final var entry = applyState.getReplicatedLogEntry();
+        final var payload = entry.getData();
         if (LOG.isDebugEnabled()) {
             LOG.debug("{}: Applying state for log index {} data {}",
-                persistenceId(), applyState.getReplicatedLogEntry().getIndex(), payload);
+                persistenceId(), entry.index(), payload);
         }
 
         if (!(payload instanceof NoopPayload) && !(payload instanceof ServerConfigurationPayload)) {
@@ -599,15 +598,15 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
             if (!hasFollowers()) {
                 // Increment the Commit Index and the Last Applied values
-                raftContext.setCommitIndex(persistedLogEntry.getIndex());
-                raftContext.setLastApplied(persistedLogEntry.getIndex());
+                raftContext.setCommitIndex(persistedLogEntry.index());
+                raftContext.setLastApplied(persistedLogEntry.index());
 
                 // Apply the state immediately.
                 handleApplyState(new ApplyState(clientActor, identifier, persistedLogEntry));
 
                 // Send a ApplyJournalEntries message so that we write the fact that we applied
                 // the state to durable storage
-                self().tell(new ApplyJournalEntries(persistedLogEntry.getIndex()), self());
+                self().tell(new ApplyJournalEntries(persistedLogEntry.index()), self());
 
             } else {
                 context.getReplicatedLog().captureSnapshotIfReady(replicatedLogEntry);
@@ -622,7 +621,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         if (wasAppended && hasFollowers()) {
             // Send log entry for replication.
             getCurrentBehavior().handleMessage(getSelf(),
-                new Replicate(replicatedLogEntry.getIndex(), !batchHint, clientActor, identifier));
+                new Replicate(replicatedLogEntry.index(), !batchHint, clientActor, identifier));
         }
     }
 
@@ -895,10 +894,11 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         if (!snapshotManager.isCapturing()) {
             final long idx = getCurrentBehavior().getReplicatedToAllIndex();
+            final var last = replicatedLog().lastMeta();
             LOG.debug("Take a snapshot of current state. lastReplicatedLog is {} and replicatedToAllIndex is {}",
-                replicatedLog().last(), idx);
+                last, idx);
 
-            snapshotManager.captureWithForcedTrim(replicatedLog().last(), idx);
+            snapshotManager.captureWithForcedTrim(last, idx);
         }
     }
 

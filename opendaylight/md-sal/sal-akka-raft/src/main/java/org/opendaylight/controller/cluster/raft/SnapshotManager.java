@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStream;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
@@ -81,18 +82,18 @@ public class SnapshotManager implements SnapshotState {
     }
 
     @Override
-    public boolean captureToInstall(final ReplicatedLogEntry lastLogEntry, final long replicatedToAllIndex,
+    public boolean captureToInstall(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex,
             final String targetFollower) {
         return currentState.captureToInstall(lastLogEntry, replicatedToAllIndex, targetFollower);
     }
 
     @Override
-    public boolean capture(final ReplicatedLogEntry lastLogEntry, final long replicatedToAllIndex) {
+    public boolean capture(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex) {
         return currentState.capture(lastLogEntry, replicatedToAllIndex);
     }
 
     @Override
-    public boolean captureWithForcedTrim(final ReplicatedLogEntry lastLogEntry, final long replicatedToAllIndex) {
+    public boolean captureWithForcedTrim(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex) {
         return currentState.captureWithForcedTrim(lastLogEntry, replicatedToAllIndex);
     }
 
@@ -159,7 +160,7 @@ public class SnapshotManager implements SnapshotState {
      * @param replicatedToAllIndex the index of the last entry replicated to all followers.
      * @return a new CaptureSnapshot instance.
      */
-    public CaptureSnapshot newCaptureSnapshot(final ReplicatedLogEntry lastLogEntry, final long replicatedToAllIndex,
+    public CaptureSnapshot newCaptureSnapshot(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex,
                                               final boolean mandatoryTrim) {
         TermInformationReader lastAppliedTermInfoReader =
                 lastAppliedTermInformationReader.init(context.getReplicatedLog(), context.getLastApplied(),
@@ -187,8 +188,8 @@ public class SnapshotManager implements SnapshotState {
             log.debug("{}: Capturing Snapshot : lastLogEntry is null. Using snapshot values lastAppliedIndex {} and "
                     + "lastAppliedTerm {} instead.", persistenceId(), lastAppliedIndex, lastAppliedTerm);
         } else {
-            lastLogEntryIndex = lastLogEntry.getIndex();
-            lastLogEntryTerm = lastLogEntry.getTerm();
+            lastLogEntryIndex = lastLogEntry.index();
+            lastLogEntryTerm = lastLogEntry.term();
         }
 
         return new CaptureSnapshot(lastLogEntryIndex, lastLogEntryTerm, lastAppliedIndex, lastAppliedTerm,
@@ -203,20 +204,20 @@ public class SnapshotManager implements SnapshotState {
         }
 
         @Override
-        public boolean capture(final ReplicatedLogEntry lastLogEntry, final long replicatedToAllIndex) {
+        public boolean capture(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex) {
             log.debug("capture should not be called in state {}", this);
             return false;
         }
 
         @Override
-        public boolean captureToInstall(final ReplicatedLogEntry lastLogEntry, final long replicatedToAllIndex,
+        public boolean captureToInstall(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex,
                 final String targetFollower) {
             log.debug("captureToInstall should not be called in state {}", this);
             return false;
         }
 
         @Override
-        public boolean captureWithForcedTrim(final ReplicatedLogEntry lastLogEntry, final long replicatedToAllIndex) {
+        public boolean captureWithForcedTrim(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex) {
             log.debug("captureWithForcedTrim should not be called in state {}", this);
             return false;
         }
@@ -264,7 +265,7 @@ public class SnapshotManager implements SnapshotState {
 
                 //use the term of the temp-min, since we check for isPresent, entry will not be null
                 ReplicatedLogEntry entry = context.getReplicatedLog().get(tempMin);
-                context.getReplicatedLog().snapshotPreCommit(tempMin, entry.getTerm());
+                context.getReplicatedLog().snapshotPreCommit(tempMin, entry.term());
                 context.getReplicatedLog().snapshotCommit(false);
                 return tempMin;
             }
@@ -289,7 +290,7 @@ public class SnapshotManager implements SnapshotState {
         }
 
         @SuppressWarnings("checkstyle:IllegalCatch")
-        private boolean capture(final ReplicatedLogEntry lastLogEntry, final long replicatedToAllIndex,
+        private boolean capture(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex,
                 final String targetFollower, final boolean mandatoryTrim) {
             captureSnapshot = newCaptureSnapshot(lastLogEntry, replicatedToAllIndex, mandatoryTrim);
 
@@ -320,18 +321,18 @@ public class SnapshotManager implements SnapshotState {
         }
 
         @Override
-        public boolean capture(final ReplicatedLogEntry lastLogEntry, final long replicatedToAllIndex) {
+        public boolean capture(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex) {
             return capture(lastLogEntry, replicatedToAllIndex, null, false);
         }
 
         @Override
-        public boolean captureToInstall(final ReplicatedLogEntry lastLogEntry, final long replicatedToAllIndex,
+        public boolean captureToInstall(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex,
                 final String targetFollower) {
             return capture(lastLogEntry, replicatedToAllIndex, targetFollower, false);
         }
 
         @Override
-        public boolean captureWithForcedTrim(final ReplicatedLogEntry lastLogEntry, final long replicatedToAllIndex) {
+        public boolean captureWithForcedTrim(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex) {
             return capture(lastLogEntry, replicatedToAllIndex, null, true);
         }
 
@@ -546,20 +547,20 @@ public class SnapshotManager implements SnapshotState {
         private long term;
 
         LastAppliedTermInformationReader init(final ReplicatedLog log, final long originalIndex,
-                final ReplicatedLogEntry lastLogEntry, final boolean hasFollowers) {
-            ReplicatedLogEntry entry = log.get(originalIndex);
+                final @Nullable RaftEntryMeta lastLogEntry, final boolean hasFollowers) {
+            RaftEntryMeta entry = log.lookupMeta(originalIndex);
             index = -1L;
             term = -1L;
             if (!hasFollowers) {
                 if (lastLogEntry != null) {
                     // since we have persisted the last-log-entry to persistent journal before the capture,
                     // we would want to snapshot from this entry.
-                    index = lastLogEntry.getIndex();
-                    term = lastLogEntry.getTerm();
+                    index = lastLogEntry.index();
+                    term = lastLogEntry.term();
                 }
             } else if (entry != null) {
-                index = entry.getIndex();
-                term = entry.getTerm();
+                index = entry.index();
+                term = entry.term();
             } else if (log.getSnapshotIndex() > -1) {
                 index = log.getSnapshotIndex();
                 term = log.getSnapshotTerm();
@@ -583,15 +584,14 @@ public class SnapshotManager implements SnapshotState {
         private long term;
 
         ReplicatedToAllTermInformationReader init(final ReplicatedLog log, final long originalIndex) {
-            ReplicatedLogEntry entry = log.get(originalIndex);
-            index = -1L;
-            term = -1L;
-
+            var entry = log.get(originalIndex);
             if (entry != null) {
-                index = entry.getIndex();
-                term = entry.getTerm();
+                index = entry.index();
+                term = entry.term();
+            } else {
+                index = -1L;
+                term = -1L;
             }
-
             return this;
         }
 
