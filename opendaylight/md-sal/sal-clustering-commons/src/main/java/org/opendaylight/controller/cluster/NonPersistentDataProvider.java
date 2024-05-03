@@ -9,10 +9,11 @@ package org.opendaylight.controller.cluster;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.japi.Procedure;
 import akka.persistence.JournalProtocol;
 import akka.persistence.SnapshotProtocol;
 import akka.persistence.SnapshotSelectionCriteria;
+import java.util.function.Consumer;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,13 +36,13 @@ public class NonPersistentDataProvider implements DataPersistenceProvider {
     }
 
     @Override
-    public <T> void persist(final T entry, final Procedure<T> procedure) {
-        invokeProcedure(procedure, entry);
+    public <T extends PersistentData> void persist(final T entry, final Consumer<T> procedure) {
+        invokeCallback(procedure, entry);
     }
 
     @Override
-    public <T> void persistAsync(final T entry, final Procedure<T> procedure) {
-        actor.executeInSelf(() -> invokeProcedure(procedure, entry));
+    public <T extends PersistentData> void persistAsync(final T entry, final Consumer<T> procedure) {
+        actor.executeInSelf(() -> invokeCallback(procedure, entry));
     }
 
     @Override
@@ -64,10 +65,11 @@ public class NonPersistentDataProvider implements DataPersistenceProvider {
         return -1;
     }
 
+    @NonNullByDefault
     @SuppressWarnings("checkstyle:IllegalCatch")
-    static <T> void invokeProcedure(final Procedure<T> procedure, final T argument) {
+    static <T extends PersistentData> void invokeCallback(final Consumer<T> callback, final T argument) {
         try {
-            procedure.apply(argument);
+            callback.accept(argument);
         } catch (Exception e) {
             LOG.error("An unexpected error occurred", e);
         }

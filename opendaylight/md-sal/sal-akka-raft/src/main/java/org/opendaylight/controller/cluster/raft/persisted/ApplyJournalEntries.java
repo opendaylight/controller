@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.raft.persisted;
 
 import akka.dispatch.ControlMessage;
-import java.io.Serializable;
+import org.opendaylight.controller.cluster.PersistentData;
 
 /**
  * This is an internal message that is stored in the akka's persistent journal. During recovery, this
@@ -18,7 +18,7 @@ import java.io.Serializable;
  *
  * @author Thomas Pantelis
  */
-public final class ApplyJournalEntries implements Serializable, ControlMessage {
+public final class ApplyJournalEntries implements PersistentData, ControlMessage {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 

@@ -9,13 +9,13 @@ package org.opendaylight.controller.cluster;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.japi.Procedure;
 import akka.persistence.AbstractPersistentActor;
 import akka.persistence.DeleteMessagesSuccess;
 import akka.persistence.DeleteSnapshotsSuccess;
 import akka.persistence.JournalProtocol;
 import akka.persistence.SnapshotProtocol;
 import akka.persistence.SnapshotSelectionCriteria;
+import java.util.function.Consumer;
 
 /**
  * A DataPersistenceProvider implementation with persistence enabled.
@@ -33,13 +33,13 @@ public class PersistentDataProvider implements DataPersistenceProvider {
     }
 
     @Override
-    public <T> void persist(final T entry, final Procedure<T> procedure) {
-        persistentActor.persist(entry, procedure);
+    public <T extends PersistentData> void persist(final T entry, final Consumer<T> callback) {
+        persistentActor.persist(entry, callback::accept);
     }
 
     @Override
-    public <T> void persistAsync(final T entry, final Procedure<T> procedure) {
-        persistentActor.persistAsync(entry, procedure);
+    public <T extends PersistentData> void persistAsync(final T entry, final Consumer<T> callback) {
+        persistentActor.persistAsync(entry, callback::accept);
     }
 
     @Override

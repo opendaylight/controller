@@ -7,14 +7,14 @@
  */
 package org.opendaylight.controller.cluster.raft.persisted;
 
-import java.io.Serializable;
+import org.opendaylight.controller.cluster.PersistentData;
 
 /**
  * Internal message that is stored in the akka's persistent journal to delete journal entries.
  *
  * @author Thomas Pantelis
  */
-public final class DeleteEntries implements Serializable {
+public final class DeleteEntries implements PersistentData {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 

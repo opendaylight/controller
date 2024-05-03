@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.raft.persisted;
 
 import static java.util.Objects.requireNonNull;
 
-import java.io.Serializable;
 import org.apache.commons.lang3.SerializationUtils;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
@@ -19,7 +18,7 @@ import org.opendaylight.controller.cluster.raft.messages.Payload;
  *
  * @author Thomas Pantelis
  */
-public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Serializable {
+public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
     // Estimate to how big the proxy is. Note this includes object stream overhead, so it is a bit conservative.

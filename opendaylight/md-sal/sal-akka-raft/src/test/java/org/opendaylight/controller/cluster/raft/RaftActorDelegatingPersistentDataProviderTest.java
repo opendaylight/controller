@@ -12,7 +12,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
-import akka.japi.Procedure;
+import java.util.function.Consumer;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,8 +20,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
+import org.opendaylight.controller.cluster.PersistentData;
 import org.opendaylight.controller.cluster.PersistentDataProvider;
-import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.messages.PersistentPayload;
 
 /**
@@ -31,11 +31,14 @@ import org.opendaylight.controller.cluster.raft.messages.PersistentPayload;
  */
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class RaftActorDelegatingPersistentDataProviderTest {
-    private static final Payload PERSISTENT_PAYLOAD = new TestPersistentPayload();
+    private static final PersistentData PERSISTENT_PAYLOAD = new TestPersistentPayload();
 
-    private static final Payload NON_PERSISTENT_PAYLOAD = new TestNonPersistentPayload();
+    private static final PersistentData NON_PERSISTENT_PAYLOAD = new TestNonPersistentPayload();
 
-    private static final Object OTHER_DATA_OBJECT = new Object();
+    private static final PersistentData OTHER_DATA_OBJECT = new PersistentData() {
+        @java.io.Serial
+        private static final long serialVersionUID = 1;
+    };
 
     @Mock
     private ReplicatedLogEntry mockPersistentLogEntry;
@@ -49,9 +52,8 @@ public class RaftActorDelegatingPersistentDataProviderTest {
     @Mock
     private PersistentDataProvider mockPersistentProvider;
 
-    @SuppressWarnings("rawtypes")
     @Mock
-    private Procedure mockProcedure;
+    private Consumer<PersistentData> mockProcedure;
 
     private RaftActorDelegatingPersistentDataProvider provider;
 
@@ -77,18 +79,18 @@ public class RaftActorDelegatingPersistentDataProviderTest {
         verify(mockDelegateProvider).persist(OTHER_DATA_OBJECT, mockProcedure);
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings("unchecked")
     @Test
     public void testPersistWithPersistenceDisabled() throws Exception {
         doReturn(false).when(mockDelegateProvider).isRecoveryApplicable();
 
         provider.persist(mockPersistentLogEntry, mockProcedure);
 
-        ArgumentCaptor<Procedure> procedureCaptor = ArgumentCaptor.forClass(Procedure.class);
+        final var procedureCaptor = ArgumentCaptor.forClass(Consumer.class);
         verify(mockPersistentProvider).persist(eq(PERSISTENT_PAYLOAD), procedureCaptor.capture());
         verify(mockDelegateProvider, never()).persist(mockNonPersistentLogEntry, mockProcedure);
-        procedureCaptor.getValue().apply(PERSISTENT_PAYLOAD);
-        verify(mockProcedure).apply(mockPersistentLogEntry);
+        procedureCaptor.getValue().accept(PERSISTENT_PAYLOAD);
+        verify(mockProcedure).accept(mockPersistentLogEntry);
 
         provider.persist(mockNonPersistentLogEntry, mockProcedure);
         verify(mockDelegateProvider).persist(mockNonPersistentLogEntry, mockProcedure);
@@ -97,25 +99,10 @@ public class RaftActorDelegatingPersistentDataProviderTest {
         verify(mockDelegateProvider).persist(OTHER_DATA_OBJECT, mockProcedure);
     }
 
-    static class TestNonPersistentPayload extends Payload {
+    static class TestNonPersistentPayload implements PersistentData {
         @java.io.Serial
         private static final long serialVersionUID = 1L;
 
-        @Override
-        public int size() {
-            return 0;
-        }
-
-        @Override
-        public int serializedSize() {
-            return 0;
-        }
-
-        @Override
-        protected Object writeReplace() {
-            // Not needed
-            throw new UnsupportedOperationException();
-        }
     }
 
     static class TestPersistentPayload extends TestNonPersistentPayload implements PersistentPayload {
