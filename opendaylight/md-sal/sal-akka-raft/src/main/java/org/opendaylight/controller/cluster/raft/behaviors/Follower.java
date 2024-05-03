@@ -247,32 +247,32 @@ public class Follower extends AbstractRaftActorBehavior {
         if (context.getReplicatedLog().size() > 0) {
             // Find the entry up until the one that is not in the follower's log
             for (int i = 0;i < numLogEntries; i++, addEntriesFrom++) {
-                ReplicatedLogEntry matchEntry = appendEntries.getEntries().get(i);
+                final var matchEntry = appendEntries.getEntries().get(i);
 
-                if (!isLogEntryPresent(matchEntry.getIndex())) {
+                if (!isLogEntryPresent(matchEntry.index())) {
                     // newEntry not found in the log
                     break;
                 }
 
-                long existingEntryTerm = getLogEntryTerm(matchEntry.getIndex());
+                long existingEntryTerm = getLogEntryTerm(matchEntry.index());
 
                 log.debug("{}: matchEntry {} is present: existingEntryTerm: {}", logName(), matchEntry,
                         existingEntryTerm);
 
                 // existingEntryTerm == -1 means it's in the snapshot and not in the log. We don't know
                 // what the term was so we'll assume it matches.
-                if (existingEntryTerm == -1 || existingEntryTerm == matchEntry.getTerm()) {
+                if (existingEntryTerm == -1 || existingEntryTerm == matchEntry.term()) {
                     continue;
                 }
 
                 if (!context.getRaftPolicy().applyModificationToStateBeforeConsensus()) {
                     log.info("{}: Removing entries from log starting at {}, commitIndex: {}, lastApplied: {}",
-                            logName(), matchEntry.getIndex(), context.getCommitIndex(), context.getLastApplied());
+                            logName(), matchEntry.index(), context.getCommitIndex(), context.getLastApplied());
 
                     // Entries do not match so remove all subsequent entries but only if the existing entries haven't
                     // been applied to the state yet.
-                    if (matchEntry.getIndex() <= context.getLastApplied()
-                            || !context.getReplicatedLog().removeFromAndPersist(matchEntry.getIndex())) {
+                    if (matchEntry.index() <= context.getLastApplied()
+                            || !context.getReplicatedLog().removeFromAndPersist(matchEntry.index())) {
                         // Could not remove the entries - this means the matchEntry index must be in the
                         // snapshot and not the log. In this case the prior entries are part of the state
                         // so we must send back a reply to force a snapshot to completely re-sync the
@@ -311,7 +311,7 @@ public class Follower extends AbstractRaftActorBehavior {
             final List<ReplicatedLogEntry> entries = appendEntries.getEntries();
             final ReplicatedLogEntry lastEntryToAppend = entries.get(entries.size() - 1);
             if (shouldCaptureSnapshot.get() && logEntry == lastEntryToAppend) {
-                context.getSnapshotManager().capture(context.getReplicatedLog().last(), getReplicatedToAllIndex());
+                context.getSnapshotManager().capture(context.getReplicatedLog().lastMeta(), getReplicatedToAllIndex());
             }
         };
 
@@ -324,7 +324,7 @@ public class Follower extends AbstractRaftActorBehavior {
             context.getReplicatedLog().appendAndPersist(entry, appendAndPersistCallback, false);
 
             shouldCaptureSnapshot.compareAndSet(false,
-                    context.getReplicatedLog().shouldCaptureSnapshot(entry.getIndex()));
+                    context.getReplicatedLog().shouldCaptureSnapshot(entry.index()));
 
             if (entry.getData() instanceof ServerConfigurationPayload serverConfiguration) {
                 context.updatePeerIds(serverConfiguration);
@@ -398,10 +398,10 @@ public class Follower extends AbstractRaftActorBehavior {
             }
 
             final List<ReplicatedLogEntry> entries = appendEntries.getEntries();
-            if (entries.size() > 0 && !isLogEntryPresent(entries.get(0).getIndex() - 1)) {
+            if (entries.size() > 0 && !isLogEntryPresent(entries.get(0).index() - 1)) {
                 log.info("{}: Cannot append entries because the calculated previousIndex {} was not found in the "
                         + "in-memory journal - lastIndex: {}, snapshotIndex: {}, snapshotTerm: {}", logName(),
-                        entries.get(0).getIndex() - 1, lastIndex, context.getReplicatedLog().getSnapshotIndex(),
+                        entries.get(0).index() - 1, lastIndex, context.getReplicatedLog().getSnapshotIndex(),
                         context.getReplicatedLog().getSnapshotTerm());
 
                 sendOutOfSyncAppendEntriesReply(sender, false, appendEntries.getLeaderRaftVersion());

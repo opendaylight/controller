@@ -13,7 +13,7 @@ import org.opendaylight.controller.cluster.raft.messages.Payload;
 /**
  * Represents one entry in the replicated log.
  */
-public interface ReplicatedLogEntry {
+public interface ReplicatedLogEntry extends RaftEntryMeta {
     /**
      * Returns the payload/data to be replicated.
      *
@@ -25,15 +25,23 @@ public interface ReplicatedLogEntry {
      * Returns the term of the entry.
      *
      * @return the term
+     * @deprecated Use {@link #term()} istead.
      */
-    long getTerm();
+    @Deprecated(since = "9.0.3", forRemoval = true)
+    default long getTerm() {
+        return term();
+    }
 
     /**
      * Returns the index of the entry.
      *
      * @return the index
+     * @deprecated Use {@link #index()} istead.
      */
-    long getIndex();
+    @Deprecated(since = "9.0.3", forRemoval = true)
+    default long getIndex() {
+        return index();
+    }
 
     /**
      * Returns the size of the entry in bytes. An approximate number may be good enough.

@@ -49,13 +49,13 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Seria
     }
 
     @Override
-    public long getTerm() {
-        return term;
+    public long index() {
+        return index;
     }
 
     @Override
-    public long getIndex() {
-        return index;
+    public long term() {
+        return term;
     }
 
     @Override

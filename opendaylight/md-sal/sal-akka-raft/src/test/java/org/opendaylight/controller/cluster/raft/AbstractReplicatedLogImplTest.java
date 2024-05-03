@@ -307,15 +307,15 @@ public class AbstractReplicatedLogImplTest {
 
     // create a snapshot for test
     public Map<Long, String> takeSnapshot(final int numEntries) {
-        Map<Long, String> map = new HashMap<>(numEntries);
+        final var map = new HashMap<Long, String>(numEntries);
 
         long lastIndex = 0;
         long lastTerm = 0;
         for (int i = 0; i < numEntries; i++) {
-            ReplicatedLogEntry entry = replicatedLogImpl.getAtPhysicalIndex(i);
-            map.put(entry.getIndex(), entry.getData().toString());
-            lastIndex = entry.getIndex();
-            lastTerm = entry.getTerm();
+            final var entry = replicatedLogImpl.getAtPhysicalIndex(i);
+            map.put(entry.index(), entry.getData().toString());
+            lastIndex = entry.index();
+            lastTerm = entry.term();
         }
 
         replicatedLogImpl.snapshotPreCommit(lastIndex, lastTerm);
@@ -341,7 +341,7 @@ public class AbstractReplicatedLogImplTest {
         }
 
         @Override
-        public void captureSnapshotIfReady(final ReplicatedLogEntry replicatedLogEntry) {
+        public void captureSnapshotIfReady(final RaftEntryMeta replicatedLogEntry) {
             // No-op
         }
 
