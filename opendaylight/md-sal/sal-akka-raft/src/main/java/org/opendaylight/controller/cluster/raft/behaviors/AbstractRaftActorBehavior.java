@@ -325,9 +325,9 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
             return context.getReplicatedLog().getSnapshotIndex();
         }
 
-        ReplicatedLogEntry entry = context.getReplicatedLog().get(index);
+        var entry = context.getReplicatedLog().get(index);
         if (entry != null) {
-            return entry.getIndex();
+            return entry.index();
         }
 
         return -1;
@@ -343,9 +343,9 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
             return context.getReplicatedLog().getSnapshotTerm();
         }
 
-        ReplicatedLogEntry entry = context.getReplicatedLog().get(index);
+        var entry = context.getReplicatedLog().get(index);
         if (entry != null) {
-            return entry.getTerm();
+            return entry.term();
         }
 
         return -1;

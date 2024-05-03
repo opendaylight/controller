@@ -34,7 +34,7 @@ public interface SnapshotState {
      * @param replicatedToAllIndex the current replicatedToAllIndex
      * @return true if capture was started
      */
-    boolean capture(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex);
+    boolean capture(RaftEntryMeta lastLogEntry, long replicatedToAllIndex);
 
     /**
      * Initiates a capture snapshot for the purposing of installing the snapshot on a follower.
@@ -44,7 +44,7 @@ public interface SnapshotState {
      * @param targetFollower the id of the follower on which to install
      * @return true if capture was started
      */
-    boolean captureToInstall(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex, String targetFollower);
+    boolean captureToInstall(RaftEntryMeta lastLogEntry, long replicatedToAllIndex, String targetFollower);
 
     /**
      * Initiates a capture snapshot, while enforcing trimming of the log up to lastAppliedIndex.
@@ -52,7 +52,7 @@ public interface SnapshotState {
      * @param replicatedToAllIndex the current replicatedToAllIndex
      * @return true if capture was started
      */
-    boolean captureWithForcedTrim(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex);
+    boolean captureWithForcedTrim(RaftEntryMeta lastLogEntry, long replicatedToAllIndex);
 
     /**
      * Applies a snapshot on a follower that was installed by the leader.
