@@ -38,8 +38,8 @@ final class LE implements Externalizable {
     }
 
     LE(final SimpleReplicatedLogEntry logEntry) {
-        index = logEntry.getIndex();
-        term = logEntry.getTerm();
+        index = logEntry.index();
+        term = logEntry.term();
         data = logEntry.getData();
     }
 

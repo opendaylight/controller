@@ -24,10 +24,10 @@ public class SimpleReplicatedLogEntryTest {
         final var expected = new SimpleReplicatedLogEntry(0, 1, new MockRaftActorContext.MockPayload("A"));
         final var bytes = SerializationUtils.serialize(expected);
         assertEquals(218, bytes.length);
-        final var cloned = (SimpleReplicatedLogEntry) SerializationUtils.deserialize(bytes);
+        final var cloned = SerializationUtils.<SimpleReplicatedLogEntry>deserialize(bytes);
 
-        assertEquals("getTerm", expected.getTerm(), cloned.getTerm());
-        assertEquals("getIndex", expected.getIndex(), cloned.getIndex());
+        assertEquals("getTerm", expected.term(), cloned.term());
+        assertEquals("getIndex", expected.index(), cloned.index());
         assertEquals("getData", expected.getData(), cloned.getData());
     }
 }

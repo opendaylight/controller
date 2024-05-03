@@ -158,11 +158,11 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         // message is forwarded to the followers.
 
         expectFirstMatching(follower1CollectorActor, AppendEntries.class, ae ->
-                ae.getEntries().size() == 1 && ae.getEntries().get(0).getIndex() == 1
+                ae.getEntries().size() == 1 && ae.getEntries().get(0).index() == 1
                         && ae.getEntries().get(0).getData().equals(payload1));
 
         expectFirstMatching(follower2CollectorActor, AppendEntries.class, ae ->
-                ae.getEntries().size() == 1 && ae.getEntries().get(0).getIndex() == 1
+                ae.getEntries().size() == 1 && ae.getEntries().get(0).index() == 1
                         && ae.getEntries().get(0).getData().equals(payload1));
 
         verifyApplyJournalEntries(leaderCollectorActor, 1);
@@ -235,7 +235,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
 
         List<ApplyState> applyState = getAllMatching(leaderCollectorActor, ApplyState.class);
         for (ApplyState as: applyState) {
-            if (as.getReplicatedLogEntry().getIndex() == 2 && as.getReplicatedLogEntry().getTerm() == 1) {
+            if (as.getReplicatedLogEntry().index() == 2 && as.getReplicatedLogEntry().term() == 1) {
                 fail("Got unexpected ApplyState: " + as);
             }
         }
@@ -279,11 +279,11 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         // message is forwarded to the followers.
 
         expectFirstMatching(follower1CollectorActor, AppendEntries.class, ae ->
-                ae.getEntries().size() == 1 && ae.getEntries().get(0).getIndex() == 1
+                ae.getEntries().size() == 1 && ae.getEntries().get(0).index() == 1
                         && ae.getEntries().get(0).getData().equals(payload1));
 
         expectFirstMatching(follower2CollectorActor, AppendEntries.class, ae ->
-                ae.getEntries().size() == 1 && ae.getEntries().get(0).getIndex() == 1
+                ae.getEntries().size() == 1 && ae.getEntries().get(0).index() == 1
                         && ae.getEntries().get(0).getData().equals(payload1));
 
         verifyApplyJournalEntries(leaderCollectorActor, 1);
@@ -302,8 +302,8 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         // are collected but not forwarded to the follower RaftActor.
 
         expectFirstMatching(follower1CollectorActor, AppendEntries.class, ae -> {
-            for (ReplicatedLogEntry e: ae.getEntries()) {
-                if (e.getIndex() == 4) {
+            for (var entry : ae.getEntries()) {
+                if (entry.index() == 4) {
                     return true;
                 }
             }
@@ -363,7 +363,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
 
         List<ApplyState> applyState = getAllMatching(leaderCollectorActor, ApplyState.class);
         for (ApplyState as: applyState) {
-            if (as.getReplicatedLogEntry().getTerm() == 1) {
+            if (as.getReplicatedLogEntry().term() == 1) {
                 fail("Got unexpected ApplyState: " + as);
             }
         }
