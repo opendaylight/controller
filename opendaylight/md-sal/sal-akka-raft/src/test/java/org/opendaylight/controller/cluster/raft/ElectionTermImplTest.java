@@ -10,13 +10,15 @@ package org.opendaylight.controller.cluster.raft;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
 
-import akka.japi.Procedure;
+import java.util.function.Consumer;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
+import org.opendaylight.controller.cluster.PersistentData;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,9 +34,12 @@ public class ElectionTermImplTest {
 
     @Mock
     private DataPersistenceProvider mockPersistence;
+    @Captor
+    private ArgumentCaptor<PersistentData> message;
+    @Captor
+    private ArgumentCaptor<Consumer<PersistentData>> callback;
 
     @Test
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     public void testUpdateAndPersist() throws Exception {
         ElectionTermImpl impl = new ElectionTermImpl(mockPersistence, "test", LOG);
 
@@ -43,15 +48,13 @@ public class ElectionTermImplTest {
         assertEquals("getCurrentTerm", 10, impl.getCurrentTerm());
         assertEquals("getVotedFor", "member-1", impl.getVotedFor());
 
-        ArgumentCaptor<Object> message = ArgumentCaptor.forClass(Object.class);
-        ArgumentCaptor<Procedure> procedure = ArgumentCaptor.forClass(Procedure.class);
-        verify(mockPersistence).persist(message.capture(), procedure.capture());
+        verify(mockPersistence).persist(message.capture(), callback.capture());
 
         assertEquals("Message type", UpdateElectionTerm.class, message.getValue().getClass());
         UpdateElectionTerm update = (UpdateElectionTerm)message.getValue();
         assertEquals("getCurrentTerm", 10, update.getCurrentTerm());
         assertEquals("getVotedFor", "member-1", update.getVotedFor());
 
-        procedure.getValue().apply(null);
+        callback.getValue().accept(null);
     }
 }
