@@ -337,12 +337,12 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
 
     protected void verifyPersistedJournal(final String persistenceId,
             final List<? extends ReplicatedLogEntry> expJournal) {
-        List<ReplicatedLogEntry> journal = InMemoryJournal.get(persistenceId, ReplicatedLogEntry.class);
+        final var journal = InMemoryJournal.get(persistenceId, ReplicatedLogEntry.class);
         assertEquals("Journal ReplicatedLogEntry count", expJournal.size(), journal.size());
         for (int i = 0; i < expJournal.size(); i++) {
-            ReplicatedLogEntry expected = expJournal.get(i);
-            ReplicatedLogEntry actual = journal.get(i);
-            verifyReplicatedLogEntry(expected, actual.getTerm(), actual.getIndex(), actual.getData());
+            final var expected = expJournal.get(i);
+            final var actual = journal.get(i);
+            verifyReplicatedLogEntry(expected, actual.term(), actual.index(), actual.getData());
         }
     }
 
@@ -374,8 +374,8 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
 
     protected void verifyReplicatedLogEntry(final ReplicatedLogEntry replicatedLogEntry, final long expTerm,
             final long expIndex, final Payload payload) {
-        assertEquals("ReplicatedLogEntry getTerm", expTerm, replicatedLogEntry.getTerm());
-        assertEquals("ReplicatedLogEntry getIndex", expIndex, replicatedLogEntry.getIndex());
+        assertEquals("ReplicatedLogEntry getTerm", expTerm, replicatedLogEntry.term());
+        assertEquals("ReplicatedLogEntry getIndex", expIndex, replicatedLogEntry.index());
         assertEquals("ReplicatedLogEntry getData", payload, replicatedLogEntry.getData());
     }
 

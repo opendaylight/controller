@@ -42,8 +42,8 @@ public class SimpleReplicatedLogEntrySerializerTest {
         assertEquals("fromBinary return type", SimpleReplicatedLogEntry.class, deserialized.getClass());
 
         SimpleReplicatedLogEntry actual = (SimpleReplicatedLogEntry)deserialized;
-        assertEquals("getTerm", expected.getTerm(), actual.getTerm());
-        assertEquals("getIndex", expected.getIndex(), actual.getIndex());
+        assertEquals("getTerm", expected.term(), actual.term());
+        assertEquals("getIndex", expected.index(), actual.index());
         assertEquals("getData", expected.getData(), actual.getData());
     }
 }

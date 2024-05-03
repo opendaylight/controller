@@ -881,12 +881,12 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         assertEquals("getStatus", ServerChangeStatus.OK, removeServerReply.getStatus());
 
         ApplyState applyState = MessageCollectorActor.expectFirstMatching(leaderCollector, ApplyState.class);
-        assertEquals(0L, applyState.getReplicatedLogEntry().getIndex());
+        assertEquals(0L, applyState.getReplicatedLogEntry().index());
         verifyServerConfigurationPayloadEntry(leaderActor.underlyingActor().getRaftActorContext().getReplicatedLog(),
                 votingServer(LEADER_ID), votingServer(FOLLOWER_ID2), votingServer(downNodeId));
 
         applyState = MessageCollectorActor.expectFirstMatching(follower2Collector, ApplyState.class);
-        assertEquals(0L, applyState.getReplicatedLogEntry().getIndex());
+        assertEquals(0L, applyState.getReplicatedLogEntry().index());
         verifyServerConfigurationPayloadEntry(leaderActor.underlyingActor().getRaftActorContext().getReplicatedLog(),
                 votingServer(LEADER_ID), votingServer(FOLLOWER_ID2), votingServer(downNodeId));
 
@@ -931,7 +931,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         assertEquals("getStatus", ServerChangeStatus.OK, removeServerReply.getStatus());
 
         final ApplyState applyState = MessageCollectorActor.expectFirstMatching(followerCollector, ApplyState.class);
-        assertEquals(0L, applyState.getReplicatedLogEntry().getIndex());
+        assertEquals(0L, applyState.getReplicatedLogEntry().index());
         verifyServerConfigurationPayloadEntry(leaderActor.underlyingActor().getRaftActorContext().getReplicatedLog(),
                 votingServer(FOLLOWER_ID));
 
@@ -997,7 +997,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         assertEquals("getStatus", ServerChangeStatus.OK, reply.getStatus());
 
         final ApplyState applyState = MessageCollectorActor.expectFirstMatching(leaderCollector, ApplyState.class);
-        assertEquals(0L, applyState.getReplicatedLogEntry().getIndex());
+        assertEquals(0L, applyState.getReplicatedLogEntry().index());
         verifyServerConfigurationPayloadEntry(leaderActor.underlyingActor().getRaftActorContext().getReplicatedLog(),
                 votingServer(LEADER_ID), nonVotingServer(FOLLOWER_ID), nonVotingServer(FOLLOWER_ID2));
 
