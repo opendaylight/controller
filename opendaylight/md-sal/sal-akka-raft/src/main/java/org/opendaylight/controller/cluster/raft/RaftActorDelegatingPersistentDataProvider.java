@@ -9,9 +9,11 @@ package org.opendaylight.controller.cluster.raft;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.japi.Procedure;
+import java.util.function.Consumer;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.DelegatingPersistentDataProvider;
+import org.opendaylight.controller.cluster.PersistentData;
 import org.opendaylight.controller.cluster.PersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.messages.PersistentPayload;
 
@@ -31,29 +33,30 @@ class RaftActorDelegatingPersistentDataProvider extends DelegatingPersistentData
     }
 
     @Override
-    public <T> void persist(final T entry, final Procedure<T> procedure) {
-        doPersist(entry, procedure, false);
+    public <T extends PersistentData> void persist(final T entry, final Consumer<T> callback) {
+        doPersist(entry, callback, false);
     }
 
     @Override
-    public <T> void persistAsync(final T entry, final Procedure<T> procedure) {
-        doPersist(entry, procedure, true);
+    public <T extends PersistentData> void persistAsync(final T entry, final Consumer<T> callback) {
+        doPersist(entry, callback, true);
     }
 
-    private <T> void doPersist(final T entry, final Procedure<T> procedure, final boolean async) {
+    @NonNullByDefault
+    private <T extends PersistentData> void doPersist(final T entry, final Consumer<T> callback, final boolean async) {
         if (!getDelegate().isRecoveryApplicable() && entry instanceof ReplicatedLogEntry replicatedLogEntry
             && replicatedLogEntry.getData() instanceof PersistentPayload payload) {
             // We persist the Payload but not the ReplicatedLogEntry to avoid gaps in the journal indexes on recovery
             // if data persistence is later enabled.
             if (async) {
-                persistentProvider.persistAsync(payload, p -> procedure.apply(entry));
+                persistentProvider.persistAsync(payload, p -> callback.accept(entry));
             } else {
-                persistentProvider.persist(payload, p -> procedure.apply(entry));
+                persistentProvider.persist(payload, p -> callback.accept(entry));
             }
         } else if (async) {
-            super.persistAsync(entry, procedure);
+            super.persistAsync(entry, callback);
         } else {
-            super.persist(entry, procedure);
+            super.persist(entry, callback);
         }
     }
 }

@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.cluster;
 
-import akka.japi.Procedure;
 import akka.persistence.JournalProtocol;
 import akka.persistence.SnapshotProtocol;
 import akka.persistence.SnapshotSelectionCriteria;
+import java.util.function.Consumer;
 
 /**
  * A DataPersistenceProvider implementation that delegates to another implementation.
@@ -38,13 +38,13 @@ public class DelegatingPersistentDataProvider implements DataPersistenceProvider
     }
 
     @Override
-    public <T> void persist(final T entry, final Procedure<T> procedure) {
-        delegate.persist(entry, procedure);
+    public <T extends PersistentData> void persist(final T entry, final Consumer<T> callback) {
+        delegate.persist(entry, callback);
     }
 
     @Override
-    public <T> void persistAsync(final T entry, final Procedure<T> procedure) {
-        delegate.persistAsync(entry, procedure);
+    public <T extends PersistentData> void persistAsync(final T entry, final Consumer<T> callback) {
+        delegate.persistAsync(entry, callback);
     }
 
     @Override

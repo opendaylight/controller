@@ -240,7 +240,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         } else if (message instanceof ApplyJournalEntries applyEntries) {
             LOG.debug("{}: Persisting ApplyJournalEntries with index={}", persistenceId(), applyEntries.getToIndex());
 
-            persistence().persistAsync(applyEntries, NoopProcedure.instance());
+            persistence().persistAsync(applyEntries, unused -> {
+                // no-op
+            });
         } else if (message instanceof FindLeader) {
             getSender().tell(new FindLeaderReply(getLeaderAddress()), getSelf());
         } else if (message instanceof GetOnDemandRaftState) {
