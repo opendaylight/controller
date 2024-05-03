@@ -15,7 +15,6 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-import akka.japi.Procedure;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -28,6 +27,7 @@ import org.mockito.Mock;
 import org.mockito.internal.matchers.Same;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
+import org.opendaylight.controller.cluster.PersistentData;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
@@ -60,21 +60,22 @@ public class ReplicatedLogImplTest {
                 configParams, mockPersistence, applyState -> { }, LOG,  MoreExecutors.directExecutor());
     }
 
-    private void verifyPersist(final Object message) throws Exception {
+    private void verifyPersist(final PersistentData message) throws Exception {
         verifyPersist(message, new Same(message), true);
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    private void verifyPersist(final Object message, final ArgumentMatcher<?> matcher, final boolean async)
+    @SuppressWarnings("unchecked")
+    private void verifyPersist(final PersistentData message, final ArgumentMatcher<?> matcher, final boolean async)
             throws Exception {
-        ArgumentCaptor<Procedure> procedure = ArgumentCaptor.forClass(Procedure.class);
+        final var callback = ArgumentCaptor.forClass(Consumer.class);
+        final var cast = (ArgumentMatcher<PersistentData>) matcher;
         if (async) {
-            verify(mockPersistence).persistAsync(argThat(matcher), procedure.capture());
+            verify(mockPersistence).persistAsync(argThat(cast), callback.capture());
         } else {
-            verify(mockPersistence).persist(argThat(matcher), procedure.capture());
+            verify(mockPersistence).persist(argThat(cast), callback.capture());
         }
 
-        procedure.getValue().apply(message);
+        callback.getValue().accept(message);
     }
 
     @Test

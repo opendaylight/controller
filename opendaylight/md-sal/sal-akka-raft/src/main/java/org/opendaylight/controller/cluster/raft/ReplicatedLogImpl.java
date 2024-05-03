@@ -44,7 +44,9 @@ final class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
     public boolean removeFromAndPersist(final long logEntryIndex) {
         long adjustedIndex = removeFrom(logEntryIndex);
         if (adjustedIndex >= 0) {
-            context.getPersistenceProvider().persist(new DeleteEntries(logEntryIndex), NoopProcedure.instance());
+            context.getPersistenceProvider().persist(new DeleteEntries(logEntryIndex), unused -> {
+                // no-op
+            });
             return true;
         }
 

@@ -7,12 +7,12 @@
  */
 package org.opendaylight.controller.cluster.raft.persisted;
 
-import java.io.Serializable;
+import org.opendaylight.controller.cluster.PersistentData;
 
 /**
  * Message class to persist election term information.
  */
-public final class UpdateElectionTerm implements Serializable {
+public final class UpdateElectionTerm implements PersistentData {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 

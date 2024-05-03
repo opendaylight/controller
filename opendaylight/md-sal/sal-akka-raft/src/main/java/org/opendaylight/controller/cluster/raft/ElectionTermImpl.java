@@ -23,7 +23,7 @@ class ElectionTermImpl implements ElectionTerm {
     private final Logger log;
     private final String logId;
 
-    ElectionTermImpl(DataPersistenceProvider persistence, String logId, Logger log) {
+    ElectionTermImpl(final DataPersistenceProvider persistence, final String logId, final Logger log) {
         this.persistence = persistence;
         this.logId = logId;
         this.log = log;
@@ -40,16 +40,18 @@ class ElectionTermImpl implements ElectionTerm {
     }
 
     @Override
-    public void update(long newTerm, String newVotedFor) {
+    public void update(final long newTerm, final String newVotedFor) {
         log.debug("{}: Set currentTerm={}, votedFor={}", logId, newTerm, newVotedFor);
-        this.currentTerm = newTerm;
-        this.votedFor = newVotedFor;
+        currentTerm = newTerm;
+        votedFor = newVotedFor;
     }
 
     @Override
-    public void updateAndPersist(long newTerm, String newVotedFor) {
+    public void updateAndPersist(final long newTerm, final String newVotedFor) {
         update(newTerm, newVotedFor);
         // FIXME : Maybe first persist then update the state
-        persistence.persist(new UpdateElectionTerm(this.currentTerm, this.votedFor), NoopProcedure.instance());
+        persistence.persist(new UpdateElectionTerm(currentTerm, votedFor), unused -> {
+            // no-op
+        });
     }
 }
