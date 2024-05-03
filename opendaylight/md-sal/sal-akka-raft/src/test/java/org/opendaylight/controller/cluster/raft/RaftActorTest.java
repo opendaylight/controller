@@ -30,7 +30,6 @@ import akka.actor.PoisonPill;
 import akka.actor.Status.Failure;
 import akka.actor.Terminated;
 import akka.dispatch.Dispatchers;
-import akka.japi.Procedure;
 import akka.persistence.SaveSnapshotFailure;
 import akka.persistence.SaveSnapshotSuccess;
 import akka.persistence.SnapshotMetadata;
@@ -49,12 +48,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
+import org.opendaylight.controller.cluster.PersistentData;
 import org.opendaylight.controller.cluster.PersistentDataProvider;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RoleChanged;
@@ -379,7 +380,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         mockRaftActor.handleCommand(new ApplyJournalEntries(10));
 
-        verify(dataPersistenceProvider).persistAsync(any(ApplyJournalEntries.class), any(Procedure.class));
+        verify(dataPersistenceProvider).persistAsync(any(ApplyJournalEntries.class), any());
     }
 
     @Test
@@ -1255,7 +1256,7 @@ public class RaftActorTest extends AbstractActorTest {
         TEST_LOG.info("testLeaderTransitioning ending");
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings("unchecked")
     @Test
     public void testReplicateWithPersistencePending() throws Exception {
         final String leaderId = factory.generateActorId("leader-");
@@ -1292,10 +1293,10 @@ public class RaftActorTest extends AbstractActorTest {
         leaderActor.handleCommand(new AppendEntriesReply(followerId, 1, true, 0, 1, (short)0));
         assertEquals("getCommitIndex", -1, leaderActor.getRaftActorContext().getCommitIndex());
 
-        ArgumentCaptor<Procedure> callbackCaptor = ArgumentCaptor.forClass(Procedure.class);
+        final var callbackCaptor = ArgumentCaptor.forClass(Consumer.class);
         verify(mockPersistenceProvider).persistAsync(eq(logEntry), callbackCaptor.capture());
 
-        callbackCaptor.getValue().apply(logEntry);
+        callbackCaptor.getValue().accept(logEntry);
 
         assertEquals("getCommitIndex", 0, leaderActor.getRaftActorContext().getCommitIndex());
         assertEquals("getLastApplied", 0, leaderActor.getRaftActorContext().getLastApplied());
@@ -1371,11 +1372,11 @@ public class RaftActorTest extends AbstractActorTest {
 
         leaderActor.setPersistence(new PersistentDataProvider(leaderActor) {
             @Override
-            public <T> void persistAsync(final T entry, final Procedure<T> procedure) {
+            public <T extends PersistentData> void persistAsync(final T entry, final Consumer<T> callback) {
                 // needs to be executed from another thread to simulate the persistence actor calling this callback
                 executorService.submit(() -> {
                     try {
-                        procedure.apply(entry);
+                        callback.accept(entry);
                     } catch (Exception e) {
                         TEST_LOG.info("Fail during async persist callback", e);
                     }

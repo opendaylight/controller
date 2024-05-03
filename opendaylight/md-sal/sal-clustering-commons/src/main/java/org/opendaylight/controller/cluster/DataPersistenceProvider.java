@@ -5,13 +5,12 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster;
 
-import akka.japi.Procedure;
 import akka.persistence.JournalProtocol;
 import akka.persistence.SnapshotProtocol;
 import akka.persistence.SnapshotSelectionCriteria;
+import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNull;
 
 /**
@@ -19,7 +18,6 @@ import org.eclipse.jdt.annotation.NonNull;
  * API.
  */
 public interface DataPersistenceProvider {
-
     /**
      * Returns whether or not persistence recovery is applicable/enabled.
      *
@@ -32,19 +30,19 @@ public interface DataPersistenceProvider {
      * Persists an entry to the applicable journal synchronously.
      *
      * @param entry the journal entry to persist
-     * @param procedure the callback when persistence is complete
+     * @param callback the callback when persistence is complete
      * @param <T> the type of the journal entry
      */
-    <T> void persist(T entry, Procedure<T> procedure);
+    <T extends PersistentData> void persist(@NonNull T entry, @NonNull Consumer<@NonNull T> callback);
 
     /**
      * Persists an entry to the applicable journal asynchronously.
      *
      * @param entry the journal entry to persist
-     * @param procedure the callback when persistence is complete
+     * @param callback the callback when persistence is complete
      * @param <T> the type of the journal entry
      */
-    <T> void persistAsync(T entry, Procedure<T> procedure);
+    <T extends PersistentData> void persistAsync(@NonNull T entry, @NonNull Consumer<@NonNull T> callback);
 
     /**
      * Saves a snapshot.
