@@ -82,23 +82,24 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
     }
 
     @Override
+    public RaftEntryMeta lastMeta() {
+        return last();
+    }
+
+    @Override
     public long lastIndex() {
-        if (journal.isEmpty()) {
-            // it can happen that after snapshot, all the entries of the
-            // journal are trimmed till lastApplied, so lastIndex = snapshotIndex
-            return snapshotIndex;
-        }
-        return last().getIndex();
+        final var last = last();
+        // it can happen that after snapshot, all the entries of the journal are trimmed till lastApplied,
+        // so lastIndex = snapshotIndex
+        return last != null ? last.index() : snapshotIndex;
     }
 
     @Override
     public long lastTerm() {
-        if (journal.isEmpty()) {
-            // it can happen that after snapshot, all the entries of the
-            // journal are trimmed till lastApplied, so lastTerm = snapshotTerm
-            return snapshotTerm;
-        }
-        return last().getTerm();
+        final var last = last();
+        // it can happen that after snapshot, all the entries of the journal are trimmed till lastApplied,
+        // so lastTerm = snapshotTerm
+        return last != null ? last.term() : snapshotTerm;
     }
 
     @Override
@@ -120,13 +121,13 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
 
     @Override
     public boolean append(final ReplicatedLogEntry replicatedLogEntry) {
-        if (replicatedLogEntry.getIndex() > lastIndex()) {
+        if (replicatedLogEntry.index() > lastIndex()) {
             journal.add(replicatedLogEntry);
             dataSize += replicatedLogEntry.size();
             return true;
         } else {
             LOG.warn("{}: Cannot append new entry - new index {} is not greater than the last index {}",
-                    logContext, replicatedLogEntry.getIndex(), lastIndex(), new Exception("stack trace"));
+                    logContext, replicatedLogEntry.index(), lastIndex(), new Exception("stack trace"));
             return false;
         }
     }
