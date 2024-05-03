@@ -65,8 +65,8 @@ final class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
     }
 
     @Override
-    public void captureSnapshotIfReady(final ReplicatedLogEntry replicatedLogEntry) {
-        if (shouldCaptureSnapshot(replicatedLogEntry.getIndex())) {
+    public void captureSnapshotIfReady(final RaftEntryMeta replicatedLogEntry) {
+        if (shouldCaptureSnapshot(replicatedLogEntry.index())) {
             boolean started = context.getSnapshotManager().capture(replicatedLogEntry,
                     context.getCurrentBehavior().getReplicatedToAllIndex());
             if (started && !context.hasFollowers()) {

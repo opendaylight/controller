@@ -82,23 +82,24 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
     }
 
     @Override
+    public RaftEntryMeta lastMeta() {
+        return last();
+    }
+
+    @Override
     public long lastIndex() {
-        if (journal.isEmpty()) {
-            // it can happen that after snapshot, all the entries of the
-            // journal are trimmed till lastApplied, so lastIndex = snapshotIndex
-            return snapshotIndex;
-        }
-        return last().getIndex();
+        final var last = last();
+        // it can happen that after snapshot, all the entries of the journal are trimmed till lastApplied,
+        // so lastIndex = snapshotIndex
+        return last != null ? last.index() : snapshotIndex;
     }
 
     @Override
     public long lastTerm() {
-        if (journal.isEmpty()) {
-            // it can happen that after snapshot, all the entries of the
-            // journal are trimmed till lastApplied, so lastTerm = snapshotTerm
-            return snapshotTerm;
-        }
-        return last().getTerm();
+        final var last = last();
+        // it can happen that after snapshot, all the entries of the journal are trimmed till lastApplied,
+        // so lastTerm = snapshotTerm
+        return last != null ? last.term() : snapshotTerm;
     }
 
     @Override
@@ -120,15 +121,17 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
 
     @Override
     public boolean append(final ReplicatedLogEntry replicatedLogEntry) {
-        if (replicatedLogEntry.getIndex() > lastIndex()) {
+        final var entryIndex = replicatedLogEntry.index();
+        final var lastIndex = lastIndex();
+        if (entryIndex > lastIndex) {
             journal.add(replicatedLogEntry);
             dataSize += replicatedLogEntry.size();
             return true;
-        } else {
-            LOG.warn("{}: Cannot append new entry - new index {} is not greater than the last index {}",
-                    logContext, replicatedLogEntry.getIndex(), lastIndex(), new Exception("stack trace"));
-            return false;
         }
+
+        LOG.warn("{}: Cannot append new entry - new index {} is not greater than the last index {}", logContext,
+            entryIndex, lastIndex, new Exception("stack trace"));
+        return false;
     }
 
     @Override
@@ -164,10 +167,10 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
 
     private @NonNull List<ReplicatedLogEntry> copyJournalEntries(final int fromIndex, final int toIndex,
             final long maxDataSize) {
-        List<ReplicatedLogEntry> retList = new ArrayList<>(toIndex - fromIndex);
+        final var retList = new ArrayList<ReplicatedLogEntry>(toIndex - fromIndex);
         long totalSize = 0;
         for (int i = fromIndex; i < toIndex; i++) {
-            ReplicatedLogEntry entry = journal.get(i);
+            final var entry = journal.get(i);
             totalSize += entry.serializedSize();
             if (totalSize <= maxDataSize) {
                 retList.add(entry);
@@ -242,8 +245,7 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
 
         snapshottedJournal = new ArrayList<>(journal.size());
 
-        List<ReplicatedLogEntry> snapshotJournalEntries =
-                journal.subList(0, (int) (snapshotCapturedIndex - snapshotIndex));
+        final var snapshotJournalEntries = journal.subList(0, (int) (snapshotCapturedIndex - snapshotIndex));
 
         snapshottedJournal.addAll(snapshotJournalEntries);
         snapshotJournalEntries.clear();

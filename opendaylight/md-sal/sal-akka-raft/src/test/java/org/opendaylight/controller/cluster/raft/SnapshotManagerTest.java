@@ -13,6 +13,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -86,6 +87,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         doReturn(70).when(mockConfigParams).getSnapshotDataThresholdPercentage();
         doReturn(mockReplicatedLog).when(mockRaftActorContext).getReplicatedLog();
         doReturn("123").when(mockRaftActorContext).getId();
+        doCallRealMethod().when(mockReplicatedLog).lookupMeta(anyLong());
         doReturn(mockDataPersistenceProvider).when(mockRaftActorContext).getPersistenceProvider();
         doReturn(mockRaftActorBehavior).when(mockRaftActorContext).getCurrentBehavior();
         doReturn("123").when(mockRaftActorBehavior).getLeaderId();
@@ -250,10 +252,9 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         doReturn(8L).when(mockRaftActorContext).getLastApplied();
 
-        ReplicatedLogEntry lastLogEntry = new SimpleReplicatedLogEntry(9L, 3L, new MockRaftActorContext.MockPayload());
+        RaftEntryMeta lastLogEntry = new SimpleReplicatedLogEntry(9L, 3L, new MockRaftActorContext.MockPayload());
 
-        ReplicatedLogEntry lastAppliedEntry = new SimpleReplicatedLogEntry(
-                8L, 2L, new MockRaftActorContext.MockPayload());
+        RaftEntryMeta lastAppliedEntry = new SimpleReplicatedLogEntry(8L, 2L, new MockRaftActorContext.MockPayload());
 
         doReturn(lastAppliedEntry).when(mockReplicatedLog).get(8L);
         doReturn(List.of(lastLogEntry)).when(mockReplicatedLog).getFrom(9L);
@@ -288,8 +289,8 @@ public class SnapshotManagerTest extends AbstractActorTest {
         ReplicatedLogEntry replicatedLogEntry = mock(ReplicatedLogEntry.class);
         doReturn(null).when(mockReplicatedLog).get(0);
         doReturn(replicatedLogEntry).when(mockReplicatedLog).get(9);
-        doReturn(6L).when(replicatedLogEntry).getTerm();
-        doReturn(9L).when(replicatedLogEntry).getIndex();
+        doReturn(6L).when(replicatedLogEntry).term();
+        doReturn(9L).when(replicatedLogEntry).index();
 
         // when replicatedToAllIndex != -1
         snapshotManager.capture(new SimpleReplicatedLogEntry(9, 6, new MockRaftActorContext.MockPayload()), 9);
@@ -342,8 +343,8 @@ public class SnapshotManagerTest extends AbstractActorTest {
         ReplicatedLogEntry replicatedLogEntry = mock(ReplicatedLogEntry.class);
         doReturn(null).when(mockReplicatedLog).get(0);
         doReturn(replicatedLogEntry).when(mockReplicatedLog).get(replicatedToAllIndex);
-        doReturn(6L).when(replicatedLogEntry).getTerm();
-        doReturn(replicatedToAllIndex).when(replicatedLogEntry).getIndex();
+        doReturn(6L).when(replicatedLogEntry).term();
+        doReturn(replicatedToAllIndex).when(replicatedLogEntry).index();
 
         snapshotManager.capture(new SimpleReplicatedLogEntry(9, 6,
                 new MockRaftActorContext.MockPayload()), replicatedToAllIndex);
@@ -555,7 +556,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         ReplicatedLogEntry replicatedLogEntry = mock(ReplicatedLogEntry.class);
         doReturn(true).when(mockReplicatedLog).isPresent(10);
         doReturn(replicatedLogEntry).when(mockReplicatedLog).get(10);
-        doReturn(5L).when(replicatedLogEntry).getTerm();
+        doReturn(5L).when(replicatedLogEntry).term();
 
         long retIndex = snapshotManager.trimLog(10);
         assertEquals("return index", 10L, retIndex);
@@ -646,7 +647,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         doReturn(4L).when(mockReplicatedLog).getSnapshotTerm();
         doReturn(7L).when(mockReplicatedLog).getSnapshotIndex();
 
-        ReplicatedLogEntry lastLogEntry = new SimpleReplicatedLogEntry(9L, 6L,
+        RaftEntryMeta lastLogEntry = new SimpleReplicatedLogEntry(9L, 6L,
                 new MockRaftActorContext.MockPayload());
 
         // No followers and valid lastLogEntry

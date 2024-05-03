@@ -115,7 +115,7 @@ class RaftActorSnapshotMessageSupport {
 
         if (context.getPersistenceProvider().isRecoveryApplicable()) {
             CaptureSnapshot captureSnapshot = context.getSnapshotManager().newCaptureSnapshot(
-                    context.getReplicatedLog().last(), -1, true);
+                    context.getReplicatedLog().lastMeta(), -1, true);
 
             final FiniteDuration timeout =
                     getSnapshot.getTimeout().map(Timeout::duration).orElse(snapshotReplyActorTimeout);
