@@ -321,16 +321,13 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      * @return the log entry index or -1 if not found
      */
     protected long getLogEntryIndex(final long index) {
-        if (index == context.getReplicatedLog().getSnapshotIndex()) {
-            return context.getReplicatedLog().getSnapshotIndex();
+        final var log = context.getReplicatedLog();
+        if (index == log.getSnapshotIndex()) {
+            return index;
         }
 
-        ReplicatedLogEntry entry = context.getReplicatedLog().get(index);
-        if (entry != null) {
-            return entry.getIndex();
-        }
-
-        return -1;
+        final var entry = log.get(index);
+        return entry != null ? entry.index() : -1;
     }
 
     /**
@@ -339,16 +336,13 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      * @return the log entry term or -1 if not found
      */
     protected long getLogEntryTerm(final long index) {
-        if (index == context.getReplicatedLog().getSnapshotIndex()) {
-            return context.getReplicatedLog().getSnapshotTerm();
+        final var log = context.getReplicatedLog();
+        if (index == log.getSnapshotIndex()) {
+            return log.getSnapshotTerm();
         }
 
-        ReplicatedLogEntry entry = context.getReplicatedLog().get(index);
-        if (entry != null) {
-            return entry.getTerm();
-        }
-
-        return -1;
+        final var entry = log.get(index);
+        return entry != null ? entry.term() : -1;
     }
 
     /**
@@ -358,11 +352,8 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      * @return the term or -1 otherwise
      */
     protected long getLogEntryOrSnapshotTerm(final long index) {
-        if (context.getReplicatedLog().isInSnapshot(index)) {
-            return context.getReplicatedLog().getSnapshotTerm();
-        }
-
-        return getLogEntryTerm(index);
+        final var log = context.getReplicatedLog();
+        return log.isInSnapshot(index) ? log.getSnapshotTerm() : getLogEntryTerm(index);
     }
 
     /**

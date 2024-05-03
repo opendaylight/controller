@@ -28,11 +28,31 @@ public interface ReplicatedLog {
     @Nullable ReplicatedLogEntry get(long index);
 
     /**
+     * Return metadata about a replicated entry.
+     *
+     * @param index the index of the log entry
+     * @return the RaftEntryMeta if found, otherwise null if the adjusted index less than 0 or
+     *         greater than the size of the in-memory journal
+     */
+    default @Nullable RaftEntryMeta lookupMeta(final long index) {
+        return get(index);
+    }
+
+    /**
      * Return the last replicated log entry in the log or null of not found.
      *
      * @return the last replicated log entry in the log or null of not found.
      */
     @Nullable ReplicatedLogEntry last();
+
+    /**
+     * Return the last replicated log entry in the log or null of not found.
+     *
+     * @return the last replicated log entry in the log or null of not found.
+     */
+    default @Nullable RaftEntryMeta lastMeta() {
+        return last();
+    }
 
     /**
      * Return the index of the last entry in the log or -1 if the log is empty.
@@ -218,7 +238,7 @@ public interface ReplicatedLog {
      *
      * @param replicatedLogEntry the last log entry.
      */
-    void captureSnapshotIfReady(ReplicatedLogEntry replicatedLogEntry);
+    void captureSnapshotIfReady(RaftEntryMeta replicatedLogEntry);
 
     /**
      * Determines if a snapshot should be captured based on the count/memory consumed.
