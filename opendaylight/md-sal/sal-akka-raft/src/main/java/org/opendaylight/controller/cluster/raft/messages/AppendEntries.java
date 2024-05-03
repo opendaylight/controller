@@ -175,8 +175,8 @@ public final class AppendEntries extends AbstractRaftRPC {
 
             out.writeInt(appendEntries.entries.size());
             for (ReplicatedLogEntry e: appendEntries.entries) {
-                out.writeLong(e.getIndex());
-                out.writeLong(e.getTerm());
+                out.writeLong(e.index());
+                out.writeLong(e.term());
                 out.writeObject(e.getData());
             }
 

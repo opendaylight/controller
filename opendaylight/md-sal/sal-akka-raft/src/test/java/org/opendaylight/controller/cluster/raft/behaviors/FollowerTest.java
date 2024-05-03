@@ -587,7 +587,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         assertSame(follower, newBehavior);
 
-        assertEquals("Next index", 5, log.last().getIndex() + 1);
+        assertEquals("Next index", 5, log.last().index() + 1);
         assertEquals("Entry 3", entries.get(0), log.get(3));
         assertEquals("Entry 4", entries.get(1), log.get(4));
 
@@ -640,7 +640,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         // and will be removed
         // Then the two new entries will be added to the log
         // Thus making the log to have 4 entries
-        assertEquals("Next index", 4, log.last().getIndex() + 1);
+        assertEquals("Next index", 4, log.last().index() + 1);
         //assertEquals("Entry 2", entries.get(0), log.get(2));
 
         assertEquals("Entry 1 data", "one", log.get(1).getData().toString());
@@ -740,7 +740,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         follower.handleMessage(leaderActor, new AppendEntries(1, "leader", 0, 1, entries, 1, -1, (short)0));
 
-        assertEquals("Next index", 2, log.last().getIndex() + 1);
+        assertEquals("Next index", 2, log.last().index() + 1);
         assertEquals("Entry 1", entries.get(0), log.get(1));
 
         expectAndVerifyAppendEntriesReply(1, true, context.getId(), 1, 1);
@@ -752,7 +752,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         MessageCollectorActor.clearMessages(leaderActor);
         follower.handleMessage(leaderActor, new AppendEntries(1, "leader", 0, 1, entries, 2, -1, (short)0));
 
-        assertEquals("Next index", 3, log.last().getIndex() + 1);
+        assertEquals("Next index", 3, log.last().index() + 1);
         assertEquals("Entry 1", entries.get(0), log.get(1));
         assertEquals("Entry 2", entries.get(1), log.get(2));
 
@@ -1273,8 +1273,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertEquals("ApplyJournalEntries index", 0, ((ApplyJournalEntries)journalEntries.get(0)).getToIndex());
 
         assertEquals("Snapshot unapplied size", 2, snapshot.getUnAppliedEntries().size());
-        assertEquals("Snapshot unapplied entry index", 1, snapshot.getUnAppliedEntries().get(0).getIndex());
-        assertEquals("Snapshot unapplied entry index", 2, snapshot.getUnAppliedEntries().get(1).getIndex());
+        assertEquals("Snapshot unapplied entry index", 1, snapshot.getUnAppliedEntries().get(0).index());
+        assertEquals("Snapshot unapplied entry index", 2, snapshot.getUnAppliedEntries().get(1).index());
         assertEquals("Snapshot getLastAppliedTerm", 1, snapshot.getLastAppliedTerm());
         assertEquals("Snapshot getLastAppliedIndex", 0, snapshot.getLastAppliedIndex());
         assertEquals("Snapshot getLastTerm", 1, snapshot.getLastTerm());

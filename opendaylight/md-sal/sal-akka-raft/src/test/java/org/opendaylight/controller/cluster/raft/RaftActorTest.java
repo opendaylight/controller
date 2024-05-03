@@ -826,7 +826,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         // Simulate an install snaphost to a follower.
         leaderActor.getRaftActorContext().getSnapshotManager().captureToInstall(
-                leaderActor.getReplicatedLog().last(), -1, "member1");
+                leaderActor.getReplicatedLog().lastMeta(), -1, "member1");
 
         // Now send a CaptureSnapshotReply
         mockActorRef.tell(new CaptureSnapshotReply(ByteState.of(fromObject("foo").toByteArray()),
@@ -1043,7 +1043,7 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals("getLastTerm", term, replySnapshot.getLastTerm());
         assertEquals("getState", ByteState.of(stateSnapshot), replySnapshot.getState());
         assertEquals("getUnAppliedEntries size", 1, replySnapshot.getUnAppliedEntries().size());
-        assertEquals("UnApplied entry index ", 2L, replySnapshot.getUnAppliedEntries().get(0).getIndex());
+        assertEquals("UnApplied entry index ", 2L, replySnapshot.getUnAppliedEntries().get(0).index());
 
         // Test with timeout
 

@@ -176,7 +176,8 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         }
 
         @Override
-        public void captureSnapshotIfReady(final ReplicatedLogEntry replicatedLogEntry) {
+        public void captureSnapshotIfReady(final RaftEntryMeta replicatedLogEntry) {
+            // No-op
         }
 
         @Override
@@ -260,7 +261,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         private final String value;
         private final int size;
 
-        MockPayloadProxy(String value, int size) {
+        MockPayloadProxy(final String value, final int size) {
             this.value = value;
             this.size = size;
         }
