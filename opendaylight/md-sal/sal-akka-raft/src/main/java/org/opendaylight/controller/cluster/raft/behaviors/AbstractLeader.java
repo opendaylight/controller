@@ -18,7 +18,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -690,7 +689,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             long followerNextIndex = followerLogInformation.getNextIndex();
             boolean isFollowerActive = followerLogInformation.isFollowerActive();
             boolean sendAppendEntries = false;
-            List<ReplicatedLogEntry> entries = Collections.emptyList();
+            var entries = List.<ReplicatedLogEntry>of();
 
             LeaderInstallSnapshotState installSnapshotState = followerLogInformation.getInstallSnapshotState();
             if (installSnapshotState != null) {
@@ -776,8 +775,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         int maxEntries = (int) context.getReplicatedLog().size();
         final int maxDataSize = context.getConfigParams().getMaximumMessageSliceSize();
         final long followerNextIndex = followerLogInfo.getNextIndex();
-        List<ReplicatedLogEntry> entries = context.getReplicatedLog().getFrom(followerNextIndex,
-                maxEntries, maxDataSize);
+        final var entries = context.getReplicatedLog().getFrom(followerNextIndex, maxEntries, maxDataSize);
 
         // If the first entry's size exceeds the max data size threshold, it will be returned from the call above. If
         // that is the case, then we need to slice it into smaller chunks.
@@ -786,12 +784,13 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             return entries;
         }
 
-        log.debug("{}: Log entry size {} exceeds max payload size {}", logName(), entries.get(0).getData().size(),
+        final var firstEntry = entries.get(0);
+        log.debug("{}: Log entry size {} exceeds max payload size {}", logName(), firstEntry.getData().size(),
                 maxDataSize);
 
         // If an AppendEntries has already been serialized for the log index then reuse the
         // SharedFileBackedOutputStream.
-        final Long logIndex = entries.get(0).index();
+        final Long logIndex = firstEntry.index();
         SharedFileBackedOutputStream fileBackedStream = sharedSerializedAppendEntriesStreams.get(logIndex);
         if (fileBackedStream == null) {
             fileBackedStream = context.getFileBackedOutputStreamFactory().newSharedInstance();
@@ -808,7 +807,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             } catch (IOException e) {
                 log.error("{}: Error serializing {}", logName(), appendEntries, e);
                 fileBackedStream.cleanup();
-                return Collections.emptyList();
+                return List.of();
             }
 
             sharedSerializedAppendEntriesStreams.put(logIndex, fileBackedStream);
@@ -836,7 +835,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                     followerLogInfo.setSlicedLogEntryIndex(FollowerLogInformation.NO_INDEX);
                 }).build());
 
-        return Collections.emptyList();
+        return List.of();
     }
 
     private void sendAppendEntriesToFollower(final ActorSelection followerActor, final List<ReplicatedLogEntry> entries,
