@@ -168,8 +168,8 @@ class RaftActorRecoverySupport {
                     logEntry.getIndex(), logEntry.size());
         }
 
-        if (isServerConfigurationPayload(logEntry)) {
-            context.updatePeerIds((ServerConfigurationPayload)logEntry.getData());
+        if (logEntry.getData() instanceof ServerConfigurationPayload payload) {
+            context.updatePeerIds(payload);
         }
 
         if (isMigratedPayload(logEntry)) {
@@ -234,17 +234,20 @@ class RaftActorRecoverySupport {
     private void batchRecoveredLogEntry(final ReplicatedLogEntry logEntry) {
         initRecoveryTimers();
 
+        if (logEntry.getData() instanceof ServerConfigurationPayload) {
+            // FIXME: explain why ServerConfigurationPayload is special
+            return;
+        }
+
         int batchSize = context.getConfigParams().getJournalRecoveryLogBatchSize();
-        if (!isServerConfigurationPayload(logEntry)) {
-            if (currentRecoveryBatchCount == 0) {
-                cohort.startLogRecoveryBatch(batchSize);
-            }
+        if (currentRecoveryBatchCount == 0) {
+            cohort.startLogRecoveryBatch(batchSize);
+        }
 
-            cohort.appendRecoveredLogEntry(logEntry.getData());
+        cohort.appendRecoveredLogEntry(logEntry.getData());
 
-            if (++currentRecoveryBatchCount >= batchSize) {
-                endCurrentLogRecoveryBatch();
-            }
+        if (++currentRecoveryBatchCount >= batchSize) {
+            endCurrentLogRecoveryBatch();
         }
     }
 
@@ -322,10 +325,6 @@ class RaftActorRecoverySupport {
         } else {
             possiblyRestoreFromSnapshot();
         }
-    }
-
-    private static boolean isServerConfigurationPayload(final ReplicatedLogEntry repLogEntry) {
-        return repLogEntry.getData() instanceof ServerConfigurationPayload;
     }
 
     private static boolean isPersistentPayload(final ReplicatedLogEntry repLogEntry) {
