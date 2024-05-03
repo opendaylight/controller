@@ -8,12 +8,13 @@
 
 package org.opendaylight.controller.cluster.raft;
 
+import org.opendaylight.controller.cluster.PersistentData;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 
 /**
  * Represents one entry in the replicated log.
  */
-public interface ReplicatedLogEntry extends RaftEntryMeta {
+public interface ReplicatedLogEntry extends RaftEntryMeta, PersistentData {
     /**
      * Returns the payload/data to be replicated.
      *
