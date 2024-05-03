@@ -51,12 +51,15 @@ public class SimpleReplicatedLogEntrySerializer extends JSerializer {
 
         final int estimatedSerializedSize = replicatedLogEntry.serializedSize();
 
-        final ByteArrayOutputStream bos = new ByteArrayOutputStream(estimatedSerializedSize);
-        SerializationUtils.serialize(replicatedLogEntry, bos);
-        final byte[] bytes = bos.toByteArray();
+        final var baos = new ByteArrayOutputStream(estimatedSerializedSize);
+        SerializationUtils.serialize(replicatedLogEntry, baos);
+        final byte[] bytes = baos.toByteArray();
 
-        LOG.debug("Estimated serialized size {}, data size {} for payload: {}. Actual serialized size: {}",
-            estimatedSerializedSize, replicatedLogEntry.getData().size(), replicatedLogEntry.getData(), bytes.length);
+        if (LOG.isDebugEnabled()) {
+            final var data = replicatedLogEntry.getData();
+            LOG.debug("Estimated serialized size {}, data size {} for payload: {}. Actual serialized size: {}",
+                estimatedSerializedSize, data.size(), data, bytes.length);
+        }
 
         return bytes;
     }
