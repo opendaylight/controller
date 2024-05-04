@@ -10,40 +10,33 @@ package org.opendaylight.controller.akka.segjournal;
 import static java.util.Objects.requireNonNull;
 
 import akka.persistence.PersistentRepr;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * A single entry in the data journal. We do not store {@code persistenceId} for each entry, as that is a
  * journal-invariant, nor do we store {@code sequenceNr}, as that information is maintained by a particular journal
  * segment's index.
  */
-abstract sealed class DataJournalEntry {
+@NonNullByDefault
+sealed interface DataJournalEntry {
     /**
      * A single data journal entry on its way to the backing file.
      */
-    static final class ToPersistence extends DataJournalEntry {
-        private final PersistentRepr repr;
-
-        ToPersistence(final PersistentRepr repr) {
-            this.repr = requireNonNull(repr);
-        }
-
-        PersistentRepr repr() {
-            return repr;
+    record ToPersistence(PersistentRepr repr) implements DataJournalEntry {
+        public ToPersistence {
+            requireNonNull(repr);
         }
     }
 
     /**
      * A single data journal entry on its way from the backing file.
      */
-    static final class FromPersistence extends DataJournalEntry {
-        private final String manifest;
-        private final String writerUuid;
-        private final Object payload;
-
-        FromPersistence(final String manifest, final String writerUuid, final Object payload) {
-            this.manifest = manifest;
-            this.writerUuid = requireNonNull(writerUuid);
-            this.payload = requireNonNull(payload);
+    record FromPersistence(@Nullable String manifest, String writerUuid, Object payload)
+            implements DataJournalEntry {
+        public FromPersistence {
+            requireNonNull(writerUuid);
+            requireNonNull(payload);
         }
 
         PersistentRepr toRepr(final String persistenceId, final long sequenceNr) {
