@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.concurrent.Callable;
 import org.opendaylight.controller.akka.segjournal.DataJournalEntry.FromPersistence;
 import org.opendaylight.controller.akka.segjournal.DataJournalEntry.ToPersistence;
+import org.opendaylight.controller.cluster.PersistentData;
 
 /**
  * Kryo serializer for {@link DataJournalEntry}. Each {@link SegmentedJournalActor} has its own instance, as well as
@@ -45,7 +46,8 @@ final class DataJournalEntrySerdes implements EntrySerdes<DataJournalEntry> {
             final var repr = toPersistence.repr();
             output.writeString(repr.manifest());
             output.writeString(repr.writerUuid());
-            output.writeObject(repr.payload());
+            final var payload = (PersistentData) repr.payload();
+            output.writeObject(payload);
         } else {
             throw new VerifyException("Unexpected entry " + entry);
         }
@@ -54,6 +56,7 @@ final class DataJournalEntrySerdes implements EntrySerdes<DataJournalEntry> {
     @Override
     public DataJournalEntry read(final EntryInput input) throws IOException {
         return new FromPersistence(input.readString(), input.readString(),
-            JavaSerializer.currentSystem().withValue(actorSystem, (Callable<Object>) input::readObject));
+            JavaSerializer.currentSystem().withValue(actorSystem,
+                (Callable<PersistentData>) () -> (PersistentData) input.readObject()));
     }
 }

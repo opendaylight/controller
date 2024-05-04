@@ -12,6 +12,7 @@ import static java.util.Objects.requireNonNull;
 import akka.persistence.PersistentRepr;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.cluster.PersistentData;
 
 /**
  * A single entry in the data journal. We do not store {@code persistenceId} for each entry, as that is a
@@ -32,7 +33,7 @@ sealed interface DataJournalEntry {
     /**
      * A single data journal entry on its way from the backing file.
      */
-    record FromPersistence(@Nullable String manifest, String writerUuid, Object payload)
+    record FromPersistence(@Nullable String manifest, String writerUuid, PersistentData payload)
             implements DataJournalEntry {
         public FromPersistence {
             requireNonNull(writerUuid);

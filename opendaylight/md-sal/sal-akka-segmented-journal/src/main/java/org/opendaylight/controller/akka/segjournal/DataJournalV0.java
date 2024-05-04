@@ -17,7 +17,6 @@ import io.atomix.storage.journal.JournalWriter;
 import io.atomix.storage.journal.SegmentedJournal;
 import io.atomix.storage.journal.StorageLevel;
 import java.io.File;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import org.opendaylight.controller.akka.segjournal.DataJournalEntry.FromPersistence;
@@ -25,6 +24,7 @@ import org.opendaylight.controller.akka.segjournal.DataJournalEntry.ToPersistenc
 import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.ReplayMessages;
 import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.WriteMessages;
 import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.WrittenMessages;
+import org.opendaylight.controller.cluster.PersistentData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.jdk.javaapi.CollectionConverters;
@@ -142,16 +142,15 @@ final class DataJournalV0 extends DataJournal {
     private long writePayload(final JournalWriter<DataJournalEntry> writer, final List<PersistentRepr> reprs) {
         long bytes = 0;
         for (var repr : reprs) {
-            final Object payload = repr.payload();
-            if (!(payload instanceof Serializable)) {
-                throw new UnsupportedOperationException("Non-serializable payload encountered "
-                        + payload.getClass());
+            final var payload = repr.payload();
+            if (!(payload instanceof PersistentData persistent)) {
+                throw new UnsupportedOperationException("Non-serializable payload encountered " + payload.getClass());
             }
 
-            LOG.trace("{}: starting append of {}", persistenceId, payload);
+            LOG.trace("{}: starting append of {}", persistenceId, persistent);
             final var entry = writer.append(new ToPersistence(repr));
             final int size = entry.size();
-            LOG.trace("{}: finished append of {} with {} bytes at {}", persistenceId, payload, size, entry.index());
+            LOG.trace("{}: finished append of {} with {} bytes at {}", persistenceId, persistent, size, entry.index());
             recordMessageSize(size);
             bytes += size;
         }
