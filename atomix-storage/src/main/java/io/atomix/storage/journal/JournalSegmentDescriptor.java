@@ -15,12 +15,16 @@
  */
 package io.atomix.storage.journal;
 
-import com.google.common.annotations.VisibleForTesting;
-
-import java.nio.ByteBuffer;
-
-import static com.google.common.base.MoreObjects.toStringHelper;
 import static java.util.Objects.requireNonNull;
+
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.MoreObjects;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * Stores information about a {@link JournalSegment} of the log.
@@ -120,6 +124,24 @@ public final class JournalSegmentDescriptor {
   }
 
   /**
+   * Read a JournalSegmentDescriptor from a {@link Path}.
+   *
+   * @param path path to read from
+   * @return A {@link JournalSegmentDescriptor}
+   * @throws IOException if an I/O error occurs or there is not enough data
+   */
+  public static @NonNull JournalSegmentDescriptor readFrom(final Path path) throws IOException {
+      try (var channel = FileChannel.open(path, StandardOpenOption.READ)) {
+          final var buffer = ByteBuffer.allocate(BYTES);
+          final var readBytes = channel.read(buffer);
+          if (readBytes != BYTES) {
+              throw new IOException("Need " + BYTES + " bytes, only " + readBytes + " available");
+          }
+          return new JournalSegmentDescriptor(buffer.flip());
+      }
+  }
+
+  /**
    * Returns the segment version.
    * <p>
    * Versions are monotonically increasing starting at {@code 1}.
@@ -211,7 +233,7 @@ public final class JournalSegmentDescriptor {
 
   @Override
   public String toString() {
-    return toStringHelper(this)
+    return MoreObjects.toStringHelper(this)
         .add("version", version)
         .add("id", id)
         .add("index", index)

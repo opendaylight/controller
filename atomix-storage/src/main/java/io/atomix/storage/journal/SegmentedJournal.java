@@ -26,7 +26,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.StandardOpenOption;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -469,32 +468,6 @@ public final class SegmentedJournal<E> implements Journal<E> {
   }
 
   /**
-   * Loads a segment.
-   */
-  private JournalSegment loadSegment(long segmentId) {
-    File segmentFile = JournalSegmentFile.createSegmentFile(name, directory, segmentId);
-    ByteBuffer buffer = ByteBuffer.allocate(JournalSegmentDescriptor.BYTES);
-    try (FileChannel channel = openChannel(segmentFile)) {
-      channel.read(buffer);
-      buffer.flip();
-      JournalSegmentDescriptor descriptor = new JournalSegmentDescriptor(buffer);
-      JournalSegment segment = newSegment(new JournalSegmentFile(segmentFile), descriptor);
-      LOG.debug("Loaded disk segment: {} ({})", descriptor.id(), segmentFile.getName());
-      return segment;
-    } catch (IOException e) {
-      throw new StorageException(e);
-    }
-  }
-
-  private FileChannel openChannel(File file) {
-    try {
-      return FileChannel.open(file.toPath(), StandardOpenOption.CREATE, StandardOpenOption.READ, StandardOpenOption.WRITE);
-    } catch (IOException e) {
-      throw new StorageException(e);
-    }
-  }
-
-  /**
    * Loads all segments from disk.
    *
    * @return A collection of segments for the log.
@@ -503,29 +476,27 @@ public final class SegmentedJournal<E> implements Journal<E> {
     // Ensure log directories are created.
     directory.mkdirs();
 
-    TreeMap<Long, JournalSegment> segments = new TreeMap<>();
+    final var segments = new TreeMap<Long, JournalSegment>();
 
     // Iterate through all files in the log directory.
-    for (File file : directory.listFiles(File::isFile)) {
+    for (var file : directory.listFiles(File::isFile)) {
 
       // If the file looks like a segment file, attempt to load the segment.
       if (JournalSegmentFile.isSegmentFile(name, file)) {
-        JournalSegmentFile segmentFile = new JournalSegmentFile(file);
-        ByteBuffer buffer = ByteBuffer.allocate(JournalSegmentDescriptor.BYTES);
-        try (FileChannel channel = openChannel(file)) {
-          channel.read(buffer);
-          buffer.flip();
+        // read the descriptor
+        final JournalSegmentDescriptor descriptor;
+        try {
+          descriptor = JournalSegmentDescriptor.readFrom(file.toPath());
         } catch (IOException e) {
           throw new StorageException(e);
         }
 
-        JournalSegmentDescriptor descriptor = new JournalSegmentDescriptor(buffer);
-
         // Load the segment.
-        JournalSegment segment = loadSegment(descriptor.id());
+        final var segmentFile = new JournalSegmentFile(file);
+        final var segment = newSegment(segmentFile, descriptor);
+        LOG.debug("Loaded disk segment: {} ({})", descriptor.id(), file.getName());
 
         // Add the segment to the segments list.
-        LOG.debug("Found segment: {} ({})", segment.descriptor().id(), segmentFile.file().getName());
         segments.put(segment.firstIndex(), segment);
       }
     }
@@ -533,11 +504,12 @@ public final class SegmentedJournal<E> implements Journal<E> {
     // Verify that all the segments in the log align with one another.
     JournalSegment previousSegment = null;
     boolean corrupted = false;
-    Iterator<Map.Entry<Long, JournalSegment>> iterator = segments.entrySet().iterator();
+    final var iterator = segments.entrySet().iterator();
     while (iterator.hasNext()) {
-      JournalSegment segment = iterator.next().getValue();
+      final var segment = iterator.next().getValue();
       if (previousSegment != null && previousSegment.lastIndex() != segment.firstIndex() - 1) {
-        LOG.warn("Journal is inconsistent. {} is not aligned with prior segment {}", segment.file().file(), previousSegment.file().file());
+        LOG.warn("Journal is inconsistent. {} is not aligned with prior segment {}", segment.file().file(),
+            previousSegment.file().file());
         corrupted = true;
       }
       if (corrupted) {
