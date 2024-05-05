@@ -20,7 +20,6 @@ import static java.util.Objects.requireNonNull;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import java.util.zip.CRC32;
 import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,12 +100,8 @@ final class JournalSegmentReader {
 
         // Slice off the entry's bytes
         final var entryBuffer = buffer.slice(SegmentEntry.HEADER_BYTES, length);
-        // Compute the checksum for the entry bytes.
-        final var crc32 = new CRC32();
-        crc32.update(entryBuffer);
-
         // If the stored checksum does not equal the computed checksum, do not proceed further
-        final var computed = (int) crc32.getValue();
+        final var computed = SegmentEntry.computeChecksum(entryBuffer);
         if (checksum != computed) {
             LOG.warn("Expected checksum {}, computed {}", Integer.toHexString(checksum), Integer.toHexString(computed));
             invalidateCache();
@@ -116,9 +111,8 @@ final class JournalSegmentReader {
         // update position
         position += SegmentEntry.HEADER_BYTES + length;
 
-        // return bytes
-        entryBuffer.rewind();
-        return Unpooled.buffer(length).writeBytes(entryBuffer);
+        // rewind and return
+        return Unpooled.buffer(length).writeBytes(entryBuffer.rewind());
     }
 
     /**
