@@ -16,6 +16,7 @@
  */
 package io.atomix.storage.journal.index;
 
+import com.google.common.base.MoreObjects;
 import java.util.TreeMap;
 
 /**
@@ -51,5 +52,10 @@ public final class SparseJournalIndex implements JournalIndex {
     public Position truncate(final long index) {
         positions.tailMap(index, false).clear();
         return Position.ofNullable(positions.lastEntry());
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this).add("positions", positions).toString();
     }
 }
