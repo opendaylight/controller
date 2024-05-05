@@ -25,7 +25,7 @@ import org.eclipse.jdt.annotation.NonNull;
  * An abstraction over how to read a {@link JournalSegmentFile}.
  */
 abstract sealed class FileReader permits DiskFileReader, MappedFileReader {
-    private final JournalSegmentFile file;
+    private final @NonNull JournalSegmentFile file;
 
     FileReader(final JournalSegmentFile file) {
         this.file = requireNonNull(file);

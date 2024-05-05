@@ -18,9 +18,7 @@ package io.atomix.storage.journal;
 import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
+import java.nio.channels.ReadableByteChannel;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -69,23 +67,20 @@ public record JournalSegmentDescriptor(
     static final int VERSION = 1;
 
     /**
-     * Read a JournalSegmentDescriptor from a {@link Path}.
+     * Read a JournalSegmentDescriptor from a {@link ReadableByteChannel}.
      *
-     * @param path path to read from
+     * @param channel channel to read from
      * @return A {@link JournalSegmentDescriptor}
      * @throws IOException if an I/O error occurs or there is not enough data
      */
-    public static @NonNull JournalSegmentDescriptor readFrom(final Path path) throws IOException {
-        final byte[] bytes;
-        try (var is = Files.newInputStream(path, StandardOpenOption.READ)) {
-            bytes = is.readNBytes(BYTES);
+    public static @NonNull JournalSegmentDescriptor readFrom(final ReadableByteChannel channel) throws IOException {
+        final var buffer = ByteBuffer.allocate(BYTES);
+        final var read = channel.read(buffer);
+        if (read != BYTES) {
+            throw new IOException("Need " + BYTES + " bytes, only " + read + " available");
         }
 
-        if (bytes.length != BYTES) {
-            throw new IOException("Need " + BYTES + " bytes, only " + bytes.length + " available");
-        }
-
-        final var buffer = ByteBuffer.wrap(bytes);
+        buffer.flip();
         return new JournalSegmentDescriptor(
             buffer.getInt(),
             buffer.getLong(),

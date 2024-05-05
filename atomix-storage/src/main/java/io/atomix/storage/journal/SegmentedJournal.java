@@ -191,7 +191,13 @@ public final class SegmentedJournal<E> implements Journal<E> {
    */
   public long size() {
     return segments.values().stream()
-        .mapToLong(JournalSegment::size)
+        .mapToLong(segment -> {
+          try {
+            return segment.file().size();
+          } catch (IOException e) {
+            throw new StorageException(e);
+          }
+        })
         .sum();
   }
 
