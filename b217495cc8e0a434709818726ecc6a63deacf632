@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e2c26eca_0ad4ae3c",
+        "filename": "atomix-storage/src/main/java/io/atomix/storage/journal/BufUtils.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2024-05-05T23:10:38Z",
+      "side": 1,
+      "message": "remove this call",
+      "range": {
+        "startLine": 43,
+        "startChar": 39,
+        "endLine": 43,
+        "endChar": 54
+      },
+      "revId": "b217495cc8e0a434709818726ecc6a63deacf632",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6241b4ff_011e51b2",
+        "filename": "atomix-storage/src/main/java/io/atomix/storage/journal/BufUtils.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2024-05-05T23:10:38Z",
+      "side": 1,
+      "message": "if (expected !\u003d computed) {\n   LOG.warn();\n   return false;\n}\nreturn true",
+      "range": {
+        "startLine": 47,
+        "startChar": 8,
+        "endLine": 51,
+        "endChar": 23
+      },
+      "revId": "b217495cc8e0a434709818726ecc6a63deacf632",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a1854375_c3077ac1",
+        "filename": "atomix-storage/src/main/java/io/atomix/storage/journal/DiskFileReader.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2024-05-05T23:10:38Z",
+      "side": 1,
+      "message": "superfluous empty lines",
+      "revId": "b217495cc8e0a434709818726ecc6a63deacf632",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
