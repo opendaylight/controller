@@ -19,6 +19,8 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
 import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.file.Path;
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -35,9 +37,25 @@ final class JournalSegmentFile {
     private final @NonNull JournalSegmentDescriptor descriptor;
     private final @NonNull Path path;
 
-    JournalSegmentFile(final Path path, final JournalSegmentDescriptor descriptor) {
+    private JournalSegmentFile(final Path path, final JournalSegmentDescriptor descriptor) {
         this.path = requireNonNull(path);
         this.descriptor = requireNonNull(descriptor);
+    }
+
+    static @NonNull JournalSegmentFile createNew(final String name, final File directory,
+            final JournalSegmentDescriptor descriptor) throws IOException {
+        final var file = createSegmentFile(name, directory, descriptor.id());
+        try (var raf = new RandomAccessFile(file, "rw")) {
+            raf.setLength(descriptor.maxSegmentSize());
+            raf.write(descriptor.toArray());
+        }
+        return new JournalSegmentFile(file.toPath(), descriptor);
+    }
+
+    static @NonNull JournalSegmentFile openExisting(final Path path) throws IOException {
+        // read the descriptor
+        final var descriptor = JournalSegmentDescriptor.readFrom(path);
+        return new JournalSegmentFile(path, descriptor);
     }
 
     /**

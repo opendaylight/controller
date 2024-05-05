@@ -21,7 +21,6 @@ import static java.util.Objects.requireNonNull;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
@@ -389,35 +388,22 @@ public final class SegmentedJournal<E> implements Journal<E> {
    * Creates a new segment.
    */
   JournalSegment createSegment(long id, long index) {
-    final var segmentFile = JournalSegmentFile.createSegmentFile(name, directory, id);
-    final var descriptor = JournalSegmentDescriptor.builder()
-        .withId(id)
-        .withIndex(index)
-        .withMaxSegmentSize(maxSegmentSize)
-        .withMaxEntries(maxEntriesPerSegment)
-        .withUpdated(System.currentTimeMillis())
-        .build();
-
-    try (var raf = new RandomAccessFile(segmentFile, "rw")) {
-      raf.setLength(maxSegmentSize);
-      raf.write(descriptor.toArray());
+    final JournalSegmentFile file;
+    try {
+      file = JournalSegmentFile.createNew(name, directory, JournalSegmentDescriptor.builder()
+          .withId(id)
+          .withIndex(index)
+          .withMaxSegmentSize(maxSegmentSize)
+          .withMaxEntries(maxEntriesPerSegment)
+          .withUpdated(System.currentTimeMillis())
+          .build());
     } catch (IOException e) {
       throw new StorageException(e);
     }
 
-    final var segment = newSegment(new JournalSegmentFile(segmentFile.toPath(), descriptor));
+    final var segment = new JournalSegment(file, storageLevel, maxEntrySize, indexDensity);
     LOG.debug("Created segment: {}", segment);
     return segment;
-  }
-
-  /**
-   * Creates a new segment instance.
-   *
-   * @param segmentFile The segment file.
-   * @return The segment instance.
-   */
-  protected JournalSegment newSegment(JournalSegmentFile segmentFile) {
-    return new JournalSegment(segmentFile, storageLevel, maxEntrySize, indexDensity);
   }
 
   /**
@@ -436,20 +422,18 @@ public final class SegmentedJournal<E> implements Journal<E> {
 
       // If the file looks like a segment file, attempt to load the segment.
       if (JournalSegmentFile.isSegmentFile(name, file)) {
-        final var path = file.toPath();
-        // read the descriptor
-        final JournalSegmentDescriptor descriptor;
+        final JournalSegmentFile segmentFile;
         try {
-          descriptor = JournalSegmentDescriptor.readFrom(path);
+          segmentFile = JournalSegmentFile.openExisting(file.toPath());
         } catch (IOException e) {
           throw new StorageException(e);
         }
 
         // Load the segment.
-        final var segment = newSegment(new JournalSegmentFile(path, descriptor));
-        LOG.debug("Loaded disk segment: {} ({})", descriptor.id(), path);
+        LOG.debug("Loaded disk segment: {} ({})", segmentFile.descriptor().id(), segmentFile.path());
 
         // Add the segment to the segments list.
+        final var segment = new JournalSegment(segmentFile, storageLevel, maxEntrySize, indexDensity);
         segments.put(segment.firstIndex(), segment);
       }
     }
