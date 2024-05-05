@@ -21,7 +21,6 @@ import static java.util.Objects.requireNonNull;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.file.Path;
 import org.eclipse.jdt.annotation.NonNull;
 
 /**
@@ -39,13 +38,13 @@ final class DiskFileReader extends FileReader {
     // tracks where memory's first available byte maps to in terms of FileChannel.position()
     private int bufferPosition;
 
-    DiskFileReader(final Path path, final FileChannel channel, final int maxSegmentSize, final int maxEntrySize) {
-        this(path, channel, allocateBuffer(maxSegmentSize, maxEntrySize));
+    DiskFileReader(final JournalSegmentFile file, final FileChannel channel, final int maxEntrySize) {
+        this(file, channel, allocateBuffer(file.maxSize(), maxEntrySize));
     }
 
     // Note: take ownership of the buffer
-    DiskFileReader(final Path path, final FileChannel channel, final ByteBuffer buffer) {
-        super(path);
+    DiskFileReader(final JournalSegmentFile file, final FileChannel channel, final ByteBuffer buffer) {
+        super(file);
         this.channel = requireNonNull(channel);
         this.buffer = buffer.flip();
         bufferPosition = 0;

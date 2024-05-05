@@ -236,8 +236,8 @@ public final class SegmentedJournal<E> implements Journal<E> {
    */
   private synchronized void open() {
     // Load existing log segments from disk.
-    for (JournalSegment segment : loadSegments()) {
-      segments.put(segment.descriptor().index(), segment);
+    for (var segment : loadSegments()) {
+      segments.put(segment.firstIndex(), segment);
     }
 
     // If a segment doesn't already exist, create an initial segment starting at index 1.
@@ -340,7 +340,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
 
     final var index = currentSegment.lastIndex() + 1;
     final var lastSegment = getLastSegment();
-    currentSegment = createSegment(lastSegment != null ? lastSegment.descriptor().id() + 1 : 1, index);
+    currentSegment = createSegment(lastSegment != null ? lastSegment.file().descriptor().id() + 1 : 1, index);
     segments.put(index, currentSegment);
     return currentSegment;
   }
@@ -409,7 +409,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
       throw new StorageException(e);
     }
 
-    final var segment = newSegment(new JournalSegmentFile(segmentFile), descriptor);
+    final var segment = newSegment(new JournalSegmentFile(segmentFile.toPath(), descriptor));
     LOG.debug("Created segment: {}", segment);
     return segment;
   }
@@ -418,11 +418,10 @@ public final class SegmentedJournal<E> implements Journal<E> {
    * Creates a new segment instance.
    *
    * @param segmentFile The segment file.
-   * @param descriptor The segment descriptor.
    * @return The segment instance.
    */
-  protected JournalSegment newSegment(JournalSegmentFile segmentFile, JournalSegmentDescriptor descriptor) {
-    return new JournalSegment(segmentFile, descriptor, storageLevel, maxEntrySize, indexDensity);
+  protected JournalSegment newSegment(JournalSegmentFile segmentFile) {
+    return new JournalSegment(segmentFile, storageLevel, maxEntrySize, indexDensity);
   }
 
   /**
@@ -441,18 +440,18 @@ public final class SegmentedJournal<E> implements Journal<E> {
 
       // If the file looks like a segment file, attempt to load the segment.
       if (JournalSegmentFile.isSegmentFile(name, file)) {
+        final var path = file.toPath();
         // read the descriptor
         final JournalSegmentDescriptor descriptor;
         try {
-          descriptor = JournalSegmentDescriptor.readFrom(file.toPath());
+          descriptor = JournalSegmentDescriptor.readFrom(path);
         } catch (IOException e) {
           throw new StorageException(e);
         }
 
         // Load the segment.
-        final var segmentFile = new JournalSegmentFile(file);
-        final var segment = newSegment(segmentFile, descriptor);
-        LOG.debug("Loaded disk segment: {} ({})", descriptor.id(), file.getName());
+        final var segment = newSegment(new JournalSegmentFile(path, descriptor));
+        LOG.debug("Loaded disk segment: {} ({})", descriptor.id(), path);
 
         // Add the segment to the segments list.
         segments.put(segment.firstIndex(), segment);
@@ -466,8 +465,8 @@ public final class SegmentedJournal<E> implements Journal<E> {
     while (iterator.hasNext()) {
       final var segment = iterator.next().getValue();
       if (previousSegment != null && previousSegment.lastIndex() != segment.firstIndex() - 1) {
-        LOG.warn("Journal is inconsistent. {} is not aligned with prior segment {}", segment.file().file(),
-            previousSegment.file().file());
+        LOG.warn("Journal is inconsistent. {} is not aligned with prior segment {}", segment.file().path(),
+            previousSegment.file().path());
         corrupted = true;
       }
       if (corrupted) {

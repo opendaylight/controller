@@ -21,22 +21,19 @@ import com.google.common.base.MoreObjects;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.file.Path;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * An abstraction over how to write a {@link JournalSegmentFile}.
  */
 abstract sealed class FileWriter permits DiskFileWriter, MappedFileWriter {
-    final Path path;
+    final JournalSegmentFile file;
     final FileChannel channel;
-    final int maxSegmentSize;
     final int maxEntrySize;
 
-    FileWriter(final Path path, final FileChannel channel, final int maxSegmentSize, final int maxEntrySize) {
-        this.path = requireNonNull(path);
+    FileWriter(final JournalSegmentFile file, final FileChannel channel, final int maxEntrySize) {
+        this.file = requireNonNull(file);
         this.channel = requireNonNull(channel);
-        this.maxSegmentSize = maxSegmentSize;
         this.maxEntrySize = maxEntrySize;
     }
 
@@ -70,7 +67,7 @@ abstract sealed class FileWriter permits DiskFileWriter, MappedFileWriter {
 
     @Override
     public final String toString() {
-        return MoreObjects.toStringHelper(this).add("path", path).toString();
+        return MoreObjects.toStringHelper(this).add("path", file.path()).toString();
     }
 
     abstract @Nullable MappedByteBuffer buffer();

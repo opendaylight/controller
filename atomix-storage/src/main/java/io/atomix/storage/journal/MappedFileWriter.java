@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.file.Path;
 import org.eclipse.jdt.annotation.NonNull;
 
 /**
@@ -31,12 +30,12 @@ final class MappedFileWriter extends FileWriter {
     private final MappedFileReader reader;
     private final ByteBuffer buffer;
 
-    MappedFileWriter(final Path path, final FileChannel channel, final int maxSegmentSize, final int maxEntrySize) {
-        super(path, channel, maxSegmentSize, maxEntrySize);
+    MappedFileWriter(final JournalSegmentFile file, final FileChannel channel, final int maxEntrySize) {
+        super(file, channel, maxEntrySize);
 
-        mappedBuffer = mapBuffer(channel, maxSegmentSize);
+        mappedBuffer = mapBuffer(channel, file.maxSize());
         buffer = mappedBuffer.slice();
-        reader = new MappedFileReader(path, mappedBuffer);
+        reader = new MappedFileReader(file, mappedBuffer);
     }
 
     private static @NonNull MappedByteBuffer mapBuffer(final FileChannel channel, final int maxSegmentSize) {
@@ -65,7 +64,7 @@ final class MappedFileWriter extends FileWriter {
     @Override
     DiskFileWriter toDisk() {
         close();
-        return new DiskFileWriter(path, channel, maxSegmentSize, maxEntrySize);
+        return new DiskFileWriter(file, channel, maxEntrySize);
     }
 
     @Override

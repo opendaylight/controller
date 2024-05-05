@@ -16,6 +16,8 @@
  */
 package io.atomix.storage.journal;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.MoreObjects;
 import io.atomix.storage.journal.index.JournalIndex;
 import io.atomix.storage.journal.index.Position;
@@ -36,7 +38,6 @@ import org.eclipse.jdt.annotation.Nullable;
  */
 final class JournalSegment implements AutoCloseable {
   private final JournalSegmentFile file;
-  private final JournalSegmentDescriptor descriptor;
   private final StorageLevel storageLevel;
   private final int maxEntrySize;
   private final JournalIndex journalIndex;
@@ -49,25 +50,23 @@ final class JournalSegment implements AutoCloseable {
 
   JournalSegment(
       final JournalSegmentFile file,
-      final JournalSegmentDescriptor descriptor,
       final StorageLevel storageLevel,
       final int maxEntrySize,
       final double indexDensity) {
-    this.file = file;
-    this.descriptor = descriptor;
-    this.storageLevel = storageLevel;
+    this.file = requireNonNull(file);
+    this.storageLevel = requireNonNull(storageLevel);
     this.maxEntrySize = maxEntrySize;
     journalIndex = new SparseJournalIndex(indexDensity);
     try {
-      channel = FileChannel.open(file.file().toPath(),
+      channel = FileChannel.open(file.path(),
         StandardOpenOption.CREATE, StandardOpenOption.READ, StandardOpenOption.WRITE);
     } catch (IOException e) {
       throw new StorageException(e);
     }
 
     final var fileWriter = switch (storageLevel) {
-        case DISK -> new DiskFileWriter(file.file().toPath(), channel, descriptor.maxSegmentSize(), maxEntrySize);
-        case MAPPED -> new MappedFileWriter(file.file().toPath(), channel, descriptor.maxSegmentSize(), maxEntrySize);
+        case DISK -> new DiskFileWriter(file, channel, maxEntrySize);
+        case MAPPED -> new MappedFileWriter(file, channel, maxEntrySize);
     };
     writer = new JournalSegmentWriter(fileWriter, this, maxEntrySize, journalIndex)
         // relinquish mapped memory
@@ -80,7 +79,7 @@ final class JournalSegment implements AutoCloseable {
    * @return The segment's starting index.
    */
   long firstIndex() {
-    return descriptor.index();
+    return file.descriptor().index();
   }
 
   /**
@@ -112,15 +111,6 @@ final class JournalSegment implements AutoCloseable {
    */
   JournalSegmentFile file() {
     return file;
-  }
-
-  /**
-   * Returns the segment descriptor.
-   *
-   * @return The segment descriptor.
-   */
-  JournalSegmentDescriptor descriptor() {
-    return descriptor;
   }
 
   /**
@@ -185,9 +175,8 @@ final class JournalSegment implements AutoCloseable {
     acquire();
 
     final var buffer = writer.buffer();
-    final var path = file.file().toPath();
-    final var fileReader = buffer != null ? new MappedFileReader(path, buffer)
-        : new DiskFileReader(path, channel, descriptor.maxSegmentSize(), maxEntrySize);
+    final var fileReader = buffer != null ? new MappedFileReader(file, buffer)
+        : new DiskFileReader(file, channel, maxEntrySize);
     final var reader = new JournalSegmentReader(this, fileReader, maxEntrySize);
     reader.setPosition(JournalSegmentDescriptor.BYTES);
     readers.add(reader);
@@ -253,7 +242,7 @@ final class JournalSegment implements AutoCloseable {
    */
   void delete() {
     try {
-      Files.deleteIfExists(file.file().toPath());
+      Files.deleteIfExists(file.path());
     } catch (IOException e) {
       throw new StorageException(e);
     }
@@ -261,10 +250,11 @@ final class JournalSegment implements AutoCloseable {
 
   @Override
   public String toString() {
+    final var descriptor = file.descriptor();
     return MoreObjects.toStringHelper(this)
         .add("id", descriptor.id())
         .add("version", descriptor.version())
-        .add("index", firstIndex())
+        .add("index", descriptor.index())
         .toString();
   }
 }

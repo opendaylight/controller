@@ -38,7 +38,7 @@ final class JournalSegmentReader {
     JournalSegmentReader(final JournalSegment segment, final FileReader fileReader, final int maxEntrySize) {
         this.segment = requireNonNull(segment);
         this.fileReader = requireNonNull(fileReader);
-        maxSegmentSize = segment.descriptor().maxSegmentSize();
+        maxSegmentSize = segment.file().maxSize();
         this.maxEntrySize = maxEntrySize;
     }
 

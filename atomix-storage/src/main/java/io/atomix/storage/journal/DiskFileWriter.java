@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.file.Path;
 
 /**
  * A {@link StorageLevel#DISK} {@link FileWriter}.
@@ -32,10 +31,10 @@ final class DiskFileWriter extends FileWriter {
     private final DiskFileReader reader;
     private final ByteBuffer buffer;
 
-    DiskFileWriter(final Path path, final FileChannel channel, final int maxSegmentSize, final int maxEntrySize) {
-        super(path, channel, maxSegmentSize, maxEntrySize);
-        buffer = DiskFileReader.allocateBuffer(maxSegmentSize, maxEntrySize);
-        reader = new DiskFileReader(path, channel, buffer);
+    DiskFileWriter(final JournalSegmentFile file, final FileChannel channel, final int maxEntrySize) {
+        super(file, channel, maxEntrySize);
+        buffer = DiskFileReader.allocateBuffer(file.maxSize(), maxEntrySize);
+        reader = new DiskFileReader(file, channel, buffer);
     }
 
     @Override
@@ -51,7 +50,7 @@ final class DiskFileWriter extends FileWriter {
     @Override
     MappedFileWriter toMapped() {
         flush();
-        return new MappedFileWriter(path, channel, maxSegmentSize, maxEntrySize);
+        return new MappedFileWriter(file, channel, maxEntrySize);
     }
 
     @Override

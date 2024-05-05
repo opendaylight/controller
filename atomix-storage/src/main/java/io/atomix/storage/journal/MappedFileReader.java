@@ -16,7 +16,6 @@
 package io.atomix.storage.journal;
 
 import java.nio.ByteBuffer;
-import java.nio.file.Path;
 
 /**
  * A {@link StorageLevel#MAPPED} implementation of {@link FileReader}. Operates on direct mapping of the entire file.
@@ -24,8 +23,8 @@ import java.nio.file.Path;
 final class MappedFileReader extends FileReader {
     private final ByteBuffer buffer;
 
-    MappedFileReader(final Path path, final ByteBuffer buffer) {
-        super(path);
+    MappedFileReader(final JournalSegmentFile file, final ByteBuffer buffer) {
+        super(file);
         this.buffer = buffer.slice().asReadOnlyBuffer();
     }
 

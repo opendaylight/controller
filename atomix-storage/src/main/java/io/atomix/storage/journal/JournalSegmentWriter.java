@@ -44,7 +44,7 @@ final class JournalSegmentWriter {
         this.fileWriter = requireNonNull(fileWriter);
         this.segment = requireNonNull(segment);
         this.index = requireNonNull(index);
-        maxSegmentSize = segment.descriptor().maxSegmentSize();
+        maxSegmentSize = segment.file().maxSize();
         this.maxEntrySize = maxEntrySize;
         // adjust lastEntry value
         reset(0);

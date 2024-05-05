@@ -19,17 +19,16 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
 import java.nio.ByteBuffer;
-import java.nio.file.Path;
 import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * An abstraction over how to read a {@link JournalSegmentFile}.
  */
 abstract sealed class FileReader permits DiskFileReader, MappedFileReader {
-    private final Path path;
+    private final JournalSegmentFile file;
 
-    FileReader(final Path path) {
-        this.path = requireNonNull(path);
+    FileReader(final JournalSegmentFile file) {
+        this.file = requireNonNull(file);
     }
 
     /**
@@ -49,6 +48,6 @@ abstract sealed class FileReader permits DiskFileReader, MappedFileReader {
 
     @Override
     public final String toString() {
-        return MoreObjects.toStringHelper(this).add("path", path).toString();
+        return MoreObjects.toStringHelper(this).add("path", file.path()).toString();
     }
 }

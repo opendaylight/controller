@@ -17,25 +17,27 @@ package io.atomix.storage.journal;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.base.MoreObjects;
 import java.io.File;
+import java.nio.file.Path;
+import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * Segment file utility.
  *
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
-public final class JournalSegmentFile {
+final class JournalSegmentFile {
     private static final char PART_SEPARATOR = '-';
     private static final char EXTENSION_SEPARATOR = '.';
     private static final String EXTENSION = "log";
 
-    private final File file;
+    private final @NonNull JournalSegmentDescriptor descriptor;
+    private final @NonNull Path path;
 
-    /**
-     * @throws IllegalArgumentException if {@code file} is not a valid segment file
-     */
-    JournalSegmentFile(final File file) {
-        this.file = file;
+    JournalSegmentFile(final Path path, final JournalSegmentDescriptor descriptor) {
+        this.path = requireNonNull(path);
+        this.descriptor = requireNonNull(descriptor);
     }
 
     /**
@@ -43,8 +45,26 @@ public final class JournalSegmentFile {
      *
      * @return The segment file.
      */
-    public File file() {
-        return file;
+    @NonNull Path path() {
+        return path;
+    }
+
+    /**
+     * Returns the segment descriptor.
+     *
+     * @return The segment descriptor.
+     */
+    @NonNull JournalSegmentDescriptor descriptor() {
+        return descriptor;
+    }
+
+    int maxSize() {
+        return descriptor.maxSegmentSize();
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this).add("path", path).add("descriptor", descriptor).toString();
     }
 
     /**
