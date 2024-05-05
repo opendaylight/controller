@@ -30,10 +30,10 @@ final class MappedFileWriter extends FileWriter {
     private final MappedFileReader reader;
     private final ByteBuffer buffer;
 
-    MappedFileWriter(final JournalSegmentFile file, final FileChannel channel, final int maxEntrySize) {
-        super(file, channel, maxEntrySize);
+    MappedFileWriter(final JournalSegmentFile file, final int maxEntrySize) {
+        super(file, maxEntrySize);
 
-        mappedBuffer = mapBuffer(channel, file.maxSize());
+        mappedBuffer = mapBuffer(file.channel(), file.maxSize());
         buffer = mappedBuffer.slice();
         reader = new MappedFileReader(file, mappedBuffer);
     }
@@ -64,7 +64,7 @@ final class MappedFileWriter extends FileWriter {
     @Override
     DiskFileWriter toDisk() {
         close();
-        return new DiskFileWriter(file, channel, maxEntrySize);
+        return new DiskFileWriter(file, maxEntrySize);
     }
 
     @Override

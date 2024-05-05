@@ -29,12 +29,14 @@ final class DiskFileWriter extends FileWriter {
     private static final ByteBuffer ZERO_ENTRY_HEADER = ByteBuffer.wrap(new byte[HEADER_BYTES]);
 
     private final DiskFileReader reader;
+    private final FileChannel channel;
     private final ByteBuffer buffer;
 
-    DiskFileWriter(final JournalSegmentFile file, final FileChannel channel, final int maxEntrySize) {
-        super(file, channel, maxEntrySize);
+    DiskFileWriter(final JournalSegmentFile file, final int maxEntrySize) {
+        super(file, maxEntrySize);
+        channel = file.channel();
         buffer = DiskFileReader.allocateBuffer(file.maxSize(), maxEntrySize);
-        reader = new DiskFileReader(file, channel, buffer);
+        reader = new DiskFileReader(file, buffer);
     }
 
     @Override
@@ -50,7 +52,7 @@ final class DiskFileWriter extends FileWriter {
     @Override
     MappedFileWriter toMapped() {
         flush();
-        return new MappedFileWriter(file, channel, maxEntrySize);
+        return new MappedFileWriter(file, maxEntrySize);
     }
 
     @Override
