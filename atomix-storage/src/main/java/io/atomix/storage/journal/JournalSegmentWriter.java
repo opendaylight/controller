@@ -21,7 +21,6 @@ import static java.util.Objects.requireNonNull;
 import io.atomix.storage.journal.index.JournalIndex;
 import io.netty.buffer.ByteBuf;
 import java.nio.MappedByteBuffer;
-import java.util.zip.CRC32;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
@@ -103,16 +102,14 @@ final class JournalSegmentWriter {
         }
 
         // allocate buffer and write data
-        final var writeBuffer = fileWriter.startWrite(position, length + HEADER_BYTES).position(HEADER_BYTES);
-        writeBuffer.put(buf.nioBuffer());
+        final var writeBuffer = fileWriter.startWrite(position, length + HEADER_BYTES);
+        writeBuffer.put(HEADER_BYTES, buf.nioBuffer(), 0, length);
 
         // Compute the checksum for the entry.
-        final var crc32 = new CRC32();
-        crc32.update(writeBuffer.flip().position(HEADER_BYTES));
+        final var checksum = SegmentEntry.computeChecksum(writeBuffer.slice(HEADER_BYTES, length));
 
         // Create a single byte[] in memory for the entire entry and write it as a batch to the underlying buffer.
-        writeBuffer.putInt(0, length).putInt(Integer.BYTES, (int) crc32.getValue());
-        fileWriter.commitWrite(position, writeBuffer.rewind());
+        fileWriter.commitWrite(position, writeBuffer.putInt(0, length).putInt(Integer.BYTES, checksum));
 
         // Update the last entry with the correct index/term/length.
         currentPosition = nextPosition;

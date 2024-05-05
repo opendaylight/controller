@@ -16,14 +16,16 @@
 package io.atomix.storage.journal;
 
 import java.nio.ByteBuffer;
+import java.util.zip.CRC32;
+import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * An {@link Indexed} entry read from {@link JournalSegment}.
  *
- * @param checksum The CRC32 checksum of data
+ * @param checksum The {@link CRC32} checksum of data
  * @param bytes Entry bytes
  */
-record SegmentEntry(int checksum, ByteBuffer bytes) {
+record SegmentEntry(int checksum, @NonNull ByteBuffer bytes) {
     /**
      * The size of the header, comprising of:
      * <ul>
@@ -37,5 +39,17 @@ record SegmentEntry(int checksum, ByteBuffer bytes) {
         if (bytes.remaining() < 1) {
             throw new IllegalArgumentException("Invalid entry bytes " + bytes);
         }
+    }
+
+    /**
+     * Compute the {@link CRC32} checksum of a buffer. Note that the buffer will be consumed during this process.
+     *
+     * @param bytes buffer to checksum
+     * @return the checksum
+     */
+    static int computeChecksum(final ByteBuffer bytes) {
+        final var crc32 = new CRC32();
+        crc32.update(bytes);
+        return (int) crc32.getValue();
     }
 }
