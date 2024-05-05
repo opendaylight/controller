@@ -21,6 +21,7 @@ import com.google.common.base.MoreObjects;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -37,25 +38,40 @@ final class JournalSegmentFile {
     private final @NonNull JournalSegmentDescriptor descriptor;
     private final @NonNull Path path;
 
-    private JournalSegmentFile(final Path path, final JournalSegmentDescriptor descriptor) {
+    private final RandomAccessFile file;
+
+    private JournalSegmentFile(final Path path, final JournalSegmentDescriptor descriptor,
+            final RandomAccessFile file) {
         this.path = requireNonNull(path);
         this.descriptor = requireNonNull(descriptor);
+        this.file = requireNonNull(file);
     }
 
     static @NonNull JournalSegmentFile createNew(final String name, final File directory,
             final JournalSegmentDescriptor descriptor) throws IOException {
         final var file = createSegmentFile(name, directory, descriptor.id());
-        try (var raf = new RandomAccessFile(file, "rw")) {
+        final var raf = new RandomAccessFile(file, "rw");
+        try {
             raf.setLength(descriptor.maxSegmentSize());
             raf.write(descriptor.toArray());
+        } catch (IOException e) {
+            raf.close();
+            throw e;
         }
-        return new JournalSegmentFile(file.toPath(), descriptor);
+        return new JournalSegmentFile(file.toPath(), descriptor, raf);
     }
 
     static @NonNull JournalSegmentFile openExisting(final Path path) throws IOException {
-        // read the descriptor
-        final var descriptor = JournalSegmentDescriptor.readFrom(path);
-        return new JournalSegmentFile(path, descriptor);
+        final var raf = new RandomAccessFile(path.toFile(), "rw");
+        final JournalSegmentDescriptor descriptor;
+        try {
+            // read the descriptor
+            descriptor = JournalSegmentDescriptor.readFrom(raf.getChannel());
+        } catch (IOException e) {
+            raf.close();
+            throw e;
+        }
+        return new JournalSegmentFile(path, descriptor, raf);
     }
 
     /**
@@ -78,6 +94,18 @@ final class JournalSegmentFile {
 
     int maxSize() {
         return descriptor.maxSegmentSize();
+    }
+
+    long size() throws IOException {
+        return file.length();
+    }
+
+    FileChannel channel() {
+        return file.getChannel();
+    }
+
+    void close() throws IOException {
+        file.close();
     }
 
     @Override

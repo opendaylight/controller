@@ -20,7 +20,6 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.base.MoreObjects;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
@@ -28,12 +27,10 @@ import org.eclipse.jdt.annotation.Nullable;
  */
 abstract sealed class FileWriter permits DiskFileWriter, MappedFileWriter {
     final JournalSegmentFile file;
-    final FileChannel channel;
     final int maxEntrySize;
 
-    FileWriter(final JournalSegmentFile file, final FileChannel channel, final int maxEntrySize) {
+    FileWriter(final JournalSegmentFile file, final int maxEntrySize) {
         this.file = requireNonNull(file);
-        this.channel = requireNonNull(channel);
         this.maxEntrySize = maxEntrySize;
     }
 
