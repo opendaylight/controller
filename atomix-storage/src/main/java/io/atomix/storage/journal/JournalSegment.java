@@ -23,9 +23,7 @@ import io.atomix.storage.journal.index.JournalIndex;
 import io.atomix.storage.journal.index.Position;
 import io.atomix.storage.journal.index.SparseJournalIndex;
 import java.io.IOException;
-import java.nio.channels.FileChannel;
 import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -47,7 +45,6 @@ final class JournalSegment {
   private final JournalIndex journalIndex;
   private final Set<JournalSegmentReader> readers = ConcurrentHashMap.newKeySet();
   private final AtomicInteger references = new AtomicInteger();
-  private final FileChannel channel;
 
   private JournalSegmentWriter writer;
   private boolean open = true;
@@ -61,16 +58,10 @@ final class JournalSegment {
     this.storageLevel = requireNonNull(storageLevel);
     this.maxEntrySize = maxEntrySize;
     journalIndex = new SparseJournalIndex(indexDensity);
-    try {
-      channel = FileChannel.open(file.path(),
-        StandardOpenOption.CREATE, StandardOpenOption.READ, StandardOpenOption.WRITE);
-    } catch (IOException e) {
-      throw new StorageException(e);
-    }
 
     final var fileWriter = switch (storageLevel) {
-        case DISK -> new DiskFileWriter(file, channel, maxEntrySize);
-        case MAPPED -> new MappedFileWriter(file, channel, maxEntrySize);
+        case DISK -> new DiskFileWriter(file, maxEntrySize);
+        case MAPPED -> new MappedFileWriter(file, maxEntrySize);
     };
     writer = new JournalSegmentWriter(fileWriter, this, maxEntrySize, journalIndex)
         // relinquish mapped memory
@@ -100,12 +91,8 @@ final class JournalSegment {
    *
    * @return the size of the segment
    */
-  int size() {
-    try {
-      return (int) channel.size();
-    } catch (IOException e) {
-      throw new StorageException(e);
-    }
+  int size() throws IOException {
+    return file.size();
   }
 
   /**
@@ -179,8 +166,7 @@ final class JournalSegment {
     acquire();
 
     final var buffer = writer.buffer();
-    final var fileReader = buffer != null ? new MappedFileReader(file, buffer)
-        : new DiskFileReader(file, channel, maxEntrySize);
+    final var fileReader = buffer != null ? new MappedFileReader(file, buffer) : new DiskFileReader(file, maxEntrySize);
     final var reader = new JournalSegmentReader(this, fileReader, maxEntrySize);
     reader.setPosition(JournalSegmentDescriptor.BYTES);
     readers.add(reader);
@@ -235,7 +221,7 @@ final class JournalSegment {
   private void finishClose() {
     writer.close();
     try {
-      channel.close();
+      file.close();
     } catch (IOException e) {
       throw new StorageException(e);
     }

@@ -16,7 +16,6 @@
 package io.atomix.storage.journal;
 
 import static com.google.common.base.Verify.verify;
-import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -38,14 +37,14 @@ final class DiskFileReader extends FileReader {
     // tracks where memory's first available byte maps to in terms of FileChannel.position()
     private int bufferPosition;
 
-    DiskFileReader(final JournalSegmentFile file, final FileChannel channel, final int maxEntrySize) {
-        this(file, channel, allocateBuffer(file.maxSize(), maxEntrySize));
+    DiskFileReader(final JournalSegmentFile file, final int maxEntrySize) {
+        this(file, allocateBuffer(file.maxSize(), maxEntrySize));
     }
 
     // Note: take ownership of the buffer
-    DiskFileReader(final JournalSegmentFile file, final FileChannel channel, final ByteBuffer buffer) {
+    DiskFileReader(final JournalSegmentFile file, final ByteBuffer buffer) {
         super(file);
-        this.channel = requireNonNull(channel);
+        channel = file.channel();
         this.buffer = buffer.flip();
         bufferPosition = 0;
     }
