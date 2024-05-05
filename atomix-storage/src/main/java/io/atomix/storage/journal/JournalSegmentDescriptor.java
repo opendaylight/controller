@@ -15,16 +15,14 @@
  */
 package io.atomix.storage.journal;
 
-import static java.util.Objects.requireNonNull;
-
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.MoreObjects;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * Stores information about a {@link JournalSegment} of the log.
@@ -32,280 +30,271 @@ import org.eclipse.jdt.annotation.NonNull;
  * The segment descriptor manages metadata related to a single segment of the log. Descriptors are stored within the
  * first {@code 64} bytes of each segment in the following order:
  * <ul>
- * <li>{@code id} (64-bit signed integer) - A unique segment identifier. This is a monotonically increasing number within
- * each log. Segments with in-sequence identifiers should contain in-sequence indexes.</li>
- * <li>{@code index} (64-bit signed integer) - The effective first index of the segment. This indicates the index at which
- * the first entry should be written to the segment. Indexes are monotonically increasing thereafter.</li>
- * <li>{@code version} (64-bit signed integer) - The version of the segment. Versions are monotonically increasing
- * starting at {@code 1}. Versions will only be incremented whenever the segment is rewritten to another memory/disk
- * space, e.g. after log compaction.</li>
- * <li>{@code maxSegmentSize} (32-bit unsigned integer) - The maximum number of bytes allowed in the segment.</li>
- * <li>{@code maxEntries} (32-bit signed integer) - The total number of expected entries in the segment. This is the final
- * number of entries allowed within the segment both before and after compaction. This entry count is used to determine
- * the count of internal indexing and deduplication facilities.</li>
- * <li>{@code updated} (64-bit signed integer) - The last update to the segment in terms of milliseconds since the epoch.
- * When the segment is first constructed, the {@code updated} time is {@code 0}. Once all entries in the segment have
- * been committed, the {@code updated} time should be set to the current time. Log compaction should not result in a
- * change to {@code updated}.</li>
- * <li>{@code locked} (8-bit boolean) - A boolean indicating whether the segment is locked. Segments will be locked once
- * all entries have been committed to the segment. The lock state of each segment is used to determine log compaction
- * and recovery behavior.</li>
+ *   <li>{@code id} (64-bit signed integer) - A unique segment identifier. This is a monotonically increasing number
+ *       within each log. Segments with in-sequence identifiers should contain in-sequence indexes.</li>
+ *   <li>{@code index} (64-bit signed integer) - The effective first index of the segment. This indicates the index at
+ *       which the first entry should be written to the segment. Indexes are monotonically increasing thereafter.</li>
+ *   <li>{@code version} (64-bit signed integer) - The version of the segment. Versions are monotonically increasing
+ *       starting at {@code 1}. Versions will only be incremented whenever the segment is rewritten to another
+ *       memory/disk space, e.g. after log compaction.</li>
+ *   <li>{@code maxSegmentSize} (32-bit unsigned integer) - The maximum number of bytes allowed in the segment.</li>
+ *   <li>{@code maxEntries} (32-bit signed integer) - The total number of expected entries in the segment. This is the
+ *       final number of entries allowed within the segment both before and after compaction. This entry count is used
+ *       to determine the count of internal indexing and deduplication facilities.</li>
+ *   <li>{@code updated} (64-bit signed integer) - The last update to the segment in terms of milliseconds since the
+ *       epoch.
+ *       When the segment is first constructed, the {@code updated} time is {@code 0}. Once all entries in the segment
+ *       have been committed, the {@code updated} time should be set to the current time. Log compaction should not
+ *       result in a change to {@code updated}.</li>
+ *   <li>{@code locked} (8-bit boolean) - A boolean indicating whether the segment is locked. Segments will be locked
+ *       once all entries have been committed to the segment. The lock state of each segment is used to determine log
+ *       compaction and recovery behavior.</li>
  * </ul>
  * The remainder of the 64 segment header bytes are reserved for future metadata.
  *
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
-public final class JournalSegmentDescriptor {
-  public static final int BYTES = 64;
+public record JournalSegmentDescriptor(
+        int version,
+        long id,
+        long index,
+        int maxSegmentSize,
+        int maxEntries,
+        long updated,
+        boolean locked) {
+    public static final int BYTES = 64;
 
-  // Current segment version.
-  @VisibleForTesting
-  static final int VERSION = 1;
+    // Current segment version.
+    @VisibleForTesting
+    static final int VERSION = 1;
 
-  // The lengths of each field in the header.
-  private static final int VERSION_LENGTH = Integer.BYTES;     // 32-bit signed integer
-  private static final int ID_LENGTH = Long.BYTES;             // 64-bit signed integer
-  private static final int INDEX_LENGTH = Long.BYTES;          // 64-bit signed integer
-  private static final int MAX_SIZE_LENGTH = Integer.BYTES;    // 32-bit signed integer
-  private static final int MAX_ENTRIES_LENGTH = Integer.BYTES; // 32-bit signed integer
-  private static final int UPDATED_LENGTH = Long.BYTES;        // 64-bit signed integer
+    /**
+     * Read a JournalSegmentDescriptor from a {@link Path}.
+     *
+     * @param path path to read from
+     * @return A {@link JournalSegmentDescriptor}
+     * @throws IOException if an I/O error occurs or there is not enough data
+     */
+    public static @NonNull JournalSegmentDescriptor readFrom(final Path path) throws IOException {
+        final byte[] bytes;
+        try (var is = Files.newInputStream(path, StandardOpenOption.READ)) {
+            bytes = is.readNBytes(BYTES);
+        }
 
-  // The positions of each field in the header.
-  private static final int VERSION_POSITION = 0;                                         // 0
-  private static final int ID_POSITION = VERSION_POSITION + VERSION_LENGTH;              // 4
-  private static final int INDEX_POSITION = ID_POSITION + ID_LENGTH;                     // 12
-  private static final int MAX_SIZE_POSITION = INDEX_POSITION + INDEX_LENGTH;            // 20
-  private static final int MAX_ENTRIES_POSITION = MAX_SIZE_POSITION + MAX_SIZE_LENGTH;   // 24
-  private static final int UPDATED_POSITION = MAX_ENTRIES_POSITION + MAX_ENTRIES_LENGTH; // 28
+        if (bytes.length != BYTES) {
+            throw new IOException("Need " + BYTES + " bytes, only " + bytes.length + " available");
+        }
 
-  /**
-   * Returns a descriptor builder.
-   * <p>
-   * The descriptor builder will write segment metadata to a {@code 48} byte in-memory buffer.
-   *
-   * @return The descriptor builder.
-   */
-  public static Builder builder() {
-    return new Builder(ByteBuffer.allocate(BYTES));
-  }
-
-  /**
-   * Returns a descriptor builder for the given descriptor buffer.
-   *
-   * @param buffer The descriptor buffer.
-   * @return The descriptor builder.
-   * @throws NullPointerException if {@code buffer} is null
-   */
-  public static Builder builder(ByteBuffer buffer) {
-    return new Builder(buffer);
-  }
-
-  private final ByteBuffer buffer;
-  private final int version;
-  private final long id;
-  private final long index;
-  private final int maxSegmentSize;
-  private final int maxEntries;
-  private volatile long updated;
-  private volatile boolean locked;
-
-  /**
-   * @throws NullPointerException if {@code buffer} is null
-   */
-  public JournalSegmentDescriptor(ByteBuffer buffer) {
-    this.buffer = buffer;
-    this.version = buffer.getInt();
-    this.id = buffer.getLong();
-    this.index = buffer.getLong();
-    this.maxSegmentSize = buffer.getInt();
-    this.maxEntries = buffer.getInt();
-    this.updated = buffer.getLong();
-    this.locked = buffer.get() == 1;
-  }
-
-  /**
-   * Read a JournalSegmentDescriptor from a {@link Path}.
-   *
-   * @param path path to read from
-   * @return A {@link JournalSegmentDescriptor}
-   * @throws IOException if an I/O error occurs or there is not enough data
-   */
-  public static @NonNull JournalSegmentDescriptor readFrom(final Path path) throws IOException {
-      try (var channel = FileChannel.open(path, StandardOpenOption.READ)) {
-          final var buffer = ByteBuffer.allocate(BYTES);
-          final var readBytes = channel.read(buffer);
-          if (readBytes != BYTES) {
-              throw new IOException("Need " + BYTES + " bytes, only " + readBytes + " available");
-          }
-          return new JournalSegmentDescriptor(buffer.flip());
-      }
-  }
-
-  /**
-   * Returns the segment version.
-   * <p>
-   * Versions are monotonically increasing starting at {@code 1}.
-   *
-   * @return The segment version.
-   */
-  public int version() {
-    return version;
-  }
-
-  /**
-   * Returns the segment identifier.
-   * <p>
-   * The segment ID is a monotonically increasing number within each log. Segments with in-sequence identifiers should
-   * contain in-sequence indexes.
-   *
-   * @return The segment identifier.
-   */
-  public long id() {
-    return id;
-  }
-
-  /**
-   * Returns the segment index.
-   * <p>
-   * The index indicates the index at which the first entry should be written to the segment. Indexes are monotonically
-   * increasing thereafter.
-   *
-   * @return The segment index.
-   */
-  public long index() {
-    return index;
-  }
-
-  /**
-   * Returns the maximum count of the segment.
-   *
-   * @return The maximum allowed count of the segment.
-   */
-  public int maxSegmentSize() {
-    return maxSegmentSize;
-  }
-
-  /**
-   * Returns the maximum number of entries allowed in the segment.
-   *
-   * @return The maximum number of entries allowed in the segment.
-   */
-  public int maxEntries() {
-    return maxEntries;
-  }
-
-  /**
-   * Returns last time the segment was updated.
-   * <p>
-   * When the segment is first constructed, the {@code updated} time is {@code 0}. Once all entries in the segment have
-   * been committed, the {@code updated} time should be set to the current time. Log compaction should not result in a
-   * change to {@code updated}.
-   *
-   * @return The last time the segment was updated in terms of milliseconds since the epoch.
-   */
-  public long updated() {
-    return updated;
-  }
-
-  /**
-   * Writes an update to the descriptor.
-   */
-  public void update(long timestamp) {
-    if (!locked) {
-      buffer.putLong(UPDATED_POSITION, timestamp);
-      this.updated = timestamp;
-    }
-  }
-
-  /**
-   * Copies the segment to a new buffer.
-   */
-  JournalSegmentDescriptor copyTo(ByteBuffer buffer) {
-    buffer.putInt(version);
-    buffer.putLong(id);
-    buffer.putLong(index);
-    buffer.putInt(maxSegmentSize);
-    buffer.putInt(maxEntries);
-    buffer.putLong(updated);
-    buffer.put(locked ? (byte) 1 : (byte) 0);
-    return this;
-  }
-
-  @Override
-  public String toString() {
-    return MoreObjects.toStringHelper(this)
-        .add("version", version)
-        .add("id", id)
-        .add("index", index)
-        .add("updated", updated)
-        .toString();
-  }
-
-  /**
-   * Segment descriptor builder.
-   */
-  public static class Builder {
-    private final ByteBuffer buffer;
-
-    private Builder(ByteBuffer buffer) {
-      this.buffer = requireNonNull(buffer, "buffer cannot be null");
-      buffer.putInt(VERSION_POSITION, VERSION);
+        final var buffer = ByteBuffer.wrap(bytes);
+        return new JournalSegmentDescriptor(
+            buffer.getInt(),
+            buffer.getLong(),
+            buffer.getLong(),
+            buffer.getInt(),
+            buffer.getInt(),
+            buffer.getLong(),
+            buffer.get() == 1);
     }
 
     /**
-     * Sets the segment identifier.
+     * Returns the segment version.
+     * <p>
+     * Versions are monotonically increasing starting at {@code 1}.
      *
-     * @param id The segment identifier.
-     * @return The segment descriptor builder.
+     * @return The segment version.
      */
-    public Builder withId(long id) {
-      buffer.putLong(ID_POSITION, id);
-      return this;
+    public int version() {
+        return version;
     }
 
     /**
-     * Sets the segment index.
+     * Returns the segment identifier.
+     * <p>
+     * The segment ID is a monotonically increasing number within each log. Segments with in-sequence identifiers should
+     * contain in-sequence indexes.
      *
-     * @param index The segment starting index.
-     * @return The segment descriptor builder.
+     * @return The segment identifier.
      */
-    public Builder withIndex(long index) {
-      buffer.putLong(INDEX_POSITION, index);
-      return this;
+    public long id() {
+        return id;
     }
 
     /**
-     * Sets maximum count of the segment.
+     * Returns the segment index.
+     * <p>
+     * The index indicates the index at which the first entry should be written to the segment. Indexes are monotonically
+     * increasing thereafter.
      *
-     * @param maxSegmentSize The maximum count of the segment.
-     * @return The segment descriptor builder.
+     * @return The segment index.
      */
-    public Builder withMaxSegmentSize(int maxSegmentSize) {
-      buffer.putInt(MAX_SIZE_POSITION, maxSegmentSize);
-      return this;
+    public long index() {
+        return index;
     }
 
     /**
-     * Sets the maximum number of entries in the segment.
+     * Returns the maximum count of the segment.
      *
-     * @param maxEntries The maximum number of entries in the segment.
-     * @return The segment descriptor builder.
-     * @deprecated since 3.0.2
+     * @return The maximum allowed count of the segment.
      */
-    @Deprecated
-    public Builder withMaxEntries(int maxEntries) {
-      buffer.putInt(MAX_ENTRIES_POSITION, maxEntries);
-      return this;
+    public int maxSegmentSize() {
+        return maxSegmentSize;
     }
 
     /**
-     * Builds the segment descriptor.
+     * Returns the maximum number of entries allowed in the segment.
      *
-     * @return The built segment descriptor.
+     * @return The maximum number of entries allowed in the segment.
      */
-    public JournalSegmentDescriptor build() {
-      buffer.rewind();
-      return new JournalSegmentDescriptor(buffer);
+    public int maxEntries() {
+        return maxEntries;
     }
-  }
+
+    /**
+     * Returns last time the segment was updated.
+     * <p>
+     * When the segment is first constructed, the {@code updated} time is {@code 0}. Once all entries in the segment have
+     * been committed, the {@code updated} time should be set to the current time. Log compaction should not result in a
+     * change to {@code updated}.
+     *
+     * @return The last time the segment was updated in terms of milliseconds since the epoch.
+     */
+    public long updated() {
+        return updated;
+    }
+
+    /**
+     * Returns this segment as an array of bytes
+     *
+     * @return bytes
+     */
+    byte @NonNull [] toArray() {
+        final var bytes = new byte[BYTES];
+        ByteBuffer.wrap(bytes)
+            .putInt(version)
+            .putLong(id)
+            .putLong(index)
+            .putInt(maxSegmentSize)
+            .putInt(maxEntries)
+            .putLong(updated)
+            .put(locked ? (byte) 1 : (byte) 0);
+        return bytes;
+    }
+
+    /**
+     * Returns a descriptor builder.
+     * <p>
+     * The descriptor builder will write segment metadata to a {@code 48} byte in-memory buffer.
+     *
+     * @return The descriptor builder.
+     */
+    public static Builder builder() {
+        return builder(VERSION);
+    }
+
+    /**
+     * Returns a descriptor builder for the given descriptor buffer.
+     *
+     * @param version version to build
+     * @return The descriptor builder.
+     * @throws NullPointerException if {@code buffer} is null
+     */
+    public static Builder builder(final int version) {
+        return new Builder(version);
+    }
+
+    /**
+     * Segment descriptor builder.
+     */
+    public static final class Builder {
+        private final int version;
+
+        private Long id;
+        private Long index;
+        private Integer maxSegmentSize;
+        private Integer maxEntries;
+        private Long updated;
+
+        Builder(final int version) {
+            this.version = version;
+        }
+
+        /**
+         * Sets the segment identifier.
+         *
+         * @param id The segment identifier.
+         * @return The segment descriptor builder.
+         */
+        public Builder withId(final long id) {
+            this.id = id;
+            return this;
+        }
+
+        /**
+         * Sets the segment index.
+         *
+         * @param index The segment starting index.
+         * @return The segment descriptor builder.
+         */
+        public Builder withIndex(final long index) {
+            this.index = index;
+            return this;
+        }
+
+        /**
+         * Sets maximum count of the segment.
+         *
+         * @param maxSegmentSize The maximum count of the segment.
+         * @return The segment descriptor builder.
+         */
+        public Builder withMaxSegmentSize(final int maxSegmentSize) {
+            this.maxSegmentSize = maxSegmentSize;
+            return this;
+        }
+
+        /**
+         * Sets the maximum number of entries in the segment.
+         *
+         * @param maxEntries The maximum number of entries in the segment.
+         * @return The segment descriptor builder.
+         * @deprecated since 3.0.2
+         */
+        @Deprecated
+        public Builder withMaxEntries(final int maxEntries) {
+            this.maxEntries = maxEntries;
+            return this;
+        }
+
+        /**
+         * Sets updated timestamp;
+         *
+         * @param updated Epoch milliseconds
+         * @return The segment descriptor builder.
+         */
+        public Builder withUpdated(final long updated) {
+            this.updated = updated;
+            return this;
+        }
+
+        /**
+         * Builds the segment descriptor.
+         *
+         * @return The built segment descriptor.
+         */
+        public JournalSegmentDescriptor build() {
+            return new JournalSegmentDescriptor(version,
+                checkSet(id, "id"),
+                checkSet(index, "index"),
+                checkSet(maxSegmentSize, "maxSegmentSize"),
+                checkSet(maxEntries, "maxEntries"),
+                checkSet(updated, "updated"),
+                false);
+        }
+
+        private static <T> @NonNull T checkSet(final @Nullable T obj, final String name) {
+            if (obj != null) {
+                return obj;
+            }
+            throw new IllegalArgumentException(name + " not set");
+        }
+    }
 }

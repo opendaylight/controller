@@ -15,65 +15,53 @@
  */
 package io.atomix.storage.journal;
 
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.nio.ByteBuffer;
-
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.Test;
 
 /**
  * Segment descriptor test.
  *
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
-public class JournalSegmentDescriptorTest {
+class JournalSegmentDescriptorTest {
+    /**
+     * Tests the segment descriptor builder.
+     */
+    @Test
+    void testDescriptorBuilder() {
+        final var descriptor = JournalSegmentDescriptor.builder()
+            .withId(2)
+            .withIndex(1025)
+            .withMaxSegmentSize(1024 * 1024)
+            .withMaxEntries(2048)
+            .withUpdated(0)
+            .build();
 
-  /**
-   * Tests the segment descriptor builder.
-   */
-  @Test
-  public void testDescriptorBuilder() {
-    JournalSegmentDescriptor descriptor = JournalSegmentDescriptor.builder(ByteBuffer.allocate(JournalSegmentDescriptor.BYTES))
-        .withId(2)
-        .withIndex(1025)
-        .withMaxSegmentSize(1024 * 1024)
-        .withMaxEntries(2048)
-        .build();
+        assertEquals(2, descriptor.id());
+        assertEquals(JournalSegmentDescriptor.VERSION, descriptor.version());
+        assertEquals(1025, descriptor.index());
+        assertEquals(1024 * 1024, descriptor.maxSegmentSize());
+        assertEquals(2048, descriptor.maxEntries());
+        assertEquals(0, descriptor.updated());
+    }
 
-    assertEquals(2, descriptor.id());
-    assertEquals(JournalSegmentDescriptor.VERSION, descriptor.version());
-    assertEquals(1025, descriptor.index());
-    assertEquals(1024 * 1024, descriptor.maxSegmentSize());
-    assertEquals(2048, descriptor.maxEntries());
-
-    assertEquals(0, descriptor.updated());
-    long time = System.currentTimeMillis();
-    descriptor.update(time);
-    assertEquals(time, descriptor.updated());
-  }
-
-  /**
-   * Tests copying the segment descriptor.
-   */
-  @Test
-  public void testDescriptorCopy() {
-    JournalSegmentDescriptor descriptor = JournalSegmentDescriptor.builder()
-        .withId(2)
-        .withIndex(1025)
-        .withMaxSegmentSize(1024 * 1024)
-        .withMaxEntries(2048)
-        .build();
-
-    long time = System.currentTimeMillis();
-    descriptor.update(time);
-
-    descriptor = descriptor.copyTo(ByteBuffer.allocate(JournalSegmentDescriptor.BYTES));
-
-    assertEquals(2, descriptor.id());
-    assertEquals(JournalSegmentDescriptor.VERSION, descriptor.version());
-    assertEquals(1025, descriptor.index());
-    assertEquals(1024 * 1024, descriptor.maxSegmentSize());
-    assertEquals(2048, descriptor.maxEntries());
-    assertEquals(time, descriptor.updated());
-  }
+    /**
+     * Tests copying the segment descriptor.
+     */
+    @Test
+    void testToArray() {
+        assertArrayEquals(new byte[] {
+            0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 4, 1, 0, 16, 0, 0, 0, 0, 8, 0, 8, 7, 6, 5,
+            4, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        }, JournalSegmentDescriptor.builder()
+            .withId(2)
+            .withIndex(1025)
+            .withMaxSegmentSize(1024 * 1024)
+            .withMaxEntries(2048)
+            .withUpdated(0x0807060504030201L)
+            .build()
+            .toArray());
+    }
 }
