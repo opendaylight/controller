@@ -74,7 +74,7 @@ final class JournalSegment {
    * @return The segment's starting index.
    */
   long firstIndex() {
-    return file.descriptor().index();
+    return file.firstIndex();
   }
 
   /**
@@ -233,11 +233,10 @@ final class JournalSegment {
 
   @Override
   public String toString() {
-    final var descriptor = file.descriptor();
     return MoreObjects.toStringHelper(this)
-        .add("id", descriptor.id())
-        .add("version", descriptor.version())
-        .add("index", descriptor.index())
-        .toString();
+      .add("id", file.segmentId())
+      .add("version", file.version())
+      .add("index", file.firstIndex())
+      .toString();
   }
 }
