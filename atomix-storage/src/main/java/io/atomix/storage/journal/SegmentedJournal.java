@@ -290,15 +290,12 @@ public final class SegmentedJournal<E> implements Journal<E> {
     assertOpen();
 
     // If the index already equals the first segment index, skip the reset.
-    JournalSegment firstSegment = getFirstSegment();
+    final var firstSegment = getFirstSegment();
     if (index == firstSegment.firstIndex()) {
       return firstSegment;
     }
 
-    for (JournalSegment segment : segments.values()) {
-      segment.close();
-      segment.delete();
-    }
+    segments.values().forEach(JournalSegment::delete);
     segments.clear();
 
     currentSegment = createSegment(1, index);
@@ -384,7 +381,6 @@ public final class SegmentedJournal<E> implements Journal<E> {
    */
   synchronized void removeSegment(JournalSegment segment) {
     segments.remove(segment.firstIndex());
-    segment.close();
     segment.delete();
     resetCurrentSegment();
   }
@@ -470,7 +466,6 @@ public final class SegmentedJournal<E> implements Journal<E> {
         corrupted = true;
       }
       if (corrupted) {
-        segment.close();
         segment.delete();
         iterator.remove();
       }
@@ -550,11 +545,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
       final var compactSegments = segments.headMap(segmentEntry.getValue().firstIndex());
       if (!compactSegments.isEmpty()) {
         LOG.debug("{} - Compacting {} segment(s)", name, compactSegments.size());
-        for (JournalSegment segment : compactSegments.values()) {
-          LOG.trace("Deleting segment: {}", segment);
-          segment.close();
-          segment.delete();
-        }
+        compactSegments.values().forEach(JournalSegment::delete);
         compactSegments.clear();
         resetHead(segmentEntry.getValue().firstIndex());
       }
@@ -563,10 +554,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
 
   @Override
   public void close() {
-    segments.values().forEach(segment -> {
-      LOG.debug("Closing segment: {}", segment);
-      segment.close();
-    });
+    segments.values().forEach(JournalSegment::close);
     currentSegment = null;
     open = false;
   }

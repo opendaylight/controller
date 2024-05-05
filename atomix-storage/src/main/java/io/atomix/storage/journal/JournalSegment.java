@@ -30,13 +30,17 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.jdt.annotation.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Log segment.
  *
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
-final class JournalSegment implements AutoCloseable {
+final class JournalSegment {
+  private static final Logger LOG = LoggerFactory.getLogger(JournalSegment.class);
+
   private final JournalSegmentFile file;
   private final StorageLevel storageLevel;
   private final int maxEntrySize;
@@ -188,7 +192,7 @@ final class JournalSegment implements AutoCloseable {
    *
    * @param reader the closed segment reader
    */
-  void closeReader(JournalSegmentReader reader) {
+  void closeReader(final JournalSegmentReader reader) {
     if (readers.remove(reader)) {
       release();
     }
@@ -208,19 +212,19 @@ final class JournalSegment implements AutoCloseable {
    *
    * @return indicates whether the segment is open
    */
-  public boolean isOpen() {
+  boolean isOpen() {
     return open;
   }
 
   /**
    * Closes the segment.
    */
-  @Override
-  public void close() {
+  void close() {
     if (!open) {
       return;
     }
 
+    LOG.debug("Closing segment: {}", this);
     open = false;
     readers.forEach(JournalSegmentReader::close);
     if (references.get() == 0) {
@@ -241,6 +245,8 @@ final class JournalSegment implements AutoCloseable {
    * Deletes the segment.
    */
   void delete() {
+    close();
+    LOG.debug("Deleting segment: {}", this);
     try {
       Files.deleteIfExists(file.path());
     } catch (IOException e) {
