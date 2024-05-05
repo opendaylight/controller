@@ -342,7 +342,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
 
     final var index = currentSegment.lastIndex() + 1;
     final var lastSegment = getLastSegment();
-    currentSegment = createSegment(lastSegment != null ? lastSegment.file().descriptor().id() + 1 : 1, index);
+    currentSegment = createSegment(lastSegment != null ? lastSegment.file().segmentId() + 1 : 1, index);
     segments.put(index, currentSegment);
     return currentSegment;
   }
@@ -436,7 +436,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
         }
 
         // Load the segment.
-        LOG.debug("Loaded disk segment: {} ({})", segmentFile.descriptor().id(), segmentFile.path());
+        LOG.debug("Loaded disk segment: {} ({})", segmentFile.segmentId(), segmentFile.path());
 
         // Add the segment to the segments list.
         final var segment = new JournalSegment(segmentFile, storageLevel, maxEntrySize, indexDensity);

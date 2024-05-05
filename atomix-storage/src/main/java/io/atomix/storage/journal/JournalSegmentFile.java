@@ -84,12 +84,30 @@ final class JournalSegmentFile {
     }
 
     /**
-     * Returns the segment descriptor.
+     * Returns the segment version.
      *
-     * @return The segment descriptor.
+     * @return the segment version
      */
-    @NonNull JournalSegmentDescriptor descriptor() {
-        return descriptor;
+    int version() {
+        return descriptor.version();
+    }
+
+    /**
+     * Returns the segment identifier.
+     *
+     * @return the segment identifier
+     */
+    long segmentId() {
+        return descriptor.id();
+    }
+
+    /**
+     * Returns the index of first entry stored in this file.
+     *
+     * @return the index of first entry stored in this file
+     */
+    long firstIndex() {
+        return descriptor.index();
     }
 
     int maxSize() {
