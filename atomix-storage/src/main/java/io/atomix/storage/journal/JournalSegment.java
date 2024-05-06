@@ -19,6 +19,8 @@ package io.atomix.storage.journal;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
+import io.atomix.storage.journal.SegmentState.Active;
+import io.atomix.storage.journal.SegmentState.Inactive;
 import io.atomix.storage.journal.index.JournalIndex;
 import io.atomix.storage.journal.index.Position;
 import io.atomix.storage.journal.index.SparseJournalIndex;
@@ -46,7 +48,7 @@ final class JournalSegment {
   private final int maxEntrySize;
   private final JournalIndex journalIndex;
 
-  private JournalSegmentWriter writer;
+  private SegmentState state;
   private boolean open = true;
 
   JournalSegment(
@@ -59,13 +61,11 @@ final class JournalSegment {
     this.maxEntrySize = maxEntrySize;
     journalIndex = new SparseJournalIndex(indexDensity);
 
-    final var fileWriter = switch (storageLevel) {
-        case DISK -> new DiskFileWriter(file, maxEntrySize);
-        case MAPPED -> new MappedFileWriter(file, maxEntrySize);
-    };
-    writer = new JournalSegmentWriter(fileWriter, this, maxEntrySize, journalIndex)
-        // relinquish mapped memory
-        .toFileChannel();
+    try (var tmpAccess = file.newAccess(storageLevel, maxEntrySize)) {
+      state = new JournalSegmentWriter(tmpAccess.newFileWriter(), this, journalIndex).toInactive();
+    } catch (IOException e) {
+      throw new StorageException(e);
+    }
   }
 
   /**
@@ -109,10 +109,22 @@ final class JournalSegment {
   /**
    * Acquires a reference to the log segment.
    */
-  private void acquire() {
-    if (references.getAndIncrement() == 0 && storageLevel == StorageLevel.MAPPED) {
-      writer = writer.toMapped();
-    }
+  private Active acquire() {
+    return references.getAndIncrement() == 0 ? activate() : (Active) state;
+  }
+
+  private Active activate() {
+      final var toOpen = (Inactive) state;
+      final FileAccess access;
+      try {
+        access = file.newAccess(storageLevel, maxEntrySize);
+      } catch (IOException e) {
+        throw new StorageException(e);
+      }
+
+      final var ret = new Active(access, new JournalSegmentWriter(access.newFileWriter(), this, journalIndex, toOpen));
+      state = ret;
+      return ret;
   }
 
   /**
@@ -120,9 +132,8 @@ final class JournalSegment {
    */
   private void release() {
     if (references.decrementAndGet() == 0) {
-      if (storageLevel == StorageLevel.MAPPED) {
-        writer = writer.toFileChannel();
-      }
+      state = ((Active) state).close();
+
       if (!open) {
         finishClose();
       }
@@ -136,16 +147,14 @@ final class JournalSegment {
    */
   JournalSegmentWriter acquireWriter() {
     checkOpen();
-    acquire();
-
-    return writer;
+    return acquire().writer();
   }
 
   /**
    * Releases the reference to the segment writer.
    */
   void releaseWriter() {
-      release();
+    release();
   }
 
   /**
@@ -155,11 +164,8 @@ final class JournalSegment {
    */
   JournalSegmentReader createReader() {
     checkOpen();
-    acquire();
 
-    final var buffer = writer.buffer();
-    final var fileReader = buffer != null ? new MappedFileReader(file, buffer) : new DiskFileReader(file, maxEntrySize);
-    final var reader = new JournalSegmentReader(this, fileReader, maxEntrySize);
+    final var reader = new JournalSegmentReader(this, acquire().access().newFileReader(), maxEntrySize);
     reader.setPosition(JournalSegmentDescriptor.BYTES);
     readers.add(reader);
     return reader;
@@ -211,7 +217,6 @@ final class JournalSegment {
   }
 
   private void finishClose() {
-    writer.close();
     try {
       file.close();
     } catch (IOException e) {

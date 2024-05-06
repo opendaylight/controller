@@ -19,7 +19,6 @@ import static io.atomix.storage.journal.SegmentEntry.HEADER_BYTES;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 
 /**
@@ -42,22 +41,6 @@ final class DiskFileWriter extends FileWriter {
     @Override
     DiskFileReader reader() {
         return reader;
-    }
-
-    @Override
-    MappedByteBuffer buffer() {
-        return null;
-    }
-
-    @Override
-    MappedFileWriter toMapped() {
-        flush();
-        return new MappedFileWriter(file, maxEntrySize);
-    }
-
-    @Override
-    DiskFileWriter toDisk() {
-        return null;
     }
 
     @Override
@@ -92,10 +75,5 @@ final class DiskFileWriter extends FileWriter {
                 throw new StorageException(e);
             }
         }
-    }
-
-    @Override
-    void close() {
-        flush();
     }
 }
