@@ -32,10 +32,6 @@ final class DiskFileReader extends FileReader {
     // tracks where memory's first available byte maps to in terms of FileChannel.position()
     private int bufferPosition;
 
-    DiskFileReader(final JournalSegmentFile file, final int maxEntrySize) {
-        this(file, file.allocateBuffer(maxEntrySize));
-    }
-
     // Note: take ownership of the buffer
     DiskFileReader(final JournalSegmentFile file, final ByteBuffer buffer) {
         super(file);

@@ -16,10 +16,10 @@
 package io.atomix.storage.journal;
 
 import static io.atomix.storage.journal.SegmentEntry.HEADER_BYTES;
+import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 
 /**
@@ -32,32 +32,16 @@ final class DiskFileWriter extends FileWriter {
     private final FileChannel channel;
     private final ByteBuffer buffer;
 
-    DiskFileWriter(final JournalSegmentFile file, final int maxEntrySize) {
+    DiskFileWriter(final JournalSegmentFile file, final int maxEntrySize, final ByteBuffer buffer) {
         super(file, maxEntrySize);
+        this.buffer = requireNonNull(buffer);
         channel = file.channel();
-        buffer = file.allocateBuffer(maxEntrySize);
         reader = new DiskFileReader(file, buffer);
     }
 
     @Override
     DiskFileReader reader() {
         return reader;
-    }
-
-    @Override
-    MappedByteBuffer buffer() {
-        return null;
-    }
-
-    @Override
-    MappedFileWriter toMapped() {
-        flush();
-        return new MappedFileWriter(file, maxEntrySize);
-    }
-
-    @Override
-    DiskFileWriter toDisk() {
-        return null;
     }
 
     @Override
@@ -92,10 +76,5 @@ final class DiskFileWriter extends FileWriter {
                 throw new StorageException(e);
             }
         }
-    }
-
-    @Override
-    void close() {
-        flush();
     }
 }

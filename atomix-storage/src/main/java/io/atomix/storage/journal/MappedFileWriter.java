@@ -15,51 +15,31 @@
  */
 package io.atomix.storage.journal;
 
-import io.netty.util.internal.PlatformDependent;
+import static java.util.Objects.requireNonNull;
+
+import java.io.Flushable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.MappedByteBuffer;
-import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * A {@link StorageLevel#MAPPED} {@link FileWriter}.
  */
 final class MappedFileWriter extends FileWriter {
-    private final @NonNull MappedByteBuffer mappedBuffer;
     private final MappedFileReader reader;
     private final ByteBuffer buffer;
+    private final Flushable flush;
 
-    MappedFileWriter(final JournalSegmentFile file, final int maxEntrySize) {
+    MappedFileWriter(final JournalSegmentFile file, final int maxEntrySize, final ByteBuffer buffer,
+            final Flushable flush) {
         super(file, maxEntrySize);
-
-        try {
-            mappedBuffer = file.map();
-        } catch (IOException e) {
-            throw new StorageException(e);
-        }
-        buffer = mappedBuffer.slice();
-        reader = new MappedFileReader(file, mappedBuffer);
+        this.buffer = requireNonNull(buffer);
+        this.flush = requireNonNull(flush);
+        reader = new MappedFileReader(file, buffer);
     }
 
     @Override
     MappedFileReader reader() {
         return reader;
-    }
-
-    @Override
-    MappedByteBuffer buffer() {
-        return mappedBuffer;
-    }
-
-    @Override
-    MappedFileWriter toMapped() {
-        return null;
-    }
-
-    @Override
-    DiskFileWriter toDisk() {
-        close();
-        return new DiskFileWriter(file, maxEntrySize);
     }
 
     @Override
@@ -79,13 +59,7 @@ final class MappedFileWriter extends FileWriter {
     }
 
     @Override
-    void flush() {
-        mappedBuffer.force();
-    }
-
-    @Override
-    void close() {
-        flush();
-        PlatformDependent.freeDirectBuffer(mappedBuffer);
+    void flush() throws IOException {
+        flush.flush();
     }
 }
