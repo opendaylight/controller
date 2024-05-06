@@ -152,7 +152,7 @@ public abstract class AbstractJournalTest {
             assertNoNext(reader);
 
             // Truncate the journal and write a different entry.
-            writer.truncate(1);
+            writer.reset(2);
             assertEquals(2, writer.getNextIndex());
             writer.append(ENTRY);
             reader.reset(2);
@@ -193,7 +193,7 @@ public abstract class AbstractJournalTest {
             indexed = assertNext(reader);
             assertEquals(1, indexed.index());
 
-            writer.truncate(0);
+            writer.reset(1);
             assertEquals(0, writer.getLastIndex());
             indexed = writer.append(ENTRY);
             assertEquals(1, writer.getLastIndex());
@@ -219,7 +219,7 @@ public abstract class AbstractJournalTest {
                 assertEquals(j, assertNext(reader).index());
             }
 
-            writer.truncate(i - 2);
+            writer.reset(i - 1);
 
             assertNoNext(reader);
             assertEquals(i - 1, writer.append(new TestEntry(32)).index());
@@ -256,7 +256,7 @@ public abstract class AbstractJournalTest {
                     reader.reset(i + 1);
                 }
 
-                writer.truncate(i - 1);
+                writer.reset(i);
                 writer.append(ENTRY);
 
                 assertNext(reader);
