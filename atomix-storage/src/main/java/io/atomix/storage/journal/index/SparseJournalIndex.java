@@ -25,8 +25,8 @@ import java.util.TreeMap;
 public final class SparseJournalIndex implements JournalIndex {
     private static final int MIN_DENSITY = 1000;
 
-    private final int density;
     private final TreeMap<Long, Integer> positions = new TreeMap<>();
+    private final int density;
 
     public SparseJournalIndex() {
         density = MIN_DENSITY;
