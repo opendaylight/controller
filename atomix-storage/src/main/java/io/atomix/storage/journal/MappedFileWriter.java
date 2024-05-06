@@ -19,7 +19,6 @@ import io.netty.util.internal.PlatformDependent;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
 import org.eclipse.jdt.annotation.NonNull;
 
 /**
@@ -33,17 +32,13 @@ final class MappedFileWriter extends FileWriter {
     MappedFileWriter(final JournalSegmentFile file, final int maxEntrySize) {
         super(file, maxEntrySize);
 
-        mappedBuffer = mapBuffer(file.channel(), file.maxSize());
-        buffer = mappedBuffer.slice();
-        reader = new MappedFileReader(file, mappedBuffer);
-    }
-
-    private static @NonNull MappedByteBuffer mapBuffer(final FileChannel channel, final int maxSegmentSize) {
         try {
-            return channel.map(FileChannel.MapMode.READ_WRITE, 0, maxSegmentSize);
+            mappedBuffer = file.map();
         } catch (IOException e) {
             throw new StorageException(e);
         }
+        buffer = mappedBuffer.slice();
+        reader = new MappedFileReader(file, mappedBuffer);
     }
 
     @Override

@@ -22,7 +22,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.channels.FileChannel.MapMode;
 import java.nio.file.Path;
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -125,6 +127,16 @@ final class JournalSegmentFile {
 
     FileChannel channel() {
         return file.getChannel();
+    }
+
+    /**
+     * Map the contents of the file into memory.
+     *
+     * @return A {@link MappedByteBuffer}
+     * @throws IOException if an I/O error occurs
+     */
+    @NonNull MappedByteBuffer map() throws IOException {
+        return channel().map(MapMode.READ_WRITE, 0, maxSize());
     }
 
     void close() throws IOException {
