@@ -93,6 +93,11 @@ public final class SegmentedByteBufJournal implements ByteBufJournal {
     }
 
     @Override
+    public long lastIndex() {
+        return lastSegment().lastIndex();
+    }
+
+    @Override
     public ByteBufWriter writer() {
         return writer;
     }

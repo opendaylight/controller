@@ -24,6 +24,13 @@ import io.atomix.storage.journal.JournalReader.Mode;
  */
 public interface Journal<E> extends AutoCloseable {
     /**
+     * Return the index of the last entry in the journal.
+     *
+     * @return the last index, or zero if there are no entries.
+     */
+    long lastIndex();
+
+    /**
      * Returns the journal writer.
      *
      * @return The journal writer.

@@ -494,9 +494,13 @@ abstract sealed class SegmentedJournalActor extends AbstractActor {
         }
 
         final var sw = Stopwatch.createStarted();
-        deleteJournal = SegmentedJournal.<Long>builder().withDirectory(directory).withName("delete")
-                .withNamespace(DELETE_NAMESPACE).withMaxSegmentSize(DELETE_SEGMENT_SIZE).build();
-        final var lastDeleteRecovered = deleteJournal.openReader(deleteJournal.writer().getLastIndex())
+        deleteJournal = SegmentedJournal.<Long>builder()
+            .withDirectory(directory)
+            .withName("delete")
+            .withNamespace(DELETE_NAMESPACE)
+            .withMaxSegmentSize(DELETE_SEGMENT_SIZE)
+            .build();
+        final var lastDeleteRecovered = deleteJournal.openReader(deleteJournal.lastIndex())
             .tryNext((index, value, length) -> value);
         lastDelete = lastDeleteRecovered == null ? 0 : lastDeleteRecovered.longValue();
 
