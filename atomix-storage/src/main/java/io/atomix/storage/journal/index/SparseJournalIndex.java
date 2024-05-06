@@ -18,6 +18,7 @@ package io.atomix.storage.journal.index;
 
 import com.google.common.base.MoreObjects;
 import java.util.TreeMap;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * A {@link JournalIndex} maintaining target density.
@@ -25,8 +26,11 @@ import java.util.TreeMap;
 public final class SparseJournalIndex implements JournalIndex {
     private static final int MIN_DENSITY = 1000;
 
-    private final int density;
     private final TreeMap<Long, Integer> positions = new TreeMap<>();
+    private final int density;
+
+    // Last known position. May not be accurate immediately after a truncate() or construction
+    private @Nullable Position last;
 
     public SparseJournalIndex() {
         density = MIN_DENSITY;
@@ -37,10 +41,18 @@ public final class SparseJournalIndex implements JournalIndex {
     }
 
     @Override
-    public void index(final long index, final int position) {
+    public Position index(final long index, final int position) {
+        final var newLast = new Position(index, position);
+        last = newLast;
         if (index % density == 0) {
             positions.put(index, position);
         }
+        return newLast;
+    }
+
+    @Override
+    public Position last() {
+        return last;
     }
 
     @Override
@@ -51,7 +63,19 @@ public final class SparseJournalIndex implements JournalIndex {
     @Override
     public Position truncate(final long index) {
         positions.tailMap(index, false).clear();
-        return Position.ofNullable(positions.lastEntry());
+
+        // Update last position to the last entry, but make sure to return a pointer to index if that is what we have
+        // indexed.
+        var lastEntry = positions.lastEntry();
+        if (lastEntry == null) {
+            last = null;
+            return null;
+        }
+        if (lastEntry.getKey() == index) {
+            positions.pollLastEntry();
+            last = Position.ofNullable(positions.lastEntry());
+        }
+        return new Position(lastEntry);
     }
 
     @Override
