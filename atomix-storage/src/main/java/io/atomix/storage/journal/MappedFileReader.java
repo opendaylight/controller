@@ -25,7 +25,7 @@ final class MappedFileReader extends FileReader {
 
     MappedFileReader(final JournalSegmentFile file, final ByteBuffer buffer) {
         super(file);
-        this.buffer = buffer.slice().asReadOnlyBuffer();
+        this.buffer = buffer.asReadOnlyBuffer();
     }
 
     @Override
