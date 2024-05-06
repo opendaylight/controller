@@ -78,7 +78,8 @@ sealed class SegmentedJournalReader<E> implements JournalReader<E> permits Commi
     }
 
     private void resetCurrentReader(final long index) {
-        final var position = currentSegment.lookup(index - 1);
+        final var adj = index - 1;
+        final var position = currentSegment.lookup(adj);
         if (position != null) {
             nextIndex = position.index();
             currentReader.setPosition(position.position());
@@ -86,7 +87,7 @@ sealed class SegmentedJournalReader<E> implements JournalReader<E> permits Commi
             nextIndex = currentSegment.firstIndex();
             currentReader.setPosition(JournalSegmentDescriptor.BYTES);
         }
-        while (nextIndex < index && tryAdvance()) {
+        while (nextIndex < adj && tryAdvance()) {
             // Nothing else
         }
     }

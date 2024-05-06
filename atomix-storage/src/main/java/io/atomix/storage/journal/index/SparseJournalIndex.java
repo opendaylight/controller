@@ -62,20 +62,37 @@ public final class SparseJournalIndex implements JournalIndex {
 
     @Override
     public Position truncate(final long index) {
-        // Clear all indexes unto and including index, saving the first removed entry
+        // Clear all indexes unto and including index, saving the first removed entry, if any.
         final var tailMap = positions.tailMap(index, true);
         final var firstRemoved = tailMap.firstEntry();
         tailMap.clear();
 
+        // We have not removed anything, but our last entry may have disappeared.
+        final Position position;
+        final var prevLast = last;
+        final var newLast = Position.ofNullable(positions.lastEntry());
+        if (firstRemoved != null) {
+            // Reuse or invalidate last entry
+            if (prevLast != null && prevLast.index() < index) {
+                // previous last entry has not been invalidated, nothing else to do
+                return prevLast;
+            }
+            position = firstRemoved.getKey() == index ? new Position(firstRemoved) : newLast;
+        } else {
+            position = newLast;
+        }
+
         // Update last position to the last entry, but make sure to return a pointer to index if that is what we have
         // indexed.
-        final var newLast = Position.ofNullable(positions.lastEntry());
         last = newLast;
-        return firstRemoved != null && firstRemoved.getKey() == index ? new Position(firstRemoved) : newLast;
+        return position;
     }
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this).add("positions", positions).toString();
+        return MoreObjects.toStringHelper(this).omitNullValues()
+            .add("positions", positions)
+            .add("last", last)
+            .toString();
     }
 }
