@@ -31,11 +31,6 @@ final class SegmentedJournalWriter<E> implements JournalWriter<E> {
     }
 
     @Override
-    public long getLastIndex() {
-        return writer.lastIndex();
-    }
-
-    @Override
     public long getNextIndex() {
         return writer.nextIndex();
     }

@@ -24,13 +24,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public interface ByteBufWriter {
     /**
-     * Returns the last written index.
-     *
-     * @return The last written index
-     */
-    long lastIndex();
-
-    /**
      * Returns the next index to be written.
      *
      * @return The next index to be written
