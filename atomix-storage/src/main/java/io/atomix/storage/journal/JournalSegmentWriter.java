@@ -18,13 +18,13 @@ package io.atomix.storage.journal;
 import static io.atomix.storage.journal.SegmentEntry.HEADER_BYTES;
 import static java.util.Objects.requireNonNull;
 
+import io.atomix.storage.journal.SegmentState.Inactive;
 import io.atomix.storage.journal.StorageException.TooLarge;
 import io.atomix.storage.journal.index.JournalIndex;
 import io.atomix.storage.journal.index.Position;
 import io.netty.buffer.ByteBuf;
-import java.nio.MappedByteBuffer;
+import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,29 +34,27 @@ final class JournalSegmentWriter {
     private final FileWriter fileWriter;
     final @NonNull JournalSegment segment;
     private final @NonNull JournalIndex journalIndex;
-    final int maxSegmentSize;
-    final int maxEntrySize;
 
     private int currentPosition;
 
-    JournalSegmentWriter(final FileWriter fileWriter, final JournalSegment segment, final int maxEntrySize,
-            final JournalIndex journalIndex) {
+    JournalSegmentWriter(final FileWriter fileWriter, final JournalSegment segment, final JournalIndex journalIndex) {
         this.fileWriter = requireNonNull(fileWriter);
         this.segment = requireNonNull(segment);
         this.journalIndex = requireNonNull(journalIndex);
-        maxSegmentSize = segment.file().maxSize();
-        this.maxEntrySize = maxEntrySize;
         // adjust lastEntry value
         reset(0);
     }
 
-    JournalSegmentWriter(final JournalSegmentWriter previous, final FileWriter fileWriter) {
-        segment = previous.segment;
-        journalIndex = previous.journalIndex;
-        maxSegmentSize = previous.maxSegmentSize;
-        maxEntrySize = previous.maxEntrySize;
-        currentPosition = previous.currentPosition;
+    JournalSegmentWriter(final FileWriter fileWriter, final JournalSegment segment, final JournalIndex journalIndex,
+            final Inactive segmentState) {
         this.fileWriter = requireNonNull(fileWriter);
+        this.segment = requireNonNull(segment);
+        this.journalIndex = requireNonNull(journalIndex);
+        currentPosition = segmentState.position();
+    }
+
+    @NonNull Inactive toInactive() {
+        return new Inactive(currentPosition);
     }
 
     /**
@@ -77,6 +75,7 @@ final class JournalSegmentWriter {
      */
     Position append(final ByteBuf buf) {
         final var length = buf.readableBytes();
+        final var maxEntrySize = fileWriter.maxEntrySize();
         if (length > maxEntrySize) {
             throw new TooLarge("Serialized entry size exceeds maximum allowed bytes (" + maxEntrySize + ")");
         }
@@ -87,6 +86,7 @@ final class JournalSegmentWriter {
 
         // check space available
         final int nextPosition = position + HEADER_BYTES + length;
+        final var maxSegmentSize = segment.file().maxSize();
         if (nextPosition >= maxSegmentSize) {
             LOG.trace("Not enough space for {} at {}", index, position);
             return null;
@@ -128,7 +128,7 @@ final class JournalSegmentWriter {
 
         // Clear the buffer indexes and acquire ownership of the buffer
         currentPosition = JournalSegmentDescriptor.BYTES;
-        final var reader = new JournalSegmentReader(segment, fileReader, maxEntrySize);
+        final var reader = new JournalSegmentReader(segment, fileReader, fileWriter.maxEntrySize());
         reader.setPosition(JournalSegmentDescriptor.BYTES);
 
         while (index == 0 || nextIndex <= index) {
@@ -174,33 +174,10 @@ final class JournalSegmentWriter {
      * Flushes written entries to disk.
      */
     void flush() {
-        fileWriter.flush();
-    }
-
-    /**
-     * Closes this writer.
-     */
-    void close() {
-        fileWriter.close();
-    }
-
-    /**
-     * Returns the mapped buffer underlying the segment writer, or {@code null} if the writer does not have such a
-     * buffer.
-     *
-     * @return the mapped buffer underlying the segment writer, or {@code null}.
-     */
-    @Nullable MappedByteBuffer buffer() {
-        return fileWriter.buffer();
-    }
-
-    @NonNull JournalSegmentWriter toMapped() {
-        final var newWriter = fileWriter.toMapped();
-        return newWriter == null ? this : new JournalSegmentWriter(this, newWriter);
-    }
-
-    @NonNull JournalSegmentWriter toFileChannel() {
-        final var newWriter = fileWriter.toDisk();
-        return newWriter == null ? this : new JournalSegmentWriter(this, newWriter);
+        try {
+            fileWriter.flush();
+        } catch (IOException e) {
+            throw new StorageException(e);
+        }
     }
 }
