@@ -16,6 +16,7 @@
  */
 package io.atomix.storage.journal.index;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
@@ -27,8 +28,16 @@ public interface JournalIndex {
      *
      * @param index the index for which to add the entry
      * @param position the position of the given index
+     * @return A {@link Position}
      */
-    void index(long index, int position);
+    @NonNull Position index(long index, int position);
+
+    /**
+     * Return the last position known to this index.
+     *
+     * @return the last position known to this index
+     */
+    @Nullable Position last();
 
     /**
      * Looks up the position of the given index.
