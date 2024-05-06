@@ -35,7 +35,7 @@ final class DiskFileWriter extends FileWriter {
     DiskFileWriter(final JournalSegmentFile file, final int maxEntrySize) {
         super(file, maxEntrySize);
         channel = file.channel();
-        buffer = DiskFileReader.allocateBuffer(file.maxSize(), maxEntrySize);
+        buffer = file.allocateBuffer(maxEntrySize);
         reader = new DiskFileReader(file, buffer);
     }
 

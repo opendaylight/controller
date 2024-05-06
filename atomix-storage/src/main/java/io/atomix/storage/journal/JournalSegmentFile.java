@@ -21,6 +21,7 @@ import com.google.common.base.MoreObjects;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import org.eclipse.jdt.annotation.NonNull;
@@ -34,6 +35,10 @@ final class JournalSegmentFile {
     private static final char PART_SEPARATOR = '-';
     private static final char EXTENSION_SEPARATOR = '.';
     private static final String EXTENSION = "log";
+    /**
+     * Just do not bother with IO smaller than this many bytes.
+     */
+    private static final int MIN_IO_SIZE = 8192;
 
     private final @NonNull JournalSegmentDescriptor descriptor;
     private final @NonNull Path path;
@@ -126,9 +131,25 @@ final class JournalSegmentFile {
         file.close();
     }
 
+    ByteBuffer allocateBuffer(final int maxEntrySize) {
+        return ByteBuffer.allocate(chooseBufferSize(maxEntrySize));
+    }
+
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this).add("path", path).add("descriptor", descriptor).toString();
+    }
+
+    private int chooseBufferSize(final int maxEntrySize) {
+        final int maxSegmentSize = maxSize();
+        if (maxSegmentSize <= MIN_IO_SIZE) {
+            // just buffer the entire segment
+            return maxSegmentSize;
+        }
+
+        // one full entry plus its header, or MIN_IO_SIZE, which benefits the read of many small entries
+        final int minBufferSize = maxEntrySize + SegmentEntry.HEADER_BYTES;
+        return minBufferSize <= MIN_IO_SIZE ? MIN_IO_SIZE : minBufferSize;
     }
 
     /**

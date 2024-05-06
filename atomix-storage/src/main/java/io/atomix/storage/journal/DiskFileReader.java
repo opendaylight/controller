@@ -26,11 +26,6 @@ import org.eclipse.jdt.annotation.NonNull;
  * A {@link StorageLevel#DISK} implementation of {@link FileReader}. Maintains an internal buffer.
  */
 final class DiskFileReader extends FileReader {
-    /**
-     * Just do not bother with IO smaller than this many bytes.
-     */
-    private static final int MIN_IO_SIZE = 8192;
-
     private final FileChannel channel;
     private final ByteBuffer buffer;
 
@@ -38,7 +33,7 @@ final class DiskFileReader extends FileReader {
     private int bufferPosition;
 
     DiskFileReader(final JournalSegmentFile file, final int maxEntrySize) {
-        this(file, allocateBuffer(file.maxSize(), maxEntrySize));
+        this(file, file.allocateBuffer(maxEntrySize));
     }
 
     // Note: take ownership of the buffer
@@ -47,21 +42,6 @@ final class DiskFileReader extends FileReader {
         channel = file.channel();
         this.buffer = buffer.flip();
         bufferPosition = 0;
-    }
-
-    static ByteBuffer allocateBuffer(final int maxSegmentSize, final int maxEntrySize) {
-        return ByteBuffer.allocate(chooseBufferSize(maxSegmentSize, maxEntrySize));
-    }
-
-    private static int chooseBufferSize(final int maxSegmentSize, final int maxEntrySize) {
-        if (maxSegmentSize <= MIN_IO_SIZE) {
-            // just buffer the entire segment
-            return maxSegmentSize;
-        }
-
-        // one full entry plus its header, or MIN_IO_SIZE, which benefits the read of many small entries
-        final int minBufferSize = maxEntrySize + SegmentEntry.HEADER_BYTES;
-        return minBufferSize <= MIN_IO_SIZE ? MIN_IO_SIZE : minBufferSize;
     }
 
     @Override
