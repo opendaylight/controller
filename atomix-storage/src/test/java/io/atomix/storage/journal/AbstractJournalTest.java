@@ -175,28 +175,34 @@ public abstract class AbstractJournalTest {
             JournalWriter<TestEntry> writer = journal.writer();
             JournalReader<TestEntry> reader = journal.openReader(1);
 
-            assertEquals(0, writer.getLastIndex());
+            assertEquals(0, journal.lastIndex());
+            assertEquals(1, writer.getNextIndex());
             writer.append(ENTRY);
             writer.append(ENTRY);
             writer.reset(1);
-            assertEquals(0, writer.getLastIndex());
+            assertEquals(0, journal.lastIndex());
+            assertEquals(1, writer.getNextIndex());
             writer.append(ENTRY);
 
             var indexed = assertNext(reader);
             assertEquals(1, indexed.index());
             writer.reset(1);
-            assertEquals(0, writer.getLastIndex());
+            assertEquals(0, journal.lastIndex());
+            assertEquals(1, writer.getNextIndex());
             indexed = writer.append(ENTRY);
-            assertEquals(1, writer.getLastIndex());
+            assertEquals(1, journal.lastIndex());
+            assertEquals(2, writer.getNextIndex());
             assertEquals(1, indexed.index());
 
             indexed = assertNext(reader);
             assertEquals(1, indexed.index());
 
             writer.truncate(0);
-            assertEquals(0, writer.getLastIndex());
+            assertEquals(0, journal.lastIndex());
+            assertEquals(1, writer.getNextIndex());
             indexed = writer.append(ENTRY);
-            assertEquals(1, writer.getLastIndex());
+            assertEquals(1, journal.lastIndex());
+            assertEquals(2, writer.getNextIndex());
             assertEquals(1, indexed.index());
 
             indexed = assertNext(reader);

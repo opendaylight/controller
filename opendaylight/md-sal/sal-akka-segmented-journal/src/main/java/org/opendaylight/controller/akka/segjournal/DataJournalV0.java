@@ -51,7 +51,7 @@ final class DataJournalV0 extends DataJournal {
 
     @Override
     long lastWrittenSequenceNr() {
-        return entries.writer().getLastIndex();
+        return entries.lastIndex();
     }
 
     @Override
@@ -120,17 +120,18 @@ final class DataJournalV0 extends DataJournal {
         long writtenBytes = 0;
 
         for (int i = 0; i < count; ++i) {
-            final long mark = writer.getLastIndex();
+            final long prevNextIndex = writer.getNextIndex();
             final var request = message.getRequest(i);
 
             final var reprs = CollectionConverters.asJava(request.payload());
-            LOG.trace("{}: append {}/{}: {} items at mark {}", persistenceId, i, count, reprs.size(), mark);
+            LOG.trace("{}: append {}/{}: {} items at mark {}", persistenceId, i, count, reprs.size(), prevNextIndex);
             try {
                 writtenBytes += writePayload(writer, reprs);
             } catch (Exception e) {
-                LOG.warn("{}: failed to write out request {}/{} reverting to {}", persistenceId, i, count, mark, e);
+                LOG.warn("{}: failed to write out request {}/{} reverting to {}", persistenceId, i, count,
+                    prevNextIndex, e);
                 responses.add(e);
-                writer.truncate(mark);
+                writer.reset(prevNextIndex);
                 continue;
             }
             responses.add(null);

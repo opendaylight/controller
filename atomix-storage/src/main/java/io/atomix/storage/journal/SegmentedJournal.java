@@ -175,6 +175,12 @@ public final class SegmentedJournal<E> implements Journal<E> {
   }
 
   @Override
+  public long lastIndex() {
+    final var segment = getLastSegment();
+    return segment != null ? segment.lastIndex() : 0;
+  }
+
+  @Override
   public JournalWriter<E> writer() {
     return writer;
   }

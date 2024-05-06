@@ -63,7 +63,7 @@ final class JournalSegmentWriter {
      *
      * @return The last written index.
      */
-    long getLastIndex() {
+    private long getLastIndex() {
         final var last = index.last();
         return last != null ? last.index() : segment.firstIndex() - 1;
     }

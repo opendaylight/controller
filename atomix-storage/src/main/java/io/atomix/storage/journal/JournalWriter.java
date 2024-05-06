@@ -24,13 +24,6 @@ import org.eclipse.jdt.annotation.NonNull;
  */
 public interface JournalWriter<E> {
     /**
-     * Returns the last written index.
-     *
-     * @return The last written index.
-     */
-    long getLastIndex();
-
-    /**
      * Returns the next index to be written.
      *
      * @return The next index to be written.
