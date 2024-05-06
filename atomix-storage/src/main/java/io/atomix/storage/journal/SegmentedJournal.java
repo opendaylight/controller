@@ -19,13 +19,11 @@ package io.atomix.storage.journal;
 import static java.util.Objects.requireNonNull;
 
 import java.io.File;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Segmented journal.
  */
 public final class SegmentedJournal<E> implements Journal<E> {
-    private final AtomicBoolean open = new AtomicBoolean(true);
     private final SegmentedByteBufJournal journal;
     private final SegmentedJournalWriter<E> writer;
     private final ByteBufMapper<E> mapper;
@@ -63,15 +61,8 @@ public final class SegmentedJournal<E> implements Journal<E> {
     }
 
     @Override
-    public boolean isOpen() {
-        return open.get();
-    }
-
-    @Override
     public void close() {
-        if (open.compareAndExchange(true, false)) {
-            journal.close();
-        }
+        journal.close();
     }
 
     /**
