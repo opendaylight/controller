@@ -22,7 +22,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.nio.file.Path;
@@ -130,13 +129,18 @@ final class JournalSegmentFile {
     }
 
     /**
-     * Map the contents of the file into memory.
+     * Access this file using specified {@link StorageLevel} and maximum entry size.
      *
-     * @return A {@link MappedByteBuffer}
+     * @param level a {@link StorageLevel}
+     * @param maxEntrySize maximum size of stored entry
+     * @return A {@link MappedFileAccess}
      * @throws IOException if an I/O error occurs
      */
-    @NonNull MappedByteBuffer map() throws IOException {
-        return channel().map(MapMode.READ_WRITE, 0, maxSize());
+    @NonNull FileAccess newAccess(final StorageLevel level, final int maxEntrySize) throws IOException {
+        return switch (level) {
+            case DISK -> new DiskFileAccess(this, maxEntrySize);
+            case MAPPED -> new MappedFileAccess(this, maxEntrySize, channel().map(MapMode.READ_WRITE, 0, maxSize()));
+        };
     }
 
     void close() throws IOException {
