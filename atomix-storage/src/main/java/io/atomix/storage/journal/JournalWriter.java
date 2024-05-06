@@ -60,13 +60,6 @@ public interface JournalWriter<E> {
     void reset(long index);
 
     /**
-     * Truncates the log to the given index.
-     *
-     * @param index The index to which to truncate the log.
-     */
-    void truncate(long index);
-
-    /**
      * Flushes written entries to disk.
      */
     void flush();

@@ -46,7 +46,7 @@ final class JournalSegmentWriter {
         maxSegmentSize = segment.file().maxSize();
         this.maxEntrySize = maxEntrySize;
         // adjust lastEntry value
-        reset(0);
+        reset(0, null);
     }
 
     JournalSegmentWriter(final JournalSegmentWriter previous, final FileWriter fileWriter) {
@@ -121,27 +121,34 @@ final class JournalSegmentWriter {
      * Resets the head of the segment to the given index.
      *
      * @param index the index to which to reset the head of the segment
+     * @param fromPosition position of the last known entry
      */
-    void reset(final long index) {
+    void reset(final long index, final @Nullable Position fromPosition) {
         // acquire ownership of cache and make sure reader does not see anything we've done once we're done
         final var fileReader = fileWriter.reader();
         try {
-            resetWithBuffer(fileReader, index);
+            resetWithBuffer(fileReader, index, fromPosition);
         } finally {
             // Make sure reader does not see anything we've done
             fileReader.invalidateCache();
         }
     }
 
-    private void resetWithBuffer(final FileReader fileReader, final long index) {
-        long nextIndex = segment.firstIndex();
+    private void resetWithBuffer(final FileReader fileReader, final long index, final @Nullable Position fromPosition) {
+        long nextIndex;
+        if (fromPosition != null) {
+            nextIndex = fromPosition.index();
+            currentPosition = fromPosition.position();
+        } else {
+            nextIndex = segment.firstIndex();
+            currentPosition = JournalSegmentDescriptor.BYTES;
+        }
 
         // Clear the buffer indexes and acquire ownership of the buffer
-        currentPosition = JournalSegmentDescriptor.BYTES;
         final var reader = new JournalSegmentReader(segment, fileReader, maxEntrySize);
-        reader.setPosition(JournalSegmentDescriptor.BYTES);
+        reader.setPosition(currentPosition);
 
-        while (index == 0 || nextIndex <= index) {
+        while (index == 0 || nextIndex < index) {
             final var buf = reader.readBytes(nextIndex);
             if (buf == null) {
                 break;
@@ -160,21 +167,14 @@ final class JournalSegmentWriter {
      * @param index The index to which to truncate the log.
      */
     void truncate(final long index) {
-        // If the index is greater than or equal to the last index, skip the truncate.
-        if (index >= getLastIndex()) {
+        // If the index is greater than the last index, skip the truncate.
+        if (index > getLastIndex()) {
             return;
         }
 
-        // Truncate the index.
-        this.index.truncate(index);
-
-        if (index < segment.firstIndex()) {
-            // Reset the writer to the first entry.
-            currentPosition = JournalSegmentDescriptor.BYTES;
-        } else {
-            // Reset the writer to the given index.
-            reset(index);
-        }
+        // Truncate the index and reset
+        final var lastPosition = this.index.truncate(index);
+        reset(index, lastPosition);
 
         // Zero the entry header at current channel position.
         fileWriter.writeEmptyHeader(currentPosition);
