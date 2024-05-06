@@ -18,20 +18,27 @@ package io.atomix.storage.journal;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
+import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.MappedByteBuffer;
-import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * An abstraction over how to write a {@link JournalSegmentFile}.
  */
 abstract sealed class FileWriter permits DiskFileWriter, MappedFileWriter {
-    final JournalSegmentFile file;
-    final int maxEntrySize;
+    private final JournalSegmentFile file;
+    private final int maxEntrySize;
 
     FileWriter(final JournalSegmentFile file, final int maxEntrySize) {
         this.file = requireNonNull(file);
         this.maxEntrySize = maxEntrySize;
+    }
+
+    final JournalSegmentFile file() {
+        return file;
+    }
+
+    final int maxEntrySize() {
+        return maxEntrySize;
     }
 
     /**
@@ -63,21 +70,10 @@ abstract sealed class FileWriter permits DiskFileWriter, MappedFileWriter {
     /**
      * Flushes written entries to disk.
      */
-    abstract void flush();
-
-    /**
-     * Closes this writer.
-     */
-    abstract void close();
+    abstract void flush() throws IOException;
 
     @Override
     public final String toString() {
         return MoreObjects.toStringHelper(this).add("path", file.path()).toString();
     }
-
-    abstract @Nullable MappedByteBuffer buffer();
-
-    abstract @Nullable MappedFileWriter toMapped();
-
-    abstract @Nullable DiskFileWriter toDisk();
 }
