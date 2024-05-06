@@ -15,61 +15,72 @@
  */
 package io.atomix.storage.journal.index;
 
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import org.junit.jupiter.api.Test;
 
 /**
  * Sparse journal index test.
  */
-public class SparseJournalIndexTest {
-  @Test
-  public void testSparseJournalIndex() throws Exception {
-    JournalIndex index = new SparseJournalIndex(.2);
-    assertNull(index.lookup(1));
-    index.index(1, 2);
-    assertNull(index.lookup(1));
-    index.index(2, 4);
-    index.index(3, 6);
-    index.index(4, 8);
-    index.index(5, 10);
-    assertEquals(new Position(5, 10), index.lookup(5));
-    index.index(6, 12);
-    index.index(7, 14);
-    index.index(8, 16);
-    assertEquals(new Position(5, 10), index.lookup(8));
-    index.index(9, 18);
-    index.index(10, 20);
-    assertEquals(new Position(10, 20), index.lookup(10));
-    index.truncate(8);
-    assertEquals(new Position(5, 10), index.lookup(8));
-    assertEquals(new Position(5, 10), index.lookup(10));
-    index.truncate(4);
-    assertNull(index.lookup(4));
-    assertNull(index.lookup(8));
+class SparseJournalIndexTest {
+    private final SparseJournalIndex sparseIndex = new SparseJournalIndex(.2);
 
-    index = new SparseJournalIndex(.2);
-    assertNull(index.lookup(100));
-    index.index(101, 2);
-    assertNull(index.lookup(1));
-    index.index(102, 4);
-    index.index(103, 6);
-    index.index(104, 8);
-    index.index(105, 10);
-    assertEquals(new Position(105, 10), index.lookup(105));
-    index.index(106, 12);
-    index.index(107, 14);
-    index.index(108, 16);
-    assertEquals(new Position(105, 10), index.lookup(108));
-    index.index(109, 18);
-    index.index(110, 20);
-    assertEquals(new Position(110, 20), index.lookup(110));
-    index.truncate(108);
-    assertEquals(new Position(105, 10), index.lookup(108));
-    assertEquals(new Position(105, 10), index.lookup(110));
-    index.truncate(104);
-    assertNull(index.lookup(104));
-    assertNull(index.lookup(108));
-  }
+    @Test
+    void firstTest() throws Exception {
+        assertNull(sparseIndex.lookup(1));
+        assertIndex(1, 2);
+        assertNull(sparseIndex.lookup(1));
+        assertIndex(2, 4);
+        assertIndex(3, 6);
+        assertIndex(4, 8);
+        assertIndex(5, 10);
+        assertEquals(new Position(5, 10), sparseIndex.lookup(5));
+        assertIndex(6, 12);
+        assertIndex(7, 14);
+        assertIndex(8, 16);
+        assertEquals(new Position(5, 10), sparseIndex.lookup(8));
+        assertIndex(9, 18);
+        assertIndex(10, 20);
+        assertEquals(new Position(10, 20), sparseIndex.lookup(10));
+        assertEquals(new Position(5, 10), sparseIndex.truncate(8));
+        assertEquals(new Position(5, 10), sparseIndex.lookup(5));
+        assertEquals(new Position(5, 10), sparseIndex.lookup(8));
+        assertEquals(new Position(5, 10), sparseIndex.lookup(10));
+        assertEquals(new Position(5, 10), sparseIndex.truncate(5));
+        assertNull(sparseIndex.lookup(5));
+        assertNull(sparseIndex.lookup(8));
+        assertNull(sparseIndex.truncate(4));
+        assertNull(sparseIndex.lookup(4));
+        assertNull(sparseIndex.lookup(8));
+    }
+
+   @Test
+   void secondTest() {
+        assertNull(sparseIndex.lookup(100));
+        assertIndex(101, 2);
+        assertNull(sparseIndex.lookup(1));
+        assertIndex(102, 4);
+        assertIndex(103, 6);
+        assertIndex(104, 8);
+        assertIndex(105, 10);
+        assertEquals(new Position(105, 10), sparseIndex.lookup(105));
+        assertIndex(106, 12);
+        assertIndex(107, 14);
+        assertIndex(108, 16);
+        assertEquals(new Position(105, 10), sparseIndex.lookup(108));
+        assertIndex(109, 18);
+        assertIndex(110, 20);
+        assertEquals(new Position(110, 20), sparseIndex.lookup(110));
+        assertEquals(new Position(105, 10), sparseIndex.truncate(108));
+        assertEquals(new Position(105, 10), sparseIndex.lookup(108));
+        assertEquals(new Position(105, 10), sparseIndex.lookup(110));
+        assertNull(sparseIndex.truncate(104));
+        assertNull(sparseIndex.lookup(104));
+        assertNull(sparseIndex.lookup(108));
+    }
+
+    private void assertIndex(final long index, final int position) {
+        assertEquals(new Position(index, position), sparseIndex.index(index, position));
+    }
 }
