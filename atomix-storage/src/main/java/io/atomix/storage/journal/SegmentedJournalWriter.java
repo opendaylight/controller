@@ -79,8 +79,7 @@ final class SegmentedJournalWriter<E> implements JournalWriter<E> {
     return new Indexed<>(verifyNotNull(currentWriter.append(bytes)), entry, bytes.readableBytes());
   }
 
-  @Override
-  public void truncate(long index) {
+  private void truncate(long index) {
     if (index < journal.getCommitIndex()) {
       throw new IndexOutOfBoundsException("Cannot truncate committed index: " + index);
     }
