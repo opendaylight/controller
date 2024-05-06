@@ -39,12 +39,12 @@ import org.slf4j.LoggerFactory;
 final class JournalSegment {
   private static final Logger LOG = LoggerFactory.getLogger(JournalSegment.class);
 
+  private final Set<JournalSegmentReader> readers = ConcurrentHashMap.newKeySet();
+  private final AtomicInteger references = new AtomicInteger();
   private final JournalSegmentFile file;
   private final StorageLevel storageLevel;
   private final int maxEntrySize;
   private final JournalIndex journalIndex;
-  private final Set<JournalSegmentReader> readers = ConcurrentHashMap.newKeySet();
-  private final AtomicInteger references = new AtomicInteger();
 
   private JournalSegmentWriter writer;
   private boolean open = true;
@@ -83,7 +83,8 @@ final class JournalSegment {
    * @return The last index in the segment.
    */
   long lastIndex() {
-    return writer.getLastIndex();
+    final var lastPosition = journalIndex.last();
+    return lastPosition != null ? lastPosition.index() : firstIndex() - 1;
   }
 
   /**

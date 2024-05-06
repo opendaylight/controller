@@ -36,13 +36,8 @@ final class SegmentedByteBufWriter implements ByteBufWriter {
     }
 
     @Override
-    public long lastIndex() {
-        return currentWriter.getLastIndex();
-    }
-
-    @Override
     public long nextIndex() {
-        return currentWriter.getNextIndex();
+        return currentWriter.nextIndex();
     }
 
     @Override
