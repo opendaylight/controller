@@ -66,9 +66,9 @@ final class SegmentedJournalWriter<E> implements JournalWriter<E> {
   @Override
   public <T extends E> Indexed<T> append(T entry) {
     final var bytes = journal.serializer().serialize(entry);
-    var index = currentWriter.append(bytes);
-    if (index != null) {
-      return new Indexed<>(index, entry, bytes.readableBytes());
+    final var position = currentWriter.append(bytes);
+    if (position != null) {
+      return new Indexed<>(position, entry, bytes.readableBytes());
     }
 
     //  Slow path: we do not have enough capacity
@@ -76,8 +76,7 @@ final class SegmentedJournalWriter<E> implements JournalWriter<E> {
     currentSegment.releaseWriter();
     currentSegment = journal.getNextSegment();
     currentWriter = currentSegment.acquireWriter();
-    final var newIndex = verifyNotNull(currentWriter.append(bytes));
-    return new Indexed<>(newIndex, entry, bytes.readableBytes());
+    return new Indexed<>(verifyNotNull(currentWriter.append(bytes)), entry, bytes.readableBytes());
   }
 
   @Override
