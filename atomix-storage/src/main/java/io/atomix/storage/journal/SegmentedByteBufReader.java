@@ -125,7 +125,7 @@ sealed class SegmentedByteBufReader implements ByteBufReader permits SegmentedCo
     ByteBuf tryAdvance(final long index) {
         var buf = currentReader.readBytes();
         if (buf == null) {
-            final var nextSegment = journal.nextSegment(currentSegment.firstIndex());
+            final var nextSegment = journal.tryNextSegment(currentSegment.firstIndex());
             if (nextSegment == null || nextSegment.firstIndex() != index) {
                 return null;
             }

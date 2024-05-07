@@ -77,7 +77,7 @@ final class SegmentedByteBufWriter implements ByteBufWriter {
         //  Slow path: we do not have enough capacity
         currentWriter.flush();
         currentSegment.releaseWriter();
-        currentSegment = journal.nextSegment();
+        currentSegment = journal.createNextSegment();
         currentWriter = currentSegment.acquireWriter();
         return verifyNotNull(currentWriter.append(buf));
     }
