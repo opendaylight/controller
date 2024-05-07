@@ -120,6 +120,7 @@
                                     <excludes>
                                         <exclude>META-INF/MANIFEST.MF</exclude>
                                         <exclude>reference.conf</exclude>
+                                        <exclude>akka/remote/transport/**</exclude>
                                     </excludes>
                                 </filter>
                             </filters>
