@@ -370,8 +370,8 @@ public final class SegmentedByteBufJournal implements ByteBufJournal {
      * @return indicates whether a segment can be removed from the journal
      */
     public boolean isCompactable(final long index) {
-        final var segmentEntry = segments.floorEntry(index);
-        return segmentEntry != null && segments.headMap(segmentEntry.getValue().firstIndex()).size() > 0;
+        final var firstIndex = getCompactableIndex(index);
+        return firstIndex != 0 && !segments.headMap(firstIndex).isEmpty();
     }
 
     /**
@@ -393,14 +393,14 @@ public final class SegmentedByteBufJournal implements ByteBufJournal {
      * @param index The index up to which to compact the journal.
      */
     public void compact(final long index) {
-        final var segmentEntry = segments.floorEntry(index);
-        if (segmentEntry != null) {
-            final var compactSegments = segments.headMap(segmentEntry.getValue().firstIndex());
+        final var firstIndex = getCompactableIndex(index);
+        if (firstIndex != 0) {
+            final var compactSegments = segments.headMap(firstIndex);
             if (!compactSegments.isEmpty()) {
                 LOG.debug("{} - Compacting {} segment(s)", name, compactSegments.size());
                 compactSegments.values().forEach(JournalSegment::delete);
                 compactSegments.clear();
-                resetHead(segmentEntry.getValue().firstIndex());
+                resetHead(firstIndex);
             }
         }
     }
