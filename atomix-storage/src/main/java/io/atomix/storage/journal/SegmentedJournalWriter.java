@@ -42,18 +42,6 @@ final class SegmentedJournalWriter<E> implements JournalWriter<E> {
   }
 
   @Override
-  public void reset(long index) {
-    if (index > currentSegment.firstIndex()) {
-      currentSegment.releaseWriter();
-      currentSegment = journal.resetSegments(index);
-      currentWriter = currentSegment.acquireWriter();
-    } else {
-      truncate(index - 1);
-    }
-    journal.resetHead(index);
-  }
-
-  @Override
   public void commit(long index) {
     if (index > journal.getCommitIndex()) {
       journal.setCommitIndex(index);
@@ -81,11 +69,32 @@ final class SegmentedJournalWriter<E> implements JournalWriter<E> {
   }
 
   @Override
+  public void reset(long index) {
+    final long commitIndex = journal.getCommitIndex();
+    if (index <= commitIndex) {
+      // also catches index == 0, which is not a valid next index
+      throw new IndexOutOfBoundsException("Cannot reset to: " + index + ", committed index: " + commitIndex);
+    }
+
+    if (index > currentSegment.firstIndex()) {
+      currentSegment.releaseWriter();
+      currentSegment = journal.resetSegments(index);
+      currentWriter = currentSegment.acquireWriter();
+    } else {
+      checkedTruncate(index - 1);
+    }
+    journal.resetHead(index);
+  }
+
+  @Override
   public void truncate(long index) {
     if (index < journal.getCommitIndex()) {
       throw new IndexOutOfBoundsException("Cannot truncate committed index: " + index);
     }
+    checkedTruncate(index);
+  }
 
+  private void checkedTruncate(long index) {
     // Delete all segments with first indexes greater than the given index.
     while (index < currentSegment.firstIndex() && currentSegment != journal.getFirstSegment()) {
       currentSegment.releaseWriter();
