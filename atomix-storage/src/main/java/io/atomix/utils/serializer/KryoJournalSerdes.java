@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Pool of Kryo instances, with classes pre-registered.
  */
+@Deprecated(forRemoval = true, since="9.0.3")
 final class KryoJournalSerdes implements JournalSerdes, KryoFactory, KryoPool {
     /**
      * Default buffer size used for serialization.

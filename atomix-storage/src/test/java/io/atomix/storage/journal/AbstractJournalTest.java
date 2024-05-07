@@ -45,6 +45,7 @@ import org.junit.runners.Parameterized;
  */
 @RunWith(Parameterized.class)
 public abstract class AbstractJournalTest {
+    @Deprecated(forRemoval = true, since="9.0.3")
     private static final JournalSerdes NAMESPACE = JournalSerdes.builder()
         .register(new TestEntrySerdes(), TestEntry.class)
         .register(new ByteArraySerdes(), byte[].class)

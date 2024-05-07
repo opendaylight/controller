@@ -24,6 +24,7 @@ import com.esotericsoftware.kryo.serializers.JavaSerializer;
 import io.atomix.storage.journal.JournalSerdes.EntryOutput;
 import java.io.IOException;
 
+@Deprecated(forRemoval = true, since="9.0.3")
 final class KryoEntryOutput implements EntryOutput {
     private final Kryo kryo;
     private final Output output;

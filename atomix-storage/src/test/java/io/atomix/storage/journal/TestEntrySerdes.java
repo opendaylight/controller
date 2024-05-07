@@ -20,6 +20,7 @@ import io.atomix.storage.journal.JournalSerdes.EntryOutput;
 import io.atomix.storage.journal.JournalSerdes.EntrySerdes;
 import java.io.IOException;
 
+@Deprecated(forRemoval = true, since="9.0.3")
 final class TestEntrySerdes implements EntrySerdes<TestEntry> {
     private static final ByteArraySerdes BA_SERIALIZER = new ByteArraySerdes();
 
