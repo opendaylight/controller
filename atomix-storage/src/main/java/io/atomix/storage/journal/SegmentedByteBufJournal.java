@@ -51,6 +51,7 @@ public final class SegmentedByteBufJournal implements ByteBufJournal {
     private final boolean flushOnCommit;
     private final @NonNull ByteBufWriter writer;
 
+    // null when closed
     private JournalSegment currentSegment;
     private volatile long commitIndex;
 
@@ -186,8 +187,7 @@ public final class SegmentedByteBufJournal implements ByteBufJournal {
      */
     JournalSegment firstSegment() {
         assertOpen();
-        final var firstEntry = segments.firstEntry();
-        return firstEntry != null ? firstEntry.getValue() : nextSegment();
+        return segments.firstEntry().getValue();
     }
 
     /**
@@ -197,8 +197,7 @@ public final class SegmentedByteBufJournal implements ByteBufJournal {
      */
     JournalSegment lastSegment() {
         assertOpen();
-        final var lastEntry = segments.lastEntry();
-        return lastEntry != null ? lastEntry.getValue() : nextSegment();
+        return segments.lastEntry().getValue();
     }
 
     /**
