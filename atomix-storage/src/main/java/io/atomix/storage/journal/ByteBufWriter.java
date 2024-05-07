@@ -15,7 +15,6 @@
  */
 package io.atomix.storage.journal;
 
-import io.netty.buffer.ByteBuf;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -33,11 +32,12 @@ public interface ByteBufWriter {
     /**
      * Appends an entry to the journal.
      *
-     * @param bytes Data block to append
-     * @return The index of appended data block
+     * @param mapper a {@link ByteBufMapper} to use with entry
+     * @param entry entry to append
+     * @return the on-disk size of the entry
      */
     // FIXME: throws IOException
-    long append(ByteBuf bytes);
+    <T> int append(ByteBufMapper<T> mapper, T entry);
 
     /**
      * Commits entries up to the given index.
