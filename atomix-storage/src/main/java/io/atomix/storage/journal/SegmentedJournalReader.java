@@ -18,11 +18,13 @@ package io.atomix.storage.journal;
 
 import static java.util.Objects.requireNonNull;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * A {@link JournalReader} backed by a {@link ByteBufReader}.
  */
+@NonNullByDefault
 final class SegmentedJournalReader<E> implements JournalReader<E> {
     private final ByteBufMapper<E> mapper;
     private final ByteBufReader reader;
@@ -54,9 +56,10 @@ final class SegmentedJournalReader<E> implements JournalReader<E> {
 
     @Override
     public <T> @Nullable T tryNext(final EntryMapper<E, T> entryMapper) {
-        return reader.tryNext(
-            (index, buf) -> requireNonNull(entryMapper.mapEntry(index, mapper.bytesToObject(buf), buf.readableBytes()))
-        );
+        return reader.tryNext((index, buf) -> {
+            final var size = buf.readableBytes();
+            return requireNonNull(entryMapper.mapEntry(index, mapper.bytesToObject(index, buf), size));
+        });
     }
 
     @Override
