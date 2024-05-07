@@ -16,12 +16,12 @@
  */
 package io.atomix.storage.journal;
 
+import com.esotericsoftware.kryo.KryoException;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import io.atomix.utils.serializer.KryoJournalSerdesBuilder;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
-import io.netty.buffer.Unpooled;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -121,14 +121,18 @@ public interface JournalSerdes {
     default <T> ByteBufMapper<T> toMapper() {
         return new ByteBufMapper<>() {
             @Override
-            public ByteBuf objectToBytes(final T obj) {
-                return Unpooled.wrappedBuffer(serialize(obj));
+            public void objectToBytes(final T obj, final ByteBuf bytes) throws IOException {
+                try {
+                    serialize(obj, bytes.nioBuffer());
+                } catch (KryoException e) {
+                    throw new IOException(e);
+                }
             }
 
             @Override
-            public T bytesToObject(final ByteBuf buf) {
+            public T bytesToObject(final long index, final ByteBuf bytes) {
                 // FIXME: ByteBufUtil creates a copy -- we do not want to do that!
-                return deserialize(ByteBufUtil.getBytes(buf));
+                return deserialize(ByteBufUtil.getBytes(bytes));
             }
         };
     }

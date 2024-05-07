@@ -18,9 +18,12 @@ package io.atomix.storage.journal;
 
 import static java.util.Objects.requireNonNull;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * A {@link JournalWriter} backed by a {@link ByteBufWriter}.
  */
+@NonNullByDefault
 final class SegmentedJournalWriter<E> implements JournalWriter<E> {
     private final ByteBufMapper<E> mapper;
     private final ByteBufWriter writer;
@@ -52,8 +55,8 @@ final class SegmentedJournalWriter<E> implements JournalWriter<E> {
 
     @Override
     public <T extends E> Indexed<T> append(final T entry) {
-        final var buf = mapper.objectToBytes(entry);
-        return new Indexed<>(writer.append(buf), entry, buf.readableBytes());
+        final var index = writer.nextIndex();
+        return new Indexed<>(index, entry, writer.append(mapper, entry));
     }
 
     @Override
