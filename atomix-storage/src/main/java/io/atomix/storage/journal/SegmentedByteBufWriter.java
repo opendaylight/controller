@@ -16,9 +16,8 @@
  */
 package io.atomix.storage.journal;
 
+import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
-
-import io.netty.buffer.ByteBuf;
 
 /**
  * A {@link ByteBufWriter} implementation.
@@ -51,18 +50,18 @@ final class SegmentedByteBufWriter implements ByteBufWriter {
     }
 
     @Override
-    public long append(final ByteBuf bytes) {
-        final var position = currentWriter.append(bytes);
-        return position != null ? position.index() : appendToNextSegment(bytes);
+    public <T> int append(final ByteBufMapper<T> mapper, final T entry) {
+        final var size = currentWriter.append(mapper, entry);
+        return size != null ? size : appendToNextSegment(mapper, entry);
     }
 
     //  Slow path: we do not have enough capacity
-    private long appendToNextSegment(final ByteBuf bytes) {
+    private <T> int appendToNextSegment(final ByteBufMapper<T> mapper, final T entry) {
         currentWriter.flush();
         currentSegment.releaseWriter();
         currentSegment = journal.createNextSegment();
         currentWriter = currentSegment.acquireWriter();
-        return currentWriter.append(bytes).index();
+        return verifyNotNull(currentWriter.append(mapper, entry));
     }
 
     @Override
