@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "78b8012f_d4ec3f53",
+        "filename": "atomix-storage/src/main/java/io/atomix/storage/journal/JournalSegmentWriter.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2024-05-07T17:58:36Z",
+      "side": 1,
+      "message": "unrelated change",
+      "range": {
+        "startLine": 153,
+        "startChar": 13,
+        "endLine": 153,
+        "endChar": 36
+      },
+      "revId": "5708c24d382ce186df3fe82cb35f4a9fbc7d1bb6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
