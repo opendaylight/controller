@@ -16,26 +16,29 @@
 package io.atomix.storage.journal;
 
 import io.netty.buffer.ByteBuf;
+import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * Support for serialization of {@link ByteBufJournal} entries.
+ * Support for mapping of {@link ByteBufJournal} entries to and from {@link ByteBuf}s.
  */
 @NonNullByDefault
 public interface ByteBufMapper<T> {
     /**
-     * Converts an object into a series of bytes in a {@link ByteBuf}.
-     *
-     * @param obj the object
-     * @return resulting buffer
-     */
-    ByteBuf objectToBytes(T obj) ;
-
-    /**
      * Converts the contents of a {@link ByteBuf} to an object.
      *
-     * @param buf buffer to convert
+     * @param index entry index
+     * @param bytes entry bytes
      * @return resulting object
      */
-    T bytesToObject(ByteBuf buf);
+    T bytesToObject(final long index, ByteBuf bytes);
+
+    /**
+     * Converts an object into a series of bytes in the specified {@link ByteBuf}.
+     *
+     * @param obj the object
+     * @param buf target buffer
+     * @throws IOException if an I/O error occurs
+     */
+    void objectToBytes(T obj, ByteBuf buf) throws IOException;
 }
