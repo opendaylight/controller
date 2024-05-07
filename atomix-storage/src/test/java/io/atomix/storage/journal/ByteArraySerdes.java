@@ -20,6 +20,7 @@ import io.atomix.storage.journal.JournalSerdes.EntryOutput;
 import io.atomix.storage.journal.JournalSerdes.EntrySerdes;
 import java.io.IOException;
 
+@Deprecated(forRemoval = true, since="9.0.3")
 final class ByteArraySerdes implements EntrySerdes<byte[]> {
     @Override
     public byte[] read(final EntryInput input) throws IOException {
