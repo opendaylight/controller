@@ -55,7 +55,8 @@ public interface JournalWriter<E> {
     /**
      * Resets the head of the journal to the given index.
      *
-     * @param index the index to which to reset the head of the journal
+     * @param index the next index to write
+     * @throws IndexOutOfBoundsException if the journal cannot be reset to specified index
      */
     // FIXME: reconcile with reader's reset and truncate()
     void reset(long index);
@@ -64,6 +65,7 @@ public interface JournalWriter<E> {
      * Truncates the log to the given index.
      *
      * @param index The index to which to truncate the log.
+     * @throws IndexOutOfBoundsException if the journal cannot be reset to specified index
      */
     // FIXME: reconcile with reset()
     void truncate(long index);

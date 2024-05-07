@@ -41,11 +41,6 @@ final class SegmentedJournalWriter<E> implements JournalWriter<E> {
     }
 
     @Override
-    public void reset(final long index) {
-        writer.reset(index);
-    }
-
-    @Override
     public void commit(final long index) {
         writer.commit(index);
     }
@@ -54,6 +49,11 @@ final class SegmentedJournalWriter<E> implements JournalWriter<E> {
     public <T extends E> Indexed<T> append(final T entry) {
         final var buf = mapper.objectToBytes(entry);
         return new Indexed<>(writer.append(buf), entry, buf.readableBytes());
+    }
+
+    @Override
+    public void reset(final long index) {
+        writer.reset(index);
     }
 
     @Override

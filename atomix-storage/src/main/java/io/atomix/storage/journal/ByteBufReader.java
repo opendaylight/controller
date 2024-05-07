@@ -71,7 +71,7 @@ public interface ByteBufReader extends AutoCloseable {
     /**
      * Resets the reader to the given index.
      *
-     * @param index The index to which to reset the reader
+     * @param index the next index to read
      */
     void reset(long index);
 

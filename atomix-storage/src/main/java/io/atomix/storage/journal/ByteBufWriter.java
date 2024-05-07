@@ -56,9 +56,9 @@ public interface ByteBufWriter {
     /**
      * Resets the head of the journal to the given index.
      *
-     * @param index The index to which to reset the head of the journal
+     * @param index the next index to write
+     * @throws IndexOutOfBoundsException if the journal cannot be reset to specified index
      */
-    // FIXME: reconcile with reader's reset and truncate()
     // FIXME: throws IOException
     void reset(long index);
 
@@ -66,6 +66,7 @@ public interface ByteBufWriter {
      * Truncates the log to the given index.
      *
      * @param index The index to which to truncate the log.
+     * @throws IndexOutOfBoundsException if the journal cannot be reset to specified index
      */
     // FIXME: reconcile with reset()
     // FIXME: throws IOException
