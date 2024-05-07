@@ -6,11 +6,11 @@
         <bundle>mvn:com.typesafe/ssl-config-core_2.13/0.4.3</bundle>
         <bundle>mvn:io.aeron/aeron-client/1.38.1</bundle>
         <bundle>mvn:io.aeron/aeron-driver/1.38.1</bundle>
-        <bundle>mvn:io.netty/netty/3.10.6.Final</bundle>
         <bundle>mvn:org.agrona/agrona/1.15.2</bundle>
         <bundle>mvn:org.opendaylight.controller/repackaged-akka/${project.version}</bundle>
         <bundle>mvn:org.reactivestreams/reactive-streams/1.0.4</bundle>
         <feature>wrap</feature>
         <bundle>wrap:mvn:org.lmdbjava/lmdbjava/0.7.0</bundle>
+        <bundle>wrap:mvn:com.hierynomus/asn-one/0.4.0</bundle>
     </feature>
 </features>
