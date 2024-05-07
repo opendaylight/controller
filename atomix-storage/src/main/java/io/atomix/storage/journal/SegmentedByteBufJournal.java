@@ -309,7 +309,7 @@ public final class SegmentedByteBufJournal implements ByteBufJournal {
 
                 // Add the segment to the segments list.
                 final var segment = new JournalSegment(segmentFile, storageLevel, maxEntrySize, indexDensity);
-                segments.put(segment.firstIndex(), segment);
+                segmentsMap.put(segment.firstIndex(), segment);
             }
         }
 
