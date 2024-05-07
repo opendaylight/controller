@@ -48,6 +48,14 @@ abstract sealed class FileWriter permits DiskFileWriter, MappedFileWriter {
      */
     abstract void writeEmptyHeader(int position);
 
+    /**
+     * Allocate file space. Note that the allocated space may be a buffer disconnected from the file. Any modifications
+     * to the returned buffer need to be committed via {@link #commitWrite(int, ByteBuffer)}.
+     *
+     * @param position position to start from
+     * @param size the size to allocate
+     * @return A {@link ByteBuffer} covering the allocated area
+     */
     abstract ByteBuffer startWrite(int position, int size);
 
     abstract void commitWrite(int position, ByteBuffer entry);
