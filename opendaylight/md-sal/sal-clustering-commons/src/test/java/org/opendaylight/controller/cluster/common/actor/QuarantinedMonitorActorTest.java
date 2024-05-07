@@ -27,7 +27,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import scala.Option;
 
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class QuarantinedMonitorActorTest {
@@ -54,7 +53,6 @@ public class QuarantinedMonitorActorTest {
     @Test
     public void testOnReceiveQuarantined() throws Exception {
         final Throwable t = new RuntimeException("Remote has quarantined this system");
-        final InvalidAssociation cause = InvalidAssociation.apply(LOCAL, REMOTE, t, Option.apply(null));
         final UniqueAddress localAddress = new UniqueAddress(LOCAL, 1);
         final UniqueAddress remoteAddress = new UniqueAddress(REMOTE, 2);
         final ThisActorSystemQuarantinedEvent event = new ThisActorSystemQuarantinedEvent(localAddress, remoteAddress);
@@ -67,7 +65,7 @@ public class QuarantinedMonitorActorTest {
         for (int i = 0; i < 9; i++) {
             final Throwable t =
                     new RuntimeException("The remote system has a UID that has been quarantined. Association aborted.");
-            final InvalidAssociation cause = InvalidAssociation.apply(LOCAL, REMOTE, t, Option.apply(null));
+            final InvalidAssociation cause = InvalidAssociation.apply(LOCAL, REMOTE, t, null);
             final AssociationErrorEvent event =
                     new AssociationErrorEvent(cause, LOCAL, REMOTE, true, Logging.ErrorLevel());
             actor.tell(event, ActorRef.noSender());
@@ -77,7 +75,7 @@ public class QuarantinedMonitorActorTest {
         final Address remote1 = Address.apply("http", "remote1");
         final Throwable t1 =
                 new RuntimeException("The remote system has a UID that has been quarantined. Association aborted.");
-        final InvalidAssociation cause1 = InvalidAssociation.apply(local1, remote1, t1, Option.apply(null));
+        final InvalidAssociation cause1 = InvalidAssociation.apply(local1, remote1, t1, null);
         final AssociationErrorEvent event1 =
                 new AssociationErrorEvent(cause1, local1, remote1, true, Logging.ErrorLevel());
         actor.tell(event1, ActorRef.noSender());
@@ -89,7 +87,7 @@ public class QuarantinedMonitorActorTest {
         final Address local = Address.apply("http", "local");
         final Address remote = Address.apply("http", "remote");
         final Throwable t = new RuntimeException("Another exception");
-        final InvalidAssociation cause = InvalidAssociation.apply(local, remote, t, Option.apply(null));
+        final InvalidAssociation cause = InvalidAssociation.apply(local, remote, t, null);
         final AssociationErrorEvent event = new AssociationErrorEvent(cause, local, remote, true, Logging.ErrorLevel());
         actor.tell(event, ActorRef.noSender());
         verify(callback, never()).apply();

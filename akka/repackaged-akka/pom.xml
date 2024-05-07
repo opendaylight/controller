@@ -55,11 +55,6 @@
             <artifactId>aeron-driver</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty</artifactId>
-            <version>3.10.6.Final</version>
-        </dependency>
-        <dependency>
             <groupId>org.agrona</groupId>
             <artifactId>agrona</artifactId>
         </dependency>
@@ -210,14 +205,24 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
                 <configuration>
+                    <excludeDependencies>
+                        akka.remote.transport.*
+                        akka/remote/transport/**
+                        org/jboss/netty/**
+                    </excludeDependencies>
                     <instructions>
                         <Automatic-Module-Name>org.opendaylight.controller.repackaged.akka</Automatic-Module-Name>
                         <Export-Package>
                             akka.*,
                             com.typesafe.sslconfig.akka.*,
                             jdk.jfr,
+                            !akka.remote.transport.*,
                         </Export-Package>
+                        <Private-Package>
+                            !akka.remote.transport.*,
+                        </Private-Package>
                         <Import-Package>
+                            !akka.remote.transport.*,
                             sun.misc;resolution:=optional,
                             sun.reflect;resolution:=optional,
                             org.fusesource.leveldbjni;resolution:=optional,
