@@ -22,6 +22,30 @@
       },
       "revId": "5aad6f64d05f5fb833ff59817cd2af9d85b11808",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ae345ff7_51e2877a",
+        "filename": "atomix-storage/src/main/java/io/atomix/storage/journal/ByteBufMapper.java",
+        "patchSetId": 19
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2024-05-07T18:44:10Z",
+      "side": 1,
+      "message": "This is coming from CONTROLLER-2115 from the serializer side of things in https://git.opendaylight.org/gerrit/c/controller/+/111217. The effects of that patch will be addressed in in future.",
+      "parentUuid": "56a6b9c5_51b9880a",
+      "range": {
+        "startLine": 32,
+        "startChar": 4,
+        "endLine": 32,
+        "endChar": 34
+      },
+      "revId": "5aad6f64d05f5fb833ff59817cd2af9d85b11808",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }

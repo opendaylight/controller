@@ -24,6 +24,30 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "adab1bdc_c6c287dc",
+        "filename": "atomix-storage/src/main/java/io/atomix/storage/journal/ByteBufReader.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2024-05-07T18:44:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "61548e26_377e965b",
+      "range": {
+        "startLine": 57,
+        "startChar": 4,
+        "endLine": 57,
+        "endChar": 21
+      },
+      "revId": "35f3e8eb74f1825a6fe32b15903b73bdba65fd0a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "9e7a7e44_120db0d2",
@@ -37,6 +61,30 @@
       "writtenOn": "2024-05-07T17:06:16Z",
       "side": 1,
       "message": "this is the sole reader of lastIndex -- so all we really need to do is:\n\nfinal int index \u003d nextIndex;\n\nbefore calling tryNext() and use that index.",
+      "range": {
+        "startLine": 118,
+        "startChar": 52,
+        "endLine": 118,
+        "endChar": 61
+      },
+      "revId": "35f3e8eb74f1825a6fe32b15903b73bdba65fd0a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "046b769b_eac675dd",
+        "filename": "atomix-storage/src/main/java/io/atomix/storage/journal/SegmentedAllByteBufReader.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2024-05-07T18:44:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9e7a7e44_120db0d2",
       "range": {
         "startLine": 118,
         "startChar": 52,
