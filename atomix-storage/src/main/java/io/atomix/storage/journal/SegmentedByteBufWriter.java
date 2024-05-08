@@ -77,30 +77,27 @@ final class SegmentedByteBufWriter implements ByteBufWriter {
         final var prevIndex = index - 1;
         if (prevIndex == lastIndex) {
             // already at the correct position: no-op
-        } else if (prevIndex < lastIndex) {
-            // move back
-            checkedTruncate(prevIndex);
-            journal.resetHead(index);
-        } else {
+            return;
+        }
+        if (prevIndex > lastIndex) {
             // cannot seek past last written entry
             throw new IndexOutOfBoundsException("Cannot reset to: " + index + ", lastIndex: " + lastIndex);
         }
-    }
 
-    private void checkedTruncate(final long index) {
-        // Delete all segments with first indexes greater than the given index.
-        while (index < currentSegment.firstIndex() && currentSegment != journal.firstSegment()) {
+        // move back:
+        // 1. delete all segments with first indexes greater than the given index.
+        while (prevIndex < currentSegment.firstIndex() && currentSegment != journal.firstSegment()) {
             currentSegment.releaseWriter();
             journal.removeSegment(currentSegment);
             currentSegment = journal.lastSegment();
             currentWriter = currentSegment.acquireWriter();
         }
+        // 2. truncate the current index.
+        currentWriter.truncate(prevIndex);
 
-        // Truncate the current index.
-        currentWriter.truncate(index);
-
-        // Reset segment readers.
-        journal.resetTail(index + 1);
+        // 3. reset segment readers.
+        journal.resetTail(index);
+        journal.resetHead(index);
     }
 
     @Override
