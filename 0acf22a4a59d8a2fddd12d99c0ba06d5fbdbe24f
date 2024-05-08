@@ -35,6 +35,42 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "926bbeed_c813ba8c",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 8
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2024-05-08T06:26:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a32dcd78_a73f5984",
+      "revId": "0acf22a4a59d8a2fddd12d99c0ba06d5fbdbe24f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7da9d4bf_fb0a566e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 8
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2024-05-08T06:26:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bfd5a7b0_590fa10d",
+      "revId": "0acf22a4a59d8a2fddd12d99c0ba06d5fbdbe24f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "5140695c_d666eda8",
@@ -48,6 +84,30 @@
       "writtenOn": "2024-05-05T10:54:50Z",
       "side": 1,
       "message": "keep this an abstract class",
+      "range": {
+        "startLine": 24,
+        "startChar": 7,
+        "endLine": 24,
+        "endChar": 16
+      },
+      "revId": "0acf22a4a59d8a2fddd12d99c0ba06d5fbdbe24f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6c817d5d_14f7fd0f",
+        "filename": "atomix-storage/src/main/java/io/atomix/storage/journal/FileReader.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2024-05-08T06:26:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5140695c_d666eda8",
       "range": {
         "startLine": 24,
         "startChar": 7,
