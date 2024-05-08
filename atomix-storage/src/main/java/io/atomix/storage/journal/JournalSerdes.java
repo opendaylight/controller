@@ -21,6 +21,7 @@ import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import io.atomix.utils.serializer.KryoJournalSerdesBuilder;
 import io.netty.buffer.ByteBuf;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -125,7 +126,7 @@ public interface JournalSerdes {
                 try {
                     serialize(obj, buffer);
                 } catch (KryoException e) {
-                    throw new IOException(e);
+                    throw newIOException(e);
                 } finally {
                     // adjust writerIndex so that readableBytes() the bytes written
                     bytes.writerIndex(bytes.readerIndex() + buffer.position());
@@ -135,6 +136,25 @@ public interface JournalSerdes {
             @Override
             public T bytesToObject(final long index, final ByteBuf bytes) {
                 return deserialize(bytes.nioBuffer());
+            }
+
+            private static IOException newIOException(final KryoException cause) {
+                // We may have multiple nested KryoExceptions (intertwined with others, like IOExceptions. Let's find
+                // the deepest KryoException and operate on that.
+                var rootKryo = cause;
+                for (var nextCause = rootKryo.getCause(); nextCause != null; nextCause = nextCause.getCause()) {
+                    if (nextCause instanceof KryoException kryo) {
+                        rootKryo = kryo;
+                    }
+                }
+
+                // It would be nice to have a better way of discerning these, but alas it is what it is.
+                if (rootKryo.getMessage().startsWith("Buffer overflow.")) {
+                    final var ex = new EOFException();
+                    ex.initCause(cause);
+                    return ex;
+                }
+                return new IOException(rootKryo);
             }
         };
     }
