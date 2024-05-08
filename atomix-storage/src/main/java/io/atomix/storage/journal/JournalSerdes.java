@@ -20,7 +20,6 @@ import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import io.atomix.utils.serializer.KryoJournalSerdesBuilder;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import java.io.IOException;
 import java.io.InputStream;
@@ -127,8 +126,7 @@ public interface JournalSerdes {
 
             @Override
             public T bytesToObject(final ByteBuf buf) {
-                // FIXME: ByteBufUtil creates a copy -- we do not want to do that!
-                return deserialize(ByteBufUtil.getBytes(buf));
+                return deserialize(buf.nioBuffer());
             }
         };
     }
