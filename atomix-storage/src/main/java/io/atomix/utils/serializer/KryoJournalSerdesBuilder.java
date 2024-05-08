@@ -25,7 +25,7 @@ import io.atomix.storage.journal.JournalSerdes.EntrySerdes;
 import java.util.ArrayList;
 import java.util.List;
 
-@Deprecated(forRemoval = true, since="9.0.3")
+@Deprecated(forRemoval = true, since = "9.0.3")
 public final class KryoJournalSerdesBuilder implements Builder {
     private final List<RegisteredType> types = new ArrayList<>();
     private ClassLoader classLoader = Thread.currentThread().getContextClassLoader();

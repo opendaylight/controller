@@ -392,6 +392,7 @@ public final class SegmentedByteBufJournal implements ByteBufJournal {
 
     /**
      * Compacts the journal up to the given index.
+     *
      * <p>
      * The semantics of compaction are not specified by this interface.
      *
@@ -507,7 +508,7 @@ public final class SegmentedByteBufJournal implements ByteBufJournal {
         }
 
         /**
-         * Sets the journal directory
+         * Sets the journal directory.
          *
          * @param directory The log directory.
          * @return The builder instance
@@ -548,6 +549,7 @@ public final class SegmentedByteBufJournal implements ByteBufJournal {
 
         /**
          * Sets the journal index density.
+         *
          * <p>
          * The index density is the frequency at which the position of entries written to the journal will be
          * recorded in an in-memory index for faster seeking.
@@ -564,6 +566,7 @@ public final class SegmentedByteBufJournal implements ByteBufJournal {
 
         /**
          * Enables flushing buffers to disk when entries are committed to a segment.
+         *
          * <p>
          * When flush-on-commit is enabled, log entry buffers will be automatically flushed to disk each time
          * an entry is committed in a given segment.
@@ -576,6 +579,7 @@ public final class SegmentedByteBufJournal implements ByteBufJournal {
 
         /**
          * Sets whether to flush buffers to disk when entries are committed to a segment.
+         *
          * <p>
          * When flush-on-commit is enabled, log entry buffers will be automatically flushed to disk each time
          * an entry is committed in a given segment.

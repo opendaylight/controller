@@ -15,52 +15,46 @@
  */
 package io.atomix.utils.serializer;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+
 import com.esotericsoftware.kryo.io.Output;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+class KryoOutputPoolTest {
+    private final KryoOutputPool kryoOutputPool = new KryoOutputPool();
 
-public class KryoOutputPoolTest {
+    @Test
+    void discardOutput() {
+        final var result = new Output[2];
+        kryoOutputPool.run(output -> {
+            result[0] = output;
+            return null;
+        }, KryoOutputPool.MAX_POOLED_BUFFER_SIZE + 1);
+        kryoOutputPool.run(output -> {
+            result[1] = output;
+            return null;
+        }, 0);
+        assertNotSame(result[0], result[1]);
+    }
 
-  private KryoOutputPool kryoOutputPool;
-
-  @Before
-  public void setUp() throws Exception {
-    kryoOutputPool = new KryoOutputPool();
-  }
-
-  @Test
-  public void discardOutput() {
-    final Output[] result = new Output[2];
-    kryoOutputPool.run(output -> {
-      result[0] = output;
-      return null;
-    }, KryoOutputPool.MAX_POOLED_BUFFER_SIZE + 1);
-    kryoOutputPool.run(output -> {
-      result[1] = output;
-      return null;
-    }, 0);
-    assertTrue(result[0] != result[1]);
-  }
-
-  @Test
-  public void recycleOutput() {
-    final ByteArrayOutput[] result = new ByteArrayOutput[2];
-    kryoOutputPool.run(output -> {
-      output.writeInt(1);
-      assertEquals(Integer.BYTES, output.position());
-      result[0] = output;
-      return null;
-    }, 0);
-    assertEquals(0, result[0].position());
-    assertEquals(0, result[0].getByteArrayOutputStream().size());
-    kryoOutputPool.run(output -> {
-      assertEquals(0, output.position());
-      result[1] = output;
-      return null;
-    }, 0);
-    assertTrue(result[0] == result[1]);
-  }
+    @Test
+    void recycleOutput() {
+        final var result = new ByteArrayOutput[2];
+        kryoOutputPool.run(output -> {
+            output.writeInt(1);
+            assertEquals(Integer.BYTES, output.position());
+            result[0] = output;
+            return null;
+        }, 0);
+        assertEquals(0, result[0].position());
+        assertEquals(0, result[0].getByteArrayOutputStream().size());
+        kryoOutputPool.run(output -> {
+            assertEquals(0, output.position());
+            result[1] = output;
+            return null;
+        }, 0);
+        assertSame(result[0], result[1]);
+    }
 }

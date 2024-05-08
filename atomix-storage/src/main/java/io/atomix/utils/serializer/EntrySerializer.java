@@ -27,7 +27,7 @@ import com.google.common.base.MoreObjects;
 import io.atomix.storage.journal.JournalSerdes.EntrySerdes;
 import java.io.IOException;
 
-@Deprecated(forRemoval = true, since="9.0.3")
+@Deprecated(forRemoval = true, since = "9.0.3")
 final class EntrySerializer<T> extends Serializer<T> {
     // Note: uses identity to create things in Kryo, hence we want an instance for every serdes we wrap
     private final JavaSerializer javaSerializer = new JavaSerializer();

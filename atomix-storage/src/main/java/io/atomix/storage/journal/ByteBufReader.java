@@ -56,7 +56,7 @@ public interface ByteBufReader extends AutoCloseable {
     long nextIndex();
 
     /**
-     * Try to move to the next binary data block
+     * Try to move to the next binary data block.
      *
      * @param entryMapper callback to be invoked on binary data
      * @return processed binary data, or {@code null}
