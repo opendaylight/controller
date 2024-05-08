@@ -25,6 +25,7 @@ import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  * Segment file utility.
@@ -142,7 +143,8 @@ final class JournalSegmentFile {
      * @return A {@link MappedFileAccess}
      * @throws IOException if an I/O error occurs
      */
-    @NonNull FileAccess newAccess(final StorageLevel level, final int maxEntrySize) throws IOException {
+    @NonNullByDefault
+    FileAccess newAccess(final StorageLevel level, final int maxEntrySize) throws IOException {
         return switch (level) {
             case DISK -> new DiskFileAccess(this, maxEntrySize);
             case MAPPED -> MappedFileAccess.of(this, maxEntrySize);

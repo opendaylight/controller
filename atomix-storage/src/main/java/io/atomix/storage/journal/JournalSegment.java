@@ -27,6 +27,7 @@ import java.nio.file.Files;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
@@ -59,6 +60,7 @@ final class JournalSegment {
     }
   }
 
+  @NonNullByDefault
   record Inactive(int position) implements State {
     Active activate(final JournalSegment segment) throws IOException {
       final var access = segment.file.newAccess(segment.storageLevel, segment.maxEntrySize);
@@ -70,10 +72,10 @@ final class JournalSegment {
 
   private final Set<JournalSegmentReader> readers = ConcurrentHashMap.newKeySet();
   private final AtomicInteger references = new AtomicInteger();
-  private final JournalSegmentFile file;
-  private final StorageLevel storageLevel;
+  private final @NonNull JournalSegmentFile file;
+  private final @NonNull StorageLevel storageLevel;
+  private final @NonNull JournalIndex journalIndex;
   private final int maxEntrySize;
-  private final JournalIndex journalIndex;
 
   private State state;
   private boolean open = true;
