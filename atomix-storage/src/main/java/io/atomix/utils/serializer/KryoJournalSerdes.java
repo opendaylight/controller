@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Pool of Kryo instances, with classes pre-registered.
  */
-@Deprecated(forRemoval = true, since="9.0.3")
+@Deprecated(forRemoval = true, since = "9.0.3")
 final class KryoJournalSerdes implements JournalSerdes, KryoFactory, KryoPool {
     /**
      * Default buffer size used for serialization.
@@ -227,20 +227,20 @@ final class KryoJournalSerdes implements JournalSerdes, KryoFactory, KryoPool {
         }
 
         for (Class<?> type : types) {
-            Registration r = null;
+            Registration reg = null;
             if (serializer == null) {
-                r = kryo.register(type, id);
+                reg = kryo.register(type, id);
             } else if (type.isInterface()) {
                 kryo.addDefaultSerializer(type, serializer);
             } else {
-                r = kryo.register(type, serializer, id);
+                reg = kryo.register(type, serializer, id);
             }
-            if (r != null) {
-                if (r.getId() != id) {
+            if (reg != null) {
+                if (reg.getId() != id) {
                     LOGGER.debug("{}: {} already registered as {}. Skipping {}.",
-                        friendlyName, r.getType(), r.getId(), id);
+                        friendlyName, reg.getType(), reg.getId(), id);
                 }
-                LOGGER.trace("{} registered as {}", r.getType(), r.getId());
+                LOGGER.trace("{} registered as {}", reg.getType(), reg.getId());
             }
         }
     }

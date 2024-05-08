@@ -45,7 +45,7 @@ import org.junit.runners.Parameterized;
  */
 @RunWith(Parameterized.class)
 public abstract class AbstractJournalTest {
-    @Deprecated(forRemoval = true, since="9.0.3")
+    @Deprecated(forRemoval = true, since = "9.0.3")
     private static final JournalSerdes NAMESPACE = JournalSerdes.builder()
         .register(new TestEntrySerdes(), TestEntry.class)
         .register(new ByteArraySerdes(), byte[].class)
@@ -101,9 +101,9 @@ public abstract class AbstractJournalTest {
 
     @Test
     public void testWriteRead() throws Exception {
-        try (Journal<TestEntry> journal = createJournal()) {
-            JournalWriter<TestEntry> writer = journal.writer();
-            JournalReader<TestEntry> reader = journal.openReader(1);
+        try (var journal = createJournal()) {
+            var writer = journal.writer();
+            var reader = journal.openReader(1);
 
             // Append a couple entries.
             assertEquals(1, writer.getNextIndex());
@@ -219,30 +219,30 @@ public abstract class AbstractJournalTest {
 
     @Test
     public void testTruncateRead() throws Exception {
-        int i = 10;
+        final int cnt = 10;
         try (Journal<TestEntry> journal = createJournal()) {
             JournalWriter<TestEntry> writer = journal.writer();
             JournalReader<TestEntry> reader = journal.openReader(1);
 
-            for (int j = 1; j <= i; j++) {
-                assertEquals(j, writer.append(new TestEntry(32)).index());
+            for (int i = 1; i <= cnt; i++) {
+                assertEquals(i, writer.append(new TestEntry(32)).index());
             }
 
-            for (int j = 1; j <= i - 2; j++) {
-                assertEquals(j, assertNext(reader).index());
+            for (int i = 1; i <= cnt - 2; i++) {
+                assertEquals(i, assertNext(reader).index());
             }
 
-            writer.reset(i - 1);
+            writer.reset(cnt - 1);
 
             assertNoNext(reader);
-            assertEquals(i - 1, writer.append(new TestEntry(32)).index());
-            assertEquals(i, writer.append(new TestEntry(32)).index());
+            assertEquals(cnt - 1, writer.append(new TestEntry(32)).index());
+            assertEquals(cnt, writer.append(new TestEntry(32)).index());
 
             var entry = assertNext(reader);
-            assertEquals(i - 1, entry.index());
+            assertEquals(cnt - 1, entry.index());
             entry = assertNext(reader);
             assertNotNull(entry);
-            assertEquals(i, entry.index());
+            assertEquals(cnt, entry.index());
         }
     }
 

@@ -27,11 +27,11 @@ import org.eclipse.jdt.annotation.NonNull;
  */
 record SegmentEntry(int checksum, @NonNull ByteBuffer bytes) {
     /**
-     * The size of the header, comprising of:
+     * The size of the header. It is comprised of
      * <ul>
      *   <li>32-bit signed entry length</li>
      *   <li>32-bit unsigned CRC32 checksum</li>
-     * </li>
+     * </ul>
      */
     static final int HEADER_BYTES = Integer.BYTES + Integer.BYTES;
 

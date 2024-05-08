@@ -25,35 +25,32 @@ import java.util.Arrays;
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
 public class TestEntry {
-  private final byte[] bytes;
+    private final byte[] bytes;
 
-  public TestEntry(int size) {
-    this(new byte[size]);
-  }
+    public TestEntry(final int size) {
+        this(new byte[size]);
+    }
 
-  public TestEntry(byte[] bytes) {
-    this.bytes = bytes;
-  }
+    public TestEntry(final byte[] bytes) {
+        this.bytes = bytes;
+    }
 
-  public byte[] bytes() {
-    return bytes;
-  }
+    public byte[] bytes() {
+        return bytes;
+    }
 
-  @Override
-  public boolean equals(Object obj) {
-    return this == obj || obj instanceof TestEntry testEntry && Arrays.equals(bytes, testEntry.bytes);
-  }
+    @Override
+    public boolean equals(final Object obj) {
+        return this == obj || obj instanceof TestEntry other && Arrays.equals(bytes, other.bytes);
+    }
 
-  @Override
-  public int hashCode() {
-    return Arrays.hashCode(bytes);
-  }
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(bytes);
+    }
 
-  @Override
-  public String toString() {
-    return toStringHelper(this)
-        .add("length", bytes.length)
-        .add("hash", Arrays.hashCode(bytes))
-        .toString();
-  }
+    @Override
+    public String toString() {
+        return toStringHelper(this).add("length", bytes.length).add("hash", Arrays.hashCode(bytes)).toString();
+    }
 }
