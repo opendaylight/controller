@@ -146,7 +146,8 @@ final class JournalSegmentFile {
     @NonNullByDefault
     FileAccess newAccess(final StorageLevel level, final int maxEntrySize) throws IOException {
         return switch (level) {
-            case DISK -> new DiskFileAccess(this, maxEntrySize);
+            case DIRECT -> DiskFileAccess.direct(this, maxEntrySize);
+            case DISK -> DiskFileAccess.heap(this, maxEntrySize);
             case MAPPED -> MappedFileAccess.of(this, maxEntrySize);
         };
     }

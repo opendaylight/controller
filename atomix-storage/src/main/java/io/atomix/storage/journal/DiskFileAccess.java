@@ -15,21 +15,62 @@
  */
 package io.atomix.storage.journal;
 
+import static java.util.Objects.requireNonNull;
+
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * {@link FileAccess} for {@link StorageLevel#DISK}.
+ * {@link FileAccess} for {@link StorageLevel#DISK} and {@link StorageLevel#DIRECT}.
  */
 @NonNullByDefault
 final class DiskFileAccess extends FileAccess {
+    /**
+     * Lambda helper for buffer allocator method, such as {@link ByteBufAllocator#heapBuffer(int, int)}.
+     */
+    @FunctionalInterface
+    private interface BufferSupplier {
+        /**
+         * Invoke the method.
+         *
+         * @param allocator allocator to invoke on
+         * @param initialCapacity initial capacity
+         * @param maxCapacity maximum capacity
+         * @return A {@link ByteBuf}
+         */
+        ByteBuf getBuffer(ByteBufAllocator allocator, int initialCapacity, int maxCapacity);
+
+        /**
+         * Convenience method to allocate a fixed buffer.
+         *
+         * @param allocator allocator to invoke on
+         * @param size initial and maximum capacity
+         * @return A {@link ByteBuf}
+         */
+        default ByteBuf getFixedBuffer(final ByteBufAllocator allocator, final int size) {
+            return getBuffer(allocator, size, size);
+        }
+    }
+
     /**
      * Just do not bother with IO smaller than this many bytes.
      */
     private static final int MIN_IO_SIZE = 8192;
 
-    DiskFileAccess(final JournalSegmentFile file, final int maxEntrySize) {
+    private final BufferSupplier bufferSupplier;
+
+    private DiskFileAccess(final JournalSegmentFile file, final int maxEntrySize, final BufferSupplier method) {
         super(file, maxEntrySize);
+        this.bufferSupplier = requireNonNull(method);
+    }
+
+    static DiskFileAccess direct(final JournalSegmentFile file, final int maxEntrySize) {
+        return new DiskFileAccess(file, maxEntrySize, ByteBufAllocator::directBuffer);
+    }
+
+    static DiskFileAccess heap(final JournalSegmentFile file, final int maxEntrySize) {
+        return new DiskFileAccess(file, maxEntrySize, ByteBufAllocator::heapBuffer);
     }
 
     @Override
@@ -47,9 +88,8 @@ final class DiskFileAccess extends FileAccess {
         // No-op
     }
 
-    private static ByteBuf allocateBuffer(final JournalSegmentFile file, final int maxEntrySize) {
-        final var bufferSize = chooseBufferSize(maxEntrySize, file.maxSize());
-        return file.allocator().heapBuffer(bufferSize, bufferSize);
+    private ByteBuf allocateBuffer(final JournalSegmentFile file, final int maxEntrySize) {
+        return bufferSupplier.getFixedBuffer(file.allocator(), chooseBufferSize(maxEntrySize, file.maxSize()));
     }
 
     private static int chooseBufferSize(final int maxEntrySize, final int maxSegmentSize) {
