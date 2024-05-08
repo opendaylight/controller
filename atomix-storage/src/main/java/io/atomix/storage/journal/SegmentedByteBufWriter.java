@@ -67,20 +67,24 @@ final class SegmentedByteBufWriter implements ByteBufWriter {
 
     @Override
     public void reset(final long index) {
-        final long commitIndex = journal.getCommitIndex();
+        final var commitIndex = journal.getCommitIndex();
         if (index <= commitIndex) {
-          // also catches index == 0, which is not a valid next index
-          throw new IndexOutOfBoundsException("Cannot reset to: " + index + ", committed index: " + commitIndex);
+            // also catches index == 0, which is not a valid next index
+            throw new IndexOutOfBoundsException("Cannot reset to: " + index + ", committed index: " + commitIndex);
         }
 
-        if (index > currentSegment.firstIndex()) {
-            currentSegment.releaseWriter();
-            currentSegment = journal.resetSegments(index);
-            currentWriter = currentSegment.acquireWriter();
+        final var lastIndex = currentSegment.lastIndex();
+        final var prevIndex = index - 1;
+        if (prevIndex == lastIndex) {
+            // already at the correct position: no-op
+        } else if (prevIndex < lastIndex) {
+            // move back
+            checkedTruncate(prevIndex);
+            journal.resetHead(index);
         } else {
-            checkedTruncate(index - 1);
+            // cannot seek past last written entry
+            throw new IndexOutOfBoundsException("Cannot reset to: " + index + ", lastIndex: " + lastIndex);
         }
-        journal.resetHead(index);
     }
 
     @Override

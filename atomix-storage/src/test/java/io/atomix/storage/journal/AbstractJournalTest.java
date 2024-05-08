@@ -180,9 +180,15 @@ public abstract class AbstractJournalTest {
             assertEquals(1, writer.getNextIndex());
             writer.append(ENTRY);
             writer.append(ENTRY);
+
             writer.reset(1);
             assertEquals(0, journal.lastIndex());
             assertEquals(1, writer.getNextIndex());
+            // Repeat to assert this is a no-op
+            writer.reset(1);
+            assertEquals(0, journal.lastIndex());
+            assertEquals(1, writer.getNextIndex());
+
             writer.append(ENTRY);
 
             var indexed = assertNext(reader);
