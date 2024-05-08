@@ -24,6 +24,7 @@ import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * Stores information about a {@link JournalSegment} of the log.
+ *
  * <p>
  * The segment descriptor manages metadata related to a single segment of the log. Descriptors are stored within the
  * first {@code 64} bytes of each segment in the following order:
@@ -93,6 +94,7 @@ public record JournalSegmentDescriptor(
 
     /**
      * Returns the segment version.
+     *
      * <p>
      * Versions are monotonically increasing starting at {@code 1}.
      *
@@ -104,6 +106,7 @@ public record JournalSegmentDescriptor(
 
     /**
      * Returns the segment identifier.
+     *
      * <p>
      * The segment ID is a monotonically increasing number within each log. Segments with in-sequence identifiers should
      * contain in-sequence indexes.
@@ -116,9 +119,10 @@ public record JournalSegmentDescriptor(
 
     /**
      * Returns the segment index.
+     *
      * <p>
-     * The index indicates the index at which the first entry should be written to the segment. Indexes are monotonically
-     * increasing thereafter.
+     * The index indicates the index at which the first entry should be written to the segment. Indexes are
+     * monotonically increasing thereafter.
      *
      * @return The segment index.
      */
@@ -146,10 +150,11 @@ public record JournalSegmentDescriptor(
 
     /**
      * Returns last time the segment was updated.
+     *
      * <p>
-     * When the segment is first constructed, the {@code updated} time is {@code 0}. Once all entries in the segment have
-     * been committed, the {@code updated} time should be set to the current time. Log compaction should not result in a
-     * change to {@code updated}.
+     * When the segment is first constructed, the {@code updated} time is {@code 0}. Once all entries in the segment
+     * have been committed, the {@code updated} time should be set to the current time. Log compaction should not result
+     * in a change to {@code updated}.
      *
      * @return The last time the segment was updated in terms of milliseconds since the epoch.
      */
@@ -158,7 +163,7 @@ public record JournalSegmentDescriptor(
     }
 
     /**
-     * Returns this segment as an array of bytes
+     * Returns this segment as an array of bytes.
      *
      * @return bytes
      */
@@ -177,6 +182,7 @@ public record JournalSegmentDescriptor(
 
     /**
      * Returns a descriptor builder.
+     *
      * <p>
      * The descriptor builder will write segment metadata to a {@code 48} byte in-memory buffer.
      *
@@ -260,7 +266,7 @@ public record JournalSegmentDescriptor(
         }
 
         /**
-         * Sets updated timestamp;
+         * Sets updated timestamp.
          *
          * @param updated Epoch milliseconds
          * @return The segment descriptor builder.

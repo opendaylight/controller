@@ -55,8 +55,8 @@ class SparseJournalIndexTest {
         assertNull(sparseIndex.lookup(8));
     }
 
-   @Test
-   void secondTest() {
+    @Test
+    void secondTest() {
         assertNull(sparseIndex.lookup(100));
         assertIndex(101, 2);
         assertNull(sparseIndex.lookup(1));

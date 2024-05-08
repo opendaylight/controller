@@ -72,6 +72,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
 
     /**
      * Compacts the journal up to the given index.
+     *
      * <p>
      * The semantics of compaction are not specified by this interface.
      *
@@ -111,6 +112,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
 
         /**
          * Sets the journal storage level.
+         *
          * <p>
          * The storage level indicates how individual entries will be persisted in the journal.
          *
@@ -124,6 +126,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
 
         /**
          * Sets the journal storage directory.
+         *
          * <p>
          * The journal will write segment files into the provided directory.
          *
@@ -138,6 +141,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
 
         /**
          * Sets the journal storage directory.
+         *
          * <p>
          * The journal will write segment files into the provided directory.
          *
@@ -146,7 +150,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
          * @throws NullPointerException If the {@code directory} is {@code null}
          */
         public Builder<E> withDirectory(final File directory) {
-             byteJournalBuilder.withDirectory(directory);
+            byteJournalBuilder.withDirectory(directory);
             return this;
         }
 
@@ -157,7 +161,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
          * @return The journal builder.
          * @deprecated due to serialization refactoring, use {@link Builder#withMapper(ByteBufMapper)} instead
          */
-        @Deprecated(forRemoval = true, since="9.0.3")
+        @Deprecated(forRemoval = true, since = "9.0.3")
         public Builder<E> withNamespace(final JournalSerdes namespace) {
             return withMapper(requireNonNull(namespace, "namespace cannot be null").toMapper());
         }
@@ -175,10 +179,12 @@ public final class SegmentedJournal<E> implements Journal<E> {
 
         /**
          * Sets the maximum segment size in bytes.
+         *
          * <p>
          * The maximum segment size dictates when journal should roll over to new segments. As entries are written
          * to a journal segment, once the size of the segment surpasses the configured maximum segment size, the
          * journal will create a new segment and append new entries to that segment.
+         *
          * <p>
          * By default, the maximum segment size is 32M.
          *
@@ -218,6 +224,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
 
         /**
          * Sets the journal index density.
+         *
          * <p>
          * The index density is the frequency at which the position of entries written to the journal will be recorded
          * in an in-memory index for faster seeking.
@@ -233,6 +240,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
 
         /**
          * Enables flushing buffers to disk when entries are committed to a segment.
+         *
          * <p>
          * When flush-on-commit is enabled, log entry buffers will be automatically flushed to disk each time an
          * entry is committed in a given segment.
@@ -245,6 +253,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
 
         /**
          * Enables flushing buffers to disk when entries are committed to a segment.
+         *
          * <p>
          * When flush-on-commit is enabled, log entry buffers will be automatically flushed to disk each time an
          * entry is committed in a given segment.

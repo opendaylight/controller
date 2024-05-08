@@ -70,7 +70,7 @@ final class JournalSegmentReader {
     }
 
     /**
-     * Reads the next binary data block
+     * Reads the next binary data block.
      *
      * @return The binary data, or {@code null}
      */

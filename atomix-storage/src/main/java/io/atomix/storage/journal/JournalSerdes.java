@@ -31,7 +31,7 @@ import java.nio.ByteBuffer;
  *
  * @deprecated due to dependency on outdated Kryo library, {@link ByteBufMapper} to be used instead.
  */
-@Deprecated(forRemoval = true, since="9.0.3")
+@Deprecated(forRemoval = true, since = "9.0.3")
 public interface JournalSerdes {
     /**
      * Serializes given object to byte array.
@@ -91,7 +91,7 @@ public interface JournalSerdes {
      * @param <T>    deserialized Object type
      * @return deserialized Object
      */
-    <T> T deserialize(final ByteBuffer buffer);
+    <T> T deserialize(ByteBuffer buffer);
 
     /**
      * Deserializes given InputStream to an Object.
@@ -110,7 +110,7 @@ public interface JournalSerdes {
      * @param bufferSize size of the buffer in front of the stream
      * @return deserialized Object
      */
-    <T> T deserialize(final InputStream stream, final int bufferSize);
+    <T> T deserialize(InputStream stream, int bufferSize);
 
     /**
      * Returns a {@link ByteBufMapper} backed by this object.
@@ -161,6 +161,7 @@ public interface JournalSerdes {
 
         /**
          * Registers serializer for the given set of classes.
+         *
          * <p>
          * When multiple classes are registered with an explicitly provided serializer, the namespace guarantees
          * all instances will be serialized with the same type ID.

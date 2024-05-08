@@ -15,29 +15,26 @@
  */
 package io.atomix.storage.journal;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.File;
-
-import org.junit.Test;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Test;
 
 /**
  * Journal segment file test.
  */
-public class JournalSegmentFileTest {
+class JournalSegmentFileTest {
+    @Test
+    void testIsSegmentFile() {
+        assertTrue(JournalSegmentFile.isSegmentFile("foo", "foo-1.log"));
+        assertFalse(JournalSegmentFile.isSegmentFile("foo", "bar-1.log"));
+        assertTrue(JournalSegmentFile.isSegmentFile("foo", "foo-1-1.log"));
+    }
 
-  @Test
-  public void testIsSegmentFile() throws Exception {
-    assertTrue(JournalSegmentFile.isSegmentFile("foo", "foo-1.log"));
-    assertFalse(JournalSegmentFile.isSegmentFile("foo", "bar-1.log"));
-    assertTrue(JournalSegmentFile.isSegmentFile("foo", "foo-1-1.log"));
-  }
-
-  @Test
-  public void testCreateSegmentFile() throws Exception {
-    File file = JournalSegmentFile.createSegmentFile("foo", new File(System.getProperty("user.dir")), 1);
-    assertTrue(JournalSegmentFile.isSegmentFile("foo", file));
-  }
-
+    @Test
+    void testCreateSegmentFile() {
+        final var file = JournalSegmentFile.createSegmentFile("foo", new File(System.getProperty("user.dir")), 1);
+        assertTrue(JournalSegmentFile.isSegmentFile("foo", file));
+    }
 }

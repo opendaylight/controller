@@ -17,7 +17,7 @@ package io.atomix.utils.serializer;
 
 import static java.util.Objects.requireNonNull;
 
-@Deprecated(forRemoval = true, since="9.0.3")
+@Deprecated(forRemoval = true, since = "9.0.3")
 record RegisteredType(EntrySerializer<?> serializer, Class<?>[] types) {
     RegisteredType {
         requireNonNull(serializer);
