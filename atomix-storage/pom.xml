@@ -29,7 +29,6 @@
   <packaging>bundle</packaging>
 
   <properties>
-    <odlparent.checkstyle.skip>true</odlparent.checkstyle.skip>
     <odlparent.spotbugs.enforce>false</odlparent.spotbugs.enforce>
   </properties>
 
