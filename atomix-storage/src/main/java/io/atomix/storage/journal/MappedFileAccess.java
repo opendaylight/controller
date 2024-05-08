@@ -18,7 +18,6 @@ package io.atomix.storage.journal;
 import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
-import java.nio.channels.FileChannel.MapMode;
 import org.eclipse.jdt.annotation.NonNull;
 
 /**
@@ -35,8 +34,7 @@ final class MappedFileAccess extends FileAccess {
 
     static @NonNull MappedFileAccess of(final @NonNull JournalSegmentFile file, final int maxEntrySize)
             throws IOException {
-        return new MappedFileAccess(file, maxEntrySize,
-            new MappedByteBuf(file.allocator(), file.channel().map(MapMode.READ_WRITE, 0, file.maxSize())));
+        return new MappedFileAccess(file, maxEntrySize, MappedByteBuf.of(file));
     }
 
     @Override

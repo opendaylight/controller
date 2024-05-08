@@ -21,16 +21,18 @@ import io.netty.buffer.AbstractReferenceCountedByteBuf;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.ByteBufUtil;
-import io.netty.util.internal.PlatformDependent;
 import java.io.Flushable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.channels.FileChannel.MapMode;
 import java.nio.channels.GatheringByteChannel;
 import java.nio.channels.ScatteringByteChannel;
 
@@ -39,21 +41,32 @@ import java.nio.channels.ScatteringByteChannel;
  */
 final class MappedByteBuf extends AbstractReferenceCountedByteBuf implements Flushable {
     private final ByteBufAllocator alloc;
+    private final MemorySegment segment;
+    private final ByteBuffer byteBuffer;
+    private final Arena arena;
 
-    private MappedByteBuffer byteBuffer;
     private ByteBuffer internalNio;
 
-    MappedByteBuf(final ByteBufAllocator alloc, final MappedByteBuffer byteBuffer) {
+    private MappedByteBuf(final ByteBufAllocator alloc, final Arena arena, final MemorySegment segment,
+            final ByteBuffer byteBuffer) {
         super(byteBuffer.limit());
         this.alloc = requireNonNull(alloc);
+        this.arena = requireNonNull(arena);
+        this.segment = requireNonNull(segment);
         this.byteBuffer = requireNonNull(byteBuffer);
+    }
+
+    static MappedByteBuf of(final JournalSegmentFile file) throws IOException {
+        final var arena = Arena.ofShared();
+        final var segment = file.channel().map(MapMode.READ_WRITE, 0, file.maxSize(), arena);
+        return new MappedByteBuf(file.allocator(), arena, segment, segment.asByteBuffer());
     }
 
     @Override
     public void flush() throws IOException {
         ensureAccessible();
         try {
-            byteBuffer.force();
+            segment.force();
         } catch (UncheckedIOException e) {
             throw e.getCause();
         }
@@ -61,11 +74,7 @@ final class MappedByteBuf extends AbstractReferenceCountedByteBuf implements Flu
 
     @Override
     protected void deallocate() {
-        final var local = byteBuffer;
-        if (local != null) {
-            byteBuffer = null;
-            PlatformDependent.freeDirectBuffer(local);
-        }
+        arena.close();
     }
 
     @Override
