@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4ea2bf83_18be56ca",
+        "filename": "atomix-storage/src/main/java/io/atomix/storage/journal/MappedFileWriter.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2024-05-08T06:29:16Z",
+      "side": 1,
+      "message": "It seems we are trying to avoid an exception. For DiskFileWriter we perform a different check. Perhaps the same check would work here?",
+      "range": {
+        "startLine": 88,
+        "startChar": 15,
+        "endLine": 88,
+        "endChar": 86
+      },
+      "revId": "4ed02ad61a07f177006c1bedb21b3ddbc64fec11",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
