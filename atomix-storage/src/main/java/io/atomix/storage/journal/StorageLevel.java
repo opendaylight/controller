@@ -20,11 +20,15 @@ package io.atomix.storage.journal;
  */
 public enum StorageLevel {
     /**
-     * Stores data in a memory-mapped file.
+     * Stores data on disk, performs I/O using a memory-mapped region.
      */
     MAPPED,
     /**
-     * Stores data on disk.
+     * Stores data on disk, performs I/O using a sliding heap buffer.
      */
-    DISK
+    DISK,
+    /**
+     * Stores data on dist, performs I/O using a sliding direct buffer.
+     */
+    DIRECT,
 }
