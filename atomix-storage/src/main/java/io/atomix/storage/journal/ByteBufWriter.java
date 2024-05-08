@@ -56,16 +56,6 @@ public interface ByteBufWriter {
     void reset(long index);
 
     /**
-     * Truncates the log to the given index.
-     *
-     * @param index The index to which to truncate the log.
-     * @throws IndexOutOfBoundsException if the journal cannot be reset to specified index
-     */
-    // FIXME: reconcile with reset()
-    // FIXME: throws IOException
-    void truncate(long index);
-
-    /**
      * Flushes written entries to disk.
      */
     // FIXME: throws IOException

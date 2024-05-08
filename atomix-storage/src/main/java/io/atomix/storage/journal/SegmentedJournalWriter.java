@@ -52,11 +52,6 @@ final class SegmentedJournalWriter<E> implements JournalWriter<E> {
     }
 
     @Override
-    public void truncate(final long index) {
-        writer.truncate(index);
-    }
-
-    @Override
     public void flush() {
         writer.flush();
     }

@@ -87,14 +87,6 @@ final class SegmentedByteBufWriter implements ByteBufWriter {
         }
     }
 
-    @Override
-    public void truncate(final long index) {
-        if (index < journal.getCommitIndex()) {
-            throw new IndexOutOfBoundsException("Cannot truncate committed index: " + index);
-        }
-        checkedTruncate(index);
-    }
-
     private void checkedTruncate(final long index) {
         // Delete all segments with first indexes greater than the given index.
         while (index < currentSegment.firstIndex() && currentSegment != journal.firstSegment()) {
