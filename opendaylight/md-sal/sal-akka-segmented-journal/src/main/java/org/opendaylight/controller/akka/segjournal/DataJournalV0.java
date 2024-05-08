@@ -14,6 +14,7 @@ import com.google.common.base.VerifyException;
 import io.atomix.storage.journal.JournalReader;
 import io.atomix.storage.journal.JournalSerdes;
 import io.atomix.storage.journal.JournalWriter;
+import io.atomix.storage.journal.SegmentedByteBufJournal;
 import io.atomix.storage.journal.SegmentedJournal;
 import io.atomix.storage.journal.StorageLevel;
 import java.io.File;
@@ -40,13 +41,16 @@ final class DataJournalV0 extends DataJournal {
     DataJournalV0(final String persistenceId, final Histogram messageSize, final ActorSystem system,
             final StorageLevel storage, final File directory, final int maxEntrySize, final int maxSegmentSize) {
         super(persistenceId, messageSize);
-        entries = SegmentedJournal.<DataJournalEntry>builder()
-                .withStorageLevel(storage).withDirectory(directory).withName("data")
-                .withNamespace(JournalSerdes.builder()
-                    .register(new DataJournalEntrySerdes(system), FromPersistence.class, ToPersistence.class)
-                    .build())
-                .withMaxEntrySize(maxEntrySize).withMaxSegmentSize(maxSegmentSize)
-                .build();
+        entries = new SegmentedJournal<>(SegmentedByteBufJournal.builder()
+            .withDirectory(directory)
+            .withName("data")
+            .withStorageLevel(storage)
+            .withMaxEntrySize(maxEntrySize)
+            .withMaxSegmentSize(maxSegmentSize)
+            .build(),
+            JournalSerdes.builder()
+                .register(new DataJournalEntrySerdes(system), FromPersistence.class, ToPersistence.class)
+                .build().toMapper());
     }
 
     @Override
