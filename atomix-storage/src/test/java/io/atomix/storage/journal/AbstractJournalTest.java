@@ -76,15 +76,14 @@ public abstract class AbstractJournalTest {
         return runs;
     }
 
-    protected SegmentedJournal<TestEntry> createJournal() {
-        return SegmentedJournal.<TestEntry>builder()
+    private SegmentedJournal<TestEntry> createJournal() {
+        return new SegmentedJournal<>(SegmentedByteBufJournal.builder()
             .withName("test")
             .withDirectory(PATH.toFile())
-            .withNamespace(NAMESPACE)
             .withStorageLevel(storageLevel)
             .withMaxSegmentSize(maxSegmentSize)
             .withIndexDensity(.2)
-            .build();
+            .build(), NAMESPACE.toMapper());
     }
 
     @Test

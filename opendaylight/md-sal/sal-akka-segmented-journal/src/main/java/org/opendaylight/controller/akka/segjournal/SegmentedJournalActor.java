@@ -25,6 +25,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Stopwatch;
 import io.atomix.storage.journal.Indexed;
 import io.atomix.storage.journal.JournalSerdes;
+import io.atomix.storage.journal.SegmentedByteBufJournal;
 import io.atomix.storage.journal.SegmentedJournal;
 import io.atomix.storage.journal.StorageLevel;
 import java.io.File;
@@ -494,15 +495,14 @@ abstract sealed class SegmentedJournalActor extends AbstractActor {
         }
 
         final var sw = Stopwatch.createStarted();
-        deleteJournal = SegmentedJournal.<Long>builder()
+        deleteJournal = new SegmentedJournal<>(SegmentedByteBufJournal.builder()
             .withDirectory(directory)
             .withName("delete")
-            .withNamespace(DELETE_NAMESPACE)
             .withMaxSegmentSize(DELETE_SEGMENT_SIZE)
-            .build();
+            .build(), DELETE_NAMESPACE.toMapper());
         final var lastDeleteRecovered = deleteJournal.openReader(deleteJournal.lastIndex())
             .tryNext((index, value, length) -> value);
-        lastDelete = lastDeleteRecovered == null ? 0 : lastDeleteRecovered.longValue();
+        lastDelete = lastDeleteRecovered == null ? 0 : lastDeleteRecovered;
 
         dataJournal = new DataJournalV0(persistenceId, messageSize, context().system(), storage, directory,
             maxEntrySize, maxSegmentSize);

@@ -48,6 +48,8 @@ public final class SegmentedByteBufJournal implements ByteBufJournal {
     private final File directory;
     private final int maxSegmentSize;
     private final int maxEntrySize;
+    @Deprecated(forRemoval = true)
+    private final int maxEntriesPerSegment;
     private final double indexDensity;
     private final boolean flushOnCommit;
     private final @NonNull ByteBufWriter writer;
@@ -56,13 +58,15 @@ public final class SegmentedByteBufJournal implements ByteBufJournal {
     private JournalSegment currentSegment;
     private volatile long commitIndex;
 
-    public SegmentedByteBufJournal(final String name, final StorageLevel storageLevel, final File directory,
-            final int maxSegmentSize, final int maxEntrySize, final double indexDensity, final boolean flushOnCommit) {
+    SegmentedByteBufJournal(final String name, final StorageLevel storageLevel, final File directory,
+            final int maxSegmentSize, final int maxEntrySize, final int maxEntriesPerSegment, final double indexDensity,
+            final boolean flushOnCommit) {
         this.name = requireNonNull(name, "name cannot be null");
         this.storageLevel = requireNonNull(storageLevel, "storageLevel cannot be null");
         this.directory = requireNonNull(directory, "directory cannot be null");
         this.maxSegmentSize = maxSegmentSize;
         this.maxEntrySize = maxEntrySize;
+        this.maxEntriesPerSegment = maxEntriesPerSegment;
         this.indexDensity = indexDensity;
         this.flushOnCommit = flushOnCommit;
 
@@ -256,8 +260,7 @@ public final class SegmentedByteBufJournal implements ByteBufJournal {
                 .withId(segmentId)
                 .withIndex(firstIndex)
                 .withMaxSegmentSize(maxSegmentSize)
-                // FIXME: propagate maxEntries
-                .withMaxEntries(Integer.MAX_VALUE)
+                .withMaxEntries(maxEntriesPerSegment)
                 .withUpdated(System.currentTimeMillis())
                 .build());
         } catch (IOException e) {
@@ -390,14 +393,7 @@ public final class SegmentedByteBufJournal implements ByteBufJournal {
         return segmentEntry != null ? segmentEntry.getValue().firstIndex() : 0;
     }
 
-    /**
-     * Compacts the journal up to the given index.
-     *
-     * <p>
-     * The semantics of compaction are not specified by this interface.
-     *
-     * @param index The index up to which to compact the journal.
-     */
+    @Override
     public void compact(final long index) {
         final var firstIndex = getCompactableIndex(index);
         if (firstIndex != 0) {
@@ -460,6 +456,7 @@ public final class SegmentedByteBufJournal implements ByteBufJournal {
         private static final String DEFAULT_DIRECTORY = System.getProperty("user.dir");
         private static final int DEFAULT_MAX_SEGMENT_SIZE = 1024 * 1024 * 32;
         private static final int DEFAULT_MAX_ENTRY_SIZE = 1024 * 1024;
+        private static final int DEFAULT_MAX_ENTRIES_PER_SEGMENT = 1024 * 1024;
         private static final double DEFAULT_INDEX_DENSITY = .005;
 
         private String name = DEFAULT_NAME;
@@ -467,6 +464,7 @@ public final class SegmentedByteBufJournal implements ByteBufJournal {
         private File directory = new File(DEFAULT_DIRECTORY);
         private int maxSegmentSize = DEFAULT_MAX_SEGMENT_SIZE;
         private int maxEntrySize = DEFAULT_MAX_ENTRY_SIZE;
+        private int maxEntriesPerSegment = DEFAULT_MAX_ENTRIES_PER_SEGMENT;
         private double indexDensity = DEFAULT_INDEX_DENSITY;
         private boolean flushOnCommit = DEFAULT_FLUSH_ON_COMMIT;
 
@@ -548,6 +546,32 @@ public final class SegmentedByteBufJournal implements ByteBufJournal {
         }
 
         /**
+         * Sets the maximum number of allows entries per segment, returning the builder for method chaining.
+         *
+         * <p>
+         * The maximum entry count dictates when logs should roll over to new segments. As entries are written to a
+         * segment of the log, if the entry count in that segment meets the configured maximum entry count, the log will
+         * create a new segment and append new entries to that segment.
+         *
+         * <p>
+         * By default, the maximum entries per segment is {@code 1024 * 1024}.
+         *
+         * @param maxEntriesPerSegment The maximum number of entries allowed per segment.
+         * @return The storage builder.
+         * @throws IllegalArgumentException If the {@code maxEntriesPerSegment} not greater than the default max entries
+         *     per segment
+         * @deprecated This option has no effect and is scheduled for removal.
+         */
+        @Deprecated(forRemoval = true, since = "9.0.3")
+        public Builder withMaxEntriesPerSegment(final int maxEntriesPerSegment) {
+            checkArgument(maxEntriesPerSegment > 0, "max entries per segment must be positive");
+            checkArgument(maxEntriesPerSegment <= DEFAULT_MAX_ENTRIES_PER_SEGMENT,
+                "max entries per segment cannot be greater than " + DEFAULT_MAX_ENTRIES_PER_SEGMENT);
+            this.maxEntriesPerSegment = maxEntriesPerSegment;
+            return this;
+        }
+
+        /**
          * Sets the journal index density.
          *
          * <p>
@@ -599,7 +623,7 @@ public final class SegmentedByteBufJournal implements ByteBufJournal {
          */
         public SegmentedByteBufJournal build() {
             return new SegmentedByteBufJournal(name, storageLevel, directory, maxSegmentSize, maxEntrySize,
-                indexDensity, flushOnCommit);
+                maxEntriesPerSegment, indexDensity, flushOnCommit);
         }
     }
 }
