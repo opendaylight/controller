@@ -17,21 +17,21 @@ package io.atomix.utils.serializer;
 
 import com.esotericsoftware.kryo.io.Input;
 
-class KryoInputPool extends KryoIOPool<Input> {
+final class KryoInputPool extends KryoIOPool<Input> {
+    static final int MAX_POOLED_BUFFER_SIZE = 512 * 1024;
 
-  static final int MAX_POOLED_BUFFER_SIZE = 512 * 1024;
-
-  @Override
-  protected Input create(int bufferSize) {
-    return new Input(bufferSize);
-  }
-
-  @Override
-  protected boolean recycle(Input input) {
-    if (input.getBuffer().length < MAX_POOLED_BUFFER_SIZE) {
-      input.setInputStream(null);
-      return true;
+    @Override
+    Input create(final int bufferSize) {
+        return new Input(bufferSize);
     }
-    return false; // discard
-  }
+
+    @Override
+    boolean recycle(final Input input) {
+        if (input.getBuffer().length >= MAX_POOLED_BUFFER_SIZE) {
+            // discard
+            return false;
+        }
+        input.setInputStream(null);
+        return true;
+    }
 }
