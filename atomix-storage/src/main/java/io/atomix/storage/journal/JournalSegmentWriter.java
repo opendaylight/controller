@@ -21,6 +21,7 @@ import static java.util.Objects.requireNonNull;
 import io.atomix.storage.journal.StorageException.TooLarge;
 import io.atomix.storage.journal.index.JournalIndex;
 import io.netty.buffer.Unpooled;
+import java.io.EOFException;
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import org.eclipse.jdt.annotation.NonNull;
@@ -101,7 +102,7 @@ final class JournalSegmentWriter {
         final var bytes = Unpooled.wrappedBuffer(diskEntry.position(HEADER_BYTES));
         try {
             mapper.objectToBytes(entry, bytes);
-        } catch (IOException e) {
+        } catch (EOFException e) {
             // We ran out of buffer space: let's decide who's fault it is:
             if (writeLimit == maxEntrySize) {
                 // - it is the entry and/or mapper. This is not exactly accurate, as there may be other serialization
@@ -112,6 +113,8 @@ final class JournalSegmentWriter {
             // - it is us, as we do not have the capacity to hold maxEntrySize bytes
             LOG.trace("Tail serialization with {} bytes available failed", writeLimit, e);
             return null;
+        } catch (IOException e) {
+            throw new StorageException(e);
         }
 
         // Determine length, trim distEntry and compute checksum. We are okay with computeChecksum() consuming

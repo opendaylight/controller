@@ -16,6 +16,7 @@
 package io.atomix.storage.journal;
 
 import io.netty.buffer.ByteBuf;
+import java.io.EOFException;
 import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
@@ -38,7 +39,8 @@ public interface ByteBufMapper<T> {
      *
      * @param obj the object
      * @param buf target buffer
-     * @throws IOException if an I/O error occurs
+     * @throws EOFException if the buffer does not have sufficient capacity
+     * @throws IOException if some other I/O error occurs
      */
     void objectToBytes(T obj, ByteBuf buf) throws IOException;
 }
