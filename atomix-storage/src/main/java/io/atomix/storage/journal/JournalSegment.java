@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  */
 final class JournalSegment {
     /**
-     * Encapsulation of a {@link JournalSegment}'s state;
+     * Encapsulation of a {@link JournalSegment}'s state.
      */
     sealed interface State {
         // Marker interface

@@ -478,6 +478,7 @@ public final class SegmentedByteBufJournal implements ByteBufJournal {
          * @param name The journal name.
          * @return The builder instance
          */
+        @SuppressWarnings("checkstyle:hiddenField")
         public Builder withName(final String name) {
             this.name = requireNonNull(name, "name cannot be null");
             return this;
@@ -489,6 +490,7 @@ public final class SegmentedByteBufJournal implements ByteBufJournal {
          * @param storageLevel The storage level.
          * @return The builder instance
          */
+        @SuppressWarnings("checkstyle:hiddenField")
         public Builder withStorageLevel(final StorageLevel storageLevel) {
             this.storageLevel = requireNonNull(storageLevel, "storageLevel cannot be null");
             return this;
@@ -501,6 +503,7 @@ public final class SegmentedByteBufJournal implements ByteBufJournal {
          * @return The builder instance
          * @throws NullPointerException If the {@code directory} is {@code null}
          */
+        @SuppressWarnings("checkstyle:hiddenField")
         public Builder withDirectory(final String directory) {
             return withDirectory(new File(requireNonNull(directory, "directory cannot be null")));
         }
@@ -512,6 +515,7 @@ public final class SegmentedByteBufJournal implements ByteBufJournal {
          * @return The builder instance
          * @throws NullPointerException If the {@code directory} is {@code null}
          */
+        @SuppressWarnings("checkstyle:hiddenField")
         public Builder withDirectory(final File directory) {
             this.directory = requireNonNull(directory, "directory cannot be null");
             return this;
@@ -525,6 +529,7 @@ public final class SegmentedByteBufJournal implements ByteBufJournal {
          * @return The builder instance
          * @throws IllegalArgumentException If the {@code maxSegmentSize} is not positive
          */
+        @SuppressWarnings("checkstyle:hiddenField")
         public Builder withMaxSegmentSize(final int maxSegmentSize) {
             checkArgument(maxSegmentSize > JournalSegmentDescriptor.BYTES,
                 "maxSegmentSize must be greater than " + JournalSegmentDescriptor.BYTES);
@@ -539,6 +544,7 @@ public final class SegmentedByteBufJournal implements ByteBufJournal {
          * @return the builder instance
          * @throws IllegalArgumentException if the {@code maxEntrySize} is not positive
          */
+        @SuppressWarnings("checkstyle:hiddenField")
         public Builder withMaxEntrySize(final int maxEntrySize) {
             checkArgument(maxEntrySize > 0, "maxEntrySize must be positive");
             this.maxEntrySize = maxEntrySize;
@@ -563,6 +569,7 @@ public final class SegmentedByteBufJournal implements ByteBufJournal {
          * @deprecated This option has no effect and is scheduled for removal.
          */
         @Deprecated(forRemoval = true, since = "9.0.3")
+        @SuppressWarnings("checkstyle:hiddenField")
         public Builder withMaxEntriesPerSegment(final int maxEntriesPerSegment) {
             checkArgument(maxEntriesPerSegment > 0, "max entries per segment must be positive");
             checkArgument(maxEntriesPerSegment <= DEFAULT_MAX_ENTRIES_PER_SEGMENT,
@@ -582,6 +589,7 @@ public final class SegmentedByteBufJournal implements ByteBufJournal {
          * @return the builder instance
          * @throws IllegalArgumentException if the density is not between 0 and 1
          */
+        @SuppressWarnings("checkstyle:hiddenField")
         public Builder withIndexDensity(final double indexDensity) {
             checkArgument(indexDensity > 0 && indexDensity < 1, "index density must be between 0 and 1");
             this.indexDensity = indexDensity;
@@ -611,6 +619,7 @@ public final class SegmentedByteBufJournal implements ByteBufJournal {
          * @param flushOnCommit Whether to flush buffers to disk when entries are committed to a segment.
          * @return The builder instance
          */
+        @SuppressWarnings("checkstyle:hiddenField")
         public Builder withFlushOnCommit(final boolean flushOnCommit) {
             this.flushOnCommit = flushOnCommit;
             return this;

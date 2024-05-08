@@ -225,6 +225,7 @@ public record JournalSegmentDescriptor(
          * @param id The segment identifier.
          * @return The segment descriptor builder.
          */
+        @SuppressWarnings("checkstyle:hiddenField")
         public Builder withId(final long id) {
             this.id = id;
             return this;
@@ -236,6 +237,7 @@ public record JournalSegmentDescriptor(
          * @param index The segment starting index.
          * @return The segment descriptor builder.
          */
+        @SuppressWarnings("checkstyle:hiddenField")
         public Builder withIndex(final long index) {
             this.index = index;
             return this;
@@ -247,6 +249,7 @@ public record JournalSegmentDescriptor(
          * @param maxSegmentSize The maximum count of the segment.
          * @return The segment descriptor builder.
          */
+        @SuppressWarnings("checkstyle:hiddenField")
         public Builder withMaxSegmentSize(final int maxSegmentSize) {
             this.maxSegmentSize = maxSegmentSize;
             return this;
@@ -260,6 +263,7 @@ public record JournalSegmentDescriptor(
          * @deprecated since 3.0.2
          */
         @Deprecated
+        @SuppressWarnings("checkstyle:hiddenField")
         public Builder withMaxEntries(final int maxEntries) {
             this.maxEntries = maxEntries;
             return this;
@@ -271,6 +275,7 @@ public record JournalSegmentDescriptor(
          * @param updated Epoch milliseconds
          * @return The segment descriptor builder.
          */
+        @SuppressWarnings("checkstyle:hiddenField")
         public Builder withUpdated(final long updated) {
             this.updated = updated;
             return this;

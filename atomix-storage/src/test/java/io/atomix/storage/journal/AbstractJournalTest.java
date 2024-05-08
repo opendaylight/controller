@@ -101,8 +101,8 @@ public abstract class AbstractJournalTest {
     @Test
     public void testWriteRead() throws Exception {
         try (var journal = createJournal()) {
-            var writer = journal.writer();
-            var reader = journal.openReader(1);
+            final var writer = journal.writer();
+            final var reader = journal.openReader(1);
 
             // Append a couple entries.
             assertEquals(1, writer.getNextIndex());
@@ -129,51 +129,51 @@ public abstract class AbstractJournalTest {
             assertNoNext(reader);
 
             // Test opening a new reader and reading from the journal.
-            reader = journal.openReader(1);
-            entry1 = assertNext(reader);
+            final var reader2 = journal.openReader(1);
+            entry1 = assertNext(reader2);
             assertEquals(1, entry1.index());
 
-            assertEquals(2, reader.getNextIndex());
-            entry2 = assertNext(reader);
+            assertEquals(2, reader2.getNextIndex());
+            entry2 = assertNext(reader2);
             assertEquals(2, entry2.index());
-            assertNoNext(reader);
+            assertNoNext(reader2);
 
             // Reset the reader.
-            reader.reset();
+            reader2.reset();
 
             // Test opening a new reader and reading from the journal.
-            reader = journal.openReader(1);
-            entry1 = assertNext(reader);
+            final var reader3 = journal.openReader(1);
+            entry1 = assertNext(reader3);
             assertEquals(1, entry1.index());
 
-            assertEquals(2, reader.getNextIndex());
-            entry2 = assertNext(reader);
+            assertEquals(2, reader3.getNextIndex());
+            entry2 = assertNext(reader3);
             assertEquals(2, entry2.index());
-            assertNoNext(reader);
+            assertNoNext(reader3);
 
             // Truncate the journal and write a different entry.
             writer.reset(2);
             assertEquals(2, writer.getNextIndex());
             writer.append(ENTRY);
-            reader.reset(2);
-            indexed = assertNext(reader);
+            reader3.reset(2);
+            indexed = assertNext(reader3);
             assertEquals(2, indexed.index());
 
             // Reset the reader to a specific index and read the last entry again.
-            reader.reset(2);
+            reader3.reset(2);
 
-            assertEquals(2, reader.getNextIndex());
-            entry2 = assertNext(reader);
+            assertEquals(2, reader3.getNextIndex());
+            entry2 = assertNext(reader3);
             assertEquals(2, entry2.index());
-            assertNoNext(reader);
+            assertNoNext(reader3);
         }
     }
 
     @Test
     public void testResetTruncateZero() throws Exception {
-        try (SegmentedJournal<TestEntry> journal = createJournal()) {
-            JournalWriter<TestEntry> writer = journal.writer();
-            JournalReader<TestEntry> reader = journal.openReader(1);
+        try (var journal = createJournal()) {
+            final var writer = journal.writer();
+            final var reader = journal.openReader(1);
 
             assertEquals(0, journal.lastIndex());
             assertEquals(1, writer.getNextIndex());

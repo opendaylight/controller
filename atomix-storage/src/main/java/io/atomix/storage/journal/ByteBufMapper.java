@@ -32,7 +32,7 @@ public interface ByteBufMapper<T> {
      * @param bytes entry bytes
      * @return resulting object
      */
-    T bytesToObject(final long index, ByteBuf bytes);
+    T bytesToObject(long index, ByteBuf bytes);
 
     /**
      * Converts an object into a series of bytes in the specified {@link ByteBuf}.

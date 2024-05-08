@@ -40,13 +40,14 @@ final class MappedFileAccess extends FileAccess {
     }
 
     @Override
+    @SuppressWarnings("checkstyle:avoidHidingCauseException")
     MappedFileWriter newFileWriter() {
         return new MappedFileWriter(file, maxEntrySize, mappedBuffer.slice(), () -> {
-           try {
-               mappedBuffer.force();
-           } catch (UncheckedIOException e) {
-               throw e.getCause();
-           }
+            try {
+                mappedBuffer.force();
+            } catch (UncheckedIOException e) {
+                throw e.getCause();
+            }
         });
     }
 
