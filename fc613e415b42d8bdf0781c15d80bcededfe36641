@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8b09f74d_140760fd",
+        "filename": "features/odl-controller-akka/src/main/history/dependencies.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2024-05-08T18:20:54Z",
+      "side": 1,
+      "message": "do we really need to wrap it? why cannot it be inlined?",
+      "range": {
+        "startLine": 14,
+        "startChar": 8,
+        "endLine": 14,
+        "endChar": 62
+      },
+      "revId": "fc613e415b42d8bdf0781c15d80bcededfe36641",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
