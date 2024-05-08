@@ -17,6 +17,7 @@ package io.atomix.storage.journal;
 
 import io.netty.buffer.ByteBuf;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * {@link FileAccess} for {@link StorageLevel#DISK}.
@@ -43,8 +44,9 @@ final class DiskFileAccess extends FileAccess {
     }
 
     @Override
-    public void close() {
+    public @Nullable WeakMemoized close() {
         // No-op
+        return null;
     }
 
     private static ByteBuf allocateBuffer(final JournalSegmentFile file, final int maxEntrySize) {

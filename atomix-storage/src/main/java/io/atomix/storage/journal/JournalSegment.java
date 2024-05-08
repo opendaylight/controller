@@ -20,6 +20,7 @@ import static io.atomix.storage.journal.SegmentEntry.HEADER_BYTES;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
+import io.atomix.storage.journal.FileAccess.WeakMemoized;
 import io.atomix.storage.journal.index.JournalIndex;
 import io.atomix.storage.journal.index.Position;
 import io.atomix.storage.journal.index.SparseJournalIndex;
@@ -58,19 +59,19 @@ final class JournalSegment {
         }
 
         Inactive deactivate() {
-            final var inactive = new Inactive(writer.currentPosition());
-            access.close();
-            return inactive;
+            return new Inactive(writer.currentPosition(), access.close());
         }
     }
 
     /**
      * Journal segment is inactive, i.e. there is no writer associated with it.
      */
-    @NonNullByDefault
-    record Inactive(int position) implements State {
+    record Inactive(int position, @Nullable WeakMemoized memoized) implements State {
+        @NonNullByDefault
         Active activate(final JournalSegment segment) throws IOException {
-            final var access = segment.file.newAccess(segment.storageLevel, segment.maxEntrySize);
+            final var local = memoized;
+            final var access = local == null ? segment.file.newAccess(segment.storageLevel, segment.maxEntrySize)
+                : local.acquire(segment.file, segment.maxEntrySize);
             return new Active(access, new JournalSegmentWriter(access.newFileWriter(), segment, segment.journalIndex,
                 this));
         }
@@ -99,12 +100,23 @@ final class JournalSegment {
 
         journalIndex = new SparseJournalIndex(indexDensity);
 
-        try (var tmpAccess = file.newAccess(storageLevel, maxEntrySize)) {
-            final var fileReader = tmpAccess.newFileReader();
-            state = new Inactive(indexEntries(fileReader, this, maxEntrySize, journalIndex, Long.MAX_VALUE, null));
+        final FileAccess access;
+        try {
+            access = file.newAccess(storageLevel, maxEntrySize);
         } catch (IOException e) {
             throw new StorageException(e);
         }
+
+        final int currentPosition;
+        final WeakMemoized weak;
+        try {
+            currentPosition = indexEntries(access.newFileReader(), this, maxEntrySize, journalIndex, Long.MAX_VALUE,
+                null);
+        } finally {
+            weak = access.close();
+        }
+
+        state = new Inactive(currentPosition, weak);
     }
 
     /**

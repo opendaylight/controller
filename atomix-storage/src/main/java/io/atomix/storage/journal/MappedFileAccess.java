@@ -17,14 +17,20 @@ package io.atomix.storage.journal;
 
 import static java.util.Objects.requireNonNull;
 
+import io.netty.util.IllegalReferenceCountException;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link FileAccess} for {@link StorageLevel#MAPPED}.
  */
 final class MappedFileAccess extends FileAccess {
+    private static final Logger LOG = LoggerFactory.getLogger(MappedFileAccess.class);
+
     private MappedByteBuf mappedBuf;
 
     private MappedFileAccess(final @NonNull JournalSegmentFile file, final int maxEntrySize,
@@ -49,11 +55,32 @@ final class MappedFileAccess extends FileAccess {
     }
 
     @Override
-    public void close() {
+    WeakMemoized close() {
         final var toClose = mappedBuf;
-        if (toClose != null) {
-            mappedBuf = null;
-            toClose.release();
+        if (toClose == null) {
+            // nothing to do
+            return null;
         }
+
+        mappedBuf = null;
+        if (toClose.release()) {
+            // freed by this call
+            return null;
+        }
+
+        final var weakRef = new WeakReference<>(toClose);
+
+        return toClose.release() ? null : (file, maxEntrySize) -> {
+            final var ref = weakRef.get();
+            if (ref != null) {
+                try {
+                    return new MappedFileAccess(file, maxEntrySize, (MappedByteBuf) ref.retain());
+                } catch (IllegalReferenceCountException e) {
+                    LOG.trace("Missed weak retain()", e);
+                    weakRef.clear();
+                }
+            }
+            return of(file, maxEntrySize);
+        };
     }
 }

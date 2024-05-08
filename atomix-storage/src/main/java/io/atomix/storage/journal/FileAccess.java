@@ -17,13 +17,21 @@ package io.atomix.storage.journal;
 
 import static java.util.Objects.requireNonNull;
 
+import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * Abstract base class for accessing a particular file.
  */
 @NonNullByDefault
-abstract sealed class FileAccess implements AutoCloseable permits DiskFileAccess, MappedFileAccess {
+abstract sealed class FileAccess permits DiskFileAccess, MappedFileAccess {
+    @FunctionalInterface
+    interface WeakMemoized {
+
+        FileAccess acquire(JournalSegmentFile file, int maxEntrySize) throws IOException;
+    }
+
     final JournalSegmentFile file;
     final int maxEntrySize;
 
@@ -37,15 +45,19 @@ abstract sealed class FileAccess implements AutoCloseable permits DiskFileAccess
      *
      * @return a new {@link FileReader}
      */
-    abstract FileReader newFileReader();
+   abstract FileReader newFileReader();
 
     /**
      * Create a new {@link FileWriter}.
      *
      * @return a new {@link FileWriter}
      */
-    abstract FileWriter newFileWriter();
+   abstract FileWriter newFileWriter();
 
-    @Override
-    public abstract void close();
+   /**
+    * Close this access and perhaps return a memoized access.
+    *
+    * @return a {@link WeakMemoized}, or {@code null}
+    */
+   abstract @Nullable WeakMemoized close();
 }
