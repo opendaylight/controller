@@ -22,6 +22,30 @@
       },
       "revId": "fc613e415b42d8bdf0781c15d80bcededfe36641",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6252b1b1_46351f13",
+        "filename": "features/odl-controller-akka/src/main/history/dependencies.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 8449
+      },
+      "writtenOn": "2024-05-09T10:05:09Z",
+      "side": 1,
+      "message": "This dependencies.xml file is generated automatically with Maven build. It appears that asn-one is a non-OSGi bundle:\nhttps://docs.cloudsoft.io/blueprints/java/bundle-dependencies.html#converting-non-osgi-dependencies-to-bundles\n\nIf I understand correctly, it needs to add support for OSGi in the same way as Argona does:\n\nhttps://github.com/real-logic/agrona/pull/176/commits/49e769e07c3ba3fa176d3b1079f2472184612e1d\n\nhttps://github.com/hierynomus/asn-one/blob/master/build.gradle\n\nWithout this, we will need to wrap it.",
+      "parentUuid": "8b09f74d_140760fd",
+      "range": {
+        "startLine": 14,
+        "startChar": 8,
+        "endLine": 14,
+        "endChar": 62
+      },
+      "revId": "fc613e415b42d8bdf0781c15d80bcededfe36641",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
