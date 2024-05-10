@@ -13,34 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.atomix.storage.journal;
+package org.opendaylight.controller.raft.journal;
 
-import io.netty.buffer.ByteBuf;
+import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * A reader of {@link ByteBufJournal} entries.
+ * A reader of {@link RaftJournal} entries.
  */
 @NonNullByDefault
-public interface ByteBufReader extends AutoCloseable {
-    /**
-     * A journal entry processor. Responsible for transforming bytes into their internal representation.
-     *
-     * @param <T> Internal representation type
-     */
-    @FunctionalInterface
-    interface EntryMapper<T> {
-        /**
-         * Process an entry.
-         *
-         * @param index entry index
-         * @param bytes entry bytes
-         * @return resulting internal representation
-         */
-        T mapEntry(long index, ByteBuf bytes);
-    }
-
+public interface EntryReader extends AutoCloseable {
     /**
      * Returns the first index in the journal.
      *
@@ -58,10 +41,11 @@ public interface ByteBufReader extends AutoCloseable {
     /**
      * Try to move to the next binary data block.
      *
-     * @param entryMapper callback to be invoked on binary data
+     * @param mapper a {@link FromByteBufMapper} to use with entry
      * @return processed binary data, or {@code null}
+     * @throws IOException in an I/O error occurs
      */
-    <T> @Nullable T tryNext(EntryMapper<T> entryMapper);
+    <T> @Nullable T tryNext(FromByteBufMapper<T> mapper) throws IOException;
 
     /**
      * Resets the reader to the start.

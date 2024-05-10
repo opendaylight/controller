@@ -25,6 +25,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.raft.journal.ToByteBufMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,7 +75,7 @@ final class JournalSegmentWriter {
      * @param entry the entry
      * @return the entry size, or {@code null} if segment has no space
      */
-    <T> @Nullable Integer append(final ByteBufMapper<T> mapper, final T entry) {
+    <T> @Nullable Integer append(final ToByteBufMapper<T> mapper, final T entry) {
         // we are appending at this index and position
         final long index = nextIndex();
         final int position = currentPosition;

@@ -19,18 +19,20 @@ package io.atomix.storage.journal;
 import com.esotericsoftware.kryo.KryoException;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
+import io.atomix.storage.journal.JournalReader.EntryMapper;
 import io.atomix.utils.serializer.KryoJournalSerdesBuilder;
-import io.netty.buffer.ByteBuf;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import org.opendaylight.controller.raft.journal.FromByteBufMapper;
+import org.opendaylight.controller.raft.journal.ToByteBufMapper;
 
 /**
  * Support for serialization of {@link Journal} entries.
  *
- * @deprecated due to dependency on outdated Kryo library, {@link ByteBufMapper} to be used instead.
+ * @deprecated due to dependency on outdated Kryo library, {@link EntryMapper} to be used instead.
  */
 @Deprecated(forRemoval = true, since = "9.0.3")
 public interface JournalSerdes {
@@ -113,49 +115,51 @@ public interface JournalSerdes {
      */
     <T> T deserialize(InputStream stream, int bufferSize);
 
+
     /**
-     * Returns a {@link ByteBufMapper} backed by this object.
+     * Returns a {@link EntryMapper} backed by this object.
      *
-     * @return a {@link ByteBufMapper} backed by this object
+     * @return a {@link EntryMapper} backed by this object
      */
-    default <T> ByteBufMapper<T> toMapper() {
-        return new ByteBufMapper<>() {
-            @Override
-            public void objectToBytes(final T obj, final ByteBuf bytes) throws IOException {
-                final var buffer = bytes.nioBuffer();
-                try {
-                    serialize(obj, buffer);
-                } catch (KryoException e) {
-                    throw newIOException(e);
-                } finally {
-                    // adjust writerIndex so that readableBytes() the bytes written
-                    bytes.writerIndex(bytes.readerIndex() + buffer.position());
-                }
-            }
+    default <T> FromByteBufMapper<T> toReadMapper() {
+        return (index, bytes) -> deserialize(bytes.nioBuffer());
+    }
 
-            @Override
-            public T bytesToObject(final long index, final ByteBuf bytes) {
-                return deserialize(bytes.nioBuffer());
-            }
-
-            private static IOException newIOException(final KryoException cause) {
-                // We may have multiple nested KryoExceptions, intertwined with others, like IOExceptions. Let's find
-                // the deepest one.
-                var rootKryo = cause;
-                for (var nextCause = rootKryo.getCause(); nextCause != null; nextCause = nextCause.getCause()) {
-                    if (nextCause instanceof KryoException kryo) {
-                        rootKryo = kryo;
-                    }
-                }
-                // It would be nice to have a better way of discerning these, but alas it is what it is.
-                if (rootKryo.getMessage().startsWith("Buffer overflow.")) {
-                    final var ex = new EOFException();
-                    ex.initCause(cause);
-                    return ex;
-                }
-                return new IOException(rootKryo);
+    /**
+     * Returns a {@link EntryMapper} backed by this object.
+     *
+     * @return a {@link EntryMapper} backed by this object
+     */
+    default <T> ToByteBufMapper<T> toWriteMapper() {
+        return (obj, bytes) -> {
+            final var buffer = bytes.nioBuffer();
+            try {
+                serialize(obj, buffer);
+            } catch (KryoException e) {
+                throw newIOException(e);
+            } finally {
+                // adjust writerIndex so that readableBytes() the bytes written
+                bytes.writerIndex(bytes.readerIndex() + buffer.position());
             }
         };
+    }
+
+    private static IOException newIOException(final KryoException cause) {
+        // We may have multiple nested KryoExceptions, intertwined with others, like IOExceptions. Let's find
+        // the deepest one.
+        var rootKryo = cause;
+        for (var nextCause = rootKryo.getCause(); nextCause != null; nextCause = nextCause.getCause()) {
+            if (nextCause instanceof KryoException kryo) {
+                rootKryo = kryo;
+            }
+        }
+        // It would be nice to have a better way of discerning these, but alas it is what it is.
+        if (rootKryo.getMessage().startsWith("Buffer overflow.")) {
+            final var ex = new EOFException();
+            ex.initCause(cause);
+            return ex;
+        }
+        return new IOException(rootKryo);
     }
 
     /**

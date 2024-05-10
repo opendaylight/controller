@@ -18,18 +18,21 @@ package io.atomix.storage.journal;
 
 import static java.util.Objects.requireNonNull;
 
+import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.raft.journal.EntryReader;
+import org.opendaylight.controller.raft.journal.FromByteBufMapper;
 
 /**
- * A {@link JournalReader} backed by a {@link ByteBufReader}.
+ * A {@link JournalReader} backed by a {@link EntryReader}.
  */
 @NonNullByDefault
 final class SegmentedJournalReader<E> implements JournalReader<E> {
-    private final ByteBufMapper<E> mapper;
-    private final ByteBufReader reader;
+    private final FromByteBufMapper<E> mapper;
+    private final EntryReader reader;
 
-    SegmentedJournalReader(final ByteBufReader reader, final ByteBufMapper<E> mapper) {
+    SegmentedJournalReader(final EntryReader reader, final FromByteBufMapper<E> mapper) {
         this.reader = requireNonNull(reader);
         this.mapper = requireNonNull(mapper);
     }
@@ -56,10 +59,14 @@ final class SegmentedJournalReader<E> implements JournalReader<E> {
 
     @Override
     public <T> @Nullable T tryNext(final EntryMapper<E, T> entryMapper) {
-        return reader.tryNext((index, buf) -> {
-            final var size = buf.readableBytes();
-            return requireNonNull(entryMapper.mapEntry(index, mapper.bytesToObject(index, buf), size));
-        });
+        try {
+            return reader.tryNext((index, buf) -> {
+                final var size = buf.readableBytes();
+                return requireNonNull(entryMapper.mapEntry(index, mapper.bytesToObject(index, buf), size));
+            });
+        } catch (IOException e) {
+            throw new StorageException(e);
+        }
     }
 
     @Override

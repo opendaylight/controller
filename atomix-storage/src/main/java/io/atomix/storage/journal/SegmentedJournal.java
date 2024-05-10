@@ -19,19 +19,25 @@ package io.atomix.storage.journal;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.opendaylight.controller.raft.journal.FromByteBufMapper;
+import org.opendaylight.controller.raft.journal.RaftJournal;
+import org.opendaylight.controller.raft.journal.ToByteBufMapper;
 
 /**
- * A {@link Journal} implementation based on a {@link ByteBufJournal}.
+ * A {@link Journal} implementation based on a {@link RaftJournal}.
  */
+@NonNullByDefault
 public final class SegmentedJournal<E> implements Journal<E> {
     private final SegmentedJournalWriter<E> writer;
-    private final ByteBufMapper<E> mapper;
-    private final ByteBufJournal journal;
+    private final FromByteBufMapper<E> readMapper;
+    private final RaftJournal journal;
 
-    public SegmentedJournal(final ByteBufJournal journal, final ByteBufMapper<E> mapper) {
+    public SegmentedJournal(final RaftJournal journal, final FromByteBufMapper<E> readMapper,
+            final ToByteBufMapper<E> writeMmapper) {
         this.journal = requireNonNull(journal, "journal is required");
-        this.mapper = requireNonNull(mapper, "mapper cannot be null");
-        writer = new SegmentedJournalWriter<>(journal.writer(), mapper);
+        this.readMapper = requireNonNull(readMapper, "readMmapper cannot be null");
+        writer = new SegmentedJournalWriter<>(journal.writer(), writeMmapper);
     }
 
     @Override
@@ -62,7 +68,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
             case ALL -> journal.openReader(index);
             case COMMITS -> journal.openCommitsReader(index);
         };
-        return new SegmentedJournalReader<>(byteReader, mapper);
+        return new SegmentedJournalReader<>(byteReader, readMapper);
     }
 
     @Override

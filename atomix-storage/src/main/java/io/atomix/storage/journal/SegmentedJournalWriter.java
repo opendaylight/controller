@@ -19,16 +19,18 @@ package io.atomix.storage.journal;
 import static java.util.Objects.requireNonNull;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.opendaylight.controller.raft.journal.EntryWriter;
+import org.opendaylight.controller.raft.journal.ToByteBufMapper;
 
 /**
- * A {@link JournalWriter} backed by a {@link ByteBufWriter}.
+ * A {@link JournalWriter} backed by a {@link EntryWriter}.
  */
 @NonNullByDefault
 final class SegmentedJournalWriter<E> implements JournalWriter<E> {
-    private final ByteBufMapper<E> mapper;
-    private final ByteBufWriter writer;
+    private final ToByteBufMapper<E> mapper;
+    private final EntryWriter writer;
 
-    SegmentedJournalWriter(final ByteBufWriter writer, final ByteBufMapper<E> mapper) {
+    SegmentedJournalWriter(final EntryWriter writer, final ToByteBufMapper<E> mapper) {
         this.writer = requireNonNull(writer);
         this.mapper = requireNonNull(mapper);
     }

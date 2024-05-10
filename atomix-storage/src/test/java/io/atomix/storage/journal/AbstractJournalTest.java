@@ -37,6 +37,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.opendaylight.controller.raft.journal.StorageLevel;
 
 /**
  * Base journal test.
@@ -83,7 +84,7 @@ public abstract class AbstractJournalTest {
             .withStorageLevel(storageLevel)
             .withMaxSegmentSize(maxSegmentSize)
             .withIndexDensity(.2)
-            .build(), NAMESPACE.toMapper());
+            .build(), NAMESPACE.toReadMapper(), NAMESPACE.toWriteMapper());
     }
 
     @Test

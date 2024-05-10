@@ -20,6 +20,7 @@ import static java.util.Objects.requireNonNull;
 import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.opendaylight.controller.raft.journal.StorageLevel;
 
 /**
  * {@link FileAccess} for {@link StorageLevel#MAPPED}.

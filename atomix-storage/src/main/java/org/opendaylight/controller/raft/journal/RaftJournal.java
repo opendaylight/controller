@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.atomix.storage.journal;
+package org.opendaylight.controller.raft.journal;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * A journal of byte arrays. Provides the ability to write modify entries via {@link ByteBufWriter} and read them
- * back via {@link ByteBufReader}.
+ * A journal of byte arrays. Provides the ability to write modify entries via {@link EntryWriter} and read them
+ * back via {@link EntryReader}.
  */
 @NonNullByDefault
-public interface ByteBufJournal extends AutoCloseable {
+public interface RaftJournal extends AutoCloseable {
     /**
      * Return the index of the last entry in the journal.
      *
@@ -35,23 +35,23 @@ public interface ByteBufJournal extends AutoCloseable {
      *
      * @return The journal writer.
      */
-    ByteBufWriter writer();
+    EntryWriter writer();
 
     /**
-     * Opens a new {@link ByteBufReader} reading all entries.
+     * Opens a new {@link EntryReader} reading all entries.
      *
      * @param index The index at which to start the reader.
      * @return A new journal reader.
      */
-    ByteBufReader openReader(long index);
+    EntryReader openReader(long index);
 
     /**
-     * Opens a new {@link ByteBufReader} reading only committed entries.
+     * Opens a new {@link EntryReader} reading only committed entries.
      *
      * @param index The index at which to start the reader.
      * @return A new journal reader.
      */
-    ByteBufReader openCommitsReader(long index);
+    EntryReader openCommitsReader(long index);
 
     /**
      * Compacts the journal up to the given index.

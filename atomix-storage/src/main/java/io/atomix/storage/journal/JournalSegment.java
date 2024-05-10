@@ -31,6 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.raft.journal.StorageLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -16,6 +16,7 @@
 package io.atomix.storage.journal;
 
 import io.atomix.storage.journal.JournalReader.Mode;
+import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * Journal.
@@ -54,7 +55,7 @@ public interface Journal<E> extends AutoCloseable {
      * @param mode the reader mode
      * @return A new journal reader.
      */
-    JournalReader<E> openReader(long index, Mode mode);
+    JournalReader<E> openReader(long index, @NonNull Mode mode);
 
     /**
      * Compacts the journal up to the given index.

@@ -16,9 +16,10 @@
 package io.atomix.storage.journal;
 
 import io.netty.buffer.ByteBuf;
+import org.opendaylight.controller.raft.journal.EntryReader;
 
 /**
- * A {@link ByteBufReader} traversing only committed entries.
+ * A {@link EntryReader} traversing only committed entries.
  */
 final class SegmentedCommitsByteBufReader extends SegmentedByteBufReader {
     SegmentedCommitsByteBufReader(final SegmentedByteBufJournal journal, final JournalSegment segment) {

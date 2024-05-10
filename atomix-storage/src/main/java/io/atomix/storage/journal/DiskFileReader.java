@@ -22,6 +22,7 @@ import io.netty.buffer.ByteBuf;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.controller.raft.journal.StorageLevel;
 
 /**
  * A {@link StorageLevel#DISK} implementation of {@link FileReader}. Maintains an internal buffer.

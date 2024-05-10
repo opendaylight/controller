@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.atomix.storage.journal;
+package org.opendaylight.controller.raft.journal;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * A writer of {@link ByteBufJournal} entries.
+ * A writer of {@link RaftJournal} entries.
  */
 @NonNullByDefault
-public interface ByteBufWriter {
+public interface EntryWriter {
     /**
      * Returns the next index to be written.
      *
@@ -32,12 +32,12 @@ public interface ByteBufWriter {
     /**
      * Appends an entry to the journal.
      *
-     * @param mapper a {@link ByteBufMapper} to use with entry
+     * @param mapper a {@link ToByteBufMapper} to use with entry
      * @param entry entry to append
      * @return the on-disk size of the entry
      */
     // FIXME: throws IOException
-    <T> int append(ByteBufMapper<T> mapper, T entry);
+    <T> int append(ToByteBufMapper<T> mapper, T entry);
 
     /**
      * Commits entries up to the given index.

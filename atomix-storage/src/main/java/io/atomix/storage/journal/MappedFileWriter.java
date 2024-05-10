@@ -20,6 +20,7 @@ import static java.util.Objects.requireNonNull;
 import io.netty.buffer.ByteBuf;
 import java.io.Flushable;
 import java.io.IOException;
+import org.opendaylight.controller.raft.journal.StorageLevel;
 
 /**
  * A {@link StorageLevel#MAPPED} {@link FileWriter}.
