@@ -55,11 +55,6 @@
             <artifactId>aeron-driver</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty</artifactId>
-            <version>3.10.6.Final</version>
-        </dependency>
-        <dependency>
             <groupId>org.agrona</groupId>
             <artifactId>agrona</artifactId>
         </dependency>
@@ -223,6 +218,7 @@
                             org.fusesource.leveldbjni;resolution:=optional,
                             org.iq80.leveldb;resolution:=optional,
                             org.iq80.leveldb.impl;resolution:=optional,
+                            org.jboss.netty.*;resolution:=optional,
                             *
                         </Import-Package>
                     </instructions>
