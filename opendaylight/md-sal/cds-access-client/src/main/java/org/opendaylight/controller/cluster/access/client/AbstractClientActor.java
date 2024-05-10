@@ -19,11 +19,11 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractClientActor extends AbstractPersistentActor {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractClientActor.class);
+
     private AbstractClientActorBehavior<?> currentBehavior;
 
     protected AbstractClientActor(final FrontendIdentifier frontendId) {
-        currentBehavior = new RecoveringClientActorBehavior(
-                new InitialClientActorContext(this, frontendId.toPersistentId()), frontendId);
+        currentBehavior = new RecoveringClientActorBehavior(this, frontendId);
     }
 
     @Override
