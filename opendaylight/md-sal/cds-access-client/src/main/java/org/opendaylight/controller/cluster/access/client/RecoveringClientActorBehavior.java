@@ -46,31 +46,38 @@ final class RecoveringClientActorBehavior extends AbstractClientActorBehavior<In
 
     @Override
     AbstractClientActorBehavior<?> onReceiveRecover(final Object recover) {
-        if (recover instanceof RecoveryCompleted) {
-            final ClientIdentifier nextId;
-            if (lastId != null) {
-                if (!currentFrontend.equals(lastId.getFrontendId())) {
-                    LOG.error("{}: Mismatched frontend identifier, shutting down. Current: {} Saved: {}",
-                        persistenceId(), currentFrontend, lastId.getFrontendId());
-                    return null;
-                }
-
-                nextId = ClientIdentifier.create(currentFrontend, lastId.getGeneration() + 1);
-            } else {
-                nextId = ClientIdentifier.create(currentFrontend, initialGeneration());
-            }
-
-            LOG.debug("{}: persisting new identifier {}", persistenceId(), nextId);
-            context().saveSnapshot(nextId);
-            return new SavingClientActorBehavior(context(), nextId);
+        if (recover instanceof RecoveryCompleted msg) {
+            return onRecoveryCompleted(msg);
         } else if (recover instanceof SnapshotOffer snapshotOffer) {
-            lastId = (ClientIdentifier) snapshotOffer.snapshot();
-            LOG.debug("{}: recovered identifier {}", persistenceId(), lastId);
+            onSnapshotOffer(snapshotOffer);
         } else {
             LOG.warn("{}: ignoring recovery message {}", persistenceId(), recover);
         }
-
         return this;
+    }
+
+    private void onSnapshotOffer(final SnapshotOffer snapshotOffer) {
+        lastId = (ClientIdentifier) snapshotOffer.snapshot();
+        LOG.debug("{}: recovered identifier {}", persistenceId(), lastId);
+    }
+
+    private SavingClientActorBehavior onRecoveryCompleted(final RecoveryCompleted msg) {
+        final ClientIdentifier nextId;
+        if (lastId != null) {
+            if (!currentFrontend.equals(lastId.getFrontendId())) {
+                LOG.error("{}: Mismatched frontend identifier, shutting down. Current: {} Saved: {}",
+                    persistenceId(), currentFrontend, lastId.getFrontendId());
+                return null;
+            }
+
+            nextId = ClientIdentifier.create(currentFrontend, lastId.getGeneration() + 1);
+        } else {
+            nextId = ClientIdentifier.create(currentFrontend, initialGeneration());
+        }
+
+        LOG.debug("{}: persisting new identifier {}", persistenceId(), nextId);
+        context().saveSnapshot(nextId);
+        return new SavingClientActorBehavior(context(), nextId);
     }
 
     private long initialGeneration() {
