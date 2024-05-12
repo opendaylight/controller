@@ -72,6 +72,11 @@ abstract sealed class FileWriter permits DiskFileWriter, MappedFileWriter {
      */
     abstract void flush() throws IOException;
 
+    /**
+     * Releases resources associated with this writer.
+     */
+    abstract void release();
+
     @Override
     public final String toString() {
         return MoreObjects.toStringHelper(this).add("path", file.path()).toString();

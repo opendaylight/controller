@@ -27,10 +27,10 @@ final class JournalSegmentReader {
     private static final Logger LOG = LoggerFactory.getLogger(JournalSegmentReader.class);
 
     private final JournalSegment segment;
-    private final FileReader fileReader;
     private final int maxSegmentSize;
     private final int maxEntrySize;
 
+    private FileReader fileReader;
     private int position;
 
     JournalSegmentReader(final JournalSegment segment, final FileReader fileReader, final int maxEntrySize) {
@@ -115,6 +115,11 @@ final class JournalSegmentReader {
      * Close this reader.
      */
     void close() {
-        segment.closeReader(this);
+        final var local = fileReader;
+        if (local != null) {
+            fileReader = null;
+            local.release();
+            segment.closeReader(this);
+        }
     }
 }

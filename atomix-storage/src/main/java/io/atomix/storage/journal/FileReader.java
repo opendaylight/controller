@@ -46,6 +46,11 @@ abstract sealed class FileReader permits DiskFileReader, MappedFileReader {
      */
     abstract @NonNull ByteBuf read(int position, int size);
 
+    /**
+     * Releases resources associated with this writer.
+     */
+    abstract void release();
+
     @Override
     public final String toString() {
         return MoreObjects.toStringHelper(this).add("path", file.path()).toString();

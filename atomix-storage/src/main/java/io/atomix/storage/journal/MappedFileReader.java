@@ -37,4 +37,9 @@ final class MappedFileReader extends FileReader {
     ByteBuf read(final int position, final int size) {
         return buffer.slice(position, size);
     }
+
+    @Override
+    void release() {
+        // No-op
+    }
 }

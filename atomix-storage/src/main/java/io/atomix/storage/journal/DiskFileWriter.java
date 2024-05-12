@@ -78,4 +78,9 @@ final class DiskFileWriter extends FileWriter {
             }
         }
     }
+
+    @Override
+    void release() {
+        reader.release();
+    }
 }
