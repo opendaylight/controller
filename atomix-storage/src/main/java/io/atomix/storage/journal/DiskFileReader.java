@@ -28,8 +28,8 @@ import org.eclipse.jdt.annotation.NonNull;
  */
 final class DiskFileReader extends FileReader {
     private final FileChannel channel;
-    private final ByteBuf buffer;
 
+    private ByteBuf buffer;
     // tracks where memory's first available byte maps to in terms of FileChannel.position()
     private int bufferPosition;
 
@@ -53,6 +53,15 @@ final class DiskFileReader extends FileReader {
         // forward-moving and backwards-moving code paths.
         final int seek = bufferPosition - position;
         return seek >= 0 ? forwardAndRead(seek, position, size) : rewindAndRead(-seek, position, size);
+    }
+
+    @Override
+    void close() {
+        final var local = buffer;
+        if (local != null) {
+            buffer = null;
+            local.release();
+        }
     }
 
     private @NonNull ByteBuf forwardAndRead(final int seek, final int position, final int size) {

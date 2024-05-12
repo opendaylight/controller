@@ -62,4 +62,9 @@ final class MappedFileWriter extends FileWriter {
     void flush() throws IOException {
         flush.flush();
     }
+
+    @Override
+    void close() {
+        // No-op
+    }
 }
