@@ -83,7 +83,7 @@ public abstract class AbstractJournalTest {
             .withStorageLevel(storageLevel)
             .withMaxSegmentSize(maxSegmentSize)
             .withIndexDensity(.2)
-            .build(), NAMESPACE.toMapper());
+            .build(), NAMESPACE.toReadMapper(), NAMESPACE.toWriteMapper());
     }
 
     @Test

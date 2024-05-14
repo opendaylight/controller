@@ -23,11 +23,13 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Stopwatch;
+import io.atomix.storage.journal.FromByteBufMapper;
 import io.atomix.storage.journal.Indexed;
 import io.atomix.storage.journal.JournalSerdes;
 import io.atomix.storage.journal.SegmentedByteBufJournal;
 import io.atomix.storage.journal.SegmentedJournal;
 import io.atomix.storage.journal.StorageLevel;
+import io.atomix.storage.journal.ToByteBufMapper;
 import java.io.File;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -283,10 +285,18 @@ abstract sealed class SegmentedJournalActor extends AbstractActor {
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(SegmentedJournalActor.class);
-    private static final JournalSerdes DELETE_NAMESPACE = JournalSerdes.builder()
-        .register(LongEntrySerdes.LONG_ENTRY_SERDES, Long.class)
-        .build();
     private static final int DELETE_SEGMENT_SIZE = 64 * 1024;
+    private static final FromByteBufMapper<Long> READ_MAPPER;
+    private static final ToByteBufMapper<Long> WRITE_MAPPER;
+
+    static {
+        final var namespace = JournalSerdes.builder()
+            .register(LongEntrySerdes.LONG_ENTRY_SERDES, Long.class)
+            .build();
+
+        READ_MAPPER = namespace.toReadMapper();
+        WRITE_MAPPER = namespace.toWriteMapper();
+    }
 
     private final String persistenceId;
     private final StorageLevel storage;
@@ -499,7 +509,7 @@ abstract sealed class SegmentedJournalActor extends AbstractActor {
             .withDirectory(directory)
             .withName("delete")
             .withMaxSegmentSize(DELETE_SEGMENT_SIZE)
-            .build(), DELETE_NAMESPACE.toMapper());
+            .build(), READ_MAPPER, WRITE_MAPPER);
         final var lastDeleteRecovered = deleteJournal.openReader(deleteJournal.lastIndex())
             .tryNext((index, value, length) -> value);
         lastDelete = lastDeleteRecovered == null ? 0 : lastDeleteRecovered;

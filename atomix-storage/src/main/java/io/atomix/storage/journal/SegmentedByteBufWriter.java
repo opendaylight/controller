@@ -50,13 +50,13 @@ final class SegmentedByteBufWriter implements ByteBufWriter {
     }
 
     @Override
-    public <T> int append(final ByteBufMapper<T> mapper, final T entry) {
+    public <T> int append(final ToByteBufMapper<T> mapper, final T entry) {
         final var size = currentWriter.append(mapper, entry);
         return size != null ? size : appendToNextSegment(mapper, entry);
     }
 
     //  Slow path: we do not have enough capacity
-    private <T> int appendToNextSegment(final ByteBufMapper<T> mapper, final T entry) {
+    private <T> int appendToNextSegment(final ToByteBufMapper<T> mapper, final T entry) {
         currentWriter.flush();
         currentSegment.releaseWriter();
         currentSegment = journal.createNextSegment();

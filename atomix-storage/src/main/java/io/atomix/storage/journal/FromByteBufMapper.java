@@ -15,41 +15,23 @@
  */
 package io.atomix.storage.journal;
 
+import io.netty.buffer.ByteBuf;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * A reader of {@link ByteBufJournal} entries.
+ * Interface for transforming bytes into their internal representation.
+ *
+ * @param <T> Internal representation type
  */
 @NonNullByDefault
-public interface ByteBufReader extends AutoCloseable {
+@FunctionalInterface
+public interface FromByteBufMapper<T> {
     /**
-     * Returns the next reader index.
+     * Converts the contents of a {@link ByteBuf} to an object.
      *
-     * @return The next reader index
+     * @param index entry index
+     * @param bytes entry bytes
+     * @return resulting object
      */
-    long nextIndex();
-
-    /**
-     * Try to move to the next binary data block.
-     *
-     * @param mapper callback to be invoked on binary data
-     * @return processed binary data, or {@code null}
-     */
-    <T> @Nullable T tryNext(FromByteBufMapper<T> mapper);
-
-    /**
-     * Resets the reader to the start.
-     */
-    void reset();
-
-    /**
-     * Resets the reader to the given index.
-     *
-     * @param index the next index to read
-     */
-    void reset(long index);
-
-    @Override
-    void close();
+    T bytesToObject(long index, ByteBuf bytes);
 }

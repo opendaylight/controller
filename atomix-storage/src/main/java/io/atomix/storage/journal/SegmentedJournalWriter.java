@@ -25,10 +25,10 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 final class SegmentedJournalWriter<E> implements JournalWriter<E> {
-    private final ByteBufMapper<E> mapper;
+    private final ToByteBufMapper<E> mapper;
     private final ByteBufWriter writer;
 
-    SegmentedJournalWriter(final ByteBufWriter writer, final ByteBufMapper<E> mapper) {
+    SegmentedJournalWriter(final ByteBufWriter writer, final ToByteBufMapper<E> mapper) {
         this.writer = requireNonNull(writer);
         this.mapper = requireNonNull(mapper);
     }

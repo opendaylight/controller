@@ -74,7 +74,7 @@ final class JournalSegmentWriter {
      * @param entry the entry
      * @return the entry size, or {@code null} if segment has no space
      */
-    <T> @Nullable Integer append(final ByteBufMapper<T> mapper, final T entry) {
+    <T> @Nullable Integer append(final ToByteBufMapper<T> mapper, final T entry) {
         // we are appending at this index and position
         final long index = nextIndex();
         final int position = currentPosition;

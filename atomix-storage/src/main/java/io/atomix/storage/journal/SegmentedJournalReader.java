@@ -26,10 +26,10 @@ import org.eclipse.jdt.annotation.Nullable;
  */
 @NonNullByDefault
 final class SegmentedJournalReader<E> implements JournalReader<E> {
-    private final ByteBufMapper<E> mapper;
+    private final FromByteBufMapper<E> mapper;
     private final ByteBufReader reader;
 
-    SegmentedJournalReader(final ByteBufReader reader, final ByteBufMapper<E> mapper) {
+    SegmentedJournalReader(final ByteBufReader reader, final FromByteBufMapper<E> mapper) {
         this.reader = requireNonNull(reader);
         this.mapper = requireNonNull(mapper);
     }

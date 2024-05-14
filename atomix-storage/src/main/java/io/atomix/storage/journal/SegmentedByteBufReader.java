@@ -100,10 +100,10 @@ sealed class SegmentedByteBufReader implements ByteBufReader permits SegmentedCo
     }
 
     @Override
-    public final <T> T tryNext(final EntryMapper<T> entryMapper) {
+    public final <T> T tryNext(final FromByteBufMapper<T> mapper) {
         final var index = nextIndex;
         final var bytes = tryAdvance(index);
-        return bytes == null ? null : entryMapper.mapEntry(index, bytes);
+        return bytes == null ? null : mapper.bytesToObject(index, bytes);
     }
 
     /**

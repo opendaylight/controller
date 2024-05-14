@@ -41,16 +41,18 @@ final class DataJournalV0 extends DataJournal {
     DataJournalV0(final String persistenceId, final Histogram messageSize, final ActorSystem system,
             final StorageLevel storage, final File directory, final int maxEntrySize, final int maxSegmentSize) {
         super(persistenceId, messageSize);
+
+        final var serdes = JournalSerdes.builder()
+            .register(new DataJournalEntrySerdes(system), FromPersistence.class, ToPersistence.class)
+            .build();
+
         entries = new SegmentedJournal<>(SegmentedByteBufJournal.builder()
             .withDirectory(directory)
             .withName("data")
             .withStorageLevel(storage)
             .withMaxEntrySize(maxEntrySize)
             .withMaxSegmentSize(maxSegmentSize)
-            .build(),
-            JournalSerdes.builder()
-                .register(new DataJournalEntrySerdes(system), FromPersistence.class, ToPersistence.class)
-                .build().toMapper());
+            .build(), serdes.toReadMapper(), serdes.toWriteMapper());
     }
 
     @Override

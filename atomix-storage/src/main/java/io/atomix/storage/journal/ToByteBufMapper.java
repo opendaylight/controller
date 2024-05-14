@@ -21,19 +21,13 @@ import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * Support for mapping of {@link ByteBufJournal} entries to and from {@link ByteBuf}s.
+ * Interface for transforming internal represetation to bytes.
+ *
+ * @param <T> Internal representation type
  */
 @NonNullByDefault
-public interface ByteBufMapper<T> {
-    /**
-     * Converts the contents of a {@link ByteBuf} to an object.
-     *
-     * @param index entry index
-     * @param bytes entry bytes
-     * @return resulting object
-     */
-    T bytesToObject(long index, ByteBuf bytes);
-
+@FunctionalInterface
+public interface ToByteBufMapper<T> {
     /**
      * Converts an object into a series of bytes in the specified {@link ByteBuf}.
      *

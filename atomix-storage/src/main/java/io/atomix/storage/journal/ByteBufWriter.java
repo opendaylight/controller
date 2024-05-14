@@ -32,12 +32,12 @@ public interface ByteBufWriter {
     /**
      * Appends an entry to the journal.
      *
-     * @param mapper a {@link ByteBufMapper} to use with entry
+     * @param mapper a {@link ToByteBufMapper} to use with entry
      * @param entry entry to append
      * @return the on-disk size of the entry
      */
     // FIXME: throws IOException
-    <T> int append(ByteBufMapper<T> mapper, T entry);
+    <T> int append(ToByteBufMapper<T> mapper, T entry);
 
     /**
      * Commits entries up to the given index.

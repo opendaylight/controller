@@ -19,19 +19,22 @@ package io.atomix.storage.journal;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
+import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * A {@link Journal} implementation based on a {@link ByteBufJournal}.
  */
 public final class SegmentedJournal<E> implements Journal<E> {
-    private final SegmentedJournalWriter<E> writer;
-    private final ByteBufMapper<E> mapper;
-    private final ByteBufJournal journal;
+    private final @NonNull SegmentedJournalWriter<E> writer;
+    private final @NonNull FromByteBufMapper<E> readMapper;
+    private final @NonNull ByteBufJournal journal;
 
-    public SegmentedJournal(final ByteBufJournal journal, final ByteBufMapper<E> mapper) {
+    public SegmentedJournal(final ByteBufJournal journal, final FromByteBufMapper<E> readMapper,
+            final ToByteBufMapper<E> writeMapper) {
         this.journal = requireNonNull(journal, "journal is required");
-        this.mapper = requireNonNull(mapper, "mapper cannot be null");
-        writer = new SegmentedJournalWriter<>(journal.writer(), mapper);
+        this.readMapper = requireNonNull(readMapper, "readMapper cannot be null");
+        writer = new SegmentedJournalWriter<>(journal.writer(),
+            requireNonNull(writeMapper, "writeMapper cannot be null"));
     }
 
     @Override
@@ -67,7 +70,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
             case ALL -> journal.openReader(index);
             case COMMITS -> journal.openCommitsReader(index);
         };
-        return new SegmentedJournalReader<>(byteReader, mapper);
+        return new SegmentedJournalReader<>(byteReader, readMapper);
     }
 
     @Override
