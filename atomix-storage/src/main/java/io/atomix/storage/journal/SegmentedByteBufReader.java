@@ -20,11 +20,13 @@ import static java.util.Objects.requireNonNull;
 
 import io.netty.buffer.ByteBuf;
 import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.controller.raft.journal.EntryReader;
+import org.opendaylight.controller.raft.journal.FromByteBufMapper;
 
 /**
- * A {@link ByteBufReader} implementation.
+ * A {@link EntryReader} implementation.
  */
-sealed class SegmentedByteBufReader implements ByteBufReader permits SegmentedCommitsByteBufReader {
+sealed class SegmentedByteBufReader implements EntryReader permits SegmentedCommitsByteBufReader {
     final @NonNull SegmentedByteBufJournal journal;
 
     private JournalSegment currentSegment;

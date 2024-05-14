@@ -20,16 +20,19 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
 import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.controller.raft.journal.FromByteBufMapper;
+import org.opendaylight.controller.raft.journal.RaftJournal;
+import org.opendaylight.controller.raft.journal.ToByteBufMapper;
 
 /**
- * A {@link Journal} implementation based on a {@link ByteBufJournal}.
+ * A {@link Journal} implementation based on a {@link RaftJournal}.
  */
 public final class SegmentedJournal<E> implements Journal<E> {
     private final @NonNull SegmentedJournalWriter<E> writer;
     private final @NonNull FromByteBufMapper<E> readMapper;
-    private final @NonNull ByteBufJournal journal;
+    private final @NonNull RaftJournal journal;
 
-    public SegmentedJournal(final ByteBufJournal journal, final FromByteBufMapper<E> readMapper,
+    public SegmentedJournal(final RaftJournal journal, final FromByteBufMapper<E> readMapper,
             final ToByteBufMapper<E> writeMapper) {
         this.journal = requireNonNull(journal, "journal is required");
         this.readMapper = requireNonNull(readMapper, "readMapper cannot be null");

@@ -19,10 +19,13 @@ package io.atomix.storage.journal;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
+import org.opendaylight.controller.raft.journal.EntryWriter;
+import org.opendaylight.controller.raft.journal.ToByteBufMapper;
+
 /**
- * A {@link ByteBufWriter} implementation.
+ * A {@link EntryWriter} implementation.
  */
-final class SegmentedByteBufWriter implements ByteBufWriter {
+final class SegmentedByteBufWriter implements EntryWriter {
     private final SegmentedByteBufJournal journal;
 
     private JournalSegment currentSegment;

@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.atomix.storage.journal;
+package org.opendaylight.controller.raft.journal;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * A reader of {@link ByteBufJournal} entries.
+ * A reader of {@link RaftJournal} entries.
  */
 @NonNullByDefault
-public interface ByteBufReader extends AutoCloseable {
+public interface EntryReader extends AutoCloseable {
     /**
      * Returns the next reader index.
      *

@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.atomix.storage.journal;
+package org.opendaylight.controller.raft.journal;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * A writer of {@link ByteBufJournal} entries.
+ * A writer of {@link RaftJournal} entries.
  */
 @NonNullByDefault
-public interface ByteBufWriter {
+public interface EntryWriter {
     /**
      * Returns the next index to be written.
      *

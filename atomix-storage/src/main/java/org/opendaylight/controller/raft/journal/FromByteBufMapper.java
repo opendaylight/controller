@@ -13,28 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.atomix.storage.journal;
+package org.opendaylight.controller.raft.journal;
 
 import io.netty.buffer.ByteBuf;
-import java.io.EOFException;
-import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * Interface for transforming internal represetation to bytes.
+ * Interface for transforming bytes into their internal representation.
  *
  * @param <T> Internal representation type
  */
 @NonNullByDefault
 @FunctionalInterface
-public interface ToByteBufMapper<T> {
+public interface FromByteBufMapper<T> {
     /**
-     * Converts an object into a series of bytes in the specified {@link ByteBuf}.
+     * Converts the contents of a {@link ByteBuf} to an object.
      *
-     * @param obj the object
-     * @param buf target buffer
-     * @throws EOFException if the buffer does not have sufficient capacity
-     * @throws IOException if some other I/O error occurs
+     * @param index entry index
+     * @param bytes entry bytes
+     * @return resulting object
      */
-    void objectToBytes(T obj, ByteBuf buf) throws IOException;
+    T bytesToObject(long index, ByteBuf bytes);
 }

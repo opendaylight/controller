@@ -32,23 +32,26 @@ import java.util.function.BiFunction;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.raft.journal.EntryReader;
+import org.opendaylight.controller.raft.journal.EntryWriter;
+import org.opendaylight.controller.raft.journal.RaftJournal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A {@link ByteBufJournal} Implementation.
+ * A {@link RaftJournal} Implementation.
  */
-public final class SegmentedByteBufJournal implements ByteBufJournal {
+public final class SegmentedByteBufJournal implements RaftJournal {
     private static final Logger LOG = LoggerFactory.getLogger(SegmentedByteBufJournal.class);
     private static final int SEGMENT_BUFFER_FACTOR = 3;
 
     private final ConcurrentNavigableMap<Long, JournalSegment> segments = new ConcurrentSkipListMap<>();
-    private final Collection<ByteBufReader> readers = ConcurrentHashMap.newKeySet();
+    private final Collection<EntryReader> readers = ConcurrentHashMap.newKeySet();
     private final @NonNull ByteBufAllocator allocator;
     private final @NonNull StorageLevel storageLevel;
     private final @NonNull File directory;
     private final @NonNull String name;
-    private final @NonNull ByteBufWriter writer;
+    private final @NonNull EntryWriter writer;
     private final int maxSegmentSize;
     private final int maxEntrySize;
     @Deprecated(forRemoval = true)
@@ -110,18 +113,18 @@ public final class SegmentedByteBufJournal implements ByteBufJournal {
     }
 
     @Override
-    public ByteBufWriter writer() {
+    public EntryWriter writer() {
         return writer;
     }
 
     @Override
-    public ByteBufReader openReader(final long index) {
+    public EntryReader openReader(final long index) {
         return openReader(index, SegmentedByteBufReader::new);
     }
 
     @NonNullByDefault
-    private ByteBufReader openReader(final long index,
-            final BiFunction<SegmentedByteBufJournal, JournalSegment, ByteBufReader> constructor) {
+    private EntryReader openReader(final long index,
+            final BiFunction<SegmentedByteBufJournal, JournalSegment, EntryReader> constructor) {
         final var reader = constructor.apply(this, segment(index));
         reader.reset(index);
         readers.add(reader);
@@ -129,7 +132,7 @@ public final class SegmentedByteBufJournal implements ByteBufJournal {
     }
 
     @Override
-    public ByteBufReader openCommitsReader(final long index) {
+    public EntryReader openCommitsReader(final long index) {
         return openReader(index, SegmentedCommitsByteBufReader::new);
     }
 

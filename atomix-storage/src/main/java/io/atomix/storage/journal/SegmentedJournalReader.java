@@ -20,16 +20,18 @@ import static java.util.Objects.requireNonNull;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.raft.journal.EntryReader;
+import org.opendaylight.controller.raft.journal.FromByteBufMapper;
 
 /**
- * A {@link JournalReader} backed by a {@link ByteBufReader}.
+ * A {@link JournalReader} backed by a {@link EntryReader}.
  */
 @NonNullByDefault
 final class SegmentedJournalReader<E> implements JournalReader<E> {
     private final FromByteBufMapper<E> mapper;
-    private final ByteBufReader reader;
+    private final EntryReader reader;
 
-    SegmentedJournalReader(final ByteBufReader reader, final FromByteBufMapper<E> mapper) {
+    SegmentedJournalReader(final EntryReader reader, final FromByteBufMapper<E> mapper) {
         this.reader = requireNonNull(reader);
         this.mapper = requireNonNull(mapper);
     }
