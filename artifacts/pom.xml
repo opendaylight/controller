@@ -32,6 +32,13 @@
                 <version>${project.version}</version>
             </dependency>
 
+            <!-- RAFT Journal -->
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>raft-journal</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
             <!-- Atomix -->
             <dependency>
                 <groupId>${project.groupId}</groupId>

@@ -31,6 +31,7 @@
     <module>bundle-parent</module>
     <module>benchmark</module>
     <module>jolokia</module>
+    <module>raft-journal</module>
 
     <module>opendaylight/blueprint</module>
     <module>opendaylight/md-sal</module>
