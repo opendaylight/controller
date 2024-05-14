@@ -24,9 +24,16 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public interface ByteBufJournal extends AutoCloseable {
     /**
+     * Return the index of the first entry in the journal.
+     *
+     * @return the index of the first entry in the journal
+     */
+    long firstIndex();
+
+    /**
      * Return the index of the last entry in the journal.
      *
-     * @return the last index, or zero if there are no entries.
+     * @return the last index, or zero if there are no entries
      */
     long lastIndex();
 

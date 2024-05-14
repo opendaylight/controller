@@ -35,11 +35,6 @@ final class SegmentedJournalReader<E> implements JournalReader<E> {
     }
 
     @Override
-    public long getFirstIndex() {
-        return reader.firstIndex();
-    }
-
-    @Override
     public long getNextIndex() {
         return reader.nextIndex();
     }

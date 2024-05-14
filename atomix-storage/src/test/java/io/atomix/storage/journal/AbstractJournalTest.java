@@ -375,7 +375,7 @@ public abstract class AbstractJournalTest {
 
             // Ensure the reader starts at the first physical index in the journal.
             assertEquals(entriesPerSegment + 1, reader.getNextIndex());
-            assertEquals(reader.getFirstIndex(), reader.getNextIndex());
+            assertEquals(journal.firstIndex(), reader.getNextIndex());
             assertEquals(entriesPerSegment + 1, assertNext(reader).index());
             assertEquals(entriesPerSegment + 2, reader.getNextIndex());
         }

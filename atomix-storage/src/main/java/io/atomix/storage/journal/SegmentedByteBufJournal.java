@@ -100,6 +100,11 @@ public final class SegmentedByteBufJournal implements ByteBufJournal {
     }
 
     @Override
+    public long firstIndex() {
+        return firstSegment().firstIndex();
+    }
+
+    @Override
     public long lastIndex() {
         return lastSegment().lastIndex();
     }

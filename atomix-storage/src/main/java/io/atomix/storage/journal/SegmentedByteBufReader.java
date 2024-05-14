@@ -39,11 +39,6 @@ sealed class SegmentedByteBufReader implements ByteBufReader permits SegmentedCo
     }
 
     @Override
-    public final long firstIndex() {
-        return journal.firstSegment().firstIndex();
-    }
-
-    @Override
     public final long nextIndex() {
         return nextIndex;
     }

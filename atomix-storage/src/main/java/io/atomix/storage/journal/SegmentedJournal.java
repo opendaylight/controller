@@ -35,6 +35,11 @@ public final class SegmentedJournal<E> implements Journal<E> {
     }
 
     @Override
+    public long firstIndex() {
+        return journal.firstIndex();
+    }
+
+    @Override
     public long lastIndex() {
         return journal.lastIndex();
     }
