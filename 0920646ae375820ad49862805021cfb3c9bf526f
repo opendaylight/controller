@@ -47,6 +47,54 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "0e516aa7_74182809",
+        "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/ClientStateUtils.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 8894
+      },
+      "writtenOn": "2024-05-21T09:21:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "10afad0d_36b60cf7",
+      "range": {
+        "startLine": 112,
+        "startChar": 43,
+        "endLine": 112,
+        "endChar": 71
+      },
+      "revId": "0920646ae375820ad49862805021cfb3c9bf526f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "596b20c0_ab793652",
+        "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/ClientStateUtils.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 8894
+      },
+      "writtenOn": "2024-05-21T09:21:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5bb18cbd_f3f2d6de",
+      "range": {
+        "startLine": 112,
+        "startChar": 28,
+        "endLine": 112,
+        "endChar": 42
+      },
+      "revId": "0920646ae375820ad49862805021cfb3c9bf526f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "80303dd1_514b949a",
@@ -70,6 +118,30 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "3a72802c_7cbbe542",
+        "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/ClientStateUtils.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 8894
+      },
+      "writtenOn": "2024-05-21T09:21:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "80303dd1_514b949a",
+      "range": {
+        "startLine": 143,
+        "startChar": 15,
+        "endLine": 143,
+        "endChar": 23
+      },
+      "revId": "0920646ae375820ad49862805021cfb3c9bf526f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "4b3d7d41_0932efc8",
@@ -83,6 +155,30 @@
       "writtenOn": "2024-05-10T17:43:23Z",
       "side": 1,
       "message": "we should be injecting parent directory instead",
+      "range": {
+        "startLine": 160,
+        "startChar": 27,
+        "endLine": 160,
+        "endChar": 37
+      },
+      "revId": "0920646ae375820ad49862805021cfb3c9bf526f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "77cceb5f_c8927fda",
+        "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/ClientStateUtils.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 8894
+      },
+      "writtenOn": "2024-05-21T09:21:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4b3d7d41_0932efc8",
       "range": {
         "startLine": 160,
         "startChar": 27,

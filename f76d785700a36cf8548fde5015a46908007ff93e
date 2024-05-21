@@ -22,6 +22,30 @@
       },
       "revId": "f76d785700a36cf8548fde5015a46908007ff93e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "bd8a3231_bd02c4a1",
+        "filename": "opendaylight/md-sal/cds-access-client/src/test/java/org/opendaylight/controller/cluster/access/client/ActorBehaviorTest.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 8894
+      },
+      "writtenOn": "2024-05-21T09:21:34Z",
+      "side": 0,
+      "message": "these cases are related to save snapshot flow\nafter update snapshots no longer saved",
+      "parentUuid": "fb644d0f_b882500f",
+      "range": {
+        "startLine": 134,
+        "startChar": 9,
+        "endLine": 134,
+        "endChar": 49
+      },
+      "revId": "f76d785700a36cf8548fde5015a46908007ff93e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
