@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import akka.japi.Procedure;
+import org.apache.pekko.japi.Procedure;
 
 /**
  * An akka Procedure that does nothing.

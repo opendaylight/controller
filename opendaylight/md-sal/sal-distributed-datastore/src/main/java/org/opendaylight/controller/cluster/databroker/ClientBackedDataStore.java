@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.cluster.databroker;
 
-import akka.actor.ActorSystem;
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.pekko.actor.ActorSystem;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
 import org.opendaylight.controller.cluster.datastore.AbstractDataStore;

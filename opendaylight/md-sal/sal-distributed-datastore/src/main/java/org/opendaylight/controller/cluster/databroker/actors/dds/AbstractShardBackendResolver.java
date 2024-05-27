@@ -10,8 +10,6 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
-import akka.util.Timeout;
 import com.google.common.primitives.UnsignedLong;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -21,6 +19,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.util.Timeout;
 import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;

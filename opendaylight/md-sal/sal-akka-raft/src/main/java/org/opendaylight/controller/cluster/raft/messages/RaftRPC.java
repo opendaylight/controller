@@ -8,8 +8,8 @@
 
 package org.opendaylight.controller.cluster.raft.messages;
 
-import akka.dispatch.ControlMessage;
 import java.io.Serializable;
+import org.apache.pekko.dispatch.ControlMessage;
 
 /**
  * Interface implemented by all requests exchanged in the Raft protocol.

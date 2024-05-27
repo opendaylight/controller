@@ -9,12 +9,12 @@ package org.opendaylight.controller.cluster.raft;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
-import akka.actor.PoisonPill;
-import akka.actor.Props;
-import akka.actor.ReceiveTimeout;
-import akka.actor.UntypedAbstractActor;
 import java.util.concurrent.TimeoutException;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.PoisonPill;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.actor.ReceiveTimeout;
+import org.apache.pekko.actor.UntypedAbstractActor;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshotReply;
@@ -59,7 +59,7 @@ final class GetSnapshotReplyActor extends UntypedAbstractActor {
             LOG.warn("{}: Got ReceiveTimeout for inactivity - did not receive CaptureSnapshotReply within {} ms",
                     params.id, params.receiveTimeout.toMillis());
 
-            params.replyToActor.tell(new akka.actor.Status.Failure(new TimeoutException(String.format(
+            params.replyToActor.tell(new org.apache.pekko.actor.Status.Failure(new TimeoutException(String.format(
                     "Timed out after %d ms while waiting for CaptureSnapshotReply",
                         params.receiveTimeout.toMillis()))), getSelf());
             getSelf().tell(PoisonPill.getInstance(), getSelf());
