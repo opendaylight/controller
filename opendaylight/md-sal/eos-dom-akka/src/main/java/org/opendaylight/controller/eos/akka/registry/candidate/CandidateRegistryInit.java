@@ -7,16 +7,16 @@
  */
 package org.opendaylight.controller.eos.akka.registry.candidate;
 
-import akka.actor.typed.ActorRef;
-import akka.actor.typed.Behavior;
-import akka.actor.typed.javadsl.AbstractBehavior;
-import akka.actor.typed.javadsl.ActorContext;
-import akka.actor.typed.javadsl.Behaviors;
-import akka.actor.typed.javadsl.Receive;
-import akka.actor.typed.javadsl.StashBuffer;
-import akka.cluster.Cluster;
 import java.time.Duration;
 import java.util.Set;
+import org.apache.pekko.actor.typed.ActorRef;
+import org.apache.pekko.actor.typed.Behavior;
+import org.apache.pekko.actor.typed.javadsl.AbstractBehavior;
+import org.apache.pekko.actor.typed.javadsl.ActorContext;
+import org.apache.pekko.actor.typed.javadsl.Behaviors;
+import org.apache.pekko.actor.typed.javadsl.Receive;
+import org.apache.pekko.actor.typed.javadsl.StashBuffer;
+import org.apache.pekko.cluster.Cluster;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.ClearCandidatesForMember;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.ClearCandidatesResponse;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.OwnerSupervisorCommand;

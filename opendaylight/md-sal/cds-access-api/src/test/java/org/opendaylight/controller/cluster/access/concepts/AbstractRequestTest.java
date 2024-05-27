@@ -12,13 +12,13 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.ExtendedActorSystem;
-import akka.serialization.JavaSerializer;
-import akka.testkit.TestProbe;
 import com.google.common.base.MoreObjects;
 import org.apache.commons.lang3.SerializationUtils;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.ExtendedActorSystem;
+import org.apache.pekko.serialization.JavaSerializer;
+import org.apache.pekko.testkit.TestProbe;
 import org.junit.Before;
 import org.junit.Test;
 

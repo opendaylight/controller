@@ -8,7 +8,7 @@
 
 package org.opendaylight.controller.cluster.raft.base.messages;
 
-import akka.dispatch.ControlMessage;
+import org.apache.pekko.dispatch.ControlMessage;
 
 /**
  * This messages is sent via a schedule to the Leader to prompt it to send a heart beat to its followers.

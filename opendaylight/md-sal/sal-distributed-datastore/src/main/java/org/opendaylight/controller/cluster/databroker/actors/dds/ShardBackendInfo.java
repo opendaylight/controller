@@ -10,10 +10,10 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.primitives.UnsignedLong;
 import java.util.Optional;
+import org.apache.pekko.actor.ActorRef;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.client.BackendInfo;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;

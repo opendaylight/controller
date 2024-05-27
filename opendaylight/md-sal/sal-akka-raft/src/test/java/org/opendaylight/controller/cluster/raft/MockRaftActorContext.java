@@ -10,10 +10,6 @@ package org.opendaylight.controller.cluster.raft;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.actor.ActorSystem;
-import akka.actor.Props;
 import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.io.IOException;
@@ -24,6 +20,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSelection;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.Props;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;

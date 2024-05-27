@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import akka.actor.ActorRef;
 import com.google.common.base.Joiner;
 import com.google.common.base.Joiner.MapJoiner;
 import java.time.Instant;
@@ -15,6 +14,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
+import org.apache.pekko.actor.ActorRef;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStatsMXBean;

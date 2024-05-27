@@ -9,9 +9,6 @@ package org.opendaylight.controller.cluster.raft;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.actor.Cancellable;
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayDeque;
 import java.util.Collection;
@@ -19,6 +16,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSelection;
+import org.apache.pekko.actor.Cancellable;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.SnapshotComplete;

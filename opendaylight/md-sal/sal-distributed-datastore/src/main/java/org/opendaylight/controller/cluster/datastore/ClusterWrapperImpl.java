@@ -10,11 +10,11 @@ package org.opendaylight.controller.cluster.datastore;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.Address;
-import akka.cluster.Cluster;
-import akka.cluster.ClusterEvent;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.Address;
+import org.apache.pekko.cluster.Cluster;
+import org.apache.pekko.cluster.ClusterEvent;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 
 public class ClusterWrapperImpl implements ClusterWrapper {

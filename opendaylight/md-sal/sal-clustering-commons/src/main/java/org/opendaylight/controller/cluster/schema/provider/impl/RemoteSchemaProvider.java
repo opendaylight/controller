@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.cluster.schema.provider.impl;
 
-import akka.dispatch.OnComplete;
 import com.google.common.annotations.Beta;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import org.apache.pekko.dispatch.OnComplete;
 import org.opendaylight.controller.cluster.schema.provider.RemoteYangTextSourceProvider;
 import org.opendaylight.yangtools.yang.model.api.source.SourceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.source.YangTextSource;
