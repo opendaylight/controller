@@ -9,13 +9,13 @@ package org.opendaylight.controller.eos.akka;
 
 import static org.awaitility.Awaitility.await;
 
-import akka.actor.testkit.typed.javadsl.ActorTestKit;
-import akka.cluster.Member;
-import akka.cluster.MemberStatus;
-import akka.cluster.typed.Cluster;
 import com.google.common.collect.ImmutableList;
 import java.time.Duration;
 import java.util.List;
+import org.apache.pekko.actor.testkit.typed.javadsl.ActorTestKit;
+import org.apache.pekko.cluster.Member;
+import org.apache.pekko.cluster.MemberStatus;
+import org.apache.pekko.cluster.typed.Cluster;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

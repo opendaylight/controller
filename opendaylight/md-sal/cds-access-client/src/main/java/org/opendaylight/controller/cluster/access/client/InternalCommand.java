@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
-import akka.dispatch.ControlMessage;
+import org.apache.pekko.dispatch.ControlMessage;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
