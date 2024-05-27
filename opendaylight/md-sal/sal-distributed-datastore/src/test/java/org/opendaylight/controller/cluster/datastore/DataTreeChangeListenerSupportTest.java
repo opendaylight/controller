@@ -20,16 +20,16 @@ import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.o
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.outerNodeEntry;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.testNodeWithOuter;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.pattern.Patterns;
-import akka.testkit.TestActorRef;
-import akka.testkit.javadsl.TestKit;
-import akka.util.Timeout;
 import java.time.Duration;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSelection;
+import org.apache.pekko.pattern.Patterns;
+import org.apache.pekko.testkit.TestActorRef;
+import org.apache.pekko.testkit.javadsl.TestKit;
+import org.apache.pekko.util.Timeout;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

@@ -40,7 +40,7 @@ final class BenchmarkUtils {
     static final String BENCHMARK_PAYLOAD_SIZE = "payload-size";
     static final String BENCHMARK_PAYLOAD_SIZE_DEFAULT = "10K";
 
-    static final String CURRENT_CONFIG_RESOURCE = "/initial/factory-akka.conf";
+    static final String CURRENT_CONFIG_RESOURCE = "/initial/factory-pekko.conf";
     static final String CURRENT_CONFIG_PATH = "odl-cluster-data.akka.persistence.journal.segmented-file";
 
     private static final String[] BYTE_SFX = {"G", "M", "K"};

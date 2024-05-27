@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.dummy.datastore;
 
-import akka.actor.Props;
-import akka.actor.UntypedAbstractActor;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.actor.UntypedAbstractActor;
 
 public final class DummyShardManager extends UntypedAbstractActor {
     public DummyShardManager(final Configuration configuration, final String memberName, final String[] shardNames,

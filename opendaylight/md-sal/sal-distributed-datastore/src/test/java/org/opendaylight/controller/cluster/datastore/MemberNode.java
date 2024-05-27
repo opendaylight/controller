@@ -11,13 +11,6 @@ import static java.util.Objects.requireNonNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.AddressFromURIString;
-import akka.cluster.Cluster;
-import akka.cluster.ClusterEvent.CurrentClusterState;
-import akka.cluster.Member;
-import akka.cluster.MemberStatus;
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.Config;
@@ -27,6 +20,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.AddressFromURIString;
+import org.apache.pekko.cluster.Cluster;
+import org.apache.pekko.cluster.ClusterEvent.CurrentClusterState;
+import org.apache.pekko.cluster.Member;
+import org.apache.pekko.cluster.MemberStatus;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.databroker.ClientBackedDataStore;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
@@ -49,7 +49,7 @@ import scala.concurrent.duration.FiniteDuration;
  * @author Thomas Pantelis
  */
 public class MemberNode {
-    private static final String MEMBER_1_ADDRESS = "akka://cluster-test@127.0.0.1:2558";
+    private static final String MEMBER_1_ADDRESS = "pekko://cluster-test@127.0.0.1:2558";
 
     private IntegrationTestKit kit;
     private ClientBackedDataStore configDataStore;
@@ -301,7 +301,7 @@ public class MemberNode {
             }
 
             ActorSystem system = ActorSystem.create("cluster-test", config);
-            String member1Address = useAkkaArtery ? MEMBER_1_ADDRESS : MEMBER_1_ADDRESS.replace("akka", "akka.tcp");
+            String member1Address = useAkkaArtery ? MEMBER_1_ADDRESS : MEMBER_1_ADDRESS.replace("pekko", "pekko.tcp");
             Cluster.get(system).join(AddressFromURIString.parse(member1Address));
 
             node.kit = new IntegrationTestKit(system, datastoreContextBuilder);

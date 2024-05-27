@@ -7,18 +7,6 @@
  */
 package org.opendaylight.controller.eos.akka.registry.listener.type;
 
-import akka.actor.typed.ActorRef;
-import akka.actor.typed.Behavior;
-import akka.actor.typed.javadsl.AbstractBehavior;
-import akka.actor.typed.javadsl.ActorContext;
-import akka.actor.typed.javadsl.Behaviors;
-import akka.actor.typed.javadsl.Receive;
-import akka.cluster.ddata.ORMap;
-import akka.cluster.ddata.ORSet;
-import akka.cluster.ddata.typed.javadsl.DistributedData;
-import akka.cluster.ddata.typed.javadsl.Replicator.Changed;
-import akka.cluster.ddata.typed.javadsl.Replicator.SubscribeResponse;
-import akka.cluster.ddata.typed.javadsl.ReplicatorMessageAdapter;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import java.time.Duration;
@@ -28,6 +16,18 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.apache.pekko.actor.typed.ActorRef;
+import org.apache.pekko.actor.typed.Behavior;
+import org.apache.pekko.actor.typed.javadsl.AbstractBehavior;
+import org.apache.pekko.actor.typed.javadsl.ActorContext;
+import org.apache.pekko.actor.typed.javadsl.Behaviors;
+import org.apache.pekko.actor.typed.javadsl.Receive;
+import org.apache.pekko.cluster.ddata.ORMap;
+import org.apache.pekko.cluster.ddata.ORSet;
+import org.apache.pekko.cluster.ddata.typed.javadsl.DistributedData;
+import org.apache.pekko.cluster.ddata.typed.javadsl.Replicator.Changed;
+import org.apache.pekko.cluster.ddata.typed.javadsl.Replicator.SubscribeResponse;
+import org.apache.pekko.cluster.ddata.typed.javadsl.ReplicatorMessageAdapter;
 import org.opendaylight.controller.eos.akka.registry.candidate.CandidateRegistry;
 import org.opendaylight.controller.eos.akka.registry.listener.owner.SingleEntityListenerActor;
 import org.opendaylight.controller.eos.akka.registry.listener.owner.command.ListenerCommand;

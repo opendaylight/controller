@@ -10,16 +10,16 @@ package org.opendaylight.controller.cluster.access.commands;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.actor.ActorSystem;
-import akka.actor.ExtendedActorSystem;
-import akka.serialization.JavaSerializer;
-import akka.testkit.TestProbe;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.Optional;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSelection;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.ExtendedActorSystem;
+import org.apache.pekko.serialization.JavaSerializer;
+import org.apache.pekko.testkit.TestProbe;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
@@ -40,7 +40,7 @@ public class ConnectClientSuccessTest extends AbstractRequestSuccessTest<Connect
         ALTERNATES, TREE, MAX_MESSAGES);
 
     public ConnectClientSuccessTest() {
-        super(OBJECT, 146 + ACTOR_REF.path().toSerializationFormat().length());
+        super(OBJECT, 147 + ACTOR_REF.path().toSerializationFormat().length());
     }
 
     @Before

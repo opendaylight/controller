@@ -9,12 +9,12 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
-import akka.actor.PoisonPill;
-import akka.actor.Props;
-import akka.actor.ReceiveTimeout;
-import akka.japi.Creator;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.PoisonPill;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.actor.ReceiveTimeout;
+import org.apache.pekko.japi.Creator;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActorWithMetering;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
@@ -90,8 +90,8 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
         final boolean ret = transaction.isClosed();
         if (ret) {
             shardStats.incrementFailedReadTransactionsCount();
-            getSender().tell(new akka.actor.Status.Failure(new ReadFailedException("Transaction is closed")),
-                    getSelf());
+            getSender().tell(
+                new org.apache.pekko.actor.Status.Failure(new ReadFailedException("Transaction is closed")), getSelf());
         }
         return ret;
     }
