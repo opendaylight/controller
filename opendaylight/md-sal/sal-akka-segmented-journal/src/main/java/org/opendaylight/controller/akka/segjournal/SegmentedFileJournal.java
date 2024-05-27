@@ -7,15 +7,10 @@
  */
 package org.opendaylight.controller.akka.segjournal;
 
-import static akka.actor.ActorRef.noSender;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
+import static org.apache.pekko.actor.ActorRef.noSender;
 
-import akka.actor.ActorRef;
-import akka.dispatch.Futures;
-import akka.persistence.AtomicWrite;
-import akka.persistence.PersistentRepr;
-import akka.persistence.journal.japi.AsyncWriteJournal;
 import com.typesafe.config.Config;
 import io.atomix.storage.journal.SegmentedJournal;
 import io.atomix.storage.journal.StorageLevel;
@@ -27,6 +22,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.dispatch.Futures;
+import org.apache.pekko.persistence.AtomicWrite;
+import org.apache.pekko.persistence.PersistentRepr;
+import org.apache.pekko.persistence.journal.japi.AsyncWriteJournal;
 import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.AsyncMessage;
 import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.WriteMessages;
 import org.slf4j.Logger;
@@ -34,8 +34,8 @@ import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
 
 /**
- * An Akka persistence journal implementation on top of {@link SegmentedJournal}. This actor represents aggregation
- * of multiple journals and performs a receptionist job between Akka and invidual per-persistenceId actors. See
+ * An Pekko persistence journal implementation on top of {@link SegmentedJournal}. This actor represents aggregation
+ * of multiple journals and performs a receptionist job between Pekko and invidual per-persistenceId actors. See
  * {@link SegmentedJournalActor} for details on how the persistence works.
  */
 public class SegmentedFileJournal extends AsyncWriteJournal {

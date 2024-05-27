@@ -9,9 +9,9 @@ package org.opendaylight.controller.eos.akka.owner.supervisor.command;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.typed.ActorRef;
-import akka.pattern.StatusReply;
 import java.io.Serializable;
+import org.apache.pekko.actor.typed.ActorRef;
+import org.apache.pekko.pattern.StatusReply;
 import org.eclipse.jdt.annotation.NonNull;
 
 public abstract class OwnerSupervisorRequest<T extends OwnerSupervisorReply> extends OwnerSupervisorCommand

@@ -9,13 +9,13 @@ package org.opendaylight.controller.cluster;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.japi.Procedure;
-import akka.persistence.AbstractPersistentActor;
-import akka.persistence.DeleteMessagesSuccess;
-import akka.persistence.DeleteSnapshotsSuccess;
-import akka.persistence.JournalProtocol;
-import akka.persistence.SnapshotProtocol;
-import akka.persistence.SnapshotSelectionCriteria;
+import org.apache.pekko.japi.Procedure;
+import org.apache.pekko.persistence.AbstractPersistentActor;
+import org.apache.pekko.persistence.DeleteMessagesSuccess;
+import org.apache.pekko.persistence.DeleteSnapshotsSuccess;
+import org.apache.pekko.persistence.JournalProtocol;
+import org.apache.pekko.persistence.SnapshotProtocol;
+import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 
 /**
  * A DataPersistenceProvider implementation with persistence enabled.
