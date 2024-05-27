@@ -9,11 +9,11 @@ package org.opendaylight.controller.cluster.access.client;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.persistence.DeleteSnapshotsFailure;
-import akka.persistence.DeleteSnapshotsSuccess;
-import akka.persistence.SaveSnapshotFailure;
-import akka.persistence.SaveSnapshotSuccess;
-import akka.persistence.SnapshotSelectionCriteria;
+import org.apache.pekko.persistence.DeleteSnapshotsFailure;
+import org.apache.pekko.persistence.DeleteSnapshotsSuccess;
+import org.apache.pekko.persistence.SaveSnapshotFailure;
+import org.apache.pekko.persistence.SaveSnapshotSuccess;
+import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

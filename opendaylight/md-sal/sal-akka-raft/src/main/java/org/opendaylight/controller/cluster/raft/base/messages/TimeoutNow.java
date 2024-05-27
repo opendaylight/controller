@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.cluster.raft.base.messages;
 
-import akka.dispatch.ControlMessage;
 import java.io.Serializable;
+import org.apache.pekko.dispatch.ControlMessage;
 
 /**
  * Message sent to a follower to force an immediate election time out.

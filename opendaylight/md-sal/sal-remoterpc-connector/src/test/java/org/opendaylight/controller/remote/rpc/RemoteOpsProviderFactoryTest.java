@@ -9,7 +9,7 @@ package org.opendaylight.controller.remote.rpc;
 
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import akka.actor.ActorSystem;
+import org.apache.pekko.actor.ActorSystem;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
