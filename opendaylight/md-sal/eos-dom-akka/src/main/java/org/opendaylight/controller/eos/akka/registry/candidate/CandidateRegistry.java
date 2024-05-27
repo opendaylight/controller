@@ -7,21 +7,21 @@
  */
 package org.opendaylight.controller.eos.akka.registry.candidate;
 
-import akka.actor.typed.Behavior;
-import akka.actor.typed.javadsl.AbstractBehavior;
-import akka.actor.typed.javadsl.ActorContext;
-import akka.actor.typed.javadsl.Behaviors;
-import akka.actor.typed.javadsl.Receive;
-import akka.cluster.Cluster;
-import akka.cluster.ddata.Key;
-import akka.cluster.ddata.ORMap;
-import akka.cluster.ddata.ORMapKey;
-import akka.cluster.ddata.ORSet;
-import akka.cluster.ddata.SelfUniqueAddress;
-import akka.cluster.ddata.typed.javadsl.DistributedData;
-import akka.cluster.ddata.typed.javadsl.Replicator;
-import akka.cluster.ddata.typed.javadsl.ReplicatorMessageAdapter;
 import java.util.Set;
+import org.apache.pekko.actor.typed.Behavior;
+import org.apache.pekko.actor.typed.javadsl.AbstractBehavior;
+import org.apache.pekko.actor.typed.javadsl.ActorContext;
+import org.apache.pekko.actor.typed.javadsl.Behaviors;
+import org.apache.pekko.actor.typed.javadsl.Receive;
+import org.apache.pekko.cluster.Cluster;
+import org.apache.pekko.cluster.ddata.Key;
+import org.apache.pekko.cluster.ddata.ORMap;
+import org.apache.pekko.cluster.ddata.ORMapKey;
+import org.apache.pekko.cluster.ddata.ORSet;
+import org.apache.pekko.cluster.ddata.SelfUniqueAddress;
+import org.apache.pekko.cluster.ddata.typed.javadsl.DistributedData;
+import org.apache.pekko.cluster.ddata.typed.javadsl.Replicator;
+import org.apache.pekko.cluster.ddata.typed.javadsl.ReplicatorMessageAdapter;
 import org.opendaylight.controller.eos.akka.registry.candidate.command.CandidateRegistryCommand;
 import org.opendaylight.controller.eos.akka.registry.candidate.command.InternalUpdateResponse;
 import org.opendaylight.controller.eos.akka.registry.candidate.command.RegisterCandidate;

@@ -10,19 +10,6 @@ package org.opendaylight.controller.eos.akka;
 import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 
-import akka.actor.ActorSystem;
-import akka.actor.Address;
-import akka.actor.typed.ActorRef;
-import akka.actor.typed.Behavior;
-import akka.actor.typed.javadsl.Adapter;
-import akka.actor.typed.javadsl.AskPattern;
-import akka.actor.typed.javadsl.Behaviors;
-import akka.cluster.ddata.LWWRegister;
-import akka.cluster.ddata.LWWRegisterKey;
-import akka.cluster.ddata.ORMap;
-import akka.cluster.ddata.ORSet;
-import akka.cluster.ddata.typed.javadsl.DistributedData;
-import akka.cluster.ddata.typed.javadsl.Replicator;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import java.time.Duration;
@@ -36,6 +23,19 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.Address;
+import org.apache.pekko.actor.typed.ActorRef;
+import org.apache.pekko.actor.typed.Behavior;
+import org.apache.pekko.actor.typed.javadsl.Adapter;
+import org.apache.pekko.actor.typed.javadsl.AskPattern;
+import org.apache.pekko.actor.typed.javadsl.Behaviors;
+import org.apache.pekko.cluster.ddata.LWWRegister;
+import org.apache.pekko.cluster.ddata.LWWRegisterKey;
+import org.apache.pekko.cluster.ddata.ORMap;
+import org.apache.pekko.cluster.ddata.ORSet;
+import org.apache.pekko.cluster.ddata.typed.javadsl.DistributedData;
+import org.apache.pekko.cluster.ddata.typed.javadsl.Replicator;
 import org.opendaylight.controller.eos.akka.bootstrap.EOSMain;
 import org.opendaylight.controller.eos.akka.bootstrap.command.BootstrapCommand;
 import org.opendaylight.controller.eos.akka.bootstrap.command.GetRunningContext;
@@ -70,28 +70,28 @@ public abstract class AbstractNativeEosTest {
     protected static final String DEFAULT_DATACENTER = "dc-default";
 
     protected static final List<String> TWO_NODE_SEED_NODES =
-            List.of("akka://ClusterSystem@127.0.0.1:2550",
-                    "akka://ClusterSystem@127.0.0.1:2551");
+            List.of("pekko://ClusterSystem@127.0.0.1:2550",
+                    "pekko://ClusterSystem@127.0.0.1:2551");
 
     protected static final List<String> THREE_NODE_SEED_NODES =
-            List.of("akka://ClusterSystem@127.0.0.1:2550",
-                    "akka://ClusterSystem@127.0.0.1:2551",
-                    "akka://ClusterSystem@127.0.0.1:2552");
+            List.of("pekko://ClusterSystem@127.0.0.1:2550",
+                    "pekko://ClusterSystem@127.0.0.1:2551",
+                    "pekko://ClusterSystem@127.0.0.1:2552");
 
     protected static final List<String> DATACENTER_SEED_NODES =
-            List.of("akka://ClusterSystem@127.0.0.1:2550",
-                    "akka://ClusterSystem@127.0.0.1:2551",
-                    "akka://ClusterSystem@127.0.0.1:2552",
-                    "akka://ClusterSystem@127.0.0.1:2553");
+            List.of("pekko://ClusterSystem@127.0.0.1:2550",
+                    "pekko://ClusterSystem@127.0.0.1:2551",
+                    "pekko://ClusterSystem@127.0.0.1:2552",
+                    "pekko://ClusterSystem@127.0.0.1:2553");
 
     protected static final BindingDOMCodecServices CODEC_CONTEXT =
         new DefaultBindingDOMCodecFactory().createBindingDOMCodec(BindingRuntimeHelpers.createRuntimeContext());
 
-    private static final String REMOTE_PROTOCOL = "akka";
-    private static final String PORT_PARAM = "akka.remote.artery.canonical.port";
-    private static final String ROLE_PARAM = "akka.cluster.roles";
-    private static final String SEED_NODES_PARAM = "akka.cluster.seed-nodes";
-    private static final String DATA_CENTER_PARAM = "akka.cluster.multi-data-center.self-data-center";
+    private static final String REMOTE_PROTOCOL = "pekko";
+    private static final String PORT_PARAM = "pekko.remote.artery.canonical.port";
+    private static final String ROLE_PARAM = "pekko.cluster.roles";
+    private static final String SEED_NODES_PARAM = "pekko.cluster.seed-nodes";
+    private static final String DATA_CENTER_PARAM = "pekko.cluster.multi-data-center.self-data-center";
 
     protected static MockNativeEntityOwnershipService startupNativeService(final int port, final List<String> roles,
                                                                            final List<String> seedNodes)
@@ -106,8 +106,8 @@ public abstract class AbstractNativeEosTest {
         final Config config = ConfigFactory.parseMap(overrides)
                 .withFallback(ConfigFactory.load());
 
-        // Create a classic Akka system since thats what we will have in osgi
-        final akka.actor.ActorSystem system = akka.actor.ActorSystem.create("ClusterSystem", config);
+        // Create a classic Pekko system since thats what we will have in osgi
+        final var system = org.apache.pekko.actor.ActorSystem.create("ClusterSystem", config);
 
         return new MockNativeEntityOwnershipService(system);
     }
@@ -146,8 +146,8 @@ public abstract class AbstractNativeEosTest {
 
         final Config config = ConfigFactory.parseMap(overrides).withFallback(ConfigFactory.load());
 
-        // Create a classic Akka system since thats what we will have in osgi
-        final akka.actor.ActorSystem system = akka.actor.ActorSystem.create("ClusterSystem", config);
+        // Create a classic Pekko system since thats what we will have in osgi
+        final var system = org.apache.pekko.actor.ActorSystem.create("ClusterSystem", config);
         final ActorRef<BootstrapCommand> eosBootstrap =
                 Adapter.spawn(system, bootstrap.get(), "EOSBootstrap");
 
@@ -164,7 +164,7 @@ public abstract class AbstractNativeEosTest {
     protected static ClusterNode startupWithDatacenter(final int port, final List<String> roles,
                                                        final List<String> seedNodes, final String dataCenter)
             throws ExecutionException, InterruptedException {
-        final akka.actor.ActorSystem system = startupActorSystem(port, roles, seedNodes, dataCenter);
+        final org.apache.pekko.actor.ActorSystem system = startupActorSystem(port, roles, seedNodes, dataCenter);
         final ActorRef<BootstrapCommand> eosBootstrap =
                 Adapter.spawn(system, EOSMain.create(CODEC_CONTEXT.getInstanceIdentifierCodec()), "EOSBootstrap");
 
@@ -178,7 +178,7 @@ public abstract class AbstractNativeEosTest {
                 runningContext.getCandidateRegistry(), runningContext.getOwnerSupervisor());
     }
 
-    protected static akka.actor.ActorSystem startupActorSystem(final int port, final List<String> roles,
+    protected static org.apache.pekko.actor.ActorSystem startupActorSystem(final int port, final List<String> roles,
                                                                final List<String> seedNodes) {
         final Map<String, Object> overrides = new HashMap<>();
         overrides.put(PORT_PARAM, port);
@@ -190,11 +190,11 @@ public abstract class AbstractNativeEosTest {
         final Config config = ConfigFactory.parseMap(overrides)
                 .withFallback(ConfigFactory.load());
 
-        // Create a classic Akka system since thats what we will have in osgi
-        return akka.actor.ActorSystem.create("ClusterSystem", config);
+        // Create a classic Pekko system since thats what we will have in osgi
+        return org.apache.pekko.actor.ActorSystem.create("ClusterSystem", config);
     }
 
-    protected static akka.actor.ActorSystem startupActorSystem(final int port, final List<String> roles,
+    protected static org.apache.pekko.actor.ActorSystem startupActorSystem(final int port, final List<String> roles,
                                                                final List<String> seedNodes, final String dataCenter) {
         final Map<String, Object> overrides = new HashMap<>();
         overrides.put(PORT_PARAM, port);
@@ -207,8 +207,8 @@ public abstract class AbstractNativeEosTest {
         final Config config = ConfigFactory.parseMap(overrides)
                 .withFallback(ConfigFactory.load());
 
-        // Create a classic Akka system since thats what we will have in osgi
-        return akka.actor.ActorSystem.create("ClusterSystem", config);
+        // Create a classic Pekko system since thats what we will have in osgi
+        return org.apache.pekko.actor.ActorSystem.create("ClusterSystem", config);
     }
 
     private static Behavior<BootstrapCommand> rootBehavior() {
@@ -361,7 +361,7 @@ public abstract class AbstractNativeEosTest {
     protected static final class ClusterNode {
         private final int port;
         private final List<String> roles;
-        private final akka.actor.typed.ActorSystem<Void> actorSystem;
+        private final org.apache.pekko.actor.typed.ActorSystem<Void> actorSystem;
         private final ActorRef<BootstrapCommand> eosBootstrap;
         private final ActorRef<TypeListenerRegistryCommand> listenerRegistry;
         private final ActorRef<CandidateRegistryCommand> candidateRegistry;
@@ -387,7 +387,7 @@ public abstract class AbstractNativeEosTest {
             return port;
         }
 
-        public akka.actor.typed.ActorSystem<Void> getActorSystem() {
+        public org.apache.pekko.actor.typed.ActorSystem<Void> getActorSystem() {
             return actorSystem;
         }
 

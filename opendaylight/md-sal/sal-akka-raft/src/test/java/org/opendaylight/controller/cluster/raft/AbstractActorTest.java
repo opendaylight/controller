@@ -8,11 +8,11 @@
 
 package org.opendaylight.controller.cluster.raft;
 
-import akka.actor.ActorSystem;
-import akka.testkit.javadsl.TestKit;
 import java.io.File;
 import java.io.IOException;
 import org.apache.commons.io.FileUtils;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.opendaylight.yangtools.util.AbstractStringIdentifier;

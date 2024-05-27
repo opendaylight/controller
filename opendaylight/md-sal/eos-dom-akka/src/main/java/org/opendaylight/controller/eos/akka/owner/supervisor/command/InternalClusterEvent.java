@@ -9,9 +9,9 @@ package org.opendaylight.controller.eos.akka.owner.supervisor.command;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.Address;
 import com.google.common.base.MoreObjects;
 import java.util.Set;
+import org.apache.pekko.actor.Address;
 import org.eclipse.jdt.annotation.NonNull;
 
 public abstract class InternalClusterEvent extends OwnerSupervisorCommand {

@@ -9,9 +9,9 @@ package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
 
-import akka.persistence.SaveSnapshotSuccess;
 import java.util.List;
 import java.util.Map;
+import org.apache.pekko.persistence.SaveSnapshotSuccess;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
