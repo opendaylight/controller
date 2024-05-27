@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.eos.akka.owner.supervisor.command;
 
-import akka.actor.typed.ActorRef;
 import java.io.Serializable;
+import org.apache.pekko.actor.typed.ActorRef;
 import org.eclipse.jdt.annotation.Nullable;
 
 public final class ActivateDataCenter extends OwnerSupervisorCommand implements Serializable {

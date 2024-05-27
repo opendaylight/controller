@@ -93,18 +93,18 @@
         </dependency>
 
         <dependency>
-            <!-- finalname="configuration/initial/akka.conf" -->
+            <!-- finalname="configuration/initial/pekko.conf" -->
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-clustering-config</artifactId>
             <type>xml</type>
-            <classifier>akkaconf</classifier>
+            <classifier>pekkoconf</classifier>
         </dependency>
         <dependency>
-            <!-- finalname="configuration/factory/akka.conf" override="true" -->
+            <!-- finalname="configuration/factory/pekko.conf" override="true" -->
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-clustering-config</artifactId>
             <type>xml</type>
-            <classifier>factoryakkaconf</classifier>
+            <classifier>factorypekkoconf</classifier>
         </dependency>
         <dependency>
             <!-- finalname="configuration/initial/module-shards.conf" -->

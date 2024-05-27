@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.cluster.common.actor;
 
-import akka.japi.Procedure;
 import com.google.common.annotations.Beta;
+import org.apache.pekko.japi.Procedure;
 import org.eclipse.jdt.annotation.NonNull;
 
 /**

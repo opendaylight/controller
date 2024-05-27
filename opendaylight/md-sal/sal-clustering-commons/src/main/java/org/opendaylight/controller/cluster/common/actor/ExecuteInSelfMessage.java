@@ -9,7 +9,7 @@ package org.opendaylight.controller.cluster.common.actor;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.dispatch.ControlMessage;
+import org.apache.pekko.dispatch.ControlMessage;
 import org.eclipse.jdt.annotation.NonNull;
 
 /**

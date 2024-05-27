@@ -2,7 +2,6 @@
 <!-- vi: set et smarttab sw=4 tabstop=4: -->
 <!--
  Copyright (c) 2020 PANTHEON.tech, s.r.o. and others.  All rights reserved.
-
  This program and the accompanying materials are made available under the
  terms of the Eclipse Public License v1.0 which accompanies this distribution,
  and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -17,7 +16,7 @@
         <relativePath>../../bundle-parent</relativePath>
     </parent>
 
-    <artifactId>repackaged-akka</artifactId>
+    <artifactId>repackaged-pekko</artifactId>
     <packaging>bundle</packaging>
     <name>${project.artifactId}</name>
 
@@ -25,7 +24,6 @@
         <!-- We are just juggling classes here -->
         <odlparent.modernizer.skip>true</odlparent.modernizer.skip>
         <odlparent.spotbugs.skip>true</odlparent.spotbugs.skip>
-
         <!-- We do not want to generate javadoc -->
         <maven.javadoc.skip>true</maven.javadoc.skip>
     </properties>
@@ -33,7 +31,7 @@
     <dependencies>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
-            <artifactId>repackaged-akka-jar</artifactId>
+            <artifactId>repackaged-pekko-jar</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
@@ -121,13 +119,13 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>org.opendaylight.controller</groupId>
-                                    <artifactId>repackaged-akka-jar</artifactId>
+                                    <artifactId>repackaged-pekko-jar</artifactId>
                                     <version>${project.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>com.hierynomus</groupId>
                                     <artifactId>asn-one</artifactId>
-                                    <version>0.4.0</version>
+                                    <version>0.5.0</version>
                                 </artifactItem>
                             </artifactItems>
                             <overWriteReleases>false</overWriteReleases>
@@ -143,7 +141,7 @@
                         </goals>
                         <configuration>
                             <classifier>sources</classifier>
-                            <includeArtifactIds>repackaged-akka-jar</includeArtifactIds>
+                            <includeArtifactIds>repackaged-pekko-jar</includeArtifactIds>
                             <outputDirectory>${project.build.directory}/shaded-sources</outputDirectory>
                         </configuration>
                     </execution>
@@ -178,7 +176,7 @@
                         <id>shaded-sources</id>
                         <phase>prepare-package</phase>
                         <goals>
-                           <goal>add-source</goal>
+                            <goal>add-source</goal>
                         </goals>
                         <configuration>
                             <sources>${project.build.directory}/shaded-sources</sources>
@@ -188,7 +186,7 @@
                         <id>shaded-resources</id>
                         <phase>prepare-package</phase>
                         <goals>
-                           <goal>add-resource</goal>
+                            <goal>add-resource</goal>
                         </goals>
                         <configuration>
                             <resources>
@@ -206,9 +204,9 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Automatic-Module-Name>org.opendaylight.controller.repackaged.akka</Automatic-Module-Name>
+                        <Automatic-Module-Name>org.opendaylight.controller.repackaged.pekko</Automatic-Module-Name>
                         <Export-Package>
-                            akka.*,
+                            org.apache.pekko.*,
                             com.typesafe.sslconfig.akka.*,
                             jdk.jfr,
                         </Export-Package>

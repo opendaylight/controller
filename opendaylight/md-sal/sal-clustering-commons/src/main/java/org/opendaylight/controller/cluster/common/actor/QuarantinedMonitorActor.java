@@ -8,18 +8,18 @@
 
 package org.opendaylight.controller.cluster.common.actor;
 
-import akka.actor.Address;
-import akka.actor.Props;
-import akka.actor.UntypedAbstractActor;
-import akka.cluster.Cluster;
-import akka.cluster.ClusterEvent;
-import akka.japi.Effect;
-import akka.remote.AssociationErrorEvent;
-import akka.remote.RemotingLifecycleEvent;
-import akka.remote.artery.ThisActorSystemQuarantinedEvent;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.HashSet;
 import java.util.Set;
+import org.apache.pekko.actor.Address;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.actor.UntypedAbstractActor;
+import org.apache.pekko.cluster.Cluster;
+import org.apache.pekko.cluster.ClusterEvent;
+import org.apache.pekko.japi.Effect;
+import org.apache.pekko.remote.AssociationErrorEvent;
+import org.apache.pekko.remote.RemotingLifecycleEvent;
+import org.apache.pekko.remote.artery.ThisActorSystemQuarantinedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
