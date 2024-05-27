@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "db3d1af1_455f7ccc",
+        "filename": "opendaylight/md-sal/eos-dom-pekko/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2024-05-27T12:29:50Z",
+      "side": 1,
+      "message": "ahem, why?",
+      "range": {
+        "startLine": 21,
+        "startChar": 16,
+        "endLine": 21,
+        "endChar": 29
+      },
+      "revId": "ec32421cfbdfb78b470835814760a47dec7952f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
