@@ -9,13 +9,13 @@ package org.opendaylight.controller.eos.akka.owner.supervisor;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.typed.Behavior;
-import akka.actor.typed.javadsl.ActorContext;
-import akka.actor.typed.javadsl.Behaviors;
-import akka.actor.typed.javadsl.Receive;
-import akka.cluster.Member;
-import akka.cluster.typed.Cluster;
-import akka.pattern.StatusReply;
+import org.apache.pekko.actor.typed.Behavior;
+import org.apache.pekko.actor.typed.javadsl.ActorContext;
+import org.apache.pekko.actor.typed.javadsl.Behaviors;
+import org.apache.pekko.actor.typed.javadsl.Receive;
+import org.apache.pekko.cluster.Member;
+import org.apache.pekko.cluster.typed.Cluster;
+import org.apache.pekko.pattern.StatusReply;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.ActivateDataCenter;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.ClearCandidates;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.ClearCandidatesForMember;

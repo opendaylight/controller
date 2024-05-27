@@ -7,11 +7,11 @@
  */
 package org.opendaylight.controller.cluster.persistence;
 
-import akka.persistence.snapshot.SnapshotStoreSpec;
 import com.typesafe.config.ConfigFactory;
 import java.io.File;
 import java.io.IOException;
 import org.apache.commons.io.FileUtils;
+import org.apache.pekko.persistence.snapshot.SnapshotStoreSpec;
 import org.junit.runner.RunWith;
 import org.scalatestplus.junit.JUnitRunner;
 

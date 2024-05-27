@@ -10,9 +10,9 @@ package org.opendaylight.controller.cluster.raft.utils;
 
 import static org.junit.Assert.assertTrue;
 
-import akka.actor.Props;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.pekko.actor.Props;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 
 public class ForwardMessageToBehaviorActor extends MessageCollectorActor {

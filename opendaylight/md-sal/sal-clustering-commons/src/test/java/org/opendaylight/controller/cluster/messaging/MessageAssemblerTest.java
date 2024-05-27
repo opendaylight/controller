@@ -21,12 +21,12 @@ import static org.opendaylight.controller.cluster.messaging.MessageSlicingIntegr
 import static org.opendaylight.controller.cluster.messaging.MessageSlicingIntegrationTest.assertFailedMessageSliceReply;
 import static org.opendaylight.controller.cluster.messaging.MessageSlicingIntegrationTest.assertSuccessfulMessageSliceReply;
 
-import akka.actor.ActorRef;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import org.apache.commons.lang3.SerializationUtils;
+import org.apache.pekko.actor.ActorRef;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;

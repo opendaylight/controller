@@ -13,14 +13,14 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import akka.actor.ActorRef;
-import akka.persistence.SaveSnapshotSuccess;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.SerializationUtils;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.persistence.SaveSnapshotSuccess;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;

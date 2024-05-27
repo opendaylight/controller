@@ -9,15 +9,15 @@ package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.fail;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.pattern.Patterns;
-import akka.testkit.javadsl.EventFilter;
-import akka.testkit.javadsl.TestKit;
-import akka.util.Timeout;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.pattern.Patterns;
+import org.apache.pekko.testkit.javadsl.EventFilter;
+import org.apache.pekko.testkit.javadsl.TestKit;
+import org.apache.pekko.util.Timeout;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
 import org.slf4j.Logger;

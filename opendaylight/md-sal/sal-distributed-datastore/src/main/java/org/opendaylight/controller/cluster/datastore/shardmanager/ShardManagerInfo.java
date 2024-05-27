@@ -9,10 +9,10 @@ package org.opendaylight.controller.cluster.datastore.shardmanager;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
-import akka.pattern.Patterns;
 import com.google.common.base.Throwables;
 import java.util.List;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.pattern.Patterns;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.raft.RaftState;

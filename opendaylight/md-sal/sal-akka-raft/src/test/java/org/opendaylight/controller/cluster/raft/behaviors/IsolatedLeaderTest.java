@@ -9,9 +9,9 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import static org.junit.Assert.assertEquals;
 
-import akka.actor.ActorRef;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.pekko.actor.ActorRef;
 import org.junit.After;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
@@ -62,8 +62,8 @@ public class IsolatedLeaderTest extends AbstractLeaderTest<IsolatedLeader> {
 
     @Test
     public void testHandleMessageWithThreeMembers() {
-        String followerAddress1 = "akka://test/user/$a";
-        String followerAddress2 = "akka://test/user/$b";
+        String followerAddress1 = "pekko://test/user/$a";
+        String followerAddress2 = "pekko://test/user/$b";
 
         MockRaftActorContext leaderActorContext = createActorContext();
         Map<String, String> peerAddresses = new HashMap<>();
@@ -94,10 +94,10 @@ public class IsolatedLeaderTest extends AbstractLeaderTest<IsolatedLeader> {
 
     @Test
     public void testHandleMessageWithFiveMembers() {
-        String followerAddress1 = "akka://test/user/$a";
-        String followerAddress2 = "akka://test/user/$b";
-        String followerAddress3 = "akka://test/user/$c";
-        String followerAddress4 = "akka://test/user/$d";
+        String followerAddress1 = "pekko://test/user/$a";
+        String followerAddress2 = "pekko://test/user/$b";
+        String followerAddress3 = "pekko://test/user/$c";
+        String followerAddress4 = "pekko://test/user/$d";
 
         final MockRaftActorContext leaderActorContext = createActorContext();
         Map<String, String> peerAddresses = new HashMap<>();
@@ -136,8 +136,8 @@ public class IsolatedLeaderTest extends AbstractLeaderTest<IsolatedLeader> {
 
     @Test
     public void testHandleMessageFromAnotherLeader() {
-        String followerAddress1 = "akka://test/user/$a";
-        String followerAddress2 = "akka://test/user/$b";
+        String followerAddress1 = "pekko://test/user/$a";
+        String followerAddress2 = "pekko://test/user/$b";
 
         MockRaftActorContext leaderActorContext = createActorContext();
         Map<String, String> peerAddresses = new HashMap<>();

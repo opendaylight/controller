@@ -9,9 +9,6 @@ package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
 
-import akka.actor.ActorRef;
-import akka.dispatch.Dispatchers;
-import akka.testkit.TestActorRef;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -20,6 +17,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.dispatch.Dispatchers;
+import org.apache.pekko.testkit.TestActorRef;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
