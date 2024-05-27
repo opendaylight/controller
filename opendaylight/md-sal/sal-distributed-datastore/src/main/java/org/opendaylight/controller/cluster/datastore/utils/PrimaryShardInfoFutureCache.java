@@ -7,9 +7,9 @@
  */
 package org.opendaylight.controller.cluster.datastore.utils;
 
-import akka.dispatch.Futures;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import org.apache.pekko.dispatch.Futures;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
