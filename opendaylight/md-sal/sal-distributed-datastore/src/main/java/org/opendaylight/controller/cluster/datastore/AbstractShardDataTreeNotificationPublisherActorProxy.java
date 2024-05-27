@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import akka.actor.ActorContext;
-import akka.actor.ActorRef;
-import akka.actor.Props;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.apache.pekko.actor.ActorContext;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.Props;
 import org.opendaylight.controller.cluster.common.actor.Dispatchers;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.slf4j.Logger;

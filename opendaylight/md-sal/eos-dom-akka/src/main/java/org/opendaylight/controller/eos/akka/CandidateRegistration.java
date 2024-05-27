@@ -13,9 +13,9 @@ import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
 import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
 
 final class CandidateRegistration extends AbstractObjectRegistration<DOMEntity> {
-    private final AkkaEntityOwnershipService service;
+    private final PekkoEntityOwnershipService service;
 
-    CandidateRegistration(final DOMEntity instance, final AkkaEntityOwnershipService service) {
+    CandidateRegistration(final DOMEntity instance, final PekkoEntityOwnershipService service) {
         super(instance);
         this.service = requireNonNull(service);
     }

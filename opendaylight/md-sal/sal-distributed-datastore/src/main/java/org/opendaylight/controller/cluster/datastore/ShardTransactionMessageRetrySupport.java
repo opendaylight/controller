@@ -9,12 +9,12 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
-import akka.actor.Cancellable;
-import akka.actor.Status.Failure;
 import java.io.Closeable;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.Cancellable;
+import org.apache.pekko.actor.Status.Failure;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

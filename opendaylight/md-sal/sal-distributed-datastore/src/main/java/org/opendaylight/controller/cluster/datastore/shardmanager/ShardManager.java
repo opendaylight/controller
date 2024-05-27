@@ -9,29 +9,6 @@ package org.opendaylight.controller.cluster.datastore.shardmanager;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
-import akka.actor.Address;
-import akka.actor.Cancellable;
-import akka.actor.OneForOneStrategy;
-import akka.actor.PoisonPill;
-import akka.actor.Status;
-import akka.actor.SupervisorStrategy;
-import akka.actor.SupervisorStrategy.Directive;
-import akka.cluster.ClusterEvent;
-import akka.cluster.ClusterEvent.MemberWeaklyUp;
-import akka.cluster.Member;
-import akka.dispatch.Futures;
-import akka.dispatch.OnComplete;
-import akka.japi.Function;
-import akka.pattern.Patterns;
-import akka.persistence.DeleteSnapshotsFailure;
-import akka.persistence.DeleteSnapshotsSuccess;
-import akka.persistence.RecoveryCompleted;
-import akka.persistence.SaveSnapshotFailure;
-import akka.persistence.SaveSnapshotSuccess;
-import akka.persistence.SnapshotOffer;
-import akka.persistence.SnapshotSelectionCriteria;
-import akka.util.Timeout;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.SettableFuture;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -47,6 +24,29 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.Address;
+import org.apache.pekko.actor.Cancellable;
+import org.apache.pekko.actor.OneForOneStrategy;
+import org.apache.pekko.actor.PoisonPill;
+import org.apache.pekko.actor.Status;
+import org.apache.pekko.actor.SupervisorStrategy;
+import org.apache.pekko.actor.SupervisorStrategy.Directive;
+import org.apache.pekko.cluster.ClusterEvent;
+import org.apache.pekko.cluster.ClusterEvent.MemberWeaklyUp;
+import org.apache.pekko.cluster.Member;
+import org.apache.pekko.dispatch.Futures;
+import org.apache.pekko.dispatch.OnComplete;
+import org.apache.pekko.japi.Function;
+import org.apache.pekko.pattern.Patterns;
+import org.apache.pekko.persistence.DeleteSnapshotsFailure;
+import org.apache.pekko.persistence.DeleteSnapshotsSuccess;
+import org.apache.pekko.persistence.RecoveryCompleted;
+import org.apache.pekko.persistence.SaveSnapshotFailure;
+import org.apache.pekko.persistence.SaveSnapshotSuccess;
+import org.apache.pekko.persistence.SnapshotOffer;
+import org.apache.pekko.persistence.SnapshotSelectionCriteria;
+import org.apache.pekko.util.Timeout;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActorWithMetering;
 import org.opendaylight.controller.cluster.common.actor.Dispatchers;
@@ -163,7 +163,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     private final String persistenceId;
 
-    @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Akka class design")
+    @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Pekko class design")
     ShardManager(final AbstractShardManagerCreator<?> builder) {
         cluster = builder.getCluster();
         configuration = builder.getConfiguration();

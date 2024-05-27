@@ -7,13 +7,6 @@
  */
 package org.opendaylight.controller.eos.akka;
 
-import akka.actor.ActorSystem;
-import akka.actor.typed.ActorRef;
-import akka.actor.typed.Scheduler;
-import akka.actor.typed.javadsl.Adapter;
-import akka.actor.typed.javadsl.AskPattern;
-import akka.actor.typed.javadsl.Behaviors;
-import akka.cluster.typed.Cluster;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
@@ -28,6 +21,13 @@ import java.util.function.Function;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.typed.ActorRef;
+import org.apache.pekko.actor.typed.Scheduler;
+import org.apache.pekko.actor.typed.javadsl.Adapter;
+import org.apache.pekko.actor.typed.javadsl.AskPattern;
+import org.apache.pekko.actor.typed.javadsl.Behaviors;
+import org.apache.pekko.cluster.typed.Cluster;
 import org.opendaylight.controller.cluster.ActorSystemProvider;
 import org.opendaylight.controller.eos.akka.bootstrap.EOSMain;
 import org.opendaylight.controller.eos.akka.bootstrap.command.BootstrapCommand;
@@ -82,14 +82,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * DOMEntityOwnershipService implementation backed by native Akka clustering constructs. We use distributed-data
+ * DOMEntityOwnershipService implementation backed by native Pekko clustering constructs. We use distributed-data
  * to track all registered candidates and cluster-singleton to maintain a single cluster-wide authority which selects
  * the appropriate owners.
  */
 @Singleton
 @Component(immediate = true, service = { DOMEntityOwnershipService.class, DataCenterControl.class })
-public class AkkaEntityOwnershipService implements DOMEntityOwnershipService, DataCenterControl, AutoCloseable {
-    private static final Logger LOG = LoggerFactory.getLogger(AkkaEntityOwnershipService.class);
+public class PekkoEntityOwnershipService implements DOMEntityOwnershipService, DataCenterControl, AutoCloseable {
+    private static final Logger LOG = LoggerFactory.getLogger(PekkoEntityOwnershipService.class);
     private static final String DATACENTER_PREFIX = "dc";
     private static final Duration DATACENTER_OP_TIMEOUT = Duration.ofSeconds(20);
     private static final Duration QUERY_TIMEOUT = Duration.ofSeconds(10);
@@ -111,7 +111,7 @@ public class AkkaEntityOwnershipService implements DOMEntityOwnershipService, Da
     private Registration reg;
 
     @VisibleForTesting
-    protected AkkaEntityOwnershipService(final ActorSystem actorSystem, final BindingCodecTree codecTree)
+    protected PekkoEntityOwnershipService(final ActorSystem actorSystem, final BindingCodecTree codecTree)
             throws ExecutionException, InterruptedException {
         final var typedActorSystem = Adapter.toTyped(actorSystem);
         scheduler = typedActorSystem.scheduler();
@@ -142,7 +142,7 @@ public class AkkaEntityOwnershipService implements DOMEntityOwnershipService, Da
     @Activate
     @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR",
         justification = "Non-final for testing 'this' reference is expected to be stable at registration time")
-    public AkkaEntityOwnershipService(@Reference final ActorSystemProvider actorProvider,
+    public PekkoEntityOwnershipService(@Reference final ActorSystemProvider actorProvider,
             @Reference final RpcProviderService rpcProvider, @Reference final BindingCodecTree codecTree)
             throws ExecutionException, InterruptedException {
         this(actorProvider.getActorSystem(), codecTree);

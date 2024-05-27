@@ -14,8 +14,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
-import akka.actor.Status.Failure;
 import java.time.Duration;
+import org.apache.pekko.actor.Status.Failure;
 import org.junit.Test;
 import org.opendaylight.controller.remote.rpc.messages.ExecuteRpc;
 import org.opendaylight.controller.remote.rpc.messages.RpcResponse;

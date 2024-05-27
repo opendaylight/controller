@@ -9,17 +9,17 @@ package org.opendaylight.controller.cluster.akka.impl;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import org.opendaylight.controller.cluster.common.actor.AkkaConfigurationReader;
+import org.opendaylight.controller.cluster.common.actor.PekkoConfigurationReader;
 
-public final class AkkaConfigFactory {
+public final class PekkoConfigFactory {
 
     private static final String CONFIGURATION_NAME = "odl-cluster-data";
 
-    private AkkaConfigFactory() {
+    private PekkoConfigFactory() {
 
     }
 
-    public static Config createAkkaConfig(final AkkaConfigurationReader reader) {
+    public static Config createPekkoConfig(final PekkoConfigurationReader reader) {
         return ConfigFactory.load(reader.read()).getConfig(CONFIGURATION_NAME);
     }
 }

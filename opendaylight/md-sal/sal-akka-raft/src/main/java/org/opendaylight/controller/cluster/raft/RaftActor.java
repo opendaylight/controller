@@ -11,12 +11,6 @@ package org.opendaylight.controller.cluster.raft;
 import static com.google.common.base.Verify.verify;
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.actor.PoisonPill;
-import akka.actor.Status;
-import akka.persistence.JournalProtocol;
-import akka.persistence.SnapshotProtocol;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -26,6 +20,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.time.DurationFormatUtils;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSelection;
+import org.apache.pekko.actor.PoisonPill;
+import org.apache.pekko.actor.Status;
+import org.apache.pekko.persistence.JournalProtocol;
+import org.apache.pekko.persistence.SnapshotProtocol;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
@@ -123,7 +123,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     private boolean shuttingDown;
 
-    @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Akka class design")
+    @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Pekko class design")
     protected RaftActor(final String id, final Map<String, String> peerAddresses,
          final Optional<ConfigParams> configParams, final short payloadVersion) {
 

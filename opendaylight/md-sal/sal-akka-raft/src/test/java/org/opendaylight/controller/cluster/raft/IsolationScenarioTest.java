@@ -15,11 +15,11 @@ import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorAct
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.expectMatching;
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.getAllMatching;
 
-import akka.actor.ActorRef;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import org.apache.pekko.actor.ActorRef;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.notifications.RoleChanged;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;

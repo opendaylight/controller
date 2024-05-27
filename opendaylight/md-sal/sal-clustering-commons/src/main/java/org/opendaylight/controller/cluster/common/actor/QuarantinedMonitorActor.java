@@ -8,23 +8,23 @@
 
 package org.opendaylight.controller.cluster.common.actor;
 
-import akka.actor.Address;
-import akka.actor.Props;
-import akka.actor.UntypedAbstractActor;
-import akka.cluster.Cluster;
-import akka.cluster.ClusterEvent;
-import akka.japi.Effect;
-import akka.remote.AssociationErrorEvent;
-import akka.remote.RemotingLifecycleEvent;
-import akka.remote.artery.ThisActorSystemQuarantinedEvent;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.HashSet;
 import java.util.Set;
+import org.apache.pekko.actor.Address;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.actor.UntypedAbstractActor;
+import org.apache.pekko.cluster.Cluster;
+import org.apache.pekko.cluster.ClusterEvent;
+import org.apache.pekko.japi.Effect;
+import org.apache.pekko.remote.AssociationErrorEvent;
+import org.apache.pekko.remote.RemotingLifecycleEvent;
+import org.apache.pekko.remote.artery.ThisActorSystemQuarantinedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class listens to Akka RemotingLifecycleEvent events to detect when this node has been
+ * This class listens to Pekko RemotingLifecycleEvent events to detect when this node has been
  * quarantined by another. Once this node gets quarantined, restart the ActorSystem to allow this
  * node to rejoin the cluster.
  *
@@ -43,7 +43,7 @@ public class QuarantinedMonitorActor extends UntypedAbstractActor {
     private final Set<Address> addressSet = new HashSet<>();
     private int count = 0;
 
-    @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Akka class design")
+    @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Pekko class design")
     protected QuarantinedMonitorActor(final Effect callback) {
         this.callback = callback;
 

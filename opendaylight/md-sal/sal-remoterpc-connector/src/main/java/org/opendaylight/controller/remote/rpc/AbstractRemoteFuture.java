@@ -9,11 +9,11 @@ package org.opendaylight.controller.remote.rpc;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.dispatch.OnComplete;
 import com.google.common.util.concurrent.AbstractFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import org.apache.pekko.dispatch.OnComplete;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
@@ -84,7 +84,7 @@ abstract class AbstractRemoteFuture<T, O, E extends Exception> extends AbstractF
                     LOG.debug("Received response for operation {}: result is {}", type, result);
                     set(result);
                 } else {
-                    failNow(new IllegalStateException("Incorrect reply type " + reply + " from Akka"));
+                    failNow(new IllegalStateException("Incorrect reply type " + reply + " from Pekko"));
                 }
             } else {
                 failNow(error);

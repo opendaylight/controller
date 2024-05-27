@@ -15,11 +15,11 @@ import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipListener;
 import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
 
 final class ListenerRegistration extends AbstractObjectRegistration<DOMEntityOwnershipListener> {
-    private final AkkaEntityOwnershipService service;
+    private final PekkoEntityOwnershipService service;
     private final @NonNull String entityType;
 
     ListenerRegistration(final DOMEntityOwnershipListener listener, final String entityType,
-            final AkkaEntityOwnershipService service) {
+            final PekkoEntityOwnershipService service) {
         super(listener);
         this.entityType = requireNonNull(entityType);
         this.service = requireNonNull(service);

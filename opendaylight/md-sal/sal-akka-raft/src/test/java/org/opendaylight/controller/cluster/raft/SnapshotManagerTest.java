@@ -22,12 +22,12 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import akka.actor.ActorRef;
-import akka.persistence.SnapshotSelectionCriteria;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

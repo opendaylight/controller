@@ -23,10 +23,6 @@ import static org.opendaylight.controller.cluster.datastore.MemberNode.verifyNoS
 import static org.opendaylight.controller.cluster.datastore.MemberNode.verifyRaftPeersPresent;
 import static org.opendaylight.controller.cluster.datastore.MemberNode.verifyRaftState;
 
-import akka.actor.ActorRef;
-import akka.actor.PoisonPill;
-import akka.actor.Status.Success;
-import akka.cluster.Cluster;
 import com.google.common.collect.Lists;
 import java.io.File;
 import java.nio.file.Files;
@@ -39,6 +35,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.SerializationUtils;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.PoisonPill;
+import org.apache.pekko.actor.Status.Success;
+import org.apache.pekko.cluster.Cluster;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

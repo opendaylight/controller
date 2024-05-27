@@ -10,6 +10,6 @@ package org.opendaylight.controller.cluster.common.actor;
 
 import com.typesafe.config.Config;
 
-public interface AkkaConfigurationReader {
+public interface PekkoConfigurationReader {
     Config read();
 }

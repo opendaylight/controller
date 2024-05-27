@@ -13,7 +13,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
-import akka.dispatch.MessageDispatcher;
+import org.apache.pekko.dispatch.MessageDispatcher;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.common.actor.Dispatchers;
 
@@ -21,7 +21,7 @@ public class DispatchersTest {
 
     @Test
     public void testGetDefaultDispatcherPath() {
-        akka.dispatch.Dispatchers mockDispatchers = mock(akka.dispatch.Dispatchers.class);
+        org.apache.pekko.dispatch.Dispatchers mockDispatchers = mock(org.apache.pekko.dispatch.Dispatchers.class);
         doReturn(false).when(mockDispatchers).hasDispatcher(anyString());
         Dispatchers dispatchers = new Dispatchers(mockDispatchers);
 
@@ -34,7 +34,7 @@ public class DispatchersTest {
 
     @Test
     public void testGetDefaultDispatcher() {
-        akka.dispatch.Dispatchers mockDispatchers = mock(akka.dispatch.Dispatchers.class);
+        org.apache.pekko.dispatch.Dispatchers mockDispatchers = mock(org.apache.pekko.dispatch.Dispatchers.class);
         MessageDispatcher mockGlobalDispatcher = mock(MessageDispatcher.class);
         doReturn(false).when(mockDispatchers).hasDispatcher(anyString());
         doReturn(mockGlobalDispatcher).when(mockDispatchers).defaultGlobalDispatcher();
@@ -49,7 +49,7 @@ public class DispatchersTest {
 
     @Test
     public void testGetDispatcherPath() {
-        akka.dispatch.Dispatchers mockDispatchers = mock(akka.dispatch.Dispatchers.class);
+        org.apache.pekko.dispatch.Dispatchers mockDispatchers = mock(org.apache.pekko.dispatch.Dispatchers.class);
         doReturn(true).when(mockDispatchers).hasDispatcher(anyString());
         Dispatchers dispatchers = new Dispatchers(mockDispatchers);
 
@@ -69,7 +69,7 @@ public class DispatchersTest {
 
     @Test
     public void testGetDispatcher() {
-        akka.dispatch.Dispatchers mockDispatchers = mock(akka.dispatch.Dispatchers.class);
+        org.apache.pekko.dispatch.Dispatchers mockDispatchers = mock(org.apache.pekko.dispatch.Dispatchers.class);
         MessageDispatcher mockDispatcher = mock(MessageDispatcher.class);
         doReturn(true).when(mockDispatchers).hasDispatcher(anyString());
         doReturn(mockDispatcher).when(mockDispatchers).lookup(anyString());

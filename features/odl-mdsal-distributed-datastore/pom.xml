@@ -18,7 +18,7 @@
     <artifactId>odl-mdsal-distributed-datastore</artifactId>
     <packaging>feature</packaging>
     <name>OpenDaylight :: Controller :: Clustered Datastore</name>
-    <description>Controller Clustered Datastore (akka-based)</description>
+    <description>Controller Clustered Datastore (pekko-based)</description>
 
     <dependencies>
         <dependency>

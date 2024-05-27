@@ -11,11 +11,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.opendaylight.controller.md.cluster.datastore.model.CarsModel.CAR_QNAME;
 
-import akka.actor.ActorSystem;
-import akka.actor.Address;
-import akka.actor.AddressFromURIString;
-import akka.cluster.Cluster;
-import akka.testkit.javadsl.TestKit;
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.ConfigFactory;
@@ -27,6 +22,11 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.io.FileUtils;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.Address;
+import org.apache.pekko.actor.AddressFromURIString;
+import org.apache.pekko.cluster.Cluster;
+import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -66,7 +66,7 @@ public class DistributedDataStoreWithSegmentedJournalIntegrationTest
                 ConfigFactory.load("segmented.conf").getConfig("Member1"));
         cleanSnapshotDir(system);
 
-        Address member1Address = AddressFromURIString.parse("akka://cluster-test@127.0.0.1:2558");
+        Address member1Address = AddressFromURIString.parse("pekko://cluster-test@127.0.0.1:2558");
         Cluster.get(system).join(member1Address);
     }
 

@@ -186,7 +186,7 @@ public class RemoteOpsImplementationTest extends AbstractOpsTest {
      */
     @Ignore
     @Test
-    public void testInvokeRpcWithAkkaTimeoutException() {
+    public void testInvokeRpcWithPekkoTimeoutException() {
         final ContainerNode invokeRpcInput = makeRPCInput("foo");
         final ListenableFuture<DOMRpcResult> frontEndFuture = remoteRpcImpl1.invokeRpc(TEST_RPC_ID, invokeRpcInput);
         assertThat(frontEndFuture, instanceOf(RemoteDOMRpcFuture.class));

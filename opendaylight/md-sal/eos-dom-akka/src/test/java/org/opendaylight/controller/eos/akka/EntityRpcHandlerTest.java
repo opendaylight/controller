@@ -11,16 +11,16 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import akka.actor.ActorSystem;
-import akka.actor.testkit.typed.javadsl.ActorTestKit;
-import akka.actor.typed.javadsl.Adapter;
-import akka.cluster.Member;
-import akka.cluster.MemberStatus;
-import akka.cluster.typed.Cluster;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.testkit.typed.javadsl.ActorTestKit;
+import org.apache.pekko.actor.typed.javadsl.Adapter;
+import org.apache.pekko.cluster.Member;
+import org.apache.pekko.cluster.MemberStatus;
+import org.apache.pekko.cluster.typed.Cluster;
 import org.awaitility.Awaitility;
 import org.junit.After;
 import org.junit.Before;
@@ -48,16 +48,16 @@ public class EntityRpcHandlerTest extends AbstractNativeEosTest {
     private ActorSystem system1;
     private ActorSystem system2;
 
-    private AkkaEntityOwnershipService service1;
-    private AkkaEntityOwnershipService service2;
+    private PekkoEntityOwnershipService service1;
+    private PekkoEntityOwnershipService service2;
 
     @Before
     public void setUp() throws Exception {
         system1 = startupActorSystem(2550, List.of("member-1"), TWO_NODE_SEED_NODES);
         system2 = startupActorSystem(2551, List.of("member-2"), TWO_NODE_SEED_NODES, "dc-backup");
 
-        service1 = new AkkaEntityOwnershipService(system1, CODEC_CONTEXT);
-        service2 = new AkkaEntityOwnershipService(system2, CODEC_CONTEXT);
+        service1 = new PekkoEntityOwnershipService(system1, CODEC_CONTEXT);
+        service2 = new PekkoEntityOwnershipService(system2, CODEC_CONTEXT);
 
         // need to wait until all nodes are ready
         final var cluster = Cluster.get(Adapter.toTyped(system2));

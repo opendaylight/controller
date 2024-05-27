@@ -16,7 +16,7 @@ import com.typesafe.config.Config;
  * It merges configuration from:
  * <ul>
  *     <li>Config subsystem</li>
- *     <li>Akka configuration files</li>
+ *     <li>Pekko configuration files</li>
  * </ul>
  * Configurations defined in config subsystem takes precedence.
  */

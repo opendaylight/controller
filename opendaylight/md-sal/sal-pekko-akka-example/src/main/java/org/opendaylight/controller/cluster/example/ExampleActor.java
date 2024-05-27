@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.cluster.example;
 
-import akka.actor.ActorRef;
-import akka.actor.Props;
 import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -17,6 +15,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.commons.lang3.SerializationUtils;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.Props;
 import org.opendaylight.controller.cluster.example.messages.KeyValue;
 import org.opendaylight.controller.cluster.example.messages.KeyValueSaved;
 import org.opendaylight.controller.cluster.example.messages.PrintRole;

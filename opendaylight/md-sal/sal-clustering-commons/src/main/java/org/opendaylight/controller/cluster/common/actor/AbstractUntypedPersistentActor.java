@@ -7,9 +7,9 @@
  */
 package org.opendaylight.controller.cluster.common.actor;
 
-import akka.actor.ActorRef;
-import akka.persistence.AbstractPersistentActor;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.persistence.AbstractPersistentActor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +23,7 @@ public abstract class AbstractUntypedPersistentActor extends AbstractPersistentA
     @SuppressFBWarnings("SLF4J_LOGGER_SHOULD_BE_PRIVATE")
     protected final Logger LOG = LoggerFactory.getLogger(getClass());
 
-    @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Akka class design")
+    @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Pekko class design")
     protected AbstractUntypedPersistentActor() {
         LOG.trace("Actor created {}", getSelf());
         getContext().system().actorSelection("user/termination-monitor").tell(new Monitor(getSelf()), getSelf());

@@ -29,7 +29,7 @@
     <module>samples</module>
 
     <module>sal-akka-raft</module>
-    <module>sal-akka-raft-example</module>
+    <module>sal-pekko-akka-example</module>
 
     <module>sal-clustering-commons</module>
     <module>cds-access-api</module>
