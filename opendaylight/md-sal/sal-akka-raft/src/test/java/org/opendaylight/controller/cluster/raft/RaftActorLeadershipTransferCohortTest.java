@@ -12,8 +12,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
-import akka.dispatch.Dispatchers;
 import java.util.function.Function;
+import org.apache.pekko.dispatch.Dispatchers;
 import org.junit.After;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.RaftActorLeadershipTransferCohort.OnComplete;

@@ -15,15 +15,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import akka.actor.ActorSystem;
-import akka.actor.testkit.typed.javadsl.ActorTestKit;
-import akka.actor.typed.ActorRef;
-import akka.actor.typed.javadsl.Adapter;
-import akka.actor.typed.javadsl.AskPattern;
-import akka.cluster.ddata.ORMap;
-import akka.cluster.ddata.ORSet;
-import akka.cluster.ddata.typed.javadsl.DistributedData;
-import akka.cluster.ddata.typed.javadsl.Replicator;
 import com.typesafe.config.ConfigFactory;
 import java.time.Duration;
 import java.util.List;
@@ -31,6 +22,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.testkit.typed.javadsl.ActorTestKit;
+import org.apache.pekko.actor.typed.ActorRef;
+import org.apache.pekko.actor.typed.javadsl.Adapter;
+import org.apache.pekko.actor.typed.javadsl.AskPattern;
+import org.apache.pekko.cluster.ddata.ORMap;
+import org.apache.pekko.cluster.ddata.ORSet;
+import org.apache.pekko.cluster.ddata.typed.javadsl.DistributedData;
+import org.apache.pekko.cluster.ddata.typed.javadsl.Replicator;
 import org.awaitility.Durations;
 import org.junit.After;
 import org.junit.Before;
@@ -64,7 +64,7 @@ public class AkkaEntityOwnershipServiceTest extends AbstractNativeEosTest {
     static final QName QNAME = QName.create("test", "2015-08-11", "foo");
 
     private ActorSystem system;
-    private akka.actor.typed.ActorSystem<Void> typedSystem;
+    private org.apache.pekko.actor.typed.ActorSystem<Void> typedSystem;
     private AkkaEntityOwnershipService service;
     private ActorRef<Replicator.Command> replicator;
 

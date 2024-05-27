@@ -9,16 +9,16 @@ package org.opendaylight.controller.cluster.datastore.shardmanager;
 
 import static org.junit.Assert.assertEquals;
 
-import akka.actor.ActorRef;
-import akka.actor.Status.Failure;
-import akka.actor.Terminated;
-import akka.testkit.javadsl.TestKit;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.Status.Failure;
+import org.apache.pekko.actor.Terminated;
+import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.AbstractActorTest;

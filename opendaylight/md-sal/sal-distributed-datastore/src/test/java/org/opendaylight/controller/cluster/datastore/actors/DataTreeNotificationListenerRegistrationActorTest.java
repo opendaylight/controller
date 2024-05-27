@@ -11,9 +11,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
-import akka.actor.ActorRef;
-import akka.testkit.javadsl.TestKit;
 import java.time.Duration;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

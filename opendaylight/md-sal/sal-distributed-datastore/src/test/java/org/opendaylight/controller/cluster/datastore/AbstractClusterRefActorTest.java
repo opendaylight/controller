@@ -8,9 +8,9 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
-import akka.actor.ActorSystem;
-import akka.testkit.javadsl.TestKit;
 import com.typesafe.config.ConfigFactory;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 

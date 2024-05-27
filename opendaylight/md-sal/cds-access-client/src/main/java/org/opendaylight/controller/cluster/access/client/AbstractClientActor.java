@@ -7,9 +7,9 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
-import akka.actor.ActorRef;
-import akka.actor.PoisonPill;
-import akka.persistence.AbstractPersistentActor;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.PoisonPill;
+import org.apache.pekko.persistence.AbstractPersistentActor;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

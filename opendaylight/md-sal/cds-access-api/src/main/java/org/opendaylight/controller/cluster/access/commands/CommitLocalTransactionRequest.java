@@ -9,13 +9,13 @@ package org.opendaylight.controller.cluster.access.commands;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamException;
 import java.util.Optional;
+import org.apache.pekko.actor.ActorRef;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
