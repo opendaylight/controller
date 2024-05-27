@@ -43,11 +43,11 @@ public class FileAkkaConfigurationReader implements AkkaConfigurationReader {
 
     @Activate
     void activate() {
-        LOG.info("File-based Akka configuration reader enabled");
+        LOG.info("File-based Pekko configuration reader enabled");
     }
 
     @Deactivate
     void deactivate() {
-        LOG.info("File-based Akka configuration reader disabled");
+        LOG.info("File-based Pekko configuration reader disabled");
     }
 }

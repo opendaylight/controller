@@ -9,11 +9,11 @@ package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
 
-import akka.actor.ActorRef;
-import akka.persistence.SaveSnapshotSuccess;
-import akka.testkit.TestActorRef;
 import java.util.List;
 import java.util.Map;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.persistence.SaveSnapshotSuccess;
+import org.apache.pekko.testkit.TestActorRef;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;

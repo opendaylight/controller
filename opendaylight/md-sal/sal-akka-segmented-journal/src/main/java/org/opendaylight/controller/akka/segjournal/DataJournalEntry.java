@@ -9,7 +9,7 @@ package org.opendaylight.controller.akka.segjournal;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.persistence.PersistentRepr;
+import org.apache.pekko.persistence.PersistentRepr;
 
 /**
  * A single entry in the data journal. We do not store {@code persistenceId} for each entry, as that is a

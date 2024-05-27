@@ -12,18 +12,6 @@ import static com.google.common.base.Verify.verify;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.actor.Cancellable;
-import akka.actor.ExtendedActorSystem;
-import akka.actor.PoisonPill;
-import akka.actor.Props;
-import akka.actor.Status;
-import akka.actor.Status.Failure;
-import akka.persistence.RecoveryCompleted;
-import akka.persistence.SnapshotOffer;
-import akka.serialization.JavaSerializer;
-import akka.serialization.Serialization;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Ticker;
 import com.google.common.collect.ImmutableList;
@@ -41,6 +29,18 @@ import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSelection;
+import org.apache.pekko.actor.Cancellable;
+import org.apache.pekko.actor.ExtendedActorSystem;
+import org.apache.pekko.actor.PoisonPill;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.actor.Status;
+import org.apache.pekko.actor.Status.Failure;
+import org.apache.pekko.persistence.RecoveryCompleted;
+import org.apache.pekko.persistence.SnapshotOffer;
+import org.apache.pekko.serialization.JavaSerializer;
+import org.apache.pekko.serialization.Serialization;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.ABIVersion;
@@ -155,7 +155,7 @@ public class Shard extends RaftActor {
     private static final Collection<ABIVersion> SUPPORTED_ABIVERSIONS;
 
     // Make sure to keep this in sync with the journal configuration in factory-akka.conf
-    public static final String NON_PERSISTENT_JOURNAL_ID = "akka.persistence.non-persistent.journal";
+    public static final String NON_PERSISTENT_JOURNAL_ID = "pekko.persistence.non-persistent.journal";
 
     static {
         final ABIVersion[] values = ABIVersion.values();

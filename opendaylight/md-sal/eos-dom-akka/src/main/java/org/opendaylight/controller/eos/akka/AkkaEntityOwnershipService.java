@@ -7,13 +7,6 @@
  */
 package org.opendaylight.controller.eos.akka;
 
-import akka.actor.ActorSystem;
-import akka.actor.typed.ActorRef;
-import akka.actor.typed.Scheduler;
-import akka.actor.typed.javadsl.Adapter;
-import akka.actor.typed.javadsl.AskPattern;
-import akka.actor.typed.javadsl.Behaviors;
-import akka.cluster.typed.Cluster;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
@@ -28,6 +21,13 @@ import java.util.function.Function;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.typed.ActorRef;
+import org.apache.pekko.actor.typed.Scheduler;
+import org.apache.pekko.actor.typed.javadsl.Adapter;
+import org.apache.pekko.actor.typed.javadsl.AskPattern;
+import org.apache.pekko.actor.typed.javadsl.Behaviors;
+import org.apache.pekko.cluster.typed.Cluster;
 import org.opendaylight.controller.cluster.ActorSystemProvider;
 import org.opendaylight.controller.eos.akka.bootstrap.EOSMain;
 import org.opendaylight.controller.eos.akka.bootstrap.command.BootstrapCommand;
@@ -82,7 +82,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * DOMEntityOwnershipService implementation backed by native Akka clustering constructs. We use distributed-data
+ * DOMEntityOwnershipService implementation backed by native Pekko clustering constructs. We use distributed-data
  * to track all registered candidates and cluster-singleton to maintain a single cluster-wide authority which selects
  * the appropriate owners.
  */

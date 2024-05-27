@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import akka.actor.ActorRef;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
@@ -19,6 +18,7 @@ import java.io.ObjectStreamException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.apache.pekko.actor.ActorRef;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.SliceableMessage;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;

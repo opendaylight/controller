@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.cluster.raft.client.messages;
 
-import akka.dispatch.ControlMessage;
 import java.io.Serializable;
+import org.apache.pekko.dispatch.ControlMessage;
 
 /**
  * Message sent to a raft actor to shutdown gracefully. If it's the leader it will transfer leadership to a
