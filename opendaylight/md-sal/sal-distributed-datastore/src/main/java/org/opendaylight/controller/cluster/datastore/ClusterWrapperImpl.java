@@ -10,11 +10,11 @@ package org.opendaylight.controller.cluster.datastore;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.Address;
-import akka.cluster.Cluster;
-import akka.cluster.ClusterEvent;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.Address;
+import org.apache.pekko.cluster.Cluster;
+import org.apache.pekko.cluster.ClusterEvent;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 
 public class ClusterWrapperImpl implements ClusterWrapper {
@@ -28,7 +28,7 @@ public class ClusterWrapperImpl implements ClusterWrapper {
         checkState(cluster.getSelfRoles().size() > 0,
             "No akka roles were specified.\n"
             + "One way to specify the member name is to pass a property on the command line like so\n"
-            + "   -Dakka.cluster.roles.0=member-3\n"
+            + "   -Dpekko.cluster.roles.0=member-3\n"
             + "member-3 here would be the name of the member");
 
         currentMemberName = MemberName.forName(cluster.getSelfRoles().iterator().next());

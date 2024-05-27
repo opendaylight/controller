@@ -8,8 +8,8 @@
 
 package org.opendaylight.controller.cluster.common.actor;
 
-import akka.actor.ActorRef;
 import java.io.Serializable;
+import org.apache.pekko.actor.ActorRef;
 
 public class Monitor implements Serializable {
     private static final long serialVersionUID = 1L;

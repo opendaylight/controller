@@ -11,8 +11,8 @@ package org.opendaylight.controller.cluster.datastore.messages;
 /**
  * Message sent to local shard to try to gain shard leadership. Sender of this
  * message will be notified about result of leadership transfer with
- * {@link akka.actor.Status.Success}, if leadership is successfully transferred
- * to local shard. Otherwise {@link akka.actor.Status.Failure} with
+ * {@link org.apache.pekko.actor.Status.Success}, if leadership is successfully transferred
+ * to local shard. Otherwise {@link org.apache.pekko.actor.Status.Failure} with
  * {@link org.opendaylight.controller.cluster.raft.LeadershipTransferFailedException}
  * will be sent to sender of this message.
  */

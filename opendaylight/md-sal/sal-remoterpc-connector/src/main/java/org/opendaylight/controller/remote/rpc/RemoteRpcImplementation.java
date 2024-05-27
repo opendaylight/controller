@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.remote.rpc;
 
-import akka.actor.ActorRef;
 import com.google.common.util.concurrent.ListenableFuture;
+import org.apache.pekko.actor.ActorRef;
 import org.opendaylight.controller.remote.rpc.messages.ExecuteRpc;
 import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.mdsal.dom.api.DOMRpcImplementation;

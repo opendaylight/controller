@@ -14,7 +14,7 @@ import java.util.function.Consumer;
 /**
  * Local ShardManager message to register a callback to be notified of shard availability changes. The reply to
  * this message is a {@link org.opendaylight.yangtools.concepts.Registration} instance wrapped in a
- * {@link akka.actor.Status.Success}.
+ * {@link org.apache.pekko.actor.Status.Success}.
  *
  * @author Thomas Pantelis
  */

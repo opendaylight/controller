@@ -9,8 +9,8 @@ package org.opendaylight.controller.eos.akka.owner.checker.command;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.typed.ActorRef;
 import java.io.Serializable;
+import org.apache.pekko.actor.typed.ActorRef;
 import org.eclipse.jdt.annotation.NonNull;
 
 public abstract class StateCheckerRequest<T extends StateCheckerReply> extends StateCheckerCommand

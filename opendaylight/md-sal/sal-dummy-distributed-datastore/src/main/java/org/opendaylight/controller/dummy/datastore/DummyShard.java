@@ -8,10 +8,10 @@
 
 package org.opendaylight.controller.dummy.datastore;
 
-import akka.actor.Props;
-import akka.actor.UntypedAbstractActor;
 import com.google.common.base.Stopwatch;
 import java.util.concurrent.TimeUnit;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.actor.UntypedAbstractActor;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;

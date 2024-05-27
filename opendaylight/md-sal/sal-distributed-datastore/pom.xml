@@ -42,14 +42,15 @@
       <artifactId>org.osgi.service.metatype.annotations</artifactId>
     </dependency>
 
-    <!-- Akka -->
+    <!-- Pekko -->
     <dependency>
       <groupId>org.scala-lang.modules</groupId>
       <artifactId>scala-java8-compat_2.13</artifactId>
+      <version>1.0.2</version>
     </dependency>
     <dependency>
-      <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-testkit_2.13</artifactId>
+      <groupId>org.apache.pekko</groupId>
+      <artifactId>pekko-testkit_2.13</artifactId>
     </dependency>
 
     <!-- Scala -->

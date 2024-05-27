@@ -9,11 +9,11 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
-import akka.dispatch.OnComplete;
-import akka.pattern.Patterns;
-import akka.util.Timeout;
 import java.util.concurrent.TimeUnit;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.dispatch.OnComplete;
+import org.apache.pekko.pattern.Patterns;
+import org.apache.pekko.util.Timeout;
 import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.opendaylight.controller.cluster.datastore.exceptions.LocalShardNotFoundException;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
