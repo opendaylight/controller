@@ -15,10 +15,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.assertFutureEquals;
 
-import akka.testkit.TestProbe;
 import com.google.common.base.Ticker;
 import java.util.Optional;
 import java.util.function.Consumer;
+import org.apache.pekko.testkit.TestProbe;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;

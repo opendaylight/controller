@@ -7,18 +7,18 @@
  */
 package org.opendaylight.controller.eos.akka.registry.listener.owner;
 
-import akka.actor.typed.ActorRef;
-import akka.actor.typed.Behavior;
-import akka.actor.typed.javadsl.AbstractBehavior;
-import akka.actor.typed.javadsl.ActorContext;
-import akka.actor.typed.javadsl.Behaviors;
-import akka.actor.typed.javadsl.Receive;
-import akka.cluster.ddata.LWWRegister;
-import akka.cluster.ddata.LWWRegisterKey;
-import akka.cluster.ddata.typed.javadsl.DistributedData;
-import akka.cluster.ddata.typed.javadsl.Replicator;
-import akka.cluster.ddata.typed.javadsl.ReplicatorMessageAdapter;
 import java.time.Duration;
+import org.apache.pekko.actor.typed.ActorRef;
+import org.apache.pekko.actor.typed.Behavior;
+import org.apache.pekko.actor.typed.javadsl.AbstractBehavior;
+import org.apache.pekko.actor.typed.javadsl.ActorContext;
+import org.apache.pekko.actor.typed.javadsl.Behaviors;
+import org.apache.pekko.actor.typed.javadsl.Receive;
+import org.apache.pekko.cluster.ddata.LWWRegister;
+import org.apache.pekko.cluster.ddata.LWWRegisterKey;
+import org.apache.pekko.cluster.ddata.typed.javadsl.DistributedData;
+import org.apache.pekko.cluster.ddata.typed.javadsl.Replicator;
+import org.apache.pekko.cluster.ddata.typed.javadsl.ReplicatorMessageAdapter;
 import org.opendaylight.controller.eos.akka.registry.listener.owner.command.InitialOwnerSync;
 import org.opendaylight.controller.eos.akka.registry.listener.owner.command.ListenerCommand;
 import org.opendaylight.controller.eos.akka.registry.listener.owner.command.OwnerChanged;

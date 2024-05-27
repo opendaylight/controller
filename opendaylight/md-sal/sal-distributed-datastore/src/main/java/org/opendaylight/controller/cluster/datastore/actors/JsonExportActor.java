@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.datastore.actors;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.Props;
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -19,6 +18,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import org.apache.pekko.actor.Props;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;

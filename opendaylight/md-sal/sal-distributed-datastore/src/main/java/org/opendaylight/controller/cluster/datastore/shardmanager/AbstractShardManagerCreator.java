@@ -10,8 +10,8 @@ package org.opendaylight.controller.cluster.datastore.shardmanager;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.Props;
 import com.google.common.util.concurrent.SettableFuture;
+import org.apache.pekko.actor.Props;
 import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.DatastoreContextFactory;

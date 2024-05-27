@@ -7,11 +7,6 @@
  */
 package org.opendaylight.controller.cluster.raft.utils;
 
-import akka.dispatch.Futures;
-import akka.persistence.AtomicWrite;
-import akka.persistence.PersistentImpl;
-import akka.persistence.PersistentRepr;
-import akka.persistence.journal.japi.AsyncWriteJournal;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -25,6 +20,11 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import org.apache.commons.lang3.SerializationUtils;
+import org.apache.pekko.dispatch.Futures;
+import org.apache.pekko.persistence.AtomicWrite;
+import org.apache.pekko.persistence.PersistentImpl;
+import org.apache.pekko.persistence.PersistentRepr;
+import org.apache.pekko.persistence.journal.japi.AsyncWriteJournal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.Option;
@@ -184,7 +184,7 @@ public class InMemoryJournal extends AsyncWriteJournal {
     public Future<Long> doAsyncReadHighestSequenceNr(final String persistenceId, final long fromSequenceNr) {
         LOG.trace("doAsyncReadHighestSequenceNr for {}: fromSequenceNr: {}", persistenceId, fromSequenceNr);
 
-        // Akka calls this during recovery.
+        // Pekko calls this during recovery.
         Map<Long, Object> journal = JOURNALS.get(persistenceId);
         if (journal == null) {
             return Futures.successful(fromSequenceNr);

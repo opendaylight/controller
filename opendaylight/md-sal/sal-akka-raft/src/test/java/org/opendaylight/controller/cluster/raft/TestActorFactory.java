@@ -9,25 +9,25 @@ package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertTrue;
 
-import akka.actor.Actor;
-import akka.actor.ActorIdentity;
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.actor.ActorSystem;
-import akka.actor.Identify;
-import akka.actor.InvalidActorNameException;
-import akka.actor.PoisonPill;
-import akka.actor.Props;
-import akka.pattern.Patterns;
-import akka.testkit.TestActorRef;
-import akka.testkit.javadsl.TestKit;
-import akka.util.Timeout;
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import org.apache.pekko.actor.Actor;
+import org.apache.pekko.actor.ActorIdentity;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSelection;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.Identify;
+import org.apache.pekko.actor.InvalidActorNameException;
+import org.apache.pekko.actor.PoisonPill;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.pattern.Patterns;
+import org.apache.pekko.testkit.TestActorRef;
+import org.apache.pekko.testkit.javadsl.TestKit;
+import org.apache.pekko.util.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
@@ -190,7 +190,7 @@ public class TestActorFactory implements AutoCloseable {
     }
 
     public String createTestActorPath(final String actorId) {
-        return "akka://test/user/" + actorId;
+        return "pekko://test/user/" + actorId;
     }
 
     @Override
