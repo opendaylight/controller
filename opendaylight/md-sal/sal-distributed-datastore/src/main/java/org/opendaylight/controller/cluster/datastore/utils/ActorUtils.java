@@ -7,15 +7,6 @@
  */
 package org.opendaylight.controller.cluster.datastore.utils;
 
-import akka.actor.ActorPath;
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.actor.ActorSystem;
-import akka.dispatch.Mapper;
-import akka.dispatch.OnComplete;
-import akka.pattern.AskTimeoutException;
-import akka.pattern.Patterns;
-import akka.util.Timeout;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Preconditions;
@@ -25,6 +16,15 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Function;
+import org.apache.pekko.actor.ActorPath;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSelection;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.dispatch.Mapper;
+import org.apache.pekko.dispatch.OnComplete;
+import org.apache.pekko.pattern.AskTimeoutException;
+import org.apache.pekko.pattern.Patterns;
+import org.apache.pekko.util.Timeout;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.common.actor.Dispatchers;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;

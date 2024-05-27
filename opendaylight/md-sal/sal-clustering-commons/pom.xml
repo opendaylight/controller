@@ -114,7 +114,7 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>repackaged-akka</artifactId>
+      <artifactId>repackaged-pekko</artifactId>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
@@ -130,12 +130,12 @@
       <artifactId>guava-testlib</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-persistence-tck_2.13</artifactId>
+      <groupId>org.apache.pekko</groupId>
+      <artifactId>pekko-persistence-tck_2.13</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-testkit_2.13</artifactId>
+      <groupId>org.apache.pekko</groupId>
+      <artifactId>pekko-testkit_2.13</artifactId>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>

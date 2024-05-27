@@ -7,9 +7,6 @@
  */
 package org.opendaylight.controller.remote.rpc.registry;
 
-import akka.actor.ActorRef;
-import akka.serialization.JavaSerializer;
-import akka.serialization.Serialization;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.Externalizable;
 import java.io.IOException;
@@ -19,6 +16,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.serialization.JavaSerializer;
+import org.apache.pekko.serialization.Serialization;
 import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataInput;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataOutput;

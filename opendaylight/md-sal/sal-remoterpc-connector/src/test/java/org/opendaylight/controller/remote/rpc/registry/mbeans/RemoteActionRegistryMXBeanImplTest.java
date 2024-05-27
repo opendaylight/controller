@@ -7,13 +7,6 @@
  */
 package org.opendaylight.controller.remote.rpc.registry.mbeans;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.Props;
-import akka.dispatch.Dispatchers;
-import akka.testkit.TestActorRef;
-import akka.testkit.javadsl.TestKit;
-import akka.util.Timeout;
 import com.google.common.collect.Lists;
 import com.typesafe.config.ConfigFactory;
 import java.util.Collections;
@@ -21,6 +14,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.dispatch.Dispatchers;
+import org.apache.pekko.testkit.TestActorRef;
+import org.apache.pekko.testkit.javadsl.TestKit;
+import org.apache.pekko.util.Timeout;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;

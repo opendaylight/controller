@@ -9,14 +9,14 @@ package org.opendaylight.controller.cluster.access.client;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
-import akka.dispatch.OnComplete;
-import akka.pattern.Patterns;
-import akka.persistence.SelectedSnapshot;
-import akka.persistence.SnapshotMetadata;
-import akka.persistence.SnapshotSelectionCriteria;
-import akka.persistence.snapshot.japi.SnapshotStore;
 import java.util.Optional;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.dispatch.OnComplete;
+import org.apache.pekko.pattern.Patterns;
+import org.apache.pekko.persistence.SelectedSnapshot;
+import org.apache.pekko.persistence.SnapshotMetadata;
+import org.apache.pekko.persistence.SnapshotSelectionCriteria;
+import org.apache.pekko.persistence.snapshot.japi.SnapshotStore;
 import scala.concurrent.Future;
 import scala.concurrent.Promise;
 

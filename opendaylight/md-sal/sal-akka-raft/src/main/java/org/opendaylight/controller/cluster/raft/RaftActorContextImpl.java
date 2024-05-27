@@ -9,12 +9,6 @@ package org.opendaylight.controller.cluster.raft;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorContext;
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.actor.ActorSystem;
-import akka.actor.Props;
-import akka.cluster.Cluster;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
@@ -25,6 +19,12 @@ import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.LongSupplier;
+import org.apache.pekko.actor.ActorContext;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSelection;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.cluster.Cluster;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStreamFactory;

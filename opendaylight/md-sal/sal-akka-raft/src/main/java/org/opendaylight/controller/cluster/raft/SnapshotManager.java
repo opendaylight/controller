@@ -7,13 +7,13 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import akka.persistence.SnapshotSelectionCriteria;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Optional;
 import java.util.function.Consumer;
+import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStream;

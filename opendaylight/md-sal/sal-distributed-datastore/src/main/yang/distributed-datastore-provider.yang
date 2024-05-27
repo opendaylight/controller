@@ -265,7 +265,7 @@ module distributed-datastore-provider {
             default false;
             type boolean;
             description "Use lz4 compression for snapshots, sent from leader to follower, for snapshots stored
-                        by LocalSnapshotStore, use akka.conf configuration.";
+                        by LocalSnapshotStore, use pekko.conf configuration.";
         }
 
         leaf export-on-recovery {

@@ -10,13 +10,13 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import static org.junit.Assert.assertTrue;
 
-import akka.actor.ActorRef;
-import akka.testkit.TestActorRef;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.testkit.TestActorRef;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;

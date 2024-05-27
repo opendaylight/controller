@@ -9,7 +9,7 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
+import org.apache.pekko.actor.ActorRef;
 
 /**
  * Request the ClientIdentifier from a particular actor. Response is an instance of {@link DataStoreClient}.
