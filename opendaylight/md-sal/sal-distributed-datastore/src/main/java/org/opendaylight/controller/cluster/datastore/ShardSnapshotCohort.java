@@ -9,8 +9,8 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorContext;
-import akka.actor.ActorRef;
+import org.apache.pekko.actor.ActorContext;
+import org.apache.pekko.actor.ActorRef;
 import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.ObjectInputStream;

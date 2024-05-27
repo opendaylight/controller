@@ -42,14 +42,21 @@
       <artifactId>org.osgi.service.metatype.annotations</artifactId>
     </dependency>
 
-    <!-- Akka -->
+    <!-- Pekko -->
     <dependency>
-      <groupId>org.scala-lang.modules</groupId>
-      <artifactId>scala-java8-compat_2.13</artifactId>
+      <groupId>org.apache.pekko</groupId>
+      <artifactId>pekko-osgi_3</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-testkit_2.13</artifactId>
+      <groupId>org.scala-lang.modules</groupId>
+      <artifactId>scala-java8-compat_3</artifactId>
+      <version>1.0.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.pekko</groupId>
+      <artifactId>pekko-testkit_2.13</artifactId>
+      <version>1.0.2</version>
+      <scope>test</scope>
     </dependency>
 
     <!-- Scala -->
@@ -65,7 +72,7 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-akka-raft</artifactId>
+      <artifactId>sal-pekko-raft</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
@@ -91,12 +98,12 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-akka-raft-example</artifactId>
+      <artifactId>sal-pekko-raft-example</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-akka-raft</artifactId>
+      <artifactId>sal-pekko-raft</artifactId>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
@@ -110,7 +117,7 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-akka-segmented-journal</artifactId>
+      <artifactId>sal-pekko-segmented-journal</artifactId>
       <scope>test</scope>
     </dependency>
 

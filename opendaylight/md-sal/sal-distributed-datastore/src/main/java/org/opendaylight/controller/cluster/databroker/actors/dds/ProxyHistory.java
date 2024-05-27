@@ -12,7 +12,7 @@ import static com.google.common.base.Verify.verify;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
+import org.apache.pekko.actor.ActorRef;
 import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.UnsignedLong;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;

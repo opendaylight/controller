@@ -11,13 +11,13 @@ import static java.util.Objects.requireNonNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.AddressFromURIString;
-import akka.cluster.Cluster;
-import akka.cluster.ClusterEvent.CurrentClusterState;
-import akka.cluster.Member;
-import akka.cluster.MemberStatus;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.AddressFromURIString;
+import org.apache.pekko.cluster.Cluster;
+import org.apache.pekko.cluster.ClusterEvent.CurrentClusterState;
+import org.apache.pekko.cluster.Member;
+import org.apache.pekko.cluster.MemberStatus;
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.Config;
@@ -49,7 +49,7 @@ import scala.concurrent.duration.FiniteDuration;
  * @author Thomas Pantelis
  */
 public class MemberNode {
-    private static final String MEMBER_1_ADDRESS = "akka://cluster-test@127.0.0.1:2558";
+    private static final String MEMBER_1_ADDRESS = "pekko://cluster-test@127.0.0.1:2558";
 
     private IntegrationTestKit kit;
     private ClientBackedDataStore configDataStore;
@@ -187,7 +187,7 @@ public class MemberNode {
         private final List<MemberNode> members;
         private String moduleShardsConfig;
         private String akkaConfig;
-        private boolean useAkkaArtery = true;
+        private boolean usePekkoArtery = true;
         private String[] waitForshardLeader = new String[0];
         private String testName;
         private EffectiveModelContext schemaContext;
@@ -214,8 +214,8 @@ public class MemberNode {
          *
          * @return this Builder
          */
-        public Builder akkaConfig(final String newAkkaConfig) {
-            akkaConfig = newAkkaConfig;
+        public Builder akkaConfig(final String newPekkoConfig) {
+            akkaConfig = newPekkoConfig;
             return this;
         }
 
@@ -224,8 +224,8 @@ public class MemberNode {
          *
          * @return this Builder
          */
-        public Builder useAkkaArtery(final boolean newUseAkkaArtery) {
-            useAkkaArtery = newUseAkkaArtery;
+        public Builder usePekkoArtery(final boolean newUsePekkoArtery) {
+            usePekkoArtery = newUsePekkoArtery;
             return this;
         }
 
@@ -293,7 +293,7 @@ public class MemberNode {
 
             Config baseConfig = ConfigFactory.load();
             Config config;
-            if (useAkkaArtery) {
+            if (usePekkoArtery) {
                 config = baseConfig.getConfig(akkaConfig);
             } else {
                 config = baseConfig.getConfig(akkaConfig + "-without-artery")
@@ -301,7 +301,7 @@ public class MemberNode {
             }
 
             ActorSystem system = ActorSystem.create("cluster-test", config);
-            String member1Address = useAkkaArtery ? MEMBER_1_ADDRESS : MEMBER_1_ADDRESS.replace("akka", "akka.tcp");
+            String member1Address = usePekkoArtery ? MEMBER_1_ADDRESS : MEMBER_1_ADDRESS.replace("akka", "pekko.tcp");
             Cluster.get(system).join(AddressFromURIString.parse(member1Address));
 
             node.kit = new IntegrationTestKit(system, datastoreContextBuilder);

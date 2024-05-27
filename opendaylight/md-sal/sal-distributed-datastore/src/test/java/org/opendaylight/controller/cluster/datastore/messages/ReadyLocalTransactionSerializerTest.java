@@ -11,8 +11,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import akka.actor.ExtendedActorSystem;
-import akka.testkit.javadsl.TestKit;
+import org.apache.pekko.actor.ExtendedActorSystem;
+import org.apache.pekko.testkit.javadsl.TestKit;
 import com.google.common.collect.ImmutableSortedSet;
 import java.io.NotSerializableException;
 import java.util.List;

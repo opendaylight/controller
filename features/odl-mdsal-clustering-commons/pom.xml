@@ -22,12 +22,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>odl-controller-akka</artifactId>
-            <type>xml</type>
-            <classifier>features</classifier>
-        </dependency>
-        <dependency>
             <groupId>org.opendaylight.odlparent</groupId>
             <artifactId>odl-apache-commons-lang3</artifactId>
             <type>xml</type>
@@ -70,13 +64,13 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
-            <artifactId>sal-akka-raft</artifactId>
+            <artifactId>sal-pekko-raft</artifactId>
         </dependency>
 
         <!-- Segmented Journal for Akka, including Kryo and asm-5.2 -->
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
-            <artifactId>sal-akka-segmented-journal</artifactId>
+            <artifactId>sal-pekko-segmented-journal</artifactId>
         </dependency>
     </dependencies>
 </project>

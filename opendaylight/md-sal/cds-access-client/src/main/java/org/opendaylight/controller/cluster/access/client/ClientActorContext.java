@@ -9,10 +9,10 @@ package org.opendaylight.controller.cluster.access.client;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.Cancellable;
-import akka.actor.Scheduler;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.Cancellable;
+import org.apache.pekko.actor.Scheduler;
 import com.google.common.base.Ticker;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.jdt.annotation.NonNull;

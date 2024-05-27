@@ -8,11 +8,11 @@
 
 package org.opendaylight.controller.cluster.common.actor;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.dispatch.BoundedDequeBasedMailbox;
-import akka.dispatch.MailboxType;
-import akka.dispatch.ProducesMessageQueue;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.dispatch.BoundedDequeBasedMailbox;
+import org.apache.pekko.dispatch.MailboxType;
+import org.apache.pekko.dispatch.ProducesMessageQueue;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricRegistry;

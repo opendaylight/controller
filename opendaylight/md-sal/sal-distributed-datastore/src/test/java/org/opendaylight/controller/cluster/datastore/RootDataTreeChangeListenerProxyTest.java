@@ -14,8 +14,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
-import akka.actor.ActorSelection;
-import akka.testkit.javadsl.TestKit;
+import org.apache.pekko.actor.ActorSelection;
+import org.apache.pekko.testkit.javadsl.TestKit;
 import com.google.common.collect.ImmutableList;
 import java.time.Duration;
 import java.util.List;

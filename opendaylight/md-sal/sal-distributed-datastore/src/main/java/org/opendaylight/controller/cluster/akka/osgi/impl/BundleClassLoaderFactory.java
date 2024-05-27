@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.akka.osgi.impl;
 
-import akka.osgi.BundleDelegatingClassLoader;
+import org.apache.pekko.osgi.BundleDelegatingClassLoader;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import org.osgi.framework.BundleContext;

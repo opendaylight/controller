@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import akka.actor.ActorRef;
+import org.apache.pekko.actor.ActorRef;
 import java.io.DataInput;
 import java.io.IOException;
 import org.opendaylight.controller.cluster.access.ABIVersion;

@@ -9,8 +9,8 @@ package org.opendaylight.controller.cluster.datastore.messages;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorPath;
-import akka.actor.ActorRef;
+import org.apache.pekko.actor.ActorPath;
+import org.apache.pekko.actor.ActorRef;
 import java.io.Serializable;
 
 /**

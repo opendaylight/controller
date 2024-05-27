@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.common.actor;
 
-import akka.actor.AbstractActor;
+import org.apache.pekko.actor.AbstractActor;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import org.opendaylight.controller.cluster.reporting.MetricsReporter;

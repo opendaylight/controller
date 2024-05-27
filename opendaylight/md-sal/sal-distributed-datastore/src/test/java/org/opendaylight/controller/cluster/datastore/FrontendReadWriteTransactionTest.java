@@ -17,7 +17,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import akka.actor.ActorRef;
+import org.apache.pekko.actor.ActorRef;
 import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;

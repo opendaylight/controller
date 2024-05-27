@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
-import akka.actor.ActorRef;
-import akka.actor.Status;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.Status;
 import com.google.common.base.Throwables;
 import com.google.common.base.Verify;
 import java.util.ArrayList;

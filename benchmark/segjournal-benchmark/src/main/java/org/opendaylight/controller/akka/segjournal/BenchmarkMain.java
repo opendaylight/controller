@@ -12,10 +12,10 @@ import static org.opendaylight.controller.akka.segjournal.BenchmarkUtils.formatB
 import static org.opendaylight.controller.akka.segjournal.BenchmarkUtils.formatNanos;
 import static org.opendaylight.controller.akka.segjournal.BenchmarkUtils.toMetricId;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.persistence.AtomicWrite;
-import akka.persistence.PersistentRepr;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.persistence.AtomicWrite;
+import org.apache.pekko.persistence.PersistentRepr;
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.io.Serializable;

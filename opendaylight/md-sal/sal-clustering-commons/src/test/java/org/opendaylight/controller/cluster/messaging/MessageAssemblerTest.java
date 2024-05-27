@@ -21,7 +21,7 @@ import static org.opendaylight.controller.cluster.messaging.MessageSlicingIntegr
 import static org.opendaylight.controller.cluster.messaging.MessageSlicingIntegrationTest.assertFailedMessageSliceReply;
 import static org.opendaylight.controller.cluster.messaging.MessageSlicingIntegrationTest.assertSuccessfulMessageSliceReply;
 
-import akka.actor.ActorRef;
+import org.apache.pekko.actor.ActorRef;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;

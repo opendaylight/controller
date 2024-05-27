@@ -10,8 +10,8 @@ package org.opendaylight.controller.cluster.datastore.actors;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import akka.actor.ActorRef;
-import akka.testkit.javadsl.TestKit;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.testkit.javadsl.TestKit;
 import com.google.common.io.ByteSource;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;

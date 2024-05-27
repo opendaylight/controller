@@ -9,7 +9,7 @@ package org.opendaylight.controller.remote.rpc.registry.gossip;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.Address;
+import org.apache.pekko.actor.Address;
 import com.google.common.collect.ImmutableMap;
 import java.io.Serializable;
 import java.util.Map;

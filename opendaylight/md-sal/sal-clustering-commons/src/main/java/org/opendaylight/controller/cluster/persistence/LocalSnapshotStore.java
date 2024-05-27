@@ -9,15 +9,15 @@ package org.opendaylight.controller.cluster.persistence;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import akka.actor.ExtendedActorSystem;
-import akka.dispatch.Futures;
-import akka.persistence.SelectedSnapshot;
-import akka.persistence.SnapshotMetadata;
-import akka.persistence.SnapshotSelectionCriteria;
-import akka.persistence.serialization.Snapshot;
-import akka.persistence.serialization.SnapshotSerializer;
-import akka.persistence.snapshot.japi.SnapshotStore;
-import akka.serialization.JavaSerializer;
+import org.apache.pekko.actor.ExtendedActorSystem;
+import org.apache.pekko.dispatch.Futures;
+import org.apache.pekko.persistence.SelectedSnapshot;
+import org.apache.pekko.persistence.SnapshotMetadata;
+import org.apache.pekko.persistence.SnapshotSelectionCriteria;
+import org.apache.pekko.persistence.serialization.Snapshot;
+import org.apache.pekko.persistence.serialization.SnapshotSerializer;
+import org.apache.pekko.persistence.snapshot.japi.SnapshotStore;
+import org.apache.pekko.serialization.JavaSerializer;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.ByteStreams;
 import com.typesafe.config.Config;
@@ -52,7 +52,7 @@ import scala.concurrent.ExecutionContext;
 import scala.concurrent.Future;
 
 /**
- * Akka SnapshotStore implementation backed by the local file system. This class was patterned after akka's
+ * Pekko SnapshotStore implementation backed by the local file system. This class was patterned after akka's
  * LocalSnapshotStore class and exists because akka's version serializes to a byte[] before persisting
  * to the file which will fail if the data reaches or exceeds Integer.MAX_VALUE in size. This class avoids that issue
  * by serializing the data directly to the file.
@@ -153,13 +153,13 @@ public final class LocalSnapshotStore extends SnapshotStore {
                     throw new IOException("Error loading snapshot file " + file, e);
                 } catch (IOException e) {
                     LOG.debug("Error loading snapshot file {}", file, e);
-                    return tryDeserializeAkkaSnapshot(file);
+                    return tryDeserializePekkoSnapshot(file);
                 }
             });
     }
 
-    private Object tryDeserializeAkkaSnapshot(final File file) throws IOException {
-        LOG.debug("tryDeserializeAkkaSnapshot {}", file);
+    private Object tryDeserializePekkoSnapshot(final File file) throws IOException {
+        LOG.debug("tryDeserializePekkoSnapshot {}", file);
 
         // The snapshot was probably previously stored via akka's LocalSnapshotStore which wraps the data
         // in a Snapshot instance and uses the SnapshotSerializer to serialize it to a byte[]. So we'll use

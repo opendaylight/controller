@@ -71,44 +71,102 @@
                 <version>0.4.3</version>
             </dependency>
 
-            <!-- Akka testkit -->
+            <!-- Pekko  -->
             <dependency>
-                <groupId>com.typesafe.akka</groupId>
-                <artifactId>akka-testkit_2.13</artifactId>
-                <version>2.6.21</version>
+                <groupId>org.apache.pekko</groupId>
+                <artifactId>pekko-actor_3</artifactId>
+                <version>1.0.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.pekko</groupId>
+                <artifactId>pekko-persistence_3</artifactId>
+                <version>1.0.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.pekko</groupId>
+                <artifactId>pekko-persistence-tck_2.13</artifactId>
+                <version>1.0.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.pekko</groupId>
+                <artifactId>pekko-cluster_3</artifactId>
+                <version>1.0.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.pekko</groupId>
+                <artifactId>pekko-remote_3</artifactId>
+                <version>1.0.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.pekko</groupId>
+                <artifactId>pekko-protobuf_3</artifactId>
+                <version>1.0.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.pekko</groupId>
+                <artifactId>pekko-osgi_3</artifactId>
+                <version>1.0.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.pekko</groupId>
+                <artifactId>pekko-actor-typed_3</artifactId>
+                <version>1.0.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.pekko</groupId>
+                <artifactId>pekko-distributed-data_3</artifactId>
+                <version>1.0.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.pekko</groupId>
+                <artifactId>pekko-persistence-typed_3</artifactId>
+                <version>1.0.2</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.pekko</groupId>
+                <artifactId>pekko-cluster-typed_3</artifactId>
+                <version>1.0.2</version>
+            </dependency>
+
+            <!-- Pekko testkit -->
+            <dependency>
+                <groupId>org.apache.pekko</groupId>
+                <artifactId>pekko-testkit_2.13</artifactId>
+                <version>1.0.2</version>
                 <scope>test</scope>
                 <exclusions>
                     <exclusion>
-                        <groupId>com.typesafe.akka</groupId>
-                        <artifactId>akka-actor_2.13</artifactId>
+                        <groupId>org.apache.pekko</groupId>
+                        <artifactId>pekko-actor_2.13</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>com.typesafe.akka</groupId>
-                <artifactId>akka-actor-testkit-typed_2.13</artifactId>
-                <version>2.6.21</version>
+                <groupId>org.apache.pekko</groupId>
+                <artifactId>pekko-actor-testkit-typed_2.13</artifactId>
+                <version>1.0.2</version>
                 <scope>test</scope>
                 <exclusions>
                     <exclusion>
-                        <groupId>com.typesafe.akka</groupId>
-                        <artifactId>akka-actor-typed_2.13</artifactId>
+                        <groupId>org.apache.pekko</groupId>
+                        <artifactId>pekko-actor-typed_2.13</artifactId>
                     </exclusion>
                     <exclusion>
-                        <groupId>com.typesafe.akka</groupId>
-                        <artifactId>akka-slf4j_2.13</artifactId>
+                        <groupId>org.apache.pekko</groupId>
+                        <artifactId>pekko-slf4j_2.13</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>com.typesafe.akka</groupId>
-                <artifactId>akka-persistence-tck_2.13</artifactId>
-                <version>2.6.21</version>
+                <groupId>org.apache.pekko</groupId>
+                <artifactId>pekko-persistence-tck_2.13</artifactId>
+                <version>1.0.2</version>
                 <scope>test</scope>
                 <exclusions>
                     <exclusion>
-                        <groupId>com.typesafe.akka</groupId>
-                        <artifactId>akka-persistence_2.13</artifactId>
+                        <groupId>org.apache.pekko</groupId>
+                        <artifactId>pekko-persistence_2.13</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>

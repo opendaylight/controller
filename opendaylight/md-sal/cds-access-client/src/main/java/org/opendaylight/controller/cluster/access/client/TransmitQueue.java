@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.access.client;
 import static com.google.common.base.Verify.verify;
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
+import org.apache.pekko.actor.ActorRef;
 import com.google.common.annotations.VisibleForTesting;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayDeque;

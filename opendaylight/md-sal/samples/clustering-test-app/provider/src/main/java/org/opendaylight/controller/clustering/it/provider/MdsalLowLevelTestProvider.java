@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.clustering.it.provider;
 
-import akka.actor.ActorRef;
-import akka.dispatch.Futures;
-import akka.dispatch.OnComplete;
-import akka.pattern.Patterns;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.dispatch.Futures;
+import org.apache.pekko.dispatch.OnComplete;
+import org.apache.pekko.pattern.Patterns;
 import com.google.common.base.Strings;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;

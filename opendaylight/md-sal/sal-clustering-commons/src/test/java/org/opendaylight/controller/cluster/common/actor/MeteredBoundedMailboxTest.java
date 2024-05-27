@@ -7,12 +7,12 @@
  */
 package org.opendaylight.controller.cluster.common.actor;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.DeadLetter;
-import akka.actor.Props;
-import akka.actor.UntypedAbstractActor;
-import akka.testkit.TestKit;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.DeadLetter;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.actor.UntypedAbstractActor;
+import org.apache.pekko.testkit.TestKit;
 import com.typesafe.config.ConfigFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;

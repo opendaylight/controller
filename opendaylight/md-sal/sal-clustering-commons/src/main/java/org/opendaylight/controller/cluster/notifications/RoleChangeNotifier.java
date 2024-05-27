@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.cluster.notifications;
 
-import akka.actor.ActorPath;
-import akka.actor.ActorRef;
-import akka.actor.Props;
-import akka.serialization.Serialization;
+import org.apache.pekko.actor.ActorPath;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.serialization.Serialization;
 import java.util.HashMap;
 import java.util.Map;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;

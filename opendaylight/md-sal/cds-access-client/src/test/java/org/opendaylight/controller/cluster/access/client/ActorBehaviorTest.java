@@ -13,14 +13,14 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.Props;
-import akka.persistence.Persistence;
-import akka.persistence.SelectedSnapshot;
-import akka.persistence.SnapshotMetadata;
-import akka.testkit.TestProbe;
-import akka.testkit.javadsl.TestKit;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.persistence.Persistence;
+import org.apache.pekko.persistence.SelectedSnapshot;
+import org.apache.pekko.persistence.SnapshotMetadata;
+import org.apache.pekko.testkit.TestProbe;
+import org.apache.pekko.testkit.javadsl.TestKit;
 import com.typesafe.config.ConfigFactory;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -67,8 +67,9 @@ class ActorBehaviorTest {
         persistenceId.set(ctx, MEMBER_1_FRONTEND_TYPE_1);
 
         system = ActorSystem.apply("system1");
-        final ActorRef storeRef = system.registerExtension(Persistence.lookup()).snapshotStoreFor(null,
-            ConfigFactory.empty());
+        final ActorRef storeRef = null;
+        //FIXME final ActorRef storeRef = system.registerExtension(Persistence.lookup()).snapshotStoreFor(null,
+        //     ConfigFactory.empty());
         probe = new TestProbe(system);
         storeRef.tell(probe.ref(), ActorRef.noSender());
         final MemberName name = MemberName.forName("member-1");

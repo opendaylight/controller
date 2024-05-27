@@ -9,7 +9,7 @@ package org.opendaylight.controller.cluster.access.commands;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import akka.actor.ActorRef;
+import org.apache.pekko.actor.ActorRef;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;

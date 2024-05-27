@@ -9,8 +9,8 @@ package org.opendaylight.controller.remote.rpc;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.Address;
-import akka.actor.Props;
+import org.apache.pekko.actor.Address;
+import org.apache.pekko.actor.Props;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;

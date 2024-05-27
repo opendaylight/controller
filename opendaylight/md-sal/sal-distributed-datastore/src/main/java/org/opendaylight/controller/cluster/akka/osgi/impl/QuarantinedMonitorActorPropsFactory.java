@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.akka.osgi.impl;
 
-import akka.actor.Props;
+import org.apache.pekko.actor.Props;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigException;
 import org.opendaylight.controller.cluster.common.actor.QuarantinedMonitorActor;
@@ -32,7 +32,7 @@ public final class QuarantinedMonitorActorPropsFactory {
                 return QuarantinedMonitorActor.props(() -> { });
             }
         } catch (ConfigException configEx) {
-            LOG.info("Akka config doesn't contain property {}. Therefore default handling will be used",
+            LOG.info("Pekko config doesn't contain property {}. Therefore default handling will be used",
                 DEFAULT_HANDLING_DISABLED);
         }
         return QuarantinedMonitorActor.props(() -> {

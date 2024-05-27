@@ -10,9 +10,9 @@ package org.opendaylight.controller.cluster.datastore;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
-import akka.actor.ActorRef;
-import akka.actor.Props;
-import akka.testkit.TestActorRef;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.testkit.TestActorRef;
 import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
@@ -73,13 +73,13 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
         final TestActorRef<ShardTransaction> subject = TestActorRef.create(getSystem(), props,
                 "testNegativeReadWithReadOnlyTransactionClosed");
 
-        Future<Object> future = akka.pattern.Patterns.ask(subject,
+        Future<Object> future = org.apache.pekko.pattern.Patterns.ask(subject,
                 new ReadData(YangInstanceIdentifier.of(), DataStoreVersions.CURRENT_VERSION), 3000);
         Await.result(future, FiniteDuration.create(3, TimeUnit.SECONDS));
 
         subject.underlyingActor().getDOMStoreTransaction().abortFromTransactionActor();
 
-        future = akka.pattern.Patterns.ask(subject, new ReadData(YangInstanceIdentifier.of(),
+        future = org.apache.pekko.pattern.Patterns.ask(subject, new ReadData(YangInstanceIdentifier.of(),
                 DataStoreVersions.CURRENT_VERSION), 3000);
         Await.result(future, FiniteDuration.create(3, TimeUnit.SECONDS));
     }
@@ -95,13 +95,13 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
         final TestActorRef<ShardTransaction> subject = TestActorRef.create(getSystem(), props,
                 "testNegativeReadWithReadWriteTransactionClosed");
 
-        Future<Object> future = akka.pattern.Patterns.ask(subject,
+        Future<Object> future = org.apache.pekko.pattern.Patterns.ask(subject,
                 new ReadData(YangInstanceIdentifier.of(), DataStoreVersions.CURRENT_VERSION), 3000);
         Await.result(future, FiniteDuration.create(3, TimeUnit.SECONDS));
 
         subject.underlyingActor().getDOMStoreTransaction().abortFromTransactionActor();
 
-        future = akka.pattern.Patterns.ask(subject, new ReadData(YangInstanceIdentifier.of(),
+        future = org.apache.pekko.pattern.Patterns.ask(subject, new ReadData(YangInstanceIdentifier.of(),
                 DataStoreVersions.CURRENT_VERSION), 3000);
         Await.result(future, FiniteDuration.create(3, TimeUnit.SECONDS));
     }
@@ -116,13 +116,13 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
         final TestActorRef<ShardTransaction> subject = TestActorRef.create(getSystem(), props,
                 "testNegativeExistsWithReadWriteTransactionClosed");
 
-        Future<Object> future = akka.pattern.Patterns.ask(subject,
+        Future<Object> future = org.apache.pekko.pattern.Patterns.ask(subject,
                 new DataExists(YangInstanceIdentifier.of(), DataStoreVersions.CURRENT_VERSION), 3000);
         Await.result(future, FiniteDuration.create(3, TimeUnit.SECONDS));
 
         subject.underlyingActor().getDOMStoreTransaction().abortFromTransactionActor();
 
-        future = akka.pattern.Patterns.ask(subject,
+        future = org.apache.pekko.pattern.Patterns.ask(subject,
                 new DataExists(YangInstanceIdentifier.of(), DataStoreVersions.CURRENT_VERSION), 3000);
         Await.result(future, FiniteDuration.create(3, TimeUnit.SECONDS));
     }

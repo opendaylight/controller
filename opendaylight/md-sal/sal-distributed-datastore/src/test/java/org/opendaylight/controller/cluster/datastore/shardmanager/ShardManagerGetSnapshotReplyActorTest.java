@@ -9,10 +9,10 @@ package org.opendaylight.controller.cluster.datastore.shardmanager;
 
 import static org.junit.Assert.assertEquals;
 
-import akka.actor.ActorRef;
-import akka.actor.Status.Failure;
-import akka.actor.Terminated;
-import akka.testkit.javadsl.TestKit;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.Status.Failure;
+import org.apache.pekko.actor.Terminated;
+import org.apache.pekko.testkit.javadsl.TestKit;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;

@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
-import akka.actor.ActorRef;
+import org.apache.pekko.actor.ActorRef;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNull;

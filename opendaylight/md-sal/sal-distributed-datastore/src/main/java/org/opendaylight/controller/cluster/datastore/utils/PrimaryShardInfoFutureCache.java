@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore.utils;
 
-import akka.dispatch.Futures;
+import org.apache.pekko.dispatch.Futures;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import org.eclipse.jdt.annotation.NonNull;

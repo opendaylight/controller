@@ -18,17 +18,17 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.actor.ActorSystem;
-import akka.actor.Address;
-import akka.actor.Props;
-import akka.actor.UntypedAbstractActor;
-import akka.dispatch.Futures;
-import akka.japi.Creator;
-import akka.testkit.TestActorRef;
-import akka.testkit.javadsl.TestKit;
-import akka.util.Timeout;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSelection;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.Address;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.actor.UntypedAbstractActor;
+import org.apache.pekko.dispatch.Futures;
+import org.apache.pekko.japi.Creator;
+import org.apache.pekko.testkit.TestActorRef;
+import org.apache.pekko.testkit.javadsl.TestKit;
+import org.apache.pekko.util.Timeout;
 import com.google.common.collect.Sets;
 import com.typesafe.config.ConfigFactory;
 import java.time.Duration;
@@ -215,50 +215,50 @@ public class ActorUtilsTest extends AbstractActorTest {
         // even if the path is in local format, match the primary path (first 3 elements) and return true
         clusterWrapper.setSelfAddress(new Address("akka", "test"));
         actorUtils = new ActorUtils(getSystem(), null, clusterWrapper, mock(Configuration.class));
-        assertTrue(actorUtils.isPathLocal("akka://test/user/$a"));
+        assertTrue(actorUtils.isPathLocal("pekko://test/user/$a"));
 
         clusterWrapper.setSelfAddress(new Address("akka", "test"));
         actorUtils = new ActorUtils(getSystem(), null, clusterWrapper, mock(Configuration.class));
-        assertTrue(actorUtils.isPathLocal("akka://test/user/$a"));
+        assertTrue(actorUtils.isPathLocal("pekko://test/user/$a"));
 
         clusterWrapper.setSelfAddress(new Address("akka", "test"));
         actorUtils = new ActorUtils(getSystem(), null, clusterWrapper, mock(Configuration.class));
-        assertTrue(actorUtils.isPathLocal("akka://test/user/token2/token3/$a"));
+        assertTrue(actorUtils.isPathLocal("pekko://test/user/token2/token3/$a"));
 
         // self address of remote format,but Tx path local format.
         clusterWrapper.setSelfAddress(new Address("akka", "system", "127.0.0.1", 2550));
         actorUtils = new ActorUtils(getSystem(), null, clusterWrapper, mock(Configuration.class));
-        assertTrue(actorUtils.isPathLocal("akka://system/user/shardmanager/shard/transaction"));
+        assertTrue(actorUtils.isPathLocal("pekko://system/user/shardmanager/shard/transaction"));
 
         // self address of local format,but Tx path remote format.
         clusterWrapper.setSelfAddress(new Address("akka", "system"));
         actorUtils = new ActorUtils(getSystem(), null, clusterWrapper, mock(Configuration.class));
-        assertFalse(actorUtils.isPathLocal("akka://system@127.0.0.1:2550/user/shardmanager/shard/transaction"));
+        assertFalse(actorUtils.isPathLocal("pekko://system@127.0.0.1:2550/user/shardmanager/shard/transaction"));
 
         //local path but not same
         clusterWrapper.setSelfAddress(new Address("akka", "test"));
         actorUtils = new ActorUtils(getSystem(), null, clusterWrapper, mock(Configuration.class));
-        assertTrue(actorUtils.isPathLocal("akka://test1/user/$a"));
+        assertTrue(actorUtils.isPathLocal("pekko://test1/user/$a"));
 
         //ip and port same
         clusterWrapper.setSelfAddress(new Address("akka", "system", "127.0.0.1", 2550));
         actorUtils = new ActorUtils(getSystem(), null, clusterWrapper, mock(Configuration.class));
-        assertTrue(actorUtils.isPathLocal("akka://system@127.0.0.1:2550/"));
+        assertTrue(actorUtils.isPathLocal("pekko://system@127.0.0.1:2550/"));
 
         // forward-slash missing in address
         clusterWrapper.setSelfAddress(new Address("akka", "system", "127.0.0.1", 2550));
         actorUtils = new ActorUtils(getSystem(), null, clusterWrapper, mock(Configuration.class));
-        assertFalse(actorUtils.isPathLocal("akka://system@127.0.0.1:2550"));
+        assertFalse(actorUtils.isPathLocal("pekko://system@127.0.0.1:2550"));
 
         //ips differ
         clusterWrapper.setSelfAddress(new Address("akka", "system", "127.0.0.1", 2550));
         actorUtils = new ActorUtils(getSystem(), null, clusterWrapper, mock(Configuration.class));
-        assertFalse(actorUtils.isPathLocal("akka://system@127.1.0.1:2550/"));
+        assertFalse(actorUtils.isPathLocal("pekko://system@127.1.0.1:2550/"));
 
         //ports differ
         clusterWrapper.setSelfAddress(new Address("akka", "system", "127.0.0.1", 2550));
         actorUtils = new ActorUtils(getSystem(), null, clusterWrapper, mock(Configuration.class));
-        assertFalse(actorUtils.isPathLocal("akka://system@127.0.0.1:2551/"));
+        assertFalse(actorUtils.isPathLocal("pekko://system@127.0.0.1:2551/"));
     }
 
     @Test
@@ -320,7 +320,7 @@ public class ActorUtilsTest extends AbstractActorTest {
                 .logicalStoreType(LogicalDatastoreType.CONFIGURATION)
                 .shardLeaderElectionTimeout(100, TimeUnit.MILLISECONDS).build();
 
-        final String expPrimaryPath = "akka://test-system/find-primary-shard";
+        final String expPrimaryPath = "pekko://test-system/find-primary-shard";
         final short expPrimaryVersion = DataStoreVersions.CURRENT_VERSION;
         ActorUtils actorUtils = new ActorUtils(getSystem(), shardManager, mock(ClusterWrapper.class),
                 mock(Configuration.class), dataStoreContext, new PrimaryShardInfoFutureCache()) {
@@ -362,7 +362,7 @@ public class ActorUtilsTest extends AbstractActorTest {
                 .shardLeaderElectionTimeout(100, TimeUnit.MILLISECONDS).build();
 
         final DataTree mockDataTree = Mockito.mock(DataTree.class);
-        final String expPrimaryPath = "akka://test-system/find-primary-shard";
+        final String expPrimaryPath = "pekko://test-system/find-primary-shard";
         ActorUtils actorUtils = new ActorUtils(getSystem(), shardManager, mock(ClusterWrapper.class),
                 mock(Configuration.class), dataStoreContext, new PrimaryShardInfoFutureCache()) {
             @Override

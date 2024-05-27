@@ -51,7 +51,7 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
-            <artifactId>sal-akka-raft</artifactId>
+            <artifactId>sal-pekko-raft</artifactId>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>

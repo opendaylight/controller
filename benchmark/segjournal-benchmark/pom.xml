@@ -59,10 +59,6 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
-            <artifactId>repackaged-akka</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-clustering-commons</artifactId>
         </dependency>
         <dependency>
@@ -71,7 +67,7 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
-            <artifactId>sal-akka-segmented-journal</artifactId>
+            <artifactId>sal-pekko-segmented-journal</artifactId>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>

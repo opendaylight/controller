@@ -25,16 +25,16 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.actor.ActorSystem;
-import akka.actor.Address;
-import akka.actor.AddressFromURIString;
-import akka.cluster.Cluster;
-import akka.cluster.Member;
-import akka.dispatch.Futures;
-import akka.pattern.Patterns;
-import akka.testkit.javadsl.TestKit;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSelection;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.Address;
+import org.apache.pekko.actor.AddressFromURIString;
+import org.apache.pekko.cluster.Cluster;
+import org.apache.pekko.cluster.Member;
+import org.apache.pekko.dispatch.Futures;
+import org.apache.pekko.pattern.Patterns;
+import org.apache.pekko.testkit.javadsl.TestKit;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
@@ -154,9 +154,9 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     private static final String[] CARS = {"cars"};
 
     private static final Address MEMBER_1_ADDRESS = AddressFromURIString.parse(
-            "akka://cluster-test@127.0.0.1:2558");
+            "pekko://cluster-test@127.0.0.1:2558");
     private static final Address MEMBER_2_ADDRESS = AddressFromURIString.parse(
-            "akka://cluster-test@127.0.0.1:2559");
+            "pekko://cluster-test@127.0.0.1:2559");
 
     private static final String MODULE_SHARDS_CARS_ONLY_1_2 = "module-shards-cars-member-1-and-2.conf";
     private static final String MODULE_SHARDS_CARS_PEOPLE_1_2 = "module-shards-member1-and-2.conf";
@@ -747,8 +747,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         carsFollowerShard.orElseThrow().tell(readyLocal, followerTestKit.getRef());
         Object resp = followerTestKit.expectMsgClass(Object.class);
-        if (resp instanceof akka.actor.Status.Failure) {
-            throw new AssertionError("Unexpected failure response", ((akka.actor.Status.Failure)resp).cause());
+        if (resp instanceof org.apache.pekko.actor.Status.Failure) {
+            throw new AssertionError("Unexpected failure response", ((org.apache.pekko.actor.Status.Failure)resp).cause());
         }
 
         assertEquals("Response type", CommitTransactionReply.class, resp.getClass());
@@ -766,8 +766,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         carsFollowerShard.orElseThrow().tell(readyLocal, followerTestKit.getRef());
         resp = followerTestKit.expectMsgClass(Object.class);
-        if (resp instanceof akka.actor.Status.Failure) {
-            throw new AssertionError("Unexpected failure response", ((akka.actor.Status.Failure)resp).cause());
+        if (resp instanceof org.apache.pekko.actor.Status.Failure) {
+            throw new AssertionError("Unexpected failure response", ((org.apache.pekko.actor.Status.Failure)resp).cause());
         }
 
         assertEquals("Response type", ReadyTransactionReply.class, resp.getClass());
@@ -812,8 +812,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         carsFollowerShard.orElseThrow().tell(forwardedReady, followerTestKit.getRef());
         Object resp = followerTestKit.expectMsgClass(Object.class);
-        if (resp instanceof akka.actor.Status.Failure) {
-            throw new AssertionError("Unexpected failure response", ((akka.actor.Status.Failure)resp).cause());
+        if (resp instanceof org.apache.pekko.actor.Status.Failure) {
+            throw new AssertionError("Unexpected failure response", ((org.apache.pekko.actor.Status.Failure)resp).cause());
         }
 
         assertEquals("Response type", CommitTransactionReply.class, resp.getClass());
@@ -832,8 +832,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         carsFollowerShard.orElseThrow().tell(forwardedReady, followerTestKit.getRef());
         resp = followerTestKit.expectMsgClass(Object.class);
-        if (resp instanceof akka.actor.Status.Failure) {
-            throw new AssertionError("Unexpected failure response", ((akka.actor.Status.Failure)resp).cause());
+        if (resp instanceof org.apache.pekko.actor.Status.Failure) {
+            throw new AssertionError("Unexpected failure response", ((org.apache.pekko.actor.Status.Failure)resp).cause());
         }
 
         assertEquals("Response type", ReadyTransactionReply.class, resp.getClass());

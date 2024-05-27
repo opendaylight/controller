@@ -13,7 +13,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.assertOperationThrowsException;
 
-import akka.testkit.TestProbe;
+import org.apache.pekko.testkit.TestProbe;
 import com.google.common.base.Ticker;
 import com.google.common.base.VerifyException;
 import java.util.Optional;

@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.cluster.akka.impl;
 
-import akka.actor.ActorSystem;
-import akka.actor.Props;
-import akka.actor.Terminated;
-import akka.dispatch.OnComplete;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.actor.Terminated;
+import org.apache.pekko.dispatch.OnComplete;
 import com.typesafe.config.Config;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;

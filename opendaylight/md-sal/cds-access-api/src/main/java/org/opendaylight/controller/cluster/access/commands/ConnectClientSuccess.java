@@ -10,10 +10,10 @@ package org.opendaylight.controller.cluster.access.commands;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.serialization.JavaSerializer;
-import akka.serialization.Serialization;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSelection;
+import org.apache.pekko.serialization.JavaSerializer;
+import org.apache.pekko.serialization.Serialization;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.collect.ImmutableList;
 import java.io.DataInput;

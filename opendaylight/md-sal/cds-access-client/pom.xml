@@ -18,6 +18,10 @@
             <optional>true</optional>
         </dependency>
         <dependency>
+            <groupId>org.apache.pekko</groupId>
+            <artifactId>pekko-actor_3</artifactId>
+        </dependency>
+        <dependency>
            <groupId>com.google.guava</groupId>
            <artifactId>guava</artifactId>
         </dependency>
@@ -28,10 +32,6 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>cds-access-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>repackaged-akka</artifactId>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
@@ -57,8 +57,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-testkit_2.13</artifactId>
+            <groupId>org.apache.pekko</groupId>
+            <artifactId>pekko-testkit_2.13</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>

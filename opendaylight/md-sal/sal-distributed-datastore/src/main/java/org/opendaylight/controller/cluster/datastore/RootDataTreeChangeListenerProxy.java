@@ -11,10 +11,10 @@ import static com.google.common.base.Verify.verify;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.actor.PoisonPill;
-import akka.dispatch.OnComplete;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSelection;
+import org.apache.pekko.actor.PoisonPill;
+import org.apache.pekko.dispatch.OnComplete;
 import com.google.common.collect.Maps;
 import java.util.ArrayList;
 import java.util.HashMap;

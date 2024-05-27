@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.datastore;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
-import akka.util.Timeout;
+import org.apache.pekko.util.Timeout;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,8 +18,8 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.text.WordUtils;
 import org.opendaylight.controller.cluster.access.client.AbstractClientConnection;
 import org.opendaylight.controller.cluster.access.client.ClientActorConfig;
-import org.opendaylight.controller.cluster.common.actor.AkkaConfigurationReader;
-import org.opendaylight.controller.cluster.common.actor.FileAkkaConfigurationReader;
+import org.opendaylight.controller.cluster.common.actor.PekkoConfigurationReader;
+import org.opendaylight.controller.cluster.common.actor.FilePekkoConfigurationReader;
 import org.opendaylight.controller.cluster.raft.ConfigParams;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.PeerAddressResolver;
@@ -55,7 +55,7 @@ public class DatastoreContext implements ClientActorConfig {
     public static final int DEFAULT_INITIAL_SETTLE_TIMEOUT_MULTIPLIER = 3;
     public static final boolean DEFAULT_PERSISTENT = true;
     public static final boolean DEFAULT_SNAPSHOT_ON_ROOT_OVERWRITE = false;
-    public static final FileAkkaConfigurationReader DEFAULT_CONFIGURATION_READER = new FileAkkaConfigurationReader();
+    public static final FilePekkoConfigurationReader DEFAULT_CONFIGURATION_READER = new FilePekkoConfigurationReader();
     public static final int DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD_PERCENTAGE = 12;
     public static final int DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD = 0;
     public static final int DEFAULT_SHARD_ELECTION_TIMEOUT_FACTOR = 2;
@@ -88,7 +88,7 @@ public class DatastoreContext implements ClientActorConfig {
     private int initialSettleTimeoutMultiplier = DEFAULT_INITIAL_SETTLE_TIMEOUT_MULTIPLIER;
     private boolean persistent = DEFAULT_PERSISTENT;
     private boolean snapshotOnRootOverwrite = DEFAULT_SNAPSHOT_ON_ROOT_OVERWRITE;
-    private AkkaConfigurationReader configurationReader = DEFAULT_CONFIGURATION_READER;
+    private PekkoConfigurationReader configurationReader = DEFAULT_CONFIGURATION_READER;
     private long transactionCreationInitialRateLimit = DEFAULT_TX_CREATION_INITIAL_RATE_LIMIT;
     private String dataStoreName = UNKNOWN_DATA_STORE_TYPE;
     private LogicalDatastoreType logicalStoreType = LogicalDatastoreType.OPERATIONAL;
@@ -229,7 +229,7 @@ public class DatastoreContext implements ClientActorConfig {
         return snapshotOnRootOverwrite;
     }
 
-    public AkkaConfigurationReader getConfigurationReader() {
+    public PekkoConfigurationReader getConfigurationReader() {
         return configurationReader;
     }
 
@@ -496,7 +496,7 @@ public class DatastoreContext implements ClientActorConfig {
             return shardLeaderElectionTimeout(timeout, TimeUnit.SECONDS);
         }
 
-        public Builder configurationReader(final AkkaConfigurationReader configurationReader) {
+        public Builder configurationReader(final PekkoConfigurationReader configurationReader) {
             datastoreContext.configurationReader = configurationReader;
             return this;
         }

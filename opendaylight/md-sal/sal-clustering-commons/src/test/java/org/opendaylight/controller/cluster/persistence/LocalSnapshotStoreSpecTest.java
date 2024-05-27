@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.persistence;
 
-import akka.persistence.snapshot.SnapshotStoreSpec;
+import org.apache.pekko.persistence.snapshot.SnapshotStoreSpec;
 import com.typesafe.config.ConfigFactory;
 import java.io.File;
 import java.io.IOException;

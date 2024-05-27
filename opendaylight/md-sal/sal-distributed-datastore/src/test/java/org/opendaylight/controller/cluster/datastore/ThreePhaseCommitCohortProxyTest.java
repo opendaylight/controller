@@ -16,12 +16,12 @@ import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.lenient;
 import static org.opendaylight.controller.cluster.datastore.DataStoreVersions.CURRENT_VERSION;
 
-import akka.actor.ActorSelection;
-import akka.actor.Props;
-import akka.actor.UntypedAbstractActor;
-import akka.dispatch.Dispatchers;
-import akka.dispatch.Futures;
-import akka.testkit.TestActorRef;
+import org.apache.pekko.actor.ActorSelection;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.actor.UntypedAbstractActor;
+import org.apache.pekko.dispatch.Dispatchers;
+import org.apache.pekko.dispatch.Futures;
+import org.apache.pekko.testkit.TestActorRef;
 import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -328,7 +328,7 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
                 assertEquals(name + " transactionId", builder.transactionId, actualMessage.getTransactionId());
 
                 if (reply instanceof Throwable) {
-                    getSender().tell(new akka.actor.Status.Failure((Throwable)reply), self());
+                    getSender().tell(new org.apache.pekko.actor.Status.Failure((Throwable)reply), self());
                 } else {
                     getSender().tell(reply, self());
                 }

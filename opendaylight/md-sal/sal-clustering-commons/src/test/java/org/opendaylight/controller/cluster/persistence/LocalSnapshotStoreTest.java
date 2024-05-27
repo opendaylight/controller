@@ -14,20 +14,20 @@ import static org.opendaylight.controller.cluster.persistence.LocalSnapshotStore
 import static org.opendaylight.controller.cluster.persistence.LocalSnapshotStoreSpecTest.cleanSnapshotDir;
 import static org.opendaylight.controller.cluster.persistence.LocalSnapshotStoreSpecTest.createSnapshotDir;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.ExtendedActorSystem;
-import akka.persistence.Persistence;
-import akka.persistence.SelectedSnapshot;
-import akka.persistence.SnapshotMetadata;
-import akka.persistence.SnapshotProtocol;
-import akka.persistence.SnapshotProtocol.LoadSnapshot;
-import akka.persistence.SnapshotProtocol.LoadSnapshotFailed;
-import akka.persistence.SnapshotProtocol.LoadSnapshotResult;
-import akka.persistence.SnapshotSelectionCriteria;
-import akka.persistence.serialization.Snapshot;
-import akka.persistence.serialization.SnapshotSerializer;
-import akka.testkit.javadsl.TestKit;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.ExtendedActorSystem;
+import org.apache.pekko.persistence.Persistence;
+import org.apache.pekko.persistence.SelectedSnapshot;
+import org.apache.pekko.persistence.SnapshotMetadata;
+import org.apache.pekko.persistence.SnapshotProtocol;
+import org.apache.pekko.persistence.SnapshotProtocol.LoadSnapshot;
+import org.apache.pekko.persistence.SnapshotProtocol.LoadSnapshotFailed;
+import org.apache.pekko.persistence.SnapshotProtocol.LoadSnapshotResult;
+import org.apache.pekko.persistence.SnapshotSelectionCriteria;
+import org.apache.pekko.persistence.serialization.Snapshot;
+import org.apache.pekko.persistence.serialization.SnapshotSerializer;
+import org.apache.pekko.testkit.javadsl.TestKit;
 import com.typesafe.config.ConfigFactory;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -64,7 +64,7 @@ public class LocalSnapshotStoreTest {
         createSnapshotDir();
 
         system = ActorSystem.create("test", ConfigFactory.load("LocalSnapshotStoreTest.conf"));
-        snapshotStore = system.registerExtension(Persistence.lookup()).snapshotStoreFor(null, ConfigFactory.empty());
+        //FIXME snapshotStore = system.registerExtension(Persistence.lookup()).snapshotStoreFor(null, ConfigFactory.empty());
     }
 
     @AfterClass
@@ -164,7 +164,7 @@ public class LocalSnapshotStoreTest {
     }
 
     @Test
-    public void testDoLoadAsyncWithAkkaSerializedSnapshot() throws IOException {
+    public void testDoLoadAsyncWithPekkoSerializedSnapshot() throws IOException {
         SnapshotSerializer snapshotSerializer = new SnapshotSerializer((ExtendedActorSystem) system);
 
         String name = toSnapshotName(PERSISTENCE_ID, 1, 1000);

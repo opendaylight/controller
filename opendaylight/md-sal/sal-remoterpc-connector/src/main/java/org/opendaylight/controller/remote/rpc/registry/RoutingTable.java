@@ -7,9 +7,9 @@
  */
 package org.opendaylight.controller.remote.rpc.registry;
 
-import akka.actor.ActorRef;
-import akka.serialization.JavaSerializer;
-import akka.serialization.Serialization;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.serialization.JavaSerializer;
+import org.apache.pekko.serialization.Serialization;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.Externalizable;
 import java.io.IOException;

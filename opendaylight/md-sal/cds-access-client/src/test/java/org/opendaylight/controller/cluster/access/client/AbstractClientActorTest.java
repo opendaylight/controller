@@ -9,7 +9,7 @@ package org.opendaylight.controller.cluster.access.client;
 
 import static org.mockito.Mockito.doReturn;
 
-import akka.actor.ActorRef;
+import org.apache.pekko.actor.ActorRef;
 import com.google.common.testing.FakeTicker;
 import org.junit.Before;
 import org.mockito.Mock;

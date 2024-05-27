@@ -10,7 +10,7 @@ package org.opendaylight.controller.remote.rpc;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
+import org.apache.pekko.actor.ActorRef;
 import java.util.Collection;
 import java.util.Set;
 import org.opendaylight.controller.remote.rpc.registry.ActionRegistry;

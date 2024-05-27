@@ -21,14 +21,14 @@ import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking
 import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking.successfulCommit;
 import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking.successfulPreCommit;
 
-import akka.actor.ActorRef;
-import akka.actor.PoisonPill;
-import akka.actor.Props;
-import akka.dispatch.Dispatchers;
-import akka.japi.Creator;
-import akka.pattern.Patterns;
-import akka.testkit.TestActorRef;
-import akka.util.Timeout;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.PoisonPill;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.dispatch.Dispatchers;
+import org.apache.pekko.japi.Creator;
+import org.apache.pekko.pattern.Patterns;
+import org.apache.pekko.testkit.TestActorRef;
+import org.apache.pekko.util.Timeout;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Uninterruptibles;

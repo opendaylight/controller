@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore.utils;
 
-import akka.dispatch.OnComplete;
+import org.apache.pekko.dispatch.OnComplete;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;

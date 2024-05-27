@@ -7,12 +7,12 @@
  */
 package org.opendaylight.controller.cluster.datastore.admin;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.actor.Status.Success;
-import akka.dispatch.OnComplete;
-import akka.pattern.Patterns;
-import akka.util.Timeout;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSelection;
+import org.apache.pekko.actor.Status.Success;
+import org.apache.pekko.dispatch.OnComplete;
+import org.apache.pekko.pattern.Patterns;
+import org.apache.pekko.util.Timeout;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
@@ -55,7 +55,7 @@ import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshotList;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshot;
-import org.opendaylight.controller.eos.akka.DataCenterControl;
+import org.opendaylight.controller.eos.pekko.DataCenterControl;
 import org.opendaylight.mdsal.binding.api.RpcProviderService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ActivateEosDatacenter;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ActivateEosDatacenterInput;
@@ -315,7 +315,7 @@ public final class ClusterAdminRpcService {
 
         final Future<ActorRef> localShardReply = actorUtils.findLocalShardAsync(shardName);
 
-        final scala.concurrent.Promise<Object> makeLeaderLocalAsk = akka.dispatch.Futures.promise();
+        final scala.concurrent.Promise<Object> makeLeaderLocalAsk = org.apache.pekko.dispatch.Futures.promise();
         localShardReply.onComplete(new OnComplete<ActorRef>() {
             @Override
             public void onComplete(final Throwable failure, final ActorRef actorRef) {

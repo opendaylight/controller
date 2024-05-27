@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import akka.actor.ActorRef;
+import org.apache.pekko.actor.ActorRef;
 import com.google.common.base.Joiner;
 import com.google.common.base.Joiner.MapJoiner;
 import java.time.Instant;

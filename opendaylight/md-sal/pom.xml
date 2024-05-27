@@ -28,15 +28,15 @@
     <!-- Samples -->
     <module>samples</module>
 
-    <module>sal-akka-raft</module>
-    <module>sal-akka-raft-example</module>
+    <module>sal-pekko-raft</module>
+    <module>sal-pekko-raft-example</module>
 
     <module>sal-clustering-commons</module>
     <module>cds-access-api</module>
     <module>cds-access-client</module>
     <module>cds-dom-api</module>
     <module>cds-mgmt-api</module>
-    <module>sal-akka-segmented-journal</module>
+    <module>sal-pekko-segmented-journal</module>
 
     <!-- sal clustering configuration -->
     <module>sal-clustering-config</module>
@@ -49,7 +49,7 @@
     <module>sal-cluster-admin-karaf-cli</module>
 
     <!-- Entity Ownership Service on top of Akka Distributed Data/Singleton -->
-    <module>eos-dom-akka</module>
+    <module>eos-dom-pekko</module>
 
     <!-- Yang Test Models for MD-SAL -->
     <module>sal-test-model</module>

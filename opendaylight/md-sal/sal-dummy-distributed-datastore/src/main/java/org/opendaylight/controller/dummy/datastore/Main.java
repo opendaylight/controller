@@ -8,7 +8,7 @@
 
 package org.opendaylight.controller.dummy.datastore;
 
-import akka.actor.ActorSystem;
+import org.apache.pekko.actor.ActorSystem;
 import com.typesafe.config.ConfigFactory;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;

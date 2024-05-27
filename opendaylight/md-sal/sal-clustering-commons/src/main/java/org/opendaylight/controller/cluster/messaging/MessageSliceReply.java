@@ -9,9 +9,9 @@ package org.opendaylight.controller.cluster.messaging;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
-import akka.serialization.JavaSerializer;
-import akka.serialization.Serialization;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.serialization.JavaSerializer;
+import org.apache.pekko.serialization.Serialization;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;

@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore.shardmanager;
 
-import akka.actor.ActorRef;
-import akka.actor.Props;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.Props;
 import java.util.Map;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.TestShard;

@@ -9,10 +9,10 @@ package org.opendaylight.controller.cluster.datastore.actors;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
-import akka.actor.Cancellable;
-import akka.actor.PoisonPill;
-import akka.actor.Props;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.Cancellable;
+import org.apache.pekko.actor.PoisonPill;
+import org.apache.pekko.actor.Props;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.jdt.annotation.NonNullByDefault;

@@ -14,8 +14,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
-import akka.dispatch.ExecutionContexts;
-import akka.dispatch.Futures;
+import org.apache.pekko.dispatch.ExecutionContexts;
+import org.apache.pekko.dispatch.Futures;
 import com.google.common.io.CharSource;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.io.IOException;
