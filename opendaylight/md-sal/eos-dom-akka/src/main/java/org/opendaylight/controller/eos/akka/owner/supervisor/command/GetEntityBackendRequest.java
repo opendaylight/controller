@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.eos.akka.owner.supervisor.command;
 
-import akka.actor.typed.ActorRef;
-import akka.pattern.StatusReply;
+import org.apache.pekko.actor.typed.ActorRef;
+import org.apache.pekko.pattern.StatusReply;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.EntityId;
 
 public final class GetEntityBackendRequest extends AbstractEntityRequest<GetEntityBackendReply> {

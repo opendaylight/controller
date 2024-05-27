@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.cluster;
 
-import akka.japi.Procedure;
-import akka.persistence.JournalProtocol;
-import akka.persistence.SnapshotProtocol;
-import akka.persistence.SnapshotSelectionCriteria;
+import org.apache.pekko.japi.Procedure;
+import org.apache.pekko.persistence.JournalProtocol;
+import org.apache.pekko.persistence.SnapshotProtocol;
+import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 
 /**
  * A DataPersistenceProvider implementation that delegates to another implementation.

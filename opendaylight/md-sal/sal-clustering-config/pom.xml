@@ -37,14 +37,14 @@
           <configuration>
             <artifacts>
               <artifact>
-                <file>${project.build.directory}/classes/initial/akka.conf</file>
+                <file>${project.build.directory}/classes/initial/pekko.conf</file>
                 <type>xml</type>
-                <classifier>akkaconf</classifier>
+                <classifier>pekkoconf</classifier>
               </artifact>
               <artifact>
-                <file>${project.build.directory}/classes/initial/factory-akka.conf</file>
+                <file>${project.build.directory}/classes/initial/factory-pekko.conf</file>
                 <type>xml</type>
-                <classifier>factoryakkaconf</classifier>
+                <classifier>factorypekkoconf</classifier>
               </artifact>
               <artifact>
                 <file>${project.build.directory}/classes/initial/module-shards.conf</file>

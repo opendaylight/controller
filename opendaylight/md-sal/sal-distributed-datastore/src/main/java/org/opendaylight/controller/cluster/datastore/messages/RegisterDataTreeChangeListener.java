@@ -9,12 +9,12 @@ package org.opendaylight.controller.cluster.datastore.messages;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorPath;
-import akka.actor.ActorRef;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import org.apache.pekko.actor.ActorPath;
+import org.apache.pekko.actor.ActorRef;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.SerializationUtils;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 

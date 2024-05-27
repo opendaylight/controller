@@ -17,7 +17,7 @@
         <relativePath>../../bundle-parent</relativePath>
     </parent>
 
-    <artifactId>repackaged-akka</artifactId>
+    <artifactId>repackaged-pekko</artifactId>
     <packaging>bundle</packaging>
     <name>${project.artifactId}</name>
 
@@ -33,7 +33,7 @@
     <dependencies>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
-            <artifactId>repackaged-akka-jar</artifactId>
+            <artifactId>repackaged-pekko-jar</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
@@ -121,13 +121,13 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>org.opendaylight.controller</groupId>
-                                    <artifactId>repackaged-akka-jar</artifactId>
+                                    <artifactId>repackaged-pekko-jar</artifactId>
                                     <version>${project.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>com.hierynomus</groupId>
                                     <artifactId>asn-one</artifactId>
-                                    <version>0.4.0</version>
+                                    <version>0.5.0</version>
                                 </artifactItem>
                             </artifactItems>
                             <overWriteReleases>false</overWriteReleases>
@@ -143,7 +143,7 @@
                         </goals>
                         <configuration>
                             <classifier>sources</classifier>
-                            <includeArtifactIds>repackaged-akka-jar</includeArtifactIds>
+                            <includeArtifactIds>repackaged-pekko-jar</includeArtifactIds>
                             <outputDirectory>${project.build.directory}/shaded-sources</outputDirectory>
                         </configuration>
                     </execution>
@@ -178,7 +178,7 @@
                         <id>shaded-sources</id>
                         <phase>prepare-package</phase>
                         <goals>
-                           <goal>add-source</goal>
+                            <goal>add-source</goal>
                         </goals>
                         <configuration>
                             <sources>${project.build.directory}/shaded-sources</sources>
@@ -206,9 +206,9 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Automatic-Module-Name>org.opendaylight.controller.repackaged.akka</Automatic-Module-Name>
+                        <Automatic-Module-Name>org.opendaylight.controller.repackaged.pekko</Automatic-Module-Name>
                         <Export-Package>
-                            akka.*,
+                            org.apache.pekko.*,
                             com.typesafe.sslconfig.akka.*,
                             jdk.jfr,
                         </Export-Package>
