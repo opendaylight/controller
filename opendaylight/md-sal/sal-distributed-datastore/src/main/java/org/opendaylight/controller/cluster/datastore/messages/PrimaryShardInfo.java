@@ -9,8 +9,8 @@ package org.opendaylight.controller.cluster.datastore.messages;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorSelection;
 import java.util.Optional;
+import org.apache.pekko.actor.ActorSelection;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.yang.data.tree.api.ReadOnlyDataTree;
 

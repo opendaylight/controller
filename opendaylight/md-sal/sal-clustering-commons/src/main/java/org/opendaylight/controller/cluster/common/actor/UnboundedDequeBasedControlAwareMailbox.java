@@ -7,19 +7,19 @@
  */
 package org.opendaylight.controller.cluster.common.actor;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.dispatch.ControlMessage;
-import akka.dispatch.DequeBasedMessageQueueSemantics;
-import akka.dispatch.Envelope;
-import akka.dispatch.MailboxType;
-import akka.dispatch.ProducesMessageQueue;
-import akka.dispatch.UnboundedControlAwareMailbox;
 import com.codahale.metrics.Gauge;
 import com.typesafe.config.Config;
 import java.util.Deque;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.dispatch.ControlMessage;
+import org.apache.pekko.dispatch.DequeBasedMessageQueueSemantics;
+import org.apache.pekko.dispatch.Envelope;
+import org.apache.pekko.dispatch.MailboxType;
+import org.apache.pekko.dispatch.ProducesMessageQueue;
+import org.apache.pekko.dispatch.UnboundedControlAwareMailbox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.Option;

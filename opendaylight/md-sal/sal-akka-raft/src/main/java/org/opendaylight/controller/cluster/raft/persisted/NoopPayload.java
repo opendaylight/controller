@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.cluster.raft.persisted;
 
-import akka.dispatch.ControlMessage;
 import org.apache.commons.lang3.SerializationUtils;
+import org.apache.pekko.dispatch.ControlMessage;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 

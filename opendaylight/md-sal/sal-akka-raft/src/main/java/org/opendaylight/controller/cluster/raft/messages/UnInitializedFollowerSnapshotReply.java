@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft.messages;
 
-import akka.dispatch.ControlMessage;
+import org.apache.pekko.dispatch.ControlMessage;
 
 /**
  * Local message sent to self on receiving the InstallSnapshotReply from a follower indicating that

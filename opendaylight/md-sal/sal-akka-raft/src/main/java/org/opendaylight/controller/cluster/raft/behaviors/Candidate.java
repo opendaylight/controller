@@ -7,9 +7,9 @@
  */
 package org.opendaylight.controller.cluster.raft.behaviors;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
 import com.google.common.collect.ImmutableList;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSelection;
 import org.opendaylight.controller.cluster.raft.PeerInfo;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
