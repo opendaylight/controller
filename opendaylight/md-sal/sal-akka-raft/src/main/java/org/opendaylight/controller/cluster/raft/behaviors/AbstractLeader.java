@@ -9,9 +9,6 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.actor.Cancellable;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.ByteSource;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -27,6 +24,9 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Queue;
 import java.util.concurrent.TimeUnit;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSelection;
+import org.apache.pekko.actor.Cancellable;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.io.SharedFileBackedOutputStream;
 import org.opendaylight.controller.cluster.messaging.MessageSlicer;

@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.akka.segjournal;
 
-import akka.actor.ActorSystem;
-import akka.persistence.PersistentRepr;
 import com.codahale.metrics.Histogram;
 import com.google.common.base.VerifyException;
 import io.atomix.storage.journal.JournalReader;
@@ -21,6 +19,8 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.persistence.PersistentRepr;
 import org.opendaylight.controller.akka.segjournal.DataJournalEntry.FromPersistence;
 import org.opendaylight.controller.akka.segjournal.DataJournalEntry.ToPersistence;
 import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.ReplayMessages;

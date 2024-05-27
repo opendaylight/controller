@@ -17,12 +17,12 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
-import akka.actor.Props;
-import akka.testkit.TestActorRef;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.testkit.TestActorRef;
 import org.junit.After;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;

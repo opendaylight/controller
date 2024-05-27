@@ -8,7 +8,7 @@
 
 package org.opendaylight.controller.cluster.raft.base.messages;
 
-import akka.dispatch.ControlMessage;
+import org.apache.pekko.dispatch.ControlMessage;
 
 /**
  * Local message sent to indicate the current election term has timed out.

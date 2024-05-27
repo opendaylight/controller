@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import akka.actor.ActorRef;
+import org.apache.pekko.actor.ActorRef;
 import org.opendaylight.yangtools.concepts.Identifier;
 
 /**

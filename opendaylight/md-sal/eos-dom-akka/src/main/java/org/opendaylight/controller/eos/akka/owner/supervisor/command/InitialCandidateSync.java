@@ -7,9 +7,9 @@
  */
 package org.opendaylight.controller.eos.akka.owner.supervisor.command;
 
-import akka.cluster.ddata.ORMap;
-import akka.cluster.ddata.ORSet;
-import akka.cluster.ddata.typed.javadsl.Replicator.GetResponse;
+import org.apache.pekko.cluster.ddata.ORMap;
+import org.apache.pekko.cluster.ddata.ORSet;
+import org.apache.pekko.cluster.ddata.typed.javadsl.Replicator.GetResponse;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
 

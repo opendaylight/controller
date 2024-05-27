@@ -26,7 +26,7 @@
     <module>features</module>
     <module>karaf</module>
 
-    <module>akka</module>
+    <module>pekko</module>
     <module>atomix-storage</module>
     <module>bundle-parent</module>
     <module>benchmark</module>

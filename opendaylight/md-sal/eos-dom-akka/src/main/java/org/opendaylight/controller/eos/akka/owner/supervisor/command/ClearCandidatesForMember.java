@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.eos.akka.owner.supervisor.command;
 
-import akka.actor.typed.ActorRef;
 import java.io.Serializable;
+import org.apache.pekko.actor.typed.ActorRef;
 
 /**
  * Request sent from Candidate registration actors to clear the candidate from all entities. Issued at start to clear
