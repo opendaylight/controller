@@ -10,9 +10,9 @@ package org.opendaylight.controller.cluster.access.commands;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.pekko.actor.ActorRef;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.concepts.Identifiable;

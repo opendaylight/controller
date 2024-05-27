@@ -9,7 +9,7 @@ package org.opendaylight.controller.cluster.datastore.messages;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
+import org.apache.pekko.actor.ActorRef;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 @NonNullByDefault

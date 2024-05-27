@@ -10,12 +10,12 @@ package org.opendaylight.controller.cluster.messaging;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-import akka.actor.ActorSystem;
-import akka.actor.ExtendedActorSystem;
-import akka.serialization.JavaSerializer;
-import akka.testkit.TestProbe;
-import akka.testkit.javadsl.TestKit;
 import org.apache.commons.lang3.SerializationUtils;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.ExtendedActorSystem;
+import org.apache.pekko.serialization.JavaSerializer;
+import org.apache.pekko.testkit.TestProbe;
+import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

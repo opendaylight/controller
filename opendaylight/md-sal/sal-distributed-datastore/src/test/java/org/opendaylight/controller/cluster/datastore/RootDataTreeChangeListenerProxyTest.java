@@ -14,12 +14,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
-import akka.actor.ActorSelection;
-import akka.testkit.javadsl.TestKit;
 import com.google.common.collect.ImmutableList;
 import java.time.Duration;
 import java.util.List;
 import java.util.Set;
+import org.apache.pekko.actor.ActorSelection;
+import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedException;

@@ -9,7 +9,7 @@ package org.opendaylight.controller.eos.akka.owner.checker.command;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.typed.ActorRef;
+import org.apache.pekko.actor.typed.ActorRef;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
 

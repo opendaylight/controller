@@ -9,15 +9,15 @@ package org.opendaylight.controller.eos.akka.registry.listener.type;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.typed.ActorRef;
-import akka.actor.typed.Behavior;
-import akka.actor.typed.javadsl.AbstractBehavior;
-import akka.actor.typed.javadsl.ActorContext;
-import akka.actor.typed.javadsl.Behaviors;
-import akka.actor.typed.javadsl.Receive;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import org.apache.pekko.actor.typed.ActorRef;
+import org.apache.pekko.actor.typed.Behavior;
+import org.apache.pekko.actor.typed.javadsl.AbstractBehavior;
+import org.apache.pekko.actor.typed.javadsl.ActorContext;
+import org.apache.pekko.actor.typed.javadsl.Behaviors;
+import org.apache.pekko.actor.typed.javadsl.Receive;
 import org.opendaylight.controller.eos.akka.registry.listener.type.command.RegisterListener;
 import org.opendaylight.controller.eos.akka.registry.listener.type.command.TerminateListener;
 import org.opendaylight.controller.eos.akka.registry.listener.type.command.TypeListenerCommand;
