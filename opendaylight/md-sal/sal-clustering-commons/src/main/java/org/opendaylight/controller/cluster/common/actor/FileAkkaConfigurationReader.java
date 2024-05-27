@@ -25,8 +25,8 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class FileAkkaConfigurationReader implements AkkaConfigurationReader {
     private static final Logger LOG = LoggerFactory.getLogger(FileAkkaConfigurationReader.class);
-    private static final String CUSTOM_AKKA_CONF_PATH = "./configuration/initial/akka.conf";
-    private static final String FACTORY_AKKA_CONF_PATH = "./configuration/factory/akka.conf";
+    private static final String CUSTOM_AKKA_CONF_PATH = "./configuration/initial/pekko.conf";
+    private static final String FACTORY_AKKA_CONF_PATH = "./configuration/factory/pekko.conf";
 
     @Override
     public Config read() {
@@ -43,11 +43,11 @@ public class FileAkkaConfigurationReader implements AkkaConfigurationReader {
 
     @Activate
     void activate() {
-        LOG.info("File-based Akka configuration reader enabled");
+        LOG.info("File-based Pekko configuration reader enabled");
     }
 
     @Deactivate
     void deactivate() {
-        LOG.info("File-based Akka configuration reader disabled");
+        LOG.info("File-based Pekko configuration reader disabled");
     }
 }
