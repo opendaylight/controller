@@ -12,15 +12,15 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import akka.actor.ActorSystem;
-import akka.actor.Props;
-import akka.actor.UntypedAbstractActor;
-import akka.testkit.TestActorRef;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import java.util.concurrent.TimeUnit;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.actor.UntypedAbstractActor;
+import org.apache.pekko.testkit.TestActorRef;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.common.actor.AkkaConfigurationReader;
+import org.opendaylight.controller.cluster.common.actor.PekkoConfigurationReader;
 import scala.concurrent.duration.FiniteDuration;
 
 public class RemoteOpsProviderConfigTest {
@@ -52,7 +52,7 @@ public class RemoteOpsProviderConfigTest {
     @Test
     public void testConfigCustomizations() {
 
-        AkkaConfigurationReader reader = new TestConfigReader();
+        PekkoConfigurationReader reader = new TestConfigReader();
 
         final int expectedCapacity = 100;
         String timeOutVal = "10ms";
@@ -104,7 +104,7 @@ public class RemoteOpsProviderConfigTest {
         }
     }
 
-    public static class TestConfigReader implements AkkaConfigurationReader {
+    public static class TestConfigReader implements PekkoConfigurationReader {
 
         @Override
         public Config read() {

@@ -13,7 +13,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * Actor with its behaviour metered. Metering is enabled by configuration.
  */
 public abstract class AbstractUntypedPersistentActorWithMetering extends AbstractUntypedPersistentActor {
-    @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Akka class design")
+    @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Pekko class design")
     public AbstractUntypedPersistentActorWithMetering() {
         if (isMetricsCaptureEnabled()) {
             getContext().become(new MeteringBehavior(this));

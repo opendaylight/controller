@@ -43,7 +43,7 @@
 
     <!-- Scala/Akka features -->
     <module>odl-controller-scala</module>
-    <module>odl-controller-akka</module>
+    <module>odl-controller-pekko</module>
 
     <!-- Single features, to be cleaned up -->
     <module>odl-controller-blueprint</module>

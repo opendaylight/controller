@@ -51,7 +51,7 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>eos-dom-akka</artifactId>
+      <artifactId>eos-dom-pekko</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
@@ -59,11 +59,11 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>repackaged-akka</artifactId>
+      <artifactId>repackaged-pekko</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-akka-raft</artifactId>
+      <artifactId>sal-pekko-raft</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
@@ -84,12 +84,12 @@
 
     <!-- Tests -->
     <dependency>
-      <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-testkit_2.13</artifactId>
+      <groupId>org.apache.pekko</groupId>
+      <artifactId>pekko-testkit_2.13</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-akka-raft</artifactId>
+      <artifactId>sal-pekko-raft</artifactId>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>

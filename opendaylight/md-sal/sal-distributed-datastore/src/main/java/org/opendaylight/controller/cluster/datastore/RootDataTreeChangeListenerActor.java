@@ -10,8 +10,6 @@ package org.opendaylight.controller.cluster.datastore;
 import static com.google.common.base.Verify.verify;
 import static com.google.common.base.Verify.verifyNotNull;
 
-import akka.actor.ActorRef;
-import akka.actor.Props;
 import com.google.common.collect.Iterables;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -21,6 +19,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.Props;
 import org.opendaylight.controller.cluster.datastore.messages.DataTreeChanged;
 import org.opendaylight.controller.cluster.datastore.messages.OnInitialData;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;

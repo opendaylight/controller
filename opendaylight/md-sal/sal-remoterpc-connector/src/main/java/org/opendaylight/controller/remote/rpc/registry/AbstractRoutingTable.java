@@ -9,13 +9,13 @@ package org.opendaylight.controller.remote.rpc.registry;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableSet;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Optional;
+import org.apache.pekko.actor.ActorRef;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.remote.rpc.registry.gossip.BucketData;
 

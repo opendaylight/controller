@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
-import akka.actor.ActorRef;
+import org.apache.pekko.actor.ActorRef;
 
 public final class RequestEnvelope extends Envelope<Request<?, ?>> {
     @java.io.Serial

@@ -28,7 +28,7 @@
             <!-- Repackaged Akka -->
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>repackaged-akka</artifactId>
+                <artifactId>repackaged-pekko</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -103,24 +103,24 @@
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
-                <artifactId>sal-akka-raft</artifactId>
+                <artifactId>sal-pekko-raft</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
-                <artifactId>sal-akka-raft</artifactId>
+                <artifactId>sal-pekko-raft</artifactId>
                 <version>${project.version}</version>
                 <type>test-jar</type>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
-                <artifactId>sal-akka-raft-example</artifactId>
+                <artifactId>sal-pekko-raft-example</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
-                <artifactId>sal-akka-segmented-journal</artifactId>
+                <artifactId>sal-pekko-segmented-journal</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -167,7 +167,7 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>eos-dom-akka</artifactId>
+                <artifactId>eos-dom-pekko</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -275,7 +275,7 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>odl-controller-akka</artifactId>
+                <artifactId>odl-controller-pekko</artifactId>
                 <version>${project.version}</version>
                 <type>xml</type>
                 <classifier>features</classifier>

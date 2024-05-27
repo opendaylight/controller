@@ -9,11 +9,6 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.dispatch.Futures;
-import akka.pattern.Patterns;
-import akka.util.Timeout;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Streams;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -23,6 +18,11 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSelection;
+import org.apache.pekko.dispatch.Futures;
+import org.apache.pekko.pattern.Patterns;
+import org.apache.pekko.util.Timeout;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardDataTreeListenerInfoMXBean;
 import org.opendaylight.controller.cluster.datastore.messages.GetInfo;
 import org.opendaylight.controller.cluster.datastore.messages.OnDemandShardState;
@@ -63,7 +63,7 @@ final class ShardDataTreeListenerInfoMXBeanImpl extends AbstractMXBean implement
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    @SuppressFBWarnings(value = "REC_CATCH_EXCEPTION", justification = "Akka's Await.result() API contract")
+    @SuppressFBWarnings(value = "REC_CATCH_EXCEPTION", justification = "Pekko's Await.result() API contract")
     private static List<DataTreeListenerInfo> getListenerActorsInfo(final Collection<ActorSelection> actors) {
         final Timeout timeout = new Timeout(20, TimeUnit.SECONDS);
         final List<Future<Object>> futureList = new ArrayList<>(actors.size());

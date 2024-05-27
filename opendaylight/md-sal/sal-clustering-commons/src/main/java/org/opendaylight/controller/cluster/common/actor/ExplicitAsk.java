@@ -7,18 +7,18 @@
  */
 package org.opendaylight.controller.cluster.common.actor;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.pattern.ExplicitAskSupport;
-import akka.util.Timeout;
 import com.google.common.annotations.Beta;
 import java.util.function.Function;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSelection;
+import org.apache.pekko.pattern.ExplicitAskSupport;
+import org.apache.pekko.util.Timeout;
 import scala.Function1;
 import scala.concurrent.Future;
 import scala.runtime.AbstractFunction1;
 
 /**
- * Unfortunately Akka's explicit ask pattern does not work with its Java API, as it fails to invoke passed message.
+ * Unfortunately Pekko's explicit ask pattern does not work with its Java API, as it fails to invoke passed message.
  * In order to make this work for now, we tap directly into ExplicitAskSupport and use a Scala function instead
  * of akka.japi.Function.
  *
@@ -26,7 +26,7 @@ import scala.runtime.AbstractFunction1;
  */
 @Beta
 public final class ExplicitAsk {
-    private static final ExplicitAskSupport ASK_SUPPORT = akka.pattern.extended.package$.MODULE$;
+    private static final ExplicitAskSupport ASK_SUPPORT = org.apache.pekko.pattern.extended.package$.MODULE$;
 
     private ExplicitAsk() {
         throw new UnsupportedOperationException();

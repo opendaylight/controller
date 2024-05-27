@@ -14,7 +14,7 @@
   <dependencies>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-akka-raft</artifactId>
+      <artifactId>sal-pekko-raft</artifactId>
     </dependency>
 
     <dependency>
@@ -24,8 +24,8 @@
 
     <!-- Test Dependencies -->
     <dependency>
-      <groupId>com.typesafe.akka</groupId>
-      <artifactId>akka-testkit_2.13</artifactId>
+      <groupId>org.apache.pekko</groupId>
+      <artifactId>pekko-testkit_2.13</artifactId>
     </dependency>
 
     <dependency>

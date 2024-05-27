@@ -40,7 +40,7 @@ public abstract class AbstractConfig implements UnifiedConfig {
         }
 
         @SuppressWarnings("unchecked")
-        public T withConfigReader(AkkaConfigurationReader reader) {
+        public T withConfigReader(PekkoConfigurationReader reader) {
             fallback = reader.read().getConfig(actorSystemName);
             return (T)this;
         }

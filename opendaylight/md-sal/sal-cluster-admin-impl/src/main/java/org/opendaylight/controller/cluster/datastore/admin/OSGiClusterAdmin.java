@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.datastore.admin;
 
 import org.opendaylight.controller.cluster.datastore.DistributedDataStoreInterface;
-import org.opendaylight.controller.eos.akka.DataCenterControl;
+import org.opendaylight.controller.eos.pekko.DataCenterControl;
 import org.opendaylight.mdsal.binding.api.RpcProviderService;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.osgi.service.component.annotations.Activate;
