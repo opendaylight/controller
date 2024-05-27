@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.cluster.example;
 
-import akka.actor.ActorRef;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import org.apache.pekko.actor.ActorRef;
 import org.opendaylight.controller.cluster.example.messages.KeyValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

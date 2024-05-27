@@ -9,10 +9,10 @@ package org.opendaylight.controller.eos.akka.registry.listener.type.command;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.cluster.ddata.ORMap;
-import akka.cluster.ddata.ORSet;
-import akka.cluster.ddata.typed.javadsl.Replicator.SubscribeResponse;
 import com.google.common.base.MoreObjects;
+import org.apache.pekko.cluster.ddata.ORMap;
+import org.apache.pekko.cluster.ddata.ORSet;
+import org.apache.pekko.cluster.ddata.typed.javadsl.Replicator.SubscribeResponse;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
 

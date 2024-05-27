@@ -8,9 +8,9 @@
 
 package org.opendaylight.controller.cluster.common.actor;
 
-import akka.actor.AbstractActor;
-import akka.actor.ActorRef;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.apache.pekko.actor.AbstractActor;
+import org.apache.pekko.actor.ActorRef;
 import org.eclipse.jdt.annotation.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

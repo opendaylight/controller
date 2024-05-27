@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft.utils;
 
-import akka.actor.UntypedAbstractActor;
+import org.apache.pekko.actor.UntypedAbstractActor;
 
 /**
  * The EchoActor simply responds back with the same message that it receives.

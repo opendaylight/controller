@@ -10,9 +10,9 @@ package org.opendaylight.controller.remote.rpc;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
 import java.util.Collection;
 import java.util.Set;
+import org.apache.pekko.actor.ActorRef;
 import org.opendaylight.controller.remote.rpc.registry.ActionRegistry;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.AddOrUpdateRoutes;
