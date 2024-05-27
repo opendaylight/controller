@@ -7,11 +7,11 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import akka.persistence.RecoveryCompleted;
-import akka.persistence.SnapshotOffer;
 import com.google.common.base.Stopwatch;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
+import org.apache.pekko.persistence.RecoveryCompleted;
+import org.apache.pekko.persistence.SnapshotOffer;
 import org.opendaylight.controller.cluster.PersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.messages.PersistentPayload;

@@ -28,7 +28,7 @@
             <!-- Repackaged Akka -->
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>repackaged-akka</artifactId>
+                <artifactId>odl-pekko</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

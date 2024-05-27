@@ -43,14 +43,14 @@ public class RemoteYangTextSourceProviderImpl implements RemoteYangTextSourcePro
 
     @Override
     public Future<Set<SourceIdentifier>> getProvidedSources() {
-        return akka.dispatch.Futures.successful(providedSources);
+        return org.apache.pekko.dispatch.Futures.successful(providedSources);
     }
 
     @Override
     public Future<YangTextSchemaSourceSerializationProxy> getYangTextSchemaSource(final SourceIdentifier identifier) {
         LOG.trace("Sending yang schema source for {}", identifier);
 
-        final Promise<YangTextSchemaSourceSerializationProxy> promise = akka.dispatch.Futures.promise();
+        final Promise<YangTextSchemaSourceSerializationProxy> promise = org.apache.pekko.dispatch.Futures.promise();
         ListenableFuture<YangTextSource> future =
                 repository.getSchemaSource(identifier, YangTextSource.class);
 

@@ -9,9 +9,9 @@ package org.opendaylight.controller.cluster.raft.base.messages;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.dispatch.ControlMessage;
 import java.io.OutputStream;
 import java.util.Optional;
+import org.apache.pekko.dispatch.ControlMessage;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 

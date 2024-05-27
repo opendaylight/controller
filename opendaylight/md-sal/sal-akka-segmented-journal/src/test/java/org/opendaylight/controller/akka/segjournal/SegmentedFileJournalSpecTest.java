@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.akka.segjournal;
 
-import akka.persistence.japi.journal.JavaJournalSpec;
 import com.typesafe.config.ConfigFactory;
 import java.io.File;
 import org.apache.commons.io.FileUtils;
+import org.apache.pekko.persistence.japi.journal.JavaJournalSpec;
 import org.junit.runner.RunWith;
 import org.scalatestplus.junit.JUnitRunner;
 

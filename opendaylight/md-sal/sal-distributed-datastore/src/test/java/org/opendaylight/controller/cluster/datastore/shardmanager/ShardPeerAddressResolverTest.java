@@ -9,9 +9,9 @@ package org.opendaylight.controller.cluster.datastore.shardmanager;
 
 import static org.junit.Assert.assertEquals;
 
-import akka.actor.Address;
 import com.google.common.collect.Sets;
 import java.util.Collection;
+import org.apache.pekko.actor.Address;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
@@ -87,7 +87,7 @@ public class ShardPeerAddressResolverTest {
 
         String peerId = ShardIdentifier.create("default", MEMBER_2, type).toString();
 
-        String address = "akka://opendaylight-cluster-data@127.0.0.1:2550/user/shardmanager-" + type
+        String address = "pekko://opendaylight-cluster-data@127.0.0.1:2550/user/shardmanager-" + type
                 + "/" + MEMBER_2.getName() + "-shard-default-" + type;
 
         resolver.setResolved(peerId, address);
