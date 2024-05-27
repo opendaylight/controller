@@ -10,8 +10,8 @@ package org.opendaylight.controller.cluster.datastore;
 import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.mock;
 
-import akka.actor.ActorRef;
 import java.util.List;
+import org.apache.pekko.actor.ActorRef;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.messages.DataTreeChanged;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;

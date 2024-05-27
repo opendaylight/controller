@@ -9,8 +9,8 @@ package org.opendaylight.controller.eos.akka.registry.listener.owner.command;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.cluster.ddata.LWWRegister;
-import akka.cluster.ddata.typed.javadsl.Replicator.SubscribeResponse;
+import org.apache.pekko.cluster.ddata.LWWRegister;
+import org.apache.pekko.cluster.ddata.typed.javadsl.Replicator.SubscribeResponse;
 import org.eclipse.jdt.annotation.NonNull;
 
 /**

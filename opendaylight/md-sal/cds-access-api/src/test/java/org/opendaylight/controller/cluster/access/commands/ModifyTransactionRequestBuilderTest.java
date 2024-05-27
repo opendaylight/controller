@@ -10,10 +10,10 @@ package org.opendaylight.controller.cluster.access.commands;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.Props;
-import akka.testkit.TestActors;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.testkit.TestActors;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;

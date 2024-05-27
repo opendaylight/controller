@@ -16,11 +16,11 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.actor.ActorSystem;
 import com.google.common.primitives.UnsignedLong;
 import java.util.Optional;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSelection;
+import org.apache.pekko.actor.ActorSystem;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.opendaylight.controller.cluster.access.ABIVersion;

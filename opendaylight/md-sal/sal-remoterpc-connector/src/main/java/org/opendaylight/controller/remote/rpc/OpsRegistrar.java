@@ -9,13 +9,13 @@ package org.opendaylight.controller.remote.rpc;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.Address;
-import akka.actor.Props;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import org.apache.pekko.actor.Address;
+import org.apache.pekko.actor.Props;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.controller.remote.rpc.registry.ActionRegistry.Messages.UpdateRemoteActionEndpoints;
 import org.opendaylight.controller.remote.rpc.registry.ActionRegistry.RemoteActionEndpoint;
