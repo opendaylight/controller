@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.cluster.raft.persisted;
 
-import akka.dispatch.ControlMessage;
 import java.io.Serializable;
+import org.apache.pekko.dispatch.ControlMessage;
 
 /**
  * This is an internal message that is stored in the akka's persistent journal. During recovery, this

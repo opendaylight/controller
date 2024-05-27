@@ -16,7 +16,7 @@
     </parent>
 
     <groupId>org.opendaylight.controller</groupId>
-    <artifactId>akka-aggregator</artifactId>
+    <artifactId>pekko-aggregator</artifactId>
     <version>9.0.4-SNAPSHOT</version>
     <packaging>pom</packaging>
 
@@ -26,7 +26,6 @@
     </properties>
 
     <modules>
-        <module>repackaged-akka-jar</module>
-        <module>repackaged-akka</module>
+        <module>odl-pekko</module>
     </modules>
 </project>

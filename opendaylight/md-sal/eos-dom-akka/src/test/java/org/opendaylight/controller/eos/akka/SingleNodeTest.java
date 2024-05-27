@@ -7,9 +7,9 @@
  */
 package org.opendaylight.controller.eos.akka;
 
-import akka.actor.testkit.typed.javadsl.ActorTestKit;
 import java.time.Duration;
 import java.util.List;
+import org.apache.pekko.actor.testkit.typed.javadsl.ActorTestKit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

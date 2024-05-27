@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.remote.rpc.registry.gossip;
 
-import akka.actor.Address;
 import com.google.common.collect.ImmutableMap;
 import java.io.Serializable;
 import java.util.Map;
+import org.apache.pekko.actor.Address;
 
 final class GossipStatus implements Serializable {
     private static final long serialVersionUID = 1L;

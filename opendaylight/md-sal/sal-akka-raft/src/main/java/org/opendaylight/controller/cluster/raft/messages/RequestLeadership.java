@@ -9,8 +9,8 @@ package org.opendaylight.controller.cluster.raft.messages;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
 import java.io.Serializable;
+import org.apache.pekko.actor.ActorRef;
 
 /**
  * Message sent to leader to transfer leadership to a particular follower.
