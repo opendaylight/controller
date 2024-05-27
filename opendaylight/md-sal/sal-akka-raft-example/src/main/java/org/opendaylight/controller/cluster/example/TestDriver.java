@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.cluster.example;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
 import com.google.common.collect.Lists;
 import com.typesafe.config.ConfigFactory;
 import java.io.BufferedReader;
@@ -19,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSystem;
 import org.opendaylight.controller.cluster.example.messages.PrintRole;
 import org.opendaylight.controller.cluster.example.messages.PrintState;
 import org.opendaylight.controller.cluster.raft.ConfigParams;
@@ -151,7 +151,7 @@ public class TestDriver {
     public void createNodes(final int num) {
         for (int i = 0; i < num; i++)  {
             nameCounter = nameCounter + 1;
-            allPeers.put("example-" + nameCounter, "akka://raft-test/user/example-" + nameCounter);
+            allPeers.put("example-" + nameCounter, "pekko://raft-test/user/example-" + nameCounter);
         }
 
         for (String s : allPeers.keySet())  {
@@ -202,7 +202,7 @@ public class TestDriver {
     }
 
     public void reinstateNode(final String actorName) {
-        String address = "akka://default/user/" + actorName;
+        String address = "pekko://default/user/" + actorName;
         allPeers.put(actorName, address);
 
         ActorRef exampleActor = createExampleActor(actorName);

@@ -7,13 +7,13 @@
  */
 package org.opendaylight.controller.remote.rpc.registry.mbeans;
 
-import akka.actor.Address;
-import akka.util.Timeout;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import org.apache.pekko.actor.Address;
+import org.apache.pekko.util.Timeout;
 import org.opendaylight.controller.remote.rpc.registry.ActionRoutingTable;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Bucket;
 import org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreAccess;

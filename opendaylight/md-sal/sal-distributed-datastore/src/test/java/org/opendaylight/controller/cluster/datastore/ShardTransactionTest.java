@@ -16,16 +16,16 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 
-import akka.actor.ActorRef;
-import akka.actor.Props;
-import akka.actor.Status.Failure;
-import akka.actor.Terminated;
-import akka.dispatch.Dispatchers;
-import akka.testkit.TestActorRef;
-import akka.testkit.javadsl.TestKit;
 import com.google.common.base.Throwables;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.actor.Status.Failure;
+import org.apache.pekko.actor.Terminated;
+import org.apache.pekko.dispatch.Dispatchers;
+import org.apache.pekko.testkit.TestActorRef;
+import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -278,14 +278,14 @@ public class ShardTransactionTest extends AbstractActorTest {
         batched.addModification(new WriteModification(path, node));
 
         transaction.tell(batched, testKit.getRef());
-        testKit.expectMsgClass(Duration.ofSeconds(5), akka.actor.Status.Failure.class);
+        testKit.expectMsgClass(Duration.ofSeconds(5), org.apache.pekko.actor.Status.Failure.class);
 
         batched = new BatchedModifications(tx1, DataStoreVersions.CURRENT_VERSION);
         batched.setReady();
         batched.setTotalMessagesSent(2);
 
         transaction.tell(batched, testKit.getRef());
-        Failure failure = testKit.expectMsgClass(Duration.ofSeconds(5), akka.actor.Status.Failure.class);
+        Failure failure = testKit.expectMsgClass(Duration.ofSeconds(5), org.apache.pekko.actor.Status.Failure.class);
         watcher.expectMsgClass(Duration.ofSeconds(5), Terminated.class);
 
         if (failure != null) {
@@ -309,7 +309,7 @@ public class ShardTransactionTest extends AbstractActorTest {
 
         transaction.tell(batched, testKit.getRef());
 
-        Failure failure = testKit.expectMsgClass(Duration.ofSeconds(5), akka.actor.Status.Failure.class);
+        Failure failure = testKit.expectMsgClass(Duration.ofSeconds(5), org.apache.pekko.actor.Status.Failure.class);
         watcher.expectMsgClass(Duration.ofSeconds(5), Terminated.class);
 
         if (failure != null) {

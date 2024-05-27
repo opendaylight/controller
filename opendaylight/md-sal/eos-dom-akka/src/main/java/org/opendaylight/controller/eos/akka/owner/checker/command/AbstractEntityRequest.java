@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.eos.akka.owner.checker.command;
 
-import akka.actor.typed.ActorRef;
 import com.google.common.base.MoreObjects;
+import org.apache.pekko.actor.typed.ActorRef;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.EntityId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.EntityName;

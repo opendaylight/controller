@@ -9,7 +9,7 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.Props;
+import org.apache.pekko.actor.Props;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.client.AbstractClientActor;
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
