@@ -8,8 +8,8 @@
 
 package org.opendaylight.controller.cluster.raft.base.messages;
 
-import akka.actor.ActorRef;
-import akka.dispatch.ControlMessage;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.dispatch.ControlMessage;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.yangtools.concepts.Identifier;
 

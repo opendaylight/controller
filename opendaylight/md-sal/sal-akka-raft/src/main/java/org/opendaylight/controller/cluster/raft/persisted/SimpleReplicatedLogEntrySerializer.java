@@ -9,13 +9,13 @@ package org.opendaylight.controller.cluster.raft.persisted;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ExtendedActorSystem;
-import akka.serialization.JSerializer;
-import akka.util.ClassLoaderObjectInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import org.apache.commons.lang3.SerializationUtils;
+import org.apache.pekko.actor.ExtendedActorSystem;
+import org.apache.pekko.serialization.JSerializer;
+import org.apache.pekko.util.ClassLoaderObjectInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

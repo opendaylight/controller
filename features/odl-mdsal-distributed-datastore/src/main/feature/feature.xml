@@ -13,11 +13,11 @@
         <feature version="[13,14)">odl-mdsal-eos-dom</feature>
         <feature version="[13,14)">odl-mdsal-dom-broker</feature>
         <feature version="[13,14)">odl-mdsal-binding-dom-adapter</feature>
-        <configfile finalname="configuration/initial/akka.conf">
-            mvn:org.opendaylight.controller/sal-clustering-config/${project.version}/xml/akkaconf
+        <configfile finalname="configuration/initial/pekko.conf">
+            mvn:org.opendaylight.controller/sal-clustering-config/${project.version}/xml/pekkoconf
         </configfile>
-        <configfile finalname="configuration/factory/akka.conf" override="true">
-            mvn:org.opendaylight.controller/sal-clustering-config/${project.version}/xml/factoryakkaconf
+        <configfile finalname="configuration/factory/pekko.conf" override="true">
+            mvn:org.opendaylight.controller/sal-clustering-config/${project.version}/xml/factorypekkoconf
         </configfile>
         <configfile finalname="configuration/initial/module-shards.conf">
             mvn:org.opendaylight.controller/sal-clustering-config/${project.version}/xml/moduleshardconf

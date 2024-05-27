@@ -15,10 +15,10 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-import akka.japi.Procedure;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Map;
 import java.util.function.Consumer;
+import org.apache.pekko.japi.Procedure;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
