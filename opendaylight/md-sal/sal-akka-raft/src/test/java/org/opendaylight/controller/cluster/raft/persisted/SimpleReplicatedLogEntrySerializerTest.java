@@ -10,9 +10,9 @@ package org.opendaylight.controller.cluster.raft.persisted;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import akka.actor.ExtendedActorSystem;
-import akka.testkit.javadsl.TestKit;
 import java.io.NotSerializableException;
+import org.apache.pekko.actor.ExtendedActorSystem;
+import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 

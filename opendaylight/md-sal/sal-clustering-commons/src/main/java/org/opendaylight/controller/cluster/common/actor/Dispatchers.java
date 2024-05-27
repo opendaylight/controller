@@ -12,14 +12,14 @@ import static java.util.Objects.requireNonNull;
 import scala.concurrent.ExecutionContext;
 
 public class Dispatchers {
-    public static final String DEFAULT_DISPATCHER_PATH = "akka.actor.default-dispatcher";
+    public static final String DEFAULT_DISPATCHER_PATH = "pekko.actor.default-dispatcher";
     public static final String CLIENT_DISPATCHER_PATH = "client-dispatcher";
     public static final String TXN_DISPATCHER_PATH = "txn-dispatcher";
     public static final String SHARD_DISPATCHER_PATH = "shard-dispatcher";
     public static final String NOTIFICATION_DISPATCHER_PATH = "notification-dispatcher";
     public static final String SERIALIZATION_DISPATCHER_PATH = "serialization-dispatcher";
 
-    private final akka.dispatch.Dispatchers dispatchers;
+    private final org.apache.pekko.dispatch.Dispatchers dispatchers;
 
     public enum DispatcherType {
         Client(CLIENT_DISPATCHER_PATH),
@@ -34,14 +34,14 @@ public class Dispatchers {
             this.path = path;
         }
 
-        String path(final akka.dispatch.Dispatchers knownDispatchers) {
+        String path(final org.apache.pekko.dispatch.Dispatchers knownDispatchers) {
             if (knownDispatchers.hasDispatcher(path)) {
                 return path;
             }
             return DEFAULT_DISPATCHER_PATH;
         }
 
-        ExecutionContext dispatcher(final akka.dispatch.Dispatchers knownDispatchers) {
+        ExecutionContext dispatcher(final org.apache.pekko.dispatch.Dispatchers knownDispatchers) {
             if (knownDispatchers.hasDispatcher(path)) {
                 return knownDispatchers.lookup(path);
             }
@@ -49,7 +49,7 @@ public class Dispatchers {
         }
     }
 
-    public Dispatchers(final akka.dispatch.Dispatchers dispatchers) {
+    public Dispatchers(final org.apache.pekko.dispatch.Dispatchers dispatchers) {
         this.dispatchers = requireNonNull(dispatchers, "dispatchers should not be null");
     }
 

@@ -9,8 +9,8 @@ package org.opendaylight.controller.cluster.access.client;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorSystem;
-import akka.persistence.SnapshotSelectionCriteria;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 
 /**

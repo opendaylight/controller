@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.eos.akka.owner.checker.command;
 
-import akka.actor.typed.ActorRef;
+import org.apache.pekko.actor.typed.ActorRef;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.EntityId;
 
 public final class GetEntityRequest extends AbstractEntityRequest<GetEntityReply> {

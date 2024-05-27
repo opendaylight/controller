@@ -8,9 +8,9 @@
 
 package org.opendaylight.controller.cluster.raft.base.messages;
 
-import akka.dispatch.ControlMessage;
 import java.util.Collections;
 import java.util.List;
+import org.apache.pekko.dispatch.ControlMessage;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 
 public class CaptureSnapshot implements ControlMessage {
