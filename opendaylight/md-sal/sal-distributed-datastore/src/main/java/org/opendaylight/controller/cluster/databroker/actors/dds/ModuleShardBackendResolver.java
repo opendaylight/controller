@@ -9,16 +9,16 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import static com.google.common.base.Verify.verifyNotNull;
 
-import akka.dispatch.ExecutionContexts;
-import akka.dispatch.OnComplete;
-import akka.pattern.Patterns;
-import akka.util.Timeout;
 import com.google.common.collect.ImmutableBiMap;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
+import org.apache.pekko.dispatch.ExecutionContexts;
+import org.apache.pekko.dispatch.OnComplete;
+import org.apache.pekko.pattern.Patterns;
+import org.apache.pekko.util.Timeout;
 import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.client.BackendInfoResolver;

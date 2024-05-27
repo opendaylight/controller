@@ -10,8 +10,6 @@ package org.opendaylight.controller.cluster.datastore;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorSelection;
-import akka.dispatch.OnComplete;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -22,6 +20,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
+import org.apache.pekko.actor.ActorSelection;
+import org.apache.pekko.dispatch.OnComplete;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransactionReply;
@@ -248,7 +248,7 @@ final class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCohor
                     actorUtils.getTransactionCommitOperationTimeout()));
         }
 
-        return akka.dispatch.Futures.sequence(futureList, actorUtils.getClientDispatcher());
+        return org.apache.pekko.dispatch.Futures.sequence(futureList, actorUtils.getClientDispatcher());
     }
 
     @Override

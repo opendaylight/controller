@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft.behaviors;
 
-import akka.actor.ActorRef;
+import org.apache.pekko.actor.ActorRef;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.RaftState;
 

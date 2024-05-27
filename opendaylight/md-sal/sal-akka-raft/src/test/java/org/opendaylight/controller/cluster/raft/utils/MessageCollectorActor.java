@@ -7,12 +7,6 @@
  */
 package org.opendaylight.controller.cluster.raft.utils;
 
-import akka.actor.ActorRef;
-import akka.actor.Props;
-import akka.actor.UntypedAbstractActor;
-import akka.dispatch.ControlMessage;
-import akka.pattern.Patterns;
-import akka.util.Timeout;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.base.Throwables;
@@ -23,6 +17,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.actor.UntypedAbstractActor;
+import org.apache.pekko.dispatch.ControlMessage;
+import org.apache.pekko.pattern.Patterns;
+import org.apache.pekko.util.Timeout;
 import org.junit.Assert;
 import scala.concurrent.Await;
 import scala.concurrent.Future;

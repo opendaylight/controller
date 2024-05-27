@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
-import akka.actor.ActorRef;
-import akka.actor.Status;
 import com.google.common.base.Throwables;
 import com.google.common.base.Verify;
 import java.util.ArrayList;
@@ -18,6 +16,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.StampedLock;
 import java.util.stream.Stream;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.Status;
 import org.opendaylight.controller.cluster.access.client.ClientActorBehavior;
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
 import org.opendaylight.controller.cluster.access.client.ConnectedClientConnection;

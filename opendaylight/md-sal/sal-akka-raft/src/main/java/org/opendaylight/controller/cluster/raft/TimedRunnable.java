@@ -9,8 +9,8 @@ package org.opendaylight.controller.cluster.raft;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.Cancellable;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.apache.pekko.actor.Cancellable;
 import scala.concurrent.duration.FiniteDuration;
 
 /**

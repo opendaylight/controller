@@ -59,7 +59,7 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
-            <artifactId>repackaged-akka</artifactId>
+            <artifactId>repackaged-pekko</artifactId>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
@@ -145,7 +145,7 @@
                                 <!-- includes all dependencies to class path -->
                                 <classpath/>
                                 <argument>org.opendaylight.controller.akka.segjournal.BenchmarkMain</argument>
-                                <!-- configuration taken from factory-akka.conf of sal-clustering-config -->
+                                <!-- configuration taken from factory-pekko.conf of sal-clustering-config -->
                                 <argument>--current</argument>
                                 <!-- 100_000 messages to write -->
                                 <argument>-n100000</argument>

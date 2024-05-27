@@ -17,11 +17,11 @@ import static org.mockito.Mockito.when;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.assertFutureEquals;
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.assertOperationThrowsException;
 
-import akka.testkit.TestProbe;
 import com.google.common.base.Ticker;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Optional;
 import java.util.function.Consumer;
+import org.apache.pekko.testkit.TestProbe;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;

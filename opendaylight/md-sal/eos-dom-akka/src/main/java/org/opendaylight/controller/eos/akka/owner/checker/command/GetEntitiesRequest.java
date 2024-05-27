@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.eos.akka.owner.checker.command;
 
-import akka.actor.typed.ActorRef;
+import org.apache.pekko.actor.typed.ActorRef;
 
 public final class GetEntitiesRequest extends StateCheckerRequest<GetEntitiesReply> {
     private static final long serialVersionUID = 1L;

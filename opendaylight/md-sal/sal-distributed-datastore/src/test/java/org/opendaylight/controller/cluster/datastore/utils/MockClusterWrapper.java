@@ -7,17 +7,17 @@
  */
 package org.opendaylight.controller.cluster.datastore.utils;
 
-import akka.actor.ActorRef;
-import akka.actor.Address;
-import akka.actor.AddressFromURIString;
-import akka.cluster.ClusterEvent.MemberRemoved;
-import akka.cluster.ClusterEvent.MemberUp;
-import akka.cluster.ClusterEvent.ReachableMember;
-import akka.cluster.ClusterEvent.UnreachableMember;
-import akka.cluster.Member;
-import akka.cluster.MemberStatus;
-import akka.cluster.UniqueAddress;
-import akka.util.Version;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.Address;
+import org.apache.pekko.actor.AddressFromURIString;
+import org.apache.pekko.cluster.ClusterEvent.MemberRemoved;
+import org.apache.pekko.cluster.ClusterEvent.MemberUp;
+import org.apache.pekko.cluster.ClusterEvent.ReachableMember;
+import org.apache.pekko.cluster.ClusterEvent.UnreachableMember;
+import org.apache.pekko.cluster.Member;
+import org.apache.pekko.cluster.MemberStatus;
+import org.apache.pekko.cluster.UniqueAddress;
+import org.apache.pekko.util.Version;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import scala.collection.immutable.Set.Set1;

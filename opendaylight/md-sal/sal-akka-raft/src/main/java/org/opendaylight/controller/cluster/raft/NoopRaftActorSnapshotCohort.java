@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import akka.actor.ActorRef;
 import com.google.common.io.ByteSource;
 import java.io.OutputStream;
 import java.util.Optional;
+import org.apache.pekko.actor.ActorRef;
 import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 

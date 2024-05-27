@@ -7,11 +7,11 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
-import akka.actor.ActorRef;
-import akka.actor.PoisonPill;
-import akka.persistence.AbstractPersistentActor;
 import com.google.common.annotations.VisibleForTesting;
 import java.nio.file.Path;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.PoisonPill;
+import org.apache.pekko.persistence.AbstractPersistentActor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.slf4j.Logger;

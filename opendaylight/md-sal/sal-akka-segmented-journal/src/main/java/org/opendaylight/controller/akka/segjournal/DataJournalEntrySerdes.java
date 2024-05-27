@@ -9,16 +9,16 @@ package org.opendaylight.controller.akka.segjournal;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorSystem;
-import akka.actor.ExtendedActorSystem;
-import akka.persistence.PersistentRepr;
-import akka.serialization.JavaSerializer;
 import com.google.common.base.VerifyException;
 import io.atomix.storage.journal.JournalSerdes.EntryInput;
 import io.atomix.storage.journal.JournalSerdes.EntryOutput;
 import io.atomix.storage.journal.JournalSerdes.EntrySerdes;
 import java.io.IOException;
 import java.util.concurrent.Callable;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.ExtendedActorSystem;
+import org.apache.pekko.persistence.PersistentRepr;
+import org.apache.pekko.serialization.JavaSerializer;
 import org.opendaylight.controller.akka.segjournal.DataJournalEntry.FromPersistence;
 import org.opendaylight.controller.akka.segjournal.DataJournalEntry.ToPersistence;
 

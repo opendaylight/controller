@@ -19,8 +19,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import akka.actor.ActorRef;
 import java.util.Optional;
+import org.apache.pekko.actor.ActorRef;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequestBuilder;

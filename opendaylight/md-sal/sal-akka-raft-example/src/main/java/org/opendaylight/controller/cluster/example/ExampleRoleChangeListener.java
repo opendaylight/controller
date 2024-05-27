@@ -7,13 +7,13 @@
  */
 package org.opendaylight.controller.cluster.example;
 
-import akka.actor.ActorRef;
-import akka.actor.Cancellable;
-import akka.actor.Props;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.Cancellable;
+import org.apache.pekko.actor.Props;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.controller.cluster.example.messages.RegisterListener;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListener;
@@ -36,7 +36,7 @@ import scala.concurrent.duration.FiniteDuration;
  */
 public class ExampleRoleChangeListener extends AbstractUntypedActor implements AutoCloseable {
     // the akka url should be set to the notifiers actor-system and domain.
-    private static final String NOTIFIER_AKKA_URL = "akka://raft-test@127.0.0.1:2550/user/";
+    private static final String NOTIFIER_AKKA_URL = "pekko://raft-test@127.0.0.1:2550/user/";
 
     private final Map<String, Boolean> notifierRegistrationStatus = new HashMap<>();
     private Cancellable registrationSchedule = null;

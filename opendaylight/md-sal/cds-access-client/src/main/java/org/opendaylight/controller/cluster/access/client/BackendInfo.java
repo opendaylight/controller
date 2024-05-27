@@ -10,9 +10,9 @@ package org.opendaylight.controller.cluster.access.client;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
+import org.apache.pekko.actor.ActorRef;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 
 /**

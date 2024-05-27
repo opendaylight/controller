@@ -9,7 +9,7 @@ package org.opendaylight.controller.eos.akka.bootstrap.command;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.typed.ActorRef;
+import org.apache.pekko.actor.typed.ActorRef;
 
 public final class GetRunningContext extends BootstrapCommand {
     private final ActorRef<RunningContext> replyTo;

@@ -59,61 +59,61 @@
             </dependency>
 
             <!-- Configuration library -->
-            <!-- This needs to be kept in sync with the version used by akka -->
+            <!-- This needs to be kept in sync with the version used by pekko -->
             <dependency>
                 <groupId>com.typesafe</groupId>
                 <artifactId>config</artifactId>
-                <version>1.4.2</version>
+                <version>1.4.3</version>
             </dependency>
             <dependency>
                 <groupId>com.typesafe</groupId>
                 <artifactId>ssl-config-core_2.13</artifactId>
-                <version>0.4.3</version>
+                <version>0.6.1</version>
             </dependency>
 
-            <!-- Akka testkit -->
+            <!-- Pekko testkit -->
             <dependency>
-                <groupId>com.typesafe.akka</groupId>
-                <artifactId>akka-testkit_2.13</artifactId>
-                <version>2.6.21</version>
+                <groupId>org.apache.pekko</groupId>
+                <artifactId>pekko-testkit_2.13</artifactId>
+                <version>1.0.2</version>
                 <scope>test</scope>
                 <exclusions>
                     <exclusion>
-                        <groupId>com.typesafe.akka</groupId>
-                        <artifactId>akka-actor_2.13</artifactId>
+                        <groupId>org.apache.pekko</groupId>
+                        <artifactId>pekko-actor_2.13</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>com.typesafe.akka</groupId>
-                <artifactId>akka-actor-testkit-typed_2.13</artifactId>
-                <version>2.6.21</version>
+                <groupId>org.apache.pekko</groupId>
+                <artifactId>pekko-actor-testkit-typed_2.13</artifactId>
+                <version>1.0.2</version>
                 <scope>test</scope>
                 <exclusions>
                     <exclusion>
-                        <groupId>com.typesafe.akka</groupId>
-                        <artifactId>akka-actor-typed_2.13</artifactId>
+                        <groupId>org.apache.pekko</groupId>
+                        <artifactId>pekko-actor-typed_2.13</artifactId>
                     </exclusion>
                     <exclusion>
-                        <groupId>com.typesafe.akka</groupId>
-                        <artifactId>akka-slf4j_2.13</artifactId>
+                        <groupId>org.apache.pekko</groupId>
+                        <artifactId>pekko-slf4j_2.13</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>com.typesafe.akka</groupId>
-                <artifactId>akka-persistence-tck_2.13</artifactId>
-                <version>2.6.21</version>
+                <groupId>org.apache.pekko</groupId>
+                <artifactId>pekko-persistence-tck_2.13</artifactId>
+                <version>1.0.2</version>
                 <scope>test</scope>
                 <exclusions>
                     <exclusion>
-                        <groupId>com.typesafe.akka</groupId>
-                        <artifactId>akka-persistence_2.13</artifactId>
+                        <groupId>org.apache.pekko</groupId>
+                        <artifactId>pekko-persistence_2.13</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
 
-            <!-- Reactive Streams, used by Akka -->
+            <!-- Reactive Streams, used by Pekko -->
             <dependency>
                 <groupId>org.reactivestreams</groupId>
                 <artifactId>reactive-streams</artifactId>

@@ -23,17 +23,6 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.opendaylight.controller.cluster.datastore.DataStoreVersions.CURRENT_VERSION;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.actor.Props;
-import akka.actor.Status.Failure;
-import akka.dispatch.Dispatchers;
-import akka.dispatch.OnComplete;
-import akka.japi.Creator;
-import akka.pattern.Patterns;
-import akka.persistence.SaveSnapshotSuccess;
-import akka.testkit.TestActorRef;
-import akka.util.Timeout;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -47,6 +36,17 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSelection;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.actor.Status.Failure;
+import org.apache.pekko.dispatch.Dispatchers;
+import org.apache.pekko.dispatch.OnComplete;
+import org.apache.pekko.japi.Creator;
+import org.apache.pekko.pattern.Patterns;
+import org.apache.pekko.persistence.SaveSnapshotSuccess;
+import org.apache.pekko.testkit.TestActorRef;
+import org.apache.pekko.util.Timeout;
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
@@ -148,7 +148,7 @@ public class ShardTest extends AbstractShardTest {
             RegisterDataTreeNotificationListenerReply.class);
         final String replyPath = reply.getListenerRegistrationPath().toString();
         assertTrue("Incorrect reply path: " + replyPath,
-            replyPath.matches("akka:\\/\\/test\\/user\\/testRegisterDataTreeChangeListener\\/\\$.*"));
+            replyPath.matches("pekko:\\/\\/test\\/user\\/testRegisterDataTreeChangeListener\\/\\$.*"));
 
         final YangInstanceIdentifier path = TestModel.TEST_PATH;
         writeToStore(shard, path, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
@@ -276,7 +276,7 @@ public class ShardTest extends AbstractShardTest {
             .peerAddresses(Collections.<String, String>singletonMap(peerID.toString(), null))
             .props().withDispatcher(Dispatchers.DefaultDispatcherId()), "testPeerAddressResolved");
 
-        final String address = "akka://foobar";
+        final String address = "pekko://foobar";
         shard.tell(new PeerAddressResolved(peerID.toString(), address), ActorRef.noSender());
 
         shard.tell(GetOnDemandRaftState.INSTANCE, testKit.getRef());
@@ -485,7 +485,7 @@ public class ShardTest extends AbstractShardTest {
         final ReadyTransactionReply readyReply = ReadyTransactionReply
                 .fromSerializable(testKit.expectMsgClass(duration, ReadyTransactionReply.class));
 
-        String pathSuffix = shard.path().toString().replaceFirst("akka://test", "");
+        String pathSuffix = shard.path().toString().replaceFirst("pekko://test", "");
         assertThat(readyReply.getCohortPath(), endsWith(pathSuffix));
         // Send the CanCommitTransaction message for the first Tx.
 
@@ -697,7 +697,7 @@ public class ShardTest extends AbstractShardTest {
         BatchedModifications batched = new BatchedModifications(transactionID, CURRENT_VERSION);
         batched.addModification(new MergeModification(TestModel.TEST_PATH, invalidData));
         shard.tell(batched, testKit.getRef());
-        Failure failure = testKit.expectMsgClass(Duration.ofSeconds(5), akka.actor.Status.Failure.class);
+        Failure failure = testKit.expectMsgClass(Duration.ofSeconds(5), org.apache.pekko.actor.Status.Failure.class);
 
         final Throwable cause = failure.cause();
 
@@ -707,7 +707,7 @@ public class ShardTest extends AbstractShardTest {
 
         shard.tell(batched, testKit.getRef());
 
-        failure = testKit.expectMsgClass(Duration.ofSeconds(5), akka.actor.Status.Failure.class);
+        failure = testKit.expectMsgClass(Duration.ofSeconds(5), org.apache.pekko.actor.Status.Failure.class);
         assertEquals("Failure cause", cause, failure.cause());
     }
 
@@ -1091,7 +1091,7 @@ public class ShardTest extends AbstractShardTest {
         // and trigger the 2nd Tx to proceed.
 
         shard.tell(new CommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), testKit.getRef());
-        testKit.expectMsgClass(duration, akka.actor.Status.Failure.class);
+        testKit.expectMsgClass(duration, org.apache.pekko.actor.Status.Failure.class);
 
         // Wait for the 2nd Tx to complete the canCommit phase.
 
@@ -1161,7 +1161,7 @@ public class ShardTest extends AbstractShardTest {
         // and trigger the 2nd Tx to proceed.
 
         shard.tell(new CommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), testKit.getRef());
-        testKit.expectMsgClass(duration, akka.actor.Status.Failure.class);
+        testKit.expectMsgClass(duration, org.apache.pekko.actor.Status.Failure.class);
 
         // Wait for the 2nd Tx to complete the canCommit phase.
 
@@ -1204,7 +1204,7 @@ public class ShardTest extends AbstractShardTest {
         // Send the CanCommitTransaction message.
 
         shard.tell(new CanCommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), testKit.getRef());
-        testKit.expectMsgClass(duration, akka.actor.Status.Failure.class);
+        testKit.expectMsgClass(duration, org.apache.pekko.actor.Status.Failure.class);
 
         // Send another can commit to ensure the failed one got cleaned
         // up.
@@ -1250,7 +1250,7 @@ public class ShardTest extends AbstractShardTest {
                 ImmutableNodes.containerNode(TestModel.TEST_QNAME), true), testKit.getRef());
         }
 
-        testKit.expectMsgClass(duration, akka.actor.Status.Failure.class);
+        testKit.expectMsgClass(duration, org.apache.pekko.actor.Status.Failure.class);
 
         // Send another can commit to ensure the failed one got cleaned
         // up.
@@ -1364,7 +1364,7 @@ public class ShardTest extends AbstractShardTest {
         // current Tx.
 
         shard.tell(new CommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), testKit.getRef());
-        testKit.expectMsgClass(duration, akka.actor.Status.Failure.class);
+        testKit.expectMsgClass(duration, org.apache.pekko.actor.Status.Failure.class);
 
         // Commit the 2nd Tx.
 
@@ -1424,7 +1424,7 @@ public class ShardTest extends AbstractShardTest {
 //
 //            shard.tell(prepareReadyTransactionMessage(false, shard.underlyingActor(), cohort3, transactionID3,
 //                    modification3), getRef());
-//            expectMsgClass(duration, akka.actor.Status.Failure.class);
+//            expectMsgClass(duration, org.apache.pekko.actor.Status.Failure.class);
 //
 //            // canCommit 1st Tx.
 //
@@ -1438,7 +1438,7 @@ public class ShardTest extends AbstractShardTest {
 //            // canCommit the 3rd Tx - should exceed queue capacity and fail.
 //
 //            shard.tell(new CanCommitTransaction(transactionID3, CURRENT_VERSION).toSerializable(), getRef());
-//            expectMsgClass(duration, akka.actor.Status.Failure.class);
+//            expectMsgClass(duration, org.apache.pekko.actor.Status.Failure.class);
 //        }};
 //    }
 
@@ -1543,7 +1543,7 @@ public class ShardTest extends AbstractShardTest {
             "testCanCommitBeforeReadyFailure");
 
         shard.tell(new CanCommitTransaction(nextTransactionId(), CURRENT_VERSION).toSerializable(), testKit.getRef());
-        testKit.expectMsgClass(Duration.ofSeconds(5), akka.actor.Status.Failure.class);
+        testKit.expectMsgClass(Duration.ofSeconds(5), org.apache.pekko.actor.Status.Failure.class);
     }
 
     @Test
@@ -1625,7 +1625,7 @@ public class ShardTest extends AbstractShardTest {
         // Now send CanCommitTransaction - should fail.
 
         shard.tell(new CanCommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), testKit.getRef());
-        final Throwable failure = testKit.expectMsgClass(duration, akka.actor.Status.Failure.class).cause();
+        final Throwable failure = testKit.expectMsgClass(duration, org.apache.pekko.actor.Status.Failure.class).cause();
         assertTrue("Failure type", failure instanceof IllegalStateException);
 
         // Ready and CanCommit another and verify success.
@@ -1973,14 +1973,14 @@ public class ShardTest extends AbstractShardTest {
                 .createTestActor(Shard.builder().id(followerShardID)
                     .datastoreContext(dataStoreContextBuilder.shardElectionTimeoutFactor(1000).build())
                     .peerAddresses(Collections.singletonMap(leaderShardID.toString(),
-                        "akka://test/user/" + leaderShardID.toString()))
+                        "pekko://test/user/" + leaderShardID.toString()))
                     .schemaContextProvider(() -> SCHEMA_CONTEXT).props()
                     .withDispatcher(Dispatchers.DefaultDispatcherId()), followerShardID.toString());
 
         final TestActorRef<Shard> leaderShard = actorFactory
                 .createTestActor(Shard.builder().id(leaderShardID).datastoreContext(newDatastoreContext())
                     .peerAddresses(Collections.singletonMap(followerShardID.toString(),
-                        "akka://test/user/" + followerShardID.toString()))
+                        "pekko://test/user/" + followerShardID.toString()))
                     .schemaContextProvider(() -> SCHEMA_CONTEXT).props()
                     .withDispatcher(Dispatchers.DefaultDispatcherId()), leaderShardID.toString());
 

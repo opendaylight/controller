@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft.behaviors;
 
-import akka.actor.ActorRef;
+import org.apache.pekko.actor.ActorRef;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;

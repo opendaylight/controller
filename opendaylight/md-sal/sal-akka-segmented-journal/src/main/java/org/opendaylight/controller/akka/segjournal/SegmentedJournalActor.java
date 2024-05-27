@@ -11,12 +11,6 @@ import static com.google.common.base.Verify.verify;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.AbstractActor;
-import akka.actor.ActorRef;
-import akka.actor.Props;
-import akka.japi.pf.ReceiveBuilder;
-import akka.persistence.AtomicWrite;
-import akka.persistence.PersistentRepr;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
@@ -35,6 +29,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import org.apache.pekko.actor.AbstractActor;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.japi.pf.ReceiveBuilder;
+import org.apache.pekko.persistence.AtomicWrite;
+import org.apache.pekko.persistence.PersistentRepr;
 import org.opendaylight.controller.cluster.common.actor.MeteringBehavior;
 import org.opendaylight.controller.cluster.reporting.MetricsReporter;
 import org.opendaylight.controller.raft.journal.FromByteBufMapper;
@@ -52,10 +52,10 @@ import scala.concurrent.Promise;
  * </ul>
  *
  * <p>This is a conscious design decision to minimize the amount of data that is being stored in the data journal while
- * speeding up normal operations. Since the SegmentedJournal is an append-only linear log and Akka requires the ability
+ * speeding up normal operations. Since the SegmentedJournal is an append-only linear log and Pekko requires the ability
  * to delete persistence entries, we need ability to mark a subset of a SegmentedJournal as deleted. While we could
  * treat such delete requests as normal events, this leads to a mismatch between SegmentedJournal indices (as exposed by
- * {@link Indexed}) and Akka sequence numbers -- requiring us to potentially perform costly deserialization to find the
+ * {@link Indexed}) and Pekko sequence numbers -- requiring us to potentially perform costly deserialization to find the
  * index corresponding to a particular sequence number, or maintain moderately-complex logic and data structures to
  * perform that mapping in sub-linear time complexity.
  *
