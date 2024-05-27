@@ -7,14 +7,14 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import akka.actor.ActorRef;
-import akka.persistence.SaveSnapshotFailure;
-import akka.persistence.SaveSnapshotSuccess;
-import akka.util.Timeout;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.persistence.SaveSnapshotFailure;
+import org.apache.pekko.persistence.SaveSnapshotSuccess;
+import org.apache.pekko.util.Timeout;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;

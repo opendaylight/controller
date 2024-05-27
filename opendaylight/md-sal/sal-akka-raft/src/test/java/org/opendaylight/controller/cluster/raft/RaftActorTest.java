@@ -25,19 +25,6 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import akka.actor.ActorRef;
-import akka.actor.PoisonPill;
-import akka.actor.Status.Failure;
-import akka.actor.Terminated;
-import akka.dispatch.Dispatchers;
-import akka.japi.Procedure;
-import akka.persistence.SaveSnapshotFailure;
-import akka.persistence.SaveSnapshotSuccess;
-import akka.persistence.SnapshotMetadata;
-import akka.persistence.SnapshotOffer;
-import akka.protobuf.ByteString;
-import akka.testkit.TestActorRef;
-import akka.testkit.javadsl.TestKit;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
@@ -49,6 +36,19 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.PoisonPill;
+import org.apache.pekko.actor.Status.Failure;
+import org.apache.pekko.actor.Terminated;
+import org.apache.pekko.dispatch.Dispatchers;
+import org.apache.pekko.japi.Procedure;
+import org.apache.pekko.persistence.SaveSnapshotFailure;
+import org.apache.pekko.persistence.SaveSnapshotSuccess;
+import org.apache.pekko.persistence.SnapshotMetadata;
+import org.apache.pekko.persistence.SnapshotOffer;
+import org.apache.pekko.protobuf.ByteString;
+import org.apache.pekko.testkit.TestActorRef;
+import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -1052,7 +1052,7 @@ public class RaftActorTest extends AbstractActorTest {
         reset(mockRaftActor.snapshotCohortDelegate);
 
         raftActorRef.tell(GetSnapshot.INSTANCE, kit.getRef());
-        Failure failure = kit.expectMsgClass(akka.actor.Status.Failure.class);
+        Failure failure = kit.expectMsgClass(org.apache.pekko.actor.Status.Failure.class);
         assertEquals("Failure cause type", TimeoutException.class, failure.cause().getClass());
 
         mockRaftActor.getSnapshotMessageSupport().setSnapshotReplyActorTimeout(

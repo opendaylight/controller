@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.eos.akka.owner.supervisor.command;
 
-import akka.actor.typed.ActorRef;
-import akka.cluster.ddata.ORMap;
-import akka.cluster.ddata.ORSet;
-import akka.cluster.ddata.typed.javadsl.Replicator;
+import org.apache.pekko.actor.typed.ActorRef;
+import org.apache.pekko.cluster.ddata.ORMap;
+import org.apache.pekko.cluster.ddata.ORSet;
+import org.apache.pekko.cluster.ddata.typed.javadsl.Replicator;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
 
 public class ClearCandidatesUpdateResponse extends OwnerSupervisorCommand {

@@ -9,15 +9,15 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
-import akka.actor.Cancellable;
-import akka.cluster.Cluster;
-import akka.cluster.Member;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.Cancellable;
+import org.apache.pekko.cluster.Cluster;
+import org.apache.pekko.cluster.Member;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
