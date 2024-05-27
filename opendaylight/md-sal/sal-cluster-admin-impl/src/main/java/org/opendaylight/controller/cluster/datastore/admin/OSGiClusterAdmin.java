@@ -32,7 +32,6 @@ public final class OSGiClusterAdmin {
             @Reference(target = "(type=distributed-operational)") final DistributedDataStoreInterface operDatastore,
             @Reference final BindingNormalizedNodeSerializer serializer,
             @Reference final RpcProviderService rpcProviderService,
-            @Reference final DataCenterControl dataCenterControls,
             @Reference final DataCenterControl dataCenterControl) {
         reg = rpcProviderService.registerRpcImplementation(ClusterAdminService.class,
             new ClusterAdminRpcService(configDatastore, operDatastore, serializer, dataCenterControl));
