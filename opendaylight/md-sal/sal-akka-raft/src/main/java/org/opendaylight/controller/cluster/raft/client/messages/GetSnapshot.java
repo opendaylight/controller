@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.cluster.raft.client.messages;
 
-import akka.util.Timeout;
 import java.util.Optional;
+import org.apache.pekko.util.Timeout;
 
 /**
  * Internal client message to get a snapshot of the current state based on whether or not persistence is enabled.

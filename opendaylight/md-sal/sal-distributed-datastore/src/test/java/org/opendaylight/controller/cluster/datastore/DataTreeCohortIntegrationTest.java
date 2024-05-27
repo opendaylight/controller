@@ -19,17 +19,17 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-import akka.actor.ActorSystem;
-import akka.actor.Address;
-import akka.actor.AddressFromURIString;
-import akka.cluster.Cluster;
-import akka.testkit.javadsl.TestKit;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.FluentFuture;
 import com.typesafe.config.ConfigFactory;
 import java.util.Collection;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.Address;
+import org.apache.pekko.actor.AddressFromURIString;
+import org.apache.pekko.cluster.Cluster;
+import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -75,7 +75,7 @@ public class DataTreeCohortIntegrationTest {
     @BeforeClass
     public static void setUpClass() {
         system = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig("Member1"));
-        final Address member1Address = AddressFromURIString.parse("akka://cluster-test@127.0.0.1:2558");
+        final Address member1Address = AddressFromURIString.parse("pekko://cluster-test@127.0.0.1:2558");
         Cluster.get(system).join(member1Address);
     }
 

@@ -7,9 +7,6 @@
  */
 package org.opendaylight.controller.cluster.example;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.PoisonPill;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
@@ -17,6 +14,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.PoisonPill;
 import org.opendaylight.controller.cluster.example.messages.KeyValue;
 
 public final class Main {
@@ -25,9 +25,9 @@ public final class Main {
     private static Map<String, String> allPeers = new HashMap<>();
 
     static {
-        allPeers.put("example-1", "akka://default/user/example-1");
-        allPeers.put("example-2", "akka://default/user/example-2");
-        allPeers.put("example-3", "akka://default/user/example-3");
+        allPeers.put("example-1", "pekko://default/user/example-1");
+        allPeers.put("example-2", "pekko://default/user/example-2");
+        allPeers.put("example-3", "pekko://default/user/example-3");
     }
 
     private Main() {

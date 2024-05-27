@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.eos.akka.owner.supervisor.command;
 
-import akka.actor.Address;
 import java.util.Set;
+import org.apache.pekko.actor.Address;
 
 public final class MemberDownEvent extends InternalClusterEvent {
     public MemberDownEvent(final Address address, final Set<String> roles) {

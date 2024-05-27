@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.eos.akka.owner.supervisor.command;
 
-import akka.actor.typed.ActorRef;
-import akka.pattern.StatusReply;
+import org.apache.pekko.actor.typed.ActorRef;
+import org.apache.pekko.pattern.StatusReply;
 
 public final class GetEntitiesBackendRequest extends OwnerSupervisorRequest<GetEntitiesBackendReply> {
     private static final long serialVersionUID = 1L;

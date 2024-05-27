@@ -11,7 +11,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 
-import akka.actor.ActorSelection;
+import org.apache.pekko.actor.ActorSelection;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;

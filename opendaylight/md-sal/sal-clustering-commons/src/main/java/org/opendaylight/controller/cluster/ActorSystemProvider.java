@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster;
 
-import akka.actor.ActorSystem;
+import org.apache.pekko.actor.ActorSystem;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
 
