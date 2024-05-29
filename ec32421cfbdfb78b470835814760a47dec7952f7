@@ -22,6 +22,30 @@
       },
       "revId": "ec32421cfbdfb78b470835814760a47dec7952f7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8a42f041_f9622ece",
+        "filename": "opendaylight/md-sal/eos-dom-pekko/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2024-05-29T11:08:01Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "db3d1af1_455f7ccc",
+      "range": {
+        "startLine": 21,
+        "startChar": 16,
+        "endLine": 21,
+        "endChar": 29
+      },
+      "revId": "ec32421cfbdfb78b470835814760a47dec7952f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
