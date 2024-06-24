@@ -33,6 +33,46 @@
       "message": "recheck",
       "revId": "9646c867bd8d77e8bf5d3d55d9e867dbe41c886d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0877e833_141c88a8",
+        "filename": "features/odl-controller-akka/src/main/history/dependencies.xml",
+        "patchSetId": 12
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 8894
+      },
+      "writtenOn": "2024-06-24T14:25:39Z",
+      "side": 1,
+      "message": "use dynamically assigned project version, not hard-coded",
+      "range": {
+        "startLine": 11,
+        "startChar": 65,
+        "endLine": 11,
+        "endChar": 80
+      },
+      "revId": "9646c867bd8d77e8bf5d3d55d9e867dbe41c886d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c342f248_f4cfa0b0",
+        "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/akka.conf",
+        "patchSetId": 12
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 8894
+      },
+      "writtenOn": "2024-06-24T14:25:39Z",
+      "side": 1,
+      "message": "keeping same file name seems inconsistent\nsame for factory-akka.conf\nthese could have reference in code -- to be updated as well",
+      "revId": "9646c867bd8d77e8bf5d3d55d9e867dbe41c886d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
