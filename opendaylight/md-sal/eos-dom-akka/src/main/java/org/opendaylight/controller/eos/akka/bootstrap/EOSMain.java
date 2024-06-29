@@ -29,7 +29,7 @@ import org.opendaylight.controller.eos.akka.registry.candidate.CandidateRegistry
 import org.opendaylight.controller.eos.akka.registry.candidate.command.CandidateRegistryCommand;
 import org.opendaylight.controller.eos.akka.registry.listener.type.EntityTypeListenerRegistry;
 import org.opendaylight.controller.eos.akka.registry.listener.type.command.TypeListenerRegistryCommand;
-import org.opendaylight.mdsal.binding.dom.codec.api.BindingInstanceIdentifierCodec;
+import org.opendaylight.yangtools.binding.data.codec.api.BindingInstanceIdentifierCodec;
 import org.opendaylight.yangtools.yang.common.Empty;
 
 public final class EOSMain extends AbstractBehavior<BootstrapCommand> {

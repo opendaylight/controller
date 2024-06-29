@@ -17,12 +17,14 @@ import java.net.URISyntaxException;
 import java.util.Set;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.dom.DOMSource;
-import org.opendaylight.mdsal.binding.spec.reflect.BindingReflections;
-import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.binding.ChildOf;
+import org.opendaylight.yangtools.binding.DataObject;
+import org.opendaylight.yangtools.binding.DataRoot;
+import org.opendaylight.yangtools.binding.EntryObject;
+import org.opendaylight.yangtools.binding.Key;
+import org.opendaylight.yangtools.binding.contract.Naming;
+import org.opendaylight.yangtools.binding.reflect.BindingReflections;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.binding.Key;
-import org.opendaylight.yangtools.yang.binding.KeyAware;
-import org.opendaylight.yangtools.yang.binding.contract.Naming;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
@@ -52,7 +54,7 @@ import org.xml.sax.SAXException;
 public abstract class BindingContext {
     public static BindingContext create(final String logName, final Class<? extends DataObject> klass,
             final String appConfigListKeyValue) {
-        if (KeyAware.class.isAssignableFrom(klass)) {
+        if (EntryObject.class.isAssignableFrom(klass)) {
             // The binding class corresponds to a yang list.
             if (Strings.isNullOrEmpty(appConfigListKeyValue)) {
                 throw new ComponentDefinitionException(String.format(
@@ -61,7 +63,7 @@ public abstract class BindingContext {
             }
 
             try {
-                return ListBindingContext.newInstance(klass, appConfigListKeyValue);
+                return ListBindingContext.newInstance((Class) klass, appConfigListKeyValue);
             } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
                     | InvocationTargetException | NoSuchMethodException | SecurityException e) {
                 throw new ComponentDefinitionException(String.format(
@@ -132,13 +134,14 @@ public abstract class BindingContext {
         }
 
         @SuppressWarnings({ "rawtypes", "unchecked" })
-        static ListBindingContext newInstance(final Class<? extends DataObject> bindingClass,
-                final String listKeyValue) throws InstantiationException, IllegalAccessException,
-                IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+        static <T extends EntryObject<T, K> & ChildOf<? extends DataRoot<?>>, K extends Key<T>>
+                ListBindingContext newInstance(final Class<T> bindingClass, final String listKeyValue)
+                    throws InstantiationException, IllegalAccessException, IllegalArgumentException,
+                           InvocationTargetException, NoSuchMethodException, SecurityException {
             // We assume the yang list key type is string.
-            Key keyInstance = (Key) bindingClass.getMethod(Naming.KEY_AWARE_KEY_NAME)
+            final K keyInstance = (K) bindingClass.getMethod(Naming.KEY_AWARE_KEY_NAME)
                 .getReturnType().getConstructor(String.class).newInstance(listKeyValue);
-            InstanceIdentifier appConfigPath = InstanceIdentifier.builder((Class)bindingClass, keyInstance).build();
+            InstanceIdentifier appConfigPath = InstanceIdentifier.builder(bindingClass, keyInstance).build();
             return new ListBindingContext(bindingClass, appConfigPath, listKeyValue);
         }
 

@@ -11,10 +11,10 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Verify.verifyNotNull;
 
 import java.util.Optional;
-import org.opendaylight.mdsal.binding.dom.codec.api.BindingCodecTree;
-import org.opendaylight.mdsal.binding.dom.codec.api.BindingInstanceIdentifierCodec;
-import org.opendaylight.mdsal.binding.runtime.api.BindingRuntimeContext;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
+import org.opendaylight.yangtools.binding.data.codec.api.BindingCodecTree;
+import org.opendaylight.yangtools.binding.data.codec.api.BindingInstanceIdentifierCodec;
+import org.opendaylight.yangtools.binding.runtime.api.BindingRuntimeContext;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.codec.gson.JSONCodecFactorySupplier;
@@ -43,11 +43,11 @@ public final class DefaultInstanceIdentifierSupport implements InstanceIdentifie
     }
 
     @Override
-    public InstanceIdentifier<?> parseArgument(final String argument) {
-        final YangInstanceIdentifier path = verifyNotNull((YangInstanceIdentifier)jsonCodec.parseValue(null, argument));
-        final InstanceIdentifier<?> ret = bindingCodec.toBinding(path);
+    public DataObjectIdentifier<?> parseArgument(final String argument) {
+        final var path = verifyNotNull((YangInstanceIdentifier)jsonCodec.parseValue(null, argument));
+        final var ret = bindingCodec.toBinding(path);
         checkArgument(ret != null, "%s does not have a binding representation", path);
-        return ret;
+        return ret.toIdentifier();
     }
 
     // Mock wiring for JSON codec. Perhaps we should really bind to context-ref, or receive the class, or something.
