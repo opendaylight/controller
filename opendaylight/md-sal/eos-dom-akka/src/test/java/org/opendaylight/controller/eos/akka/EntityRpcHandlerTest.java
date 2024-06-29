@@ -105,7 +105,7 @@ public class EntityRpcHandlerTest extends AbstractNativeEosTest {
 
         await().untilAsserted(() -> {
             final var getEntityResult = service1.getEntity(new GetEntityInputBuilder()
-                .setName(new EntityName(CODEC_CONTEXT.fromYangInstanceIdentifier(entityId)))
+                .setName(new EntityName(CODEC_CONTEXT.fromYangInstanceIdentifier(entityId).toIdentifier()))
                 .setType(new EntityType(ENTITY_TYPE))
                 .build()).get();
 
@@ -120,18 +120,18 @@ public class EntityRpcHandlerTest extends AbstractNativeEosTest {
             final var entities = getEntitiesResult.nonnullEntities();
             assertEquals(1, entities.size());
             assertTrue(entities.get(new EntitiesKey(
-                new EntityName(CODEC_CONTEXT.fromYangInstanceIdentifier(entityId)),
+                new EntityName(CODEC_CONTEXT.fromYangInstanceIdentifier(entityId).toIdentifier()),
                 new EntityType(ENTITY_TYPE)))
                 .getCandidateNodes().contains(new NodeName("member-1")));
             assertTrue(entities.get(new EntitiesKey(
-                new EntityName(CODEC_CONTEXT.fromYangInstanceIdentifier(entityId)),
+                new EntityName(CODEC_CONTEXT.fromYangInstanceIdentifier(entityId).toIdentifier()),
                 new EntityType(ENTITY_TYPE)))
                 .getOwnerNode().getValue().equals("member-1"));
         });
 
         await().atMost(Duration.ofSeconds(2)).untilAsserted(() -> {
             final var getEntityResult = service2.getEntity(new GetEntityInputBuilder()
-                .setName(new EntityName(CODEC_CONTEXT.fromYangInstanceIdentifier(entityId)))
+                .setName(new EntityName(CODEC_CONTEXT.fromYangInstanceIdentifier(entityId).toIdentifier()))
                 .setType(new EntityType(ENTITY_TYPE))
                 .build()).get().getResult();
 
@@ -141,7 +141,7 @@ public class EntityRpcHandlerTest extends AbstractNativeEosTest {
 
         await().atMost(Duration.ofSeconds(2)).untilAsserted(() -> {
             final var getOwnerResult = service2.getEntityOwner(new GetEntityOwnerInputBuilder()
-                .setName(new EntityName(CODEC_CONTEXT.fromYangInstanceIdentifier(entityId)))
+                .setName(new EntityName(CODEC_CONTEXT.fromYangInstanceIdentifier(entityId).toIdentifier()))
                 .setType(new EntityType(ENTITY_TYPE))
                 .build()).get().getResult();
 

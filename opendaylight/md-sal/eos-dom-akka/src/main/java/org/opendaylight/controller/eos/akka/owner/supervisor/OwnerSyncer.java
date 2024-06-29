@@ -40,8 +40,8 @@ import org.opendaylight.controller.eos.akka.owner.supervisor.command.OwnerSuperv
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.OwnerSupervisorReply;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.OwnerSupervisorRequest;
 import org.opendaylight.controller.eos.akka.registry.candidate.CandidateRegistry;
-import org.opendaylight.mdsal.binding.dom.codec.api.BindingInstanceIdentifierCodec;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
+import org.opendaylight.yangtools.binding.data.codec.api.BindingInstanceIdentifierCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
