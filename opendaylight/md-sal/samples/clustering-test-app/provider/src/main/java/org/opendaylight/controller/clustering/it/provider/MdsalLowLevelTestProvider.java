@@ -37,7 +37,6 @@ import org.opendaylight.controller.clustering.it.provider.impl.YnlListener;
 import org.opendaylight.mdsal.binding.api.NotificationPublishService;
 import org.opendaylight.mdsal.binding.api.NotificationService;
 import org.opendaylight.mdsal.binding.api.RpcProviderService;
-import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataBroker;
 import org.opendaylight.mdsal.dom.api.DOMDataBroker.DataTreeChangeExtension;
@@ -130,6 +129,8 @@ import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.l
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.WriteTransactionsInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.WriteTransactionsOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.target.rev170215.IdSequence;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
+import org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.concepts.Registration;
@@ -318,16 +319,25 @@ public final class MdsalLowLevelTestProvider {
         return RpcResultBuilder.success(new SubscribeYnlOutputBuilder().build()).buildFuture();
     }
 
-
     private ListenableFuture<RpcResult<UnregisterBoundConstantOutput>> unregisterBoundConstant(
             final UnregisterBoundConstantInput input) {
         LOG.info("In unregisterBoundConstant - {}", input);
 
-        final var rpcRegistration = routedRegistrations.remove(input.getContext());
+        final DataObjectIdentifier<?> context;
+        switch (input.getContext()) {
+            case null -> {
+                return RpcResultBuilder.<UnregisterBoundConstantOutput>failed()
+                    .withError(ErrorType.RPC, ErrorTag.INVALID_VALUE, "Context value is null")
+                    .buildFuture();
+            }
+            case DataObjectIdentifier<?> doi -> context = doi;
+        }
+
+        final var rpcRegistration = routedRegistrations.remove(context.toLegacy());
         if (rpcRegistration == null) {
             return RpcResultBuilder.<UnregisterBoundConstantOutput>failed()
                 .withError(ErrorType.RPC, ErrorTag.DATA_MISSING,
-                    "No prior RPC was registered for " + input.getContext())
+                    "No prior RPC was registered for " + context)
                 .buildFuture();
         }
 
@@ -339,14 +349,15 @@ public final class MdsalLowLevelTestProvider {
             final RegisterSingletonConstantInput input) {
         LOG.info("In registerSingletonConstant - input: {}", input);
 
-        if (input.getConstant() == null) {
+        final var constant = input.getConstant();
+        if (constant == null) {
             return RpcResultBuilder.<RegisterSingletonConstantOutput>failed()
                 .withError(ErrorType.RPC, ErrorTag.INVALID_VALUE, "Constant value is null")
                 .buildFuture();
         }
 
-        getSingletonConstantRegistration =
-                SingletonGetConstantService.registerNew(singletonService, domRpcService, input.getConstant());
+        getSingletonConstantRegistration = SingletonGetConstantService.registerNew(singletonService, domRpcService,
+            constant);
 
         return RpcResultBuilder.success(new RegisterSingletonConstantOutputBuilder().build()).buildFuture();
     }
@@ -401,26 +412,33 @@ public final class MdsalLowLevelTestProvider {
             final RegisterBoundConstantInput input) {
         LOG.info("In registerBoundConstant - input: {}", input);
 
-        if (input.getContext() == null) {
-            return RpcResultBuilder.<RegisterBoundConstantOutput>failed().withError(
+        final DataObjectIdentifier<?> context;
+        switch (input.getContext()) {
+            case null -> {
+                return RpcResultBuilder.<RegisterBoundConstantOutput>failed().withError(
                     ErrorType.RPC, ErrorTag.INVALID_VALUE, "Context value is null").buildFuture();
+            }
+            case DataObjectIdentifier<?> bid -> context = bid;
         }
 
-        if (input.getConstant() == null) {
+        final var constant = input.getConstant();
+        if (constant == null) {
             return RpcResultBuilder.<RegisterBoundConstantOutput>failed().withError(
                     ErrorType.RPC, ErrorTag.INVALID_VALUE, "Constant value is null").buildFuture();
         }
 
-        if (routedRegistrations.containsKey(input.getContext())) {
-            return RpcResultBuilder.<RegisterBoundConstantOutput>failed().withError(ErrorType.RPC,
-                ErrorTag.DATA_EXISTS, "There is already an rpc registered for context: " + input.getContext())
+        final var iid = context.toLegacy();
+        if (routedRegistrations.containsKey(iid)) {
+            return RpcResultBuilder.<RegisterBoundConstantOutput>failed()
+                .withError(ErrorType.RPC, ErrorTag.DATA_EXISTS,
+                    "There is already an rpc registered for context: " + context)
                 .buildFuture();
         }
 
         final var rpcRegistration = RoutedGetConstantService.registerNew(bindingNormalizedNodeSerializer, domRpcService,
-            input.getConstant(), input.getContext());
+            constant, iid);
 
-        routedRegistrations.put(input.getContext(), rpcRegistration);
+        routedRegistrations.put(iid, rpcRegistration);
         return RpcResultBuilder.success(new RegisterBoundConstantOutputBuilder().build()).buildFuture();
     }
 

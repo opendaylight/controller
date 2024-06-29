@@ -7,13 +7,9 @@
  */
 package rpcbenchmark.impl;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMap.Builder;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
 import org.opendaylight.mdsal.binding.api.RpcService;
@@ -24,7 +20,8 @@ import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.RoutedRpcBenchOut
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.payload.Payload;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.payload.PayloadBuilder;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.payload.PayloadKey;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
+import org.opendaylight.yangtools.binding.util.BindingMap;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,18 +35,20 @@ public class RoutedBindingRTClient implements RTCClient {
     private final int inSize;
 
     public RoutedBindingRTClient(final RpcService rpcService, final int inSize,
-            final List<InstanceIdentifier<?>> routeIid) {
+            final List<DataObjectIdentifier<?>> routeIid) {
         routedRpcBench = rpcService.getRpc(RoutedRpcBench.class);
         this.inSize = inSize;
 
-        Builder<PayloadKey, Payload> listVals = ImmutableMap.builderWithExpectedSize(inSize);
+        final var listVals = BindingMap.<PayloadKey, Payload>orderedBuilder(inSize);
         for (int i = 0; i < inSize; i++) {
-            final PayloadKey key = new PayloadKey(i);
-            listVals.put(key, new PayloadBuilder().withKey(key).build());
+            listVals.add(new PayloadBuilder().withKey(new PayloadKey(i)).build());
         }
 
-        for (InstanceIdentifier<?> iid : routeIid) {
-            inVal.add(new RoutedRpcBenchInputBuilder().setNode(iid).setPayload(listVals.build()).build());
+        for (var iid : routeIid) {
+            inVal.add(new RoutedRpcBenchInputBuilder()
+                .setNode(iid)
+                .setPayload(listVals.build())
+                .build());
         }
 
     }
@@ -71,23 +70,25 @@ public class RoutedBindingRTClient implements RTCClient {
 
         int rpcServerCnt = inVal.size();
         for (int i = 0; i < iterations; i++) {
-            RoutedRpcBenchInput input = inVal.get(ThreadLocalRandom.current().nextInt(rpcServerCnt));
-            Future<RpcResult<RoutedRpcBenchOutput>> output = routedRpcBench.invoke(input);
+            final var input = inVal.get(ThreadLocalRandom.current().nextInt(rpcServerCnt));
+            final var future = routedRpcBench.invoke(input);
+            final RpcResult<RoutedRpcBenchOutput> rpcResult;
             try {
-                RpcResult<RoutedRpcBenchOutput> rpcResult = output.get();
-
-                if (rpcResult.isSuccessful()) {
-                    Map<PayloadKey, Payload> retVal = rpcResult.getResult().getPayload();
-                    if (retVal.size() == inSize) {
-                        ok++;
-                    }
-                    else {
-                        error++;
-                    }
-                }
+                rpcResult = future.get();
             } catch (InterruptedException | ExecutionException e) {
                 error++;
                 LOG.error("Execution failed: ", e);
+                continue;
+            }
+
+            if (rpcResult.isSuccessful()) {
+                final var retVal = rpcResult.getResult().getPayload();
+                if (retVal.size() == inSize) {
+                    ok++;
+                }
+                else {
+                    error++;
+                }
             }
         }
 

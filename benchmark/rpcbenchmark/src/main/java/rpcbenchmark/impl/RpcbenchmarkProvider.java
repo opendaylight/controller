@@ -12,7 +12,6 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -35,6 +34,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.rpcbench
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.rpcbenchmark.rev150702.TestStatusOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.rpcbenchmark.rev150702.TestStatusOutput.ExecStatus;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.rpcbenchmark.rev150702.TestStatusOutputBuilder;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -88,24 +88,24 @@ public final class RpcbenchmarkProvider implements AutoCloseable {
         RoutedBindingRTCServer routed = null;
 
         switch (input.getOperation()) {
-            case ROUTEDRTC:
-                List<InstanceIdentifier<?>> routeIid = new ArrayList<>();
+            case ROUTEDRTC -> {
+                final var routeIid = new ArrayList<DataObjectIdentifier<?>>();
                 for (int i = 0; i < input.getNumServers().intValue(); i++) {
                     routeIid.add(InstanceIdentifier.create(RpcbenchRpcRoutes.class)
-                        .child(RpcRoute.class, new RpcRouteKey(Integer.toString(i))));
+                        .child(RpcRoute.class, new RpcRouteKey(Integer.toString(i)))
+                        .toIdentifier());
                 }
 
                 routed = new RoutedBindingRTCServer(providerRegistry, Set.copyOf(routeIid));
                 client = new RoutedBindingRTClient(consumerRegistry, input.getPayloadSize().intValue(), routeIid);
-                break;
-
-            case GLOBALRTC:
+            }
+            case GLOBALRTC -> {
                 client = new GlobalBindingRTCClient(consumerRegistry, input.getPayloadSize().intValue());
-                break;
-
-            default:
+            }
+            default -> {
                 LOG.error("Unsupported server/client type {}", input.getOperation());
                 throw new IllegalArgumentException("Unsupported server/client type" + input.getOperation());
+            }
         }
 
         try {

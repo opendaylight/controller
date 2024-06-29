@@ -12,13 +12,13 @@ import java.util.Set;
 import org.opendaylight.mdsal.binding.api.RpcProviderService;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.GlobalRpcBench;
 import org.opendaylight.yang.gen.v1.rpcbench.payload.rev150702.RoutedRpcBench;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.concepts.Registration;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 final class RoutedBindingRTCServer extends AbstractRpcbenchPayloadService implements AutoCloseable {
     private final Registration reg;
 
-    RoutedBindingRTCServer(final RpcProviderService rpcProvider, final Set<InstanceIdentifier<?>> paths) {
+    RoutedBindingRTCServer(final RpcProviderService rpcProvider, final Set<DataObjectIdentifier<?>> paths) {
         reg = rpcProvider.registerRpcImplementations(List.of(
             (GlobalRpcBench) this::globalRpcBench,
             (RoutedRpcBench) this::routedRpcBench), paths);
