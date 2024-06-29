@@ -24,7 +24,7 @@ import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntityBa
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntityOwnerBackendRequest;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.OwnerSupervisorCommand;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.OwnerSupervisorRequest;
-import org.opendaylight.mdsal.binding.dom.codec.api.BindingInstanceIdentifierCodec;
+import org.opendaylight.yangtools.binding.data.codec.api.BindingInstanceIdentifierCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

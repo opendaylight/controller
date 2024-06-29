@@ -30,6 +30,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.store.rev140422.lists.UnorderedContainer;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.store.rev140422.lists.unordered.container.UnorderedList;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.store.rev140422.lists.unordered.container.UnorderedListKey;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -73,8 +74,8 @@ public class RoutedServiceIT extends AbstractIT {
     @Test
     public void testServiceRegistration() {
         LOG.info("Register provider 1 with first implementation of routeSimpleService - rpc1 of node 1");
-        final InstanceIdentifier<UnorderedList> nodeOnePath = createNodeRef("foo:node:1");
-        final InstanceIdentifier<UnorderedList> nodeTwo = createNodeRef("foo:node:2");
+        final var nodeOnePath = createNodeRef("foo:node:1");
+        final var nodeTwo = createNodeRef("foo:node:2");
 
         Registration firstReg = rpcProviderService.registerRpcImplementation(routedSimpleRouteRpc1,
             Set.of(nodeOnePath));
@@ -146,11 +147,12 @@ public class RoutedServiceIT extends AbstractIT {
      * @param string string with key(path)
      * @return instance identifier to {@link UnorderedList}
      */
-    private static InstanceIdentifier<UnorderedList> createNodeRef(final String string) {
+    private static DataObjectIdentifier<UnorderedList> createNodeRef(final String string) {
         return InstanceIdentifier.builder(Lists.class)
                 .child(UnorderedContainer.class)
                 .child(UnorderedList.class, new UnorderedListKey(string))
-                .build();
+                .build()
+                .toIdentifier();
     }
 
     /**
@@ -159,7 +161,7 @@ public class RoutedServiceIT extends AbstractIT {
      * @param node NodeRef value
      * @return simpleRouteInput instance
      */
-    static RoutedSimpleRouteInput createSimpleRouteInput(final InstanceIdentifier<UnorderedList> node) {
+    static RoutedSimpleRouteInput createSimpleRouteInput(final DataObjectIdentifier<UnorderedList> node) {
         return new RoutedSimpleRouteInputBuilder().setRoute(node).build();
     }
 }
