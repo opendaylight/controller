@@ -99,8 +99,10 @@ public final class AddPersonImpl implements AddPerson, AutoCloseable {
         final SettableFuture<RpcResult<AddPersonOutput>> futureResult = SettableFuture.create();
 
         // Each entry will be identifiable by a unique key, we have to create that identifier
-        final InstanceIdentifier<Person> personId = InstanceIdentifier.builder(People.class)
-                .child(Person.class, person.key()).build();
+        final var personId = InstanceIdentifier.builder(People.class)
+                .child(Person.class, person.key())
+                .build()
+                .toIdentifier();
         // Place entry in data store tree
         WriteTransaction tx = dataProvider.newWriteOnlyTransaction();
         tx.put(LogicalDatastoreType.CONFIGURATION, personId, person);

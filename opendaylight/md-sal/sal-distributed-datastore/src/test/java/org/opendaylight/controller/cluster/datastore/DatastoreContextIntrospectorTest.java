@@ -23,10 +23,10 @@ import static org.opendaylight.mdsal.common.api.LogicalDatastoreType.OPERATIONAL
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Test;
-import org.opendaylight.mdsal.binding.dom.codec.impl.BindingCodecContext;
-import org.opendaylight.mdsal.binding.runtime.spi.BindingRuntimeHelpers;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev231229.DataStoreProperties.ExportOnRecovery;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev231229.DataStorePropertiesContainer;
+import org.opendaylight.yangtools.binding.data.codec.impl.BindingCodecContext;
+import org.opendaylight.yangtools.binding.runtime.spi.BindingRuntimeHelpers;
 
 /**
  * Unit tests for DatastoreContextIntrospector.
