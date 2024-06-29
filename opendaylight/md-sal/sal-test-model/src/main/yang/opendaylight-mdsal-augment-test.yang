@@ -1,12 +1,11 @@
 module opendaylight-mdsal-augment-test {
-
     namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:test:augment";
     prefix aug-test;
 
     import opendaylight-mdsal-list-test {
         prefix test;
     }
-    import yang-ext {
+    import odl-codegen-extensions {
         prefix ext;
     }
 
@@ -35,7 +34,6 @@ module opendaylight-mdsal-augment-test {
                 type string;
             }
         }
-    
     }
 
     augment "/test:top/test:top-level-list" {
@@ -65,7 +63,7 @@ module opendaylight-mdsal-augment-test {
             type string;
         }
     }
-    
+
     augment "/test:top/test:top-level-list" {
         ext:augment-identifier tree-second-leaf-only-augment;
 
@@ -89,5 +87,4 @@ module opendaylight-mdsal-augment-test {
             type string;
         }
     }
-
 }

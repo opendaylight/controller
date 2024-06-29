@@ -8,6 +8,7 @@
 package org.opendaylight.clustering.it.karaf.cli;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 /**
@@ -22,5 +23,5 @@ public interface InstanceIdentifierSupport {
      * @return Parse InstanceIdentifier
      * @throws NullPointerException if {@code argument} is null
      */
-    @NonNull InstanceIdentifier<?> parseArgument(String argument);
+    @NonNull DataObjectIdentifier<?> parseArgument(String argument);
 }

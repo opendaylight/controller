@@ -36,8 +36,8 @@ import org.opendaylight.controller.eos.akka.owner.checker.command.InternalGetRep
 import org.opendaylight.controller.eos.akka.owner.checker.command.StateCheckerCommand;
 import org.opendaylight.controller.eos.akka.owner.checker.command.StateCheckerRequest;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.OwnerSupervisorCommand;
-import org.opendaylight.mdsal.binding.dom.codec.api.BindingInstanceIdentifierCodec;
 import org.opendaylight.mdsal.eos.common.api.EntityOwnershipState;
+import org.opendaylight.yangtools.binding.data.codec.api.BindingInstanceIdentifierCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -160,6 +160,6 @@ public class RoutedServiceIT extends AbstractIT {
      * @return simpleRouteInput instance
      */
     static RoutedSimpleRouteInput createSimpleRouteInput(final InstanceIdentifier<UnorderedList> node) {
-        return new RoutedSimpleRouteInputBuilder().setRoute(node).build();
+        return new RoutedSimpleRouteInputBuilder().setRoute(node.toIdentifier()).build();
     }
 }

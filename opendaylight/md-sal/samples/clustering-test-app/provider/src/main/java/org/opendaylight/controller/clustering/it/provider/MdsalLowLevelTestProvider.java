@@ -37,7 +37,6 @@ import org.opendaylight.controller.clustering.it.provider.impl.YnlListener;
 import org.opendaylight.mdsal.binding.api.NotificationPublishService;
 import org.opendaylight.mdsal.binding.api.NotificationService;
 import org.opendaylight.mdsal.binding.api.RpcProviderService;
-import org.opendaylight.mdsal.binding.dom.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataBroker;
 import org.opendaylight.mdsal.dom.api.DOMDataBroker.DataTreeChangeExtension;
@@ -130,6 +129,8 @@ import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.l
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.WriteTransactionsInput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.WriteTransactionsOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.target.rev170215.IdSequence;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
+import org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.concepts.Registration;
@@ -401,12 +402,17 @@ public final class MdsalLowLevelTestProvider {
             final RegisterBoundConstantInput input) {
         LOG.info("In registerBoundConstant - input: {}", input);
 
-        if (input.getContext() == null) {
-            return RpcResultBuilder.<RegisterBoundConstantOutput>failed().withError(
+        final DataObjectIdentifier<?> context;
+        switch (input.getContext()) {
+            case null -> {
+                return RpcResultBuilder.<RegisterBoundConstantOutput>failed().withError(
                     ErrorType.RPC, ErrorTag.INVALID_VALUE, "Context value is null").buildFuture();
+            }
+            case DataObjectIdentifier<?> bid -> context = bid;
         }
 
-        if (input.getConstant() == null) {
+        final var constant = input.getConstant();
+        if (constant == null) {
             return RpcResultBuilder.<RegisterBoundConstantOutput>failed().withError(
                     ErrorType.RPC, ErrorTag.INVALID_VALUE, "Constant value is null").buildFuture();
         }
@@ -418,9 +424,9 @@ public final class MdsalLowLevelTestProvider {
         }
 
         final var rpcRegistration = RoutedGetConstantService.registerNew(bindingNormalizedNodeSerializer, domRpcService,
-            input.getConstant(), input.getContext());
+            constant, context.toLegacy());
 
-        routedRegistrations.put(input.getContext(), rpcRegistration);
+        routedRegistrations.put(context.toLegacy(), rpcRegistration);
         return RpcResultBuilder.success(new RegisterBoundConstantOutputBuilder().build()).buildFuture();
     }
 
