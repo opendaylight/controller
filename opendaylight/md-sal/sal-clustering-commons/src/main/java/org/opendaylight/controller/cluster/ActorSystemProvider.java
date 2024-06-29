@@ -9,7 +9,7 @@ package org.opendaylight.controller.cluster;
 
 import akka.actor.ActorSystem;
 import org.eclipse.jdt.annotation.NonNull;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.concepts.ObjectRegistration;
 
 /**
  * Interface that provides an akka ActorSystem instance.
@@ -31,6 +31,6 @@ public interface ActorSystemProvider {
      * @param listener the ActorSystemProviderListener to register
      * @return a ListenerRegistration instance to be used to unregister
      */
-    ListenerRegistration<ActorSystemProviderListener> registerActorSystemProviderListener(
+    ObjectRegistration<ActorSystemProviderListener> registerActorSystemProviderListener(
             @NonNull ActorSystemProviderListener listener);
 }

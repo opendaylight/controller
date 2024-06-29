@@ -14,7 +14,7 @@ import org.opendaylight.controller.cluster.ActorSystemProviderListener;
 import org.opendaylight.controller.cluster.akka.impl.ActorSystemProviderImpl;
 import org.opendaylight.controller.cluster.akka.impl.AkkaConfigFactory;
 import org.opendaylight.controller.cluster.common.actor.AkkaConfigurationReader;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -54,7 +54,7 @@ public final class OSGiActorSystemProvider implements ActorSystemProvider {
     }
 
     @Override
-    public ListenerRegistration<ActorSystemProviderListener> registerActorSystemProviderListener(
+    public ObjectRegistration<ActorSystemProviderListener> registerActorSystemProviderListener(
             final ActorSystemProviderListener listener) {
         return delegate.registerActorSystemProviderListener(listener);
     }

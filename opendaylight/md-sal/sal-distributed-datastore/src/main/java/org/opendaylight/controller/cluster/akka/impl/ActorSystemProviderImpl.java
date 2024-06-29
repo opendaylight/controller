@@ -19,8 +19,8 @@ import org.opendaylight.controller.cluster.ActorSystemProvider;
 import org.opendaylight.controller.cluster.ActorSystemProviderListener;
 import org.opendaylight.controller.cluster.common.actor.QuarantinedMonitorActor;
 import org.opendaylight.controller.cluster.datastore.TerminationMonitor;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.util.ListenerRegistry;
+import org.opendaylight.yangtools.concepts.ObjectRegistration;
+import org.opendaylight.yangtools.util.ObjectRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
@@ -33,7 +33,8 @@ public class ActorSystemProviderImpl implements ActorSystemProvider, AutoCloseab
     private static final Logger LOG = LoggerFactory.getLogger(ActorSystemProviderImpl.class);
 
     private final @NonNull ActorSystem actorSystem;
-    private final ListenerRegistry<ActorSystemProviderListener> listeners = ListenerRegistry.create();
+    private final ObjectRegistry<ActorSystemProviderListener> listeners =
+        ObjectRegistry.createConcurrent("ActorSystemProvider listeners");
 
     public ActorSystemProviderImpl(
             final ClassLoader classLoader, final Props quarantinedMonitorActorProps, final Config akkaConfig) {
@@ -50,7 +51,7 @@ public class ActorSystemProviderImpl implements ActorSystemProvider, AutoCloseab
     }
 
     @Override
-    public ListenerRegistration<ActorSystemProviderListener> registerActorSystemProviderListener(
+    public ObjectRegistration<ActorSystemProviderListener> registerActorSystemProviderListener(
             final ActorSystemProviderListener listener) {
         return listeners.register(listener);
     }

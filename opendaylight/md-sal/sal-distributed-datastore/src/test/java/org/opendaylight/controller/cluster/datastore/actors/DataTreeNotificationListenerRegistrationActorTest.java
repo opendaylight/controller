@@ -22,12 +22,12 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataTreeNotificationListenerRegistration;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataTreeNotificationListenerRegistrationReply;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.concepts.Registration;
 
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class DataTreeNotificationListenerRegistrationActorTest extends AbstractActorTest {
     @Mock
-    private ListenerRegistration<?> mockListenerReg;
+    private Registration mockListenerReg;
 
     @Mock
     private Runnable mockOnClose;
@@ -79,7 +79,7 @@ public class DataTreeNotificationListenerRegistrationActorTest extends AbstractA
     @Test
     public void testOnReceiveSetRegistrationAfterPriorClose() {
         DataTreeNotificationListenerRegistrationActor.killDelay = 1000;
-        final ListenerRegistration<?> mockListenerReg2 = mock(ListenerRegistration.class);
+        final Registration mockListenerReg2 = mock(Registration.class);
         final Runnable mockOnClose2 = mock(Runnable.class);
 
         final ActorRef subject = getSystem().actorOf(DataTreeNotificationListenerRegistrationActor.props(),
