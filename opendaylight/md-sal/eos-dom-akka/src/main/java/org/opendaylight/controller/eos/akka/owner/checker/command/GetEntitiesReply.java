@@ -19,7 +19,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.eos.akka.owner.supervisor.command.GetEntitiesBackendReply;
-import org.opendaylight.mdsal.binding.dom.codec.api.BindingInstanceIdentifierCodec;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.EntityName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.EntityType;
@@ -28,7 +27,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.NodeName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.entity.owners.norev.get.entities.output.EntitiesBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.mdsal.core.general.entity.rev150930.Entity;
-import org.opendaylight.yangtools.yang.binding.util.BindingMap;
+import org.opendaylight.yangtools.binding.data.codec.api.BindingInstanceIdentifierCodec;
+import org.opendaylight.yangtools.binding.util.BindingMap;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 
@@ -39,8 +39,8 @@ public final class GetEntitiesReply extends StateCheckerReply implements Seriali
     private final ImmutableMap<DOMEntity, String> owners;
 
     public GetEntitiesReply(final GetEntitiesBackendReply response) {
-        this.owners = response.getOwners();
-        this.candidates = response.getCandidates();
+        owners = response.getOwners();
+        candidates = response.getCandidates();
     }
 
     public GetEntitiesReply(final Map<DOMEntity, Set<String>> candidates, final Map<DOMEntity, String> owners) {
@@ -87,7 +87,7 @@ public final class GetEntitiesReply extends StateCheckerReply implements Seriali
     private static EntityName extractName(final DOMEntity entity, final BindingInstanceIdentifierCodec iidCodec) {
         final var id = entity.getIdentifier();
         if (id.isEmpty() || !id.getPathArguments().get(0).getNodeType().equals(Entity.QNAME)) {
-            return new EntityName(iidCodec.toBinding(id));
+            return new EntityName(iidCodec.toBinding(id).toIdentifier());
         }
 
         final PathArgument last = id.getLastPathArgument();
