@@ -8,14 +8,13 @@
 package org.opendaylight.controller.cluster;
 
 import akka.actor.ActorSystem;
-import java.util.EventListener;
 
 /**
  * Listener interface for notification of ActorSystem changes from an ActorSystemProvider.
  *
  * @author Thomas Pantelis
  */
-public interface ActorSystemProviderListener extends EventListener {
+public interface ActorSystemProviderListener {
     /**
      * Method called when the current actor system is about to be shutdown.
      */
