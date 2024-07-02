@@ -8,7 +8,6 @@
 package org.opendaylight.controller.clustering.it.provider.impl;
 
 import static java.util.Objects.requireNonNull;
-import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntryBuilder;
 
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
@@ -38,6 +37,7 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
@@ -131,7 +131,8 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
         LOG.info("Starting write transactions with input {}", input);
 
         final String id = input.getId();
-        final MapEntryNode entry = mapEntryBuilder(ID_INT, ID, id)
+        final MapEntryNode entry = ImmutableNodes.newMapEntryBuilder()
+                .withNodeIdentifier(NodeIdentifierWithPredicates.of(ID_INT, ID, id))
                 .withChild(ImmutableNodes.newSystemMapBuilder()
                     .withNodeIdentifier(new NodeIdentifier(ITEM))
                     .build())
@@ -230,7 +231,10 @@ public abstract class WriteTransactionsHandler extends AbstractTransactionHandle
         } else {
             LOG.debug("Inserting item: {}", i);
             insertTx.incrementAndGet();
-            tx.put(LogicalDatastoreType.CONFIGURATION, entryId, mapEntryBuilder(ITEM, NUMBER, i).build());
+            tx.put(LogicalDatastoreType.CONFIGURATION, entryId,
+                ImmutableNodes.newMapEntryBuilder()
+                .withNodeIdentifier(NodeIdentifierWithPredicates.of(ITEM, NUMBER, i))
+                .build());
             usedValues.add(i);
         }
 
