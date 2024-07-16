@@ -130,6 +130,7 @@ import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.l
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.control.rev170215.WriteTransactionsOutput;
 import org.opendaylight.yang.gen.v1.tag.opendaylight.org._2017.controller.yang.lowlevel.target.rev170215.IdSequence;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
+import org.opendaylight.yangtools.binding.PropertyIdentifier;
 import org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
@@ -330,6 +331,10 @@ public final class MdsalLowLevelTestProvider {
                     .withError(ErrorType.RPC, ErrorTag.INVALID_VALUE, "Context value is null")
                     .buildFuture();
             }
+            case PropertyIdentifier<?, ?> pid -> {
+                return RpcResultBuilder.<UnregisterBoundConstantOutput>failed().withError(
+                    ErrorType.RPC, ErrorTag.INVALID_VALUE, "Context value points to a non-container").buildFuture();
+            }
             case DataObjectIdentifier<?> doi -> context = doi;
         }
 
@@ -417,6 +422,10 @@ public final class MdsalLowLevelTestProvider {
             case null -> {
                 return RpcResultBuilder.<RegisterBoundConstantOutput>failed().withError(
                     ErrorType.RPC, ErrorTag.INVALID_VALUE, "Context value is null").buildFuture();
+            }
+            case PropertyIdentifier<?, ?> pid -> {
+                return RpcResultBuilder.<RegisterBoundConstantOutput>failed().withError(
+                    ErrorType.RPC, ErrorTag.INVALID_VALUE, "Context value points to a non-container").buildFuture();
             }
             case DataObjectIdentifier<?> bid -> context = bid;
         }

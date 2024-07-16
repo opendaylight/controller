@@ -65,7 +65,7 @@ public class DataTreeCohortIntegrationTest {
             FluentFutures.immediateFailedFluentFuture(FAILED_CAN_COMMIT);
 
     private static final DOMDataTreeIdentifier TEST_ID =
-            new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH);
+            DOMDataTreeIdentifier.of(LogicalDatastoreType.CONFIGURATION, TestModel.TEST_PATH);
 
     private static ActorSystem system;
 
@@ -171,7 +171,7 @@ public class DataTreeCohortIntegrationTest {
             "cars-1")) {
 
             final var cohortReg = dataStore.registerCommitCohort(
-                    new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, CarsModel.CAR_LIST_PATH
+                    DOMDataTreeIdentifier.of(LogicalDatastoreType.CONFIGURATION, CarsModel.CAR_LIST_PATH
                             .node(CarsModel.CAR_QNAME)), cohort);
             assertNotNull(cohortReg);
 
@@ -197,7 +197,7 @@ public class DataTreeCohortIntegrationTest {
             ArgumentCaptor<Collection> candidateCapture = ArgumentCaptor.forClass(Collection.class);
             verify(cohort).canCommit(any(Object.class), any(EffectiveModelContext.class), candidateCapture.capture());
             assertDataTreeCandidate((DOMDataTreeCandidate) candidateCapture.getValue().iterator().next(),
-                    new DOMDataTreeIdentifier(LogicalDatastoreType.CONFIGURATION, optimaPath), ModificationType.WRITE,
+                    DOMDataTreeIdentifier.of(LogicalDatastoreType.CONFIGURATION, optimaPath), ModificationType.WRITE,
                     optimaNode, null);
 
             // Write replace the cars container with 2 new car entries. The cohort should get invoked with 3
@@ -219,15 +219,15 @@ public class DataTreeCohortIntegrationTest {
             candidateCapture = ArgumentCaptor.forClass(Collection.class);
             verify(cohort).canCommit(any(Object.class), any(EffectiveModelContext.class), candidateCapture.capture());
 
-            assertDataTreeCandidate(findCandidate(candidateCapture, sportagePath), new DOMDataTreeIdentifier(
+            assertDataTreeCandidate(findCandidate(candidateCapture, sportagePath), DOMDataTreeIdentifier.of(
                     LogicalDatastoreType.CONFIGURATION, sportagePath), ModificationType.WRITE,
                     sportageNode, null);
 
-            assertDataTreeCandidate(findCandidate(candidateCapture, soulPath), new DOMDataTreeIdentifier(
+            assertDataTreeCandidate(findCandidate(candidateCapture, soulPath), DOMDataTreeIdentifier.of(
                     LogicalDatastoreType.CONFIGURATION, soulPath), ModificationType.WRITE,
                     soulNode, null);
 
-            assertDataTreeCandidate(findCandidate(candidateCapture, optimaPath), new DOMDataTreeIdentifier(
+            assertDataTreeCandidate(findCandidate(candidateCapture, optimaPath), DOMDataTreeIdentifier.of(
                     LogicalDatastoreType.CONFIGURATION, optimaPath), ModificationType.DELETE,
                     null, optimaNode);
 
@@ -244,11 +244,11 @@ public class DataTreeCohortIntegrationTest {
             candidateCapture = ArgumentCaptor.forClass(Collection.class);
             verify(cohort).canCommit(any(Object.class), any(EffectiveModelContext.class), candidateCapture.capture());
 
-            assertDataTreeCandidate(findCandidate(candidateCapture, sportagePath), new DOMDataTreeIdentifier(
+            assertDataTreeCandidate(findCandidate(candidateCapture, sportagePath), DOMDataTreeIdentifier.of(
                     LogicalDatastoreType.CONFIGURATION, sportagePath), ModificationType.DELETE,
                     null, sportageNode);
 
-            assertDataTreeCandidate(findCandidate(candidateCapture, soulPath), new DOMDataTreeIdentifier(
+            assertDataTreeCandidate(findCandidate(candidateCapture, soulPath), DOMDataTreeIdentifier.of(
                     LogicalDatastoreType.CONFIGURATION, soulPath), ModificationType.DELETE,
                     null, soulNode);
 
