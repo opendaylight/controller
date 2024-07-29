@@ -16,6 +16,23 @@
       "message": "We are using it in the code",
       "revId": "357b2eb7362270276643a8d80ec8099e829298c5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "66b657f3_cb47b172",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2024-07-29T11:36:17Z",
+      "side": 1,
+      "message": "The Scala 2.13/Scala 3 versions of Pekko no longer include scala-java8-compat as a dependency. This means if you were relying on scala-java8-compat along with Scala 2.12/Scala 3 as a transitive dependency that it’s recommended to migrate to using scala.jdk instead. If this is not possible/desired then you can add scala-java8-compat as dependency yourself.\n\nhttps://pekko.apache.org/docs/pekko/current/project/migration-guides.html",
+      "revId": "357b2eb7362270276643a8d80ec8099e829298c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ],
   "submitRequirementResults": [
