@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d3be6782_cd9b1941",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 19
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2024-07-29T08:58:07Z",
+      "side": 1,
+      "message": "Badly documented, no info abound changes in ports, etc.",
+      "revId": "06204aa433346497b5616b533f8fb0d796488c79",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
