@@ -75,7 +75,7 @@
             <dependency>
                 <groupId>org.apache.pekko</groupId>
                 <artifactId>pekko-testkit_2.13</artifactId>
-                <version>1.0.2</version>
+                <version>1.0.3</version>
                 <scope>test</scope>
                 <exclusions>
                     <exclusion>
@@ -87,7 +87,7 @@
             <dependency>
                 <groupId>org.apache.pekko</groupId>
                 <artifactId>pekko-actor-testkit-typed_2.13</artifactId>
-                <version>1.0.2</version>
+                <version>1.0.3</version>
                 <scope>test</scope>
                 <exclusions>
                     <exclusion>
@@ -103,7 +103,7 @@
             <dependency>
                 <groupId>org.apache.pekko</groupId>
                 <artifactId>pekko-persistence-tck_2.13</artifactId>
-                <version>1.0.2</version>
+                <version>1.0.3</version>
                 <scope>test</scope>
                 <exclusions>
                     <exclusion>
