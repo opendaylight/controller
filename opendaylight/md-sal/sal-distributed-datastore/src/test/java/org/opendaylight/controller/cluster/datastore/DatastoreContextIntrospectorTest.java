@@ -25,7 +25,7 @@ import java.util.Map;
 import org.junit.Test;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev231229.DataStoreProperties.ExportOnRecovery;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev231229.DataStorePropertiesContainer;
-import org.opendaylight.yangtools.binding.data.codec.impl.BindingCodecContext;
+import org.opendaylight.yangtools.binding.data.codec.impl.di.DefaultBindingDOMCodecFactory;
 import org.opendaylight.yangtools.binding.runtime.spi.BindingRuntimeHelpers;
 
 /**
@@ -35,7 +35,7 @@ import org.opendaylight.yangtools.binding.runtime.spi.BindingRuntimeHelpers;
  */
 public class DatastoreContextIntrospectorTest {
     static final AbstractDatastoreContextIntrospectorFactory INTROSPECTOR_FACTORY =
-            new DefaultDatastoreContextIntrospectorFactory(new BindingCodecContext(
+            new DefaultDatastoreContextIntrospectorFactory(new DefaultBindingDOMCodecFactory().createBindingDOMCodec(
                 BindingRuntimeHelpers.createRuntimeContext(DataStorePropertiesContainer.class)));
 
     @Test
