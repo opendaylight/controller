@@ -56,9 +56,8 @@ import org.opendaylight.controller.eos.akka.registry.listener.type.command.TypeL
 import org.opendaylight.mdsal.eos.common.api.EntityOwnershipStateChange;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
 import org.opendaylight.mdsal.eos.dom.api.DOMEntityOwnershipListener;
-import org.opendaylight.yangtools.binding.data.codec.impl.BindingCodecContext;
-import org.opendaylight.yangtools.binding.generator.impl.DefaultBindingRuntimeGenerator;
-import org.opendaylight.yangtools.binding.runtime.api.BindingRuntimeGenerator;
+import org.opendaylight.yangtools.binding.data.codec.impl.di.DefaultBindingDOMCodecFactory;
+import org.opendaylight.yangtools.binding.data.codec.spi.BindingDOMCodecServices;
 import org.opendaylight.yangtools.binding.runtime.spi.BindingRuntimeHelpers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,10 +84,8 @@ public abstract class AbstractNativeEosTest {
                     "akka://ClusterSystem@127.0.0.1:2552",
                     "akka://ClusterSystem@127.0.0.1:2553");
 
-    private static final BindingRuntimeGenerator BINDING_RUNTIME_GENERATOR = new DefaultBindingRuntimeGenerator();
-
-    protected static BindingCodecContext CODEC_CONTEXT
-            = new BindingCodecContext(BindingRuntimeHelpers.createRuntimeContext());
+    protected static final BindingDOMCodecServices CODEC_CONTEXT =
+        new DefaultBindingDOMCodecFactory().createBindingDOMCodec(BindingRuntimeHelpers.createRuntimeContext());
 
     private static final String REMOTE_PROTOCOL = "akka";
     private static final String PORT_PARAM = "akka.remote.artery.canonical.port";
