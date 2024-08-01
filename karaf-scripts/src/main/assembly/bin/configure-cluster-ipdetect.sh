@@ -79,8 +79,8 @@ function create_strings
     # Then merge the array using the join utility defined above.
     count=1
     for ip in ${CONTROLLERIPS[@]} ; do
-        ds[$count]=\\\"akka.tcp:\\/\\/opendaylight-cluster-data@${ip}:2550\\\"
-        rpc[$count]=\\\"akka.tcp:\\/\\/odl-cluster-rpc@${ip}:2551\\\"
+        ds[$count]=\\\"pekko.tcp:\\/\\/opendaylight-cluster-data@${ip}:2550\\\"
+        rpc[$count]=\\\"pekko.tcp:\\/\\/odl-cluster-rpc@${ip}:2551\\\"
         members[$count]=\\\"member-${count}\\\"
         count=$[count + 1]
     done
@@ -181,13 +181,13 @@ function modify_conf_files
 {
     BIN_DIR=`dirname $0`
     CUSTOM_SHARD_CONFIG_FILE=${BIN_DIR}'/custom_shard_config.txt'
-    echo "Configuring unique name in akka.conf"
+    echo "Configuring unique name in pekko.conf"
     sed -i -e "/roles[ ]*=/ { :loop1 /.*\]/ b done1; N; b loop1; :done1 s/roles.*\]/roles = [\"${CONTROLLER_ID}\"]/}" ${AKKACONF}
 
-    echo "Configuring hostname in akka.conf"
+    echo "Configuring hostname in pekko.conf"
     sed -i -e "s/hostname[ ]*=.*\"/hostname = \"${CONTROLLER_IP}\"/" ${AKKACONF}
 
-    echo "Configuring data and rpc seed nodes in akka.conf"
+    echo "Configuring data and rpc seed nodes in pekko.conf"
     sed -i -e "/seed-nodes[ ]*=/ { :loop2 /.*\]/ b done2; N; b loop2; :done2 s/seed-nodes.*opendaylight-cluster-data.*\]/seed-nodes = [${DATA_SEED_LIST}]/; s/seed-nodes.*odl-cluster-rpc.*\]/seed-nodes = [${RPC_SEED_LIST}]/}" ${AKKACONF}
 
     if [ -f ${CUSTOM_SHARD_CONFIG_FILE} ]; then
@@ -213,7 +213,7 @@ function verify_configuration_files
     test ${BIN_DIR} == '.' && BIN_DIR=${PWD}
     CONTROLLER_DIR=`dirname ${BIN_DIR}`
     CONF_DIR=${CONTROLLER_DIR}/configuration/initial
-    AKKACONF=${CONF_DIR}/akka.conf
+    AKKACONF=${CONF_DIR}/pekko.conf
     MODULESCONF=${CONF_DIR}/modules.conf
     MODULESHARDSCONF=${CONF_DIR}/module-shards.conf
 
@@ -224,7 +224,7 @@ function verify_configuration_files
         ORIG_CONF_DIR=${CONTROLLER_DIR}/system/org/opendaylight/controller/sal-clustering-config
         version=$(sed -n -e 's/.*<version>\(.*\)<\/version>/\1/p' ${ORIG_CONF_DIR}/maven-metadata-local.xml)
         ORIG_CONF_DIR=${ORIG_CONF_DIR}/${version}
-        ORIG_AKKA_CONF=sal-clustering-config-${version}-akkaconf.xml
+        ORIG_AKKA_CONF=sal-clustering-config-${version}-pekkoconf.xml
         ORIG_MODULES_CONF=sal-clustering-config-${version}-moduleconf.xml
         ORIG_MODULESHARDS_CONF=sal-clustering-config-${version}-moduleshardconf.xml
 
