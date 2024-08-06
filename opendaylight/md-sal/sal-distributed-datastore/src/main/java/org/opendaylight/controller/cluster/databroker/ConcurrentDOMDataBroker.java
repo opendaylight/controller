@@ -14,6 +14,7 @@ import static org.opendaylight.mdsal.dom.broker.TransactionCommitFailedException
 import static org.opendaylight.mdsal.dom.broker.TransactionCommitFailedExceptionMapper.PRE_COMMIT_MAPPER;
 
 import com.google.common.annotations.Beta;
+import com.google.common.base.MoreObjects;
 import com.google.common.util.concurrent.AbstractFuture;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
@@ -255,6 +256,11 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
                             Thread.currentThread().getName());
                     delegate.run();
                 }
+            }
+
+            @Override
+            public String toString() {
+                return MoreObjects.toStringHelper(this).add("delegate", delegate).toString();
             }
         }
     }
