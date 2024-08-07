@@ -33,6 +33,24 @@
       "message": "Still can see a lot of akka in search in class/var names, java docs, conf etc. If this patch should only aimed at imports then just ignore my comment and mark it as resolved. Otherwise pls check again.",
       "revId": "65d25b9b974f9941521cc25f5a177917abe3863e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1e2599e4_630c5040",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 28
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 8144
+      },
+      "writtenOn": "2024-08-07T06:55:53Z",
+      "side": 1,
+      "message": "Yes, our approach is to just replace `akka` by `pekko` with minimal impact on the code and our cosumers",
+      "parentUuid": "2ae901dc_a260e71e",
+      "revId": "65d25b9b974f9941521cc25f5a177917abe3863e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
