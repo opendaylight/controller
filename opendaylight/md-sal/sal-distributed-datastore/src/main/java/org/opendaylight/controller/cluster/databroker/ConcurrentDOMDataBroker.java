@@ -217,7 +217,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMDataBroker {
         /**
          * ThreadLocal used to detect if the task completion thread is running the future listener Runnables.
          */
-        private static final ThreadLocal<Boolean> ON_TASK_COMPLETION_THREAD_TL = new ThreadLocal<>();
+        private static final ThreadLocal<Empty> ON_TASK_COMPLETION_THREAD_TL = new ThreadLocal<>();
 
         private final Executor listenerExecutor;
 
@@ -240,7 +240,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMDataBroker {
         }
 
         boolean set() {
-            ON_TASK_COMPLETION_THREAD_TL.set(Boolean.TRUE);
+            ON_TASK_COMPLETION_THREAD_TL.set(Empty.value());
             try {
                 return super.set(CommitInfo.empty());
             } finally {
@@ -250,7 +250,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMDataBroker {
 
         @Override
         protected boolean setException(final Throwable throwable) {
-            ON_TASK_COMPLETION_THREAD_TL.set(Boolean.TRUE);
+            ON_TASK_COMPLETION_THREAD_TL.set(Empty.value());
             try {
                 return super.setException(throwable);
             } finally {
