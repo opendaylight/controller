@@ -214,10 +214,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMDataBroker {
      * unified with AsyncNotifyingListenableFutureTask.
      */
     private static class AsyncNotifyingSettableFuture extends AbstractFuture<CommitInfo> {
-        /**
-         * ThreadLocal used to detect if the task completion thread is running the future listener Runnables.
-         */
-        private static final ThreadLocal<Empty> ON_TASK_COMPLETION_THREAD_TL = new ThreadLocal<>();
+        private static final ScopedValue<Void> ON_TASK_COMPLETION_THREAD = ScopedValue.newInstance();
 
         private final Executor listenerExecutor;
 
@@ -240,22 +237,12 @@ public class ConcurrentDOMDataBroker extends AbstractDOMDataBroker {
         }
 
         boolean set() {
-            ON_TASK_COMPLETION_THREAD_TL.set(Empty.value());
-            try {
-                return super.set(CommitInfo.empty());
-            } finally {
-                ON_TASK_COMPLETION_THREAD_TL.set(null);
-            }
+            return ScopedValue.getWhere(ON_TASK_COMPLETION_THREAD, null, () -> set(CommitInfo.empty()));
         }
 
         @Override
         protected boolean setException(final Throwable throwable) {
-            ON_TASK_COMPLETION_THREAD_TL.set(Empty.value());
-            try {
-                return super.setException(throwable);
-            } finally {
-                ON_TASK_COMPLETION_THREAD_TL.set(null);
-            }
+            return ScopedValue.getWhere(ON_TASK_COMPLETION_THREAD, null, () -> super.setException(throwable));
         }
 
         private static final class DelegatingRunnable implements Runnable {
@@ -269,7 +256,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMDataBroker {
 
             @Override
             public void run() {
-                if (ON_TASK_COMPLETION_THREAD_TL.get() != null) {
+                if (ON_TASK_COMPLETION_THREAD.isBound()) {
                     // We're running on the task completion thread so off-load to the executor.
                     LOG.trace("Submitting ListenenableFuture Runnable from thread {} to executor {}",
                             Thread.currentThread().getName(), executor);
