@@ -96,6 +96,11 @@ public class ConcurrentDOMDataBroker extends AbstractDOMDataBroker {
     }
 
     @Override
+    public final String toString() {
+        return MoreObjects.toStringHelper(this).toString();
+    }
+
+    @Override
     protected FluentFuture<? extends CommitInfo> commit(final DOMDataTreeWriteTransaction transaction,
             final DOMStoreThreePhaseCommitCohort cohort) {
 
@@ -282,10 +287,5 @@ public class ConcurrentDOMDataBroker extends AbstractDOMDataBroker {
                 return MoreObjects.toStringHelper(this).add("delegate", delegate).toString();
             }
         }
-    }
-
-    @Override
-    public String toString() {
-        return "Clustered ConcurrentDOMDataBroker";
     }
 }
