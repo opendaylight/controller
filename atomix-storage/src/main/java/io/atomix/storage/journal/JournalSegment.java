@@ -101,7 +101,11 @@ final class JournalSegment {
 
         try (var tmpAccess = file.newAccess(storageLevel, maxEntrySize)) {
             final var fileReader = tmpAccess.newFileReader();
-            state = new Inactive(indexEntries(fileReader, this, maxEntrySize, journalIndex, Long.MAX_VALUE, null));
+            try {
+                state = new Inactive(indexEntries(fileReader, this, maxEntrySize, journalIndex, Long.MAX_VALUE, null));
+            } finally {
+                fileReader.release();
+            }
         } catch (IOException e) {
             throw new StorageException(e);
         }
