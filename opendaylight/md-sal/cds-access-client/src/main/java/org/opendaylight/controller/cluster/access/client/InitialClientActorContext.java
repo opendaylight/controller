@@ -9,14 +9,11 @@ package org.opendaylight.controller.cluster.access.client;
 
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorSystem;
 import akka.persistence.SnapshotSelectionCriteria;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 
 /**
  * The initial context for an actor.
- *
- * @author Robert Varga
  */
 final class InitialClientActorContext extends AbstractClientActorContext {
     private final AbstractClientActor actor;
@@ -26,8 +23,8 @@ final class InitialClientActorContext extends AbstractClientActorContext {
         this.actor = requireNonNull(actor);
     }
 
-    void saveSnapshot(final ClientIdentifier snapshot) {
-        actor.saveSnapshot(snapshot);
+    void saveSnapshot(final ClientIdentifier clientId) {
+        actor.saveSnapshot(new PersistenceTombstone(clientId));
     }
 
     void deleteSnapshots(final SnapshotSelectionCriteria criteria) {
@@ -35,11 +32,8 @@ final class InitialClientActorContext extends AbstractClientActorContext {
     }
 
     ClientActorBehavior<?> createBehavior(final ClientIdentifier clientId) {
-        final ActorSystem system = actor.getContext().system();
-        final ClientActorContext context = new ClientActorContext(self(), persistenceId(), system,
-            clientId, actor.getClientActorConfig());
-
-        return actor.initialBehavior(context);
+        return actor.initialBehavior(new ClientActorContext(self(), persistenceId(), actor.getContext().system(),
+            clientId, actor.getClientActorConfig()));
     }
 
     void stash() {
