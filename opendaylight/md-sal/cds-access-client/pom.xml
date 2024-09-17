@@ -76,7 +76,7 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
-            <artifactId>yang-data-impl</artifactId>
+            <artifactId>yang-data-spi</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
