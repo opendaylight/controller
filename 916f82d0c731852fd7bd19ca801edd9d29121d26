@@ -95,6 +95,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "51532ebd_3866a8c4",
+        "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/ClientStateUtils.java",
+        "patchSetId": 19
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2024-09-17T16:28:07Z",
+      "side": 1,
+      "message": "we can actually solve this by injecting the root directory from tests as well",
+      "parentUuid": "fd10fb73_1bd3732f",
+      "range": {
+        "startLine": 134,
+        "startChar": 46,
+        "endLine": 134,
+        "endChar": 88
+      },
+      "revId": "916f82d0c731852fd7bd19ca801edd9d29121d26",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "0f5ac831_83c7f509",
         "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/ClientStateUtils.java",
         "patchSetId": 19
