@@ -88,22 +88,21 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
         super(context);
         this.resolver = requireNonNull(resolver);
 
-        final ClientActorConfig config = context.config();
-        responseMessageAssembler = MessageAssembler.builder().logContext(persistenceId())
-                .fileBackedStreamFactory(new FileBackedOutputStreamFactory(config.getFileBackedStreamingThreshold(),
+        final var config = context.config();
+        responseMessageAssembler = MessageAssembler.builder()
+            .logContext(persistenceId())
+            .fileBackedStreamFactory(new FileBackedOutputStreamFactory(config.getFileBackedStreamingThreshold(),
                         config.getTempFileDirectory()))
-                .assembledMessageCallback((message, sender) -> context.self().tell(message, sender)).build();
+            .assembledMessageCallback((message, sender) -> context.self().tell(message, sender))
+            .build();
 
-        staleBackendInfoReg = resolver.notifyWhenBackendInfoIsStale(shard -> {
-            context().executeInActor(behavior -> {
-                LOG.debug("BackendInfo for shard {} is now stale", shard);
-                final AbstractClientConnection<T> conn = connections.get(shard);
-                if (conn instanceof ConnectedClientConnection) {
-                    conn.reconnect(this, new BackendStaleException(shard));
-                }
-                return behavior;
-            });
-        });
+        staleBackendInfoReg = resolver.notifyWhenBackendInfoIsStale(shard -> context().executeInActor(behavior -> {
+            LOG.debug("BackendInfo for shard {} is now stale", shard);
+            if (connections.get(shard) instanceof ConnectedClientConnection<T> conn) {
+                conn.reconnect(this, new BackendStaleException(shard));
+            }
+            return behavior;
+        }));
     }
 
     @Override
