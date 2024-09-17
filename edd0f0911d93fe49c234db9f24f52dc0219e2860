@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "72addfc7_29aa85b2",
+        "filename": "opendaylight/md-sal/cds-access-client/src/main/java/org/opendaylight/controller/cluster/access/client/ClientActorBehavior.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2024-09-17T08:10:11Z",
+      "side": 1,
+      "message": "this cannot be null, can it?",
+      "range": {
+        "startLine": 117,
+        "startChar": 8,
+        "endLine": 117,
+        "endChar": 47
+      },
+      "revId": "edd0f0911d93fe49c234db9f24f52dc0219e2860",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
