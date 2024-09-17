@@ -46,19 +46,18 @@ final class RecoveringClientActorBehavior extends AbstractClientActorBehavior<In
 
     @Override
     AbstractClientActorBehavior<?> onReceiveRecover(final Object recover) {
-        if (recover instanceof RecoveryCompleted msg) {
-            return onRecoveryCompleted(msg);
-        } else if (recover instanceof SnapshotOffer snapshotOffer) {
-            onSnapshotOffer(snapshotOffer);
-        } else {
-            LOG.warn("{}: ignoring recovery message {}", persistenceId(), recover);
-        }
-        return this;
-    }
-
-    private void onSnapshotOffer(final SnapshotOffer snapshotOffer) {
-        lastId = (ClientIdentifier) snapshotOffer.snapshot();
-        LOG.debug("{}: recovered identifier {}", persistenceId(), lastId);
+        return switch (recover) {
+            case RecoveryCompleted msg -> onRecoveryCompleted(msg);
+            case SnapshotOffer snapshotOffer -> {
+                lastId = (ClientIdentifier) snapshotOffer.snapshot();
+                LOG.debug("{}: recovered identifier {}", persistenceId(), lastId);
+                yield this;
+            }
+            default -> {
+                LOG.warn("{}: ignoring recovery message {}", persistenceId(), recover);
+                yield this;
+            }
+        };
     }
 
     private SavingClientActorBehavior onRecoveryCompleted(final RecoveryCompleted msg) {
