@@ -168,13 +168,11 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
     }
 
     private static long extractCookie(final Identifier id) {
-        if (id instanceof TransactionIdentifier transactionId) {
-            return transactionId.getHistoryId().getCookie();
-        } else if (id instanceof LocalHistoryIdentifier historyId) {
-            return historyId.getCookie();
-        } else {
-            throw new IllegalArgumentException("Unhandled identifier " + id);
-        }
+        return switch (id) {
+            case TransactionIdentifier transactionId -> transactionId.getHistoryId().getCookie();
+            case LocalHistoryIdentifier historyId -> historyId.getCookie();
+            default -> throw new IllegalArgumentException("Unhandled identifier " + id);
+        };
     }
 
     private void onResponse(final ResponseEnvelope<?> response) {
