@@ -46,6 +46,30 @@
       },
       "revId": "f76d785700a36cf8548fde5015a46908007ff93e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "93c65fa2_3e134f94",
+        "filename": "opendaylight/md-sal/cds-access-client/src/test/java/org/opendaylight/controller/cluster/access/client/ActorBehaviorTest.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2024-09-17T09:53:44Z",
+      "side": 0,
+      "message": "right, but that really is a side-effect of squashing persistence-related behaviours -- i.e. we no longer have recovery and update handled by distinct behaviours.\n\nthat distinction has to be restored again",
+      "parentUuid": "bd8a3231_bd02c4a1",
+      "range": {
+        "startLine": 134,
+        "startChar": 9,
+        "endLine": 134,
+        "endChar": 49
+      },
+      "revId": "f76d785700a36cf8548fde5015a46908007ff93e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
