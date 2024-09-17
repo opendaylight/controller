@@ -16,8 +16,6 @@ import org.slf4j.LoggerFactory;
 /**
  * An {@link AbstractClientConnection} which is being reconnected after having timed out.
  *
- * @author Robert Varga
- *
  * @param <T> {@link BackendInfo} type
  */
 public final class ReconnectingClientConnection<T extends BackendInfo> extends AbstractReceivingClientConnection<T> {

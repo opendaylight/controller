@@ -39,10 +39,9 @@ import scala.concurrent.duration.FiniteDuration;
  * Base class for a connection to the backend. Responsible to queueing and dispatch of requests toward the backend.
  * Can be in three conceptual states: Connecting, Connected and Reconnecting, which are represented by public final
  * classes exposed from this package. This class NOT thread-safe, not are its subclasses expected to be thread-safe.
- *
- * @author Robert Varga
  */
-public abstract class AbstractClientConnection<T extends BackendInfo> {
+public abstract sealed class AbstractClientConnection<T extends BackendInfo>
+        permits AbstractReceivingClientConnection, ConnectingClientConnection {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractClientConnection.class);
 
     /*

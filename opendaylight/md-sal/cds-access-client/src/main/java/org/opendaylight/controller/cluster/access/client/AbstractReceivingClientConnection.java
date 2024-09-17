@@ -17,11 +17,10 @@ import org.slf4j.LoggerFactory;
  * Implementation-internal intermediate subclass between {@link AbstractClientConnection} and two-out of three of its
  * subclasses. It allows us to share some code.
  *
- * @author Robert Varga
- *
  * @param <T> Concrete {@link BackendInfo} type
  */
-abstract class AbstractReceivingClientConnection<T extends BackendInfo> extends AbstractClientConnection<T> {
+abstract sealed class AbstractReceivingClientConnection<T extends BackendInfo> extends AbstractClientConnection<T>
+        permits ConnectedClientConnection, ReconnectingClientConnection {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractReceivingClientConnection.class);
 
     /**
@@ -42,13 +41,13 @@ abstract class AbstractReceivingClientConnection<T extends BackendInfo> extends 
     // To be called by ConnectedClientConnection only.
     AbstractReceivingClientConnection(final AbstractClientConnection<T> oldConnection, final T newBackend) {
         super(oldConnection, newBackend, targetQueueSize(newBackend));
-        this.backend = newBackend;
+        backend = newBackend;
     }
 
     // To be called by ReconnectingClientConnection only.
     AbstractReceivingClientConnection(final AbstractReceivingClientConnection<T> oldConnection) {
         super(oldConnection);
-        this.backend = oldConnection.backend;
+        backend = oldConnection.backend;
     }
 
     private static int targetQueueSize(final BackendInfo backend) {
