@@ -10,6 +10,8 @@ package org.opendaylight.controller.cluster.access.client;
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.persistence.AbstractPersistentActor;
+import com.google.common.annotations.VisibleForTesting;
+import java.nio.file.Path;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,11 +21,17 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractClientActor extends AbstractPersistentActor {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractClientActor.class);
+    private static final Path STATE_PATH = Path.of("state");
 
     private AbstractClientActorBehavior<?> currentBehavior;
 
     protected AbstractClientActor(final FrontendIdentifier frontendId) {
-        currentBehavior = new RecoveringClientActorBehavior(this, frontendId);
+        this(STATE_PATH, frontendId);
+    }
+
+    @VisibleForTesting
+    protected AbstractClientActor(final Path statePath, final FrontendIdentifier frontendId) {
+        currentBehavior = new RecoveringClientActorBehavior(statePath, this, frontendId);
     }
 
     @Override
