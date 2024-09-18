@@ -31,7 +31,9 @@ import scala.concurrent.ExecutionContext;
  * same as {@link System#nanoTime()}, but it is not tied to that particular clock. Actor clock is exposed as
  * a {@link Ticker}, which can be obtained via {@link #ticker()}. This class is thread-safe.
  */
-public class ClientActorContext extends AbstractClientActorContext implements Identifiable<ClientIdentifier> {
+public class ClientActorContext implements Identifiable<ClientIdentifier> {
+    private final @NonNull String persistenceId;
+    private final @NonNull ActorRef self;
     private final ExecutionContext executionContext;
     private final ClientIdentifier identifier;
     private final Scheduler scheduler;
@@ -42,7 +44,8 @@ public class ClientActorContext extends AbstractClientActorContext implements Id
     // Hidden to avoid subclassing
     ClientActorContext(final ActorRef self, final String persistenceId, final ActorSystem system,
             final ClientIdentifier identifier, final ClientActorConfig config) {
-        super(self, persistenceId);
+        this.persistenceId = requireNonNull(persistenceId);
+        this.self = requireNonNull(self);
         this.identifier = requireNonNull(identifier);
         scheduler = requireNonNull(system).scheduler();
         executionContext = system.dispatcher();
@@ -53,6 +56,15 @@ public class ClientActorContext extends AbstractClientActorContext implements Id
             .logContext(persistenceId).expireStateAfterInactivity(config.getRequestTimeout(), TimeUnit.NANOSECONDS)
                 .fileBackedStreamFactory(new FileBackedOutputStreamFactory(config.getFileBackedStreamingThreshold(),
                     config.getTempFileDirectory())).build();
+    }
+
+    // TODO: rename this to logContext()
+    final @NonNull String persistenceId() {
+        return persistenceId;
+    }
+
+    public final @NonNull ActorRef self() {
+        return self;
     }
 
     @Override
