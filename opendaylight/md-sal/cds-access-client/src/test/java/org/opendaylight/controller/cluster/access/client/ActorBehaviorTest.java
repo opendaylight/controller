@@ -39,10 +39,6 @@ import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.opendaylight.controller.cluster.access.client.MockedSnapshotStore.DeleteByCriteriaRequest;
-import org.opendaylight.controller.cluster.access.client.MockedSnapshotStore.DeleteByMetadataRequest;
-import org.opendaylight.controller.cluster.access.client.MockedSnapshotStore.LoadRequest;
-import org.opendaylight.controller.cluster.access.client.MockedSnapshotStore.SaveRequest;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
@@ -64,7 +60,7 @@ class ActorBehaviorTest {
     @Mock(answer = Answers.CALLS_REAL_METHODS)
     private ClientActorBehavior<BackendInfo> initialBehavior;
     @Mock
-    private AbstractClientActorContext ctx;
+    private ClientActorContext ctx;
 
     private ActorSystem system;
     private TestProbe probe;
@@ -74,10 +70,10 @@ class ActorBehaviorTest {
     void beforeEach() throws Exception {
         //persistenceId() in AbstractClientActorBehavior is final and can't be mocked
         //use reflection to work around this
-        final var context = AbstractClientActorBehavior.class.getDeclaredField("context");
+        final var context = ClientActorBehavior.class.getDeclaredField("context");
         context.setAccessible(true);
         context.set(initialBehavior, ctx);
-        final var persistenceId = AbstractClientActorContext.class.getDeclaredField("persistenceId");
+        final var persistenceId = ClientActorContext.class.getDeclaredField("persistenceId");
         persistenceId.setAccessible(true);
         persistenceId.set(ctx, MEMBER_1_FRONTEND_TYPE_1);
 
