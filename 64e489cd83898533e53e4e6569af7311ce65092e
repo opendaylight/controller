@@ -16,6 +16,24 @@
       "message": "needs a .gitignore updated for sal-cluster-admin-impl and sal-distributed-datastore",
       "revId": "64e489cd83898533e53e4e6569af7311ce65092e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "0e685941_7e7f014a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 24
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2024-09-18T12:38:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bb0984fd_ef7f1fff",
+      "revId": "64e489cd83898533e53e4e6569af7311ce65092e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
