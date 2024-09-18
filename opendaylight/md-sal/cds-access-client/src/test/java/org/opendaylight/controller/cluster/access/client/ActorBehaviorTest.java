@@ -16,12 +16,10 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
 import com.typesafe.config.ConfigFactory;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -37,13 +35,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.opendaylight.controller.cluster.access.client.MockedSnapshotStore.DeleteByCriteriaRequest;
-import org.opendaylight.controller.cluster.access.client.MockedSnapshotStore.DeleteByMetadataRequest;
-import org.opendaylight.controller.cluster.access.client.MockedSnapshotStore.LoadRequest;
-import org.opendaylight.controller.cluster.access.client.MockedSnapshotStore.SaveRequest;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
@@ -58,14 +53,15 @@ class ActorBehaviorTest {
     private final FrontendIdentifier id =
         FrontendIdentifier.create(MemberName.forName("member-1"), FrontendType.forName("type-1"));
 
+    @TempDir
+    private Path statePath;
     @Mock
     private InternalCommand<BackendInfo> cmd;
     @Mock(answer = Answers.CALLS_REAL_METHODS)
     private ClientActorBehavior<BackendInfo> initialBehavior;
     @Mock
-    private AbstractClientActorContext ctx;
+    private ClientActorContext ctx;
 
-    private Path statePath;
     private ActorSystem system;
     private TestProbe probe;
     private ActorRef mockedActor;
@@ -74,10 +70,10 @@ class ActorBehaviorTest {
     void beforeEach() throws Exception {
         //persistenceId() in AbstractClientActorBehavior is final and can't be mocked
         //use reflection to work around this
-        final var context = AbstractClientActorBehavior.class.getDeclaredField("context");
+        final var context = ClientActorBehavior.class.getDeclaredField("context");
         context.setAccessible(true);
         context.set(initialBehavior, ctx);
-        final var persistenceId = AbstractClientActorContext.class.getDeclaredField("persistenceId");
+        final var persistenceId = ClientActorContext.class.getDeclaredField("persistenceId");
         persistenceId.setAccessible(true);
         persistenceId.set(ctx, MEMBER_1_FRONTEND_TYPE_1);
 
@@ -87,18 +83,12 @@ class ActorBehaviorTest {
         probe = new TestProbe(system);
         storeRef.tell(probe.ref(), ActorRef.noSender());
 
-        statePath = Files.createTempDirectory("test");
-
         mockedActor = system.actorOf(MockedActor.props(statePath, id, initialBehavior));
     }
 
     @AfterEach
     void afterEach() throws Exception {
         TestKit.shutdownActorSystem(system);
-
-        try (var paths = Files.walk(statePath)) {
-            paths.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
-        }
     }
 
     @Test
