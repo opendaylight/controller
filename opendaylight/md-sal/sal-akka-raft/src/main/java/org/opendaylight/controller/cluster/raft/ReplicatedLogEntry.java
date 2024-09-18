@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft;
 
 import org.opendaylight.controller.cluster.raft.messages.Payload;
@@ -20,28 +19,6 @@ public interface ReplicatedLogEntry extends RaftEntryMeta {
      * @return the payload/data
      */
     Payload getData();
-
-    /**
-     * Returns the term of the entry.
-     *
-     * @return the term
-     * @deprecated Use {@link #term()} istead.
-     */
-    @Deprecated(since = "9.0.3", forRemoval = true)
-    default long getTerm() {
-        return term();
-    }
-
-    /**
-     * Returns the index of the entry.
-     *
-     * @return the index
-     * @deprecated Use {@link #index()} istead.
-     */
-    @Deprecated(since = "9.0.3", forRemoval = true)
-    default long getIndex() {
-        return index();
-    }
 
     /**
      * Returns the size of the entry in bytes. An approximate number may be good enough.
