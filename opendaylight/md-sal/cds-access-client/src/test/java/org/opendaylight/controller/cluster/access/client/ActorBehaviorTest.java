@@ -63,7 +63,7 @@ class ActorBehaviorTest {
     @Mock(answer = Answers.CALLS_REAL_METHODS)
     private ClientActorBehavior<BackendInfo> initialBehavior;
     @Mock
-    private AbstractClientActorContext ctx;
+    private ClientActorContext ctx;
 
     private Path statePath;
     private ActorSystem system;
@@ -74,10 +74,10 @@ class ActorBehaviorTest {
     void beforeEach() throws Exception {
         //persistenceId() in AbstractClientActorBehavior is final and can't be mocked
         //use reflection to work around this
-        final var context = AbstractClientActorBehavior.class.getDeclaredField("context");
+        final var context = ClientActorBehavior.class.getDeclaredField("context");
         context.setAccessible(true);
         context.set(initialBehavior, ctx);
-        final var persistenceId = AbstractClientActorContext.class.getDeclaredField("persistenceId");
+        final var persistenceId = ClientActorContext.class.getDeclaredField("persistenceId");
         persistenceId.setAccessible(true);
         persistenceId.set(ctx, MEMBER_1_FRONTEND_TYPE_1);
 
