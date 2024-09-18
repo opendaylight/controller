@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.dummy.datastore;
 
 import akka.actor.Props;
@@ -32,31 +31,27 @@ public class DummyShard extends UntypedAbstractActor {
     private long lastMessageSize = 0;
     private Stopwatch appendEntriesWatch;
 
-    public DummyShard(Configuration configuration, String followerId) {
+    public DummyShard(final Configuration configuration, final String followerId) {
         this.configuration = configuration;
         this.followerId = followerId;
         LOG.info("Creating : {}", followerId);
     }
 
     @Override
-    public void onReceive(Object message) throws Exception {
-        if (message instanceof RequestVote) {
-            RequestVote req = (RequestVote) message;
-            sender().tell(new RequestVoteReply(req.getTerm(), true), self());
-        } else if (message instanceof AppendEntries) {
-            handleAppendEntries((AppendEntries) message);
-        } else if (message instanceof InstallSnapshot) {
-            handleInstallSnapshot((InstallSnapshot) message);
-        } else {
-            LOG.error("Unknown message : {}", message.getClass());
+    public void onReceive(final Object message) throws Exception {
+        switch (message) {
+            case RequestVote msg -> sender().tell(new RequestVoteReply(msg.getTerm(), true), self());
+            case AppendEntries msg -> handleAppendEntries(msg);
+            case InstallSnapshot msg -> handleInstallSnapshot(msg);
+            default -> LOG.error("Unknown message : {}", message.getClass());
         }
     }
 
-    private void handleInstallSnapshot(InstallSnapshot req) {
+    private void handleInstallSnapshot(final InstallSnapshot req) {
         sender().tell(new InstallSnapshotReply(req.getTerm(), followerId, req.getChunkIndex(), true), self());
     }
 
-    protected void handleAppendEntries(AppendEntries req) throws InterruptedException {
+    protected void handleAppendEntries(final AppendEntries req) throws InterruptedException {
         LOG.info("{} - Received AppendEntries message : leader term = {}, index = {}, prevLogIndex = {}, size = {}",
                 followerId, req.getTerm(),req.getLeaderCommit(), req.getPrevLogIndex(), req.getEntries().size());
 
@@ -83,7 +78,7 @@ public class DummyShard extends UntypedAbstractActor {
         long lastIndex = req.getLeaderCommit();
         if (req.getEntries().size() > 0) {
             for (ReplicatedLogEntry entry : req.getEntries()) {
-                lastIndex = entry.getIndex();
+                lastIndex = entry.index();
             }
         }
 
@@ -108,7 +103,7 @@ public class DummyShard extends UntypedAbstractActor {
         }
     }
 
-    public static Props props(Configuration configuration, final String followerId) {
+    public static Props props(final Configuration configuration, final String followerId) {
         return Props.create(DummyShard.class, configuration, followerId);
     }
 }
