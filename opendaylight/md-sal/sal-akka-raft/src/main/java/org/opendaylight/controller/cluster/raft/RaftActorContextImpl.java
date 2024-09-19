@@ -52,7 +52,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     private final String id;
 
-    private final ElectionTerm termInformation;
+    private @NonNull ElectionTerm termInformation;
 
     private long commitIndex;
 
@@ -177,6 +177,12 @@ public class RaftActorContextImpl implements RaftActorContext {
     @Override
     public ElectionTerm getTermInformation() {
         return termInformation;
+    }
+
+    @Override
+    public void setTermInformation(final ElectionTerm termInformation) {
+        this.termInformation = requireNonNull(termInformation);
+        log.debug("{}: Set currentTerm={}, votedFor={}", id, termInformation.currentTerm(), termInformation.votedFor());
     }
 
     @Override
