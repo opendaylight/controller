@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.raft;
 import akka.persistence.RecoveryCompleted;
 import akka.persistence.SnapshotOffer;
 import com.google.common.base.Stopwatch;
-import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.PersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
@@ -60,7 +60,7 @@ class RaftActorRecoverySupport {
 
         boolean recoveryComplete = false;
         if (message instanceof UpdateElectionTerm updateElectionTerm) {
-            context.getTermInformation().update(updateElectionTerm.getCurrentTerm(), updateElectionTerm.getVotedFor());
+            context.setTermInformation(updateElectionTerm.getCurrentTerm(), updateElectionTerm.getVotedFor());
         } else if (message instanceof SnapshotOffer snapshotOffer) {
             onRecoveredSnapshot(snapshotOffer);
         } else if (message instanceof ReplicatedLogEntry replicatedLogEntry) {
@@ -127,8 +127,7 @@ class RaftActorRecoverySupport {
             // We may have just transitioned to disabled and have a snapshot containing state data and/or log
             // entries - we don't want to preserve these, only the server config and election term info.
 
-            snapshot = Snapshot.create(
-                    EmptyState.INSTANCE, Collections.emptyList(), -1, -1, -1, -1,
+            snapshot = Snapshot.create(EmptyState.INSTANCE, List.of(), -1, -1, -1, -1,
                     snapshot.getElectionTerm(), snapshot.getElectionVotedFor(), snapshot.getServerConfiguration());
         }
 
@@ -139,7 +138,7 @@ class RaftActorRecoverySupport {
         context.setReplicatedLog(ReplicatedLogImpl.newInstance(snapshot, context));
         context.setLastApplied(snapshot.getLastAppliedIndex());
         context.setCommitIndex(snapshot.getLastAppliedIndex());
-        context.getTermInformation().update(snapshot.getElectionTerm(), snapshot.getElectionVotedFor());
+        context.setTermInformation(snapshot.getElectionTerm(), snapshot.getElectionVotedFor());
 
         final Stopwatch timer = Stopwatch.createStarted();
 
@@ -309,11 +308,8 @@ class RaftActorRecoverySupport {
             // messages. Either way, we persist a snapshot and delete all the messages from the akka journal
             // to clean out unwanted messages.
 
-            Snapshot snapshot = Snapshot.create(
-                    EmptyState.INSTANCE, Collections.<ReplicatedLogEntry>emptyList(),
-                    -1, -1, -1, -1,
-                    context.getTermInformation().getCurrentTerm(), context.getTermInformation().getVotedFor(),
-                    context.getPeerServerInfo(true));
+            Snapshot snapshot = Snapshot.create(EmptyState.INSTANCE, List.of(), -1, -1, -1, -1,
+                    context.getTermInformation(), context.getPeerServerInfo(true));
 
             persistentProvider.saveSnapshot(snapshot);
 

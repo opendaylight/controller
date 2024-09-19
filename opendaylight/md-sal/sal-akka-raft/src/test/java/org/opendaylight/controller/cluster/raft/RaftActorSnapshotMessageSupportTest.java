@@ -67,9 +67,8 @@ public class RaftActorSnapshotMessageSupportTest {
 
     @Before
     public void setup() {
-        context = new RaftActorContextImpl(mockRaftActorRef, null, "test",
-                new ElectionTermImpl(mockPersistence, "test", LOG), -1, -1, Map.of(),
-                configParams, mockPersistence, applyState -> { }, LOG,  MoreExecutors.directExecutor()) {
+        context = new RaftActorContextImpl(mockRaftActorRef, null, "test", -1, -1, Map.of(), configParams,
+                mockPersistence, applyState -> { }, LOG, MoreExecutors.directExecutor()) {
             @Override
             public SnapshotManager getSnapshotManager() {
                 return mockSnapshotManager;

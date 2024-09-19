@@ -120,7 +120,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         actorContext.setPayloadVersion(payloadVersion);
 
         long term = 1;
-        actorContext.getTermInformation().update(term, "");
+        actorContext.setTermInformation(term, "");
 
         leader = new Leader(actorContext);
         actorContext.setCurrentBehavior(leader);
@@ -179,7 +179,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         MockRaftActorContext actorContext = createActorContextWithFollower();
 
         long term = 1;
-        actorContext.getTermInformation().update(term, "");
+        actorContext.setTermInformation(term, "");
 
         leader = new Leader(actorContext);
 
@@ -220,9 +220,9 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         // The raft context is initialized with a couple log entries. However the commitIndex
         // is -1, simulating that the leader previously didn't get consensus and thus the log entries weren't
         // committed and applied. Now it regains leadership with a higher term (2).
-        long prevTerm = actorContext.getTermInformation().getCurrentTerm();
+        long prevTerm = actorContext.getTermInformation().currentTerm();
         long newTerm = prevTerm + 1;
-        actorContext.getTermInformation().update(newTerm, "");
+        actorContext.setTermInformation(newTerm, "");
 
         leader = new Leader(actorContext);
         actorContext.setCurrentBehavior(leader);
@@ -272,7 +272,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         actorContext.setRaftPolicy(createRaftPolicy(true, true));
 
         long term = 1;
-        actorContext.getTermInformation().update(term, "");
+        actorContext.setTermInformation(term, "");
 
         leader = new Leader(actorContext);
 
@@ -315,7 +315,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         });
 
         long term = 1;
-        actorContext.getTermInformation().update(term, "");
+        actorContext.setTermInformation(term, "");
 
         leader = new Leader(actorContext);
 
@@ -355,7 +355,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         });
 
         long term = 1;
-        actorContext.getTermInformation().update(term, "");
+        actorContext.setTermInformation(term, "");
 
         leader = new Leader(actorContext);
 
@@ -426,7 +426,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         });
 
         long term = 1;
-        actorContext.getTermInformation().update(term, "");
+        actorContext.setTermInformation(term, "");
 
         leader = new Leader(actorContext);
 
@@ -472,7 +472,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         });
 
         long term = 1;
-        actorContext.getTermInformation().update(term, "");
+        actorContext.setTermInformation(term, "");
 
         leader = new Leader(actorContext);
 
@@ -509,7 +509,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         });
 
         long term = 1;
-        actorContext.getTermInformation().update(term, "");
+        actorContext.setTermInformation(term, "");
 
         leader = new Leader(actorContext);
 
@@ -843,7 +843,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         // set the snapshot variables in replicatedlog
         actorContext.getReplicatedLog().setSnapshotIndex(snapshotIndex);
         actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
-        actorContext.getTermInformation().update(currentTerm, leaderActor.path().toString());
+        actorContext.setTermInformation(currentTerm, leaderActor.path().toString());
         actorContext.setCommitIndex(lastAppliedIndex);
         actorContext.setLastApplied(lastAppliedIndex);
 
@@ -895,7 +895,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         // set the snapshot variables in replicatedlog
         actorContext.getReplicatedLog().setSnapshotIndex(snapshotIndex);
         actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
-        actorContext.getTermInformation().update(currentTerm, leaderActor.path().toString());
+        actorContext.setTermInformation(currentTerm, leaderActor.path().toString());
         actorContext.setCommitIndex(lastAppliedIndex);
         actorContext.setLastApplied(lastAppliedIndex);
 
@@ -959,7 +959,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         actorContext.getReplicatedLog().setSnapshotIndex(snapshotIndex);
         actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
-        actorContext.getTermInformation().update(currentTerm, leaderActor.path().toString());
+        actorContext.setTermInformation(currentTerm, leaderActor.path().toString());
 
         ByteString bs = toByteString(leadersSnapshot);
         leader.setSnapshotHolder(new SnapshotHolder(Snapshot.create(ByteState.of(bs.toByteArray()),
@@ -1028,7 +1028,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         // set the snapshot variables in replicatedlog
         actorContext.getReplicatedLog().setSnapshotIndex(snapshotIndex);
         actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
-        actorContext.getTermInformation().update(currentTerm, leaderActor.path().toString());
+        actorContext.setTermInformation(currentTerm, leaderActor.path().toString());
 
         ByteString bs = toByteString(leadersSnapshot);
         Snapshot snapshot = Snapshot.create(ByteState.of(bs.toByteArray()),
@@ -1043,7 +1043,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         assertEquals(3, installSnapshot.getTotalChunks());
 
         followerActor.underlyingActor().clear();
-        leader.handleMessage(followerActor, new InstallSnapshotReply(actorContext.getTermInformation().getCurrentTerm(),
+        leader.handleMessage(followerActor, new InstallSnapshotReply(actorContext.getTermInformation().currentTerm(),
                 FOLLOWER_ID, installSnapshot.getChunkIndex(), true));
 
         installSnapshot = MessageCollectorActor.expectFirstMatching(followerActor, InstallSnapshot.class);
@@ -1052,14 +1052,14 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         assertEquals(3, installSnapshot.getTotalChunks());
 
         followerActor.underlyingActor().clear();
-        leader.handleMessage(followerActor, new InstallSnapshotReply(actorContext.getTermInformation().getCurrentTerm(),
+        leader.handleMessage(followerActor, new InstallSnapshotReply(actorContext.getTermInformation().currentTerm(),
                 FOLLOWER_ID, installSnapshot.getChunkIndex(), true));
 
         installSnapshot = MessageCollectorActor.expectFirstMatching(followerActor, InstallSnapshot.class);
 
         // Send snapshot reply one more time and make sure that a new snapshot message should not be sent to follower
         followerActor.underlyingActor().clear();
-        leader.handleMessage(followerActor, new InstallSnapshotReply(actorContext.getTermInformation().getCurrentTerm(),
+        leader.handleMessage(followerActor, new InstallSnapshotReply(actorContext.getTermInformation().currentTerm(),
                 FOLLOWER_ID, installSnapshot.getChunkIndex(), true));
 
         installSnapshot = MessageCollectorActor.getFirstMatching(followerActor, InstallSnapshot.class);
@@ -1101,7 +1101,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         // set the snapshot variables in replicatedlog
         actorContext.getReplicatedLog().setSnapshotIndex(snapshotIndex);
         actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
-        actorContext.getTermInformation().update(currentTerm, leaderActor.path().toString());
+        actorContext.setTermInformation(currentTerm, leaderActor.path().toString());
 
         ByteString bs = toByteString(leadersSnapshot);
         Snapshot snapshot = Snapshot.create(ByteState.of(bs.toByteArray()),
@@ -1118,7 +1118,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         followerActor.underlyingActor().clear();
 
-        leader.handleMessage(followerActor, new InstallSnapshotReply(actorContext.getTermInformation().getCurrentTerm(),
+        leader.handleMessage(followerActor, new InstallSnapshotReply(actorContext.getTermInformation().currentTerm(),
                 FOLLOWER_ID, -1, false));
 
         Uninterruptibles.sleepUninterruptibly(actorContext.getConfigParams().getHeartBeatInterval().toMillis(),
@@ -1165,7 +1165,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         // set the snapshot variables in replicatedlog
         actorContext.getReplicatedLog().setSnapshotIndex(snapshotIndex);
         actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
-        actorContext.getTermInformation().update(currentTerm, leaderActor.path().toString());
+        actorContext.setTermInformation(currentTerm, leaderActor.path().toString());
 
         ByteString bs = toByteString(leadersSnapshot);
         Snapshot snapshot = Snapshot.create(ByteState.of(bs.toByteArray()),
@@ -1711,7 +1711,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         leaderActorContext.setCommitIndex(1);
         leaderActorContext.setLastApplied(1);
-        leaderActorContext.getTermInformation().update(1, "leader");
+        leaderActorContext.setTermInformation(1, "leader");
 
         leader = new Leader(leaderActorContext);
 
@@ -1995,7 +1995,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
                 follower2Actor.path().toString());
 
         leaderActorContext.setPeerAddresses(peerAddresses);
-        leaderActorContext.getTermInformation().update(1, leaderActorId);
+        leaderActorContext.setTermInformation(1, leaderActorId);
 
         leader = createBehavior(leaderActorContext);
 
@@ -2438,7 +2438,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
     protected void assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(final MockRaftActorContext actorContext,
             final ActorRef actorRef, final RaftRPC rpc) {
         super.assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(actorContext, actorRef, rpc);
-        assertEquals("New votedFor", null, actorContext.getTermInformation().getVotedFor());
+        assertEquals("New votedFor", null, actorContext.getTermInformation().votedFor());
     }
 
     private static class MockConfigParamsImpl extends DefaultConfigParamsImpl {
