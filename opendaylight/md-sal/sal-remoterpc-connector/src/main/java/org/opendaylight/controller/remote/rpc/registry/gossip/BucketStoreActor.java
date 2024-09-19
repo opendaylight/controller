@@ -154,59 +154,70 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
             return;
         }
 
-        if (message instanceof ExecuteInActor execute) {
-            execute.accept(this);
-        } else if (GET_BUCKET_VERSIONS == message) {
+        if (GET_BUCKET_VERSIONS == message) {
             // FIXME: do we need to send ourselves?
             getSender().tell(ImmutableMap.copyOf(versions), getSelf());
-        } else if (message instanceof Terminated terminated) {
-            actorTerminated(terminated);
-        } else if (message instanceof DeleteSnapshotsSuccess deleteSuccess) {
-            LOG.debug("{}: got command: {}", persistenceId(), deleteSuccess);
-        } else if (message instanceof DeleteSnapshotsFailure deleteFailure) {
-            LOG.warn("{}: failed to delete prior snapshots", persistenceId(), deleteFailure.cause());
-        } else {
-            LOG.debug("Unhandled message [{}]", message);
-            unhandled(message);
+            return;
+        }
+
+        switch (message) {
+            case ExecuteInActor execute -> execute.accept(this);
+            case Terminated terminated -> actorTerminated(terminated);
+            case DeleteSnapshotsSuccess deleteSuccess ->
+                LOG.debug("{}: got command: {}", persistenceId(), deleteSuccess);
+            case DeleteSnapshotsFailure deleteFailure ->
+                LOG.warn("{}: failed to delete prior snapshots", persistenceId(), deleteFailure.cause());
+            default -> {
+                LOG.debug("Unhandled message [{}]", message);
+                unhandled(message);
+            }
         }
     }
 
     private void handleSnapshotMessage(final Object message) {
-        if (message instanceof SaveSnapshotFailure saveFailure) {
-            LOG.error("{}: failed to persist state", persistenceId(), saveFailure.cause());
-            persisting = false;
-            self().tell(PoisonPill.getInstance(), ActorRef.noSender());
-        } else if (message instanceof SaveSnapshotSuccess saveSuccess) {
-            LOG.debug("{}: got command: {}", persistenceId(), saveSuccess);
-            deleteSnapshots(new SnapshotSelectionCriteria(scala.Long.MaxValue(), saveSuccess.metadata().timestamp() - 1,
-                0L, 0L));
-            persisting = false;
-            unstash();
-        } else {
-            LOG.debug("{}: stashing command {}", persistenceId(), message);
-            stash();
+        switch (message) {
+            case SaveSnapshotFailure saveFailure -> {
+                LOG.error("{}: failed to persist state", persistenceId(), saveFailure.cause());
+                persisting = false;
+                self().tell(PoisonPill.getInstance(), ActorRef.noSender());
+            }
+            case SaveSnapshotSuccess saveSuccess -> {
+                LOG.debug("{}: got command: {}", persistenceId(), saveSuccess);
+                deleteSnapshots(new SnapshotSelectionCriteria(scala.Long.MaxValue(),
+                    saveSuccess.metadata().timestamp() - 1, 0L, 0L));
+                persisting = false;
+                unstash();
+            }
+            default -> {
+                LOG.debug("{}: stashing command {}", persistenceId(), message);
+                stash();
+            }
         }
     }
 
     @Override
     protected final void handleRecover(final Object message) {
-        if (message instanceof RecoveryCompleted) {
-            if (incarnation != null) {
-                incarnation = incarnation + 1;
-            } else {
-                incarnation = 0;
-            }
+        switch (message) {
+            case RecoveryCompleted msg -> {
+                if (incarnation != null) {
+                    incarnation = incarnation + 1;
+                } else {
+                    incarnation = 0;
+                }
 
-            this.localBucket = new LocalBucket<>(incarnation, initialData);
-            initialData = null;
-            LOG.debug("{}: persisting new incarnation {}", persistenceId(), incarnation);
-            persisting = true;
-            saveSnapshot(incarnation);
-        } else if (message instanceof SnapshotOffer snapshotOffer) {
-            incarnation = (Integer) snapshotOffer.snapshot();
-            LOG.debug("{}: recovered incarnation {}", persistenceId(), incarnation);
-        } else {
-            LOG.warn("{}: ignoring recovery message {}", persistenceId(), message);
+                localBucket = new LocalBucket<>(incarnation, initialData);
+                initialData = null;
+                LOG.debug("{}: persisting new incarnation {}", persistenceId(), incarnation);
+                persisting = true;
+                saveSnapshot(incarnation);
+            }
+            case SnapshotOffer msg -> {
+                incarnation = (Integer) msg.snapshot();
+                LOG.debug("{}: recovered incarnation {}", persistenceId(), incarnation);
+            }
+            default -> {
+                LOG.warn("{}: ignoring recovery message {}", persistenceId(), message);
+            }
         }
     }
 
