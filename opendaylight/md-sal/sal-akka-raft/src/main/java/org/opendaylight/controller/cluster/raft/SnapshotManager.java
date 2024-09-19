@@ -12,7 +12,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNull;
@@ -48,9 +47,6 @@ public class SnapshotManager implements SnapshotState {
     private final RaftActorContext context;
     private final LastAppliedTermInformationReader lastAppliedTermInformationReader =
             new LastAppliedTermInformationReader();
-    private final ReplicatedToAllTermInformationReader replicatedToAllTermInformationReader =
-            new ReplicatedToAllTermInformationReader();
-
 
     private SnapshotState currentState = IDLE;
     private CaptureSnapshot captureSnapshot;
@@ -162,20 +158,24 @@ public class SnapshotManager implements SnapshotState {
      */
     public CaptureSnapshot newCaptureSnapshot(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex,
                                               final boolean mandatoryTrim) {
-        TermInformationReader lastAppliedTermInfoReader =
-                lastAppliedTermInformationReader.init(context.getReplicatedLog(), context.getLastApplied(),
-                        lastLogEntry, hasFollowers());
+        final var lastAppliedTermInfoReader = lastAppliedTermInformationReader.init(context.getReplicatedLog(),
+            context.getLastApplied(), lastLogEntry, hasFollowers());
 
         long lastAppliedIndex = lastAppliedTermInfoReader.getIndex();
         long lastAppliedTerm = lastAppliedTermInfoReader.getTerm();
 
-        TermInformationReader replicatedToAllTermInfoReader =
-                replicatedToAllTermInformationReader.init(context.getReplicatedLog(), replicatedToAllIndex);
+        final long newReplicatedToAllIndex;
+        final long newReplicatedToAllTerm;
+        final var entry = context.getReplicatedLog().get(replicatedToAllIndex);
+        if (entry != null) {
+            newReplicatedToAllIndex = entry.index();
+            newReplicatedToAllTerm = entry.term();
+        } else {
+            newReplicatedToAllIndex = -1L;
+            newReplicatedToAllTerm = -1L;
+        }
 
-        long newReplicatedToAllIndex = replicatedToAllTermInfoReader.getIndex();
-        long newReplicatedToAllTerm = replicatedToAllTermInfoReader.getTerm();
-
-        List<ReplicatedLogEntry> unAppliedEntries = context.getReplicatedLog().getFrom(lastAppliedIndex + 1);
+        final var unAppliedEntries = context.getReplicatedLog().getFrom(lastAppliedIndex + 1);
 
         final long lastLogEntryIndex;
         final long lastLogEntryTerm;
@@ -536,13 +536,8 @@ public class SnapshotManager implements SnapshotState {
 
     }
 
-    private interface TermInformationReader {
-        long getIndex();
-
-        long getTerm();
-    }
-
-    static final class LastAppliedTermInformationReader implements TermInformationReader {
+    @VisibleForTesting
+    static final class LastAppliedTermInformationReader {
         private long index;
         private long term;
 
@@ -568,40 +563,11 @@ public class SnapshotManager implements SnapshotState {
             return this;
         }
 
-        @Override
-        public long getIndex() {
+        long getIndex() {
             return index;
         }
 
-        @Override
-        public long getTerm() {
-            return term;
-        }
-    }
-
-    private static final class ReplicatedToAllTermInformationReader implements TermInformationReader {
-        private long index;
-        private long term;
-
-        ReplicatedToAllTermInformationReader init(final ReplicatedLog log, final long originalIndex) {
-            var entry = log.get(originalIndex);
-            if (entry != null) {
-                index = entry.index();
-                term = entry.term();
-            } else {
-                index = -1L;
-                term = -1L;
-            }
-            return this;
-        }
-
-        @Override
-        public long getIndex() {
-            return index;
-        }
-
-        @Override
-        public long getTerm() {
+        long getTerm() {
             return term;
         }
     }
