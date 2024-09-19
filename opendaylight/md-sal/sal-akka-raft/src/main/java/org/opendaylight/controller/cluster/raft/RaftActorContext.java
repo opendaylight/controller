@@ -87,6 +87,17 @@ public interface RaftActorContext {
     @NonNull ElectionTerm getTermInformation();
 
     /**
+     * Sets the current ElectionTerm information.
+     *
+     * @param termInformation the ElectionTerm.
+     */
+    void setTermInformation(@NonNull ElectionTerm termInformation);
+
+    default void setTermInformation(final long currentTerm, final @Nullable String votedFor) {
+        setTermInformation(new ElectionTerm(currentTerm, votedFor));
+    }
+
+    /**
      * Returns the index of highest log entry known to be committed.
      *
      * @return index of highest log entry known to be committed.

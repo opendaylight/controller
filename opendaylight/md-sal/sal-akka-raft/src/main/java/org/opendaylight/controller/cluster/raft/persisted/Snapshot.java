@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft.persisted;
 
 import java.io.Serializable;
 import java.util.List;
+import org.opendaylight.controller.cluster.raft.ElectionTerm;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 
 /**
@@ -66,6 +67,13 @@ public final class Snapshot implements Serializable {
             final String electionVotedFor, final ServerConfigurationPayload serverConfig) {
         return new Snapshot(state, entries, lastIndex, lastTerm, lastAppliedIndex, lastAppliedTerm,
                 electionTerm, electionVotedFor, serverConfig);
+    }
+
+    public static Snapshot create(final State state, final List<ReplicatedLogEntry> entries, final long lastIndex,
+            final long lastTerm, final long lastAppliedIndex, final long lastAppliedTerm,
+            final ElectionTerm electionTerm, final ServerConfigurationPayload serverConfig) {
+        return new Snapshot(state, entries, lastIndex, lastTerm, lastAppliedIndex, lastAppliedTerm,
+            electionTerm.currentTerm(), electionTerm.votedFor(), serverConfig);
     }
 
     public State getState() {

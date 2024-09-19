@@ -18,6 +18,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.cluster.raft.NoopProcedure;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
@@ -29,6 +31,7 @@ import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
+import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.slf4j.Logger;
 import scala.concurrent.duration.FiniteDuration;
 
@@ -165,14 +168,15 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      * @return a new behavior if it was changed or the current behavior
      */
     protected RaftActorBehavior requestVote(final ActorRef sender, final RequestVote requestVote) {
-
         log.debug("{}: In requestVote:  {} - currentTerm: {}, votedFor: {}, lastIndex: {}, lastTerm: {}", logName(),
                 requestVote, currentTerm(), votedFor(), lastIndex(), lastTerm());
 
-        boolean grantVote = canGrantVote(requestVote);
-
+        final boolean grantVote = canGrantVote(requestVote);
         if (grantVote) {
-            context.getTermInformation().updateAndPersist(requestVote.getTerm(), requestVote.getCandidateId());
+            final var voteTerm = requestVote.getTerm();
+            final var voteCandidate = requestVote.getCandidateId();
+            context.setTermInformation(voteTerm, voteCandidate);
+            persistence.persist(new UpdateElectionTerm(voteTerm, voteCandidate), NoopProcedure.instance());
         }
 
         RequestVoteReply reply = new RequestVoteReply(currentTerm(), grantVote);
@@ -193,9 +197,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
 
             // If votedFor is null or candidateId, and candidate’s log is at
             // least as up-to-date as receiver’s log, grant vote (§5.2, §5.4)
-        } else if (votedFor() == null || votedFor()
-                .equals(requestVote.getCandidateId())) {
-
+        } else if (votedFor() == null || votedFor().equals(requestVote.getCandidateId())) {
             boolean candidateLatest = false;
 
             // From §5.4.1
@@ -276,7 +278,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      * @return the current term
      */
     protected long currentTerm() {
-        return context.getTermInformation().getCurrentTerm();
+        return context.getTermInformation().currentTerm();
     }
 
     /**
@@ -284,8 +286,8 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      *
      * @return the candidate for whom we voted in the current term
      */
-    protected String votedFor() {
-        return context.getTermInformation().getVotedFor();
+    protected @Nullable String votedFor() {
+        return context.getTermInformation().votedFor();
     }
 
     /**
@@ -426,8 +428,8 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
             return this;
         }
 
-        log.info("{} :- Switching from behavior {} to {}, election term: {}", logName(), state(),
-                newBehavior.state(), context.getTermInformation().getCurrentTerm());
+        log.info("{} :- Switching from behavior {} to {}, election term: {}", logName(), state(), newBehavior.state(),
+            context.getTermInformation().currentTerm());
         try {
             close();
         } catch (RuntimeException e) {

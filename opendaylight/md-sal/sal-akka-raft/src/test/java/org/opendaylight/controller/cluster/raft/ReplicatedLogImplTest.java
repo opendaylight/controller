@@ -55,9 +55,8 @@ public class ReplicatedLogImplTest {
 
     @Before
     public void setup() {
-        context = new RaftActorContextImpl(null, null, "test",
-                new ElectionTermImpl(mockPersistence, "test", LOG), -1, -1, Map.of(),
-                configParams, mockPersistence, applyState -> { }, LOG,  MoreExecutors.directExecutor());
+        context = new RaftActorContextImpl(null, null, "test", -1, -1, Map.of(), configParams, mockPersistence,
+            applyState -> { }, LOG,  MoreExecutors.directExecutor());
     }
 
     private void verifyPersist(final Object message) throws Exception {
@@ -67,7 +66,7 @@ public class ReplicatedLogImplTest {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private void verifyPersist(final Object message, final ArgumentMatcher<?> matcher, final boolean async)
             throws Exception {
-        ArgumentCaptor<Procedure> procedure = ArgumentCaptor.forClass(Procedure.class);
+        final var procedure = ArgumentCaptor.forClass(Procedure.class);
         if (async) {
             verify(mockPersistence).persistAsync(argThat(matcher), procedure.capture());
         } else {

@@ -16,7 +16,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.After;
@@ -26,7 +26,6 @@ import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardManagerSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
-import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.PeopleModel;
@@ -132,7 +131,7 @@ public class DatastoreSnapshotRestoreTest {
         AbstractShardTest.writeToStore(dataTree, path, node);
         NormalizedNode root = AbstractShardTest.readStore(dataTree, YangInstanceIdentifier.of());
 
-        return Snapshot.create(new ShardSnapshotState(new MetadataShardDataTreeSnapshot(root)),
-                Collections.<ReplicatedLogEntry>emptyList(), 2, 1, 2, 1, 1, "member-1", null);
+        return Snapshot.create(new ShardSnapshotState(new MetadataShardDataTreeSnapshot(root)), List.of(),
+            2, 1, 2, 1, 1, "member-1", null);
     }
 }
