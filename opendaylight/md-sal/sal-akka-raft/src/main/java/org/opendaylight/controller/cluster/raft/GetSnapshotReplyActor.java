@@ -48,8 +48,7 @@ final class GetSnapshotReplyActor extends UntypedAbstractActor {
                     params.captureSnapshot.getUnAppliedEntries(),
                     params.captureSnapshot.getLastIndex(), params.captureSnapshot.getLastTerm(),
                     params.captureSnapshot.getLastAppliedIndex(), params.captureSnapshot.getLastAppliedTerm(),
-                    params.electionTerm.getCurrentTerm(), params.electionTerm.getVotedFor(),
-                    params.peerInformation);
+                    params.electionTerm, params.peerInformation);
 
             LOG.debug("{}: Received CaptureSnapshotReply, sending {}", params.id, snapshot);
 

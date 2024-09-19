@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.messaging.MessageAssembler;
+import org.opendaylight.controller.cluster.raft.NoopProcedure;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
@@ -43,6 +44,7 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 
 /**
  * The behavior of a RaftActor in the Follower raft state.
@@ -454,11 +456,14 @@ public class Follower extends AbstractRaftActorBehavior {
         // If RPC request or response contains term T > currentTerm:
         // set currentTerm = T, convert to follower (§5.1)
         // This applies to all RPC messages and responses
-        if (rpc.getTerm() > context.getTermInformation().getCurrentTerm() && shouldUpdateTerm(rpc)) {
-            log.info("{}: Term {} in \"{}\" message is greater than follower's term {} - updating term",
-                logName(), rpc.getTerm(), rpc, context.getTermInformation().getCurrentTerm());
+        final var rpcTerm = rpc.getTerm();
+        final var currentTerm = currentTerm();
 
-            context.getTermInformation().updateAndPersist(rpc.getTerm(), null);
+        if (rpcTerm > currentTerm && shouldUpdateTerm(rpc)) {
+            log.info("{}: Term {} in \"{}\" message is greater than follower's term {} - updating term", logName(),
+                rpcTerm, rpc, currentTerm);
+            context.setTermInformation(rpcTerm, null);
+            persistence.persist(new UpdateElectionTerm(rpcTerm, null), NoopProcedure.instance());
         }
 
         if (rpc instanceof InstallSnapshot installSnapshot) {
@@ -632,8 +637,7 @@ public class Follower extends AbstractRaftActorBehavior {
                         installSnapshot.getLastIncludedTerm(),
                         installSnapshot.getLastIncludedIndex(),
                         installSnapshot.getLastIncludedTerm(),
-                        context.getTermInformation().getCurrentTerm(),
-                        context.getTermInformation().getVotedFor(),
+                        context.getTermInformation(),
                         installSnapshot.getServerConfig().orElse(null));
 
                 ApplySnapshot.Callback applySnapshotCallback = new ApplySnapshot.Callback() {
