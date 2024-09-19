@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft;
 
 import static java.util.Objects.requireNonNull;
@@ -42,48 +41,19 @@ public class MockRaftActorContext extends RaftActorContextImpl {
     private RaftPolicy raftPolicy;
     private Consumer<Optional<OutputStream>> createSnapshotProcedure = out -> { };
 
-    private static ElectionTerm newElectionTerm() {
-        return new ElectionTerm() {
-            private long currentTerm = 1;
-            private String votedFor = "";
-
-            @Override
-            public long getCurrentTerm() {
-                return currentTerm;
-            }
-
-            @Override
-            public String getVotedFor() {
-                return votedFor;
-            }
-
-            @Override
-            public void update(final long newTerm, final String newVotedFor) {
-                currentTerm = newTerm;
-                votedFor = newVotedFor;
-
-                // TODO : Write to some persistent state
-            }
-
-            @Override public void updateAndPersist(final long newTerm, final String newVotedFor) {
-                update(newTerm, newVotedFor);
-            }
-        };
-    }
-
     private static DataPersistenceProvider createProvider() {
         return new NonPersistentDataProvider(Runnable::run);
     }
 
     public MockRaftActorContext() {
-        super(null, null, "test", newElectionTerm(), -1, -1, new HashMap<>(),
+        super(null, null, "test", new ElectionTerm(1, ""), -1, -1, new HashMap<>(),
                 new DefaultConfigParamsImpl(), createProvider(), applyState -> { }, LOG,
                 MoreExecutors.directExecutor());
         setReplicatedLog(new MockReplicatedLogBuilder().build());
     }
 
     public MockRaftActorContext(final String id, final ActorSystem system, final ActorRef actor) {
-        super(actor, null, id, newElectionTerm(), -1, -1, new HashMap<>(),
+        super(actor, null, id, new ElectionTerm(1, ""), -1, -1, new HashMap<>(),
             new DefaultConfigParamsImpl(), createProvider(), applyState -> actor.tell(applyState, actor), LOG,
             MoreExecutors.directExecutor());
 
@@ -95,7 +65,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
 
     public void initReplicatedLog() {
         SimpleReplicatedLog replicatedLog = new SimpleReplicatedLog();
-        long term = getTermInformation().getCurrentTerm();
+        long term = getTermInformation().currentTerm();
         replicatedLog.append(new SimpleReplicatedLogEntry(0, term, new MockPayload("1")));
         replicatedLog.append(new SimpleReplicatedLogEntry(1, term, new MockPayload("2")));
         setReplicatedLog(replicatedLog);

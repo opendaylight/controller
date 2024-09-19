@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft.behaviors;
 
 import static org.junit.Assert.assertEquals;
@@ -18,7 +17,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.junit.After;
@@ -98,10 +96,9 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         context.setPayloadVersion(payloadVersion);
 
         // First set the receivers term to a high number (1000)
-        context.getTermInformation().update(1000, "test");
+        context.setTermInformation(1000, "test");
 
-        AppendEntries appendEntries = new AppendEntries(100, "leader-1", 0, 0, Collections.emptyList(), 101, -1,
-                (short)4);
+        AppendEntries appendEntries = new AppendEntries(100, "leader-1", 0, 0, List.of(), 101, -1, (short)4);
 
         behavior = createBehavior(context);
 
@@ -125,7 +122,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
     public void testHandleAppendEntriesAddSameEntryToLog() {
         MockRaftActorContext context = createActorContext();
 
-        context.getTermInformation().update(2, "test");
+        context.setTermInformation(2, "test");
 
         // Prepare the receivers log
         MockRaftActorContext.MockPayload payload = new MockRaftActorContext.MockPayload("zero");
@@ -170,7 +167,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
 
         behavior = createBehavior(context);
 
-        context.getTermInformation().update(1, "test");
+        context.setTermInformation(1, "test");
 
         behavior.handleMessage(behaviorActor, new RequestVote(context.getTermInformation().getCurrentTerm(),
                 "test", 10000, 999));
@@ -191,15 +188,13 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
 
         behavior = createBehavior(context);
 
-        context.getTermInformation().update(1, "test");
+        context.setTermInformation(1, "test");
 
         int index = 2000;
-        setLastLogEntry(context, context.getTermInformation().getCurrentTerm(), index,
-                new MockRaftActorContext.MockPayload(""));
+        final var currentTerm = context.getTermInformation().currentTerm();
+        setLastLogEntry(context, currentTerm, index, new MockRaftActorContext.MockPayload(""));
 
-        behavior.handleMessage(behaviorActor, new RequestVote(
-                context.getTermInformation().getCurrentTerm(), "test",
-                index - 1, context.getTermInformation().getCurrentTerm()));
+        behavior.handleMessage(behaviorActor, new RequestVote(currentTerm, "test", index - 1, currentTerm));
 
         RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(behaviorActor,
                 RequestVoteReply.class);
@@ -217,7 +212,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
     public void testHandleRequestVoteWhenSenderTermLessThanCurrentTerm() {
         MockRaftActorContext context = createActorContext();
 
-        context.getTermInformation().update(1000, null);
+        context.setTermInformation(1000, null);
 
         behavior = createBehavior(context);
 
@@ -236,7 +231,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
             return;
         }
 
-        context.getTermInformation().update(1, "test");
+        context.setTermInformation(1, "test");
 
         //log has 1 entry with replicatedToAllIndex = 0, does not do anything, returns the
         context.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 1, 1).build());
@@ -281,13 +276,13 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
 
         Payload payload = new MockRaftActorContext.MockPayload("");
         setLastLogEntry(actorContext, 1, 0, payload);
-        actorContext.getTermInformation().update(1, "test");
+        actorContext.setTermInformation(1, "test");
 
         RaftActorBehavior origBehavior = createBehavior(actorContext);
         RaftActorBehavior raftBehavior = origBehavior.handleMessage(actorRef, rpc);
 
         assertEquals("New raft state", RaftState.Follower, raftBehavior.state());
-        assertEquals("New election term", rpc.getTerm(), actorContext.getTermInformation().getCurrentTerm());
+        assertEquals("New election term", rpc.getTerm(), actorContext.getTermInformation().currentTerm());
 
         origBehavior.close();
         raftBehavior.close();
@@ -328,7 +323,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
     }
 
     protected AppendEntries createAppendEntriesWithNewerTerm() {
-        return new AppendEntries(100, "leader-1", 0, 0, Collections.emptyList(), 1, -1, (short)0);
+        return new AppendEntries(100, "leader-1", 0, 0, List.of(), 1, -1, (short)0);
     }
 
     protected AppendEntriesReply createAppendEntriesReplyWithNewerTerm() {
