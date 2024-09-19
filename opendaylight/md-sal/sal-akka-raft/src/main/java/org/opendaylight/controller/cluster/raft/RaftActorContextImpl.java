@@ -184,7 +184,8 @@ public class RaftActorContextImpl implements RaftActorContext {
         return commitIndex;
     }
 
-    @Override public void setCommitIndex(final long commitIndex) {
+    @Override
+    public void setCommitIndex(final long commitIndex) {
         this.commitIndex = commitIndex;
     }
 
@@ -280,7 +281,8 @@ public class RaftActorContextImpl implements RaftActorContext {
         setDynamicServerConfigurationInUse();
     }
 
-    @Override public ConfigParams getConfigParams() {
+    @Override
+    public ConfigParams getConfigParams() {
         return configParams;
     }
 
@@ -300,7 +302,8 @@ public class RaftActorContextImpl implements RaftActorContext {
         }
     }
 
-    @Override public ActorSelection getPeerActorSelection(final String peerId) {
+    @Override
+    public ActorSelection getPeerActorSelection(final String peerId) {
         String peerAddress = getPeerAddress(peerId);
         if (peerAddress != null) {
             return actorSelection(peerAddress);
@@ -344,7 +347,6 @@ public class RaftActorContextImpl implements RaftActorContext {
     public DataPersistenceProvider getPersistenceProvider() {
         return persistenceProvider;
     }
-
 
     @Override
     public RaftPolicy getRaftPolicy() {
