@@ -52,7 +52,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     private final String id;
 
-    private final ElectionTerm termInformation;
+    private @NonNull ElectionTerm termInformation;
 
     private long commitIndex;
 
@@ -94,9 +94,18 @@ public class RaftActorContextImpl implements RaftActorContext {
     private RaftActorLeadershipTransferCohort leadershipTransferCohort;
 
     public RaftActorContextImpl(final ActorRef actor, final ActorContext context, final String id,
-            final @NonNull ElectionTerm termInformation, final long commitIndex, final long lastApplied,
-            final @NonNull Map<String, String> peerAddresses,
+            final long commitIndex, final long lastApplied, final @NonNull Map<String, String> peerAddresses,
             final @NonNull ConfigParams configParams, final @NonNull DataPersistenceProvider persistenceProvider,
+            final @NonNull Consumer<ApplyState> applyStateConsumer, final @NonNull Logger logger,
+            final @NonNull Executor executor) {
+        this(actor, context, id, new ElectionTerm(0, null), commitIndex, lastApplied, peerAddresses, configParams,
+            persistenceProvider, applyStateConsumer, logger, executor);
+    }
+
+    public RaftActorContextImpl(final ActorRef actor, final ActorContext context, final String id,
+            final @NonNull ElectionTerm termInformation, final long commitIndex, final long lastApplied,
+            final @NonNull Map<String, String> peerAddresses, final @NonNull ConfigParams configParams,
+            final @NonNull DataPersistenceProvider persistenceProvider,
             final @NonNull Consumer<ApplyState> applyStateConsumer, final @NonNull Logger logger,
             final @NonNull Executor executor) {
         this.actor = actor;
@@ -177,6 +186,12 @@ public class RaftActorContextImpl implements RaftActorContext {
     @Override
     public ElectionTerm getTermInformation() {
         return termInformation;
+    }
+
+    @Override
+    public void setTermInformation(final ElectionTerm termInformation) {
+        this.termInformation = requireNonNull(termInformation);
+        log.debug("{}: Set currentTerm={}, votedFor={}", id, termInformation.currentTerm(), termInformation.votedFor());
     }
 
     @Override

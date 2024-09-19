@@ -57,6 +57,7 @@ import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.NoopPayload;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.concepts.Immutable;
 
@@ -122,10 +123,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         persistentProvider = new PersistentDataProvider(this);
         delegatingPersistenceProvider = new RaftActorDelegatingPersistentDataProvider(null, persistentProvider);
 
-        context = new RaftActorContextImpl(getSelf(), getContext(), id,
-            new ElectionTermImpl(persistentProvider, id, LOG), -1, -1, peerAddresses,
-            configParams.isPresent() ? configParams.orElseThrow() : new DefaultConfigParamsImpl(),
-            delegatingPersistenceProvider, this::handleApplyState, LOG, this::executeInSelf);
+        context = new RaftActorContextImpl(getSelf(), getContext(), id, -1, -1, peerAddresses,
+            configParams.orElseGet(DefaultConfigParamsImpl::new), delegatingPersistenceProvider, this::handleApplyState,
+            LOG, this::executeInSelf);
 
         context.setPayloadVersion(payloadVersion);
         context.setReplicatedLog(ReplicatedLogImpl.newInstance(context));
@@ -414,7 +414,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         if (!getRaftActorContext().getRaftPolicy().automaticElectionsEnabled()) {
             RaftState newState = message.getNewState();
             if (newState == RaftState.Leader || newState == RaftState.Follower) {
-                getRaftActorContext().getTermInformation().updateAndPersist(message.getNewTerm(), "");
+                final var newTerm = message.getNewTerm();
+                getRaftActorContext().setTermInformation(newTerm, "");
+                persistentProvider.persist(new UpdateElectionTerm(newTerm, ""), NoopProcedure.instance());
+
                 switchBehavior(behaviorStateTracker.capture(getCurrentBehavior()),
                     AbstractRaftActorBehavior.createBehavior(context, message.getNewState()));
             } else {

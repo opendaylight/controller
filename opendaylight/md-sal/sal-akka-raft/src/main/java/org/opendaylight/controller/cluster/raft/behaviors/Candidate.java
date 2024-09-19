@@ -8,8 +8,8 @@
 package org.opendaylight.controller.cluster.raft.behaviors;
 
 import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
 import com.google.common.collect.ImmutableList;
+import org.opendaylight.controller.cluster.raft.NoopProcedure;
 import org.opendaylight.controller.cluster.raft.PeerInfo;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
@@ -21,6 +21,7 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
+import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
@@ -153,18 +154,21 @@ public final class Candidate extends AbstractRaftActorBehavior {
         }
 
         if (message instanceof RaftRPC rpc) {
-
-            log.debug("{}: RaftRPC message received {}, my term is {}", logName(), rpc,
-                        context.getTermInformation().getCurrentTerm());
+            final var currentTerm = context.getTermInformation().currentTerm();
+            log.debug("{}: RaftRPC message received {}, my term is {}", logName(), rpc, currentTerm);
 
             // If RPC request or response contains term T > currentTerm:
             // set currentTerm = T, convert to follower (§5.1)
             // This applies to all RPC messages and responses
-            if (rpc.getTerm() > context.getTermInformation().getCurrentTerm()) {
+            final var rpcTerm = rpc.getTerm();
+            if (rpcTerm > currentTerm) {
                 log.info("{}: Term {} in \"{}\" message is greater than Candidate's term {} - switching to Follower",
-                        logName(), rpc.getTerm(), rpc, context.getTermInformation().getCurrentTerm());
+                    logName(), rpcTerm, rpc, currentTerm);
 
-                context.getTermInformation().updateAndPersist(rpc.getTerm(), null);
+                context.setTermInformation(rpcTerm, null);
+                persistence.persist(new UpdateElectionTerm(rpcTerm, null), NoopProcedure.instance());
+
+                // FIXME: persist
 
                 // The raft paper does not say whether or not a Candidate can/should process a RequestVote in
                 // this case but doing so gains quicker convergence when the sender's log is more up-to-date.
@@ -184,26 +188,23 @@ public final class Candidate extends AbstractRaftActorBehavior {
         voteCount = 1;
 
         // Increment the election term and vote for self
-        long currentTerm = context.getTermInformation().getCurrentTerm();
-        long newTerm = currentTerm + 1;
-        context.getTermInformation().updateAndPersist(newTerm, context.getId());
+        final long currentTerm = currentTerm();
+        final long newTerm = currentTerm + 1;
+
+        context.setTermInformation(newTerm, context.getId());
+        persistence.persist(new UpdateElectionTerm(newTerm, context.getId()), NoopProcedure.instance());
 
         log.info("{}: Starting new election term {}", logName(), newTerm);
+        final var requestVote = new RequestVote(newTerm, context.getId(), context.getReplicatedLog().lastIndex(),
+            context.getReplicatedLog().lastTerm());
 
         // Request for a vote
         // TODO: Retry request for vote if replies do not arrive in a reasonable
         // amount of time TBD
         for (String peerId : votingPeers) {
-            ActorSelection peerActor = context.getPeerActorSelection(peerId);
+            final var peerActor = context.getPeerActorSelection(peerId);
             if (peerActor != null) {
-                RequestVote requestVote = new RequestVote(
-                        context.getTermInformation().getCurrentTerm(),
-                        context.getId(),
-                        context.getReplicatedLog().lastIndex(),
-                        context.getReplicatedLog().lastTerm());
-
                 log.debug("{}: Sending {} to peer {}", logName(), requestVote, peerId);
-
                 peerActor.tell(requestVote, context.getActor());
             }
         }

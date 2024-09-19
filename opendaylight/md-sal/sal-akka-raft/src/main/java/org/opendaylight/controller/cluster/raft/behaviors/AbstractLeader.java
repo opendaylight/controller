@@ -33,6 +33,7 @@ import org.opendaylight.controller.cluster.messaging.MessageSlicer;
 import org.opendaylight.controller.cluster.messaging.SliceOptions;
 import org.opendaylight.controller.cluster.raft.ClientRequestTracker;
 import org.opendaylight.controller.cluster.raft.FollowerLogInformation;
+import org.opendaylight.controller.cluster.raft.NoopProcedure;
 import org.opendaylight.controller.cluster.raft.PeerInfo;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
@@ -55,6 +56,7 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.messages.UnInitializedFollowerSnapshotReply;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
@@ -313,16 +315,14 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                 log.info("{}: follower {} appears to be behind the leader from the last snapshot - "
                     + "updated: matchIndex: {}, nextIndex: {}", logName(), followerId,
                     followerLogInformation.getMatchIndex(), followerLogInformation.getNextIndex());
-            } else {
-                // The follower's log conflicts with leader's log so decrement follower's next index
-                // in an attempt to find where the logs match.
-                if (followerLogInformation.decrNextIndex(appendEntriesReply.getLogLastIndex())) {
-                    updated = true;
+            } else // The follower's log conflicts with leader's log so decrement follower's next index
+            // in an attempt to find where the logs match.
+            if (followerLogInformation.decrNextIndex(appendEntriesReply.getLogLastIndex())) {
+                updated = true;
 
-                    log.info("{}: follower {} last log term {} conflicts with the leader's {} - dec next index to {}",
-                            logName(), followerId, appendEntriesReply.getLogLastTerm(),
-                            followersLastLogTermInLeadersLogOrSnapshot, followerLogInformation.getNextIndex());
-                }
+                log.info("{}: follower {} last log term {} conflicts with the leader's {} - dec next index to {}",
+                        logName(), followerId, appendEntriesReply.getLogLastTerm(),
+                        followersLastLogTermInLeadersLogOrSnapshot, followerLogInformation.getNextIndex());
             }
         }
 
@@ -497,28 +497,31 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         // If RPC request or response contains term T > currentTerm:
         // set currentTerm = T, convert to follower (§5.1)
         // This applies to all RPC messages and responses
-        if (message instanceof RaftRPC rpc && rpc.getTerm() > context.getTermInformation().getCurrentTerm()
-                && shouldUpdateTerm(rpc)) {
+        if (message instanceof RaftRPC rpc) {
+            final var rpcTerm = rpc.getTerm();
+            final var currentTerm = currentTerm();
+            if (rpcTerm > currentTerm && shouldUpdateTerm(rpc)) {
+                log.info("{}: Term {} in \"{}\" message is greater than leader's term {} - switching to Follower",
+                    logName(), rpcTerm, rpc, currentTerm);
 
-            log.info("{}: Term {} in \"{}\" message is greater than leader's term {} - switching to Follower",
-                logName(), rpc.getTerm(), rpc, context.getTermInformation().getCurrentTerm());
+                context.setTermInformation(rpcTerm, null);
+                persistence.persist(new UpdateElectionTerm(rpcTerm, null), NoopProcedure.instance());
 
-            context.getTermInformation().updateAndPersist(rpc.getTerm(), null);
+                // This is a special case. Normally when stepping down as leader we don't process and reply to the
+                // RaftRPC as per raft. But if we're in the process of transferring leadership and we get a
+                // RequestVote, process the RequestVote before switching to Follower. This enables the requesting
+                // candidate node to be elected the leader faster and avoids us possibly timing out in the Follower
+                // state and starting a new election and grabbing leadership back before the other candidate node can
+                // start a new election due to lack of responses. This case would only occur if there isn't a majority
+                // of other nodes available that can elect the requesting candidate. Since we're transferring
+                // leadership, we should make every effort to get the requesting node elected.
+                if (rpc instanceof RequestVote requestVote && context.getRaftActorLeadershipTransferCohort() != null) {
+                    log.debug("{}: Leadership transfer in progress - processing RequestVote", logName());
+                    requestVote(sender, requestVote);
+                }
 
-            // This is a special case. Normally when stepping down as leader we don't process and reply to the
-            // RaftRPC as per raft. But if we're in the process of transferring leadership and we get a
-            // RequestVote, process the RequestVote before switching to Follower. This enables the requesting
-            // candidate node to be elected the leader faster and avoids us possibly timing out in the Follower
-            // state and starting a new election and grabbing leadership back before the other candidate node can
-            // start a new election due to lack of responses. This case would only occur if there isn't a majority
-            // of other nodes available that can elect the requesting candidate. Since we're transferring
-            // leadership, we should make every effort to get the requesting node elected.
-            if (rpc instanceof RequestVote requestVote && context.getRaftActorLeadershipTransferCohort() != null) {
-                log.debug("{}: Leadership transfer in progress - processing RequestVote", logName());
-                requestVote(sender, requestVote);
+                return internalSwitchBehavior(RaftState.Follower);
             }
-
-            return internalSwitchBehavior(RaftState.Follower);
         }
 
         if (message instanceof SendHeartBeat) {
