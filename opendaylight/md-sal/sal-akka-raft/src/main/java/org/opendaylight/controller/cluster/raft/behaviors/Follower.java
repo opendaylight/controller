@@ -227,7 +227,8 @@ public class Follower extends AbstractRaftActorBehavior {
     }
 
     private boolean processNewEntries(final AppendEntries appendEntries, final ActorRef sender) {
-        int numLogEntries = appendEntries.getEntries().size();
+        final var entries = appendEntries.getEntries();
+        final int numLogEntries = entries.size();
         if (numLogEntries == 0) {
             return true;
         }
@@ -242,8 +243,8 @@ public class Follower extends AbstractRaftActorBehavior {
         final var replLog = context.getReplicatedLog();
         if (replLog.size() > 0) {
             // Find the entry up until the one that is not in the follower's log
-            for (int i = 0;i < numLogEntries; i++, addEntriesFrom++) {
-                final var matchEntry = appendEntries.getEntries().get(i);
+            for (int i = 0; i < numLogEntries; i++, addEntriesFrom++) {
+                final var matchEntry = entries.get(i);
 
                 if (!isLogEntryPresent(matchEntry.index())) {
                     // newEntry not found in the log
@@ -304,16 +305,14 @@ public class Follower extends AbstractRaftActorBehavior {
         // purged from the persisted log as well.
         final AtomicBoolean shouldCaptureSnapshot = new AtomicBoolean(false);
         final Consumer<ReplicatedLogEntry> appendAndPersistCallback = logEntry -> {
-            final List<ReplicatedLogEntry> entries = appendEntries.getEntries();
-            final ReplicatedLogEntry lastEntryToAppend = entries.get(entries.size() - 1);
-            if (shouldCaptureSnapshot.get() && logEntry == lastEntryToAppend) {
+            if (shouldCaptureSnapshot.get() && logEntry == entries.getLast()) {
                 context.getSnapshotManager().capture(replLog.lastMeta(), getReplicatedToAllIndex());
             }
         };
 
         // Append any new entries not already in the log
         for (int i = addEntriesFrom; i < numLogEntries; i++) {
-            ReplicatedLogEntry entry = appendEntries.getEntries().get(i);
+            ReplicatedLogEntry entry = entries.get(i);
 
             log.debug("{}: Append entry to log {}", logName(), entry.getData());
 
