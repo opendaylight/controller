@@ -20,7 +20,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.Iterables;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
@@ -234,14 +233,14 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
      * @return A state snapshot
      */
     @NonNull ShardDataTreeSnapshot takeStateSnapshot() {
-        final NormalizedNode rootNode = takeSnapshot().readNode(YangInstanceIdentifier.of()).orElseThrow();
-        final Builder<Class<? extends ShardDataTreeSnapshotMetadata<?>>, ShardDataTreeSnapshotMetadata<?>> metaBuilder =
-                ImmutableMap.builder();
+        final var rootNode = takeSnapshot().readNode(YangInstanceIdentifier.of()).orElseThrow();
+        final var metaBuilder =
+            ImmutableMap.<Class<? extends ShardDataTreeSnapshotMetadata<?>>, ShardDataTreeSnapshotMetadata<?>>builder();
 
-        for (ShardDataTreeMetadata<?> m : metadata) {
-            final ShardDataTreeSnapshotMetadata<?> meta = m.toSnapshot();
-            if (meta != null) {
-                metaBuilder.put(meta.getType(), meta);
+        for (var meta : metadata) {
+            final var snapshot = meta.toSnapshot();
+            if (snapshot != null) {
+                metaBuilder.put(snapshot.getType(), snapshot);
             }
         }
 
@@ -260,12 +259,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             LOG.warn("{}: applying state snapshot with pending transactions", logContext);
         }
 
-        final Map<Class<? extends ShardDataTreeSnapshotMetadata<?>>, ShardDataTreeSnapshotMetadata<?>> snapshotMeta;
-        if (snapshot instanceof MetadataShardDataTreeSnapshot metaSnapshot) {
-            snapshotMeta = metaSnapshot.getMetadata();
-        } else {
-            snapshotMeta = ImmutableMap.of();
-        }
+        final var snapshotMeta = snapshot instanceof MetadataShardDataTreeSnapshot ms ? ms.getMetadata()
+            : Map.<Class<? extends ShardDataTreeSnapshotMetadata<?>>, ShardDataTreeSnapshotMetadata<?>>of();
 
         for (var m : metadata) {
             final var s = snapshotMeta.get(m.getSupportedType());
@@ -373,22 +368,15 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
      * @throws DataValidationFailedException when the snapshot fails to apply
      */
     final void applyRecoveryPayload(final @NonNull Payload payload) throws IOException {
-        if (payload instanceof CommitTransactionPayload commit) {
-            applyRecoveryCandidate(commit);
-        } else if (payload instanceof AbortTransactionPayload abort) {
-            allMetadataAbortedTransaction(abort.getIdentifier());
-        } else if (payload instanceof PurgeTransactionPayload purge) {
-            allMetadataPurgedTransaction(purge.getIdentifier());
-        } else if (payload instanceof CreateLocalHistoryPayload create) {
-            allMetadataCreatedLocalHistory(create.getIdentifier());
-        } else if (payload instanceof CloseLocalHistoryPayload close) {
-            allMetadataClosedLocalHistory(close.getIdentifier());
-        } else if (payload instanceof PurgeLocalHistoryPayload purge) {
-            allMetadataPurgedLocalHistory(purge.getIdentifier());
-        } else if (payload instanceof SkipTransactionsPayload skip) {
-            allMetadataSkipTransactions(skip);
-        } else {
-            LOG.debug("{}: ignoring unhandled payload {}", logContext, payload);
+        switch (payload) {
+            case CommitTransactionPayload commit -> applyRecoveryCandidate(commit);
+            case AbortTransactionPayload abort -> allMetadataAbortedTransaction(abort.getIdentifier());
+            case PurgeTransactionPayload purge -> allMetadataPurgedTransaction(purge.getIdentifier());
+            case CreateLocalHistoryPayload create -> allMetadataCreatedLocalHistory(create.getIdentifier());
+            case CloseLocalHistoryPayload close -> allMetadataClosedLocalHistory(close.getIdentifier());
+            case PurgeLocalHistoryPayload purge -> allMetadataPurgedLocalHistory(purge.getIdentifier());
+            case SkipTransactionsPayload skip -> allMetadataSkipTransactions(skip);
+            default -> LOG.debug("{}: ignoring unhandled payload {}", logContext, payload);
         }
     }
 
@@ -434,53 +422,61 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
          * In any case, we know that this is an entry coming from replication, hence we can be sure we will not observe
          * pre-Boron state -- which limits the number of options here.
          */
-        if (payload instanceof CommitTransactionPayload commit) {
-            if (identifier == null) {
-                applyReplicatedCandidate(commit);
-            } else {
-                verify(identifier instanceof TransactionIdentifier);
-                // if we did not track this transaction before, it means that it came from another leader and we are in
-                // the process of commiting it while in PreLeader state. That means that it hasnt yet been committed to
-                // the local DataTree and would be lost if it was only applied via payloadReplicationComplete().
-                if (!payloadReplicationComplete((TransactionIdentifier) identifier)) {
+        switch (payload) {
+            case CommitTransactionPayload commit -> {
+                if (identifier == null) {
                     applyReplicatedCandidate(commit);
+                } else {
+                    verify(identifier instanceof TransactionIdentifier);
+                    // if we did not track this transaction before, it means that it came from another leader and we are
+                    // in the process of commiting it while in PreLeader state. That means that it hasnt yet been
+                    // committed to the local DataTree and would be lost if it was only applied via
+                    // payloadReplicationComplete().
+                    if (!payloadReplicationComplete((TransactionIdentifier) identifier)) {
+                        applyReplicatedCandidate(commit);
+                    }
                 }
-            }
 
-            // make sure acquireCandidate() is the last call touching the payload data as we want it to be GC-ed.
-            checkRootOverwrite(commit.acquireCandidate().candidate());
-        } else if (payload instanceof AbortTransactionPayload abort) {
-            if (identifier != null) {
-                payloadReplicationComplete(abort);
+                // make sure acquireCandidate() is the last call touching the payload data as we want it to be GC-ed.
+                checkRootOverwrite(commit.acquireCandidate().candidate());
             }
-            allMetadataAbortedTransaction(abort.getIdentifier());
-        } else if (payload instanceof PurgeTransactionPayload purge) {
-            if (identifier != null) {
-                payloadReplicationComplete(purge);
+            case AbortTransactionPayload abort -> {
+                if (identifier != null) {
+                    payloadReplicationComplete(abort);
+                }
+                allMetadataAbortedTransaction(abort.getIdentifier());
             }
-            allMetadataPurgedTransaction(purge.getIdentifier());
-        } else if (payload instanceof CloseLocalHistoryPayload close) {
-            if (identifier != null) {
-                payloadReplicationComplete(close);
+            case PurgeTransactionPayload purge -> {
+                if (identifier != null) {
+                    payloadReplicationComplete(purge);
+                }
+                allMetadataPurgedTransaction(purge.getIdentifier());
             }
-            allMetadataClosedLocalHistory(close.getIdentifier());
-        } else if (payload instanceof CreateLocalHistoryPayload create) {
-            if (identifier != null) {
-                payloadReplicationComplete(create);
+            case CloseLocalHistoryPayload close -> {
+                if (identifier != null) {
+                    payloadReplicationComplete(close);
+                }
+                allMetadataClosedLocalHistory(close.getIdentifier());
             }
-            allMetadataCreatedLocalHistory(create.getIdentifier());
-        } else if (payload instanceof PurgeLocalHistoryPayload purge) {
-            if (identifier != null) {
-                payloadReplicationComplete(purge);
+            case CreateLocalHistoryPayload create -> {
+                if (identifier != null) {
+                    payloadReplicationComplete(create);
+                }
+                allMetadataCreatedLocalHistory(create.getIdentifier());
             }
-            allMetadataPurgedLocalHistory(purge.getIdentifier());
-        } else if (payload instanceof SkipTransactionsPayload skip) {
-            if (identifier != null) {
-                payloadReplicationComplete(skip);
+            case PurgeLocalHistoryPayload purge -> {
+                if (identifier != null) {
+                    payloadReplicationComplete(purge);
+                }
+                allMetadataPurgedLocalHistory(purge.getIdentifier());
             }
-            allMetadataSkipTransactions(skip);
-        } else {
-            LOG.warn("{}: ignoring unhandled identifier {} payload {}", logContext, identifier, payload);
+            case SkipTransactionsPayload skip -> {
+                if (identifier != null) {
+                    payloadReplicationComplete(skip);
+                }
+                allMetadataSkipTransactions(skip);
+            }
+            default -> LOG.warn("{}: ignoring unhandled identifier {} payload {}", logContext, identifier, payload);
         }
     }
 
