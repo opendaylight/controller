@@ -402,17 +402,13 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
 
     @Override
     public RaftActorBehavior handleMessage(final ActorRef sender, final Object message) {
-        if (message instanceof AppendEntries appendEntries) {
-            return appendEntries(sender, appendEntries);
-        } else if (message instanceof AppendEntriesReply appendEntriesReply) {
-            return handleAppendEntriesReply(sender, appendEntriesReply);
-        } else if (message instanceof RequestVote requestVote) {
-            return requestVote(sender, requestVote);
-        } else if (message instanceof RequestVoteReply requestVoteReply) {
-            return handleRequestVoteReply(sender, requestVoteReply);
-        } else {
-            return null;
-        }
+        return switch (message) {
+            case AppendEntries appendEntries -> appendEntries(sender, appendEntries);
+            case AppendEntriesReply appendEntriesReply -> handleAppendEntriesReply(sender, appendEntriesReply);
+            case RequestVote requestVote -> requestVote(sender, requestVote);
+            case RequestVoteReply requestVoteReply -> handleRequestVoteReply(sender, requestVoteReply);
+            default -> null;
+        };
     }
 
     @Override
