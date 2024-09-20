@@ -22,7 +22,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.AbstractActorTest;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
@@ -113,8 +112,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
 
         // Also expect an AppendEntriesReply to be sent where success is false
 
-        AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(
-                behaviorActor, AppendEntriesReply.class);
+        AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(behaviorActor, AppendEntriesReply.class);
 
         assertEquals("isSuccess", false, reply.isSuccess());
         assertEquals("getPayloadVersion", payloadVersion, reply.getPayloadVersion());
@@ -156,7 +154,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
 
     protected void handleAppendEntriesAddSameEntryToLogReply(final ActorRef replyActor) {
         AppendEntriesReply reply = MessageCollectorActor.getFirstMatching(replyActor, AppendEntriesReply.class);
-        Assert.assertNull("Expected no AppendEntriesReply", reply);
+        assertNull("Expected no AppendEntriesReply", reply);
     }
 
     /**
@@ -175,8 +173,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         behavior.handleMessage(behaviorActor, new RequestVote(context.getTermInformation().getCurrentTerm(),
                 "test", 10000, 999));
 
-        RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(behaviorActor,
-                RequestVoteReply.class);
+        RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(behaviorActor, RequestVoteReply.class);
         assertEquals("isVoteGranted", true, reply.isVoteGranted());
     }
 
@@ -201,8 +198,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
                 context.getTermInformation().getCurrentTerm(), "test",
                 index - 1, context.getTermInformation().getCurrentTerm()));
 
-        RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(behaviorActor,
-                RequestVoteReply.class);
+        RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(behaviorActor, RequestVoteReply.class);
         assertEquals("isVoteGranted", false, reply.isVoteGranted());
     }
 
@@ -223,8 +219,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
 
         behavior.handleMessage(behaviorActor, new RequestVote(999, "test", 10000, 999));
 
-        RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(behaviorActor,
-                RequestVoteReply.class);
+        RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(behaviorActor, RequestVoteReply.class);
         assertEquals("isVoteGranted", false, reply.isVoteGranted());
     }
 
