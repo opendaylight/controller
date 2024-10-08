@@ -52,11 +52,11 @@ final class RecoveringClientActorBehavior extends AbstractClientActorBehavior<In
 
     private RecoveredState recoveredState;
 
-    RecoveringClientActorBehavior(final Path statePath, final AbstractClientActor actor,
+    RecoveringClientActorBehavior(final Path statePath, final AbstractClientActor actor, final String persistenceId,
             final FrontendIdentifier frontendId) {
-        super(new InitialClientActorContext(actor, frontendId.toPersistentId()));
-        filePath = statePath.resolve("odl.cluster.client." + frontendId.toPersistentId() + ".properties");
-        currentFrontend = frontendId;
+        super(new InitialClientActorContext(actor, persistenceId));
+        filePath = statePath.resolve("odl.cluster.client." + persistenceId + ".properties");
+        currentFrontend = requireNonNull(frontendId);
     }
 
     @Override

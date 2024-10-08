@@ -12,6 +12,7 @@ import akka.actor.PoisonPill;
 import akka.persistence.AbstractPersistentActor;
 import com.google.common.annotations.VisibleForTesting;
 import java.nio.file.Path;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +24,8 @@ public abstract class AbstractClientActor extends AbstractPersistentActor {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractClientActor.class);
     private static final Path STATE_PATH = Path.of("state");
 
+    private final @NonNull String persistenceId;
+
     private AbstractClientActorBehavior<?> currentBehavior;
 
     protected AbstractClientActor(final FrontendIdentifier frontendId) {
@@ -31,12 +34,13 @@ public abstract class AbstractClientActor extends AbstractPersistentActor {
 
     @VisibleForTesting
     protected AbstractClientActor(final Path statePath, final FrontendIdentifier frontendId) {
-        currentBehavior = new RecoveringClientActorBehavior(statePath, this, frontendId);
+        persistenceId = frontendId.toPersistentId();
+        currentBehavior = new RecoveringClientActorBehavior(statePath, this, persistenceId, frontendId);
     }
 
     @Override
     public final String persistenceId() {
-        return currentBehavior.persistenceId();
+        return persistenceId;
     }
 
     @Override
@@ -51,10 +55,10 @@ public abstract class AbstractClientActor extends AbstractPersistentActor {
     private void switchBehavior(final AbstractClientActorBehavior<?> nextBehavior) {
         if (!currentBehavior.equals(nextBehavior)) {
             if (nextBehavior == null) {
-                LOG.debug("{}: shutting down", persistenceId());
+                LOG.debug("{}: shutting down", persistenceId);
                 self().tell(PoisonPill.getInstance(), ActorRef.noSender());
             } else {
-                LOG.debug("{}: switched from {} to {}", persistenceId(), currentBehavior, nextBehavior);
+                LOG.debug("{}: switched from {} to {}", persistenceId, currentBehavior, nextBehavior);
             }
 
             currentBehavior.close();
@@ -74,14 +78,14 @@ public abstract class AbstractClientActor extends AbstractPersistentActor {
 
     private void onReceiveCommand(final Object command) {
         if (command == null) {
-            LOG.debug("{}: ignoring null command", persistenceId());
+            LOG.debug("{}: ignoring null command", persistenceId);
             return;
         }
 
         if (currentBehavior != null) {
             switchBehavior(currentBehavior.onReceiveCommand(command));
         } else {
-            LOG.debug("{}: shutting down, ignoring command {}", persistenceId(), command);
+            LOG.debug("{}: shutting down, ignoring command {}", persistenceId, command);
         }
     }
 
