@@ -33,7 +33,6 @@ import com.google.common.collect.SetMultimap;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Consumer;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActorWithMetering;
@@ -226,7 +225,7 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
     }
 
     protected final void updateLocalBucket(final T data) {
-        final LocalBucket<T> local = getLocalBucket();
+        final var local = getLocalBucket();
         final boolean bumpIncarnation = local.setData(data);
         versions.put(selfAddress, local.getVersion());
 
@@ -262,7 +261,7 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
      * @return self owned + remote buckets
      */
     private Map<Address, Bucket<T>> getAllBuckets() {
-        Map<Address, Bucket<T>> all = new HashMap<>(remoteBuckets.size() + 1);
+        final var all = new HashMap<Address, Bucket<T>>(remoteBuckets.size() + 1);
 
         //first add the local bucket
         all.put(selfAddress, getLocalBucket().snapshot());
@@ -279,7 +278,7 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
      * @param members requested members
      */
     private void getBucketsByMembers(final Collection<Address> members) {
-        Map<Address, Bucket<T>> buckets = new HashMap<>();
+        final var buckets = new HashMap<Address, Bucket<T>>();
 
         //first add the local bucket if asked
         if (members.contains(selfAddress)) {
@@ -287,7 +286,7 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
         }
 
         //then get buckets for requested remote nodes
-        for (Address address : members) {
+        for (var address : members) {
             if (remoteBuckets.containsKey(address)) {
                 buckets.put(address, remoteBuckets.get(address));
             }
@@ -297,7 +296,7 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
     }
 
     private void removeBucket(final Address addr) {
-        final Bucket<T> bucket = remoteBuckets.remove(addr);
+        final var bucket = remoteBuckets.remove(addr);
         if (bucket != null) {
             bucket.getWatchActor().ifPresent(ref -> removeWatch(addr, ref));
             onBucketRemoved(addr, bucket);
@@ -319,9 +318,9 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
             return;
         }
 
-        final Map<Address, Bucket<T>> newBuckets = new HashMap<>(receivedBuckets.size());
-        for (Entry<Address, Bucket<?>> entry : receivedBuckets.entrySet()) {
-            final Address addr = entry.getKey();
+        final var newBuckets = new HashMap<Address, Bucket<T>>(receivedBuckets.size());
+        for (var entry : receivedBuckets.entrySet()) {
+            final var addr = entry.getKey();
 
             if (selfAddress.equals(addr)) {
                 // Remote cannot update our bucket
@@ -329,7 +328,7 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
             }
 
             @SuppressWarnings("unchecked")
-            final Bucket<T> receivedBucket = (Bucket<T>) entry.getValue();
+            final var receivedBucket = (Bucket<T>) entry.getValue();
             if (receivedBucket == null) {
                 LOG.debug("Ignoring null bucket from {}", addr);
                 continue;
@@ -345,11 +344,11 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
             }
             newBuckets.put(addr, receivedBucket);
             versions.put(addr, remoteVersion);
-            final Bucket<T> prevBucket = remoteBuckets.put(addr, receivedBucket);
+            final var prevBucket = remoteBuckets.put(addr, receivedBucket);
 
             // Deal with DeathWatch subscriptions
-            final Optional<ActorRef> prevRef = prevBucket != null ? prevBucket.getWatchActor() : Optional.empty();
-            final Optional<ActorRef> curRef = receivedBucket.getWatchActor();
+            final var prevRef = prevBucket != null ? prevBucket.getWatchActor() : Optional.<ActorRef>empty();
+            final var curRef = receivedBucket.getWatchActor();
             if (!curRef.equals(prevRef)) {
                 prevRef.ifPresent(ref -> removeWatch(addr, ref));
                 curRef.ifPresent(ref -> addWatch(addr, ref));
@@ -382,7 +381,7 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
     private void actorTerminated(final Terminated message) {
         LOG.info("Actor termination {} received", message);
 
-        for (Address addr : watchedActors.removeAll(message.getActor())) {
+        for (var addr : watchedActors.removeAll(message.getActor())) {
             versions.remove(addr);
             final Bucket<T> bucket = remoteBuckets.remove(addr);
             if (bucket != null) {
