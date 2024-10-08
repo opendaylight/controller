@@ -245,7 +245,8 @@ class ActorBehaviorTest {
     private void verifyStateFile(final long expectedGeneration) {
         final List<String> lines;
         try {
-            lines = Files.readAllLines(statePath.resolve("odl.cluster.client.member-1-frontend-type-1.properties"));
+            lines = Files.readAllLines(statePath.resolve("odl.cluster.client").resolve("member-1")
+                .resolve("type-1.properties"));
         } catch (IOException e) {
             throw new AssertionError(e);
         }
