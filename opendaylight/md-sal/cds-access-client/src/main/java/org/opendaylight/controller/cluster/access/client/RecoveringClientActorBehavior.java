@@ -34,7 +34,8 @@ final class RecoveringClientActorBehavior extends AbstractClientActorBehavior<In
     private final FrontendIdentifier currentFrontend;
     private ClientIdentifier lastId = null;
 
-    RecoveringClientActorBehavior(final AbstractClientActor actor, final FrontendIdentifier frontendId) {
+    RecoveringClientActorBehavior(final AbstractClientActor actor, final String persistenceId,
+            final FrontendIdentifier frontendId) {
         super(new InitialClientActorContext(actor, frontendId.toPersistentId()));
         currentFrontend = requireNonNull(frontendId);
     }

@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.access.client;
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.persistence.AbstractPersistentActor;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,15 +21,18 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractClientActor extends AbstractPersistentActor {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractClientActor.class);
 
+    private final @NonNull String persistenceId;
+
     private AbstractClientActorBehavior<?> currentBehavior;
 
     protected AbstractClientActor(final FrontendIdentifier frontendId) {
-        currentBehavior = new RecoveringClientActorBehavior(this, frontendId);
+        persistenceId = frontendId.toPersistentId();
+        currentBehavior = new RecoveringClientActorBehavior(this, persistenceId, frontendId);
     }
 
     @Override
     public final String persistenceId() {
-        return currentBehavior.persistenceId();
+        return persistenceId;
     }
 
     @Override
@@ -43,10 +47,10 @@ public abstract class AbstractClientActor extends AbstractPersistentActor {
     private void switchBehavior(final AbstractClientActorBehavior<?> nextBehavior) {
         if (!currentBehavior.equals(nextBehavior)) {
             if (nextBehavior == null) {
-                LOG.debug("{}: shutting down", persistenceId());
+                LOG.debug("{}: shutting down", persistenceId);
                 self().tell(PoisonPill.getInstance(), ActorRef.noSender());
             } else {
-                LOG.debug("{}: switched from {} to {}", persistenceId(), currentBehavior, nextBehavior);
+                LOG.debug("{}: switched from {} to {}", persistenceId, currentBehavior, nextBehavior);
             }
 
             currentBehavior.close();
@@ -66,14 +70,14 @@ public abstract class AbstractClientActor extends AbstractPersistentActor {
 
     private void onReceiveCommand(final Object command) {
         if (command == null) {
-            LOG.debug("{}: ignoring null command", persistenceId());
+            LOG.debug("{}: ignoring null command", persistenceId);
             return;
         }
 
         if (currentBehavior != null) {
             switchBehavior(currentBehavior.onReceiveCommand(command));
         } else {
-            LOG.debug("{}: shutting down, ignoring command {}", persistenceId(), command);
+            LOG.debug("{}: shutting down, ignoring command {}", persistenceId, command);
         }
     }
 
