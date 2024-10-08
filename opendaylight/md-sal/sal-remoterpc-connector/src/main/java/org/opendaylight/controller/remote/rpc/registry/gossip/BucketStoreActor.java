@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.remote.rpc.registry.gossip;
 
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Verify.verify;
 import static java.util.Objects.requireNonNull;
 import static org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreAccess.Singletons.GET_ALL_BUCKETS;
@@ -30,10 +29,16 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.SetMultimap;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.function.Consumer;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActorWithMetering;
 import org.opendaylight.controller.remote.rpc.RemoteOpsProviderConfig;
@@ -52,8 +57,11 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
     // Internal marker interface for messages which are just bridges to execute a method
     @FunctionalInterface
     private interface ExecuteInActor extends Consumer<BucketStoreActor<?>> {
-
+        // Nothing else
     }
+
+    private static final String PROP_INCARNATION = "incarnation";
+    private static final Path STATE_DIR = Path.of("state", "odl.cluster.remoterpc");
 
     /**
      * Buckets owned by other known nodes in the cluster.
@@ -86,6 +94,7 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
     private T initialData;
     private Integer incarnation;
     private boolean persisting;
+    private boolean tombstoned;
 
     protected BucketStoreActor(final RemoteOpsProviderConfig config, final String persistenceId, final T initialData) {
         this.config = requireNonNull(config);
@@ -185,6 +194,8 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
                 deleteSnapshots(new SnapshotSelectionCriteria(scala.Long.MaxValue(),
                     saveSuccess.metadata().timestamp() - 1, 0L, 0L));
                 persisting = false;
+                tombstoned = true;
+                saveFile();
                 unstash();
             }
             default -> {
@@ -195,7 +206,7 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
     }
 
     @Override
-    protected final void handleRecover(final Object message) {
+    protected final void handleRecover(final Object message) throws IOException{
         switch (message) {
             case RecoveryCompleted msg -> onRecoveryCompleted(msg);
             case SnapshotOffer msg -> onSnapshotOffer(msg);
@@ -203,7 +214,9 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
         }
     }
 
-    private void onRecoveryCompleted(final RecoveryCompleted msg) {
+    private void onRecoveryCompleted(final RecoveryCompleted msg) throws IOException {
+        loadFile();
+
         final var prev = incarnation;
         final var current = prev != null ? incarnation + 1 : 0;
         localBucket = new LocalBucket<>(current, initialData);
@@ -211,13 +224,59 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
         initialData = null;
 
         LOG.debug("{}: persisting new incarnation {}", persistenceId(), incarnation);
-        persisting = true;
-        saveSnapshot(incarnation);
+        if (!tombstoned) {
+            persisting = true;
+            saveSnapshot(new Tombstone(current));
+        } else {
+            saveFile();
+        }
+    }
+
+    private void loadFile() {
+
+    }
+
+    private void saveFile() throws IOException {
+        final var props = new Properties();
+        props.setProperty(PROP_INCARNATION, String.valueOf(incarnation.intValue()));
+
+        final var path = STATE_DIR.resolve(persistenceId + ".properties");
+        Files.createDirectories(STATE_DIR);
+
+        final var temp = Files.createTempFile(STATE_DIR, "cds-id", null);
+
+        try {
+            try (var os = Files.newOutputStream(temp,
+                StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.SYNC)) {
+                props.store(os, "Critical persistent state. Do not touch unless you know what you are doing!");
+            }
+
+            Files.move(temp, path, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+        } finally {
+            try {
+                Files.deleteIfExists(temp);
+            } catch (IOException e) {
+                LOG.warn("Failed to delete {}", temp, e);
+            }
+        }
     }
 
     private void onSnapshotOffer(final SnapshotOffer msg) {
-        incarnation = (Integer) msg.snapshot();
-        LOG.debug("{}: recovered incarnation {}", persistenceId(), incarnation);
+        final var snapshot = msg.snapshot();
+        switch (snapshot) {
+            case Integer migrate -> {
+                incarnation = migrate;
+                tombstoned = false;
+
+            }
+            case Tombstone migrated -> {
+                incarnation = migrated.incarnation();
+                tombstoned = true;
+            }
+            default -> throw new IllegalStateException("Unsupported snapshot" + snapshot);
+        }
+
+        LOG.debug("{}: recovered incarnation {}{}", persistenceId(), incarnation, tombstoned ? " (tombstoned)" : "");
     }
 
     protected final RemoteOpsProviderConfig getConfig() {
@@ -391,13 +450,11 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
         }
     }
 
-    @VisibleForTesting
-    protected boolean isPersisting() {
-        return persisting;
-    }
-
     private LocalBucket<T> getLocalBucket() {
-        checkState(localBucket != null, "Attempted to access local bucket before recovery completed");
-        return localBucket;
+        final var local = localBucket;
+        if (local == null) {
+            throw new IllegalStateException("Attempted to access local bucket before recovery completed");
+        }
+        return local;
     }
 }
