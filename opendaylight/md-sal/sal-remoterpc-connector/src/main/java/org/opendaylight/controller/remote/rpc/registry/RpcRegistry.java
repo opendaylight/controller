@@ -14,6 +14,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -44,9 +45,14 @@ public class RpcRegistry extends BucketStoreActor<RoutingTable> {
     private RemoteRpcRegistryMXBeanImpl mxBean;
 
     public RpcRegistry(final RemoteOpsProviderConfig config, final ActorRef rpcInvoker, final ActorRef rpcRegistrar) {
-        super(config, config.getRpcRegistryPersistenceId(), new RoutingTable(rpcInvoker, ImmutableSet.of()));
-        this.rpcRegistrar = requireNonNull(rpcRegistrar);
+        this(STATE_DIR, config, rpcInvoker, rpcRegistrar);
+    }
 
+    @VisibleForTesting
+    public RpcRegistry(final Path stateDir, final RemoteOpsProviderConfig config, final ActorRef rpcInvoker,
+            final ActorRef rpcRegistrar) {
+        super(stateDir, config, config.getRpcRegistryPersistenceId(), new RoutingTable(rpcInvoker, ImmutableSet.of()));
+        this.rpcRegistrar = requireNonNull(rpcRegistrar);
     }
 
     /**
@@ -58,8 +64,14 @@ public class RpcRegistry extends BucketStoreActor<RoutingTable> {
      * @return A new {@link Props} instance
      */
     public static Props props(final RemoteOpsProviderConfig config, final ActorRef rpcInvoker,
-                              final ActorRef rpcRegistrar) {
-        return Props.create(RpcRegistry.class, config, rpcInvoker, rpcRegistrar);
+            final ActorRef rpcRegistrar) {
+        return props(STATE_DIR, config, rpcInvoker, rpcRegistrar);
+    }
+
+    @VisibleForTesting
+    public static Props props(final Path stateDir, final RemoteOpsProviderConfig config, final ActorRef rpcInvoker,
+            final ActorRef rpcRegistrar) {
+        return Props.create(RpcRegistry.class, stateDir, config, rpcInvoker, rpcRegistrar);
     }
 
     @Override
