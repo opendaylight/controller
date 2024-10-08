@@ -219,6 +219,17 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
     }
 
     private void onSnapshotOffer(final SnapshotOffer msg) {
+        final var snapshot = msg.snapshot();
+        switch (snapshot) {
+            case Integer migrate -> {
+
+            }
+            case Tombstone migrated -> {
+
+            }
+            default -> throw new IllegalStateException("Unsupported snapshot" + snapshot);
+        }
+
         incarnation = (Integer) msg.snapshot();
         log().debug("{}: recovered incarnation {}", persistenceId(), incarnation);
     }
