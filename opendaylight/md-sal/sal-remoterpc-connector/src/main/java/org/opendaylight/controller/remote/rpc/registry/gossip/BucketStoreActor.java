@@ -198,27 +198,27 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
     @Override
     protected final void handleRecover(final Object message) {
         switch (message) {
-            case RecoveryCompleted msg -> {
-                if (incarnation != null) {
-                    incarnation = incarnation + 1;
-                } else {
-                    incarnation = 0;
-                }
-
-                localBucket = new LocalBucket<>(incarnation, initialData);
-                initialData = null;
-                LOG.debug("{}: persisting new incarnation {}", persistenceId(), incarnation);
-                persisting = true;
-                saveSnapshot(incarnation);
-            }
-            case SnapshotOffer msg -> {
-                incarnation = (Integer) msg.snapshot();
-                LOG.debug("{}: recovered incarnation {}", persistenceId(), incarnation);
-            }
-            default -> {
-                LOG.warn("{}: ignoring recovery message {}", persistenceId(), message);
-            }
+            case RecoveryCompleted msg -> onRecoveryCompleted(msg);
+            case SnapshotOffer msg -> onSnapshotOffer(msg);
+            default -> LOG.warn("{}: ignoring recovery message {}", persistenceId(), message);
         }
+    }
+
+    private void onRecoveryCompleted(final RecoveryCompleted msg) {
+        final var prev = incarnation;
+        final var current = prev != null ? incarnation + 1 : 0;
+        localBucket = new LocalBucket<>(current, initialData);
+        incarnation = current;
+        initialData = null;
+
+        LOG.debug("{}: persisting new incarnation {}", persistenceId(), incarnation);
+        persisting = true;
+        saveSnapshot(incarnation);
+    }
+
+    private void onSnapshotOffer(final SnapshotOffer msg) {
+        incarnation = (Integer) msg.snapshot();
+        LOG.debug("{}: recovered incarnation {}", persistenceId(), incarnation);
     }
 
     protected final RemoteOpsProviderConfig getConfig() {
