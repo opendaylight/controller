@@ -48,10 +48,7 @@ import scala.compat.java8.FutureConverters;
  * shard is assigned a single cookie and this mapping is stored in a bidirectional map. Information about corresponding
  * shard leader is resolved via {@link ActorUtils}. The product of resolution is {@link ShardBackendInfo}.
  *
- * <p>
- * This class is thread-safe.
- *
- * @author Robert Varga
+ * <p>This class is thread-safe.
  */
 abstract class AbstractShardBackendResolver extends BackendInfoResolver<ShardBackendInfo> {
     static final class ShardState {

@@ -23,14 +23,12 @@ import org.opendaylight.controller.cluster.raft.persisted.NoopPayload;
  * indirectly. Once all entries are committed, ie commitIndex matches the last log index, it switches to the
  * normal Leader state.
  *
- * <p>
- * The use of a no-op entry in this manner is outlined in the last paragraph in §8 of the
+ * <p>The use of a no-op entry in this manner is outlined in the last paragraph in §8 of the
  * <a href="https://raft.github.io/raft.pdf">extended raft version</a>.
  *
  * @author Thomas Pantelis
  */
 public class PreLeader extends AbstractLeader {
-
     public PreLeader(RaftActorContext context) {
         super(context, RaftState.PreLeader);
 

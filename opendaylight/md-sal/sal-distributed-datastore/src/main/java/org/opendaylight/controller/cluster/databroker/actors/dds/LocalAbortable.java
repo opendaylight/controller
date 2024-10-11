@@ -11,11 +11,8 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
  * Common interface for client histories and client transactions, which can be aborted immediately without replicating
  * the effect to the backend. This is needed for abrupt shutdowns.
  *
- * <p>
- * Since classes which need to expose this functionality do not need a base class, this is an abstract class and not
+ * <p>Since classes which need to expose this functionality do not need a base class, this is an abstract class and not
  * an interface -- which allows us to not leak the {@link #localAbort(Throwable)} method.
- *
- * @author Robert Varga
  */
 abstract class LocalAbortable {
     /**

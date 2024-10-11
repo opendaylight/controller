@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.access.client;
 
 import java.util.concurrent.TimeUnit;
@@ -23,8 +22,7 @@ import java.util.concurrent.TimeUnit;
  * <p>On the other hand, there is no delay when number of open tasks is half the limit or less,
  * in order to prevent backend from running out of tasks while there may be waiting frontend threads.
  *
- * <p>
- * This class is NOT thread-safe.
+ * <p>This class is NOT thread-safe.
  *
  * @author Vratko Polak
  */

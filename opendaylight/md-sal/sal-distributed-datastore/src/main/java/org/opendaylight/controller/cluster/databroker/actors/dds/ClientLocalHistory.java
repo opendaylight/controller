@@ -17,12 +17,9 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
  * Client-side view of a local history. This class tracks all state related to a particular history and routes
  * frontend requests towards the backend.
  *
- * <p>
- * This interface is used by the world outside of the actor system and in the actor system it is manifested via
- * its client actor. That requires some state transfer with {@link AbstractDataStoreClientBehavior}. In order to
- * reduce request latency, all messages are carbon-copied (and enqueued first) to the client actor.
- *
- * @author Robert Varga
+ * <p>This interface is used by the world outside of the actor system and in the actor system it is manifested via its
+ * client actor. That requires some state transfer with {@link AbstractDataStoreClientBehavior}. In order to reduce
+ * request latency, all messages are carbon-copied (and enqueued first) to the client actor.
  */
 @Beta
 public class ClientLocalHistory extends AbstractClientHistory implements AutoCloseable {

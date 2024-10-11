@@ -19,9 +19,8 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 /**
  * Abstract base class for {@link TransactionRequest}s accessing transaction state without modifying it.
  *
- * <p>
- * This class is visible outside of this package for the purpose of allowing common instanceof checks
- * and simplified codepaths.
+ * <p>This class is visible outside of this package for the purpose of allowing common instanceof checks and simplified
+ * codepaths.
  *
  * @param <T> Message type
  */

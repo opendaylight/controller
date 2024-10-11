@@ -19,16 +19,12 @@ import org.eclipse.jdt.annotation.NonNull;
  * we need to force {@link #writeReplace()} to be abstract. We do that by making it final and exposing a protected
  * {@link #externalizableProxy()} method.
  *
- * <p>
- * All concrete subclasses of this class should be final so as to form a distinct set of possible metadata. Since
+ * <p>All concrete subclasses of this class should be final so as to form a distinct set of possible metadata. Since
  * metadata is serialized along with {@link MetadataShardDataTreeSnapshot}, this set is part of the serialization format
  * guarded by {@link PayloadVersion}.
  *
- * <p>
- * If a new metadata type is introduced or a type is removed, {@link PayloadVersion} needs to be bumped to ensure
+ * <p>If a new metadata type is introduced or a type is removed, {@link PayloadVersion} needs to be bumped to ensure
  * compatibility.
- *
- * @author Robert Varga
  */
 public abstract class ShardDataTreeSnapshotMetadata<T extends ShardDataTreeSnapshotMetadata<T>>
         implements Serializable {

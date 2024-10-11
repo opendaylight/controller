@@ -10,14 +10,10 @@ package org.opendaylight.controller.cluster.raft;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * ElectionTerm contains information about a RaftActors election term.
+ * ElectionTerm contains information about a RaftActors election term. This information includes the last known current
+ * term of the RaftActor and which candidate was voted for by the RaftActor in that term.
  *
- * <p>
- * This information includes the last known current term of the RaftActor
- * and which candidate was voted for by the RaftActor in that term.
- *
- * <p>
- * This class ensures that election term information is persisted.
+ * <p>This class ensures that election term information is persisted.
  */
 public interface ElectionTerm {
     /**

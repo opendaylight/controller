@@ -54,8 +54,7 @@ import org.slf4j.LoggerFactory;
  *
  * </pre>
  *
- * <p>
- * This class is NOT thread-safe.
+ * <p>This class is NOT thread-safe.
  */
 @Beta
 public final class MessageTracker {

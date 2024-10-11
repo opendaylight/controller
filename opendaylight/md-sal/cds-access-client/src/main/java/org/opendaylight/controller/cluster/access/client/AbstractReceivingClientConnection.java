@@ -28,8 +28,7 @@ abstract sealed class AbstractReceivingClientConnection<T extends BackendInfo> e
      * rate-limiting strategy in {@link AveragingProgressTracker} does not penalize threads as long as we have not
      * reached half of the target.
      *
-     * <p>
-     * By multiplying the advertised maximum by four, our queue steady-state should end up with:
+     * <p>By multiplying the advertised maximum by four, our queue steady-state should end up with:
      * - the backend pipeline being full,
      * - another full batch of messages being in the queue while not paying any throttling cost
      * - another 2 full batches of messages with incremental throttling cost

@@ -162,8 +162,7 @@ public abstract sealed class AbstractClientConnection<T extends BackendInfo>
      * Send a request to the backend and invoke a specified callback when it finishes. This method is safe to invoke
      * from any thread.
      *
-     * <p>
-     * Note that unlike {@link #sendRequest(Request, Consumer)}, this method does not exert backpressure, hence it
+     * <p>Note that unlike {@link #sendRequest(Request, Consumer)}, this method does not exert backpressure, hence it
      * should never be called from an application thread and serves mostly for moving requests between queues.
      *
      * @param request Request to send

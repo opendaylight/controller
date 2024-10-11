@@ -27,8 +27,7 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 /**
  * The behavior of a RaftActor when it is in the Leader state.
  *
- * <p>
- * Leaders:
+ * <p>Leaders:
  * <ul>
  * <li> Upon election: send initial empty AppendEntries RPCs
  * (heartbeat) to each server; repeat during idle periods to

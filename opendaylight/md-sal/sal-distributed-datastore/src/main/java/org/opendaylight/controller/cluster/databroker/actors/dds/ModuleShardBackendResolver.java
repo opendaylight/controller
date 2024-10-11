@@ -37,10 +37,7 @@ import scala.concurrent.Future;
  * shard is assigned a single cookie and this mapping is stored in a bidirectional map. Information about corresponding
  * shard leader is resolved via {@link ActorUtils}. The product of resolution is {@link ShardBackendInfo}.
  *
- * <p>
- * This class is thread-safe.
- *
- * @author Robert Varga
+ * <p>This class is thread-safe.
  */
 final class ModuleShardBackendResolver extends AbstractShardBackendResolver {
     private static final Logger LOG = LoggerFactory.getLogger(ModuleShardBackendResolver.class);

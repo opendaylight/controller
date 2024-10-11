@@ -14,13 +14,11 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
 /**
- * Maintains metrics registry that is provided to reporters.
- * At the moment only one reporter exists {@code JmxReporter}.
+ * Maintains metrics registry that is provided to reporters. At the moment only one reporter exists {@code JmxReporter}.
  * More reporters can be added.
  *
- * <p>
- * The consumers of this class will only be interested in {@code MetricsRegistry}
- * where metrics for that consumer gets stored.
+ * <p>The consumers of this class will only be interested in {@code MetricsRegistry} where metrics for that consumer
+ * gets stored.
  */
 public class MetricsReporter implements AutoCloseable {
 

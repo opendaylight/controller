@@ -57,8 +57,7 @@ public abstract class AbstractIdentifiablePayload<T extends Identifier> extends 
         /**
          * {@inheritDoc}
          *
-         * <p>
-         * The default implementation is canonical and should never be overridden.
+         * <p>The default implementation is canonical and should never be overridden.
          */
         @Override
         default void readExternal(final ObjectInput in) throws IOException {
@@ -70,8 +69,7 @@ public abstract class AbstractIdentifiablePayload<T extends Identifier> extends 
         /**
          * {@inheritDoc}
          *
-         * <p>
-         * The default implementation is canonical and should never be overridden.
+         * <p>The default implementation is canonical and should never be overridden.
          */
         @Override
         default void writeExternal(final ObjectOutput out) throws IOException {

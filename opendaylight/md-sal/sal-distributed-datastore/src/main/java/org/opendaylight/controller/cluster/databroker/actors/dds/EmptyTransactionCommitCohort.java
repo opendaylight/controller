@@ -16,10 +16,7 @@ import org.opendaylight.yangtools.yang.common.Empty;
  * An {@link AbstractTransactionCommitCohort} for use with empty transactions. This relies on the fact that no backends
  * have been touched, hence all state book-keeping needs to happen only locally and shares fate with the coordinator.
  *
- * <p>
- * Therefore all methods can finish immediately without any effects.
- *
- * @author Robert Varga
+ * <p>Therefore all methods can finish immediately without any effects.
  */
 final class EmptyTransactionCommitCohort extends AbstractTransactionCommitCohort {
     EmptyTransactionCommitCohort(final AbstractClientHistory parent, final TransactionIdentifier txId) {

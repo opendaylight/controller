@@ -100,8 +100,7 @@ import scala.concurrent.duration.FiniteDuration;
  * Internal shard state, similar to a DOMStore, but optimized for use in the actor system, e.g. it does not expose
  * public interfaces and assumes it is only ever called from a single thread.
  *
- * <p>
- * This class is not part of the API contract and is subject to change at any time. It is NOT thread-safe.
+ * <p>This class is not part of the API contract and is subject to change at any time. It is NOT thread-safe.
  */
 @VisibleForTesting
 // non-final for mocking

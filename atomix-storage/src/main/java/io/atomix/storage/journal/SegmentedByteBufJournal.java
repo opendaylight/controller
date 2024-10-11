@@ -566,13 +566,11 @@ public final class SegmentedByteBufJournal implements RaftJournal {
         /**
          * Sets the maximum number of allows entries per segment, returning the builder for method chaining.
          *
-         * <p>
-         * The maximum entry count dictates when logs should roll over to new segments. As entries are written to a
+         * <p>The maximum entry count dictates when logs should roll over to new segments. As entries are written to a
          * segment of the log, if the entry count in that segment meets the configured maximum entry count, the log will
          * create a new segment and append new entries to that segment.
          *
-         * <p>
-         * By default, the maximum entries per segment is {@code 1024 * 1024}.
+         * <p>By default, the maximum entries per segment is {@code 1024 * 1024}.
          *
          * @param maxEntriesPerSegment The maximum number of entries allowed per segment.
          * @return The storage builder.
@@ -593,8 +591,7 @@ public final class SegmentedByteBufJournal implements RaftJournal {
         /**
          * Sets the journal index density.
          *
-         * <p>
-         * The index density is the frequency at which the position of entries written to the journal will be
+         * <p>The index density is the frequency at which the position of entries written to the journal will be
          * recorded in an in-memory index for faster seeking.
          *
          * @param indexDensity the index density
@@ -611,8 +608,7 @@ public final class SegmentedByteBufJournal implements RaftJournal {
         /**
          * Enables flushing buffers to disk when entries are committed to a segment.
          *
-         * <p>
-         * When flush-on-commit is enabled, log entry buffers will be automatically flushed to disk each time
+         * <p>When flush-on-commit is enabled, log entry buffers will be automatically flushed to disk each time
          * an entry is committed in a given segment.
          *
          * @return The builder instance
@@ -624,8 +620,7 @@ public final class SegmentedByteBufJournal implements RaftJournal {
         /**
          * Sets whether to flush buffers to disk when entries are committed to a segment.
          *
-         * <p>
-         * When flush-on-commit is enabled, log entry buffers will be automatically flushed to disk each time
+         * <p>When flush-on-commit is enabled, log entry buffers will be automatically flushed to disk each time
          * an entry is committed in a given segment.
          *
          * @param flushOnCommit Whether to flush buffers to disk when entries are committed to a segment.

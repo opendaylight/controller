@@ -51,8 +51,7 @@ import scala.concurrent.Promise;
  *     <li>A simple file journal, containing sequence numbers of last deleted entry</li>
  * </ul>
  *
- * <p>
- * This is a conscious design decision to minimize the amount of data that is being stored in the data journal while
+ * <p>This is a conscious design decision to minimize the amount of data that is being stored in the data journal while
  * speeding up normal operations. Since the SegmentedJournal is an append-only linear log and Akka requires the ability
  * to delete persistence entries, we need ability to mark a subset of a SegmentedJournal as deleted. While we could
  * treat such delete requests as normal events, this leads to a mismatch between SegmentedJournal indices (as exposed by
@@ -60,9 +59,9 @@ import scala.concurrent.Promise;
  * index corresponding to a particular sequence number, or maintain moderately-complex logic and data structures to
  * perform that mapping in sub-linear time complexity.
  *
- * <p>
- * Split-file approach allows us to treat sequence numbers and indices as equivalent, without maintaining any explicit
- * mapping information. The only additional information we need to maintain is the last deleted sequence number.
+ * <p>Split-file approach allows us to treat sequence numbers and indices as equivalent, without maintaining any
+ * explicit mapping information. The only additional information we need to maintain is the last deleted sequence
+ * number.
  */
 abstract sealed class SegmentedJournalActor extends AbstractActor {
     abstract static sealed class AsyncMessage<T> {
@@ -171,19 +170,16 @@ abstract sealed class SegmentedJournalActor extends AbstractActor {
      * A {@link SegmentedJournalActor} which delays issuing a flush operation until a watermark is reached or when the
      * queue is empty.
      *
-     * <p>
-     * The problem we are addressing is that there is a queue sitting in from of the actor, which we have no direct
+     * <p>The problem we are addressing is that there is a queue sitting in from of the actor, which we have no direct
      * access to. Since a flush involves committing data to durable storage, that operation can easily end up dominating
      * workloads.
      *
-     * <p>
-     * We solve this by having an additional queue in which we track which messages were written and trigger a flush
+     * <p>We solve this by having an additional queue in which we track which messages were written and trigger a flush
      * only when the number of bytes we have written exceeds specified limit. The other part is that each time this
      * queue becomes non-empty, we send a dedicated message to self. This acts as a actor queue probe -- when we receive
      * it, we know we have processed all messages that were in the queue when we first delayed the write.
      *
-     * <p>
-     * The combination of these mechanisms ensure we use a minimal delay while also ensuring we take advantage of
+     * <p>The combination of these mechanisms ensure we use a minimal delay while also ensuring we take advantage of
      * batching opportunities.
      */
     private static final class Delayed extends SegmentedJournalActor {

@@ -36,23 +36,19 @@ import org.slf4j.LoggerFactory;
  * This queue is internally split into two queues for performance reasons, both memory efficiency and copy
  * operations.
  *
- * <p>
- * Entries are always appended to the end, but then they are transmitted to the remote end and do not necessarily
- * complete in the order in which they were sent -- hence the head of the queue does not increase linearly,
- * but can involve spurious removals of non-head entries.
+ * <p>Entries are always appended to the end, but then they are transmitted to the remote end and do not necessarily
+ * complete in the order in which they were sent -- hence the head of the queue does not increase linearly, but can
+ * involve spurious removals of non-head entries.
  *
- * <p>
- * For memory efficiency we want to pre-allocate both queues -- which points to ArrayDeque, but that is very
- * inefficient when entries are removed from the middle. In the typical case we expect the number of in-flight
- * entries to be an order of magnitude lower than the number of enqueued entries, hence the split.
+ * <p>For memory efficiency we want to pre-allocate both queues -- which points to ArrayDeque, but that is very
+ * inefficient when entries are removed from the middle. In the typical case we expect the number of in-flight entries
+ * to be an order of magnitude lower than the number of enqueued entries, hence the split.
  *
- * <p>
- * Note that in transient case of reconnect, when the backend gives us a lower number of maximum in-flight entries
+ * <p>Note that in transient case of reconnect, when the backend gives us a lower number of maximum in-flight entries
  * than the previous incarnation, we may end up still moving the pending queue -- but that is a very exceptional
  * scenario, hence we consciously ignore it to keep the design relatively simple.
  *
- * <p>
- * This class is not thread-safe, as it is expected to be guarded by {@link AbstractClientConnection}.
+ * <p>This class is not thread-safe, as it is expected to be guarded by {@link AbstractClientConnection}.
  */
 abstract sealed class TransmitQueue {
     static final class Halted extends TransmitQueue {

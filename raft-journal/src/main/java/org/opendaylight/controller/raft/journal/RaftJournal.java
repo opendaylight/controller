@@ -61,10 +61,7 @@ public interface RaftJournal extends AutoCloseable {
     EntryReader openCommitsReader(long index);
 
     /**
-     * Compacts the journal up to the given index.
-     *
-     * <p>
-     * The semantics of compaction are not specified by this interface.
+     * Compacts the journal up to the given index. The semantics of compaction are not specified by this interface.
      *
      * @param index The index up to which to compact the journal.
      */

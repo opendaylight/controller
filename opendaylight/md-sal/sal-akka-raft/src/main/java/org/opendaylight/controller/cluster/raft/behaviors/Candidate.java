@@ -26,8 +26,7 @@ import scala.concurrent.duration.FiniteDuration;
 /**
  * The behavior of a RaftActor when it is in the Candidate raft state.
  *
- * <p>
- * Candidates (§5.2):
+ * <p>Candidates (§5.2):
  * <ul>
  * <li> On conversion to candidate, start election:
  * <ul>

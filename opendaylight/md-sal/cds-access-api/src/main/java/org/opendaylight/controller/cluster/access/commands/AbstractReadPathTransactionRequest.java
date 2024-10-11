@@ -24,9 +24,8 @@ import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataInput
  * Abstract base class for {@link TransactionRequest}s accessing data as visible in the isolated context of a particular
  * transaction. The path of the data being accessed is returned via {@link #getPath()}.
  *
- * <p>
- * This class is visible outside of this package for the purpose of allowing common instanceof checks
- * and simplified codepaths.
+ * <p>This class is visible outside of this package for the purpose of allowing common instanceof checks and simplified
+ * codepaths.
  *
  * @param <T> Message type
  */

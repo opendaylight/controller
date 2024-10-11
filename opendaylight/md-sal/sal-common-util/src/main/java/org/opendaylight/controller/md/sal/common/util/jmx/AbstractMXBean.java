@@ -21,13 +21,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Abstract base for an MXBean implementation class.
- *
- * <p>
- * This class is not intended for use outside of MD-SAL and its part of private
- * implementation (still exported as public to be reused across MD-SAL implementation
- * components) and may be removed in subsequent
- * releases.
+ * Abstract base for an MXBean implementation class. This class is not intended for use outside of MD-SAL and its part
+ * of private implementation (still exported as public to be reused across MD-SAL implementation components) and may be
+ * removed in subsequent releases.
  *
  * @author Thomas Pantelis
  */

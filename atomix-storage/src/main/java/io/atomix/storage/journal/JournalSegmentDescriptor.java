@@ -23,11 +23,9 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * Stores information about a {@link JournalSegment} of the log.
- *
- * <p>
- * The segment descriptor manages metadata related to a single segment of the log. Descriptors are stored within the
- * first {@code 64} bytes of each segment in the following order:
+ * Stores information about a {@link JournalSegment} of the log. The segment descriptor manages metadata related to a
+ * single segment of the log. Descriptors are stored within the first {@code 64} bytes of each segment in the following
+ * order:
  * <ul>
  *   <li>{@code id} (64-bit signed integer) - A unique segment identifier. This is a monotonically increasing number
  *       within each log. Segments with in-sequence identifiers should contain in-sequence indexes.</li>
@@ -93,10 +91,7 @@ public record JournalSegmentDescriptor(
     }
 
     /**
-     * Returns the segment version.
-     *
-     * <p>
-     * Versions are monotonically increasing starting at {@code 1}.
+     * Returns the segment version. Versions are monotonically increasing starting at {@code 1}.
      *
      * @return The segment version.
      */
@@ -105,11 +100,8 @@ public record JournalSegmentDescriptor(
     }
 
     /**
-     * Returns the segment identifier.
-     *
-     * <p>
-     * The segment ID is a monotonically increasing number within each log. Segments with in-sequence identifiers should
-     * contain in-sequence indexes.
+     * Returns the segment identifier. The segment ID is a monotonically increasing number within each log. Segments
+     * with in-sequence identifiers should contain in-sequence indexes.
      *
      * @return The segment identifier.
      */
@@ -118,11 +110,8 @@ public record JournalSegmentDescriptor(
     }
 
     /**
-     * Returns the segment index.
-     *
-     * <p>
-     * The index indicates the index at which the first entry should be written to the segment. Indexes are
-     * monotonically increasing thereafter.
+     * Returns the segment index. The index indicates the index at which the first entry should be written to the
+     * segment. Indexes are monotonically increasing thereafter.
      *
      * @return The segment index.
      */
@@ -151,8 +140,7 @@ public record JournalSegmentDescriptor(
     /**
      * Returns last time the segment was updated.
      *
-     * <p>
-     * When the segment is first constructed, the {@code updated} time is {@code 0}. Once all entries in the segment
+     * <p>When the segment is first constructed, the {@code updated} time is {@code 0}. Once all entries in the segment
      * have been committed, the {@code updated} time should be set to the current time. Log compaction should not result
      * in a change to {@code updated}.
      *
@@ -181,10 +169,8 @@ public record JournalSegmentDescriptor(
     }
 
     /**
-     * Returns a descriptor builder.
-     *
-     * <p>
-     * The descriptor builder will write segment metadata to a {@code 48} byte in-memory buffer.
+     * Returns a descriptor builder. The descriptor builder will write segment metadata to a {@code 48} byte in-memory
+     * buffer.
      *
      * @return The descriptor builder.
      */

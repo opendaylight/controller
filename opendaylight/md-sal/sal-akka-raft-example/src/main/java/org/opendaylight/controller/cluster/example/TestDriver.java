@@ -57,10 +57,9 @@ public class TestDriver {
      *  printNodes
      *  printState
      *
-     * <p>
-     *  Note: when run on IDE and on debug log level, the debug logs in
-     *  AbstractUptypedActor and AbstractUptypedPersistentActor would need to be commented out.
-     *  Also RaftActor handleCommand(), debug log which prints for every command other than AE/AER
+     * <p>Note: when run on IDE and on debug log level, the debug logs in AbstractUptypedActor and
+     * AbstractUptypedPersistentActor would need to be commented out.
+     * Also RaftActor handleCommand(), debug log which prints for every command other than AE/AER
      */
     public static void main(final String[] args) throws Exception {
 

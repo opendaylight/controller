@@ -79,9 +79,8 @@ public interface ReplicatedLog {
     /**
      * Removes entries from the in-memory log and the persisted log starting at the given index.
      *
-     * <p>
-     * The persisted information would then be used during recovery to properly
-     * reconstruct the state of the in-memory replicated log
+     * <p>The persisted information would then be used during recovery to properly reconstruct the state
+     * of the in-memory replicated log
      *
      * @param index the index of the first log entry to remove
      * @return true if entries were removed, false otherwise

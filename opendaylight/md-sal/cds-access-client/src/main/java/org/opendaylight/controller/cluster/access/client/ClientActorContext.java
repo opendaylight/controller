@@ -27,8 +27,7 @@ import scala.concurrent.duration.FiniteDuration;
 /**
  * An actor context associated with this {@link AbstractClientActor}.
  *
- * <p>
- * Time-keeping in a client actor is based on monotonic time. The precision of this time can be expected to be the
+ * <p>Time-keeping in a client actor is based on monotonic time. The precision of this time can be expected to be the
  * same as {@link System#nanoTime()}, but it is not tied to that particular clock. Actor clock is exposed as
  * a {@link Ticker}, which can be obtained via {@link #ticker()}. This class is thread-safe.
  */

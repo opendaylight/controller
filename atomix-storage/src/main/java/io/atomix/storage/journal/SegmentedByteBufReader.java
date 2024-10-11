@@ -112,8 +112,7 @@ sealed class SegmentedByteBufReader implements EntryReader permits SegmentedComm
      * Attempt to read the next entry. {@code index} here is really {@code nextIndex} passed by callers, which already
      * check it for invariants. If non-null is returned, {@code nextIndex} has already been set to {@code index + 1}.
      *
-     * <p>
-     * This method is shared between 'all entries' and 'committed entries only' variants. The distinction is made by
+     * <p>This method is shared between 'all entries' and 'committed entries only' variants. The distinction is made by
      * an additional check in {@link SegmentedCommitsByteBufReader#tryAdvance(long)}.
      *
      * @param index next index

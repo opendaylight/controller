@@ -43,8 +43,7 @@ import org.opendaylight.controller.remote.rpc.RemoteOpsProviderConfig;
  * It maintains a {@link org.opendaylight.controller.remote.rpc.registry.gossip.Bucket} per node. Buckets are versioned.
  * A node can write ONLY to its bucket. This way, write conflicts are avoided.
  *
- * <p>
- * Buckets are sync'ed across nodes using Gossip protocol (http://en.wikipedia.org/wiki/Gossip_protocol).
+ * <p>Buckets are sync'ed across nodes using Gossip protocol (http://en.wikipedia.org/wiki/Gossip_protocol).
  * This store uses a {@link org.opendaylight.controller.remote.rpc.registry.gossip.Gossiper}.
  */
 public abstract class BucketStoreActor<T extends BucketData<T>> extends

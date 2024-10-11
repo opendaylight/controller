@@ -58,13 +58,11 @@ import org.slf4j.LoggerFactory;
 /**
  * Class translating transaction operations towards a particular backend shard.
  *
- * <p>
- * This class is not safe to access from multiple application threads, as is usual for transactions. Internal state
+ * <p>This class is not safe to access from multiple application threads, as is usual for transactions. Internal state
  * transitions coming from interactions with backend are expected to be thread-safe.
  *
- * <p>
- * This class interacts with the queueing mechanism in ClientActorBehavior, hence once we arrive at a decision
- * to use either a local or remote implementation, we are stuck with it. We can re-evaluate on the next transaction.
+ * <p>This class interacts with the queueing mechanism in ClientActorBehavior, hence once we arrive at a decision to use
+ * either a local or remote implementation, we are stuck with it. We can re-evaluate on the next transaction.
  */
 abstract sealed class AbstractProxyTransaction implements Identifiable<TransactionIdentifier>
         permits LocalProxyTransaction, RemoteProxyTransaction {
@@ -116,8 +114,7 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
      * between the old connection (potentially being accessed by the user) and the new connection (being cleaned up
      * by the actor.
      *
-     * <p>
-     * When a user operation encounters this state, it synchronizes on the it and wait until reconnection completes,
+     * <p>When a user operation encounters this state, it synchronizes on the it and wait until reconnection completes,
      * at which point the request is routed to the successor transaction. This is a relatively heavy-weight solution
      * to the problem of state transfer, but the user will observe it only if the race condition is hit.
      */
@@ -195,8 +192,7 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
      * Transaction has been sealed by the user, but it has not completed flushing to the backed, yet. This is
      * a transition state, as we are waiting for the user to initiate commit procedures.
      *
-     * <p>
-     * Since the reconnect mechanics relies on state replay for transactions, this state needs to be flushed into the
+     * <p>Since the reconnect mechanics relies on state replay for transactions, this state needs to be flushed into the
      * queue to re-create state in successor transaction (which may be based on different messages as locality may have
      * changed). Hence the transition to {@link #FLUSHED} state needs to be handled in a thread-safe manner.
      */
@@ -207,8 +203,7 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
      * the backend. At this point the transaction does not hold any state besides successful requests, all other state
      * is held either in the connection's queue or the successor object.
      *
-     * <p>
-     * Transition to this state indicates we have all input from the user we need to initiate the correct commit
+     * <p>Transition to this state indicates we have all input from the user we need to initiate the correct commit
      * protocol.
      */
     private static final State FLUSHED = new State("FLUSHED");
@@ -745,8 +740,7 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
      * Invoked from {@link #replayMessages(AbstractProxyTransaction, Iterable)} to have successor adopt an in-flight
      * request.
      *
-     * <p>
-     * Note: this method is invoked by the predecessor on the successor.
+     * <p>Note: this method is invoked by the predecessor on the successor.
      *
      * @param request Request which needs to be forwarded
      * @param callback Callback to be invoked once the request completes
@@ -831,8 +825,7 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
     /**
      * Invoked from {@link LocalProxyTransaction} when it replays its successful requests to its successor.
      *
-     * <p>
-     * Note: this method is invoked by the predecessor on the successor.
+     * <p>Note: this method is invoked by the predecessor on the successor.
      *
      * @param request Request which needs to be forwarded
      * @param callback Callback to be invoked once the request completes
@@ -844,8 +837,7 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
     /**
      * Invoked from {@link RemoteProxyTransaction} when it replays its successful requests to its successor.
      *
-     * <p>
-     * Note: this method is invoked by the predecessor on the successor.
+     * <p>Note: this method is invoked by the predecessor on the successor.
      *
      * @param request Request which needs to be forwarded
      * @param callback Callback to be invoked once the request completes

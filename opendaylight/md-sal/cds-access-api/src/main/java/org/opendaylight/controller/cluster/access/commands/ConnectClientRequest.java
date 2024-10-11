@@ -22,12 +22,13 @@ import org.opendaylight.controller.cluster.access.concepts.RequestException;
 
 /**
  * Request to connect a frontend instance to the backend. It carries basic information about the frontend:
- * - its coordinates in {@link #getReplyTo()}.
- * - its minimum supported ABI version
- * - its maximum supported ABI version
+ * <ul>
+ *   <li>its coordinates in {@link #getReplyTo()}</li>
+ *   <li>its minimum supported ABI version</li>
+ *   <li>its maximum supported ABI version</li>
+ * </ul>
  *
- * <p>
- * It also includes request stream sequencing information.
+ * <p>It also includes request stream sequencing information.
  */
 public final class ConnectClientRequest extends Request<ClientIdentifier, ConnectClientRequest> {
     interface SerialForm extends Request.SerialForm<ClientIdentifier, ConnectClientRequest> {

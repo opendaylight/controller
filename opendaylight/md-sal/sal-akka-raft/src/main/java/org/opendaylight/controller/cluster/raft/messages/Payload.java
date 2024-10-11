@@ -12,9 +12,9 @@ import java.io.Serializable;
 /**
  * An instance of a {@link Payload} class is meant to be used as the Payload for {@link AppendEntries}.
  *
- * <p>
- * When an actor which is derived from RaftActor attempts to persistData it must pass an instance of the Payload class.
- * Similarly when state needs to be applied to the derived RaftActor it will be passed an instance of the Payload class.
+ * <p>When an actor which is derived from RaftActor attempts to persistData it must pass an instance of the Payload
+ * class. Similarly when state needs to be applied to the derived RaftActor it will be passed an instance of the
+ * Payload class.
  */
 public abstract class Payload implements Serializable {
     @java.io.Serial

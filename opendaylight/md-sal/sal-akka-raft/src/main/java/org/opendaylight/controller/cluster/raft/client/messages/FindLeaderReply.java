@@ -17,8 +17,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * sent the message. If the responding actor does not have knowledge of the leader, {@link #getLeaderActor()} will
  * return {@link Optional#empty()}.
  *
- * <p>
- * This message is intended for testing purposes only.
+ * <p>This message is intended for testing purposes only.
  */
 @VisibleForTesting
 public final class FindLeaderReply implements Serializable {

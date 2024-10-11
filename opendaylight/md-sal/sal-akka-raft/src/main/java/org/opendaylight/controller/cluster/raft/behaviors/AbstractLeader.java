@@ -60,8 +60,7 @@ import scala.concurrent.duration.FiniteDuration;
 /**
  * The behavior of a RaftActor when it is in the Leader state.
  *
- * <p>
- * Leaders:
+ * <p>Leaders:
  * <ul>
  * <li> Upon election: send initial empty AppendEntries RPCs
  * (heartbeat) to each server; repeat during idle periods to
@@ -872,20 +871,19 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     }
 
     /**
-     * Initiates a snapshot capture to install on a follower.
-     *
-     * <p>
-     * Install Snapshot works as follows
-     *   1. Leader initiates the capture snapshot by calling createSnapshot on the RaftActor.
-     *   2. On receipt of the CaptureSnapshotReply message, the RaftActor persists the snapshot and makes a call to
-     *      the Leader's handleMessage with a SendInstallSnapshot message.
-     *   3. The Leader obtains and stores the Snapshot from the SendInstallSnapshot message and sends it in chunks to
-     *      the Follower via InstallSnapshot messages.
-     *   4. For each chunk, the Follower sends back an InstallSnapshotReply.
-     *   5. On receipt of the InstallSnapshotReply for the last chunk, the Leader marks the install complete for that
-     *      follower.
-     *   6. If another follower requires a snapshot and a snapshot has been collected (via SendInstallSnapshot)
-     *      then send the existing snapshot in chunks to the follower.
+     * Initiates a snapshot capture to install on a follower. Install Snapshot works as follows:
+     * <ol>
+     *   <li>Leader initiates the capture snapshot by calling createSnapshot on the RaftActor.</li>
+     *   <li>On receipt of the CaptureSnapshotReply message, the RaftActor persists the snapshot and makes a call to
+     *       the Leader's handleMessage with a SendInstallSnapshot message.</li>
+     *   <li>The Leader obtains and stores the Snapshot from the SendInstallSnapshot message and sends it in chunks to
+     *       the Follower via InstallSnapshot messages.</li>
+     *   <li>For each chunk, the Follower sends back an InstallSnapshotReply.</li>
+     *   <li>On receipt of the InstallSnapshotReply for the last chunk, the Leader marks the install complete for that
+     *       follower.</li>
+     *   <li>If another follower requires a snapshot and a snapshot has been collected (via SendInstallSnapshot)
+     *       then send the existing snapshot in chunks to the follower.</li>
+     * </ol>
      *
      * @param followerId the id of the follower.
      * @return true if capture was initiated, false otherwise.

@@ -26,8 +26,7 @@ import org.opendaylight.yangtools.concepts.WritableObjects;
  * equivalent to {@link TransactionPurgeRequest} for {@link #getTarget()}, but also carries additional sibling
  * {@link TransactionIdentifier}s in {@link #getOthers()}.
  *
- * <p>
- * This request is sent by the frontend to inform the backend that a set of {@link TransactionIdentifier}s are
+ * <p>This request is sent by the frontend to inform the backend that a set of {@link TransactionIdentifier}s are
  * explicitly retired and are guaranteed to never be used by the frontend.
  */
 public final class SkipTransactionsRequest extends TransactionRequest<SkipTransactionsRequest> {

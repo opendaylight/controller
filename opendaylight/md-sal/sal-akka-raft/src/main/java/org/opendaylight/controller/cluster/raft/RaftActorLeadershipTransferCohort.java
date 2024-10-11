@@ -28,8 +28,7 @@ import scala.concurrent.duration.FiniteDuration;
  * A raft actor support class that participates in leadership transfer. An instance is created upon
  * initialization of leadership transfer.
  *
- * <p>
- * The transfer process is as follows:
+ * <p>The transfer process is as follows:
  * <ol>
  * <li>Send a LeaderStateChanged message with a null leader Id to the local RoleChangeNotifier to notify
  *     clients that we no longer have a working leader.</li>
@@ -45,8 +44,7 @@ import scala.concurrent.duration.FiniteDuration;
  * <li>On notification of the new leader from the RaftActor or on time out, notify {@link OnComplete} callbacks.</li>
  * </ol>
  *
- * <p>
- * NOTE: All methods on this class must be called on the actor's thread dispatcher as they may access/modify
+ * <p>NOTE: All methods on this class must be called on the actor's thread dispatcher as they may access/modify
  * internal state.
  *
  * @author Thomas Pantelis

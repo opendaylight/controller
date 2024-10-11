@@ -33,28 +33,23 @@ import org.opendaylight.yangtools.concepts.WritableObjects;
  * An abstract concept of a Message. This class cannot be instantiated directly, use its specializations {@link Request}
  * and {@link Response}.
  *
- * <p>
- * Messages have a target and a sequence number. Sequence numbers are expected to be assigned monotonically on a
+ * <p>Messages have a target and a sequence number. Sequence numbers are expected to be assigned monotonically on a
  * per-target basis, hence two targets can observe the same sequence number.
  *
- * <p>
- * This class includes explicit versioning for forward- and backward- compatibility of serialization format. This is
+ * <p>This class includes explicit versioning for forward- and backward- compatibility of serialization format. This is
  * achieved by using the serialization proxy pattern. Subclasses are in complete control of what proxy is used to
  * serialize a particular object on the wire. This class can serve as an explicit version marker, hence no further
  * action is necessary in the deserialization path.
  *
- * <p>
- * For the serialization path an explicit call from the user is required to select the appropriate serialization
+ * <p>For the serialization path an explicit call from the user is required to select the appropriate serialization
  * version. This is done via {@link #toVersion(ABIVersion)} method, which should return a copy of this object with
  * the requested ABI version recorded and should return the appropriate serialization proxy.
  *
- * <p>
- * This workflow allows least disturbance across ABI versions, as all messages not affected by a ABI version bump
+ * <p>This workflow allows least disturbance across ABI versions, as all messages not affected by a ABI version bump
  * will remain working with the same serialization format for the new ABI version.
  *
- * <p>
- * Note that this class specifies the {@link Immutable} contract, which means that all subclasses must follow this API
- * contract.
+ * <p>Note that this class specifies the {@link Immutable} contract, which means that all subclasses must follow this
+ * API contract.
  *
  * @param <T> Target identifier type
  * @param <C> Message type

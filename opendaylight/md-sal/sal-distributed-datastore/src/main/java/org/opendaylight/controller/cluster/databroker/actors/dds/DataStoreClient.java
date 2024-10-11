@@ -16,10 +16,8 @@ import org.opendaylight.yangtools.concepts.Identifiable;
  * Client interface for interacting with the frontend actor. This interface is the primary access point through
  * which the DistributedDataStore frontend interacts with backend Shards.
  *
- * <p>
- * Keep this interface as clean as possible, as it needs to be implemented in thread-safe and highly-efficient manner.
- *
- * @author Robert Varga
+ * <p>Keep this interface as clean as possible, as it needs to be implemented in thread-safe and highly-efficient
+ * manner.
  */
 @Beta
 @NonNullByDefault

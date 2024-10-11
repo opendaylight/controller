@@ -25,11 +25,8 @@ import org.checkerframework.checker.lock.qual.Holding;
  * an exception. This exception corresponds to the cause reported by the first 'no' vote, with all subsequent votes
  * added as suppressed exceptions.
  *
- * <p>
- * Implementation is geared toward positive votes. Negative votes have to synchronize and therefore are more likely
+ * <p>Implementation is geared toward positive votes. Negative votes have to synchronize and therefore are more likely
  * to see contention.
- *
- * @author Robert Varga
  *
  * @param <T> Type of value returned on success
  */

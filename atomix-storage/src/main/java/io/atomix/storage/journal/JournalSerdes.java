@@ -192,8 +192,7 @@ public interface JournalSerdes {
         /**
          * Registers serializer for the given set of classes.
          *
-         * <p>
-         * When multiple classes are registered with an explicitly provided serializer, the namespace guarantees
+         * <p>When multiple classes are registered with an explicitly provided serializer, the namespace guarantees
          * all instances will be serialized with the same type ID.
          *
          * @param classes list of classes to register

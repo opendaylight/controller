@@ -18,16 +18,14 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 /**
  * Represents a modification to the data store.
  *
- * <p>
- * Simple modifications can be of type,
+ * <p>Simple modifications can be of type,
  * <ul>
  * <li> {@link org.opendaylight.controller.cluster.datastore.modification.WriteModification}
  * <li> {@link org.opendaylight.controller.cluster.datastore.modification.MergeModification}
  * <li> {@link org.opendaylight.controller.cluster.datastore.modification.DeleteModification}
  * </ul>
  *
- * <p>
- * Modifications can in turn be lumped into a single
+ * <p>Modifications can in turn be lumped into a single
  * {@link org.opendaylight.controller.cluster.datastore.modification.CompositeModification}
  * which can then be applied to a write transaction.
  */

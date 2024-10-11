@@ -31,9 +31,8 @@ import org.opendaylight.yangtools.concepts.Either;
  * a fixed maximum size. This is generally preferable to {@link ByteArrayOutputStream}, as that can result in huge
  * byte arrays -- which can create unnecessary pressure on the GC (as well as lot of copying).
  *
- * <p>
- * This class takes a different approach: it recognizes that result of buffering will be collected at some point, when
- * the stream is already closed (and thus unmodifiable). Thus it splits the process into two steps:
+ * <p>This class takes a different approach: it recognizes that result of buffering will be collected at some point,
+ * when the stream is already closed (and thus unmodifiable). Thus it splits the process into two steps:
  * <ul>
  *   <li>Data acquisition, during which we start with an initial (power-of-two) size and proceed to fill it up. Once the
  *       buffer is full, we stash it, allocate a new buffer twice its size and repeat the process. Once we hit
@@ -43,8 +42,7 @@ import org.opendaylight.yangtools.concepts.Either;
  *       final collection of buffers.</li>
  * </ul>
  *
- * <p>
- * The data acquisition strategy results in predictably-sized buffers, which are growing exponentially in size until
+ * <p>The data acquisition strategy results in predictably-sized buffers, which are growing exponentially in size until
  * they hit maximum size. Intrinsic property here is that the total capacity of chunks created during the ramp up is
  * guaranteed to fit into {@code maxChunkSize}, hence they can readily be compacted into a single buffer, which replaces
  * them. Combined with the requirement to trim the last buffer to have accurate length, this algorithm guarantees total

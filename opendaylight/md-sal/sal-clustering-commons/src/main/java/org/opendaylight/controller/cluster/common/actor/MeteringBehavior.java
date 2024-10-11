@@ -16,10 +16,8 @@ import scala.runtime.AbstractPartialFunction;
 import scala.runtime.BoxedUnit;
 
 /**
- * Represents behaviour that can be exhibited by actors of type {@link AbstractActor}
- *
- * <p>
- * This behaviour meters actor's default behaviour. It captures 2 metrics:
+ * Represents behaviour that can be exhibited by actors of type {@link AbstractActor}. This behaviour meters actor's
+ * default behaviour. It captures 2 metrics:
  * <ul>
  *     <li>message processing rate of actor's receive block</li>
  *     <li>message processing rate by message type</li>
@@ -65,13 +63,11 @@ public class MeteringBehavior extends AbstractPartialFunction<Object, BoxedUnit>
      * Uses 2 timers to measure message processing rate. One for overall message processing rate and
      * another to measure rate by message type. The timers are re-used if they were previously created.
      *
-     * <p>
-     * {@link com.codahale.metrics.MetricRegistry} maintains a reservoir for different timers where
+     * <p>{@link com.codahale.metrics.MetricRegistry} maintains a reservoir for different timers where
      * collected timings are kept. It exposes various metrics for each timer based on collected
      * data. Eg: count of messages, 99, 95, 50... percentiles, max, mean etc.
      *
-     * <p>
-     * These metrics are exposed as JMX bean.
+     * <p>These metrics are exposed as JMX bean.
      *
      * @see <a href="http://dropwizard.github.io/metrics/manual/core/#timers">
      *     http://dropwizard.github.io/metrics/manual/core/#timers</a>

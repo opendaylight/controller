@@ -10,10 +10,7 @@ package org.opendaylight.controller.cluster.common.actor;
 import com.typesafe.config.Config;
 
 /**
- * Represents a unified view of configuration.
- *
- * <p>
- * It merges configuration from:
+ * Represents a unified view of configuration. It merges configuration from:
  * <ul>
  *     <li>Config subsystem</li>
  *     <li>Akka configuration files</li>
@@ -21,7 +18,6 @@ import com.typesafe.config.Config;
  * Configurations defined in config subsystem takes precedence.
  */
 public interface UnifiedConfig {
-
     /**
      * Returns an immutable instance of unified configuration.
      *

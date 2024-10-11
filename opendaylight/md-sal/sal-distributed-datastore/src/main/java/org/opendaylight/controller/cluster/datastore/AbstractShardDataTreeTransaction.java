@@ -76,9 +76,8 @@ abstract class AbstractShardDataTreeTransaction<T extends DataTreeSnapshot>
      * This method is exposed for sake of {@link ShardTransaction}, which is an actor. We need to ensure that
      * the parent is updated to reflect the transaction has been closed, but no journal actions may be invoked.
      *
-     * <p>
-     * ShardTransaction is responsible for additionally sending a request to persist an {@link AbortTransactionPayload}
-     * via a message to the Shard actor.
+     * <p>ShardTransaction is responsible for additionally sending a request to persist an
+     * {@link AbortTransactionPayload} via a message to the Shard actor.
      */
     final void abortFromTransactionActor() {
         if (close()) {

@@ -26,15 +26,12 @@ import scala.concurrent.duration.FiniteDuration;
  * This is a sample implementation of a Role Change Listener which is an actor, which registers itself
  * to the ClusterRoleChangeNotifier.
  *
- * <p>
- * The Role Change listener receives a SetNotifiers message with the notifiers to register itself with.
+ * <p>The Role Change listener receives a SetNotifiers message with the notifiers to register itself with.
  *
- * <p>
- * It kicks of a scheduler which sends registration messages to the notifiers, till it gets a
+ * <p>It kicks of a scheduler which sends registration messages to the notifiers, till it gets a
  *  RegisterRoleChangeListenerReply.
  *
- * <p>
- * If all the notifiers have been regsitered with, then it cancels the scheduler.
+ * <p>If all the notifiers have been regsitered with, then it cancels the scheduler.
  * It starts the scheduler again when it receives a new registration
  */
 public class ExampleRoleChangeListener extends AbstractUntypedActor implements AutoCloseable {

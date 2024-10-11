@@ -26,8 +26,7 @@ import org.opendaylight.controller.akka.segjournal.DataJournalEntry.ToPersistenc
  * Kryo serializer for {@link DataJournalEntry}. Each {@link SegmentedJournalActor} has its own instance, as well as
  * a nested JavaSerializer to handle the payload.
  *
- * <p>
- * Since we are persisting only parts of {@link PersistentRepr}, this class asymmetric by design:
+ * <p>Since we are persisting only parts of {@link PersistentRepr}, this class asymmetric by design:
  * {@link #write(EntryOutput, DataJournalEntry)} only accepts {@link ToPersistence} subclass, which is a wrapper
  * around a {@link PersistentRepr}, while {@link #read(EntryInput)} produces an {@link FromPersistence}, which
  * needs further processing to reconstruct a {@link PersistentRepr}.

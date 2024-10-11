@@ -26,8 +26,7 @@ import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVer
  * <li>serialization format is changed</li>
  * </ul>
  *
- * <p>
- * This version effectively defines the protocol version between actors participating on a particular shard. A shard
+ * <p>This version effectively defines the protocol version between actors participating on a particular shard. A shard
  * participant instance should oppose RAFT candidates which produce persistence of an unsupported version. If a follower
  * encounters an unsupported version it must not become fully-operational, as it does not have an accurate view
  * of shard state.

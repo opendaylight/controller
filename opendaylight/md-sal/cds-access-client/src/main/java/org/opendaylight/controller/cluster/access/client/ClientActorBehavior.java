@@ -70,8 +70,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
      * during connection transitions. Optimistic read-side of the lock is taken when new connections are introduced
      * into the map.
      *
-     * <p>
-     * The lock detects potential AB/BA deadlock scenarios and will force the reader side out by throwing
+     * <p>The lock detects potential AB/BA deadlock scenarios and will force the reader side out by throwing
      * a {@link InversibleLockException} -- which must be propagated up, releasing locks as it propagates. The initial
      * entry point causing the the conflicting lookup must then call {@link InversibleLockException#awaitResolution()}
      * before retrying the operation.

@@ -57,13 +57,11 @@ import org.slf4j.LoggerFactory;
  * An {@link AbstractProxyTransaction} for dispatching a transaction towards a shard leader which is co-located with
  * the client instance. This class is NOT thread-safe.
  *
- * <p>
- * It requires a {@link DataTreeSnapshot}, which is used to instantiated a new {@link DataTreeModification}. Operations
- * are then performed on this modification and once the transaction is submitted, the modification is sent to the shard
- * leader.
+ * <p>It requires a {@link DataTreeSnapshot}, which is used to instantiated a new {@link DataTreeModification}.
+ * Operations are then performed on this modification and once the transaction is submitted, the modification is sent
+ * to the shard leader.
  *
- * <p>
- * This class is not thread-safe as usual with transactions. Since it does not interact with the backend until the
+ * <p>This class is not thread-safe as usual with transactions. Since it does not interact with the backend until the
  * transaction is submitted, at which point this class gets out of the picture, this is not a cause for concern.
  *
  * @author Robert Varga
@@ -86,8 +84,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
      * offending call site, but that exposes inconsistency in behavior during initial connection, when we go through
      * {@link RemoteProxyTransaction}, which detects this sort of issues at canCommit/directCommit time on the backend.
      *
-     * <p>
-     * We therefore do not report incurred exceptions directly, but report them once the user attempts to commit
+     * <p>We therefore do not report incurred exceptions directly, but report them once the user attempts to commit
      * this transaction.
      */
     private Exception recordedFailure;

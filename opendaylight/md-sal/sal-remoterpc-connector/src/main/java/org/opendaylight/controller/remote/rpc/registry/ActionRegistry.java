@@ -31,9 +31,8 @@ import org.opendaylight.mdsal.dom.api.DOMActionInstance;
 /**
  * Registry to look up cluster nodes that have registered for a given Action.
  *
- * <p>
- * It uses {@link org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreActor} to maintain this
- * cluster wide information.
+ * <p>It uses {@link org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreActor} to maintain this
+ * cluster-wide information.
  */
 public class ActionRegistry extends BucketStoreActor<ActionRoutingTable> {
     private final ActorRef rpcRegistrar;

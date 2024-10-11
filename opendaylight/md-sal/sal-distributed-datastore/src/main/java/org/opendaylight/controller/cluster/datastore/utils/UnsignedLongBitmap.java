@@ -247,8 +247,7 @@ public abstract class UnsignedLongBitmap implements Immutable {
     /**
      * {@inheritDoc}
      *
-     * <p>
-     * Implementations of this method return a deterministic value.
+     * <p>Implementations of this method return a deterministic value.
      */
     @Override
     public abstract int hashCode();

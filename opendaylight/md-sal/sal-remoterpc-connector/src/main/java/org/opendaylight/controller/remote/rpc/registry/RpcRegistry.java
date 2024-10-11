@@ -36,9 +36,8 @@ import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
 /**
  * Registry to look up cluster nodes that have registered for a given RPC.
  *
- * <p>
- * It uses {@link org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreActor} to maintain this
- * cluster wide information.
+ * <p>It uses {@link org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreActor} to maintain this
+ * cluster-wide information.
  */
 public class RpcRegistry extends BucketStoreActor<RoutingTable> {
     private final ActorRef rpcRegistrar;

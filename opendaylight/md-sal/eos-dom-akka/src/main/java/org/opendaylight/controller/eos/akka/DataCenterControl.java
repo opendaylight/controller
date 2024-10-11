@@ -12,15 +12,14 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.yang.common.Empty;
 
 /**
- * Service used to bring up/down the Entity Ownership Service service in individual datacenters.
- * Active datacenter in native eos terms means that the candidates from this datacenter can become owners of entities.
- * Additionally the singleton component makings ownership decisions, runs only in an active datacenter.
+ * Service used to bring up/down the Entity Ownership Service service in individual datacenters. Active datacenter
+ * in native eos terms means that the candidates from this datacenter can become owners of entities. Additionally
+ * the singleton component makings ownership decisions, runs only in an active datacenter.
  *
- * <p>
- * Caller must make sure that only one datacenter is active at a time, otherwise the singleton actors
- * in each datacenter will interfere with each other. The methods provided byt this service can be called
- * on any node from the datacenter to be activated. Datacenters only need to brought up when using non-default
- * datacenter or multiple datacenters.
+ * <p>Caller must make sure that only one datacenter is active at a time, otherwise the singleton actors in each
+ * datacenter will interfere with each other. The methods provided byt this service can be called on any node from
+ * the datacenter to be activated. Datacenters only need to brought up when using non-default datacenter or multiple
+ * datacenters.
  */
 public interface DataCenterControl {
     /**

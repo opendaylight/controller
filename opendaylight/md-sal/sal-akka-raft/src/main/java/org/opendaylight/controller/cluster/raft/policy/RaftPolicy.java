@@ -5,20 +5,18 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft.policy;
 
 /**
- * The RaftPolicy is intended to change the default behavior of Raft. For example
- * we may want to be able to determine which Raft replica should become the leader - with Raft elections are
- * randomized so it is not possible to specify which replica should be the leader. The ability to specify
- * the leader would be quite useful when testing a raft cluster.
+ * The RaftPolicy is intended to change the default behavior of Raft. For example we may want to be able to determine
+ * which Raft replica should become the leader - with Raft elections are randomized so it is not possible to specify
+ * which replica should be the leader. The ability to specify the leader would be quite useful when testing a raft
+ * cluster.
  *
- * <p>
- * Similarly we may want to customize when exactly we apply a modification to the state - with Raft a modification
- * is only applied to the state when the modification is replicated to a majority of the replicas. The ability to
- * apply a modification to the state before consensus would be useful in scenarios where you have only 2 nodes
- * in a Raft cluster and one of them is down but you still want the RaftActor to apply a modification to the state.
+ * <p>Similarly we may want to customize when exactly we apply a modification to the state - with Raft a modification
+ * is only applied to the state when the modification is replicated to a majority of the replicas. The ability to apply
+ * a modification to the state before consensus would be useful in scenarios where you have only 2 nodes in a Raft
+ * cluster and one of them is down but you still want the RaftActor to apply a modification to the state.
  */
 public interface RaftPolicy {
     /**

@@ -19,13 +19,12 @@ import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
  * The RoleChangeNotifier is responsible for receiving Raft role and leader state change messages and notifying
  * the listeners (within the same node), which are registered with it.
  *
- * <p>
- * The RoleChangeNotifier is instantiated by the Shard and injected into the RaftActor.
+ * <p>The RoleChangeNotifier is instantiated by the Shard and injected into the RaftActor.
  */
 public class RoleChangeNotifier extends AbstractUntypedActor implements AutoCloseable {
-
-    private final String memberId;
     private final Map<ActorPath, ActorRef> registeredListeners = new HashMap<>();
+    private final String memberId;
+
     private RoleChangeNotification latestRoleChangeNotification = null;
     private LeaderStateChanged latestLeaderStateChanged;
 

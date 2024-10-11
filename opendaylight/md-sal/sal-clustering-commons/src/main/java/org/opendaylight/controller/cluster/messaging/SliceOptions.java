@@ -106,8 +106,7 @@ public final class SliceOptions {
          * message doesn't need to be sliced, ie its serialized size is less than the maximum message slice size, then
          * the original message is sent. Otherwise the first message slice is sent.
          *
-         * <p>
-         * <b>Note:</b> a {@link FileBackedOutputStreamFactory} must be set in the {@link MessageSlicer}.
+         * <p><b>Note:</b> a {@link FileBackedOutputStreamFactory} must be set in the {@link MessageSlicer}.
          *
          * @param newMessage the message
          * @param <T> the Serializable message type

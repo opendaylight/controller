@@ -14,13 +14,12 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
- * An abstract class that implements a Runnable operation with a timer such that if the run method isn't
- * invoked within a timeout period, the operation is cancelled via {@link #doCancel}.
+ * An abstract class that implements a Runnable operation with a timer such that if the run method is not invoked within
+ * a timeout period, the operation is cancelled via {@link #doCancel}.
  *
- * <p>
- * <b>Note:</b> this class is not thread safe and is intended for use only within the context of the same
- * actor that's passed on construction. The run method must be called on this actor's thread dispatcher as it
- * modifies internal state.
+ * <p><b>Note:</b> this class is not thread safe and is intended for use only within the context of the same actor that
+ * is passed on construction. The run method must be called on this actor's thread dispatcher as it modifies internal
+ * state.
  *
  * @author Thomas Pantelis
  */

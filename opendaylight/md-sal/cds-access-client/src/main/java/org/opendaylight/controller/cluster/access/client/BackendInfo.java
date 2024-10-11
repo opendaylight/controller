@@ -19,12 +19,9 @@ import org.opendaylight.controller.cluster.access.ABIVersion;
  * Basic information about how to talk to the backend. ClientActorBehavior uses this information to dispatch requests
  * to the backend.
  *
- * <p>
- * This class is not final so concrete actor behavior implementations may subclass it and track more information about
- * the backend. The {@link #hashCode()} and {@link #equals(Object)} methods are made final to ensure subclasses compare
- * on object identity.
- *
- * @author Robert Varga
+ * <p>This class is not final so concrete actor behavior implementations may subclass it and track more information
+ * about the backend. The {@link #hashCode()} and {@link #equals(Object)} methods are made final to ensure subclasses
+ * compare on object identity.
  */
 public class BackendInfo {
     private final ABIVersion version;

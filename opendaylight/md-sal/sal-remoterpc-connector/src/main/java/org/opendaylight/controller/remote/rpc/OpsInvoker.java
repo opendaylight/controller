@@ -39,8 +39,7 @@ import org.opendaylight.yangtools.yang.model.api.stmt.SchemaNodeIdentifier.Absol
  * {@link DOMRpcService#invokeRpc(SchemaPath, NormalizedNode)} and
  * {@link DOMActionService#invokeAction(SchemaPath, DOMDataTreeIdentifier, ContainerNode)}.
  *
- * <p>
- * Note that while the two interfaces are very similar, invocation strategies are slightly different due to historic
+ * <p>Note that while the two interfaces are very similar, invocation strategies are slightly different due to historic
  * behavior of RPCs:
  * <ul>
  *   <li>RPCs allow both null input and output, and this is passed to the infrastructure. Furthermore any invocation

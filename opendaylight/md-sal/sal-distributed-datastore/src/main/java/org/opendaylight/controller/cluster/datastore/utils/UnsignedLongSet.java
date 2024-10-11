@@ -27,11 +27,8 @@ import org.opendaylight.yangtools.concepts.WritableObjects;
  * A class holding an equivalent of {@code Set<UnsignedLong>}. It is geared towards efficiently tracking ranges of
  * objects, similar to what a {@link RangeSet} would do.
  *
- * <p>
- * Unlike a {@code RangeSet}, though, this class takes advantage of knowing that an unsigned long is a discrete unit
+ * <p>Unlike a {@code RangeSet}, though, this class takes advantage of knowing that an unsigned long is a discrete unit
  * and can be stored in a simple {@code long}.
- *
- * @author Robert Varga
  */
 abstract class UnsignedLongSet {
     @Beta

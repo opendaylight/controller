@@ -61,39 +61,31 @@ import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.concepts.Immutable;
 
 /**
- * RaftActor encapsulates a state machine that needs to be kept synchronized
- * in a cluster. It implements the RAFT algorithm as described in the paper
+ * RaftActor encapsulates a state machine that needs to be kept synchronized in a cluster. It implements the RAFT
+ * algorithm as described in the paper
  * <a href='https://ramcloud.stanford.edu/wiki/download/attachments/11370504/raft.pdf'>
  * In Search of an Understandable Consensus Algorithm</a>
  *
- * <p>
- * RaftActor has 3 states and each state has a certain behavior associated
- * with it. A Raft actor can behave as,
+ * <p>RaftActor has 3 states and each state has a certain behavior associated with it. A Raft actor can behave as,
  * <ul>
  * <li> A Leader </li>
  * <li> A Follower (or) </li>
  * <li> A Candidate </li>
  * </ul>
  *
- * <p>
- * A RaftActor MUST be a Leader in order to accept requests from clients to
- * change the state of it's encapsulated state machine. Once a RaftActor becomes
- * a Leader it is also responsible for ensuring that all followers ultimately
+ * <p>A RaftActor MUST be a Leader in order to accept requests from clients to change the state of it's encapsulated
+ * state machine. Once a RaftActor becomes a Leader it is also responsible for ensuring that all followers ultimately
  * have the same log and therefore the same state machine as itself.
  *
- * <p>
- * The current behavior of a RaftActor determines how election for leadership
- * is initiated and how peer RaftActors react to request for votes.
+ * <p>The current behavior of a RaftActor determines how election for leadership is initiated and how peer RaftActors
+ * react to request for votes.
  *
- * <p>
- * Each RaftActor also needs to know the current election term. It uses this
- * information for a couple of things. One is to simply figure out who it
- * voted for in the last election. Another is to figure out if the message
- * it received to update it's state is stale.
+ * <p>Each RaftActor also needs to know the current election term. It uses this information for a couple of things.
+ * One is to simply figure out who it voted for in the last election. Another is to figure out if the message it
+ * received to update it's state is stale.
  *
- * <p>
- * The RaftActor uses akka-persistence to store it's replicated log.
- * Furthermore through it's behaviors a Raft Actor determines
+ * <p>The RaftActor uses akka-persistence to store it's replicated log. Furthermore through it's behaviors a Raft Actor
+ * determines
  * <ul>
  * <li> when a log entry should be persisted </li>
  * <li> when a log entry should be applied to the state machine (and) </li>
@@ -773,14 +765,12 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     /**
      * setPeerAddress sets the address of a known peer at a later time.
      *
-     * <p>
-     * This is to account for situations where a we know that a peer
+     * <p>This is to account for situations where a we know that a peer
      * exists but we do not know an address up-front. This may also be used in
      * situations where a known peer starts off in a different location and we
      * need to change it's address
      *
-     * <p>
-     * Note that if the peerId does not match the list of peers passed to
+     * <p>Note that if the peerId does not match the list of peers passed to
      * this actor during construction an IllegalStateException will be thrown.
      */
     protected void setPeerAddress(final String peerId, final String peerAddress) {
@@ -848,8 +838,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
      * given Runnable to proceed with the given operation. <b>Important:</b> the run method must be called on
      * this actor's thread dispatcher as as it modifies internal state.
      *
-     * <p>
-     * The default implementation immediately runs the operation.
+     * <p>The default implementation immediately runs the operation.
      *
      * @param operation the operation to run
      */
@@ -861,8 +850,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
      * This method is invoked when the actions hooked to the leader becoming paused failed to execute and the leader
      * should resume normal operations.
      *
-     * <p>
-     * Note this method can be invoked even before the operation supplied to {@link #pauseLeader(Runnable)} is invoked.
+     * <p>Note this method can be invoked even before the operation supplied to {@link #pauseLeader(Runnable)} is
+     * invoked.
      */
     protected void unpauseLeader() {
 
