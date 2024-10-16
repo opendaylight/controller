@@ -452,7 +452,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         final Ready ready = checkReady();
         ready.stage = CommitStage.PRE_COMMIT_PENDING;
         LOG.debug("{}: Transaction {} initiating direct preCommit", persistenceId(), getIdentifier());
-        ready.readyCohort.preCommit(new FutureCallback<DataTreeCandidate>() {
+        ready.readyCohort.preCommit(new FutureCallback<>() {
             @Override
             public void onSuccess(final DataTreeCandidate result) {
                 successfulDirectPreCommit(envelope, startTime);
@@ -540,15 +540,11 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
     private void applyModifications(final Collection<TransactionModification> modifications) {
         if (!modifications.isEmpty()) {
             final var modification = checkOpen().getSnapshot();
-            for (var m : modifications) {
-                if (m instanceof TransactionDelete) {
-                    modification.delete(m.getPath());
-                } else if (m instanceof TransactionWrite write) {
-                    modification.write(m.getPath(), write.getData());
-                } else if (m instanceof TransactionMerge merge) {
-                    modification.merge(m.getPath(), merge.getData());
-                } else {
-                    LOG.warn("{}: ignoring unhandled modification {}", persistenceId(), m);
+            for (var mod : modifications) {
+                switch (mod) {
+                    case TransactionDelete delete -> modification.delete(delete.getPath());
+                    case TransactionMerge merge -> modification.merge(merge.getPath(), merge.getData());
+                    case TransactionWrite write -> modification.write(write.getPath(), write.getData());
                 }
             }
         }
