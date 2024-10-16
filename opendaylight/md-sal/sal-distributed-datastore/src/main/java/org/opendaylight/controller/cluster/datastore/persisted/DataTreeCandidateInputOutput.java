@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.Immutable;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.ReusableStreamReceiver;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataInput;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataOutput;
@@ -55,7 +56,7 @@ public final class DataTreeCandidateInputOutput {
     private static final byte DISAPPEARED = 5;
 
     private DataTreeCandidateInputOutput() {
-        throw new UnsupportedOperationException();
+        // Hidden on purpose
     }
 
     private static DataTreeCandidateNode readModifiedNode(final ModificationType type, final NormalizedNodeDataInput in,
@@ -97,7 +98,7 @@ public final class DataTreeCandidateInputOutput {
             case SUBTREE_MODIFIED -> readModifiedNode(ModificationType.SUBTREE_MODIFIED, in, receiver);
             case UNMODIFIED -> null;
             case WRITE -> DataTreeCandidateNodes.written(in.readNormalizedNode(receiver));
-            default -> throw new IllegalArgumentException("Unhandled node type " + type);
+            default -> throw new IOException("Unhandled node type " + type);
         };
     }
 
@@ -117,7 +118,7 @@ public final class DataTreeCandidateInputOutput {
                 readChildren(reader, receiver));
             case WRITE -> DataTreeCandidateNodes.written(reader.readNormalizedNode(receiver));
             case UNMODIFIED -> AbstractDataTreeCandidateNode.createUnmodified();
-            default -> throw new IllegalArgumentException("Unhandled node type " + type);
+            default -> throw new IOException("Unhandled node type " + type);
         };
         return new DataTreeCandidateWithVersion(DataTreeCandidates.newDataTreeCandidate(rootPath, rootNode),
             reader.getVersion());
@@ -155,10 +156,10 @@ public final class DataTreeCandidateInputOutput {
             }
             case WRITE -> {
                 out.writeByte(WRITE);
-                out.writeNormalizedNode(node.getDataAfter());
+                out.writeNormalizedNode(requireDataAfter(node));
             }
             case UNMODIFIED -> out.writeByte(UNMODIFIED);
-            default -> throwUnhandledNodeType(node);
+            default -> throw unhandledNodeType(node);
         }
     }
 
@@ -186,9 +187,9 @@ public final class DataTreeCandidateInputOutput {
                 case UNMODIFIED -> writer.writeByte(UNMODIFIED);
                 case WRITE -> {
                     writer.writeByte(WRITE);
-                    writer.writeNormalizedNode(node.getDataAfter());
+                    writer.writeNormalizedNode(requireDataAfter(node));
                 }
-                default -> throwUnhandledNodeType(node);
+                default -> throw unhandledNodeType(node);
             }
         }
     }
@@ -198,7 +199,16 @@ public final class DataTreeCandidateInputOutput {
         writeDataTreeCandidate(out, PayloadVersion.current(), candidate);
     }
 
-    private static void throwUnhandledNodeType(final DataTreeCandidateNode node) {
-        throw new IllegalArgumentException("Unhandled node type " + node.modificationType());
+    private static @NonNull NormalizedNode requireDataAfter(final DataTreeCandidateNode node) throws IOException {
+        final var after = node.dataAfter();
+        if (after != null) {
+            return after;
+        }
+        throw new IOException(
+            "Candidate for %s (%s) does not have after-image".formatted(node.name(), node.modificationType()));
+    }
+
+    private static IOException unhandledNodeType(final DataTreeCandidateNode node) {
+        return new IOException("Unhandled node type " + node.modificationType());
     }
 }
