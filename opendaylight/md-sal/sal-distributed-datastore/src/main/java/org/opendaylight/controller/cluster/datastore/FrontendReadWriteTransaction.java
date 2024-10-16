@@ -220,10 +220,10 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
 
         final Ready ready = checkReady();
         switch (ready.stage) {
-            case PRE_COMMIT_PENDING:
+            case null -> throw new NullPointerException();
+            case PRE_COMMIT_PENDING ->
                 LOG.debug("{}: Transaction {} is already preCommitting", persistenceId(), getIdentifier());
-                break;
-            case CAN_COMMIT_COMPLETE:
+            case CAN_COMMIT_COMPLETE -> {
                 ready.stage = CommitStage.PRE_COMMIT_PENDING;
                 LOG.debug("{}: Transaction {} initiating preCommit", persistenceId(), getIdentifier());
                 ready.readyCohort.preCommit(new FutureCallback<DataTreeCandidate>() {
@@ -237,14 +237,9 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
                         failTransaction(envelope, now, new RuntimeRequestException("Precommit failed", failure));
                     }
                 });
-                break;
-            case CAN_COMMIT_PENDING:
-            case COMMIT_PENDING:
-            case PRE_COMMIT_COMPLETE:
-            case READY:
+            }
+            case CAN_COMMIT_PENDING, COMMIT_PENDING, PRE_COMMIT_COMPLETE, READY ->
                 throw new IllegalStateException("Attempted to preCommit in stage " + ready.stage);
-            default:
-                throwUnhandledCommitStage(ready);
         }
     }
 
@@ -255,7 +250,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             return;
         }
 
-        final Ready ready = checkReady();
+        final var ready = checkReady();
         LOG.debug("{}: Transaction {} completed preCommit", persistenceId(), getIdentifier());
         recordAndSendSuccess(envelope, startTime, new TransactionPreCommitSuccess(getIdentifier(),
             envelope.getMessage().getSequence()));
@@ -277,12 +272,12 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             final long now) throws RequestException {
         throwIfFailed();
 
-        final Ready ready = checkReady();
+        final var ready = checkReady();
         switch (ready.stage) {
-            case COMMIT_PENDING:
+            case null -> throw new NullPointerException();
+            case COMMIT_PENDING ->
                 LOG.debug("{}: Transaction {} is already committing", persistenceId(), getIdentifier());
-                break;
-            case PRE_COMMIT_COMPLETE:
+            case PRE_COMMIT_COMPLETE -> {
                 ready.stage = CommitStage.COMMIT_PENDING;
                 LOG.debug("{}: Transaction {} initiating commit", persistenceId(), getIdentifier());
                 ready.readyCohort.commit(new FutureCallback<UnsignedLong>() {
@@ -296,14 +291,9 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
                         failTransaction(envelope, now, new RuntimeRequestException("Commit failed", failure));
                     }
                 });
-                break;
-            case CAN_COMMIT_COMPLETE:
-            case CAN_COMMIT_PENDING:
-            case PRE_COMMIT_PENDING:
-            case READY:
+            }
+            case CAN_COMMIT_COMPLETE, CAN_COMMIT_PENDING, PRE_COMMIT_PENDING, READY ->
                 throw new IllegalStateException("Attempted to doCommit in stage " + ready.stage);
-            default:
-                throwUnhandledCommitStage(ready);
         }
     }
 
@@ -325,7 +315,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
     private TransactionAbortSuccess handleTransactionAbort(final long sequence, final RequestEnvelope envelope,
             final long now) {
         if (state instanceof Open) {
-            final ReadWriteShardDataTreeTransaction openTransaction = checkOpen();
+            final var openTransaction = checkOpen();
             startAbort();
             openTransaction.abort(() -> {
                 recordAndSendSuccess(envelope, now, new TransactionAbortSuccess(getIdentifier(),
@@ -344,7 +334,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             return new TransactionAbortSuccess(getIdentifier(), sequence);
         }
 
-        final Ready ready = checkReady();
+        final var ready = checkReady();
         startAbort();
         ready.readyCohort.abort(new FutureCallback<>() {
             @Override
@@ -366,12 +356,12 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
     private void coordinatedCommit(final RequestEnvelope envelope, final long now) throws RequestException {
         throwIfFailed();
 
-        final Ready ready = checkReady();
+        final var ready = checkReady();
         switch (ready.stage) {
-            case CAN_COMMIT_PENDING:
+            case null -> throw new NullPointerException();
+            case CAN_COMMIT_PENDING ->
                 LOG.debug("{}: Transaction {} is already canCommitting", persistenceId(), getIdentifier());
-                break;
-            case READY:
+            case READY -> {
                 ready.stage = CommitStage.CAN_COMMIT_PENDING;
                 LOG.debug("{}: Transaction {} initiating canCommit", persistenceId(), getIdentifier());
                 checkReady().readyCohort.canCommit(new FutureCallback<>() {
@@ -385,14 +375,9 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
                         failTransaction(envelope, now, new RuntimeRequestException("CanCommit failed", failure));
                     }
                 });
-                break;
-            case CAN_COMMIT_COMPLETE:
-            case COMMIT_PENDING:
-            case PRE_COMMIT_COMPLETE:
-            case PRE_COMMIT_PENDING:
+            }
+            case CAN_COMMIT_COMPLETE, COMMIT_PENDING, PRE_COMMIT_COMPLETE, PRE_COMMIT_PENDING ->
                 throw new IllegalStateException("Attempted to canCommit in stage " + ready.stage);
-            default:
-                throwUnhandledCommitStage(ready);
         }
     }
 
@@ -403,7 +388,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             return;
         }
 
-        final Ready ready = checkReady();
+        final var ready = checkReady();
         recordAndSendSuccess(envelope, startTime, new TransactionCanCommitSuccess(getIdentifier(),
             envelope.getMessage().getSequence()));
         ready.stage = CommitStage.CAN_COMMIT_COMPLETE;
@@ -413,17 +398,14 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
     private void directCommit(final RequestEnvelope envelope, final long now) throws RequestException {
         throwIfFailed();
 
-        final Ready ready = checkReady();
+        final var ready = checkReady();
         switch (ready.stage) {
-            case CAN_COMMIT_COMPLETE:
-            case CAN_COMMIT_PENDING:
-            case COMMIT_PENDING:
-            case PRE_COMMIT_COMPLETE:
-            case PRE_COMMIT_PENDING:
+            case null -> throw new NullPointerException();
+            case CAN_COMMIT_COMPLETE, CAN_COMMIT_PENDING, COMMIT_PENDING, PRE_COMMIT_COMPLETE, PRE_COMMIT_PENDING -> {
                 LOG.debug("{}: Transaction {} in state {}, not initiating direct commit for {}", persistenceId(),
                     getIdentifier(), state, envelope);
-                break;
-            case READY:
+            }
+            case READY -> {
                 ready.stage = CommitStage.CAN_COMMIT_PENDING;
                 LOG.debug("{}: Transaction {} initiating direct canCommit", persistenceId(), getIdentifier());
                 ready.readyCohort.canCommit(new FutureCallback<>() {
@@ -437,9 +419,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
                         failTransaction(envelope, now, new RuntimeRequestException("CanCommit failed", failure));
                     }
                 });
-                break;
-            default:
-                throwUnhandledCommitStage(ready);
+            }
         }
     }
 
@@ -631,9 +611,5 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             return sealed.sealedModification;
         }
         throw new IllegalStateException(getIdentifier() + " expect to be sealed, is in state " + state);
-    }
-
-    private static void throwUnhandledCommitStage(final Ready ready) {
-        throw new IllegalStateException("Unhandled commit stage " + ready.stage);
     }
 }
