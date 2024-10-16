@@ -17,7 +17,8 @@ import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeDataOutpu
 /**
  * A {@link TransactionModification} which has a data component.
  */
-public abstract class TransactionDataModification extends TransactionModification {
+public abstract sealed class TransactionDataModification extends TransactionModification
+        permits TransactionMerge, TransactionWrite {
     private final NormalizedNode data;
 
     TransactionDataModification(final YangInstanceIdentifier path, final NormalizedNode data) {

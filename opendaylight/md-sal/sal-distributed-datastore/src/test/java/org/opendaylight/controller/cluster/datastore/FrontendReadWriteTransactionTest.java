@@ -25,7 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequestBuilder;
 import org.opendaylight.controller.cluster.access.commands.ReadTransactionRequest;
-import org.opendaylight.controller.cluster.access.commands.TransactionModification;
+import org.opendaylight.controller.cluster.access.commands.TransactionDelete;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionSuccess;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
@@ -151,7 +151,7 @@ public class FrontendReadWriteTransactionTest {
         verify(mockParent).finishTransaction(same(shardTransaction), eq(Optional.empty()));
 
         b.setSequence(1);
-        b.addModification(mock(TransactionModification.class));
+        b.addModification(mock(TransactionDelete.class));
 
         final var req = b.build();
         final var ex = assertThrows(IllegalStateException.class, () -> handleRequest(req));
