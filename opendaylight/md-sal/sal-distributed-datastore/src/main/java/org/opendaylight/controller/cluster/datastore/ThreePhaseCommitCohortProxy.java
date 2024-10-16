@@ -230,7 +230,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
     @Override
     public ListenableFuture<Empty> preCommit() {
         // We don't need to do anything here - preCommit is done atomically with the commit phase by the shard.
-        return IMMEDIATE_EMPTY_SUCCESS;
+        return Empty.immediateFuture();
     }
 
     @Override
