@@ -18,7 +18,7 @@ import org.opendaylight.yangtools.concepts.WritableIdentifier;
  *
  * @param <T> Target identifier type
  */
-public abstract class RequestSuccess<T extends WritableIdentifier, C extends RequestSuccess<T, C>>
+public abstract non-sealed class RequestSuccess<T extends WritableIdentifier, C extends RequestSuccess<T, C>>
         extends Response<T, C> {
     protected interface SerialForm<T extends WritableIdentifier, C extends RequestSuccess<T, C>>
             extends Response.SerialForm<T, C> {
