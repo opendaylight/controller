@@ -183,30 +183,20 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
     @Override
     TransactionSuccess<?> doHandleRequest(final TransactionRequest<?> request, final RequestEnvelope envelope,
             final long now) throws RequestException {
-        if (request instanceof ModifyTransactionRequest modifyRequest) {
-            return handleModifyTransaction(modifyRequest, envelope, now);
-        } else if (request instanceof CommitLocalTransactionRequest commitLocalRequest) {
-            handleCommitLocalTransaction(commitLocalRequest, envelope, now);
-            return null;
-        } else if (request instanceof ExistsTransactionRequest existsRequest) {
-            return handleExistsTransaction(existsRequest);
-        } else if (request instanceof ReadTransactionRequest readRequest) {
-            return handleReadTransaction(readRequest);
-        } else if (request instanceof TransactionPreCommitRequest preCommitRequest) {
-            handleTransactionPreCommit(preCommitRequest, envelope, now);
-            return null;
-        } else if (request instanceof TransactionDoCommitRequest doCommitRequest) {
-            handleTransactionDoCommit(doCommitRequest, envelope, now);
-            return null;
-        } else if (request instanceof TransactionAbortRequest) {
-            return handleTransactionAbort(request.getSequence(), envelope, now);
-        } else if (request instanceof AbortLocalTransactionRequest) {
-            handleLocalTransactionAbort(request.getSequence(), envelope, now);
-            return null;
-        } else {
-            LOG.warn("Rejecting unsupported request {}", request);
-            throw new UnsupportedRequestException(request);
-        }
+        return switch (request) {
+            case ModifyTransactionRequest req -> handleModifyTransaction(req, envelope, now);
+            case CommitLocalTransactionRequest req -> handleCommitLocalTransaction(req, envelope, now);
+            case ExistsTransactionRequest req -> handleExistsTransaction(req);
+            case ReadTransactionRequest req -> handleReadTransaction(req);
+            case TransactionPreCommitRequest req -> handleTransactionPreCommit(req, envelope, now);
+            case TransactionDoCommitRequest req -> handleTransactionDoCommit(req, envelope, now);
+            case TransactionAbortRequest req -> handleTransactionAbort(req.getSequence(), envelope, now);
+            case AbortLocalTransactionRequest req -> handleLocalTransactionAbort(req.getSequence(), envelope, now);
+            default -> {
+                LOG.warn("Rejecting unsupported request {}", request);
+                throw new UnsupportedRequestException(request);
+            }
+        };
     }
 
     @Override
@@ -214,11 +204,11 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         state = new Retired(state);
     }
 
-    private void handleTransactionPreCommit(final TransactionPreCommitRequest request,
+    private TransactionSuccess<?> handleTransactionPreCommit(final TransactionPreCommitRequest request,
             final RequestEnvelope envelope, final long now) throws RequestException {
         throwIfFailed();
 
-        final Ready ready = checkReady();
+        final var ready = checkReady();
         switch (ready.stage) {
             case null -> throw new NullPointerException();
             case PRE_COMMIT_PENDING ->
@@ -241,6 +231,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             case CAN_COMMIT_PENDING, COMMIT_PENDING, PRE_COMMIT_COMPLETE, READY ->
                 throw new IllegalStateException("Attempted to preCommit in stage " + ready.stage);
         }
+        return null;
     }
 
     void successfulPreCommit(final RequestEnvelope envelope, final long startTime) {
@@ -268,8 +259,8 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         LOG.debug("{}: Transaction {} failed", persistenceId(), getIdentifier(), cause);
     }
 
-    private void handleTransactionDoCommit(final TransactionDoCommitRequest request, final RequestEnvelope envelope,
-            final long now) throws RequestException {
+    private TransactionSuccess<?> handleTransactionDoCommit(final TransactionDoCommitRequest request,
+            final RequestEnvelope envelope, final long now) throws RequestException {
         throwIfFailed();
 
         final var ready = checkReady();
@@ -295,11 +286,14 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             case CAN_COMMIT_COMPLETE, CAN_COMMIT_PENDING, PRE_COMMIT_PENDING, READY ->
                 throw new IllegalStateException("Attempted to doCommit in stage " + ready.stage);
         }
+        return null;
     }
 
-    private void handleLocalTransactionAbort(final long sequence, final RequestEnvelope envelope, final long now) {
-        checkOpen().abort(() -> recordAndSendSuccess(envelope, now, new TransactionAbortSuccess(getIdentifier(),
-            sequence)));
+    private TransactionSuccess<?> handleLocalTransactionAbort(final long sequence, final RequestEnvelope envelope,
+            final long now) {
+        checkOpen().abort(
+            () -> recordAndSendSuccess(envelope, now, new TransactionAbortSuccess(getIdentifier(), sequence)));
+        return null;
     }
 
     private void startAbort() {
@@ -478,7 +472,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         state = COMMITTED;
     }
 
-    private void handleCommitLocalTransaction(final CommitLocalTransactionRequest request,
+    private TransactionSuccess<?> handleCommitLocalTransaction(final CommitLocalTransactionRequest request,
             final RequestEnvelope envelope, final long now) throws RequestException {
         final DataTreeModification sealedModification = checkSealed();
         if (!sealedModification.equals(request.getModification())) {
@@ -499,6 +493,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         } else {
             directCommit(envelope, now);
         }
+        return null;
     }
 
     private ExistsTransactionSuccess handleExistsTransaction(final ExistsTransactionRequest request) {
