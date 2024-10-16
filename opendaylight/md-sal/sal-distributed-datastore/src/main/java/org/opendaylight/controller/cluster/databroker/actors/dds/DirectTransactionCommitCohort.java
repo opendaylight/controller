@@ -17,8 +17,6 @@ import org.opendaylight.yangtools.yang.common.Empty;
 /**
  * An {@link AbstractTransactionCommitCohort} implementation for transactions which contain a single proxy. Since there
  * is only one proxy,
- *
- * @author Robert Varga
  */
 final class DirectTransactionCommitCohort extends AbstractTransactionCommitCohort {
     private final AbstractProxyTransaction proxy;
@@ -36,13 +34,13 @@ final class DirectTransactionCommitCohort extends AbstractTransactionCommitCohor
 
     @Override
     public ListenableFuture<Empty> preCommit() {
-        return EMPTY_FUTURE;
+        return Empty.immediateFuture();
     }
 
     @Override
     public ListenableFuture<Empty> abort() {
         complete();
-        return EMPTY_FUTURE;
+        return Empty.immediateFuture();
     }
 
     @Override

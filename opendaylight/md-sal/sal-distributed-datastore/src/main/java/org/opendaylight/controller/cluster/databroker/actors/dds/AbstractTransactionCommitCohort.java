@@ -14,17 +14,13 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
-import org.opendaylight.yangtools.yang.common.Empty;
 
 /**
  * Base class for internal {@link DOMStoreThreePhaseCommitCohort} implementation. It contains utility constants for
  * wide reuse.
- *
- * @author Robert Varga
  */
 abstract class AbstractTransactionCommitCohort implements DOMStoreThreePhaseCommitCohort {
     static final ListenableFuture<Boolean> TRUE_FUTURE = Futures.immediateFuture(Boolean.TRUE);
-    static final ListenableFuture<Empty> EMPTY_FUTURE = Futures.immediateFuture(Empty.value());
 
     private final AbstractClientHistory parent;
     private final TransactionIdentifier txId;

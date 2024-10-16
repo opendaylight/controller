@@ -30,13 +30,13 @@ final class EmptyTransactionCommitCohort extends AbstractTransactionCommitCohort
 
     @Override
     public ListenableFuture<Empty> preCommit() {
-        return EMPTY_FUTURE;
+        return Empty.immediateFuture();
     }
 
     @Override
     public ListenableFuture<Empty> abort() {
         complete();
-        return EMPTY_FUTURE;
+        return Empty.immediateFuture();
     }
 
     @Override
