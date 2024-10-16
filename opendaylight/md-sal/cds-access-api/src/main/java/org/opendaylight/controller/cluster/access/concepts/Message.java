@@ -54,8 +54,8 @@ import org.opendaylight.yangtools.concepts.WritableObjects;
  * @param <T> Target identifier type
  * @param <C> Message type
  */
-public abstract class Message<T extends WritableIdentifier, C extends Message<T, C>>
-        implements Immutable, Serializable {
+public abstract sealed class Message<T extends WritableIdentifier, C extends Message<T, C>>
+        implements Immutable, Serializable permits Request, Response {
     /**
      * Externalizable proxy for use with {@link Message} subclasses.
      *
@@ -90,7 +90,8 @@ public abstract class Message<T extends WritableIdentifier, C extends Message<T,
 
         Object readResolve();
 
-        @NonNull T readTarget(@NonNull DataInput in) throws IOException;
+        @NonNull T readTarget(@NonNull
+        final DataInput in) throws IOException;
     }
 
     @java.io.Serial
