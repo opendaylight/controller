@@ -135,6 +135,7 @@ public final class DataTreeCandidateInputOutput {
     private static void writeNode(final NormalizedNodeDataOutput out, final DataTreeCandidateNode node)
             throws IOException {
         switch (node.modificationType()) {
+            case null -> throw new NullPointerException();
             case APPEARED -> {
                 out.writeByte(APPEARED);
                 out.writePathArgument(node.name());
@@ -159,7 +160,6 @@ public final class DataTreeCandidateInputOutput {
                 out.writeNormalizedNode(requireDataAfter(node));
             }
             case UNMODIFIED -> out.writeByte(UNMODIFIED);
-            default -> throw unhandledNodeType(node);
         }
     }
 
@@ -171,6 +171,7 @@ public final class DataTreeCandidateInputOutput {
 
             final var node = candidate.getRootNode();
             switch (node.modificationType()) {
+                case null -> throw new NullPointerException();
                 case APPEARED -> {
                     writer.writeByte(APPEARED);
                     writeChildren(writer, node.childNodes());
@@ -189,7 +190,6 @@ public final class DataTreeCandidateInputOutput {
                     writer.writeByte(WRITE);
                     writer.writeNormalizedNode(requireDataAfter(node));
                 }
-                default -> throw unhandledNodeType(node);
             }
         }
     }
@@ -206,9 +206,5 @@ public final class DataTreeCandidateInputOutput {
         }
         throw new IOException(
             "Candidate for %s (%s) does not have after-image".formatted(node.name(), node.modificationType()));
-    }
-
-    private static IOException unhandledNodeType(final DataTreeCandidateNode node) {
-        return new IOException("Unhandled node type " + node.modificationType());
     }
 }
