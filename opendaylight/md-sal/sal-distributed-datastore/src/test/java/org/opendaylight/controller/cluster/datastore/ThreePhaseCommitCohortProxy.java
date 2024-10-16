@@ -22,7 +22,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
-import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransactionReply;
@@ -44,8 +43,6 @@ import scala.concurrent.Future;
 @Deprecated(since = "9.0.0", forRemoval = true)
 final class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCohort {
     private static final Logger LOG = LoggerFactory.getLogger(ThreePhaseCommitCohortProxy.class);
-    private static final @NonNull ListenableFuture<Empty> IMMEDIATE_EMPTY_SUCCESS =
-        Futures.immediateFuture(Empty.value());
 
     private static final MessageSupplier COMMIT_MESSAGE_SUPPLIER = new MessageSupplier() {
         @Override
@@ -257,7 +254,7 @@ final class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCohor
     @Override
     public ListenableFuture<Empty> preCommit() {
         // We don't need to do anything here - preCommit is done atomically with the commit phase by the shard.
-        return IMMEDIATE_EMPTY_SUCCESS;
+        return Empty.immediateFuture();
     }
 
     @Override
