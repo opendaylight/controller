@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.primitives.UnsignedLong;
@@ -21,7 +20,6 @@ import org.opendaylight.controller.cluster.access.commands.ExistsTransactionRequ
 import org.opendaylight.controller.cluster.access.commands.ExistsTransactionSuccess;
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionSuccess;
-import org.opendaylight.controller.cluster.access.commands.PersistenceProtocol;
 import org.opendaylight.controller.cluster.access.commands.ReadTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ReadTransactionSuccess;
 import org.opendaylight.controller.cluster.access.commands.TransactionAbortRequest;
@@ -543,8 +541,8 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
 
     private void applyModifications(final Collection<TransactionModification> modifications) {
         if (!modifications.isEmpty()) {
-            final DataTreeModification modification = checkOpen().getSnapshot();
-            for (TransactionModification m : modifications) {
+            final var modification = checkOpen().getSnapshot();
+            for (var m : modifications) {
                 if (m instanceof TransactionDelete) {
                     modification.delete(m.getPath());
                 } else if (m instanceof TransactionWrite write) {
@@ -562,41 +560,42 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             final RequestEnvelope envelope, final long now) throws RequestException {
         // We need to examine the persistence protocol first to see if this is an idempotent request. If there is no
         // protocol, there is nothing for us to do.
-        final Optional<PersistenceProtocol> maybeProto = request.getPersistenceProtocol();
-        if (!maybeProto.isPresent()) {
+        final var maybeProto = request.getPersistenceProtocol();
+        if (maybeProto.isEmpty()) {
             applyModifications(request.getModifications());
             return replyModifySuccess(request.getSequence());
         }
 
-        switch (maybeProto.orElseThrow()) {
-            case ABORT:
+        return switch (maybeProto.orElseThrow()) {
+            case ABORT -> {
                 if (ABORTING.equals(state)) {
                     LOG.debug("{}: Transaction {} already aborting", persistenceId(), getIdentifier());
-                    return null;
+                    yield null;
                 }
-                final ReadWriteShardDataTreeTransaction openTransaction = checkOpen();
+                final var openTransaction = checkOpen();
                 startAbort();
                 openTransaction.abort(() -> {
                     recordAndSendSuccess(envelope, now, new ModifyTransactionSuccess(getIdentifier(),
                         request.getSequence()));
                     finishAbort();
                 });
-                return null;
-            case READY:
+                yield null;
+            }
+            case READY -> {
                 ensureReady(request.getModifications());
-                return replyModifySuccess(request.getSequence());
-            case SIMPLE:
+                yield replyModifySuccess(request.getSequence());
+            }
+            case SIMPLE -> {
                 ensureReady(request.getModifications());
                 directCommit(envelope, now);
-                return null;
-            case THREE_PHASE:
+                yield null;
+            }
+            case THREE_PHASE -> {
                 ensureReady(request.getModifications());
                 coordinatedCommit(envelope, now);
-                return null;
-            default:
-                LOG.warn("{}: rejecting unsupported protocol {}", persistenceId(), maybeProto.orElseThrow());
-                throw new UnsupportedRequestException(request);
-        }
+                yield null;
+            }
+        };
     }
 
     private void ensureReady(final Collection<TransactionModification> modifications) {
@@ -613,25 +612,31 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
     }
 
     private void throwIfFailed() throws RequestException {
-        if (state instanceof Failed) {
+        if (state instanceof Failed failed) {
             LOG.debug("{}: {} has failed, rejecting request", persistenceId(), getIdentifier());
-            throw ((Failed) state).cause;
+            throw failed.cause;
         }
     }
 
     private ReadWriteShardDataTreeTransaction checkOpen() {
-        checkState(state instanceof Open, "%s expect to be open, is in state %s", getIdentifier(), state);
-        return ((Open) state).openTransaction;
+        if (state instanceof Open open) {
+            return open.openTransaction;
+        }
+        throw new IllegalStateException(getIdentifier() + " expect to be open, is in state " + state);
     }
 
     private Ready checkReady() {
-        checkState(state instanceof Ready, "%s expect to be ready, is in state %s", getIdentifier(), state);
-        return (Ready) state;
+        if (state instanceof Ready ready) {
+            return ready;
+        }
+        throw new IllegalStateException(getIdentifier() + " expect to be ready, is in state " + state);
     }
 
     private DataTreeModification checkSealed() {
-        checkState(state instanceof Sealed, "%s expect to be sealed, is in state %s", getIdentifier(), state);
-        return ((Sealed) state).sealedModification;
+        if (state instanceof Sealed sealed) {
+            return sealed.sealedModification;
+        }
+        throw new IllegalStateException(getIdentifier() + " expect to be sealed, is in state " + state);
     }
 
     private static void throwUnhandledCommitStage(final Ready ready) {
