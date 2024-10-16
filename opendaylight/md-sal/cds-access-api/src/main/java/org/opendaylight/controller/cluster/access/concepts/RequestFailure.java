@@ -23,7 +23,7 @@ import org.opendaylight.yangtools.concepts.WritableIdentifier;
  * @param <T> Target identifier type
  * @param <C> Message class
  */
-public abstract class RequestFailure<T extends WritableIdentifier, C extends RequestFailure<T, C>>
+public abstract non-sealed class RequestFailure<T extends WritableIdentifier, C extends RequestFailure<T, C>>
         extends Response<T, C> {
     /**
      * Externalizable proxy for use with {@link RequestFailure} subclasses.
@@ -53,7 +53,7 @@ public abstract class RequestFailure<T extends WritableIdentifier, C extends Req
 
     protected RequestFailure(final @NonNull C failure, final @NonNull ABIVersion version) {
         super(failure, version);
-        this.cause = requireNonNull(failure.getCause());
+        cause = requireNonNull(failure.getCause());
     }
 
     protected RequestFailure(final @NonNull T target, final long sequence, final @NonNull RequestException cause) {
