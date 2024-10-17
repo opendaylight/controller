@@ -7,8 +7,10 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.same;
@@ -123,7 +125,7 @@ public class FrontendReadWriteTransactionTest {
         verifyNoMoreInteractions(mockParent);
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testReadAfterReady() throws RequestException {
         final ModifyTransactionRequestBuilder b = new ModifyTransactionRequestBuilder(TX_ID, mock(ActorRef.class));
         b.setSequence(0);
@@ -133,10 +135,12 @@ public class FrontendReadWriteTransactionTest {
         assertNotNull(handleRequest(readyReq));
         verify(mockParent).finishTransaction(same(shardTransaction), eq(Optional.empty()));
 
-        handleRequest(new ReadTransactionRequest(TX_ID, 0, mock(ActorRef.class), YangInstanceIdentifier.of(), true));
+        final var req = new ReadTransactionRequest(TX_ID, 0, mock(ActorRef.class), YangInstanceIdentifier.of(), true);
+        final var ex = assertThrows(IllegalStateException.class, () -> handleRequest(req));
+        assertEquals("mock-mock-fe-0-txn-0-0 expect to be open, is in state READY (READY)", ex.getMessage());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testModifyAfterReady() throws RequestException {
         final ModifyTransactionRequestBuilder b = new ModifyTransactionRequestBuilder(TX_ID, mock(ActorRef.class));
         b.setSequence(0);
@@ -148,10 +152,13 @@ public class FrontendReadWriteTransactionTest {
 
         b.setSequence(1);
         b.addModification(mock(TransactionModification.class));
-        handleRequest(b.build());
+
+        final var req = b.build();
+        final var ex = assertThrows(IllegalStateException.class, () -> handleRequest(req));
+        assertEquals("mock-mock-fe-0-txn-0-0 expect to be open, is in state READY (READY)", ex.getMessage());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testReadAfterAbort() throws RequestException {
         final ModifyTransactionRequestBuilder b = new ModifyTransactionRequestBuilder(TX_ID, mock(ActorRef.class));
         b.setSequence(0);
@@ -160,6 +167,8 @@ public class FrontendReadWriteTransactionTest {
         assertNull(handleRequest(abortReq));
         verify(mockParent).abortTransaction(same(shardTransaction), any(Runnable.class));
 
-        handleRequest(new ReadTransactionRequest(TX_ID, 0, mock(ActorRef.class), YangInstanceIdentifier.of(), true));
+        final var req = new ReadTransactionRequest(TX_ID, 0, mock(ActorRef.class), YangInstanceIdentifier.of(), true);
+        final var ex = assertThrows(IllegalStateException.class, () -> handleRequest(req));
+        assertEquals("mock-mock-fe-0-txn-0-0 expect to be open, is in state ABORTING", ex.getMessage());
     }
 }
