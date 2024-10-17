@@ -21,11 +21,10 @@ import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
@@ -111,14 +110,14 @@ public class DataTreeCohortActorTest extends AbstractActorTest {
 
     @Test
     public void testAsyncCohort() throws Exception {
-        ListeningExecutorService executor = MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor());
+        final var executor = Executors.newSingleThreadExecutor();
 
         doReturn(executeWithDelay(executor, mockPostCanCommit))
                 .when(mockCohort).canCommit(any(Object.class), any(EffectiveModelContext.class), anyCollection());
 
-        doReturn(executor.submit(() -> mockPostPreCommit)).when(mockPostCanCommit).preCommit();
+        doReturn(Futures.submit(() -> mockPostPreCommit, executor)).when(mockPostCanCommit).preCommit();
 
-        doReturn(executor.submit(() -> null)).when(mockPostPreCommit).commit();
+        doReturn(Futures.submit(() -> null, executor)).when(mockPostPreCommit).commit();
 
         ActorRef cohortActor = newCohortActor("testAsyncCohort");
 
@@ -187,11 +186,11 @@ public class DataTreeCohortActorTest extends AbstractActorTest {
         verify(mockPostPreCommit).abort();
     }
 
-    private static <T> FluentFuture<T> executeWithDelay(final ListeningExecutorService executor, final T result) {
-        return FluentFuture.from(executor.submit(() -> {
+    private static <T> FluentFuture<T> executeWithDelay(final Executor executor, final T result) {
+        return FluentFutures.submit(() -> {
             Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
             return result;
-        }));
+        }, executor);
     }
 
     private ActorRef newCohortActor(final String name) {
