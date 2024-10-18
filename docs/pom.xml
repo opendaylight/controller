@@ -235,7 +235,7 @@
 
                         <link>https://www.javadoc.io/doc/org.opendaylight.odlparent/odlparent-docs/13.1.5/</link>
                         <link>https://www.javadoc.io/doc/org.opendaylight.yangtools/yangtools-docs/11.0.8/</link>
-                        <link>https://www.javadoc.io/doc/org.opendaylight.mdsal/mdsal-docs/12.0.7/</link>
+                        <link>https://www.javadoc.io/doc/org.opendaylight.mdsal/mdsal-docs/12.0.8/</link>
                     </links>
                     <groups>
                         <group>
