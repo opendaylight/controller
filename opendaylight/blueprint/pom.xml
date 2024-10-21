@@ -34,7 +34,7 @@
       <dependency>
         <groupId>org.opendaylight.mdsal</groupId>
         <artifactId>mdsal-artifacts</artifactId>
-        <version>14.0.3</version>
+        <version>14.0.4</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
