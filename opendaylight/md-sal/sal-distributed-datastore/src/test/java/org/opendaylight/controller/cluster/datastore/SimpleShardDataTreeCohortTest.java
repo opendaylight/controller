@@ -50,7 +50,7 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
     @Mock
     private FutureCallback<DataTreeCandidate> mockPreCallback;
     @Mock
-    private ShardStats shardStats;
+    private ShardStats stats;
 
     private SimpleShardDataTreeCohort cohort;
 
@@ -58,7 +58,7 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
     public void setup() {
         doReturn(Optional.empty()).when(mockUserCohorts).commit();
         doReturn(Optional.empty()).when(mockUserCohorts).abort();
-        doReturn(shardStats).when(mockShardDataTree).getStats();
+        doReturn(stats).when(mockShardDataTree).getStats();
 
         cohort = new SimpleShardDataTreeCohort(mockShardDataTree, mockModification, nextTransactionId(),
             mockUserCohorts, Optional.empty());
