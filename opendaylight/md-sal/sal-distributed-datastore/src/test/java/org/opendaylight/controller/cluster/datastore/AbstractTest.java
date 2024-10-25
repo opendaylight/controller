@@ -14,6 +14,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicLong;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.testkit.javadsl.TestKit;
+import org.eclipse.jdt.annotation.NonNull;
 import org.junit.After;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
@@ -33,8 +34,9 @@ public abstract class AbstractTest {
 
     protected static final FrontendIdentifier FRONTEND_ID = FrontendIdentifier.create(MEMBER_NAME, FRONTEND_TYPE);
 
-    private static final ClientIdentifier CLIENT_ID = ClientIdentifier.create(FRONTEND_ID, 0);
-    private static final LocalHistoryIdentifier HISTORY_ID = new LocalHistoryIdentifier(CLIENT_ID, 0);
+    protected static final ClientIdentifier CLIENT_ID = ClientIdentifier.create(FRONTEND_ID, 0);
+
+    private static final @NonNull LocalHistoryIdentifier HISTORY_ID = new LocalHistoryIdentifier(CLIENT_ID, 0);
     private static final AtomicLong HISTORY_COUNTER = new AtomicLong();
     private static final AtomicLong TX_COUNTER = new AtomicLong();
 
@@ -45,11 +47,11 @@ public abstract class AbstractTest {
         TX_COUNTER.set(1L);
     }
 
-    protected static TransactionIdentifier newTransactionId(final long txId) {
+    protected static @NonNull TransactionIdentifier newTransactionId(final long txId) {
         return new TransactionIdentifier(HISTORY_ID, txId);
     }
 
-    protected static TransactionIdentifier nextTransactionId() {
+    protected static @NonNull TransactionIdentifier nextTransactionId() {
         return newTransactionId(TX_COUNTER.getAndIncrement());
     }
 
