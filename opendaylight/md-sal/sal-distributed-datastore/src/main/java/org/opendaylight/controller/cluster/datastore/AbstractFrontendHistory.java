@@ -104,7 +104,7 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
         if (tx == null) {
             // The transaction does not exist and we are about to create it, check sequence number
             if (request.getSequence() != 0) {
-                LOG.warn("{}: no transaction state present, unexpected request {}", persistenceId(), request);
+                LOG.warn("{}: no transaction state present, unexpected request {}", persistenceId, request);
                 throw new OutOfOrderRequestException(0);
             }
 
@@ -114,7 +114,7 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
             final Optional<TransactionSuccess<?>> maybeReplay = tx.replaySequence(request.getSequence());
             if (maybeReplay.isPresent()) {
                 final TransactionSuccess<?> replay = maybeReplay.orElseThrow();
-                LOG.debug("{}: envelope {} replaying response {}", persistenceId(), envelope, replay);
+                LOG.debug("{}: envelope {} replaying response {}", persistenceId, envelope, replay);
                 return replay;
             }
         }
@@ -143,7 +143,7 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
                 }
 
                 purgedTransactions.add(txidBits);
-                LOG.debug("{}: finished purging inherited transaction {}", persistenceId(), id);
+                LOG.debug("{}: finished purging inherited transaction {}", persistenceId, id);
                 envelope.sendSuccess(new TransactionPurgeResponse(id, request.getSequence()), readTime() - now);
             });
             return null;
@@ -162,7 +162,7 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
         tree.purgeTransaction(id, () -> {
             purgedTransactions.add(txidBits);
             transactions.remove(id);
-            LOG.debug("{}: finished purging transaction {}", persistenceId(), id);
+            LOG.debug("{}: finished purging transaction {}", persistenceId, id);
             envelope.sendSuccess(new TransactionPurgeResponse(id, request.getSequence()), readTime() - now);
         });
 
@@ -182,22 +182,22 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
             final var id = it.next();
             final long bits = id.longValue();
             if (purgedTransactions.contains(bits)) {
-                LOG.warn("{}: history {} tracks {} as purged", persistenceId(), getIdentifier(), id);
+                LOG.warn("{}: history {} tracks {} as purged", persistenceId, getIdentifier(), id);
                 it.remove();
             } else if (transactions.containsKey(new TransactionIdentifier(getIdentifier(), bits))) {
-                LOG.warn("{}: history {} tracks {} as open", persistenceId(), getIdentifier(), id);
+                LOG.warn("{}: history {} tracks {} as open", persistenceId, getIdentifier(), id);
                 it.remove();
             }
         }
 
         if (ids.isEmpty()) {
-            LOG.debug("{}: history {} completing empty skip request", persistenceId(), getIdentifier());
+            LOG.debug("{}: history {} completing empty skip request", persistenceId, getIdentifier());
             return new SkipTransactionsResponse(first, now);
         }
 
         final var transactionIds = MutableUnsignedLongSet.of(ids.stream().mapToLong(UnsignedLong::longValue).toArray())
             .immutableCopy();
-        LOG.debug("{}: history {} skipping transactions {}", persistenceId(), getIdentifier(), transactionIds.ranges());
+        LOG.debug("{}: history {} skipping transactions {}", persistenceId, getIdentifier(), transactionIds.ranges());
 
         tree.skipTransactions(getIdentifier(), transactionIds, () -> {
             purgedTransactions.addAll(transactionIds);
@@ -207,13 +207,13 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
     }
 
     final void destroy(final long sequence, final RequestEnvelope envelope, final long now) {
-        LOG.debug("{}: closing history {}", persistenceId(), getIdentifier());
+        LOG.debug("{}: closing history {}", persistenceId, getIdentifier());
         tree.closeTransactionChain(getIdentifier(),
             () -> envelope.sendSuccess(new LocalHistorySuccess(getIdentifier(), sequence), readTime() - now));
     }
 
     final void purge(final long sequence, final RequestEnvelope envelope, final long now) {
-        LOG.debug("{}: purging history {}", persistenceId(), getIdentifier());
+        LOG.debug("{}: purging history {}", persistenceId, getIdentifier());
         tree.purgeTransactionChain(getIdentifier(),
             () -> envelope.sendSuccess(new LocalHistorySuccess(getIdentifier(), sequence), readTime() - now));
     }
@@ -224,20 +224,23 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
     }
 
     private FrontendTransaction createTransaction(final TransactionRequest<?> request, final TransactionIdentifier id) {
-        if (request instanceof CommitLocalTransactionRequest commitLocalRequest) {
-            LOG.debug("{}: allocating new ready transaction {}", persistenceId(), id);
-            tree.getStats().incrementReadWriteTransactionCount();
-            return createReadyTransaction(id, commitLocalRequest.getModification());
-        }
-        if (request instanceof AbstractReadTransactionRequest<?> readTxRequest && readTxRequest.isSnapshotOnly()) {
-            LOG.debug("{}: allocating new open snapshot {}", persistenceId(), id);
-            tree.getStats().incrementReadOnlyTransactionCount();
-            return createOpenSnapshot(id);
-        }
-
-        LOG.debug("{}: allocating new open transaction {}", persistenceId(), id);
-        tree.getStats().incrementReadWriteTransactionCount();
-        return createOpenTransaction(id);
+        return switch (request) {
+            case CommitLocalTransactionRequest req -> {
+                LOG.debug("{}: allocating new ready transaction {}", persistenceId, id);
+                tree.getStats().incrementReadWriteTransactionCount();
+                yield createReadyTransaction(id, req.getModification());
+            }
+            case AbstractReadTransactionRequest<?> req when req.isSnapshotOnly() -> {
+                LOG.debug("{}: allocating new open snapshot {}", persistenceId, id);
+                tree.getStats().incrementReadOnlyTransactionCount();
+                yield createOpenSnapshot(id);
+            }
+            default -> {
+                LOG.debug("{}: allocating new open transaction {}", persistenceId, id);
+                tree.getStats().incrementReadWriteTransactionCount();
+                yield createOpenTransaction(id);
+            }
+        };
     }
 
     abstract FrontendTransaction createOpenSnapshot(TransactionIdentifier id);
