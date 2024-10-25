@@ -26,10 +26,6 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev231229.DataStoreProperties.ExportOnRecovery;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
-import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 
 public class JsonExportTest extends AbstractShardTest {
     private static final String DUMMY_DATA = "Dummy data as snapshot sequence number is set to 0 in "
@@ -69,9 +65,7 @@ public class JsonExportTest extends AbstractShardTest {
         final var source = setupInMemorySnapshotStore();
 
         final var writeMod = source.takeSnapshot().newModification();
-        writeMod.write(TestModel.OUTER_LIST_PATH, ImmutableNodes.newSystemMapBuilder()
-            .withNodeIdentifier(new NodeIdentifier(TestModel.OUTER_LIST_QNAME))
-            .build());
+        writeMod.write(TestModel.OUTER_LIST_PATH, TestModel.EMPTY_OUTER_LIST);
         writeMod.ready();
         InMemoryJournal.addEntry(shardID.toString(), 0, DUMMY_DATA);
 
@@ -84,18 +78,10 @@ public class JsonExportTest extends AbstractShardTest {
 
         // Add some ModificationPayload entries
         for (int i = 1; i <= nListEntries; i++) {
-            final Integer value = i;
-            listEntryKeys.add(value);
-
-            final var path = YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)
-                    .nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, value).build();
+            listEntryKeys.add(i);
 
             final var mod = source.takeSnapshot().newModification();
-            mod.merge(path, ImmutableNodes.newMapEntryBuilder()
-                .withNodeIdentifier(
-                    NodeIdentifierWithPredicates.of(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, value))
-                .withChild(ImmutableNodes.leafNode(TestModel.ID_QNAME, value))
-                .build());
+            mod.merge(TestModel.outerEntryPath(i), TestModel.outerEntry(i));
             mod.ready();
 
             InMemoryJournal.addEntry(shardID.toString(), i + 1, new SimpleReplicatedLogEntry(i, 1,

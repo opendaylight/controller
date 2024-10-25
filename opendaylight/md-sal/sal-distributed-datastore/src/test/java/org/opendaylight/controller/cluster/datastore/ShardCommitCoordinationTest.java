@@ -9,18 +9,17 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertNotNull;
 import static org.opendaylight.controller.cluster.datastore.DataStoreVersions.CURRENT_VERSION;
+import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.EMPTY_OUTER_LIST;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.EMPTY_TEST;
-import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.ID_QNAME;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.INNER_LIST_QNAME;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.NAME_QNAME;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.OUTER_LIST_PATH;
-import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.OUTER_LIST_QNAME;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.TEST_PATH;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.innerEntryPath;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.innerMapPath;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.innerNode;
+import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.outerEntry;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.outerEntryPath;
-import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.outerMapNode;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.outerNode;
 
 import com.google.common.collect.ImmutableSortedSet;
@@ -215,12 +214,12 @@ public class ShardCommitCoordinationTest extends AbstractShardTest {
             kit3.getRef());
         kit3.expectMsgClass(ReadyTransactionReply.class);
 
-        shardA.tell(newReadyBatchedModifications(txId4, OUTER_LIST_PATH, outerMapNode(),
+        shardA.tell(newReadyBatchedModifications(txId4, OUTER_LIST_PATH, EMPTY_OUTER_LIST,
                 participatingShardNames1), kit4.getRef());
         kit4.expectMsgClass(ReadyTransactionReply.class);
 
-        shardA.tell(newReadyBatchedModifications(txId5, outerEntryPath(1),
-                ImmutableNodes.mapEntry(OUTER_LIST_QNAME, ID_QNAME, 1), participatingShardNames1), kit5.getRef());
+        shardA.tell(newReadyBatchedModifications(txId5, outerEntryPath(1), outerEntry(1), participatingShardNames1),
+            kit5.getRef());
         kit5.expectMsgClass(ReadyTransactionReply.class);
 
         // Ready [tx1, tx2, tx5, tx4, tx3] on shard B.
@@ -229,7 +228,7 @@ public class ShardCommitCoordinationTest extends AbstractShardTest {
             kit1.getRef());
         kit1.expectMsgClass(ReadyTransactionReply.class);
 
-        shardB.tell(newReadyBatchedModifications(txId2, OUTER_LIST_PATH, outerMapNode(),
+        shardB.tell(newReadyBatchedModifications(txId2, OUTER_LIST_PATH, EMPTY_OUTER_LIST,
                 participatingShardNames2), kit2.getRef());
         kit2.expectMsgClass(ReadyTransactionReply.class);
 
@@ -241,8 +240,8 @@ public class ShardCommitCoordinationTest extends AbstractShardTest {
                 participatingShardNames1), kit4.getRef());
         kit4.expectMsgClass(ReadyTransactionReply.class);
 
-        shardB.tell(newReadyBatchedModifications(txId3, outerEntryPath(1),
-                ImmutableNodes.mapEntry(OUTER_LIST_QNAME, ID_QNAME, 1), participatingShardNames1), kit3.getRef());
+        shardB.tell(newReadyBatchedModifications(txId3, outerEntryPath(1), outerEntry(1), participatingShardNames1),
+            kit3.getRef());
         kit3.expectMsgClass(ReadyTransactionReply.class);
 
         // Send tx3 CanCommit to A - it's at the head of the queue so should proceed.

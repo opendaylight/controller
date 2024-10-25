@@ -53,7 +53,6 @@ import org.opendaylight.yangtools.yang.common.Uint64;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.tree.api.ModificationType;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 
@@ -117,10 +116,7 @@ public class DataTreeCohortIntegrationTest {
             doReturn(PostCanCommitStep.NOOP_SUCCESSFUL_FUTURE).when(cohort).canCommit(any(Object.class),
                     any(EffectiveModelContext.class), anyCollection());
 
-            kit.testWriteTransaction(dataStore, TestModel.OUTER_LIST_PATH,
-                    ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
-                    .withChild(ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 42))
-                    .build());
+            kit.testWriteTransaction(dataStore, TestModel.OUTER_LIST_PATH, TestModel.outerNode(42));
             verify(cohort).canCommit(any(Object.class), any(EffectiveModelContext.class), anyCollection());
 
             cohortReg.close();

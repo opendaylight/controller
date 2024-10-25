@@ -67,10 +67,11 @@ import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidateNode;
@@ -372,7 +373,9 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         final DataTreeCandidateTip mockCandidate = mock(DataTreeCandidateTip.class, name);
         final DataTreeCandidateNode mockCandidateNode = mock(DataTreeCandidateNode.class, name + "-node");
         doReturn(ModificationType.WRITE).when(mockCandidateNode).modificationType();
-        doReturn(ImmutableNodes.containerNode(CarsModel.CARS_QNAME)).when(mockCandidateNode).dataAfter();
+        doReturn(ImmutableNodes.newContainerBuilder()
+            .withNodeIdentifier(new NodeIdentifier(CarsModel.CARS_QNAME))
+            .build()).when(mockCandidateNode).dataAfter();
         doReturn(CarsModel.BASE_PATH).when(mockCandidate).getRootPath();
         doReturn(mockCandidateNode).when(mockCandidate).getRootNode();
         return mockCandidate;
