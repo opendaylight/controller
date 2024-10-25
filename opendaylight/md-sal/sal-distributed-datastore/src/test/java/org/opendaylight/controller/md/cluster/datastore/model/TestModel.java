@@ -57,7 +57,9 @@ public final class TestModel {
     public static final @NonNull ContainerNode EMPTY_TEST = ImmutableNodes.newContainerBuilder()
         .withNodeIdentifier(new NodeIdentifier(TEST_QNAME))
         .build();
-
+    public static final @NonNull ContainerNode EMPTY_TEST2 = ImmutableNodes.newContainerBuilder()
+        .withNodeIdentifier(new NodeIdentifier(TestModel.TEST2_QNAME))
+        .build();
     public static final @NonNull SystemMapNode EMPTY_OUTER_LIST = ImmutableNodes.newSystemMapBuilder()
         .withNodeIdentifier(new NodeIdentifier(OUTER_LIST_QNAME))
         .build();
