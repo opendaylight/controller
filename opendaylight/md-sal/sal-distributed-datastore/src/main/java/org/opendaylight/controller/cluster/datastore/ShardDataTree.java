@@ -1003,7 +1003,6 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     private void failPreCommit(final Throwable cause) {
-        shard.getShardMBean().incrementFailedTransactionsCount();
         pendingTransactions.poll().cohort.failedPreCommit(cause);
         processNextPendingTransaction();
     }
@@ -1055,7 +1054,6 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     private void failCommit(final Exception cause) {
-        shard.getShardMBean().incrementFailedTransactionsCount();
         pendingFinishCommits.poll().cohort.failedCommit(cause);
         processNextPending();
     }
@@ -1081,8 +1079,6 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         }
 
         allMetadataCommittedTransaction(txId);
-        shard.getShardMBean().incrementCommittedTransactionCount();
-        shard.getShardMBean().setLastCommittedTransactionTime(System.currentTimeMillis());
 
         // FIXME: propagate journal index
         pendingFinishCommits.poll().cohort.successfulCommit(UnsignedLong.ZERO, () -> {
@@ -1300,6 +1296,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             if (cohort.getState() != State.COMMIT_PENDING) {
                 LOG.debug("{}: aborting head of queue {} in state {}", logContext, cohort.transactionId(),
                     cohort.transactionId());
+                getStats().incrementAbortTransactionsCount();
 
                 it.remove();
                 if (cohort.getCandidate() != null) {
@@ -1319,6 +1316,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             final CommitEntry e = it.next();
             if (cohort.equals(e.cohort)) {
                 LOG.debug("{}: aborting queued transaction {}", logContext, cohort.transactionId());
+                getStats().incrementAbortTransactionsCount();
 
                 it.remove();
                 if (cohort.getCandidate() != null) {
