@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.Optional;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;
+import org.opendaylight.controller.cluster.access.commands.ClosedTransactionException;
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ExistsTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ExistsTransactionSuccess;
@@ -262,6 +263,19 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
     private TransactionSuccess<?> handleTransactionDoCommit(final TransactionDoCommitRequest request,
             final RequestEnvelope envelope, final long now) throws RequestException {
         throwIfFailed();
+
+        if (state == ABORTING) {
+            LOG.debug("{}: Transaction {} is already aborting", persistenceId(), getIdentifier());
+            throw new ClosedTransactionException(false);
+        }
+        if (state == ABORTED) {
+            LOG.debug("{}: Transaction {} has already aborted", persistenceId(), getIdentifier());
+            throw new ClosedTransactionException(false);
+        }
+        if (state == COMMITTED) {
+            LOG.debug("{}: Transaction {} has already committed", persistenceId(), getIdentifier());
+            throw new ClosedTransactionException(true);
+        }
 
         final var ready = checkReady();
         switch (ready.stage) {

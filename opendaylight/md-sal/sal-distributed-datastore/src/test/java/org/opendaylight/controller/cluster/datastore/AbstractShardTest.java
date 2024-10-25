@@ -11,12 +11,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.opendaylight.controller.cluster.datastore.DataStoreVersions.CURRENT_VERSION;
 import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking.successfulCanCommit;
 import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking.successfulCommit;
 import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking.successfulPreCommit;
@@ -32,18 +32,14 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.PoisonPill;
 import org.apache.pekko.actor.Props;
 import org.apache.pekko.dispatch.Dispatchers;
 import org.apache.pekko.japi.Creator;
-import org.apache.pekko.pattern.Patterns;
 import org.apache.pekko.testkit.TestActorRef;
-import org.apache.pekko.util.Timeout;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -51,10 +47,6 @@ import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
-import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
-import org.opendaylight.controller.cluster.datastore.messages.ForwardedReadyTransaction;
-import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
-import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.cluster.datastore.persisted.CommitTransactionPayload;
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
@@ -82,8 +74,6 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataValidationFailedExcepti
 import org.opendaylight.yangtools.yang.data.tree.api.ModificationType;
 import org.opendaylight.yangtools.yang.data.tree.impl.di.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
-import scala.concurrent.Await;
-import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Abstract base for shard unit tests.
@@ -256,29 +246,6 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         return cohortMap;
     }
 
-    @Deprecated(since = "11.0.0", forRemoval = true)
-    protected static BatchedModifications prepareBatchedModifications(final TransactionIdentifier transactionID,
-            final YangInstanceIdentifier path, final NormalizedNode data, final boolean doCommitOnReady) {
-        final var modification = new MutableCompositeModification();
-        modification.addModification(new WriteModification(path, data));
-        final var batchedModifications = new BatchedModifications(transactionID, CURRENT_VERSION);
-        batchedModifications.addModification(modification);
-        batchedModifications.setReady();
-        batchedModifications.setDoCommitOnReady(doCommitOnReady);
-        batchedModifications.setTotalMessagesSent(1);
-        return batchedModifications;
-    }
-
-    @Deprecated(since = "11.0.0", forRemoval = true)
-    protected static ForwardedReadyTransaction prepareForwardedReadyTransaction(final TestActorRef<Shard> shard,
-            final TransactionIdentifier transactionID, final YangInstanceIdentifier path,
-            final NormalizedNode data, final boolean doCommitOnReady) {
-        ReadWriteShardDataTreeTransaction rwTx = shard.underlyingActor().getDataStore()
-                .newReadWriteTransaction(transactionID);
-        rwTx.getSnapshot().write(path, data);
-        return new ForwardedReadyTransaction(transactionID, CURRENT_VERSION, rwTx, doCommitOnReady, Optional.empty());
-    }
-
     public static NormalizedNode readStore(final TestActorRef<? extends Shard> shard,
             final YangInstanceIdentifier id) {
         return shard.underlyingActor().getDataStore().readNode(id).orElse(null);
@@ -289,25 +256,17 @@ public abstract class AbstractShardTest extends AbstractActorTest {
     }
 
     public static void writeToStore(final TestActorRef<Shard> shard, final YangInstanceIdentifier id,
-            final NormalizedNode node) throws InterruptedException, ExecutionException {
-        final var future = Patterns.ask(shard, newBatchedModifications(nextTransactionId(), id, node, true, true, 1),
-            new Timeout(5, TimeUnit.SECONDS));
-        try {
-            Await.ready(future, FiniteDuration.create(5, TimeUnit.SECONDS));
-        } catch (TimeoutException e) {
-            throw new ExecutionException(e);
-        }
+            final NormalizedNode node) {
+        final var store = shard.underlyingActor().getDataStore();
+        final var dataTree = store.getDataTree();
+        store.notifyListeners(assertDoesNotThrow(() -> writeToStore(dataTree, id, node)));
     }
 
-    public static void writeToStore(final DataTree store, final YangInstanceIdentifier id, final NormalizedNode node)
-            throws DataValidationFailedException {
-        final DataTreeModification transaction = store.takeSnapshot().newModification();
-
-        transaction.write(id, node);
-        transaction.ready();
-        store.validate(transaction);
-        final DataTreeCandidate candidate = store.prepare(transaction);
-        store.commit(candidate);
+    public static DataTreeCandidate writeToStore(final DataTree store, final YangInstanceIdentifier id,
+            final NormalizedNode node) throws DataValidationFailedException {
+        final var mod = store.takeSnapshot().newModification();
+        mod.write(id, node);
+        return commitTransaction(store, mod);
     }
 
     DataTree setupInMemorySnapshotStore() throws DataValidationFailedException {
@@ -330,31 +289,6 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         final DataTreeCandidate candidate = source.prepare(mod);
         source.commit(candidate);
         return CommitTransactionPayload.create(transactionId, candidate);
-    }
-
-    @Deprecated(since = "11.0.0", forRemoval = true)
-    static BatchedModifications newBatchedModifications(final TransactionIdentifier transactionID,
-            final YangInstanceIdentifier path, final NormalizedNode data, final boolean ready,
-            final boolean doCommitOnReady, final int messagesSent) {
-        final BatchedModifications batched = new BatchedModifications(transactionID, CURRENT_VERSION);
-        batched.addModification(new WriteModification(path, data));
-        if (ready) {
-            batched.setReady();
-        }
-        batched.setDoCommitOnReady(doCommitOnReady);
-        batched.setTotalMessagesSent(messagesSent);
-        return batched;
-    }
-
-    @Deprecated(since = "11.0.0", forRemoval = true)
-    static BatchedModifications newReadyBatchedModifications(final TransactionIdentifier transactionID,
-            final YangInstanceIdentifier path, final NormalizedNode data,
-            final SortedSet<String> participatingShardNames) {
-        final BatchedModifications batched = new BatchedModifications(transactionID, CURRENT_VERSION);
-        batched.addModification(new WriteModification(path, data));
-        batched.setReady(Optional.of(participatingShardNames));
-        batched.setTotalMessagesSent(1);
-        return batched;
     }
 
     @SuppressWarnings("unchecked")
