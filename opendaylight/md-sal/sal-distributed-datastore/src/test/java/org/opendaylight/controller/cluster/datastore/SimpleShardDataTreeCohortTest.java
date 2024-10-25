@@ -43,15 +43,14 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataValidationFailedExcepti
 public class SimpleShardDataTreeCohortTest extends AbstractTest {
     @Mock
     private ShardDataTree mockShardDataTree;
-
     @Mock
     private DataTreeModification mockModification;
-
     @Mock
     private CompositeDataTreeCohort mockUserCohorts;
-
     @Mock
     private FutureCallback<DataTreeCandidate> mockPreCallback;
+    @Mock
+    private ShardStats shardStats;
 
     private SimpleShardDataTreeCohort cohort;
 
@@ -59,6 +58,7 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
     public void setup() {
         doReturn(Optional.empty()).when(mockUserCohorts).commit();
         doReturn(Optional.empty()).when(mockUserCohorts).abort();
+        doReturn(shardStats).when(mockShardDataTree).getStats();
 
         cohort = new SimpleShardDataTreeCohort(mockShardDataTree, mockModification, nextTransactionId(),
             mockUserCohorts, Optional.empty());
@@ -210,7 +210,7 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
     }
 
     private static Future<?> abort(final ShardDataTreeCohort cohort) {
-        final CompletableFuture<Empty> f = new CompletableFuture<>();
+        final var f = new CompletableFuture<Empty>();
         cohort.abort(new FutureCallback<>() {
             @Override
             public void onSuccess(final Empty result) {
@@ -240,7 +240,7 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
 
         doReturn(Optional.of(CompletableFuture.completedFuture(null))).when(mockUserCohorts).abort();
 
-        final Future<?> abortFuture = abort(cohort);
+        final var abortFuture = abort(cohort);
 
         abortFuture.get();
         verify(mockShardDataTree).startAbort(cohort);
