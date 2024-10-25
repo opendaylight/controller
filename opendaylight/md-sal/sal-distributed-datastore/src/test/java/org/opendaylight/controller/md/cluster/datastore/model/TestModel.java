@@ -8,7 +8,6 @@
 package org.opendaylight.controller.md.cluster.datastore.model;
 
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntry;
-import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntryBuilder;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -59,18 +58,16 @@ public final class TestModel {
         .withNodeIdentifier(new NodeIdentifier(TEST_QNAME))
         .build();
 
+    public static final @NonNull SystemMapNode EMPTY_OUTER_LIST = ImmutableNodes.newSystemMapBuilder()
+        .withNodeIdentifier(new NodeIdentifier(OUTER_LIST_QNAME))
+        .build();
+
     private TestModel() {
         // Hidden on purpose
     }
 
     public static EffectiveModelContext createTestContext() {
         return YangParserTestUtils.parseYangResource(DATASTORE_TEST_YANG);
-    }
-
-    public static SystemMapNode outerMapNode() {
-        return ImmutableNodes.newSystemMapBuilder()
-            .withNodeIdentifier(new NodeIdentifier(OUTER_LIST_QNAME))
-            .build();
     }
 
     public static SystemMapNode outerNode(final int... ids) {
@@ -91,7 +88,7 @@ public final class TestModel {
         return outer.build();
     }
 
-    public static DataContainerChild innerNode(final String... names) {
+    public static SystemMapNode innerNode(final String... names) {
         var outer = ImmutableNodes.newSystemMapBuilder().withNodeIdentifier(new NodeIdentifier(INNER_LIST_QNAME));
         for (var name : names) {
             outer.addChild(mapEntry(INNER_LIST_QNAME, NAME_QNAME, name));
@@ -99,8 +96,16 @@ public final class TestModel {
         return outer.build();
     }
 
-    public static MapEntryNode outerNodeEntry(final int id, final DataContainerChild inner) {
-        return mapEntryBuilder(OUTER_LIST_QNAME, ID_QNAME, id).addChild(inner).build();
+    public static MapEntryNode outerEntry(final int id, final DataContainerChild... children) {
+        final var builder = ImmutableNodes.newMapEntryBuilder()
+            .withNodeIdentifier(outerEntryKey(id))
+            .withChild(ImmutableNodes.leafNode(ID_QNAME, id));
+
+        for (var child : children) {
+            builder.addChild(child);
+        }
+
+        return builder.build();
     }
 
     public static ContainerNode testNodeWithOuter(final int... ids) {

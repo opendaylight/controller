@@ -14,10 +14,10 @@ import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.O
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.TEST_PATH;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.innerEntryPath;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.innerNode;
+import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.outerEntry;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.outerEntryKey;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.outerEntryPath;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.outerNode;
-import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.outerNodeEntry;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.testNodeWithOuter;
 
 import java.time.Duration;
@@ -124,7 +124,7 @@ public class DataTreeChangeListenerSupportTest extends AbstractShardTest {
     @Test
     public void testInitialChangeListenerEventWithNestedWildcardedListsPath() throws DataValidationFailedException {
         mergeToStore(shard.getDataStore(), TEST_PATH, testNodeWithOuter(outerNode(
-                outerNodeEntry(1, innerNode("one", "two")), outerNodeEntry(2, innerNode("three", "four")))));
+                outerEntry(1, innerNode("one", "two")), outerEntry(2, innerNode("three", "four")))));
 
         MockDataTreeChangeListener listener = registerChangeListener(
                 OUTER_LIST_PATH.node(OUTER_LIST_QNAME).node(INNER_LIST_QNAME).node(INNER_LIST_QNAME), 1).getKey();
@@ -146,7 +146,7 @@ public class DataTreeChangeListenerSupportTest extends AbstractShardTest {
         listener2.reset(1);
 
         mergeToStore(shard.getDataStore(), TEST_PATH, testNodeWithOuter(outerNode(
-                outerNodeEntry(1, innerNode("three")))));
+                outerEntry(1, innerNode("three")))));
 
         listener.waitForChangeEvents();
         listener.verifyNotifiedData(innerEntryPath(1, "three"));

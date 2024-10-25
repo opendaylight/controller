@@ -28,7 +28,6 @@ import org.opendaylight.controller.cluster.datastore.modification.WriteModificat
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
-import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeConfiguration;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
@@ -49,7 +48,7 @@ public class ReadyLocalTransactionSerializerTest extends AbstractTest {
 
         ContainerNode writeData = TestModel.EMPTY_TEST;
         modification.write(TestModel.TEST_PATH, writeData);
-        MapNode mergeData = ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build();
+        MapNode mergeData = TestModel.EMPTY_OUTER_LIST;
         modification.merge(TestModel.OUTER_LIST_PATH, mergeData);
 
         final SortedSet<String> shardNames = ImmutableSortedSet.of("one", "two");

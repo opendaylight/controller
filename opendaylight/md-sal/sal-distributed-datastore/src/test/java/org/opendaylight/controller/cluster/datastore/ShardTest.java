@@ -22,9 +22,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.opendaylight.controller.cluster.datastore.DataStoreVersions.CURRENT_VERSION;
-import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.containerNode;
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntry;
-import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapNodeBuilder;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Throwables;
@@ -111,8 +109,8 @@ import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
-import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.SystemMapNode;
 import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
@@ -298,9 +296,7 @@ public class ShardTest extends AbstractShardTest {
 
         final ContainerNode container = ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(TestModel.TEST_QNAME))
-            .withChild(mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
-                .addChild(mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1))
-                .build())
+            .withChild(TestModel.outerNode(1))
             .build();
 
         writeToStore(store, TestModel.TEST_PATH, container);
@@ -366,7 +362,7 @@ public class ShardTest extends AbstractShardTest {
         final DataTree source = setupInMemorySnapshotStore();
 
         final DataTreeModification writeMod = source.takeSnapshot().newModification();
-        writeMod.write(TestModel.OUTER_LIST_PATH, mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build());
+        writeMod.write(TestModel.OUTER_LIST_PATH, TestModel.EMPTY_OUTER_LIST);
         writeMod.ready();
         InMemoryJournal.addEntry(shardID.toString(), 0, DUMMY_DATA);
 
@@ -381,11 +377,8 @@ public class ShardTest extends AbstractShardTest {
         for (int i = 1; i <= nListEntries; i++) {
             listEntryKeys.add(i);
 
-            final YangInstanceIdentifier path = YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)
-                    .nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, i).build();
-
             final DataTreeModification mod = source.takeSnapshot().newModification();
-            mod.merge(path, mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, i));
+            mod.merge(TestModel.outerEntryPath(i), TestModel.outerEntry(i));
             mod.ready();
 
             InMemoryJournal.addEntry(shardID.toString(), i + 1, new SimpleReplicatedLogEntry(i, 1,
@@ -497,14 +490,12 @@ public class ShardTest extends AbstractShardTest {
 
         // Ready 2 more Tx's.
 
-        shard.tell(prepareBatchedModifications(transactionID2, TestModel.OUTER_LIST_PATH,
-            mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build(), false), testKit.getRef());
+        shard.tell(prepareBatchedModifications(transactionID2, TestModel.OUTER_LIST_PATH, TestModel.EMPTY_OUTER_LIST,
+            false), testKit.getRef());
         testKit.expectMsgClass(duration, ReadyTransactionReply.class);
 
-        shard.tell(
-            prepareBatchedModifications(transactionID3, YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)
-                .nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1).build(),
-                mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1), false), testKit.getRef());
+        shard.tell(prepareBatchedModifications(transactionID3, TestModel.outerEntryPath(1), TestModel.outerEntry(1),
+            false), testKit.getRef());
         testKit.expectMsgClass(duration, ReadyTransactionReply.class);
 
         // Send the CanCommitTransaction message for the next 2 Tx's.
@@ -581,15 +572,12 @@ public class ShardTest extends AbstractShardTest {
 
         // Send a couple more BatchedModifications.
 
-        shard.tell(newBatchedModifications(transactionID, TestModel.OUTER_LIST_PATH,
-                mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build(), false, false, 2),
-            testKit.getRef());
+        shard.tell(newBatchedModifications(transactionID, TestModel.OUTER_LIST_PATH, TestModel.EMPTY_OUTER_LIST, false,
+            false, 2), testKit.getRef());
         testKit.expectMsgClass(duration, BatchedModificationsReply.class);
 
-        shard.tell(newBatchedModifications(transactionID, YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)
-            .nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1).build(),
-            mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1), true, false, 3),
-            testKit.getRef());
+        shard.tell(newBatchedModifications(transactionID, TestModel.outerEntryPath(1), TestModel.outerEntry(1),
+            true, false, 3), testKit.getRef());
         testKit.expectMsgClass(duration, ReadyTransactionReply.class);
 
         // Send the CanCommitTransaction message.
@@ -629,16 +617,13 @@ public class ShardTest extends AbstractShardTest {
 
         // Send a couple more BatchedModifications.
 
-        shard.tell(newBatchedModifications(transactionID, TestModel.OUTER_LIST_PATH,
-            mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build(), false, false, 2),
+        shard.tell(newBatchedModifications(transactionID, TestModel.OUTER_LIST_PATH, TestModel.EMPTY_OUTER_LIST, false,
+            false, 2),
             testKit.getRef());
         testKit.expectMsgClass(duration, BatchedModificationsReply.class);
 
-        shard.tell(newBatchedModifications(transactionID,
-            YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)
-            .nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1).build(),
-            mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1), true, true, 3),
-            testKit.getRef());
+        shard.tell(newBatchedModifications(transactionID, TestModel.outerEntryPath(1), TestModel.outerEntry(1),
+            true, true, 3), testKit.getRef());
 
         testKit.expectMsgClass(duration, CommitTransactionReply.class);
 
@@ -880,9 +865,7 @@ public class ShardTest extends AbstractShardTest {
 
         final var writeData = TestModel.EMPTY_TEST;
         modification.write(TestModel.TEST_PATH, writeData);
-        final var mergeData = mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
-                .addChild(mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 42))
-                .build();
+        final var mergeData = TestModel.outerNode(42);
         modification.merge(TestModel.OUTER_LIST_PATH, mergeData);
 
         final TransactionIdentifier txId = nextTransactionId();
@@ -913,9 +896,7 @@ public class ShardTest extends AbstractShardTest {
 
         final ContainerNode writeData = TestModel.EMPTY_TEST;
         modification.write(TestModel.TEST_PATH, writeData);
-        final MapNode mergeData = mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
-                .addChild(mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 42))
-                .build();
+        final SystemMapNode mergeData = TestModel.outerNode(42);
         modification.merge(TestModel.OUTER_LIST_PATH, mergeData);
 
         final TransactionIdentifier txId = nextTransactionId();
@@ -1325,7 +1306,7 @@ public class ShardTest extends AbstractShardTest {
         final Duration duration = Duration.ofSeconds(5);
 
         writeToStore(shard, TestModel.TEST_PATH, TestModel.EMPTY_TEST);
-        writeToStore(shard, TestModel.OUTER_LIST_PATH, mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build());
+        writeToStore(shard, TestModel.OUTER_LIST_PATH, TestModel.EMPTY_OUTER_LIST);
 
         // Ready 2 Tx's - the first will timeout
 
@@ -1510,7 +1491,9 @@ public class ShardTest extends AbstractShardTest {
 
         final TransactionIdentifier transactionID3 = nextTransactionId();
         final DataTreeModification modification3 = dataStore.newModification();
-        modification3.write(TestModel.TEST2_PATH, containerNode(TestModel.TEST2_QNAME));
+        modification3.write(TestModel.TEST2_PATH, ImmutableNodes.newContainerBuilder()
+            .withNodeIdentifier(new NodeIdentifier(TestModel.TEST2_QNAME))
+            .build());
         modification3.ready();
         final ReadyLocalTransaction readyMessage = new ReadyLocalTransaction(transactionID3, modification3,
             true, Optional.empty());
@@ -1658,8 +1641,8 @@ public class ShardTest extends AbstractShardTest {
         testKit.expectMsgClass(duration, ReadyTransactionReply.class);
 
         final TransactionIdentifier transactionID3 = nextTransactionId();
-        shard.tell(newBatchedModifications(transactionID3, TestModel.OUTER_LIST_PATH,
-            mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build(), true, false, 1), testKit.getRef());
+        shard.tell(newBatchedModifications(transactionID3, TestModel.OUTER_LIST_PATH, TestModel.EMPTY_OUTER_LIST, true,
+            false, 1), testKit.getRef());
         testKit.expectMsgClass(duration, ReadyTransactionReply.class);
 
         // Abort the second tx while it's queued.
