@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.datastore.modification;
 
 import static org.junit.Assert.assertEquals;
-import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.containerNode;
 
 import java.util.Optional;
 import org.apache.commons.lang3.SerializationUtils;
@@ -26,13 +25,12 @@ public class MergeModificationTest extends AbstractModificationTest {
 
         //Write something into the datastore
         DOMStoreReadWriteTransaction writeTransaction = store.newReadWriteTransaction();
-        MergeModification writeModification = new MergeModification(TestModel.TEST_PATH,
-                containerNode(TestModel.TEST_QNAME));
+        MergeModification writeModification = new MergeModification(TestModel.TEST_PATH, TestModel.EMPTY_TEST);
         writeModification.apply(writeTransaction);
         commitTransaction(writeTransaction);
 
         //Check if it's in the datastore
-        assertEquals(Optional.of(TEST_CONTAINER), readData(TestModel.TEST_PATH));
+        assertEquals(Optional.of(TestModel.EMPTY_TEST), readData(TestModel.TEST_PATH));
     }
 
     @Test

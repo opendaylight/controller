@@ -10,8 +10,8 @@ package org.opendaylight.controller.cluster.datastore.utils;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import com.google.common.collect.ImmutableList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -38,18 +38,16 @@ public class NormalizedNodeAggregatorTest {
     @Test
     public void testAggregate() throws InterruptedException, ExecutionException, DataValidationFailedException {
         EffectiveModelContext schemaContext = SchemaContextHelper.full();
-        NormalizedNode expectedNode1 = ImmutableNodes.newContainerBuilder()
-            .withNodeIdentifier(new NodeIdentifier(TestModel.TEST_QNAME))
-            .build();
-        NormalizedNode expectedNode2 = ImmutableNodes.newContainerBuilder()
+        final var expectedNode1 = TestModel.EMPTY_TEST;
+        final var expectedNode2 = ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(CarsModel.CARS_QNAME))
             .build();
 
         Optional<NormalizedNode> optional = NormalizedNodeAggregator.aggregate(YangInstanceIdentifier.of(),
-                ImmutableList.of(
-                        Optional.<NormalizedNode>of(getRootNode(expectedNode1, schemaContext)),
-                        Optional.<NormalizedNode>of(getRootNode(expectedNode2, schemaContext))),
-                schemaContext, LogicalDatastoreType.CONFIGURATION);
+            List.of(
+                Optional.<NormalizedNode>of(getRootNode(expectedNode1, schemaContext)),
+                Optional.<NormalizedNode>of(getRootNode(expectedNode2, schemaContext))),
+            schemaContext, LogicalDatastoreType.CONFIGURATION);
 
 
         NormalizedNode normalizedNode = optional.orElseThrow();

@@ -10,6 +10,7 @@ package org.opendaylight.controller.md.cluster.datastore.model;
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntry;
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntryBuilder;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
@@ -53,6 +54,10 @@ public final class TestModel {
     public static final YangInstanceIdentifier OUTER_CONTAINER_PATH = TEST_PATH.node(OUTER_CONTAINER_QNAME);
     public static final QName TWO_QNAME = QName.create(TEST_QNAME,"two");
     public static final QName THREE_QNAME = QName.create(TEST_QNAME,"three");
+
+    public static final @NonNull ContainerNode EMPTY_TEST = ImmutableNodes.newContainerBuilder()
+        .withNodeIdentifier(new NodeIdentifier(TEST_QNAME))
+        .build();
 
     private TestModel() {
         // Hidden on purpose

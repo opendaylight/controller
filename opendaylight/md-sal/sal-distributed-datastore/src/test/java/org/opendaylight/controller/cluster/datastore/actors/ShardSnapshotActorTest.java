@@ -26,12 +26,9 @@ import org.opendaylight.controller.cluster.io.InputOutputStreamFactory;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 
 public class ShardSnapshotActorTest extends AbstractActorTest {
     private static final InputOutputStreamFactory STREAM_FACTORY = InputOutputStreamFactory.simple();
-
-    private static final NormalizedNode DATA = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
     private static void testSerializeSnapshot(final String testName, final ShardDataTreeSnapshot snapshot,
             final boolean withInstallSnapshot) throws Exception {
@@ -65,8 +62,8 @@ public class ShardSnapshotActorTest extends AbstractActorTest {
     @Test
     public void testSerializeBoronSnapshot() throws Exception {
         testSerializeSnapshot("testSerializeBoronSnapshotWithInstallSnapshot",
-                new MetadataShardDataTreeSnapshot(DATA), true);
+                new MetadataShardDataTreeSnapshot(TestModel.EMPTY_TEST), true);
         testSerializeSnapshot("testSerializeBoronSnapshotWithoutInstallSnapshot",
-                new MetadataShardDataTreeSnapshot(DATA), false);
+                new MetadataShardDataTreeSnapshot(TestModel.EMPTY_TEST), false);
     }
 }

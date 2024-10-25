@@ -107,7 +107,7 @@ public class DataTreeCohortIntegrationTest {
             IntegrationTestKit.verifyShardState(dataStore, "test-1",
                 state -> assertEquals("Cohort registrations", 1, state.getCommitCohortActors().size()));
 
-            final var node = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+            final var node = TestModel.EMPTY_TEST;
             kit.testWriteTransaction(dataStore, TestModel.TEST_PATH, node);
             verify(cohort).canCommit(any(Object.class), any(EffectiveModelContext.class), candidateCapt.capture());
             assertDataTreeCandidate((DOMDataTreeCandidate) candidateCapt.getValue().iterator().next(), TEST_ID,
@@ -148,7 +148,7 @@ public class DataTreeCohortIntegrationTest {
                 state -> assertEquals("Cohort registrations", 1, state.getCommitCohortActors().size()));
 
             DOMStoreWriteTransaction writeTx = dataStore.newWriteOnlyTransaction();
-            writeTx.write(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+            writeTx.write(TestModel.TEST_PATH, TestModel.EMPTY_TEST);
             DOMStoreThreePhaseCommitCohort dsCohort = writeTx.ready();
             try {
                 dsCohort.canCommit().get(5, TimeUnit.SECONDS);
@@ -292,7 +292,7 @@ public class DataTreeCohortIntegrationTest {
                 state -> assertEquals("Cohort registrations", 1, state.getCommitCohortActors().size()));
 
             var writeTx = dataStore.newWriteOnlyTransaction();
-            writeTx.write(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+            writeTx.write(TestModel.TEST_PATH, TestModel.EMPTY_TEST);
             writeTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
             var dsCohort = writeTx.ready();
 

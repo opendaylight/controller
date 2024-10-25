@@ -7,11 +7,11 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.EMPTY_TEST;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.INNER_LIST_QNAME;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.OUTER_LIST_PATH;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.OUTER_LIST_QNAME;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.TEST_PATH;
-import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.TEST_QNAME;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.innerEntryPath;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.innerNode;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.outerEntryKey;
@@ -40,9 +40,7 @@ import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeNo
 import org.opendaylight.controller.cluster.datastore.utils.MockDataTreeChangeListener;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.tree.api.DataValidationFailedException;
 import scala.concurrent.Await;
 import scala.concurrent.duration.FiniteDuration;
@@ -79,9 +77,7 @@ public class DataTreeChangeListenerSupportTest extends AbstractShardTest {
 
     @Test
     public void testInitialChangeListenerEventWithContainerPath() throws DataValidationFailedException {
-        writeToStore(shard.getDataStore(), TEST_PATH, ImmutableNodes.newContainerBuilder()
-            .withNodeIdentifier(new NodeIdentifier(TEST_QNAME))
-            .build());
+        writeToStore(shard.getDataStore(), TEST_PATH, EMPTY_TEST);
 
         Entry<MockDataTreeChangeListener, ActorSelection> entry = registerChangeListener(TEST_PATH, 1);
         MockDataTreeChangeListener listener = entry.getKey();
@@ -91,9 +87,7 @@ public class DataTreeChangeListenerSupportTest extends AbstractShardTest {
 
         listener.reset(1);
 
-        writeToStore(shard.getDataStore(), TEST_PATH, ImmutableNodes.newContainerBuilder()
-            .withNodeIdentifier(new NodeIdentifier(TEST_QNAME))
-            .build());
+        writeToStore(shard.getDataStore(), TEST_PATH, EMPTY_TEST);
         listener.waitForChangeEvents();
         listener.verifyNotifiedData(TEST_PATH);
 
@@ -102,9 +96,7 @@ public class DataTreeChangeListenerSupportTest extends AbstractShardTest {
         entry.getValue().tell(CloseDataTreeNotificationListenerRegistration.getInstance(), kit.getRef());
         kit.expectMsgClass(Duration.ofSeconds(5), CloseDataTreeNotificationListenerRegistrationReply.class);
 
-        writeToStore(shard.getDataStore(), TEST_PATH, ImmutableNodes.newContainerBuilder()
-            .withNodeIdentifier(new NodeIdentifier(TEST_QNAME))
-            .build());
+        writeToStore(shard.getDataStore(), TEST_PATH, EMPTY_TEST);
         listener.verifyNoNotifiedData(TEST_PATH);
     }
 

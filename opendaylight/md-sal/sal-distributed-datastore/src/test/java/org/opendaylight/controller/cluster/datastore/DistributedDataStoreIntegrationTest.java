@@ -104,7 +104,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
             final CountDownLatch txReady = new CountDownLatch(1);
             final Thread txThread = new Thread(() -> {
                 try {
-                    writeTx.write(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+                    writeTx.write(TestModel.TEST_PATH, TestModel.EMPTY_TEST);
 
                     writeTx.merge(TestModel.OUTER_LIST_PATH,
                         ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
@@ -193,8 +193,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
             final CountDownLatch txReadsDone = new CountDownLatch(1);
             final Thread txThread = new Thread(() -> {
                 try {
-                    readWriteTx.write(TestModel.TEST_PATH,
-                        ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+                    readWriteTx.write(TestModel.TEST_PATH, TestModel.EMPTY_TEST);
 
                     txExistsFuture.set(readWriteTx.exists(TestModel.TEST_PATH));
 
@@ -260,7 +259,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
         final CountDownLatch txReady = new CountDownLatch(1);
         final Thread txThread = new Thread(() -> {
             try {
-                writeTx.write(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+                writeTx.write(TestModel.TEST_PATH, TestModel.EMPTY_TEST);
 
                 txCohort.set(writeTx.ready());
             } catch (Exception e) {
@@ -324,8 +323,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
             final CountDownLatch txReadDone = new CountDownLatch(1);
             final Thread txThread = new Thread(() -> {
                 try {
-                    readWriteTx.write(TestModel.TEST_PATH,
-                        ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+                    readWriteTx.write(TestModel.TEST_PATH, TestModel.EMPTY_TEST);
 
                     txReadFuture.set(readWriteTx.read(TestModel.TEST_PATH));
 

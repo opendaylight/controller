@@ -268,9 +268,7 @@ public class ShardTransactionTest extends AbstractActorTest {
         watcher.watch(transaction);
 
         YangInstanceIdentifier path = TestModel.TEST_PATH;
-        ContainerNode node = ImmutableNodes.newContainerBuilder()
-            .withNodeIdentifier(new NodeIdentifier(TestModel.TEST_QNAME))
-            .build();
+        ContainerNode node = TestModel.EMPTY_TEST;
 
         doThrow(new TestException()).when(mockModification).write(path, node);
 

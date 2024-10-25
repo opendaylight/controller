@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.datastore.modification;
 
 import static org.junit.Assert.assertEquals;
-import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.containerNode;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Test;
@@ -25,8 +24,7 @@ public class MutableCompositeModificationTest extends AbstractModificationTest {
     @Test
     public void testApply() throws Exception {
         MutableCompositeModification compositeModification = new MutableCompositeModification();
-        compositeModification.addModification(new WriteModification(TestModel.TEST_PATH,
-            containerNode(TestModel.TEST_QNAME)));
+        compositeModification.addModification(new WriteModification(TestModel.TEST_PATH, TestModel.EMPTY_TEST));
 
         DOMStoreReadWriteTransaction transaction = store.newReadWriteTransaction();
         compositeModification.apply(transaction);

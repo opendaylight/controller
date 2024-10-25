@@ -47,7 +47,7 @@ public class ReadyLocalTransactionSerializerTest extends AbstractTest {
             DataTreeConfiguration.DEFAULT_OPERATIONAL, TestModel.createTestContext());
         DataTreeModification modification = dataTree.takeSnapshot().newModification();
 
-        ContainerNode writeData = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        ContainerNode writeData = TestModel.EMPTY_TEST;
         modification.write(TestModel.TEST_PATH, writeData);
         MapNode mergeData = ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build();
         modification.merge(TestModel.OUTER_LIST_PATH, mergeData);

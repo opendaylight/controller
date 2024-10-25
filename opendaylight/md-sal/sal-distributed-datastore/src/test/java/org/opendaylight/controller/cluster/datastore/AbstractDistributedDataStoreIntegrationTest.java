@@ -103,7 +103,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
         final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
         try (var dataStore = testKit.setupDataStore(testParameter, "transactionIntegrationTest", "test-1")) {
 
-            testKit.testWriteTransaction(dataStore, TestModel.TEST_PATH, containerNode(TestModel.TEST_QNAME));
+            testKit.testWriteTransaction(dataStore, TestModel.TEST_PATH, TestModel.EMPTY_TEST);
 
             testKit.testWriteTransaction(dataStore, TestModel.OUTER_LIST_PATH,
                 mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
@@ -165,7 +165,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
 
             // 2. Write some data
             final YangInstanceIdentifier nodePath = TestModel.TEST_PATH;
-            final NormalizedNode nodeToWrite = containerNode(TestModel.TEST_QNAME);
+            final ContainerNode nodeToWrite = TestModel.EMPTY_TEST;
             readWriteTx.write(nodePath, nodeToWrite);
 
             // 3. Read the data from Tx
@@ -381,7 +381,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
             final DOMStoreWriteTransaction writeTx = dataStore.newWriteOnlyTransaction();
             assertNotNull("newWriteOnlyTransaction returned null", writeTx);
 
-            writeTx.write(TestModel.TEST_PATH, containerNode(TestModel.TEST_QNAME));
+            writeTx.write(TestModel.TEST_PATH, TestModel.EMPTY_TEST);
 
             final DOMStoreThreePhaseCommitCohort cohort = writeTx.ready();
 
@@ -389,7 +389,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
 
             cohort.abort().get(5, TimeUnit.SECONDS);
 
-            testKit.testWriteTransaction(dataStore, TestModel.TEST_PATH, containerNode(TestModel.TEST_QNAME));
+            testKit.testWriteTransaction(dataStore, TestModel.TEST_PATH, TestModel.EMPTY_TEST);
         }
     }
 
@@ -406,7 +406,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
             assertNotNull("newWriteOnlyTransaction returned null", writeTx);
 
             // 2. Write some data
-            final NormalizedNode testNode = containerNode(TestModel.TEST_QNAME);
+            final NormalizedNode testNode = TestModel.EMPTY_TEST;
             writeTx.write(TestModel.TEST_PATH, testNode);
 
             // 3. Ready the Tx for commit
@@ -603,7 +603,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
             final DOMStoreWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
             assertNotNull("newWriteOnlyTransaction returned null", writeTx);
 
-            writeTx.write(TestModel.TEST_PATH, containerNode(TestModel.TEST_QNAME));
+            writeTx.write(TestModel.TEST_PATH, TestModel.EMPTY_TEST);
 
             // Try to create another Tx of each type - each should fail
             // b/c the previous Tx wasn't
@@ -637,7 +637,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
 
             // Create a write tx and submit.
             final DOMStoreWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
-            writeTx.write(TestModel.TEST_PATH, containerNode(TestModel.TEST_QNAME));
+            writeTx.write(TestModel.TEST_PATH, TestModel.EMPTY_TEST);
             final DOMStoreThreePhaseCommitCohort cohort1 = writeTx.ready();
 
             // Create read-only tx's and issue a read.
@@ -750,7 +750,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
         try (var dataStore = testKit.setupDataStore(testParameter, "testDataTreeChangeListenerRegistration",
             "test-1")) {
 
-            testKit.testWriteTransaction(dataStore, TestModel.TEST_PATH, containerNode(TestModel.TEST_QNAME));
+            testKit.testWriteTransaction(dataStore, TestModel.TEST_PATH, TestModel.EMPTY_TEST);
 
             final MockDataTreeChangeListener listener = new MockDataTreeChangeListener(1);
 

@@ -311,7 +311,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         final DataTree testStore = new InMemoryDataTreeFactory().create(
             DataTreeConfiguration.DEFAULT_OPERATIONAL, SCHEMA_CONTEXT);
 
-        writeToStore(testStore, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+        writeToStore(testStore, TestModel.TEST_PATH, TestModel.EMPTY_TEST);
 
         final NormalizedNode root = readStore(testStore, YangInstanceIdentifier.of());
 

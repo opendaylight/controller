@@ -9,13 +9,13 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertNotNull;
 import static org.opendaylight.controller.cluster.datastore.DataStoreVersions.CURRENT_VERSION;
+import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.EMPTY_TEST;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.ID_QNAME;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.INNER_LIST_QNAME;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.NAME_QNAME;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.OUTER_LIST_PATH;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.OUTER_LIST_QNAME;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.TEST_PATH;
-import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.TEST_QNAME;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.innerEntryPath;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.innerMapPath;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.innerNode;
@@ -94,8 +94,7 @@ public class ShardCommitCoordinationTest extends AbstractShardTest {
 
         // Ready [tx1, tx2] on shard A.
 
-        shardA.tell(newReadyBatchedModifications(txId1, TEST_PATH,
-                ImmutableNodes.containerNode(TEST_QNAME), participatingShardNames), kit1.getRef());
+        shardA.tell(newReadyBatchedModifications(txId1, TEST_PATH, EMPTY_TEST, participatingShardNames), kit1.getRef());
         kit1.expectMsgClass(ReadyTransactionReply.class);
 
         shardA.tell(newReadyBatchedModifications(txId2, OUTER_LIST_PATH, outerNode(1),
@@ -108,8 +107,7 @@ public class ShardCommitCoordinationTest extends AbstractShardTest {
                 participatingShardNames), kit2.getRef());
         kit2.expectMsgClass(ReadyTransactionReply.class);
 
-        shardB.tell(newReadyBatchedModifications(txId1, TEST_PATH,
-                ImmutableNodes.containerNode(TEST_QNAME), participatingShardNames), kit1.getRef());
+        shardB.tell(newReadyBatchedModifications(txId1, TEST_PATH, EMPTY_TEST, participatingShardNames), kit1.getRef());
         kit1.expectMsgClass(ReadyTransactionReply.class);
 
         // Send tx2 CanCommit to A - tx1 is at the head of the queue so tx2 should not proceed as A is the first shard
@@ -213,8 +211,8 @@ public class ShardCommitCoordinationTest extends AbstractShardTest {
 
         // Ready [tx3, tx4, tx5] on shard A.
 
-        shardA.tell(newReadyBatchedModifications(txId3, TEST_PATH,
-                ImmutableNodes.containerNode(TEST_QNAME), participatingShardNames1), kit3.getRef());
+        shardA.tell(newReadyBatchedModifications(txId3, TEST_PATH, EMPTY_TEST, participatingShardNames1),
+            kit3.getRef());
         kit3.expectMsgClass(ReadyTransactionReply.class);
 
         shardA.tell(newReadyBatchedModifications(txId4, OUTER_LIST_PATH, outerMapNode(),
@@ -227,8 +225,8 @@ public class ShardCommitCoordinationTest extends AbstractShardTest {
 
         // Ready [tx1, tx2, tx5, tx4, tx3] on shard B.
 
-        shardB.tell(newReadyBatchedModifications(txId1, TEST_PATH,
-                ImmutableNodes.containerNode(TEST_QNAME), participatingShardNames2), kit1.getRef());
+        shardB.tell(newReadyBatchedModifications(txId1, TEST_PATH, EMPTY_TEST, participatingShardNames2),
+            kit1.getRef());
         kit1.expectMsgClass(ReadyTransactionReply.class);
 
         shardB.tell(newReadyBatchedModifications(txId2, OUTER_LIST_PATH, outerMapNode(),
@@ -378,20 +376,20 @@ public class ShardCommitCoordinationTest extends AbstractShardTest {
 
         // Ready [tx1] on shard A.
 
-        shardA.tell(newReadyBatchedModifications(txId1, TEST_PATH,
-                ImmutableNodes.containerNode(TEST_QNAME), participatingShardNames1), kit1.getRef());
+        shardA.tell(newReadyBatchedModifications(txId1, TEST_PATH, EMPTY_TEST, participatingShardNames1),
+            kit1.getRef());
         kit1.expectMsgClass(ReadyTransactionReply.class);
 
         // Ready [tx2] on shard B.
 
-        shardB.tell(newReadyBatchedModifications(txId2, TEST_PATH,
-                ImmutableNodes.containerNode(TEST_QNAME), participatingShardNames2), kit2.getRef());
+        shardB.tell(newReadyBatchedModifications(txId2, TEST_PATH, EMPTY_TEST, participatingShardNames2),
+            kit2.getRef());
         kit2.expectMsgClass(ReadyTransactionReply.class);
 
         // Ready [tx2, tx1] on shard C.
 
-        shardC.tell(newReadyBatchedModifications(txId2, TEST_PATH,
-                ImmutableNodes.containerNode(TEST_QNAME), participatingShardNames2), kit2.getRef());
+        shardC.tell(newReadyBatchedModifications(txId2, TEST_PATH, EMPTY_TEST, participatingShardNames2),
+            kit2.getRef());
         kit2.expectMsgClass(ReadyTransactionReply.class);
 
         shardC.tell(newReadyBatchedModifications(txId1, OUTER_LIST_PATH, outerNode(1),
@@ -491,14 +489,14 @@ public class ShardCommitCoordinationTest extends AbstractShardTest {
 
         // Ready [tx1] on shard A.
 
-        shardA.tell(newReadyBatchedModifications(txId1, TEST_PATH,
-                ImmutableNodes.containerNode(TEST_QNAME), participatingShardNames1), kit1.getRef());
+        shardA.tell(newReadyBatchedModifications(txId1, TEST_PATH, EMPTY_TEST, participatingShardNames1),
+            kit1.getRef());
         kit1.expectMsgClass(ReadyTransactionReply.class);
 
         // Ready [tx2, tx1] on shard B.
 
-        shardB.tell(newReadyBatchedModifications(txId2, TEST_PATH,
-                ImmutableNodes.containerNode(TEST_QNAME), participatingShardNames2), kit2.getRef());
+        shardB.tell(newReadyBatchedModifications(txId2, TEST_PATH, EMPTY_TEST, participatingShardNames2),
+            kit2.getRef());
         kit2.expectMsgClass(ReadyTransactionReply.class);
 
         shardB.tell(newReadyBatchedModifications(txId1, OUTER_LIST_PATH, outerNode(1),
@@ -507,8 +505,8 @@ public class ShardCommitCoordinationTest extends AbstractShardTest {
 
         // Ready [tx2] on shard C.
 
-        shardC.tell(newReadyBatchedModifications(txId2, TEST_PATH,
-                ImmutableNodes.containerNode(TEST_QNAME), participatingShardNames2), kit2.getRef());
+        shardC.tell(newReadyBatchedModifications(txId2, TEST_PATH, EMPTY_TEST, participatingShardNames2),
+            kit2.getRef());
         kit2.expectMsgClass(ReadyTransactionReply.class);
 
         // Send tx1 CanCommit to A - should succeed.

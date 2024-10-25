@@ -23,12 +23,12 @@ public class WriteModificationTest extends AbstractModificationTest {
     public void testApply() throws Exception {
         //Write something into the datastore
         DOMStoreReadWriteTransaction writeTransaction = store.newReadWriteTransaction();
-        WriteModification writeModification = new WriteModification(TestModel.TEST_PATH, TEST_CONTAINER);
+        WriteModification writeModification = new WriteModification(TestModel.TEST_PATH, TestModel.EMPTY_TEST);
         writeModification.apply(writeTransaction);
         commitTransaction(writeTransaction);
 
         //Check if it's in the datastore
-        assertEquals(Optional.of(TEST_CONTAINER), readData(TestModel.TEST_PATH));
+        assertEquals(Optional.of(TestModel.EMPTY_TEST), readData(TestModel.TEST_PATH));
     }
 
     @Test
