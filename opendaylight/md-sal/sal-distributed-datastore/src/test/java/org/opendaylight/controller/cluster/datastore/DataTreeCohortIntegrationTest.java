@@ -260,7 +260,7 @@ public class DataTreeCohortIntegrationTest {
             final YangInstanceIdentifier rootPath) {
         for (Object obj: candidateCapture.getValue()) {
             DOMDataTreeCandidate candidate = (DOMDataTreeCandidate)obj;
-            if (rootPath.equals(candidate.getRootPath().getRootIdentifier())) {
+            if (rootPath.equals(candidate.getRootPath().path())) {
                 return candidate;
             }
         }
@@ -306,7 +306,7 @@ public class DataTreeCohortIntegrationTest {
     private static void assertDataTreeCandidate(final DOMDataTreeCandidate candidate,
             final DOMDataTreeIdentifier expTreeId, final ModificationType expType,
             final NormalizedNode expDataAfter, final NormalizedNode expDataBefore) {
-        assertNotNull("Expected candidate for path " + expTreeId.getRootIdentifier(), candidate);
+        assertNotNull("Expected candidate for path " + expTreeId.path(), candidate);
         assertEquals("rootPath", expTreeId, candidate.getRootPath());
         assertEquals("modificationType", expType, candidate.getRootNode().modificationType());
         assertEquals("dataAfter", expDataAfter, candidate.getRootNode().dataAfter());

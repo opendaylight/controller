@@ -13,11 +13,9 @@ import static com.google.common.base.Verify.verifyNotNull;
 import com.google.common.collect.Iterables;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Props;
@@ -28,8 +26,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.api.schema.builder.DataContainerNodeBuilder;
-import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.tree.spi.DataTreeCandidateNodes;
 import org.opendaylight.yangtools.yang.data.tree.spi.DataTreeCandidates;
@@ -97,15 +94,15 @@ final class RootDataTreeChangeListenerActor extends DataTreeChangeListenerActor 
          * Construct an overall NormalizedNode view of the entire datastore by combining first-level children from all
          * reported initial state reports, report that node as written and then report any additional deltas.
          */
-        final List<DataTreeCandidate> initialChanges = new ArrayList<>();
+        final var initialChanges = new ArrayList<DataTreeCandidate>();
         // Reserve first item
         initialChanges.add(null);
 
-        final DataContainerNodeBuilder<NodeIdentifier, ContainerNode> rootBuilder = Builders.containerBuilder()
+        final var rootBuilder = ImmutableNodes.newContainerBuilder()
                 .withNodeIdentifier(NodeIdentifier.create(SchemaContext.NAME));
         for (Object message : initialMessages.values()) {
-            if (message instanceof DataTreeChanged) {
-                final Collection<DataTreeCandidate> changes = ((DataTreeChanged) message).getChanges();
+            if (message instanceof DataTreeChanged dtc) {
+                final var changes = dtc.getChanges();
                 final DataTreeCandidate initial;
                 if (changes.size() != 1) {
                     final Iterator<DataTreeCandidate> it = changes.iterator();

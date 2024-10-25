@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore.modification;
 
 import static org.junit.Assert.assertEquals;
+import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.containerNode;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Test;
@@ -17,8 +18,7 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
-import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
-import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 
 @Deprecated(since = "9.0.0", forRemoval = true)
 public class MutableCompositeModificationTest extends AbstractModificationTest {
@@ -26,7 +26,7 @@ public class MutableCompositeModificationTest extends AbstractModificationTest {
     public void testApply() throws Exception {
         MutableCompositeModification compositeModification = new MutableCompositeModification();
         compositeModification.addModification(new WriteModification(TestModel.TEST_PATH,
-            ImmutableNodes.containerNode(TestModel.TEST_QNAME)));
+            containerNode(TestModel.TEST_QNAME)));
 
         DOMStoreReadWriteTransaction transaction = store.newReadWriteTransaction();
         compositeModification.apply(transaction);
@@ -38,13 +38,13 @@ public class MutableCompositeModificationTest extends AbstractModificationTest {
     @Test
     public void testSerialization() {
         YangInstanceIdentifier writePath = TestModel.TEST_PATH;
-        ContainerNode writeData = Builders.containerBuilder()
+        ContainerNode writeData = ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(TestModel.TEST_QNAME))
             .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo"))
             .build();
 
         YangInstanceIdentifier mergePath = TestModel.OUTER_LIST_PATH;
-        ContainerNode mergeData = Builders.containerBuilder()
+        ContainerNode mergeData = ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(TestModel.OUTER_LIST_QNAME))
             .build();
 
@@ -82,13 +82,13 @@ public class MutableCompositeModificationTest extends AbstractModificationTest {
     @Test
     public void testSerializationModern() {
         YangInstanceIdentifier writePath = TestModel.TEST_PATH;
-        ContainerNode writeData = Builders.containerBuilder()
+        ContainerNode writeData = ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(TestModel.TEST_QNAME))
             .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo"))
             .build();
 
         YangInstanceIdentifier mergePath = TestModel.OUTER_LIST_PATH;
-        ContainerNode mergeData = Builders.containerBuilder()
+        ContainerNode mergeData = ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(TestModel.OUTER_LIST_QNAME))
             .build();
 

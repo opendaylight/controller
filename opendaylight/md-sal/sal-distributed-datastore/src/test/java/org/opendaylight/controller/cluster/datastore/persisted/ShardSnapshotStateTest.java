@@ -15,9 +15,7 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Test;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
-import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
-import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 
 /**
  * Unit tests for ShardSnapshotState.
@@ -27,13 +25,13 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 public class ShardSnapshotStateTest {
     @Test
     public void testSerialization() {
-        ContainerNode expectedNode = Builders.containerBuilder()
+        final var expectedNode = ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(TestModel.TEST_QNAME))
             .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo"))
             .build();
 
-        ShardSnapshotState expected = new ShardSnapshotState(new MetadataShardDataTreeSnapshot(expectedNode));
-        ShardSnapshotState cloned = SerializationUtils.clone(expected);
+        final var expected = new ShardSnapshotState(new MetadataShardDataTreeSnapshot(expectedNode));
+        final var cloned = SerializationUtils.clone(expected);
 
         assertNotNull("getSnapshot is null", cloned.getSnapshot());
         assertEquals("getSnapshot type", MetadataShardDataTreeSnapshot.class, cloned.getSnapshot().getClass());

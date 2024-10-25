@@ -64,8 +64,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdent
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
-import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeConfiguration;
@@ -507,9 +506,9 @@ public class ShardDataTreeTest extends AbstractTest {
         final DataTree dataTree = new InMemoryDataTreeFactory().create(DataTreeConfiguration.DEFAULT_OPERATIONAL,
             fullSchema);
         DataTreeModification mod = dataTree.takeSnapshot().newModification();
-        mod.write(CarsModel.BASE_PATH, Builders.containerBuilder()
+        mod.write(CarsModel.BASE_PATH, ImmutableNodes.newContainerBuilder()
                 .withNodeIdentifier(new NodeIdentifier(CarsModel.BASE_QNAME))
-                .withChild(Builders.mapBuilder()
+                .withChild(ImmutableNodes.newSystemMapBuilder()
                     .withNodeIdentifier(new NodeIdentifier(CarsModel.CAR_QNAME))
                     .withChild(createCar("one", Uint64.ONE))
                     .build())
@@ -527,7 +526,7 @@ public class ShardDataTreeTest extends AbstractTest {
         dataTree.commit(second);
 
         mod = dataTree.takeSnapshot().newModification();
-        mod.merge(CarsModel.CAR_LIST_PATH, Builders.mapBuilder()
+        mod.merge(CarsModel.CAR_LIST_PATH, ImmutableNodes.newSystemMapBuilder()
             .withNodeIdentifier(new NodeIdentifier(CarsModel.CAR_QNAME))
             .withChild(createCar("three", Uint64.TEN))
             .build());
@@ -548,7 +547,7 @@ public class ShardDataTreeTest extends AbstractTest {
         // Verify uint translation
         final DataTreeSnapshot snapshot = shardDataTree.newReadOnlyTransaction(nextTransactionId()).getSnapshot();
 
-        assertEquals(Builders.mapBuilder()
+        assertEquals(ImmutableNodes.newSystemMapBuilder()
             .withNodeIdentifier(new NodeIdentifier(CarsModel.CAR_QNAME))
             // Note: Uint64
             .withChild(createCar("one", Uint64.ONE))
@@ -561,7 +560,7 @@ public class ShardDataTreeTest extends AbstractTest {
         final DataTreeSnapshot snapshot = shardDataTree.newReadOnlyTransaction(nextTransactionId()).getSnapshot();
         final NormalizedNode cars = snapshot.readNode(CarsModel.CAR_LIST_PATH).orElseThrow();
 
-        assertEquals(Builders.mapBuilder()
+        assertEquals(ImmutableNodes.newSystemMapBuilder()
             .withNodeIdentifier(new NodeIdentifier(CarsModel.CAR_QNAME))
             // Note: Uint64
             .withChild(createCar("foo", Uint64.ONE))
@@ -569,11 +568,11 @@ public class ShardDataTreeTest extends AbstractTest {
     }
 
     private static ContainerNode bigIntegerRoot() {
-        return Builders.containerBuilder()
+        return ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(SchemaContext.NAME))
-            .withChild(Builders.containerBuilder()
+            .withChild(ImmutableNodes.newContainerBuilder()
                 .withNodeIdentifier(new NodeIdentifier(CarsModel.CARS_QNAME))
-                .withChild(Builders.mapBuilder()
+                .withChild(ImmutableNodes.newSystemMapBuilder()
                     .withNodeIdentifier(new NodeIdentifier(CarsModel.CAR_QNAME))
                     .withChild(createCar("foo", Uint64.ONE))
                     .build())
@@ -582,7 +581,7 @@ public class ShardDataTreeTest extends AbstractTest {
     }
 
     private static MapEntryNode createCar(final String name, final Object value) {
-        return Builders.mapEntryBuilder()
+        return ImmutableNodes.newMapEntryBuilder()
             .withNodeIdentifier(NodeIdentifierWithPredicates.of(CarsModel.CAR_QNAME, CarsModel.CAR_NAME_QNAME, name))
             .withChild(ImmutableNodes.leafNode(CarsModel.CAR_NAME_QNAME, name))
             // Note: old BigInteger

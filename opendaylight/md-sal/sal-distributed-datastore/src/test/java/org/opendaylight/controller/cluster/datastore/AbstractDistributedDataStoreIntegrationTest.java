@@ -19,6 +19,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
+import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.containerNode;
+import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntry;
+import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapNodeBuilder;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
@@ -76,8 +79,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
-import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeConfiguration;
 import org.opendaylight.yangtools.yang.data.tree.impl.di.InMemoryDataTreeFactory;
@@ -101,13 +103,12 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
         final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
         try (var dataStore = testKit.setupDataStore(testParameter, "transactionIntegrationTest", "test-1")) {
 
-            testKit.testWriteTransaction(dataStore, TestModel.TEST_PATH,
-                ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+            testKit.testWriteTransaction(dataStore, TestModel.TEST_PATH, containerNode(TestModel.TEST_QNAME));
 
             testKit.testWriteTransaction(dataStore, TestModel.OUTER_LIST_PATH,
-                ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
-                .withChild(ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 42))
-                .build());
+                mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
+                    .withChild(mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 42))
+                    .build());
         }
     }
 
@@ -164,7 +165,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
 
             // 2. Write some data
             final YangInstanceIdentifier nodePath = TestModel.TEST_PATH;
-            final NormalizedNode nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+            final NormalizedNode nodeToWrite = containerNode(TestModel.TEST_QNAME);
             readWriteTx.write(nodePath, nodeToWrite);
 
             // 3. Read the data from Tx
@@ -320,8 +321,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
                 final CountDownLatch txReady = new CountDownLatch(1);
                 final Thread txThread = new Thread(() -> {
                     try {
-                        writeTx.write(TestModel.JUNK_PATH,
-                            ImmutableNodes.containerNode(TestModel.JUNK_QNAME));
+                        writeTx.write(TestModel.JUNK_PATH, containerNode(TestModel.JUNK_QNAME));
 
                         txCohort.set(writeTx.ready());
                     } catch (Exception e) {
@@ -381,7 +381,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
             final DOMStoreWriteTransaction writeTx = dataStore.newWriteOnlyTransaction();
             assertNotNull("newWriteOnlyTransaction returned null", writeTx);
 
-            writeTx.write(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+            writeTx.write(TestModel.TEST_PATH, containerNode(TestModel.TEST_QNAME));
 
             final DOMStoreThreePhaseCommitCohort cohort = writeTx.ready();
 
@@ -389,8 +389,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
 
             cohort.abort().get(5, TimeUnit.SECONDS);
 
-            testKit.testWriteTransaction(dataStore, TestModel.TEST_PATH,
-                ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+            testKit.testWriteTransaction(dataStore, TestModel.TEST_PATH, containerNode(TestModel.TEST_QNAME));
         }
     }
 
@@ -407,7 +406,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
             assertNotNull("newWriteOnlyTransaction returned null", writeTx);
 
             // 2. Write some data
-            final NormalizedNode testNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+            final NormalizedNode testNode = containerNode(TestModel.TEST_QNAME);
             writeTx.write(TestModel.TEST_PATH, testNode);
 
             // 3. Ready the Tx for commit
@@ -438,8 +437,8 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
             // 6. Create a new RW Tx from the chain, write more data,
             // and ready it
             final DOMStoreReadWriteTransaction rwTx = txChain.newReadWriteTransaction();
-            final MapNode outerNode = ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
-                    .withChild(ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 42))
+            final MapNode outerNode = mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
+                    .withChild(mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 42))
                     .build();
             rwTx.write(TestModel.OUTER_LIST_PATH, outerNode);
 
@@ -604,7 +603,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
             final DOMStoreWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
             assertNotNull("newWriteOnlyTransaction returned null", writeTx);
 
-            writeTx.write(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+            writeTx.write(TestModel.TEST_PATH, containerNode(TestModel.TEST_QNAME));
 
             // Try to create another Tx of each type - each should fail
             // b/c the previous Tx wasn't
@@ -638,7 +637,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
 
             // Create a write tx and submit.
             final DOMStoreWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
-            writeTx.write(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+            writeTx.write(TestModel.TEST_PATH, containerNode(TestModel.TEST_QNAME));
             final DOMStoreThreePhaseCommitCohort cohort1 = writeTx.ready();
 
             // Create read-only tx's and issue a read.
@@ -650,9 +649,8 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
 
             // Create another write tx and issue the write.
             DOMStoreWriteTransaction writeTx2 = txChain.newWriteOnlyTransaction();
-            writeTx2.write(TestModel.OUTER_LIST_PATH,
-                ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
-                .withChild(ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 42))
+            writeTx2.write(TestModel.OUTER_LIST_PATH, mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
+                .withChild(mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 42))
                 .build());
 
             // Ensure the reads succeed.
@@ -691,7 +689,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
             writeTx.put(LogicalDatastoreType.CONFIGURATION, PeopleModel.BASE_PATH,
                 PeopleModel.emptyContainer());
 
-            final var invalidData = Builders.containerBuilder()
+            final var invalidData = ImmutableNodes.newContainerBuilder()
                     .withNodeIdentifier(new NodeIdentifier(CarsModel.BASE_QNAME))
                     .withChild(ImmutableNodes.leafNode(TestModel.JUNK_QNAME, "junk"))
                     .build();
@@ -727,7 +725,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
             writeTx.put(LogicalDatastoreType.CONFIGURATION, PeopleModel.BASE_PATH,
                 PeopleModel.emptyContainer());
 
-            final ContainerNode invalidData = Builders.containerBuilder()
+            final ContainerNode invalidData = ImmutableNodes.newContainerBuilder()
                 .withNodeIdentifier(new NodeIdentifier(CarsModel.BASE_QNAME))
                 .withChild(ImmutableNodes.leafNode(TestModel.JUNK_QNAME, "junk"))
                 .build();
@@ -752,8 +750,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
         try (var dataStore = testKit.setupDataStore(testParameter, "testDataTreeChangeListenerRegistration",
             "test-1")) {
 
-            testKit.testWriteTransaction(dataStore, TestModel.TEST_PATH,
-                ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+            testKit.testWriteTransaction(dataStore, TestModel.TEST_PATH, containerNode(TestModel.TEST_QNAME));
 
             final MockDataTreeChangeListener listener = new MockDataTreeChangeListener(1);
 
@@ -771,14 +768,14 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
 
             // Write 2 updates.
             testKit.testWriteTransaction(dataStore, TestModel.OUTER_LIST_PATH,
-                ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
-                .withChild(ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 42))
-                .build());
+                mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
+                    .withChild(mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 42))
+                    .build());
 
             YangInstanceIdentifier listPath = YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)
                     .nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1).build();
             testKit.testWriteTransaction(dataStore, listPath,
-                ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1));
+                mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1));
 
             // Wait for the 2 updates.
             listener.waitForChangeEvents(TestModel.OUTER_LIST_PATH, listPath);
@@ -788,10 +785,9 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
                 state -> assertEquals("getTreeChangeListenerActors", 0,
                     state.getTreeChangeListenerActors().size()));
 
-            testKit.testWriteTransaction(dataStore,
-                YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)
-                .nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 2).build(),
-                ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 2));
+            testKit.testWriteTransaction(dataStore, YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)
+                .nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 2)
+                .build(), mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 2));
 
             listener.expectNoMoreChanges("Received unexpected change after close");
         }
@@ -850,7 +846,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
         try (var dataStore = testKit.setupDataStore(testParameter, "testRootOverwrite",
             "module-shards-default-cars-member1.conf", true, "cars", "default")) {
 
-            final var rootNode = Builders.containerBuilder()
+            final var rootNode = ImmutableNodes.newContainerBuilder()
                 .withNodeIdentifier(NodeIdentifier.create(SchemaContext.NAME))
                 .withChild(CarsModel.create())
                 .build();

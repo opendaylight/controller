@@ -7,6 +7,9 @@
  */
 package org.opendaylight.controller.md.cluster.datastore.model;
 
+import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntryBuilder;
+import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapNodeBuilder;
+
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.Uint64;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -16,8 +19,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.SystemMapNode;
-import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
-import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 
 public final class CarsModel {
     public static final QName BASE_QNAME = QName.create(
@@ -36,17 +38,17 @@ public final class CarsModel {
     }
 
     public static ContainerNode create() {
-        return Builders.containerBuilder()
+        return ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(BASE_QNAME))
-            .withChild(Builders.mapBuilder()
+            .withChild(ImmutableNodes.newSystemMapBuilder()
                 .withNodeIdentifier(new NodeIdentifier(CAR_QNAME))
                 // Create an entry for the car altima
-                .withChild(ImmutableNodes.mapEntryBuilder(CAR_QNAME, CAR_NAME_QNAME, "altima")
+                .withChild(mapEntryBuilder(CAR_QNAME, CAR_NAME_QNAME, "altima")
                     .withChild(ImmutableNodes.leafNode(CAR_NAME_QNAME, "altima"))
                     .withChild(ImmutableNodes.leafNode(CAR_PRICE_QNAME, Uint64.valueOf(1000)))
                     .build())
                 // Create an entry for the car accord
-                .withChild(ImmutableNodes.mapEntryBuilder(CAR_QNAME, CAR_NAME_QNAME, "accord")
+                .withChild(mapEntryBuilder(CAR_QNAME, CAR_NAME_QNAME, "accord")
                     .withChild(ImmutableNodes.leafNode(CAR_NAME_QNAME, "accord"))
                     .withChild(ImmutableNodes.leafNode(CAR_PRICE_QNAME, Uint64.valueOf("2000")))
                     .build())
@@ -59,14 +61,14 @@ public final class CarsModel {
     }
 
     public static ContainerNode newCarsNode(final MapNode carsList) {
-        return Builders.containerBuilder()
+        return ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(BASE_QNAME))
             .withChild(carsList)
             .build();
     }
 
     public static MapNode newCarsMapNode(final MapEntryNode... carEntries) {
-        var builder = Builders.mapBuilder().withNodeIdentifier(new NodeIdentifier(CAR_QNAME));
+        var builder = ImmutableNodes.newSystemMapBuilder().withNodeIdentifier(new NodeIdentifier(CAR_QNAME));
         for (MapEntryNode e : carEntries) {
             builder.withChild(e);
         }
@@ -75,17 +77,17 @@ public final class CarsModel {
     }
 
     public static ContainerNode emptyContainer() {
-        return Builders.containerBuilder().withNodeIdentifier(new NodeIdentifier(BASE_QNAME)).build();
+        return ImmutableNodes.newContainerBuilder().withNodeIdentifier(new NodeIdentifier(BASE_QNAME)).build();
     }
 
     public static SystemMapNode newCarMapNode() {
-        return ImmutableNodes.mapNodeBuilder(CAR_QNAME).build();
+        return mapNodeBuilder(CAR_QNAME).build();
     }
 
     public static MapEntryNode newCarEntry(final String name, final Uint64 price) {
-        return ImmutableNodes.mapEntryBuilder(CAR_QNAME, CAR_NAME_QNAME, name)
-                .withChild(ImmutableNodes.leafNode(CAR_NAME_QNAME, name))
-                .withChild(ImmutableNodes.leafNode(CAR_PRICE_QNAME, price)).build();
+        return mapEntryBuilder(CAR_QNAME, CAR_NAME_QNAME, name)
+            .withChild(ImmutableNodes.leafNode(CAR_NAME_QNAME, name))
+            .withChild(ImmutableNodes.leafNode(CAR_PRICE_QNAME, price)).build();
     }
 
     public static YangInstanceIdentifier newCarPath(final String name) {

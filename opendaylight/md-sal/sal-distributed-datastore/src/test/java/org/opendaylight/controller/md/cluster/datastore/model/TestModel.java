@@ -7,6 +7,9 @@
  */
 package org.opendaylight.controller.md.cluster.datastore.model;
 
+import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntry;
+import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntryBuilder;
+
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
@@ -14,8 +17,8 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdent
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
-import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
-import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.data.api.schema.SystemMapNode;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 
@@ -52,46 +55,47 @@ public final class TestModel {
     public static final QName THREE_QNAME = QName.create(TEST_QNAME,"three");
 
     private TestModel() {
-
+        // Hidden on purpose
     }
 
     public static EffectiveModelContext createTestContext() {
         return YangParserTestUtils.parseYangResource(DATASTORE_TEST_YANG);
     }
 
-    public static DataContainerChild outerMapNode() {
-        return ImmutableNodes.mapNodeBuilder(OUTER_LIST_QNAME).build();
+    public static SystemMapNode outerMapNode() {
+        return ImmutableNodes.newSystemMapBuilder()
+            .withNodeIdentifier(new NodeIdentifier(OUTER_LIST_QNAME))
+            .build();
     }
 
-    public static DataContainerChild outerNode(final int... ids) {
-        var outer = ImmutableNodes.mapNodeBuilder(OUTER_LIST_QNAME);
+    public static SystemMapNode outerNode(final int... ids) {
+        var outer = ImmutableNodes.newSystemMapBuilder().withNodeIdentifier(new NodeIdentifier(OUTER_LIST_QNAME));
         for (int id: ids) {
-            outer.addChild(ImmutableNodes.mapEntry(OUTER_LIST_QNAME, ID_QNAME, id));
+            outer.addChild(mapEntry(OUTER_LIST_QNAME, ID_QNAME, id));
         }
 
         return outer.build();
     }
 
-    public static DataContainerChild outerNode(final MapEntryNode... entries) {
-        var outer = ImmutableNodes.mapNodeBuilder(OUTER_LIST_QNAME);
-        for (MapEntryNode e: entries) {
-            outer.addChild(e);
+    public static SystemMapNode outerNode(final MapEntryNode... entries) {
+        var outer = ImmutableNodes.newSystemMapBuilder().withNodeIdentifier(new NodeIdentifier(OUTER_LIST_QNAME));
+        for (var entry : entries) {
+            outer.addChild(entry);
         }
 
         return outer.build();
     }
 
     public static DataContainerChild innerNode(final String... names) {
-        var outer = ImmutableNodes.mapNodeBuilder(INNER_LIST_QNAME);
-        for (String name: names) {
-            outer.addChild(ImmutableNodes.mapEntry(INNER_LIST_QNAME, NAME_QNAME, name));
+        var outer = ImmutableNodes.newSystemMapBuilder().withNodeIdentifier(new NodeIdentifier(INNER_LIST_QNAME));
+        for (var name : names) {
+            outer.addChild(mapEntry(INNER_LIST_QNAME, NAME_QNAME, name));
         }
-
         return outer.build();
     }
 
     public static MapEntryNode outerNodeEntry(final int id, final DataContainerChild inner) {
-        return ImmutableNodes.mapEntryBuilder(OUTER_LIST_QNAME, ID_QNAME, id).addChild(inner).build();
+        return mapEntryBuilder(OUTER_LIST_QNAME, ID_QNAME, id).addChild(inner).build();
     }
 
     public static ContainerNode testNodeWithOuter(final int... ids) {
@@ -99,7 +103,7 @@ public final class TestModel {
     }
 
     public static ContainerNode testNodeWithOuter(final DataContainerChild outer) {
-        return Builders.containerBuilder()
+        return ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(TEST_QNAME))
             .withChild(outer)
             .build();

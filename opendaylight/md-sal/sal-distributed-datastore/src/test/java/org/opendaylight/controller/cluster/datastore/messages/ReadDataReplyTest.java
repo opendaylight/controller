@@ -18,8 +18,7 @@ import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
-import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
-import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 
 /**
  * Unit tests for ReadDataReply.
@@ -28,10 +27,9 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
  */
 @Deprecated(since = "9.0.0", forRemoval = true)
 public class ReadDataReplyTest {
-
     @Test
     public void testSerialization() {
-        ContainerNode data = Builders.containerBuilder()
+        ContainerNode data = ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(TestModel.TEST_QNAME))
             .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
 

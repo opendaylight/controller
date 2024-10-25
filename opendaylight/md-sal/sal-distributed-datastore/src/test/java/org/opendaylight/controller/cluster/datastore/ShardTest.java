@@ -22,6 +22,9 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.opendaylight.controller.cluster.datastore.DataStoreVersions.CURRENT_VERSION;
+import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.containerNode;
+import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntry;
+import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapNodeBuilder;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Throwables;
@@ -111,8 +114,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdent
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
-import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeConfiguration;
@@ -151,7 +153,7 @@ public class ShardTest extends AbstractShardTest {
             replyPath.matches("pekko:\\/\\/test\\/user\\/testRegisterDataTreeChangeListener\\/\\$.*"));
 
         final YangInstanceIdentifier path = TestModel.TEST_PATH;
-        writeToStore(shard, path, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+        writeToStore(shard, path, containerNode(TestModel.TEST_QNAME));
 
         listener.waitForChangeEvents();
         listener.verifyOnInitialDataEvent();
@@ -295,10 +297,10 @@ public class ShardTest extends AbstractShardTest {
         final DataTree store = new InMemoryDataTreeFactory().create(DataTreeConfiguration.DEFAULT_OPERATIONAL,
             SCHEMA_CONTEXT);
 
-        final ContainerNode container = Builders.containerBuilder()
+        final ContainerNode container = ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(TestModel.TEST_QNAME))
-            .withChild(ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
-                .addChild(ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1))
+            .withChild(mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
+                .addChild(mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1))
                 .build())
             .build();
 
@@ -338,7 +340,7 @@ public class ShardTest extends AbstractShardTest {
             SCHEMA_CONTEXT);
 
         final DataTreeModification writeMod = store.takeSnapshot().newModification();
-        final ContainerNode node = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        final ContainerNode node = containerNode(TestModel.TEST_QNAME);
         writeMod.write(TestModel.TEST_PATH, node);
         writeMod.ready();
 
@@ -365,7 +367,7 @@ public class ShardTest extends AbstractShardTest {
         final DataTree source = setupInMemorySnapshotStore();
 
         final DataTreeModification writeMod = source.takeSnapshot().newModification();
-        writeMod.write(TestModel.OUTER_LIST_PATH, ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build());
+        writeMod.write(TestModel.OUTER_LIST_PATH, mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build());
         writeMod.ready();
         InMemoryJournal.addEntry(shardID.toString(), 0, DUMMY_DATA);
 
@@ -384,7 +386,7 @@ public class ShardTest extends AbstractShardTest {
                     .nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, i).build();
 
             final DataTreeModification mod = source.takeSnapshot().newModification();
-            mod.merge(path, ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, i));
+            mod.merge(path, mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, i));
             mod.ready();
 
             InMemoryJournal.addEntry(shardID.toString(), i + 1, new SimpleReplicatedLogEntry(i, 1,
@@ -481,7 +483,7 @@ public class ShardTest extends AbstractShardTest {
         final CapturingShardDataTreeCohort cohort3 = cohortMap.get(transactionID3);
 
         shard.tell(prepareBatchedModifications(transactionID1, TestModel.TEST_PATH,
-            ImmutableNodes.containerNode(TestModel.TEST_QNAME), false), testKit.getRef());
+            containerNode(TestModel.TEST_QNAME), false), testKit.getRef());
         final ReadyTransactionReply readyReply = ReadyTransactionReply
                 .fromSerializable(testKit.expectMsgClass(duration, ReadyTransactionReply.class));
 
@@ -497,14 +499,13 @@ public class ShardTest extends AbstractShardTest {
         // Ready 2 more Tx's.
 
         shard.tell(prepareBatchedModifications(transactionID2, TestModel.OUTER_LIST_PATH,
-            ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build(), false), testKit.getRef());
+            mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build(), false), testKit.getRef());
         testKit.expectMsgClass(duration, ReadyTransactionReply.class);
 
         shard.tell(
-            prepareBatchedModifications(transactionID3,
-                YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)
+            prepareBatchedModifications(transactionID3, YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)
                 .nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1).build(),
-                ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1), false), testKit.getRef());
+                mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1), false), testKit.getRef());
         testKit.expectMsgClass(duration, ReadyTransactionReply.class);
 
         // Send the CanCommitTransaction message for the next 2 Tx's.
@@ -576,20 +577,19 @@ public class ShardTest extends AbstractShardTest {
         // Send a BatchedModifications to start a transaction.
 
         shard.tell(newBatchedModifications(transactionID, TestModel.TEST_PATH,
-            ImmutableNodes.containerNode(TestModel.TEST_QNAME), false, false, 1), testKit.getRef());
+            containerNode(TestModel.TEST_QNAME), false, false, 1), testKit.getRef());
         testKit.expectMsgClass(duration, BatchedModificationsReply.class);
 
         // Send a couple more BatchedModifications.
 
         shard.tell(newBatchedModifications(transactionID, TestModel.OUTER_LIST_PATH,
-                ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build(), false, false, 2),
+                mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build(), false, false, 2),
             testKit.getRef());
         testKit.expectMsgClass(duration, BatchedModificationsReply.class);
 
-        shard.tell(newBatchedModifications(transactionID,
-            YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)
+        shard.tell(newBatchedModifications(transactionID, YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)
             .nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1).build(),
-            ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1), true, false, 3),
+            mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1), true, false, 3),
             testKit.getRef());
         testKit.expectMsgClass(duration, ReadyTransactionReply.class);
 
@@ -625,20 +625,20 @@ public class ShardTest extends AbstractShardTest {
         // Send a BatchedModifications to start a transaction.
 
         shard.tell(newBatchedModifications(transactionID, TestModel.TEST_PATH,
-            ImmutableNodes.containerNode(TestModel.TEST_QNAME), false, false, 1), testKit.getRef());
+            containerNode(TestModel.TEST_QNAME), false, false, 1), testKit.getRef());
         testKit.expectMsgClass(duration, BatchedModificationsReply.class);
 
         // Send a couple more BatchedModifications.
 
         shard.tell(newBatchedModifications(transactionID, TestModel.OUTER_LIST_PATH,
-            ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build(), false, false, 2),
+            mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build(), false, false, 2),
             testKit.getRef());
         testKit.expectMsgClass(duration, BatchedModificationsReply.class);
 
         shard.tell(newBatchedModifications(transactionID,
             YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)
             .nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1).build(),
-            ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1), true, true, 3),
+            mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1), true, true, 3),
             testKit.getRef());
 
         testKit.expectMsgClass(duration, CommitTransactionReply.class);
@@ -689,7 +689,7 @@ public class ShardTest extends AbstractShardTest {
 
         final TransactionIdentifier transactionID = nextTransactionId();
 
-        final ContainerNode invalidData = Builders.containerBuilder()
+        final ContainerNode invalidData = ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(TestModel.TEST_QNAME))
             .withChild(ImmutableNodes.leafNode(TestModel.JUNK_QNAME, "junk"))
             .build();
@@ -729,7 +729,7 @@ public class ShardTest extends AbstractShardTest {
         // Send a BatchedModifications to start a chained write
         // transaction and ready it.
 
-        final ContainerNode containerNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        final ContainerNode containerNode = containerNode(TestModel.TEST_QNAME);
         final YangInstanceIdentifier path = TestModel.TEST_PATH;
         shard.tell(newBatchedModifications(transactionID1, path, containerNode, true, false, 1), testKit.getRef());
         testKit.expectMsgClass(duration, ReadyTransactionReply.class);
@@ -822,7 +822,7 @@ public class ShardTest extends AbstractShardTest {
         assertEquals("Failure cause type", NoShardLeaderException.class, failure.cause().getClass());
 
         shard.tell(prepareForwardedReadyTransaction(shard, txId, TestModel.TEST_PATH,
-            ImmutableNodes.containerNode(TestModel.TEST_QNAME), true), testKit.getRef());
+            containerNode(TestModel.TEST_QNAME), true), testKit.getRef());
         failure = testKit.expectMsgClass(Failure.class);
         assertEquals("Failure cause type", NoShardLeaderException.class, failure.cause().getClass());
 
@@ -851,7 +851,7 @@ public class ShardTest extends AbstractShardTest {
         ShardTestKit.waitUntilLeader(shard);
 
         final TransactionIdentifier transactionID = nextTransactionId();
-        final NormalizedNode containerNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        final NormalizedNode containerNode = containerNode(TestModel.TEST_QNAME);
         if (readWrite) {
             shard.tell(prepareForwardedReadyTransaction(shard, transactionID, TestModel.TEST_PATH, containerNode, true),
                 testKit.getRef());
@@ -879,10 +879,10 @@ public class ShardTest extends AbstractShardTest {
 
         final DataTreeModification modification = dataStore.newModification();
 
-        final ContainerNode writeData = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        final ContainerNode writeData = containerNode(TestModel.TEST_QNAME);
         new WriteModification(TestModel.TEST_PATH, writeData).apply(modification);
-        final MapNode mergeData = ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
-                .addChild(ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 42))
+        final MapNode mergeData = mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
+                .addChild(mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 42))
                 .build();
         new MergeModification(TestModel.OUTER_LIST_PATH, mergeData).apply(modification);
 
@@ -912,10 +912,10 @@ public class ShardTest extends AbstractShardTest {
 
         final DataTreeModification modification = dataStore.newModification();
 
-        final ContainerNode writeData = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        final ContainerNode writeData = containerNode(TestModel.TEST_QNAME);
         new WriteModification(TestModel.TEST_PATH, writeData).apply(modification);
-        final MapNode mergeData = ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
-                .addChild(ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 42))
+        final MapNode mergeData = mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
+                .addChild(mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 42))
                 .build();
         new MergeModification(TestModel.OUTER_LIST_PATH, mergeData).apply(modification);
 
@@ -959,7 +959,7 @@ public class ShardTest extends AbstractShardTest {
         final Duration duration = Duration.ofSeconds(5);
 
         final TransactionIdentifier transactionID = nextTransactionId();
-        final NormalizedNode containerNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        final NormalizedNode containerNode = containerNode(TestModel.TEST_QNAME);
         shard.tell(prepareBatchedModifications(transactionID, TestModel.TEST_PATH, containerNode, false),
             testKit.getRef());
         testKit.expectMsgClass(duration, ReadyTransactionReply.class);
@@ -1004,10 +1004,10 @@ public class ShardTest extends AbstractShardTest {
 
         if (readWrite) {
             shard.tell(prepareForwardedReadyTransaction(shard, transactionID, TestModel.TEST_PATH,
-                ImmutableNodes.containerNode(TestModel.TEST_QNAME), false), testKit.getRef());
+                containerNode(TestModel.TEST_QNAME), false), testKit.getRef());
         } else {
             shard.tell(prepareBatchedModifications(transactionID, TestModel.TEST_PATH,
-                ImmutableNodes.containerNode(TestModel.TEST_QNAME), false), testKit.getRef());
+                containerNode(TestModel.TEST_QNAME), false), testKit.getRef());
         }
 
         testKit.expectMsgClass(duration, ReadyTransactionReply.class);
@@ -1064,12 +1064,12 @@ public class ShardTest extends AbstractShardTest {
 
         final TransactionIdentifier transactionID1 = nextTransactionId();
         shard.tell(newBatchedModifications(transactionID1, TestModel.TEST_PATH,
-            ImmutableNodes.containerNode(TestModel.TEST_QNAME), true, false, 1), testKit.getRef());
+            containerNode(TestModel.TEST_QNAME), true, false, 1), testKit.getRef());
         testKit.expectMsgClass(duration, ReadyTransactionReply.class);
 
         final TransactionIdentifier transactionID2 = nextTransactionId();
         shard.tell(newBatchedModifications(transactionID2, TestModel.TEST_PATH,
-            ImmutableNodes.containerNode(TestModel.TEST_QNAME), true, false, 1), testKit.getRef());
+            containerNode(TestModel.TEST_QNAME), true, false, 1), testKit.getRef());
         testKit.expectMsgClass(duration, ReadyTransactionReply.class);
 
         // Send the CanCommitTransaction message for the first Tx.
@@ -1134,12 +1134,12 @@ public class ShardTest extends AbstractShardTest {
 
         final TransactionIdentifier transactionID1 = nextTransactionId();
         shard.tell(newBatchedModifications(transactionID1, TestModel.TEST_PATH,
-            ImmutableNodes.containerNode(TestModel.TEST_QNAME), true, false, 1), testKit.getRef());
+            containerNode(TestModel.TEST_QNAME), true, false, 1), testKit.getRef());
         testKit.expectMsgClass(duration, ReadyTransactionReply.class);
 
         final TransactionIdentifier transactionID2 = nextTransactionId();
         shard.tell(newBatchedModifications(transactionID2, TestModel.TEST_PATH,
-            ImmutableNodes.containerNode(TestModel.TEST_QNAME), true, false, 1), testKit.getRef());
+            containerNode(TestModel.TEST_QNAME), true, false, 1), testKit.getRef());
         testKit.expectMsgClass(duration, ReadyTransactionReply.class);
 
         // Send the CanCommitTransaction message for the first Tx.
@@ -1198,7 +1198,7 @@ public class ShardTest extends AbstractShardTest {
         .doNothing().when(dataTree).validate(any(DataTreeModification.class));
 
         shard.tell(newBatchedModifications(transactionID1, TestModel.TEST_PATH,
-            ImmutableNodes.containerNode(TestModel.TEST_QNAME), true, false, 1), testKit.getRef());
+            containerNode(TestModel.TEST_QNAME), true, false, 1), testKit.getRef());
         testKit.expectMsgClass(duration, ReadyTransactionReply.class);
 
         // Send the CanCommitTransaction message.
@@ -1211,7 +1211,7 @@ public class ShardTest extends AbstractShardTest {
 
         final TransactionIdentifier transactionID2 = nextTransactionId();
         shard.tell(newBatchedModifications(transactionID2, TestModel.TEST_PATH,
-            ImmutableNodes.containerNode(TestModel.TEST_QNAME), true, false, 1), testKit.getRef());
+            containerNode(TestModel.TEST_QNAME), true, false, 1), testKit.getRef());
         testKit.expectMsgClass(duration, ReadyTransactionReply.class);
 
         shard.tell(new CanCommitTransaction(transactionID2, CURRENT_VERSION).toSerializable(), testKit.getRef());
@@ -1244,10 +1244,10 @@ public class ShardTest extends AbstractShardTest {
 
         if (readWrite) {
             shard.tell(prepareForwardedReadyTransaction(shard, transactionID1, TestModel.TEST_PATH,
-                ImmutableNodes.containerNode(TestModel.TEST_QNAME), true), testKit.getRef());
+                containerNode(TestModel.TEST_QNAME), true), testKit.getRef());
         } else {
             shard.tell(prepareBatchedModifications(transactionID1, TestModel.TEST_PATH,
-                ImmutableNodes.containerNode(TestModel.TEST_QNAME), true), testKit.getRef());
+                containerNode(TestModel.TEST_QNAME), true), testKit.getRef());
         }
 
         testKit.expectMsgClass(duration, org.apache.pekko.actor.Status.Failure.class);
@@ -1258,10 +1258,10 @@ public class ShardTest extends AbstractShardTest {
         final TransactionIdentifier transactionID2 = nextTransactionId();
         if (readWrite) {
             shard.tell(prepareForwardedReadyTransaction(shard, transactionID2, TestModel.TEST_PATH,
-                ImmutableNodes.containerNode(TestModel.TEST_QNAME), true), testKit.getRef());
+                containerNode(TestModel.TEST_QNAME), true), testKit.getRef());
         } else {
             shard.tell(prepareBatchedModifications(transactionID2, TestModel.TEST_PATH,
-                ImmutableNodes.containerNode(TestModel.TEST_QNAME), true), testKit.getRef());
+                containerNode(TestModel.TEST_QNAME), true), testKit.getRef());
         }
 
         testKit.expectMsgClass(duration, CommitTransactionReply.class);
@@ -1294,7 +1294,7 @@ public class ShardTest extends AbstractShardTest {
         final TransactionIdentifier transactionID = nextTransactionId();
 
         shard.tell(prepareBatchedModifications(transactionID, TestModel.TEST_PATH,
-            ImmutableNodes.containerNode(TestModel.TEST_QNAME), false), testKit.getRef());
+            containerNode(TestModel.TEST_QNAME), false), testKit.getRef());
         testKit.expectMsgClass(duration, ReadyTransactionReply.class);
 
         shard.tell(new CanCommitTransaction(transactionID, CURRENT_VERSION).toSerializable(), testKit.getRef());
@@ -1325,18 +1325,16 @@ public class ShardTest extends AbstractShardTest {
 
         final Duration duration = Duration.ofSeconds(5);
 
-        writeToStore(shard, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
-        writeToStore(shard, TestModel.OUTER_LIST_PATH,
-            ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build());
+        writeToStore(shard, TestModel.TEST_PATH, containerNode(TestModel.TEST_QNAME));
+        writeToStore(shard, TestModel.OUTER_LIST_PATH, mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build());
 
         // Ready 2 Tx's - the first will timeout
 
         final TransactionIdentifier transactionID1 = nextTransactionId();
         shard.tell(
-            prepareBatchedModifications(transactionID1,
-                YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)
+            prepareBatchedModifications(transactionID1, YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)
                 .nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1).build(),
-                ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1), false),
+                mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1), false),
             testKit.getRef());
         testKit.expectMsgClass(duration, ReadyTransactionReply.class);
 
@@ -1345,7 +1343,7 @@ public class ShardTest extends AbstractShardTest {
                 .nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 2).build();
         shard.tell(
             prepareBatchedModifications(transactionID2, listNodePath,
-                ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 2), false), testKit.getRef());
+                mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 2), false), testKit.getRef());
         testKit.expectMsgClass(duration, ReadyTransactionReply.class);
 
         // canCommit 1st Tx. We don't send the commit so it should
@@ -1456,17 +1454,17 @@ public class ShardTest extends AbstractShardTest {
 
         final TransactionIdentifier transactionID1 = nextTransactionId();
         shard.tell(newBatchedModifications(transactionID1, TestModel.TEST_PATH,
-            ImmutableNodes.containerNode(TestModel.TEST_QNAME), true, false, 1), testKit.getRef());
+            containerNode(TestModel.TEST_QNAME), true, false, 1), testKit.getRef());
         testKit.expectMsgClass(duration, ReadyTransactionReply.class);
 
         final TransactionIdentifier transactionID2 = nextTransactionId();
         shard.tell(newBatchedModifications(transactionID2, TestModel.TEST_PATH,
-            ImmutableNodes.containerNode(TestModel.TEST_QNAME), true, false, 1), testKit.getRef());
+            containerNode(TestModel.TEST_QNAME), true, false, 1), testKit.getRef());
         testKit.expectMsgClass(duration, ReadyTransactionReply.class);
 
         final TransactionIdentifier transactionID3 = nextTransactionId();
         shard.tell(newBatchedModifications(transactionID3, TestModel.TEST_PATH,
-            ImmutableNodes.containerNode(TestModel.TEST_QNAME), true, false, 1), testKit.getRef());
+            containerNode(TestModel.TEST_QNAME), true, false, 1), testKit.getRef());
         testKit.expectMsgClass(duration, ReadyTransactionReply.class);
 
         // All Tx's are readied. We'll send canCommit for the last one
@@ -1494,7 +1492,7 @@ public class ShardTest extends AbstractShardTest {
 
         final TransactionIdentifier transactionID1 = nextTransactionId();
         shard.tell(prepareBatchedModifications(transactionID1, TestModel.TEST_PATH,
-            ImmutableNodes.containerNode(TestModel.TEST_QNAME), false), testKit.getRef());
+            containerNode(TestModel.TEST_QNAME), false), testKit.getRef());
         testKit.expectMsgClass(duration, ReadyTransactionReply.class);
 
         // CanCommit the first Tx so it's the current in-progress Tx.
@@ -1506,15 +1504,14 @@ public class ShardTest extends AbstractShardTest {
 
         final TransactionIdentifier transactionID2 = nextTransactionId();
         shard.tell(prepareBatchedModifications(transactionID2, TestModel.TEST_PATH,
-            ImmutableNodes.containerNode(TestModel.TEST_QNAME), false), testKit.getRef());
+            containerNode(TestModel.TEST_QNAME), false), testKit.getRef());
         testKit.expectMsgClass(duration, ReadyTransactionReply.class);
 
         // Ready the third Tx.
 
         final TransactionIdentifier transactionID3 = nextTransactionId();
         final DataTreeModification modification3 = dataStore.newModification();
-        new WriteModification(TestModel.TEST2_PATH, ImmutableNodes.containerNode(TestModel.TEST2_QNAME))
-            .apply(modification3);
+        new WriteModification(TestModel.TEST2_PATH, containerNode(TestModel.TEST2_QNAME)).apply(modification3);
         modification3.ready();
         final ReadyLocalTransaction readyMessage = new ReadyLocalTransaction(transactionID3, modification3,
             true, Optional.empty());
@@ -1561,12 +1558,12 @@ public class ShardTest extends AbstractShardTest {
 
         final TransactionIdentifier transactionID1 = nextTransactionId();
         shard.tell(newBatchedModifications(transactionID1, TestModel.TEST_PATH,
-            ImmutableNodes.containerNode(TestModel.TEST_QNAME), true, false, 1), testKit.getRef());
+            containerNode(TestModel.TEST_QNAME), true, false, 1), testKit.getRef());
         testKit.expectMsgClass(duration, ReadyTransactionReply.class);
 
         final TransactionIdentifier transactionID2 = nextTransactionId();
         shard.tell(newBatchedModifications(transactionID2, TestModel.TEST_PATH,
-            ImmutableNodes.containerNode(TestModel.TEST_QNAME), true, false, 1), testKit.getRef());
+            containerNode(TestModel.TEST_QNAME), true, false, 1), testKit.getRef());
         testKit.expectMsgClass(duration, ReadyTransactionReply.class);
 
         // Send the CanCommitTransaction message for the first Tx.
@@ -1612,7 +1609,7 @@ public class ShardTest extends AbstractShardTest {
 
         final TransactionIdentifier transactionID1 = nextTransactionId();
         shard.tell(newBatchedModifications(transactionID1, TestModel.TEST_PATH,
-            ImmutableNodes.containerNode(TestModel.TEST_QNAME), true, false, 1), testKit.getRef());
+            containerNode(TestModel.TEST_QNAME), true, false, 1), testKit.getRef());
         testKit.expectMsgClass(duration, ReadyTransactionReply.class);
 
         // Send the AbortTransaction message.
@@ -1632,7 +1629,7 @@ public class ShardTest extends AbstractShardTest {
 
         final TransactionIdentifier transactionID2 = nextTransactionId();
         shard.tell(newBatchedModifications(transactionID2, TestModel.TEST_PATH,
-            ImmutableNodes.containerNode(TestModel.TEST_QNAME), true, false, 1), testKit.getRef());
+            containerNode(TestModel.TEST_QNAME), true, false, 1), testKit.getRef());
         testKit.expectMsgClass(duration, ReadyTransactionReply.class);
 
         shard.tell(new CanCommitTransaction(transactionID2, CURRENT_VERSION).toSerializable(), testKit.getRef());
@@ -1653,17 +1650,17 @@ public class ShardTest extends AbstractShardTest {
 
         final TransactionIdentifier transactionID1 = nextTransactionId();
         shard.tell(newBatchedModifications(transactionID1, TestModel.TEST_PATH,
-            ImmutableNodes.containerNode(TestModel.TEST_QNAME), true, false, 1), testKit.getRef());
+            containerNode(TestModel.TEST_QNAME), true, false, 1), testKit.getRef());
         testKit.expectMsgClass(duration, ReadyTransactionReply.class);
 
         final TransactionIdentifier transactionID2 = nextTransactionId();
         shard.tell(newBatchedModifications(transactionID2, TestModel.TEST_PATH,
-            ImmutableNodes.containerNode(TestModel.TEST_QNAME), true, false, 1), testKit.getRef());
+            containerNode(TestModel.TEST_QNAME), true, false, 1), testKit.getRef());
         testKit.expectMsgClass(duration, ReadyTransactionReply.class);
 
         final TransactionIdentifier transactionID3 = nextTransactionId();
         shard.tell(newBatchedModifications(transactionID3, TestModel.OUTER_LIST_PATH,
-                ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build(), true, false, 1), testKit.getRef());
+            mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build(), true, false, 1), testKit.getRef());
         testKit.expectMsgClass(duration, ReadyTransactionReply.class);
 
         // Abort the second tx while it's queued.
@@ -1745,7 +1742,7 @@ public class ShardTest extends AbstractShardTest {
             new DelegatingShardCreator(creator)).withDispatcher(Dispatchers.DefaultDispatcherId()), shardActorName);
 
         ShardTestKit.waitUntilLeader(shard);
-        writeToStore(shard, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+        writeToStore(shard, TestModel.TEST_PATH, containerNode(TestModel.TEST_QNAME));
 
         final NormalizedNode expectedRoot = readStore(shard, YangInstanceIdentifier.of());
 
@@ -1785,8 +1782,7 @@ public class ShardTest extends AbstractShardTest {
             SCHEMA_CONTEXT);
 
         final DataTreeModification putTransaction = store.takeSnapshot().newModification();
-        putTransaction.write(TestModel.TEST_PATH,
-            ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+        putTransaction.write(TestModel.TEST_PATH, containerNode(TestModel.TEST_QNAME));
         commitTransaction(store, putTransaction);
 
 
@@ -1998,7 +1994,7 @@ public class ShardTest extends AbstractShardTest {
             RegisterDataTreeNotificationListenerReply.class);
         assertNotNull("getListenerRegistrationPath", reply.getListenerRegistrationPath());
 
-        writeToStore(followerShard, path, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+        writeToStore(followerShard, path, containerNode(TestModel.TEST_QNAME));
 
         listener.waitForChangeEvents();
     }
