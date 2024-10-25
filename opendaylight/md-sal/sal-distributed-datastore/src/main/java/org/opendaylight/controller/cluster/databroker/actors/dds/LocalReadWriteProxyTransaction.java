@@ -25,7 +25,6 @@ import org.opendaylight.controller.cluster.access.commands.AbstractLocalTransact
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ExistsTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequest;
-import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequestBuilder;
 import org.opendaylight.controller.cluster.access.commands.PersistenceProtocol;
 import org.opendaylight.controller.cluster.access.commands.ReadTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionAbortRequest;
@@ -232,27 +231,26 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
 
     @Override
     Optional<ModifyTransactionRequest> flushState() {
-        final ModifyTransactionRequestBuilder b = new ModifyTransactionRequestBuilder(getIdentifier(), localActor());
-        b.setSequence(0);
+        final var builder = ModifyTransactionRequest.builder(getIdentifier(), localActor()).setSequence(0);
 
         sealedModification.applyToCursor(new AbstractDataTreeModificationCursor() {
             @Override
             public void write(final PathArgument child, final NormalizedNode data) {
-                b.addModification(new TransactionWrite(current().node(child), data));
+                builder.addWrite(current().node(child), data);
             }
 
             @Override
             public void merge(final PathArgument child, final NormalizedNode data) {
-                b.addModification(new TransactionMerge(current().node(child), data));
+                builder.addMerge(current().node(child), data);
             }
 
             @Override
             public void delete(final PathArgument child) {
-                b.addModification(new TransactionDelete(current().node(child)));
+                builder.addDelete(current().node(child));
             }
         });
 
-        return Optional.of(b.build());
+        return Optional.of(builder.build());
     }
 
     CursorAwareDataTreeSnapshot getSnapshot() {

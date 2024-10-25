@@ -20,7 +20,6 @@ import org.apache.pekko.testkit.TestProbe;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequest;
-import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequestBuilder;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeSnapshot;
 
@@ -29,9 +28,8 @@ public class LocalReadOnlyProxyTransactionTest extends LocalProxyTransactionTest
 
     @Override
     @SuppressWarnings("checkstyle:hiddenField")
-    protected LocalReadOnlyProxyTransaction createTransaction(final ProxyHistory parent,
-                                                              final TransactionIdentifier id,
-                                                              final DataTreeSnapshot snapshot) {
+    protected LocalReadOnlyProxyTransaction createTransaction(final ProxyHistory parent, final TransactionIdentifier id,
+            final DataTreeSnapshot snapshot) {
         when(snapshot.readNode(PATH_1)).thenReturn(Optional.of(DATA_1));
         when(snapshot.readNode(PATH_3)).thenReturn(Optional.empty());
         this.snapshot = snapshot;
@@ -115,11 +113,10 @@ public class LocalReadOnlyProxyTransactionTest extends LocalProxyTransactionTest
     @Test
     public void testApplyModifyTransactionRequest() {
         final TestProbe probe = createProbe();
-        final ModifyTransactionRequestBuilder builder =
-                new ModifyTransactionRequestBuilder(TRANSACTION_ID, probe.ref());
-        builder.setSequence(0);
-        builder.setAbort();
-        final ModifyTransactionRequest request = builder.build();
+        final ModifyTransactionRequest request = ModifyTransactionRequest.builder(TRANSACTION_ID, probe.ref())
+            .setSequence(0)
+            .setAbort()
+            .build();
         transaction.replayModifyTransactionRequest(request, createCallbackMock(), Ticker.systemTicker().read());
         getTester().expectTransactionRequest(AbortLocalTransactionRequest.class);
     }
@@ -127,11 +124,10 @@ public class LocalReadOnlyProxyTransactionTest extends LocalProxyTransactionTest
     @Test
     public void testApplyModifyTransactionRequestNotAbort() throws Exception {
         final TestProbe probe = createProbe();
-        final ModifyTransactionRequestBuilder builder =
-                new ModifyTransactionRequestBuilder(TRANSACTION_ID, probe.ref());
-        builder.setSequence(0);
-        builder.setReady();
-        final ModifyTransactionRequest request = builder.build();
+        final ModifyTransactionRequest request = ModifyTransactionRequest.builder(TRANSACTION_ID, probe.ref())
+            .setSequence(0)
+            .setReady()
+            .build();
         assertOperationThrowsException(() -> transaction.replayModifyTransactionRequest(request, createCallbackMock(),
             Ticker.systemTicker().read()), VerifyException.class);
     }

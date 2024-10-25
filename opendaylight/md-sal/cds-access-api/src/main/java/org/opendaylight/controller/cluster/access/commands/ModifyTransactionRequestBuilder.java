@@ -11,18 +11,19 @@ import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
-import java.util.List;
 import org.apache.pekko.actor.ActorRef;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.concepts.Identifiable;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 /**
  * A reusable builder for creating {@link ModifyTransactionRequest} message instances. Its internal state is reset when
  * {@link #build()} is invoked, hence it can be used to create a sequence of messages. This class is NOT thread-safe.
  */
 public final class ModifyTransactionRequestBuilder implements Identifiable<TransactionIdentifier> {
-    private final List<TransactionModification> modifications = new ArrayList<>(1);
+    private final ArrayList<TransactionModification> modifications = new ArrayList<>(1);
     private final @NonNull TransactionIdentifier identifier;
     private final ActorRef replyTo;
 
@@ -44,32 +45,49 @@ public final class ModifyTransactionRequestBuilder implements Identifiable<Trans
         checkState(protocol == null, "Batch has already been finished");
     }
 
-    public void addModification(final TransactionModification modification) {
+    public ModifyTransactionRequestBuilder addModification(final TransactionModification modification) {
         checkNotFinished();
         modifications.add(requireNonNull(modification));
+        return this;
     }
 
-    public void setSequence(final long sequence) {
+    public ModifyTransactionRequestBuilder addDelete(final YangInstanceIdentifier path) {
+        return addModification(new TransactionDelete(path));
+    }
+
+    public ModifyTransactionRequestBuilder addMerge(final YangInstanceIdentifier path, final NormalizedNode data) {
+        return addModification(new TransactionMerge(path, data));
+    }
+
+    public ModifyTransactionRequestBuilder addWrite(final YangInstanceIdentifier path, final NormalizedNode data) {
+        return addModification(new TransactionWrite(path, data));
+    }
+
+    public ModifyTransactionRequestBuilder setSequence(final long sequence) {
         checkState(!haveSequence, "Sequence has already been set");
         this.sequence = sequence;
         haveSequence = true;
+        return this;
     }
 
-    public void setAbort() {
+    public ModifyTransactionRequestBuilder setAbort() {
         checkNotFinished();
         // Transaction is being aborted, no need to transmit operations
         modifications.clear();
         protocol = PersistenceProtocol.ABORT;
+        return this;
     }
 
-    public void setCommit(final boolean coordinated) {
+    public ModifyTransactionRequestBuilder setCommit(final boolean coordinated) {
         checkNotFinished();
         protocol = coordinated ? PersistenceProtocol.THREE_PHASE : PersistenceProtocol.SIMPLE;
+        return this;
     }
 
-    public void setReady() {
+    public ModifyTransactionRequestBuilder setReady() {
         checkNotFinished();
         protocol = PersistenceProtocol.READY;
+        return this;
     }
 
     public int size() {

@@ -27,18 +27,13 @@ import org.mockito.Mock;
 import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequest;
-import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequestBuilder;
 import org.opendaylight.controller.cluster.access.commands.TransactionAbortRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionCanCommitSuccess;
 import org.opendaylight.controller.cluster.access.commands.TransactionCommitSuccess;
-import org.opendaylight.controller.cluster.access.commands.TransactionDelete;
 import org.opendaylight.controller.cluster.access.commands.TransactionDoCommitRequest;
-import org.opendaylight.controller.cluster.access.commands.TransactionMerge;
-import org.opendaylight.controller.cluster.access.commands.TransactionModification;
 import org.opendaylight.controller.cluster.access.commands.TransactionPreCommitRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionPreCommitSuccess;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
-import org.opendaylight.controller.cluster.access.commands.TransactionWrite;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.CursorAwareDataTreeModification;
@@ -174,11 +169,10 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
     @Test
     public void testApplyModifyTransactionRequestAbort() {
         final TestProbe probe = createProbe();
-        final ModifyTransactionRequestBuilder builder =
-                new ModifyTransactionRequestBuilder(TRANSACTION_ID, probe.ref());
-        builder.setSequence(0L);
-        builder.setAbort();
-        final ModifyTransactionRequest request = builder.build();
+        final ModifyTransactionRequest request = ModifyTransactionRequest.builder(TRANSACTION_ID, probe.ref())
+            .setSequence(0L)
+            .setAbort()
+            .build();
         final Consumer<Response<?, ?>> callback = createCallbackMock();
         transaction.replayModifyTransactionRequest(request, callback, Ticker.systemTicker().read());
         getTester().expectTransactionRequest(AbortLocalTransactionRequest.class);
@@ -187,24 +181,21 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
     @Test
     public void testHandleForwardedRemotePreCommitRequest() {
         final TestProbe probe = createProbe();
-        final TransactionPreCommitRequest request =
-                new TransactionPreCommitRequest(TRANSACTION_ID, 0L, probe.ref());
+        final TransactionPreCommitRequest request = new TransactionPreCommitRequest(TRANSACTION_ID, 0L, probe.ref());
         testHandleForwardedRemoteRequest(request);
     }
 
     @Test
     public void testHandleForwardedRemoteDoCommitRequest() {
         final TestProbe probe = createProbe();
-        final TransactionDoCommitRequest request =
-                new TransactionDoCommitRequest(TRANSACTION_ID, 0L, probe.ref());
+        final TransactionDoCommitRequest request = new TransactionDoCommitRequest(TRANSACTION_ID, 0L, probe.ref());
         testHandleForwardedRemoteRequest(request);
     }
 
     @Test
     public void testHandleForwardedRemoteAbortRequest() {
         final TestProbe probe = createProbe();
-        final TransactionAbortRequest request =
-                new TransactionAbortRequest(TRANSACTION_ID, 0L, probe.ref());
+        final TransactionAbortRequest request = new TransactionAbortRequest(TRANSACTION_ID, 0L, probe.ref());
         testHandleForwardedRemoteRequest(request);
     }
 
@@ -227,17 +218,13 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
 
     private void applyModifyTransactionRequest(final boolean coordinated) {
         final TestProbe probe = createProbe();
-        final ModifyTransactionRequestBuilder builder =
-                new ModifyTransactionRequestBuilder(TRANSACTION_ID, probe.ref());
-        final TransactionModification write = new TransactionWrite(PATH_1, DATA_1);
-        final TransactionModification merge = new TransactionMerge(PATH_2, DATA_2);
-        final TransactionModification delete = new TransactionDelete(PATH_3);
-        builder.addModification(write);
-        builder.addModification(merge);
-        builder.addModification(delete);
-        builder.setSequence(0L);
-        builder.setCommit(coordinated);
-        final ModifyTransactionRequest request = builder.build();
+        final ModifyTransactionRequest request = ModifyTransactionRequest.builder(TRANSACTION_ID, probe.ref())
+            .addWrite(PATH_1, DATA_1)
+            .addMerge(PATH_2, DATA_2)
+            .addDelete(PATH_3)
+            .setSequence(0L)
+            .setCommit(coordinated)
+            .build();
         final Consumer<Response<?, ?>> callback = createCallbackMock();
         transaction.replayModifyTransactionRequest(request, callback, Ticker.systemTicker().read());
         verify(modification).write(PATH_1, DATA_1);

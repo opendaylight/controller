@@ -32,8 +32,6 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ReusableImmutableNormali
 public final class ModifyTransactionRequest extends TransactionRequest<ModifyTransactionRequest>
         implements SliceableMessage {
     interface SerialForm extends TransactionRequest.SerialForm<ModifyTransactionRequest> {
-
-
         @Override
         default ModifyTransactionRequest readExternal(final ObjectInput in, final TransactionIdentifier target,
                 final long sequence, final ActorRef replyTo) throws IOException {
@@ -90,6 +88,10 @@ public final class ModifyTransactionRequest extends TransactionRequest<ModifyTra
         super(target, sequence, replyTo);
         this.modifications = ImmutableList.copyOf(modifications);
         this.protocol = protocol;
+    }
+
+    public static ModifyTransactionRequestBuilder builder(final TransactionIdentifier txId, final ActorRef replyTo) {
+        return new ModifyTransactionRequestBuilder(txId, replyTo);
     }
 
     public Optional<PersistenceProtocol> getPersistenceProtocol() {

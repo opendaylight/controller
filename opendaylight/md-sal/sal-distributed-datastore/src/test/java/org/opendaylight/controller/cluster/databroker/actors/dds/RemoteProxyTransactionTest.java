@@ -23,7 +23,6 @@ import org.junit.Test;
 import org.opendaylight.controller.cluster.access.commands.ExistsTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ExistsTransactionSuccess;
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequest;
-import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequestBuilder;
 import org.opendaylight.controller.cluster.access.commands.PersistenceProtocol;
 import org.opendaylight.controller.cluster.access.commands.ReadTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ReadTransactionSuccess;
@@ -144,11 +143,10 @@ public class RemoteProxyTransactionTest extends AbstractProxyTransactionTest<Rem
     @Test
     public void testForwardToRemoteModifyCommitSimple() {
         final TestProbe probe = createProbe();
-        final ModifyTransactionRequestBuilder builder =
-                new ModifyTransactionRequestBuilder(TRANSACTION_ID, probe.ref());
-        builder.setSequence(0L);
-        builder.setCommit(false);
-        final ModifyTransactionRequest request = builder.build();
+        final ModifyTransactionRequest request = ModifyTransactionRequest.builder(TRANSACTION_ID, probe.ref())
+            .setSequence(0L)
+            .setCommit(false)
+            .build();
         final ModifyTransactionRequest received = testForwardToRemote(request, ModifyTransactionRequest.class);
         assertEquals(request.getPersistenceProtocol(), received.getPersistenceProtocol());
         assertEquals(request.getModifications(), received.getModifications());
@@ -158,11 +156,10 @@ public class RemoteProxyTransactionTest extends AbstractProxyTransactionTest<Rem
     @Test
     public void testForwardToRemoteModifyCommit3Phase() {
         final TestProbe probe = createProbe();
-        final ModifyTransactionRequestBuilder builder =
-                new ModifyTransactionRequestBuilder(TRANSACTION_ID, probe.ref());
-        builder.setSequence(0L);
-        builder.setCommit(true);
-        final ModifyTransactionRequest request = builder.build();
+        final ModifyTransactionRequest request = ModifyTransactionRequest.builder(TRANSACTION_ID, probe.ref())
+            .setSequence(0L)
+            .setCommit(true)
+            .build();
         final ModifyTransactionRequest received = testForwardToRemote(request, ModifyTransactionRequest.class);
         assertEquals(request.getPersistenceProtocol(), received.getPersistenceProtocol());
         assertEquals(request.getModifications(), received.getModifications());
@@ -172,11 +169,10 @@ public class RemoteProxyTransactionTest extends AbstractProxyTransactionTest<Rem
     @Test
     public void testForwardToRemoteModifyAbort() {
         final TestProbe probe = createProbe();
-        final ModifyTransactionRequestBuilder builder =
-                new ModifyTransactionRequestBuilder(TRANSACTION_ID, probe.ref());
-        builder.setSequence(0L);
-        builder.setAbort();
-        final ModifyTransactionRequest request = builder.build();
+        final ModifyTransactionRequest request = ModifyTransactionRequest.builder(TRANSACTION_ID, probe.ref())
+            .setSequence(0L)
+            .setAbort()
+            .build();
         final ModifyTransactionRequest received = testForwardToRemote(request, ModifyTransactionRequest.class);
         assertEquals(request.getTarget(), received.getTarget());
         assertEquals(Optional.of(PersistenceProtocol.ABORT), received.getPersistenceProtocol());

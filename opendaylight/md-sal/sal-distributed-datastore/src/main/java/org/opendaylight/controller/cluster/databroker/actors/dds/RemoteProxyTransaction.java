@@ -80,7 +80,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
         super(parent, isDone);
         this.snapshotOnly = snapshotOnly;
         this.sendReadyOnSeal = sendReadyOnSeal;
-        builder = new ModifyTransactionRequestBuilder(identifier, localActor());
+        builder = ModifyTransactionRequest.builder(identifier, localActor());
         maxModifications = parent.parent().actorUtils().getDatastoreContext().getShardBatchedModificationCount();
     }
 

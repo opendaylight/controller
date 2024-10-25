@@ -42,7 +42,7 @@ public class ModifyTransactionRequestBuilderTest {
     private final TransactionModification transactionModification =
             new TransactionWrite(YangInstanceIdentifier.of(), node);
     private final ModifyTransactionRequestBuilder modifyTransactionRequestBuilder =
-            new ModifyTransactionRequestBuilder(transactionIdentifier, actorRef);
+            ModifyTransactionRequest.builder(transactionIdentifier, actorRef);
 
     @Before
     public void setUp() {

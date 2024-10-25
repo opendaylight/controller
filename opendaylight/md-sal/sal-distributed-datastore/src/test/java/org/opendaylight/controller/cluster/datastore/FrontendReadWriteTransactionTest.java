@@ -23,7 +23,7 @@ import java.util.Optional;
 import org.apache.pekko.actor.ActorRef;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequestBuilder;
+import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ReadTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionDelete;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
@@ -72,10 +72,10 @@ public class FrontendReadWriteTransactionTest {
 
     @Test
     public void testDuplicateModifyAbort() throws RequestException {
-        final ModifyTransactionRequestBuilder b = new ModifyTransactionRequestBuilder(TX_ID, mock(ActorRef.class));
-        b.setSequence(0);
-        b.setAbort();
-        final TransactionRequest<?> abortReq = b.build();
+        final TransactionRequest<?> abortReq = ModifyTransactionRequest.builder(TX_ID, mock(ActorRef.class))
+            .setSequence(0)
+            .setAbort()
+            .build();
         assertNull(handleRequest(abortReq));
         verify(mockParent).abortTransaction(same(shardTransaction), any(Runnable.class));
 
@@ -85,10 +85,10 @@ public class FrontendReadWriteTransactionTest {
 
     @Test
     public void testDuplicateReady() throws RequestException {
-        final ModifyTransactionRequestBuilder b = new ModifyTransactionRequestBuilder(TX_ID, mock(ActorRef.class));
-        b.setSequence(0);
-        b.setReady();
-        final TransactionRequest<?> readyReq = b.build();
+        final TransactionRequest<?> readyReq = ModifyTransactionRequest.builder(TX_ID, mock(ActorRef.class))
+            .setSequence(0)
+            .setReady()
+            .build();
 
         assertNotNull(handleRequest(readyReq));
         verify(mockParent).finishTransaction(same(shardTransaction), eq(Optional.empty()));
@@ -99,10 +99,10 @@ public class FrontendReadWriteTransactionTest {
 
     @Test
     public void testDuplicateDirect() throws RequestException {
-        final ModifyTransactionRequestBuilder b = new ModifyTransactionRequestBuilder(TX_ID, mock(ActorRef.class));
-        b.setSequence(0);
-        b.setCommit(false);
-        final TransactionRequest<?> readyReq = b.build();
+        final TransactionRequest<?> readyReq = ModifyTransactionRequest.builder(TX_ID, mock(ActorRef.class))
+            .setSequence(0)
+            .setCommit(false)
+            .build();
 
         assertNull(handleRequest(readyReq));
         verify(mockParent).finishTransaction(same(shardTransaction), eq(Optional.empty()));
@@ -113,10 +113,10 @@ public class FrontendReadWriteTransactionTest {
 
     @Test
     public void testDuplicateCoordinated() throws RequestException {
-        final ModifyTransactionRequestBuilder b = new ModifyTransactionRequestBuilder(TX_ID, mock(ActorRef.class));
-        b.setSequence(0);
-        b.setCommit(true);
-        final TransactionRequest<?> readyReq = b.build();
+        final TransactionRequest<?> readyReq = ModifyTransactionRequest.builder(TX_ID, mock(ActorRef.class))
+            .setSequence(0)
+            .setCommit(true)
+            .build();
 
         assertNull(handleRequest(readyReq));
         verify(mockParent).finishTransaction(same(shardTransaction), eq(Optional.empty()));
@@ -127,10 +127,10 @@ public class FrontendReadWriteTransactionTest {
 
     @Test
     public void testReadAfterReady() throws RequestException {
-        final ModifyTransactionRequestBuilder b = new ModifyTransactionRequestBuilder(TX_ID, mock(ActorRef.class));
-        b.setSequence(0);
-        b.setReady();
-        final TransactionRequest<?> readyReq = b.build();
+        final TransactionRequest<?> readyReq = ModifyTransactionRequest.builder(TX_ID, mock(ActorRef.class))
+            .setSequence(0)
+            .setReady()
+            .build();
 
         assertNotNull(handleRequest(readyReq));
         verify(mockParent).finishTransaction(same(shardTransaction), eq(Optional.empty()));
@@ -142,28 +142,24 @@ public class FrontendReadWriteTransactionTest {
 
     @Test
     public void testModifyAfterReady() throws RequestException {
-        final ModifyTransactionRequestBuilder b = new ModifyTransactionRequestBuilder(TX_ID, mock(ActorRef.class));
-        b.setSequence(0);
-        b.setReady();
-        final TransactionRequest<?> readyReq = b.build();
+        final var builder = ModifyTransactionRequest.builder(TX_ID, mock(ActorRef.class))
+            .setSequence(0)
+            .setReady();
+        final TransactionRequest<?> readyReq = builder.build();
 
         assertNotNull(handleRequest(readyReq));
         verify(mockParent).finishTransaction(same(shardTransaction), eq(Optional.empty()));
 
-        b.setSequence(1);
-        b.addModification(mock(TransactionDelete.class));
-
-        final var req = b.build();
+        final var req = builder.setSequence(1).addModification(mock(TransactionDelete.class)).build();
         final var ex = assertThrows(IllegalStateException.class, () -> handleRequest(req));
         assertEquals("mock-mock-fe-0-txn-0-0 expect to be open, is in state READY (READY)", ex.getMessage());
     }
 
     @Test
     public void testReadAfterAbort() throws RequestException {
-        final ModifyTransactionRequestBuilder b = new ModifyTransactionRequestBuilder(TX_ID, mock(ActorRef.class));
-        b.setSequence(0);
-        b.setAbort();
-        final TransactionRequest<?> abortReq = b.build();
+        final TransactionRequest<?> abortReq = ModifyTransactionRequest.builder(TX_ID, mock(ActorRef.class))
+            .setSequence(0)
+            .setAbort().build();
         assertNull(handleRequest(abortReq));
         verify(mockParent).abortTransaction(same(shardTransaction), any(Runnable.class));
 
