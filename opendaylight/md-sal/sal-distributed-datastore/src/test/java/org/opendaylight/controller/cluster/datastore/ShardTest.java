@@ -18,6 +18,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
@@ -633,9 +634,9 @@ public class ShardTest extends AbstractShardTest {
         verifyOuterListEntry(shard, 1);
     }
 
+    @Test
     @Deprecated(since = "9.0.0", forRemoval = true)
-    @Test(expected = IllegalStateException.class)
-    public void testBatchedModificationsReadyWithIncorrectTotalMessageCount() throws Exception {
+    public void testBatchedModificationsReadyWithIncorrectTotalMessageCount() {
         final ShardTestKit testKit = new ShardTestKit(getSystem());
         final TestActorRef<Shard> shard = actorFactory.createTestActor(
             newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()),
@@ -652,11 +653,7 @@ public class ShardTest extends AbstractShardTest {
         shard.tell(batched, testKit.getRef());
 
         final Failure failure = testKit.expectMsgClass(Duration.ofSeconds(5), Failure.class);
-
-        if (failure != null) {
-            Throwables.propagateIfPossible(failure.cause(), Exception.class);
-            throw new RuntimeException(failure.cause());
-        }
+        assertInstanceOf(IllegalStateException.class, failure.cause());
     }
 
     @Test
