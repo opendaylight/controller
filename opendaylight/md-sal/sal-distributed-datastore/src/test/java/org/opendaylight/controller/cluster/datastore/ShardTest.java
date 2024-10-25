@@ -54,8 +54,17 @@ import org.junit.Test;
 import org.mockito.InOrder;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.DelegatingPersistentDataProvider;
+import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequest;
+import org.opendaylight.controller.cluster.access.commands.ModifyTransactionSuccess;
+import org.opendaylight.controller.cluster.access.commands.TransactionAbortRequest;
+import org.opendaylight.controller.cluster.access.commands.TransactionAbortSuccess;
+import org.opendaylight.controller.cluster.access.commands.TransactionCanCommitSuccess;
+import org.opendaylight.controller.cluster.access.commands.TransactionPreCommitRequest;
+import org.opendaylight.controller.cluster.access.commands.TransactionPreCommitSuccess;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
+import org.opendaylight.controller.cluster.access.concepts.RequestEnvelope;
+import org.opendaylight.controller.cluster.access.concepts.SuccessEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
@@ -1283,15 +1292,29 @@ public class ShardTest extends AbstractShardTest {
 
         final TransactionIdentifier transactionID = nextTransactionId();
 
-        shard.tell(prepareBatchedModifications(transactionID, TestModel.TEST_PATH, TestModel.EMPTY_TEST, false),
-            testKit.getRef());
-        testKit.expectMsgClass(duration, ReadyTransactionReply.class);
+        testKit.connectClient(shard, CLIENT_ID, duration);
 
-        shard.tell(new CanCommitTransaction(transactionID, CURRENT_VERSION).toSerializable(), testKit.getRef());
-        testKit.expectMsgClass(duration, CanCommitTransactionReply.class);
+        shard.tell(prepareWrite(testKit.getRef(), transactionID, TestModel.TEST_PATH, TestModel.EMPTY_TEST),
+            noSender());
+        assertInstanceOf(ModifyTransactionSuccess.class,
+            testKit.expectMsgClass(duration, SuccessEnvelope.class).getMessage());
 
-        shard.tell(new CommitTransaction(transactionID, CURRENT_VERSION).toSerializable(), testKit.getRef());
-        testKit.expectMsgClass(duration, CommitTransactionReply.class);
+        shard.tell(new RequestEnvelope(ModifyTransactionRequest.builder(transactionID, testKit.getRef())
+            .setSequence(1)
+            .setCommit(true)
+            .build(), 0, 1), noSender());
+        assertInstanceOf(TransactionCanCommitSuccess.class,
+            testKit.expectMsgClass(duration, SuccessEnvelope.class).getMessage());
+
+        shard.tell(new RequestEnvelope(new TransactionPreCommitRequest(transactionID, 2, testKit.getRef()), 0, 2),
+            noSender());
+        assertInstanceOf(TransactionPreCommitSuccess.class,
+            testKit.expectMsgClass(duration, SuccessEnvelope.class).getMessage());
+
+        shard.tell(new RequestEnvelope(new TransactionAbortRequest(transactionID, 3, testKit.getRef()), 0, 3),
+            noSender());
+        assertInstanceOf(TransactionAbortSuccess.class,
+            testKit.expectMsgClass(duration, SuccessEnvelope.class).getMessage());
         assertEquals(1, shard.underlyingActor().getShardMBean().getAbortTransactionsCount());
 
         // Since we're simulating an abort occurring during replication
