@@ -81,7 +81,6 @@ import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeNo
 import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderStateChanged;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
-import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
 import org.opendaylight.controller.cluster.datastore.utils.MockDataTreeChangeListener;
@@ -879,12 +878,12 @@ public class ShardTest extends AbstractShardTest {
 
         final DataTreeModification modification = dataStore.newModification();
 
-        final ContainerNode writeData = containerNode(TestModel.TEST_QNAME);
-        new WriteModification(TestModel.TEST_PATH, writeData).apply(modification);
-        final MapNode mergeData = mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
+        final var writeData = containerNode(TestModel.TEST_QNAME);
+        modification.write(TestModel.TEST_PATH, writeData);
+        final var mergeData = mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
                 .addChild(mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 42))
                 .build();
-        new MergeModification(TestModel.OUTER_LIST_PATH, mergeData).apply(modification);
+        modification.merge(TestModel.OUTER_LIST_PATH, mergeData);
 
         final TransactionIdentifier txId = nextTransactionId();
         modification.ready();
@@ -913,11 +912,11 @@ public class ShardTest extends AbstractShardTest {
         final DataTreeModification modification = dataStore.newModification();
 
         final ContainerNode writeData = containerNode(TestModel.TEST_QNAME);
-        new WriteModification(TestModel.TEST_PATH, writeData).apply(modification);
+        modification.write(TestModel.TEST_PATH, writeData);
         final MapNode mergeData = mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
                 .addChild(mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 42))
                 .build();
-        new MergeModification(TestModel.OUTER_LIST_PATH, mergeData).apply(modification);
+        modification.merge(TestModel.OUTER_LIST_PATH, mergeData);
 
         final TransactionIdentifier txId = nextTransactionId();
         modification.ready();
@@ -940,7 +939,7 @@ public class ShardTest extends AbstractShardTest {
         shard.tell(new CommitTransaction(txId, CURRENT_VERSION).toSerializable(), testKit.getRef());
         testKit.expectMsgClass(CommitTransactionReply.class);
 
-        final NormalizedNode actualNode = readStore(shard, TestModel.OUTER_LIST_PATH);
+        final var actualNode = readStore(shard, TestModel.OUTER_LIST_PATH);
         assertEquals(TestModel.OUTER_LIST_QNAME.getLocalName(), mergeData, actualNode);
     }
 
@@ -1511,7 +1510,7 @@ public class ShardTest extends AbstractShardTest {
 
         final TransactionIdentifier transactionID3 = nextTransactionId();
         final DataTreeModification modification3 = dataStore.newModification();
-        new WriteModification(TestModel.TEST2_PATH, containerNode(TestModel.TEST2_QNAME)).apply(modification3);
+        modification3.write(TestModel.TEST2_PATH, containerNode(TestModel.TEST2_QNAME));
         modification3.ready();
         final ReadyLocalTransaction readyMessage = new ReadyLocalTransaction(transactionID3, modification3,
             true, Optional.empty());

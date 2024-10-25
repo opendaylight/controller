@@ -33,12 +33,10 @@ import org.apache.pekko.util.Timeout;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataTreeNotificationListenerRegistration;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataTreeNotificationListenerRegistrationReply;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeNotificationListenerReply;
-import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
 import org.opendaylight.controller.cluster.datastore.utils.MockDataTreeChangeListener;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -192,22 +190,15 @@ public class DataTreeChangeListenerSupportTest extends AbstractShardTest {
 
     private static void mergeToStore(final ShardDataTree store, final YangInstanceIdentifier id,
             final NormalizedNode node) throws DataValidationFailedException {
-        final var batched = new BatchedModifications(nextTransactionId(), DataStoreVersions.CURRENT_VERSION);
-        batched.addModification(new MergeModification(id, node));
-        batched.setReady();
-        batched.setDoCommitOnReady(true);
-        batched.setTotalMessagesSent(1);
-
         final var modification = store.getDataTree().takeSnapshot().newModification();
-        batched.apply(modification);
+        modification.merge(id, node);
         store.notifyListeners(commitTransaction(store.getDataTree(), modification));
     }
 
     private static void writeToStore(final ShardDataTree store, final YangInstanceIdentifier id,
             final NormalizedNode node) throws DataValidationFailedException {
-        final var batched = newBatchedModifications(nextTransactionId(), id, node, true, true, 1);
-        var modification = store.getDataTree().takeSnapshot().newModification();
-        batched.apply(modification);
+        final var modification = store.getDataTree().takeSnapshot().newModification();
+        modification.write(id, node);
         store.notifyListeners(commitTransaction(store.getDataTree(), modification));
     }
 }

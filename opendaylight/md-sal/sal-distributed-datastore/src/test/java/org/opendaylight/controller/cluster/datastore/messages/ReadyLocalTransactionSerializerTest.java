@@ -48,9 +48,9 @@ public class ReadyLocalTransactionSerializerTest extends AbstractTest {
         DataTreeModification modification = dataTree.takeSnapshot().newModification();
 
         ContainerNode writeData = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
-        new WriteModification(TestModel.TEST_PATH, writeData).apply(modification);
+        modification.write(TestModel.TEST_PATH, writeData);
         MapNode mergeData = ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build();
-        new MergeModification(TestModel.OUTER_LIST_PATH, mergeData).apply(modification);
+        modification.merge(TestModel.OUTER_LIST_PATH, mergeData);
 
         final SortedSet<String> shardNames = ImmutableSortedSet.of("one", "two");
         TransactionIdentifier txId = nextTransactionId();

@@ -80,8 +80,6 @@ import org.opendaylight.controller.cluster.datastore.messages.ForwardedReadyTran
 import org.opendaylight.controller.cluster.datastore.messages.GetShardDataTree;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyLocalTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionReply;
-import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
-import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.cluster.datastore.persisted.FrontendClientMetadata;
 import org.opendaylight.controller.cluster.datastore.persisted.FrontendShardDataTreeSnapshotMetadata;
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
@@ -737,11 +735,11 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         // Send a tx with immediate commit.
 
         DataTreeModification modification = dataTree.takeSnapshot().newModification();
-        new WriteModification(CarsModel.BASE_PATH, CarsModel.emptyContainer()).apply(modification);
-        new MergeModification(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode()).apply(modification);
+        modification.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
+        modification.merge(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
 
-        final MapEntryNode car1 = CarsModel.newCarEntry("optima", Uint64.valueOf(20000));
-        new WriteModification(CarsModel.newCarPath("optima"), car1).apply(modification);
+        final var car1 = CarsModel.newCarEntry("optima", Uint64.valueOf(20000));
+        modification.write(CarsModel.newCarPath("optima"), car1);
         modification.ready();
 
         ReadyLocalTransaction readyLocal = new ReadyLocalTransaction(tx1 , modification, true, Optional.empty());
@@ -758,9 +756,9 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         // Send another tx without immediate commit.
 
+        final var car2 = CarsModel.newCarEntry("sportage", Uint64.valueOf(30000));
         modification = dataTree.takeSnapshot().newModification();
-        MapEntryNode car2 = CarsModel.newCarEntry("sportage", Uint64.valueOf(30000));
-        new WriteModification(CarsModel.newCarPath("sportage"), car2).apply(modification);
+        modification.write(CarsModel.newCarPath("sportage"), car2);
         modification.ready();
 
         readyLocal = new ReadyLocalTransaction(tx2 , modification, false, Optional.empty());
@@ -801,11 +799,11 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         // Send a tx with immediate commit.
 
         DataTreeModification modification = dataTree.takeSnapshot().newModification();
-        new WriteModification(CarsModel.BASE_PATH, CarsModel.emptyContainer()).apply(modification);
-        new MergeModification(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode()).apply(modification);
+        modification.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
+        modification.merge(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
 
-        final MapEntryNode car1 = CarsModel.newCarEntry("optima", Uint64.valueOf(20000));
-        new WriteModification(CarsModel.newCarPath("optima"), car1).apply(modification);
+        final var car1 = CarsModel.newCarEntry("optima", Uint64.valueOf(20000));
+        modification.write(CarsModel.newCarPath("optima"), car1);
 
         ForwardedReadyTransaction forwardedReady = new ForwardedReadyTransaction(tx1, DataStoreVersions.CURRENT_VERSION,
             new ReadWriteShardDataTreeTransaction(mock(ShardDataTreeTransactionParent.class), tx1, modification),
@@ -823,9 +821,9 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         // Send another tx without immediate commit.
 
+        final var car2 = CarsModel.newCarEntry("sportage", Uint64.valueOf(30000));
         modification = dataTree.takeSnapshot().newModification();
-        MapEntryNode car2 = CarsModel.newCarEntry("sportage", Uint64.valueOf(30000));
-        new WriteModification(CarsModel.newCarPath("sportage"), car2).apply(modification);
+        modification.write(CarsModel.newCarPath("sportage"), car2);
 
         forwardedReady = new ForwardedReadyTransaction(tx2, DataStoreVersions.CURRENT_VERSION,
             new ReadWriteShardDataTreeTransaction(mock(ShardDataTreeTransactionParent.class), tx2, modification),
