@@ -43,15 +43,14 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataValidationFailedExcepti
 public class SimpleShardDataTreeCohortTest extends AbstractTest {
     @Mock
     private ShardDataTree mockShardDataTree;
-
     @Mock
     private DataTreeModification mockModification;
-
     @Mock
     private CompositeDataTreeCohort mockUserCohorts;
-
     @Mock
     private FutureCallback<DataTreeCandidate> mockPreCallback;
+    @Mock
+    private ShardStats stats;
 
     private SimpleShardDataTreeCohort cohort;
 
@@ -59,6 +58,7 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
     public void setup() {
         doReturn(Optional.empty()).when(mockUserCohorts).commit();
         doReturn(Optional.empty()).when(mockUserCohorts).abort();
+        doReturn(stats).when(mockShardDataTree).getStats();
 
         cohort = new SimpleShardDataTreeCohort(mockShardDataTree, mockModification, nextTransactionId(),
             mockUserCohorts, Optional.empty());

@@ -22,12 +22,12 @@ import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 
 public class ShardStatsTest {
     private MBeanServer mbeanServer;
-    private ShardStats shardStats;
+    private DefaultShardStatsMXBean shardStats;
     private ObjectName testMBeanName;
 
     @Before
     public void setUp() throws Exception {
-        shardStats = new ShardStats("shard-1", "DataStore", null);
+        shardStats = new DefaultShardStatsMXBean("shard-1", "DataStore", null);
         shardStats.registerMBean();
         mbeanServer = ManagementFactory.getPlatformMBeanServer();
         String objectName = AbstractMXBean.BASE_JMX_PREFIX + "type=" + shardStats.getMBeanType() + ",Category="
