@@ -50,8 +50,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
-import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 
@@ -168,13 +167,13 @@ public class ShardTransactionTest extends AbstractActorTest {
         final ActorRef transaction = newTransactionActor(RW, mockWriteTx, "testOnReceiveBatchedModifications");
 
         YangInstanceIdentifier writePath = TestModel.TEST_PATH;
-        NormalizedNode writeData = Builders.containerBuilder()
+        NormalizedNode writeData = ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(TestModel.TEST_QNAME))
             .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo"))
             .build();
 
         YangInstanceIdentifier mergePath = TestModel.OUTER_LIST_PATH;
-        NormalizedNode mergeData = Builders.containerBuilder()
+        NormalizedNode mergeData = ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(TestModel.OUTER_LIST_QNAME))
             .build();
 
@@ -207,7 +206,7 @@ public class ShardTransactionTest extends AbstractActorTest {
         watcher.watch(transaction);
 
         YangInstanceIdentifier writePath = TestModel.TEST_PATH;
-        NormalizedNode writeData = Builders.containerBuilder()
+        NormalizedNode writeData = ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(TestModel.TEST_QNAME))
             .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo"))
             .build();
@@ -239,7 +238,7 @@ public class ShardTransactionTest extends AbstractActorTest {
         watcher.watch(transaction);
 
         YangInstanceIdentifier writePath = TestModel.TEST_PATH;
-        NormalizedNode writeData = Builders.containerBuilder()
+        NormalizedNode writeData = ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(TestModel.TEST_QNAME))
             .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo"))
             .build();
@@ -269,7 +268,9 @@ public class ShardTransactionTest extends AbstractActorTest {
         watcher.watch(transaction);
 
         YangInstanceIdentifier path = TestModel.TEST_PATH;
-        ContainerNode node = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        ContainerNode node = ImmutableNodes.newContainerBuilder()
+            .withNodeIdentifier(new NodeIdentifier(TestModel.TEST_QNAME))
+            .build();
 
         doThrow(new TestException()).when(mockModification).write(path, node);
 

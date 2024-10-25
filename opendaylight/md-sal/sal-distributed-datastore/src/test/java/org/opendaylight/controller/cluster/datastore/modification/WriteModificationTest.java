@@ -15,8 +15,7 @@ import org.junit.Test;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
-import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
-import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 
 @Deprecated(since = "9.0.0", forRemoval = true)
 public class WriteModificationTest extends AbstractModificationTest {
@@ -34,7 +33,7 @@ public class WriteModificationTest extends AbstractModificationTest {
 
     @Test
     public void testSerialization() {
-        WriteModification expected = new WriteModification(TestModel.TEST_PATH, Builders.containerBuilder()
+        WriteModification expected = new WriteModification(TestModel.TEST_PATH, ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(TestModel.TEST_QNAME))
             .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo"))
             .build());

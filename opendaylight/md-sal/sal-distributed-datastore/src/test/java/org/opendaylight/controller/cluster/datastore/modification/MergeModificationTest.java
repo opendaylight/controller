@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore.modification;
 
 import static org.junit.Assert.assertEquals;
+import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.containerNode;
 
 import java.util.Optional;
 import org.apache.commons.lang3.SerializationUtils;
@@ -15,8 +16,7 @@ import org.junit.Test;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
-import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
-import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 
 @Deprecated(since = "9.0.0", forRemoval = true)
 public class MergeModificationTest extends AbstractModificationTest {
@@ -27,7 +27,7 @@ public class MergeModificationTest extends AbstractModificationTest {
         //Write something into the datastore
         DOMStoreReadWriteTransaction writeTransaction = store.newReadWriteTransaction();
         MergeModification writeModification = new MergeModification(TestModel.TEST_PATH,
-                ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+                containerNode(TestModel.TEST_QNAME));
         writeModification.apply(writeTransaction);
         commitTransaction(writeTransaction);
 
@@ -37,7 +37,7 @@ public class MergeModificationTest extends AbstractModificationTest {
 
     @Test
     public void testSerialization() {
-        MergeModification expected = new MergeModification(TestModel.TEST_PATH, Builders.containerBuilder()
+        MergeModification expected = new MergeModification(TestModel.TEST_PATH, ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(TestModel.TEST_QNAME))
             .withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo"))
             .build());

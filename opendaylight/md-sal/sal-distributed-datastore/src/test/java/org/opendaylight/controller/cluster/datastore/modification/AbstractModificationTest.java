@@ -18,16 +18,19 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.mdsal.dom.store.inmemory.InMemoryDOMDataStore;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 
 @Deprecated(since = "9.0.0", forRemoval = true)
 public abstract class AbstractModificationTest {
     private static EffectiveModelContext TEST_SCHEMA_CONTEXT;
 
-    static final @NonNull ContainerNode TEST_CONTAINER = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+    static final @NonNull ContainerNode TEST_CONTAINER = ImmutableNodes.newContainerBuilder()
+        .withNodeIdentifier(new NodeIdentifier(TestModel.TEST_QNAME))
+        .build();
 
     protected InMemoryDOMDataStore store;
 

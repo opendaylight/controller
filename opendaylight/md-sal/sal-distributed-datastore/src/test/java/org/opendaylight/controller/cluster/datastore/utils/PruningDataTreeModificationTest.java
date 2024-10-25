@@ -30,7 +30,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.datastore.Shard;
 import org.opendaylight.controller.cluster.datastore.ShardDataTree;
@@ -45,8 +44,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdent
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
-import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeConfiguration;
@@ -147,12 +145,14 @@ public class PruningDataTreeModificationTest {
     @Test
     public void testMergeWithInvalidChildNodeNames() throws DataValidationFailedException {
         DataContainerChild outerNode = outerNode(outerNodeEntry(1, innerNode("one", "two")));
-        ContainerNode normalizedNode = Builders.containerBuilder()
+        ContainerNode normalizedNode = ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(TEST_QNAME))
             .withChild(outerNode)
-            .withChild(Builders.containerBuilder()
+            .withChild(ImmutableNodes.newContainerBuilder()
                 .withNodeIdentifier(new NodeIdentifier(AUG_CONTAINER))
-                .withChild(ImmutableNodes.containerNode(AUG_INNER_CONTAINER))
+                .withChild(ImmutableNodes.newContainerBuilder()
+                    .withNodeIdentifier(new NodeIdentifier(AUG_INNER_CONTAINER))
+                    .build())
                 .build())
             .withChild(ImmutableNodes.leafNode(AUG_QNAME, "aug"))
             .build();
@@ -163,7 +163,7 @@ public class PruningDataTreeModificationTest {
 
         dataTree.commit(getCandidate());
 
-        ContainerNode prunedNode = Builders.containerBuilder()
+        ContainerNode prunedNode = ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(TEST_QNAME))
             .withChild(outerNode)
             .build();
@@ -173,7 +173,9 @@ public class PruningDataTreeModificationTest {
 
     @Test
     public void testMergeWithValidNamespaceAndInvalidNodeName() throws DataValidationFailedException {
-        NormalizedNode normalizedNode = ImmutableNodes.containerNode(INVALID_TEST_QNAME);
+        var normalizedNode = ImmutableNodes.newContainerBuilder()
+            .withNodeIdentifier(new NodeIdentifier(INVALID_TEST_QNAME))
+            .build();
         YangInstanceIdentifier path = INVALID_TEST_PATH;
 
         pruningDataTreeModification.merge(path, normalizedNode);
@@ -213,14 +215,16 @@ public class PruningDataTreeModificationTest {
 
     @Test
     public void testWriteRootNodeWithInvalidChild() throws Exception {
-        final Shard mockShard = Mockito.mock(Shard.class);
+        final Shard mockShard = mock(Shard.class);
 
         ShardDataTree shardDataTree = new ShardDataTree(mockShard, SCHEMA_CONTEXT, TreeType.CONFIGURATION);
         NormalizedNode root = shardDataTree.readNode(YangInstanceIdentifier.of()).orElseThrow();
 
-        NormalizedNode normalizedNode = Builders.containerBuilder()
+        NormalizedNode normalizedNode = ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(root.name().getNodeType()))
-            .withChild(ImmutableNodes.containerNode(AUG_CONTAINER))
+            .withChild(ImmutableNodes.newContainerBuilder()
+                .withNodeIdentifier(new NodeIdentifier(AUG_CONTAINER))
+                .build())
             .build();
         pruningDataTreeModification.write(YangInstanceIdentifier.of(), normalizedNode);
         dataTree.commit(getCandidate());
@@ -245,12 +249,14 @@ public class PruningDataTreeModificationTest {
     @Test
     public void testWriteWithInvalidChildNodeNames() throws DataValidationFailedException {
         DataContainerChild outerNode = outerNode(outerNodeEntry(1, innerNode("one", "two")));
-        ContainerNode normalizedNode = Builders.containerBuilder()
+        ContainerNode normalizedNode = ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(TEST_QNAME))
             .withChild(outerNode)
-            .withChild(Builders.containerBuilder()
+            .withChild(ImmutableNodes.newContainerBuilder()
                 .withNodeIdentifier(new NodeIdentifier(AUG_CONTAINER))
-                .withChild(ImmutableNodes.containerNode(AUG_INNER_CONTAINER))
+                .withChild(ImmutableNodes.newContainerBuilder()
+                    .withNodeIdentifier(new NodeIdentifier(AUG_INNER_CONTAINER))
+                    .build())
                 .build())
             .withChild(ImmutableNodes.leafNode(AUG_QNAME, "aug"))
             .withChild(ImmutableNodes.leafNode(NAME_QNAME, "name"))
@@ -262,7 +268,7 @@ public class PruningDataTreeModificationTest {
 
         dataTree.commit(getCandidate());
 
-        ContainerNode prunedNode = Builders.containerBuilder()
+        ContainerNode prunedNode = ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(TEST_QNAME))
             .withChild(outerNode)
             .withChild(ImmutableNodes.leafNode(NAME_QNAME, "name"))
