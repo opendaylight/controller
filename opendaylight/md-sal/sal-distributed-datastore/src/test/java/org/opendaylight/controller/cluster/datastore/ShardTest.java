@@ -596,7 +596,7 @@ public class ShardTest extends AbstractShardTest {
         testKit.expectMsgClass(duration, CommitTransactionReply.class);
 
         // Verify data in the data store.
-
+        assertEquals(1, shard.underlyingActor().getShardMBean().getCommittedTransactionsCount());
         verifyOuterListEntry(shard, 1);
     }
 
@@ -631,6 +631,7 @@ public class ShardTest extends AbstractShardTest {
         testKit.expectMsgClass(duration, CommitTransactionReply.class);
 
         // Verify data in the data store.
+        assertEquals(1, shard.underlyingActor().getShardMBean().getCommittedTransactionsCount());
         verifyOuterListEntry(shard, 1);
     }
 
@@ -681,6 +682,8 @@ public class ShardTest extends AbstractShardTest {
         batched.addModification(new MergeModification(TestModel.TEST_PATH, invalidData));
         shard.tell(batched, testKit.getRef());
         Failure failure = testKit.expectMsgClass(Duration.ofSeconds(5), Failure.class);
+        // FIXME: invalid operation should be properly accounted for:
+        //        assertEquals(1, shard.underlyingActor().getShardMBean().getFailedTransactionsCount());
 
         final Throwable cause = failure.cause();
 
@@ -739,6 +742,7 @@ public class ShardTest extends AbstractShardTest {
 
         shard.tell(new CommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), testKit.getRef());
         testKit.expectMsgClass(duration, CommitTransactionReply.class);
+        assertEquals(1, shard.underlyingActor().getShardMBean().getCommittedTransactionsCount());
 
         // Verify data in the data store.
 
@@ -844,6 +848,7 @@ public class ShardTest extends AbstractShardTest {
         }
 
         testKit.expectMsgClass(Duration.ofSeconds(5), CommitTransactionReply.class);
+        assertEquals(1, shard.underlyingActor().getShardMBean().getCommittedTransactionsCount());
 
         final NormalizedNode actualNode = readStore(shard, TestModel.TEST_PATH);
         assertEquals(TestModel.TEST_QNAME.getLocalName(), containerNode, actualNode);
@@ -875,6 +880,7 @@ public class ShardTest extends AbstractShardTest {
         shard.tell(readyMessage, testKit.getRef());
 
         testKit.expectMsgClass(CommitTransactionReply.class);
+        assertEquals(1, shard.underlyingActor().getShardMBean().getCommittedTransactionsCount());
 
         final NormalizedNode actualNode = readStore(shard, TestModel.OUTER_LIST_PATH);
         assertEquals(TestModel.OUTER_LIST_QNAME.getLocalName(), mergeData, actualNode);
@@ -918,6 +924,7 @@ public class ShardTest extends AbstractShardTest {
 
         shard.tell(new CommitTransaction(txId, CURRENT_VERSION).toSerializable(), testKit.getRef());
         testKit.expectMsgClass(CommitTransactionReply.class);
+        assertEquals(1, shard.underlyingActor().getShardMBean().getCommittedTransactionsCount());
 
         final var actualNode = readStore(shard, TestModel.OUTER_LIST_PATH);
         assertEquals(TestModel.OUTER_LIST_QNAME.getLocalName(), mergeData, actualNode);
@@ -954,6 +961,7 @@ public class ShardTest extends AbstractShardTest {
 
         shard.tell(new CommitTransaction(transactionID, CURRENT_VERSION).toSerializable(), testKit.getRef());
         testKit.expectMsgClass(duration, CommitTransactionReply.class);
+        assertEquals(1, shard.underlyingActor().getShardMBean().getCommittedTransactionsCount());
 
         final NormalizedNode actualNode = readStore(shard, TestModel.TEST_PATH);
         assertEquals(TestModel.TEST_QNAME.getLocalName(), containerNode, actualNode);
@@ -1072,6 +1080,8 @@ public class ShardTest extends AbstractShardTest {
 
         shard.tell(new CommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), testKit.getRef());
         testKit.expectMsgClass(duration, Failure.class);
+        assertEquals(1, shard.underlyingActor().getShardMBean().getFailedTransactionsCount());
+        assertEquals(0, shard.underlyingActor().getShardMBean().getCommittedTransactionsCount());
 
         // Wait for the 2nd Tx to complete the canCommit phase.
 
@@ -1282,6 +1292,7 @@ public class ShardTest extends AbstractShardTest {
 
         shard.tell(new CommitTransaction(transactionID, CURRENT_VERSION).toSerializable(), testKit.getRef());
         testKit.expectMsgClass(duration, CommitTransactionReply.class);
+        assertEquals(1, shard.underlyingActor().getShardMBean().getAbortTransactionsCount());
 
         // Since we're simulating an abort occurring during replication
         // and before finish commit,
@@ -1346,6 +1357,7 @@ public class ShardTest extends AbstractShardTest {
 
         shard.tell(new CommitTransaction(transactionID2, CURRENT_VERSION).toSerializable(), testKit.getRef());
         testKit.expectMsgClass(duration, CommitTransactionReply.class);
+        assertEquals(3, shard.underlyingActor().getShardMBean().getCommittedTransactionsCount());
 
         final NormalizedNode node = readStore(shard, listNodePath);
         assertNotNull(listNodePath + " not found", node);
@@ -1596,6 +1608,7 @@ public class ShardTest extends AbstractShardTest {
 
         shard.tell(new AbortTransaction(transactionID1, CURRENT_VERSION).toSerializable(), testKit.getRef());
         testKit.expectMsgClass(duration, AbortTransactionReply.class);
+        assertEquals(1, shard.underlyingActor().getShardMBean().getAbortTransactionsCount());
 
         assertEquals("getPendingTxCommitQueueSize", 0, shard.underlyingActor().getPendingTxCommitQueueSize());
 
