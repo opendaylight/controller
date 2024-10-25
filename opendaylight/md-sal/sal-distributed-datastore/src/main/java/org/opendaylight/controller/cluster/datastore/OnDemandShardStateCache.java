@@ -46,7 +46,7 @@ final class OnDemandShardStateCache {
         return ONDEMAND_SHARD_STATE_CACHE.get(shardName, this::retrieveState);
     }
 
-    String getStatRetrievaelTime() {
+    String stateRetrievalTime() {
         return stateRetrievalTime;
     }
 

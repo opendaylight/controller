@@ -292,7 +292,7 @@ final class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
     @Override
     public String getStatRetrievalTime() {
         getOnDemandRaftState();
-        return stateCache.getStatRetrievaelTime();
+        return stateCache.stateRetrievalTime();
     }
 
     @Override
