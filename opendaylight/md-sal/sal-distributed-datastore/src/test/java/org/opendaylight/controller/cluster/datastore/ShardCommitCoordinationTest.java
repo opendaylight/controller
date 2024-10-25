@@ -26,6 +26,7 @@ import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.o
 import com.google.common.collect.ImmutableSortedSet;
 import java.time.Duration;
 import java.util.Map;
+import java.util.Optional;
 import java.util.SortedSet;
 import java.util.concurrent.TimeUnit;
 import org.apache.pekko.actor.ActorRef;
@@ -40,6 +41,7 @@ import org.opendaylight.controller.cluster.databroker.actors.dds.DistributedData
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
 import org.opendaylight.controller.cluster.datastore.config.ModuleConfig;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
+import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransaction;
@@ -47,6 +49,7 @@ import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionR
 import org.opendaylight.controller.cluster.datastore.messages.FindPrimary;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.RemotePrimaryShardFound;
+import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.cluster.datastore.shardmanager.RegisterForShardAvailabilityChanges;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.DefaultShardStrategy;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy;
@@ -602,5 +605,15 @@ public class ShardCommitCoordinationTest extends AbstractShardTest {
         final YangInstanceIdentifier path = innerEntryPath(outerID, innerID);
         final NormalizedNode innerListEntry = readStore(shard, path);
         assertNotNull(path + " not found", innerListEntry);
+    }
+
+    private static BatchedModifications newReadyBatchedModifications(final TransactionIdentifier transactionID,
+            final YangInstanceIdentifier path, final NormalizedNode data,
+            final SortedSet<String> participatingShardNames) {
+        final BatchedModifications batched = new BatchedModifications(transactionID, CURRENT_VERSION);
+        batched.addModification(new WriteModification(path, data));
+        batched.setReady(Optional.of(participatingShardNames));
+        batched.setTotalMessagesSent(1);
+        return batched;
     }
 }
