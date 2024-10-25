@@ -14,6 +14,7 @@ import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.PoisonPill;
 import org.apache.pekko.actor.Props;
 import org.apache.pekko.actor.ReceiveTimeout;
+import org.apache.pekko.actor.Status.Failure;
 import org.apache.pekko.japi.Creator;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActorWithMetering;
@@ -90,8 +91,7 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
         final boolean ret = transaction.isClosed();
         if (ret) {
             shardStats.incrementFailedReadTransactionsCount();
-            getSender().tell(new org.apache.pekko.actor.Status.Failure(
-                new ReadFailedException("Transaction is closed")), getSelf());
+            getSender().tell(new Failure(new ReadFailedException("Transaction is closed")), getSelf());
         }
         return ret;
     }

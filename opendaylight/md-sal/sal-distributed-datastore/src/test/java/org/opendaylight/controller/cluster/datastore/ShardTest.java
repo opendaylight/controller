@@ -696,7 +696,7 @@ public class ShardTest extends AbstractShardTest {
         BatchedModifications batched = new BatchedModifications(transactionID, CURRENT_VERSION);
         batched.addModification(new MergeModification(TestModel.TEST_PATH, invalidData));
         shard.tell(batched, testKit.getRef());
-        Failure failure = testKit.expectMsgClass(Duration.ofSeconds(5), org.apache.pekko.actor.Status.Failure.class);
+        Failure failure = testKit.expectMsgClass(Duration.ofSeconds(5), Failure.class);
 
         final Throwable cause = failure.cause();
 
@@ -706,7 +706,7 @@ public class ShardTest extends AbstractShardTest {
 
         shard.tell(batched, testKit.getRef());
 
-        failure = testKit.expectMsgClass(Duration.ofSeconds(5), org.apache.pekko.actor.Status.Failure.class);
+        failure = testKit.expectMsgClass(Duration.ofSeconds(5), Failure.class);
         assertEquals("Failure cause", cause, failure.cause());
     }
 
@@ -1090,7 +1090,7 @@ public class ShardTest extends AbstractShardTest {
         // and trigger the 2nd Tx to proceed.
 
         shard.tell(new CommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), testKit.getRef());
-        testKit.expectMsgClass(duration, org.apache.pekko.actor.Status.Failure.class);
+        testKit.expectMsgClass(duration, Failure.class);
 
         // Wait for the 2nd Tx to complete the canCommit phase.
 
@@ -1160,7 +1160,7 @@ public class ShardTest extends AbstractShardTest {
         // and trigger the 2nd Tx to proceed.
 
         shard.tell(new CommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), testKit.getRef());
-        testKit.expectMsgClass(duration, org.apache.pekko.actor.Status.Failure.class);
+        testKit.expectMsgClass(duration, Failure.class);
 
         // Wait for the 2nd Tx to complete the canCommit phase.
 
@@ -1203,7 +1203,7 @@ public class ShardTest extends AbstractShardTest {
         // Send the CanCommitTransaction message.
 
         shard.tell(new CanCommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), testKit.getRef());
-        testKit.expectMsgClass(duration, org.apache.pekko.actor.Status.Failure.class);
+        testKit.expectMsgClass(duration, Failure.class);
 
         // Send another can commit to ensure the failed one got cleaned
         // up.
@@ -1249,7 +1249,7 @@ public class ShardTest extends AbstractShardTest {
                 TestModel.EMPTY_TEST, true), testKit.getRef());
         }
 
-        testKit.expectMsgClass(duration, org.apache.pekko.actor.Status.Failure.class);
+        testKit.expectMsgClass(duration, Failure.class);
 
         // Send another can commit to ensure the failed one got cleaned
         // up.
@@ -1361,7 +1361,7 @@ public class ShardTest extends AbstractShardTest {
         // current Tx.
 
         shard.tell(new CommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), testKit.getRef());
-        testKit.expectMsgClass(duration, org.apache.pekko.actor.Status.Failure.class);
+        testKit.expectMsgClass(duration, Failure.class);
 
         // Commit the 2nd Tx.
 
@@ -1421,7 +1421,7 @@ public class ShardTest extends AbstractShardTest {
 //
 //            shard.tell(prepareReadyTransactionMessage(false, shard.underlyingActor(), cohort3, transactionID3,
 //                    modification3), getRef());
-//            expectMsgClass(duration, org.apache.pekko.actor.Status.Failure.class);
+//            expectMsgClass(duration, Failure.class);
 //
 //            // canCommit 1st Tx.
 //
@@ -1435,7 +1435,7 @@ public class ShardTest extends AbstractShardTest {
 //            // canCommit the 3rd Tx - should exceed queue capacity and fail.
 //
 //            shard.tell(new CanCommitTransaction(transactionID3, CURRENT_VERSION).toSerializable(), getRef());
-//            expectMsgClass(duration, org.apache.pekko.actor.Status.Failure.class);
+//            expectMsgClass(duration, Failure.class);
 //        }};
 //    }
 
@@ -1539,7 +1539,7 @@ public class ShardTest extends AbstractShardTest {
             "testCanCommitBeforeReadyFailure");
 
         shard.tell(new CanCommitTransaction(nextTransactionId(), CURRENT_VERSION).toSerializable(), testKit.getRef());
-        testKit.expectMsgClass(Duration.ofSeconds(5), org.apache.pekko.actor.Status.Failure.class);
+        testKit.expectMsgClass(Duration.ofSeconds(5), Failure.class);
     }
 
     @Test
@@ -1621,7 +1621,7 @@ public class ShardTest extends AbstractShardTest {
         // Now send CanCommitTransaction - should fail.
 
         shard.tell(new CanCommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), testKit.getRef());
-        final Throwable failure = testKit.expectMsgClass(duration, org.apache.pekko.actor.Status.Failure.class).cause();
+        final Throwable failure = testKit.expectMsgClass(duration, Failure.class).cause();
         assertTrue("Failure type", failure instanceof IllegalStateException);
 
         // Ready and CanCommit another and verify success.

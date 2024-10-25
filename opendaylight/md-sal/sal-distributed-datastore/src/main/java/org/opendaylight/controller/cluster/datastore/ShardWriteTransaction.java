@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.PoisonPill;
+import org.apache.pekko.actor.Status.Failure;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModificationsReply;
@@ -81,7 +82,7 @@ public class ShardWriteTransaction extends ShardTransaction {
             }
         } catch (Exception e) {
             lastBatchedModificationsException = e;
-            getSender().tell(new org.apache.pekko.actor.Status.Failure(e), getSelf());
+            getSender().tell(new Failure(e), getSelf());
 
             if (batched.isReady()) {
                 getSelf().tell(PoisonPill.getInstance(), getSelf());
@@ -100,8 +101,8 @@ public class ShardWriteTransaction extends ShardTransaction {
     private boolean checkClosed() {
         final boolean ret = transaction.isClosed();
         if (ret) {
-            getSender().tell(new org.apache.pekko.actor.Status.Failure(new IllegalStateException(
-                    "Transaction is closed, no modifications allowed")), getSelf());
+            getSender().tell(new Failure(new IllegalStateException("Transaction is closed, no modifications allowed")),
+                getSelf());
         }
         return ret;
     }

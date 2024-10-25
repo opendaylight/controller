@@ -277,14 +277,14 @@ public class ShardTransactionTest extends AbstractActorTest {
         batched.addModification(new WriteModification(path, node));
 
         transaction.tell(batched, testKit.getRef());
-        testKit.expectMsgClass(Duration.ofSeconds(5), org.apache.pekko.actor.Status.Failure.class);
+        testKit.expectMsgClass(Duration.ofSeconds(5), Failure.class);
 
         batched = new BatchedModifications(tx1, DataStoreVersions.CURRENT_VERSION);
         batched.setReady();
         batched.setTotalMessagesSent(2);
 
         transaction.tell(batched, testKit.getRef());
-        Failure failure = testKit.expectMsgClass(Duration.ofSeconds(5), org.apache.pekko.actor.Status.Failure.class);
+        Failure failure = testKit.expectMsgClass(Duration.ofSeconds(5), Failure.class);
         watcher.expectMsgClass(Duration.ofSeconds(5), Terminated.class);
 
         if (failure != null) {
@@ -308,7 +308,7 @@ public class ShardTransactionTest extends AbstractActorTest {
 
         transaction.tell(batched, testKit.getRef());
 
-        Failure failure = testKit.expectMsgClass(Duration.ofSeconds(5), org.apache.pekko.actor.Status.Failure.class);
+        Failure failure = testKit.expectMsgClass(Duration.ofSeconds(5), Failure.class);
         watcher.expectMsgClass(Duration.ofSeconds(5), Terminated.class);
 
         if (failure != null) {

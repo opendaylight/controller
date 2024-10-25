@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.Props;
+import org.apache.pekko.actor.Status.Failure;
 import org.apache.pekko.actor.UntypedAbstractActor;
 import org.apache.pekko.dispatch.Dispatchers;
 import org.apache.pekko.dispatch.Futures;
@@ -328,7 +329,7 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
                 assertEquals(name + " transactionId", builder.transactionId, actualMessage.getTransactionId());
 
                 if (reply instanceof Throwable) {
-                    getSender().tell(new org.apache.pekko.actor.Status.Failure((Throwable)reply), self());
+                    getSender().tell(new Failure((Throwable)reply), self());
                 } else {
                     getSender().tell(reply, self());
                 }
