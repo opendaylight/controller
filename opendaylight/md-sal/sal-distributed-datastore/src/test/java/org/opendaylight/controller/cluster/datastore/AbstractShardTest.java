@@ -47,7 +47,10 @@ import org.apache.pekko.util.Timeout;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequest;
+import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequestBuilder;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
+import org.opendaylight.controller.cluster.access.concepts.RequestEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
@@ -267,6 +270,38 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         batchedModifications.setDoCommitOnReady(doCommitOnReady);
         batchedModifications.setTotalMessagesSent(1);
         return batchedModifications;
+    }
+
+    protected static final RequestEnvelope prepareWrite(final ActorRef replyTo,
+            final TransactionIdentifier transactionID, final YangInstanceIdentifier path, final NormalizedNode data) {
+        return prepareWrite(replyTo, transactionID, 0, path, data);
+    }
+
+    protected static final RequestEnvelope prepareWrite(final ActorRef replyTo,
+            final TransactionIdentifier transactionID, final long sequence, final YangInstanceIdentifier path,
+            final NormalizedNode data) {
+        return new RequestEnvelope(writeBuilder(replyTo, transactionID, sequence, path, data).setReady().build(),
+            0, 0);
+    }
+
+    protected static final RequestEnvelope singleWrite(final ActorRef replyTo,
+            final TransactionIdentifier transactionID, final YangInstanceIdentifier path, final NormalizedNode data) {
+        return singleWrite(replyTo, transactionID, path, data);
+    }
+
+    protected static final RequestEnvelope singleWrite(final ActorRef replyTo,
+            final TransactionIdentifier transactionID, final long sequence, final YangInstanceIdentifier path,
+            final NormalizedNode data) {
+        return new RequestEnvelope(writeBuilder(replyTo, transactionID, sequence, path, data).setCommit(false).build(),
+            0, 0);
+    }
+
+    private static ModifyTransactionRequestBuilder writeBuilder(final ActorRef replyTo,
+            final TransactionIdentifier transactionID, final long sequence, final YangInstanceIdentifier path,
+            final NormalizedNode data) {
+        return ModifyTransactionRequest.builder(transactionID, replyTo)
+            .setSequence(sequence)
+            .addWrite(path, data);
     }
 
     @Deprecated(since = "11.0.0", forRemoval = true)
