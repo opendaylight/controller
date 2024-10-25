@@ -256,6 +256,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         return cohortMap;
     }
 
+    @Deprecated(since = "11.0.0", forRemoval = true)
     protected static BatchedModifications prepareBatchedModifications(final TransactionIdentifier transactionID,
             final YangInstanceIdentifier path, final NormalizedNode data, final boolean doCommitOnReady) {
         final var modification = new MutableCompositeModification();
@@ -268,6 +269,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         return batchedModifications;
     }
 
+    @Deprecated(since = "11.0.0", forRemoval = true)
     protected static ForwardedReadyTransaction prepareForwardedReadyTransaction(final TestActorRef<Shard> shard,
             final TransactionIdentifier transactionID, final YangInstanceIdentifier path,
             final NormalizedNode data, final boolean doCommitOnReady) {
@@ -330,6 +332,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         return CommitTransactionPayload.create(transactionId, candidate);
     }
 
+    @Deprecated(since = "11.0.0", forRemoval = true)
     static BatchedModifications newBatchedModifications(final TransactionIdentifier transactionID,
             final YangInstanceIdentifier path, final NormalizedNode data, final boolean ready,
             final boolean doCommitOnReady, final int messagesSent) {
@@ -343,6 +346,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         return batched;
     }
 
+    @Deprecated(since = "11.0.0", forRemoval = true)
     static BatchedModifications newReadyBatchedModifications(final TransactionIdentifier transactionID,
             final YangInstanceIdentifier path, final NormalizedNode data,
             final SortedSet<String> participatingShardNames) {
