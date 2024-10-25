@@ -7,18 +7,27 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static org.apache.pekko.actor.ActorRef.noSender;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
 
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.pattern.Patterns;
+import org.apache.pekko.testkit.TestActorRef;
 import org.apache.pekko.testkit.javadsl.EventFilter;
 import org.apache.pekko.testkit.javadsl.TestKit;
 import org.apache.pekko.util.Timeout;
+import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.controller.cluster.access.ABIVersion;
+import org.opendaylight.controller.cluster.access.commands.ConnectClientRequest;
+import org.opendaylight.controller.cluster.access.commands.ConnectClientSuccess;
+import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
 import org.slf4j.Logger;
@@ -94,5 +103,19 @@ public class ShardTestKit extends TestKit {
         }
 
         fail(String.format("Unexpected leader %s found for shard %s", lastResponse, shard.path()));
+    }
+
+    public @NonNull ShardTestConnection connect(final TestActorRef<Shard> shard, final ClientIdentifier clientId) {
+        return connect(shard, clientId, Duration.ofSeconds(5));
+    }
+
+    public @NonNull ShardTestConnection connect(final TestActorRef<Shard> shard, final ClientIdentifier clientId,
+            final Duration max) {
+        shard.tell(new ConnectClientRequest(clientId, getRef(), ABIVersion.current(), ABIVersion.current()),
+            noSender());
+        final var connect = expectMsgClass(max, ConnectClientSuccess.class);
+        assertEquals(clientId, connect.getTarget());
+        assertSame(shard, connect.getBackend());
+        return new ShardTestConnection(this, shard, clientId, connect);
     }
 }
