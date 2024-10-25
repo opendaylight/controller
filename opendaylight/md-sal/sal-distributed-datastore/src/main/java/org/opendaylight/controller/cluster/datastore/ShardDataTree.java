@@ -1003,7 +1003,6 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     private void failPreCommit(final Throwable cause) {
-        shard.shardStats().incrementFailedTransactionsCount();
         pendingTransactions.poll().cohort.failedPreCommit(cause);
         processNextPendingTransaction();
     }
@@ -1055,7 +1054,6 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     private void failCommit(final Exception cause) {
-        shard.shardStats().incrementFailedTransactionsCount();
         pendingFinishCommits.poll().cohort.failedCommit(cause);
         processNextPending();
     }
@@ -1081,7 +1079,6 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         }
 
         allMetadataCommittedTransaction(txId);
-        shard.shardStats().incrementCommittedTransactionCount();
 
         // FIXME: propagate journal index
         pendingFinishCommits.poll().cohort.successfulCommit(UnsignedLong.ZERO, () -> {
@@ -1318,6 +1315,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             final CommitEntry e = it.next();
             if (cohort.equals(e.cohort)) {
                 LOG.debug("{}: aborting queued transaction {}", logContext, cohort.transactionId());
+                getStats().incrementAbortTransactionsCount();
 
                 it.remove();
                 if (cohort.getCandidate() != null) {
