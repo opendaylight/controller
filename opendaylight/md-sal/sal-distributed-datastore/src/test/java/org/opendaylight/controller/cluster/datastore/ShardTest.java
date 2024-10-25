@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static org.apache.pekko.actor.ActorRef.noSender;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -135,7 +136,7 @@ public class ShardTest extends AbstractShardTest {
 
         ShardTestKit.waitUntilLeader(shard);
 
-        shard.tell(new UpdateSchemaContext(SchemaContextHelper.full()), ActorRef.noSender());
+        shard.tell(new UpdateSchemaContext(SchemaContextHelper.full()), noSender());
 
         final MockDataTreeChangeListener listener = new MockDataTreeChangeListener(1);
         final ActorRef dclActor = actorFactory.createActor(DataTreeChangeListenerActor.props(listener,
@@ -167,12 +168,14 @@ public class ShardTest extends AbstractShardTest {
         listener2.verifyNoOnInitialDataEvent();
     }
 
-    @SuppressWarnings("serial")
     @Test
     public void testDataTreeChangeListenerNotifiedWhenNotTheLeaderOnRegistration() throws Exception {
         final CountDownLatch onFirstElectionTimeout = new CountDownLatch(1);
         final CountDownLatch onChangeListenerRegistered = new CountDownLatch(1);
         final Creator<Shard> creator = new Creator<>() {
+            @java.io.Serial
+            private static final long serialVersionUID = 1L;
+
             boolean firstElectionTimeout = true;
 
             @Override
@@ -184,8 +187,7 @@ public class ShardTest extends AbstractShardTest {
                             firstElectionTimeout = false;
                             final ActorRef self = getSelf();
                             new Thread(() -> {
-                                Uninterruptibles.awaitUninterruptibly(
-                                        onChangeListenerRegistered, 5, TimeUnit.SECONDS);
+                                Uninterruptibles.awaitUninterruptibly(onChangeListenerRegistered, 5, TimeUnit.SECONDS);
                                 self.tell(message, self);
                             }).start();
 
@@ -276,7 +278,7 @@ public class ShardTest extends AbstractShardTest {
             .props().withDispatcher(Dispatchers.DefaultDispatcherId()), "testPeerAddressResolved");
 
         final String address = "pekko://foobar";
-        shard.tell(new PeerAddressResolved(peerID.toString(), address), ActorRef.noSender());
+        shard.tell(new PeerAddressResolved(peerID.toString(), address), noSender());
 
         shard.tell(GetOnDemandRaftState.INSTANCE, testKit.getRef());
         final OnDemandRaftState state = testKit.expectMsgClass(OnDemandRaftState.class);
@@ -307,7 +309,7 @@ public class ShardTest extends AbstractShardTest {
         final Snapshot snapshot = Snapshot.create(new ShardSnapshotState(new MetadataShardDataTreeSnapshot(expected)),
                 Collections.emptyList(), 1, 2, 3, 4, -1, null, null);
 
-        shard.tell(new ApplySnapshot(snapshot), ActorRef.noSender());
+        shard.tell(new ApplySnapshot(snapshot), noSender());
 
         final Stopwatch sw = Stopwatch.createStarted();
         while (sw.elapsed(TimeUnit.SECONDS) <= 5) {
@@ -783,7 +785,7 @@ public class ShardTest extends AbstractShardTest {
         final BatchedModifications batched = new BatchedModifications(nextTransactionId(),
             DataStoreVersions.CURRENT_VERSION);
 
-        shard.tell(batched, ActorRef.noSender());
+        shard.tell(batched, noSender());
 
         testKit.expectMsgEquals(batched);
     }
@@ -970,6 +972,7 @@ public class ShardTest extends AbstractShardTest {
         testCommitWhenTransactionHasModifications(false);
     }
 
+    // FIXME: @ParameterizedTest when on JUnit5
     private void testCommitWhenTransactionHasModifications(final boolean readWrite) throws Exception {
         final ShardTestKit testKit = new ShardTestKit(getSystem());
         final DataTree dataTree = createDelegatingMockDataTree();
@@ -1814,11 +1817,11 @@ public class ShardTest extends AbstractShardTest {
 
         ShardTestKit.waitUntilLeader(shard);
 
-        shard.tell(dataStoreContextBuilder.persistent(false).build(), ActorRef.noSender());
+        shard.tell(dataStoreContextBuilder.persistent(false).build(), noSender());
 
         assertFalse("isRecoveryApplicable", shard.underlyingActor().persistence().isRecoveryApplicable());
 
-        shard.tell(dataStoreContextBuilder.persistent(true).build(), ActorRef.noSender());
+        shard.tell(dataStoreContextBuilder.persistent(true).build(), noSender());
 
         assertTrue("isRecoveryApplicable", shard.underlyingActor().persistence().isRecoveryApplicable());
     }
@@ -1896,7 +1899,7 @@ public class ShardTest extends AbstractShardTest {
         assertNotNull("getListenerRegistrationPath", reply.getListenerRegistrationPath());
 
         shard.tell(DatastoreContext.newBuilderFrom(dataStoreContextBuilder.build())
-            .customRaftPolicyImplementation(null).build(), ActorRef.noSender());
+            .customRaftPolicyImplementation(null).build(), noSender());
 
         listener.waitForChangeEvents();
     }
@@ -1930,7 +1933,7 @@ public class ShardTest extends AbstractShardTest {
         testKit.expectMsgClass(CloseDataTreeNotificationListenerRegistrationReply.class);
 
         shard.tell(DatastoreContext.newBuilderFrom(dataStoreContextBuilder.build())
-            .customRaftPolicyImplementation(null).build(), ActorRef.noSender());
+            .customRaftPolicyImplementation(null).build(), noSender());
 
         listener.expectNoMoreChanges("Received unexpected change after close");
     }
@@ -1960,7 +1963,7 @@ public class ShardTest extends AbstractShardTest {
                     .schemaContextProvider(() -> SCHEMA_CONTEXT).props()
                     .withDispatcher(Dispatchers.DefaultDispatcherId()), leaderShardID.toString());
 
-        leaderShard.tell(TimeoutNow.INSTANCE, ActorRef.noSender());
+        leaderShard.tell(TimeoutNow.INSTANCE, noSender());
         final String leaderPath = ShardTestKit.waitUntilLeader(followerShard);
         assertEquals("Shard leader path", leaderShard.path().toString(), leaderPath);
 
@@ -1988,7 +1991,7 @@ public class ShardTest extends AbstractShardTest {
                 newShardBuilder().props().withDispatcher(Dispatchers.DefaultDispatcherId()),
                 "testServerRemoved");
 
-        shard.tell(new ServerRemoved("test"), ActorRef.noSender());
+        shard.tell(new ServerRemoved("test"), noSender());
 
         MessageCollectorActor.expectFirstMatching(parent, ServerRemoved.class);
     }
