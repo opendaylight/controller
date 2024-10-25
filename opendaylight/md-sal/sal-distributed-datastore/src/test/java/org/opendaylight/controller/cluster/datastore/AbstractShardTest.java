@@ -53,7 +53,6 @@ import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.ForwardedReadyTransaction;
-import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.cluster.datastore.persisted.CommitTransactionPayload;
@@ -83,7 +82,6 @@ import org.opendaylight.yangtools.yang.data.tree.api.ModificationType;
 import org.opendaylight.yangtools.yang.data.tree.impl.di.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import scala.concurrent.Await;
-import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
@@ -293,23 +291,15 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         return store.takeSnapshot().readNode(id).orElse(null);
     }
 
-    public void writeToStore(final TestActorRef<Shard> shard, final YangInstanceIdentifier id,
+    public static void writeToStore(final TestActorRef<Shard> shard, final YangInstanceIdentifier id,
             final NormalizedNode node) throws InterruptedException, ExecutionException {
-        Future<Object> future = Patterns.ask(shard, newBatchedModifications(nextTransactionId(),
-                id, node, true, true, 1), new Timeout(5, TimeUnit.SECONDS));
+        final var future = Patterns.ask(shard, newBatchedModifications(nextTransactionId(), id, node, true, true, 1),
+            new Timeout(5, TimeUnit.SECONDS));
         try {
             Await.ready(future, FiniteDuration.create(5, TimeUnit.SECONDS));
         } catch (TimeoutException e) {
             throw new ExecutionException(e);
         }
-    }
-
-    public static void writeToStore(final ShardDataTree store, final YangInstanceIdentifier id,
-            final NormalizedNode node) throws DataValidationFailedException {
-        BatchedModifications batched = newBatchedModifications(nextTransactionId(), id, node, true, true, 1);
-        DataTreeModification modification = store.getDataTree().takeSnapshot().newModification();
-        batched.apply(modification);
-        store.notifyListeners(commitTransaction(store.getDataTree(), modification));
     }
 
     public static void writeToStore(final DataTree store, final YangInstanceIdentifier id, final NormalizedNode node)
@@ -321,19 +311,6 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         store.validate(transaction);
         final DataTreeCandidate candidate = store.prepare(transaction);
         store.commit(candidate);
-    }
-
-    public void mergeToStore(final ShardDataTree store, final YangInstanceIdentifier id, final NormalizedNode node)
-        throws DataValidationFailedException {
-        final BatchedModifications batched = new BatchedModifications(nextTransactionId(), CURRENT_VERSION);
-        batched.addModification(new MergeModification(id, node));
-        batched.setReady();
-        batched.setDoCommitOnReady(true);
-        batched.setTotalMessagesSent(1);
-
-        DataTreeModification modification = store.getDataTree().takeSnapshot().newModification();
-        batched.apply(modification);
-        store.notifyListeners(commitTransaction(store.getDataTree(), modification));
     }
 
     DataTree setupInMemorySnapshotStore() throws DataValidationFailedException {
