@@ -173,6 +173,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     }
 
     void failedCanCommit(final Exception cause) {
+        dataTree.getStats().incrementFailedTransactionsCount();
         switchState(State.FAILED).onFailure(cause);
     }
 
@@ -231,6 +232,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
         }
 
         userCohorts.abort();
+        dataTree.getStats().incrementFailedTransactionsCount();
         switchState(State.FAILED).onFailure(cause);
     }
 
@@ -251,6 +253,10 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     }
 
     private void finishSuccessfulCommit(final UnsignedLong journalIndex, final Runnable onComplete) {
+        final var stats = dataTree.getStats();
+        stats.incrementCommittedTransactionCount();
+        stats.setLastCommittedTransactionTime(System.currentTimeMillis());
+
         switchState(State.COMMITTED).onSuccess(journalIndex);
         onComplete.run();
     }
@@ -263,6 +269,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
         }
 
         userCohorts.abort();
+        dataTree.getStats().incrementFailedTransactionsCount();
         switchState(State.FAILED).onFailure(cause);
     }
 
