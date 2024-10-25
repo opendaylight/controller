@@ -256,21 +256,15 @@ public abstract class AbstractShardTest extends AbstractActorTest {
     }
 
     protected static BatchedModifications prepareBatchedModifications(final TransactionIdentifier transactionID,
-                                                             final MutableCompositeModification modification,
-                                                             final boolean doCommitOnReady) {
-        final BatchedModifications batchedModifications = new BatchedModifications(transactionID, CURRENT_VERSION);
+            final YangInstanceIdentifier path, final NormalizedNode data, final boolean doCommitOnReady) {
+        final var modification = new MutableCompositeModification();
+        modification.addModification(new WriteModification(path, data));
+        final var batchedModifications = new BatchedModifications(transactionID, CURRENT_VERSION);
         batchedModifications.addModification(modification);
         batchedModifications.setReady();
         batchedModifications.setDoCommitOnReady(doCommitOnReady);
         batchedModifications.setTotalMessagesSent(1);
         return batchedModifications;
-    }
-
-    protected static BatchedModifications prepareBatchedModifications(final TransactionIdentifier transactionID,
-            final YangInstanceIdentifier path, final NormalizedNode data, final boolean doCommitOnReady) {
-        final MutableCompositeModification modification = new MutableCompositeModification();
-        modification.addModification(new WriteModification(path, data));
-        return prepareBatchedModifications(transactionID, modification, doCommitOnReady);
     }
 
     protected static ForwardedReadyTransaction prepareForwardedReadyTransaction(final TestActorRef<Shard> shard,
