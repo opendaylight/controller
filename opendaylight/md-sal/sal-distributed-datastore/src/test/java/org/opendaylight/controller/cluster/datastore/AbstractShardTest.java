@@ -257,11 +257,6 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         return cohortMap;
     }
 
-    protected BatchedModifications prepareBatchedModifications(final TransactionIdentifier transactionID,
-                                                               final MutableCompositeModification modification) {
-        return prepareBatchedModifications(transactionID, modification, false);
-    }
-
     protected static BatchedModifications prepareBatchedModifications(final TransactionIdentifier transactionID,
                                                              final MutableCompositeModification modification,
                                                              final boolean doCommitOnReady) {
