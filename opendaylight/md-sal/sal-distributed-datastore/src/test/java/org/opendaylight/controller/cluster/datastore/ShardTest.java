@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore;
 import static org.apache.pekko.actor.ActorRef.noSender;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.endsWith;
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -24,7 +25,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.opendaylight.controller.cluster.datastore.DataStoreVersions.CURRENT_VERSION;
-import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntry;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Throwables;
@@ -37,6 +37,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.pekko.actor.ActorRef;
@@ -54,11 +55,24 @@ import org.junit.Test;
 import org.mockito.InOrder;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.DelegatingPersistentDataProvider;
+import org.opendaylight.controller.cluster.access.commands.ClosedTransactionException;
+import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequest;
+import org.opendaylight.controller.cluster.access.commands.ModifyTransactionSuccess;
+import org.opendaylight.controller.cluster.access.commands.TransactionAbortRequest;
+import org.opendaylight.controller.cluster.access.commands.TransactionAbortSuccess;
+import org.opendaylight.controller.cluster.access.commands.TransactionCanCommitSuccess;
+import org.opendaylight.controller.cluster.access.commands.TransactionCommitSuccess;
+import org.opendaylight.controller.cluster.access.commands.TransactionDoCommitRequest;
+import org.opendaylight.controller.cluster.access.commands.TransactionFailure;
+import org.opendaylight.controller.cluster.access.commands.TransactionPreCommitRequest;
+import org.opendaylight.controller.cluster.access.commands.TransactionPreCommitSuccess;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
+import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestException;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
+import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStatsMXBean;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
@@ -71,6 +85,7 @@ import org.opendaylight.controller.cluster.datastore.messages.CommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
+import org.opendaylight.controller.cluster.datastore.messages.ForwardedReadyTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.PeerAddressResolved;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
 import org.opendaylight.controller.cluster.datastore.messages.ReadDataReply;
@@ -81,6 +96,8 @@ import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeNo
 import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderStateChanged;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
+import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
+import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
 import org.opendaylight.controller.cluster.datastore.utils.MockDataTreeChangeListener;
@@ -96,7 +113,6 @@ import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
 import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
-import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
@@ -107,7 +123,6 @@ import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
-import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
@@ -942,29 +957,31 @@ public class ShardTest extends AbstractShardTest {
 
         // Setup a simulated transactions with a mock cohort.
 
-        final Duration duration = Duration.ofSeconds(5);
-
         final TransactionIdentifier transactionID = nextTransactionId();
-        final ContainerNode containerNode = TestModel.EMPTY_TEST;
-        shard.tell(prepareBatchedModifications(transactionID, TestModel.TEST_PATH, containerNode, false),
-            testKit.getRef());
-        testKit.expectMsgClass(duration, ReadyTransactionReply.class);
 
-        // Send the CanCommitTransaction message.
+        final var connection = testKit.connect(shard, CLIENT_ID);
+        connection.request(ModifyTransactionSuccess.class,
+            self -> ModifyTransactionRequest.builder(transactionID, self)
+                .setSequence(0)
+                .addWrite(TestModel.TEST_PATH, TestModel.EMPTY_TEST)
+                .setReady()
+                .build());
 
-        shard.tell(new CanCommitTransaction(transactionID, CURRENT_VERSION).toSerializable(), testKit.getRef());
-        final CanCommitTransactionReply canCommitReply = CanCommitTransactionReply
-                .fromSerializable(testKit.expectMsgClass(duration, CanCommitTransactionReply.class));
-        assertTrue("Can commit", canCommitReply.getCanCommit());
+        // initiate three-phase commit: can-commit
+        connection.request(TransactionCanCommitSuccess.class,
+            self -> ModifyTransactionRequest.builder(transactionID, self)
+                .setSequence(1)
+                .setCommit(true)
+                .build());
+        // pre-commit
+        connection.request(TransactionPreCommitSuccess.class,
+            self -> new TransactionPreCommitRequest(transactionID, 2, self));
+        // commit
+        connection.request(TransactionCommitSuccess.class,
+            self -> new TransactionDoCommitRequest(transactionID, 3, self));
 
-        // Send the CanCommitTransaction message.
-
-        shard.tell(new CommitTransaction(transactionID, CURRENT_VERSION).toSerializable(), testKit.getRef());
-        testKit.expectMsgClass(duration, CommitTransactionReply.class);
         assertEquals(1, shard.underlyingActor().getShardMBean().getCommittedTransactionsCount());
-
-        final NormalizedNode actualNode = readStore(shard, TestModel.TEST_PATH);
-        assertEquals(TestModel.TEST_QNAME.getLocalName(), containerNode, actualNode);
+        assertEquals(TestModel.EMPTY_TEST, readStore(shard, TestModel.TEST_PATH));
     }
 
     @Test
@@ -1020,7 +1037,7 @@ public class ShardTest extends AbstractShardTest {
         Thread.sleep(HEARTBEAT_MILLIS * 2);
 
         shard.tell(Shard.GET_SHARD_MBEAN_MESSAGE, testKit.getRef());
-        final ShardStats shardStats = testKit.expectMsgClass(duration, ShardStats.class);
+        final var shardStats = testKit.expectMsgClass(duration, ShardStatsMXBean.class);
 
         // Use MBean for verification
         // Committed transaction count should increase as usual
@@ -1258,20 +1275,9 @@ public class ShardTest extends AbstractShardTest {
     }
 
     @Test
-    public void testAbortWithCommitPending() {
+    public void testAbortWithCommitPending() throws Exception {
         final ShardTestKit testKit = new ShardTestKit(getSystem());
-        final Creator<Shard> creator = () -> new Shard(newShardBuilder()) {
-            @Override
-            void persistPayload(final Identifier id, final Payload payload, final boolean batchHint) {
-                // Simulate an AbortTransaction message occurring during
-                // replication, after
-                // persisting and before finishing the commit to the
-                // in-memory store.
-
-                doAbortTransaction(id, null);
-                super.persistPayload(id, payload, batchHint);
-            }
-        };
+        final Creator<Shard> creator = () -> new Shard(newShardBuilder());
 
         final TestActorRef<Shard> shard = actorFactory.createTestActor(Props.create(Shard.class,
             new DelegatingShardCreator(creator)).withDispatcher(Dispatchers.DefaultDispatcherId()),
@@ -1279,27 +1285,40 @@ public class ShardTest extends AbstractShardTest {
 
         ShardTestKit.waitUntilLeader(shard);
 
-        final Duration duration = Duration.ofSeconds(5);
-
         final TransactionIdentifier transactionID = nextTransactionId();
 
-        shard.tell(prepareBatchedModifications(transactionID, TestModel.TEST_PATH, TestModel.EMPTY_TEST, false),
-            testKit.getRef());
-        testKit.expectMsgClass(duration, ReadyTransactionReply.class);
+        final var client = testKit.connect(shard, CLIENT_ID);
 
-        shard.tell(new CanCommitTransaction(transactionID, CURRENT_VERSION).toSerializable(), testKit.getRef());
-        testKit.expectMsgClass(duration, CanCommitTransactionReply.class);
+        client.request(ModifyTransactionSuccess.class,
+            self -> ModifyTransactionRequest.builder(transactionID, self)
+            .setSequence(0)
+            .addWrite(TestModel.TEST_PATH, TestModel.EMPTY_TEST)
+            .setReady()
+            .build());
 
-        shard.tell(new CommitTransaction(transactionID, CURRENT_VERSION).toSerializable(), testKit.getRef());
-        testKit.expectMsgClass(duration, CommitTransactionReply.class);
+        client.request(TransactionCanCommitSuccess.class,
+            self -> ModifyTransactionRequest.builder(transactionID, self)
+                .setSequence(1)
+                .setCommit(true)
+                .build());
+
+        client.request(TransactionPreCommitSuccess.class,
+            self -> new TransactionPreCommitRequest(transactionID, 2, self));
+
+        // Abort after pre-commit ...
+        client.asyncRequest(self -> new TransactionAbortRequest(transactionID, 3, self));
+        // ... and also try co-commit before pre-commit returns
+        client.asyncRequest(self -> new TransactionDoCommitRequest(transactionID, 4, self));
+
+        // wait for TransactionAbortSuccess
+        client.assertResponse(TransactionAbortSuccess.class);
+        // wait for do-commit, it will fail
+        final var commit = client.assertResponse(TransactionFailure.class);
+        assertInstanceOf(ClosedTransactionException.class, commit.getCause());
+        assertTrue(commit.isHardFailure());
+
         assertEquals(1, shard.underlyingActor().getShardMBean().getAbortTransactionsCount());
-
-        // Since we're simulating an abort occurring during replication
-        // and before finish commit,
-        // the data should still get written to the in-memory store
-        // since we've gotten past
-        // canCommit and preCommit and persisted the data.
-        assertEquals(TestModel.EMPTY_TEST, readStore(shard, TestModel.TEST_PATH));
+        assertNull(readStore(shard, TestModel.TEST_PATH));
     }
 
     @Test
@@ -1312,55 +1331,58 @@ public class ShardTest extends AbstractShardTest {
 
         ShardTestKit.waitUntilLeader(shard);
 
-        final Duration duration = Duration.ofSeconds(5);
-
         writeToStore(shard, TestModel.TEST_PATH, TestModel.EMPTY_TEST);
         writeToStore(shard, TestModel.OUTER_LIST_PATH, TestModel.EMPTY_OUTER_LIST);
 
         // Ready 2 Tx's - the first will timeout
+        final var client = testKit.connect(shard, CLIENT_ID);
 
         final TransactionIdentifier transactionID1 = nextTransactionId();
-        shard.tell(
-            prepareBatchedModifications(transactionID1, YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)
-                .nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1).build(),
-                mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1), false),
-            testKit.getRef());
-        testKit.expectMsgClass(duration, ReadyTransactionReply.class);
+        client.request(ModifyTransactionSuccess.class,
+            self -> ModifyTransactionRequest.builder(transactionID1, self)
+                .setSequence(0)
+                .addWrite(TestModel.outerEntryPath(1), TestModel.outerEntry(1))
+                .setReady()
+                .build());
 
         final TransactionIdentifier transactionID2 = nextTransactionId();
-        final YangInstanceIdentifier listNodePath = YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)
-                .nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 2).build();
-        shard.tell(
-            prepareBatchedModifications(transactionID2, listNodePath,
-                mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 2), false), testKit.getRef());
-        testKit.expectMsgClass(duration, ReadyTransactionReply.class);
+        final var listNodePath = TestModel.outerEntryPath(2);
+        client.request(ModifyTransactionSuccess.class,
+            self -> ModifyTransactionRequest.builder(transactionID2, self)
+                .setSequence(0)
+                .addWrite(listNodePath, TestModel.outerEntry(2))
+                .setReady()
+                .build());
 
-        // canCommit 1st Tx. We don't send the commit so it should
-        // timeout.
+        // canCommit 1st Tx. We don't send the commit so it should timeout.
+        client.asyncRequest(self -> ModifyTransactionRequest.builder(transactionID1, self)
+            .setSequence(1)
+            .setCommit(true)
+            .build());
 
-        shard.tell(new CanCommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), testKit.getRef());
-        testKit.expectMsgClass(duration, CanCommitTransactionReply.class);
+        // uncoordinated commit the 2nd Tx - it should complete after the 1st Tx times out.
+        client.asyncRequest(self -> ModifyTransactionRequest.builder(transactionID2, self)
+            .setSequence(1)
+            .setCommit(false)
+            .build());
 
-        // canCommit the 2nd Tx - it should complete after the 1st Tx
-        // times out.
+        assertEquals(transactionID1, client.assertResponse(TransactionCanCommitSuccess.class).getTarget());
+        assertEquals(transactionID2, client.assertResponse(TransactionCommitSuccess.class).getTarget());
+        assertEquals(0, shard.underlyingActor().getShardMBean().getFailedTransactionsCount());
+        assertEquals(1, shard.underlyingActor().getShardMBean().getCommittedTransactionsCount());
 
-        shard.tell(new CanCommitTransaction(transactionID2, CURRENT_VERSION).toSerializable(), testKit.getRef());
-        testKit.expectMsgClass(duration, CanCommitTransactionReply.class);
+        final var failure = client.request(TransactionFailure.class,
+            self -> new TransactionPreCommitRequest(transactionID1, 2, self));
+        assertEquals(transactionID1, failure.getTarget());
+        assertTrue(failure.isHardFailure());
+        final var cause = assertInstanceOf(RuntimeRequestException.class, failure.getCause());
+        assertEquals("Precommit failed", cause.getMessage());
+        final var unwrapped = assertInstanceOf(TimeoutException.class, cause.unwrap());
+        assertThat(unwrapped.getMessage(), startsWith("Backend timeout in state CAN_COMMIT_COMPLETE after "));
+        assertEquals(1, shard.underlyingActor().getShardMBean().getFailedTransactionsCount());
+        assertEquals(1, shard.underlyingActor().getShardMBean().getCommittedTransactionsCount());
 
-        // Try to commit the 1st Tx - should fail as it's not the
-        // current Tx.
-
-        shard.tell(new CommitTransaction(transactionID1, CURRENT_VERSION).toSerializable(), testKit.getRef());
-        testKit.expectMsgClass(duration, Failure.class);
-
-        // Commit the 2nd Tx.
-
-        shard.tell(new CommitTransaction(transactionID2, CURRENT_VERSION).toSerializable(), testKit.getRef());
-        testKit.expectMsgClass(duration, CommitTransactionReply.class);
-        assertEquals(3, shard.underlyingActor().getShardMBean().getCommittedTransactionsCount());
-
-        final NormalizedNode node = readStore(shard, listNodePath);
-        assertNotNull(listNodePath + " not found", node);
+        assertEquals(TestModel.outerEntry(2), readStore(shard, listNodePath));
     }
 
 //    @Test
@@ -2003,4 +2025,42 @@ public class ShardTest extends AbstractShardTest {
 
         MessageCollectorActor.expectFirstMatching(parent, ServerRemoved.class);
     }
+
+    @Deprecated(since = "11.0.0", forRemoval = true)
+    private static BatchedModifications newBatchedModifications(final TransactionIdentifier transactionID,
+            final YangInstanceIdentifier path, final NormalizedNode data, final boolean ready,
+            final boolean doCommitOnReady, final int messagesSent) {
+        final BatchedModifications batched = new BatchedModifications(transactionID, CURRENT_VERSION);
+        batched.addModification(new WriteModification(path, data));
+        if (ready) {
+            batched.setReady();
+        }
+        batched.setDoCommitOnReady(doCommitOnReady);
+        batched.setTotalMessagesSent(messagesSent);
+        return batched;
+    }
+
+    @Deprecated(since = "11.0.0", forRemoval = true)
+    private static BatchedModifications prepareBatchedModifications(final TransactionIdentifier transactionID,
+            final YangInstanceIdentifier path, final NormalizedNode data, final boolean doCommitOnReady) {
+        final var modification = new MutableCompositeModification();
+        modification.addModification(new WriteModification(path, data));
+        final var batchedModifications = new BatchedModifications(transactionID, CURRENT_VERSION);
+        batchedModifications.addModification(modification);
+        batchedModifications.setReady();
+        batchedModifications.setDoCommitOnReady(doCommitOnReady);
+        batchedModifications.setTotalMessagesSent(1);
+        return batchedModifications;
+    }
+
+    @Deprecated(since = "11.0.0", forRemoval = true)
+    private static ForwardedReadyTransaction prepareForwardedReadyTransaction(final TestActorRef<Shard> shard,
+            final TransactionIdentifier transactionID, final YangInstanceIdentifier path,
+            final NormalizedNode data, final boolean doCommitOnReady) {
+        ReadWriteShardDataTreeTransaction rwTx = shard.underlyingActor().getDataStore()
+                .newReadWriteTransaction(transactionID);
+        rwTx.getSnapshot().write(path, data);
+        return new ForwardedReadyTransaction(transactionID, CURRENT_VERSION, rwTx, doCommitOnReady, Optional.empty());
+    }
+
 }

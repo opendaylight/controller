@@ -88,7 +88,7 @@ public class ShardDataTreeTest extends AbstractTest {
     @Before
     public void setUp() {
         doReturn(Ticker.systemTicker()).when(mockShard).ticker();
-        doReturn(new ShardStats("shardName", "mxBeanType", mockShard)).when(mockShard).getShardMBean();
+        doReturn(new DefaultShardStatsMXBean("shardName", "mxBeanType", mockShard)).when(mockShard).shardStats();
         doReturn(DATASTORE_CONTEXT).when(mockShard).getDatastoreContext();
 
         fullSchema = SchemaContextHelper.full();

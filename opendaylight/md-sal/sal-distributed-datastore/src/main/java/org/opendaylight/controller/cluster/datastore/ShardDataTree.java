@@ -610,7 +610,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     final @NonNull ReadOnlyShardDataTreeTransaction newReadOnlyTransaction(final TransactionIdentifier txId) {
-        shard.getShardMBean().incrementReadOnlyTransactionCount();
+        shard.shardStats().incrementReadOnlyTransactionCount();
 
         final var historyId = txId.getHistoryId();
         return historyId.getHistoryId() == 0 ? newStandaloneReadOnlyTransaction(txId)
@@ -622,7 +622,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     final @NonNull ReadWriteShardDataTreeTransaction newReadWriteTransaction(final TransactionIdentifier txId) {
-        shard.getShardMBean().incrementReadWriteTransactionCount();
+        shard.shardStats().incrementReadWriteTransactionCount();
 
         final var historyId = txId.getHistoryId();
         return historyId.getHistoryId() == 0 ? newStandaloneReadWriteTransaction(txId)
@@ -1378,8 +1378,9 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         }
     }
 
-    final ShardStats getStats() {
-        return shard.getShardMBean();
+    // Non-final for mocking
+    ShardStats getStats() {
+        return shard.shardStats();
     }
 
     final Iterator<SimpleShardDataTreeCohort> cohortIterator() {

@@ -68,6 +68,7 @@ import org.opendaylight.controller.cluster.common.actor.MeteringBehavior;
 import org.opendaylight.controller.cluster.datastore.actors.JsonExportActor;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
+import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStatsMXBean;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.ActorInitialized;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
@@ -173,7 +174,7 @@ public class Shard extends RaftActor {
 
     private final String shardName;
 
-    private final ShardStats shardMBean;
+    private final DefaultShardStatsMXBean shardMBean;
 
     private final ShardDataTreeListenerInfoMXBeanImpl listenerInfoMXBean;
 
@@ -251,7 +252,7 @@ public class Shard extends RaftActor {
                     frontendMetadata);
         }
 
-        shardMBean = ShardStats.create(name, datastoreContext.getDataStoreMXBeanType(), this);
+        shardMBean = DefaultShardStatsMXBean.create(name, datastoreContext.getDataStoreMXBeanType(), this);
 
         if (isMetricsCaptureEnabled()) {
             getContext().become(new MeteringBehavior(this));
@@ -1154,7 +1155,13 @@ public class Shard extends RaftActor {
 
     @VisibleForTesting
     // non-final for mocking
-    ShardStats getShardMBean() {
+    ShardStatsMXBean getShardMBean() {
+        return shardMBean;
+    }
+
+    @VisibleForTesting
+    // non-final for mocking
+    ShardStats shardStats() {
         return shardMBean;
     }
 
