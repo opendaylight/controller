@@ -126,14 +126,14 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
 
     @Override
     FluentFuture<Boolean> doExists(final YangInstanceIdentifier path) {
-        final SettableFuture<Boolean> future = SettableFuture.create();
+        final var future = SettableFuture.<Boolean>create();
         return sendReadRequest(new ExistsTransactionRequest(getIdentifier(), nextSequence(), localActor(), path,
             isSnapshotOnly()), t -> completeExists(path, future, t), future);
     }
 
     @Override
     FluentFuture<Optional<NormalizedNode>> doRead(final YangInstanceIdentifier path) {
-        final SettableFuture<Optional<NormalizedNode>> future = SettableFuture.create();
+        final var future = SettableFuture.<Optional<NormalizedNode>>create();
         return sendReadRequest(new ReadTransactionRequest(getIdentifier(), nextSequence(), localActor(), path,
             isSnapshotOnly()), t -> completeRead(path, future, t), future);
     }
@@ -156,7 +156,7 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     }
 
     private void flushBuilder(final OptionalLong enqueuedTicks) {
-        final ModifyTransactionRequest request = builder.build();
+        final var request = builder.build();
         builderBusy = false;
 
         sendModification(request, enqueuedTicks);
@@ -298,40 +298,42 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
     }
 
     void handleForwardedRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback) {
-        if (request instanceof ModifyTransactionRequest modifyRequest) {
-            handleForwardedModifyTransactionRequest(callback, modifyRequest);
-        } else if (request instanceof ReadTransactionRequest readRequest) {
-            ensureFlushedBuider();
-            sendRequest(new ReadTransactionRequest(getIdentifier(), nextSequence(), localActor(),
-                readRequest.getPath(), isSnapshotOnly()), resp -> {
-                    recordFinishedRequest(resp);
+        switch (request) {
+            case ModifyTransactionRequest modify -> handleForwardedModifyTransactionRequest(callback, modify);
+            case ReadTransactionRequest read -> {
+                ensureFlushedBuider();
+                sendRequest(new ReadTransactionRequest(getIdentifier(), nextSequence(), localActor(),
+                    read.getPath(), isSnapshotOnly()), resp -> {
+                        recordFinishedRequest(resp);
+                        callback.accept(resp);
+                    });
+            }
+            case ExistsTransactionRequest exists -> {
+                ensureFlushedBuider();
+                sendRequest(new ExistsTransactionRequest(getIdentifier(), nextSequence(), localActor(),
+                    exists.getPath(), isSnapshotOnly()), resp -> {
+                        recordFinishedRequest(resp);
+                        callback.accept(resp);
+                    });
+            }
+            case TransactionPreCommitRequest preCommit -> {
+                ensureFlushedBuider();
+                final var tmp = new TransactionPreCommitRequest(getIdentifier(), nextSequence(), localActor());
+                sendRequest(tmp, resp -> {
+                    recordSuccessfulRequest(tmp);
                     callback.accept(resp);
                 });
-        } else if (request instanceof ExistsTransactionRequest existsRequest) {
-            ensureFlushedBuider();
-            sendRequest(new ExistsTransactionRequest(getIdentifier(), nextSequence(), localActor(),
-                existsRequest.getPath(), isSnapshotOnly()), resp -> {
-                    recordFinishedRequest(resp);
-                    callback.accept(resp);
-                });
-        } else if (request instanceof TransactionPreCommitRequest) {
-            ensureFlushedBuider();
-            final TransactionRequest<?> tmp = new TransactionPreCommitRequest(getIdentifier(), nextSequence(),
-                localActor());
-            sendRequest(tmp, resp -> {
-                recordSuccessfulRequest(tmp);
-                callback.accept(resp);
-            });
-        } else if (request instanceof TransactionDoCommitRequest) {
-            ensureFlushedBuider();
-            sendRequest(new TransactionDoCommitRequest(getIdentifier(), nextSequence(), localActor()), callback);
-        } else if (request instanceof TransactionAbortRequest) {
-            ensureFlushedBuider();
-            sendDoAbort(callback);
-        } else if (request instanceof TransactionPurgeRequest) {
-            enqueuePurge(callback);
-        } else {
-            throw unhandledRequest(request);
+            }
+            case TransactionDoCommitRequest doCommit -> {
+                ensureFlushedBuider();
+                sendRequest(new TransactionDoCommitRequest(getIdentifier(), nextSequence(), localActor()), callback);
+            }
+            case TransactionAbortRequest abort -> {
+                ensureFlushedBuider();
+                sendDoAbort(callback);
+            }
+            case TransactionPurgeRequest purge -> enqueuePurge(callback);
+            default -> throw unhandledRequest(request);
         }
     }
 
@@ -434,46 +436,49 @@ final class RemoteProxyTransaction extends AbstractProxyTransaction {
         final Consumer<Response<?, ?>> cb = callback != null ? callback : resp -> { /* NOOP */ };
         final OptionalLong optTicks = OptionalLong.of(enqueuedTicks);
 
-        if (request instanceof ModifyTransactionRequest modifyRequest) {
-            handleReplayedModifyTransactionRequest(enqueuedTicks, cb, modifyRequest);
-        } else if (request instanceof ReadTransactionRequest readRequest) {
-            ensureFlushedBuider(optTicks);
-            enqueueRequest(new ReadTransactionRequest(getIdentifier(), nextSequence(), localActor(),
-                readRequest.getPath(), isSnapshotOnly()), resp -> {
-                    recordFinishedRequest(resp);
+        switch (request) {
+            case ModifyTransactionRequest modify -> handleReplayedModifyTransactionRequest(enqueuedTicks, cb, modify);
+            case ReadTransactionRequest read -> {
+                ensureFlushedBuider(optTicks);
+                enqueueRequest(new ReadTransactionRequest(getIdentifier(), nextSequence(), localActor(), read.getPath(),
+                    isSnapshotOnly()), resp -> {
+                        recordFinishedRequest(resp);
+                        cb.accept(resp);
+                    }, enqueuedTicks);
+            }
+            case ExistsTransactionRequest exists -> {
+                ensureFlushedBuider(optTicks);
+                enqueueRequest(new ExistsTransactionRequest(getIdentifier(), nextSequence(), localActor(),
+                    exists.getPath(), isSnapshotOnly()), resp -> {
+                        recordFinishedRequest(resp);
+                        cb.accept(resp);
+                    }, enqueuedTicks);
+            }
+            case TransactionPreCommitRequest preCommit -> {
+                ensureFlushedBuider(optTicks);
+                final var tmp = new TransactionPreCommitRequest(getIdentifier(), nextSequence(), localActor());
+                enqueueRequest(tmp, resp -> {
+                    recordSuccessfulRequest(tmp);
                     cb.accept(resp);
                 }, enqueuedTicks);
-        } else if (request instanceof ExistsTransactionRequest existsRequest) {
-            ensureFlushedBuider(optTicks);
-            enqueueRequest(new ExistsTransactionRequest(getIdentifier(), nextSequence(), localActor(),
-                existsRequest.getPath(), isSnapshotOnly()), resp -> {
-                    recordFinishedRequest(resp);
-                    cb.accept(resp);
-                }, enqueuedTicks);
-        } else if (request instanceof TransactionPreCommitRequest) {
-            ensureFlushedBuider(optTicks);
-            final TransactionRequest<?> tmp = new TransactionPreCommitRequest(getIdentifier(), nextSequence(),
-                localActor());
-            enqueueRequest(tmp, resp -> {
-                recordSuccessfulRequest(tmp);
-                cb.accept(resp);
-            }, enqueuedTicks);
-        } else if (request instanceof TransactionDoCommitRequest) {
-            ensureFlushedBuider(optTicks);
-            enqueueRequest(new TransactionDoCommitRequest(getIdentifier(), nextSequence(), localActor()), callback,
-                enqueuedTicks);
-        } else if (request instanceof TransactionAbortRequest) {
-            ensureFlushedBuider(optTicks);
-            enqueueDoAbort(callback, enqueuedTicks);
-        } else if (request instanceof TransactionPurgeRequest) {
-            enqueuePurge(callback, enqueuedTicks);
-        } else if (request instanceof IncrementTransactionSequenceRequest req) {
-            ensureFlushedBuider(optTicks);
-            enqueueRequest(new IncrementTransactionSequenceRequest(getIdentifier(), nextSequence(), localActor(),
-                snapshotOnly, req.getIncrement()), callback, enqueuedTicks);
-            incrementSequence(req.getIncrement());
-        } else {
-            throw unhandledRequest(request);
+            }
+            case TransactionDoCommitRequest doCommit -> {
+                ensureFlushedBuider(optTicks);
+                enqueueRequest(new TransactionDoCommitRequest(getIdentifier(), nextSequence(), localActor()), callback,
+                    enqueuedTicks);
+            }
+            case TransactionAbortRequest abort -> {
+                ensureFlushedBuider(optTicks);
+                enqueueDoAbort(callback, enqueuedTicks);
+            }
+            case TransactionPurgeRequest purge -> enqueuePurge(callback, enqueuedTicks);
+            case IncrementTransactionSequenceRequest req -> {
+                ensureFlushedBuider(optTicks);
+                enqueueRequest(new IncrementTransactionSequenceRequest(getIdentifier(), nextSequence(), localActor(),
+                    snapshotOnly, req.getIncrement()), callback, enqueuedTicks);
+                incrementSequence(req.getIncrement());
+            }
+            default -> throw unhandledRequest(request);
         }
     }
 
