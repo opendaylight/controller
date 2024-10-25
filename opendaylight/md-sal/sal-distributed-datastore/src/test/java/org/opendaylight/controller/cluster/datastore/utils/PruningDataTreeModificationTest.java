@@ -19,8 +19,8 @@ import static org.opendaylight.controller.md.cluster.datastore.model.CompositeMo
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.NAME_QNAME;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.TEST_QNAME;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.innerNode;
+import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.outerEntry;
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.outerNode;
-import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.outerNodeEntry;
 
 import com.google.common.reflect.Reflection;
 import java.lang.reflect.InvocationTargetException;
@@ -144,7 +144,7 @@ public class PruningDataTreeModificationTest {
 
     @Test
     public void testMergeWithInvalidChildNodeNames() throws DataValidationFailedException {
-        DataContainerChild outerNode = outerNode(outerNodeEntry(1, innerNode("one", "two")));
+        DataContainerChild outerNode = outerNode(outerEntry(1, innerNode("one", "two")));
         ContainerNode normalizedNode = ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(TEST_QNAME))
             .withChild(outerNode)
@@ -248,7 +248,7 @@ public class PruningDataTreeModificationTest {
 
     @Test
     public void testWriteWithInvalidChildNodeNames() throws DataValidationFailedException {
-        DataContainerChild outerNode = outerNode(outerNodeEntry(1, innerNode("one", "two")));
+        DataContainerChild outerNode = outerNode(outerEntry(1, innerNode("one", "two")));
         ContainerNode normalizedNode = ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(TEST_QNAME))
             .withChild(outerNode)

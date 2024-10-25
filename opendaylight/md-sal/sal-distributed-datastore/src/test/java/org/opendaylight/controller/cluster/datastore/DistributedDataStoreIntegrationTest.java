@@ -45,9 +45,7 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 
 @RunWith(Parameterized.class)
 public class DistributedDataStoreIntegrationTest extends AbstractDistributedDataStoreIntegrationTest {
@@ -95,9 +93,6 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
 
             // Do some modification operations and ready the Tx on a
             // separate thread.
-            final YangInstanceIdentifier listEntryPath = YangInstanceIdentifier
-                    .builder(TestModel.OUTER_LIST_PATH)
-                    .nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1).build();
 
             final AtomicReference<DOMStoreThreePhaseCommitCohort> txCohort = new AtomicReference<>();
             final AtomicReference<Exception> caughtEx = new AtomicReference<>();
@@ -106,13 +101,11 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
                 try {
                     writeTx.write(TestModel.TEST_PATH, TestModel.EMPTY_TEST);
 
-                    writeTx.merge(TestModel.OUTER_LIST_PATH,
-                        ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME)
-                        .withChild(ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 42))
-                        .build());
+                    writeTx.merge(TestModel.OUTER_LIST_PATH, TestModel.outerNode(42));
 
-                    writeTx.write(listEntryPath,
-                        ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1));
+                    final var listEntryPath = TestModel.outerEntryPath(1);
+
+                    writeTx.write(listEntryPath, TestModel.outerEntry(1));
 
                     writeTx.delete(listEntryPath);
 

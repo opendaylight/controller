@@ -173,9 +173,7 @@ public class ShardTransactionTest extends AbstractActorTest {
             .build();
 
         YangInstanceIdentifier mergePath = TestModel.OUTER_LIST_PATH;
-        NormalizedNode mergeData = ImmutableNodes.newContainerBuilder()
-            .withNodeIdentifier(new NodeIdentifier(TestModel.OUTER_LIST_QNAME))
-            .build();
+        NormalizedNode mergeData = TestModel.EMPTY_OUTER_LIST;
 
         YangInstanceIdentifier deletePath = TestModel.TEST_PATH;
 
