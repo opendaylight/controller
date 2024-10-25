@@ -52,6 +52,7 @@ import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.actor.Address;
 import org.apache.pekko.actor.AddressFromURIString;
+import org.apache.pekko.actor.Status.Failure;
 import org.apache.pekko.cluster.Cluster;
 import org.apache.pekko.cluster.Member;
 import org.apache.pekko.dispatch.Futures;
@@ -747,9 +748,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         carsFollowerShard.orElseThrow().tell(readyLocal, followerTestKit.getRef());
         Object resp = followerTestKit.expectMsgClass(Object.class);
-        if (resp instanceof org.apache.pekko.actor.Status.Failure) {
-            throw new AssertionError("Unexpected failure response",
-                ((org.apache.pekko.actor.Status.Failure)resp).cause());
+        if (resp instanceof Failure failure) {
+            throw new AssertionError("Unexpected failure response", failure.cause());
         }
 
         assertEquals("Response type", CommitTransactionReply.class, resp.getClass());
@@ -767,9 +767,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         carsFollowerShard.orElseThrow().tell(readyLocal, followerTestKit.getRef());
         resp = followerTestKit.expectMsgClass(Object.class);
-        if (resp instanceof org.apache.pekko.actor.Status.Failure) {
-            throw new AssertionError("Unexpected failure response",
-                ((org.apache.pekko.actor.Status.Failure)resp).cause());
+        if (resp instanceof Failure failure) {
+            throw new AssertionError("Unexpected failure response", failure.cause());
         }
 
         assertEquals("Response type", ReadyTransactionReply.class, resp.getClass());
@@ -814,9 +813,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         carsFollowerShard.orElseThrow().tell(forwardedReady, followerTestKit.getRef());
         Object resp = followerTestKit.expectMsgClass(Object.class);
-        if (resp instanceof org.apache.pekko.actor.Status.Failure) {
-            throw new AssertionError("Unexpected failure response",
-                ((org.apache.pekko.actor.Status.Failure)resp).cause());
+        if (resp instanceof Failure failure) {
+            throw new AssertionError("Unexpected failure response", failure.cause());
         }
 
         assertEquals("Response type", CommitTransactionReply.class, resp.getClass());
@@ -835,9 +833,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         carsFollowerShard.orElseThrow().tell(forwardedReady, followerTestKit.getRef());
         resp = followerTestKit.expectMsgClass(Object.class);
-        if (resp instanceof org.apache.pekko.actor.Status.Failure) {
-            throw new AssertionError("Unexpected failure response",
-                ((org.apache.pekko.actor.Status.Failure)resp).cause());
+        if (resp instanceof Failure failure) {
+            throw new AssertionError("Unexpected failure response", failure.cause());
         }
 
         assertEquals("Response type", ReadyTransactionReply.class, resp.getClass());
