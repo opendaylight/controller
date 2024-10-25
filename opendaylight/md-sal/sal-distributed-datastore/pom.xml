@@ -127,10 +127,6 @@
       <artifactId>mdsal-dom-spi</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.mdsal</groupId>
-      <artifactId>mdsal-dom-broker</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>binding-data-codec-api</artifactId>
     </dependency>
@@ -188,11 +184,11 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
-      <artifactId>yang-model-api</artifactId>
+      <artifactId>yang-data-spi</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
-      <artifactId>yang-model-spi</artifactId>
+      <artifactId>yang-model-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
