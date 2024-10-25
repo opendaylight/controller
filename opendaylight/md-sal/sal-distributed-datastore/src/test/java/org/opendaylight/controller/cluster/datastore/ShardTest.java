@@ -1283,14 +1283,12 @@ public class ShardTest extends AbstractShardTest {
         shard.tell(new CommitTransaction(transactionID, CURRENT_VERSION).toSerializable(), testKit.getRef());
         testKit.expectMsgClass(duration, CommitTransactionReply.class);
 
-        final NormalizedNode node = readStore(shard, TestModel.TEST_PATH);
-
         // Since we're simulating an abort occurring during replication
         // and before finish commit,
         // the data should still get written to the in-memory store
         // since we've gotten past
         // canCommit and preCommit and persisted the data.
-        assertNotNull(TestModel.TEST_QNAME.getLocalName() + " not found", node);
+        assertEquals(TestModel.EMPTY_TEST, readStore(shard, TestModel.TEST_PATH));
     }
 
     @Test
