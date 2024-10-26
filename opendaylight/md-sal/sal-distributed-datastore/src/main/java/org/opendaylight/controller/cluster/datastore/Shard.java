@@ -632,16 +632,16 @@ public class Shard extends RaftActor {
         }
 
         final var request = envelope.getMessage();
-        if (request instanceof TransactionRequest<?> txReq) {
-            final var clientId = txReq.getTarget().getHistoryId().getClientId();
-            return getFrontend(clientId).handleTransactionRequest(txReq, envelope, now);
-        } else if (request instanceof LocalHistoryRequest<?> lhReq) {
-            final var clientId = lhReq.getTarget().getClientId();
-            return getFrontend(clientId).handleLocalHistoryRequest(lhReq, envelope, now);
-        } else {
-            LOG.warn("{}: rejecting unsupported request {}", persistenceId(), request);
-            throw new UnsupportedRequestException(request);
-        }
+        return switch (request) {
+            case TransactionRequest<?> req -> getFrontend(req.getTarget().getHistoryId().getClientId())
+                .handleTransactionRequest(req, envelope, now);
+            case LocalHistoryRequest<?> req -> getFrontend(req.getTarget().getClientId())
+                .handleLocalHistoryRequest(req, envelope, now);
+            default -> {
+                LOG.warn("{}: rejecting unsupported request {}", persistenceId(), request);
+                throw new UnsupportedRequestException(request);
+            }
+        };
     }
 
     private void handleGetKnownClients() {
