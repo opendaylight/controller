@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import static org.apache.pekko.actor.ActorRef.noSender;
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -38,7 +37,6 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
@@ -242,47 +240,6 @@ public class ShardTest extends AbstractShardTest {
 
         // TODO: investigate why we do not receive data chage events
         listener.waitForChangeEvents();
-    }
-
-    @Test
-    @Deprecated(since = "11.0.0", forRemoval = true)
-    public void testCreateTransaction() {
-        final ShardTestKit testKit = new ShardTestKit(getSystem());
-        final ActorRef shard = actorFactory.createActor(newShardProps(), "testCreateTransaction");
-
-        ShardTestKit.waitUntilLeader(shard);
-
-        shard.tell(new UpdateSchemaContext(TestModel.createTestContext()), testKit.getRef());
-
-        shard.tell(new CreateTransaction(nextTransactionId(), TransactionType.READ_ONLY.ordinal(),
-            DataStoreVersions.CURRENT_VERSION).toSerializable(), testKit.getRef());
-
-        final CreateTransactionReply reply = testKit.expectMsgClass(Duration.ofSeconds(3),
-            CreateTransactionReply.class);
-
-        final String path = reply.getTransactionPath().toString();
-        assertThat(path, containsString(String.format("/user/testCreateTransaction/shard-%s-%s:ShardTransactionTest@0:",
-            shardID.getShardName(), shardID.getMemberName().getName())));
-    }
-
-    @Test
-    @Deprecated(since = "11.0.0", forRemoval = true)
-    public void testCreateTransactionOnChain() {
-        final ShardTestKit testKit = new ShardTestKit(getSystem());
-        final ActorRef shard = actorFactory.createActor(newShardProps(), "testCreateTransactionOnChain");
-
-        ShardTestKit.waitUntilLeader(shard);
-
-        shard.tell(new CreateTransaction(nextTransactionId(), TransactionType.READ_ONLY.ordinal(),
-            DataStoreVersions.CURRENT_VERSION).toSerializable(), testKit.getRef());
-
-        final CreateTransactionReply reply = testKit.expectMsgClass(Duration.ofSeconds(3),
-            CreateTransactionReply.class);
-
-        final String path = reply.getTransactionPath().toString();
-        assertThat(path, containsString(String.format(
-            "/user/testCreateTransactionOnChain/shard-%s-%s:ShardTransactionTest@0:",
-            shardID.getShardName(), shardID.getMemberName().getName())));
     }
 
     @Test
@@ -654,27 +611,6 @@ public class ShardTest extends AbstractShardTest {
 
     @Test
     @Deprecated(since = "9.0.0", forRemoval = true)
-    public void testBatchedModificationsReadyWithIncorrectTotalMessageCount() {
-        final ShardTestKit testKit = new ShardTestKit(getSystem());
-        final TestActorRef<Shard> shard = actorFactory.createTestActor(
-            newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()),
-            "testBatchedModificationsReadyWithIncorrectTotalMessageCount");
-
-        ShardTestKit.waitUntilLeader(shard);
-
-        final TransactionIdentifier transactionID = nextTransactionId();
-        final BatchedModifications batched = new BatchedModifications(transactionID, DataStoreVersions.CURRENT_VERSION);
-        batched.setReady();
-        batched.setTotalMessagesSent(2);
-
-        shard.tell(batched, testKit.getRef());
-
-        final Failure failure = testKit.expectMsgClass(Duration.ofSeconds(5), Failure.class);
-        assertInstanceOf(IllegalStateException.class, failure.cause());
-    }
-
-    @Test
-    @Deprecated(since = "9.0.0", forRemoval = true)
     public void testBatchedModificationsWithOperationFailure() {
         final ShardTestKit testKit = new ShardTestKit(getSystem());
         final TestActorRef<Shard> shard = actorFactory.createTestActor(
@@ -764,47 +700,6 @@ public class ShardTest extends AbstractShardTest {
 
         final NormalizedNode actualNode = readStore(shard, path);
         assertEquals("Stored node", containerNode, actualNode);
-    }
-
-    @Test
-    @Deprecated(since = "9.0.0", forRemoval = true)
-    public void testOnBatchedModificationsWhenNotLeader() {
-        final AtomicBoolean overrideLeaderCalls = new AtomicBoolean();
-        final ShardTestKit testKit = new ShardTestKit(getSystem());
-        final Creator<Shard> creator = new Creator<>() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public Shard create() {
-                return new Shard(newShardBuilder()) {
-                    @Override
-                    protected boolean isLeader() {
-                        return overrideLeaderCalls.get() ? false : super.isLeader();
-                    }
-
-                    @Override
-                    public ActorSelection getLeader() {
-                        return overrideLeaderCalls.get() ? getSystem().actorSelection(testKit.getRef().path())
-                                : super.getLeader();
-                    }
-                };
-            }
-        };
-
-        final TestActorRef<Shard> shard = actorFactory.createTestActor(Props.create(Shard.class,
-            new DelegatingShardCreator(creator)).withDispatcher(Dispatchers.DefaultDispatcherId()),
-            "testOnBatchedModificationsWhenNotLeader");
-
-        ShardTestKit.waitUntilLeader(shard);
-
-        overrideLeaderCalls.set(true);
-
-        final BatchedModifications batched = new BatchedModifications(nextTransactionId(),
-            DataStoreVersions.CURRENT_VERSION);
-
-        shard.tell(batched, noSender());
-
-        testKit.expectMsgEquals(batched);
     }
 
     @Test
