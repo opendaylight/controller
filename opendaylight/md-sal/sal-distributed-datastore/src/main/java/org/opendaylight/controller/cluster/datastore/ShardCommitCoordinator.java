@@ -393,7 +393,7 @@ final class ShardCommitCoordinator {
             }
         });
 
-        shard.getShardMBean().incrementAbortTransactionsCount();
+        shard.shardStats().incrementAbortTransactionsCount();
     }
 
     void checkForExpiredTransactions(final long timeout, final Shard shard) {

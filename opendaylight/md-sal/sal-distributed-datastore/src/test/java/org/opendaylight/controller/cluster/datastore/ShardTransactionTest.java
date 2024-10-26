@@ -86,7 +86,7 @@ public class ShardTransactionTest extends AbstractActorTest {
     private ActorRef newTransactionActor(final TransactionType type,
             final AbstractShardDataTreeTransaction<?> transaction, final String name) {
         Props props = ShardTransaction.props(type, transaction, shard, datastoreContext,
-                shard.underlyingActor().getShardMBean());
+                shard.underlyingActor().shardStats());
         return actorFactory.createActorNoVerify(props, name);
     }
 
