@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 
 import java.lang.management.ManagementFactory;
 import java.text.SimpleDateFormat;
@@ -22,22 +21,24 @@ import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 
 public class ShardStatsTest {
     private MBeanServer mbeanServer;
-    private ShardStats shardStats;
+    private DefaultShardStatsMXBean mbean;
     private ObjectName testMBeanName;
+    private ShardStats shardStats;
 
     @Before
     public void setUp() throws Exception {
-        shardStats = new ShardStats("shard-1", "DataStore", null);
-        shardStats.registerMBean();
+        mbean = new DefaultShardStatsMXBean("shard-1", "DataStore", null);
+        mbean.registerMBean();
         mbeanServer = ManagementFactory.getPlatformMBeanServer();
-        String objectName = AbstractMXBean.BASE_JMX_PREFIX + "type=" + shardStats.getMBeanType() + ",Category="
-                + shardStats.getMBeanCategory() + ",name=" + shardStats.getMBeanName();
+        String objectName = AbstractMXBean.BASE_JMX_PREFIX + "type=" + mbean.getMBeanType() + ",Category="
+                + mbean.getMBeanCategory() + ",name=" + mbean.getMBeanName();
         testMBeanName = new ObjectName(objectName);
+        shardStats = mbean.shardStats();
     }
 
     @After
     public void tearDown() {
-        shardStats.unregisterMBean();
+        mbean.unregisterMBean();
     }
 
     @Test
@@ -58,16 +59,13 @@ public class ShardStatsTest {
 
     @Test
     public void testGetLastCommittedTransactionTime() throws Exception {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-        assertEquals(sdf.format(new Date(0L)), shardStats.getLastCommittedTransactionTime());
-        long millis = System.currentTimeMillis();
-        shardStats.setLastCommittedTransactionTime(millis);
+        final var sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        shardStats.incrementCommittedTransactionCount();
 
+        final var inst = shardStats.lastCommittedTransactionTime();
         //now let us get from MBeanServer what is the transaction count.
-        Object attribute = mbeanServer.getAttribute(testMBeanName,
-            "LastCommittedTransactionTime");
-        assertEquals(sdf.format(new Date(millis)), attribute);
-        assertNotEquals(attribute, sdf.format(new Date(millis - 1)));
+        Object attribute = mbeanServer.getAttribute(testMBeanName, "LastCommittedTransactionTime");
+        assertEquals(sdf.format(Date.from(inst)), attribute);
     }
 
     @Test
