@@ -59,6 +59,7 @@ import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
+import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStatsMXBean;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
@@ -645,8 +646,7 @@ public class ShardTest extends AbstractShardTest {
         ShardTestKit.waitUntilLeader(shard);
 
         final TransactionIdentifier transactionID = nextTransactionId();
-        final BatchedModifications batched = new BatchedModifications(transactionID,
-            DataStoreVersions.CURRENT_VERSION);
+        final BatchedModifications batched = new BatchedModifications(transactionID, DataStoreVersions.CURRENT_VERSION);
         batched.setReady();
         batched.setTotalMessagesSent(2);
 
@@ -1012,7 +1012,7 @@ public class ShardTest extends AbstractShardTest {
         Thread.sleep(HEARTBEAT_MILLIS * 2);
 
         shard.tell(Shard.GET_SHARD_MBEAN_MESSAGE, testKit.getRef());
-        final ShardStats shardStats = testKit.expectMsgClass(duration, ShardStats.class);
+        final var shardStats = testKit.expectMsgClass(duration, ShardStatsMXBean.class);
 
         // Use MBean for verification
         // Committed transaction count should increase as usual

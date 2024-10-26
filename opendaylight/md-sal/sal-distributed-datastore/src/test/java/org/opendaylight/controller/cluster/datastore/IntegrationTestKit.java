@@ -33,6 +33,7 @@ import org.opendaylight.controller.cluster.databroker.ClientBackedDataStore;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
+import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStatsMXBean;
 import org.opendaylight.controller.cluster.datastore.messages.OnDemandShardState;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
@@ -212,7 +213,7 @@ public class IntegrationTestKit extends ShardTestKit {
         AssertionError lastError = null;
         Stopwatch sw = Stopwatch.createStarted();
         while (sw.elapsed(TimeUnit.SECONDS) <= 5) {
-            ShardStats shardStats = (ShardStats)actorUtils
+            final var shardStats = (ShardStatsMXBean) actorUtils
                     .executeOperation(shardActor, Shard.GET_SHARD_MBEAN_MESSAGE);
 
             try {
@@ -301,6 +302,6 @@ public class IntegrationTestKit extends ShardTestKit {
     }
 
     public interface ShardStatsVerifier {
-        void verify(ShardStats stats);
+        void verify(ShardStatsMXBean stats);
     }
 }
