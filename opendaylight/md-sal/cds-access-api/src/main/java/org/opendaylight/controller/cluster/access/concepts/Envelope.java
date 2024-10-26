@@ -19,7 +19,8 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.Immutable;
 import org.opendaylight.yangtools.concepts.WritableObjects;
 
-public abstract class Envelope<T extends Message<?, ?>> implements Immutable, Serializable {
+public abstract sealed class Envelope<T extends Message<?, ?>> implements Immutable, Serializable
+        permits RequestEnvelope, ResponseEnvelope {
     interface SerialForm<T extends Message<?, ?>, E extends Envelope<T>> extends Externalizable {
 
         @NonNull E envelope();

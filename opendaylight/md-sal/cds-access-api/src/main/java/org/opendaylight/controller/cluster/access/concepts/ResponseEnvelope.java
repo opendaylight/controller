@@ -15,7 +15,8 @@ import java.io.ObjectOutput;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.WritableObjects;
 
-public abstract class ResponseEnvelope<T extends Response<?, ?>> extends Envelope<T> {
+public abstract sealed class ResponseEnvelope<T extends Response<?, ?>> extends Envelope<T>
+        permits FailureEnvelope, SuccessEnvelope {
     interface SerialForm<T extends Response<?, ?>, E extends ResponseEnvelope<T>> extends Envelope.SerialForm<T, E> {
         @Override
         default void writeExternal(final ObjectOutput out, final @NonNull E envelope) throws IOException {
