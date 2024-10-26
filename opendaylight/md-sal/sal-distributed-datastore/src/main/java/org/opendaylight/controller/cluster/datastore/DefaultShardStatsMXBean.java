@@ -1,0 +1,279 @@
+/*
+ * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+package org.opendaylight.controller.cluster.datastore;
+
+import com.google.common.base.Joiner;
+import com.google.common.base.Joiner.MapJoiner;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.LongAdder;
+import org.apache.pekko.actor.ActorRef;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStatsMXBean;
+import org.opendaylight.controller.cluster.mgmt.api.FollowerInfo;
+import org.opendaylight.controller.cluster.raft.base.messages.InitiateCaptureSnapshot;
+import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
+import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
+
+/**
+ * Maintains statistics for a shard.
+ *
+ * @author  Basheeruddin syedbahm@cisco.com
+ */
+final class DefaultShardStatsMXBean extends AbstractMXBean implements ShardStatsMXBean {
+    public static final String JMX_CATEGORY_SHARD = "Shards";
+
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss.SSS")
+        .withZone(ZoneId.systemDefault());
+    private static final MapJoiner MAP_JOINER = Joiner.on(", ").withKeyValueSeparator(": ");
+
+    private final AtomicReference<ShardStats> shardStats = new AtomicReference<>(new ShardStats());
+    private final LongAdder leadershipChangeCount = new LongAdder();
+    private final OnDemandShardStateCache stateCache;
+    private final Shard shard;
+
+    private volatile boolean followerInitialSyncStatus = false;
+    private volatile String statRetrievalError;
+    private volatile long lastLeadershipChangeTime;
+
+    DefaultShardStatsMXBean(final String shardName, final String mxBeanType, final @Nullable Shard shard) {
+        super(shardName, mxBeanType, JMX_CATEGORY_SHARD);
+        this.shard = shard;
+        stateCache = new OnDemandShardStateCache(shardName, shard != null ? shard.self() : null);
+    }
+
+    static DefaultShardStatsMXBean create(final String shardName, final String mxBeanType, final @NonNull Shard shard) {
+        final var finalMXBeanType = mxBeanType != null ? mxBeanType : "DistDataStore";
+        final var shardStatsMBeanImpl = new DefaultShardStatsMXBean(shardName, finalMXBeanType, shard);
+        shardStatsMBeanImpl.registerMBean();
+        return shardStatsMBeanImpl;
+    }
+
+    @SuppressWarnings("checkstyle:IllegalCatch")
+    private OnDemandRaftState getOnDemandRaftState() {
+        try {
+            final OnDemandRaftState state = stateCache.get();
+            statRetrievalError = null;
+            return state;
+        } catch (Exception e) {
+            statRetrievalError = e.getCause().toString();
+            return OnDemandRaftState.builder().build();
+        }
+    }
+
+    @Override
+    public String getShardName() {
+        return getMBeanName();
+    }
+
+    @Override
+    public String getLeader() {
+        return getOnDemandRaftState().getLeader();
+    }
+
+    @Override
+    public String getRaftState() {
+        return getOnDemandRaftState().getRaftState();
+    }
+
+    @Override
+    public long getLastLogIndex() {
+        return getOnDemandRaftState().getLastLogIndex();
+    }
+
+    @Override
+    public long getLastLogTerm() {
+        return getOnDemandRaftState().getLastLogTerm();
+    }
+
+    @Override
+    public long getCurrentTerm() {
+        return getOnDemandRaftState().getCurrentTerm();
+    }
+
+    @Override
+    public long getCommitIndex() {
+        return getOnDemandRaftState().getCommitIndex();
+    }
+
+    @Override
+    public long getLastApplied() {
+        return getOnDemandRaftState().getLastApplied();
+    }
+
+    @Override
+    public long getLastIndex() {
+        return getOnDemandRaftState().getLastIndex();
+    }
+
+    @Override
+    public long getLastTerm() {
+        return getOnDemandRaftState().getLastTerm();
+    }
+
+    @Override
+    public long getSnapshotIndex() {
+        return getOnDemandRaftState().getSnapshotIndex();
+    }
+
+    @Override
+    public long getSnapshotTerm() {
+        return getOnDemandRaftState().getSnapshotTerm();
+    }
+
+    @Override
+    public long getReplicatedToAllIndex() {
+        return getOnDemandRaftState().getReplicatedToAllIndex();
+    }
+
+    @Override
+    public String getVotedFor() {
+        return getOnDemandRaftState().getVotedFor();
+    }
+
+    @Override
+    public boolean isVoting() {
+        return getOnDemandRaftState().isVoting();
+    }
+
+    @Override
+    public String getPeerVotingStates() {
+        return MAP_JOINER.join(getOnDemandRaftState().getPeerVotingStates());
+    }
+
+    @Override
+    public boolean isSnapshotCaptureInitiated() {
+        return getOnDemandRaftState().isSnapshotCaptureInitiated();
+    }
+
+    @Override
+    public long getInMemoryJournalDataSize() {
+        return getOnDemandRaftState().getInMemoryJournalDataSize();
+    }
+
+    @Override
+    public long getInMemoryJournalLogSize() {
+        return getOnDemandRaftState().getInMemoryJournalLogSize();
+    }
+
+    @Override
+    public String getLastCommittedTransactionTime() {
+        return DATE_FORMATTER.format(shardStats().lastCommittedTransactionTime());
+    }
+
+    @Override
+    public long getCommittedTransactionsCount() {
+        return shardStats().committedTransactionsCount.sum();
+    }
+
+    @Override
+    public long getReadOnlyTransactionCount() {
+        return shardStats().readOnlyTransactionCount.sum();
+    }
+
+    @Override
+    public long getReadWriteTransactionCount() {
+        return shardStats().readWriteTransactionCount.sum();
+    }
+
+    @Override
+    public long getFailedTransactionsCount() {
+        return shardStats().failedTransactionsCount.sum();
+    }
+
+    @Override
+    public long getFailedReadTransactionsCount() {
+        return shardStats().failedReadTransactionsCount.sum();
+    }
+
+    @Override
+    public long getAbortTransactionsCount() {
+        return shardStats().abortTransactionsCount.sum();
+    }
+
+    /**
+     * Resets the counters related to transactions.
+     */
+    @Override
+    public void resetTransactionCounters() {
+        shardStats.setRelease(new ShardStats());
+    }
+
+    @Override
+    public boolean getFollowerInitialSyncStatus() {
+        return followerInitialSyncStatus;
+    }
+
+    @Override
+    public List<FollowerInfo> getFollowerInfo() {
+        return getOnDemandRaftState().getFollowerInfoList();
+    }
+
+    @Override
+    public String getPeerAddresses() {
+        return MAP_JOINER.join(getOnDemandRaftState().getPeerAddresses());
+    }
+
+    @Override
+    public String getStatRetrievalTime() {
+        getOnDemandRaftState();
+        return stateCache.stateRetrievalTime();
+    }
+
+    @Override
+    public String getStatRetrievalError() {
+        getOnDemandRaftState();
+        return statRetrievalError;
+    }
+
+    @Override
+    public long getLeadershipChangeCount() {
+        return leadershipChangeCount.sum();
+    }
+
+    public void incrementLeadershipChangeCount() {
+        leadershipChangeCount.increment();
+        lastLeadershipChangeTime = System.currentTimeMillis();
+    }
+
+    @Override
+    public String getLastLeadershipChangeTime() {
+        final var last = lastLeadershipChangeTime;
+        final var now = System.nanoTime();
+        return DATE_FORMATTER.format(Instant.now().minusNanos(now - last));
+    }
+
+    @Override
+    public int getPendingTxCommitQueueSize() {
+        return shard != null ? shard.getPendingTxCommitQueueSize() : -1;
+    }
+
+    @Override
+    public int getTxCohortCacheSize() {
+        return shard != null ? shard.getCohortCacheSize() : -1;
+    }
+
+    @Override
+    public void captureSnapshot() {
+        if (shard != null) {
+            shard.getSelf().tell(new InitiateCaptureSnapshot(), ActorRef.noSender());
+        }
+    }
+
+    void setFollowerInitialSyncStatus(final boolean followerInitialSyncStatus) {
+        this.followerInitialSyncStatus = followerInitialSyncStatus;
+    }
+
+    ShardStats shardStats() {
+        return shardStats.getAcquire();
+    }
+}
