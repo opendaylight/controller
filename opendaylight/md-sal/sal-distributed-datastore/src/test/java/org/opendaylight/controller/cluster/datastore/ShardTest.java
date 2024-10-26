@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import static org.apache.pekko.actor.ActorRef.noSender;
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -243,47 +242,6 @@ public class ShardTest extends AbstractShardTest {
 
         // TODO: investigate why we do not receive data chage events
         listener.waitForChangeEvents();
-    }
-
-    @Test
-    @Deprecated(since = "11.0.0", forRemoval = true)
-    public void testCreateTransaction() {
-        final ShardTestKit testKit = new ShardTestKit(getSystem());
-        final ActorRef shard = actorFactory.createActor(newShardProps(), "testCreateTransaction");
-
-        ShardTestKit.waitUntilLeader(shard);
-
-        shard.tell(new UpdateSchemaContext(TestModel.createTestContext()), testKit.getRef());
-
-        shard.tell(new CreateTransaction(nextTransactionId(), TransactionType.READ_ONLY.ordinal(),
-            DataStoreVersions.CURRENT_VERSION).toSerializable(), testKit.getRef());
-
-        final CreateTransactionReply reply = testKit.expectMsgClass(Duration.ofSeconds(3),
-            CreateTransactionReply.class);
-
-        final String path = reply.getTransactionPath().toString();
-        assertThat(path, containsString(String.format("/user/testCreateTransaction/shard-%s-%s:ShardTransactionTest@0:",
-            shardID.getShardName(), shardID.getMemberName().getName())));
-    }
-
-    @Test
-    @Deprecated(since = "11.0.0", forRemoval = true)
-    public void testCreateTransactionOnChain() {
-        final ShardTestKit testKit = new ShardTestKit(getSystem());
-        final ActorRef shard = actorFactory.createActor(newShardProps(), "testCreateTransactionOnChain");
-
-        ShardTestKit.waitUntilLeader(shard);
-
-        shard.tell(new CreateTransaction(nextTransactionId(), TransactionType.READ_ONLY.ordinal(),
-            DataStoreVersions.CURRENT_VERSION).toSerializable(), testKit.getRef());
-
-        final CreateTransactionReply reply = testKit.expectMsgClass(Duration.ofSeconds(3),
-            CreateTransactionReply.class);
-
-        final String path = reply.getTransactionPath().toString();
-        assertThat(path, containsString(String.format(
-            "/user/testCreateTransactionOnChain/shard-%s-%s:ShardTransactionTest@0:",
-            shardID.getShardName(), shardID.getMemberName().getName())));
     }
 
     @Test
