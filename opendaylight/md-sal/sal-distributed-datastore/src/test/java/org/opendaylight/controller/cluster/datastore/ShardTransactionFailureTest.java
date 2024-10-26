@@ -49,7 +49,8 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
 
     private final DatastoreContext datastoreContext = DatastoreContext.newBuilder().build();
 
-    private final ShardStats shardStats = new ShardStats(SHARD_IDENTIFIER.toString(), "DataStore", null);
+    private final ShardStats shardStats = new DefaultShardStatsMXBean(SHARD_IDENTIFIER.toString(), "DataStore", null)
+        .shardStats();
 
     private ActorRef createShard() {
         ActorRef shard = getSystem().actorOf(Shard.builder().id(SHARD_IDENTIFIER).datastoreContext(datastoreContext)
@@ -60,7 +61,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
 
     @Before
     public void setup() {
-        doReturn(new ShardStats("inventory", "mxBeanType", MOCK_SHARD)).when(MOCK_SHARD).getShardMBean();
+        doReturn(new ShardStats()).when(MOCK_SHARD).shardStats();
     }
 
     @Test(expected = ReadFailedException.class)

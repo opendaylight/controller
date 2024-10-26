@@ -610,7 +610,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     final @NonNull ReadOnlyShardDataTreeTransaction newReadOnlyTransaction(final TransactionIdentifier txId) {
-        shard.getShardMBean().incrementReadOnlyTransactionCount();
+        shard.shardStats().incrementReadOnlyTransactionCount();
 
         final var historyId = txId.getHistoryId();
         return historyId.getHistoryId() == 0 ? newStandaloneReadOnlyTransaction(txId)
@@ -622,7 +622,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     final @NonNull ReadWriteShardDataTreeTransaction newReadWriteTransaction(final TransactionIdentifier txId) {
-        shard.getShardMBean().incrementReadWriteTransactionCount();
+        shard.shardStats().incrementReadWriteTransactionCount();
 
         final var historyId = txId.getHistoryId();
         return historyId.getHistoryId() == 0 ? newStandaloneReadWriteTransaction(txId)
@@ -1003,7 +1003,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     private void failPreCommit(final Throwable cause) {
-        shard.getShardMBean().incrementFailedTransactionsCount();
+        shard.shardStats().incrementFailedTransactionsCount();
         pendingTransactions.poll().cohort.failedPreCommit(cause);
         processNextPendingTransaction();
     }
@@ -1055,7 +1055,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     private void failCommit(final Exception cause) {
-        shard.getShardMBean().incrementFailedTransactionsCount();
+        shard.shardStats().incrementFailedTransactionsCount();
         pendingFinishCommits.poll().cohort.failedCommit(cause);
         processNextPending();
     }
@@ -1081,8 +1081,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         }
 
         allMetadataCommittedTransaction(txId);
-        shard.getShardMBean().incrementCommittedTransactionCount();
-        shard.getShardMBean().setLastCommittedTransactionTime(System.currentTimeMillis());
+        shard.shardStats().incrementCommittedTransactionCount();
 
         // FIXME: propagate journal index
         pendingFinishCommits.poll().cohort.successfulCommit(UnsignedLong.ZERO, () -> {
@@ -1381,8 +1380,9 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         }
     }
 
-    final ShardStats getStats() {
-        return shard.getShardMBean();
+    // Non-final for mocking
+    ShardStats getStats() {
+        return shard.shardStats();
     }
 
     final Iterator<SimpleShardDataTreeCohort> cohortIterator() {
