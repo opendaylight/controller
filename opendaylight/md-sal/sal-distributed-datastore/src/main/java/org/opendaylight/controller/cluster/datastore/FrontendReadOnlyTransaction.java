@@ -52,17 +52,15 @@ final class FrontendReadOnlyTransaction extends FrontendTransaction {
     @Override
     TransactionSuccess<?> doHandleRequest(final TransactionRequest<?> request, final RequestEnvelope envelope,
             final long now) throws RequestException {
-        if (request instanceof ExistsTransactionRequest) {
-            return handleExistsTransaction((ExistsTransactionRequest) request);
-        } else if (request instanceof ReadTransactionRequest) {
-            return handleReadTransaction((ReadTransactionRequest) request);
-        } else if (request instanceof ModifyTransactionRequest) {
-            handleModifyTransaction((ModifyTransactionRequest) request, envelope, now);
-            return null;
-        } else {
-            LOG.warn("Rejecting unsupported request {}", request);
-            throw new UnsupportedRequestException(request);
-        }
+        return switch (request) {
+            case ExistsTransactionRequest req -> handleExistsTransaction(req);
+            case ReadTransactionRequest req -> handleReadTransaction(req);
+            case ModifyTransactionRequest req -> handleModifyTransaction(req, envelope, now);
+            default -> {
+                LOG.warn("Rejecting unsupported request {}", request);
+                throw new UnsupportedRequestException(request);
+            }
+        };
     }
 
     @Override
@@ -70,8 +68,8 @@ final class FrontendReadOnlyTransaction extends FrontendTransaction {
         // No-op
     }
 
-    private void handleModifyTransaction(final ModifyTransactionRequest request, final RequestEnvelope envelope,
-            final long now) {
+    private TransactionSuccess<?> handleModifyTransaction(final ModifyTransactionRequest request,
+            final RequestEnvelope envelope, final long now) {
         // The only valid request here is with abort protocol
         final Optional<PersistenceProtocol> optProto = request.getPersistenceProtocol();
         checkArgument(optProto.isPresent(), "Commit protocol is missing in %s", request);
@@ -79,6 +77,7 @@ final class FrontendReadOnlyTransaction extends FrontendTransaction {
             request);
         openTransaction.abort(() -> recordAndSendSuccess(envelope, now,
             new ModifyTransactionSuccess(request.getTarget(), request.getSequence())));
+        return null;
     }
 
     private ExistsTransactionSuccess handleExistsTransaction(final ExistsTransactionRequest request) {
