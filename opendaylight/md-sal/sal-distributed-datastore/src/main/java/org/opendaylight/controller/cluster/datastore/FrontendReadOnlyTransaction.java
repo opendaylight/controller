@@ -7,10 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
-import java.util.Optional;
 import org.opendaylight.controller.cluster.access.commands.ExistsTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ExistsTransactionSuccess;
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequest;
@@ -23,14 +21,11 @@ import org.opendaylight.controller.cluster.access.commands.TransactionSuccess;
 import org.opendaylight.controller.cluster.access.concepts.RequestEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.UnsupportedRequestException;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Read-only frontend transaction state as observed by the shard leader. This class is NOT thread-safe.
- *
- * @author Robert Varga
  */
 final class FrontendReadOnlyTransaction extends FrontendTransaction {
     private static final Logger LOG = LoggerFactory.getLogger(FrontendReadOnlyTransaction.class);
@@ -52,17 +47,15 @@ final class FrontendReadOnlyTransaction extends FrontendTransaction {
     @Override
     TransactionSuccess<?> doHandleRequest(final TransactionRequest<?> request, final RequestEnvelope envelope,
             final long now) throws RequestException {
-        if (request instanceof ExistsTransactionRequest) {
-            return handleExistsTransaction((ExistsTransactionRequest) request);
-        } else if (request instanceof ReadTransactionRequest) {
-            return handleReadTransaction((ReadTransactionRequest) request);
-        } else if (request instanceof ModifyTransactionRequest) {
-            handleModifyTransaction((ModifyTransactionRequest) request, envelope, now);
-            return null;
-        } else {
-            LOG.warn("Rejecting unsupported request {}", request);
-            throw new UnsupportedRequestException(request);
-        }
+        return switch (request) {
+            case ExistsTransactionRequest req -> handleExistsTransaction(req);
+            case ReadTransactionRequest req -> handleReadTransaction(req);
+            case ModifyTransactionRequest req -> handleModifyTransaction(req, envelope, now);
+            default -> {
+                LOG.warn("Rejecting unsupported request {}", request);
+                throw new UnsupportedRequestException(request);
+            }
+        };
     }
 
     @Override
@@ -70,26 +63,27 @@ final class FrontendReadOnlyTransaction extends FrontendTransaction {
         // No-op
     }
 
-    private void handleModifyTransaction(final ModifyTransactionRequest request, final RequestEnvelope envelope,
-            final long now) {
+    private TransactionSuccess<?> handleModifyTransaction(final ModifyTransactionRequest request,
+            final RequestEnvelope envelope, final long now) {
         // The only valid request here is with abort protocol
-        final Optional<PersistenceProtocol> optProto = request.getPersistenceProtocol();
-        checkArgument(optProto.isPresent(), "Commit protocol is missing in %s", request);
-        checkArgument(optProto.orElseThrow() == PersistenceProtocol.ABORT, "Unsupported commit protocol in %s",
-            request);
+        final var proto = request.getPersistenceProtocol()
+            .orElseThrow(() -> new IllegalArgumentException("Commit protocol is missing in " + request));
+        if (proto != PersistenceProtocol.ABORT) {
+            throw new IllegalArgumentException("Unsupported commit protocol in " + proto);
+        }
+
         openTransaction.abort(() -> recordAndSendSuccess(envelope, now,
             new ModifyTransactionSuccess(request.getTarget(), request.getSequence())));
+        return null;
     }
 
     private ExistsTransactionSuccess handleExistsTransaction(final ExistsTransactionRequest request) {
-        final Optional<NormalizedNode> data = openTransaction.getSnapshot().readNode(request.getPath());
         return recordSuccess(request.getSequence(), new ExistsTransactionSuccess(openTransaction.getIdentifier(),
-            request.getSequence(), data.isPresent()));
+            request.getSequence(), openTransaction.getSnapshot().readNode(request.getPath()).isPresent()));
     }
 
     private ReadTransactionSuccess handleReadTransaction(final ReadTransactionRequest request) {
-        final Optional<NormalizedNode> data = openTransaction.getSnapshot().readNode(request.getPath());
         return recordSuccess(request.getSequence(), new ReadTransactionSuccess(openTransaction.getIdentifier(),
-            request.getSequence(), data));
+            request.getSequence(), openTransaction.getSnapshot().readNode(request.getPath())));
     }
 }
