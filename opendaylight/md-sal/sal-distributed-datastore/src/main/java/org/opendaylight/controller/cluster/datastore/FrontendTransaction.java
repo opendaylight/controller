@@ -30,10 +30,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Frontend common transaction state as observed by the shard leader. This class is NOT thread-safe.
- *
- * @author Robert Varga
  */
-abstract class FrontendTransaction implements Identifiable<TransactionIdentifier> {
+abstract sealed class FrontendTransaction implements Identifiable<TransactionIdentifier>
+        permits FrontendReadOnlyTransaction, FrontendReadWriteTransaction {
     private static final Logger LOG = LoggerFactory.getLogger(FrontendTransaction.class);
 
     private final AbstractFrontendHistory history;
@@ -121,8 +120,7 @@ abstract class FrontendTransaction implements Identifiable<TransactionIdentifier
     @SuppressWarnings("checkstyle:IllegalCatch")
     final @Nullable TransactionSuccess<?> handleRequest(final TransactionRequest<?> request,
             final RequestEnvelope envelope, final long now) throws RequestException {
-        if (request instanceof IncrementTransactionSequenceRequest) {
-            final IncrementTransactionSequenceRequest incr = (IncrementTransactionSequenceRequest) request;
+        if (request instanceof final IncrementTransactionSequenceRequest incr) {
             expectedSequence += incr.getIncrement();
 
             return recordSuccess(incr.getSequence(),
