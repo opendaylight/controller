@@ -171,7 +171,7 @@ public class Shard extends RaftActor {
 
     private Cancellable txCommitTimeoutCheckSchedule;
 
-    private final Optional<ActorRef> roleChangeNotifier;
+    private final ActorRef roleChangeNotifier;
 
     private final MessageTracker appendEntriesReplyTracker;
 
@@ -239,7 +239,7 @@ public class Shard extends RaftActor {
         setTransactionCommitTimeout();
 
         // create a notifier actor for each cluster member
-        roleChangeNotifier = createRoleChangeNotifier(name);
+        roleChangeNotifier = getContext().actorOf(RoleChangeNotifier.getProps(name), name + "-notifier");
 
         appendEntriesReplyTracker = new MessageTracker(AppendEntriesReply.class,
                 getRaftActorContext().getConfigParams().getIsolatedCheckIntervalInMillis());
@@ -267,12 +267,6 @@ public class Shard extends RaftActor {
     private void setTransactionCommitTimeout() {
         transactionCommitTimeout = TimeUnit.MILLISECONDS.convert(
                 datastoreContext.getShardTransactionCommitTimeoutInSeconds(), TimeUnit.SECONDS) / 2;
-    }
-
-    private Optional<ActorRef> createRoleChangeNotifier(final String shardId) {
-        ActorRef shardRoleChangeNotifier = getContext().actorOf(
-            RoleChangeNotifier.getProps(shardId), shardId + "-notifier");
-        return Optional.of(shardRoleChangeNotifier);
     }
 
     @Override
@@ -349,7 +343,7 @@ public class Shard extends RaftActor {
             } else if (message instanceof DatastoreContext request) {
                 onDatastoreContext(request);
             } else if (message instanceof RegisterRoleChangeListener) {
-                roleChangeNotifier.orElseThrow().forward(message, context());
+                roleChangeNotifier.forward(message, context());
             } else if (message instanceof FollowerInitialSyncUpStatus request) {
                 shardMBean.setFollowerInitialSyncStatus(request.isInitialSyncDone());
                 context().parent().tell(message, self());
@@ -611,7 +605,7 @@ public class Shard extends RaftActor {
     }
 
     @Override
-    protected final Optional<ActorRef> getRoleChangeNotifier() {
+    protected final ActorRef roleChangeNotifier() {
         return roleChangeNotifier;
     }
 
