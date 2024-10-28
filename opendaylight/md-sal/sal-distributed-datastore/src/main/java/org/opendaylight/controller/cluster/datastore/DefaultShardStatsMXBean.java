@@ -257,7 +257,8 @@ final class DefaultShardStatsMXBean extends AbstractMXBean implements ShardStats
 
     @Override
     public int getTxCohortCacheSize() {
-        return shard != null ? shard.getCohortCacheSize() : -1;
+        // FIXME: deprecate this?
+        return shard != null ? 0 : -1;
     }
 
     @Override
