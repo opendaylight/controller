@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.base.Verify.verify;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
@@ -424,34 +423,6 @@ public class Shard extends RaftActor {
         return OptionalLong.of(state.getLastConnectTicks());
     }
 
-    private void disableTracking(final DisableTrackingPayload payload) {
-        final ClientIdentifier clientId = payload.getIdentifier();
-        LOG.debug("{}: disabling tracking of {}", persistenceId(), clientId);
-        frontendMetadata.disableTracking(clientId);
-
-        if (isLeader()) {
-            final FrontendIdentifier frontendId = clientId.getFrontendId();
-            final LeaderFrontendState frontend = knownFrontends.get(frontendId);
-            if (frontend != null) {
-                if (clientId.equals(frontend.getIdentifier())) {
-                    if (!(frontend instanceof LeaderFrontendState.Disabled)) {
-                        verify(knownFrontends.replace(frontendId, frontend,
-                            new LeaderFrontendState.Disabled(persistenceId(), clientId, store)));
-                        LOG.debug("{}: leader state for {} disabled", persistenceId(), clientId);
-                    } else {
-                        LOG.debug("{}: leader state {} is already disabled", persistenceId(), frontend);
-                    }
-                } else {
-                    LOG.debug("{}: leader state {} does not match {}", persistenceId(), frontend, clientId);
-                }
-            } else {
-                LOG.debug("{}: leader state for {} not found", persistenceId(), clientId);
-                knownFrontends.put(frontendId, new LeaderFrontendState.Disabled(persistenceId(), clientId,
-                    getDataStore()));
-            }
-        }
-    }
-
     private void onMakeLeaderLocal() {
         LOG.debug("{}: onMakeLeaderLocal received", persistenceId());
         if (isLeader()) {
@@ -699,7 +670,7 @@ public class Shard extends RaftActor {
     protected final void applyState(final ActorRef clientActor, final Identifier identifier, final Object data) {
         if (data instanceof Payload payload) {
             if (payload instanceof DisableTrackingPayload disableTracking) {
-                disableTracking(disableTracking);
+                LOG.debug("{}: ignoring legacy {}", persistenceId(), disableTracking);
                 return;
             }
 

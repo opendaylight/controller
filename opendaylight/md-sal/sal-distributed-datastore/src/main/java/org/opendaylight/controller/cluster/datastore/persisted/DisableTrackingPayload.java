@@ -7,43 +7,26 @@
  */
 package org.opendaylight.controller.cluster.datastore.persisted;
 
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
-import java.io.IOException;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+// We only support cds-aclient-api and that requires tracking. This payload is no longer generated, but retained for
+// backwards compatibility.
+@Deprecated(since = "11.0.0", forRemoval = true)
 public final class DisableTrackingPayload extends AbstractIdentifiablePayload<ClientIdentifier> {
-    private static final Logger LOG = LoggerFactory.getLogger(DisableTrackingPayload.class);
     @java.io.Serial
     private static final long serialVersionUID = 1L;
-    private static final int PROXY_SIZE = externalizableProxySize(DT::new);
 
     DisableTrackingPayload(final ClientIdentifier clientId, final byte[] serialized) {
         super(clientId, serialized);
     }
 
-    public static DisableTrackingPayload create(final ClientIdentifier clientId,
-            final int initialSerializedBufferCapacity) {
-        final ByteArrayDataOutput out = ByteStreams.newDataOutput(initialSerializedBufferCapacity);
-        try {
-            clientId.writeTo(out);
-        } catch (IOException e) {
-            // This should never happen
-            LOG.error("Failed to serialize {}", clientId, e);
-            throw new IllegalStateException("Failed to serialize " + clientId, e);
-        }
-        return new DisableTrackingPayload(clientId, out.toByteArray());
-    }
-
     @Override
     protected DT externalizableProxy(final byte[] serialized) {
-        return new DT(serialized);
+        throw new UnsupportedOperationException();
     }
 
     @Override
     protected int externalizableProxySize() {
-        return PROXY_SIZE;
+        throw new UnsupportedOperationException();
     }
 }
