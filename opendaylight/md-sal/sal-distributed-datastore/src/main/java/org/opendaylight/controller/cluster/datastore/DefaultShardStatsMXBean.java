@@ -264,6 +264,7 @@ final class DefaultShardStatsMXBean extends AbstractMXBean implements ShardStats
     @Override
     public void captureSnapshot() {
         if (shard != null) {
+            // FIXME: really a RaftActor thing
             shard.getSelf().tell(new InitiateCaptureSnapshot(), ActorRef.noSender());
         }
     }
