@@ -8,9 +8,9 @@
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.base.Verify.verify;
 import static com.google.common.base.Verify.verifyNotNull;
 
+import com.google.common.base.VerifyException;
 import com.google.common.util.concurrent.FluentFuture;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Optional;
@@ -25,13 +25,11 @@ import org.opendaylight.controller.cluster.access.commands.AbstractLocalTransact
 import org.opendaylight.controller.cluster.access.commands.CommitLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ExistsTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequest;
-import org.opendaylight.controller.cluster.access.commands.PersistenceProtocol;
 import org.opendaylight.controller.cluster.access.commands.ReadTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionAbortRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionDelete;
 import org.opendaylight.controller.cluster.access.commands.TransactionDoCommitRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionMerge;
-import org.opendaylight.controller.cluster.access.commands.TransactionModification;
 import org.opendaylight.controller.cluster.access.commands.TransactionPreCommitRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionWrite;
@@ -47,7 +45,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.tree.api.CursorAwareDataTreeModification;
 import org.opendaylight.yangtools.yang.data.tree.api.CursorAwareDataTreeSnapshot;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
-import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModificationCursor;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeSnapshot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -142,7 +139,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
     void doDelete(final YangInstanceIdentifier path) {
-        final CursorAwareDataTreeModification mod = getModification();
+        final var mod = getModification();
         if (recordedFailure != null) {
             LOG.debug("Transaction {} recorded failure, ignoring delete of {}", getIdentifier(), path);
             return;
@@ -160,7 +157,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
     void doMerge(final YangInstanceIdentifier path, final NormalizedNode data) {
-        final CursorAwareDataTreeModification mod = getModification();
+        final var mod = getModification();
         if (recordedFailure != null) {
             LOG.debug("Transaction {} recorded failure, ignoring merge to {}", getIdentifier(), path);
             return;
@@ -178,7 +175,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
     void doWrite(final YangInstanceIdentifier path, final NormalizedNode data) {
-        final CursorAwareDataTreeModification mod = getModification();
+        final var mod = getModification();
         if (recordedFailure != null) {
             LOG.debug("Transaction {} recorded failure, ignoring write to {}", getIdentifier(), path);
             return;
@@ -203,16 +200,16 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
 
     @Override
     CommitLocalTransactionRequest commitRequest(final boolean coordinated) {
-        final CursorAwareDataTreeModification mod = getModification();
-        final CommitLocalTransactionRequest ret = new CommitLocalTransactionRequest(getIdentifier(), nextSequence(),
-            localActor(), mod, recordedFailure, coordinated);
+        final var mod = getModification();
+        final var ret = new CommitLocalTransactionRequest(getIdentifier(), nextSequence(), localActor(), mod,
+            recordedFailure, coordinated);
         closedException = this::submittedException;
         return ret;
     }
 
     private void sealModification() {
         checkState(sealedModification == null, "Transaction %s is already sealed", this);
-        final CursorAwareDataTreeModification mod = getModification();
+        final var mod = getModification();
         mod.ready();
         sealedModification = mod;
     }
@@ -273,84 +270,68 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     private void commonModifyTransactionRequest(final ModifyTransactionRequest request,
             final @Nullable Consumer<Response<?, ?>> callback,
             final BiConsumer<TransactionRequest<?>, Consumer<Response<?, ?>>> sendMethod) {
-        for (final TransactionModification mod : request.getModifications()) {
-            if (mod instanceof TransactionWrite) {
-                write(mod.getPath(), ((TransactionWrite)mod).getData());
-            } else if (mod instanceof TransactionMerge) {
-                merge(mod.getPath(), ((TransactionMerge)mod).getData());
-            } else if (mod instanceof TransactionDelete) {
-                delete(mod.getPath());
-            } else {
-                throw new IllegalArgumentException("Unsupported modification " + mod);
+        for (var mod : request.getModifications()) {
+            switch (mod) {
+                case TransactionDelete delete -> delete(delete.getPath());
+                case TransactionWrite write -> write(write.getPath(), write.getData());
+                case TransactionMerge merge -> merge(merge.getPath(), merge.getData());
             }
         }
 
-        final Optional<PersistenceProtocol> maybeProtocol = request.getPersistenceProtocol();
-        if (maybeProtocol.isPresent()) {
+        request.getPersistenceProtocol().ifPresent(proto -> {
             final var cb = verifyNotNull(callback, "Request %s has null callback", request);
             if (markSealed()) {
                 sealOnly();
             }
 
-            switch (maybeProtocol.orElseThrow()) {
-                case ABORT:
-                    sendMethod.accept(new AbortLocalTransactionRequest(getIdentifier(), localActor()), cb);
-                    break;
-                case READY:
+            switch (proto) {
+                case null -> throw new NullPointerException();
+                case ABORT -> sendMethod.accept(new AbortLocalTransactionRequest(getIdentifier(), localActor()), cb);
+                case READY -> {
                     // No-op, as we have already issued a sealOnly() and we are not transmitting anything
-                    break;
-                case SIMPLE:
-                    sendMethod.accept(commitRequest(false), cb);
-                    break;
-                case THREE_PHASE:
-                    sendMethod.accept(commitRequest(true), cb);
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unhandled protocol " + maybeProtocol.orElseThrow());
+                }
+                case SIMPLE -> sendMethod.accept(commitRequest(false), cb);
+                case THREE_PHASE -> sendMethod.accept(commitRequest(true), cb);
             }
-        }
+        });
     }
 
     @Override
     void handleReplayedLocalRequest(final AbstractLocalTransactionRequest<?> request,
             final Consumer<Response<?, ?>> callback, final long now) {
-        if (request instanceof CommitLocalTransactionRequest) {
-            enqueueRequest(rebaseCommit((CommitLocalTransactionRequest)request), callback, now);
+        if (request instanceof CommitLocalTransactionRequest req) {
+            enqueueRequest(rebaseCommit(req), callback, now);
         } else {
             super.handleReplayedLocalRequest(request, callback, now);
         }
     }
 
     @Override
-    void handleReplayedRemoteRequest(final TransactionRequest<?> request,
-            final Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
+    void handleReplayedRemoteRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback,
+            final long enqueuedTicks) {
         LOG.debug("Applying replayed request {}", request);
-
-        if (request instanceof TransactionPreCommitRequest) {
-            enqueueRequest(new TransactionPreCommitRequest(getIdentifier(), nextSequence(), localActor()), callback,
-                enqueuedTicks);
-        } else if (request instanceof TransactionDoCommitRequest) {
-            enqueueRequest(new TransactionDoCommitRequest(getIdentifier(), nextSequence(), localActor()), callback,
-                enqueuedTicks);
-        } else if (request instanceof TransactionAbortRequest) {
-            enqueueDoAbort(callback, enqueuedTicks);
-        } else {
-            super.handleReplayedRemoteRequest(request, callback, enqueuedTicks);
+        switch (request) {
+            case TransactionPreCommitRequest req ->
+                enqueueRequest(new TransactionPreCommitRequest(getIdentifier(), nextSequence(), localActor()), callback,
+                    enqueuedTicks);
+            case TransactionDoCommitRequest req ->
+                enqueueRequest(new TransactionDoCommitRequest(getIdentifier(), nextSequence(), localActor()), callback,
+                    enqueuedTicks);
+            case TransactionAbortRequest req -> enqueueDoAbort(callback, enqueuedTicks);
+            default -> super.handleReplayedRemoteRequest(request, callback, enqueuedTicks);
         }
     }
 
     @Override
     void handleForwardedRemoteRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback) {
         LOG.debug("Applying forwarded request {}", request);
-
-        if (request instanceof TransactionPreCommitRequest) {
-            sendRequest(new TransactionPreCommitRequest(getIdentifier(), nextSequence(), localActor()), callback);
-        } else if (request instanceof TransactionDoCommitRequest) {
-            sendRequest(new TransactionDoCommitRequest(getIdentifier(), nextSequence(), localActor()), callback);
-        } else if (request instanceof TransactionAbortRequest) {
-            sendDoAbort(callback);
-        } else {
-            super.handleForwardedRemoteRequest(request, callback);
+        switch (request) {
+            case TransactionPreCommitRequest req ->
+                sendRequest(new TransactionPreCommitRequest(getIdentifier(), nextSequence(), localActor()), callback);
+            case TransactionDoCommitRequest req ->
+                sendRequest(new TransactionDoCommitRequest(getIdentifier(), nextSequence(), localActor()), callback);
+            case TransactionAbortRequest req -> sendDoAbort(callback);
+            default -> super.handleForwardedRemoteRequest(request, callback);
         }
     }
 
@@ -373,20 +354,23 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     @Override
     void forwardToLocal(final LocalProxyTransaction successor, final TransactionRequest<?> request,
             final Consumer<Response<?, ?>> callback) {
-        if (request instanceof CommitLocalTransactionRequest) {
-            verifyLocalReadWrite(successor).sendRebased((CommitLocalTransactionRequest)request, callback);
-        } else if (request instanceof ModifyTransactionRequest) {
-            verifyLocalReadWrite(successor).handleForwardedRemoteRequest(request, callback);
-        } else {
-            super.forwardToLocal(successor, request, callback);
-            return;
+        switch (request) {
+            case CommitLocalTransactionRequest req -> verifyLocalReadWrite(successor).sendRebased(req, callback);
+            case ModifyTransactionRequest req ->
+                verifyLocalReadWrite(successor).handleForwardedRemoteRequest(req, callback);
+            default -> {
+                super.forwardToLocal(successor, request, callback);
+                return;
+            }
         }
         LOG.debug("Forwarded request {} to successor {}", request, successor);
     }
 
     private static LocalReadWriteProxyTransaction verifyLocalReadWrite(final LocalProxyTransaction successor) {
-        verify(successor instanceof LocalReadWriteProxyTransaction, "Unexpected successor %s", successor);
-        return (LocalReadWriteProxyTransaction) successor;
+        if (successor instanceof LocalReadWriteProxyTransaction local) {
+            return local;
+        }
+        throw new VerifyException("Unexpected successor " + successor);
     }
 
     @Override
@@ -416,7 +400,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
 
     private CommitLocalTransactionRequest rebaseCommit(final CommitLocalTransactionRequest request) {
         // Rebase old modification on new data tree.
-        final CursorAwareDataTreeModification mod = getModification();
+        final var mod = getModification();
 
         if (!(mod instanceof FailedDataTreeModification)) {
             request.getDelayedFailure().ifPresentOrElse(failure -> {
@@ -426,7 +410,7 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
                     recordedFailure.addSuppressed(failure);
                 }
             }, () -> {
-                try (DataTreeModificationCursor cursor = mod.openCursor()) {
+                try (var cursor = mod.openCursor()) {
                     request.getModification().applyToCursor(cursor);
                 }
             });
