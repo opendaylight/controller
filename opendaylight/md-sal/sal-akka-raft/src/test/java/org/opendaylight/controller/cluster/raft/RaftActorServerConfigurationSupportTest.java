@@ -36,6 +36,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
+import org.opendaylight.controller.cluster.raft.api.MemberInfo;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
@@ -1465,9 +1466,9 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         NonPersistentDataProvider noPersistence = new NonPersistentDataProvider(Runnable::run);
         ElectionTermImpl termInfo = new ElectionTermImpl(noPersistence, id, LOG);
         termInfo.update(1, LEADER_ID);
-        return new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
-                id, termInfo, -1, -1, Map.of(LEADER_ID, ""), configParams,
-                noPersistence, applyState -> actor.tell(applyState, actor), LOG,  MoreExecutors.directExecutor());
+        return new RaftActorContextImpl(actor, actor.underlyingActor().getContext(), new MemberInfo(id, (short) 0),
+            termInfo, -1, -1, Map.of(LEADER_ID, ""), configParams, noPersistence,
+            applyState -> actor.tell(applyState, actor), LOG,  MoreExecutors.directExecutor());
     }
 
     abstract static class AbstractMockRaftActor extends MockRaftActor {
