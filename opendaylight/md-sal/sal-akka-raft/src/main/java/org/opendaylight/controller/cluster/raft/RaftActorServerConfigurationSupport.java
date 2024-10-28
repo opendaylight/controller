@@ -67,29 +67,34 @@ class RaftActorServerConfigurationSupport {
     }
 
     boolean handleMessage(final Object message, final ActorRef sender) {
-        if (message instanceof AddServer addServer) {
-            onAddServer(addServer, sender);
-            return true;
-        } else if (message instanceof RemoveServer removeServer) {
-            onRemoveServer(removeServer, sender);
-            return true;
-        } else if (message instanceof ChangeServersVotingStatus changeServersVotingStatus) {
-            onChangeServersVotingStatus(changeServersVotingStatus, sender);
-            return true;
-        } else if (message instanceof ServerOperationTimeout serverOperationTimeout) {
-            currentOperationState.onServerOperationTimeout(serverOperationTimeout);
-            return true;
-        } else if (message instanceof UnInitializedFollowerSnapshotReply uninitFollowerSnapshotReply) {
-            currentOperationState.onUnInitializedFollowerSnapshotReply(uninitFollowerSnapshotReply);
-            return true;
-        } else if (message instanceof ApplyState applyState) {
-            return onApplyState(applyState);
-        } else if (message instanceof SnapshotComplete) {
-            currentOperationState.onSnapshotComplete();
-            return false;
-        } else {
-            return false;
-        }
+        return switch (message) {
+            case ApplyState msg -> onApplyState(msg);
+            case AddServer msg -> {
+                onAddServer(msg, sender);
+                yield true;
+            }
+            case RemoveServer msg -> {
+                onRemoveServer(msg, sender);
+                yield true;
+            }
+            case ChangeServersVotingStatus msg -> {
+                onChangeServersVotingStatus(msg, sender);
+                yield true;
+            }
+            case ServerOperationTimeout msg -> {
+                currentOperationState.onServerOperationTimeout(msg);
+                yield true;
+            }
+            case UnInitializedFollowerSnapshotReply msg -> {
+                currentOperationState.onUnInitializedFollowerSnapshotReply(msg);
+                yield true;
+            }
+            case SnapshotComplete msg -> {
+                currentOperationState.onSnapshotComplete();
+                yield false;
+            }
+            default -> false;
+        };
     }
 
     void onNewLeader(final String leaderId) {
