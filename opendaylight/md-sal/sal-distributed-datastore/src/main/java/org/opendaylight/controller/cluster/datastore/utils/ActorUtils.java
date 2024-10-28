@@ -148,7 +148,7 @@ public class ActorUtils {
             final PrimaryShardInfoFutureCache primaryShardInfoCache) {
         this(actorSystem, shardManager, clusterWrapper, configuration, datastoreContext, primaryShardInfoCache,
             new ShardStrategyFactory(configuration));
-}
+    }
 
     public ActorUtils(final ActorSystem actorSystem, final ActorRef shardManager, final ClusterWrapper clusterWrapper,
             final Configuration configuration, final ShardStrategyFactory shardStrategyFactory) {
