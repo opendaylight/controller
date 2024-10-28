@@ -22,6 +22,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStreamFactory;
+import org.opendaylight.controller.cluster.raft.api.MemberInfo;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
@@ -29,9 +30,8 @@ import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.slf4j.Logger;
 
 /**
- * The RaftActorContext contains that portion of the RaftActors state that
- * needs to be shared with it's behaviors. A RaftActorContext should NEVER be
- * used in any actor context outside the RaftActor that constructed it.
+ * The RaftActorContext contains that portion of the RaftActors state that needs to be shared with it's behaviors.
+ * A RaftActorContext should NEVER be used in any actor context outside the RaftActor that constructed it.
  */
 public interface RaftActorContext {
     /**
@@ -51,12 +51,21 @@ public interface RaftActorContext {
     ActorSelection actorSelection(String path);
 
     /**
-     * Returns the identifier for the RaftActor. This identifier represents the
-     * name of the actor whose common state is being shared.
+     * Return this {@link RaftActor}'s {@link MemberInfo}.
+     *
+     * @return a {@link MemberInfo} structure
+     */
+    @NonNull MemberInfo info();
+
+    /**
+     * Returns the identifier for the RaftActor. This identifier represents the name of the actor whose common state is
+     * being shared.
      *
      * @return the identifier
      */
-    String getId();
+    default String getId() {
+        return info().id();
+    }
 
     /**
      * Returns the reference to the RaftActor.
@@ -92,7 +101,6 @@ public interface RaftActorContext {
      * @return index of highest log entry known to be committed.
      */
     long getCommitIndex();
-
 
     /**
      * Sets the index of highest log entry known to be committed.
@@ -261,7 +269,10 @@ public interface RaftActorContext {
      *
      * @return the payload version.
      */
-    short getPayloadVersion();
+    default short getPayloadVersion() {
+        final var info = info();
+        return info != null ? info.payloadVersion() : -1;
+    }
 
     /**
      * Returns the RaftPolicy used to determine certain Raft behaviors.

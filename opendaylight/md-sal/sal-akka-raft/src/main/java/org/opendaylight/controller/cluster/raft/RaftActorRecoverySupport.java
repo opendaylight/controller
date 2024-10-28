@@ -58,25 +58,22 @@ class RaftActorRecoverySupport {
             hasMigratedDataRecovered = true;
         }
 
-        boolean recoveryComplete = false;
-        if (message instanceof UpdateElectionTerm updateElectionTerm) {
-            context.getTermInformation().update(updateElectionTerm.getCurrentTerm(), updateElectionTerm.getVotedFor());
-        } else if (message instanceof SnapshotOffer snapshotOffer) {
-            onRecoveredSnapshot(snapshotOffer);
-        } else if (message instanceof ReplicatedLogEntry replicatedLogEntry) {
-            onRecoveredJournalLogEntry(replicatedLogEntry);
-        } else if (message instanceof ApplyJournalEntries applyJournalEntries) {
-            onRecoveredApplyLogEntries(applyJournalEntries.getToIndex());
-        } else if (message instanceof DeleteEntries deleteEntries) {
-            onDeleteEntries(deleteEntries);
-        } else if (message instanceof ServerConfigurationPayload serverConfigurationPayload) {
-            context.updatePeerIds(serverConfigurationPayload);
-        } else if (message instanceof RecoveryCompleted) {
-            recoveryComplete = true;
-            onRecoveryCompletedMessage(persistentProvider);
+        switch (message) {
+            case SnapshotOffer msg -> onRecoveredSnapshot(msg);
+            case ReplicatedLogEntry msg -> onRecoveredJournalLogEntry(msg);
+            case ApplyJournalEntries msg -> onRecoveredApplyLogEntries(msg.getToIndex());
+            case DeleteEntries msg -> onDeleteEntries(msg);
+            case ServerConfigurationPayload msg -> context.updatePeerIds(msg);
+            case UpdateElectionTerm msg -> context.getTermInformation().update(msg.getCurrentTerm(), msg.getVotedFor());
+            case RecoveryCompleted msg -> {
+                onRecoveryCompletedMessage(persistentProvider);
+                return true;
+            }
+            default -> {
+                // No-op
+            }
         }
-
-        return recoveryComplete;
+        return false;
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
