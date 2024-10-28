@@ -28,6 +28,7 @@ import org.apache.pekko.cluster.Cluster;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStreamFactory;
+import org.opendaylight.controller.cluster.raft.api.MemberInfo;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
@@ -49,8 +50,6 @@ public class RaftActorContextImpl implements RaftActorContext {
     private final ActorContext context;
 
     private final @NonNull Executor executor;
-
-    private final String id;
 
     private final @NonNull ElectionTerm termInformation;
 
@@ -77,7 +76,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     private final DataPersistenceProvider persistenceProvider;
 
-    private short payloadVersion;
+    private @NonNull MemberInfo info;
 
     private boolean votingMember = true;
 
@@ -93,7 +92,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     private RaftActorLeadershipTransferCohort leadershipTransferCohort;
 
-    public RaftActorContextImpl(final ActorRef actor, final ActorContext context, final String id,
+    public RaftActorContextImpl(final ActorRef actor, final ActorContext context, final MemberInfo info,
             final @NonNull ElectionTerm termInformation, final long commitIndex, final long lastApplied,
             final @NonNull Map<String, String> peerAddresses,
             final @NonNull ConfigParams configParams, final @NonNull DataPersistenceProvider persistenceProvider,
@@ -101,7 +100,7 @@ public class RaftActorContextImpl implements RaftActorContext {
             final @NonNull Executor executor) {
         this.actor = actor;
         this.context = context;
-        this.id = id;
+        this.info = requireNonNull(info);
         this.termInformation = requireNonNull(termInformation);
         this.executor = requireNonNull(executor);
         this.commitIndex = commitIndex;
@@ -119,14 +118,14 @@ public class RaftActorContextImpl implements RaftActorContext {
         }
     }
 
-    @VisibleForTesting
-    public void setPayloadVersion(final short payloadVersion) {
-        this.payloadVersion = payloadVersion;
+    @Override
+    public @NonNull MemberInfo info() {
+        return info;
     }
 
-    @Override
-    public short getPayloadVersion() {
-        return payloadVersion;
+    @VisibleForTesting
+    public void setPayloadVersion(final short payloadVersion) {
+        info = new MemberInfo(info.id(), payloadVersion);
     }
 
     public void setConfigParams(final ConfigParams configParams) {
@@ -141,11 +140,6 @@ public class RaftActorContextImpl implements RaftActorContext {
     @Override
     public ActorSelection actorSelection(final String path) {
         return context.actorSelection(path);
-    }
-
-    @Override
-    public String getId() {
-        return id;
     }
 
     @Override
@@ -196,8 +190,8 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     public void setLastApplied(final long lastApplied) {
-        final Throwable stackTrace = log.isTraceEnabled() ? new Throwable() : null;
-        log.debug("{}: Moving last applied index from {} to {}", id, this.lastApplied, lastApplied, stackTrace);
+        final var stackTrace = log.isTraceEnabled() ? new Throwable() : null;
+        log.debug("{}: Moving last applied index from {} to {}", getId(), this.lastApplied, lastApplied, stackTrace);
         this.lastApplied = lastApplied;
     }
 
@@ -276,7 +270,7 @@ public class RaftActorContextImpl implements RaftActorContext {
         }
 
         votingMember = newVotingMember;
-        log.debug("{}: Updated server config: isVoting: {}, peers: {}", id, votingMember, peerInfoMap.values());
+        log.debug("{}: Updated server config: isVoting: {}, peers: {}", getId(), votingMember, peerInfoMap.values());
 
         setDynamicServerConfigurationInUse();
     }
