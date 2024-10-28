@@ -487,18 +487,34 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     private void handleBehaviorChange(final BehaviorState oldBehaviorState, final RaftActorBehavior currentBehavior) {
-        RaftActorBehavior oldBehavior = oldBehaviorState.getBehavior();
-
-        if (oldBehavior != currentBehavior) {
-            onStateChanged();
+        final @Nullable String lastLeaderId;
+        final @Nullable String lastValidLeaderId;
+        final @Nullable String oldBehaviorStateName;
+        final var oldBehavior = oldBehaviorState.getBehavior();
+        if (oldBehavior != null) {
+            lastLeaderId = oldBehaviorState.getLastLeaderId();
+            lastValidLeaderId = oldBehaviorState.getLastValidLeaderId();
+            oldBehaviorStateName = oldBehavior.state().name();
+        } else {
+            lastLeaderId = null;
+            lastValidLeaderId = null;
+            oldBehaviorStateName = null;
         }
 
-        String lastLeaderId = oldBehavior == null ? null : oldBehaviorState.getLastLeaderId();
-        String lastValidLeaderId = oldBehavior == null ? null : oldBehaviorState.getLastValidLeaderId();
-        String oldBehaviorStateName = oldBehavior == null ? null : oldBehavior.state().name();
+        final var leaderId = currentBehavior.getLeaderId();
+        if (oldBehavior != currentBehavior) {
+            if (leaderId != null) {
+                if (leaderId.equals(context.getId())) {
+                    onChangedToLeader();
+                } else {
+                    onChangedToDifferentLeader(leaderId, lastValidLeaderId);
+                }
+            } else {
+                onChangedToNoLeader();
+            }
+        }
 
         // it can happen that the state has not changed but the leader has changed.
-        final var leaderId = currentBehavior.getLeaderId();
         final var roleChangeNotifier = roleChangeNotifier();
         if (!Objects.equals(lastLeaderId, leaderId)
                 || oldBehaviorState.getLeaderPayloadVersion() != currentBehavior.getLeaderPayloadVersion()) {
@@ -507,9 +523,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                     currentBehavior.getLeaderPayloadVersion()), getSelf());
             }
 
-            onLeaderChanged(lastValidLeaderId, leaderId);
+            onChangedToDifferentLeader(leaderId, lastValidLeaderId);
 
-            final var leadershipTransferInProgress = context.getRaftActorLeadershipTransferCohort();
+            var leadershipTransferInProgress = context.getRaftActorLeadershipTransferCohort();
             if (leadershipTransferInProgress != null) {
                 leadershipTransferInProgress.onNewLeader(leaderId);
             }
@@ -518,7 +534,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         }
 
         if (roleChangeNotifier != null && (oldBehavior == null || oldBehavior.state() != currentBehavior.state())) {
-            roleChangeNotifier.tell(new RoleChanged(getId(), oldBehaviorStateName ,
+            roleChangeNotifier.tell(new RoleChanged(getId(), oldBehaviorStateName,
                 currentBehavior.state().name()), getSelf());
         }
     }
@@ -811,11 +827,24 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     protected abstract @NonNull RaftActorSnapshotCohort getRaftActorSnapshotCohort();
 
     /**
-     * This method will be called by the RaftActor when the state of the
-     * RaftActor changes. The derived actor can then use methods like
-     * isLeader or getLeader to do something useful
+     * This method will be invoked by RaftActor when the behaviour changes to leader
      */
-    protected abstract void onStateChanged();
+    protected abstract void onChangedToLeader();
+
+    /**
+     * This method will be invoked by RaftActor when the behaviour changes to being a candidate/follower with a known
+     * different leader.
+     *
+     * @param newLeader new leader's ID
+     * @param oldLeader old leader's ID, or {@code null} if not known
+     */
+    protected abstract void onChangedToDifferentLeader(@NonNull String newLeader, @Nullable String oldLeader);
+
+    /**
+     * This method will be invoked by RaftActor when the behaviour changes to being a candidate/follower without
+     * a leader.
+     */
+    protected abstract void onChangedToNoLeader();
 
     /**
      * Notifier Actor for this RaftActor to notify when a role change happens.
@@ -854,9 +883,6 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
      */
     protected void unpauseLeader() {
 
-    }
-
-    protected void onLeaderChanged(final String oldLeader, final String newLeader) {
     }
 
     private String getLeaderAddress() {

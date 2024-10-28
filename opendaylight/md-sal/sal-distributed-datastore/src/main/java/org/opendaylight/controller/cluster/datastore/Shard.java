@@ -712,28 +712,21 @@ public class Shard extends RaftActor {
     }
 
     @Override
-    protected final void onStateChanged() {
-        boolean isLeader = isLeader();
-        boolean hasLeader = hasLeader();
-        treeChangeSupport.onLeadershipChange(isLeader, hasLeader);
-
-        // If this actor is no longer the leader close all the transaction chains
-        if (!isLeader) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(
-                    "{}: onStateChanged: Closing all transaction chains because shard {} is no longer the leader",
-                    persistenceId(), getId());
-            }
-
-            paused = false;
-            store.purgeLeaderState();
-        }
+    protected final void onChangedToLeader() {
+        treeChangeSupport.onLeadershipChange(true, true);
     }
 
     @Override
-    protected final void onLeaderChanged(final String oldLeader, final String newLeader) {
+    protected final void onChangedToNoLeader() {
+        treeChangeSupport.onLeadershipChange(false, false);
+        ensureNoLeaderState();
+    }
+
+    @Override
+    protected final void onChangedToDifferentLeader(final String newLeader, final String oldLeader) {
         shardMBean.incrementLeadershipChangeCount();
-        paused = false;
+        treeChangeSupport.onLeadershipChange(false, true);
+        ensureNoLeaderState();
 
         if (!isLeader()) {
             if (!knownFrontends.isEmpty()) {
@@ -747,6 +740,18 @@ public class Shard extends RaftActor {
             knownFrontends = verifyNotNull(frontendMetadata.toLeaderState(this));
             LOG.debug("{}: became leader with frontend state for {}", persistenceId(), knownFrontends.keySet());
         }
+    }
+
+    private void ensureNoLeaderState() {
+        // If this actor is no longer the leader close all the transaction chains
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(
+                "{}: onStateChanged: Closing all transaction chains because shard {} is no longer the leader",
+                persistenceId(), getId());
+        }
+
+        paused = false;
+        store.purgeLeaderState();
     }
 
     @Override

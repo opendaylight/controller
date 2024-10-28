@@ -204,8 +204,18 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     @Override
-    protected void onStateChanged() {
-        actorDelegate.onStateChanged();
+    protected void onChangedToLeader() {
+        actorDelegate.onChangedToLeader();
+    }
+
+    @Override
+    protected void onChangedToDifferentLeader(final String newLeader, final String oldLeader) {
+        actorDelegate.onChangedToDifferentLeader(newLeader, oldLeader);
+    }
+
+    @Override
+    protected void onChangedToNoLeader() {
+        actorDelegate.onChangedToNoLeader();
     }
 
     @Override
