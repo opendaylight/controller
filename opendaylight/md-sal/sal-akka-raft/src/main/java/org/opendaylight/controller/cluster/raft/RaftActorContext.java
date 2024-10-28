@@ -16,12 +16,12 @@ import java.util.function.LongSupplier;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.ActorSystem;
-import org.apache.pekko.actor.Props;
 import org.apache.pekko.cluster.Cluster;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStreamFactory;
+import org.opendaylight.controller.cluster.raft.api.RaftActorAccess;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
@@ -33,23 +33,7 @@ import org.slf4j.Logger;
  * needs to be shared with it's behaviors. A RaftActorContext should NEVER be
  * used in any actor context outside the RaftActor that constructed it.
  */
-public interface RaftActorContext {
-    /**
-     * Creates a new local actor.
-     *
-     * @param props the Props used to create the actor.
-     * @return a reference to the newly created actor.
-     */
-    ActorRef actorOf(Props props);
-
-    /**
-     * Creates an actor selection.
-     *
-     * @param path the path.
-     * @return an actor selection for the given actor path.
-     */
-    ActorSelection actorSelection(String path);
-
+public interface RaftActorContext extends RaftActorAccess {
     /**
      * Returns the identifier for the RaftActor. This identifier represents the
      * name of the actor whose common state is being shared.
@@ -65,6 +49,11 @@ public interface RaftActorContext {
      */
     ActorRef getActor();
 
+    @Override
+    default ActorRef raftActor() {
+        return getActor();
+    }
+
     /**
      * Return an Executor which is guaranteed to run tasks in the context of {@link #getActor()}.
      *
@@ -72,12 +61,22 @@ public interface RaftActorContext {
      */
     @NonNull Executor getExecutor();
 
+    @Override
+    default Executor executor() {
+        return getExecutor();
+    }
+
     /**
      * The akka Cluster singleton for the actor system if one is configured.
      *
      * @return an Optional containing the Cluster instance is present.
      */
     Optional<Cluster> getCluster();
+
+    @Override
+    default Cluster cluster() {
+        return getCluster().orElse(null);
+    }
 
     /**
      * Returns the current ElectionTerm information.
@@ -135,6 +134,11 @@ public interface RaftActorContext {
      * @return the ActorSystem.
      */
     @NonNull ActorSystem getActorSystem();
+
+    @Override
+    default ActorSystem actorSystem() {
+        return getActorSystem();
+    }
 
     /**
      * Returns the logger to be used for logging messages.
