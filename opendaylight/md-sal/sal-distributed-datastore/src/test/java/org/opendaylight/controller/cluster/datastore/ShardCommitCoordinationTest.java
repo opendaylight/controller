@@ -24,19 +24,29 @@ import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.o
 
 import com.google.common.collect.ImmutableSortedSet;
 import java.time.Duration;
+import java.util.Map;
 import java.util.SortedSet;
+import java.util.concurrent.TimeUnit;
 import org.apache.pekko.dispatch.Dispatchers;
 import org.apache.pekko.testkit.TestActorRef;
 import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.cluster.databroker.actors.dds.DistributedDataStoreClientActor;
+import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
+import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
+import org.opendaylight.controller.cluster.datastore.config.ModuleConfig;
+import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfigProvider;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionReply;
+import org.opendaylight.controller.cluster.datastore.shardmanager.RegisterForShardAvailabilityChanges;
+import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
+import org.opendaylight.controller.cluster.datastore.utils.MockClusterWrapper;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
@@ -51,6 +61,13 @@ import org.slf4j.LoggerFactory;
 @Deprecated(since = "9.0.0", forRemoval = true)
 public class ShardCommitCoordinationTest extends AbstractShardTest {
     private static final Logger LOG = LoggerFactory.getLogger(ShardCommitCoordinationTest.class);
+    private static final int HEARTBEAT_MILLIS = 100;
+
+    private final Builder datastoreContextBuilder = DatastoreContext.newBuilder()
+        .shardJournalRecoveryLogBatchSize(3)
+        .shardSnapshotBatchCount(5000)
+        .shardHeartbeatIntervalInMillis(HEARTBEAT_MILLIS);
+
 
     /**
      * Test 2 tx's accessing the same shards.
@@ -71,43 +88,49 @@ public class ShardCommitCoordinationTest extends AbstractShardTest {
         final String testName = "testTwoTransactionsWithSameTwoParticipatingShards";
         LOG.info("{} starting", testName);
 
+        final var memberName = MemberName.forName(testName);
+        final var shardAId = ShardIdentifier.create("shardA", memberName, "config");
+        final var shardBId = ShardIdentifier.create("shardB", memberName, "config");
+        final ModuleShardConfigProvider shardConfig = configuration -> Map.of(
+            shardAId.getShardName(), ModuleConfig.builder("moduleA"),
+            shardBId.getShardName(), ModuleConfig.builder("moduleB"));
+
+        final var shardManager = new TestKit(getSystem());
+        final var actorUtils = new ActorUtils(getSystem(), shardManager.getRef(), new MockClusterWrapper(memberName),
+            new ConfigurationImpl(shardConfig));
+        final var clientActor = getSystem().actorOf(
+            DistributedDataStoreClientActor.props(memberName, actorUtils.getDataStoreName(), actorUtils));
+        final var client = DistributedDataStoreClientActor.getDistributedDataStoreClient(clientActor,
+            30, TimeUnit.SECONDS);
+
+        final var shardAvailReg = shardManager.expectMsgClass(Duration.ofSeconds(1),
+            RegisterForShardAvailabilityChanges.class);
+        shardAvailReg.getCallback().accept(shardAId.getShardName());
+        shardAvailReg.getCallback().accept(shardBId.getShardName());
+
         final TestKit kit1 = new TestKit(getSystem());
         final TestKit kit2 = new TestKit(getSystem());
-
-        final ShardIdentifier shardAId = ShardIdentifier.create("shardA", MemberName.forName(testName), "config");
-        final ShardIdentifier shardBId = ShardIdentifier.create("shardB", MemberName.forName(testName), "config");
-
         final TestActorRef<Shard> shardA = actorFactory.createTestActor(
                 newShardBuilder().id(shardAId).props().withDispatcher(Dispatchers.DefaultDispatcherId()));
-        ShardTestKit.waitUntilLeader(shardA);
-
         final TestActorRef<Shard> shardB = actorFactory.createTestActor(
                 newShardBuilder().id(shardBId).props().withDispatcher(Dispatchers.DefaultDispatcherId()));
+        ShardTestKit.waitUntilLeader(shardA);
         ShardTestKit.waitUntilLeader(shardB);
 
-        final TransactionIdentifier txId1 = nextTransactionId();
-        final TransactionIdentifier txId2 = nextTransactionId();
+        final var tx1 = client.createTransaction();
+        final var txId1 = tx1.getIdentifier();
+        tx1.write(TEST_PATH, EMPTY_TEST);
 
-        SortedSet<String> participatingShardNames = ImmutableSortedSet.of(shardAId.getShardName(),
-                shardBId.getShardName());
 
-        // Ready [tx1, tx2] on shard A.
 
-        shardA.tell(newReadyBatchedModifications(txId1, TEST_PATH, EMPTY_TEST, participatingShardNames), kit1.getRef());
-        kit1.expectMsgClass(ReadyTransactionReply.class);
+        final var tx2 = client.createTransaction();
+        final var txId2 = tx2.getIdentifier();
+        tx2.write(OUTER_LIST_PATH, outerNode(1));
 
-        shardA.tell(newReadyBatchedModifications(txId2, OUTER_LIST_PATH, outerNode(1),
-                participatingShardNames), kit2.getRef());
-        kit2.expectMsgClass(ReadyTransactionReply.class);
+        // Ready [tx1, tx2] on shard A and shard B
+        final var cohort1 = tx1.ready();
+        final var cohort2 = tx2.ready();
 
-        // Ready [tx2, tx1] on shard B.
-
-        shardB.tell(newReadyBatchedModifications(txId2, OUTER_LIST_PATH, outerNode(1),
-                participatingShardNames), kit2.getRef());
-        kit2.expectMsgClass(ReadyTransactionReply.class);
-
-        shardB.tell(newReadyBatchedModifications(txId1, TEST_PATH, EMPTY_TEST, participatingShardNames), kit1.getRef());
-        kit1.expectMsgClass(ReadyTransactionReply.class);
 
         // Send tx2 CanCommit to A - tx1 is at the head of the queue so tx2 should not proceed as A is the first shard
         // in the participating shard list.
