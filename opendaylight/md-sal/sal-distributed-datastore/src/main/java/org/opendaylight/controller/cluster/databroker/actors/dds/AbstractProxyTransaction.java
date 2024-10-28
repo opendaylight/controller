@@ -13,13 +13,13 @@ import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.base.VerifyException;
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.Iterator;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.CountDownLatch;
@@ -44,7 +44,6 @@ import org.opendaylight.controller.cluster.access.commands.TransactionPreCommitR
 import org.opendaylight.controller.cluster.access.commands.TransactionPreCommitSuccess;
 import org.opendaylight.controller.cluster.access.commands.TransactionPurgeRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
-import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -405,9 +404,11 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
     }
 
     private SuccessorState getSuccessorState() {
-        final State local = state;
-        verify(local instanceof SuccessorState, "State %s has unexpected class", local);
-        return (SuccessorState) local;
+        final var local = state;
+        if (local instanceof SuccessorState successor) {
+            return successor;
+        }
+        throw new VerifyException("State " + local + " has unexpected class");
     }
 
     private void checkReadWrite() {
@@ -421,9 +422,8 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
     }
 
     final void recordFinishedRequest(final Response<?, ?> response) {
-        final Object last = successfulRequests.peekLast();
-        if (last instanceof IncrementSequence) {
-            ((IncrementSequence) last).incrementDelta();
+        if (successfulRequests.peekLast() instanceof IncrementSequence incr) {
+            incr.incrementDelta();
         } else {
             successfulRequests.addLast(new IncrementSequence(response.getSequence()));
         }
@@ -533,17 +533,14 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
         // Precludes startReconnect() from interfering with the fast path
         synchronized (this) {
             if (STATE_UPDATER.compareAndSet(this, SEALED, FLUSHED)) {
-                final TransactionRequest<?> req = verifyNotNull(commitRequest(true));
+                final var req = verifyNotNull(commitRequest(true));
 
                 sendRequest(req, t -> {
-                    if (t instanceof TransactionCanCommitSuccess) {
-                        ret.voteYes();
-                    } else if (t instanceof RequestFailure) {
-                        ret.voteNo(((RequestFailure<?, ?>) t).getCause().unwrap());
-                    } else {
-                        ret.voteNo(unhandledResponseException(t));
+                    switch (t) {
+                        case TransactionCanCommitSuccess success -> ret.voteYes();
+                        case RequestFailure<?, ?> failure -> ret.voteNo(failure.getCause().unwrap());
+                        default -> ret.voteNo(unhandledResponseException(t));
                     }
-
                     recordSuccessfulRequest(req);
                     LOG.debug("Transaction {} canCommit completed", this);
                 });
@@ -564,17 +561,13 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
         checkReadWrite();
         checkSealed();
 
-        final TransactionRequest<?> req = new TransactionPreCommitRequest(getIdentifier(), nextSequence(),
-            localActor());
+        final var req = new TransactionPreCommitRequest(getIdentifier(), nextSequence(), localActor());
         sendRequest(req, t -> {
-            if (t instanceof TransactionPreCommitSuccess) {
-                ret.voteYes();
-            } else if (t instanceof RequestFailure) {
-                ret.voteNo(((RequestFailure<?, ?>) t).getCause().unwrap());
-            } else {
-                ret.voteNo(unhandledResponseException(t));
+            switch (t) {
+                case TransactionPreCommitSuccess success -> ret.voteYes();
+                case RequestFailure<?, ?> failure -> ret.voteNo(failure.getCause().unwrap());
+                default -> ret.voteNo(unhandledResponseException(t));
             }
-
             onPreCommitComplete(req);
         });
     }
@@ -600,14 +593,11 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
         checkSealed();
 
         sendRequest(new TransactionDoCommitRequest(getIdentifier(), nextSequence(), localActor()), t -> {
-            if (t instanceof TransactionCommitSuccess) {
-                ret.voteYes();
-            } else if (t instanceof RequestFailure) {
-                ret.voteNo(((RequestFailure<?, ?>) t).getCause().unwrap());
-            } else {
-                ret.voteNo(unhandledResponseException(t));
+            switch (t) {
+                case TransactionCommitSuccess success -> ret.voteYes();
+                case RequestFailure<?, ?> failure -> ret.voteNo(failure.getCause().unwrap());
+                default -> ret.voteNo(unhandledResponseException(t));
             }
-
             LOG.debug("Transaction {} doCommit completed", this);
 
             // Needed for ProxyHistory$Local data tree rebase points.
@@ -629,14 +619,11 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
     final void enqueuePurge(final Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
         LOG.debug("{}: initiating purge", this);
 
-        final State prev = state;
-        if (prev instanceof SuccessorState) {
-            ((SuccessorState) prev).setDone();
-        } else {
-            final boolean success = STATE_UPDATER.compareAndSet(this, prev, DONE);
-            if (!success) {
-                LOG.warn("{}: moved from state {} while we were purging it", this, prev);
-            }
+        final var prev = state;
+        if (prev instanceof SuccessorState successor) {
+            successor.setDone();
+        } else if (!STATE_UPDATER.compareAndSet(this, prev, DONE)) {
+            LOG.warn("{}: moved from state {} while we were purging it", this, prev);
         }
 
         successfulRequests.clear();
@@ -655,12 +642,13 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
     final synchronized void startReconnect() {
         // At this point canCommit/directCommit are blocked, we assert a new successor state, retrieving the previous
         // state. This method is called with the queue still unlocked.
-        final SuccessorState nextState = new SuccessorState();
-        final State prevState = STATE_UPDATER.getAndSet(this, nextState);
+        final var nextState = new SuccessorState();
+        final var prevState = STATE_UPDATER.getAndSet(this, nextState);
 
         LOG.debug("Start reconnect of proxy {} previous state {}", this, prevState);
-        verify(!(prevState instanceof SuccessorState), "Proxy %s duplicate reconnect attempt after %s", this,
-            prevState);
+        if (prevState instanceof SuccessorState successor) {
+            throw new VerifyException("Proxy " + this + " duplicate reconnect attempt after " + successor);
+        }
 
         // We have asserted a slow-path state, seal(), canCommit(), directCommit() are forced to slow paths, which will
         // wait until we unblock nextState's latch before accessing state. Now we record prevState for later use and we
@@ -670,11 +658,11 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
 
     // Called with the connection locked
     final void replayMessages(final ProxyHistory successorHistory, final Iterable<ConnectionEntry> enqueuedEntries) {
-        final SuccessorState local = getSuccessorState();
-        final State prevState = local.getPrevState();
+        final var local = getSuccessorState();
+        final var prevState = local.getPrevState();
 
-        final AbstractProxyTransaction successor = successorHistory.createTransactionProxy(getIdentifier(),
-            isSnapshotOnly(), local.isDone());
+        final var successor = successorHistory.createTransactionProxy(getIdentifier(), isSnapshotOnly(),
+            local.isDone());
         LOG.debug("{} created successor {}", this, successor);
         local.setSuccessor(successor);
 
@@ -684,20 +672,22 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
             // nor create timing inconsistencies in the queue -- requests are expected to be ordered by their enqueue
             // time. We will pick the time of the first entry available. If there is none, we will just use current
             // time, as all other requests will get enqueued afterwards.
-            final ConnectionEntry firstInQueue = Iterables.getFirst(enqueuedEntries, null);
+            final var firstInQueue = Iterables.getFirst(enqueuedEntries, null);
             final long now = firstInQueue != null ? firstInQueue.getEnqueuedTicks() : parent.currentTime();
 
-            for (Object obj : successfulRequests) {
-                if (obj instanceof TransactionRequest) {
-                    LOG.debug("Forwarding successful request {} to successor {}", obj, successor);
-                    successor.doReplayRequest((TransactionRequest<?>) obj, resp -> { /*NOOP*/ }, now);
-                } else {
-                    verify(obj instanceof IncrementSequence);
-                    final IncrementSequence increment = (IncrementSequence) obj;
-                    successor.doReplayRequest(new IncrementTransactionSequenceRequest(getIdentifier(),
-                        increment.getSequence(), localActor(), isSnapshotOnly(),
-                        increment.getDelta()), resp -> { /*NOOP*/ }, now);
-                    LOG.debug("Incrementing sequence {} to successor {}", obj, successor);
+            for (var obj : successfulRequests) {
+                switch (obj) {
+                    case TransactionRequest<?> req -> {
+                        LOG.debug("Forwarding successful request {} to successor {}", req, successor);
+                        successor.doReplayRequest(req, resp -> { /*NOOP*/ }, now);
+                    }
+                    case IncrementSequence req -> {
+                        successor.doReplayRequest(new IncrementTransactionSequenceRequest(getIdentifier(),
+                            req.getSequence(), localActor(), isSnapshotOnly(), req.getDelta()), resp -> { /*NOOP*/ },
+                            now);
+                        LOG.debug("Incrementing sequence {} to successor {}", obj, successor);
+                    }
+                    default -> throw new VerifyException("Unexpected request " + obj);
                 }
             }
             LOG.debug("{} replayed {} successful requests", getIdentifier(), successfulRequests.size());
@@ -705,16 +695,19 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
         }
 
         // Now replay whatever is in the connection
-        final Iterator<ConnectionEntry> it = enqueuedEntries.iterator();
+        final var it = enqueuedEntries.iterator();
         while (it.hasNext()) {
-            final ConnectionEntry e = it.next();
-            final Request<?, ?> req = e.getRequest();
+            final var eentry = it.next();
+            final var req = eentry.getRequest();
 
             if (getIdentifier().equals(req.getTarget())) {
-                verify(req instanceof TransactionRequest, "Unhandled request %s", req);
-                LOG.debug("Replaying queued request {} to successor {}", req, successor);
-                successor.doReplayRequest((TransactionRequest<?>) req, e.getCallback(), e.getEnqueuedTicks());
-                it.remove();
+                if (req instanceof TransactionRequest<?> tx) {
+                    LOG.debug("Replaying queued request {} to successor {}", req, successor);
+                    successor.doReplayRequest(tx, eentry.getCallback(), eentry.getEnqueuedTicks());
+                    it.remove();
+                } else {
+                    throw new VerifyException("Unhandled request " + req);
+                }
             }
         }
 
@@ -726,10 +719,7 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
         if (SEALED.equals(prevState)) {
             LOG.debug("Proxy {} reconnected while being sealed, propagating state to successor {}", this, successor);
             final long enqueuedTicks = parent.currentTime();
-            final Optional<ModifyTransactionRequest> optState = flushState();
-            if (optState.isPresent()) {
-                successor.handleReplayedRemoteRequest(optState.orElseThrow(), null, enqueuedTicks);
-            }
+            flushState().ifPresent(toFlush -> successor.handleReplayedRemoteRequest(toFlush, null, enqueuedTicks));
             if (successor.markSealed()) {
                 successor.sealAndSend(OptionalLong.of(enqueuedTicks));
             }
@@ -748,8 +738,8 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
      */
     private void doReplayRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback,
             final long enqueuedTicks) {
-        if (request instanceof AbstractLocalTransactionRequest) {
-            handleReplayedLocalRequest((AbstractLocalTransactionRequest<?>) request, callback, enqueuedTicks);
+        if (request instanceof AbstractLocalTransactionRequest<?> req) {
+            handleReplayedLocalRequest(req, callback, enqueuedTicks);
         } else {
             handleReplayedRemoteRequest(request, callback, enqueuedTicks);
         }
@@ -777,12 +767,9 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
 
     final void forwardToSuccessor(final AbstractProxyTransaction successor, final TransactionRequest<?> request,
             final Consumer<Response<?, ?>> callback) {
-        if (successor instanceof LocalProxyTransaction) {
-            forwardToLocal((LocalProxyTransaction)successor, request, callback);
-        } else if (successor instanceof RemoteProxyTransaction) {
-            forwardToRemote((RemoteProxyTransaction)successor, request, callback);
-        } else {
-            throw new IllegalStateException("Unhandled successor " + successor);
+        switch (successor) {
+            case LocalProxyTransaction local -> forwardToLocal(local, request, callback);
+            case RemoteProxyTransaction remote -> forwardToRemote(remote, request, callback);
         }
     }
 
