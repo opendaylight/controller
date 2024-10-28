@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.apache.pekko.actor.ActorRef;
-import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.Cancellable;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.base.messages.LeaderTransitioning;
@@ -85,14 +84,14 @@ public class RaftActorLeadershipTransferCohort {
 
         transferTimer.start();
 
-        Optional<ActorRef> roleChangeNotifier = raftActor.getRoleChangeNotifier();
-        if (roleChangeNotifier.isPresent()) {
-            roleChangeNotifier.orElseThrow().tell(raftActor.newLeaderStateChanged(context.getId(), null,
-                    currentBehavior.getLeaderPayloadVersion()), raftActor.self());
+        final var roleChangeNotifier = raftActor.roleChangeNotifier();
+        if (roleChangeNotifier != null) {
+            roleChangeNotifier.tell(raftActor.newLeaderStateChanged(context.getId(), null,
+                currentBehavior.getLeaderPayloadVersion()), raftActor.self());
         }
 
-        for (String peerId: context.getPeerIds()) {
-            ActorSelection followerActor = context.getPeerActorSelection(peerId);
+        for (String peerId : context.getPeerIds()) {
+            final var followerActor = context.getPeerActorSelection(peerId);
             if (followerActor != null) {
                 followerActor.tell(new LeaderTransitioning(context.getId()), context.getActor());
             }
