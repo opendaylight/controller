@@ -17,7 +17,10 @@ import org.opendaylight.controller.cluster.datastore.persisted.AbstractIdentifia
 
 /**
  * Serialization proxy for {@link DisableTrackingPayload}.
+ *
+ * @deprecated This serial form is never emitted and will be removed with {@link DisableTrackingPayload}.
  */
+@Deprecated(since = "11.0.0", forRemoval = true)
 final class DT implements SerialForm {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
@@ -28,10 +31,6 @@ final class DT implements SerialForm {
     @SuppressWarnings("checkstyle:RedundantModifier")
     public DT() {
         // For Externalizable
-    }
-
-    DT(final byte[] bytes) {
-        this.bytes = requireNonNull(bytes);
     }
 
     @Override
