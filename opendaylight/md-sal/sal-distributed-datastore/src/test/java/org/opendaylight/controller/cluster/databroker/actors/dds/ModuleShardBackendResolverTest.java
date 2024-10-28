@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -17,23 +18,19 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.List;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import org.apache.pekko.actor.ActorRef;
-import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.actor.Status;
 import org.apache.pekko.testkit.TestProbe;
 import org.apache.pekko.testkit.javadsl.TestKit;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.opendaylight.controller.cluster.access.commands.ConnectClientFailure;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.opendaylight.controller.cluster.access.commands.ConnectClientRequest;
 import org.opendaylight.controller.cluster.access.commands.ConnectClientSuccess;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
@@ -51,20 +48,15 @@ import org.opendaylight.controller.cluster.datastore.utils.PrimaryShardInfoFutur
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
+import scala.concurrent.Future;
 import scala.concurrent.Promise;
 
-@RunWith(MockitoJUnitRunner.StrictStubs.class)
-public class ModuleShardBackendResolverTest {
-
+@ExtendWith(MockitoExtension.class)
+class ModuleShardBackendResolverTest {
     private static final MemberName MEMBER_NAME = MemberName.forName("member-1");
     private static final FrontendType FRONTEND_TYPE = FrontendType.forName("type-1");
     private static final FrontendIdentifier FRONTEND_ID = FrontendIdentifier.create(MEMBER_NAME, FRONTEND_TYPE);
     private static final ClientIdentifier CLIENT_ID = ClientIdentifier.create(FRONTEND_ID, 0);
-
-    private ActorSystem system;
-    private ModuleShardBackendResolver moduleShardBackendResolver;
-    private TestProbe contextProbe;
-    private TestProbe shardManagerProbe;
 
     @Mock
     private ShardStrategyFactory shardStrategyFactory;
@@ -72,107 +64,121 @@ public class ModuleShardBackendResolverTest {
     private ShardStrategy shardStrategy;
     @Mock
     private DataTree dataTree;
+    @Mock
+    private ActorUtils actorUtils;
+    @Mock
+    private Consumer<Long> mockCallback;
+    @Mock
+    private Registration mockReg;
 
-    @Before
-    public void setUp() {
+    private ActorSystem system;
+    private ModuleShardBackendResolver moduleShardBackendResolver;
+    private TestProbe contextProbe;
+    private TestProbe shardManagerProbe;
+    private Future<PrimaryShardInfo> future;
+
+    @BeforeEach
+    void beforeEach() {
         system = ActorSystem.apply();
         contextProbe = new TestProbe(system, "context");
-
         shardManagerProbe = new TestProbe(system, "ShardManager");
-
-        final ActorUtils actorUtils = createActorUtilsMock(system, contextProbe.ref());
+        future = Promise.successful(new PrimaryShardInfo(system.actorSelection(contextProbe.ref().path()), (short) 0))
+            .future();
         doReturn(shardManagerProbe.ref()).when(actorUtils).getShardManager();
-
         moduleShardBackendResolver = new ModuleShardBackendResolver(CLIENT_ID, actorUtils);
-        doReturn(shardStrategyFactory).when(actorUtils).getShardStrategyFactory();
-        doReturn(shardStrategy).when(shardStrategyFactory).getStrategy(YangInstanceIdentifier.of());
-        final PrimaryShardInfoFutureCache cache = new PrimaryShardInfoFutureCache();
-        doReturn(cache).when(actorUtils).getPrimaryShardInfoCache();
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void afterEach() {
         TestKit.shutdownActorSystem(system);
     }
 
     @Test
-    public void testResolveShardForPathNonNullCookie() {
+    void testResolveShardForPathNonNullCookie() {
         doReturn(DefaultShardStrategy.DEFAULT_SHARD).when(shardStrategy).findShard(YangInstanceIdentifier.of());
-        final Long cookie = moduleShardBackendResolver.resolveShardForPath(YangInstanceIdentifier.of());
+        doReturn(shardStrategyFactory).when(actorUtils).getShardStrategyFactory();
+        doReturn(shardStrategy).when(shardStrategyFactory).getStrategy(YangInstanceIdentifier.of());
+
+        final var cookie = moduleShardBackendResolver.resolveShardForPath(YangInstanceIdentifier.of());
         assertEquals(0L, (long) cookie);
     }
 
     @Test
-    public void testResolveShardForPathNullCookie() {
+    void testResolveShardForPathNullCookie() {
         doReturn("foo").when(shardStrategy).findShard(YangInstanceIdentifier.of());
-        final Long cookie = moduleShardBackendResolver.resolveShardForPath(YangInstanceIdentifier.of());
+        doReturn(shardStrategyFactory).when(actorUtils).getShardStrategyFactory();
+        doReturn(shardStrategy).when(shardStrategyFactory).getStrategy(YangInstanceIdentifier.of());
+
+        final var cookie = moduleShardBackendResolver.resolveShardForPath(YangInstanceIdentifier.of());
         assertEquals(1L, (long) cookie);
     }
 
     @Test
-    public void testGetBackendInfo() throws Exception {
-        final CompletionStage<ShardBackendInfo> i = moduleShardBackendResolver.getBackendInfo(0L);
+    void testGetBackendInfo() throws Exception {
+        doReturn(future).when(actorUtils).findPrimaryShardAsync(DefaultShardStrategy.DEFAULT_SHARD);
+
+        final var initial = moduleShardBackendResolver.getBackendInfo(0L);
         contextProbe.expectMsgClass(ConnectClientRequest.class);
-        final TestProbe backendProbe = new TestProbe(system, "backend");
-        final ConnectClientSuccess msg = new ConnectClientSuccess(CLIENT_ID, 0L, backendProbe.ref(),
-                List.of(), dataTree, 3);
+        final var backendProbe = new TestProbe(system, "backend");
+        final var msg = new ConnectClientSuccess(CLIENT_ID, 0L, backendProbe.ref(), List.of(), dataTree, 3);
         contextProbe.reply(msg);
-        final CompletionStage<ShardBackendInfo> stage = moduleShardBackendResolver.getBackendInfo(0L);
-        final ShardBackendInfo shardBackendInfo = TestUtils.getWithTimeout(stage.toCompletableFuture());
+        assertSame(initial, moduleShardBackendResolver.getBackendInfo(0L));
+
+        final var shardBackendInfo = TestUtils.getWithTimeout(initial.toCompletableFuture());
         assertEquals(0L, shardBackendInfo.getCookie().longValue());
         assertEquals(dataTree, shardBackendInfo.getDataTree().orElseThrow());
         assertEquals(DefaultShardStrategy.DEFAULT_SHARD, shardBackendInfo.getName());
     }
 
     @Test
-    public void testGetBackendInfoFail() throws Exception {
-        final CompletionStage<ShardBackendInfo> i = moduleShardBackendResolver.getBackendInfo(0L);
-        final ConnectClientRequest req = contextProbe.expectMsgClass(ConnectClientRequest.class);
-        final RuntimeException cause = new RuntimeException();
-        final ConnectClientFailure response = req.toRequestFailure(new RuntimeRequestException("fail", cause));
+    void testGetBackendInfoFail() throws Exception {
+        doReturn(future).when(actorUtils).findPrimaryShardAsync(DefaultShardStrategy.DEFAULT_SHARD);
+
+        final var initial = moduleShardBackendResolver.getBackendInfo(0L);
+        final var req = contextProbe.expectMsgClass(ConnectClientRequest.class);
+        final var cause = new RuntimeException();
+        final var response = req.toRequestFailure(new RuntimeRequestException("fail", cause));
         contextProbe.reply(response);
-        final CompletionStage<ShardBackendInfo> stage = moduleShardBackendResolver.getBackendInfo(0L);
-        final ExecutionException caught =
-                TestUtils.assertOperationThrowsException(() -> TestUtils.getWithTimeout(stage.toCompletableFuture()),
-                        ExecutionException.class);
+
+        final var caught = assertThrows(ExecutionException.class,
+            () -> TestUtils.getWithTimeout(initial.toCompletableFuture()));
         assertEquals(cause, caught.getCause());
     }
 
     @Test
-    public void testRefreshBackendInfo() throws Exception {
-        final CompletionStage<ShardBackendInfo> backendInfo = moduleShardBackendResolver.getBackendInfo(0L);
-        //handle first connect
+    void testRefreshBackendInfo() throws Exception {
+        doReturn(future).when(actorUtils).findPrimaryShardAsync(DefaultShardStrategy.DEFAULT_SHARD);
+        doReturn(new PrimaryShardInfoFutureCache()).when(actorUtils).getPrimaryShardInfoCache();
+
+        final var backendInfo = moduleShardBackendResolver.getBackendInfo(0L);
+        // handle first connect
         contextProbe.expectMsgClass(ConnectClientRequest.class);
-        final TestProbe staleBackendProbe = new TestProbe(system, "staleBackend");
-        final ConnectClientSuccess msg = new ConnectClientSuccess(CLIENT_ID, 0L, staleBackendProbe.ref(),
-                List.of(), dataTree, 3);
+
+        final var staleBackendProbe = new TestProbe(system, "staleBackend");
+        final var msg = new ConnectClientSuccess(CLIENT_ID, 0L, staleBackendProbe.ref(), List.of(), dataTree, 3);
         contextProbe.reply(msg);
-        //get backend info
-        final ShardBackendInfo staleBackendInfo = TestUtils.getWithTimeout(backendInfo.toCompletableFuture());
-        //refresh
-        final CompletionStage<ShardBackendInfo> refreshed =
-                moduleShardBackendResolver.refreshBackendInfo(0L, staleBackendInfo);
-        //stale backend info should be removed and new connect request issued to the context
+
+        // get backend info
+        final var staleBackendInfo = TestUtils.getWithTimeout(backendInfo.toCompletableFuture());
+        // refresh
+        final var refreshed = moduleShardBackendResolver.refreshBackendInfo(0L, staleBackendInfo);
+
+        // stale backend info should be removed and new connect request issued to the context
         contextProbe.expectMsgClass(ConnectClientRequest.class);
-        final TestProbe refreshedBackendProbe = new TestProbe(system, "refreshedBackend");
-        final ConnectClientSuccess msg2 = new ConnectClientSuccess(CLIENT_ID, 1L, refreshedBackendProbe.ref(),
-                List.of(), dataTree, 3);
+        final var refreshedBackendProbe = new TestProbe(system, "refreshedBackend");
+        final var msg2 = new ConnectClientSuccess(CLIENT_ID, 1L, refreshedBackendProbe.ref(), List.of(), dataTree, 3);
         contextProbe.reply(msg2);
-        final ShardBackendInfo refreshedBackendInfo = TestUtils.getWithTimeout(refreshed.toCompletableFuture());
+        final var refreshedBackendInfo = TestUtils.getWithTimeout(refreshed.toCompletableFuture());
         assertEquals(staleBackendInfo.getCookie(), refreshedBackendInfo.getCookie());
         assertEquals(refreshedBackendProbe.ref(), refreshedBackendInfo.getActor());
     }
 
-    @SuppressWarnings("unchecked")
     @Test
-    public void testNotifyWhenBackendInfoIsStale() {
-        final RegisterForShardAvailabilityChanges regMessage =
-                shardManagerProbe.expectMsgClass(RegisterForShardAvailabilityChanges.class);
-        Registration mockReg = mock(Registration.class);
+    void testNotifyWhenBackendInfoIsStale() {
+        final var regMessage = shardManagerProbe.expectMsgClass(RegisterForShardAvailabilityChanges.class);
         shardManagerProbe.reply(new Status.Success(mockReg));
 
-        Consumer<Long> mockCallback = mock(Consumer.class);
-        final Registration callbackReg = moduleShardBackendResolver.notifyWhenBackendInfoIsStale(mockCallback);
+        final var callbackReg = moduleShardBackendResolver.notifyWhenBackendInfoIsStale(mockCallback);
 
         regMessage.getCallback().accept(DefaultShardStrategy.DEFAULT_SHARD);
         verify(mockCallback, timeout(5000)).accept((long) 0);
@@ -183,15 +189,5 @@ public class ModuleShardBackendResolverTest {
         regMessage.getCallback().accept(DefaultShardStrategy.DEFAULT_SHARD);
         Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
         verifyNoMoreInteractions(mockCallback);
-    }
-
-    private static ActorUtils createActorUtilsMock(final ActorSystem system, final ActorRef actor) {
-        final ActorUtils mock = mock(ActorUtils.class);
-        final Promise<PrimaryShardInfo> promise = new scala.concurrent.impl.Promise.DefaultPromise<>();
-        final ActorSelection selection = system.actorSelection(actor.path());
-        final PrimaryShardInfo shardInfo = new PrimaryShardInfo(selection, (short) 0);
-        promise.success(shardInfo);
-        doReturn(promise.future()).when(mock).findPrimaryShardAsync(DefaultShardStrategy.DEFAULT_SHARD);
-        return mock;
     }
 }
