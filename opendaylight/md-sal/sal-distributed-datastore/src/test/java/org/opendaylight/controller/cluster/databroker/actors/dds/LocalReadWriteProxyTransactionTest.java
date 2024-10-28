@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -18,10 +19,8 @@ import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtil
 import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtils.assertOperationThrowsException;
 
 import com.google.common.base.Ticker;
-import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Optional;
 import java.util.function.Consumer;
-import org.apache.pekko.testkit.TestProbe;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;
@@ -33,7 +32,6 @@ import org.opendaylight.controller.cluster.access.commands.TransactionCommitSucc
 import org.opendaylight.controller.cluster.access.commands.TransactionDoCommitRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionPreCommitRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionPreCommitSuccess;
-import org.opendaylight.controller.cluster.access.commands.TransactionRequest;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.CursorAwareDataTreeModification;
@@ -75,9 +73,9 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
     @Override
     public void testDirectCommit() throws Exception {
         transaction.seal();
-        final ListenableFuture<Boolean> result = transaction.directCommit();
-        final TransactionTester<LocalReadWriteProxyTransaction> tester = getTester();
-        final CommitLocalTransactionRequest req = tester.expectTransactionRequest(CommitLocalTransactionRequest.class);
+        final var result = transaction.directCommit();
+        final var tester = getTester();
+        final var req = tester.expectTransactionRequest(CommitLocalTransactionRequest.class);
         tester.replySuccess(new TransactionCommitSuccess(TRANSACTION_ID, req.getSequence()));
         assertFutureEquals(Boolean.TRUE, result);
     }
@@ -119,9 +117,8 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
     @Test
     public void testCommitRequest() {
         transaction.doWrite(PATH_1, DATA_1);
-        final boolean coordinated = true;
-        final CommitLocalTransactionRequest request = transaction.commitRequest(coordinated);
-        assertEquals(coordinated, request.isCoordinated());
+        final var request = transaction.commitRequest(true);
+        assertTrue(request.isCoordinated());
         assertEquals(modification, request.getModification());
     }
 
@@ -142,17 +139,16 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
 
     @Test
     public void testFlushState() {
-        final TransactionTester<RemoteProxyTransaction> transactionTester = createRemoteProxyTransactionTester();
-        final RemoteProxyTransaction successor = transactionTester.getTransaction();
+        final var transactionTester = createRemoteProxyTransactionTester();
+        final var successor = transactionTester.getTransaction();
         doAnswer(LocalProxyTransactionTest::applyToCursorAnswer).when(modification).applyToCursor(any());
         transaction.sealOnly();
-        final TransactionRequest<?> request = transaction.flushState().orElseThrow();
+        final var request = transaction.flushState().orElseThrow();
         transaction.forwardToSuccessor(successor, request, null);
         verify(modification).applyToCursor(any());
         transactionTester.getTransaction().seal();
         transactionTester.getTransaction().directCommit();
-        final ModifyTransactionRequest modifyRequest =
-                transactionTester.expectTransactionRequest(ModifyTransactionRequest.class);
+        final var modifyRequest = transactionTester.expectTransactionRequest(ModifyTransactionRequest.class);
         checkModifications(modifyRequest);
     }
 
@@ -168,8 +164,8 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
 
     @Test
     public void testApplyModifyTransactionRequestAbort() {
-        final TestProbe probe = createProbe();
-        final ModifyTransactionRequest request = ModifyTransactionRequest.builder(TRANSACTION_ID, probe.ref())
+        final var probe = createProbe();
+        final var request = ModifyTransactionRequest.builder(TRANSACTION_ID, probe.ref())
             .setSequence(0L)
             .setAbort()
             .build();
@@ -180,45 +176,40 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
 
     @Test
     public void testHandleForwardedRemotePreCommitRequest() {
-        final TestProbe probe = createProbe();
-        final TransactionPreCommitRequest request = new TransactionPreCommitRequest(TRANSACTION_ID, 0L, probe.ref());
-        testHandleForwardedRemoteRequest(request);
+        final var probe = createProbe();
+        testHandleForwardedRemoteRequest(new TransactionPreCommitRequest(TRANSACTION_ID, 0L, probe.ref()));
     }
 
     @Test
     public void testHandleForwardedRemoteDoCommitRequest() {
-        final TestProbe probe = createProbe();
-        final TransactionDoCommitRequest request = new TransactionDoCommitRequest(TRANSACTION_ID, 0L, probe.ref());
-        testHandleForwardedRemoteRequest(request);
+        final var probe = createProbe();
+        testHandleForwardedRemoteRequest(new TransactionDoCommitRequest(TRANSACTION_ID, 0L, probe.ref()));
     }
 
     @Test
     public void testHandleForwardedRemoteAbortRequest() {
-        final TestProbe probe = createProbe();
-        final TransactionAbortRequest request = new TransactionAbortRequest(TRANSACTION_ID, 0L, probe.ref());
-        testHandleForwardedRemoteRequest(request);
+        final var probe = createProbe();
+        testHandleForwardedRemoteRequest(new TransactionAbortRequest(TRANSACTION_ID, 0L, probe.ref()));
     }
 
     @Test
     public void testForwardToLocalCommit() {
-        final TestProbe probe = createProbe();
-        final DataTreeModification mod = mock(DataTreeModification.class);
-        final TransactionRequest<?> request =
-                new CommitLocalTransactionRequest(TRANSACTION_ID, 0L, probe.ref(), mod, null, false);
+        final var probe = createProbe();
+        final var mod = mock(DataTreeModification.class);
+        final var request = new CommitLocalTransactionRequest(TRANSACTION_ID, 0L, probe.ref(), mod, null, false);
         testForwardToLocal(request, CommitLocalTransactionRequest.class);
     }
 
     @Test
     public void testSendAbort() throws Exception {
-        final TestProbe probe = createProbe();
-        final TransactionRequest<?> request = new AbortLocalTransactionRequest(TRANSACTION_ID, probe.ref());
-        transaction.sendAbort(request, createCallbackMock());
+        final var probe = createProbe();
+        transaction.sendAbort(new AbortLocalTransactionRequest(TRANSACTION_ID, probe.ref()), createCallbackMock());
         assertOperationThrowsException(() -> transaction.delete(PATH_1), IllegalStateException.class);
     }
 
     private void applyModifyTransactionRequest(final boolean coordinated) {
-        final TestProbe probe = createProbe();
-        final ModifyTransactionRequest request = ModifyTransactionRequest.builder(TRANSACTION_ID, probe.ref())
+        final var probe = createProbe();
+        final var request = ModifyTransactionRequest.builder(TRANSACTION_ID, probe.ref())
             .addWrite(PATH_1, DATA_1)
             .addMerge(PATH_2, DATA_2)
             .addDelete(PATH_3)
@@ -230,8 +221,7 @@ public class LocalReadWriteProxyTransactionTest extends LocalProxyTransactionTes
         verify(modification).write(PATH_1, DATA_1);
         verify(modification).merge(PATH_2, DATA_2);
         verify(modification).delete(PATH_3);
-        final CommitLocalTransactionRequest commitRequest =
-                getTester().expectTransactionRequest(CommitLocalTransactionRequest.class);
+        final var commitRequest = getTester().expectTransactionRequest(CommitLocalTransactionRequest.class);
         assertEquals(modification, commitRequest.getModification());
         assertEquals(coordinated, commitRequest.isCoordinated());
     }
