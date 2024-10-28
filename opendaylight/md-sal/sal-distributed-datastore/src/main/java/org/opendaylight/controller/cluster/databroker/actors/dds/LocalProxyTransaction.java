@@ -104,8 +104,8 @@ abstract sealed class LocalProxyTransaction extends AbstractProxyTransaction
     @Override
     void handleReplayedLocalRequest(final AbstractLocalTransactionRequest<?> request,
             final Consumer<Response<?, ?>> callback, final long enqueuedTicks) {
-        if (request instanceof AbortLocalTransactionRequest) {
-            enqueueAbort(request, callback, enqueuedTicks);
+        if (request instanceof AbortLocalTransactionRequest req) {
+            enqueueAbort(req, callback, enqueuedTicks);
         } else {
             throw unhandledRequest(request);
         }
@@ -114,18 +114,15 @@ abstract sealed class LocalProxyTransaction extends AbstractProxyTransaction
     @Override
     void handleReplayedRemoteRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback,
             final long enqueuedTicks) {
-        if (request instanceof ModifyTransactionRequest) {
-            replayModifyTransactionRequest((ModifyTransactionRequest) request, callback, enqueuedTicks);
-        } else if (handleReadRequest(request, callback)) {
-            // No-op
-        } else if (request instanceof TransactionPurgeRequest) {
-            enqueuePurge(callback, enqueuedTicks);
-        } else if (request instanceof IncrementTransactionSequenceRequest) {
-            // Local transactions do not have non-replayable requests which would be visible to the backend,
-            // hence we can skip sequence increments.
-            LOG.debug("Not replaying {}", request);
-        } else {
-            throw unhandledRequest(request);
+        switch (request) {
+            case ModifyTransactionRequest req -> replayModifyTransactionRequest(req, callback, enqueuedTicks);
+            case TransactionPurgeRequest req -> enqueuePurge(callback, enqueuedTicks);
+            case IncrementTransactionSequenceRequest req -> {
+                // Local transactions do not have non-replayable requests which would be visible to the backend,
+                // hence we can skip sequence increments.
+                LOG.debug("Not replaying {}", req);
+            }
+            default -> handleReadRequest(request, callback);
         }
     }
 
@@ -138,14 +135,10 @@ abstract sealed class LocalProxyTransaction extends AbstractProxyTransaction
      * @param callback Callback to be invoked once the request completes
      */
     void handleForwardedRemoteRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback) {
-        if (request instanceof ModifyTransactionRequest) {
-            applyForwardedModifyTransactionRequest((ModifyTransactionRequest) request, callback);
-        } else if (handleReadRequest(request, callback)) {
-            // No-op
-        } else if (request instanceof TransactionPurgeRequest) {
-            enqueuePurge(callback);
-        } else {
-            throw unhandledRequest(request);
+        switch (request) {
+            case ModifyTransactionRequest req -> applyForwardedModifyTransactionRequest(req, callback);
+            case TransactionPurgeRequest req -> enqueuePurge(callback);
+            default -> handleReadRequest(request, callback);
         }
     }
 
@@ -171,85 +164,84 @@ abstract sealed class LocalProxyTransaction extends AbstractProxyTransaction
         }
     }
 
-    private boolean handleReadRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback) {
+    private void handleReadRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback) {
         // Note we delay completion of read requests to limit the scope at which the client can run, as they have
         // listeners, which we do not want to execute while we are reconnecting.
-        if (request instanceof ReadTransactionRequest) {
-            if (callback != null) {
-                final var response = handleReadRequest(readOnlyView(), (ReadTransactionRequest) request);
-                executeInActor(() -> callback.accept(response));
+        switch (request) {
+            case ReadTransactionRequest msg -> {
+                if (callback != null) {
+                    final var response = handleReadRequest(readOnlyView(), msg);
+                    executeInActor(() -> callback.accept(response));
+                }
             }
-            return true;
-        } else if (request instanceof ExistsTransactionRequest) {
-            if (callback != null) {
-                final var response = handleExistsRequest(readOnlyView(), (ExistsTransactionRequest) request);
-                executeInActor(() -> callback.accept(response));
+            case ExistsTransactionRequest req -> {
+                if (callback != null) {
+                    final var response = handleExistsRequest(readOnlyView(), req);
+                    executeInActor(() -> callback.accept(response));
+                }
             }
-            return true;
-        } else {
-            return false;
+            default -> throw unhandledRequest(request);
         }
     }
 
     @Override
     final void forwardToRemote(final RemoteProxyTransaction successor, final TransactionRequest<?> request,
                          final Consumer<Response<?, ?>> callback) {
-        if (request instanceof final CommitLocalTransactionRequest req) {
-            final DataTreeModification mod = req.getModification();
+        switch (request) {
+            case CommitLocalTransactionRequest req -> {
+                final DataTreeModification mod = req.getModification();
 
-            LOG.debug("Applying modification {} to successor {}", mod, successor);
-            mod.applyToCursor(new AbstractDataTreeModificationCursor() {
-                @Override
-                public void write(final PathArgument child, final NormalizedNode data) {
-                    successor.write(current().node(child), data);
-                }
+                LOG.debug("Applying modification {} to successor {}", mod, successor);
+                mod.applyToCursor(new AbstractDataTreeModificationCursor() {
+                    @Override
+                    public void write(final PathArgument child, final NormalizedNode data) {
+                        successor.write(current().node(child), data);
+                    }
 
-                @Override
-                public void merge(final PathArgument child, final NormalizedNode data) {
-                    successor.merge(current().node(child), data);
-                }
+                    @Override
+                    public void merge(final PathArgument child, final NormalizedNode data) {
+                        successor.merge(current().node(child), data);
+                    }
 
-                @Override
-                public void delete(final PathArgument child) {
-                    successor.delete(current().node(child));
-                }
-            });
+                    @Override
+                    public void delete(final PathArgument child) {
+                        successor.delete(current().node(child));
+                    }
+                });
 
-            successor.sealOnly();
-            final ModifyTransactionRequest successorReq = successor.commitRequest(req.isCoordinated());
-            successor.sendRequest(successorReq, callback);
-        } else if (request instanceof AbortLocalTransactionRequest) {
-            LOG.debug("Forwarding abort {} to successor {}", request, successor);
-            successor.abort();
-        } else if (request instanceof TransactionPurgeRequest) {
-            LOG.debug("Forwarding purge {} to successor {}", request, successor);
-            successor.enqueuePurge(callback);
-        } else if (request instanceof ModifyTransactionRequest) {
-            successor.handleForwardedRequest(request, callback);
-        } else {
-            throw unhandledRequest(request);
+                successor.sealOnly();
+                final ModifyTransactionRequest successorReq = successor.commitRequest(req.isCoordinated());
+                successor.sendRequest(successorReq, callback);
+            }
+            case AbortLocalTransactionRequest req -> {
+                LOG.debug("Forwarding abort {} to successor {}", req, successor);
+                successor.abort();
+            }
+            case TransactionPurgeRequest req -> {
+                LOG.debug("Forwarding purge {} to successor {}", req, successor);
+                successor.enqueuePurge(callback);
+            }
+            case ModifyTransactionRequest req -> successor.handleForwardedRequest(req, callback);
+            default -> throw unhandledRequest(request);
         }
     }
 
     @Override
     void forwardToLocal(final LocalProxyTransaction successor, final TransactionRequest<?> request,
             final Consumer<Response<?, ?>> callback) {
-        if (request instanceof AbortLocalTransactionRequest) {
-            successor.sendAbort(request, callback);
-        } else if (request instanceof TransactionPurgeRequest) {
-            successor.enqueuePurge(callback);
-        } else {
-            throw unhandledRequest(request);
+        switch (request) {
+            case AbortLocalTransactionRequest msg -> successor.sendAbort(msg, callback);
+            case TransactionPurgeRequest msg -> successor.enqueuePurge(callback);
+            default -> throw unhandledRequest(request);
         }
-
         LOG.debug("Forwarded request {} to successor {}", request, successor);
     }
 
-    void sendAbort(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback) {
+    void sendAbort(final AbortLocalTransactionRequest request, final Consumer<Response<?, ?>> callback) {
         sendRequest(request, callback);
     }
 
-    void enqueueAbort(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback,
+    void enqueueAbort(final AbortLocalTransactionRequest request, final Consumer<Response<?, ?>> callback,
             final long enqueuedTicks) {
         enqueueRequest(request, callback, enqueuedTicks);
     }

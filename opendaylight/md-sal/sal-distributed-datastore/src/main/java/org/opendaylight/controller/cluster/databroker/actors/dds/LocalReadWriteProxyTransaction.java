@@ -390,13 +390,13 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
     }
 
     @Override
-    void sendAbort(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback) {
+    void sendAbort(final AbortLocalTransactionRequest request, final Consumer<Response<?, ?>> callback) {
         super.sendAbort(request, callback);
         closedException = this::abortedException;
     }
 
     @Override
-    void enqueueAbort(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback,
+    void enqueueAbort(final AbortLocalTransactionRequest request, final Consumer<Response<?, ?>> callback,
             final long enqueuedTicks) {
         super.enqueueAbort(request, callback, enqueuedTicks);
         closedException = this::abortedException;
