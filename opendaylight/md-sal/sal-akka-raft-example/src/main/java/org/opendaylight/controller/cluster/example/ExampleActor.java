@@ -37,7 +37,7 @@ import org.opendaylight.yangtools.util.AbstractStringIdentifier;
 /**
  * A sample actor showing how the RaftActor is to be extended.
  */
-public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, RaftActorSnapshotCohort {
+public final class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, RaftActorSnapshotCohort {
     private static final class PayloadIdentifier extends AbstractStringIdentifier<PayloadIdentifier> {
         private static final long serialVersionUID = 1L;
 
@@ -47,15 +47,15 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
     }
 
     private final Map<String, String> state = new HashMap<>();
-    private final Optional<ActorRef> roleChangeNotifier;
+    private final ActorRef roleChangeNotifier;
 
     private long persistIdentifier = 1;
 
     public ExampleActor(final String id, final Map<String, String> peerAddresses,
-        final Optional<ConfigParams> configParams) {
+            final Optional<ConfigParams> configParams) {
         super(id, peerAddresses, configParams, (short)0);
         setPersistence(true);
-        roleChangeNotifier = createRoleChangeNotifier(id);
+        roleChangeNotifier = getContext().actorOf(RoleChangeNotifier.getProps(id), id + "-notifier");
     }
 
     public static Props props(final String id, final Map<String, String> peerAddresses,
@@ -65,9 +65,9 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
 
     @Override
     protected void handleNonRaftCommand(final Object message) {
-        if (message instanceof KeyValue) {
+        if (message instanceof KeyValue kv) {
             if (isLeader()) {
-                persistData(getSender(), new PayloadIdentifier(persistIdentifier++), (Payload) message, false);
+                persistData(getSender(), new PayloadIdentifier(persistIdentifier++), kv, false);
             } else if (getLeader() != null) {
                 getLeader().forward(message, getContext());
             }
@@ -103,14 +103,8 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
             + ", im-mem journal size=" + getRaftActorContext().getReplicatedLog().size();
     }
 
-    public Optional<ActorRef> createRoleChangeNotifier(final String actorId) {
-        ActorRef exampleRoleChangeNotifier = getContext().actorOf(
-            RoleChangeNotifier.getProps(actorId), actorId + "-notifier");
-        return Optional.<ActorRef>of(exampleRoleChangeNotifier);
-    }
-
     @Override
-    protected Optional<ActorRef> getRoleChangeNotifier() {
+    protected ActorRef roleChangeNotifier() {
         return roleChangeNotifier;
     }
 
