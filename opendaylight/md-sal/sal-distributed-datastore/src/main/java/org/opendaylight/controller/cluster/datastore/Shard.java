@@ -24,7 +24,6 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
@@ -41,7 +40,6 @@ import org.apache.pekko.actor.Status.Failure;
 import org.apache.pekko.persistence.RecoveryCompleted;
 import org.apache.pekko.persistence.SnapshotOffer;
 import org.apache.pekko.serialization.JavaSerializer;
-import org.apache.pekko.serialization.Serialization;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.ABIVersion;
@@ -59,7 +57,6 @@ import org.opendaylight.controller.cluster.access.concepts.RequestSuccess;
 import org.opendaylight.controller.cluster.access.concepts.RetiredGenerationException;
 import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestException;
 import org.opendaylight.controller.cluster.access.concepts.SliceableMessage;
-import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.UnsupportedRequestException;
 import org.opendaylight.controller.cluster.common.actor.CommonConfig;
 import org.opendaylight.controller.cluster.common.actor.Dispatchers;
@@ -67,26 +64,16 @@ import org.opendaylight.controller.cluster.common.actor.Dispatchers.DispatcherTy
 import org.opendaylight.controller.cluster.common.actor.MessageTracker;
 import org.opendaylight.controller.cluster.common.actor.MeteringBehavior;
 import org.opendaylight.controller.cluster.datastore.actors.JsonExportActor;
-import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStatsMXBean;
-import org.opendaylight.controller.cluster.datastore.messages.AbortTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.ActorInitialized;
-import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
-import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransaction;
-import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionChain;
-import org.opendaylight.controller.cluster.datastore.messages.CommitTransaction;
-import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
-import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.DataTreeChangedReply;
-import org.opendaylight.controller.cluster.datastore.messages.ForwardedReadyTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.GetKnownClients;
 import org.opendaylight.controller.cluster.datastore.messages.GetKnownClientsReply;
 import org.opendaylight.controller.cluster.datastore.messages.GetShardDataTree;
 import org.opendaylight.controller.cluster.datastore.messages.MakeLeaderLocal;
 import org.opendaylight.controller.cluster.datastore.messages.OnDemandShardState;
 import org.opendaylight.controller.cluster.datastore.messages.PeerAddressResolved;
-import org.opendaylight.controller.cluster.datastore.messages.ReadyLocalTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderStateChanged;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
@@ -180,9 +167,6 @@ public class Shard extends RaftActor {
 
     private DatastoreContext datastoreContext;
 
-    @Deprecated(since = "9.0.0", forRemoval = true)
-    private final ShardCommitCoordinator commitCoordinator;
-
     private long transactionCommitTimeout;
 
     private Cancellable txCommitTimeoutCheckSchedule;
@@ -191,17 +175,11 @@ public class Shard extends RaftActor {
 
     private final MessageTracker appendEntriesReplyTracker;
 
-    @Deprecated(since = "9.0.0", forRemoval = true)
-    private final ShardTransactionActorFactory transactionActorFactory;
-
     private final ShardSnapshotCohort snapshotCohort;
 
     private final DataTreeChangeListenerSupport treeChangeSupport = new DataTreeChangeListenerSupport(this);
 
     private ShardSnapshot restoreFromSnapshot;
-
-    @Deprecated(since = "9.0.0", forRemoval = true)
-    private final ShardTransactionMessageRetrySupport messageRetrySupport;
 
     @VisibleForTesting
     final FrontendMetadata frontendMetadata;
@@ -258,8 +236,6 @@ public class Shard extends RaftActor {
             getContext().become(new MeteringBehavior(this));
         }
 
-        commitCoordinator = new ShardCommitCoordinator(store, LOG, name);
-
         setTransactionCommitTimeout();
 
         // create a notifier actor for each cluster member
@@ -269,14 +245,9 @@ public class Shard extends RaftActor {
                 getRaftActorContext().getConfigParams().getIsolatedCheckIntervalInMillis());
 
         dispatchers = new Dispatchers(context().system().dispatchers());
-        transactionActorFactory = new ShardTransactionActorFactory(store, datastoreContext,
-            dispatchers.getDispatcherPath(Dispatchers.DispatcherType.Transaction),
-                self(), getContext(), shardMBean.shardStats(), builder.getId().getShardName());
 
         snapshotCohort = ShardSnapshotCohort.create(getContext(), builder.getId().getMemberName(), store, LOG,
             name, datastoreContext);
-
-        messageRetrySupport = new ShardTransactionMessageRetrySupport(this);
 
         responseMessageSlicer = MessageSlicer.builder().logContext(name)
                 .messageSliceSize(datastoreContext.getMaximumMessageSliceSize())
@@ -304,13 +275,9 @@ public class Shard extends RaftActor {
 
         super.postStop();
 
-        messageRetrySupport.close();
-
         if (txCommitTimeoutCheckSchedule != null) {
             txCommitTimeoutCheckSchedule.cancel();
         }
-
-        commitCoordinator.abortPendingTransactions("Transaction aborted due to shutdown.", this);
 
         shardMBean.unregisterMBean();
         listenerInfoMXBean.unregister();
@@ -395,28 +362,7 @@ public class Shard extends RaftActor {
             } else if (GetKnownClients.INSTANCE.equals(message)) {
                 handleGetKnownClients();
             } else if (!responseMessageSlicer.handleMessage(message)) {
-                // Ask-based protocol messages
-                if (CreateTransaction.isSerializedType(message)) {
-                    handleCreateTransaction(message);
-                } else if (message instanceof BatchedModifications request) {
-                    handleBatchedModifications(request);
-                } else if (message instanceof ForwardedReadyTransaction request) {
-                    handleForwardedReadyTransaction(request);
-                } else if (message instanceof ReadyLocalTransaction request) {
-                    handleReadyLocalTransaction(request);
-                } else if (CanCommitTransaction.isSerializedType(message)) {
-                    handleCanCommitTransaction(CanCommitTransaction.fromSerializable(message));
-                } else if (CommitTransaction.isSerializedType(message)) {
-                    handleCommitTransaction(CommitTransaction.fromSerializable(message));
-                } else if (AbortTransaction.isSerializedType(message)) {
-                    handleAbortTransaction(AbortTransaction.fromSerializable(message));
-                } else if (CloseTransactionChain.isSerializedType(message)) {
-                    closeTransactionChain(CloseTransactionChain.fromSerializable(message));
-                } else if (ShardTransactionMessageRetrySupport.TIMER_MESSAGE_CLASS.isInstance(message)) {
-                    messageRetrySupport.onTimerMessage(message);
-                } else {
-                    super.handleNonRaftCommand(message);
-                }
+                super.handleNonRaftCommand(message);
             }
         }
     }
@@ -457,7 +403,6 @@ public class Shard extends RaftActor {
 
     private void commitTimeoutCheck() {
         store.checkForExpiredTransactions(transactionCommitTimeout, this::updateAccess);
-        commitCoordinator.checkForExpiredTransactions(transactionCommitTimeout, this);
         requestMessageAssembler.checkExpiredAssembledMessageState();
     }
 
@@ -659,10 +604,6 @@ public class Shard extends RaftActor {
         return store.getQueueSize();
     }
 
-    final int getCohortCacheSize() {
-        return commitCoordinator.getCohortCacheSize();
-    }
-
     @Override
     protected final ActorRef roleChangeNotifier() {
         return roleChangeNotifier;
@@ -701,251 +642,8 @@ public class Shard extends RaftActor {
         }
     }
 
-    @Deprecated(since = "9.0.0", forRemoval = true)
-    private void handleCommitTransaction(final CommitTransaction commit) {
-        final var txId = commit.getTransactionId();
-        if (isLeader()) {
-            askProtocolEncountered(txId);
-            commitCoordinator.handleCommit(txId, getSender(), this);
-        } else {
-            final var leader = getLeader();
-            if (leader == null) {
-                messageRetrySupport.addMessageToRetry(commit, getSender(), "Could not commit transaction " + txId);
-            } else {
-                LOG.debug("{}: Forwarding CommitTransaction to leader {}", persistenceId(), leader);
-                leader.forward(commit, getContext());
-            }
-        }
-    }
-
-    @Deprecated(since = "9.0.0", forRemoval = true)
-    private void handleCanCommitTransaction(final CanCommitTransaction canCommit) {
-        final var txId = canCommit.getTransactionId();
-        LOG.debug("{}: Can committing transaction {}", persistenceId(), txId);
-
-        if (isLeader()) {
-            askProtocolEncountered(txId);
-            commitCoordinator.handleCanCommit(txId, getSender(), this);
-        } else {
-            final var leader = getLeader();
-            if (leader == null) {
-                messageRetrySupport.addMessageToRetry(canCommit, getSender(),
-                        "Could not canCommit transaction " + txId);
-            } else {
-                LOG.debug("{}: Forwarding CanCommitTransaction to leader {}", persistenceId(), leader);
-                leader.forward(canCommit, getContext());
-            }
-        }
-    }
-
-    @SuppressWarnings("checkstyle:IllegalCatch")
-    @Deprecated(since = "9.0.0", forRemoval = true)
-    private void handleBatchedModificationsLocal(final BatchedModifications batched, final ActorRef sender) {
-        askProtocolEncountered(batched.getTransactionId());
-
-        try {
-            commitCoordinator.handleBatchedModifications(batched, sender, this);
-        } catch (Exception e) {
-            LOG.error("{}: Error handling BatchedModifications for Tx {}", persistenceId(),
-                    batched.getTransactionId(), e);
-            sender.tell(new Failure(e), getSelf());
-        }
-    }
-
-    @Deprecated(since = "9.0.0", forRemoval = true)
-    private void handleBatchedModifications(final BatchedModifications batched) {
-        // This message is sent to prepare the modifications transaction directly on the Shard as an
-        // optimization to avoid the extra overhead of a separate ShardTransaction actor. On the last
-        // BatchedModifications message, the caller sets the ready flag in the message indicating
-        // modifications are complete. The reply contains the cohort actor path (this actor) for the caller
-        // to initiate the 3-phase commit. This also avoids the overhead of sending an additional
-        // ReadyTransaction message.
-
-        // If we're not the leader then forward to the leader. This is a safety measure - we shouldn't
-        // normally get here if we're not the leader as the front-end (TransactionProxy) should determine
-        // the primary/leader shard. However with timing and caching on the front-end, there's a small
-        // window where it could have a stale leader during leadership transitions.
-        //
-        boolean isLeaderActive = isLeaderActive();
-        if (isLeader() && isLeaderActive) {
-            handleBatchedModificationsLocal(batched, getSender());
-        } else {
-            final var leader = getLeader();
-            if (!isLeaderActive || leader == null) {
-                messageRetrySupport.addMessageToRetry(batched, getSender(),
-                        "Could not process BatchedModifications " + batched.getTransactionId());
-            } else {
-                // If this is not the first batch and leadership changed in between batched messages,
-                // we need to reconstruct previous BatchedModifications from the transaction
-                // DataTreeModification, honoring the max batched modification count, and forward all the
-                // previous BatchedModifications to the new leader.
-                final var newModifications = commitCoordinator.createForwardedBatchedModifications(batched,
-                    datastoreContext.getShardBatchedModificationCount());
-
-                LOG.debug("{}: Forwarding {} BatchedModifications to leader {}", persistenceId(),
-                        newModifications.size(), leader);
-
-                for (BatchedModifications bm : newModifications) {
-                    leader.forward(bm, getContext());
-                }
-            }
-        }
-    }
-
-    private boolean failIfIsolatedLeader(final ActorRef sender) {
-        if (isIsolatedLeader()) {
-            sender.tell(new Failure(new NoShardLeaderException(String.format(
-                    "Shard %s was the leader but has lost contact with all of its followers. Either all"
-                    + " other follower nodes are down or this node is isolated by a network partition.",
-                    persistenceId()))), getSelf());
-            return true;
-        }
-
-        return false;
-    }
-
     protected boolean isIsolatedLeader() {
         return getRaftState() == RaftState.IsolatedLeader;
-    }
-
-    @SuppressWarnings("checkstyle:IllegalCatch")
-    @Deprecated(since = "9.0.0", forRemoval = true)
-   private void handleReadyLocalTransaction(final ReadyLocalTransaction message) {
-        final var txId = message.getTransactionId();
-        LOG.debug("{}: handleReadyLocalTransaction for {}", persistenceId(), txId);
-
-        final var isLeaderActive = isLeaderActive();
-        if (isLeader() && isLeaderActive) {
-            askProtocolEncountered(txId);
-            try {
-                commitCoordinator.handleReadyLocalTransaction(message, getSender(), this);
-            } catch (Exception e) {
-                LOG.error("{}: Error handling ReadyLocalTransaction for Tx {}", persistenceId(), txId, e);
-                getSender().tell(new Failure(e), getSelf());
-            }
-        } else {
-            final var leader = getLeader();
-            if (!isLeaderActive || leader == null) {
-                messageRetrySupport.addMessageToRetry(message, getSender(),
-                        "Could not process ready local transaction " + txId);
-            } else {
-                LOG.debug("{}: Forwarding ReadyLocalTransaction to leader {}", persistenceId(), leader);
-                message.setRemoteVersion(getCurrentBehavior().getLeaderPayloadVersion());
-                leader.forward(message, getContext());
-            }
-        }
-    }
-
-    @Deprecated(since = "9.0.0", forRemoval = true)
-    private void handleForwardedReadyTransaction(final ForwardedReadyTransaction forwardedReady) {
-        LOG.debug("{}: handleForwardedReadyTransaction for {}", persistenceId(), forwardedReady.getTransactionId());
-
-        final var isLeaderActive = isLeaderActive();
-        if (isLeader() && isLeaderActive) {
-            askProtocolEncountered(forwardedReady.getTransactionId());
-            commitCoordinator.handleForwardedReadyTransaction(forwardedReady, getSender(), this);
-        } else {
-            final var leader = getLeader();
-            if (!isLeaderActive || leader == null) {
-                messageRetrySupport.addMessageToRetry(forwardedReady, getSender(),
-                        "Could not process forwarded ready transaction " + forwardedReady.getTransactionId());
-            } else {
-                LOG.debug("{}: Forwarding ForwardedReadyTransaction to leader {}", persistenceId(), leader);
-
-                final var readyLocal = new ReadyLocalTransaction(forwardedReady.getTransactionId(),
-                        forwardedReady.getTransaction().getSnapshot(), forwardedReady.isDoImmediateCommit(),
-                        forwardedReady.getParticipatingShardNames());
-                readyLocal.setRemoteVersion(getCurrentBehavior().getLeaderPayloadVersion());
-                leader.forward(readyLocal, getContext());
-            }
-        }
-    }
-
-    @Deprecated(since = "9.0.0", forRemoval = true)
-    private void handleAbortTransaction(final AbortTransaction abort) {
-        final var transactionId = abort.getTransactionId();
-        askProtocolEncountered(transactionId);
-        doAbortTransaction(transactionId, getSender());
-    }
-
-    final void doAbortTransaction(final Identifier transactionID, final ActorRef sender) {
-        commitCoordinator.handleAbort(transactionID, sender, this);
-    }
-
-    @Deprecated(since = "9.0.0", forRemoval = true)
-    private void handleCreateTransaction(final Object message) {
-        if (isLeader()) {
-            createTransaction(CreateTransaction.fromSerializable(message));
-        } else if (getLeader() != null) {
-            getLeader().forward(message, getContext());
-        } else {
-            getSender().tell(new Failure(new NoShardLeaderException(
-                    "Could not create a shard transaction", persistenceId())), getSelf());
-        }
-    }
-
-    @Deprecated(since = "9.0.0", forRemoval = true)
-    private void closeTransactionChain(final CloseTransactionChain closeTransactionChain) {
-        if (isLeader()) {
-            final var id = closeTransactionChain.getIdentifier();
-            askProtocolEncountered(id.getClientId());
-            store.closeTransactionChain(id);
-        } else if (getLeader() != null) {
-            getLeader().forward(closeTransactionChain, getContext());
-        } else {
-            LOG.warn("{}: Could not close transaction {}", persistenceId(), closeTransactionChain.getIdentifier());
-        }
-    }
-
-    @Deprecated(since = "9.0.0", forRemoval = true)
-    @SuppressWarnings("checkstyle:IllegalCatch")
-    private void createTransaction(final CreateTransaction createTransaction) {
-        askProtocolEncountered(createTransaction.getTransactionId());
-
-        try {
-            if (TransactionType.fromInt(createTransaction.getTransactionType()) != TransactionType.READ_ONLY
-                    && failIfIsolatedLeader(getSender())) {
-                return;
-            }
-
-            final var transactionActor = createTransaction(createTransaction.getTransactionType(),
-                createTransaction.getTransactionId());
-
-            getSender().tell(new CreateTransactionReply(Serialization.serializedActorPath(transactionActor),
-                    createTransaction.getTransactionId(), createTransaction.getVersion()).toSerializable(), getSelf());
-        } catch (Exception e) {
-            getSender().tell(new Failure(e), getSelf());
-        }
-    }
-
-    @Deprecated(since = "9.0.0", forRemoval = true)
-    private ActorRef createTransaction(final int transactionType, final TransactionIdentifier transactionId) {
-        LOG.debug("{}: Creating transaction : {} ", persistenceId(), transactionId);
-        return transactionActorFactory.newShardTransaction(TransactionType.fromInt(transactionType),
-            transactionId);
-    }
-
-    // Called on leader only
-    @Deprecated(since = "9.0.0", forRemoval = true)
-    private void askProtocolEncountered(final TransactionIdentifier transactionId) {
-        askProtocolEncountered(transactionId.getHistoryId().getClientId());
-    }
-
-    // Called on leader only
-    @Deprecated(since = "9.0.0", forRemoval = true)
-    private void askProtocolEncountered(final ClientIdentifier clientId) {
-        final var frontend = clientId.getFrontendId();
-        final var state = knownFrontends.get(frontend);
-        if (!(state instanceof LeaderFrontendState.Disabled)) {
-            LOG.debug("{}: encountered ask-based client {}, disabling transaction tracking", persistenceId(), clientId);
-            if (knownFrontends.isEmpty()) {
-                knownFrontends = new HashMap<>();
-            }
-            knownFrontends.put(frontend, new LeaderFrontendState.Disabled(persistenceId(), clientId, getDataStore()));
-
-            persistPayload(clientId, DisableTrackingPayload.create(clientId,
-                datastoreContext.getInitialPayloadSerializedBufferCapacity()), false);
-        }
     }
 
     private void updateSchemaContext(final UpdateSchemaContext message) {
@@ -1032,10 +730,6 @@ public class Shard extends RaftActor {
             paused = false;
             store.purgeLeaderState();
         }
-
-        if (hasLeader && !isIsolatedLeader()) {
-            messageRetrySupport.retryMessages();
-        }
     }
 
     @Override
@@ -1050,42 +744,10 @@ public class Shard extends RaftActor {
             }
 
             requestMessageAssembler.close();
-
-            if (!hasLeader()) {
-                // No leader anywhere, nothing else to do
-                return;
-            }
-
-            // Another leader was elected. If we were the previous leader and had pending transactions, convert
-            // them to transaction messages and send to the new leader.
-            ActorSelection leader = getLeader();
-            if (leader != null) {
-                // Clears all pending transactions and converts them to messages to be forwarded to a new leader.
-                Collection<?> messagesToForward = commitCoordinator.convertPendingTransactionsToMessages(
-                    datastoreContext.getShardBatchedModificationCount());
-
-                if (!messagesToForward.isEmpty()) {
-                    LOG.debug("{}: Forwarding {} pending transaction messages to leader {}", persistenceId(),
-                            messagesToForward.size(), leader);
-
-                    for (Object message : messagesToForward) {
-                        LOG.debug("{}: Forwarding pending transaction message {}", persistenceId(), message);
-
-                        leader.tell(message, self());
-                    }
-                }
-            } else {
-                commitCoordinator.abortPendingTransactions("The transacton was aborted due to inflight leadership "
-                        + "change and the leader address isn't available.", this);
-            }
         } else {
             // We have become the leader, we need to reconstruct frontend state
             knownFrontends = verifyNotNull(frontendMetadata.toLeaderState(this));
             LOG.debug("{}: became leader with frontend state for {}", persistenceId(), knownFrontends.keySet());
-        }
-
-        if (!isIsolatedLeader()) {
-            messageRetrySupport.retryMessages();
         }
     }
 
@@ -1132,11 +794,6 @@ public class Shard extends RaftActor {
             return NON_PERSISTENT_JOURNAL_ID;
         }
         return super.journalPluginId();
-    }
-
-    @VisibleForTesting
-    final ShardCommitCoordinator getCommitCoordinator() {
-        return commitCoordinator;
     }
 
     // non-final for mocking
