@@ -26,6 +26,7 @@ import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.actor.Props;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
+import org.opendaylight.controller.cluster.raft.api.MemberInfo;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.ByteState;
@@ -76,14 +77,14 @@ public class MockRaftActorContext extends RaftActorContextImpl {
     }
 
     public MockRaftActorContext() {
-        super(null, null, "test", newElectionTerm(), -1, -1, new HashMap<>(),
+        super(null, null, new MemberInfo("test", (short) 0), newElectionTerm(), -1, -1, new HashMap<>(),
                 new DefaultConfigParamsImpl(), createProvider(), applyState -> { }, LOG,
                 MoreExecutors.directExecutor());
         setReplicatedLog(new MockReplicatedLogBuilder().build());
     }
 
     public MockRaftActorContext(final String id, final ActorSystem system, final ActorRef actor) {
-        super(actor, null, id, newElectionTerm(), -1, -1, new HashMap<>(),
+        super(actor, null, new MemberInfo(id, (short) 0), newElectionTerm(), -1, -1, new HashMap<>(),
             new DefaultConfigParamsImpl(), createProvider(), applyState -> actor.tell(applyState, actor), LOG,
             MoreExecutors.directExecutor());
 

@@ -30,6 +30,7 @@ import org.opendaylight.controller.cluster.messaging.MessageAssembler;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.api.MemberInfo;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
@@ -57,33 +58,31 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 public class Follower extends AbstractRaftActorBehavior {
     private static final long MAX_ELECTION_TIMEOUT_FACTOR = 18;
 
+    private final Stopwatch lastLeaderMessageTimer = Stopwatch.createStarted();
     private final SyncStatusTracker initialSyncStatusTracker;
-
     private final MessageAssembler appendEntriesMessageAssembler;
 
-    private final Stopwatch lastLeaderMessageTimer = Stopwatch.createStarted();
     private SnapshotTracker snapshotTracker = null;
-    private String leaderId;
-    private short leaderPayloadVersion;
+    private MemberInfo leaderInfo;
 
     public Follower(final RaftActorContext context) {
-        this(context, null, (short)-1);
+        this(context, null);
     }
 
     @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR",
         justification = "electionDuration() is not final for Candidate override")
-    public Follower(final RaftActorContext context, final String initialLeaderId,
-            final short initialLeaderPayloadVersion) {
+    public Follower(final RaftActorContext context, final MemberInfo leaderInfo) {
         super(context, RaftState.Follower);
-        leaderId = initialLeaderId;
-        leaderPayloadVersion = initialLeaderPayloadVersion;
+        this.leaderInfo = leaderInfo;
 
-        initialSyncStatusTracker = new SyncStatusTracker(context.getActor(), getId(), context.getConfigParams()
-            .getSyncIndexThreshold());
+        initialSyncStatusTracker = new SyncStatusTracker(context.getActor(), getId(),
+            context.getConfigParams().getSyncIndexThreshold());
 
-        appendEntriesMessageAssembler = MessageAssembler.builder().logContext(logName())
-                .fileBackedStreamFactory(context.getFileBackedOutputStreamFactory())
-                .assembledMessageCallback((message, sender) -> handleMessage(sender, message)).build();
+        appendEntriesMessageAssembler = MessageAssembler.builder()
+            .logContext(logName())
+            .fileBackedStreamFactory(context.getFileBackedOutputStreamFactory())
+            .assembledMessageCallback((message, sender) -> handleMessage(sender, message))
+            .build();
 
         if (context.getPeerIds().isEmpty() && getLeaderId() == null) {
             actor().tell(TimeoutNow.INSTANCE, actor());
@@ -93,23 +92,13 @@ public class Follower extends AbstractRaftActorBehavior {
     }
 
     @Override
-    public final String getLeaderId() {
-        return leaderId;
+    public final MemberInfo leaderInfo() {
+        return leaderInfo;
     }
 
     @VisibleForTesting
-    protected final void setLeaderId(final @Nullable String leaderId) {
-        this.leaderId = leaderId;
-    }
-
-    @Override
-    public short getLeaderPayloadVersion() {
-        return leaderPayloadVersion;
-    }
-
-    @VisibleForTesting
-    protected final void setLeaderPayloadVersion(final short leaderPayloadVersion) {
-        this.leaderPayloadVersion = leaderPayloadVersion;
+    protected final void setLeaderInfo(final @Nullable MemberInfo leaderInfo) {
+        this.leaderInfo = leaderInfo;
     }
 
     private void restartLastLeaderMessageTimer() {
@@ -157,9 +146,8 @@ public class Follower extends AbstractRaftActorBehavior {
         }
 
         // If we got here then we do appear to be talking to the leader
-        leaderId = appendEntries.getLeaderId();
-        leaderPayloadVersion = appendEntries.getPayloadVersion();
-
+        final var leaderId = appendEntries.getLeaderId();
+        setLeaderInfo(new MemberInfo(leaderId, appendEntries.getPayloadVersion()));
         final var leaderAddress = appendEntries.leaderAddress();
         if (leaderAddress != null) {
             log.debug("New leader address: {}", leaderAddress);
@@ -415,7 +403,7 @@ public class Follower extends AbstractRaftActorBehavior {
     }
 
     private boolean needsLeaderAddress() {
-        return context.getPeerAddress(leaderId) == null;
+        return context.getPeerAddress(getLeaderId()) == null;
     }
 
     @Override
@@ -501,7 +489,7 @@ public class Follower extends AbstractRaftActorBehavior {
                     scheduleElection(electionDuration());
                 } else if (isThisFollowerIsolated()) {
                     log.debug("{}: this follower is isolated. Do not switch to Candidate for now.", logName());
-                    setLeaderId(null);
+                    setLeaderInfo(null);
                     scheduleElection(electionDuration());
                 } else {
                     log.debug("{}: Received ElectionTimeout - switching to Candidate", logName());
@@ -514,7 +502,7 @@ public class Follower extends AbstractRaftActorBehavior {
             }
         } else if (message instanceof ElectionTimeout) {
             if (noLeaderMessageReceived) {
-                setLeaderId(null);
+                setLeaderInfo(null);
             }
 
             scheduleElection(electionDuration());
@@ -524,7 +512,7 @@ public class Follower extends AbstractRaftActorBehavior {
     }
 
     private boolean isLeaderAvailabilityKnown() {
-        if (leaderId == null) {
+        if (leaderInfo == null) {
             return false;
         }
 
@@ -533,7 +521,7 @@ public class Follower extends AbstractRaftActorBehavior {
             return false;
         }
 
-        ActorSelection leaderActor = context.getPeerActorSelection(leaderId);
+        ActorSelection leaderActor = context.getPeerActorSelection(leaderInfo.id());
         if (leaderActor == null) {
             return false;
         }
@@ -606,6 +594,7 @@ public class Follower extends AbstractRaftActorBehavior {
 
         log.debug("{}: handleInstallSnapshot: {}", logName(), installSnapshot);
 
+        // FIXME: uh-oh: InstallSnapshot does not contain information about payload version, or does it?
         leaderId = installSnapshot.getLeaderId();
 
         if (snapshotTracker == null) {
