@@ -26,8 +26,6 @@ import org.opendaylight.controller.cluster.raft.PeerAddressResolver;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev231229.DataStoreProperties.ExportOnRecovery;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
@@ -71,8 +69,6 @@ public class DatastoreContext implements ClientActorConfig {
     public static final String DEFAULT_RECOVERY_EXPORT_BASE_DIR = "persistence-export";
 
     public static final long DEFAULT_SYNC_INDEX_THRESHOLD = 10;
-
-    private static final Logger LOG = LoggerFactory.getLogger(DatastoreContext.class);
 
     private static final Set<String> GLOBAL_DATASTORE_NAMES = ConcurrentHashMap.newKeySet();
 
