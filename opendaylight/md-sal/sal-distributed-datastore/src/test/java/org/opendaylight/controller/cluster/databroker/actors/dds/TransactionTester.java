@@ -7,10 +7,11 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.testkit.TestProbe;
-import org.eclipse.jdt.annotation.NonNull;
-import org.junit.Assert;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.client.AbstractClientConnection;
 import org.opendaylight.controller.cluster.access.client.AccessClientUtil;
@@ -27,16 +28,15 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 /**
  * Helper class. Allows checking messages received by backend and respond to them.
  */
-class TransactionTester<T extends AbstractProxyTransaction> {
-
+final class TransactionTester<T extends AbstractProxyTransaction> {
     private final T transaction;
     private final AbstractClientConnection<ShardBackendInfo> connection;
     private final TestProbe backendProbe;
+
     private RequestEnvelope envelope;
 
-    TransactionTester(final T transaction,
-                      final AbstractClientConnection<ShardBackendInfo> connection,
-                      final TestProbe backendProbe) {
+    TransactionTester(final T transaction, final AbstractClientConnection<ShardBackendInfo> connection,
+            final TestProbe backendProbe) {
         this.transaction = transaction;
         this.connection = connection;
         this.backendProbe = backendProbe;
@@ -51,40 +51,31 @@ class TransactionTester<T extends AbstractProxyTransaction> {
     }
 
     TransactionRequest<?> getLastReceivedMessage() {
-        return (TransactionRequest<?>) envelope.getMessage();
+        return assertInstanceOf(TransactionRequest.class, envelope.getMessage());
     }
 
     <R extends TransactionRequest<R>> R expectTransactionRequest(final Class<R> expected) {
         envelope = backendProbe.expectMsgClass(RequestEnvelope.class);
-        final Class<?> actual = envelope.getMessage().getClass();
-        final String errorMsg = String.format("Expected instance of %s, received %s", expected, actual);
-        Assert.assertTrue(errorMsg, expected.isAssignableFrom(actual));
-        return expected.cast(envelope.getMessage());
+        return assertInstanceOf(expected, envelope.getMessage());
     }
 
     void replySuccess(final RequestSuccess<?, ?> success) {
-        final long sessionId = envelope.getSessionId();
-        final long txSequence = envelope.getTxSequence();
-        final long executionTime = 0L;
-        final SuccessEnvelope responseEnvelope = new SuccessEnvelope(success, sessionId, txSequence, executionTime);
-        AccessClientUtil.completeRequest(connection, responseEnvelope);
+        AccessClientUtil.completeRequest(connection,
+            new SuccessEnvelope(success, envelope.getSessionId(), envelope.getTxSequence(), 0));
     }
 
     void replyFailure(final RequestException cause) {
-        final long sessionId = envelope.getSessionId();
-        final long txSequence = envelope.getTxSequence();
-        final long executionTime = 0L;
-        final RequestFailure<?, ?> fail =
-                new MockFailure(transaction.getIdentifier(), envelope.getMessage().getSequence(), cause);
-        final FailureEnvelope responseEnvelope = new FailureEnvelope(fail, sessionId, txSequence, executionTime);
-        AccessClientUtil.completeRequest(connection, responseEnvelope);
+        AccessClientUtil.completeRequest(connection, new FailureEnvelope(
+            new MockFailure(transaction.getIdentifier(), envelope.getMessage().getSequence(), cause),
+            envelope.getSessionId(), envelope.getTxSequence(), 0));
     }
 
     private static class MockFailure extends RequestFailure<TransactionIdentifier, TransactionFailure> {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
-        MockFailure(final @NonNull TransactionIdentifier target, final long sequence,
-                            final @NonNull RequestException cause) {
+        @NonNullByDefault
+        MockFailure(final TransactionIdentifier target, final long sequence, final RequestException cause) {
             super(target, sequence, cause);
         }
 
@@ -94,8 +85,7 @@ class TransactionTester<T extends AbstractProxyTransaction> {
         }
 
         @Override
-        protected RequestFailure.SerialForm<TransactionIdentifier, TransactionFailure> externalizableProxy(
-                final ABIVersion version) {
+        protected SerialForm<TransactionIdentifier, TransactionFailure> externalizableProxy(final ABIVersion version) {
             throw new UnsupportedOperationException("Not implemented");
         }
     }
