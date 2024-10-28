@@ -42,7 +42,7 @@ public class ShardStrategyFactory {
         return DefaultShardStrategy.getInstance();
     }
 
-    private String getModuleName(final YangInstanceIdentifier path) {
+    protected String getModuleName(final YangInstanceIdentifier path) {
         if (path.isEmpty()) {
             return UNKNOWN_MODULE_NAME;
         }
