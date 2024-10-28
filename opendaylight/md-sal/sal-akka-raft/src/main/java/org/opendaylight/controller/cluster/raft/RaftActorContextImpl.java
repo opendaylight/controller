@@ -52,7 +52,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     private final String id;
 
-    private final ElectionTerm termInformation;
+    private final @NonNull ElectionTerm termInformation;
 
     private long commitIndex;
 
