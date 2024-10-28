@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.datastore.shardmanager;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.base.MoreObjects;
 import java.util.function.Consumer;
 
 /**
@@ -21,11 +22,16 @@ import java.util.function.Consumer;
 public class RegisterForShardAvailabilityChanges {
     private final Consumer<String> callback;
 
-    public RegisterForShardAvailabilityChanges(Consumer<String> callback) {
+    public RegisterForShardAvailabilityChanges(final Consumer<String> callback) {
         this.callback = requireNonNull(callback);
     }
 
     public Consumer<String> getCallback() {
         return callback;
+    }
+
+    @Override
+    public final String toString() {
+        return MoreObjects.toStringHelper(this).add("callback", callback).toString();
     }
 }
