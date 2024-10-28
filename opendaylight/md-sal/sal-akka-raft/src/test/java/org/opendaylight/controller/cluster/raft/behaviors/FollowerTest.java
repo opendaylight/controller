@@ -48,6 +48,7 @@ import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.VotingState;
+import org.opendaylight.controller.cluster.raft.api.MemberInfo;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
@@ -1063,7 +1064,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
                 FiniteDuration.apply(100, TimeUnit.MILLISECONDS));
         ((DefaultConfigParamsImpl)context.getConfigParams()).setElectionTimeoutFactor(1);
 
-        follower = new Follower(context, "leader", (short)1);
+        follower = new Follower(context, new MemberInfo("leader", (short)1));
 
         ElectionTimeout electionTimeout = MessageCollectorActor.expectFirstMatching(followerActor,
                 ElectionTimeout.class);
@@ -1077,6 +1078,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         MockRaftActorContext context = createActorContext();
         follower = createBehavior(context);
         follower.handleMessage(leaderActor, new RaftRPC() {
+            @java.io.Serial
             private static final long serialVersionUID = 1L;
 
             @Override
