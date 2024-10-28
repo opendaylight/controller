@@ -150,7 +150,7 @@ public class Shard extends RaftActor {
     }
 
     // FIXME: make this a dynamic property based on mailbox size and maximum number of clients
-    private static final int CLIENT_MAX_MESSAGES = 1000;
+    static final int CLIENT_MAX_MESSAGES = 1000;
 
     // The state of this Shard
     private final ShardDataTree store;
@@ -484,8 +484,8 @@ public class Shard extends RaftActor {
         throw new OutOfSequenceEnvelopeException(0);
     }
 
-    private static @NonNull ABIVersion selectVersion(final ConnectClientRequest message) {
-        final Range<ABIVersion> clientRange = Range.closed(message.getMinVersion(), message.getMaxVersion());
+    public static @NonNull ABIVersion selectVersion(final ConnectClientRequest request) {
+        final Range<ABIVersion> clientRange = Range.closed(request.getMinVersion(), request.getMaxVersion());
         for (ABIVersion v : SUPPORTED_ABIVERSIONS) {
             if (clientRange.contains(v)) {
                 return v;
