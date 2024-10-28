@@ -7,12 +7,8 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
-import static com.google.common.base.Preconditions.checkState;
-
 import com.google.common.annotations.Beta;
 import com.google.common.util.concurrent.FluentFuture;
-import java.util.Collection;
-import java.util.Map;
 import java.util.Optional;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -61,8 +57,8 @@ public class ClientTransaction extends AbstractClientHandle<AbstractProxyTransac
     }
 
     private FluentFuture<Optional<NormalizedNode>> readRoot() {
-        return RootScatterGather.gather(parent().actorUtils(), ensureAllProxies()
-            .map(proxy -> proxy.read(YangInstanceIdentifier.of())));
+        return RootScatterGather.gather(parent().actorUtils(),
+            ensureAllProxies().map(proxy -> proxy.read(YangInstanceIdentifier.of())));
     }
 
     public void delete(final YangInstanceIdentifier path) {
@@ -106,22 +102,22 @@ public class ClientTransaction extends AbstractClientHandle<AbstractProxyTransac
     }
 
     public DOMStoreThreePhaseCommitCohort ready() {
-        final Map<Long, AbstractProxyTransaction> participants = ensureClosed();
-        checkState(participants != null, "Attempted to submit a closed transaction %s", this);
+        final var participants = ensureClosed();
+        if (participants == null) {
+            throw new IllegalStateException("Attempted to submit a closed transaction " + this);
+        }
 
-        final Collection<AbstractProxyTransaction> toReady = participants.values();
+        final var toReady = participants.values();
         toReady.forEach(AbstractProxyTransaction::seal);
 
-        final TransactionIdentifier txId = getIdentifier();
-        final AbstractClientHistory parent = parent();
+        final var txId = getIdentifier();
+        final var parent = parent();
         parent.onTransactionShardsBound(txId, participants.keySet());
-
-        final AbstractTransactionCommitCohort cohort = switch (toReady.size()) {
+        return parent.onTransactionReady(this, switch (toReady.size()) {
             case 0 -> new EmptyTransactionCommitCohort(parent, txId);
             case 1 -> new DirectTransactionCommitCohort(parent, txId, toReady.iterator().next());
             default -> new ClientTransactionCommitCohort(parent, txId, toReady);
-        };
-        return parent.onTransactionReady(this, cohort);
+        });
     }
 
     @Override
