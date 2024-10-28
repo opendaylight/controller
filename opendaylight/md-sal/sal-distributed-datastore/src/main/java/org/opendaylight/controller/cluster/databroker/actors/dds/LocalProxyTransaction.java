@@ -115,14 +115,16 @@ abstract sealed class LocalProxyTransaction extends AbstractProxyTransaction
     void handleReplayedRemoteRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback,
             final long enqueuedTicks) {
         switch (request) {
-            case ModifyTransactionRequest req -> replayModifyTransactionRequest(req, callback, enqueuedTicks);
-            case TransactionPurgeRequest req -> enqueuePurge(callback, enqueuedTicks);
             case IncrementTransactionSequenceRequest req -> {
                 // Local transactions do not have non-replayable requests which would be visible to the backend,
                 // hence we can skip sequence increments.
                 LOG.debug("Not replaying {}", req);
             }
-            default -> handleReadRequest(request, callback);
+            case ModifyTransactionRequest req -> replayModifyTransactionRequest(req, callback, enqueuedTicks);
+            case TransactionPurgeRequest req -> enqueuePurge(callback, enqueuedTicks);
+            case ReadTransactionRequest req -> handleRemoteRead(req, callback);
+            case ExistsTransactionRequest req -> handleRemoteExists(req, callback);
+            default -> throw unhandledRequest(request);
         }
     }
 
@@ -138,7 +140,27 @@ abstract sealed class LocalProxyTransaction extends AbstractProxyTransaction
         switch (request) {
             case ModifyTransactionRequest req -> applyForwardedModifyTransactionRequest(req, callback);
             case TransactionPurgeRequest req -> enqueuePurge(callback);
-            default -> handleReadRequest(request, callback);
+            case ReadTransactionRequest req -> handleRemoteRead(req, callback);
+            case ExistsTransactionRequest req -> handleRemoteExists(req, callback);
+            default -> throw unhandledRequest(request);
+        }
+    }
+
+    private void handleRemoteExists(final ExistsTransactionRequest request, final Consumer<Response<?, ?>> callback) {
+        // Note we delay completion of read requests to limit the scope at which the client can run, as they have
+        // listeners, which we do not want to execute while we are reconnecting.
+        if (callback != null) {
+            final var response = handleExistsRequest(readOnlyView(), request);
+            executeInActor(() -> callback.accept(response));
+        }
+    }
+
+    private void handleRemoteRead(final ReadTransactionRequest request, final Consumer<Response<?, ?>> callback) {
+        // Note we delay completion of read requests to limit the scope at which the client can run, as they have
+        // listeners, which we do not want to execute while we are reconnecting.
+        if (callback != null) {
+            final var response = handleReadRequest(readOnlyView(), request);
+            executeInActor(() -> callback.accept(response));
         }
     }
 
@@ -161,26 +183,6 @@ abstract sealed class LocalProxyTransaction extends AbstractProxyTransaction
         } catch (FailedDataTreeModificationException e) {
             return request.toRequestFailure(new RuntimeRequestException("Failed to access data",
                 ReadFailedException.MAPPER.apply(e)));
-        }
-    }
-
-    private void handleReadRequest(final TransactionRequest<?> request, final Consumer<Response<?, ?>> callback) {
-        // Note we delay completion of read requests to limit the scope at which the client can run, as they have
-        // listeners, which we do not want to execute while we are reconnecting.
-        switch (request) {
-            case ReadTransactionRequest msg -> {
-                if (callback != null) {
-                    final var response = handleReadRequest(readOnlyView(), msg);
-                    executeInActor(() -> callback.accept(response));
-                }
-            }
-            case ExistsTransactionRequest req -> {
-                if (callback != null) {
-                    final var response = handleExistsRequest(readOnlyView(), req);
-                    executeInActor(() -> callback.accept(response));
-                }
-            }
-            default -> throw unhandledRequest(request);
         }
     }
 
