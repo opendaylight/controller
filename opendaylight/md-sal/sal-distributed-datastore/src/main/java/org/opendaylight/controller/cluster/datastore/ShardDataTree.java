@@ -1170,17 +1170,6 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         return cohort;
     }
 
-    // Exposed for ShardCommitCoordinator so it does not have deal with local histories (it does not care), this mimics
-    // the newReadWriteTransaction()
-    final ShardDataTreeCohort newReadyCohort(final TransactionIdentifier txId, final DataTreeModification mod,
-            final Optional<SortedSet<String>> participatingShardNames) {
-        final var historyId = txId.getHistoryId();
-        if (historyId.getHistoryId() == 0) {
-            return createReadyCohort(txId, mod, participatingShardNames);
-        }
-        return ensureTransactionChain(historyId, null).createReadyCohort(txId, mod, participatingShardNames);
-    }
-
     @SuppressFBWarnings(value = "DB_DUPLICATE_SWITCH_CLAUSES", justification = "See inline comments below.")
     final void checkForExpiredTransactions(final long transactionCommitTimeoutMillis,
             final Function<SimpleShardDataTreeCohort, OptionalLong> accessTimeUpdater) {

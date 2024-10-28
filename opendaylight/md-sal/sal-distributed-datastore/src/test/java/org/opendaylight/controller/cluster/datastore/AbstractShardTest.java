@@ -14,7 +14,6 @@ import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -22,16 +21,11 @@ import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking
 import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking.successfulCommit;
 import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking.successfulPreCommit;
 
-import com.google.common.primitives.UnsignedLong;
-import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -58,7 +52,6 @@ import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
-import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
@@ -232,23 +225,6 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         return cohort;
     }
 
-    @Deprecated(since = "11.0.0", forRemoval = true)
-    protected static Map<TransactionIdentifier, CapturingShardDataTreeCohort> setupCohortDecorator(final Shard shard,
-            final TransactionIdentifier... transactionIDs) {
-        final Map<TransactionIdentifier, CapturingShardDataTreeCohort> cohortMap = new HashMap<>();
-        for (TransactionIdentifier id: transactionIDs) {
-            cohortMap.put(id, new CapturingShardDataTreeCohort());
-        }
-
-        shard.getCommitCoordinator().setCohortDecorator((transactionID, actual) -> {
-            CapturingShardDataTreeCohort cohort = cohortMap.get(transactionID);
-            cohort.setDelegate(actual);
-            return cohort;
-        });
-
-        return cohortMap;
-    }
-
     public static NormalizedNode readStore(final TestActorRef<? extends Shard> shard,
             final YangInstanceIdentifier id) {
         return shard.underlyingActor().getDataStore().readNode(id).orElse(null);
@@ -343,102 +319,6 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         @Override
         public Shard create() throws Exception {
             return delegate.create();
-        }
-    }
-
-    @Deprecated(since = "11.0.0", forRemoval = true)
-    public static class CapturingShardDataTreeCohort extends ShardDataTreeCohort {
-        private volatile ShardDataTreeCohort delegate;
-        private FutureCallback<Empty> canCommit;
-        private FutureCallback<DataTreeCandidate> preCommit;
-        private FutureCallback<UnsignedLong> commit;
-
-        public void setDelegate(final ShardDataTreeCohort delegate) {
-            this.delegate = delegate;
-        }
-
-        public FutureCallback<Empty> getCanCommit() {
-            assertNotNull("canCommit was not invoked", canCommit);
-            return canCommit;
-        }
-
-        public FutureCallback<DataTreeCandidate> getPreCommit() {
-            assertNotNull("preCommit was not invoked", preCommit);
-            return preCommit;
-        }
-
-        public FutureCallback<UnsignedLong> getCommit() {
-            assertNotNull("commit was not invoked", commit);
-            return commit;
-        }
-
-        @Override
-        TransactionIdentifier transactionId() {
-            return delegate.transactionId();
-        }
-
-        @Override
-        DataTreeCandidateTip getCandidate() {
-            return delegate.getCandidate();
-        }
-
-        @Override
-        DataTreeModification getDataTreeModification() {
-            return delegate.getDataTreeModification();
-        }
-
-        @Override
-        public void canCommit(final FutureCallback<Empty> callback) {
-            canCommit = mockFutureCallback(callback);
-            delegate.canCommit(canCommit);
-        }
-
-        @Override
-        public void preCommit(final FutureCallback<DataTreeCandidate> callback) {
-            preCommit = mockFutureCallback(callback);
-            delegate.preCommit(preCommit);
-        }
-
-        @Override
-        public void commit(final FutureCallback<UnsignedLong> callback) {
-            commit = mockFutureCallback(callback);
-            delegate.commit(commit);
-        }
-
-        @SuppressWarnings("unchecked")
-        private static <T> FutureCallback<T> mockFutureCallback(final FutureCallback<T> actual) {
-            FutureCallback<T> mock = mock(FutureCallback.class);
-            doAnswer(invocation -> {
-                actual.onFailure(invocation.getArgument(0));
-                return null;
-            }).when(mock).onFailure(any(Throwable.class));
-
-            doAnswer(invocation -> {
-                actual.onSuccess(invocation.getArgument(0));
-                return null;
-            }).when(mock).onSuccess((T) nullable(Object.class));
-
-            return mock;
-        }
-
-        @Override
-        public void abort(final FutureCallback<Empty> callback) {
-            delegate.abort(callback);
-        }
-
-        @Override
-        public boolean isFailed() {
-            return delegate.isFailed();
-        }
-
-        @Override
-        public State getState() {
-            return delegate.getState();
-        }
-
-        @Override
-        Optional<SortedSet<String>> getParticipatingShardNames() {
-            return delegate.getParticipatingShardNames();
         }
     }
 }
