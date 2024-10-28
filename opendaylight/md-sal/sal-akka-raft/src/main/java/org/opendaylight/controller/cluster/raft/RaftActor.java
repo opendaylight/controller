@@ -36,6 +36,7 @@ import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersisten
 import org.opendaylight.controller.cluster.mgmt.api.FollowerInfo;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RoleChanged;
+import org.opendaylight.controller.cluster.raft.api.MemberInfo;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.CheckConsensusReached;
 import org.opendaylight.controller.cluster.raft.base.messages.InitiateCaptureSnapshot;
@@ -116,18 +117,17 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     private boolean shuttingDown;
 
     @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Akka class design")
-    protected RaftActor(final String id, final Map<String, String> peerAddresses,
-         final Optional<ConfigParams> configParams, final short payloadVersion) {
+    protected RaftActor(final MemberInfo info, final Map<String, String> peerAddresses,
+            final Optional<ConfigParams> configParams) {
 
         persistentProvider = new PersistentDataProvider(this);
         delegatingPersistenceProvider = new RaftActorDelegatingPersistentDataProvider(null, persistentProvider);
 
-        context = new RaftActorContextImpl(getSelf(), getContext(), id,
-            new ElectionTermImpl(persistentProvider, id, LOG), -1, -1, peerAddresses,
+        context = new RaftActorContextImpl(getSelf(), getContext(), info,
+            new ElectionTermImpl(persistentProvider, info.id(), LOG), -1, -1, peerAddresses,
             configParams.isPresent() ? configParams.orElseThrow() : new DefaultConfigParamsImpl(),
             delegatingPersistenceProvider, this::handleApplyState, LOG, this::executeInSelf);
 
-        context.setPayloadVersion(payloadVersion);
         context.setReplicatedLog(ReplicatedLogImpl.newInstance(context));
     }
 
@@ -711,15 +711,12 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             // The RaftPolicy was modified. If the current behavior is Follower then re-initialize to Follower
             // but transfer the previous leaderId so it doesn't immediately try to schedule an election. This
             // avoids potential disruption. Otherwise, switch to Follower normally.
-            RaftActorBehavior behavior = getCurrentBehavior();
+            final var behavior = getCurrentBehavior();
             if (behavior != null && behavior.state() == RaftState.Follower) {
-                String previousLeaderId = behavior.getLeaderId();
-                short previousLeaderPayloadVersion = behavior.getLeaderPayloadVersion();
-
+                final var prevLeaderInfo = behavior.leaderInfo();
                 LOG.debug("{}: Re-initializing to Follower with previous leaderId {}", persistenceId(),
-                        previousLeaderId);
-
-                changeCurrentBehavior(new Follower(context, previousLeaderId, previousLeaderPayloadVersion));
+                    behavior.getLeaderId());
+                changeCurrentBehavior(new Follower(context, prevLeaderInfo));
             } else {
                 initializeBehavior();
             }

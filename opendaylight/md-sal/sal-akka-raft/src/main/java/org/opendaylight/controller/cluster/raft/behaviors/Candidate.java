@@ -14,6 +14,7 @@ import org.opendaylight.controller.cluster.raft.PeerInfo;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.api.MemberInfo;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
@@ -69,13 +70,8 @@ public final class Candidate extends AbstractRaftActorBehavior {
     }
 
     @Override
-    public String getLeaderId() {
+    public MemberInfo leaderInfo() {
         return null;
-    }
-
-    @Override
-    public short getLeaderPayloadVersion() {
-        return -1;
     }
 
     @Override

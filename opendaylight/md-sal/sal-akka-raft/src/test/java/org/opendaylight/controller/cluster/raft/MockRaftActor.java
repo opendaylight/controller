@@ -28,6 +28,7 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Props;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
+import org.opendaylight.controller.cluster.raft.api.MemberInfo;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
@@ -50,8 +51,8 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     private final Function<Runnable, Void> pauseLeaderFunction;
 
     protected MockRaftActor(final AbstractBuilder<?, ?> builder) {
-        super(builder.id, builder.peerAddresses != null ? builder.peerAddresses :
-            Collections.emptyMap(), Optional.ofNullable(builder.config), PAYLOAD_VERSION);
+        super(new MemberInfo(builder.id, PAYLOAD_VERSION),
+            builder.peerAddresses != null ? builder.peerAddresses : Map.of(), Optional.ofNullable(builder.config));
         state = Collections.synchronizedList(new ArrayList<>());
         actorDelegate = mock(RaftActor.class);
         recoveryCohortDelegate = mock(RaftActorRecoveryCohort.class);

@@ -53,6 +53,7 @@ import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.PersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.MockRaftActor.MockSnapshotState;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
+import org.opendaylight.controller.cluster.raft.api.MemberInfo;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
@@ -97,10 +98,11 @@ public class RaftActorRecoverySupportTest {
     public void setup() {
         mockActorSystem = ActorSystem.create();
         mockActorRef = mockActorSystem.actorOf(Props.create(DoNothingActor.class));
-        context = new RaftActorContextImpl(mockActorRef, null, localId,
-                new ElectionTermImpl(mockPersistentProvider, "test", LOG), -1, -1,
-                Map.of(), configParams, mockPersistence, applyState -> {
-        }, LOG, MoreExecutors.directExecutor());
+        context = new RaftActorContextImpl(mockActorRef, null, new MemberInfo(localId, (short) 0),
+            new ElectionTermImpl(mockPersistentProvider, "test", LOG), -1, -1, Map.of(), configParams, mockPersistence,
+            applyState -> {
+                // No-op
+            }, LOG, MoreExecutors.directExecutor());
 
         support = new RaftActorRecoverySupport(context, mockCohort);
 

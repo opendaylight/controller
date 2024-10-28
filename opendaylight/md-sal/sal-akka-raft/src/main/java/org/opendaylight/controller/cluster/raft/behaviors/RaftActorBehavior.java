@@ -10,13 +10,13 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 import org.apache.pekko.actor.ActorRef;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.RaftState;
+import org.opendaylight.controller.cluster.raft.api.MemberInfo;
 
 /**
  * The interface for a class that implements a specific behavior of a RaftActor. The types of behaviors are enumerated
  * by {@link RaftState}. Each handles the same Raft messages differently.
  */
 public interface RaftActorBehavior extends AutoCloseable {
-
     /**
      * Handle a message. If the processing of the message warrants a state
      * change then a new behavior should be returned otherwise this method should
@@ -37,11 +37,22 @@ public interface RaftActorBehavior extends AutoCloseable {
     RaftState state();
 
     /**
+     * Return information about current leader, if one exists.
+     *
+     * @return information about current leader, {@code null} if none exists
+     */
+    @Nullable MemberInfo leaderInfo();
+
+    /**
      * Returns the id of the leader.
      *
      * @return the id of the leader or null if not known
      */
-    @Nullable String getLeaderId();
+    // TODO: rename to leaderId()
+    default @Nullable String getLeaderId() {
+        final var info = leaderInfo();
+        return info != null ? info.id() : null;
+    }
 
     /**
      * Sets the index of the last log entry that has been replicated to all peers.
@@ -62,7 +73,11 @@ public interface RaftActorBehavior extends AutoCloseable {
      *
      * @return a short representing the version
      */
-    short getLeaderPayloadVersion();
+    // TODO: deprecate for removal
+    default short getLeaderPayloadVersion() {
+        final var info = leaderInfo();
+        return info != null ? info.payloadVersion() : -1;
+    }
 
     /**
      * Closes the current behavior and switches to the specified behavior, if possible.

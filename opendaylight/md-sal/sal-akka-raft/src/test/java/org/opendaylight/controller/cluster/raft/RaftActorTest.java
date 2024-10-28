@@ -62,6 +62,7 @@ import org.opendaylight.controller.cluster.raft.AbstractRaftActorIntegrationTest
 import org.opendaylight.controller.cluster.raft.AbstractRaftActorIntegrationTest.TestRaftActor;
 import org.opendaylight.controller.cluster.raft.MockRaftActor.MockSnapshotState;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
+import org.opendaylight.controller.cluster.raft.api.MemberInfo;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
@@ -459,8 +460,7 @@ public class RaftActorTest extends AbstractActorTest {
         Follower follower = new Follower(raftActor.getRaftActorContext()) {
             @Override
             public RaftActorBehavior handleMessage(final ActorRef sender, final Object message) {
-                setLeaderId(newLeaderId);
-                setLeaderPayloadVersion(newLeaderVersion);
+                setLeaderInfo(new MemberInfo(newLeaderId, newLeaderVersion));
                 return this;
             }
         };

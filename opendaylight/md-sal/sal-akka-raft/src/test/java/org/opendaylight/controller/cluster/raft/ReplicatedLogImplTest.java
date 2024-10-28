@@ -29,6 +29,7 @@ import org.mockito.internal.matchers.Same;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
+import org.opendaylight.controller.cluster.raft.api.MemberInfo;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
@@ -55,9 +56,9 @@ public class ReplicatedLogImplTest {
 
     @Before
     public void setup() {
-        context = new RaftActorContextImpl(null, null, "test",
-                new ElectionTermImpl(mockPersistence, "test", LOG), -1, -1, Map.of(),
-                configParams, mockPersistence, applyState -> { }, LOG,  MoreExecutors.directExecutor());
+        context = new RaftActorContextImpl(null, null, new MemberInfo("test", (short) 0),
+            new ElectionTermImpl(mockPersistence, "test", LOG), -1, -1, Map.of(),
+            configParams, mockPersistence, applyState -> { }, LOG,  MoreExecutors.directExecutor());
     }
 
     private void verifyPersist(final Object message) throws Exception {

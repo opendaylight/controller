@@ -28,6 +28,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
+import org.opendaylight.controller.cluster.raft.api.MemberInfo;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
@@ -67,9 +68,11 @@ public class RaftActorSnapshotMessageSupportTest {
 
     @Before
     public void setup() {
-        context = new RaftActorContextImpl(mockRaftActorRef, null, "test",
-                new ElectionTermImpl(mockPersistence, "test", LOG), -1, -1, Map.of(),
-                configParams, mockPersistence, applyState -> { }, LOG,  MoreExecutors.directExecutor()) {
+        context = new RaftActorContextImpl(mockRaftActorRef, null, new MemberInfo("test", (short) 0),
+                new ElectionTermImpl(mockPersistence, "test", LOG), -1, -1, Map.of(), configParams, mockPersistence,
+                applyState -> {
+                    // no-op
+                }, LOG,  MoreExecutors.directExecutor()) {
             @Override
             public SnapshotManager getSnapshotManager() {
                 return mockSnapshotManager;
