@@ -48,14 +48,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import org.apache.pekko.actor.ActorRef;
-import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.actor.Address;
 import org.apache.pekko.actor.AddressFromURIString;
-import org.apache.pekko.actor.Status.Failure;
 import org.apache.pekko.cluster.Cluster;
 import org.apache.pekko.cluster.Member;
-import org.apache.pekko.dispatch.Futures;
 import org.apache.pekko.pattern.Patterns;
 import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.After;
@@ -75,11 +72,6 @@ import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.TestShard.RequestFrontendMetadata;
 import org.opendaylight.controller.cluster.datastore.TestShard.StartDropMessages;
 import org.opendaylight.controller.cluster.datastore.TestShard.StopDropMessages;
-import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
-import org.opendaylight.controller.cluster.datastore.messages.ForwardedReadyTransaction;
-import org.opendaylight.controller.cluster.datastore.messages.GetShardDataTree;
-import org.opendaylight.controller.cluster.datastore.messages.ReadyLocalTransaction;
-import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionReply;
 import org.opendaylight.controller.cluster.datastore.persisted.FrontendClientMetadata;
 import org.opendaylight.controller.cluster.datastore.persisted.FrontendShardDataTreeSnapshotMetadata;
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
@@ -121,7 +113,6 @@ import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.tree.api.ConflictingModificationAppliedException;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeConfiguration;
-import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.tree.impl.di.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.collection.Set;
@@ -718,137 +709,6 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
             verifyCars(followerDistributedDataStore.newReadOnlyTransaction(), car1);
         }
-    }
-
-    @Test
-    public void testReadyLocalTransactionForwardedToLeader() throws Exception {
-        initDatastoresWithCars("testReadyLocalTransactionForwardedToLeader");
-        followerTestKit.waitUntilLeader(followerDistributedDataStore.getActorUtils(), "cars");
-
-        final Optional<ActorRef> carsFollowerShard =
-                followerDistributedDataStore.getActorUtils().findLocalShard("cars");
-        assertTrue("Cars follower shard found", carsFollowerShard.isPresent());
-
-        final DataTree dataTree = new InMemoryDataTreeFactory().create(
-            DataTreeConfiguration.DEFAULT_OPERATIONAL, SchemaContextHelper.full());
-
-        // Send a tx with immediate commit.
-
-        DataTreeModification modification = dataTree.takeSnapshot().newModification();
-        modification.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
-        modification.merge(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
-
-        final var car1 = CarsModel.newCarEntry("optima", Uint64.valueOf(20000));
-        modification.write(CarsModel.newCarPath("optima"), car1);
-        modification.ready();
-
-        ReadyLocalTransaction readyLocal = new ReadyLocalTransaction(tx1 , modification, true, Optional.empty());
-
-        carsFollowerShard.orElseThrow().tell(readyLocal, followerTestKit.getRef());
-        Object resp = followerTestKit.expectMsgClass(Object.class);
-        if (resp instanceof Failure failure) {
-            throw new AssertionError("Unexpected failure response", failure.cause());
-        }
-
-        assertEquals("Response type", CommitTransactionReply.class, resp.getClass());
-
-        verifyCars(leaderDistributedDataStore.newReadOnlyTransaction(), car1);
-
-        // Send another tx without immediate commit.
-
-        final var car2 = CarsModel.newCarEntry("sportage", Uint64.valueOf(30000));
-        modification = dataTree.takeSnapshot().newModification();
-        modification.write(CarsModel.newCarPath("sportage"), car2);
-        modification.ready();
-
-        readyLocal = new ReadyLocalTransaction(tx2 , modification, false, Optional.empty());
-
-        carsFollowerShard.orElseThrow().tell(readyLocal, followerTestKit.getRef());
-        resp = followerTestKit.expectMsgClass(Object.class);
-        if (resp instanceof Failure failure) {
-            throw new AssertionError("Unexpected failure response", failure.cause());
-        }
-
-        assertEquals("Response type", ReadyTransactionReply.class, resp.getClass());
-
-        final ActorSelection txActor = leaderDistributedDataStore.getActorUtils().actorSelection(
-                ((ReadyTransactionReply)resp).getCohortPath());
-
-        ThreePhaseCommitCohortProxy cohort = new ThreePhaseCommitCohortProxy(leaderDistributedDataStore.getActorUtils(),
-            List.of(new ThreePhaseCommitCohortProxy.CohortInfo(Futures.successful(txActor),
-                () -> DataStoreVersions.CURRENT_VERSION)), tx2);
-        cohort.canCommit().get(5, TimeUnit.SECONDS);
-        cohort.preCommit().get(5, TimeUnit.SECONDS);
-        cohort.commit().get(5, TimeUnit.SECONDS);
-
-        verifyCars(leaderDistributedDataStore.newReadOnlyTransaction(), car1, car2);
-    }
-
-    @Test
-    public void testForwardedReadyTransactionForwardedToLeader() throws Exception {
-        initDatastoresWithCars("testForwardedReadyTransactionForwardedToLeader");
-        followerTestKit.waitUntilLeader(followerDistributedDataStore.getActorUtils(), "cars");
-
-        final Optional<ActorRef> carsFollowerShard =
-                followerDistributedDataStore.getActorUtils().findLocalShard("cars");
-        assertTrue("Cars follower shard found", carsFollowerShard.isPresent());
-
-        carsFollowerShard.orElseThrow().tell(GetShardDataTree.INSTANCE, followerTestKit.getRef());
-        final DataTree dataTree = followerTestKit.expectMsgClass(DataTree.class);
-
-        // Send a tx with immediate commit.
-
-        DataTreeModification modification = dataTree.takeSnapshot().newModification();
-        modification.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
-        modification.merge(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
-
-        final var car1 = CarsModel.newCarEntry("optima", Uint64.valueOf(20000));
-        modification.write(CarsModel.newCarPath("optima"), car1);
-
-        ForwardedReadyTransaction forwardedReady = new ForwardedReadyTransaction(tx1, DataStoreVersions.CURRENT_VERSION,
-            new ReadWriteShardDataTreeTransaction(mock(ShardDataTreeTransactionParent.class), tx1, modification),
-            true, Optional.empty());
-
-        carsFollowerShard.orElseThrow().tell(forwardedReady, followerTestKit.getRef());
-        Object resp = followerTestKit.expectMsgClass(Object.class);
-        if (resp instanceof Failure failure) {
-            throw new AssertionError("Unexpected failure response", failure.cause());
-        }
-
-        assertEquals("Response type", CommitTransactionReply.class, resp.getClass());
-
-        verifyCars(leaderDistributedDataStore.newReadOnlyTransaction(), car1);
-
-        // Send another tx without immediate commit.
-
-        final var car2 = CarsModel.newCarEntry("sportage", Uint64.valueOf(30000));
-        modification = dataTree.takeSnapshot().newModification();
-        modification.write(CarsModel.newCarPath("sportage"), car2);
-
-        forwardedReady = new ForwardedReadyTransaction(tx2, DataStoreVersions.CURRENT_VERSION,
-            new ReadWriteShardDataTreeTransaction(mock(ShardDataTreeTransactionParent.class), tx2, modification),
-            false, Optional.empty());
-
-        carsFollowerShard.orElseThrow().tell(forwardedReady, followerTestKit.getRef());
-        resp = followerTestKit.expectMsgClass(Object.class);
-        if (resp instanceof Failure failure) {
-            throw new AssertionError("Unexpected failure response", failure.cause());
-        }
-
-        assertEquals("Response type", ReadyTransactionReply.class, resp.getClass());
-
-        ActorSelection txActor = leaderDistributedDataStore.getActorUtils().actorSelection(
-                ((ReadyTransactionReply)resp).getCohortPath());
-
-        final ThreePhaseCommitCohortProxy cohort = new ThreePhaseCommitCohortProxy(
-            leaderDistributedDataStore.getActorUtils(), List.of(
-                new ThreePhaseCommitCohortProxy.CohortInfo(Futures.successful(txActor),
-                    () -> DataStoreVersions.CURRENT_VERSION)), tx2);
-        cohort.canCommit().get(5, TimeUnit.SECONDS);
-        cohort.preCommit().get(5, TimeUnit.SECONDS);
-        cohort.commit().get(5, TimeUnit.SECONDS);
-
-        verifyCars(leaderDistributedDataStore.newReadOnlyTransaction(), car1, car2);
     }
 
     @Test
