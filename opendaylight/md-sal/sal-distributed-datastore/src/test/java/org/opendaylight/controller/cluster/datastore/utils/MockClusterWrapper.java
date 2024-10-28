@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore.utils;
 
+import static java.util.Objects.requireNonNull;
+
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Address;
 import org.apache.pekko.actor.AddressFromURIString;
@@ -31,8 +33,12 @@ public class MockClusterWrapper implements ClusterWrapper {
         this("member-1");
     }
 
+    public MockClusterWrapper(final MemberName currentMemberName) {
+        this.currentMemberName = requireNonNull(currentMemberName);
+    }
+
     public MockClusterWrapper(final String currentMemberName) {
-        this.currentMemberName = MemberName.forName(currentMemberName);
+        this(MemberName.forName(currentMemberName));
     }
 
     @Override
