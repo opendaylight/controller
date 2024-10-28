@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore.utils;
 
+import static java.util.Objects.requireNonNull;
+
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Preconditions;
@@ -134,15 +136,28 @@ public class ActorUtils {
     private final PrimaryShardInfoFutureCache primaryShardInfoCache;
     private final ShardStrategyFactory shardStrategyFactory;
 
-    public ActorUtils(final ActorSystem actorSystem, final ActorRef shardManager,
-            final ClusterWrapper clusterWrapper, final Configuration configuration) {
-        this(actorSystem, shardManager, clusterWrapper, configuration,
-                DatastoreContext.newBuilder().build(), new PrimaryShardInfoFutureCache());
+    public ActorUtils(final ActorSystem actorSystem, final ActorRef shardManager, final ClusterWrapper clusterWrapper,
+            final Configuration configuration) {
+        this(actorSystem, shardManager, clusterWrapper, configuration, DatastoreContext.newBuilder().build(),
+            new PrimaryShardInfoFutureCache());
     }
 
-    public ActorUtils(final ActorSystem actorSystem, final ActorRef shardManager,
-            final ClusterWrapper clusterWrapper, final Configuration configuration,
-            final DatastoreContext datastoreContext, final PrimaryShardInfoFutureCache primaryShardInfoCache) {
+    public ActorUtils(final ActorSystem actorSystem, final ActorRef shardManager, final ClusterWrapper clusterWrapper,
+            final Configuration configuration, final DatastoreContext datastoreContext,
+            final PrimaryShardInfoFutureCache primaryShardInfoCache) {
+        this(actorSystem, shardManager, clusterWrapper, configuration, datastoreContext, primaryShardInfoCache,
+            new ShardStrategyFactory(configuration));
+    }
+
+    public ActorUtils(final ActorSystem actorSystem, final ActorRef shardManager, final ClusterWrapper clusterWrapper,
+            final Configuration configuration, final ShardStrategyFactory shardStrategyFactory) {
+        this(actorSystem, shardManager, clusterWrapper, configuration, DatastoreContext.newBuilder().build(),
+            new PrimaryShardInfoFutureCache(), shardStrategyFactory);
+    }
+
+    public ActorUtils(final ActorSystem actorSystem, final ActorRef shardManager, final ClusterWrapper clusterWrapper,
+            final Configuration configuration, final DatastoreContext datastoreContext,
+            final PrimaryShardInfoFutureCache primaryShardInfoCache, final ShardStrategyFactory shardStrategyFactory) {
         this.actorSystem = actorSystem;
         this.shardManager = shardManager;
         this.clusterWrapper = clusterWrapper;
@@ -150,7 +165,7 @@ public class ActorUtils {
         this.datastoreContext = datastoreContext;
         dispatchers = new Dispatchers(actorSystem.dispatchers());
         this.primaryShardInfoCache = primaryShardInfoCache;
-        shardStrategyFactory = new ShardStrategyFactory(configuration);
+        this.shardStrategyFactory = requireNonNull(shardStrategyFactory);
 
         setCachedProperties();
 
