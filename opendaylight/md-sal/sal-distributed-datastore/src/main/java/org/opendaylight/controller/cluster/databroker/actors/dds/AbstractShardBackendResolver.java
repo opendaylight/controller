@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.databroker.actors.dds;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.primitives.UnsignedLong;
@@ -37,6 +36,7 @@ import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedEx
 import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
+import org.opendaylight.yangtools.concepts.AbstractRegistration;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,31 +50,49 @@ import scala.compat.java8.FutureConverters;
  *
  * <p>This class is thread-safe.
  */
-abstract class AbstractShardBackendResolver extends BackendInfoResolver<ShardBackendInfo> {
-    static final class ShardState {
-        private final CompletionStage<ShardBackendInfo> stage;
+abstract sealed class AbstractShardBackendResolver extends BackendInfoResolver<ShardBackendInfo>
+        permits ModuleShardBackendResolver, SimpleShardBackendResolver {
+    /**
+     * A future {@link ShardBackendInfo}, which can only resolve successfully.
+     */
+    static final class ResolvingBackendInfo {
+        private final @NonNull CompletionStage<ShardBackendInfo> stage;
         @GuardedBy("this")
         private ShardBackendInfo result;
 
-        ShardState(final CompletionStage<ShardBackendInfo> stage) {
+        private ResolvingBackendInfo(final CompletionStage<ShardBackendInfo> stage) {
             this.stage = requireNonNull(stage);
             stage.whenComplete(this::onStageResolved);
         }
 
-        @NonNull CompletionStage<ShardBackendInfo> getStage() {
+        @NonNull CompletionStage<ShardBackendInfo> stage() {
             return stage;
         }
 
-        synchronized @Nullable ShardBackendInfo getResult() {
+        synchronized @Nullable ShardBackendInfo result() {
             return result;
         }
 
-        private synchronized void onStageResolved(final ShardBackendInfo info, final Throwable failure) {
+        private synchronized void onStageResolved(final ShardBackendInfo info, final @Nullable Throwable failure) {
             if (failure == null) {
                 result = requireNonNull(info);
             } else {
                 LOG.warn("Failed to resolve shard", failure);
             }
+        }
+    }
+
+    private final class StaleCallbackReg extends AbstractRegistration {
+        // Note: not LongConsumer because we use it for map lookup
+        final Consumer<Long> callback;
+
+        StaleCallbackReg(final Consumer<Long> callback) {
+            this.callback = requireNonNull(callback);
+        }
+
+        @Override
+        protected void removeRegistration() {
+            staleBackendInfoCallbacks.remove(this);
         }
     }
 
@@ -89,37 +107,39 @@ abstract class AbstractShardBackendResolver extends BackendInfoResolver<ShardBac
     private final AtomicLong nextSessionId = new AtomicLong();
     private final Function1<ActorRef, ?> connectFunction;
     private final ActorUtils actorUtils;
-    private final Set<Consumer<Long>> staleBackendInfoCallbacks = ConcurrentHashMap.newKeySet();
+    private final Set<StaleCallbackReg> staleBackendInfoCallbacks = ConcurrentHashMap.newKeySet();
 
     // FIXME: we really need just ActorContext.findPrimaryShardAsync()
     AbstractShardBackendResolver(final ClientIdentifier clientId, final ActorUtils actorUtils) {
         this.actorUtils = requireNonNull(actorUtils);
-        connectFunction = ExplicitAsk.toScala(t -> new ConnectClientRequest(clientId, t, ABIVersion.POTASSIUM,
-            ABIVersion.current()));
+        requireNonNull(clientId);
+        connectFunction = ExplicitAsk.toScala(
+            t -> new ConnectClientRequest(clientId, t, ABIVersion.POTASSIUM, ABIVersion.current()));
     }
 
     @Override
-    public Registration notifyWhenBackendInfoIsStale(final Consumer<Long> callback) {
-        staleBackendInfoCallbacks.add(callback);
-        return () -> staleBackendInfoCallbacks.remove(callback);
+    public final Registration notifyWhenBackendInfoIsStale(final Consumer<Long> callback) {
+        final var reg = new StaleCallbackReg(callback);
+        staleBackendInfoCallbacks.add(reg);
+        return reg;
     }
 
-    protected void notifyStaleBackendInfoCallbacks(final Long cookie) {
-        staleBackendInfoCallbacks.forEach(callback -> callback.accept(cookie));
+    final void notifyStaleBackendInfoCallbacks(final @NonNull Long cookie) {
+        staleBackendInfoCallbacks.forEach(reg -> reg.callback.accept(cookie));
     }
 
-    protected ActorUtils actorUtils() {
+    final ActorUtils actorUtils() {
         return actorUtils;
     }
 
-    protected final void flushCache(final String shardName) {
+    final void flushCache(final String shardName) {
         actorUtils.getPrimaryShardInfoCache().remove(shardName);
     }
 
-    protected final ShardState resolveBackendInfo(final String shardName, final long cookie) {
+    final @NonNull ResolvingBackendInfo resolveBackendInfo(final String shardName, final long cookie) {
         LOG.debug("Resolving cookie {} to shard {}", cookie, shardName);
 
-        final CompletableFuture<ShardBackendInfo> future = new CompletableFuture<>();
+        final var future = new CompletableFuture<ShardBackendInfo>();
         FutureConverters.toJava(actorUtils.findPrimaryShardAsync(shardName)).whenComplete((info, failure) -> {
             if (failure == null) {
                 connectShard(shardName, cookie, info, future);
@@ -127,25 +147,26 @@ abstract class AbstractShardBackendResolver extends BackendInfoResolver<ShardBac
             }
 
             LOG.debug("Shard {} failed to resolve", shardName, failure);
-            if (failure instanceof NoShardLeaderException) {
-                future.completeExceptionally(wrap("Shard has no current leader", failure));
-            } else if (failure instanceof NotInitializedException) {
-                // FIXME: this actually is an exception we can retry on
-                LOG.info("Shard {} has not initialized yet", shardName);
-                future.completeExceptionally(failure);
-            } else if (failure instanceof PrimaryNotFoundException) {
-                LOG.info("Failed to find primary for shard {}", shardName);
-                future.completeExceptionally(failure);
-            } else {
-                future.completeExceptionally(failure);
+            switch (failure) {
+                case NoShardLeaderException ex -> future.completeExceptionally(wrap("Shard has no current leader", ex));
+                case NotInitializedException ex -> {
+                    // FIXME: this actually is an exception we can retry on
+                    LOG.info("Shard {} has not initialized yet", shardName);
+                    future.completeExceptionally(ex);
+                }
+                case PrimaryNotFoundException ex -> {
+                    LOG.info("Failed to find primary for shard {}", shardName);
+                    future.completeExceptionally(ex);
+                }
+                default -> future.completeExceptionally(failure);
             }
         });
 
-        return new ShardState(future);
+        return new ResolvingBackendInfo(future);
     }
 
     private static TimeoutException wrap(final String message, final Throwable cause) {
-        final TimeoutException ret = new TimeoutException(message);
+        final var ret = new TimeoutException(message);
         ret.initCause(requireNonNull(cause));
         return ret;
     }
@@ -165,20 +186,22 @@ abstract class AbstractShardBackendResolver extends BackendInfoResolver<ShardBac
             future.completeExceptionally(wrap("Connection attempt failed", failure));
             return;
         }
-        if (response instanceof RequestFailure) {
-            final Throwable cause = ((RequestFailure<?, ?>) response).getCause().unwrap();
+        if (response instanceof RequestFailure<?, ?> reqFailure) {
+            final var cause = reqFailure.getCause().unwrap();
             LOG.debug("Connect attempt to {} failed to process", shardName, cause);
-            final Throwable result = cause instanceof NotLeaderException
-                    ? wrap("Leader moved during establishment", cause) : cause;
+            final var result = cause instanceof NotLeaderException notLeader
+                    ? wrap("Leader moved during establishment", notLeader) : cause;
             future.completeExceptionally(result);
             return;
         }
 
         LOG.debug("Resolved backend information to {}", response);
-        checkArgument(response instanceof ConnectClientSuccess, "Unhandled response %s", response);
-        final ConnectClientSuccess success = (ConnectClientSuccess) response;
-        future.complete(new ShardBackendInfo(success.getBackend(), nextSessionId.getAndIncrement(),
-            success.getVersion(), shardName, UnsignedLong.fromLongBits(cookie), success.getDataTree(),
-            success.getMaxMessages()));
+        if (response instanceof ConnectClientSuccess success) {
+            future.complete(new ShardBackendInfo(success.getBackend(), nextSessionId.getAndIncrement(),
+                success.getVersion(), shardName, UnsignedLong.fromLongBits(cookie), success.getDataTree(),
+                success.getMaxMessages()));
+        } else {
+            throw new IllegalArgumentException("Unhandled response " + response);
+        }
     }
 }

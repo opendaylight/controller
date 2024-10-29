@@ -42,7 +42,7 @@ import scala.concurrent.Future;
 final class ModuleShardBackendResolver extends AbstractShardBackendResolver {
     private static final Logger LOG = LoggerFactory.getLogger(ModuleShardBackendResolver.class);
 
-    private final ConcurrentMap<Long, ShardState> backends = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Long, ResolvingBackendInfo> backends = new ConcurrentHashMap<>();
 
     private final Future<Registration> shardAvailabilityChangesRegFuture;
 
@@ -116,9 +116,9 @@ final class ModuleShardBackendResolver extends AbstractShardBackendResolver {
          * method runs the inherent risk of stage completing before the insertion does (i.e. we have a removal of
          * non-existent element.
          */
-        final ShardState existing = backends.get(cookie);
+        final ResolvingBackendInfo existing = backends.get(cookie);
         if (existing != null) {
-            return existing.getStage();
+            return existing.stage();
         }
 
         final String shardName = shards.inverse().get(cookie);
@@ -128,18 +128,18 @@ final class ModuleShardBackendResolver extends AbstractShardBackendResolver {
         }
 
         LOG.debug("Resolving cookie {} to shard {}", cookie, shardName);
-        final ShardState toInsert = resolveBackendInfo(shardName, cookie);
+        final ResolvingBackendInfo toInsert = resolveBackendInfo(shardName, cookie);
 
-        final ShardState raced = backends.putIfAbsent(cookie, toInsert);
+        final ResolvingBackendInfo raced = backends.putIfAbsent(cookie, toInsert);
         if (raced != null) {
             // We have had a concurrent insertion, return that
             LOG.debug("Race during insertion of state for cookie {} shard {}", cookie, shardName);
-            return raced.getStage();
+            return raced.stage();
         }
 
         // We have succeeded in populating the map, now we need to take care of pruning the entry if it fails to
         // complete
-        final CompletionStage<ShardBackendInfo> stage = toInsert.getStage();
+        final CompletionStage<ShardBackendInfo> stage = toInsert.stage();
         stage.whenComplete((info, failure) -> {
             if (failure != null) {
                 LOG.debug("Resolution of cookie {} shard {} failed, removing state", cookie, shardName, failure);
@@ -156,10 +156,10 @@ final class ModuleShardBackendResolver extends AbstractShardBackendResolver {
     @Override
     public CompletionStage<ShardBackendInfo> refreshBackendInfo(final Long cookie,
             final ShardBackendInfo staleInfo) {
-        final ShardState existing = backends.get(cookie);
+        final ResolvingBackendInfo existing = backends.get(cookie);
         if (existing != null) {
-            if (!staleInfo.equals(existing.getResult())) {
-                return existing.getStage();
+            if (!staleInfo.equals(existing.result())) {
+                return existing.stage();
             }
 
             LOG.debug("Invalidating backend information {}", staleInfo);
