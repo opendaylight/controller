@@ -12,7 +12,6 @@ import static java.util.Objects.requireNonNull;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
-import org.opendaylight.controller.cluster.datastore.persisted.FrontendShardDataTreeSnapshotMetadata;
 
 public class TestShard extends Shard {
     public static class Builder extends Shard.Builder {
@@ -26,7 +25,7 @@ public class TestShard extends Shard {
 
     }
 
-    private abstract static class DropMessages<T> {
+    private abstract static sealed class DropMessages<T> {
         private final Class<T> msgClass;
 
         DropMessages(final Class<T> msgClass) {
@@ -38,13 +37,13 @@ public class TestShard extends Shard {
         }
     }
 
-    public static class StartDropMessages<T> extends DropMessages<T> {
+    public static final class StartDropMessages<T> extends DropMessages<T> {
         public StartDropMessages(final Class<T> msgClass) {
             super(msgClass);
         }
     }
 
-    public static class StopDropMessages<T> extends DropMessages<T> {
+    public static final class StopDropMessages<T> extends DropMessages<T> {
         public StopDropMessages(final Class<T> msgClass) {
             super(msgClass);
         }
@@ -52,39 +51,38 @@ public class TestShard extends Shard {
 
     private final Map<Class<?>, Predicate<?>> dropMessages = new ConcurrentHashMap<>();
 
-    protected TestShard(AbstractBuilder<?, ?> builder) {
+    protected TestShard(final AbstractBuilder<?, ?> builder) {
         super(builder);
     }
 
     @Override
-    protected void handleNonRaftCommand(Object message) {
-        if (message instanceof  RequestFrontendMetadata) {
-            FrontendShardDataTreeSnapshotMetadata metadataSnapshot = frontendMetadata.toSnapshot();
-            sender().tell(metadataSnapshot, self());
+    protected void handleNonRaftCommand(final Object message) {
+        if (message instanceof RequestFrontendMetadata) {
+            sender().tell(frontendMetadata.toSnapshot(), self());
         } else {
             super.handleNonRaftCommand(message);
         }
     }
 
     @Override
-    protected void handleCommand(Object message) {
-        if (message instanceof StartDropMessages) {
-            startDropMessages(((StartDropMessages<?>) message).getMsgClass());
-        } else if (message instanceof StopDropMessages) {
-            stopDropMessages(((StopDropMessages<?>) message).getMsgClass());
-        } else {
-            dropOrHandle(message);
+    protected void handleCommand(final Object message) {
+        switch (message) {
+            case StartDropMessages<?> msg -> startDropMessages(msg.getMsgClass());
+            case StopDropMessages<?> msg -> stopDropMessages(msg.getMsgClass());
+            default -> dropOrHandle(message);
         }
     }
 
-    private <T> void dropOrHandle(T message) {
-        Predicate<T> drop = (Predicate<T>) dropMessages.get(message.getClass());
+    private void dropOrHandle(final Object message) {
+        @SuppressWarnings("unchecked")
+        final var drop = (Predicate<Object>) dropMessages.get(message.getClass());
         if (drop == null || !drop.test(message)) {
             super.handleCommand(message);
         }
     }
 
     private void startDropMessages(final Class<?> msgClass) {
+        // TODO: use _ when we have Java 22+
         dropMessages.put(msgClass, msg -> true);
     }
 
