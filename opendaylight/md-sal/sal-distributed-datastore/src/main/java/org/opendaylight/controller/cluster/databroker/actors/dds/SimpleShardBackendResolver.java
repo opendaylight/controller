@@ -30,7 +30,7 @@ final class SimpleShardBackendResolver extends AbstractShardBackendResolver {
 
     private final String shardName;
 
-    private volatile ShardState state;
+    private volatile ResolvingBackendInfo state;
 
     // FIXME: we really need just ActorContext.findPrimaryShardAsync()
     SimpleShardBackendResolver(final ClientIdentifier clientId, final ActorUtils actorUtils,
@@ -42,21 +42,21 @@ final class SimpleShardBackendResolver extends AbstractShardBackendResolver {
     private CompletionStage<ShardBackendInfo> getBackendInfo(final long cookie) {
         checkArgument(cookie == 0);
 
-        final ShardState existing = state;
+        final ResolvingBackendInfo existing = state;
         if (existing != null) {
-            return existing.getStage();
+            return existing.stage();
         }
 
         synchronized (this) {
-            final ShardState recheck = state;
+            final ResolvingBackendInfo recheck = state;
             if (recheck != null) {
-                return recheck.getStage();
+                return recheck.stage();
             }
 
-            final ShardState newState = resolveBackendInfo(shardName, 0);
+            final ResolvingBackendInfo newState = resolveBackendInfo(shardName, 0);
             state = newState;
 
-            final CompletionStage<ShardBackendInfo> stage = newState.getStage();
+            final CompletionStage<ShardBackendInfo> stage = newState.stage();
             stage.whenComplete((info, failure) -> {
                 if (failure != null) {
                     synchronized (SimpleShardBackendResolver.this) {
@@ -80,10 +80,10 @@ final class SimpleShardBackendResolver extends AbstractShardBackendResolver {
     public CompletionStage<? extends ShardBackendInfo> refreshBackendInfo(final Long cookie,
             final ShardBackendInfo staleInfo) {
 
-        final ShardState existing = state;
+        final ResolvingBackendInfo existing = state;
         if (existing != null) {
-            if (!staleInfo.equals(existing.getResult())) {
-                return existing.getStage();
+            if (!staleInfo.equals(existing.result())) {
+                return existing.stage();
             }
 
             synchronized (this) {
