@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Range;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -116,7 +117,6 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
 import org.opendaylight.yangtools.yang.data.tree.api.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.data.tree.api.TreeType;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
-import scala.concurrent.duration.FiniteDuration;
 
 /**
  * A Shard represents a portion of the logical data tree.
@@ -986,12 +986,14 @@ public class Shard extends RaftActor {
 
         // Being paranoid here - this method should only be called once but just in case...
         if (txCommitTimeoutCheckSchedule == null) {
-            // Schedule a message to be periodically sent to check if the current in-progress
-            // transaction should be expired and aborted.
-            final var period = FiniteDuration.create(transactionCommitTimeout / 3, TimeUnit.MILLISECONDS);
-            txCommitTimeoutCheckSchedule = getContext().system().scheduler().schedule(
-                    period, period, getSelf(),
-                    TX_COMMIT_TIMEOUT_CHECK_MESSAGE, getContext().dispatcher(), ActorRef.noSender());
+            // Schedule a message to be periodically sent to check if the current in-progress transaction should be
+            // expired and aborted.
+            // Note:
+            final var period = Duration.ofMillis(transactionCommitTimeout / 3);
+            txCommitTimeoutCheckSchedule = getContext().system().scheduler()
+                // withFixedDelay to avoid bursts
+                .scheduleWithFixedDelay(period, period, getSelf(), TX_COMMIT_TIMEOUT_CHECK_MESSAGE,
+                    getContext().dispatcher(), ActorRef.noSender());
         }
     }
 
