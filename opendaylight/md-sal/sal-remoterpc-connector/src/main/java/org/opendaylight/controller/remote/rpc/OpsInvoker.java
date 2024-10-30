@@ -58,10 +58,16 @@ final class OpsInvoker extends AbstractUntypedActor {
         this.actionService = requireNonNull(actionService);
     }
 
-    public static Props props(final DOMRpcService rpcService, final DOMActionService actionService) {
+    static Props props(final DOMRpcService rpcService, final DOMActionService actionService) {
         return Props.create(OpsInvoker.class,
             requireNonNull(rpcService, "DOMRpcService can not be null"),
             requireNonNull(actionService, "DOMActionService can not be null"));
+    }
+
+    @Override
+    @Deprecated(since = "11.0.0", forRemoval = true)
+    public ActorRef getSender() {
+        return super.getSender();
     }
 
     @Override

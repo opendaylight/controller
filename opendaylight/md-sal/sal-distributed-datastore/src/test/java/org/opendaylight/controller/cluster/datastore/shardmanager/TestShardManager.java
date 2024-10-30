@@ -16,14 +16,14 @@ import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 
 public class TestShardManager extends ShardManager {
-    TestShardManager(AbstractShardManagerCreator<?> builder) {
+    TestShardManager(final AbstractShardManagerCreator<?> builder) {
         super(builder);
     }
 
     @Override
-    public void handleCommand(Object message) throws Exception {
+    public void handleCommand(final Object message) throws Exception {
         if (GetLocalShards.INSTANCE.equals(message)) {
-            sender().tell(new GetLocalShardsReply(localShards), null);
+            getSender().tell(new GetLocalShardsReply(localShards), null);
         } else {
             super.handleCommand(message);
         }
@@ -35,28 +35,24 @@ public class TestShardManager extends ShardManager {
      * @return actor for replaced shard info.
      */
     @Override
-    protected ActorRef newShardActor(ShardInformation info) {
-        Map<String, String> peerAddresses = getPeerAddresses(info.getShardName());
-        ShardInformation newInfo = new ShardInformation(info.getShardName(),
-                info.getShardId(), peerAddresses,
-                info.getDatastoreContext(),
-                TestShard.builder()
-                        .restoreFromSnapshot(info.getBuilder().getRestoreFromSnapshot()),
-                peerAddressResolver);
+    protected ActorRef newShardActor(final ShardInformation info) {
+        final var shardName = info.getShardName();
+        final var shardId = info.getShardId();
+        final var newInfo = new ShardInformation(shardName, shardId, getPeerAddresses(info.getShardName()),
+            info.getDatastoreContext(),
+            TestShard.builder().restoreFromSnapshot(info.getBuilder().getRestoreFromSnapshot()), peerAddressResolver);
         newInfo.setSchemaContext(info.getSchemaContext());
         newInfo.setActiveMember(info.isActiveMember());
 
-
-        localShards.put(info.getShardName(), info);
-        return getContext().actorOf(newInfo.newProps().withDispatcher(shardDispatcherPath),
-                info.getShardId().toString());
+        localShards.put(shardName, info);
+        return getContext().actorOf(newInfo.newProps().withDispatcher(shardDispatcherPath), shardId.toString());
     }
 
     @Override
-    ShardInformation createShardInfoFor(String shardName, ShardIdentifier shardId,
-                                        Map<String, String> peerAddresses,
-                                        DatastoreContext datastoreContext,
-                                        Map<String, DatastoreSnapshot.ShardSnapshot> shardSnapshots) {
+    ShardInformation createShardInfoFor(final String shardName, final ShardIdentifier shardId,
+                                        final Map<String, String> peerAddresses,
+                                        final DatastoreContext datastoreContext,
+                                        final Map<String, DatastoreSnapshot.ShardSnapshot> shardSnapshots) {
         return new ShardInformation(shardName, shardId, peerAddresses,
                 datastoreContext, TestShard.builder().restoreFromSnapshot(shardSnapshots.get(shardName)),
                 peerAddressResolver);
@@ -82,7 +78,7 @@ public class TestShardManager extends ShardManager {
 
         private final Map<String, ShardInformation> localShards;
 
-        public GetLocalShardsReply(Map<String, ShardInformation> localShards) {
+        public GetLocalShardsReply(final Map<String, ShardInformation> localShards) {
             this.localShards = localShards;
         }
 

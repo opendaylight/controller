@@ -132,6 +132,12 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     @Override
+    @Deprecated(since = "11.0.0", forRemoval = true)
+    public final ActorRef getSender() {
+        return super.getSender();
+    }
+
+    @Override
     public void preStart() throws Exception {
         LOG.info("Starting recovery for {} with journal batch size {}", persistenceId(),
                 context.getConfigParams().getJournalRecoveryLogBatchSize());
@@ -236,7 +242,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         } else if (message instanceof FindLeader) {
             getSender().tell(new FindLeaderReply(getLeaderAddress()), getSelf());
         } else if (message instanceof GetOnDemandRaftState) {
-            onGetOnDemandRaftStats();
+            getSender().tell(getOnDemandRaftState(), self());
         } else if (message instanceof InitiateCaptureSnapshot) {
             captureSnapshot();
         } else if (message instanceof SwitchBehavior switchBehavior) {
@@ -433,7 +439,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         return new RaftActorSnapshotMessageSupport(context, getRaftActorSnapshotCohort());
     }
 
-    private void onGetOnDemandRaftStats() {
+    private OnDemandRaftState getOnDemandRaftState() {
         // Debugging message to retrieve raft stats.
 
         final var peerAddresses = new HashMap<String, String>();
@@ -479,7 +485,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 .collect(ImmutableList.toImmutableList()));
         }
 
-        sender().tell(builder.build(), self());
+        return builder.build();
     }
 
     protected OnDemandRaftState.AbstractBuilder<?, ?> newOnDemandRaftStateBuilder() {

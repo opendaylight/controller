@@ -36,6 +36,12 @@ public final class DataTreeNotificationListenerRegistrationActor extends Abstrac
     private boolean closed;
 
     @Override
+    @Deprecated(since = "11.0.0", forRemoval = true)
+    public ActorRef getSender() {
+        return super.getSender();
+    }
+
+    @Override
     protected void handleReceive(final Object message) {
         if (message instanceof CloseDataTreeNotificationListenerRegistration) {
             closeListenerRegistration();

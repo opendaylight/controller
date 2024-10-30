@@ -84,7 +84,15 @@ public class ActorUtilsTest extends AbstractActorTest {
             this.actorRef = actorRef;
         }
 
-        @Override public void onReceive(final Object message) {
+
+        @Override
+        @Deprecated(since = "11.0.0", forRemoval = true)
+        public ActorRef getSender() {
+            return super.getSender();
+        }
+
+        @Override
+        public void onReceive(final Object message) {
             if (message instanceof FindPrimary fp) {
                 Object resp = findPrimaryResponses.get(fp.getShardName());
                 if (resp == null) {

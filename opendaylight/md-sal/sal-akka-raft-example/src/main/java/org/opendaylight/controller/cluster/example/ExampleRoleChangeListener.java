@@ -37,12 +37,13 @@ import scala.concurrent.duration.FiniteDuration;
 public class ExampleRoleChangeListener extends AbstractUntypedActor implements AutoCloseable {
     // the akka url should be set to the notifiers actor-system and domain.
     private static final String NOTIFIER_AKKA_URL = "pekko://raft-test@127.0.0.1:2550/user/";
-
-    private final Map<String, Boolean> notifierRegistrationStatus = new HashMap<>();
-    private Cancellable registrationSchedule = null;
     private static final FiniteDuration DURATION = new FiniteDuration(100, TimeUnit.MILLISECONDS);
     private static final FiniteDuration SCHEDULER_DURATION = new FiniteDuration(1, TimeUnit.SECONDS);
     private static final String[] SHARDS_TO_MONITOR = new String[] {"example"};
+
+    private final Map<String, Boolean> notifierRegistrationStatus = new HashMap<>();
+
+    private Cancellable registrationSchedule = null;
 
     public ExampleRoleChangeListener(final String memberName) {
         scheduleRegistrationListener(SCHEDULER_DURATION);
@@ -51,6 +52,12 @@ public class ExampleRoleChangeListener extends AbstractUntypedActor implements A
 
     public static Props getProps(final String memberName) {
         return Props.create(ExampleRoleChangeListener.class, memberName);
+    }
+
+    @Override
+    @Deprecated(since = "11.0.0", forRemoval = true)
+    public final ActorRef getSender() {
+        return super.getSender();
     }
 
     @Override
@@ -63,10 +70,8 @@ public class ExampleRoleChangeListener extends AbstractUntypedActor implements A
             // called by the Notifier
             handleRegisterRoleChangeListenerReply(getSender().path().toString());
 
-        } else if (message instanceof RoleChangeNotification) {
+        } else if (message instanceof RoleChangeNotification notification) {
             // called by the Notifier
-            RoleChangeNotification notification = (RoleChangeNotification) message;
-
             LOG.info("Role Change Notification received for member:{}, old role:{}, new role:{}",
                 notification.getMemberId(), notification.getOldRole(), notification.getNewRole());
 
@@ -124,7 +129,7 @@ public class ExampleRoleChangeListener extends AbstractUntypedActor implements A
             if (!registrationSchedule.isCancelled()) {
                 boolean cancelScheduler = true;
                 for (Boolean value : notifierRegistrationStatus.values()) {
-                    cancelScheduler = cancelScheduler & value;
+                    cancelScheduler = cancelScheduler && value;
                 }
                 if (cancelScheduler) {
                     registrationSchedule.cancel();

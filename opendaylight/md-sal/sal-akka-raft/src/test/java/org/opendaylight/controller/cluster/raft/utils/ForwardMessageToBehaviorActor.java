@@ -16,13 +16,14 @@ import org.apache.pekko.actor.Props;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 
 public class ForwardMessageToBehaviorActor extends MessageCollectorActor {
-    private volatile RaftActorBehavior behavior;
     private final List<RaftActorBehavior> behaviorChanges = new ArrayList<>();
 
+    private volatile RaftActorBehavior behavior;
+
     @Override
-    public void onReceive(Object message) throws Exception {
+    public void onReceive(final Object message) throws Exception {
         if (behavior != null) {
-            behaviorChanges.add(behavior.handleMessage(sender(), message));
+            behaviorChanges.add(behavior.handleMessage(getSender(), message));
         }
         super.onReceive(message);
     }
@@ -31,7 +32,7 @@ public class ForwardMessageToBehaviorActor extends MessageCollectorActor {
         return Props.create(ForwardMessageToBehaviorActor.class);
     }
 
-    public void setBehavior(RaftActorBehavior behavior) {
+    public void setBehavior(final RaftActorBehavior behavior) {
         this.behavior = behavior;
     }
 

@@ -9,6 +9,7 @@ package org.opendaylight.controller.dummy.datastore;
 
 import com.google.common.base.Stopwatch;
 import java.util.concurrent.TimeUnit;
+import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Props;
 import org.apache.pekko.actor.UntypedAbstractActor;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
@@ -38,9 +39,15 @@ public class DummyShard extends UntypedAbstractActor {
     }
 
     @Override
+    @Deprecated(since = "11.0.0", forRemoval = true)
+    public final ActorRef getSender() {
+        return super.getSender();
+    }
+
+    @Override
     public void onReceive(final Object message) throws Exception {
         switch (message) {
-            case RequestVote msg -> sender().tell(new RequestVoteReply(msg.getTerm(), true), self());
+            case RequestVote msg -> getSender().tell(new RequestVoteReply(msg.getTerm(), true), self());
             case AppendEntries msg -> handleAppendEntries(msg);
             case InstallSnapshot msg -> handleInstallSnapshot(msg);
             default -> LOG.error("Unknown message : {}", message.getClass());
@@ -48,7 +55,7 @@ public class DummyShard extends UntypedAbstractActor {
     }
 
     private void handleInstallSnapshot(final InstallSnapshot req) {
-        sender().tell(new InstallSnapshotReply(req.getTerm(), followerId, req.getChunkIndex(), true), self());
+        getSender().tell(new InstallSnapshotReply(req.getTerm(), followerId, req.getChunkIndex(), true), self());
     }
 
     protected void handleAppendEntries(final AppendEntries req) throws InterruptedException {
@@ -94,11 +101,11 @@ public class DummyShard extends UntypedAbstractActor {
             if (!ignore) {
                 LOG.info("{} - Randomizing delay : {}", followerId, delay);
                 Thread.sleep(delay);
-                sender().tell(new AppendEntriesReply(followerId, req.getTerm(), true, lastIndex, req.getTerm(),
+                getSender().tell(new AppendEntriesReply(followerId, req.getTerm(), true, lastIndex, req.getTerm(),
                         DataStoreVersions.CURRENT_VERSION), self());
             }
         } else {
-            sender().tell(new AppendEntriesReply(followerId, req.getTerm(), true, lastIndex, req.getTerm(),
+            getSender().tell(new AppendEntriesReply(followerId, req.getTerm(), true, lastIndex, req.getTerm(),
                     DataStoreVersions.CURRENT_VERSION), self());
         }
     }

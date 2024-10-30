@@ -190,6 +190,12 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     }
 
     @Override
+    @Deprecated(since = "11.0.0", forRemoval = true)
+    public final ActorRef getSender() {
+        return super.getSender();
+    }
+
+    @Override
     public void preStart() {
         LOG.info("Starting ShardManager {}", persistenceId);
     }

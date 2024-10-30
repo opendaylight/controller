@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.Props;
 import org.apache.pekko.actor.Status.Failure;
@@ -291,7 +292,7 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
         assertEquals("canCommit", expected, actual);
     }
 
-    private static class CohortActor extends UntypedAbstractActor {
+    private static final class CohortActor extends UntypedAbstractActor {
         private final Builder builder;
         private final AtomicInteger canCommitCount = new AtomicInteger();
         private final AtomicInteger commitCount = new AtomicInteger();
@@ -300,6 +301,12 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
 
         CohortActor(final Builder builder) {
             this.builder = builder;
+        }
+
+        @Override
+        @Deprecated(since = "11.0.0", forRemoval = true)
+        public ActorRef getSender() {
+            return super.getSender();
         }
 
         @Override

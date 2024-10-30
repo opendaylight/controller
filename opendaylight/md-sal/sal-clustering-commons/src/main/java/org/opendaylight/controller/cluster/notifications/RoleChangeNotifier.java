@@ -37,6 +37,12 @@ public class RoleChangeNotifier extends AbstractUntypedActor implements AutoClos
     }
 
     @Override
+    @Deprecated(since = "11.0.0", forRemoval = true)
+    public final ActorRef getSender() {
+        return super.getSender();
+    }
+
+    @Override
     public void preStart() throws Exception {
         super.preStart();
         LOG.info("RoleChangeNotifier:{} created and ready for shard:{}",
