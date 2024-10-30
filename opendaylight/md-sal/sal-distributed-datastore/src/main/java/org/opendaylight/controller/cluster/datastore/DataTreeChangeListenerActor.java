@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static java.util.Objects.requireNonNull;
 
-import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Props;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.controller.cluster.datastore.messages.DataTreeChanged;
@@ -39,26 +38,27 @@ class DataTreeChangeListenerActor extends AbstractUntypedActor {
         this.registeredPath = requireNonNull(registeredPath);
     }
 
+    static Props props(final DOMDataTreeChangeListener listener, final YangInstanceIdentifier registeredPath) {
+        return Props.create(DataTreeChangeListenerActor.class, listener, registeredPath);
+    }
+
     @Override
     protected final void handleReceive(final Object message) {
-        if (message instanceof DataTreeChanged) {
-            dataTreeChanged((DataTreeChanged) message);
-        } else if (message instanceof OnInitialData) {
-            onInitialData((OnInitialData) message);
-        } else if (message instanceof EnableNotification) {
-            enableNotification((EnableNotification) message);
-        } else if (message instanceof GetInfo) {
-            getSender().tell(new DataTreeListenerInfo(listener.toString(), registeredPath.toString(),
+        switch (message) {
+            case DataTreeChanged msg -> dataTreeChanged(msg);
+            case OnInitialData msg -> onInitialData(msg);
+            case EnableNotification msg -> enableNotification(msg);
+            case GetInfo msg -> {
+                getSender().tell(new DataTreeListenerInfo(listener.toString(), registeredPath.toString(),
                     notificationsEnabled, notificationCount), getSelf());
-        } else {
-            unknownMessage(message);
+            }
+            default -> unknownMessage(message);
         }
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     void onInitialData(final OnInitialData message) {
         LOG.debug("{}: Notifying onInitialData to listener {}", logContext, listener);
-
         try {
             listener.onInitialData();
         } catch (Exception e) {
@@ -93,9 +93,11 @@ class DataTreeChangeListenerActor extends AbstractUntypedActor {
         }
 
         // TODO: do we really need this?
-        // It seems the sender is never null but it doesn't hurt to check. If the caller passes in
-        // a null sender (ActorRef.noSender()), akka translates that to the deadLetters actor.
-        final ActorRef sender = getSender();
+        //       It seems the sender is never null but it doesn't hurt to check. If the caller passes in a null sender
+        //       (ActorRef.noSender()), akka translates that to the deadLetters actor.
+        // FIXME: yes, we want this, as DataTreeChanged should be a Request and we should be reporting at least a
+        //        success, so that we have reliable DTCL delivery via TransmitQueue.
+        final var sender = getSender();
         if (sender != null && !sender.equals(getContext().system().deadLetters())) {
             sender.tell(DataTreeChangedReply.getInstance(), getSelf());
         }
@@ -106,9 +108,5 @@ class DataTreeChangeListenerActor extends AbstractUntypedActor {
         notificationsEnabled = message.isEnabled();
         LOG.debug("{}: {} notifications for listener {}", logContext, notificationsEnabled ? "Enabled" : "Disabled",
                 listener);
-    }
-
-    static Props props(final DOMDataTreeChangeListener listener, final YangInstanceIdentifier registeredPath) {
-        return Props.create(DataTreeChangeListenerActor.class, listener, registeredPath);
     }
 }
