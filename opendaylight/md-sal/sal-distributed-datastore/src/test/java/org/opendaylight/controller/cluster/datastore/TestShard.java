@@ -58,7 +58,7 @@ public class TestShard extends Shard {
     @Override
     protected void handleNonRaftCommand(final Object message) {
         if (message instanceof RequestFrontendMetadata) {
-            sender().tell(frontendMetadata.toSnapshot(), self());
+            getSender().tell(frontendMetadata.toSnapshot(), self());
         } else {
             super.handleNonRaftCommand(message);
         }

@@ -381,9 +381,9 @@ public class Shard extends RaftActor {
                 shardMBean.setFollowerInitialSyncStatus(request.isInitialSyncDone());
                 context().parent().tell(message, self());
             } else if (GET_SHARD_MBEAN_MESSAGE.equals(message)) {
-                sender().tell(getShardMBean(), self());
+                getSender().tell(getShardMBean(), self());
             } else if (message instanceof GetShardDataTree) {
-                sender().tell(store.getDataTree(), self());
+                getSender().tell(store.getDataTree(), self());
             } else if (message instanceof ServerRemoved) {
                 context().parent().forward(message, context());
             } else if (message instanceof DataTreeCohortActorRegistry.CohortRegistryCommand request) {
@@ -648,7 +648,7 @@ public class Shard extends RaftActor {
         } else {
             clients = frontendMetadata.getClients();
         }
-        sender().tell(new GetKnownClientsReply(clients), self());
+        getSender().tell(new GetKnownClientsReply(clients), self());
     }
 
     private boolean hasLeader() {

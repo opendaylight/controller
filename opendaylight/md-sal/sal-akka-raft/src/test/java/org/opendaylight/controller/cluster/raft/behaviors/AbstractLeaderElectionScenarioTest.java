@@ -62,6 +62,12 @@ public class AbstractLeaderElectionScenarioTest {
         }
 
         @Override
+        @Deprecated(since = "11.0.0", forRemoval = true)
+        public final ActorRef getSender() {
+            return super.getSender();
+        }
+
+        @Override
         public void onReceive(Object message) throws Exception {
             // Ignore scheduled SendHeartBeat messages.
             if (message instanceof SendHeartBeat) {

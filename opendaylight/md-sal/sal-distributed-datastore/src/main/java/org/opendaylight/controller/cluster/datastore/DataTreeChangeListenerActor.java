@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static java.util.Objects.requireNonNull;
 
+import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Props;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.controller.cluster.datastore.messages.DataTreeChanged;
@@ -40,6 +41,12 @@ class DataTreeChangeListenerActor extends AbstractUntypedActor {
 
     static Props props(final DOMDataTreeChangeListener listener, final YangInstanceIdentifier registeredPath) {
         return Props.create(DataTreeChangeListenerActor.class, listener, registeredPath);
+    }
+
+    @Override
+    @Deprecated(since = "11.0.0", forRemoval = true)
+    public final ActorRef getSender() {
+        return super.getSender();
     }
 
     @Override

@@ -92,6 +92,12 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
         this.persistenceId = requireNonNull(persistenceId);
     }
 
+    @Override
+    @Deprecated(since = "11.0.0", forRemoval = true)
+    public final ActorRef getSender() {
+        return super.getSender();
+    }
+
     static ExecuteInActor getBucketsByMembersMessage(final Collection<Address> members) {
         return actor -> actor.getBucketsByMembers(members);
     }

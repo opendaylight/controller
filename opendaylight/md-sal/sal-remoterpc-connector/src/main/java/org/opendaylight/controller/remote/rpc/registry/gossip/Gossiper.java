@@ -100,6 +100,12 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
     }
 
     @Override
+    @Deprecated(since = "11.0.0", forRemoval = true)
+    public ActorRef getSender() {
+        return super.getSender();
+    }
+
+    @Override
     public void preStart() {
         ActorRefProvider provider = getContext().provider();
         selfAddress = provider.getDefaultAddress();

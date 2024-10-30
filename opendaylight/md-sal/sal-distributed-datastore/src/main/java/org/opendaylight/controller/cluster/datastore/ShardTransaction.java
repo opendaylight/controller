@@ -62,6 +62,12 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
     }
 
     @Override
+    @Deprecated(since = "11.0.0", forRemoval = true)
+    public final ActorRef getSender() {
+        return super.getSender();
+    }
+
+    @Override
     public void handleReceive(final Object message) {
         if (CloseTransaction.isSerializedType(message)) {
             closeTransaction(true);
@@ -104,7 +110,7 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
         final YangInstanceIdentifier path = message.getPath();
         ReadDataReply readDataReply = new ReadDataReply(transaction.getSnapshot().readNode(path).orElse(null),
             message.getVersion());
-        sender().tell(readDataReply.toSerializable(), self());
+        getSender().tell(readDataReply.toSerializable(), self());
     }
 
     protected void dataExists(final AbstractShardDataTreeTransaction<?> transaction, final DataExists message) {
