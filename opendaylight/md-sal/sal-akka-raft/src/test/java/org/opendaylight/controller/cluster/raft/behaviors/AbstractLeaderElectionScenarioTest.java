@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft.behaviors;
 
+import static java.util.Objects.requireNonNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -68,19 +69,16 @@ public class AbstractLeaderElectionScenarioTest {
                 return;
             }
 
-            if (message instanceof SetBehavior) {
-                behavior = ((SetBehavior)message).behavior;
-                ((SetBehavior)message).context.setCurrentBehavior(behavior);
+            if (message instanceof SetBehavior msg) {
+                behavior = msg.behavior;
+                msg.context.setCurrentBehavior(behavior);
                 return;
             }
 
-            if (message instanceof GetBehaviorState) {
-                if (behavior != null) {
-                    getSender().tell(behavior.state(), self());
-                } else {
-                    getSender().tell(new Status.Failure(new IllegalStateException(
-                            "RaftActorBehavior is not set in MemberActor")), self());
-                }
+            if (message instanceof GetBehaviorState msg) {
+                msg.replyTo.tell(behavior != null ? behavior.state()
+                    : new Status.Failure(new IllegalStateException("RaftActorBehavior is not set in MemberActor")),
+                    self());
             }
 
             if (message instanceof SendImmediateHeartBeat) {
@@ -183,10 +181,9 @@ public class AbstractLeaderElectionScenarioTest {
         }
     }
 
-    static final class GetBehaviorState implements ControlMessage {
-        static final GetBehaviorState INSTANCE = new GetBehaviorState();
-
-        private GetBehaviorState() {
+    static record GetBehaviorState(ActorRef replyTo) implements ControlMessage {
+        GetBehaviorState {
+            requireNonNull(replyTo);
         }
     }
 
@@ -249,7 +246,7 @@ public class AbstractLeaderElectionScenarioTest {
     void verifyBehaviorState(final String name, final MemberActor actor, final RaftState expState) {
         RaftState actualState;
         try {
-            actualState = (RaftState) Await.result(Patterns.ask(actor.self(), GetBehaviorState.INSTANCE,
+            actualState = (RaftState) Await.result(Patterns.askWithReplyTo(actor.self(), GetBehaviorState::new,
                 Timeout.apply(5, TimeUnit.SECONDS)), FiniteDuration.create(5, TimeUnit.SECONDS));
         } catch (RuntimeException e) {
             throw e;
