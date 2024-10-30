@@ -7,8 +7,12 @@
  */
 package org.opendaylight.controller.cluster.raft.client.messages;
 
-import java.util.Optional;
-import org.apache.pekko.util.Timeout;
+import static java.util.Objects.requireNonNull;
+
+import org.apache.pekko.actor.ActorRef;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Internal client message to get a snapshot of the current state based on whether or not persistence is enabled.
@@ -16,16 +20,13 @@ import org.apache.pekko.util.Timeout;
  *
  * @author Thomas Pantelis
  */
-public final class GetSnapshot {
-    public static final GetSnapshot INSTANCE = new GetSnapshot(null);
-
-    private final Timeout timeout;
-
-    public GetSnapshot(final Timeout timeout) {
-        this.timeout = timeout;
+@NonNullByDefault
+public record GetSnapshot(ActorRef replyTo, @Nullable FiniteDuration timeout) {
+    public GetSnapshot {
+        requireNonNull(replyTo);
     }
 
-    public Optional<Timeout> getTimeout() {
-        return Optional.ofNullable(timeout);
+    public GetSnapshot(final ActorRef replyTo) {
+        this(replyTo, null);
     }
 }

@@ -8,15 +8,14 @@
 package org.opendaylight.controller.cluster.raft;
 
 import com.google.common.annotations.VisibleForTesting;
-import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.persistence.SaveSnapshotFailure;
 import org.apache.pekko.persistence.SaveSnapshotSuccess;
-import org.apache.pekko.util.Timeout;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
-import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.base.messages.SnapshotComplete;
 import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshot;
@@ -71,7 +70,7 @@ class RaftActorSnapshotMessageSupport {
         } else if (COMMIT_SNAPSHOT.equals(message)) {
             context.getSnapshotManager().commit(-1, -1);
         } else if (message instanceof GetSnapshot getSnapshot) {
-            onGetSnapshot(sender, getSnapshot);
+            onGetSnapshot(getSnapshot);
         } else if (message instanceof SnapshotComplete) {
             log.debug("{}: SnapshotComplete received", context.getId());
         } else {
@@ -109,30 +108,23 @@ class RaftActorSnapshotMessageSupport {
         context.getSnapshotManager().apply(message);
     }
 
-    private void onGetSnapshot(final ActorRef sender, final GetSnapshot getSnapshot) {
+    private void onGetSnapshot(final GetSnapshot message) {
         log.debug("{}: onGetSnapshot", context.getId());
 
-
         if (context.getPersistenceProvider().isRecoveryApplicable()) {
-            CaptureSnapshot captureSnapshot = context.getSnapshotManager().newCaptureSnapshot(
-                    context.getReplicatedLog().lastMeta(), -1, true);
-
-            final FiniteDuration timeout =
-                    getSnapshot.getTimeout().map(Timeout::duration).orElse(snapshotReplyActorTimeout);
-
-            ActorRef snapshotReplyActor = context.actorOf(GetSnapshotReplyActor.props(captureSnapshot,
-                    ImmutableElectionTerm.copyOf(context.getTermInformation()), sender, timeout, context.getId(),
-                    context.getPeerServerInfo(true)));
-
+            final var captureSnapshot = context.getSnapshotManager()
+                .newCaptureSnapshot(context.getReplicatedLog().lastMeta(), -1, true);
+            final var timeout = Objects.requireNonNullElse(message.timeout(), snapshotReplyActorTimeout);
+            final var snapshotReplyActor = context.actorOf(GetSnapshotReplyActor.props(captureSnapshot,
+                ImmutableElectionTerm.copyOf(context.getTermInformation()), message.replyTo(), timeout, context.getId(),
+                context.getPeerServerInfo(true)));
             cohort.createSnapshot(snapshotReplyActor, Optional.empty());
         } else {
-            Snapshot snapshot = Snapshot.create(
-                    EmptyState.INSTANCE, Collections.<ReplicatedLogEntry>emptyList(),
-                    -1, -1, -1, -1,
-                    context.getTermInformation().getCurrentTerm(), context.getTermInformation().getVotedFor(),
-                    context.getPeerServerInfo(true));
+            final var termInfo = context.getTermInformation();
+            final var snapshot = Snapshot.create(EmptyState.INSTANCE, List.of(), -1, -1, -1, -1,
+                termInfo.getCurrentTerm(), termInfo.getVotedFor(), context.getPeerServerInfo(true));
 
-            sender.tell(new GetSnapshotReply(context.getId(), snapshot), context.getActor());
+            message.replyTo().tell(new GetSnapshotReply(context.getId(), snapshot), context.getActor());
         }
     }
 
