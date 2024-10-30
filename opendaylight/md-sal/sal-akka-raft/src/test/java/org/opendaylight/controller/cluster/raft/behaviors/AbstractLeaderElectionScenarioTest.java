@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft.behaviors;
 
+import static java.util.Objects.requireNonNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -57,8 +58,9 @@ public class AbstractLeaderElectionScenarioTest {
         CountDownLatch behaviorStateChangeLatch;
 
         public static Props props() {
-            return Props.create(MemberActor.class).withDispatcher(Dispatchers.DefaultDispatcherId())
-                    .withMailbox(Mailboxes.DefaultMailboxId());
+            return Props.create(MemberActor.class)
+                .withDispatcher(Dispatchers.DefaultDispatcherId())
+                .withMailbox(Mailboxes.DefaultMailboxId());
         }
 
         @Override
@@ -68,19 +70,16 @@ public class AbstractLeaderElectionScenarioTest {
                 return;
             }
 
-            if (message instanceof SetBehavior) {
-                behavior = ((SetBehavior)message).behavior;
-                ((SetBehavior)message).context.setCurrentBehavior(behavior);
+            if (message instanceof SetBehavior(var newBehavior, var context)) {
+                behavior = newBehavior;
+                context.setCurrentBehavior(behavior);
                 return;
             }
 
-            if (message instanceof GetBehaviorState) {
-                if (behavior != null) {
-                    getSender().tell(behavior.state(), self());
-                } else {
-                    getSender().tell(new Status.Failure(new IllegalStateException(
-                            "RaftActorBehavior is not set in MemberActor")), self());
-                }
+            if (message instanceof GetBehaviorState(var replyTo)) {
+                replyTo.tell(behavior != null ? behavior.state()
+                    : new Status.Failure(new IllegalStateException("RaftActorBehavior is not set in MemberActor")),
+                    self());
             }
 
             if (message instanceof SendImmediateHeartBeat) {
@@ -89,9 +88,9 @@ public class AbstractLeaderElectionScenarioTest {
 
             try {
                 if (behavior != null && !dropMessagesToBehavior.containsKey(message.getClass())) {
-                    final RaftActorBehavior nextBehavior = behavior.handleMessage(getSender(), message);
+                    final var nextBehavior = behavior.handleMessage(getSender(), message);
                     if (nextBehavior != null) {
-                        RaftActorBehavior oldBehavior = behavior;
+                        final var oldBehavior = behavior;
                         behavior = nextBehavior;
                         if (behavior != oldBehavior && behaviorStateChangeLatch != null) {
                             behaviorStateChangeLatch.countDown();
@@ -101,7 +100,7 @@ public class AbstractLeaderElectionScenarioTest {
             } finally {
                 super.onReceive(message);
 
-                CountDownLatch latch = messagesReceivedLatches.get(message.getClass());
+                final var latch = messagesReceivedLatches.get(message.getClass());
                 if (latch != null) {
                     latch.countDown();
                 }
@@ -131,7 +130,7 @@ public class AbstractLeaderElectionScenarioTest {
         }
 
         void waitForExpectedMessages(final Class<?> expClass) {
-            CountDownLatch latch = messagesReceivedLatches.get(expClass);
+            final var latch = messagesReceivedLatches.get(expClass);
             assertNotNull("No messages received for " + expClass, latch);
             assertTrue("Missing messages of type " + expClass,
                     Uninterruptibles.awaitUninterruptibly(latch, 5, TimeUnit.SECONDS));
@@ -183,20 +182,15 @@ public class AbstractLeaderElectionScenarioTest {
         }
     }
 
-    static final class GetBehaviorState implements ControlMessage {
-        static final GetBehaviorState INSTANCE = new GetBehaviorState();
-
-        private GetBehaviorState() {
+    record GetBehaviorState(ActorRef replyTo) implements ControlMessage {
+        GetBehaviorState {
+            requireNonNull(replyTo);
         }
     }
 
-    static class SetBehavior implements ControlMessage {
-        RaftActorBehavior behavior;
-        MockRaftActorContext context;
-
-        SetBehavior(final RaftActorBehavior behavior, final MockRaftActorContext context) {
-            this.behavior = behavior;
-            this.context = context;
+    record SetBehavior(RaftActorBehavior behavior, MockRaftActorContext context) implements ControlMessage {
+        SetBehavior {
+            requireNonNull(context);
         }
     }
 
@@ -249,7 +243,7 @@ public class AbstractLeaderElectionScenarioTest {
     void verifyBehaviorState(final String name, final MemberActor actor, final RaftState expState) {
         RaftState actualState;
         try {
-            actualState = (RaftState) Await.result(Patterns.ask(actor.self(), GetBehaviorState.INSTANCE,
+            actualState = (RaftState) Await.result(Patterns.askWithReplyTo(actor.self(), GetBehaviorState::new,
                 Timeout.apply(5, TimeUnit.SECONDS)), FiniteDuration.create(5, TimeUnit.SECONDS));
         } catch (RuntimeException e) {
             throw e;
