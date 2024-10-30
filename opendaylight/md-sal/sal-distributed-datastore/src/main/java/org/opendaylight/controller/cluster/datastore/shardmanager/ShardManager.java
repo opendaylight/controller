@@ -425,7 +425,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     }
 
     private void onShardReplicaRemoved(final ServerRemoved message) {
-        removeShard(new ShardIdentifier.Builder().fromShardIdString(message.getServerId()).build());
+        removeShard(ShardIdentifier.builder().fromShardIdString(message.getServerId()).build());
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
