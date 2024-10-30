@@ -1920,9 +1920,11 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         kit.expectMsgClass(Duration.ofSeconds(5), NotInitializedException.class);
 
         // Removed the default shard replica from member-1
-        ShardIdentifier.Builder builder = new ShardIdentifier.Builder();
-        ShardIdentifier shardId = builder.shardName("default").memberName(MEMBER_1).type(shardMrgIDSuffix)
-                .build();
+        final var shardId = ShardIdentifier.builder()
+            .shardName("default")
+            .memberName(MEMBER_1)
+            .type(shardMrgIDSuffix)
+            .build();
         shardManager.tell(new ServerRemoved(shardId.toString()), kit.getRef());
 
         shardManager.underlyingActor().verifySnapshotPersisted(Sets.newHashSet("people"));
