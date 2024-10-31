@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.datastore;
 import com.typesafe.config.ConfigFactory;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicLong;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.testkit.javadsl.TestKit;
@@ -22,9 +21,6 @@ import org.opendaylight.controller.cluster.access.concepts.FrontendType;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import scala.compat.java8.FutureConverters;
-import scala.concurrent.Await;
-import scala.concurrent.duration.FiniteDuration;
 
 public abstract class AbstractTest {
     protected static final MemberName MEMBER_NAME = MemberName.forName("member-1");
@@ -63,20 +59,15 @@ public abstract class AbstractTest {
         return newHistoryId(HISTORY_COUNTER.incrementAndGet());
     }
 
-    protected static <T> T waitOnAsyncTask(final CompletionStage<T> completionStage, final FiniteDuration timeout)
-            throws Exception {
-        return Await.result(FutureConverters.toScala(completionStage), timeout);
-    }
-
     @After
     public void actorSystemCleanup() {
-        for (final ActorSystem system : actorSystems) {
+        for (var system : actorSystems) {
             TestKit.shutdownActorSystem(system, true);
         }
     }
 
     protected ActorSystem newActorSystem(final String name, final String config) {
-        ActorSystem system = ActorSystem.create(name, ConfigFactory.load().getConfig(config));
+        final var system = ActorSystem.create(name, ConfigFactory.load().getConfig(config));
         actorSystems.add(system);
         return system;
     }
