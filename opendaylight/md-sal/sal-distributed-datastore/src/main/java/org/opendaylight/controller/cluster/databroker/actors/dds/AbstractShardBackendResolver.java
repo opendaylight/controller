@@ -10,14 +10,13 @@ package org.opendaylight.controller.cluster.databroker.actors.dds;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
-import akka.actor.ActorRef;
-import akka.util.Timeout;
+import akka.pattern.Patterns;
 import com.google.common.primitives.UnsignedLong;
+import java.time.Duration;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
@@ -31,7 +30,6 @@ import org.opendaylight.controller.cluster.access.commands.ConnectClientSuccess;
 import org.opendaylight.controller.cluster.access.commands.NotLeaderException;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
-import org.opendaylight.controller.cluster.common.actor.ExplicitAsk;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedException;
 import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException;
@@ -40,7 +38,6 @@ import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.Function1;
 import scala.compat.java8.FutureConverters;
 
 /**
@@ -87,18 +84,17 @@ abstract class AbstractShardBackendResolver extends BackendInfoResolver<ShardBac
      * Connect request timeout. If the shard does not respond within this interval, we retry the lookup and connection.
      */
     // TODO: maybe make this configurable somehow?
-    private static final Timeout CONNECT_TIMEOUT = Timeout.apply(5, TimeUnit.SECONDS);
+    private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(5);
 
     private final AtomicLong nextSessionId = new AtomicLong();
-    private final Function1<ActorRef, ?> connectFunction;
+    private final ClientIdentifier clientId;
     private final ActorUtils actorUtils;
     private final Set<Consumer<Long>> staleBackendInfoCallbacks = ConcurrentHashMap.newKeySet();
 
     // FIXME: we really need just ActorContext.findPrimaryShardAsync()
     AbstractShardBackendResolver(final ClientIdentifier clientId, final ActorUtils actorUtils) {
         this.actorUtils = requireNonNull(actorUtils);
-        connectFunction = ExplicitAsk.toScala(t -> new ConnectClientRequest(clientId, t, ABIVersion.POTASSIUM,
-            ABIVersion.current()));
+        this.clientId = requireNonNull(clientId);
     }
 
     @Override
@@ -157,7 +153,8 @@ abstract class AbstractShardBackendResolver extends BackendInfoResolver<ShardBac
             final CompletableFuture<ShardBackendInfo> future) {
         LOG.debug("Shard {} resolved to {}, attempting to connect", shardName, info);
 
-        FutureConverters.toJava(ExplicitAsk.ask(info.getPrimaryShardActor(), connectFunction, CONNECT_TIMEOUT))
+        Patterns.askWithReplyTo(info.getPrimaryShardActor(),
+            t -> new ConnectClientRequest(clientId, t, ABIVersion.POTASSIUM, ABIVersion.current()), CONNECT_TIMEOUT)
             .whenComplete((response, failure) -> onConnectResponse(shardName, cookie, future, response, failure));
     }
 

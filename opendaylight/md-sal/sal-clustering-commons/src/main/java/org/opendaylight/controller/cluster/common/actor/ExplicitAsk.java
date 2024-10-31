@@ -33,7 +33,7 @@ public final class ExplicitAsk {
     }
 
     public static <T> Function1<ActorRef, T> toScala(final Function<ActorRef, T> function) {
-        return new AbstractFunction1<ActorRef, T>() {
+        return new AbstractFunction1<>() {
             @Override
             public T apply(final ActorRef askSender) {
                 return function.apply(askSender);
