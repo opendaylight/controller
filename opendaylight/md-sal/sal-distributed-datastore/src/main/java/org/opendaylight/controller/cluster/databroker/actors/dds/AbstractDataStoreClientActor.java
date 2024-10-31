@@ -11,23 +11,20 @@ import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
 import akka.actor.ActorRef;
-import akka.util.Timeout;
+import akka.pattern.Patterns;
 import com.google.common.base.Throwables;
+import java.time.Duration;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.access.client.AbstractClientActor;
 import org.opendaylight.controller.cluster.access.client.ClientActorConfig;
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
-import org.opendaylight.controller.cluster.common.actor.ExplicitAsk;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
-import scala.Function1;
-import scala.concurrent.Await;
-import scala.concurrent.duration.Duration;
 
 public abstract class AbstractDataStoreClientActor extends AbstractClientActor {
-    private static final Function1<ActorRef, ?> GET_CLIENT_FACTORY = ExplicitAsk.toScala(GetClientRequest::new);
-
     private final ActorUtils actorUtils;
 
     AbstractDataStoreClientActor(final FrontendIdentifier frontendId, final ActorUtils actorUtils) {
@@ -45,18 +42,23 @@ public abstract class AbstractDataStoreClientActor extends AbstractClientActor {
         return verifyNotNull(initialBehavior(context, actorUtils));
     }
 
-    @SuppressWarnings("checkstyle:hiddenField")
     abstract AbstractDataStoreClientBehavior initialBehavior(ClientActorContext context, ActorUtils actorUtils);
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     public static DataStoreClient getDistributedDataStoreClient(final @NonNull ActorRef actor,
             final long timeout, final TimeUnit unit) {
+        final var future = requestDistributedDataStoreClient(actor,  Duration.of(timeout, unit.toChronoUnit()));
         try {
-            return (DataStoreClient) Await.result(ExplicitAsk.ask(actor, GET_CLIENT_FACTORY,
-                Timeout.apply(timeout, unit)), Duration.Inf());
+            return future.toCompletableFuture().get();
         } catch (Exception e) {
             Throwables.throwIfUnchecked(e);
             throw new IllegalStateException(e);
         }
+    }
+
+    @NonNullByDefault
+    public static CompletionStage<DataStoreClient> requestDistributedDataStoreClient(final ActorRef actor,
+            final Duration timeout) {
+        return Patterns.askWithReplyTo(actor, GetClientRequest::new, timeout).thenApply(DataStoreClient.class::cast);
     }
 }
