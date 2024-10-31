@@ -15,7 +15,6 @@ import java.lang.invoke.VarHandle;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.LongAdder;
-import java.util.function.Function;
 import org.apache.pekko.actor.ActorPath;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
@@ -414,28 +413,6 @@ public class ActorUtils {
 
     public MemberName getCurrentMemberName() {
         return clusterWrapper.getCurrentMemberName();
-    }
-
-    /**
-     * Send the message to each and every shard.
-     */
-    public void broadcast(final Function<Short, Object> messageSupplier, final Class<?> messageClass) {
-        for (final String shardName : configuration.getAllShardNames()) {
-
-            final var primaryFuture = findPrimaryShardAsync(shardName);
-            primaryFuture.onComplete(new OnComplete<>() {
-                @Override
-                public void onComplete(final Throwable failure, final PrimaryShardInfo primaryShardInfo) {
-                    if (failure != null) {
-                        LOG.warn("broadcast failed to send message {} to shard {}", messageClass.getSimpleName(),
-                            shardName, failure);
-                    } else {
-                        final var message = messageSupplier.apply(primaryShardInfo.getPrimaryShardVersion());
-                        primaryShardInfo.getPrimaryShardActor().tell(message, ActorRef.noSender());
-                    }
-                }
-            }, getClientDispatcher());
-        }
     }
 
     public FiniteDuration getOperationDuration() {

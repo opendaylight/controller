@@ -15,13 +15,10 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
-import com.google.common.collect.Sets;
 import com.typesafe.config.ConfigFactory;
 import java.time.Duration;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -34,7 +31,6 @@ import org.apache.pekko.actor.Props;
 import org.apache.pekko.actor.UntypedAbstractActor;
 import org.apache.pekko.dispatch.Futures;
 import org.apache.pekko.japi.Creator;
-import org.apache.pekko.testkit.TestActorRef;
 import org.apache.pekko.testkit.javadsl.TestKit;
 import org.apache.pekko.util.Timeout;
 import org.junit.Assert;
@@ -46,7 +42,6 @@ import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DatastoreContextFactory;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
-import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedException;
 import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException;
 import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
@@ -84,7 +79,8 @@ public class ActorUtilsTest extends AbstractActorTest {
             this.actorRef = actorRef;
         }
 
-        @Override public void onReceive(final Object message) {
+        @Override
+        public void onReceive(final Object message) {
             if (message instanceof FindPrimary fp) {
                 Object resp = findPrimaryResponses.get(fp.getShardName());
                 if (resp == null) {
@@ -434,34 +430,5 @@ public class ActorUtilsTest extends AbstractActorTest {
         Future<PrimaryShardInfo> cached = actorUtils.getPrimaryShardInfoCache().getIfPresent("foobar");
 
         assertNull(cached);
-    }
-
-    @Test
-    public void testBroadcast() {
-        ActorRef shardActorRef1 = getSystem().actorOf(MessageCollectorActor.props());
-        ActorRef shardActorRef2 = getSystem().actorOf(MessageCollectorActor.props());
-
-        TestActorRef<MockShardManager> shardManagerActorRef = TestActorRef.create(getSystem(),
-            MockShardManager.props());
-        MockShardManager shardManagerActor = shardManagerActorRef.underlyingActor();
-        shardManagerActor.addFindPrimaryResp("shard1", new RemotePrimaryShardFound(
-            shardActorRef1.path().toString(), DataStoreVersions.CURRENT_VERSION));
-        shardManagerActor.addFindPrimaryResp("shard2", new RemotePrimaryShardFound(
-            shardActorRef2.path().toString(), DataStoreVersions.CURRENT_VERSION));
-        shardManagerActor.addFindPrimaryResp("shard3", new NoShardLeaderException("not found"));
-
-        Configuration mockConfig = mock(Configuration.class);
-        doReturn(Sets.newLinkedHashSet(Arrays.asList("shard1", "shard2", "shard3"))).when(mockConfig)
-        .getAllShardNames();
-
-        ActorUtils actorUtils = new ActorUtils(getSystem(), shardManagerActorRef,
-            mock(ClusterWrapper.class), mockConfig,
-            DatastoreContext.newBuilder().shardInitializationTimeout(200, TimeUnit.MILLISECONDS).build(),
-            new PrimaryShardInfoFutureCache());
-
-        actorUtils.broadcast(v -> new TestMessage(), TestMessage.class);
-
-        MessageCollectorActor.expectFirstMatching(shardActorRef1, TestMessage.class);
-        MessageCollectorActor.expectFirstMatching(shardActorRef2, TestMessage.class);
     }
 }
