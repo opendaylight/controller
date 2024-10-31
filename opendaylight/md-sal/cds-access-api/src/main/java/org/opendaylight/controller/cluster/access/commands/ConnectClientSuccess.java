@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.access.commands;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.collect.ImmutableList;
 import java.io.DataInput;
@@ -90,8 +91,9 @@ public final class ConnectClientSuccess extends RequestSuccess<ClientIdentifier,
         maxMessages = success.maxMessages;
     }
 
-    ConnectClientSuccess(final ClientIdentifier target, final long sequence, final ActorRef backend,
-        final List<ActorSelection> alternates, final int maxMessages, final ReadOnlyDataTree dataTree) {
+    @VisibleForTesting
+    public ConnectClientSuccess(final ClientIdentifier target, final long sequence, final ActorRef backend,
+            final List<ActorSelection> alternates, final int maxMessages, final ReadOnlyDataTree dataTree) {
         super(target, sequence);
         this.backend = requireNonNull(backend);
         this.alternates = ImmutableList.copyOf(alternates);
