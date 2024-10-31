@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore.utils;
 
+import static java.util.Objects.requireNonNull;
+
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Address;
 import org.apache.pekko.actor.AddressFromURIString;
@@ -23,16 +25,20 @@ import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import scala.collection.immutable.Set.Set1;
 
 public class MockClusterWrapper implements ClusterWrapper {
+    private final MemberName currentMemberName;
 
     private Address selfAddress = new Address("akka", "test", "127.0.0.1", 2550);
-    private final MemberName currentMemberName;
 
     public MockClusterWrapper() {
         this("member-1");
     }
 
     public MockClusterWrapper(final String currentMemberName) {
-        this.currentMemberName = MemberName.forName(currentMemberName);
+        this(MemberName.forName(currentMemberName));
+    }
+
+    public MockClusterWrapper(final MemberName currentMemberName) {
+        this.currentMemberName = requireNonNull(currentMemberName);
     }
 
     @Override
