@@ -812,7 +812,6 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         processNextPending();
     }
 
-    @SuppressWarnings("checkstyle:IllegalCatch")
     private void processNextPendingTransaction() {
         ++currentTransactionBatch;
         if (currentTransactionBatch > MAX_TRANSACTION_BATCH) {
@@ -821,39 +820,49 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             return;
         }
 
-        processNextPending(pendingTransactions, State.CAN_COMMIT_PENDING, entry -> {
-            final SimpleShardDataTreeCohort cohort = entry.cohort;
-            final DataTreeModification modification = cohort.getDataTreeModification();
-
-            LOG.debug("{}: Validating transaction {}", logContext, cohort.transactionId());
-            Exception cause;
-            try {
-                tip.validate(modification);
-                LOG.debug("{}: Transaction {} validated", logContext, cohort.transactionId());
-                cohort.successfulCanCommit();
-                entry.lastAccess = readTime();
-                return;
-            } catch (ConflictingModificationAppliedException e) {
-                LOG.warn("{}: Store Tx {}: Conflicting modification for path {}.", logContext, cohort.transactionId(),
-                    e.getPath());
-                cause = new OptimisticLockFailedException("Optimistic lock failed for path " + e.getPath(), e);
-            } catch (DataValidationFailedException e) {
-                LOG.warn("{}: Store Tx {}: Data validation failed for path {}.", logContext, cohort.transactionId(),
-                    e.getPath(), e);
-
-                // For debugging purposes, allow dumping of the modification. Coupled with the above
-                // precondition log, it should allow us to understand what went on.
-                LOG.debug("{}: Store Tx {}: modifications: {}", logContext, cohort.transactionId(), modification);
-                LOG.trace("{}: Current tree: {}", logContext, dataTree);
-                cause = new TransactionCommitFailedException("Data did not pass validation for path " + e.getPath(), e);
-            } catch (Exception e) {
-                LOG.warn("{}: Unexpected failure in validation phase", logContext, e);
-                cause = e;
+        final var entry = findFirstEntry(pendingTransactions, State.CAN_COMMIT_PENDING);
+        try {
+            if (entry != null) {
+                canCommitEntry(entry);
             }
+        } finally {
+            maybeRunOperationOnPendingTransactionsComplete();
+        }
+    }
 
-            // Failure path: propagate the failure, remove the transaction from the queue and loop to the next one
-            pendingTransactions.poll().cohort.failedCanCommit(cause);
-        });
+    @SuppressWarnings("checkstyle:IllegalCatch")
+    private void canCommitEntry(final CommitEntry entry) {
+        final var cohort = entry.cohort;
+        final var modification = cohort.getDataTreeModification();
+
+        LOG.debug("{}: Validating transaction {}", logContext, cohort.transactionId());
+        final Exception cause;
+        try {
+            tip.validate(modification);
+            LOG.debug("{}: Transaction {} validated", logContext, cohort.transactionId());
+            cohort.successfulCanCommit();
+            entry.lastAccess = readTime();
+            return;
+        } catch (ConflictingModificationAppliedException e) {
+            LOG.warn("{}: Store Tx {}: Conflicting modification for path {}.", logContext, cohort.transactionId(),
+                e.getPath());
+            cause = new OptimisticLockFailedException("Optimistic lock failed for path " + e.getPath(), e);
+        } catch (DataValidationFailedException e) {
+            LOG.warn("{}: Store Tx {}: Data validation failed for path {}.", logContext, cohort.transactionId(),
+                e.getPath(), e);
+
+            // For debugging purposes, allow dumping of the modification. Coupled with the above
+            // precondition log, it should allow us to understand what went on.
+            LOG.debug("{}: Store Tx {}: modifications: {}", logContext, cohort.transactionId(), modification);
+            LOG.trace("{}: Current tree: {}", logContext, dataTree);
+            cause = new TransactionCommitFailedException("Data did not pass validation for path " + e.getPath(), e);
+        } catch (Exception e) {
+            LOG.warn("{}: Unexpected failure in validation phase", logContext, e);
+            cause = e;
+        }
+
+        // Failure path: propagate the failure, remove the transaction from the queue and loop to the next one
+        pendingTransactions.poll().cohort.failedCanCommit(cause);
     }
 
     private void processNextPending() {
@@ -861,31 +870,35 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         processNextPendingTransaction();
     }
 
-    private void processNextPending(final Queue<CommitEntry> queue, final State allowedState,
-            final Consumer<CommitEntry> processor) {
-        while (!queue.isEmpty()) {
-            final CommitEntry entry = queue.peek();
-            final SimpleShardDataTreeCohort cohort = entry.cohort;
 
+    private @Nullable CommitEntry findFirstEntry(final Queue<CommitEntry> queue, final State allowedState) {
+        while (true) {
+            final var entry = queue.peek();
+            if (entry == null) {
+                // Empty queue
+                return null;
+            }
+
+            final var cohort = entry.cohort;
             if (cohort.isFailed()) {
                 LOG.debug("{}: Removing failed transaction {}", logContext, cohort.transactionId());
                 queue.remove();
                 continue;
             }
 
-            if (cohort.getState() == allowedState) {
-                processor.accept(entry);
-            }
-
-            break;
+            return cohort.getState() == allowedState ? entry : null;
         }
-
-        maybeRunOperationOnPendingTransactionsComplete();
     }
 
     private void processNextPendingCommit() {
-        processNextPending(pendingCommits, State.COMMIT_PENDING,
-            entry -> startCommit(entry.cohort, entry.cohort.getCandidate()));
+        final var entry = findFirstEntry(pendingCommits, State.COMMIT_PENDING);
+        try {
+            if (entry != null) {
+                startCommit(entry.cohort, entry.cohort.getCandidate());
+            }
+        } finally {
+            maybeRunOperationOnPendingTransactionsComplete();
+        }
     }
 
     private boolean peekNextPendingCommit() {
