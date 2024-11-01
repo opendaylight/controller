@@ -57,7 +57,7 @@ final class FrontendMetadata extends ShardDataTreeMetadata<FrontendShardDataTree
 
         for (var clientMeta : snapshot.getClients()) {
             LOG.debug("{}: applying metadata {}", shardName, clientMeta);
-            final var builder = FrontendClientMetadataBuilder.of(shardName, clientMeta);
+            final var builder = new FrontendClientMetadataBuilder(shardName, clientMeta);
             final var frontendId = clientMeta.clientId().getFrontendId();
 
             LOG.debug("{}: client {} updated to {}", shardName, frontendId, builder);
@@ -77,7 +77,7 @@ final class FrontendMetadata extends ShardDataTreeMetadata<FrontendShardDataTree
             return existing;
         }
 
-        final var client = new FrontendClientMetadataBuilder.Enabled(shardName, id);
+        final var client = new FrontendClientMetadataBuilder(shardName, id);
         final var previous = clients.put(id.getFrontendId(), client);
         if (previous != null) {
             LOG.debug("{}: Replaced client {} with {}", shardName, previous, client);
