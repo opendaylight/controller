@@ -379,7 +379,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     }
 
     private static void assertClientMetadata(final FrontendClientMetadata clientMeta, final long lastPurged) {
-        final var iterator = clientMeta.getCurrentHistories().iterator();
+        final var iterator = clientMeta.currentHistories().iterator();
         var metadata = iterator.next();
         while (iterator.hasNext() && metadata.getHistoryId() != 1) {
             metadata = iterator.next();

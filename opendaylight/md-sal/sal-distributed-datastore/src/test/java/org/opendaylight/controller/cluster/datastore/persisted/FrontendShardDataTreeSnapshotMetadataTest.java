@@ -13,6 +13,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.UnsignedLong;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -79,8 +80,8 @@ public class FrontendShardDataTreeSnapshotMetadataTest {
         origIdent.values().forEach(client -> {
             final var copyClient = copyIdent.get(client.clientId());
             testObject(client.clientId(), copyClient.clientId());
-            assertEquals(client.getPurgedHistories(), copyClient.getPurgedHistories());
-            assertEquals(client.getCurrentHistories(), copyClient.getCurrentHistories());
+            assertEquals(client.purgedHistories(), copyClient.purgedHistories());
+            assertEquals(client.currentHistories(), copyClient.currentHistories());
         });
     }
 
@@ -104,7 +105,7 @@ public class FrontendShardDataTreeSnapshotMetadataTest {
         final ClientIdentifier clientIdentifier = ClientIdentifier.create(frontendIdentifier, num);
         final ImmutableUnsignedLongSet purgedHistories = MutableUnsignedLongSet.of(0).immutableCopy();
 
-        return new FrontendClientMetadata(clientIdentifier, purgedHistories, List.of(
+        return new FrontendClientMetadata(clientIdentifier, purgedHistories, ImmutableList.of(
             new FrontendHistoryMetadata(num, num, true,
                 UnsignedLongBitmap.copyOf(Map.of(UnsignedLong.ZERO, Boolean.TRUE)), purgedHistories)));
     }

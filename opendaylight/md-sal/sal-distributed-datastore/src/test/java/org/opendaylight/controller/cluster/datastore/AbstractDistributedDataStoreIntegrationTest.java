@@ -262,7 +262,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
                             .executeOperation(localShard, new RequestFrontendMetadata());
 
                     final var clientMeta = frontendMetadata.getClients().get(0);
-                    final var iterator = clientMeta.getCurrentHistories().iterator();
+                    final var iterator = clientMeta.currentHistories().iterator();
                     var metadata = iterator.next();
                     while (iterator.hasNext() && metadata.getHistoryId() != 1) {
                         metadata = iterator.next();
