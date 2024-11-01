@@ -40,6 +40,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     private DataTreeCandidateTip candidate;
     private FutureCallback<?> callback;
     private Exception nextFailure;
+    private long lastAccess;
 
     SimpleShardDataTreeCohort(final ShardDataTree dataTree, final DataTreeModification transaction,
             final TransactionIdentifier transactionId, final CompositeDataTreeCohort userCohorts,
@@ -64,6 +65,14 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     @Override
     TransactionIdentifier transactionId() {
         return transactionId;
+    }
+
+    long lastAccess() {
+        return lastAccess;
+    }
+
+    void setLastAccess(final long newLastAccess) {
+        lastAccess = newLastAccess;
     }
 
     @Override
