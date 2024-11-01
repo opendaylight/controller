@@ -821,9 +821,10 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             return;
         }
 
-        processNextPending(pendingTransactions, State.CAN_COMMIT_PENDING, entry -> {
-            final SimpleShardDataTreeCohort cohort = entry.cohort;
-            final DataTreeModification modification = cohort.getDataTreeModification();
+        final var entry = findFirstEntry(pendingTransactions, State.CAN_COMMIT_PENDING);
+        if (entry != null) {
+            final var cohort = entry.cohort;
+            final var modification = cohort.getDataTreeModification();
 
             LOG.debug("{}: Validating transaction {}", logContext, cohort.transactionId());
             Exception cause;
@@ -853,7 +854,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
             // Failure path: propagate the failure, remove the transaction from the queue and loop to the next one
             pendingTransactions.poll().cohort.failedCanCommit(cause);
-        });
+        }
+        maybeRunOperationOnPendingTransactionsComplete();
     }
 
     private void processNextPending() {
@@ -861,31 +863,32 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         processNextPendingTransaction();
     }
 
-    private void processNextPending(final Queue<CommitEntry> queue, final State allowedState,
-            final Consumer<CommitEntry> processor) {
-        while (!queue.isEmpty()) {
-            final CommitEntry entry = queue.peek();
-            final SimpleShardDataTreeCohort cohort = entry.cohort;
 
+    private @Nullable CommitEntry findFirstEntry(final Queue<CommitEntry> queue, final State allowedState) {
+        while (true) {
+            final var entry = queue.peek();
+            if (entry == null) {
+                // Empty queue
+                return null;
+            }
+
+            final var cohort = entry.cohort;
             if (cohort.isFailed()) {
                 LOG.debug("{}: Removing failed transaction {}", logContext, cohort.transactionId());
                 queue.remove();
                 continue;
             }
 
-            if (cohort.getState() == allowedState) {
-                processor.accept(entry);
-            }
-
-            break;
+            return cohort.getState() == allowedState ? entry : null;
         }
-
-        maybeRunOperationOnPendingTransactionsComplete();
     }
 
     private void processNextPendingCommit() {
-        processNextPending(pendingCommits, State.COMMIT_PENDING,
-            entry -> startCommit(entry.cohort, entry.cohort.getCandidate()));
+        final var entry = findFirstEntry(pendingCommits, State.COMMIT_PENDING);
+        if (entry != null) {
+            startCommit(entry.cohort, entry.cohort.getCandidate());
+        }
+        maybeRunOperationOnPendingTransactionsComplete();
     }
 
     private boolean peekNextPendingCommit() {
