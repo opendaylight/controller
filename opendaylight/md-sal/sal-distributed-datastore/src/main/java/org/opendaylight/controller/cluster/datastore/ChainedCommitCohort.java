@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 final class ChainedCommitCohort extends ShardDataTreeCohort {
     private static final Logger LOG = LoggerFactory.getLogger(ChainedCommitCohort.class);
+
     private final ReadWriteShardDataTreeTransaction transaction;
     private final ShardDataTreeTransactionChain chain;
     private final ShardDataTreeCohort delegate;
