@@ -32,15 +32,15 @@ public final class FrontendClientMetadata implements WritableObject {
         this.currentHistories = ImmutableList.copyOf(currentHistories);
     }
 
-    public ClientIdentifier clientId() {
+    public @NonNull ClientIdentifier clientId() {
         return clientId;
     }
 
-    public ImmutableList<FrontendHistoryMetadata> getCurrentHistories() {
+    public @NonNull ImmutableList<FrontendHistoryMetadata> getCurrentHistories() {
         return currentHistories;
     }
 
-    public ImmutableUnsignedLongSet getPurgedHistories() {
+    public @NonNull ImmutableUnsignedLongSet getPurgedHistories() {
         return purgedHistories;
     }
 
