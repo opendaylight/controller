@@ -9,39 +9,24 @@ package org.opendaylight.controller.cluster.datastore.persisted;
 
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.Collection;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.datastore.utils.ImmutableUnsignedLongSet;
+import org.opendaylight.yangtools.concepts.Immutable;
 import org.opendaylight.yangtools.concepts.WritableObject;
 
-public final class FrontendClientMetadata implements WritableObject {
-    private final @NonNull ImmutableList<FrontendHistoryMetadata> currentHistories;
-    private final @NonNull ImmutableUnsignedLongSet purgedHistories;
-    private final @NonNull ClientIdentifier clientId;
-
-    public FrontendClientMetadata(final ClientIdentifier clientId, final ImmutableUnsignedLongSet purgedHistories,
-            final Collection<FrontendHistoryMetadata> currentHistories) {
-        this.clientId = requireNonNull(clientId);
-        this.purgedHistories = requireNonNull(purgedHistories);
-        this.currentHistories = ImmutableList.copyOf(currentHistories);
-    }
-
-    public @NonNull ClientIdentifier clientId() {
-        return clientId;
-    }
-
-    public @NonNull ImmutableList<FrontendHistoryMetadata> getCurrentHistories() {
-        return currentHistories;
-    }
-
-    public @NonNull ImmutableUnsignedLongSet getPurgedHistories() {
-        return purgedHistories;
+public record FrontendClientMetadata(
+        @NonNull ClientIdentifier clientId,
+        @NonNull ImmutableUnsignedLongSet purgedHistories,
+        @NonNull ImmutableList<FrontendHistoryMetadata> currentHistories) implements Immutable, WritableObject {
+    public FrontendClientMetadata {
+        requireNonNull(clientId);
+        requireNonNull(purgedHistories);
+        requireNonNull(currentHistories);
     }
 
     @Override
@@ -66,11 +51,5 @@ public final class FrontendClientMetadata implements WritableObject {
         }
 
         return new FrontendClientMetadata(clientId, purgedHistories, currentBuilder.build());
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(FrontendClientMetadata.class)
-            .add("clientId", clientId).add("current", currentHistories).add("purged", purgedHistories).toString();
     }
 }
