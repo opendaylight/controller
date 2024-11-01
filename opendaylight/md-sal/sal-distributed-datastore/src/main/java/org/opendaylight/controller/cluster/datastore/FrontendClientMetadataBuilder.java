@@ -11,7 +11,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.VerifyException;
-import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableList;
 import java.util.HashMap;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
@@ -50,32 +50,30 @@ final class FrontendClientMetadataBuilder {
         this.shardName = requireNonNull(shardName);
         clientId = meta.clientId();
 
-        purgedHistories = meta.getPurgedHistories().mutableCopy();
-        for (var historyMeta : meta.getCurrentHistories()) {
-            final var builder = new FrontendHistoryMetadataBuilder(clientId(), historyMeta);
+        purgedHistories = meta.purgedHistories().mutableCopy();
+        for (var historyMeta : meta.currentHistories()) {
+            final var builder = new FrontendHistoryMetadataBuilder(clientId, historyMeta);
             currentHistories.put(builder.getIdentifier(), builder);
         }
 
         // Sanity check and recovery
         standaloneId = new LocalHistoryIdentifier(clientId, 0);
-        if (!currentHistories.containsKey(standaloneId)) {
+        currentHistories.computeIfAbsent(standaloneId, missingId -> {
             LOG.warn("{}: Client {} recovered histories {} do not contain stand-alone history, attempting recovery",
-                shardName, clientId(), currentHistories);
-            currentHistories.put(standaloneId, new FrontendHistoryMetadataBuilder(standaloneId));
-        }
+                shardName, clientId, currentHistories);
+            return new FrontendHistoryMetadataBuilder(missingId);
+        });
     }
 
-    ClientIdentifier clientId() {
+    @NonNull ClientIdentifier clientId() {
         return clientId;
     }
 
-    String shardName() {
-        return shardName;
-    }
-
     FrontendClientMetadata build() {
-        return new FrontendClientMetadata(clientId(), purgedHistories.immutableCopy(),
-            Collections2.transform(currentHistories.values(), FrontendHistoryMetadataBuilder::build));
+        return new FrontendClientMetadata(clientId, purgedHistories.immutableCopy(),
+            currentHistories.values().stream()
+                .map(FrontendHistoryMetadataBuilder::build)
+                .collect(ImmutableList.toImmutableList()));
     }
 
     /**
@@ -101,15 +99,15 @@ final class FrontendClientMetadataBuilder {
         }
 
         final AbstractFrontendHistory singleHistory;
-        final var singleHistoryMeta = currentHistories.get(new LocalHistoryIdentifier(clientId(), 0));
+        final var singleHistoryMeta = currentHistories.get(new LocalHistoryIdentifier(clientId, 0));
         if (singleHistoryMeta == null) {
             final var tree = shard.getDataStore();
-            singleHistory = StandaloneFrontendHistory.create(shard.persistenceId(), clientId(), tree);
+            singleHistory = StandaloneFrontendHistory.create(shard.persistenceId(), clientId, tree);
         } else {
             singleHistory = singleHistoryMeta.toLeaderState(shard);
         }
 
-        return new LeaderFrontendState.Enabled(shard.persistenceId(), clientId(), shard.getDataStore(),
+        return new LeaderFrontendState.Enabled(shard.persistenceId(), clientId, shard.getDataStore(),
             purgedHistories.mutableCopy(), singleHistory, histories);
     }
 
@@ -118,9 +116,9 @@ final class FrontendClientMetadataBuilder {
         final var oldMeta = currentHistories.putIfAbsent(historyId, newMeta);
         if (oldMeta != null) {
             // This should not be happening, warn about it
-            LOG.warn("{}: Reused local history {}", shardName(), historyId);
+            LOG.warn("{}: Reused local history {}", shardName, historyId);
         } else {
-            LOG.debug("{}: Created local history {}", shardName(), historyId);
+            LOG.debug("{}: Created local history {}", shardName, historyId);
         }
     }
 
@@ -128,9 +126,9 @@ final class FrontendClientMetadataBuilder {
         final var builder = currentHistories.get(historyId);
         if (builder != null) {
             builder.onHistoryClosed();
-            LOG.debug("{}: Closed history {}", shardName(), historyId);
+            LOG.debug("{}: Closed history {}", shardName, historyId);
         } else {
-            LOG.warn("{}: Closed unknown history {}, ignoring", shardName(), historyId);
+            LOG.warn("{}: Closed unknown history {}, ignoring", shardName, historyId);
         }
     }
 
@@ -140,13 +138,13 @@ final class FrontendClientMetadataBuilder {
         if (history == null) {
             if (!purgedHistories.contains(historyBits)) {
                 purgedHistories.add(historyBits);
-                LOG.warn("{}: Purging unknown history {}", shardName(), historyId);
+                LOG.warn("{}: Purging unknown history {}", shardName, historyId);
             } else {
-                LOG.warn("{}: Duplicate purge of history {}", shardName(), historyId);
+                LOG.warn("{}: Duplicate purge of history {}", shardName, historyId);
             }
         } else {
             purgedHistories.add(historyBits);
-            LOG.debug("{}: Purged history {}", shardName(), historyId);
+            LOG.debug("{}: Purged history {}", shardName, historyId);
         }
     }
 
@@ -154,9 +152,9 @@ final class FrontendClientMetadataBuilder {
         final var history = getHistory(txId);
         if (history != null) {
             history.onTransactionAborted(txId);
-            LOG.debug("{}: Aborted transaction {}", shardName(), txId);
+            LOG.debug("{}: Aborted transaction {}", shardName, txId);
         } else {
-            LOG.warn("{}: Unknown history for aborted transaction {}, ignoring", shardName(), txId);
+            LOG.warn("{}: Unknown history for aborted transaction {}, ignoring", shardName, txId);
         }
     }
 
@@ -164,9 +162,9 @@ final class FrontendClientMetadataBuilder {
         final var history = getHistory(txId);
         if (history != null) {
             history.onTransactionCommitted(txId);
-            LOG.debug("{}: Committed transaction {}", shardName(), txId);
+            LOG.debug("{}: Committed transaction {}", shardName, txId);
         } else {
-            LOG.warn("{}: Unknown history for commited transaction {}, ignoring", shardName(), txId);
+            LOG.warn("{}: Unknown history for commited transaction {}, ignoring", shardName, txId);
         }
     }
 
@@ -174,19 +172,19 @@ final class FrontendClientMetadataBuilder {
         final var history = getHistory(txId);
         if (history != null) {
             history.onTransactionPurged(txId);
-            LOG.debug("{}: Purged transaction {}", shardName(), txId);
+            LOG.debug("{}: Purged transaction {}", shardName, txId);
         } else {
-            LOG.warn("{}: Unknown history for purged transaction {}, ignoring", shardName(), txId);
+            LOG.warn("{}: Unknown history for purged transaction {}, ignoring", shardName, txId);
         }
     }
 
     void onTransactionsSkipped(final LocalHistoryIdentifier historyId, final ImmutableUnsignedLongSet txIds) {
-        final FrontendHistoryMetadataBuilder history = getHistory(historyId);
+        final var history = getHistory(historyId);
         if (history != null) {
             history.onTransactionsSkipped(txIds);
-            LOG.debug("{}: History {} skipped transactions {}", shardName(), historyId, txIds);
+            LOG.debug("{}: History {} skipped transactions {}", shardName, historyId, txIds);
         } else {
-            LOG.warn("{}: Unknown history {} for skipped transactions, ignoring", shardName(), historyId);
+            LOG.warn("{}: Unknown history {} for skipped transactions, ignoring", shardName, historyId);
         }
     }
 
@@ -208,7 +206,7 @@ final class FrontendClientMetadataBuilder {
         if (historyId.getHistoryId() == 0 && historyId.getCookie() != 0) {
             // We are pre-creating the history for free-standing transactions with a zero cookie, hence our lookup
             // needs to account for that.
-            LOG.debug("{}: looking up {} instead of {}", shardName(), standaloneId, historyId);
+            LOG.debug("{}: looking up {} instead of {}", shardName, standaloneId, historyId);
             local = standaloneId;
         } else {
             local = historyId;
