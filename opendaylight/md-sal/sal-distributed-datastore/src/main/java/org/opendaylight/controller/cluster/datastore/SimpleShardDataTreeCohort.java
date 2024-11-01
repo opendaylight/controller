@@ -40,6 +40,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     private DataTreeCandidateTip candidate;
     private FutureCallback<?> callback;
     private Exception nextFailure;
+    private long lastAccess;
 
     SimpleShardDataTreeCohort(final ShardDataTree dataTree, final DataTreeModification transaction,
             final TransactionIdentifier transactionId, final CompositeDataTreeCohort userCohorts,
@@ -49,6 +50,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
         this.transactionId = requireNonNull(transactionId);
         this.userCohorts = requireNonNull(userCohorts);
         this.participatingShardNames = requireNonNull(participatingShardNames).orElse(null);
+        accessed();
     }
 
     SimpleShardDataTreeCohort(final ShardDataTree dataTree, final DataTreeModification transaction,
@@ -59,11 +61,24 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
         userCohorts = null;
         participatingShardNames = null;
         this.nextFailure = requireNonNull(nextFailure);
+        accessed();
     }
 
     @Override
     TransactionIdentifier transactionId() {
         return transactionId;
+    }
+
+    void accessed() {
+        setLastAccess(dataTree.readTime());
+    }
+
+    long lastAccess() {
+        return lastAccess;
+    }
+
+    void setLastAccess(final long newLastAccess) {
+        lastAccess = newLastAccess;
     }
 
     @Override
@@ -171,6 +186,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
 
     void successfulCanCommit() {
         switchState(State.CAN_COMMIT_COMPLETE).onSuccess(Empty.value());
+        accessed();
     }
 
     void failedCanCommit(final Exception cause) {
