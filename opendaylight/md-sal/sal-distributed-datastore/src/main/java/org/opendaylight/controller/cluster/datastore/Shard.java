@@ -405,9 +405,9 @@ public class Shard extends RaftActor {
         requestMessageAssembler.checkExpiredAssembledMessageState();
     }
 
-    private OptionalLong updateAccess(final SimpleShardDataTreeCohort cohort) {
-        final FrontendIdentifier frontend = cohort.transactionId().getHistoryId().getClientId().getFrontendId();
-        final LeaderFrontendState state = knownFrontends.get(frontend);
+    private OptionalLong updateAccess(final ShardDataTreeCohort cohort) {
+        final var frontend = cohort.transactionId().getHistoryId().getClientId().getFrontendId();
+        final var state = knownFrontends.get(frontend);
         if (state == null) {
             // Not tell-based protocol, do nothing
             return OptionalLong.empty();
