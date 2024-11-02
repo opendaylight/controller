@@ -93,10 +93,10 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
     }
 
     private static final class Ready extends State {
-        final ShardDataTreeCohort readyCohort;
+        final CommitCohort readyCohort;
         CommitStage stage;
 
-        Ready(final ShardDataTreeCohort readyCohort) {
+        Ready(final CommitCohort readyCohort) {
             this.readyCohort = requireNonNull(readyCohort);
             stage = CommitStage.READY;
         }
