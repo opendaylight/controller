@@ -102,8 +102,8 @@ import scala.concurrent.duration.FiniteDuration;
  *
  * <p>This class is not part of the API contract and is subject to change at any time. It is NOT thread-safe.
  */
-@VisibleForTesting
 // non-final for mocking
+@VisibleForTesting
 public class ShardDataTree extends ShardDataTreeTransactionParent {
     private static final Timeout COMMIT_STEP_TIMEOUT = new Timeout(FiniteDuration.create(5, TimeUnit.SECONDS));
     private static final Logger LOG = LoggerFactory.getLogger(ShardDataTree.class);
@@ -118,9 +118,9 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     private final Map<LocalHistoryIdentifier, ShardDataTreeTransactionChain> transactionChains = new HashMap<>();
     private final DataTreeCohortActorRegistry cohortRegistry = new DataTreeCohortActorRegistry();
-    private final Deque<SimpleShardDataTreeCohort> pendingTransactions = new ArrayDeque<>();
-    private final Queue<SimpleShardDataTreeCohort> pendingCommits = new ArrayDeque<>();
-    private final Queue<SimpleShardDataTreeCohort> pendingFinishCommits = new ArrayDeque<>();
+    private final Deque<ShardDataTreeCohort> pendingTransactions = new ArrayDeque<>();
+    private final Queue<ShardDataTreeCohort> pendingCommits = new ArrayDeque<>();
+    private final Queue<ShardDataTreeCohort> pendingFinishCommits = new ArrayDeque<>();
 
     /**
      * Callbacks that need to be invoked once a payload is replicated.
@@ -722,6 +722,10 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         return pendingTransactions.size() + pendingCommits.size() + pendingFinishCommits.size();
     }
 
+    final void enqueueReadyTransaction(final @NonNull ShardDataTreeCohort cohort) {
+        pendingTransactions.add(cohort);
+    }
+
     @Override
     final void abortTransaction(final AbstractShardDataTreeTransaction<?> transaction, final Runnable callback) {
         final TransactionIdentifier id = transaction.getIdentifier();
@@ -738,13 +742,23 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     @Override
     final SimpleShardDataTreeCohort finishTransaction(final ReadWriteShardDataTreeTransaction transaction,
             final Optional<SortedSet<String>> participatingShardNames) {
-        final DataTreeModification snapshot = transaction.getSnapshot();
-        final TransactionIdentifier id = transaction.getIdentifier();
-        LOG.debug("{}: readying transaction {}", logContext, id);
-        snapshot.ready();
-        LOG.debug("{}: transaction {} ready", logContext, id);
+        final var userCohorts = finishTransaction(transaction);
+        final var cohort = new SimpleShardDataTreeCohort(this, transaction, userCohorts, participatingShardNames);
+        enqueueReadyTransaction(cohort);
+        return cohort;
+    }
 
-        return createReadyCohort(transaction.getIdentifier(), snapshot, participatingShardNames);
+    final CompositeDataTreeCohort finishTransaction(final ReadWriteShardDataTreeTransaction transaction) {
+        final var snapshot = transaction.getSnapshot();
+        final var txId = transaction.getIdentifier();
+        LOG.debug("{}: readying transaction {}", logContext, txId);
+        snapshot.ready();
+        LOG.debug("{}: transaction {} ready", logContext, txId);
+        return newUserCohorts(txId);
+    }
+
+    final CompositeDataTreeCohort newUserCohorts(final TransactionIdentifier txId) {
+        return cohortRegistry.createCohort(schemaContext, txId, shard::executeInSelf, COMMIT_STEP_TIMEOUT);
     }
 
     final void purgeTransaction(final TransactionIdentifier id, final Runnable callback) {
@@ -816,7 +830,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private void canCommitEntry(final SimpleShardDataTreeCohort cohort) {
+    private void canCommitEntry(final ShardDataTreeCohort cohort) {
         final var modification = cohort.getDataTreeModification();
 
         LOG.debug("{}: Validating transaction {}", logContext, cohort.transactionId());
@@ -854,7 +868,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
 
-    private @Nullable SimpleShardDataTreeCohort findFirstEntry(final Queue<SimpleShardDataTreeCohort> queue,
+    private @Nullable ShardDataTreeCohort findFirstEntry(final Queue<ShardDataTreeCohort> queue,
             final State allowedState) {
         while (true) {
             final var entry = queue.peek();
@@ -890,7 +904,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     // non-final for mocking
-    void startCanCommit(final SimpleShardDataTreeCohort cohort) {
+    void startCanCommit(final ShardDataTreeCohort cohort) {
         final var head = pendingTransactions.peek();
         if (head == null) {
             LOG.warn("{}: No transactions enqueued while attempting to start canCommit on {}", logContext, cohort);
@@ -973,7 +987,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         processNextPendingTransaction();
     }
 
-    private static void insertEntry(final Deque<SimpleShardDataTreeCohort> queue, final SimpleShardDataTreeCohort entry,
+    private static void insertEntry(final Deque<ShardDataTreeCohort> queue, final ShardDataTreeCohort entry,
             final int atIndex) {
         if (atIndex == 0) {
             queue.addFirst(entry);
@@ -982,7 +996,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
         LOG.trace("Inserting into Deque at index {}", atIndex);
 
-        final var tempStack = new ArrayDeque<SimpleShardDataTreeCohort>(atIndex);
+        final var tempStack = new ArrayDeque<ShardDataTreeCohort>(atIndex);
         for (int i = 0; i < atIndex; i++) {
             tempStack.push(queue.poll());
         }
@@ -1004,7 +1018,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     // non-final for mocking
     @SuppressWarnings("checkstyle:IllegalCatch")
-    void startPreCommit(final SimpleShardDataTreeCohort cohort) {
+    void startPreCommit(final ShardDataTreeCohort cohort) {
         final var current = pendingTransactions.peek();
         checkState(current != null, "Attempted to pre-commit of %s when no transactions pending", cohort);
 
@@ -1053,9 +1067,9 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private void finishCommit(final SimpleShardDataTreeCohort cohort) {
-        final TransactionIdentifier txId = cohort.transactionId();
-        final DataTreeCandidate candidate = cohort.getCandidate();
+    private void finishCommit(final ShardDataTreeCohort cohort) {
+        final var txId = cohort.transactionId();
+        final var candidate = cohort.getCandidate();
 
         LOG.debug("{}: Resuming commit of transaction {}", logContext, txId);
 
@@ -1084,7 +1098,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     // non-final for mocking
-    void startCommit(final SimpleShardDataTreeCohort cohort, final DataTreeCandidate candidate) {
+    void startCommit(final ShardDataTreeCohort cohort, final DataTreeCandidate candidate) {
         final var current = pendingCommits.peek();
         checkState(current != null, "Attempted to start commit of %s when no transactions pending", cohort);
 
@@ -1145,26 +1159,25 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     @Override
-    final ShardDataTreeCohort createFailedCohort(final TransactionIdentifier txId, final DataTreeModification mod,
+    final SimpleShardDataTreeCohort createFailedCohort(final TransactionIdentifier txId, final DataTreeModification mod,
             final Exception failure) {
         final var cohort = new SimpleShardDataTreeCohort(this, mod, txId, failure);
-        pendingTransactions.add(cohort);
+        enqueueReadyTransaction(cohort);
         return cohort;
     }
 
     @Override
     final SimpleShardDataTreeCohort createReadyCohort(final TransactionIdentifier txId, final DataTreeModification mod,
             final Optional<SortedSet<String>> participatingShardNames) {
-        final var cohort = new SimpleShardDataTreeCohort(this, mod, txId,
-            cohortRegistry.createCohort(schemaContext, txId, shard::executeInSelf, COMMIT_STEP_TIMEOUT),
+        final var cohort = new SimpleShardDataTreeCohort(this, mod, txId, newUserCohorts(txId),
             participatingShardNames);
-        pendingTransactions.add(cohort);
+        enqueueReadyTransaction(cohort);
         return cohort;
     }
 
     @SuppressFBWarnings(value = "DB_DUPLICATE_SWITCH_CLAUSES", justification = "See inline comments below.")
     final void checkForExpiredTransactions(final long transactionCommitTimeoutMillis,
-            final Function<SimpleShardDataTreeCohort, OptionalLong> accessTimeUpdater) {
+            final Function<ShardDataTreeCohort, OptionalLong> accessTimeUpdater) {
         final long timeout = TimeUnit.MILLISECONDS.toNanos(transactionCommitTimeoutMillis);
         final long now = readTime();
 
@@ -1261,7 +1274,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     // non-final for mocking
-    boolean startAbort(final SimpleShardDataTreeCohort cohort) {
+    boolean startAbort(final ShardDataTreeCohort cohort) {
         final var it = Iterables.concat(pendingFinishCommits, pendingCommits, pendingTransactions).iterator();
         if (!it.hasNext()) {
             LOG.debug("{}: no open transaction while attempting to abort {}", logContext, cohort.transactionId());
@@ -1311,7 +1324,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private void rebaseTransactions(final Iterator<SimpleShardDataTreeCohort> iter, final @NonNull DataTreeTip newTip) {
+    private void rebaseTransactions(final Iterator<ShardDataTreeCohort> iter, final @NonNull DataTreeTip newTip) {
         tip = requireNonNull(newTip);
         while (iter.hasNext()) {
             final var cohort = iter.next();
@@ -1361,7 +1374,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         return shard.shardStats();
     }
 
-    final Iterator<SimpleShardDataTreeCohort> cohortIterator() {
+    final Iterator<ShardDataTreeCohort> cohortIterator() {
         return Iterables.concat(pendingFinishCommits, pendingCommits, pendingTransactions).iterator();
     }
 
