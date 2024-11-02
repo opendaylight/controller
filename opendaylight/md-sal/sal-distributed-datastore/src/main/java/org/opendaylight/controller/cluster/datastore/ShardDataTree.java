@@ -48,6 +48,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.cluster.datastore.CommitCohort.CanCommitPending;
 import org.opendaylight.controller.cluster.datastore.CommitCohort.State;
 import org.opendaylight.controller.cluster.datastore.DataTreeCohortActorRegistry.CohortRegistryCommand;
 import org.opendaylight.controller.cluster.datastore.node.utils.transformer.ReusableNormalizedNodePruner;
@@ -821,10 +822,10 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             return;
         }
 
-        final var entry = findFirstEntry(pendingTransactions, State.CAN_COMMIT_PENDING);
+        final var entry = findFirstEntry(pendingTransactions);
         try {
-            if (entry != null) {
-                canCommitEntry(entry);
+            if (entry != null && entry.getState() instanceof CanCommitPending canCommit) {
+                canCommitEntry(entry, canCommit);
             }
         } finally {
             maybeRunOperationOnPendingTransactionsComplete();
@@ -832,8 +833,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private void canCommitEntry(final CommitCohort cohort) {
-        final var modification = cohort.getDataTreeModification();
+    private void canCommitEntry(final CommitCohort cohort, final CanCommitPending canCommit) {
+        final var modification = canCommit.modification();
 
         LOG.debug("{}: Validating transaction {}", logContext, cohort.transactionId());
         final Exception cause;
@@ -872,7 +873,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
 
-    private @Nullable CommitCohort findFirstEntry(final Queue<CommitCohort> queue, final State allowedState) {
+    private @Nullable CommitCohort findFirstEntry(final Queue<CommitCohort> queue) {
         while (true) {
             final var entry = queue.peek();
             if (entry == null) {
@@ -883,17 +884,16 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             if (entry.isFailed()) {
                 LOG.debug("{}: Removing failed transaction {}", logContext, entry.transactionId());
                 queue.remove();
-                continue;
+            } else {
+                return entry;
             }
-
-            return entry.getState() == allowedState ? entry : null;
         }
     }
 
     private void processNextPendingCommit() {
-        final var entry = findFirstEntry(pendingCommits, State.COMMIT_PENDING);
+        final var entry = findFirstEntry(pendingCommits);
         try {
-            if (entry != null) {
+            if (entry != null && entry.getState() instanceof CommitPending commitPending) {
                 startCommit(entry, entry.getCandidate());
             }
         } finally {
@@ -1100,7 +1100,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     // non-final for mocking
-    void startCommit(final CommitCohort cohort, final DataTreeCandidate candidate) {
+    void startCommit(final CommitCohort cohort, final CommitPending commitPending) {
         final var current = pendingCommits.peek();
         checkState(current != null, "Attempted to start commit of %s when no transactions pending", cohort);
 
