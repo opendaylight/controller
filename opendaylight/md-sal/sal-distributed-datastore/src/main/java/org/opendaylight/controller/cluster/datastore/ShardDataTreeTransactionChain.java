@@ -11,9 +11,9 @@ import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
-import java.util.Optional;
 import java.util.SortedSet;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.concepts.Identifiable;
@@ -80,7 +80,7 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
 
     @Override
     ChainedCommitCohort finishTransaction(final ReadWriteShardDataTreeTransaction transaction,
-            final Optional<SortedSet<String>> participatingShardNames) {
+            final SortedSet<String> participatingShardNames) {
         checkState(openTransaction != null, "Attempted to finish transaction %s while none is outstanding",
                 transaction);
 
@@ -100,7 +100,7 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
 
     @Override
     ChainedCommitCohort createReadyCohort(final TransactionIdentifier txId, final DataTreeModification mod,
-            final Optional<SortedSet<String>> participatingShardNames) {
+            final SortedSet<String> participatingShardNames) {
         checkState(openTransaction == null, "Attempted to finish transaction %s while %s is outstanding", txId,
             openTransaction);
 
@@ -110,7 +110,7 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
     }
 
     private ChainedCommitCohort createReadyCohort(final ReadWriteShardDataTreeTransaction transaction,
-            final CompositeDataTreeCohort userCohorts, final Optional<SortedSet<String>> participatingShardNames) {
+            final CompositeDataTreeCohort userCohorts, final @Nullable SortedSet<String> participatingShardNames) {
         previousTx = transaction;
         LOG.debug("Committing transaction {}", transaction);
         final var cohort = new ChainedCommitCohort(dataTree, this, transaction, userCohorts, participatingShardNames);

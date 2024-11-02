@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import java.util.Optional;
 import java.util.SortedSet;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 
@@ -18,10 +18,10 @@ abstract class ShardDataTreeTransactionParent {
     abstract void abortTransaction(AbstractShardDataTreeTransaction<?> transaction, Runnable callback);
 
     abstract CommitCohort finishTransaction(ReadWriteShardDataTreeTransaction transaction,
-            Optional<SortedSet<String>> participatingShardNames);
+        @Nullable SortedSet<String> participatingShardNames);
 
     abstract CommitCohort createReadyCohort(TransactionIdentifier txId, DataTreeModification mod,
-            Optional<SortedSet<String>> participatingShardNames);
+        @Nullable SortedSet<String> participatingShardNames);
 
     abstract CommitCohort createFailedCohort(TransactionIdentifier txId, DataTreeModification mod,
             Exception failure);
