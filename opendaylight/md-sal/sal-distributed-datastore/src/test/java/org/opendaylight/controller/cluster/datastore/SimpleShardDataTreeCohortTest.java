@@ -60,7 +60,7 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
         doReturn(Optional.empty()).when(mockUserCohorts).abort();
         doReturn(stats).when(mockShardDataTree).getStats();
 
-        cohort = new SimpleCommitCohort(mockShardDataTree, mockModification, nextTransactionId(), mockUserCohorts,
+        cohort = new SimpleCommitCohort(mockModification, nextTransactionId(), mockUserCohorts,
             Optional.empty());
     }
 
@@ -77,7 +77,7 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
 
         @SuppressWarnings("unchecked")
         final FutureCallback<Empty> callback = mock(FutureCallback.class);
-        cohort.canCommit(callback);
+        cohort.canCommit(mockShardDataTree, callback);
 
         verify(callback).onSuccess(Empty.value());
         verifyNoMoreInteractions(callback);
@@ -85,13 +85,13 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
 
     private void testValidatationPropagates(final Exception cause) {
         doAnswer(invocation -> {
-            invocation.<SimpleCommitCohort>getArgument(0).failedCanCommit(cause);
+            invocation.<SimpleCommitCohort>getArgument(0).failedCanCommit(stats, cause);
             return null;
         }).when(mockShardDataTree).startCanCommit(cohort);
 
         @SuppressWarnings("unchecked")
         final FutureCallback<Empty> callback = mock(FutureCallback.class);
-        cohort.canCommit(callback);
+        cohort.canCommit(mockShardDataTree, callback);
 
         verify(callback).onFailure(cause);
         verifyNoMoreInteractions(callback);
@@ -121,7 +121,7 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
 
         @SuppressWarnings("unchecked")
         final FutureCallback<DataTreeCandidate> callback = mock(FutureCallback.class);
-        cohort.preCommit(callback);
+        cohort.preCommit(mockShardDataTree, callback);
 
         verify(callback).onSuccess(mockCandidate);
         verifyNoMoreInteractions(callback);
@@ -137,13 +137,13 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
         final DataTreeCandidateTip candidate = preCommitSuccess();
 
         doAnswer(invocation -> {
-            invocation.<SimpleCommitCohort>getArgument(0).successfulCommit(UnsignedLong.valueOf(0), () -> { });
+            invocation.<SimpleCommitCohort>getArgument(0).successfulCommit(stats, UnsignedLong.valueOf(0), () -> { });
             return null;
         }).when(mockShardDataTree).startCommit(cohort, candidate);
 
         @SuppressWarnings("unchecked")
         final FutureCallback<UnsignedLong> mockCommitCallback = mock(FutureCallback.class);
-        cohort.commit(mockCommitCallback);
+        cohort.commit(mockShardDataTree, mockCommitCallback);
 
         verify(mockCommitCallback).onSuccess(any(UnsignedLong.class));
         verifyNoMoreInteractions(mockCommitCallback);
@@ -157,13 +157,13 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
 
         final Exception cause = new IllegalArgumentException("mock");
         doAnswer(invocation -> {
-            invocation.<SimpleCommitCohort>getArgument(0).failedPreCommit(cause);
+            invocation.<SimpleCommitCohort>getArgument(0).failedPreCommit(stats, cause);
             return null;
         }).when(mockShardDataTree).startPreCommit(cohort);
 
         @SuppressWarnings("unchecked")
         final FutureCallback<DataTreeCandidate> callback = mock(FutureCallback.class);
-        cohort.preCommit(callback);
+        cohort.preCommit(mockShardDataTree, callback);
 
         verify(callback).onFailure(cause);
         verifyNoMoreInteractions(callback);
@@ -180,7 +180,7 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
 
         @SuppressWarnings("unchecked")
         final FutureCallback<DataTreeCandidate> callback = mock(FutureCallback.class);
-        cohort.preCommit(callback);
+        cohort.preCommit(mockShardDataTree, callback);
 
         verify(callback).onFailure(cause);
         verifyNoMoreInteractions(callback);
@@ -195,13 +195,13 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
 
         final Exception cause = new IllegalArgumentException("mock");
         doAnswer(invocation -> {
-            invocation.<SimpleCommitCohort>getArgument(0).failedCommit(cause);
+            invocation.<SimpleCommitCohort>getArgument(0).failedCommit(stats, cause);
             return null;
         }).when(mockShardDataTree).startCommit(cohort, candidate);
 
         @SuppressWarnings("unchecked")
         final FutureCallback<UnsignedLong> callback = mock(FutureCallback.class);
-        cohort.commit(callback);
+        cohort.commit(mockShardDataTree, callback);
 
         verify(callback).onFailure(cause);
         verifyNoMoreInteractions(callback);
