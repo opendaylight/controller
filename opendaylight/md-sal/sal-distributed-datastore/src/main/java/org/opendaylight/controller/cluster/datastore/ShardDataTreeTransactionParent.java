@@ -12,7 +12,7 @@ import java.util.SortedSet;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 
-abstract class ShardDataTreeTransactionParent {
+abstract sealed class ShardDataTreeTransactionParent permits ShardDataTree, ShardDataTreeTransactionChain {
 
     abstract void abortFromTransactionActor(AbstractShardDataTreeTransaction<?> transaction);
 
