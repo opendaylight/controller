@@ -24,8 +24,8 @@ final class SimpleCommitCohort extends CommitCohort {
         super(dataTree, modification, transactionId, userCohorts, participatingShardNames);
     }
 
-    SimpleCommitCohort(final ShardDataTree dataTree, final DataTreeModification modification,
-            final TransactionIdentifier transactionId, final Exception nextFailure) {
-        super(dataTree, modification, transactionId, nextFailure);
+    SimpleCommitCohort(final ShardDataTree dataTree, final TransactionIdentifier transactionId,
+            final Exception nextFailure) {
+        super(dataTree, transactionId, nextFailure);
     }
 }
