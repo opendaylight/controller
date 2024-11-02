@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 // Non-sealed for mocking
 @VisibleForTesting
-public abstract class ShardDataTreeCohort {
+public abstract class CommitCohort {
     public enum State {
         READY,
         CAN_COMMIT_PENDING,
@@ -43,7 +43,7 @@ public abstract class ShardDataTreeCohort {
         FAILED,
     }
 
-    private static final Logger LOG = LoggerFactory.getLogger(ShardDataTreeCohort.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CommitCohort.class);
 
     private final DataTreeModification modification;
     private final ShardDataTree dataTree;
@@ -57,12 +57,12 @@ public abstract class ShardDataTreeCohort {
     private Exception nextFailure;
     private long lastAccess;
 
-    ShardDataTreeCohort(final ShardDataTree dataTree, final ReadWriteShardDataTreeTransaction transaction,
+    CommitCohort(final ShardDataTree dataTree, final ReadWriteShardDataTreeTransaction transaction,
             final CompositeDataTreeCohort userCohorts, final Optional<SortedSet<String>> participatingShardNames) {
         this(dataTree, transaction.getSnapshot(), transaction.getIdentifier(), userCohorts, participatingShardNames);
     }
 
-    ShardDataTreeCohort(final ShardDataTree dataTree, final DataTreeModification modification,
+    CommitCohort(final ShardDataTree dataTree, final DataTreeModification modification,
             final TransactionIdentifier transactionId, final CompositeDataTreeCohort userCohorts,
             final Optional<SortedSet<String>> participatingShardNames) {
         this.dataTree = requireNonNull(dataTree);
@@ -72,7 +72,7 @@ public abstract class ShardDataTreeCohort {
         this.participatingShardNames = requireNonNull(participatingShardNames).orElse(null);
     }
 
-    ShardDataTreeCohort(final ShardDataTree dataTree, final DataTreeModification modification,
+    CommitCohort(final ShardDataTree dataTree, final DataTreeModification modification,
             final TransactionIdentifier transactionId, final Exception nextFailure) {
         this.dataTree = requireNonNull(dataTree);
         this.modification = requireNonNull(modification);

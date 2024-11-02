@@ -126,7 +126,7 @@ public class ShardDataTreeTest extends AbstractTest {
             snapshot.write(PeopleModel.BASE_PATH, PeopleModel.create());
         }
 
-        final ShardDataTreeCohort cohort = shardDataTree.finishTransaction(transaction, Optional.empty());
+        final CommitCohort cohort = shardDataTree.finishTransaction(transaction, Optional.empty());
 
         immediateCanCommit(cohort);
         immediatePreCommit(cohort);
@@ -228,19 +228,19 @@ public class ShardDataTreeTest extends AbstractTest {
 
     @Test
     public void testPipelinedTransactionsWithCoordinatedCommits() throws Exception {
-        final ShardDataTreeCohort cohort1 = newShardDataTreeCohort(snapshot ->
+        final CommitCohort cohort1 = newShardDataTreeCohort(snapshot ->
             snapshot.write(CarsModel.BASE_PATH, CarsModel.emptyContainer()));
 
-        final ShardDataTreeCohort cohort2 = newShardDataTreeCohort(snapshot ->
+        final CommitCohort cohort2 = newShardDataTreeCohort(snapshot ->
             snapshot.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode()));
 
         NormalizedNode peopleNode = PeopleModel.create();
-        final ShardDataTreeCohort cohort3 = newShardDataTreeCohort(snapshot ->
+        final CommitCohort cohort3 = newShardDataTreeCohort(snapshot ->
             snapshot.write(PeopleModel.BASE_PATH, peopleNode));
 
         YangInstanceIdentifier carPath = CarsModel.newCarPath("optima");
         MapEntryNode carNode = CarsModel.newCarEntry("optima", Uint64.valueOf(100));
-        final ShardDataTreeCohort cohort4 = newShardDataTreeCohort(snapshot -> snapshot.write(carPath, carNode));
+        final CommitCohort cohort4 = newShardDataTreeCohort(snapshot -> snapshot.write(carPath, carNode));
 
         immediateCanCommit(cohort1);
         final FutureCallback<Empty> canCommitCallback2 = coordinatedCanCommit(cohort2);
@@ -290,7 +290,7 @@ public class ShardDataTreeTest extends AbstractTest {
         verifyNoMoreInteractions(commitCallback3);
         verifyNoMoreInteractions(commitCallback4);
 
-        final ShardDataTreeCohort cohort5 = newShardDataTreeCohort(snapshot ->
+        final CommitCohort cohort5 = newShardDataTreeCohort(snapshot ->
             snapshot.merge(CarsModel.BASE_PATH, CarsModel.emptyContainer()));
         final FutureCallback<Empty> canCommitCallback5 = coordinatedCanCommit(cohort5);
 
@@ -318,15 +318,15 @@ public class ShardDataTreeTest extends AbstractTest {
 
     @Test
     public void testPipelinedTransactionsWithImmediateCommits() throws Exception {
-        final ShardDataTreeCohort cohort1 = newShardDataTreeCohort(snapshot ->
+        final CommitCohort cohort1 = newShardDataTreeCohort(snapshot ->
             snapshot.write(CarsModel.BASE_PATH, CarsModel.emptyContainer()));
 
-        final ShardDataTreeCohort cohort2 = newShardDataTreeCohort(snapshot ->
+        final CommitCohort cohort2 = newShardDataTreeCohort(snapshot ->
             snapshot.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode()));
 
         YangInstanceIdentifier carPath = CarsModel.newCarPath("optima");
         MapEntryNode carNode = CarsModel.newCarEntry("optima", Uint64.valueOf(100));
-        final ShardDataTreeCohort cohort3 = newShardDataTreeCohort(snapshot -> snapshot.write(carPath, carNode));
+        final CommitCohort cohort3 = newShardDataTreeCohort(snapshot -> snapshot.write(carPath, carNode));
 
         final FutureCallback<UnsignedLong> commitCallback2 = immediate3PhaseCommit(cohort2);
         final FutureCallback<UnsignedLong> commitCallback3 = immediate3PhaseCommit(cohort3);
@@ -361,15 +361,15 @@ public class ShardDataTreeTest extends AbstractTest {
     public void testPipelinedTransactionsWithImmediateReplication() {
         immediatePayloadReplication(shardDataTree, mockShard);
 
-        final ShardDataTreeCohort cohort1 = newShardDataTreeCohort(snapshot ->
+        final CommitCohort cohort1 = newShardDataTreeCohort(snapshot ->
             snapshot.write(CarsModel.BASE_PATH, CarsModel.emptyContainer()));
 
-        final ShardDataTreeCohort cohort2 = newShardDataTreeCohort(snapshot ->
+        final CommitCohort cohort2 = newShardDataTreeCohort(snapshot ->
             snapshot.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode()));
 
         YangInstanceIdentifier carPath = CarsModel.newCarPath("optima");
         MapEntryNode carNode = CarsModel.newCarEntry("optima", Uint64.valueOf(100));
-        final ShardDataTreeCohort cohort3 = newShardDataTreeCohort(snapshot -> snapshot.write(carPath, carNode));
+        final CommitCohort cohort3 = newShardDataTreeCohort(snapshot -> snapshot.write(carPath, carNode));
 
         final FutureCallback<UnsignedLong> commitCallback1 = immediate3PhaseCommit(cohort1);
         final FutureCallback<UnsignedLong> commitCallback2 = immediate3PhaseCommit(cohort2);
@@ -388,18 +388,18 @@ public class ShardDataTreeTest extends AbstractTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testAbortWithPendingCommits() throws Exception {
-        final ShardDataTreeCohort cohort1 = newShardDataTreeCohort(snapshot ->
+        final CommitCohort cohort1 = newShardDataTreeCohort(snapshot ->
             snapshot.write(CarsModel.BASE_PATH, CarsModel.emptyContainer()));
 
-        final ShardDataTreeCohort cohort2 = newShardDataTreeCohort(snapshot ->
+        final CommitCohort cohort2 = newShardDataTreeCohort(snapshot ->
             snapshot.write(PeopleModel.BASE_PATH, PeopleModel.create()));
 
-        final ShardDataTreeCohort cohort3 = newShardDataTreeCohort(snapshot ->
+        final CommitCohort cohort3 = newShardDataTreeCohort(snapshot ->
             snapshot.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode()));
 
         YangInstanceIdentifier carPath = CarsModel.newCarPath("optima");
         MapEntryNode carNode = CarsModel.newCarEntry("optima", Uint64.valueOf(100));
-        final ShardDataTreeCohort cohort4 = newShardDataTreeCohort(snapshot -> snapshot.write(carPath, carNode));
+        final CommitCohort cohort4 = newShardDataTreeCohort(snapshot -> snapshot.write(carPath, carNode));
 
         coordinatedCanCommit(cohort2);
         immediateCanCommit(cohort1);
@@ -446,14 +446,14 @@ public class ShardDataTreeTest extends AbstractTest {
     public void testAbortWithFailedRebase() {
         immediatePayloadReplication(shardDataTree, mockShard);
 
-        final ShardDataTreeCohort cohort1 = newShardDataTreeCohort(snapshot ->
+        final CommitCohort cohort1 = newShardDataTreeCohort(snapshot ->
             snapshot.write(CarsModel.BASE_PATH, CarsModel.emptyContainer()));
 
-        final ShardDataTreeCohort cohort2 = newShardDataTreeCohort(snapshot ->
+        final CommitCohort cohort2 = newShardDataTreeCohort(snapshot ->
             snapshot.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode()));
 
         NormalizedNode peopleNode = PeopleModel.create();
-        final ShardDataTreeCohort cohort3 = newShardDataTreeCohort(snapshot ->
+        final CommitCohort cohort3 = newShardDataTreeCohort(snapshot ->
             snapshot.write(PeopleModel.BASE_PATH, peopleNode));
 
         immediateCanCommit(cohort1);
@@ -589,7 +589,7 @@ public class ShardDataTreeTest extends AbstractTest {
             .build();
     }
 
-    private ShardDataTreeCohort newShardDataTreeCohort(final DataTreeOperation operation) {
+    private CommitCohort newShardDataTreeCohort(final DataTreeOperation operation) {
         final ReadWriteShardDataTreeTransaction transaction =
                 shardDataTree.newReadWriteTransaction(nextTransactionId());
         final DataTreeModification snapshot = transaction.getSnapshot();
@@ -650,7 +650,7 @@ public class ShardDataTreeTest extends AbstractTest {
                 shardDataTree.newReadWriteTransaction(nextTransactionId());
         final DataTreeModification snapshot = transaction.getSnapshot();
         operation.execute(snapshot);
-        final ShardDataTreeCohort cohort = shardDataTree.finishTransaction(transaction, Optional.empty());
+        final CommitCohort cohort = shardDataTree.finishTransaction(transaction, Optional.empty());
 
         immediateCanCommit(cohort);
         immediatePreCommit(cohort);
@@ -668,7 +668,7 @@ public class ShardDataTreeTest extends AbstractTest {
         for (final DataTreeCandidate candidateTip : candidates) {
             DataTreeCandidates.applyToModification(snapshot, candidateTip);
         }
-        final ShardDataTreeCohort cohort = shardDataTree.finishTransaction(transaction, Optional.empty());
+        final CommitCohort cohort = shardDataTree.finishTransaction(transaction, Optional.empty());
 
         immediateCanCommit(cohort);
         immediatePreCommit(cohort);

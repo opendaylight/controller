@@ -98,7 +98,7 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
     // TODO: this is not nice: we should handle this in ChainedCommitCohort -- we just do not have an underlying
     //       ReadWriteShardDataTreeTransaction
     @Override
-    ShardDataTreeCohort createFailedCohort(final TransactionIdentifier txId, final DataTreeModification mod,
+    CommitCohort createFailedCohort(final TransactionIdentifier txId, final DataTreeModification mod,
             final Exception failure) {
         return dataTree.createFailedCohort(txId, mod, failure);
     }
