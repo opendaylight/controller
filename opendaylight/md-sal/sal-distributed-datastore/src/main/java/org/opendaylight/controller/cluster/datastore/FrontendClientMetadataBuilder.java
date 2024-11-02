@@ -42,7 +42,7 @@ final class FrontendClientMetadataBuilder {
         purgedHistories = MutableUnsignedLongSet.of();
 
         // History for stand-alone transactions is always present
-        standaloneId = new LocalHistoryIdentifier(clientId, 0);
+        standaloneId = StandaloneFrontendHistory.identifierForClient(clientId);
         currentHistories.put(standaloneId, new FrontendHistoryMetadataBuilder(standaloneId));
     }
 
@@ -57,7 +57,7 @@ final class FrontendClientMetadataBuilder {
         }
 
         // Sanity check and recovery
-        standaloneId = new LocalHistoryIdentifier(clientId, 0);
+        standaloneId = StandaloneFrontendHistory.identifierForClient(clientId);
         currentHistories.computeIfAbsent(standaloneId, missingId -> {
             LOG.warn("{}: Client {} recovered histories {} do not contain stand-alone history, attempting recovery",
                 shardName, clientId, currentHistories);

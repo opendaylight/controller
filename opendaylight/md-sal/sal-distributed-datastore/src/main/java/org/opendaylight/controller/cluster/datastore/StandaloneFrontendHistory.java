@@ -25,8 +25,6 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 /**
  * Standalone transaction specialization of {@link AbstractFrontendHistory}. There can be multiple open transactions
  * and they are submitted in any order.
- *
- * @author Robert Varga
  */
 final class StandaloneFrontendHistory extends AbstractFrontendHistory {
     private final @NonNull LocalHistoryIdentifier identifier;
@@ -36,8 +34,12 @@ final class StandaloneFrontendHistory extends AbstractFrontendHistory {
             final ShardDataTree tree, final Map<UnsignedLong, Boolean> closedTransactions,
             final MutableUnsignedLongSet purgedTransactions) {
         super(persistenceId, tree, closedTransactions, purgedTransactions);
-        identifier = new LocalHistoryIdentifier(clientId, 0);
         this.tree = requireNonNull(tree);
+        identifier = identifierForClient(clientId);
+    }
+
+    static @NonNull LocalHistoryIdentifier identifierForClient(final ClientIdentifier clientId) {
+        return new LocalHistoryIdentifier(clientId, 0);
     }
 
     static @NonNull StandaloneFrontendHistory create(final String persistenceId, final ClientIdentifier clientId,
