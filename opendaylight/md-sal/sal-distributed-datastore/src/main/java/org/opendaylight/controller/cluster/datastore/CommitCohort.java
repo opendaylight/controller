@@ -222,28 +222,21 @@ public abstract class CommitCohort {
 
     @VisibleForTesting
     public final void abort(final FutureCallback<Empty> abortCallback) {
-        if (!dataTree.startAbort(this)) {
-            abortCallback.onSuccess(Empty.value());
-            return;
-        }
-
         candidate = null;
-        dataTree.getStats().incrementAbortTransactionsCount();
         state = State.ABORTED;
 
-        final Optional<CompletionStage<?>> maybeAborts = userCohorts.abort();
-        if (!maybeAborts.isPresent()) {
+        final var maybeAborts = userCohorts.abort();
+        if (maybeAborts.isPresent()) {
+            maybeAborts.orElseThrow().whenComplete((noop, failure) -> {
+                if (failure != null) {
+                    abortCallback.onFailure(failure);
+                } else {
+                    abortCallback.onSuccess(Empty.value());
+                }
+            });
+        } else {
             abortCallback.onSuccess(Empty.value());
-            return;
         }
-
-        maybeAborts.orElseThrow().whenComplete((noop, failure) -> {
-            if (failure != null) {
-                abortCallback.onFailure(failure);
-            } else {
-                abortCallback.onSuccess(Empty.value());
-            }
-        });
     }
 
     void successfulCommit(final UnsignedLong journalIndex, final Runnable onComplete) {
