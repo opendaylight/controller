@@ -27,10 +27,10 @@ import org.slf4j.LoggerFactory;
  */
 final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
         implements Identifiable<LocalHistoryIdentifier> {
-
     private static final Logger LOG = LoggerFactory.getLogger(ShardDataTreeTransactionChain.class);
-    private final LocalHistoryIdentifier chainId;
-    private final ShardDataTree dataTree;
+
+    private final @NonNull LocalHistoryIdentifier chainId;
+    private final @NonNull ShardDataTree dataTree;
 
     private ReadWriteShardDataTreeTransaction previousTx;
     private ReadWriteShardDataTreeTransaction openTransaction;
@@ -41,28 +41,20 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
         this.dataTree = requireNonNull(dataTree);
     }
 
-    private DataTreeSnapshot getSnapshot() {
-        checkState(!closed, "TransactionChain %s has been closed", this);
-        checkState(openTransaction == null, "Transaction %s is open", openTransaction);
-
-        if (previousTx == null) {
-            LOG.debug("Opening an unchained snapshot in {}", chainId);
-            return dataTree.takeSnapshot();
-        }
-
-        LOG.debug("Reusing a chained snapshot in {}", chainId);
-        return previousTx.getSnapshot();
+    @Override
+    public LocalHistoryIdentifier getIdentifier() {
+        return chainId;
     }
 
     @NonNull ReadOnlyShardDataTreeTransaction newReadOnlyTransaction(final TransactionIdentifier txId) {
-        final DataTreeSnapshot snapshot = getSnapshot();
+        final var snapshot = getSnapshot();
         LOG.debug("Allocated read-only transaction {} snapshot {}", txId, snapshot);
 
         return new ReadOnlyShardDataTreeTransaction(this, txId, snapshot);
     }
 
     @NonNull ReadWriteShardDataTreeTransaction newReadWriteTransaction(final TransactionIdentifier txId) {
-        final DataTreeSnapshot snapshot = getSnapshot();
+        final var snapshot = getSnapshot();
         LOG.debug("Allocated read-write transaction {} snapshot {}", txId, snapshot);
 
         final var ret = new ReadWriteShardDataTreeTransaction(this, txId, snapshot.newModification());
@@ -92,19 +84,56 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
     }
 
     @Override
-    ShardDataTreeCohort finishTransaction(final ReadWriteShardDataTreeTransaction transaction,
+    ChainedCommitCohort finishTransaction(final ReadWriteShardDataTreeTransaction transaction,
             final Optional<SortedSet<String>> participatingShardNames) {
         checkState(openTransaction != null, "Attempted to finish transaction %s while none is outstanding",
                 transaction);
 
-        // dataTree is finalizing ready the transaction, we just record it for the next
-        // transaction in chain
-        final ShardDataTreeCohort delegate = dataTree.finishTransaction(transaction, participatingShardNames);
+        // dataTree is finalizing ready the transaction, we just record it for the next transaction in chain
+        final var userCohorts = dataTree.finishTransaction(transaction);
         openTransaction = null;
+        return createReadyCohort(transaction, userCohorts, participatingShardNames);
+    }
+
+    // TODO: this is not nice: we should handle this in ChainedCommitCohort -- we just do not have an underlying
+    //       ReadWriteShardDataTreeTransaction
+    @Override
+    ShardDataTreeCohort createFailedCohort(final TransactionIdentifier txId, final DataTreeModification mod,
+            final Exception failure) {
+        return dataTree.createFailedCohort(txId, mod, failure);
+    }
+
+    @Override
+    ChainedCommitCohort createReadyCohort(final TransactionIdentifier txId, final DataTreeModification mod,
+            final Optional<SortedSet<String>> participatingShardNames) {
+        checkState(openTransaction == null, "Attempted to finish transaction %s while %s is outstanding", txId,
+            openTransaction);
+
+        final var transaction = new ReadWriteShardDataTreeTransaction(dataTree, txId, mod);
+        transaction.close();
+        return createReadyCohort(transaction, dataTree.newUserCohorts(txId), participatingShardNames);
+    }
+
+    private ChainedCommitCohort createReadyCohort(final ReadWriteShardDataTreeTransaction transaction,
+            final CompositeDataTreeCohort userCohorts, final Optional<SortedSet<String>> participatingShardNames) {
         previousTx = transaction;
         LOG.debug("Committing transaction {}", transaction);
+        final var cohort = new ChainedCommitCohort(dataTree, this, transaction, userCohorts, participatingShardNames);
+        dataTree.enqueueReadyTransaction(cohort);
+        return cohort;
+    }
 
-        return new ChainedCommitCohort(this, transaction, delegate);
+    private DataTreeSnapshot getSnapshot() {
+        checkState(!closed, "TransactionChain %s has been closed", this);
+        checkState(openTransaction == null, "Transaction %s is open", openTransaction);
+
+        if (previousTx == null) {
+            LOG.debug("Opening an unchained snapshot in {}", chainId);
+            return dataTree.takeSnapshot();
+        }
+
+        LOG.debug("Reusing a chained snapshot in {}", chainId);
+        return previousTx.getSnapshot();
     }
 
     @Override
@@ -116,22 +145,5 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
         if (transaction.equals(previousTx)) {
             previousTx = null;
         }
-    }
-
-    @Override
-    public LocalHistoryIdentifier getIdentifier() {
-        return chainId;
-    }
-
-    @Override
-    ShardDataTreeCohort createFailedCohort(final TransactionIdentifier txId, final DataTreeModification mod,
-            final Exception failure) {
-        return dataTree.createFailedCohort(txId, mod, failure);
-    }
-
-    @Override
-    ShardDataTreeCohort createReadyCohort(final TransactionIdentifier txId, final DataTreeModification mod,
-            final Optional<SortedSet<String>> participatingShardNames) {
-        return dataTree.createReadyCohort(txId, mod, participatingShardNames);
     }
 }
