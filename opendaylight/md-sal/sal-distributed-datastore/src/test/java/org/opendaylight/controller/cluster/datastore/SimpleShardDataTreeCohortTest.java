@@ -57,8 +57,8 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
 
     @Before
     public void setup() {
-        doReturn(Optional.empty()).when(mockUserCohorts).commit();
-        doReturn(Optional.empty()).when(mockUserCohorts).abort();
+        doReturn(null).when(mockUserCohorts).commit();
+        doReturn(null).when(mockUserCohorts).abort();
 
         cohort = new SimpleShardDataTreeCohort(mockShardDataTree, mockModification, nextTransactionId(),
             mockUserCohorts, Optional.empty());
@@ -238,7 +238,7 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
     public void testAbortWithCohorts() throws Exception {
         doReturn(true).when(mockShardDataTree).startAbort(cohort);
 
-        doReturn(Optional.of(CompletableFuture.completedFuture(null))).when(mockUserCohorts).abort();
+        doReturn(CompletableFuture.completedFuture(null)).when(mockUserCohorts).abort();
 
         final Future<?> abortFuture = abort(cohort);
 
