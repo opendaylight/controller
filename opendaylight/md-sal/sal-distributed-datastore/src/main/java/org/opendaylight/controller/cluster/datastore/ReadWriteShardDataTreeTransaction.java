@@ -20,7 +20,7 @@ public final class ReadWriteShardDataTreeTransaction extends AbstractShardDataTr
         super(parent, id, modification);
     }
 
-    ShardDataTreeCohort ready(final Optional<SortedSet<String>> participatingShardNames) {
+    CommitCohort ready(final Optional<SortedSet<String>> participatingShardNames) {
         checkState(close(), "Transaction is already closed");
         return getParent().finishTransaction(this, participatingShardNames);
     }

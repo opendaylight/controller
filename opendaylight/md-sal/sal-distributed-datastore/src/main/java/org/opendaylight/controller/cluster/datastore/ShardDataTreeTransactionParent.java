@@ -19,12 +19,12 @@ abstract class ShardDataTreeTransactionParent {
 
     abstract void abortTransaction(AbstractShardDataTreeTransaction<?> transaction, Runnable callback);
 
-    abstract ShardDataTreeCohort finishTransaction(ReadWriteShardDataTreeTransaction transaction,
+    abstract CommitCohort finishTransaction(ReadWriteShardDataTreeTransaction transaction,
             Optional<SortedSet<String>> participatingShardNames);
 
-    abstract ShardDataTreeCohort createReadyCohort(TransactionIdentifier txId, DataTreeModification mod,
+    abstract CommitCohort createReadyCohort(TransactionIdentifier txId, DataTreeModification mod,
             Optional<SortedSet<String>> participatingShardNames);
 
-    abstract ShardDataTreeCohort createFailedCohort(TransactionIdentifier txId, DataTreeModification mod,
+    abstract CommitCohort createFailedCohort(TransactionIdentifier txId, DataTreeModification mod,
             Exception failure);
 }
