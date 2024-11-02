@@ -51,14 +51,14 @@ public class FrontendReadWriteTransactionTest {
     private DataTreeModification mockModification;
     private ShardDataTreeTransactionParent mockParent;
     private FrontendReadWriteTransaction openTx;
-    private ShardDataTreeCohort mockCohort;
+    private CommitCohort mockCohort;
 
     @Before
     public void setup() {
         mockHistory = mock(AbstractFrontendHistory.class);
         mockParent = mock(ShardDataTreeTransactionParent.class);
         mockModification = mock(DataTreeModification.class);
-        mockCohort = mock(ShardDataTreeCohort.class);
+        mockCohort = mock(CommitCohort.class);
 
         shardTransaction = new ReadWriteShardDataTreeTransaction(mockParent, TX_ID, mockModification);
         openTx = FrontendReadWriteTransaction.createOpen(mockHistory, shardTransaction);

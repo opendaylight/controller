@@ -12,19 +12,19 @@ import java.util.SortedSet;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 
-final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
-    SimpleShardDataTreeCohort(final ShardDataTree dataTree, final ReadWriteShardDataTreeTransaction transaction,
+final class SimpleCommitCohort extends CommitCohort {
+    SimpleCommitCohort(final ShardDataTree dataTree, final ReadWriteShardDataTreeTransaction transaction,
             final CompositeDataTreeCohort userCohorts, final Optional<SortedSet<String>> participatingShardNames) {
         super(dataTree, transaction, userCohorts, participatingShardNames);
     }
 
-    SimpleShardDataTreeCohort(final ShardDataTree dataTree, final DataTreeModification modification,
+    SimpleCommitCohort(final ShardDataTree dataTree, final DataTreeModification modification,
             final TransactionIdentifier transactionId, final CompositeDataTreeCohort userCohorts,
             final Optional<SortedSet<String>> participatingShardNames) {
         super(dataTree, modification, transactionId, userCohorts, participatingShardNames);
     }
 
-    SimpleShardDataTreeCohort(final ShardDataTree dataTree, final DataTreeModification modification,
+    SimpleCommitCohort(final ShardDataTree dataTree, final DataTreeModification modification,
             final TransactionIdentifier transactionId, final Exception nextFailure) {
         super(dataTree, modification, transactionId, nextFailure);
     }

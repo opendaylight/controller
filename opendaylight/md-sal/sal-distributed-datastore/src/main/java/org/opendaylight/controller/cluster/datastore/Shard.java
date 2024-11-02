@@ -405,7 +405,7 @@ public class Shard extends RaftActor {
         requestMessageAssembler.checkExpiredAssembledMessageState();
     }
 
-    private OptionalLong updateAccess(final ShardDataTreeCohort cohort) {
+    private OptionalLong updateAccess(final CommitCohort cohort) {
         final var frontend = cohort.transactionId().getHistoryId().getClientId().getFrontendId();
         final var state = knownFrontends.get(frontend);
         if (state == null) {
