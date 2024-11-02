@@ -344,7 +344,8 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
 
         final var ready = checkReady();
         startAbort();
-        ready.readyCohort.abort(new FutureCallback<>() {
+
+        final var callback = new FutureCallback<Empty>() {
             @Override
             public void onSuccess(final Empty result) {
                 recordAndSendSuccess(envelope, now, new TransactionAbortSuccess(getIdentifier(), sequence));
@@ -357,7 +358,16 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
                 LOG.warn("{}: Transaction {} abort failed", persistenceId(), getIdentifier(), failure);
                 finishAbort();
             }
-        });
+        };
+
+        final var cohort = ready.readyCohort;
+        final var tree = tree();
+        if (!tree.startAbort(cohort)) {
+            callback.onSuccess(Empty.value());
+            return null;
+        }
+        tree.getStats().incrementAbortTransactionsCount();
+        cohort.abort(callback);
         return null;
     }
 
