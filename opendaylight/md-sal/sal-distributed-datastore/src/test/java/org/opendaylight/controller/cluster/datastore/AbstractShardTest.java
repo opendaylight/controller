@@ -215,8 +215,8 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         return mock;
     }
 
-    protected ShardDataTreeCohort mockShardDataTreeCohort() {
-        ShardDataTreeCohort cohort = mock(ShardDataTreeCohort.class);
+    protected CommitCohort mockShardDataTreeCohort() {
+        CommitCohort cohort = mock(CommitCohort.class);
         DataTreeCandidate candidate = mockCandidate("candidate");
         successfulCanCommit(cohort);
         successfulPreCommit(cohort, candidate);
