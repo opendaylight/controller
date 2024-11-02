@@ -30,7 +30,7 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
 import org.opendaylight.controller.cluster.access.concepts.RequestEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.UnsupportedRequestException;
-import org.opendaylight.controller.cluster.datastore.ShardDataTreeCohort.State;
+import org.opendaylight.controller.cluster.datastore.CommitCohort.State;
 import org.opendaylight.controller.cluster.datastore.utils.MutableUnsignedLongSet;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.slf4j.Logger;

@@ -16,7 +16,7 @@ import java.util.SortedSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class ChainedCommitCohort extends ShardDataTreeCohort {
+final class ChainedCommitCohort extends CommitCohort {
     private static final Logger LOG = LoggerFactory.getLogger(ChainedCommitCohort.class);
 
     private final ReadWriteShardDataTreeTransaction transaction;
