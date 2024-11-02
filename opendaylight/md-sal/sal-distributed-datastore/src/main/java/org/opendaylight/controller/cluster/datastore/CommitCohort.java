@@ -186,38 +186,38 @@ public abstract class CommitCohort {
      * @param dataTreeCandidate {@link DataTreeCandidate} under consideration
      * @param futureCallback the callback to invoke on completion, which may be immediate or async.
      */
-    final void userPreCommit(final DataTreeCandidate dataTreeCandidate, final FutureCallback<Empty> futureCallback) {
+    final void userPreCommit(final DataTreeCandidateTip dataTreeCandidate,
+            final FutureCallback<DataTreeCandidateTip> futureCallback) {
         userCohorts.reset();
 
-        final Optional<CompletionStage<Empty>> maybeCanCommitFuture = userCohorts.canCommit(dataTreeCandidate);
-        if (!maybeCanCommitFuture.isPresent()) {
-            doUserPreCommit(futureCallback);
-            return;
+        final var maybeCanCommitFuture = userCohorts.canCommit(dataTreeCandidate);
+        if (maybeCanCommitFuture.isPresent()) {
+            maybeCanCommitFuture.orElseThrow().whenComplete((noop, failure) -> {
+                if (failure != null) {
+                    futureCallback.onFailure(failure);
+                } else {
+                    doUserPreCommit(dataTreeCandidate, futureCallback);
+                }
+            });
+        } else {
+            doUserPreCommit(dataTreeCandidate, futureCallback);
         }
-
-        maybeCanCommitFuture.orElseThrow().whenComplete((noop, failure) -> {
-            if (failure != null) {
-                futureCallback.onFailure(failure);
-            } else {
-                doUserPreCommit(futureCallback);
-            }
-        });
     }
 
-    private void doUserPreCommit(final FutureCallback<Empty> futureCallback) {
-        final Optional<CompletionStage<Empty>> maybePreCommitFuture = userCohorts.preCommit();
-        if (!maybePreCommitFuture.isPresent()) {
-            futureCallback.onSuccess(Empty.value());
-            return;
+    private void doUserPreCommit(final DataTreeCandidateTip dataTreeCandidate,
+            final FutureCallback<DataTreeCandidateTip> futureCallback) {
+        final var maybePreCommitFuture = userCohorts.preCommit();
+        if (maybePreCommitFuture.isPresent()) {
+            maybePreCommitFuture.orElseThrow().whenComplete((noop, failure) -> {
+                if (failure != null) {
+                    futureCallback.onFailure(failure);
+                } else {
+                    futureCallback.onSuccess(dataTreeCandidate);
+                }
+            });
+        } else {
+            futureCallback.onSuccess(dataTreeCandidate);
         }
-
-        maybePreCommitFuture.orElseThrow().whenComplete((noop, failure) -> {
-            if (failure != null) {
-                futureCallback.onFailure(failure);
-            } else {
-                futureCallback.onSuccess(Empty.value());
-            }
-        });
     }
 
     @VisibleForTesting
