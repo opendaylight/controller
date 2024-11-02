@@ -744,8 +744,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     @Override
     final SimpleCommitCohort finishTransaction(final ReadWriteShardDataTreeTransaction transaction,
             final Optional<SortedSet<String>> participatingShardNames) {
-        final var userCohorts = finishTransaction(transaction);
-        final var cohort = new SimpleCommitCohort(this, transaction, userCohorts, participatingShardNames);
+        final var cohort = new SimpleCommitCohort(transaction, finishTransaction(transaction), participatingShardNames);
         enqueueReadyTransaction(cohort);
         return cohort;
     }
@@ -863,7 +862,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         }
 
         // Failure path: propagate the failure, remove the transaction from the queue and loop to the next one
-        pendingTransactions.poll().failedCanCommit(cause);
+        pendingTransactions.poll().failedCanCommit(getStats(), cause);
     }
 
     private void processNextPending() {
@@ -1014,7 +1013,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     private void failPreCommit(final Throwable cause) {
-        pendingTransactions.poll().failedPreCommit(cause);
+        pendingTransactions.poll().failedPreCommit(getStats(), cause);
         processNextPendingTransaction();
     }
 
@@ -1064,7 +1063,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     private void failCommit(final Exception cause) {
-        pendingFinishCommits.poll().failedCommit(cause);
+        pendingFinishCommits.poll().failedCommit(getStats(), cause);
         processNextPending();
     }
 
@@ -1091,7 +1090,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         allMetadataCommittedTransaction(txId);
 
         // FIXME: propagate journal index
-        pendingFinishCommits.poll().successfulCommit(UnsignedLong.ZERO, () -> {
+        pendingFinishCommits.poll().successfulCommit(getStats(), UnsignedLong.ZERO, () -> {
             LOG.trace("{}: Transaction {} committed, proceeding to notify", logContext, txId);
             notifyListeners(candidate);
 
@@ -1118,7 +1117,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
                     shard.getDatastoreContext().getInitialPayloadSerializedBufferCapacity());
         } catch (IOException e) {
             LOG.error("{}: Failed to encode transaction {} candidate {}", logContext, txId, candidate, e);
-            pendingCommits.poll().failedCommit(e);
+            pendingCommits.poll().failedCommit(getStats(), e);
             processNextPending();
             return;
         }
@@ -1163,7 +1162,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     @Override
     final SimpleCommitCohort createFailedCohort(final TransactionIdentifier txId, final DataTreeModification mod,
             final Exception failure) {
-        final var cohort = new SimpleCommitCohort(this, mod, txId, failure);
+        final var cohort = new SimpleCommitCohort(mod, txId, failure);
         enqueueReadyTransaction(cohort);
         return cohort;
     }
@@ -1171,8 +1170,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     @Override
     final SimpleCommitCohort createReadyCohort(final TransactionIdentifier txId, final DataTreeModification mod,
             final Optional<SortedSet<String>> participatingShardNames) {
-        final var cohort = new SimpleCommitCohort(this, mod, txId, newUserCohorts(txId),
-            participatingShardNames);
+        final var cohort = new SimpleCommitCohort(mod, txId, newUserCohorts(txId), participatingShardNames);
         enqueueReadyTransaction(cohort);
         return cohort;
     }
@@ -1224,7 +1222,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
         switch (state) {
             case CAN_COMMIT_PENDING:
-                currentQueue.remove().failedCanCommit(cohortFailure);
+                currentQueue.remove().failedCanCommit(getStats(), cohortFailure);
                 break;
             case CAN_COMMIT_COMPLETE:
                 // The suppression of the FindBugs "DB_DUPLICATE_SWITCH_CLAUSES" warning pertains to this clause
@@ -1233,7 +1231,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
                 currentQueue.remove().reportFailure(cohortFailure);
                 break;
             case PRE_COMMIT_PENDING:
-                currentQueue.remove().failedPreCommit(cohortFailure);
+                currentQueue.remove().failedPreCommit(getStats(), cohortFailure);
                 break;
             case PRE_COMMIT_COMPLETE:
                 // FIXME: this is a legacy behavior problem. Three-phase commit protocol specifies that after we
