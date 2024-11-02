@@ -16,7 +16,6 @@ import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
 import java.util.Optional;
 import java.util.SortedSet;
-import java.util.concurrent.CompletionStage;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -127,19 +126,18 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
         dataTree.getStats().incrementAbortTransactionsCount();
         state = State.ABORTED;
 
-        final Optional<CompletionStage<?>> maybeAborts = userCohorts.abort();
-        if (!maybeAborts.isPresent()) {
+        final var userAbort = userCohorts.abort();
+        if (userAbort != null) {
+            userAbort.whenComplete((noop, failure) -> {
+                if (failure != null) {
+                    abortCallback.onFailure(failure);
+                } else {
+                    abortCallback.onSuccess(Empty.value());
+                }
+            });
+        } else {
             abortCallback.onSuccess(Empty.value());
-            return;
         }
-
-        maybeAborts.orElseThrow().whenComplete((noop, failure) -> {
-            if (failure != null) {
-                abortCallback.onFailure(failure);
-            } else {
-                abortCallback.onSuccess(Empty.value());
-            }
-        });
     }
 
     @Override
@@ -188,35 +186,33 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     void userPreCommit(final DataTreeCandidate dataTreeCandidate, final FutureCallback<Empty> futureCallback) {
         userCohorts.reset();
 
-        final Optional<CompletionStage<Empty>> maybeCanCommitFuture = userCohorts.canCommit(dataTreeCandidate);
-        if (!maybeCanCommitFuture.isPresent()) {
+        final var userCanCommit = userCohorts.canCommit(dataTreeCandidate);
+        if (userCanCommit != null) {
+            userCanCommit.whenComplete((noop, failure) -> {
+                if (failure != null) {
+                    futureCallback.onFailure(failure);
+                } else {
+                    doUserPreCommit(futureCallback);
+                }
+            });
+        } else {
             doUserPreCommit(futureCallback);
-            return;
         }
-
-        maybeCanCommitFuture.orElseThrow().whenComplete((noop, failure) -> {
-            if (failure != null) {
-                futureCallback.onFailure(failure);
-            } else {
-                doUserPreCommit(futureCallback);
-            }
-        });
     }
 
     private void doUserPreCommit(final FutureCallback<Empty> futureCallback) {
-        final Optional<CompletionStage<Empty>> maybePreCommitFuture = userCohorts.preCommit();
-        if (!maybePreCommitFuture.isPresent()) {
+        final var userPreCommit = userCohorts.preCommit();
+        if (userPreCommit != null) {
+            userPreCommit.whenComplete((noop, failure) -> {
+                if (failure != null) {
+                    futureCallback.onFailure(failure);
+                } else {
+                    futureCallback.onSuccess(Empty.value());
+                }
+            });
+        } else {
             futureCallback.onSuccess(Empty.value());
-            return;
         }
-
-        maybePreCommitFuture.orElseThrow().whenComplete((noop, failure) -> {
-            if (failure != null) {
-                futureCallback.onFailure(failure);
-            } else {
-                futureCallback.onSuccess(Empty.value());
-            }
-        });
     }
 
     void successfulPreCommit(final DataTreeCandidateTip dataTreeCandidate) {
@@ -238,19 +234,17 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     }
 
     void successfulCommit(final UnsignedLong journalIndex, final Runnable onComplete) {
-        final Optional<CompletionStage<Empty>> maybeCommitFuture = userCohorts.commit();
-        if (!maybeCommitFuture.isPresent()) {
+        final var userCommit = userCohorts.commit();
+        if (userCommit != null) {
+            userCommit.whenComplete((noop, failure) -> {
+                if (failure != null) {
+                    LOG.error("User cohorts failed to commit", failure);
+                }
+                finishSuccessfulCommit(journalIndex, onComplete);
+            });
+        } else {
             finishSuccessfulCommit(journalIndex, onComplete);
-            return;
         }
-
-        maybeCommitFuture.orElseThrow().whenComplete((noop, failure) -> {
-            if (failure != null) {
-                LOG.error("User cohorts failed to commit", failure);
-            }
-
-            finishSuccessfulCommit(journalIndex, onComplete);
-        });
     }
 
     private void finishSuccessfulCommit(final UnsignedLong journalIndex, final Runnable onComplete) {
