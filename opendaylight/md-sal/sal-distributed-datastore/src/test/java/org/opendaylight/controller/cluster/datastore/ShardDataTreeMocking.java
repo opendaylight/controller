@@ -37,7 +37,7 @@ public final class ShardDataTreeMocking {
         return mock(FutureCallback.class);
     }
 
-    public static ShardDataTreeCohort immediateCanCommit(final ShardDataTreeCohort cohort) {
+    public static CommitCohort immediateCanCommit(final CommitCohort cohort) {
         final FutureCallback<Empty> callback = mockCallback();
         doNothing().when(callback).onSuccess(Empty.value());
         cohort.canCommit(callback);
@@ -47,7 +47,7 @@ public final class ShardDataTreeMocking {
         return cohort;
     }
 
-    public static FutureCallback<Empty> coordinatedCanCommit(final ShardDataTreeCohort cohort) {
+    public static FutureCallback<Empty> coordinatedCanCommit(final CommitCohort cohort) {
         final FutureCallback<Empty> callback = mockCallback();
         doNothing().when(callback).onSuccess(Empty.value());
         doNothing().when(callback).onFailure(any(Throwable.class));
@@ -55,7 +55,7 @@ public final class ShardDataTreeMocking {
         return callback;
     }
 
-    public static ShardDataTreeCohort immediatePreCommit(final ShardDataTreeCohort cohort) {
+    public static CommitCohort immediatePreCommit(final CommitCohort cohort) {
         final FutureCallback<DataTreeCandidate> callback = mockCallback();
         doNothing().when(callback).onSuccess(any(DataTreeCandidate.class));
         cohort.preCommit(callback);
@@ -65,7 +65,7 @@ public final class ShardDataTreeMocking {
         return cohort;
     }
 
-    public static FutureCallback<DataTreeCandidate> coordinatedPreCommit(final ShardDataTreeCohort cohort) {
+    public static FutureCallback<DataTreeCandidate> coordinatedPreCommit(final CommitCohort cohort) {
         final FutureCallback<DataTreeCandidate> callback = mockCallback();
         doNothing().when(callback).onSuccess(any(DataTreeCandidate.class));
         doNothing().when(callback).onFailure(any(Throwable.class));
@@ -73,7 +73,7 @@ public final class ShardDataTreeMocking {
         return callback;
     }
 
-    public static ShardDataTreeCohort immediateCommit(final ShardDataTreeCohort cohort) {
+    public static CommitCohort immediateCommit(final CommitCohort cohort) {
         final FutureCallback<UnsignedLong> callback = mockCallback();
         doNothing().when(callback).onSuccess(any(UnsignedLong.class));
         cohort.commit(callback);
@@ -83,7 +83,7 @@ public final class ShardDataTreeMocking {
         return cohort;
     }
 
-    public static FutureCallback<UnsignedLong> coordinatedCommit(final ShardDataTreeCohort cohort) {
+    public static FutureCallback<UnsignedLong> coordinatedCommit(final CommitCohort cohort) {
         final FutureCallback<UnsignedLong> callback = mockCallback();
         doNothing().when(callback).onSuccess(any(UnsignedLong.class));
         doNothing().when(callback).onFailure(any(Throwable.class));
@@ -91,7 +91,7 @@ public final class ShardDataTreeMocking {
         return callback;
     }
 
-    public static FutureCallback<UnsignedLong> immediate3PhaseCommit(final ShardDataTreeCohort cohort) {
+    public static FutureCallback<UnsignedLong> immediate3PhaseCommit(final CommitCohort cohort) {
         final FutureCallback<UnsignedLong> commitCallback = mockCallback();
         doNothing().when(commitCallback).onSuccess(any(UnsignedLong.class));
         doNothing().when(commitCallback).onFailure(any(Throwable.class));
@@ -125,55 +125,55 @@ public final class ShardDataTreeMocking {
     }
 
     @SuppressWarnings("unchecked")
-    public static ShardDataTreeCohort failedCanCommit(final ShardDataTreeCohort mock) {
+    public static CommitCohort failedCanCommit(final CommitCohort mock) {
         doAnswer(ShardDataTreeMocking::invokeFailure).when(mock).canCommit(any(FutureCallback.class));
         return mock;
     }
 
     @SuppressWarnings("unchecked")
-    public static ShardDataTreeCohort failedPreCommit(final ShardDataTreeCohort mock) {
+    public static CommitCohort failedPreCommit(final CommitCohort mock) {
         doAnswer(ShardDataTreeMocking::invokeFailure).when(mock).preCommit(any(FutureCallback.class));
         return mock;
     }
 
     @SuppressWarnings("unchecked")
-    public static ShardDataTreeCohort failedCommit(final ShardDataTreeCohort mock) {
+    public static CommitCohort failedCommit(final CommitCohort mock) {
         doAnswer(ShardDataTreeMocking::invokeFailure).when(mock).commit(any(FutureCallback.class));
         return mock;
     }
 
     @SuppressWarnings("unchecked")
-    public static ShardDataTreeCohort successfulCanCommit(final ShardDataTreeCohort mock) {
+    public static CommitCohort successfulCanCommit(final CommitCohort mock) {
         doAnswer(invocation -> invokeSuccess(invocation, null)).when(mock).canCommit(any(FutureCallback.class));
 
         return mock;
     }
 
-    public static ShardDataTreeCohort successfulPreCommit(final ShardDataTreeCohort mock) {
+    public static CommitCohort successfulPreCommit(final CommitCohort mock) {
         return successfulPreCommit(mock, mock(DataTreeCandidate.class));
     }
 
     @SuppressWarnings("unchecked")
-    public static ShardDataTreeCohort successfulPreCommit(final ShardDataTreeCohort mock,
+    public static CommitCohort successfulPreCommit(final CommitCohort mock,
             final DataTreeCandidate candidate) {
         doAnswer(invocation -> invokeSuccess(invocation, candidate)).when(mock).preCommit(any(FutureCallback.class));
 
         return mock;
     }
 
-    public static ShardDataTreeCohort successfulCommit(final ShardDataTreeCohort mock) {
+    public static CommitCohort successfulCommit(final CommitCohort mock) {
         return successfulCommit(mock, UnsignedLong.ZERO);
     }
 
     @SuppressWarnings("unchecked")
-    public static ShardDataTreeCohort successfulCommit(final ShardDataTreeCohort mock, final UnsignedLong index) {
+    public static CommitCohort successfulCommit(final CommitCohort mock, final UnsignedLong index) {
         doAnswer(invocation -> invokeSuccess(invocation, index)).when(mock).commit(any(FutureCallback.class));
 
         return mock;
     }
 
     @SuppressWarnings("unchecked")
-    public static void assertSequencedCommit(final ShardDataTreeCohort mock) {
+    public static void assertSequencedCommit(final CommitCohort mock) {
         final InOrder inOrder = inOrder(mock);
         inOrder.verify(mock).canCommit(any(FutureCallback.class));
         inOrder.verify(mock).preCommit(any(FutureCallback.class));
