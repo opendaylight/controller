@@ -252,7 +252,7 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
     abstract CommitCohort createFailedCohort(TransactionIdentifier id, DataTreeModification mod, Exception failure);
 
     abstract CommitCohort createReadyCohort(TransactionIdentifier id, DataTreeModification mod,
-            Optional<SortedSet<String>> participatingShardNames);
+            @Nullable SortedSet<String> participatingShardNames);
 
     @Override
     public final String toString() {
