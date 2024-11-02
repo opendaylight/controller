@@ -219,13 +219,7 @@ public abstract class CommitCohort {
 
     @VisibleForTesting
     public final void abort(final FutureCallback<Empty> abortCallback) {
-        if (!dataTree.startAbort(this)) {
-            abortCallback.onSuccess(Empty.value());
-            return;
-        }
-
         candidate = null;
-        dataTree.getStats().incrementAbortTransactionsCount();
         state = State.ABORTED;
 
         final var userAbort = userCohorts.abort();
