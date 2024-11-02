@@ -10,18 +10,12 @@ package org.opendaylight.controller.cluster.datastore;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.collect.Lists;
-import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
-import org.apache.pekko.actor.ActorRef;
+import java.util.stream.Collectors;
 import org.apache.pekko.actor.Status;
 import org.apache.pekko.actor.Status.Failure;
 import org.apache.pekko.dispatch.ExecutionContexts;
@@ -31,15 +25,14 @@ import org.apache.pekko.dispatch.Recover;
 import org.apache.pekko.pattern.Patterns;
 import org.apache.pekko.util.Timeout;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.controller.cluster.datastore.DataTreeCohortActor.CanCommit;
 import org.opendaylight.controller.cluster.datastore.DataTreeCohortActor.Success;
 import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.compat.java8.FutureConverters;
 import scala.concurrent.Future;
 
 /**
@@ -137,103 +130,105 @@ class CompositeDataTreeCohort {
         state = State.IDLE;
     }
 
-    Optional<CompletionStage<Empty>> canCommit(final DataTreeCandidate tip) {
+    @Nullable CompletionStage<Empty> canCommit(final DataTreeCandidate tip) {
         if (LOG.isTraceEnabled()) {
             LOG.trace("{}: canCommit - candidate: {}", txId, tip);
         } else {
             LOG.debug("{}: canCommit - candidate rootPath: {}", txId, tip.getRootPath());
         }
 
-        final List<CanCommit> messages = registry.createCanCommitMessages(txId, tip, schema);
+        final var messages = registry.createCanCommitMessages(txId, tip, schema);
         LOG.debug("{}: canCommit - messages: {}", txId, messages);
         if (messages.isEmpty()) {
             successfulFromPrevious = List.of();
             changeStateFrom(State.IDLE, State.CAN_COMMIT_SUCCESSFUL);
-            return Optional.empty();
+            return null;
         }
 
-        final List<Entry<ActorRef, Future<Object>>> futures = new ArrayList<>(messages.size());
-        for (CanCommit message : messages) {
-            final ActorRef actor = message.getCohort();
-            final Future<Object> future = Patterns.ask(actor, message, timeout).recover(EXCEPTION_TO_MESSAGE,
-                ExecutionContexts.global());
-            LOG.trace("{}: requesting canCommit from {}", txId, actor);
-            futures.add(new SimpleImmutableEntry<>(actor, future));
-        }
-
+        final var futures = messages.stream()
+            .map(message -> {
+                final var actor = message.getCohort();
+                LOG.trace("{}: requesting canCommit from {}", txId, actor);
+                return Patterns.ask(actor, message, timeout).recover(EXCEPTION_TO_MESSAGE, ExecutionContexts.global());
+            })
+            .collect(Collectors.toList());
         changeStateFrom(State.IDLE, State.CAN_COMMIT_SENT);
-        return Optional.of(processResponses(futures, State.CAN_COMMIT_SENT, State.CAN_COMMIT_SUCCESSFUL));
+        return processResponses(futures, State.CAN_COMMIT_SENT, State.CAN_COMMIT_SUCCESSFUL);
     }
 
-    Optional<CompletionStage<Empty>> preCommit() {
+    @Nullable CompletionStage<Empty> preCommit() {
         LOG.debug("{}: preCommit - successfulFromPrevious: {}", txId, successfulFromPrevious);
 
         if (successfulFromPrevious.isEmpty()) {
             changeStateFrom(State.CAN_COMMIT_SUCCESSFUL, State.PRE_COMMIT_SUCCESSFUL);
-            return Optional.empty();
+            return null;
         }
 
-        final List<Entry<ActorRef, Future<Object>>> futures = sendMessageToSuccessful(
-            new DataTreeCohortActor.PreCommit(txId));
+        final var futures = sendMessageToSuccessful(new DataTreeCohortActor.PreCommit(txId));
         changeStateFrom(State.CAN_COMMIT_SUCCESSFUL, State.PRE_COMMIT_SENT);
-        return Optional.of(processResponses(futures, State.PRE_COMMIT_SENT, State.PRE_COMMIT_SUCCESSFUL));
+        return processResponses(futures, State.PRE_COMMIT_SENT, State.PRE_COMMIT_SUCCESSFUL);
     }
 
-    Optional<CompletionStage<Empty>> commit() {
+    @Nullable CompletionStage<Empty> commit() {
         LOG.debug("{}: commit - successfulFromPrevious: {}", txId, successfulFromPrevious);
         if (successfulFromPrevious.isEmpty()) {
             changeStateFrom(State.PRE_COMMIT_SUCCESSFUL, State.COMMITED);
-            return Optional.empty();
+            return null;
         }
 
-        final List<Entry<ActorRef, Future<Object>>> futures = sendMessageToSuccessful(
-            new DataTreeCohortActor.Commit(txId));
+        final var futures = sendMessageToSuccessful(new DataTreeCohortActor.Commit(txId));
         changeStateFrom(State.PRE_COMMIT_SUCCESSFUL, State.COMMIT_SENT);
-        return Optional.of(processResponses(futures, State.COMMIT_SENT, State.COMMITED));
+        return processResponses(futures, State.COMMIT_SENT, State.COMMITED);
     }
 
-    Optional<CompletionStage<?>> abort() {
+    @Nullable CompletionStage<Empty> abort() {
         LOG.debug("{}: abort - successfulFromPrevious: {}", txId, successfulFromPrevious);
 
         state = State.ABORTED;
         if (successfulFromPrevious.isEmpty()) {
-            return Optional.empty();
+            return null;
         }
 
-        final DataTreeCohortActor.Abort message = new DataTreeCohortActor.Abort(txId);
-        final List<Future<Object>> futures = new ArrayList<>(successfulFromPrevious.size());
-        for (Success s : successfulFromPrevious) {
-            futures.add(Patterns.ask(s.getCohort(), message, timeout));
-        }
-
-        return Optional.of(FutureConverters.toJava(Futures.sequence(futures, ExecutionContexts.global())));
+        final var message = new DataTreeCohortActor.Abort(txId);
+        final var future = new CompletableFuture<Empty>();
+        Futures.sequence(successfulFromPrevious.stream()
+            .map(success -> Patterns.ask(success.getCohort(), message, timeout))
+            .collect(Collectors.toList()), ExecutionContexts.global())
+            .onComplete(new OnComplete<>() {
+                @Override
+                public void onComplete(final Throwable failure, final Iterable<Object> success) {
+                    callbackExecutor.execute(() -> {
+                        if (failure != null) {
+                            future.completeExceptionally(failure);
+                        } else {
+                            future.complete(Empty.value());
+                        }
+                    });
+                }
+            }, ExecutionContexts.global());
+        return future;
     }
 
-    private List<Entry<ActorRef, Future<Object>>> sendMessageToSuccessful(final Object message) {
+    private List<Future<Object>> sendMessageToSuccessful(final Object message) {
         LOG.debug("{}: sendMesageToSuccessful: {}", txId, message);
-
-        final List<Entry<ActorRef, Future<Object>>> ret = new ArrayList<>(successfulFromPrevious.size());
-        for (Success s : successfulFromPrevious) {
-            final ActorRef actor = s.getCohort();
-            ret.add(new SimpleImmutableEntry<>(actor, Patterns.ask(actor, message, timeout)));
-        }
-        return ret;
+        return successfulFromPrevious.stream()
+            .map(success -> Patterns.ask(success.getCohort(), message, timeout))
+            .collect(Collectors.toList());
     }
 
-    private @NonNull CompletionStage<Empty> processResponses(final List<Entry<ActorRef, Future<Object>>> futures,
+    private @NonNull CompletionStage<Empty> processResponses(final List<Future<Object>> futures,
             final State currentState, final State afterState) {
         LOG.debug("{}: processResponses - currentState: {}, afterState: {}", txId, currentState, afterState);
-        final CompletableFuture<Empty> returnFuture = new CompletableFuture<>();
-        Future<Iterable<Object>> aggregateFuture = Futures.sequence(Lists.transform(futures, Entry::getValue),
-                ExecutionContexts.global());
+        final var returnFuture = new CompletableFuture<Empty>();
 
-        aggregateFuture.onComplete(new OnComplete<Iterable<Object>>() {
-            @Override
-            public void onComplete(final Throwable failure, final Iterable<Object> results) {
-                callbackExecutor.execute(
-                    () -> processResponses(failure, results, currentState, afterState, returnFuture));
-            }
-        }, ExecutionContexts.global());
+        Futures.sequence(futures, ExecutionContexts.global())
+            .onComplete(new OnComplete<>() {
+                @Override
+                public void onComplete(final Throwable failure, final Iterable<Object> results) {
+                    callbackExecutor.execute(
+                        () -> processResponses(failure, results, currentState, afterState, returnFuture));
+                }
+            }, ExecutionContexts.global());
 
         return returnFuture;
     }
@@ -246,15 +241,14 @@ class CompositeDataTreeCohort {
             return;
         }
 
-        final Collection<Failure> failed = new ArrayList<>(1);
-        final List<Success> successful = new ArrayList<>();
-        for (Object result : results) {
-            if (result instanceof DataTreeCohortActor.Success) {
-                successful.add((Success) result);
-            } else if (result instanceof Status.Failure) {
-                failed.add((Failure) result);
-            } else {
-                LOG.warn("{}: unrecognized response {}, ignoring it", txId, result);
+        final var failed = new ArrayList<Status.Failure>(1);
+        final var successful = new ArrayList<DataTreeCohortActor.Success>();
+        for (var result : results) {
+            switch (result) {
+                case DataTreeCohortActor.Success success -> successful.add(success);
+                case Status.Failure fail -> failed.add(fail);
+                default ->
+                    LOG.warn("{}: unrecognized response {}, ignoring it", txId, result);
             }
         }
 
@@ -262,8 +256,8 @@ class CompositeDataTreeCohort {
 
         if (!failed.isEmpty()) {
             changeStateFrom(currentState, State.FAILED);
-            final Iterator<Failure> it = failed.iterator();
-            final Throwable firstEx = it.next().cause();
+            final var it = failed.iterator();
+            final var firstEx = it.next().cause();
             while (it.hasNext()) {
                 firstEx.addSuppressed(it.next().cause());
             }
