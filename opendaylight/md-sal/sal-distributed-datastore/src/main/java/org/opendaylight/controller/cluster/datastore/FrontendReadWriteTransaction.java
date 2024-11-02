@@ -12,7 +12,6 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
 import java.util.Collection;
-import java.util.Optional;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;
@@ -518,7 +517,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
 
         final var optFailure = request.getDelayedFailure();
         final var ready = new Ready(optFailure.isEmpty()
-            ? history().createReadyCohort(getIdentifier(), sealedModification, Optional.empty())
+            ? history().createReadyCohort(getIdentifier(), sealedModification, null)
             : history().createFailedCohort(getIdentifier(), sealedModification, optFailure.orElseThrow()));
         state = ready;
         if (request.isCoordinated()) {
@@ -605,11 +604,11 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
     private @NonNull Ready ensureReady(final Collection<TransactionModification> modifications) {
         // We may have a combination of READY + SIMPLE/THREE_PHASE , in which case we want to ready the transaction
         // only once.
-        return switch (state) {
+       return switch (state) {
             case Open open -> {
                 final var transaction = open.openTransaction;
                 applyModifications(transaction.getSnapshot(), modifications);
-                final var ready = new Ready(transaction.ready(Optional.empty()));
+                final var ready = new Ready(transaction.ready(null));
                 state = ready;
                 LOG.debug("{}: transitioned {} to ready", persistenceId(), getIdentifier());
                 yield ready;
