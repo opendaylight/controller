@@ -13,7 +13,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.UnsignedLong;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.SortedSet;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -75,7 +74,7 @@ final class LocalFrontendHistory extends AbstractFrontendHistory {
 
     @Override
     CommitCohort createReadyCohort(final TransactionIdentifier id, final DataTreeModification mod,
-            final Optional<SortedSet<String>> participatingShardNames) {
+            final SortedSet<String> participatingShardNames) {
         return chain.createReadyCohort(id, mod, participatingShardNames);
     }
 }
