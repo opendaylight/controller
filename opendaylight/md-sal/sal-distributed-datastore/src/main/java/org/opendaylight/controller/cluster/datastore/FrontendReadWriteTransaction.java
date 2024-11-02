@@ -488,18 +488,18 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
 
     private TransactionSuccess<?> handleCommitLocalTransaction(final CommitLocalTransactionRequest request,
             final RequestEnvelope envelope, final long now) throws RequestException {
-        final DataTreeModification sealedModification = checkSealed();
+        final var sealedModification = checkSealed();
         if (!sealedModification.equals(request.getModification())) {
             LOG.warn("Expecting modification {}, commit request has {}", sealedModification, request.getModification());
             throw new UnsupportedRequestException(request);
         }
 
-        final Optional<Exception> optFailure = request.getDelayedFailure();
+        final var optFailure = request.getDelayedFailure();
         if (optFailure.isPresent()) {
             state = new Ready(history().createFailedCohort(getIdentifier(), sealedModification,
                 optFailure.orElseThrow()));
         } else {
-            state = new Ready(history().createReadyCohort(getIdentifier(), sealedModification, Optional.empty()));
+            state = new Ready(history().createReadyCohort(getIdentifier(), sealedModification, null));
         }
 
         if (request.isCoordinated()) {
@@ -590,7 +590,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         }
 
         applyModifications(modifications);
-        state = new Ready(checkOpen().ready(Optional.empty()));
+        state = new Ready(checkOpen().ready(null));
         LOG.debug("{}: transitioned {} to ready", persistenceId(), getIdentifier());
     }
 
