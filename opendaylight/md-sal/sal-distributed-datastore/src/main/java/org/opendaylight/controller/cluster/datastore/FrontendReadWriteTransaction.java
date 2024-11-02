@@ -13,6 +13,7 @@ import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
 import java.util.Collection;
 import java.util.Optional;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ClosedTransactionException;
@@ -136,6 +137,56 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         }
     }
 
+    @FunctionalInterface
+    private interface OnSuccessMethod {
+
+        void invoke(FrontendReadWriteTransaction tx, RequestEnvelope envelope, long started);
+    }
+
+    private final class CanCommitCallback implements FutureCallback<Empty> {
+        private final @NonNull OnSuccessMethod method;
+        private final @NonNull RequestEnvelope envelope;
+        private final long startTime;
+
+        CanCommitCallback(final RequestEnvelope envelope, final long startTime, final OnSuccessMethod method) {
+            this.envelope = requireNonNull(envelope);
+            this.startTime = startTime;
+            this.method = requireNonNull(method);
+        }
+
+        @Override
+        public void onSuccess(final Empty result) {
+            method.invoke(FrontendReadWriteTransaction.this, envelope, startTime);
+        }
+
+        @Override
+        public void onFailure(final Throwable failure) {
+            failTransaction(envelope, startTime, new RuntimeRequestException("CanCommit failed", failure));
+        }
+    }
+
+    private final class PreCommitCallback implements FutureCallback<DataTreeCandidate> {
+        private final @NonNull OnSuccessMethod method;
+        private final @NonNull RequestEnvelope envelope;
+        private final long startTime;
+
+        PreCommitCallback(final RequestEnvelope envelope, final long startTime, final OnSuccessMethod method) {
+            this.envelope = requireNonNull(envelope);
+            this.startTime = startTime;
+            this.method = requireNonNull(method);
+        }
+
+        @Override
+        public void onSuccess(final DataTreeCandidate result) {
+            method.invoke(FrontendReadWriteTransaction.this, envelope, startTime);
+        }
+
+        @Override
+        public void onFailure(final Throwable failure) {
+            failTransaction(envelope, startTime, new RuntimeRequestException("Precommit failed", failure));
+        }
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(FrontendReadWriteTransaction.class);
     private static final State ABORTED = new State() {
         @Override
@@ -217,17 +268,8 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             case CAN_COMMIT_COMPLETE -> {
                 ready.stage = CommitStage.PRE_COMMIT_PENDING;
                 LOG.debug("{}: Transaction {} initiating preCommit", persistenceId(), getIdentifier());
-                ready.readyCohort.preCommit(new FutureCallback<DataTreeCandidate>() {
-                    @Override
-                    public void onSuccess(final DataTreeCandidate result) {
-                        successfulPreCommit(envelope, now);
-                    }
-
-                    @Override
-                    public void onFailure(final Throwable failure) {
-                        failTransaction(envelope, now, new RuntimeRequestException("Precommit failed", failure));
-                    }
-                });
+                ready.readyCohort.preCommit(new PreCommitCallback(envelope, now,
+                    FrontendReadWriteTransaction::successfulPreCommit));
             }
             case CAN_COMMIT_PENDING, COMMIT_PENDING, PRE_COMMIT_COMPLETE, READY ->
                 throw new IllegalStateException("Attempted to preCommit in stage " + ready.stage);
@@ -235,7 +277,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         return null;
     }
 
-    void successfulPreCommit(final RequestEnvelope envelope, final long startTime) {
+    private void successfulPreCommit(final RequestEnvelope envelope, final long startTime) {
         if (state instanceof Retired) {
             LOG.debug("{}: Suppressing successful preCommit of retired transaction {}", persistenceId(),
                 getIdentifier());
@@ -249,7 +291,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         ready.stage = CommitStage.PRE_COMMIT_COMPLETE;
     }
 
-    void failTransaction(final RequestEnvelope envelope, final long now, final RuntimeRequestException cause) {
+    private void failTransaction(final RequestEnvelope envelope, final long now, final RuntimeRequestException cause) {
         if (state instanceof Retired) {
             LOG.debug("{}: Suppressing failure of retired transaction {}", persistenceId(), getIdentifier(), cause);
             return;
@@ -372,24 +414,15 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             case READY -> {
                 ready.stage = CommitStage.CAN_COMMIT_PENDING;
                 LOG.debug("{}: Transaction {} initiating canCommit", persistenceId(), getIdentifier());
-                ready.readyCohort.canCommit(new FutureCallback<>() {
-                    @Override
-                    public void onSuccess(final Empty result) {
-                        successfulCanCommit(envelope, now);
-                    }
-
-                    @Override
-                    public void onFailure(final Throwable failure) {
-                        failTransaction(envelope, now, new RuntimeRequestException("CanCommit failed", failure));
-                    }
-                });
+                ready.readyCohort.canCommit(new CanCommitCallback(envelope, now,
+                    FrontendReadWriteTransaction::successfulCanCommit));
             }
             case CAN_COMMIT_COMPLETE, COMMIT_PENDING, PRE_COMMIT_COMPLETE, PRE_COMMIT_PENDING ->
                 throw new IllegalStateException("Attempted to canCommit in stage " + ready.stage);
         }
     }
 
-    void successfulCanCommit(final RequestEnvelope envelope, final long startTime) {
+    private void successfulCanCommit(final RequestEnvelope envelope, final long startTime) {
         if (state instanceof Retired) {
             LOG.debug("{}: Suppressing successful canCommit of retired transaction {}", persistenceId(),
                 getIdentifier());
@@ -416,22 +449,13 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             case READY -> {
                 ready.stage = CommitStage.CAN_COMMIT_PENDING;
                 LOG.debug("{}: Transaction {} initiating direct canCommit", persistenceId(), getIdentifier());
-                ready.readyCohort.canCommit(new FutureCallback<>() {
-                    @Override
-                    public void onSuccess(final Empty result) {
-                        successfulDirectCanCommit(envelope, now);
-                    }
-
-                    @Override
-                    public void onFailure(final Throwable failure) {
-                        failTransaction(envelope, now, new RuntimeRequestException("CanCommit failed", failure));
-                    }
-                });
+                ready.readyCohort.canCommit(new CanCommitCallback(envelope, now,
+                    FrontendReadWriteTransaction::successfulDirectCanCommit));
             }
         }
     }
 
-    void successfulDirectCanCommit(final RequestEnvelope envelope, final long startTime) {
+    private void successfulDirectCanCommit(final RequestEnvelope envelope, final long startTime) {
         if (state instanceof Retired) {
             LOG.debug("{}: Suppressing direct canCommit of retired transaction {}", persistenceId(), getIdentifier());
             return;
@@ -440,20 +464,11 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         final Ready ready = checkReady();
         ready.stage = CommitStage.PRE_COMMIT_PENDING;
         LOG.debug("{}: Transaction {} initiating direct preCommit", persistenceId(), getIdentifier());
-        ready.readyCohort.preCommit(new FutureCallback<>() {
-            @Override
-            public void onSuccess(final DataTreeCandidate result) {
-                successfulDirectPreCommit(envelope, startTime);
-            }
-
-            @Override
-            public void onFailure(final Throwable failure) {
-                failTransaction(envelope, startTime, new RuntimeRequestException("PreCommit failed", failure));
-            }
-        });
+        ready.readyCohort.preCommit(new PreCommitCallback(envelope, startTime,
+            FrontendReadWriteTransaction::successfulDirectPreCommit));
     }
 
-    void successfulDirectPreCommit(final RequestEnvelope envelope, final long startTime) {
+    private void successfulDirectPreCommit(final RequestEnvelope envelope, final long startTime) {
         if (state instanceof Retired) {
             LOG.debug("{}: Suppressing direct commit of retired transaction {}", persistenceId(), getIdentifier());
             return;
@@ -475,7 +490,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         });
     }
 
-    void successfulCommit(final RequestEnvelope envelope, final long startTime) {
+    private void successfulCommit(final RequestEnvelope envelope, final long startTime) {
         if (state instanceof Retired) {
             LOG.debug("{}: Suppressing commit response on retired transaction {}", persistenceId(), getIdentifier());
             return;
