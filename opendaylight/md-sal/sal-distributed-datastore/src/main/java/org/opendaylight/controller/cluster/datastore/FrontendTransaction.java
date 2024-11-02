@@ -63,6 +63,10 @@ abstract sealed class FrontendTransaction implements Identifiable<TransactionIde
         return history;
     }
 
+    final @NonNull ShardDataTree tree() {
+        return history.tree();
+    }
+
     final String persistenceId() {
         return history.persistenceId();
     }
