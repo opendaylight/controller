@@ -13,7 +13,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Verify;
 import java.util.ArrayDeque;
 import java.util.Optional;
-import java.util.Queue;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.commands.IncrementTransactionSequenceRequest;
 import org.opendaylight.controller.cluster.access.commands.IncrementTransactionSequenceSuccess;
@@ -35,19 +35,18 @@ abstract sealed class FrontendTransaction implements Identifiable<TransactionIde
         permits FrontendReadOnlyTransaction, FrontendReadWriteTransaction {
     private static final Logger LOG = LoggerFactory.getLogger(FrontendTransaction.class);
 
-    private final AbstractFrontendHistory history;
-    private final TransactionIdentifier id;
-
     /**
      * It is possible that after we process a request and send a response that response gets lost and the client
      * initiates a retry. Since subsequent requests can mutate transaction state we need to retain the response until
      * it is acknowledged by the client.
      */
-    private final Queue<Object> replayQueue = new ArrayDeque<>();
+    private final ArrayDeque<Object> replayQueue = new ArrayDeque<>();
+    private final @NonNull AbstractFrontendHistory history;
+    private final @NonNull TransactionIdentifier id;
+
     private long firstReplaySequence;
     private Long lastPurgedSequence;
     private long expectedSequence;
-
     private RequestException previousFailure;
 
     FrontendTransaction(final AbstractFrontendHistory history, final TransactionIdentifier id) {
@@ -60,12 +59,12 @@ abstract sealed class FrontendTransaction implements Identifiable<TransactionIde
         return id;
     }
 
-    final AbstractFrontendHistory history() {
+    final @NonNull AbstractFrontendHistory history() {
         return history;
     }
 
     final String persistenceId() {
-        return history().persistenceId();
+        return history.persistenceId();
     }
 
     final Optional<TransactionSuccess<?>> replaySequence(final long sequence) throws RequestException {
@@ -80,7 +79,7 @@ abstract sealed class FrontendTransaction implements Identifiable<TransactionIde
         }
 
         // Sanity check: if we have purged sequences, this has to be newer
-        if (lastPurgedSequence != null && Long.compareUnsigned(lastPurgedSequence.longValue(), sequence) >= 0) {
+        if (lastPurgedSequence != null && Long.compareUnsigned(lastPurgedSequence, sequence) >= 0) {
             // Client has sent a request sequence, which has already been purged. This is a hard error, which should
             // never occur. Throwing an IllegalArgumentException will cause it to be wrapped in a
             // RuntimeRequestException (which is not retriable) and report it back to the client.
