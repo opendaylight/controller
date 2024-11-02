@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.SortedSet;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.commands.AbstractReadTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ClosedTransactionException;
@@ -42,18 +43,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Abstract class for providing logical tracking of frontend local histories. This class is specialized for
- * standalone transactions and chained transactions.
- *
- * @author Robert Varga
+ * Abstract class for providing logical tracking of frontend local histories. This class is specialized for standalone
+ * transactions and chained transactions.
  */
 abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdentifier> {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractFrontendHistory.class);
 
-    private final Map<TransactionIdentifier, FrontendTransaction> transactions = new HashMap<>();
+    private final HashMap<TransactionIdentifier, FrontendTransaction> transactions = new HashMap<>();
     private final MutableUnsignedLongSet purgedTransactions;
-    private final String persistenceId;
-    private final ShardDataTree tree;
+    private final @NonNull String persistenceId;
+    private final @NonNull ShardDataTree tree;
 
     /**
      * Transactions closed by the previous leader. Boolean indicates whether the transaction was committed (true) or
@@ -71,6 +70,10 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
 
     final String persistenceId() {
         return persistenceId;
+    }
+
+    final @NonNull ShardDataTree tree() {
+        return tree;
     }
 
     final long readTime() {

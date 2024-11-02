@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import static java.util.Objects.requireNonNull;
-
 import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.UnsignedLong;
 import java.util.HashMap;
@@ -27,13 +25,11 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
  */
 final class StandaloneFrontendHistory extends AbstractFrontendHistory {
     private final @NonNull LocalHistoryIdentifier identifier;
-    private final @NonNull ShardDataTree tree;
 
     private StandaloneFrontendHistory(final String persistenceId, final ClientIdentifier clientId,
             final ShardDataTree tree, final Map<UnsignedLong, Boolean> closedTransactions,
             final MutableUnsignedLongSet purgedTransactions) {
         super(persistenceId, tree, closedTransactions, purgedTransactions);
-        this.tree = requireNonNull(tree);
         identifier = identifierForClient(clientId);
     }
 
@@ -61,12 +57,12 @@ final class StandaloneFrontendHistory extends AbstractFrontendHistory {
 
     @Override
     FrontendTransaction createOpenSnapshot(final TransactionIdentifier id) {
-        return FrontendReadOnlyTransaction.create(this, tree.newStandaloneReadOnlyTransaction(id));
+        return FrontendReadOnlyTransaction.create(this, tree().newStandaloneReadOnlyTransaction(id));
     }
 
     @Override
     FrontendTransaction createOpenTransaction(final TransactionIdentifier id) {
-        return FrontendReadWriteTransaction.createOpen(this, tree.newStandaloneReadWriteTransaction(id));
+        return FrontendReadWriteTransaction.createOpen(this, tree().newStandaloneReadWriteTransaction(id));
     }
 
     @Override
@@ -77,12 +73,12 @@ final class StandaloneFrontendHistory extends AbstractFrontendHistory {
     @Override
     CommitCohort createFailedCohort(final TransactionIdentifier id, final DataTreeModification mod,
             final Exception failure) {
-        return tree.createFailedCohort(id, mod, failure);
+        return tree().createFailedCohort(id, mod, failure);
     }
 
     @Override
     CommitCohort createReadyCohort(final TransactionIdentifier id, final DataTreeModification mod,
             final SortedSet<String> participatingShardNames) {
-        return tree.createReadyCohort(id, mod, participatingShardNames);
+        return tree().createReadyCohort(id, mod, participatingShardNames);
     }
 }
