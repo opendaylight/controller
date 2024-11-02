@@ -12,49 +12,162 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
+import com.google.common.base.VerifyException;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
 import java.util.Optional;
 import java.util.SortedSet;
 import java.util.concurrent.CompletionStage;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidateTip;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeTip;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 // Non-sealed for mocking
 @VisibleForTesting
 public abstract class CommitCohort {
-    public enum State {
-        READY,
-        CAN_COMMIT_PENDING,
-        CAN_COMMIT_COMPLETE,
-        PRE_COMMIT_PENDING,
-        PRE_COMMIT_COMPLETE,
-        COMMIT_PENDING,
 
-        ABORTED,
-        COMMITTED,
-        FAILED,
+    sealed interface State {
+        // Nothing else
     }
+
+    @NonNullByDefault
+    record Ready(DataTreeModification modification, CompositeDataTreeCohort userCohorts) implements State {
+        Ready {
+            requireNonNull(modification);
+            requireNonNull(userCohorts);
+        }
+
+        CanCommitPending toCanCommitPending(final FutureCallback<Empty> callback) {
+            return new CanCommitPending(modification, userCohorts, callback);
+        }
+
+        @Override
+        public String toString() {
+            return Ready.class.getSimpleName();
+        }
+    }
+
+    @NonNullByDefault
+    record CanCommitPending(DataTreeModification modification,
+            CompositeDataTreeCohort userCohorts,
+            FutureCallback<Empty> callback) implements State {
+        CanCommitPending {
+            requireNonNull(modification);
+            requireNonNull(userCohorts);
+            requireNonNull(callback);
+        }
+
+        CanCommitComplete toCanCommitComplete(final DataTreeTip tip) {
+            return new CanCommitComplete(modification, userCohorts, tip);
+        }
+
+        @Override
+        public String toString() {
+            return CanCommitPending.class.getSimpleName();
+        }
+    }
+
+    @NonNullByDefault
+    record CanCommitComplete(
+            DataTreeModification modification,
+            CompositeDataTreeCohort userCohorts,
+            DataTreeTip tip) implements State {
+        CanCommitComplete {
+            requireNonNull(modification);
+            requireNonNull(userCohorts);
+            requireNonNull(tip);
+        }
+
+        CanCommitComplete rebase(final DataTreeTip newTip) {
+            return new CanCommitComplete(modification, userCohorts, newTip);
+        }
+
+        PreCommitPending toPreCommitPending(final FutureCallback<DataTreeCandidate> callback) {
+            return new PreCommitPending(modification, userCohorts, tip, callback);
+        }
+
+        @Override
+        public String toString() {
+            return CanCommitComplete.class.getSimpleName();
+        }
+    }
+
+    @NonNullByDefault
+    record PreCommitPending(
+            DataTreeModification modification,
+            CompositeDataTreeCohort userCohorts,
+            DataTreeTip tip,
+            FutureCallback<DataTreeCandidate> callback) implements State {
+        PreCommitPending {
+            requireNonNull(modification);
+            requireNonNull(userCohorts);
+            requireNonNull(tip);
+            requireNonNull(callback);
+        }
+
+        @Override
+        public String toString() {
+            return PreCommitPending.class.getSimpleName();
+        }
+    }
+
+    @NonNullByDefault
+    record PreCommitComplete(
+            DataTreeModification modification) implements State {
+        PreCommitComplete {
+            requireNonNull(modification);
+        }
+
+        @Override
+        public String toString() {
+            return PreCommitComplete.class.getSimpleName();
+        }
+    }
+
+    record CommitPending(DataTreeCandidate candidate) implements State {
+        CommitPending {
+            requireNonNull(candidate);
+        }
+
+        @Override
+        public String toString() {
+            return CommitPending.class.getSimpleName();
+        }
+    }
+
+    @NonNullByDefault
+    record Failing(Exception cause) implements State {
+        Failing {
+            requireNonNull(cause);
+        }
+    }
+
+    @NonNullByDefault
+    record Failed() implements State {
+        // FIXME: cause?
+    }
+
+//    public enum State {
+//        ABORTED,
+//        COMMITTED,
+//    }
 
     private static final Logger LOG = LoggerFactory.getLogger(CommitCohort.class);
 
-    private final DataTreeModification modification;
     private final ShardDataTree dataTree;
     private final @NonNull TransactionIdentifier transactionId;
-    private final CompositeDataTreeCohort userCohorts;
     private final @Nullable SortedSet<String> participatingShardNames;
 
-    private State state = State.READY;
-    private DataTreeCandidateTip candidate;
+    private State state;
     private FutureCallback<?> callback;
-    private Exception nextFailure;
     private long lastAccess;
 
     CommitCohort(final ShardDataTree dataTree, final ReadWriteShardDataTreeTransaction transaction,
@@ -66,20 +179,16 @@ public abstract class CommitCohort {
             final TransactionIdentifier transactionId, final CompositeDataTreeCohort userCohorts,
             final Optional<SortedSet<String>> participatingShardNames) {
         this.dataTree = requireNonNull(dataTree);
-        this.modification = requireNonNull(modification);
         this.transactionId = requireNonNull(transactionId);
-        this.userCohorts = requireNonNull(userCohorts);
         this.participatingShardNames = requireNonNull(participatingShardNames).orElse(null);
+        state = new Ready(modification, userCohorts);
     }
 
-    CommitCohort(final ShardDataTree dataTree, final DataTreeModification modification,
-            final TransactionIdentifier transactionId, final Exception nextFailure) {
+    CommitCohort(final ShardDataTree dataTree, final TransactionIdentifier transactionId, final Exception nextFailure) {
         this.dataTree = requireNonNull(dataTree);
-        this.modification = requireNonNull(modification);
         this.transactionId = requireNonNull(transactionId);
-        userCohorts = null;
         participatingShardNames = null;
-        this.nextFailure = requireNonNull(nextFailure);
+        state = new Failing(nextFailure);
     }
 
     final @NonNull TransactionIdentifier transactionId() {
@@ -99,22 +208,11 @@ public abstract class CommitCohort {
     }
 
     public final boolean isFailed() {
-        return state == State.FAILED || nextFailure != null;
-    }
-
-    // FIXME: This leaks internal state generated in preCommit,
-    // should be result of canCommit
-    final DataTreeCandidateTip getCandidate() {
-        return candidate;
-    }
-
-    final void setNewCandidate(final DataTreeCandidateTip dataTreeCandidate) {
-        checkState(State.PRE_COMMIT_COMPLETE);
-        candidate = verifyNotNull(dataTreeCandidate);
-    }
-
-    final DataTreeModification getDataTreeModification() {
-        return modification;
+        return switch (state) {
+            case Failing failing -> true;
+            case Failed failed -> true;
+            default -> false;
+        };
     }
 
     final Optional<SortedSet<String>> getParticipatingShardNames() {
@@ -123,24 +221,31 @@ public abstract class CommitCohort {
 
     // FIXME: Should return rebased DataTreeCandidateTip
     @VisibleForTesting
-    public final void canCommit(final FutureCallback<Empty> newCallback) {
-        if (state == State.CAN_COMMIT_PENDING) {
-            return;
-        }
-
-        checkState(State.READY);
-        callback = requireNonNull(newCallback);
-        state = State.CAN_COMMIT_PENDING;
-
-        if (nextFailure == null) {
-            dataTree.startCanCommit(this);
-        } else {
-            failedCanCommit(nextFailure);
+    public final void canCommit(final FutureCallback<Empty> callback) {
+        switch (state) {
+            case CanCommitPending pending -> dataTree.startCanCommit(this);
+            case Ready ready -> {
+                state = ready.toCanCommitPending(callback);
+                dataTree.startCanCommit(this);
+            }
+            case Failing(var cause) -> {
+                state = new Failed();
+                callback.onFailure(cause);
+            }
+            default -> {
+                throw new IllegalStateException("Transaction %s in state %s cannot start can-commit".formatted(
+                    transactionId, state));
+            }
         }
     }
 
-    final void successfulCanCommit() {
-        switchState(State.CAN_COMMIT_COMPLETE).onSuccess(Empty.value());
+    final void setState(final State expected, final State next) {
+        if (state == expected) {
+            state = requireNonNull(next);
+        } else {
+            throw new VerifyException(
+                "Unexpected state " + state + " when transitioning from " + expected + " to " + next);
+        }
     }
 
     final void failedCanCommit(final Exception cause) {
@@ -149,15 +254,22 @@ public abstract class CommitCohort {
     }
 
     @VisibleForTesting
-    public final void preCommit(final FutureCallback<DataTreeCandidate> newCallback) {
-        checkState(State.CAN_COMMIT_COMPLETE);
-        callback = requireNonNull(newCallback);
-        state = State.PRE_COMMIT_PENDING;
-
-        if (nextFailure == null) {
-            dataTree.startPreCommit(this);
-        } else {
-            failedPreCommit(nextFailure);
+    public final void preCommit(final FutureCallback<DataTreeCandidate> callback) {
+        switch (state) {
+            case CanCommitComplete canCommit -> {
+                state = canCommit.toPreCommitPending(callback);
+                dataTree.startPreCommit(this);
+            }
+            case Failing(var cause) -> {
+                state = new Failed();
+                userCohorts.abort();
+                dataTree.getStats().incrementFailedTransactionsCount();
+                callback.onFailure(cause);
+            }
+            default -> {
+                throw new IllegalStateException("Transaction %s in state %s cannot start pre-commit".formatted(
+                    transactionId, state));
+            }
         }
     }
 
