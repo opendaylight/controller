@@ -13,7 +13,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.UnsignedLong;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.SortedSet;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
@@ -83,7 +82,7 @@ final class StandaloneFrontendHistory extends AbstractFrontendHistory {
 
     @Override
     CommitCohort createReadyCohort(final TransactionIdentifier id, final DataTreeModification mod,
-            final Optional<SortedSet<String>> participatingShardNames) {
+            final SortedSet<String> participatingShardNames) {
         return tree.createReadyCohort(id, mod, participatingShardNames);
     }
 }

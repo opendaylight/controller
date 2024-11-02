@@ -745,7 +745,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     @Override
     final SimpleCommitCohort finishTransaction(final ReadWriteShardDataTreeTransaction transaction,
-            final Optional<SortedSet<String>> participatingShardNames) {
+            final SortedSet<String> participatingShardNames) {
         final var userCohorts = finishTransaction(transaction);
         final var cohort = new SimpleCommitCohort(this, transaction, userCohorts, participatingShardNames);
         enqueueReadyTransaction(cohort);
@@ -1172,9 +1172,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     @Override
     final SimpleCommitCohort createReadyCohort(final TransactionIdentifier txId, final DataTreeModification mod,
-            final Optional<SortedSet<String>> participatingShardNames) {
-        final var cohort = new SimpleCommitCohort(this, mod, txId, newUserCohorts(txId),
-            participatingShardNames);
+            final SortedSet<String> participatingShardNames) {
+        final var cohort = new SimpleCommitCohort(this, mod, txId, newUserCohorts(txId), participatingShardNames);
         enqueueReadyTransaction(cohort);
         return cohort;
     }

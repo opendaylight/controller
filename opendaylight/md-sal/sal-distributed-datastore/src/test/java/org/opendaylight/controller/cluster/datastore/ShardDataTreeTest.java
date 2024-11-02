@@ -126,7 +126,7 @@ public class ShardDataTreeTest extends AbstractTest {
             snapshot.write(PeopleModel.BASE_PATH, PeopleModel.create());
         }
 
-        final CommitCohort cohort = shardDataTree.finishTransaction(transaction, Optional.empty());
+        final CommitCohort cohort = shardDataTree.finishTransaction(transaction, null);
 
         immediateCanCommit(cohort);
         immediatePreCommit(cohort);
@@ -590,11 +590,10 @@ public class ShardDataTreeTest extends AbstractTest {
     }
 
     private CommitCohort newShardDataTreeCohort(final DataTreeOperation operation) {
-        final ReadWriteShardDataTreeTransaction transaction =
-                shardDataTree.newReadWriteTransaction(nextTransactionId());
-        final DataTreeModification snapshot = transaction.getSnapshot();
+        final var transaction = shardDataTree.newReadWriteTransaction(nextTransactionId());
+        final var snapshot = transaction.getSnapshot();
         operation.execute(snapshot);
-        return shardDataTree.finishTransaction(transaction, Optional.empty());
+        return shardDataTree.finishTransaction(transaction, null);
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -646,15 +645,14 @@ public class ShardDataTreeTest extends AbstractTest {
 
     private static DataTreeCandidate doTransaction(final ShardDataTree shardDataTree,
             final DataTreeOperation operation) {
-        final ReadWriteShardDataTreeTransaction transaction =
-                shardDataTree.newReadWriteTransaction(nextTransactionId());
-        final DataTreeModification snapshot = transaction.getSnapshot();
+        final var transaction = shardDataTree.newReadWriteTransaction(nextTransactionId());
+        final var snapshot = transaction.getSnapshot();
         operation.execute(snapshot);
-        final CommitCohort cohort = shardDataTree.finishTransaction(transaction, Optional.empty());
+        final var cohort = shardDataTree.finishTransaction(transaction, null);
 
         immediateCanCommit(cohort);
         immediatePreCommit(cohort);
-        final DataTreeCandidate candidate = cohort.getCandidate();
+        final var candidate = cohort.getCandidate();
         immediateCommit(cohort);
 
         return candidate;
@@ -662,17 +660,16 @@ public class ShardDataTreeTest extends AbstractTest {
 
     private static DataTreeCandidate applyCandidates(final ShardDataTree shardDataTree,
             final List<DataTreeCandidate> candidates) {
-        final ReadWriteShardDataTreeTransaction transaction =
-                shardDataTree.newReadWriteTransaction(nextTransactionId());
-        final DataTreeModification snapshot = transaction.getSnapshot();
-        for (final DataTreeCandidate candidateTip : candidates) {
+        final var transaction = shardDataTree.newReadWriteTransaction(nextTransactionId());
+        final var snapshot = transaction.getSnapshot();
+        for (var candidateTip : candidates) {
             DataTreeCandidates.applyToModification(snapshot, candidateTip);
         }
-        final CommitCohort cohort = shardDataTree.finishTransaction(transaction, Optional.empty());
+        final var cohort = shardDataTree.finishTransaction(transaction, null);
 
         immediateCanCommit(cohort);
         immediatePreCommit(cohort);
-        final DataTreeCandidate candidate = cohort.getCandidate();
+        final var candidate = cohort.getCandidate();
         immediateCommit(cohort);
 
         return candidate;
