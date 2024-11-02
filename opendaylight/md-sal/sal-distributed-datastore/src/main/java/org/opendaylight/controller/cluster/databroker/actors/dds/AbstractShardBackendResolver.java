@@ -18,6 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
+import org.apache.pekko.dispatch.OnComplete;
 import org.apache.pekko.pattern.Patterns;
 import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.eclipse.jdt.annotation.NonNull;
@@ -38,7 +39,6 @@ import org.opendaylight.yangtools.concepts.AbstractRegistration;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.compat.java8.FutureConverters;
 
 /**
  * {@link BackendInfoResolver} implementation for static shard configuration based on ShardManager. Each string-named
@@ -135,27 +135,30 @@ abstract sealed class AbstractShardBackendResolver extends BackendInfoResolver<S
         LOG.debug("Resolving cookie {} to shard {}", cookie, shardName);
 
         final var future = new CompletableFuture<ShardBackendInfo>();
-        FutureConverters.toJava(actorUtils.findPrimaryShardAsync(shardName)).whenComplete((info, failure) -> {
-            if (failure == null) {
-                connectShard(shardName, cookie, info, future);
-                return;
-            }
-
-            LOG.debug("Shard {} failed to resolve", shardName, failure);
-            switch (failure) {
-                case NoShardLeaderException ex -> future.completeExceptionally(wrap("Shard has no current leader", ex));
-                case NotInitializedException ex -> {
-                    // FIXME: this actually is an exception we can retry on
-                    LOG.info("Shard {} has not initialized yet", shardName);
-                    future.completeExceptionally(ex);
+        actorUtils.findPrimaryShardAsync(shardName).onComplete(new OnComplete<>() {
+            @Override
+            public void onComplete(final Throwable failure, final PrimaryShardInfo success) throws Throwable {
+                if (failure != null) {
+                    LOG.debug("Shard {} failed to resolve", shardName, failure);
+                    switch (failure) {
+                        case NoShardLeaderException ex -> future.completeExceptionally(
+                            wrap("Shard has no current leader", ex));
+                        case NotInitializedException ex -> {
+                            // FIXME: this actually is an exception we can retry on
+                            LOG.info("Shard {} has not initialized yet", shardName);
+                            future.completeExceptionally(ex);
+                        }
+                        case PrimaryNotFoundException ex -> {
+                            LOG.info("Failed to find primary for shard {}", shardName);
+                            future.completeExceptionally(ex);
+                        }
+                        default -> future.completeExceptionally(failure);
+                    }
+                } else {
+                    connectShard(shardName, cookie, success, future);
                 }
-                case PrimaryNotFoundException ex -> {
-                    LOG.info("Failed to find primary for shard {}", shardName);
-                    future.completeExceptionally(ex);
-                }
-                default -> future.completeExceptionally(failure);
             }
-        });
+        }, actorUtils.getClientDispatcher());
 
         return new ResolvingBackendInfo(future);
     }

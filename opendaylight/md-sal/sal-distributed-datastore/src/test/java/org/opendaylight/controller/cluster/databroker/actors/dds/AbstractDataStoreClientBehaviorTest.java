@@ -18,9 +18,9 @@ import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtil
 import java.util.List;
 import java.util.Optional;
 import org.apache.pekko.actor.ActorRef;
-import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.actor.Status;
+import org.apache.pekko.dispatch.ExecutionContexts;
 import org.apache.pekko.testkit.TestProbe;
 import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.After;
@@ -39,7 +39,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.CursorAwareDataTreeModification;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeSnapshot;
-import scala.concurrent.Promise;
+import scala.concurrent.Future;
 
 public abstract class AbstractDataStoreClientBehaviorTest {
 
@@ -169,12 +169,10 @@ public abstract class AbstractDataStoreClientBehaviorTest {
     }
 
     private static ActorUtils createActorContextMock(final ActorSystem system, final ActorRef actor) {
-        final ActorUtils mock = mock(ActorUtils.class);
-        final Promise<PrimaryShardInfo> promise = new scala.concurrent.impl.Promise.DefaultPromise<>();
-        final ActorSelection selection = system.actorSelection(actor.path());
-        final PrimaryShardInfo shardInfo = new PrimaryShardInfo(selection, (short) 0);
-        promise.success(shardInfo);
-        doReturn(promise.future()).when(mock).findPrimaryShardAsync(SHARD);
-        return mock;
+        final var actorUtils = mock(ActorUtils.class);
+        doReturn(ExecutionContexts.global()).when(actorUtils).getClientDispatcher();
+        doReturn(Future.successful(new PrimaryShardInfo(system.actorSelection(actor.path()), (short) 0)))
+            .when(actorUtils).findPrimaryShardAsync(SHARD);
+        return actorUtils;
     }
 }

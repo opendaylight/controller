@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.actor.Status;
+import org.apache.pekko.dispatch.ExecutionContexts;
 import org.apache.pekko.testkit.TestProbe;
 import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.jupiter.api.AfterEach;
@@ -49,7 +50,6 @@ import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
 import scala.concurrent.Future;
-import scala.concurrent.Promise;
 
 @ExtendWith(MockitoExtension.class)
 class ModuleShardBackendResolverTest {
@@ -82,8 +82,7 @@ class ModuleShardBackendResolverTest {
         system = ActorSystem.apply();
         contextProbe = new TestProbe(system, "context");
         shardManagerProbe = new TestProbe(system, "ShardManager");
-        future = Promise.successful(new PrimaryShardInfo(system.actorSelection(contextProbe.ref().path()), (short) 0))
-            .future();
+        future = Future.successful(new PrimaryShardInfo(system.actorSelection(contextProbe.ref().path()), (short) 0));
         doReturn(shardManagerProbe.ref()).when(actorUtils).getShardManager();
         moduleShardBackendResolver = new ModuleShardBackendResolver(CLIENT_ID, actorUtils);
     }
@@ -116,6 +115,7 @@ class ModuleShardBackendResolverTest {
     @Test
     void testGetBackendInfo() throws Exception {
         doReturn(future).when(actorUtils).findPrimaryShardAsync(DefaultShardStrategy.DEFAULT_SHARD);
+        doReturn(ExecutionContexts.global()).when(actorUtils).getClientDispatcher();
 
         final var initial = moduleShardBackendResolver.getBackendInfo(0L);
         contextProbe.expectMsgClass(ConnectClientRequest.class);
@@ -133,6 +133,7 @@ class ModuleShardBackendResolverTest {
     @Test
     void testGetBackendInfoFail() throws Exception {
         doReturn(future).when(actorUtils).findPrimaryShardAsync(DefaultShardStrategy.DEFAULT_SHARD);
+        doReturn(ExecutionContexts.global()).when(actorUtils).getClientDispatcher();
 
         final var initial = moduleShardBackendResolver.getBackendInfo(0L);
         final var req = contextProbe.expectMsgClass(ConnectClientRequest.class);
@@ -149,6 +150,7 @@ class ModuleShardBackendResolverTest {
     void testRefreshBackendInfo() throws Exception {
         doReturn(future).when(actorUtils).findPrimaryShardAsync(DefaultShardStrategy.DEFAULT_SHARD);
         doReturn(new PrimaryShardInfoFutureCache()).when(actorUtils).getPrimaryShardInfoCache();
+        doReturn(ExecutionContexts.global()).when(actorUtils).getClientDispatcher();
 
         final var backendInfo = moduleShardBackendResolver.getBackendInfo(0L);
         // handle first connect

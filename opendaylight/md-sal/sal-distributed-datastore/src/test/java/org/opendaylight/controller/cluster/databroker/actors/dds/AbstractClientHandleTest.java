@@ -20,8 +20,8 @@ import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtil
 import java.util.List;
 import java.util.Map;
 import org.apache.pekko.actor.ActorRef;
-import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.dispatch.ExecutionContexts;
 import org.apache.pekko.testkit.TestProbe;
 import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.After;
@@ -52,7 +52,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeSnapshot;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
-import scala.concurrent.Promise;
+import scala.concurrent.Future;
 
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
 public abstract class AbstractClientHandleTest<T extends AbstractClientHandle<AbstractProxyTransaction>> {
@@ -198,18 +198,16 @@ public abstract class AbstractClientHandleTest<T extends AbstractClientHandle<Ab
     }
 
     private static ActorUtils createActorContextMock(final ActorSystem system, final ActorRef actor) {
-        final ActorUtils mock = mock(ActorUtils.class);
-        final Promise<PrimaryShardInfo> promise = new scala.concurrent.impl.Promise.DefaultPromise<>();
-        final ActorSelection selection = system.actorSelection(actor.path());
-        final PrimaryShardInfo shardInfo = new PrimaryShardInfo(selection, (short) 0);
-        promise.success(shardInfo);
-        doReturn(promise.future()).when(mock).findPrimaryShardAsync(any());
+        final var actorUtils = mock(ActorUtils.class);
+        doReturn(Future.successful(new PrimaryShardInfo(system.actorSelection(actor.path()), (short) 0)))
+            .when(actorUtils).findPrimaryShardAsync(any());
+        doReturn(ExecutionContexts.global()).when(actorUtils).getClientDispatcher();
 
-        final EffectiveModelContext context = mock(EffectiveModelContext.class);
+        final var context = mock(EffectiveModelContext.class);
         lenient().doCallRealMethod().when(context).getQName();
-        lenient().doReturn(context).when(mock).getSchemaContext();
-        lenient().doReturn(DatastoreContext.newBuilder().build()).when(mock).getDatastoreContext();
+        lenient().doReturn(context).when(actorUtils).getSchemaContext();
+        lenient().doReturn(DatastoreContext.newBuilder().build()).when(actorUtils).getDatastoreContext();
 
-        return mock;
+        return actorUtils;
     }
 }

@@ -22,11 +22,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.opendaylight.controller.cluster.access.client.AbstractClientConnection;
 import org.opendaylight.controller.cluster.access.client.AccessClientUtil;
 import org.opendaylight.controller.cluster.access.client.ClientActorContext;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class SingleClientHistoryTest extends AbstractClientHistoryTest<SingleClientHistory> {
@@ -42,11 +40,11 @@ public class SingleClientHistoryTest extends AbstractClientHistoryTest<SingleCli
     public void setUp() {
         system = ActorSystem.apply();
 
-        final TestProbe clientContextProbe = new TestProbe(system, "client");
-        final TestProbe actorContextProbe = new TestProbe(system, "actor-context");
+        final var clientContextProbe = new TestProbe(system, "client");
+        final var actorContextProbe = new TestProbe(system, "actor-context");
         clientActorContext = AccessClientUtil.createClientActorContext(
                 system, clientContextProbe.ref(), TestUtils.CLIENT_ID, PERSISTENCE_ID);
-        final ActorUtils actorUtilsMock = createActorUtilsMock(system, actorContextProbe.ref());
+        final var actorUtilsMock = createActorUtilsMock(system, actorContextProbe.ref());
         behavior = new SimpleDataStoreClientBehavior(clientActorContext, actorUtilsMock, SHARD_NAME);
 
         object = new SingleClientHistory(behavior, HISTORY_ID);
@@ -77,8 +75,8 @@ public class SingleClientHistoryTest extends AbstractClientHistoryTest<SingleCli
     @Override
     @Test
     public void testCreateHistoryProxy() {
-        final AbstractClientConnection<ShardBackendInfo> clientConnection = behavior.getConnection(0L);
-        final ProxyHistory historyProxy = object().createHistoryProxy(HISTORY_ID, clientConnection);
+        final var clientConnection = behavior.getConnection(0L);
+        final var historyProxy = object().createHistoryProxy(HISTORY_ID, clientConnection);
         assertEquals(object().getIdentifier(), historyProxy.getIdentifier());
     }
 
