@@ -45,7 +45,6 @@ public abstract class CommitCohort {
     private static final Logger LOG = LoggerFactory.getLogger(CommitCohort.class);
 
     private final DataTreeModification modification;
-    private final ShardDataTree dataTree;
     private final @NonNull TransactionIdentifier transactionId;
     private final CompositeDataTreeCohort userCohorts;
     private final @Nullable SortedSet<String> participatingShardNames;
@@ -56,24 +55,21 @@ public abstract class CommitCohort {
     private Exception nextFailure;
     private long lastAccess;
 
-    CommitCohort(final ShardDataTree dataTree, final ReadWriteShardDataTreeTransaction transaction,
-            final CompositeDataTreeCohort userCohorts, final Optional<SortedSet<String>> participatingShardNames) {
-        this(dataTree, transaction.getSnapshot(), transaction.getIdentifier(), userCohorts, participatingShardNames);
+    CommitCohort(final ReadWriteShardDataTreeTransaction transaction, final CompositeDataTreeCohort userCohorts,
+            final Optional<SortedSet<String>> participatingShardNames) {
+        this(transaction.getSnapshot(), transaction.getIdentifier(), userCohorts, participatingShardNames);
     }
 
-    CommitCohort(final ShardDataTree dataTree, final DataTreeModification modification,
-            final TransactionIdentifier transactionId, final CompositeDataTreeCohort userCohorts,
-            final Optional<SortedSet<String>> participatingShardNames) {
-        this.dataTree = requireNonNull(dataTree);
+    CommitCohort(final DataTreeModification modification, final TransactionIdentifier transactionId,
+            final CompositeDataTreeCohort userCohorts, final Optional<SortedSet<String>> participatingShardNames) {
         this.modification = requireNonNull(modification);
         this.transactionId = requireNonNull(transactionId);
         this.userCohorts = requireNonNull(userCohorts);
         this.participatingShardNames = requireNonNull(participatingShardNames).orElse(null);
     }
 
-    CommitCohort(final ShardDataTree dataTree, final DataTreeModification modification,
-            final TransactionIdentifier transactionId, final Exception nextFailure) {
-        this.dataTree = requireNonNull(dataTree);
+    CommitCohort(final DataTreeModification modification, final TransactionIdentifier transactionId,
+            final Exception nextFailure) {
         this.modification = requireNonNull(modification);
         this.transactionId = requireNonNull(transactionId);
         userCohorts = null;
@@ -122,7 +118,7 @@ public abstract class CommitCohort {
 
     // FIXME: Should return rebased DataTreeCandidateTip
     @VisibleForTesting
-    public final void canCommit(final FutureCallback<Empty> newCallback) {
+    public final void canCommit(final ShardDataTree tree, final FutureCallback<Empty> newCallback) {
         if (state == State.CAN_COMMIT_PENDING) {
             return;
         }
@@ -132,9 +128,9 @@ public abstract class CommitCohort {
         state = State.CAN_COMMIT_PENDING;
 
         if (nextFailure == null) {
-            dataTree.startCanCommit(this);
+            tree.startCanCommit(this);
         } else {
-            failedCanCommit(nextFailure);
+            failedCanCommit(tree.getStats(), nextFailure);
         }
     }
 
@@ -142,21 +138,21 @@ public abstract class CommitCohort {
         switchState(State.CAN_COMMIT_COMPLETE).onSuccess(Empty.value());
     }
 
-    final void failedCanCommit(final Exception cause) {
-        dataTree.getStats().incrementFailedTransactionsCount();
+    final void failedCanCommit(final ShardStats stats, final Exception cause) {
+        stats.incrementFailedTransactionsCount();
         switchState(State.FAILED).onFailure(cause);
     }
 
     @VisibleForTesting
-    public final void preCommit(final FutureCallback<DataTreeCandidate> newCallback) {
+    public final void preCommit(final ShardDataTree tree, final FutureCallback<DataTreeCandidate> newCallback) {
         checkState(State.CAN_COMMIT_COMPLETE);
         callback = requireNonNull(newCallback);
         state = State.PRE_COMMIT_PENDING;
 
         if (nextFailure == null) {
-            dataTree.startPreCommit(this);
+            tree.startPreCommit(this);
         } else {
-            failedPreCommit(nextFailure);
+            failedPreCommit(tree.getStats(), nextFailure);
         }
     }
 
@@ -166,7 +162,7 @@ public abstract class CommitCohort {
         switchState(State.PRE_COMMIT_COMPLETE).onSuccess(dataTreeCandidate);
     }
 
-    final void failedPreCommit(final Throwable cause) {
+    final void failedPreCommit(final ShardStats stats, final Throwable cause) {
         if (LOG.isTraceEnabled()) {
             LOG.trace("Transaction {} failed to prepare", modification, cause);
         } else {
@@ -174,7 +170,7 @@ public abstract class CommitCohort {
         }
 
         userCohorts.abort();
-        dataTree.getStats().incrementFailedTransactionsCount();
+        stats.incrementFailedTransactionsCount();
         switchState(State.FAILED).onFailure(cause);
     }
 
@@ -236,29 +232,28 @@ public abstract class CommitCohort {
         }
     }
 
-    void successfulCommit(final UnsignedLong journalIndex, final Runnable onComplete) {
+    void successfulCommit(final ShardStats stats, final UnsignedLong journalIndex, final Runnable onComplete) {
         final var userCommit = userCohorts.commit();
         if (userCommit != null) {
             userCommit.whenComplete((noop, failure) -> {
                 if (failure != null) {
                     LOG.error("User cohorts failed to commit", failure);
                 }
-                finishSuccessfulCommit(journalIndex, onComplete);
+                finishSuccessfulCommit(stats, journalIndex, onComplete);
             });
         } else {
-            finishSuccessfulCommit(journalIndex, onComplete);
+            finishSuccessfulCommit(stats, journalIndex, onComplete);
         }
     }
 
-    private void finishSuccessfulCommit(final UnsignedLong journalIndex, final Runnable onComplete) {
-        final var stats = dataTree.getStats();
+    private void finishSuccessfulCommit(final ShardStats stats, final UnsignedLong journalIndex,
+            final Runnable onComplete) {
         stats.incrementCommittedTransactionCount();
-
         switchState(State.COMMITTED).onSuccess(journalIndex);
         onComplete.run();
     }
 
-    final void failedCommit(final Exception cause) {
+    final void failedCommit(final ShardStats stats, final Exception cause) {
         if (LOG.isTraceEnabled()) {
             LOG.trace("Transaction {} failed to commit", modification, cause);
         } else {
@@ -266,20 +261,20 @@ public abstract class CommitCohort {
         }
 
         userCohorts.abort();
-        dataTree.getStats().incrementFailedTransactionsCount();
+        stats.incrementFailedTransactionsCount();
         switchState(State.FAILED).onFailure(cause);
     }
 
     @VisibleForTesting
-    public void commit(final FutureCallback<UnsignedLong> newCallback) {
+    public void commit(final ShardDataTree tree, final FutureCallback<UnsignedLong> newCallback) {
         checkState(State.PRE_COMMIT_COMPLETE);
         callback = requireNonNull(newCallback);
         state = State.COMMIT_PENDING;
 
         if (nextFailure == null) {
-            dataTree.startCommit(this, candidate);
+            tree.startCommit(this, candidate);
         } else {
-            failedCommit(nextFailure);
+            failedCommit(tree.getStats(), nextFailure);
         }
     }
 
