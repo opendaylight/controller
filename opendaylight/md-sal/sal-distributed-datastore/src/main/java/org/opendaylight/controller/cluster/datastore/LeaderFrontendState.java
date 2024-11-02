@@ -30,7 +30,6 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
 import org.opendaylight.controller.cluster.access.concepts.RequestEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.UnsupportedRequestException;
-import org.opendaylight.controller.cluster.datastore.CommitCohort.State;
 import org.opendaylight.controller.cluster.datastore.utils.MutableUnsignedLongSet;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.slf4j.Logger;
@@ -294,19 +293,7 @@ abstract sealed class LeaderFrontendState implements Identifiable<ClientIdentifi
 
     void retire() {
         // Hunt down any transactions associated with this frontend
-        final var it = tree.cohortIterator();
-        while (it.hasNext()) {
-            final var cohort = it.next();
-            final var transactionId = cohort.transactionId();
-            if (clientId.equals(transactionId.getHistoryId().getClientId())) {
-                if (cohort.getState() != State.COMMIT_PENDING) {
-                    LOG.debug("{}: Retiring transaction {}", persistenceId, transactionId);
-                    it.remove();
-                } else {
-                    LOG.debug("{}: Transaction {} already committing, not retiring it", persistenceId, transactionId);
-                }
-            }
-        }
+        tree.retire(clientId);
     }
 
     @Override
