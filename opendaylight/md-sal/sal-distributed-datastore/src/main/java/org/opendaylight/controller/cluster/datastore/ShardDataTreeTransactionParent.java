@@ -12,6 +12,7 @@ import java.util.SortedSet;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 
+// Non-sealed for mocking
 abstract class ShardDataTreeTransactionParent {
 
     abstract void abortFromTransactionActor(AbstractShardDataTreeTransaction<?> transaction);
