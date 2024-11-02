@@ -22,17 +22,16 @@ final class ChainedCommitCohort extends CommitCohort {
     private final ReadWriteShardDataTreeTransaction transaction;
     private final ShardDataTreeTransactionChain chain;
 
-    ChainedCommitCohort(final ShardDataTree dataTree, final ShardDataTreeTransactionChain chain,
-            final ReadWriteShardDataTreeTransaction transaction, final CompositeDataTreeCohort userCohorts,
-            final Optional<SortedSet<String>> participatingShardNames) {
-        super(dataTree, transaction, userCohorts, participatingShardNames);
+    ChainedCommitCohort(final ShardDataTreeTransactionChain chain, final ReadWriteShardDataTreeTransaction transaction,
+            final CompositeDataTreeCohort userCohorts, final Optional<SortedSet<String>> participatingShardNames) {
+        super(transaction, userCohorts, participatingShardNames);
         this.transaction = requireNonNull(transaction);
         this.chain = requireNonNull(chain);
     }
 
     @Override
-    public void commit(final FutureCallback<UnsignedLong> callback) {
-        super.commit(new FutureCallback<>() {
+    public void commit(final ShardDataTree tree, final FutureCallback<UnsignedLong> callback) {
+        super.commit(tree, new FutureCallback<>() {
             @Override
             public void onSuccess(final UnsignedLong result) {
                 chain.clearTransaction(transaction);
