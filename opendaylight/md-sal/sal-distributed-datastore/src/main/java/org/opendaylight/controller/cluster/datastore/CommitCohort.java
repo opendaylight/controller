@@ -57,18 +57,18 @@ public abstract class CommitCohort {
     private long lastAccess;
 
     CommitCohort(final ShardDataTree dataTree, final ReadWriteShardDataTreeTransaction transaction,
-            final CompositeDataTreeCohort userCohorts, final Optional<SortedSet<String>> participatingShardNames) {
+            final CompositeDataTreeCohort userCohorts, final @Nullable SortedSet<String> participatingShardNames) {
         this(dataTree, transaction.getSnapshot(), transaction.getIdentifier(), userCohorts, participatingShardNames);
     }
 
     CommitCohort(final ShardDataTree dataTree, final DataTreeModification modification,
             final TransactionIdentifier transactionId, final CompositeDataTreeCohort userCohorts,
-            final Optional<SortedSet<String>> participatingShardNames) {
+            final @Nullable SortedSet<String> participatingShardNames) {
         this.dataTree = requireNonNull(dataTree);
         this.modification = requireNonNull(modification);
         this.transactionId = requireNonNull(transactionId);
         this.userCohorts = requireNonNull(userCohorts);
-        this.participatingShardNames = requireNonNull(participatingShardNames).orElse(null);
+        this.participatingShardNames = participatingShardNames;
     }
 
     CommitCohort(final ShardDataTree dataTree, final DataTreeModification modification,

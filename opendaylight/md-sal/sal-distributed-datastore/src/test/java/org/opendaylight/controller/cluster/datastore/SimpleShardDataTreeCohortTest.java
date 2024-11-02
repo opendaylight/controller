@@ -18,7 +18,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import org.junit.Before;
@@ -61,7 +60,7 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
         doReturn(stats).when(mockShardDataTree).getStats();
 
         cohort = new SimpleCommitCohort(mockShardDataTree, mockModification, nextTransactionId(), mockUserCohorts,
-            Optional.empty());
+            null);
     }
 
     @Test
