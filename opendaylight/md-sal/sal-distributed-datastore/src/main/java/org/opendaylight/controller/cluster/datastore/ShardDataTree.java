@@ -74,7 +74,6 @@ import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.concepts.Registration;
-import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion;
@@ -119,7 +118,10 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     private final Map<LocalHistoryIdentifier, ShardDataTreeTransactionChain> transactionChains = new HashMap<>();
     private final DataTreeCohortActorRegistry cohortRegistry = new DataTreeCohortActorRegistry();
-    private final Deque<CommitCohort> pendingTransactions = new ArrayDeque<>();
+
+    private final Deque<CommitCohort> readyTransactions = new ArrayDeque<>();
+    private final Deque<CommitCohort> pendingCanCommit = new ArrayDeque<>();
+    private final Deque<CommitCohort> pendingPreCommit = new ArrayDeque<>();
     private final Queue<CommitCohort> pendingCommits = new ArrayDeque<>();
     private final Queue<CommitCohort> pendingFinishCommits = new ArrayDeque<>();
 
@@ -233,7 +235,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     private boolean anyPendingTransactions() {
-        return !pendingTransactions.isEmpty() || !pendingCommits.isEmpty() || !pendingFinishCommits.isEmpty();
+        return !readyTransactions.isEmpty() || !pendingCanCommit.isEmpty() || !pendingPreCommit.isEmpty()
+            || !pendingCommits.isEmpty() || !pendingFinishCommits.isEmpty();
     }
 
     private void applySnapshot(final @NonNull ShardDataTreeSnapshot snapshot,
@@ -720,12 +723,13 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     final int getQueueSize() {
-        return pendingTransactions.size() + pendingCommits.size() + pendingFinishCommits.size();
+        return readyTransactions.size() + pendingCanCommit.size() + pendingPreCommit.size() + pendingCommits.size()
+            + pendingFinishCommits.size();
     }
 
     final void enqueueReadyTransaction(final @NonNull CommitCohort cohort) {
         cohort.setLastAccess(readTime());
-        pendingTransactions.add(cohort);
+        pendingCanCommit.add(cohort);
     }
 
     @Override
@@ -789,18 +793,24 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         for (var entry : pendingFinishCommits) {
             ret.add(entry);
         }
-
         for (var entry : pendingCommits) {
             ret.add(entry);
         }
-
-        for (var entry : pendingTransactions) {
+        for (var entry : pendingPreCommit) {
+            ret.add(entry);
+        }
+        for (var entry : pendingCanCommit) {
+            ret.add(entry);
+        }
+        for (var entry : readyTransactions) {
             ret.add(entry);
         }
 
         pendingFinishCommits.clear();
         pendingCommits.clear();
-        pendingTransactions.clear();
+        pendingPreCommit.clear();
+        pendingCanCommit.clear();
+        readyTransactions.clear();
         tip = dataTree;
         return ret;
     }
@@ -841,6 +851,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             tip.validate(modification);
             LOG.debug("{}: Transaction {} validated", logContext, cohort.transactionId());
             cohort.successfulCanCommit();
+
             return;
         } catch (ConflictingModificationAppliedException e) {
             LOG.warn("{}: Store Tx {}: Conflicting modification for path {}.", logContext, cohort.transactionId(),
@@ -863,7 +874,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         }
 
         // Failure path: propagate the failure, remove the transaction from the queue and loop to the next one
-        pendingTransactions.poll().failedCanCommit(cause);
+        cohort.failedCanCommit(cause);
     }
 
     private void processNextPending() {
@@ -1013,26 +1024,27 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             set -> set.headSet(shard.getShardName())).orElse(Collections.<String>emptyList());
     }
 
-    private void failPreCommit(final Throwable cause) {
-        pendingTransactions.poll().failedPreCommit(cause);
-        processNextPendingTransaction();
-    }
-
     // non-final for mocking
     @SuppressWarnings("checkstyle:IllegalCatch")
     void startPreCommit(final CommitCohort cohort) {
-        final var current = pendingTransactions.peek();
-        checkState(current != null, "Attempted to pre-commit of %s when no transactions pending", cohort);
+        final var start = pendingPreCommit.isEmpty();
+        pendingPreCommit.addLast(cohort);
+        if (start) {
+            doStartPreCommit(cohort);
+        } else {
+            LOG.debug("{}: deferring prepare of {}", logContext, cohort.transactionId());
+            return;
+        }
+    }
 
-        verify(cohort.equals(current), "Attempted to pre-commit %s while %s is pending", cohort, current);
-
-        final var currentId = current.transactionId();
-        LOG.debug("{}: Preparing transaction {}", logContext, currentId);
+    private void doStartPreCommit(final CommitCohort cohort) {
+        final var txId = cohort.transactionId();
+        LOG.debug("{}: Preparing transaction {}", logContext, txId);
 
         final DataTreeCandidateTip candidate;
         try {
             candidate = tip.prepare(cohort.getDataTreeModification());
-            LOG.debug("{}: Transaction {} candidate ready", logContext, currentId);
+            LOG.debug("{}: Transaction {} candidate ready", logContext, txId);
         } catch (DataValidationFailedException | RuntimeException e) {
             failPreCommit(e);
             return;
@@ -1040,20 +1052,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
         cohort.userPreCommit(candidate, new FutureCallback<>() {
             @Override
-            public void onSuccess(final Empty result) {
-                // Set the tip of the data tree.
-                tip = verifyNotNull(candidate);
-
-                current.setLastAccess(readTime());
-                // TODO: cross-reference removed and current
-                pendingTransactions.remove();
-                pendingCommits.add(current);
-
-                LOG.debug("{}: Transaction {} prepared", logContext, currentId);
-
-                cohort.successfulPreCommit(candidate);
-
-                processNextPendingTransaction();
+            public void onSuccess(final DataTreeCandidateTip result) {
+                onPreCommitComplete(result);
             }
 
             @Override
@@ -1063,8 +1063,37 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         });
     }
 
+    private void failPreCommit(final Throwable cause) {
+        // Note: preCommit() is sequential, hence the remove() is safe here
+        pendingPreCommit.remove().failedPreCommit(cause);
+        onPreCommitComplete();
+    }
+
+    private void onPreCommitComplete(final DataTreeCandidateTip candidate) {
+        final var cohort = pendingPreCommit.remove();
+        cohort.setLastAccess(readTime());
+
+        // Set the tip of the data tree.
+        tip = verifyNotNull(candidate);
+        pendingCommits.add(cohort);
+        LOG.debug("{}: Transaction {} prepared", logContext, cohort.transactionId());
+
+        cohort.successfulPreCommit(candidate);
+        onPreCommitComplete();
+    }
+
+    private void onPreCommitComplete() {
+        final var nextPreCommit = pendingPreCommit.peek();
+        if (nextPreCommit != null) {
+            // FIXME: permit for next transaction
+            doStartPreCommit(nextPreCommit);
+        } else {
+            processNextPendingTransaction();
+        }
+    }
+
     private void failCommit(final Exception cause) {
-        pendingFinishCommits.poll().failedCommit(cause);
+        pendingFinishCommits.remove().failedCommit(cause);
         processNextPending();
     }
 
@@ -1377,7 +1406,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     final void retire(final ClientIdentifier clientId) {
-        final var it = Iterables.concat(pendingFinishCommits, pendingCommits, pendingTransactions).iterator();
+        final var it = Iterables.concat(pendingFinishCommits, pendingCommits, pendingPreCommit, pendingCanCommit,
+            readyTransactions).iterator();
         while (it.hasNext()) {
             final var cohort = it.next();
             final var transactionId = cohort.transactionId();
