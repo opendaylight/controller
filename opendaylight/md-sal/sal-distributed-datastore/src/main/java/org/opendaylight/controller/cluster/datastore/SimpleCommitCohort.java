@@ -13,19 +13,18 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 
 final class SimpleCommitCohort extends CommitCohort {
-    SimpleCommitCohort(final ShardDataTree dataTree, final ReadWriteShardDataTreeTransaction transaction,
-            final CompositeDataTreeCohort userCohorts, final Optional<SortedSet<String>> participatingShardNames) {
-        super(dataTree, transaction, userCohorts, participatingShardNames);
-    }
-
-    SimpleCommitCohort(final ShardDataTree dataTree, final DataTreeModification modification,
-            final TransactionIdentifier transactionId, final CompositeDataTreeCohort userCohorts,
+    SimpleCommitCohort(final ReadWriteShardDataTreeTransaction transaction, final CompositeDataTreeCohort userCohorts,
             final Optional<SortedSet<String>> participatingShardNames) {
-        super(dataTree, modification, transactionId, userCohorts, participatingShardNames);
+        super(transaction, userCohorts, participatingShardNames);
     }
 
-    SimpleCommitCohort(final ShardDataTree dataTree, final DataTreeModification modification,
-            final TransactionIdentifier transactionId, final Exception nextFailure) {
-        super(dataTree, modification, transactionId, nextFailure);
+    SimpleCommitCohort(final DataTreeModification modification, final TransactionIdentifier transactionId,
+            final CompositeDataTreeCohort userCohorts, final Optional<SortedSet<String>> participatingShardNames) {
+        super(modification, transactionId, userCohorts, participatingShardNames);
+    }
+
+    SimpleCommitCohort(final DataTreeModification modification, final TransactionIdentifier transactionId,
+            final Exception nextFailure) {
+        super(modification, transactionId, nextFailure);
     }
 }
