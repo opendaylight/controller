@@ -7,25 +7,43 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static java.util.Objects.requireNonNull;
+
+import com.google.common.primitives.UnsignedLong;
+import com.google.common.util.concurrent.FutureCallback;
 import java.util.SortedSet;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 
 final class SimpleCommitCohort extends CommitCohort {
-    SimpleCommitCohort(final ShardDataTree dataTree, final ReadWriteShardDataTreeTransaction transaction,
-            final CompositeDataTreeCohort userCohorts, final @Nullable SortedSet<String> participatingShardNames) {
-        super(dataTree, transaction, userCohorts, participatingShardNames);
-    }
+    private final @NonNull TransactionIdentifier transactionId;
 
-    SimpleCommitCohort(final ShardDataTree dataTree, final DataTreeModification modification,
-            final TransactionIdentifier transactionId, final CompositeDataTreeCohort userCohorts,
+    SimpleCommitCohort(final ReadWriteShardDataTreeTransaction transaction,
             final @Nullable SortedSet<String> participatingShardNames) {
-        super(dataTree, modification, transactionId, userCohorts, participatingShardNames);
+        super(participatingShardNames);
+        transactionId = requireNonNull(transactionId);
     }
 
-    SimpleCommitCohort(final ShardDataTree dataTree, final DataTreeModification modification,
-            final TransactionIdentifier transactionId, final Exception nextFailure) {
-        super(dataTree, modification, transactionId, nextFailure);
+    SimpleCommitCohort(final DataTreeModification modification, final TransactionIdentifier transactionId,
+            final @Nullable SortedSet<String> participatingShardNames) {
+        super(modification, participatingShardNames);
+        this.transactionId = requireNonNull(transactionId);
+    }
+
+    SimpleCommitCohort(final TransactionIdentifier transactionId, final Exception nextFailure) {
+        super(nextFailure);
+        this.transactionId = requireNonNull(transactionId);
+    }
+
+    @Override
+    TransactionIdentifier transactionId() {
+        return transactionId;
+    }
+
+    @Override
+    FutureCallback<UnsignedLong> wrapCommitCallback(final FutureCallback<UnsignedLong> callback) {
+        return callback;
     }
 }

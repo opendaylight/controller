@@ -382,7 +382,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             case READY -> {
                 ready.stage = CommitStage.CAN_COMMIT_PENDING;
                 LOG.debug("{}: Transaction {} initiating canCommit", persistenceId(), getIdentifier());
-                ready.readyCohort.canCommit(new FutureCallback<>() {
+                tree().startCanCommit(ready.readyCohort, new FutureCallback<>() {
                     @Override
                     public void onSuccess(final Empty result) {
                         successfulCanCommit(envelope, now);

@@ -15,6 +15,8 @@ import static java.util.Objects.requireNonNullElse;
 import static org.apache.pekko.actor.ActorRef.noSender;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.MoreObjects;
+import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -44,11 +46,11 @@ import java.util.function.UnaryOperator;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.util.Timeout;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.controller.cluster.datastore.CommitCohort.State;
 import org.opendaylight.controller.cluster.datastore.DataTreeCohortActorRegistry.CohortRegistryCommand;
 import org.opendaylight.controller.cluster.datastore.node.utils.transformer.ReusableNormalizedNodePruner;
 import org.opendaylight.controller.cluster.datastore.persisted.AbortTransactionPayload;
@@ -106,6 +108,219 @@ import scala.concurrent.duration.FiniteDuration;
 // non-final for mocking
 @VisibleForTesting
 public class ShardDataTree extends ShardDataTreeTransactionParent {
+
+    @NonNullByDefault
+    sealed interface Commit {
+
+        CommitCohort cohort();
+
+        default TransactionIdentifier transactionId() {
+            return cohort().transactionId();
+        }
+
+        default Optional<SortedSet<String>> getParticipatingShardNames() {
+            return Optional.ofNullable(cohort().participatingShardNames());
+        }
+
+        default boolean isFailed() {
+            return false;
+        }
+
+        default long lastAccess() {
+            return cohort().lastAccess();
+        }
+
+        default void setLastAccess(final long lastAccess) {
+            cohort().setLastAccess(lastAccess);
+        }
+
+        default String toStringImpl() {
+            return toStringHelper().toString();
+        }
+
+        default ToStringHelper toStringHelper() {
+            return MoreObjects.toStringHelper(this).add("id", transactionId());
+        }
+    }
+
+    @NonNullByDefault
+    private record Ready(
+            CommitCohort cohort,
+            DataTreeModification modification,
+            CompositeDataTreeCohort userCohorts) implements Commit {
+        Ready {
+            requireNonNull(cohort);
+            requireNonNull(modification);
+            requireNonNull(userCohorts);
+        }
+
+        @Override
+        public String toString() {
+            return toStringImpl();
+        }
+
+        CanCommitPending toCanCommitPending(final FutureCallback<Empty> callback) {
+            return new CanCommitPending(cohort, modification, userCohorts, callback);
+        }
+    }
+
+    @NonNullByDefault
+    private record CanCommitPending(
+            CommitCohort cohort,
+            DataTreeModification modification,
+            CompositeDataTreeCohort userCohorts,
+            FutureCallback<Empty> callback) implements Commit {
+        CanCommitPending {
+            requireNonNull(cohort);
+            requireNonNull(modification);
+            requireNonNull(userCohorts);
+            requireNonNull(callback);
+        }
+
+        CanCommitComplete toCanCommitComplete(final DataTreeTip tip) {
+            return new CanCommitComplete(cohort, modification, userCohorts, tip);
+        }
+
+        @Override
+        public String toString() {
+            return toStringImpl();
+        }
+    }
+
+    @NonNullByDefault
+    private record CanCommitComplete(
+            CommitCohort cohort,
+            DataTreeModification modification,
+            CompositeDataTreeCohort userCohorts,
+            DataTreeTip tip) implements Commit {
+        CanCommitComplete {
+            requireNonNull(cohort);
+            requireNonNull(modification);
+            requireNonNull(userCohorts);
+            requireNonNull(tip);
+        }
+
+        CanCommitComplete rebase(final DataTreeTip newTip) {
+            return new CanCommitComplete(cohort, modification, userCohorts, newTip);
+        }
+
+        PreCommitPending toPreCommitPending(final FutureCallback<DataTreeCandidate> callback) {
+            return new PreCommitPending(cohort, modification, userCohorts, tip, callback);
+        }
+
+        @Override
+        public String toString() {
+            return toStringImpl();
+        }
+    }
+
+    @NonNullByDefault
+    private record PreCommitPending(
+            CommitCohort cohort,
+            DataTreeModification modification,
+            CompositeDataTreeCohort userCohorts,
+            DataTreeTip tip,
+            FutureCallback<DataTreeCandidate> callback) implements Commit {
+        PreCommitPending {
+            requireNonNull(cohort);
+            requireNonNull(modification);
+            requireNonNull(userCohorts);
+            requireNonNull(tip);
+            requireNonNull(callback);
+        }
+
+        @Override
+        public String toString() {
+            return toStringImpl();
+        }
+    }
+
+    @NonNullByDefault
+    private record PreCommitComplete(CommitCohort cohort, DataTreeModification modification) implements Commit {
+        PreCommitComplete {
+            requireNonNull(cohort);
+            requireNonNull(modification);
+        }
+
+        @Override
+        public String toString() {
+            return toStringImpl();
+        }
+    }
+
+    @NonNullByDefault
+    private record CommitPending(CommitCohort cohort, DataTreeCandidate candidate) implements Commit {
+        CommitPending {
+            requireNonNull(cohort);
+            requireNonNull(candidate);
+        }
+
+        @Override
+        public String toString() {
+            return toStringImpl();
+        }
+    }
+
+    @NonNullByDefault
+    private record Failing(CommitCohort cohort, Exception cause) implements Commit {
+        Failing {
+            requireNonNull(cohort);
+            requireNonNull(cause);
+        }
+
+        @Override
+        public boolean isFailed() {
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            return toStringHelper().add("cause", cause).toString();
+        }
+    }
+
+    @NonNullByDefault
+    private record Aborted(CommitCohort cohort) implements Commit {
+        Aborted {
+            requireNonNull(cohort);
+        }
+
+        @Override
+        public String toString() {
+            return toStringImpl();
+        }
+    }
+
+    @NonNullByDefault
+    private record Committed(CommitCohort cohort, long commitIndex) implements Commit {
+        Committed {
+            requireNonNull(cohort);
+        }
+
+        @Override
+        public String toString() {
+            return toStringHelper().add("commitIndex", commitIndex).toString();
+        }
+    }
+
+    @NonNullByDefault
+    private record Failed(CommitCohort cohort) implements Commit {
+        // FIXME: cause?
+        Failed {
+            requireNonNull(cohort);
+        }
+
+        @Override
+        public boolean isFailed() {
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            return toStringImpl();
+        }
+    }
+
     private static final Timeout COMMIT_STEP_TIMEOUT = new Timeout(FiniteDuration.create(5, TimeUnit.SECONDS));
     private static final Logger LOG = LoggerFactory.getLogger(ShardDataTree.class);
 
@@ -119,9 +334,9 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     private final Map<LocalHistoryIdentifier, ShardDataTreeTransactionChain> transactionChains = new HashMap<>();
     private final DataTreeCohortActorRegistry cohortRegistry = new DataTreeCohortActorRegistry();
-    private final Deque<CommitCohort> pendingTransactions = new ArrayDeque<>();
-    private final Queue<CommitCohort> pendingCommits = new ArrayDeque<>();
-    private final Queue<CommitCohort> pendingFinishCommits = new ArrayDeque<>();
+    private final Deque<Commit> pendingTransactions = new ArrayDeque<>();
+    private final Queue<Commit> pendingCommits = new ArrayDeque<>();
+    private final Queue<CommitPending> pendingFinishCommits = new ArrayDeque<>();
 
     /**
      * Callbacks that need to be invoked once a payload is replicated.
@@ -723,7 +938,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         return pendingTransactions.size() + pendingCommits.size() + pendingFinishCommits.size();
     }
 
-    final void enqueueReadyTransaction(final @NonNull CommitCohort cohort) {
+    final void enqueueReadyTransaction(final @NonNull Commit cohort) {
         cohort.setLastAccess(readTime());
         pendingTransactions.add(cohort);
     }
@@ -783,8 +998,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         return takeSnapshot().newModification();
     }
 
-    final Collection<CommitCohort> getAndClearPendingTransactions() {
-        final var ret = new ArrayList<CommitCohort>(getQueueSize());
+    final Collection<Commit> getAndClearPendingTransactions() {
+        final var ret = new ArrayList<Commit>(getQueueSize());
 
         for (var entry : pendingFinishCommits) {
             ret.add(entry);
@@ -821,10 +1036,10 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             return;
         }
 
-        final var entry = findFirstEntry(pendingTransactions, State.CAN_COMMIT_PENDING);
+        final var entry = findFirstEntry(pendingTransactions);
         try {
-            if (entry != null) {
-                canCommitEntry(entry);
+            if (entry != null && entry.getState() instanceof CanCommitPending canCommit) {
+                canCommitEntry(entry, canCommit);
             }
         } finally {
             maybeRunOperationOnPendingTransactionsComplete();
@@ -832,15 +1047,17 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private void canCommitEntry(final CommitCohort cohort) {
-        final var modification = cohort.getDataTreeModification();
+    private void canCommitEntry(final CommitCohort cohort, final CanCommitPending canCommit) {
+        final var modification = canCommit.modification();
 
         LOG.debug("{}: Validating transaction {}", logContext, cohort.transactionId());
         final Exception cause;
         try {
-            tip.validate(modification);
+            final var localTip = tip;
+            localTip.validate(modification);
             LOG.debug("{}: Transaction {} validated", logContext, cohort.transactionId());
-            cohort.successfulCanCommit();
+            cohort.setState(canCommit, canCommit.toCanCommitComplete(localTip));
+            canCommit.callback().onSuccess(Empty.value());
             return;
         } catch (ConflictingModificationAppliedException e) {
             LOG.warn("{}: Store Tx {}: Conflicting modification for path {}.", logContext, cohort.transactionId(),
@@ -872,7 +1089,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
 
-    private @Nullable CommitCohort findFirstEntry(final Queue<CommitCohort> queue, final State allowedState) {
+    private @Nullable Commit findFirstEntry(final Queue<Commit> queue) {
         while (true) {
             final var entry = queue.peek();
             if (entry == null) {
@@ -883,37 +1100,31 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             if (entry.isFailed()) {
                 LOG.debug("{}: Removing failed transaction {}", logContext, entry.transactionId());
                 queue.remove();
-                continue;
+            } else {
+                return entry;
             }
-
-            return entry.getState() == allowedState ? entry : null;
         }
     }
 
     private void processNextPendingCommit() {
-        final var entry = findFirstEntry(pendingCommits, State.COMMIT_PENDING);
+        final var entry = findFirstEntry(pendingCommits);
         try {
-            if (entry != null) {
-                startCommit(entry, entry.getCandidate());
+            if (entry instanceof CommitPending commitPending) {
+                startCommit(commitPending);
             }
         } finally {
             maybeRunOperationOnPendingTransactionsComplete();
         }
     }
 
-    private boolean peekNextPendingCommit() {
-        final var first = pendingCommits.peek();
-        return first != null && first.getState() == State.COMMIT_PENDING;
-    }
-
     // non-final for mocking
-    void startCanCommit(final CommitCohort cohort) {
+    void startCanCommit(final Commit cohort, final FutureCallback<Empty> callback) {
         final var head = pendingTransactions.peek();
         if (head == null) {
             LOG.warn("{}: No transactions enqueued while attempting to start canCommit on {}", logContext, cohort);
             return;
         }
-        if (!cohort.equals(head)) {
+        if (cohort != head) {
             // The tx isn't at the head of the queue so we can't start canCommit at this point. Here we check if this
             // tx should be moved ahead of other tx's in the READY state in the pendingTransactions queue. If this tx
             // has other participating shards, it could deadlock with other tx's accessing the same shards
@@ -925,7 +1136,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             // canCommmit for this tx was requested before tx A, honor that request. If this tx is moved to the head of
             // the queue as a result, then proceed with canCommit.
 
-            Collection<String> precedingShardNames = extractPrecedingShardNames(cohort.getParticipatingShardNames());
+            final var precedingShardNames = extractPrecedingShardNames(cohort.getParticipatingShardNames());
             if (precedingShardNames.isEmpty()) {
                 LOG.debug("{}: Tx {} is scheduled for canCommit step", logContext, cohort.transactionId());
                 return;
@@ -940,7 +1151,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
                 final var entry = iter.next();
                 ++index;
 
-                if (cohort.equals(entry)) {
+                if (cohort != entry) {
                     if (moveToIndex < 0) {
                         LOG.debug("{}: Not moving tx {} - cannot proceed with canCommit",
                                 logContext, cohort.transactionId());
@@ -952,7 +1163,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
                     iter.remove();
                     insertEntry(pendingTransactions, entry, moveToIndex);
 
-                    if (!cohort.equals(pendingTransactions.peek())) {
+                    if (cohort != pendingTransactions.peek()) {
                         LOG.debug("{}: Tx {} is not at the head of the queue - cannot proceed with canCommit",
                                 logContext, cohort.transactionId());
                         return;
@@ -963,9 +1174,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
                     break;
                 }
 
-                if (entry.getState() != State.READY) {
-                    LOG.debug("{}: Skipping pending transaction {} in state {}",
-                            logContext, entry.transactionId(), entry.getState());
+                if (!(entry instanceof Ready)) {
+                    LOG.debug("{}: Skipping pending transaction {}", logContext, entry);
                     continue;
                 }
 
@@ -1020,11 +1230,11 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     // non-final for mocking
     @SuppressWarnings("checkstyle:IllegalCatch")
-    void startPreCommit(final CommitCohort cohort) {
+    void startPreCommit(final Commit cohort) {
         final var current = pendingTransactions.peek();
         checkState(current != null, "Attempted to pre-commit of %s when no transactions pending", cohort);
 
-        verify(cohort.equals(current), "Attempted to pre-commit %s while %s is pending", cohort, current);
+        verify(cohort == current, "Attempted to pre-commit %s while %s is pending", cohort, current);
 
         final var currentId = current.transactionId();
         LOG.debug("{}: Preparing transaction {}", logContext, currentId);
@@ -1069,9 +1279,9 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private void finishCommit(final CommitCohort cohort) {
+    private void finishCommit(final CommitPending cohort) {
         final var txId = cohort.transactionId();
-        final var candidate = cohort.getCandidate();
+        final var candidate = cohort.candidate();
 
         LOG.debug("{}: Resuming commit of transaction {}", logContext, txId);
 
@@ -1100,18 +1310,19 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     // non-final for mocking
-    void startCommit(final CommitCohort cohort, final DataTreeCandidate candidate) {
+    void startCommit(final CommitPending commit) {
         final var current = pendingCommits.peek();
-        checkState(current != null, "Attempted to start commit of %s when no transactions pending", cohort);
+        checkState(current != null, "Attempted to start commit of %s when no transactions pending", commit);
 
-        if (!cohort.equals(current)) {
-            LOG.debug("{}: Transaction {} scheduled for commit step", logContext, cohort.transactionId());
+        if (commit != current) {
+            LOG.debug("{}: Transaction {} scheduled for commit step", logContext, commit.transactionId());
             return;
         }
 
         LOG.debug("{}: Starting commit for transaction {}", logContext, current.transactionId());
 
-        final TransactionIdentifier txId = cohort.transactionId();
+        final var candidate = commit.candidate();
+        final TransactionIdentifier txId = commit.transactionId();
         final Payload payload;
         try {
             payload = CommitTransactionPayload.create(txId, candidate, PayloadVersion.current(),
@@ -1138,7 +1349,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
         // See if the next transaction is pending commit (ie in the COMMIT_PENDING state) so it can be batched with
         // this transaction for replication.
-        boolean replicationBatchHint = peekNextPendingCommit();
+        boolean replicationBatchHint = pendingCommits.peek() instanceof CommitPending;
 
         // Once completed, we will continue via payloadReplicationComplete
         shard.persistPayload(txId, payload, replicationBatchHint);
@@ -1163,7 +1374,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     @Override
     final SimpleCommitCohort createFailedCohort(final TransactionIdentifier txId, final DataTreeModification mod,
             final Exception failure) {
-        final var cohort = new SimpleCommitCohort(this, mod, txId, failure);
+        final var cohort = new SimpleCommitCohort(this, txId, failure);
         enqueueReadyTransaction(cohort);
         return cohort;
     }
@@ -1196,7 +1407,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             return;
         }
 
-        final var updateOpt = accessTimeUpdater.apply(currentTx);
+        final var updateOpt = accessTimeUpdater.apply(currentTx.cohort());
         if (updateOpt.isPresent()) {
             final long newAccess =  updateOpt.orElseThrow();
             final long newDelta = now - newAccess;
@@ -1222,19 +1433,19 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
                 + deltaMillis + "ms");
 
         switch (state) {
-            case CAN_COMMIT_PENDING:
+            case CanCommitPending canCommit -> {
                 currentQueue.remove().failedCanCommit(cohortFailure);
-                break;
-            case CAN_COMMIT_COMPLETE:
+            }
+            case CanCommitComplete canCommit -> {
                 // The suppression of the FindBugs "DB_DUPLICATE_SWITCH_CLAUSES" warning pertains to this clause
                 // whose code is duplicated with PRE_COMMIT_COMPLETE. The clauses aren't combined in case the code
                 // in PRE_COMMIT_COMPLETE is changed.
                 currentQueue.remove().reportFailure(cohortFailure);
-                break;
-            case PRE_COMMIT_PENDING:
+            }
+            case PreCommitPending preCommit -> {
                 currentQueue.remove().failedPreCommit(cohortFailure);
-                break;
-            case PRE_COMMIT_COMPLETE:
+            }
+            case PreCommitComplete preCommit -> {
                 // FIXME: this is a legacy behavior problem. Three-phase commit protocol specifies that after we
                 //        are ready we should commit the transaction, not abort it. Our current software stack does
                 //        not allow us to do that consistently, because we persist at the time of commit, hence
@@ -1253,20 +1464,29 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
                 //        a per-shard cluster-wide monotonic time, so a follower becoming the leader can accurately
                 //        restart the timer.
                 currentQueue.remove().reportFailure(cohortFailure);
-                break;
-            case COMMIT_PENDING:
+            }
+            case CommitPending commit -> {
                 LOG.warn("{}: Transaction {} is still committing, cannot abort", logContext, currentTx.transactionId());
                 currentTx.setLastAccess(now);
                 processNext = false;
                 return;
-            case READY:
+            }
+            case Ready ready -> {
                 currentQueue.remove().reportFailure(cohortFailure);
-                break;
-            case ABORTED:
-            case COMMITTED:
-            case FAILED:
-            default:
+            }
+            case Failed failed -> {
                 currentQueue.remove();
+            }
+            case Failing failing -> {
+                // FIXME: more stuff?
+                currentQueue.remove();
+            }
+//            case Aborted aborted -> {
+//                currentQueue.remove();
+//            }
+//            case Committed committed -> {
+//                currentQueue.remove();
+//            }
         }
 
         if (processNext) {
@@ -1274,8 +1494,196 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         }
     }
 
+
+//  final void canCommit(final FutureCallback<Empty> callback) {
+//      switch (state) {
+//          case CanCommitPending pending -> dataTree.startCanCommit(this);
+//          case Ready ready -> {
+//              state = ready.toCanCommitPending(callback);
+//              dataTree.startCanCommit(this);
+//          }
+//          case Failing(var cause) -> {
+//              state = new Failed();
+//              callback.onFailure(cause);
+//          }
+//          default -> {
+//              throw new IllegalStateException("Transaction %s in state %s cannot start can-commit".formatted(
+//                  transactionId, state));
+//          }
+//      }
+//  }
+
+//    @VisibleForTesting
+//    final void preCommit(final FutureCallback<DataTreeCandidate> callback) {
+//        switch (state) {
+//            case CanCommitComplete canCommit -> {
+//                state = canCommit.toPreCommitPending(callback);
+//                dataTree.startPreCommit(this);
+//            }
+//            case Failing(var cause) -> {
+//                state = new Failed();
+//                userCohorts.abort();
+//                dataTree.getStats().incrementFailedTransactionsCount();
+//                callback.onFailure(cause);
+//            }
+//            default -> {
+//                throw new IllegalStateException("Transaction %s in state %s cannot start pre-commit".formatted(
+//                    transactionId, state));
+//            }
+//        }
+//    }
+//
+//    @VisibleForTesting
+//    final void abort(final FutureCallback<Empty> abortCallback) {
+//        candidate = null;
+//        state = State.ABORTED;
+//
+//        final var userAbort = userCohorts.abort();
+//        if (userAbort != null) {
+//            userAbort.whenComplete((noop, failure) -> {
+//                if (failure != null) {
+//                    abortCallback.onFailure(failure);
+//                } else {
+//                    abortCallback.onSuccess(Empty.value());
+//                }
+//            });
+//        } else {
+//            abortCallback.onSuccess(Empty.value());
+//        }
+//    }
+//
+//    void successfulCommit(final UnsignedLong journalIndex, final Runnable onComplete) {
+//        final var userCommit = userCohorts.commit();
+//        if (userCommit != null) {
+//            userCommit.whenComplete((noop, failure) -> {
+//                if (failure != null) {
+//                    LOG.error("User cohorts failed to commit", failure);
+//                }
+//                finishSuccessfulCommit(journalIndex, onComplete);
+//            });
+//        } else {
+//            finishSuccessfulCommit(journalIndex, onComplete);
+//        }
+//    }
+//
+//    private void finishSuccessfulCommit(final UnsignedLong journalIndex, final Runnable onComplete) {
+//        final var stats = dataTree.getStats();
+//        stats.incrementCommittedTransactionCount();
+//
+//        switchState(State.COMMITTED).onSuccess(journalIndex);
+//        onComplete.run();
+//    }
+//
+//    // FIXME: Should return rebased DataTreeCandidateTip
+//    @VisibleForTesting
+//    final void setState(final State expected, final State next) {
+//        if (state == expected) {
+//            state = requireNonNull(next);
+//        } else {
+//            throw new VerifyException(
+//                "Unexpected state " + state + " when transitioning from " + expected + " to " + next);
+//        }
+//    }
+//
+//    final void failedCanCommit(final Exception cause) {
+//        dataTree.getStats().incrementFailedTransactionsCount();
+//        switchState(State.FAILED).onFailure(cause);
+//    }
+//
+//    final void successfulPreCommit(final DataTreeCandidateTip dataTreeCandidate) {
+//        LOG.trace("Transaction {} prepared candidate {}", modification, dataTreeCandidate);
+//        candidate = verifyNotNull(dataTreeCandidate);
+//        switchState(State.PRE_COMMIT_COMPLETE).onSuccess(dataTreeCandidate);
+//    }
+//
+//    final void failedPreCommit(final Throwable cause) {
+//        if (LOG.isTraceEnabled()) {
+//            LOG.trace("Transaction {} failed to prepare", modification, cause);
+//        } else {
+//            LOG.error("Transaction {} failed to prepare", transactionId, cause);
+//        }
+//
+//        userCohorts.abort();
+//        dataTree.getStats().incrementFailedTransactionsCount();
+//        switchState(State.FAILED).onFailure(cause);
+//    }
+//
+//    /**
+//     * Run user-defined canCommit and preCommit hooks. We want to run these before we initiate persistence so that
+//     * any failure to validate is propagated before we record the transaction.
+//     *
+//     * @param dataTreeCandidate {@link DataTreeCandidate} under consideration
+//     * @param futureCallback the callback to invoke on completion, which may be immediate or async.
+//     */
+//    final void userPreCommit(final DataTreeCandidate dataTreeCandidate, final FutureCallback<Empty> futureCallback) {
+//        userCohorts.reset();
+//
+//        final var userCanCommit = userCohorts.canCommit(dataTreeCandidate);
+//        if (userCanCommit != null) {
+//            userCanCommit.whenComplete((noop, failure) -> {
+//                if (failure != null) {
+//                    futureCallback.onFailure(failure);
+//                } else {
+//                    doUserPreCommit(futureCallback);
+//                }
+//            });
+//        } else {
+//            doUserPreCommit(futureCallback);
+//        }
+//    }
+//
+//    private void doUserPreCommit(final FutureCallback<Empty> futureCallback) {
+//        final var userPreCommit = userCohorts.preCommit();
+//        if (userPreCommit != null) {
+//            userPreCommit.whenComplete((noop, failure) -> {
+//                if (failure != null) {
+//                    futureCallback.onFailure(failure);
+//                } else {
+//                    futureCallback.onSuccess(Empty.value());
+//                }
+//            });
+//        } else {
+//            futureCallback.onSuccess(Empty.value());
+//        }
+//    }
+//
+//    final void failedCommit(final Exception cause) {
+//        if (LOG.isTraceEnabled()) {
+//            LOG.trace("Transaction {} failed to commit", modification, cause);
+//        } else {
+//            LOG.error("Transaction failed to commit", cause);
+//        }
+//
+//        userCohorts.abort();
+//        dataTree.getStats().incrementFailedTransactionsCount();
+//        switchState(State.FAILED).onFailure(cause);
+//    }
+//
+//    @VisibleForTesting void commit(final FutureCallback<UnsignedLong> newCallback) {
+//        checkState(State.PRE_COMMIT_COMPLETE);
+//        callback = requireNonNull(newCallback);
+//        state = State.COMMIT_PENDING;
+//
+//        if (nextFailure == null) {
+//            dataTree.startCommit(this, candidate);
+//        } else {
+//            failedCommit(nextFailure);
+//        }
+//    }
+//
+//    final void reportFailure(final Exception cause) {
+//        if (nextFailure == null) {
+//            nextFailure = requireNonNull(cause);
+//        } else {
+//            // FIXME: add suppressed exception
+//            LOG.debug("Transaction {} already has a set failure, not updating it", transactionId, cause);
+//        }
+//    }
+
+
+
     // non-final for mocking
-    boolean startAbort(final CommitCohort cohort) {
+    boolean startAbort(final Commit cohort) {
         final var it = Iterables.concat(pendingFinishCommits, pendingCommits, pendingTransactions).iterator();
         if (!it.hasNext()) {
             LOG.debug("{}: no open transaction while attempting to abort {}", logContext, cohort.transactionId());
@@ -1284,7 +1692,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
         // First entry is special, as it may already be committing
         final var first = it.next();
-        if (cohort.equals(first)) {
+        if (cohort == first) {
             if (cohort.getState() != State.COMMIT_PENDING) {
                 LOG.debug("{}: aborting head of queue {} in state {}", logContext, cohort.transactionId(),
                     cohort.transactionId());
@@ -1305,7 +1713,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         var newTip = requireNonNullElse(first.getCandidate(), dataTree);
         while (it.hasNext()) {
             final var entry = it.next();
-            if (cohort.equals(entry)) {
+            if (cohort == entry) {
                 LOG.debug("{}: aborting queued transaction {}", logContext, cohort.transactionId());
                 getStats().incrementAbortTransactionsCount();
 
@@ -1325,31 +1733,46 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private void rebaseTransactions(final Iterator<CommitCohort> iter, final @NonNull DataTreeTip newTip) {
+    private void rebaseTransactions(final Iterator<Commit> iter, final @NonNull DataTreeTip newTip) {
         tip = requireNonNull(newTip);
         while (iter.hasNext()) {
             final var cohort = iter.next();
-            if (cohort.getState() == State.CAN_COMMIT_COMPLETE) {
-                LOG.debug("{}: Revalidating queued transaction {}", logContext, cohort.transactionId());
+            switch (cohort) {
+                case CanCommitComplete canCommit -> {
+                    LOG.debug("{}: Revalidating queued transaction {}", logContext, cohort.transactionId());
 
-                try {
-                    tip.validate(cohort.getDataTreeModification());
-                } catch (DataValidationFailedException | RuntimeException e) {
-                    LOG.debug("{}: Failed to revalidate queued transaction {}", logContext, cohort.transactionId(), e);
-                    cohort.reportFailure(e);
+                    final State nextState;
+                    try {
+                        tip.validate(canCommit.modification());
+                        nextState = canCommit.rebase(tip);
+                    } catch (DataValidationFailedException | RuntimeException e) {
+                        LOG.debug("{}: Failed to revalidate queued transaction {}", logContext, cohort.transactionId(),
+                            e);
+                        nextState = new Failing(e);
+                    }
+                    cohort.setState(canCommit, nextState);
                 }
-            } else if (cohort.getState() == State.PRE_COMMIT_COMPLETE) {
-                LOG.debug("{}: Repreparing queued transaction {}", logContext, cohort.transactionId());
+                case PreCommitComplete preCommit -> {
+                    LOG.debug("{}: Repreparing queued transaction {}", logContext, cohort.transactionId());
 
-                try {
-                    tip.validate(cohort.getDataTreeModification());
-                    DataTreeCandidateTip candidate = tip.prepare(cohort.getDataTreeModification());
+                    final State nextState;
+                    try {
+                        final var modification = preCommit.modification();
+                        if (tip != preCommit.tip()) {
+                            tip.validate(modification);
+                        }
 
-                    cohort.setNewCandidate(candidate);
-                    tip = candidate;
-                } catch (RuntimeException | DataValidationFailedException e) {
-                    LOG.debug("{}: Failed to reprepare queued transaction {}", logContext, cohort.transactionId(), e);
-                    cohort.reportFailure(e);
+                        final var candidate = tip.prepare(modification);
+                        nextState = preCommit.rebase(tip, candidate);
+                        tip = candidate;
+                    } catch (RuntimeException | DataValidationFailedException e) {
+                        LOG.debug("{}: Failed to reprepare queued transaction {}", logContext, cohort.transactionId(), e);
+                        nextState = new Failing(e);
+                    }
+                    cohort.setState(preCommit, nextState);
+                }
+                default -> {
+                    // No-op
                 }
             }
         }
@@ -1381,7 +1804,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             final var cohort = it.next();
             final var transactionId = cohort.transactionId();
             if (clientId.equals(transactionId.getHistoryId().getClientId())) {
-                if (cohort.getState() != State.COMMIT_PENDING) {
+                if (cohort instanceof CommitPending) {
                     LOG.debug("{}: Retiring transaction {}", logContext, transactionId);
                     it.remove();
                 } else {
