@@ -217,7 +217,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             case CAN_COMMIT_COMPLETE -> {
                 ready.stage = CommitStage.PRE_COMMIT_PENDING;
                 LOG.debug("{}: Transaction {} initiating preCommit", persistenceId(), getIdentifier());
-                ready.readyCohort.preCommit(new FutureCallback<DataTreeCandidate>() {
+                ready.readyCohort.preCommit(tree(), new FutureCallback<DataTreeCandidate>() {
                     @Override
                     public void onSuccess(final DataTreeCandidate result) {
                         successfulPreCommit(envelope, now);
@@ -285,7 +285,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             case PRE_COMMIT_COMPLETE -> {
                 ready.stage = CommitStage.COMMIT_PENDING;
                 LOG.debug("{}: Transaction {} initiating commit", persistenceId(), getIdentifier());
-                ready.readyCohort.commit(new FutureCallback<UnsignedLong>() {
+                ready.readyCohort.commit(tree(), new FutureCallback<UnsignedLong>() {
                     @Override
                     public void onSuccess(final UnsignedLong result) {
                         successfulCommit(envelope, now);
@@ -382,7 +382,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             case READY -> {
                 ready.stage = CommitStage.CAN_COMMIT_PENDING;
                 LOG.debug("{}: Transaction {} initiating canCommit", persistenceId(), getIdentifier());
-                ready.readyCohort.canCommit(new FutureCallback<>() {
+                ready.readyCohort.canCommit(tree(), new FutureCallback<>() {
                     @Override
                     public void onSuccess(final Empty result) {
                         successfulCanCommit(envelope, now);
@@ -426,7 +426,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             case READY -> {
                 ready.stage = CommitStage.CAN_COMMIT_PENDING;
                 LOG.debug("{}: Transaction {} initiating direct canCommit", persistenceId(), getIdentifier());
-                ready.readyCohort.canCommit(new FutureCallback<>() {
+                ready.readyCohort.canCommit(tree(), new FutureCallback<>() {
                     @Override
                     public void onSuccess(final Empty result) {
                         successfulDirectCanCommit(envelope, now);
@@ -450,7 +450,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         final Ready ready = checkReady();
         ready.stage = CommitStage.PRE_COMMIT_PENDING;
         LOG.debug("{}: Transaction {} initiating direct preCommit", persistenceId(), getIdentifier());
-        ready.readyCohort.preCommit(new FutureCallback<>() {
+        ready.readyCohort.preCommit(tree(), new FutureCallback<>() {
             @Override
             public void onSuccess(final DataTreeCandidate result) {
                 successfulDirectPreCommit(envelope, startTime);
@@ -472,7 +472,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         final Ready ready = checkReady();
         ready.stage = CommitStage.COMMIT_PENDING;
         LOG.debug("{}: Transaction {} initiating direct commit", persistenceId(), getIdentifier());
-        ready.readyCohort.commit(new FutureCallback<UnsignedLong>() {
+        ready.readyCohort.commit(tree(), new FutureCallback<UnsignedLong>() {
             @Override
             public void onSuccess(final UnsignedLong result) {
                 successfulCommit(envelope, startTime);
