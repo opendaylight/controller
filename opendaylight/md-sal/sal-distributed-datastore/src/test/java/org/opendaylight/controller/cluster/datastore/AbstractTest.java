@@ -12,7 +12,6 @@ import akka.testkit.javadsl.TestKit;
 import com.typesafe.config.ConfigFactory;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicLong;
 import org.junit.After;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
@@ -21,9 +20,6 @@ import org.opendaylight.controller.cluster.access.concepts.FrontendType;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import scala.compat.java8.FutureConverters;
-import scala.concurrent.Await;
-import scala.concurrent.duration.FiniteDuration;
 
 public abstract class AbstractTest {
     protected static final MemberName MEMBER_NAME = MemberName.forName("member-1");
@@ -59,11 +55,6 @@ public abstract class AbstractTest {
 
     protected static LocalHistoryIdentifier nextHistoryId() {
         return newHistoryId(HISTORY_COUNTER.incrementAndGet());
-    }
-
-    protected static <T> T waitOnAsyncTask(final CompletionStage<T> completionStage, final FiniteDuration timeout)
-            throws Exception {
-        return Await.result(FutureConverters.toScala(completionStage), timeout);
     }
 
     @After
