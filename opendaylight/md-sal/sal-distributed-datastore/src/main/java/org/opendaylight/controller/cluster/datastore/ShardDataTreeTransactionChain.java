@@ -118,7 +118,7 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
             final CompositeDataTreeCohort userCohorts, final Optional<SortedSet<String>> participatingShardNames) {
         previousTx = transaction;
         LOG.debug("Committing transaction {}", transaction);
-        final var cohort = new ChainedCommitCohort(dataTree, this, transaction, userCohorts, participatingShardNames);
+        final var cohort = new ChainedCommitCohort(this, transaction, userCohorts, participatingShardNames);
         dataTree.enqueueReadyTransaction(cohort);
         return cohort;
     }
