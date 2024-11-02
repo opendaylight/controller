@@ -71,7 +71,7 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
 
     private void canCommitSuccess() {
         doAnswer(invocation -> {
-            invocation.<SimpleShardDataTreeCohort>getArgument(0).successfulCanCommit();
+            invocation.<ShardDataTreeCohort>getArgument(0).successfulCanCommit();
             return null;
         }).when(mockShardDataTree).startCanCommit(cohort);
 
