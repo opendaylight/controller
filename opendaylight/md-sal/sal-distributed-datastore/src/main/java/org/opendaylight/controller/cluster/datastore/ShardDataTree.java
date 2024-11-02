@@ -45,6 +45,7 @@ import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.util.Timeout;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.CommitCohort.State;
@@ -1375,8 +1376,20 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         return shard.shardStats();
     }
 
-    final Iterator<CommitCohort> cohortIterator() {
-        return Iterables.concat(pendingFinishCommits, pendingCommits, pendingTransactions).iterator();
+    final void retire(final ClientIdentifier clientId) {
+        final var it = Iterables.concat(pendingFinishCommits, pendingCommits, pendingTransactions).iterator();
+        while (it.hasNext()) {
+            final var cohort = it.next();
+            final var transactionId = cohort.transactionId();
+            if (clientId.equals(transactionId.getHistoryId().getClientId())) {
+                if (cohort.getState() != State.COMMIT_PENDING) {
+                    LOG.debug("{}: Retiring transaction {}", logContext, transactionId);
+                    it.remove();
+                } else {
+                    LOG.debug("{}: Transaction {} already committing, not retiring it", logContext, transactionId);
+                }
+            }
+        }
     }
 
     final void removeTransactionChain(final LocalHistoryIdentifier id) {
