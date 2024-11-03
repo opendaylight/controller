@@ -10,27 +10,24 @@ package org.opendaylight.controller.cluster.datastore;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.Throwables;
-import com.google.common.collect.Streams;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import java.util.ArrayList;
+import java.time.Duration;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
-import org.apache.pekko.dispatch.Futures;
 import org.apache.pekko.pattern.Patterns;
-import org.apache.pekko.util.Timeout;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardDataTreeListenerInfoMXBean;
 import org.opendaylight.controller.cluster.datastore.messages.GetInfo;
 import org.opendaylight.controller.cluster.datastore.messages.OnDemandShardState;
 import org.opendaylight.controller.cluster.mgmt.api.DataTreeListenerInfo;
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
-import scala.concurrent.Await;
-import scala.concurrent.ExecutionContext;
-import scala.concurrent.Future;
 
 /**
  * Implementation of ShardDataTreeListenerInfoMXBean.
@@ -39,6 +36,9 @@ import scala.concurrent.Future;
  */
 final class ShardDataTreeListenerInfoMXBeanImpl extends AbstractMXBean implements ShardDataTreeListenerInfoMXBean {
     private static final String JMX_CATEGORY = "ShardDataTreeListenerInfo";
+    // FIXME: why 20 seconds?
+    private static final long TIMEOUT_SECONDS = 20;
+    private static final Duration TIMEOUT = Duration.ofSeconds(TIMEOUT_SECONDS);
 
     private final OnDemandShardStateCache stateCache;
 
@@ -62,23 +62,20 @@ final class ShardDataTreeListenerInfoMXBeanImpl extends AbstractMXBean implement
         }
     }
 
-    @SuppressWarnings("checkstyle:IllegalCatch")
-    @SuppressFBWarnings(value = "REC_CATCH_EXCEPTION", justification = "Akka's Await.result() API contract")
     private static List<DataTreeListenerInfo> getListenerActorsInfo(final Collection<ActorSelection> actors) {
-        final Timeout timeout = new Timeout(20, TimeUnit.SECONDS);
-        final List<Future<Object>> futureList = new ArrayList<>(actors.size());
-        for (ActorSelection actor : actors) {
-            futureList.add(Patterns.ask(actor, GetInfo.INSTANCE, timeout));
-        }
+        final var futures = actors.stream()
+            .map(actor -> Patterns.ask(actor, GetInfo.INSTANCE, TIMEOUT))
+            .map(CompletionStage::toCompletableFuture)
+            .toArray(CompletableFuture[]::new);
 
-        final Iterable<Object> listenerInfos;
         try {
-            listenerInfos = Await.result(Futures.sequence(futureList, ExecutionContext.Implicits$.MODULE$.global()),
-                timeout.duration());
-        } catch (TimeoutException | InterruptedException e) {
+            CompletableFuture.allOf(futures).get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        } catch (ExecutionException | InterruptedException | TimeoutException e) {
             throw new IllegalStateException("Failed to acquire listeners", e);
         }
 
-        return Streams.stream(listenerInfos).map(DataTreeListenerInfo.class::cast).collect(Collectors.toList());
+        return Arrays.stream(futures)
+            .map(future -> (DataTreeListenerInfo) future.resultNow())
+            .collect(Collectors.toList());
     }
 }
