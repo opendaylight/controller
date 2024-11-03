@@ -70,7 +70,7 @@
             <dependency>
                 <groupId>org.apache.pekko</groupId>
                 <artifactId>pekko-testkit_2.13</artifactId>
-                <version>1.0.3</version>
+                <version>1.1.2</version>
                 <scope>test</scope>
                 <exclusions>
                     <exclusion>
@@ -82,7 +82,7 @@
             <dependency>
                 <groupId>org.apache.pekko</groupId>
                 <artifactId>pekko-actor-testkit-typed_2.13</artifactId>
-                <version>1.0.3</version>
+                <version>1.1.2</version>
                 <scope>test</scope>
                 <exclusions>
                     <exclusion>
@@ -98,7 +98,7 @@
             <dependency>
                 <groupId>org.apache.pekko</groupId>
                 <artifactId>pekko-persistence-tck_2.13</artifactId>
-                <version>1.0.3</version>
+                <version>1.1.2</version>
                 <scope>test</scope>
                 <exclusions>
                     <exclusion>
@@ -119,17 +119,17 @@
             <dependency>
                 <groupId>org.agrona</groupId>
                 <artifactId>agrona</artifactId>
-                <version>1.15.2</version>
+                <version>1.22.0</version>
             </dependency>
             <dependency>
                 <groupId>io.aeron</groupId>
                 <artifactId>aeron-client</artifactId>
-                <version>1.38.1</version>
+                <version>1.45.1</version>
             </dependency>
             <dependency>
                 <groupId>io.aeron</groupId>
                 <artifactId>aeron-driver</artifactId>
-                <version>1.38.1</version>
+                <version>1.45.1</version>
             </dependency>
 
             <!-- LZ4 compression -->
