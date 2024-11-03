@@ -9,12 +9,13 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.dispatch.OnComplete;
 import org.apache.pekko.pattern.Patterns;
-import org.apache.pekko.util.Timeout;
 import org.checkerframework.checker.lock.qual.GuardedBy;
+import org.opendaylight.controller.cluster.datastore.DataTreeCohortActorRegistry.RegisterCohort;
+import org.opendaylight.controller.cluster.datastore.DataTreeCohortActorRegistry.RemoveCohort;
 import org.opendaylight.controller.cluster.datastore.exceptions.LocalShardNotFoundException;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohort;
@@ -22,12 +23,11 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.concurrent.Future;
-import scala.concurrent.duration.FiniteDuration;
 
 public class DataTreeCohortRegistrationProxy<C extends DOMDataTreeCommitCohort> extends AbstractObjectRegistration<C> {
     private static final Logger LOG = LoggerFactory.getLogger(DataTreeCohortRegistrationProxy.class);
-    private static final Timeout TIMEOUT = new Timeout(new FiniteDuration(5, TimeUnit.SECONDS));
+    // FIXME: hard-coded
+    private static final Duration REGISTER_ASK_TIMEOUT = Duration.ofSeconds(5);
 
     private final DOMDataTreeIdentifier subtree;
     private final ActorRef actor;
@@ -46,16 +46,16 @@ public class DataTreeCohortRegistrationProxy<C extends DOMDataTreeCommitCohort> 
 
     public void init(final String shardName) {
         // FIXME: Add late binding to shard.
-        Future<ActorRef> findFuture = actorUtils.findLocalShardAsync(shardName);
-        findFuture.onComplete(new OnComplete<ActorRef>() {
+        actorUtils.findLocalShardAsync(shardName).onComplete(new OnComplete<>() {
             @Override
             public void onComplete(final Throwable failure, final ActorRef shard) {
                 if (failure instanceof LocalShardNotFoundException) {
-                    LOG.debug("No local shard found for {} - DataTreeChangeListener {} at path {} "
-                            + "cannot be registered", shardName, getInstance(), subtree);
+                    LOG.debug("No local shard found for {} - DataTreeChangeListener {} at path {} cannot be registered",
+                        shardName, getInstance(), subtree);
                 } else if (failure != null) {
-                    LOG.error("Failed to find local shard {} - DataTreeChangeListener {} at path {} "
-                            + "cannot be registered", shardName, getInstance(), subtree, failure);
+                    LOG.error(
+                        "Failed to find local shard {} - DataTreeChangeListener {} at path {} cannot be registered",
+                        shardName, getInstance(), subtree, failure);
                 } else {
                     performRegistration(shard);
                 }
@@ -68,27 +68,21 @@ public class DataTreeCohortRegistrationProxy<C extends DOMDataTreeCommitCohort> 
             return;
         }
         cohortRegistry = shard;
-        Future<Object> future =
-                Patterns.ask(shard, new DataTreeCohortActorRegistry.RegisterCohort(subtree, actor), TIMEOUT);
-        future.onComplete(new OnComplete<>() {
-
-            @Override
-            public void onComplete(final Throwable failure, final Object val) {
+        Patterns.ask(shard, new RegisterCohort(subtree, actor), REGISTER_ASK_TIMEOUT).whenCompleteAsync(
+            (val, failure) -> {
                 if (failure != null) {
                     LOG.error("Unable to register {} as commit cohort", getInstance(), failure);
                 }
                 if (isClosed()) {
                     removeRegistration();
                 }
-            }
-
-        }, actorUtils.getClientDispatcher());
+            }, actorUtils.getClientDispatcher());
     }
 
     @Override
     protected synchronized void removeRegistration() {
         if (cohortRegistry != null) {
-            cohortRegistry.tell(new DataTreeCohortActorRegistry.RemoveCohort(actor), ActorRef.noSender());
+            cohortRegistry.tell(new RemoveCohort(actor), ActorRef.noSender());
         }
     }
 }
