@@ -1,15 +1,35 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.6.0" name="odl-controller-akka">
     <feature version="0.0.0">
+        <feature>odl-asm</feature>
         <feature>odl-controller-scala</feature>
+        <feature>wrap</feature>
+        <bundle>mvn:com.github.jnr/jnr-constants/0.10.4</bundle>
+        <bundle>mvn:com.github.jnr/jnr-ffi/2.2.15</bundle>
         <bundle>mvn:com.typesafe/config/1.4.3</bundle>
         <bundle>mvn:com.typesafe/ssl-config-core_2.13/0.6.1</bundle>
         <bundle>mvn:io.aeron/aeron-client/1.45.1</bundle>
         <bundle>mvn:io.aeron/aeron-driver/1.45.1</bundle>
         <bundle>mvn:org.agrona/agrona/1.22.0</bundle>
-        <bundle>mvn:org.opendaylight.controller/repackaged-pekko/${project.version}</bundle>
+        <bundle>mvn:org.apache.pekko/pekko-actor-typed_2.13/1.1.2</bundle>
+        <bundle>mvn:org.apache.pekko/pekko-actor_2.13/1.1.2</bundle>
+        <bundle>mvn:org.apache.pekko/pekko-cluster-tools_2.13/1.1.2</bundle>
+        <bundle>mvn:org.apache.pekko/pekko-cluster_2.13/1.1.2</bundle>
+        <bundle>mvn:org.apache.pekko/pekko-coordination_2.13/1.1.2</bundle>
+        <bundle>mvn:org.apache.pekko/pekko-distributed-data_2.13/1.1.2</bundle>
+        <bundle>mvn:org.apache.pekko/pekko-osgi_2.13/1.1.2</bundle>
+        <bundle>mvn:org.apache.pekko/pekko-persistence_2.13/1.1.2</bundle>
+        <bundle>mvn:org.apache.pekko/pekko-protobuf-v3_2.13/1.1.2</bundle>
+        <bundle>mvn:org.apache.pekko/pekko-remote_2.13/1.1.2</bundle>
+        <bundle>mvn:org.apache.pekko/pekko-slf4j_2.13/1.1.2</bundle>
+        <bundle>mvn:org.apache.pekko/pekko-stream_2.13/1.1.2</bundle>
         <bundle>mvn:org.reactivestreams/reactive-streams/1.0.4</bundle>
-        <feature>wrap</feature>
-        <bundle>wrap:mvn:org.lmdbjava/lmdbjava/0.7.0</bundle>
+        <bundle>wrap:mvn:com.github.jnr/jffi/1.3.12</bundle>
+        <bundle>wrap:mvn:com.github.jnr/jnr-a64asm/1.0.0</bundle>
+        <bundle>wrap:mvn:com.github.jnr/jnr-x86asm/1.0.2</bundle>
+        <bundle>wrap:mvn:com.hierynomus/asn-one/0.6.0</bundle>
+        <bundle>wrap:mvn:org.apache.pekko/pekko-cluster-typed_2.13/1.1.2</bundle>
+        <bundle>wrap:mvn:org.apache.pekko/pekko-pki_2.13/1.1.2</bundle>
+        <bundle>wrap:mvn:org.lmdbjava/lmdbjava/0.9.0</bundle>
     </feature>
 </features>
