@@ -44,27 +44,27 @@
         <!-- Note: when bumping versions, make sure to update configurations in src/main/resources -->
         <dependency>
             <groupId>org.apache.pekko</groupId>
-            <artifactId>pekko-actor_2.13</artifactId>
+            <artifactId>pekko-actor_3</artifactId>
             <version>1.1.5</version>
         </dependency>
         <dependency>
             <groupId>org.apache.pekko</groupId>
-            <artifactId>pekko-actor-typed_2.13</artifactId>
+            <artifactId>pekko-actor-typed_3</artifactId>
             <version>1.1.5</version>
         </dependency>
         <dependency>
             <groupId>org.apache.pekko</groupId>
-            <artifactId>pekko-cluster_2.13</artifactId>
+            <artifactId>pekko-cluster_3</artifactId>
             <version>1.1.5</version>
         </dependency>
         <dependency>
             <groupId>org.apache.pekko</groupId>
-            <artifactId>pekko-cluster-typed_2.13</artifactId>
+            <artifactId>pekko-cluster-typed_3</artifactId>
             <version>1.1.5</version>
         </dependency>
         <dependency>
             <groupId>org.apache.pekko</groupId>
-            <artifactId>pekko-osgi_2.13</artifactId>
+            <artifactId>pekko-osgi_3</artifactId>
             <version>1.1.5</version>
             <exclusions>
                 <exclusion>
@@ -79,27 +79,27 @@
         </dependency>
         <dependency>
             <groupId>org.apache.pekko</groupId>
-            <artifactId>pekko-persistence_2.13</artifactId>
+            <artifactId>pekko-persistence_3</artifactId>
             <version>1.1.5</version>
         </dependency>
         <dependency>
             <groupId>org.apache.pekko</groupId>
-            <artifactId>pekko-protobuf-v3_2.13</artifactId>
+            <artifactId>pekko-protobuf-v3_3</artifactId>
             <version>1.1.5</version>
         </dependency>
         <dependency>
             <groupId>org.apache.pekko</groupId>
-            <artifactId>pekko-remote_2.13</artifactId>
+            <artifactId>pekko-remote_3</artifactId>
             <version>1.1.5</version>
         </dependency>
         <dependency>
             <groupId>org.apache.pekko</groupId>
-            <artifactId>pekko-slf4j_2.13</artifactId>
+            <artifactId>pekko-slf4j_3</artifactId>
             <version>1.1.5</version>
         </dependency>
         <dependency>
             <groupId>org.apache.pekko</groupId>
-            <artifactId>pekko-stream_2.13</artifactId>
+            <artifactId>pekko-stream_3</artifactId>
             <version>1.1.5</version>
         </dependency>
     </dependencies>
