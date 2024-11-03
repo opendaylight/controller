@@ -50,10 +50,6 @@
             <artifactId>config</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.typesafe</groupId>
-            <artifactId>ssl-config-core_2.13</artifactId>
-        </dependency>
-        <dependency>
             <groupId>io.aeron</groupId>
             <artifactId>aeron-annotations</artifactId>
         </dependency>
@@ -68,10 +64,6 @@
         <dependency>
             <groupId>org.agrona</groupId>
             <artifactId>agrona</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.reactivestreams</groupId>
-            <artifactId>reactive-streams</artifactId>
         </dependency>
         <dependency>
             <groupId>org.lmdbjava</groupId>
@@ -93,6 +85,14 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>scala3-library</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>ssl-config-core</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.framework</artifactId>
         </dependency>
@@ -101,8 +101,8 @@
             <artifactId>org.osgi.service.log</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-library</artifactId>
+            <groupId>org.reactivestreams</groupId>
+            <artifactId>reactive-streams</artifactId>
         </dependency>
     </dependencies>
 
