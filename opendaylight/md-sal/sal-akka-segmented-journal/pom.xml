@@ -46,20 +46,20 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
-            <artifactId>sal-clustering-commons</artifactId>
+            <artifactId>scala3-library</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-library</artifactId>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>sal-clustering-commons</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.apache.pekko</groupId>
-            <artifactId>pekko-testkit_2.13</artifactId>
+            <artifactId>pekko-testkit_3</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.pekko</groupId>
-            <artifactId>pekko-persistence-tck_2.13</artifactId>
+            <artifactId>pekko-persistence-tck_3</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
@@ -68,7 +68,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         </dependency>
         <dependency>
             <groupId>org.scalatestplus</groupId>
-            <artifactId>junit-4-13_2.13</artifactId>
+            <artifactId>junit-4-13_3</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
