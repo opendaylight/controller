@@ -1332,7 +1332,7 @@ public class ShardTest extends AbstractShardTest {
             self -> new TransactionPreCommitRequest(tx, 0, self));
         assertTrue(failure.isHardFailure());
         final var cause = assertInstanceOf(IllegalStateException.class, failure.getCause().unwrap());
-        assertEquals(tx + " expect to be ready, is in state OPEN", cause.getMessage());
+        assertEquals(tx + " cannot preCommit in state OPEN", cause.getMessage());
     }
 
     @Test
