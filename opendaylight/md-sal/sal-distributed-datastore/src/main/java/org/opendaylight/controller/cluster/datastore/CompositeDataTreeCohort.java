@@ -73,7 +73,7 @@ class CompositeDataTreeCohort {
         /**
          * Successful commit responses were received from all participating cohorts.
          */
-        COMMITED,
+        COMMITTED,
         /**
          * Some of cohorts responded back with unsuccessful message.
          */
@@ -111,20 +111,11 @@ class CompositeDataTreeCohort {
 
     void reset() {
         switch (state) {
-            case CAN_COMMIT_SENT:
-            case CAN_COMMIT_SUCCESSFUL:
-            case PRE_COMMIT_SENT:
-            case PRE_COMMIT_SUCCESSFUL:
-            case COMMIT_SENT:
-                abort();
-                break;
-            case ABORTED:
-            case COMMITED:
-            case FAILED:
-            case IDLE:
-                break;
-            default:
-                throw new IllegalStateException("Unhandled state " + state);
+            case null -> throw new NullPointerException();
+            case CAN_COMMIT_SENT, CAN_COMMIT_SUCCESSFUL, PRE_COMMIT_SENT, PRE_COMMIT_SUCCESSFUL, COMMIT_SENT -> abort();
+            case ABORTED, COMMITTED, FAILED, IDLE -> {
+                // No-op
+            }
         }
 
         successfulFromPrevious = List.of();
@@ -173,13 +164,13 @@ class CompositeDataTreeCohort {
     @Nullable CompletionStage<Empty> commit() {
         LOG.debug("{}: commit - successfulFromPrevious: {}", txId, successfulFromPrevious);
         if (successfulFromPrevious.isEmpty()) {
-            changeStateFrom(State.PRE_COMMIT_SUCCESSFUL, State.COMMITED);
+            changeStateFrom(State.PRE_COMMIT_SUCCESSFUL, State.COMMITTED);
             return null;
         }
 
         final var futures = sendMessageToSuccessful(new DataTreeCohortActor.Commit(txId));
         changeStateFrom(State.PRE_COMMIT_SUCCESSFUL, State.COMMIT_SENT);
-        return processResponses(futures, State.COMMIT_SENT, State.COMMITED);
+        return processResponses(futures, State.COMMIT_SENT, State.COMMITTED);
     }
 
     @Nullable CompletionStage<Empty> abort() {
