@@ -4,9 +4,9 @@
         <feature>odl-controller-scala</feature>
         <bundle>mvn:com.typesafe/config/1.4.3</bundle>
         <bundle>mvn:com.typesafe/ssl-config-core_2.13/0.6.1</bundle>
-        <bundle>mvn:io.aeron/aeron-client/1.38.1</bundle>
-        <bundle>mvn:io.aeron/aeron-driver/1.38.1</bundle>
-        <bundle>mvn:org.agrona/agrona/1.15.2</bundle>
+        <bundle>mvn:io.aeron/aeron-client/1.45.1</bundle>
+        <bundle>mvn:io.aeron/aeron-driver/1.45.1</bundle>
+        <bundle>mvn:org.agrona/agrona/1.22.0</bundle>
         <bundle>mvn:org.opendaylight.controller/repackaged-pekko/${project.version}</bundle>
         <bundle>mvn:org.reactivestreams/reactive-streams/1.0.4</bundle>
         <feature>wrap</feature>
