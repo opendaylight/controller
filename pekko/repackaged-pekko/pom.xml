@@ -47,6 +47,10 @@
         </dependency>
         <dependency>
             <groupId>io.aeron</groupId>
+            <artifactId>aeron-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.aeron</groupId>
             <artifactId>aeron-client</artifactId>
         </dependency>
         <dependency>
@@ -221,7 +225,6 @@
                             org.fusesource.leveldbjni;resolution:=optional,
                             org.iq80.leveldb;resolution:=optional,
                             org.iq80.leveldb.impl;resolution:=optional,
-                            org.jboss.netty.*;resolution:=optional,
                             *
                         </Import-Package>
                     </instructions>
