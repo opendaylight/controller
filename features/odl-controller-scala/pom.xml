@@ -31,11 +31,15 @@
         </dependency>
         <dependency>
             <groupId>org.scala-lang</groupId>
+            <artifactId>scala3-library_3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.scala-lang</groupId>
             <artifactId>scala-reflect</artifactId>
         </dependency>
         <dependency>
             <groupId>org.scala-lang.modules</groupId>
-            <artifactId>scala-parser-combinators_2.13</artifactId>
+            <artifactId>scala-parser-combinators_3</artifactId>
         </dependency>
     </dependencies>
 </project>
