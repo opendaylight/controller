@@ -1332,7 +1332,7 @@ public class ShardTest extends AbstractShardTest {
             self -> new TransactionPreCommitRequest(tx, 0, self));
         assertTrue(failure.isHardFailure());
         final var cause = assertInstanceOf(IllegalStateException.class, failure.getCause().unwrap());
-        assertEquals(tx + " expect to be ready, is in state OPEN", cause.getMessage());
+        assertEquals(tx + " cannot preCommit in state OPEN", cause.getMessage());
     }
 
     @Test
@@ -1413,7 +1413,7 @@ public class ShardTest extends AbstractShardTest {
                 .setCommit(true)
                 .build());
         final var cause = assertInstanceOf(IllegalStateException.class, failure.getCause().unwrap());
-        assertEquals(tx + " expect to be open, is in state ABORTED", cause.getMessage());
+        assertEquals(tx + " cannot become ready in state ABORTED", cause.getMessage());
 
         // Ready and CanCommit another and verify success.
         connection.request(TransactionCommitSuccess.class,
