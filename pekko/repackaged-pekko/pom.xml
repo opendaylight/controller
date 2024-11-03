@@ -44,7 +44,7 @@
         </dependency>
         <dependency>
             <groupId>com.typesafe</groupId>
-            <artifactId>ssl-config-core_2.13</artifactId>
+            <artifactId>ssl-config-core_3</artifactId>
         </dependency>
         <dependency>
             <groupId>io.aeron</groupId>
