@@ -115,7 +115,7 @@
                 <version>1.0.4</version>
             </dependency>
 
-            <!-- Aeron, required by Akka -->
+            <!-- Aeron, required by Pekko -->
             <dependency>
                 <groupId>org.agrona</groupId>
                 <artifactId>agrona</artifactId>
