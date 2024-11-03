@@ -46,7 +46,7 @@ import org.apache.pekko.persistence.SaveSnapshotFailure;
 import org.apache.pekko.persistence.SaveSnapshotSuccess;
 import org.apache.pekko.persistence.SnapshotMetadata;
 import org.apache.pekko.persistence.SnapshotOffer;
-import org.apache.pekko.protobuf.ByteString;
+import org.apache.pekko.protobufv3.internal.ByteString;
 import org.apache.pekko.testkit.TestActorRef;
 import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.After;

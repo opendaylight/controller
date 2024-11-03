@@ -20,7 +20,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.apache.pekko.actor.ActorRef;
-import org.apache.pekko.protobuf.ByteString;
+import org.apache.pekko.protobufv3.internal.ByteString;
 import org.junit.After;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.AbstractActorTest;
