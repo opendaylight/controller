@@ -23,6 +23,14 @@
       <optional>true</optional>
     </dependency>
     <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-text</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.checkerframework</groupId>
       <artifactId>checker-qual</artifactId>
       <optional>true</optional>
@@ -44,18 +52,6 @@
       <artifactId>org.osgi.service.metatype.annotations</artifactId>
     </dependency>
 
-    <!-- Pekko -->
-    <dependency>
-      <groupId>org.apache.pekko</groupId>
-      <artifactId>pekko-testkit_2.13</artifactId>
-    </dependency>
-
-    <!-- Scala -->
-    <dependency>
-      <groupId>org.scala-lang</groupId>
-      <artifactId>scala-library</artifactId>
-    </dependency>
-
     <!-- OpenDaylight -->
     <dependency>
       <groupId>net.java.dev.stax-utils</groupId>
@@ -68,6 +64,10 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>raft-spi</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>scala3-library</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
@@ -196,15 +196,16 @@
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>yang-model-api</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-text</artifactId>
-    </dependency>
 
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.pekko</groupId>
+      <artifactId>pekko-testkit_3</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
@@ -214,9 +215,8 @@
       <artifactId>awaitility</artifactId>
     </dependency>
     <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-      <scope>test</scope>
+      <groupId>org.opendaylight.mdsal</groupId>
+      <artifactId>mdsal-binding-test-utils</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
@@ -226,10 +226,6 @@
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>binding-data-codec-dynamic</artifactId>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.mdsal</groupId>
-      <artifactId>mdsal-binding-test-utils</artifactId>
     </dependency>
   </dependencies>
 

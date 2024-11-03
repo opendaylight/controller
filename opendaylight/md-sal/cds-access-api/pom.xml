@@ -54,8 +54,8 @@
             <artifactId>repackaged-pekko</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-library</artifactId>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>scala3-library</artifactId>
         </dependency>
 
         <!-- Testing dependencies -->
@@ -66,7 +66,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.pekko</groupId>
-            <artifactId>pekko-testkit_2.13</artifactId>
+            <artifactId>pekko-testkit_3</artifactId>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.yangtools</groupId>

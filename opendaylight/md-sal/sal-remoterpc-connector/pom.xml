@@ -55,6 +55,10 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
+            <artifactId>scala3-library</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-common-util</artifactId>
         </dependency>
         <dependency>
@@ -81,15 +85,11 @@
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.service.metatype.annotations</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-library</artifactId>
-        </dependency>
 
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.apache.pekko</groupId>
-            <artifactId>pekko-testkit_2.13</artifactId>
+            <artifactId>pekko-testkit_3</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
