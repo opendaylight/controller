@@ -17,7 +17,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.OptionalInt;
 import org.apache.commons.lang3.SerializationUtils;
-import org.apache.pekko.protobuf.ByteString;
+import org.apache.pekko.protobufv3.internal.ByteString;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
