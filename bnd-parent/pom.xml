@@ -35,15 +35,16 @@
 
             <!-- Scala and its modules -->
             <dependency>
-                <groupId>org.scala-lang</groupId>
-                <artifactId>scala-library</artifactId>
-                <version>2.13.16</version>
-            </dependency>
-            <dependency>
                 <groupId>org.scalatestplus</groupId>
-                <artifactId>junit-4-13_2.13</artifactId>
+                <artifactId>junit-4-13_3</artifactId>
                 <version>3.2.19.1</version>
                 <scope>test</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.scala-lang</groupId>
+                        <artifactId>scala3-library_3</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <!-- Configuration library -->
@@ -55,48 +56,66 @@
             </dependency>
             <dependency>
                 <groupId>com.typesafe</groupId>
-                <artifactId>ssl-config-core_2.13</artifactId>
+                <artifactId>ssl-config-core_3</artifactId>
                 <version>0.6.1</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.scala-lang</groupId>
+                        <artifactId>scala3-library_3</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <!-- Pekko testkit -->
             <dependency>
                 <groupId>org.apache.pekko</groupId>
-                <artifactId>pekko-testkit_2.13</artifactId>
+                <artifactId>pekko-testkit_3</artifactId>
                 <version>1.1.5</version>
                 <scope>test</scope>
                 <exclusions>
                     <exclusion>
                         <groupId>org.apache.pekko</groupId>
-                        <artifactId>pekko-actor_2.13</artifactId>
+                        <artifactId>pekko-actor_3</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.scala-lang</groupId>
+                        <artifactId>scala3-library_3</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.pekko</groupId>
-                <artifactId>pekko-actor-testkit-typed_2.13</artifactId>
+                <artifactId>pekko-actor-testkit-typed_3</artifactId>
                 <version>1.1.5</version>
                 <scope>test</scope>
                 <exclusions>
                     <exclusion>
                         <groupId>org.apache.pekko</groupId>
-                        <artifactId>pekko-actor-typed_2.13</artifactId>
+                        <artifactId>pekko-actor-typed_3</artifactId>
                     </exclusion>
                     <exclusion>
                         <groupId>org.apache.pekko</groupId>
-                        <artifactId>pekko-slf4j_2.13</artifactId>
+                        <artifactId>pekko-slf4j_3</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.scala-lang</groupId>
+                        <artifactId>scala3-library_3</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.pekko</groupId>
-                <artifactId>pekko-persistence-tck_2.13</artifactId>
+                <artifactId>pekko-persistence-tck_3</artifactId>
                 <version>1.1.5</version>
                 <scope>test</scope>
                 <exclusions>
                     <exclusion>
                         <groupId>org.apache.pekko</groupId>
-                        <artifactId>pekko-persistence_2.13</artifactId>
+                        <artifactId>pekko-persistence_3</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.scala-lang</groupId>
+                        <artifactId>scala3-library_3</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
