@@ -9,7 +9,7 @@ package org.opendaylight.controller.cluster.common.actor;
 
 import static java.util.Objects.requireNonNull;
 
-import scala.concurrent.ExecutionContext;
+import scala.concurrent.ExecutionContextExecutor;
 
 public class Dispatchers {
     public static final String DEFAULT_DISPATCHER_PATH = "pekko.actor.default-dispatcher";
@@ -41,7 +41,7 @@ public class Dispatchers {
             return DEFAULT_DISPATCHER_PATH;
         }
 
-        ExecutionContext dispatcher(final org.apache.pekko.dispatch.Dispatchers knownDispatchers) {
+        ExecutionContextExecutor dispatcher(final org.apache.pekko.dispatch.Dispatchers knownDispatchers) {
             if (knownDispatchers.hasDispatcher(path)) {
                 return knownDispatchers.lookup(path);
             }
@@ -53,11 +53,11 @@ public class Dispatchers {
         this.dispatchers = requireNonNull(dispatchers, "dispatchers should not be null");
     }
 
-    public ExecutionContext getDispatcher(final DispatcherType dispatcherType) {
-        return dispatcherType.dispatcher(this.dispatchers);
+    public ExecutionContextExecutor getDispatcher(final DispatcherType dispatcherType) {
+        return dispatcherType.dispatcher(dispatchers);
     }
 
     public String getDispatcherPath(final DispatcherType dispatcherType) {
-        return dispatcherType.path(this.dispatchers);
+        return dispatcherType.path(dispatchers);
     }
 }

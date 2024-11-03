@@ -53,7 +53,7 @@ import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
-import scala.concurrent.ExecutionContext;
+import scala.concurrent.ExecutionContextExecutor;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
 
@@ -63,7 +63,7 @@ import scala.concurrent.duration.FiniteDuration;
  * not be passed to actors especially remote actors.
  */
 public class ActorUtils {
-    private static final class AskTimeoutCounter extends OnComplete<Object> implements ExecutionContext {
+    private static final class AskTimeoutCounter extends OnComplete<Object> implements ExecutionContextExecutor {
         private LongAdder ateExceptions = new LongAdder();
 
         @Override
@@ -515,7 +515,7 @@ public class ActorUtils {
      *
      * @return the dispatcher
      */
-    public ExecutionContext getClientDispatcher() {
+    public ExecutionContextExecutor getClientDispatcher() {
         return dispatchers.getDispatcher(Dispatchers.DispatcherType.Client);
     }
 
