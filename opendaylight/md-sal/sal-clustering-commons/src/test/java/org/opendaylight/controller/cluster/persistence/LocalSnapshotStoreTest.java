@@ -63,7 +63,8 @@ public class LocalSnapshotStoreTest {
         createSnapshotDir();
 
         system = ActorSystem.create("test", ConfigFactory.load("LocalSnapshotStoreTest.conf"));
-        snapshotStore = system.registerExtension(Persistence.lookup()).snapshotStoreFor(null, ConfigFactory.empty());
+        snapshotStore = ((Persistence) system.registerExtension(Persistence.lookup()))
+            .snapshotStoreFor(null, ConfigFactory.empty());
     }
 
     @AfterClass
