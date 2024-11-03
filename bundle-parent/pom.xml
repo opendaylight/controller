@@ -54,7 +54,7 @@
             <dependency>
                 <groupId>org.scalatestplus</groupId>
                 <artifactId>junit-4-13_2.13</artifactId>
-                <version>3.2.13.0</version>
+                <version>3.2.19.0</version>
                 <scope>test</scope>
             </dependency>
 
