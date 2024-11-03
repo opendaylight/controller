@@ -82,7 +82,7 @@ class ActorBehaviorTest {
         persistenceId.set(ctx, MEMBER_1_FRONTEND_TYPE_1);
 
         system = ActorSystem.apply("system1");
-        final var storeRef = system.registerExtension(Persistence.lookup())
+        final var storeRef = ((Persistence) system.registerExtension(Persistence.lookup()))
             .snapshotStoreFor(null, ConfigFactory.empty());
         probe = new TestProbe(system);
         storeRef.tell(probe.ref(), ActorRef.noSender());
