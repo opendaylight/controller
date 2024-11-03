@@ -47,7 +47,7 @@
     <!-- Pekko -->
     <dependency>
       <groupId>org.apache.pekko</groupId>
-      <artifactId>pekko-testkit_2.13</artifactId>
+      <artifactId>pekko-testkit_3</artifactId>
     </dependency>
 
     <!-- Scala -->
