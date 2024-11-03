@@ -3,7 +3,7 @@
     <feature version="0.0.0">
         <feature>odl-netty-4</feature>
         <bundle>mvn:com.typesafe/config/1.4.3</bundle>
-        <bundle>mvn:com.typesafe/ssl-config-core_2.13/0.6.1</bundle>
+        <bundle>mvn:com.typesafe/ssl-config-core_3/0.6.1</bundle>
         <bundle>mvn:io.aeron/aeron-annotations/1.45.1</bundle>
         <bundle>mvn:io.aeron/aeron-client/1.45.1</bundle>
         <bundle>mvn:io.aeron/aeron-driver/1.45.1</bundle>
@@ -13,6 +13,7 @@
         <bundle>mvn:org.scala-lang/scala-library/2.13.16</bundle>
         <bundle>mvn:org.scala-lang.modules/scala-parser-combinators_2.13/1.1.2</bundle>
         <feature>wrap</feature>
+        <bundle>wrap:mvn:org.scala-lang/scala3-library_3/3.3.6</bundle>
         <bundle>wrap:mvn:org.lmdbjava/lmdbjava/0.7.0</bundle>
     </feature>
 </features>
