@@ -15,8 +15,6 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 // Non-sealed for mocking
 abstract class ShardDataTreeTransactionParent {
 
-    abstract void abortFromTransactionActor(AbstractShardDataTreeTransaction<?> transaction);
-
     abstract void abortTransaction(AbstractShardDataTreeTransaction<?> transaction, Runnable callback);
 
     abstract CommitCohort finishTransaction(ReadWriteShardDataTreeTransaction transaction,

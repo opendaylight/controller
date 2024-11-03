@@ -12,7 +12,6 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.controller.cluster.datastore.persisted.AbortTransactionPayload;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeSnapshot;
 
@@ -70,19 +69,6 @@ abstract class AbstractShardDataTreeTransaction<T extends DataTreeSnapshot>
     final void abort(final Runnable callback) {
         checkState(close(), "Transaction is already closed");
         parent.abortTransaction(this, callback);
-    }
-
-    /**
-     * This method is exposed for sake of {@link ShardTransaction}, which is an actor. We need to ensure that
-     * the parent is updated to reflect the transaction has been closed, but no journal actions may be invoked.
-     *
-     * <p>ShardTransaction is responsible for additionally sending a request to persist an
-     * {@link AbortTransactionPayload} via a message to the Shard actor.
-     */
-    final void abortFromTransactionActor() {
-        if (close()) {
-            parent.abortFromTransactionActor(this);
-        }
     }
 
     @Override

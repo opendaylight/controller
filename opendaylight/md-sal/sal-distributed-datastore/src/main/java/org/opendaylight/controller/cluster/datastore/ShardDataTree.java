@@ -737,11 +737,6 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     @Override
-    final void abortFromTransactionActor(final AbstractShardDataTreeTransaction<?> transaction) {
-        // No-op for free-standing transactions
-    }
-
-    @Override
     final SimpleCommitCohort finishTransaction(final ReadWriteShardDataTreeTransaction transaction,
             final Optional<SortedSet<String>> participatingShardNames) {
         final var userCohorts = finishTransaction(transaction);
