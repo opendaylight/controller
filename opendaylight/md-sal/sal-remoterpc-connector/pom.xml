@@ -26,6 +26,10 @@
             <artifactId>config</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.apache.pekko</groupId>
+            <artifactId>pekko-actor_2.13</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.jdt</groupId>
             <artifactId>org.eclipse.jdt.annotation</artifactId>
         </dependency>
@@ -48,10 +52,6 @@
         <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
             <artifactId>yang-model-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>repackaged-pekko</artifactId>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
