@@ -3,14 +3,14 @@
     <feature version="0.0.0">
         <feature>odl-netty-4</feature>
         <bundle>mvn:com.typesafe/config/1.4.3</bundle>
-        <bundle>mvn:com.typesafe/ssl-config-core_2.13/0.6.1</bundle>
         <bundle>mvn:io.aeron/aeron-annotations/1.45.1</bundle>
         <bundle>mvn:io.aeron/aeron-client/1.45.1</bundle>
         <bundle>mvn:io.aeron/aeron-driver/1.45.1</bundle>
         <bundle>mvn:org.agrona/agrona/1.22.0</bundle>
         <bundle>mvn:org.opendaylight.controller/repackaged-pekko/${project.version}</bundle>
+        <bundle>mvn:org.opendaylight.controller/scala3-library/${project.version}</bundle>
+        <bundle>mvn:org.opendaylight.controller/ssl-config-core/${project.version}</bundle>
         <bundle>mvn:org.reactivestreams/reactive-streams/1.0.4</bundle>
-        <bundle>mvn:org.scala-lang/scala-library/2.13.16</bundle>
         <feature>wrap</feature>
         <bundle>wrap:mvn:org.lmdbjava/lmdbjava/0.9.1</bundle>
     </feature>
