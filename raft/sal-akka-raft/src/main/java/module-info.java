@@ -32,10 +32,10 @@ module org.opendaylight.controller.cluster.raft {
     requires com.google.common;
     requires io.netty.buffer;
     requires org.apache.commons.lang3;
+    requires org.opendaylight.controller.scala3.library;
     requires org.opendaylight.raft.journal;
     requires org.opendaylight.yangtools.util;
     requires org.slf4j;
-    requires scala.library;
 
     // Constants only
     requires static org.osgi.framework;
