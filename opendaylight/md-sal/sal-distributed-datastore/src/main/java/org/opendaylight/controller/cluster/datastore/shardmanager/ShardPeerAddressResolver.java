@@ -10,16 +10,13 @@ package org.opendaylight.controller.cluster.datastore.shardmanager;
 import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import org.apache.pekko.actor.Address;
 import org.apache.pekko.actor.AddressFromURIString;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
-import org.opendaylight.controller.cluster.datastore.identifiers.ShardManagerIdentifier;
 import org.opendaylight.controller.cluster.raft.PeerAddressResolver;
 
 /**
@@ -31,13 +28,13 @@ import org.opendaylight.controller.cluster.raft.PeerAddressResolver;
 class ShardPeerAddressResolver implements PeerAddressResolver {
     // Stores a mapping between a member name and the address of the member. The map is concurrent as it
     // will be accessed by multiple threads via the public resolve method.
-    private final ConcurrentMap<MemberName, Address> memberNameToAddress = new ConcurrentHashMap<>();
-    private final String shardManagerIdentifier;
+    private final ConcurrentHashMap<MemberName, Address> memberNameToAddress = new ConcurrentHashMap<>();
+    private final ShardManagerIdentifier shardManagerIdentifier;
     private final String shardManagerType;
     private final MemberName localMemberName;
 
     ShardPeerAddressResolver(final String shardManagerType, final MemberName localMemberName) {
-        this.shardManagerIdentifier = ShardManagerIdentifier.builder().type(shardManagerType).build().toString();
+        shardManagerIdentifier = new ShardManagerIdentifier(shardManagerType);
         this.shardManagerType = shardManagerType;
         this.localMemberName = requireNonNull(localMemberName);
     }
@@ -51,16 +48,16 @@ class ShardPeerAddressResolver implements PeerAddressResolver {
     }
 
     Set<MemberName> getPeerMembers() {
-        return this.memberNameToAddress.keySet();
+        return memberNameToAddress.keySet();
     }
 
     Address getPeerAddress(final MemberName memberName) {
         return memberNameToAddress.get(memberName);
     }
 
-    Collection<String> getShardManagerPeerActorAddresses() {
-        Collection<String> peerAddresses = new ArrayList<>();
-        for (Map.Entry<MemberName, Address> entry: memberNameToAddress.entrySet()) {
+    List<String> getShardManagerPeerActorAddresses() {
+        final var peerAddresses = new ArrayList<String>();
+        for (var entry: memberNameToAddress.entrySet()) {
             if (!localMemberName.equals(entry.getKey())) {
                 peerAddresses.add(getShardManagerActorPathBuilder(entry.getValue()).toString());
             }
@@ -74,17 +71,15 @@ class ShardPeerAddressResolver implements PeerAddressResolver {
     }
 
     String getShardActorAddress(final String shardName, final MemberName memberName) {
-        Address memberAddress = memberNameToAddress.get(memberName);
-        if (memberAddress != null) {
-            return getShardManagerActorPathBuilder(memberAddress).append("/").append(
-                    getShardIdentifier(memberName, shardName)).toString();
-        }
-
-        return null;
+        final var memberAddress = memberNameToAddress.get(memberName);
+        return memberAddress == null ? null : getShardManagerActorPathBuilder(memberAddress)
+            .append("/").append(getShardIdentifier(memberName, shardName))
+            .toString();
     }
 
     StringBuilder getShardManagerActorPathBuilder(final Address address) {
-        return new StringBuilder().append(address.toString()).append("/user/").append(shardManagerIdentifier);
+        return new StringBuilder().append(address.toString())
+            .append("/user/").append(shardManagerIdentifier.toActorName());
     }
 
     @Override
@@ -93,7 +88,7 @@ class ShardPeerAddressResolver implements PeerAddressResolver {
             return null;
         }
 
-        ShardIdentifier shardId = ShardIdentifier.fromShardIdString(peerId);
+        final var shardId = ShardIdentifier.fromShardIdString(peerId);
         return getShardActorAddress(shardId.getShardName(), shardId.getMemberName());
     }
 

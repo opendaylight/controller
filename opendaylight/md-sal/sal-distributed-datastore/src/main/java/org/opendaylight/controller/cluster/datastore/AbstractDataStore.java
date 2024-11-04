@@ -30,10 +30,10 @@ import org.opendaylight.controller.cluster.common.actor.Dispatchers;
 import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
 import org.opendaylight.controller.cluster.databroker.actors.dds.DistributedDataStoreClientActor;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
-import org.opendaylight.controller.cluster.datastore.identifiers.ShardManagerIdentifier;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.shardmanager.AbstractShardManagerCreator;
 import org.opendaylight.controller.cluster.datastore.shardmanager.ShardManagerCreator;
+import org.opendaylight.controller.cluster.datastore.shardmanager.ShardManagerIdentifier;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.controller.cluster.datastore.utils.PrimaryShardInfoFutureCache;
 import org.opendaylight.mdsal.dom.api.DOMDataBroker.CommitCohortExtension;
@@ -77,26 +77,25 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
         requireNonNull(configuration, "configuration should not be null");
         requireNonNull(datastoreContextFactory, "datastoreContextFactory should not be null");
 
-        String shardManagerId = ShardManagerIdentifier.builder()
-                .type(datastoreContextFactory.getBaseDatastoreContext().getDataStoreName()).build().toString();
-
+        final var baseDatastoreContext = datastoreContextFactory.getBaseDatastoreContext();
+        final var shardManagerId = new ShardManagerIdentifier(baseDatastoreContext.getDataStoreName());
         LOG.info("Creating ShardManager : {}", shardManagerId);
 
-        String shardDispatcher =
-                new Dispatchers(actorSystem.dispatchers()).getDispatcherPath(Dispatchers.DispatcherType.Shard);
+        final var shardDispatcher = new Dispatchers(actorSystem.dispatchers())
+            .getDispatcherPath(Dispatchers.DispatcherType.Shard);
+        final var primaryShardInfoCache = new PrimaryShardInfoFutureCache();
+        final var creator = getShardManagerCreator()
+            .cluster(cluster)
+            .configuration(configuration)
+            .datastoreContextFactory(datastoreContextFactory)
+            .readinessFuture(readinessFuture)
+            .primaryShardInfoCache(primaryShardInfoCache)
+            .restoreFromSnapshot(restoreFromSnapshot)
+            .distributedDataStore(this);
 
-        PrimaryShardInfoFutureCache primaryShardInfoCache = new PrimaryShardInfoFutureCache();
-
-        AbstractShardManagerCreator<?> creator = getShardManagerCreator().cluster(cluster).configuration(configuration)
-                .datastoreContextFactory(datastoreContextFactory)
-                .readinessFuture(readinessFuture)
-                .primaryShardInfoCache(primaryShardInfoCache)
-                .restoreFromSnapshot(restoreFromSnapshot)
-                .distributedDataStore(this);
-
-        actorUtils = new ActorUtils(actorSystem, createShardManager(actorSystem, creator, shardDispatcher,
-                shardManagerId), cluster, configuration, datastoreContextFactory.getBaseDatastoreContext(),
-                primaryShardInfoCache);
+        actorUtils = new ActorUtils(actorSystem,
+            createShardManager(actorSystem, creator, shardDispatcher, shardManagerId), cluster, configuration,
+            baseDatastoreContext, primaryShardInfoCache);
 
         final Props clientProps = DistributedDataStoreClientActor.props(cluster.getCurrentMemberName(),
             datastoreContextFactory.getBaseDatastoreContext().getDataStoreName(), actorUtils);
@@ -113,13 +112,11 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
         identifier = client.getIdentifier();
         LOG.debug("Distributed data store client {} started", identifier);
 
-        datastoreConfigMXBean = new DatastoreConfigurationMXBeanImpl(
-                datastoreContextFactory.getBaseDatastoreContext().getDataStoreMXBeanType());
-        datastoreConfigMXBean.setContext(datastoreContextFactory.getBaseDatastoreContext());
+        datastoreConfigMXBean = new DatastoreConfigurationMXBeanImpl(baseDatastoreContext.getDataStoreMXBeanType());
+        datastoreConfigMXBean.setContext(baseDatastoreContext);
         datastoreConfigMXBean.registerMBean();
 
-        datastoreInfoMXBean = new DatastoreInfoMXBeanImpl(datastoreContextFactory.getBaseDatastoreContext()
-                .getDataStoreMXBeanType(), actorUtils);
+        datastoreInfoMXBean = new DatastoreInfoMXBeanImpl(baseDatastoreContext.getDataStoreMXBeanType(), actorUtils);
         datastoreInfoMXBean.registerMBean();
     }
 
@@ -303,17 +300,19 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
     @SuppressWarnings("checkstyle:IllegalCatch")
     private static ActorRef createShardManager(final ActorSystem actorSystem,
             final AbstractShardManagerCreator<?> creator, final String shardDispatcher,
-            final String shardManagerId) {
+            final ShardManagerIdentifier shardManagerId) {
         Exception lastException = null;
 
         for (int i = 0; i < 100; i++) {
             try {
-                return actorSystem.actorOf(creator.props().withDispatcher(shardDispatcher), shardManagerId);
+                return actorSystem.actorOf(creator.props().withDispatcher(shardDispatcher),
+                    shardManagerId.toActorName());
             } catch (Exception e) {
                 lastException = e;
                 Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
-                LOG.debug("Could not create actor {} because of {} - waiting for sometime before retrying "
-                        + "(retry count = {})", shardManagerId, e.getMessage(), i);
+                LOG.debug(
+                    "Could not create actor {} because of {} - waiting for sometime before retrying (retry count = {})",
+                    shardManagerId, e.getMessage(), i);
             }
         }
 

@@ -5,18 +5,18 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.identifiers;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.opendaylight.controller.cluster.datastore.shardmanager.ShardManagerIdentifier;
 
-public class ShardManagerIdentifierTest {
-
+class ShardManagerIdentifierTest {
     @Test
-    public void testIdentifier() {
-        assertEquals("shardmanager-operational", ShardManagerIdentifier.builder().type("operational")
-                .build().toString());
+    void testIdentifier() {
+        final var id = new ShardManagerIdentifier("operational");
+        assertEquals("shardmanager-operational", id.toActorName());
+        assertEquals("shardmanager-operational", id.toString());
     }
 }

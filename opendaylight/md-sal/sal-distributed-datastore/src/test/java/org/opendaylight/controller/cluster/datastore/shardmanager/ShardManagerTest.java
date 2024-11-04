@@ -89,7 +89,6 @@ import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderExc
 import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedException;
 import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
-import org.opendaylight.controller.cluster.datastore.identifiers.ShardManagerIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.ActorInitialized;
 import org.opendaylight.controller.cluster.datastore.messages.AddShardReplica;
 import org.opendaylight.controller.cluster.datastore.messages.ChangeShardMembersVotingStatus;
@@ -163,7 +162,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
             .dataStoreName(shardMrgIDSuffix).shardInitializationTimeout(600, TimeUnit.MILLISECONDS)
             .shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(6);
 
-    private final String shardMgrID = ShardManagerIdentifier.builder().type(shardMrgIDSuffix).build().toString();
+    private final String shardMgrID = new ShardManagerIdentifier(shardMrgIDSuffix).toActorName();
 
     @BeforeClass
     public static void beforeClass() {
@@ -671,7 +670,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
     @Test
     public void testOnReceiveFindPrimaryForRemoteShard() {
         LOG.info("testOnReceiveFindPrimaryForRemoteShard starting");
-        String shardManagerID = ShardManagerIdentifier.builder().type(shardMrgIDSuffix).build().toString();
+        final var shardManagerID = new ShardManagerIdentifier(shardMrgIDSuffix).toActorName();
 
         // Create an ActorSystem ShardManager actor for member-1.
 
@@ -679,9 +678,10 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         Cluster.get(system1).join(AddressFromURIString.parse("pekko://cluster-test@127.0.0.1:2558"));
 
         final TestActorRef<TestShardManager> shardManager1 = TestActorRef.create(system1,
-                newTestShardMgrBuilderWithMockShardActor().cluster(
-                        new ClusterWrapperImpl(system1)).props().withDispatcher(
-                                Dispatchers.DefaultDispatcherId()), shardManagerID);
+                newTestShardMgrBuilderWithMockShardActor()
+                    .cluster(new ClusterWrapperImpl(system1))
+                    .props().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                shardManagerID);
 
         // Create an ActorSystem ShardManager actor for member-2.
 
@@ -696,9 +696,10 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
                         .put("astronauts", Arrays.asList("member-2")).build());
 
         final TestActorRef<TestShardManager> shardManager2 = TestActorRef.create(system2,
-                newTestShardMgrBuilder(mockConfig2).shardActor(mockShardActor2).cluster(
-                        new ClusterWrapperImpl(system2)).props().withDispatcher(
-                                Dispatchers.DefaultDispatcherId()), shardManagerID);
+                newTestShardMgrBuilder(mockConfig2).shardActor(mockShardActor2)
+                    .cluster(new ClusterWrapperImpl(system2))
+                    .props().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                shardManagerID);
 
         final TestKit kit = new TestKit(system1);
         shardManager1.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
@@ -739,7 +740,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
     @Test
     public void testShardAvailabilityOnChangeOfMemberReachability() {
         LOG.info("testShardAvailabilityOnChangeOfMemberReachability starting");
-        String shardManagerID = ShardManagerIdentifier.builder().type(shardMrgIDSuffix).build().toString();
+        String shardManagerID = new ShardManagerIdentifier(shardMrgIDSuffix).toActorName();
 
         // Create an ActorSystem ShardManager actor for member-1.
 
@@ -843,7 +844,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
     @Test
     public void testShardAvailabilityChangeOnMemberUnreachableAndLeadershipChange() {
         LOG.info("testShardAvailabilityChangeOnMemberUnreachableAndLeadershipChange starting");
-        String shardManagerID = ShardManagerIdentifier.builder().type(shardMrgIDSuffix).build().toString();
+        String shardManagerID = new ShardManagerIdentifier(shardMrgIDSuffix).toActorName();
 
         // Create an ActorSystem ShardManager actor for member-1.
 
@@ -934,7 +935,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
     @Test
     public void testShardAvailabilityChangeOnMemberWithNameContainedInLeaderIdUnreachable() {
         LOG.info("testShardAvailabilityChangeOnMemberWithNameContainedInLeaderIdUnreachable starting");
-        String shardManagerID = ShardManagerIdentifier.builder().type(shardMrgIDSuffix).build().toString();
+        String shardManagerID = new ShardManagerIdentifier(shardMrgIDSuffix).toActorName();
 
         MockConfiguration mockConfig = new MockConfiguration(ImmutableMap.<String, List<String>>builder()
                 .put("default", Arrays.asList("member-256", "member-2")).build());
@@ -1497,7 +1498,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
                 ImmutableMap.<String, List<String>>builder().put("default", Arrays.asList("member-1", "member-2"))
                         .put("astronauts", Arrays.asList("member-2")).build());
 
-        final String shardManagerID = ShardManagerIdentifier.builder().type(shardMrgIDSuffix).build().toString();
+        final String shardManagerID = new ShardManagerIdentifier(shardMrgIDSuffix).toActorName();
         datastoreContextBuilder.shardManagerPersistenceId(shardManagerID);
 
         // Create an ActorSystem ShardManager actor for member-1.
@@ -1776,7 +1777,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
                 ImmutableMap.<String, List<String>>builder().put("default", Arrays.asList("member-1", "member-2"))
                         .put("astronauts", Arrays.asList("member-1")).build());
 
-        String shardManagerID = ShardManagerIdentifier.builder().type(shardMrgIDSuffix).build().toString();
+        String shardManagerID = new ShardManagerIdentifier(shardMrgIDSuffix).toActorName();
 
         // Create an ActorSystem ShardManager actor for member-1.
         final ActorSystem system1 = newActorSystem("Member1");
