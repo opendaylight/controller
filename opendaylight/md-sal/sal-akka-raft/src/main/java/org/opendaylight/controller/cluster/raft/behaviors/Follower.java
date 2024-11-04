@@ -603,67 +603,72 @@ public class Follower extends AbstractRaftActorBehavior {
     }
 
     private void handleInstallSnapshot(final ActorRef sender, final InstallSnapshot installSnapshot) {
-
         log.debug("{}: handleInstallSnapshot: {}", logName(), installSnapshot);
 
+        // update leader
         leaderId = installSnapshot.getLeaderId();
-
         if (snapshotTracker == null) {
-            snapshotTracker = new SnapshotTracker(log, installSnapshot.getTotalChunks(), installSnapshot.getLeaderId(),
-                    context);
+            snapshotTracker = new SnapshotTracker(log, installSnapshot.getTotalChunks(), leaderId, context);
         }
 
-        updateInitialSyncStatus(installSnapshot.getLastIncludedIndex(), installSnapshot.getLeaderId());
+        updateInitialSyncStatus(installSnapshot.getLastIncludedIndex(), leaderId);
 
+        final boolean isLastChunk;
         try {
-            final InstallSnapshotReply reply = new InstallSnapshotReply(
-                    currentTerm(), context.getId(), installSnapshot.getChunkIndex(), true);
-
-            if (snapshotTracker.addChunk(installSnapshot.getChunkIndex(), installSnapshot.getData(),
-                    installSnapshot.getLastChunkHashCode())) {
-
-                log.info("{}: Snapshot installed from leader: {}", logName(), installSnapshot.getLeaderId());
-
-                Snapshot snapshot = Snapshot.create(
-                        context.getSnapshotManager().convertSnapshot(snapshotTracker.getSnapshotBytes()),
-                        List.of(),
-                        installSnapshot.getLastIncludedIndex(),
-                        installSnapshot.getLastIncludedTerm(),
-                        installSnapshot.getLastIncludedIndex(),
-                        installSnapshot.getLastIncludedTerm(),
-                        context.getTermInformation().getCurrentTerm(),
-                        context.getTermInformation().getVotedFor(),
-                        installSnapshot.getServerConfig().orElse(null));
-
-                ApplySnapshot.Callback applySnapshotCallback = new ApplySnapshot.Callback() {
-                    @Override
-                    public void onSuccess() {
-                        log.debug("{}: handleInstallSnapshot returning: {}", logName(), reply);
-
-                        sender.tell(reply, actor());
-                    }
-
-                    @Override
-                    public void onFailure() {
-                        sender.tell(new InstallSnapshotReply(currentTerm(), context.getId(), -1, false), actor());
-                    }
-                };
-
-                actor().tell(new ApplySnapshot(snapshot, applySnapshotCallback), actor());
-
-                closeSnapshotTracker();
-            } else {
-                log.debug("{}: handleInstallSnapshot returning: {}", logName(), reply);
-
-                sender.tell(reply, actor());
-            }
+            isLastChunk = snapshotTracker.addChunk(installSnapshot.getChunkIndex(), installSnapshot.getData(),
+                installSnapshot.getLastChunkHashCode());
         } catch (IOException e) {
-            log.debug("{}: Exception in InstallSnapshot of follower", logName(), e);
-
-            sender.tell(new InstallSnapshotReply(currentTerm(), context.getId(), -1, false), actor());
-
+            log.debug("{}: failed to add InstallSnapshot chunk", logName(), e);
             closeSnapshotTracker();
+            sender.tell(new InstallSnapshotReply(currentTerm(), context.getId(), -1, false), actor());
+            return;
         }
+
+        final var successReply = new InstallSnapshotReply(currentTerm(), context.getId(),
+            installSnapshot.getChunkIndex(), true);
+        if (!isLastChunk) {
+            log.debug("{}: handleInstallSnapshot returning: {}", logName(), successReply);
+            sender.tell(successReply, actor());
+            return;
+        }
+
+        // TODO: this message is confusing: the snapshot is *received*, not installed yet
+        log.info("{}: Snapshot installed from leader: {}", logName(), leaderId);
+        final Snapshot.State snapshotState;
+        try {
+            snapshotState = context.getSnapshotManager().convertSnapshot(snapshotTracker.getSnapshotBytes());
+        } catch (IOException e) {
+            log.debug("{}: failed to convert InstallSnapshot to state", logName(), e);
+            closeSnapshotTracker();
+            sender.tell(new InstallSnapshotReply(currentTerm(), context.getId(), -1, false), actor());
+            return;
+        }
+
+        log.debug("{}: Converted InstallSnapshot from leader: {} to state{}", logName(), leaderId,
+            snapshotState.needsMigration() ? " (needs migration)" : "");
+
+        final var snapshot = Snapshot.create(snapshotState, List.of(),
+            installSnapshot.getLastIncludedIndex(), installSnapshot.getLastIncludedTerm(),
+            installSnapshot.getLastIncludedIndex(), installSnapshot.getLastIncludedTerm(),
+            context.getTermInformation().getCurrentTerm(), context.getTermInformation().getVotedFor(),
+            installSnapshot.getServerConfig().orElse(null));
+
+        final var applySnapshotCallback = new ApplySnapshot.Callback() {
+            @Override
+            public void onSuccess() {
+                log.debug("{}: handleInstallSnapshot returning: {}", logName(), successReply);
+                sender.tell(successReply, actor());
+            }
+
+            @Override
+            public void onFailure() {
+                sender.tell(new InstallSnapshotReply(currentTerm(), context.getId(), -1, false), actor());
+            }
+        };
+
+        actor().tell(new ApplySnapshot(snapshot, applySnapshotCallback), actor());
+
+        closeSnapshotTracker();
     }
 
     private void closeSnapshotTracker() {
