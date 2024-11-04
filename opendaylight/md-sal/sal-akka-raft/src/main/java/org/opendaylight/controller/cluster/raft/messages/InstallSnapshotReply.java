@@ -7,9 +7,29 @@
  */
 package org.opendaylight.controller.cluster.raft.messages;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.MoreObjects.ToStringHelper;
 
 public final class InstallSnapshotReply extends RaftRPC {
+    /**
+     * The kind of a particular reply.
+     */
+    public enum Kind {
+        /**
+         * The request was completed successfully.
+         */
+        SUCCESS,
+        /**
+         * The request failed.
+         */
+        FAILURE,
+        /**
+         * The request was received
+         */
+        RECEIVED;
+    }
+
     @java.io.Serial
     private static final long serialVersionUID = 642227896390779503L;
 
@@ -17,13 +37,13 @@ public final class InstallSnapshotReply extends RaftRPC {
     // responding
     private final String followerId;
     private final int chunkIndex;
-    private final boolean success;
+    private final Kind kind;
 
-    public InstallSnapshotReply(final long term, final String followerId, final int chunkIndex, final boolean success) {
+    public InstallSnapshotReply(final long term, final String followerId, final int chunkIndex, final Kind kind) {
         super(term);
         this.followerId = followerId;
         this.chunkIndex = chunkIndex;
-        this.success = success;
+        this.kind = requireNonNull(kind);
     }
 
     public String getFollowerId() {
@@ -34,8 +54,8 @@ public final class InstallSnapshotReply extends RaftRPC {
         return chunkIndex;
     }
 
-    public boolean isSuccess() {
-        return success;
+    public Kind getKind() {
+        return kind;
     }
 
     @Override
@@ -43,7 +63,7 @@ public final class InstallSnapshotReply extends RaftRPC {
         return super.addToStringAttributes(helper)
             .add("followerId", followerId)
             .add("chunkIndex", chunkIndex)
-            .add("success", success);
+            .add("kind", kind);
     }
 
     @Override

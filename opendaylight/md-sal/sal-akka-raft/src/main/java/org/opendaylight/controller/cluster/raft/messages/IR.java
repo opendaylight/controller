@@ -24,7 +24,8 @@ final class IR implements Externalizable {
     private static final long serialVersionUID = 1L;
 
     // Flags
-    private static final int SUCCESS = 0x10;
+    private static final int SUCCESS  = 0x10;
+    private static final int RECEIVED = 0x20;
 
     private InstallSnapshotReply installSnapshotReply;
 
@@ -39,7 +40,11 @@ final class IR implements Externalizable {
 
     @Override
     public void writeExternal(final ObjectOutput out) throws IOException {
-        WritableObjects.writeLong(out, installSnapshotReply.getTerm(), installSnapshotReply.isSuccess() ? SUCCESS : 0);
+        WritableObjects.writeLong(out, installSnapshotReply.getTerm(), switch (installSnapshotReply.getKind()) {
+            case FAILURE -> 0;
+            case SUCCESS -> SUCCESS;
+            case RECEIVED -> RECEIVED;
+        });
         out.writeObject(installSnapshotReply.getFollowerId());
         out.writeInt(installSnapshotReply.getChunkIndex());
     }
