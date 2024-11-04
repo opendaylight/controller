@@ -544,95 +544,92 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     private void handleInstallSnapshotReply(final InstallSnapshotReply reply) {
         log.debug("{}: handleInstallSnapshotReply: {}", logName(), reply);
 
-        String followerId = reply.getFollowerId();
-        FollowerLogInformation followerLogInformation = followerToLog.get(followerId);
-        if (followerLogInformation == null) {
+        final var followerId = reply.getFollowerId();
+        final var followerLogInfo = followerToLog.get(followerId);
+        if (followerLogInfo == null) {
             // This can happen during AddServer if it times out.
-            log.error("{}: FollowerLogInformation not found for follower {} in InstallSnapshotReply",
-                    logName(), followerId);
+            log.error("{}: FollowerLogInformation not found for follower {} in InstallSnapshotReply", logName(),
+                followerId);
             return;
         }
 
-        LeaderInstallSnapshotState installSnapshotState = followerLogInformation.getInstallSnapshotState();
+        final var installSnapshotState = followerLogInfo.getInstallSnapshotState();
         if (installSnapshotState == null) {
-            log.error("{}: LeaderInstallSnapshotState not found for follower {} in InstallSnapshotReply",
-                    logName(), followerId);
+            log.error("{}: LeaderInstallSnapshotState not found for follower {} in InstallSnapshotReply", logName(),
+                followerId);
             return;
         }
 
         installSnapshotState.resetChunkTimer();
-        followerLogInformation.markFollowerActive();
+        followerLogInfo.markFollowerActive();
 
-        if (installSnapshotState.getChunkIndex() == reply.getChunkIndex()) {
-            boolean wasLastChunk = false;
-            if (reply.isSuccess()) {
-                if (installSnapshotState.isLastChunk(reply.getChunkIndex())) {
-                    //this was the last chunk reply
-
-                    long followerMatchIndex = snapshotHolder.orElseThrow().getLastIncludedIndex();
-                    followerLogInformation.setMatchIndex(followerMatchIndex);
-                    followerLogInformation.setNextIndex(followerMatchIndex + 1);
-                    followerLogInformation.clearLeaderInstallSnapshotState();
-
-                    log.info("{}: Snapshot successfully installed on follower {} (last chunk {}) - "
-                        + "matchIndex set to {}, nextIndex set to {}", logName(), followerId, reply.getChunkIndex(),
-                        followerLogInformation.getMatchIndex(), followerLogInformation.getNextIndex());
-
-                    if (!anyFollowersInstallingSnapshot()) {
-                        // once there are no pending followers receiving snapshots
-                        // we can remove snapshot from the memory
-                        setSnapshotHolder(null);
-                    }
-
-                    wasLastChunk = true;
-                    if (context.getPeerInfo(followerId).getVotingState() == VotingState.VOTING_NOT_INITIALIZED) {
-                        UnInitializedFollowerSnapshotReply unInitFollowerSnapshotSuccess =
-                                             new UnInitializedFollowerSnapshotReply(followerId);
-                        context.getActor().tell(unInitFollowerSnapshotSuccess, context.getActor());
-                        log.debug("Sent message UnInitializedFollowerSnapshotReply to self");
-                    }
-                } else {
-                    installSnapshotState.markSendStatus(true);
-                }
-            } else {
-                log.warn("{}: Received failed InstallSnapshotReply - will retry: {}", logName(), reply);
-
-                installSnapshotState.markSendStatus(false);
-            }
-
-            if (wasLastChunk) {
-                if (!context.getSnapshotManager().isCapturing()) {
-                    // Since the follower is now caught up try to purge the log.
-                    purgeInMemoryLog();
-                }
-            } else {
-                ActorSelection followerActor = context.getPeerActorSelection(followerId);
-                if (followerActor != null) {
-                    sendSnapshotChunk(followerActor, followerLogInformation);
-                }
-            }
-
-        } else {
+        final var expectedChunkIndex = installSnapshotState.getChunkIndex();
+        final var replyChunkIndex = reply.getChunkIndex();
+        if (replyChunkIndex != expectedChunkIndex) {
             log.error("{}: Chunk index {} in InstallSnapshotReply from follower {} does not match expected index {}",
-                    logName(), reply.getChunkIndex(), followerId,
-                    installSnapshotState.getChunkIndex());
+                logName(), replyChunkIndex, followerId, expectedChunkIndex);
 
-            if (reply.getChunkIndex() == LeaderInstallSnapshotState.INVALID_CHUNK_INDEX) {
+            if (replyChunkIndex == LeaderInstallSnapshotState.INVALID_CHUNK_INDEX) {
                 // Since the Follower did not find this index to be valid we should reset the follower snapshot
                 // so that Installing the snapshot can resume from the beginning
                 installSnapshotState.reset();
             }
+            return;
+        }
+
+        if (!reply.isSuccess()) {
+            log.warn("{}: Received failed InstallSnapshotReply - will retry: {}", logName(), reply);
+            installSnapshotState.markSendStatus(false);
+            sendNextSnapshotChunk(followerId, followerLogInfo);
+            return;
+        }
+
+        if (!installSnapshotState.isLastChunk(replyChunkIndex)) {
+            log.debug("{}: Success InstallSnapshotReply from {}, sending next chunk", logName(), followerId);
+            installSnapshotState.markSendStatus(true);
+            sendNextSnapshotChunk(followerId, followerLogInfo);
+            return;
+        }
+
+        // this was the last chunk reply
+        final long followerMatchIndex = snapshotHolder.orElseThrow().getLastIncludedIndex();
+        followerLogInfo.setMatchIndex(followerMatchIndex);
+        followerLogInfo.setNextIndex(followerMatchIndex + 1);
+        followerLogInfo.clearLeaderInstallSnapshotState();
+
+        log.info("{}: Snapshot successfully installed on follower {} (last chunk {}) - matchIndex set to {}, "
+            + "nextIndex set to {}", logName(), followerId, replyChunkIndex, followerLogInfo.getMatchIndex(),
+            followerLogInfo.getNextIndex());
+
+        if (!anyFollowersInstallingSnapshot()) {
+            // once there are no pending followers receiving snapshots we can remove snapshot from the memory
+            setSnapshotHolder(null);
+        }
+
+        if (context.getPeerInfo(followerId).getVotingState() == VotingState.VOTING_NOT_INITIALIZED) {
+            context.getActor().tell(new UnInitializedFollowerSnapshotReply(followerId), context.getActor());
+            log.debug("Sent message UnInitializedFollowerSnapshotReply to self");
+        }
+
+        if (!context.getSnapshotManager().isCapturing()) {
+            // Since the follower is now caught up try to purge the log.
+            purgeInMemoryLog();
+        }
+    }
+
+    private void sendNextSnapshotChunk(final String followerId, final FollowerLogInformation followerLogInfo) {
+        final var followerActor = context.getPeerActorSelection(followerId);
+        if (followerActor != null) {
+            sendSnapshotChunk(followerActor, followerLogInfo);
         }
     }
 
     private boolean anyFollowersInstallingSnapshot() {
-        for (FollowerLogInformation info: followerToLog.values()) {
+        for (var info : followerToLog.values()) {
             if (info.getInstallSnapshotState() != null) {
                 return true;
             }
-
         }
-
         return false;
     }
 
