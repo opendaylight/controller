@@ -35,6 +35,7 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply;
+import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply.Kind;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
@@ -656,14 +657,14 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         assertEquals("InstallSnapshot getLastIncludedIndex", lastAppliedIndex, installSnapshot.getLastIncludedIndex());
         //assertArrayEquals("InstallSnapshot getData", snapshot, installSnapshot.getData().toByteArray());
 
-        List<InstallSnapshotReply> installSnapshotReplies = MessageCollectorActor.expectMatching(
-                leaderCollectorActor, InstallSnapshotReply.class, expTotalChunks);
+        final var installSnapshotReplies = MessageCollectorActor.expectMatching(leaderCollectorActor,
+            InstallSnapshotReply.class, expTotalChunks);
         int index = 1;
         for (InstallSnapshotReply installSnapshotReply : installSnapshotReplies) {
             assertEquals("InstallSnapshotReply getTerm", currentTerm, installSnapshotReply.getTerm());
             assertEquals("InstallSnapshotReply getChunkIndex", index++, installSnapshotReply.getChunkIndex());
             assertEquals("InstallSnapshotReply getFollowerId", follower2Id, installSnapshotReply.getFollowerId());
-            assertTrue("InstallSnapshotReply isSuccess", installSnapshotReply.isSuccess());
+            assertEquals("InstallSnapshotReply isSuccess", Kind.SUCCESS, installSnapshotReply.getKind());
         }
 
         // Verify follower 2 applies the snapshot.

@@ -38,6 +38,7 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply;
+import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply.Kind;
 import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
@@ -621,12 +622,12 @@ public class Follower extends RaftActorBehavior {
         } catch (IOException e) {
             log.debug("{}: failed to add InstallSnapshot chunk", logName, e);
             closeSnapshotTracker();
-            sender.tell(new InstallSnapshotReply(currentTerm(), context.getId(), -1, false), actor());
+            sender.tell(new InstallSnapshotReply(currentTerm(), context.getId(), -1, Kind.FAILURE), actor());
             return;
         }
 
         final var successReply = new InstallSnapshotReply(currentTerm(), context.getId(),
-            installSnapshot.getChunkIndex(), true);
+            installSnapshot.getChunkIndex(), Kind.SUCCESS);
         if (!isLastChunk) {
             log.debug("{}: handleInstallSnapshot returning: {}", logName, successReply);
             sender.tell(successReply, actor());
@@ -644,7 +645,7 @@ public class Follower extends RaftActorBehavior {
         } catch (IOException e) {
             log.debug("{}: failed to reconstract InstallSnapshot state", logName, e);
             tracker.close();
-            sender.tell(new InstallSnapshotReply(currentTerm(), context.getId(), -1, false), actor());
+            sender.tell(new InstallSnapshotReply(currentTerm(), context.getId(), -1, Kind.FAILURE), actor());
             return;
         }
 
@@ -661,7 +662,7 @@ public class Follower extends RaftActorBehavior {
                 @Override
                 public void onFailure() {
                     tracker.close();
-                    sender.tell(new InstallSnapshotReply(currentTerm(), context.getId(), -1, false), actor());
+                    sender.tell(new InstallSnapshotReply(currentTerm(), context.getId(), -1, Kind.FAILURE), actor());
                 }
             }), actor());
     }

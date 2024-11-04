@@ -27,8 +27,9 @@ final class IS implements Externalizable {
     private static final long serialVersionUID = 1L;
 
     // Flags
-    private static final int LAST_CHUNK_HASHCODE = 0x10;
-    private static final int SERVER_CONFIG       = 0x20;
+    private static final int LAST_CHUNK_HASHCODE   = 0x10;
+    private static final int SERVER_CONFIG         = 0x20;
+    private static final int ASYNC_APPLY_SUPPORTED = 0x40;
 
     private InstallSnapshot installSnapshot;
 
@@ -51,6 +52,9 @@ final class IS implements Externalizable {
         final var serverConfig = installSnapshot.serverConfig();
         if (serverConfig != null) {
             flags |= SERVER_CONFIG;
+        }
+        if (installSnapshot.asyncApplySupported()) {
+            flags |= ASYNC_APPLY_SUPPORTED;
         }
 
         WritableObjects.writeLong(out, installSnapshot.getTerm(), flags);
@@ -91,7 +95,8 @@ final class IS implements Externalizable {
         byte[] data = (byte[])in.readObject();
 
         installSnapshot = new InstallSnapshot(term, leaderId, lastIncludedIndex, lastIncludedTerm, data,
-                chunkIndex, totalChunks, lastChunkHashCode, serverConfig, RaftVersions.CURRENT_VERSION);
+                chunkIndex, totalChunks, lastChunkHashCode, serverConfig, RaftVersions.CURRENT_VERSION,
+                getFlag(flags, ASYNC_APPLY_SUPPORTED));
     }
 
     @java.io.Serial

@@ -38,15 +38,16 @@ public final class InstallSnapshot extends RaftRPC {
     private final OptionalInt lastChunkHashCode;
     private final @Nullable ServerConfigurationPayload serverConfig;
     private final short recipientRaftVersion;
+    private final boolean asyncApplySupported;
 
     @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = """
         Stores a reference to an externally mutable byte[] object but this is OK since this class is merely a DTO and \
         does not process byte[] internally. Also it would be inefficient to create a copy as the byte[] could be \
         large.""")
-    public InstallSnapshot(final long term, final String leaderId, final long lastIncludedIndex,
+    InstallSnapshot(final long term, final String leaderId, final long lastIncludedIndex,
             final long lastIncludedTerm, final byte[] data, final int chunkIndex, final int totalChunks,
             final OptionalInt lastChunkHashCode, final @Nullable ServerConfigurationPayload serverConfig,
-            final short recipientRaftVersion) {
+            final short recipientRaftVersion, final boolean asyncApplySupported) {
         super(term);
         this.leaderId = leaderId;
         this.lastIncludedIndex = lastIncludedIndex;
@@ -57,6 +58,15 @@ public final class InstallSnapshot extends RaftRPC {
         this.lastChunkHashCode = lastChunkHashCode;
         this.serverConfig = serverConfig;
         this.recipientRaftVersion = recipientRaftVersion;
+        this.asyncApplySupported = asyncApplySupported;
+    }
+
+    public InstallSnapshot(final long term, final String leaderId, final long lastIncludedIndex,
+            final long lastIncludedTerm, final byte[] data, final int chunkIndex, final int totalChunks,
+            final OptionalInt lastChunkHashCode, final @Nullable ServerConfigurationPayload serverConfig,
+            final short recipientRaftVersion) {
+        this(lastIncludedTerm, leaderId, lastIncludedTerm, lastIncludedTerm, data, totalChunks, totalChunks,
+            lastChunkHashCode, serverConfig, recipientRaftVersion, true);
     }
 
     @VisibleForTesting
@@ -103,6 +113,15 @@ public final class InstallSnapshot extends RaftRPC {
         return serverConfig;
     }
 
+    /**
+     * Indicates that the sender of this message supports asynchronous snapshot apply extension.
+     *
+     * @return {@code true} if the sender recognizes {@link InstallSnapshotReply.Kind#RECEIVED}, {@code false} otherwise
+     */
+    public boolean asyncApplySupported() {
+        return asyncApplySupported;
+    }
+
     @Override
     ToStringHelper addToStringAttributes(final ToStringHelper helper) {
         return super.addToStringAttributes(helper)
@@ -112,7 +131,8 @@ public final class InstallSnapshot extends RaftRPC {
             .add("datasize", data.length)
             .add("chunk", chunkIndex + "/" + totalChunks)
             .add("lastChunkHashCode", lastChunkHashCode)
-            .add("serverConfig", serverConfig);
+            .add("serverConfig", serverConfig)
+            .add("asyncApplySupported", asyncApplySupported);
     }
 
     @Override
@@ -178,7 +198,7 @@ public final class InstallSnapshot extends RaftRPC {
             byte[] data = (byte[])in.readObject();
 
             installSnapshot = new InstallSnapshot(term, leaderId, lastIncludedIndex, lastIncludedTerm, data,
-                    chunkIndex, totalChunks, lastChunkHashCode, serverConfig, RaftVersions.CURRENT_VERSION);
+                    chunkIndex, totalChunks, lastChunkHashCode, serverConfig, RaftVersions.CURRENT_VERSION, false);
         }
 
         @java.io.Serial

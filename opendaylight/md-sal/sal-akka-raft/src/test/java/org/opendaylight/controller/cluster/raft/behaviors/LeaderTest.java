@@ -63,6 +63,7 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply;
+import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply.Kind;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
@@ -979,7 +980,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         actorContext.getReplicatedLog().removeFrom(0);
 
         RaftActorBehavior raftBehavior = leader.handleMessage(followerActor,
-                new InstallSnapshotReply(currentTerm, FOLLOWER_ID, fts.getChunkIndex(), true));
+                new InstallSnapshotReply(currentTerm, FOLLOWER_ID, fts.getChunkIndex(), Kind.SUCCESS));
 
         assertTrue(raftBehavior instanceof Leader);
 
@@ -1045,7 +1046,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         followerActor.underlyingActor().clear();
         leader.handleMessage(followerActor, new InstallSnapshotReply(actorContext.currentTerm(), FOLLOWER_ID,
-            installSnapshot.getChunkIndex(), true));
+            installSnapshot.getChunkIndex(), Kind.SUCCESS));
 
         installSnapshot = MessageCollectorActor.expectFirstMatching(followerActor, InstallSnapshot.class);
 
@@ -1054,14 +1055,14 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         followerActor.underlyingActor().clear();
         leader.handleMessage(followerActor, new InstallSnapshotReply(actorContext.currentTerm(), FOLLOWER_ID,
-            installSnapshot.getChunkIndex(), true));
+            installSnapshot.getChunkIndex(), Kind.SUCCESS));
 
         installSnapshot = MessageCollectorActor.expectFirstMatching(followerActor, InstallSnapshot.class);
 
         // Send snapshot reply one more time and make sure that a new snapshot message should not be sent to follower
         followerActor.underlyingActor().clear();
         leader.handleMessage(followerActor, new InstallSnapshotReply(actorContext.currentTerm(), FOLLOWER_ID,
-            installSnapshot.getChunkIndex(), true));
+            installSnapshot.getChunkIndex(), Kind.SUCCESS));
 
         installSnapshot = MessageCollectorActor.getFirstMatching(followerActor, InstallSnapshot.class);
 
@@ -1120,7 +1121,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         followerActor.underlyingActor().clear();
 
         leader.handleMessage(followerActor,
-            new InstallSnapshotReply(actorContext.currentTerm(), FOLLOWER_ID, -1, false));
+            new InstallSnapshotReply(actorContext.currentTerm(), FOLLOWER_ID, -1, Kind.FAILURE));
 
         Uninterruptibles.sleepUninterruptibly(actorContext.getConfigParams().getHeartBeatInterval().toMillis(),
                 TimeUnit.MILLISECONDS);
@@ -1186,8 +1187,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         followerActor.underlyingActor().clear();
 
-        leader.handleMessage(followerActor, new InstallSnapshotReply(installSnapshot.getTerm(),
-                FOLLOWER_ID, 1, true));
+        leader.handleMessage(followerActor, new InstallSnapshotReply(installSnapshot.getTerm(), FOLLOWER_ID, 1,
+            Kind.SUCCESS));
 
         installSnapshot = MessageCollectorActor.expectFirstMatching(followerActor, InstallSnapshot.class);
 

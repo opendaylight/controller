@@ -57,6 +57,7 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply;
+import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply.Kind;
 import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
@@ -835,7 +836,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         for (var reply : replies) {
             assertEquals("getChunkIndex", chunkIndex++, reply.getChunkIndex());
             assertEquals("getTerm", 1, reply.getTerm());
-            assertEquals("isSuccess", true, reply.isSuccess());
+            assertEquals("isSuccess", Kind.SUCCESS, reply.getKind());
             assertEquals("getFollowerId", context.getId(), reply.getFollowerId());
         }
 
@@ -1001,7 +1002,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         InstallSnapshotReply reply = MessageCollectorActor.expectFirstMatching(leaderActor,
                 InstallSnapshotReply.class);
 
-        assertEquals("isSuccess", false, reply.isSuccess());
+        assertEquals("isSuccess", Kind.FAILURE, reply.getKind());
         assertEquals("getChunkIndex", -1, reply.getChunkIndex());
         assertEquals("getTerm", 1, reply.getTerm());
         assertEquals("getFollowerId", context.getId(), reply.getFollowerId());

@@ -11,6 +11,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply.Kind;
 
 /**
  * Unit tests for InstallSnapshotReply.
@@ -20,7 +21,7 @@ import org.junit.Test;
 public class InstallSnapshotReplyTest {
     @Test
     public void testSerialization() {
-        final var expected = new InstallSnapshotReply(5L, "follower", 1, true);
+        final var expected = new InstallSnapshotReply(5L, "follower", 1, Kind.SUCCESS);
         final var bytes = SerializationUtils.serialize(expected);
         assertEquals(95, bytes.length);
         final var cloned = (InstallSnapshotReply) SerializationUtils.deserialize(bytes);
@@ -28,6 +29,6 @@ public class InstallSnapshotReplyTest {
         assertEquals("getTerm", expected.getTerm(), cloned.getTerm());
         assertEquals("getFollowerId", expected.getFollowerId(), cloned.getFollowerId());
         assertEquals("getChunkIndex", expected.getChunkIndex(), cloned.getChunkIndex());
-        assertEquals("isSuccess", expected.isSuccess(), cloned.isSuccess());
+        assertEquals("isSuccess", expected.getKind(), cloned.getKind());
     }
 }

@@ -14,6 +14,8 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.io.StreamCorruptedException;
+import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply.Kind;
 import org.opendaylight.yangtools.concepts.WritableObjects;
 
 /**
@@ -24,7 +26,8 @@ final class IR implements Externalizable {
     private static final long serialVersionUID = 1L;
 
     // Flags
-    private static final int SUCCESS = 0x10;
+    private static final int SUCCESS  = 0x10;
+    private static final int RECEIVED = 0x20;
 
     private InstallSnapshotReply installSnapshotReply;
 
@@ -39,7 +42,11 @@ final class IR implements Externalizable {
 
     @Override
     public void writeExternal(final ObjectOutput out) throws IOException {
-        WritableObjects.writeLong(out, installSnapshotReply.getTerm(), installSnapshotReply.isSuccess() ? SUCCESS : 0);
+        WritableObjects.writeLong(out, installSnapshotReply.getTerm(), switch (installSnapshotReply.getKind()) {
+            case FAILURE -> 0;
+            case SUCCESS -> SUCCESS;
+            case RECEIVED -> RECEIVED;
+        });
         out.writeObject(installSnapshotReply.getFollowerId());
         out.writeInt(installSnapshotReply.getChunkIndex());
     }
@@ -53,7 +60,13 @@ final class IR implements Externalizable {
         String followerId = (String) in.readObject();
         int chunkIndex = in.readInt();
 
-        installSnapshotReply = new InstallSnapshotReply(term, followerId, chunkIndex, (flags & SUCCESS) != 0);
+        final var kindBits = flags & (SUCCESS | RECEIVED);
+        installSnapshotReply = new InstallSnapshotReply(term, followerId, chunkIndex, switch (kindBits) {
+            case 0 -> Kind.FAILURE;
+            case SUCCESS -> Kind.SUCCESS;
+            case RECEIVED -> Kind.RECEIVED;
+            default -> throw new StreamCorruptedException("Unexpected kind " + kindBits);
+        });
     }
 
     @java.io.Serial
