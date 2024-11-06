@@ -959,9 +959,9 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                         nextSnapshotChunk.length);
 
                 int nextChunkIndex = installSnapshotState.incrementChunkIndex();
-                Optional<ServerConfigurationPayload> serverConfig = Optional.empty();
+                ServerConfigurationPayload serverConfig = null;
                 if (installSnapshotState.isLastChunk(nextChunkIndex)) {
-                    serverConfig = Optional.ofNullable(context.getPeerServerInfo(true));
+                    serverConfig = context.getPeerServerInfo(true);
                 }
 
                 sendSnapshotChunk(followerActor, followerLogInfo, nextSnapshotChunk, nextChunkIndex, serverConfig);
@@ -980,7 +980,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
     private void sendSnapshotChunk(final ActorSelection followerActor, final FollowerLogInformation followerLogInfo,
                                    final byte[] snapshotChunk, final int chunkIndex,
-                                   final Optional<ServerConfigurationPayload> serverConfig) {
+                                   final @Nullable ServerConfigurationPayload serverConfig) {
         LeaderInstallSnapshotState installSnapshotState = followerLogInfo.getInstallSnapshotState();
 
         installSnapshotState.startChunkTimer();

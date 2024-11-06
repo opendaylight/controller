@@ -7,14 +7,16 @@
  */
 package org.opendaylight.controller.cluster.raft.messages;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.VisibleForTesting;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.util.Optional;
 import java.util.OptionalInt;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 
@@ -33,8 +35,7 @@ public final class InstallSnapshot extends AbstractRaftRPC {
     private final int totalChunks;
     @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "Handled via writeReplace()")
     private final OptionalInt lastChunkHashCode;
-    @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "Handled via writeReplace()")
-    private final Optional<ServerConfigurationPayload> serverConfig;
+    private final @Nullable ServerConfigurationPayload serverConfig;
     private final short recipientRaftVersion;
 
     @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = """
@@ -43,7 +44,7 @@ public final class InstallSnapshot extends AbstractRaftRPC {
         large.""")
     public InstallSnapshot(final long term, final String leaderId, final long lastIncludedIndex,
             final long lastIncludedTerm, final byte[] data, final int chunkIndex, final int totalChunks,
-            final OptionalInt lastChunkHashCode, final Optional<ServerConfigurationPayload> serverConfig,
+            final OptionalInt lastChunkHashCode, final @Nullable ServerConfigurationPayload serverConfig,
             final short recipientRaftVersion) {
         super(term);
         this.leaderId = leaderId;
@@ -62,7 +63,7 @@ public final class InstallSnapshot extends AbstractRaftRPC {
                            final long lastIncludedTerm, final byte[] data, final int chunkIndex,
                            final int totalChunks) {
         this(term, leaderId, lastIncludedIndex, lastIncludedTerm, data, chunkIndex, totalChunks, OptionalInt.empty(),
-            Optional.empty(), RaftVersions.CURRENT_VERSION);
+            null, RaftVersions.CURRENT_VERSION);
     }
 
     public String getLeaderId() {
@@ -97,7 +98,7 @@ public final class InstallSnapshot extends AbstractRaftRPC {
         return lastChunkHashCode;
     }
 
-    public Optional<ServerConfigurationPayload> getServerConfig() {
+    public @Nullable ServerConfigurationPayload serverConfig() {
         return serverConfig;
     }
 
@@ -106,7 +107,7 @@ public final class InstallSnapshot extends AbstractRaftRPC {
         return "InstallSnapshot [term=" + getTerm() + ", leaderId=" + leaderId + ", lastIncludedIndex="
                 + lastIncludedIndex + ", lastIncludedTerm=" + lastIncludedTerm + ", datasize=" + data.length
                 + ", Chunk=" + chunkIndex + "/" + totalChunks + ", lastChunkHashCode=" + lastChunkHashCode
-                + ", serverConfig=" + serverConfig.orElse(null) + "]";
+                + ", serverConfig=" + serverConfig + "]";
     }
 
     @Override
@@ -144,9 +145,9 @@ public final class InstallSnapshot extends AbstractRaftRPC {
                 out.writeInt(installSnapshot.lastChunkHashCode.orElseThrow());
             }
 
-            out.writeByte(installSnapshot.serverConfig.isPresent() ? 1 : 0);
-            if (installSnapshot.serverConfig.isPresent()) {
-                out.writeObject(installSnapshot.serverConfig.orElseThrow());
+            out.writeByte(installSnapshot.serverConfig != null ? 1 : 0);
+            if (installSnapshot.serverConfig != null) {
+                out.writeObject(installSnapshot.serverConfig);
             }
 
             out.writeObject(installSnapshot.data);
@@ -162,8 +163,12 @@ public final class InstallSnapshot extends AbstractRaftRPC {
             int totalChunks = in.readInt();
 
             OptionalInt lastChunkHashCode = in.readByte() == 1 ? OptionalInt.of(in.readInt()) : OptionalInt.empty();
-            Optional<ServerConfigurationPayload> serverConfig = in.readByte() == 1
-                    ? Optional.of((ServerConfigurationPayload)in.readObject()) : Optional.empty();
+            ServerConfigurationPayload serverConfig;
+            if (in.readByte() == 1) {
+                serverConfig = requireNonNull((ServerConfigurationPayload) in.readObject());
+            } else {
+                serverConfig = null;
+            }
 
             byte[] data = (byte[])in.readObject();
 

@@ -651,7 +651,7 @@ public class Follower extends AbstractRaftActorBehavior {
             installSnapshot.getLastIncludedIndex(), installSnapshot.getLastIncludedTerm(),
             installSnapshot.getLastIncludedIndex(), installSnapshot.getLastIncludedTerm(),
             context.getTermInformation().getCurrentTerm(), context.getTermInformation().getVotedFor(),
-            installSnapshot.getServerConfig().orElse(null));
+            installSnapshot.serverConfig());
 
         final var applySnapshotCallback = new ApplySnapshot.Callback() {
             @Override
