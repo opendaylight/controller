@@ -14,7 +14,6 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.util.Optional;
 import java.util.OptionalInt;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
@@ -49,8 +48,8 @@ final class IS implements Externalizable {
         if (lastChunkHashCode.isPresent()) {
             flags |= LAST_CHUNK_HASHCODE;
         }
-        final var serverConfig = installSnapshot.getServerConfig();
-        if (serverConfig.isPresent()) {
+        final var serverConfig = installSnapshot.serverConfig();
+        if (serverConfig != null) {
             flags |= SERVER_CONFIG;
         }
 
@@ -63,8 +62,8 @@ final class IS implements Externalizable {
         if (lastChunkHashCode.isPresent()) {
             out.writeInt(lastChunkHashCode.orElseThrow());
         }
-        if (serverConfig.isPresent()) {
-            out.writeObject(serverConfig.orElseThrow());
+        if (serverConfig != null) {
+            out.writeObject(serverConfig);
         }
 
         out.writeObject(installSnapshot.getData());
@@ -86,8 +85,8 @@ final class IS implements Externalizable {
 
         OptionalInt lastChunkHashCode = getFlag(flags, LAST_CHUNK_HASHCODE) ? OptionalInt.of(in.readInt())
             : OptionalInt.empty();
-        Optional<ServerConfigurationPayload> serverConfig = getFlag(flags, SERVER_CONFIG)
-                ? Optional.of((ServerConfigurationPayload)in.readObject()) : Optional.empty();
+        ServerConfigurationPayload serverConfig = getFlag(flags, SERVER_CONFIG)
+                ? requireNonNull((ServerConfigurationPayload) in.readObject()) : null;
 
         byte[] data = (byte[])in.readObject();
 

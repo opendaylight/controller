@@ -11,7 +11,6 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.OptionalInt;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Test;
@@ -47,10 +46,10 @@ public class InstallSnapshotTest {
         var serverConfig = new ServerConfigurationPayload(List.of(
                 new ServerInfo("leader", true), new ServerInfo("follower", false)));
         assertInstallSnapshot(fullSize, new InstallSnapshot(3L, "leaderId", 11L, 2L, data, 5, 6, OptionalInt.of(54321),
-            Optional.of(serverConfig), raftVersion));
+            serverConfig, raftVersion));
 
         assertInstallSnapshot(emptySize, new InstallSnapshot(3L, "leaderId", 11L, 2L, data, 5, 6, OptionalInt.empty(),
-            Optional.empty(), raftVersion));
+            null, raftVersion));
     }
 
     private static void assertInstallSnapshot(final int expectedSize, final InstallSnapshot expected) {
@@ -76,11 +75,6 @@ public class InstallSnapshotTest {
                     actual.getLastChunkHashCode());
         }
 
-        assertEquals("getServerConfig present", expected.getServerConfig().isPresent(),
-                actual.getServerConfig().isPresent());
-        if (expected.getServerConfig().isPresent()) {
-            assertEquals("getServerConfig", expected.getServerConfig().orElseThrow().getServerConfig(),
-                    actual.getServerConfig().orElseThrow().getServerConfig());
-        }
+        assertEquals(expected.serverConfig(), actual.serverConfig());
     }
 }
