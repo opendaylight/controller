@@ -33,6 +33,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotRep
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.ByteState;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,8 +98,8 @@ public class RaftActorSnapshotMessageSupportTest {
         long lastIndexDuringSnapshotCapture = 2;
         byte[] snapshotBytes = {1,2,3,4,5};
 
-        Snapshot snapshot = Snapshot.create(ByteState.of(snapshotBytes), List.of(),
-                lastIndexDuringSnapshotCapture, 1, lastAppliedDuringSnapshotCapture, 1, -1, null, null);
+        Snapshot snapshot = Snapshot.create(ByteState.of(snapshotBytes), List.of(), lastIndexDuringSnapshotCapture, 1,
+            lastAppliedDuringSnapshotCapture, 1, new TermInfo(-1), null);
 
         ApplySnapshot applySnapshot = new ApplySnapshot(snapshot);
         sendMessageToSupport(applySnapshot);

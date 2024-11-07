@@ -26,6 +26,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
+import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.slf4j.Logger;
 
 /**
@@ -80,11 +81,16 @@ public interface RaftActorContext {
     Optional<Cluster> getCluster();
 
     /**
-     * Returns the current ElectionTerm information.
+     * Returns the current term {@link TermInfo}.
      *
-     * @return the ElectionTerm.
+     * @return the {@link TermInfo}
      */
-    @NonNull ElectionTerm getTermInformation();
+    @NonNull TermInfo getTermInformation();
+
+    // Note: does not persist
+    void setTermInformation(@NonNull TermInfo newElectionInfo);
+
+    void updateTermInformation(@NonNull TermInfo newElectionInfo);
 
     /**
      * Returns the index of highest log entry known to be committed.

@@ -31,6 +31,7 @@ import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
+import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.slf4j.Logger;
 import scala.concurrent.duration.FiniteDuration;
 
@@ -189,7 +190,7 @@ public abstract class RaftActorBehavior implements AutoCloseable {
 
         final var grantVote = canGrantVote(requestVote);
         if (grantVote) {
-            context.getTermInformation().updateAndPersist(requestVote.getTerm(), requestVote.getCandidateId());
+            context.updateTermInformation(new TermInfo(requestVote.getTerm(), requestVote.getCandidateId()));
         }
 
         final var reply = new RequestVoteReply(currentTerm(), grantVote);

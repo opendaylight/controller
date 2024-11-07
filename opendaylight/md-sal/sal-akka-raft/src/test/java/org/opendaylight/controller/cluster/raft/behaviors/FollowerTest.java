@@ -69,22 +69,21 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
+import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import scala.concurrent.duration.FiniteDuration;
 
 public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
+    private final short payloadVersion = 5;
 
     private final ActorRef followerActor = actorFactory.createActor(
             MessageCollectorActor.props(), actorFactory.generateActorId("follower"));
-
     private final ActorRef leaderActor = actorFactory.createActor(
             MessageCollectorActor.props(), actorFactory.generateActorId("leader"));
 
     private Follower follower;
-
-    private final short payloadVersion = 5;
 
     @Override
     @After
@@ -175,7 +174,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         MockRaftActorContext context = createActorContext();
         long term = 1000;
-        context.getTermInformation().update(term, null);
+        context.setTermInformation(new TermInfo(term, null));
 
         follower = createBehavior(context);
 
@@ -194,7 +193,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         MockRaftActorContext context = createActorContext();
         long term = 1000;
-        context.getTermInformation().update(term, "test");
+        context.setTermInformation(new TermInfo(term, "test"));
 
         follower = createBehavior(context);
 
@@ -559,7 +558,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         MockRaftActorContext context = createActorContext();
 
         // First set the receivers term to lower number
-        context.getTermInformation().update(1, "test");
+        context.setTermInformation(new TermInfo(1, "test"));
 
         // Prepare the receivers log
         MockRaftActorContext.SimpleReplicatedLog log = new MockRaftActorContext.SimpleReplicatedLog();
@@ -610,7 +609,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         MockRaftActorContext context = createActorContext();
 
         // First set the receivers term to lower number
-        context.getTermInformation().update(1, "test");
+        context.setTermInformation(new TermInfo(1, "test"));
 
         // Prepare the receivers log
         MockRaftActorContext.SimpleReplicatedLog log = new MockRaftActorContext.SimpleReplicatedLog();
@@ -660,7 +659,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         MockRaftActorContext context = createActorContext();
 
         // First set the receivers term to lower number
-        context.getTermInformation().update(1, "test");
+        context.setTermInformation(new TermInfo(1, "test"));
 
         // Prepare the receivers log
         MockRaftActorContext.SimpleReplicatedLog log = new MockRaftActorContext.SimpleReplicatedLog();
@@ -724,7 +723,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         MockRaftActorContext context = createActorContext();
 
-        context.getTermInformation().update(1, "test");
+        context.setTermInformation(new TermInfo(1, "test"));
 
         // Prepare the receivers log
         MockRaftActorContext.SimpleReplicatedLog log = new MockRaftActorContext.SimpleReplicatedLog();
@@ -797,7 +796,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         logStart("testHandleInstallSnapshot");
 
         MockRaftActorContext context = createActorContext();
-        context.getTermInformation().update(1, "leader");
+        context.setTermInformation(new TermInfo(1, "leader"));
 
         follower = createBehavior(context);
 

@@ -54,6 +54,7 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.messages.UnInitializedFollowerSnapshotReply;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
@@ -500,7 +501,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
             log.info("{}: Term {} in \"{}\" message is greater than leader's term {} - switching to Follower",
                 logName, rpc.getTerm(), rpc, context.getTermInformation().getCurrentTerm());
 
-            context.getTermInformation().updateAndPersist(rpc.getTerm(), null);
+            context.updateTermInformation(new TermInfo(rpc.getTerm()));
 
             // This is a special case. Normally when stepping down as leader we don't process and reply to the
             // RaftRPC as per raft. But if we're in the process of transferring leadership and we get a

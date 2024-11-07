@@ -40,6 +40,7 @@ import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -134,7 +135,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     @Test
     public void testBecomeLeaderOnReceivingMajorityVotesInFiveNodeCluster() {
         MockRaftActorContext raftActorContext = createActorContext();
-        raftActorContext.getTermInformation().update(2L, "other");
+        raftActorContext.setTermInformation(new TermInfo(2L, "other"));
         raftActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder()
                 .createEntries(0, 5, 1).build());
         raftActorContext.setCommitIndex(raftActorContext.getReplicatedLog().lastIndex());
@@ -168,8 +169,8 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
 
     @Test
     public void testBecomeLeaderOnReceivingMajorityVotesWithNonVotingPeers() {
-        ElectionTerm mockElectionTerm = mock(ElectionTerm.class);
-        doReturn(1L).when(mockElectionTerm).getCurrentTerm();
+        final var mockElectionTerm = mock(ElectionTerm.class);
+        doReturn(new TermInfo(1L)).when(mockElectionTerm).currentTerm();
         RaftActorContext raftActorContext = new RaftActorContextImpl(candidateActor, candidateActor.actorContext(),
                 "candidate", mockElectionTerm, -1, -1, setupPeers(4), new DefaultConfigParamsImpl(),
                 new NonPersistentDataProvider(Runnable::run), applyState -> { }, LOG,  MoreExecutors.directExecutor());
@@ -248,7 +249,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     @Test
     public void testHandleRequestVoteWhenSenderTermEqualToCurrentTermAndVotedForMatches() {
         MockRaftActorContext context = createActorContext();
-        context.getTermInformation().update(1000, null);
+        context.setTermInformation(new TermInfo(1000, null));
 
         // Once a candidate is created it will immediately increment the current term so after
         // construction the currentTerm should be 1001
@@ -266,7 +267,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     @Test
     public void testHandleRequestVoteWhenSenderTermEqualToCurrentTermAndVotedForDoesNotMatch() {
         MockRaftActorContext context = createActorContext();
-        context.getTermInformation().update(1000, null);
+        context.setTermInformation(new TermInfo(1000, null));
 
         // Once a candidate is created it will immediately increment the current term so after
         // construction the currentTerm should be 1001
@@ -304,7 +305,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     public void testHandleAppendEntriesAddSameEntryToLog() {
         MockRaftActorContext context = createActorContext();
 
-        context.getTermInformation().update(2, "test");
+        context.setTermInformation(new TermInfo(2, "test"));
 
         // Prepare the receivers log
         MockRaftActorContext.MockPayload payload = new MockRaftActorContext.MockPayload("zero");
@@ -322,7 +323,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
         // the test will fail because the Candidate will assume that
         // the message was sent to it from a lower term peer and will
         // thus respond with a failure
-        context.getTermInformation().update(2, "test");
+        context.setTermInformation(new TermInfo(2, "test"));
 
         // Send an unknown message so that the state of the RaftActor remains unchanged
         behavior.handleMessage(candidateActor, "unknown");

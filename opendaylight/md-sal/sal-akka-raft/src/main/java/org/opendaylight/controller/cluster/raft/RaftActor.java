@@ -56,6 +56,7 @@ import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.NoopPayload;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.concepts.Immutable;
 
@@ -419,7 +420,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         if (!getRaftActorContext().getRaftPolicy().automaticElectionsEnabled()) {
             RaftState newState = message.getNewState();
             if (newState == RaftState.Leader || newState == RaftState.Follower) {
-                getRaftActorContext().getTermInformation().updateAndPersist(message.getNewTerm(), "");
+                getRaftActorContext().updateTermInformation(new TermInfo(message.getNewTerm(), ""));
                 switchBehavior(behaviorStateTracker.capture(getCurrentBehavior()),
                     RaftActorBehavior.createBehavior(context, message.getNewState()));
             } else {

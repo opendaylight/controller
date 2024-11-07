@@ -43,6 +43,7 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 
 /**
  * The behavior of a RaftActor in the Follower raft state.
@@ -456,7 +457,7 @@ public class Follower extends RaftActorBehavior {
             log.info("{}: Term {} in \"{}\" message is greater than follower's term {} - updating term",
                 logName, rpc.getTerm(), rpc, context.getTermInformation().getCurrentTerm());
 
-            context.getTermInformation().updateAndPersist(rpc.getTerm(), null);
+            context.updateTermInformation(new TermInfo(rpc.getTerm()));
         }
 
         if (rpc instanceof InstallSnapshot installSnapshot) {
@@ -649,8 +650,7 @@ public class Follower extends RaftActorBehavior {
         final var snapshot = Snapshot.create(snapshotState, List.of(),
             installSnapshot.getLastIncludedIndex(), installSnapshot.getLastIncludedTerm(),
             installSnapshot.getLastIncludedIndex(), installSnapshot.getLastIncludedTerm(),
-            context.getTermInformation().getCurrentTerm(), context.getTermInformation().getVotedFor(),
-            installSnapshot.serverConfig());
+            context.getTermInformation(), installSnapshot.serverConfig());
 
         final var applySnapshotCallback = new ApplySnapshot.Callback() {
             @Override

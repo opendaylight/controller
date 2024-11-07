@@ -7,50 +7,50 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.Mockito.verify;
 
 import org.apache.pekko.japi.Procedure;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
+import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Unit tests for ElectionTermImpl.
  *
  * @author Thomas Pantelis
  */
-@RunWith(MockitoJUnitRunner.StrictStubs.class)
-public class ElectionTermImplTest {
-    private static final Logger LOG = LoggerFactory.getLogger(RaftActorRecoverySupportTest.class);
-
+@ExtendWith(MockitoExtension.class)
+class ElectionTermImplTest {
     @Mock
     private DataPersistenceProvider mockPersistence;
+    @Mock
+    private Logger log;
+    @Captor
+    private ArgumentCaptor<UpdateElectionTerm> message;
+    @Captor
+    private ArgumentCaptor<Procedure<UpdateElectionTerm>> procedure;
 
     @Test
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void testUpdateAndPersist() throws Exception {
-        ElectionTermImpl impl = new ElectionTermImpl(mockPersistence, "test", LOG);
+    void testUpdateAndPersist() throws Exception {
+        final var impl = new ElectionTermImpl(mockPersistence, "test", log);
+        final var termInfo = new TermInfo(10, "member-1");
+        impl.updateAndPersist(termInfo);
 
-        impl.updateAndPersist(10, "member-1");
+        assertEquals(termInfo, impl.currentTerm());
 
-        assertEquals("getCurrentTerm", 10, impl.getCurrentTerm());
-        assertEquals("getVotedFor", "member-1", impl.getVotedFor());
-
-        ArgumentCaptor<Object> message = ArgumentCaptor.forClass(Object.class);
-        ArgumentCaptor<Procedure> procedure = ArgumentCaptor.forClass(Procedure.class);
         verify(mockPersistence).persist(message.capture(), procedure.capture());
 
-        assertEquals("Message type", UpdateElectionTerm.class, message.getValue().getClass());
-        UpdateElectionTerm update = (UpdateElectionTerm)message.getValue();
-        assertEquals("getCurrentTerm", 10, update.getCurrentTerm());
-        assertEquals("getVotedFor", "member-1", update.getVotedFor());
+        final var update = assertInstanceOf(UpdateElectionTerm.class, message.getValue());
+        assertEquals(termInfo, update.termInfo());
 
         procedure.getValue().apply(null);
     }
