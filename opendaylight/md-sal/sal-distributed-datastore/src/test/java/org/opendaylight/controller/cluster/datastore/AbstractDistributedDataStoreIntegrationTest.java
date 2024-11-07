@@ -30,7 +30,6 @@ import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
@@ -53,6 +52,7 @@ import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardData
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
 import org.opendaylight.controller.cluster.datastore.utils.MockDataTreeChangeListener;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.PeopleModel;
@@ -794,7 +794,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
 
         final Snapshot carsSnapshot = Snapshot.create(
             new ShardSnapshotState(new MetadataShardDataTreeSnapshot(root)),
-            Collections.emptyList(), 2, 1, 2, 1, 1, "member-1", null);
+            List.of(), 2, 1, 2, 1, new TermInfo(1, "member-1"), null);
 
         dataTree = new InMemoryDataTreeFactory().create(DataTreeConfiguration.DEFAULT_OPERATIONAL,
             SchemaContextHelper.full());
@@ -806,7 +806,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
 
         final Snapshot peopleSnapshot = Snapshot.create(
             new ShardSnapshotState(new MetadataShardDataTreeSnapshot(root)),
-            Collections.emptyList(), 2, 1, 2, 1, 1, "member-1", null);
+            List.of(), 2, 1, 2, 1, new TermInfo(1, "member-1"), null);
 
         testKit.restoreFromSnapshot = new DatastoreSnapshot(name, null, Arrays.asList(
             new DatastoreSnapshot.ShardSnapshot("cars", carsSnapshot),

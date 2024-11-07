@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 
 /**
  * ElectionTerm contains information about a RaftActors election term. This information includes the last known current
@@ -15,37 +16,30 @@ import org.eclipse.jdt.annotation.Nullable;
  *
  * <p>This class ensures that election term information is persisted.
  */
+@NonNullByDefault
 public interface ElectionTerm {
     /**
-     * Returns the current leader's Raft term.
+     * Returns {@link TermInfo} for current term.
      *
-     * @return the current leader's Raft term.
+     * @return {@link TermInfo} for current term
      */
-    long getCurrentTerm();
-
-    /**
-     * Returns the id of the candidate that this server voted for in current term.
-     *
-     * @return candidate id that received the vote or null if no candidate was voted for.
-     */
-    @Nullable String getVotedFor();
+    // FIXME: really non-null?
+    TermInfo currentTerm();
 
     /**
      * This method updates the in-memory election term state. This method should be called when recovering election
      * state from persistent storage.
      *
-     * @param term the election term.
-     * @param votedFor the candidate id that was voted for.
+     * @param newTerm new {@link TermInfo}
      */
-    void update(long term, @Nullable String votedFor);
+    void update(TermInfo newTerm);
 
     /**
      * This method updates the in-memory election term state and persists it so it can be recovered on next restart.
      * This method should be called when starting a new election or when a Raft RPC message is received  with a higher
      * term.
      *
-     * @param term the election term.
-     * @param votedFor the candidate id that was voted for.
+     * @param newTerm new {@link TermInfo}
      */
-    void updateAndPersist(long term, @Nullable String votedFor);
+    void updateAndPersist(TermInfo newTerm);
 }

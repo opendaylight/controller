@@ -14,6 +14,7 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 
 /**
  * Unit tests for Snapshot.
@@ -40,7 +41,7 @@ public class SnapshotTest {
                 new ServerInfo("1", true), new ServerInfo("2", false)));
 
         final var expected = Snapshot.create(ByteState.of(state), unapplied, lastIndex, lastTerm, lastAppliedIndex,
-                lastAppliedTerm, electionTerm, electionVotedFor, serverConfig);
+                lastAppliedTerm, new TermInfo(electionTerm, electionVotedFor), serverConfig);
         final var bytes = SerializationUtils.serialize(expected);
         assertEquals(expectedSize, bytes.length);
         final var cloned = (Snapshot) SerializationUtils.deserialize(bytes);

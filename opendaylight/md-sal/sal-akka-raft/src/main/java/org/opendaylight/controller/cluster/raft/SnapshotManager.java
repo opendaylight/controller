@@ -371,8 +371,7 @@ public class SnapshotManager implements SnapshotState {
                     captureSnapshot.getUnAppliedEntries(),
                     captureSnapshot.getLastIndex(), captureSnapshot.getLastTerm(),
                     captureSnapshot.getLastAppliedIndex(), captureSnapshot.getLastAppliedTerm(),
-                    context.getTermInformation().getCurrentTerm(),
-                    context.getTermInformation().getVotedFor(), context.getPeerServerInfo(true));
+                    context.getTermInformation(), context.getPeerServerInfo(true));
 
             context.getPersistenceProvider().saveSnapshot(snapshot);
 
@@ -477,7 +476,7 @@ public class SnapshotManager implements SnapshotState {
                     context.setReplicatedLog(ReplicatedLogImpl.newInstance(snapshot, context));
                     context.setLastApplied(snapshot.getLastAppliedIndex());
                     context.setCommitIndex(snapshot.getLastAppliedIndex());
-                    context.getTermInformation().update(snapshot.getElectionTerm(), snapshot.getElectionVotedFor());
+                    context.setTermInformation(snapshot.termInfo());
 
                     if (snapshot.getServerConfiguration() != null) {
                         context.updatePeerIds(snapshot.getServerConfiguration());

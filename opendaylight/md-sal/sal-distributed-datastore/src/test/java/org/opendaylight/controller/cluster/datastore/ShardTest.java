@@ -28,6 +28,7 @@ import com.google.common.util.concurrent.Uninterruptibles;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -100,6 +101,7 @@ import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
+import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
@@ -263,7 +265,7 @@ public class ShardTest extends AbstractShardTest {
         final NormalizedNode expected = readStore(store, root);
 
         final Snapshot snapshot = Snapshot.create(new ShardSnapshotState(new MetadataShardDataTreeSnapshot(expected)),
-                Collections.emptyList(), 1, 2, 3, 4, -1, null, null);
+                List.of(), 1, 2, 3, 4, new TermInfo(-1, null), null);
 
         shard.tell(new ApplySnapshot(snapshot), noSender());
 

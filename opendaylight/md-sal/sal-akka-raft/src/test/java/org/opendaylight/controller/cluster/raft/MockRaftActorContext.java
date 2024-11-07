@@ -24,6 +24,7 @@ import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.actor.Props;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
@@ -32,6 +33,7 @@ import org.opendaylight.controller.cluster.raft.persisted.ByteState;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
+import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,29 +46,22 @@ public class MockRaftActorContext extends RaftActorContextImpl {
 
     private static ElectionTerm newElectionTerm() {
         return new ElectionTerm() {
-            private long currentTerm = 1;
-            private String votedFor = "";
+            private @NonNull TermInfo current = new TermInfo(1, "");
 
             @Override
-            public long getCurrentTerm() {
-                return currentTerm;
+            public TermInfo currentTerm() {
+                return current;
             }
 
             @Override
-            public String getVotedFor() {
-                return votedFor;
+            public void update(final TermInfo newElectionInfo) {
+                current = requireNonNull(newElectionInfo);
             }
 
             @Override
-            public void update(final long newTerm, final String newVotedFor) {
-                currentTerm = newTerm;
-                votedFor = newVotedFor;
-
+            public void updateAndPersist(final TermInfo newElectionInfo) {
+                update(newElectionInfo);
                 // TODO : Write to some persistent state
-            }
-
-            @Override public void updateAndPersist(final long newTerm, final String newVotedFor) {
-                update(newTerm, newVotedFor);
             }
         };
     }

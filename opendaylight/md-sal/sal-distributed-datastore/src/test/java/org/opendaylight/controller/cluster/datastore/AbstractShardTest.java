@@ -23,7 +23,7 @@ import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking
 
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.IOException;
-import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -45,9 +45,9 @@ import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier
 import org.opendaylight.controller.cluster.datastore.persisted.CommitTransactionPayload;
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
-import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.TestActorFactory;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
@@ -258,7 +258,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
 
         InMemorySnapshotStore.addSnapshot(shardID.toString(), Snapshot.create(
                 new ShardSnapshotState(new MetadataShardDataTreeSnapshot(root)),
-                Collections.<ReplicatedLogEntry>emptyList(), 0, 1, -1, -1, 1, null, null));
+                List.of(), 0, 1, -1, -1, new TermInfo(1, null), null));
         return testStore;
     }
 

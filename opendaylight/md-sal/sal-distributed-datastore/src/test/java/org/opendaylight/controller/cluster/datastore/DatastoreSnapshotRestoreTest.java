@@ -16,7 +16,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.After;
@@ -26,8 +26,8 @@ import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardManagerSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
-import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.PeopleModel;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
@@ -115,8 +115,7 @@ public class DatastoreSnapshotRestoreTest {
         assertEquals(prefix + " lastAppliedIndex", expected.getLastAppliedIndex(), actual.getLastAppliedIndex());
         assertEquals(prefix + " lastAppliedTerm", expected.getLastAppliedTerm(), actual.getLastAppliedTerm());
         assertEquals(prefix + " unAppliedEntries", expected.getUnAppliedEntries(), actual.getUnAppliedEntries());
-        assertEquals(prefix + " electionTerm", expected.getElectionTerm(), actual.getElectionTerm());
-        assertEquals(prefix + " electionVotedFor", expected.getElectionVotedFor(), actual.getElectionVotedFor());
+        assertEquals(prefix + " electionTerm", expected.termInfo(), actual.termInfo());
         assertEquals(prefix + " Root node", ((ShardSnapshotState)expected.getState()).getSnapshot().getRootNode(),
                 ((ShardSnapshotState)actual.getState()).getSnapshot().getRootNode());
     }
@@ -132,6 +131,6 @@ public class DatastoreSnapshotRestoreTest {
         NormalizedNode root = AbstractShardTest.readStore(dataTree, YangInstanceIdentifier.of());
 
         return Snapshot.create(new ShardSnapshotState(new MetadataShardDataTreeSnapshot(root)),
-                Collections.<ReplicatedLogEntry>emptyList(), 2, 1, 2, 1, 1, "member-1", null);
+                List.of(), 2, 1, 2, 1, new TermInfo(1, "member-1"), null);
     }
 }

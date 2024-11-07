@@ -11,7 +11,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -26,10 +25,10 @@ import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot.ShardSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardManagerSnapshot;
-import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshotReply;
 import org.opendaylight.controller.cluster.raft.persisted.ByteState;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
@@ -54,20 +53,20 @@ public class ShardManagerGetSnapshotReplyActorTest extends AbstractActorTest {
 
         ByteState shard1SnapshotState = ByteState.of(new byte[]{1,2,3});
         replyActor.tell(new GetSnapshotReply(ShardIdentifier.create("shard1", MEMBER_1, "config").toString(),
-                Snapshot.create(shard1SnapshotState, Collections.<ReplicatedLogEntry>emptyList(),
-                        2, 1, 2, 1, 1, "member-1", null)), ActorRef.noSender());
+            Snapshot.create(shard1SnapshotState, List.of(), 2, 1, 2, 1, new TermInfo(1, "member-1"), null)),
+            ActorRef.noSender());
 
         ByteState shard2SnapshotState = ByteState.of(new byte[]{4,5,6});
         replyActor.tell(new GetSnapshotReply(ShardIdentifier.create("shard2", MEMBER_1, "config").toString(),
-                Snapshot.create(shard2SnapshotState, Collections.<ReplicatedLogEntry>emptyList(),
-                        2, 1, 2, 1, 1, "member-1", null)), ActorRef.noSender());
+            Snapshot.create(shard2SnapshotState, List.of(), 2, 1, 2, 1, new TermInfo(1, "member-1"), null)),
+            ActorRef.noSender());
 
         kit.expectNoMessage(Duration.ofMillis(500));
 
         ByteState shard3SnapshotState = ByteState.of(new byte[]{7,8,9});
         replyActor.tell(new GetSnapshotReply(ShardIdentifier.create("shard3", MEMBER_1, "config").toString(),
-                Snapshot.create(shard3SnapshotState, Collections.<ReplicatedLogEntry>emptyList(),
-                        2, 1, 2, 1, 1, "member-1", null)), ActorRef.noSender());
+            Snapshot.create(shard3SnapshotState, List.of(), 2, 1, 2, 1, new TermInfo(1, "member-1"), null)),
+            ActorRef.noSender());
 
         DatastoreSnapshot datastoreSnapshot = kit.expectMsgClass(DatastoreSnapshot.class);
 
@@ -100,8 +99,8 @@ public class ShardManagerGetSnapshotReplyActorTest extends AbstractActorTest {
         kit.watch(replyActor);
 
         replyActor.tell(new GetSnapshotReply(ShardIdentifier.create("shard1", MEMBER_1, "config").toString(),
-                Snapshot.create(ByteState.of(new byte[]{1,2,3}), Collections.<ReplicatedLogEntry>emptyList(),
-                        2, 1, 2, 1, 1, "member-1", null)), ActorRef.noSender());
+            Snapshot.create(ByteState.of(new byte[]{1,2,3}), List.of(), 2, 1, 2, 1, new TermInfo(1, "member-1"), null)),
+            ActorRef.noSender());
 
         replyActor.tell(new Failure(new RuntimeException()), ActorRef.noSender());
 
