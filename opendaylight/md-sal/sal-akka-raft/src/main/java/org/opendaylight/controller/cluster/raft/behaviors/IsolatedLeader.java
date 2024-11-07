@@ -25,19 +25,19 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
  * <p>In the Isolated Leader , on every AppendEntriesReply, we aggressively check if the leader is isolated.
  * If no, then the state is switched back to Leader.
  */
-public class IsolatedLeader extends AbstractLeader {
-    IsolatedLeader(RaftActorContext context, @Nullable AbstractLeader initializeFromLeader) {
+public non-sealed class IsolatedLeader extends AbstractLeader {
+    IsolatedLeader(final RaftActorContext context, final @Nullable AbstractLeader initializeFromLeader) {
         super(context, RaftState.IsolatedLeader, initializeFromLeader);
     }
 
-    public IsolatedLeader(RaftActorContext context) {
+    public IsolatedLeader(final RaftActorContext context) {
         this(context, null);
     }
 
     // we received an Append Entries reply, we should switch the Behavior to Leader
     @Override
-    protected RaftActorBehavior handleAppendEntriesReply(ActorRef sender,
-        AppendEntriesReply appendEntriesReply) {
+    protected RaftActorBehavior handleAppendEntriesReply(final ActorRef sender,
+            final AppendEntriesReply appendEntriesReply) {
         RaftActorBehavior ret = super.handleAppendEntriesReply(sender, appendEntriesReply);
 
         // it can happen that this isolated leader interacts with a new leader in the cluster and

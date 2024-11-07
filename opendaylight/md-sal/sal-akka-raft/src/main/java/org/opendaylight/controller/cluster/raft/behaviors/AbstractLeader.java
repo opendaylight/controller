@@ -77,7 +77,7 @@ import scala.concurrent.duration.FiniteDuration;
  * set commitIndex = N (§5.3, §5.4).
  * </ul>
  */
-public abstract class AbstractLeader extends AbstractRaftActorBehavior {
+public abstract sealed class AbstractLeader extends RaftActorBehavior permits IsolatedLeader, Leader, PreLeader {
     private final Map<String, FollowerLogInformation> followerToLog = new HashMap<>();
 
     /**

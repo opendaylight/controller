@@ -54,14 +54,13 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
  * </ul>
  */
 // Non-final for testing
-public class Follower extends AbstractRaftActorBehavior {
+public class Follower extends RaftActorBehavior {
     private static final long MAX_ELECTION_TIMEOUT_FACTOR = 18;
 
+    private final Stopwatch lastLeaderMessageTimer = Stopwatch.createStarted();
     private final SyncStatusTracker initialSyncStatusTracker;
-
     private final MessageAssembler appendEntriesMessageAssembler;
 
-    private final Stopwatch lastLeaderMessageTimer = Stopwatch.createStarted();
     private SnapshotTracker snapshotTracker = null;
     private String leaderId;
     private short leaderPayloadVersion;

@@ -28,15 +28,15 @@ import org.opendaylight.controller.cluster.raft.persisted.NoopPayload;
  *
  * @author Thomas Pantelis
  */
-public class PreLeader extends AbstractLeader {
-    public PreLeader(RaftActorContext context) {
+public non-sealed class PreLeader extends AbstractLeader {
+    public PreLeader(final RaftActorContext context) {
         super(context, RaftState.PreLeader);
 
         context.getActor().tell(NoopPayload.INSTANCE, context.getActor());
     }
 
     @Override
-    public RaftActorBehavior handleMessage(ActorRef sender, Object message) {
+    public RaftActorBehavior handleMessage(final ActorRef sender, final Object message) {
         if (message instanceof ApplyState) {
             log.debug("{}: Received {} - lastApplied: {}, lastIndex: {}", logName(), message, context.getLastApplied(),
                     context.getReplicatedLog().lastIndex());

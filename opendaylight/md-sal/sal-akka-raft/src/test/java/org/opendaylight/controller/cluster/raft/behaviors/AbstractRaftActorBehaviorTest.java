@@ -226,7 +226,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
     @Test
     public void testPerformSnapshot() {
         MockRaftActorContext context = new MockRaftActorContext("test", getSystem(), behaviorActor);
-        AbstractRaftActorBehavior abstractBehavior =  (AbstractRaftActorBehavior) createBehavior(context);
+        RaftActorBehavior abstractBehavior = createBehavior(context);
         if (abstractBehavior instanceof Candidate) {
             return;
         }
