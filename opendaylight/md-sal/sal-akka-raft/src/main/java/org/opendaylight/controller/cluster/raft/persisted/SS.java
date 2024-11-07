@@ -18,6 +18,7 @@ import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
+import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.yangtools.concepts.WritableObjects;
 
 /**
@@ -81,7 +82,7 @@ final class SS implements Externalizable {
         State state = (State) in.readObject();
 
         snapshot = Snapshot.create(state, unAppliedEntries.build(), lastIndex, lastTerm, lastAppliedIndex,
-            lastAppliedTerm, electionTerm, electionVotedFor, serverConfig);
+            lastAppliedTerm, new TermInfo(electionTerm, electionVotedFor), serverConfig);
     }
 
     @java.io.Serial

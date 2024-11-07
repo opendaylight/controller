@@ -37,6 +37,7 @@ import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.TestActorFactory;
 import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
+import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -241,7 +242,7 @@ public class AbstractLeaderElectionScenarioTest {
             final Map<String, String> peerAddresses) {
         MockRaftActorContext context = new MockRaftActorContext(id, system, actor);
         context.setPeerAddresses(peerAddresses);
-        context.getTermInformation().updateAndPersist(1, "");
+        context.updateTermInformation(new TermInfo(1, ""));
         return context;
     }
 
