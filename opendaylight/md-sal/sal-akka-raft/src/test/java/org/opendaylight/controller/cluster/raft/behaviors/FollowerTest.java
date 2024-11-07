@@ -1073,17 +1073,11 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
     @Test
+    // TODO: parameterized with all possible RaftRPCs
     public void testElectionScheduledWhenAnyRaftRPCReceived() {
         MockRaftActorContext context = createActorContext();
         follower = createBehavior(context);
-        follower.handleMessage(leaderActor, new RaftRPC() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public long getTerm() {
-                return 100;
-            }
-        });
+        follower.handleMessage(leaderActor, new RequestVoteReply(100, false));
         verify(follower).scheduleElection(any(FiniteDuration.class));
     }
 

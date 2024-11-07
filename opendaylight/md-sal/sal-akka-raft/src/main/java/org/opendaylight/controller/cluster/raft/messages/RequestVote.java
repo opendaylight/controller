@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.raft.messages;
 /**
  * Invoked by candidates to gather votes (§5.2).
  */
-public final class RequestVote extends AbstractRaftRPC {
+public final class RequestVote extends RaftRPC {
     @java.io.Serial
     private static final long serialVersionUID = -6967509186297108657L;
 

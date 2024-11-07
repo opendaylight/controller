@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft.messages;
 
-public final class InstallSnapshotReply extends AbstractRaftRPC {
+public final class InstallSnapshotReply extends RaftRPC {
     @java.io.Serial
     private static final long serialVersionUID = 642227896390779503L;
 
