@@ -5,16 +5,16 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft.behaviors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,9 +23,7 @@ import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.dispatch.Dispatchers;
 import org.apache.pekko.testkit.TestActorRef;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.ElectionTerm;
@@ -50,16 +48,11 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     static final Logger LOG = LoggerFactory.getLogger(CandidateTest.class);
 
     private final TestActorRef<MessageCollectorActor> candidateActor = actorFactory.createTestActor(
-            MessageCollectorActor.props().withDispatcher(Dispatchers.DefaultDispatcherId()),
+        MessageCollectorActor.props().withDispatcher(Dispatchers.DefaultDispatcherId()),
             actorFactory.generateActorId("candidate"));
 
     private ActorRef[] peerActors;
-
     private RaftActorBehavior candidate;
-
-    @Before
-    public void setUp(){
-    }
 
     @Override
     @After
@@ -175,8 +168,8 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
 
     @Test
     public void testBecomeLeaderOnReceivingMajorityVotesWithNonVotingPeers() {
-        ElectionTerm mockElectionTerm = Mockito.mock(ElectionTerm.class);
-        Mockito.doReturn(1L).when(mockElectionTerm).getCurrentTerm();
+        ElectionTerm mockElectionTerm = mock(ElectionTerm.class);
+        doReturn(1L).when(mockElectionTerm).getCurrentTerm();
         RaftActorContext raftActorContext = new RaftActorContextImpl(candidateActor, candidateActor.actorContext(),
                 "candidate", mockElectionTerm, -1, -1, setupPeers(4), new DefaultConfigParamsImpl(),
                 new NonPersistentDataProvider(Runnable::run), applyState -> { }, LOG,  MoreExecutors.directExecutor());
@@ -205,7 +198,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
 
         setupPeers(1);
         RaftActorBehavior newBehavior = candidate.handleMessage(peerActors[0], new AppendEntries(1, "test", 0, 0,
-                Collections.<ReplicatedLogEntry>emptyList(), 0, -1, (short) 0));
+                List.of(), 0, -1, (short) 0));
 
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(
                 peerActors[0], AppendEntriesReply.class);
@@ -220,7 +213,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
 
         setupPeers(1);
         RaftActorBehavior newBehavior = candidate.handleMessage(peerActors[0], new AppendEntries(5, "test", 0, 0,
-                Collections.<ReplicatedLogEntry>emptyList(), 0, -1, (short) 0));
+            List.of(), 0, -1, (short) 0));
 
         assertTrue("New Behavior : " + newBehavior, newBehavior instanceof Follower);
     }
@@ -233,12 +226,11 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
 
         setupPeers(1);
         RaftActorBehavior newBehavior = candidate.handleMessage(peerActors[0], new AppendEntries(2, "test", 0, 0,
-                Collections.<ReplicatedLogEntry>emptyList(), 0, -1, (short) 0));
+            List.of(), 0, -1, (short) 0));
 
         assertTrue("New Behavior : " + newBehavior + " term = " + actorContext.getTermInformation().getCurrentTerm(),
                 newBehavior instanceof Follower);
     }
-
 
     @Test
     public void testResponseToRequestVoteWithLowerTerm() {
@@ -355,7 +347,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     }
 
     private Map<String, String> setupPeers(final int count) {
-        Map<String, String> peerMap = new HashMap<>();
+        final var peerMap = new HashMap<String, String>();
         peerActors = new ActorRef[count];
         for (int i = 0; i < count; i++) {
             peerActors[i] = actorFactory.createActor(MessageCollectorActor.props(),
@@ -370,8 +362,8 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     protected void assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(final MockRaftActorContext actorContext,
             final ActorRef actorRef, final RaftRPC rpc) {
         super.assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(actorContext, actorRef, rpc);
-        if (rpc instanceof RequestVote) {
-            assertEquals("New votedFor", ((RequestVote)rpc).getCandidateId(),
+        if (rpc instanceof RequestVote requestVote) {
+            assertEquals("New votedFor", requestVote.getCandidateId(),
                     actorContext.getTermInformation().getVotedFor());
         } else {
             assertEquals("New votedFor", null, actorContext.getTermInformation().getVotedFor());
