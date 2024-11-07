@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.raft.messages;
 
+import com.google.common.base.MoreObjects.ToStringHelper;
+
 public final class RequestVoteReply extends RaftRPC {
     @java.io.Serial
     private static final long serialVersionUID = 8427899326488775660L;
@@ -24,8 +26,8 @@ public final class RequestVoteReply extends RaftRPC {
     }
 
     @Override
-    public String toString() {
-        return "RequestVoteReply [term=" + getTerm() + ", voteGranted=" + voteGranted + "]";
+    ToStringHelper addToStringAttributes(final ToStringHelper helper) {
+        return super.addToStringAttributes(helper).add("voteGranted", voteGranted);
     }
 
     @Override

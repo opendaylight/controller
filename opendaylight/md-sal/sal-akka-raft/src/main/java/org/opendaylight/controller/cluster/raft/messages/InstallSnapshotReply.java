@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.raft.messages;
 
+import com.google.common.base.MoreObjects.ToStringHelper;
+
 public final class InstallSnapshotReply extends RaftRPC {
     @java.io.Serial
     private static final long serialVersionUID = 642227896390779503L;
@@ -37,11 +39,11 @@ public final class InstallSnapshotReply extends RaftRPC {
     }
 
     @Override
-    public String toString() {
-        return "InstallSnapshotReply [term=" + getTerm()
-                + ", followerId=" + followerId
-                + ", chunkIndex=" + chunkIndex
-                + ", success=" + success + "]";
+    ToStringHelper addToStringAttributes(final ToStringHelper helper) {
+        return super.addToStringAttributes(helper)
+            .add("followerId", followerId)
+            .add("chunkIndex", chunkIndex)
+            .add("success", success);
     }
 
     @Override

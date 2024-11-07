@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft.messages;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.collect.ImmutableList;
 import java.io.Externalizable;
 import java.io.IOException;
@@ -125,17 +126,18 @@ public final class AppendEntries extends RaftRPC {
     }
 
     @Override
-    public String toString() {
-        return "AppendEntries [leaderId=" + leaderId
-                + ", prevLogIndex=" + prevLogIndex
-                + ", prevLogTerm=" + prevLogTerm
-                + ", leaderCommit=" + leaderCommit
-                + ", replicatedToAllIndex=" + replicatedToAllIndex
-                + ", payloadVersion=" + payloadVersion
-                + ", recipientRaftVersion=" + recipientRaftVersion
-                + ", leaderRaftVersion=" + leaderRaftVersion
-                + ", leaderAddress=" + leaderAddress
-                + ", entries=" + entries + "]";
+    ToStringHelper addToStringAttributes(final ToStringHelper helper) {
+        return super.addToStringAttributes(helper)
+            .add("leaderId", leaderId)
+            .add("prevLogIndex", prevLogIndex)
+            .add("prevLogTerm", prevLogTerm)
+            .add("leaderCommit", leaderCommit)
+            .add("replicatedToAllIndex", replicatedToAllIndex)
+            .add("payloadVersion", payloadVersion)
+            .add("recipientRaftVersion", recipientRaftVersion)
+            .add("leaderRaftVersion", leaderRaftVersion)
+            .add("leaderAddress", leaderAddress)
+            .add("entries=", entries);
     }
 
     @Override

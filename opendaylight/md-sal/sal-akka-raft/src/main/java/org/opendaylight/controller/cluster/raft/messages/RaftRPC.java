@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.raft.messages;
 
+import com.google.common.base.MoreObjects;
+import com.google.common.base.MoreObjects.ToStringHelper;
 import java.io.Serializable;
 import org.apache.pekko.dispatch.ControlMessage;
 
@@ -39,7 +41,13 @@ public abstract sealed class RaftRPC implements Serializable, ControlMessage
     }
 
     @Override
-    public abstract String toString();
+    public final String toString() {
+        return addToStringAttributes(MoreObjects.toStringHelper(this).omitNullValues()).toString();
+    }
+
+    ToStringHelper addToStringAttributes(final ToStringHelper helper) {
+        return helper.add("term", term);
+    }
 
     // All implementations must use Externalizable Proxy pattern
     @java.io.Serial

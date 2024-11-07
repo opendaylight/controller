@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft.messages;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.MoreObjects.ToStringHelper;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.Externalizable;
 import java.io.IOException;
@@ -103,11 +104,15 @@ public final class InstallSnapshot extends RaftRPC {
     }
 
     @Override
-    public String toString() {
-        return "InstallSnapshot [term=" + getTerm() + ", leaderId=" + leaderId + ", lastIncludedIndex="
-                + lastIncludedIndex + ", lastIncludedTerm=" + lastIncludedTerm + ", datasize=" + data.length
-                + ", Chunk=" + chunkIndex + "/" + totalChunks + ", lastChunkHashCode=" + lastChunkHashCode
-                + ", serverConfig=" + serverConfig + "]";
+    ToStringHelper addToStringAttributes(final ToStringHelper helper) {
+        return super.addToStringAttributes(helper)
+            .add("leaderId", leaderId)
+            .add("lastIncludedIndex", lastIncludedIndex)
+            .add("lastIncludedTerm", lastIncludedTerm)
+            .add("datasize", data.length)
+            .add("chunk", chunkIndex + "/" + totalChunks)
+            .add("lastChunkHashCode", lastChunkHashCode)
+            .add("serverConfig", serverConfig);
     }
 
     @Override

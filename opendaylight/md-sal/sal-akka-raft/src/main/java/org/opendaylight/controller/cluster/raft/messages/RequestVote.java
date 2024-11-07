@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.raft.messages;
 
+import com.google.common.base.MoreObjects.ToStringHelper;
+
 /**
  * Invoked by candidates to gather votes (§5.2).
  */
@@ -43,12 +45,11 @@ public final class RequestVote extends RaftRPC {
     }
 
     @Override
-    public String toString() {
-        return "RequestVote [term=" + getTerm()
-                + ", candidateId=" + candidateId
-                + ", lastLogIndex=" + lastLogIndex
-                + ", lastLogTerm=" + lastLogTerm
-                + "]";
+    ToStringHelper addToStringAttributes(final ToStringHelper helper) {
+        return super.addToStringAttributes(helper)
+            .add("candidateId", candidateId)
+            .add("lastLogIndex", lastLogIndex)
+            .add("lastLogTerm", lastLogTerm);
     }
 
     @Override

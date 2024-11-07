@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft.messages;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.MoreObjects.ToStringHelper;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -108,12 +109,17 @@ public final class AppendEntriesReply extends RaftRPC {
     }
 
     @Override
-    public String toString() {
-        return "AppendEntriesReply [term=" + getTerm() + ", success=" + success + ", followerId=" + followerId
-                + ", logLastIndex=" + logLastIndex + ", logLastTerm=" + logLastTerm + ", forceInstallSnapshot="
-                + forceInstallSnapshot + ", needsLeaderAddress=" + needsLeaderAddress
-                + ", payloadVersion=" + payloadVersion + ", raftVersion=" + raftVersion
-                + ", recipientRaftVersion=" + recipientRaftVersion + "]";
+    ToStringHelper addToStringAttributes(final ToStringHelper helper) {
+        return super.addToStringAttributes(helper)
+            .add("success", success)
+            .add("followerId", followerId)
+            .add("logLastIndex", logLastIndex)
+            .add("logLastTerm", logLastTerm)
+            .add("forceInstallSnapshot", forceInstallSnapshot)
+            .add("needsLeaderAddress", needsLeaderAddress)
+            .add("payloadVersion", payloadVersion)
+            .add("raftVersion", raftVersion)
+            .add("recipientRaftVersion", recipientRaftVersion);
     }
 
     @Override
