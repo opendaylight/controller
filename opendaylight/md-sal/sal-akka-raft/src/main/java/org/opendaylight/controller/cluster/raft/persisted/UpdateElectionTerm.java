@@ -7,39 +7,47 @@
  */
 package org.opendaylight.controller.cluster.raft.persisted;
 
+import static java.util.Objects.requireNonNull;
+
+import com.google.common.base.MoreObjects;
 import java.io.Serializable;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.cluster.raft.TermInfo;
 
 /**
  * Message class to persist election term information.
  */
-public final class UpdateElectionTerm implements Serializable {
-    @java.io.Serial
-    private static final long serialVersionUID = 1L;
-
-    private final long currentTerm;
-    private final String votedFor;
-
-    public UpdateElectionTerm(final long currentTerm, final String votedFor) {
-        this.currentTerm = currentTerm;
-        this.votedFor = votedFor;
+public record UpdateElectionTerm(@NonNull TermInfo termInfo) implements Serializable {
+    public UpdateElectionTerm {
+        requireNonNull(termInfo);
     }
 
+    public UpdateElectionTerm(final long term, final @Nullable String votedFor) {
+        this(new TermInfo(term, votedFor));
+    }
+
+    @Deprecated()
     public long getCurrentTerm() {
-        return currentTerm;
+        return termInfo.term();
     }
 
+    @Deprecated()
     public String getVotedFor() {
-        return votedFor;
+        return termInfo.votedFor();
     }
 
     @Override
     public String toString() {
-        return "UpdateElectionTerm [currentTerm=" + currentTerm + ", votedFor=" + votedFor + "]";
+        return MoreObjects.toStringHelper(this)
+            .add("currentTerm", termInfo.term())
+            .add("votedFor", termInfo.votedFor())
+            .toString();
     }
 
     @java.io.Serial
     private Object writeReplace() {
-        return new UT(this);
+        return new UT(termInfo);
     }
 }
 

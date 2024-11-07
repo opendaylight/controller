@@ -7,9 +7,13 @@
  */
 package org.opendaylight.controller.cluster.raft.persisted;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.Serializable;
 import java.util.List;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.TermInfo;
 
 /**
  * Represents a snapshot of the raft data.
@@ -43,29 +47,27 @@ public final class Snapshot implements Serializable {
     private final long lastTerm;
     private final long lastAppliedIndex;
     private final long lastAppliedTerm;
-    private final long electionTerm;
-    private final String electionVotedFor;
+    private final @NonNull TermInfo termInfo;
     private final ServerConfigurationPayload serverConfig;
 
     private Snapshot(final State state, final List<ReplicatedLogEntry> unAppliedEntries, final long lastIndex,
-            final long lastTerm, final long lastAppliedIndex, final long lastAppliedTerm, final long electionTerm,
-            final String electionVotedFor, final ServerConfigurationPayload serverConfig) {
+            final long lastTerm, final long lastAppliedIndex, final long lastAppliedTerm, final TermInfo termInfo,
+            final ServerConfigurationPayload serverConfig) {
         this.state = state;
         this.unAppliedEntries = unAppliedEntries;
         this.lastIndex = lastIndex;
         this.lastTerm = lastTerm;
         this.lastAppliedIndex = lastAppliedIndex;
         this.lastAppliedTerm = lastAppliedTerm;
-        this.electionTerm = electionTerm;
-        this.electionVotedFor = electionVotedFor;
+        this.termInfo = requireNonNull(termInfo);
         this.serverConfig = serverConfig;
     }
 
     public static Snapshot create(final State state, final List<ReplicatedLogEntry> entries, final long lastIndex,
-            final long lastTerm, final long lastAppliedIndex, final long lastAppliedTerm, final long electionTerm,
-            final String electionVotedFor, final ServerConfigurationPayload serverConfig) {
-        return new Snapshot(state, entries, lastIndex, lastTerm, lastAppliedIndex, lastAppliedTerm,
-                electionTerm, electionVotedFor, serverConfig);
+            final long lastTerm, final long lastAppliedIndex, final long lastAppliedTerm, final TermInfo termInfo,
+            final ServerConfigurationPayload serverConfig) {
+        return new Snapshot(state, entries, lastIndex, lastTerm, lastAppliedIndex, lastAppliedTerm, termInfo,
+            serverConfig);
     }
 
     public State getState() {
@@ -92,12 +94,18 @@ public final class Snapshot implements Serializable {
         return lastIndex;
     }
 
-    public long getElectionTerm() {
-        return electionTerm;
+    public @NonNull TermInfo termInfo() {
+        return termInfo;
     }
 
+    @Deprecated
+    public long getElectionTerm() {
+        return termInfo.term();
+    }
+
+    @Deprecated
     public String getElectionVotedFor() {
-        return electionVotedFor;
+        return termInfo.votedFor();
     }
 
     public ServerConfigurationPayload getServerConfiguration() {
@@ -108,8 +116,8 @@ public final class Snapshot implements Serializable {
     public String toString() {
         return "Snapshot [lastIndex=" + lastIndex + ", lastTerm=" + lastTerm + ", lastAppliedIndex=" + lastAppliedIndex
                 + ", lastAppliedTerm=" + lastAppliedTerm + ", unAppliedEntries size=" + unAppliedEntries.size()
-                + ", state=" + state + ", electionTerm=" + electionTerm + ", electionVotedFor="
-                + electionVotedFor + ", ServerConfigPayload="  + serverConfig + "]";
+                + ", state=" + state + ", electionTerm=" + termInfo.term() + ", electionVotedFor="
+                + termInfo.votedFor() + ", ServerConfigPayload="  + serverConfig + "]";
     }
 
     @java.io.Serial

@@ -16,6 +16,7 @@ import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.SimpleReplicatedLog;
 import org.opendaylight.controller.cluster.raft.RaftState;
+import org.opendaylight.controller.cluster.raft.TermInfo;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
@@ -171,7 +172,7 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         member3Context.setReplicatedLog(candidateReplicatedLog);
         member3Context.setCommitIndex(candidateReplicatedLog.lastIndex());
         member3Context.setLastApplied(candidateReplicatedLog.lastIndex());
-        member3Context.getTermInformation().update(2, member1Context.getId());
+        member3Context.setTermInformation(new TermInfo(2, member1Context.getId()));
 
         // The member 3 Candidate will start a new term and send RequestVotes. However it will be
         // partitioned from the cluster by having member 1 and 2 drop its RequestVote messages.
@@ -231,7 +232,7 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         member2Context.setReplicatedLog(replicatedLog);
         member2Context.setCommitIndex(replicatedLog.lastIndex());
         member2Context.setLastApplied(replicatedLog.lastIndex());
-        member2Context.getTermInformation().update(3, "member1");
+        member2Context.setTermInformation(new TermInfo(3, "member1"));
 
         member2Actor.self().tell(new SetBehavior(new Follower(member2Context), member2Context),
                 ActorRef.noSender());
@@ -249,7 +250,7 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         member1Context.setReplicatedLog(replicatedLog);
         member1Context.setCommitIndex(replicatedLog.lastIndex());
         member1Context.setLastApplied(replicatedLog.lastIndex());
-        member1Context.getTermInformation().update(3, "member1");
+        member1Context.setTermInformation(new TermInfo(3, "member1"));
 
         initializeLeaderBehavior(member1Actor, member1Context, 1);
 

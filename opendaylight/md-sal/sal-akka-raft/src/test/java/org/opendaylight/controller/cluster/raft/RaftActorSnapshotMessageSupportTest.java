@@ -97,8 +97,8 @@ public class RaftActorSnapshotMessageSupportTest {
         long lastIndexDuringSnapshotCapture = 2;
         byte[] snapshotBytes = {1,2,3,4,5};
 
-        Snapshot snapshot = Snapshot.create(ByteState.of(snapshotBytes), List.of(),
-                lastIndexDuringSnapshotCapture, 1, lastAppliedDuringSnapshotCapture, 1, -1, null, null);
+        Snapshot snapshot = Snapshot.create(ByteState.of(snapshotBytes), List.of(), lastIndexDuringSnapshotCapture, 1,
+            lastAppliedDuringSnapshotCapture, 1, new TermInfo(-1), null);
 
         ApplySnapshot applySnapshot = new ApplySnapshot(snapshot);
         sendMessageToSupport(applySnapshot);

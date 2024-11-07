@@ -30,6 +30,7 @@ import org.opendaylight.controller.cluster.messaging.MessageAssembler;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.TermInfo;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
@@ -456,7 +457,7 @@ public class Follower extends RaftActorBehavior {
             log.info("{}: Term {} in \"{}\" message is greater than follower's term {} - updating term",
                 logName, rpc.getTerm(), rpc, context.getTermInformation().getCurrentTerm());
 
-            context.getTermInformation().updateAndPersist(rpc.getTerm(), null);
+            context.updateTermInformation(new TermInfo(rpc.getTerm()));
         }
 
         if (rpc instanceof InstallSnapshot installSnapshot) {
@@ -649,8 +650,7 @@ public class Follower extends RaftActorBehavior {
         final var snapshot = Snapshot.create(snapshotState, List.of(),
             installSnapshot.getLastIncludedIndex(), installSnapshot.getLastIncludedTerm(),
             installSnapshot.getLastIncludedIndex(), installSnapshot.getLastIncludedTerm(),
-            context.getTermInformation().getCurrentTerm(), context.getTermInformation().getVotedFor(),
-            installSnapshot.serverConfig());
+            context.getTermInformation(), installSnapshot.serverConfig());
 
         final var applySnapshotCallback = new ApplySnapshot.Callback() {
             @Override

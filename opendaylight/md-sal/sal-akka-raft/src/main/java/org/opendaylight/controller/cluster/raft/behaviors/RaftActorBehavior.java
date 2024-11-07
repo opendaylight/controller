@@ -23,6 +23,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.TermInfo;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
@@ -189,7 +190,7 @@ public abstract class RaftActorBehavior implements AutoCloseable {
 
         final var grantVote = canGrantVote(requestVote);
         if (grantVote) {
-            context.getTermInformation().updateAndPersist(requestVote.getTerm(), requestVote.getCandidateId());
+            context.updateTermInformation(new TermInfo(requestVote.getTerm(), requestVote.getCandidateId()));
         }
 
         final var reply = new RequestVoteReply(currentTerm(), grantVote);

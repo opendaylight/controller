@@ -238,7 +238,7 @@ public class RaftActorRecoverySupportTest {
         MockSnapshotState snapshotState = new MockSnapshotState(List.of(new MockPayload("1")));
         Snapshot snapshot = Snapshot.create(snapshotState,
                 List.of(unAppliedEntry1, unAppliedEntry2), lastIndexDuringSnapshotCapture, 1,
-                lastAppliedDuringSnapshotCapture, 1, electionTerm, electionVotedFor, null);
+                lastAppliedDuringSnapshotCapture, 1, new TermInfo(electionTerm, electionVotedFor), null);
 
         SnapshotMetadata metadata = new SnapshotMetadata("test", 6, 12345);
         SnapshotOffer snapshotOffer = new SnapshotOffer(metadata, snapshot);
@@ -320,7 +320,7 @@ public class RaftActorRecoverySupportTest {
         doReturn(10L).when(mockPersistentProvider).getLastSequenceNumber();
 
         Snapshot snapshot = Snapshot.create(new MockSnapshotState(List.of(new MockPayload("1"))),
-                List.of(), 3, 1, 3, 1, -1, null, null);
+                List.of(), 3, 1, 3, 1, new TermInfo(-1), null);
         SnapshotOffer snapshotOffer = new SnapshotOffer(new SnapshotMetadata("test", 6, 12345), snapshot);
 
         sendMessageToSupport(snapshotOffer);
@@ -354,8 +354,7 @@ public class RaftActorRecoverySupportTest {
     }
 
     static UpdateElectionTerm updateElectionTerm(final long term, final String votedFor) {
-        return ArgumentMatchers.argThat(other ->
-                term == other.getCurrentTerm() && votedFor.equals(other.getVotedFor()));
+        return ArgumentMatchers.argThat(new TermInfo(term, votedFor)::equals);
     }
 
     @Test
@@ -439,7 +438,7 @@ public class RaftActorRecoverySupportTest {
 
         MockSnapshotState snapshotState = new MockSnapshotState(List.of(new MockPayload("1")));
         Snapshot snapshot = Snapshot.create(snapshotState, List.of(),
-                -1, -1, -1, -1, electionTerm, electionVotedFor, serverPayload);
+                -1, -1, -1, -1, new TermInfo(electionTerm, electionVotedFor), serverPayload);
 
         SnapshotMetadata metadata = new SnapshotMetadata("test", 6, 12345);
         SnapshotOffer snapshotOffer = new SnapshotOffer(metadata, snapshot);

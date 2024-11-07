@@ -64,7 +64,7 @@ class RaftActorRecoverySupport {
             case ApplyJournalEntries msg -> onRecoveredApplyLogEntries(msg.getToIndex());
             case DeleteEntries msg -> onDeleteEntries(msg);
             case ServerConfigurationPayload msg -> context.updatePeerIds(msg);
-            case UpdateElectionTerm msg -> context.getTermInformation().update(msg.getCurrentTerm(), msg.getVotedFor());
+            case UpdateElectionTerm msg -> context.setTermInformation(msg.termInfo());
             case RecoveryCompleted msg -> {
                 onRecoveryCompletedMessage(persistentProvider);
                 return true;
@@ -126,7 +126,7 @@ class RaftActorRecoverySupport {
 
             snapshot = Snapshot.create(
                     EmptyState.INSTANCE, Collections.emptyList(), -1, -1, -1, -1,
-                    snapshot.getElectionTerm(), snapshot.getElectionVotedFor(), snapshot.getServerConfiguration());
+                    snapshot.termInfo(), snapshot.getServerConfiguration());
         }
 
         // Create a replicated log with the snapshot information
@@ -136,7 +136,7 @@ class RaftActorRecoverySupport {
         context.setReplicatedLog(ReplicatedLogImpl.newInstance(snapshot, context));
         context.setLastApplied(snapshot.getLastAppliedIndex());
         context.setCommitIndex(snapshot.getLastAppliedIndex());
-        context.getTermInformation().update(snapshot.getElectionTerm(), snapshot.getElectionVotedFor());
+        context.setTermInformation(snapshot.termInfo());
 
         final Stopwatch timer = Stopwatch.createStarted();
 
@@ -308,9 +308,7 @@ class RaftActorRecoverySupport {
 
             Snapshot snapshot = Snapshot.create(
                     EmptyState.INSTANCE, Collections.<ReplicatedLogEntry>emptyList(),
-                    -1, -1, -1, -1,
-                    context.getTermInformation().getCurrentTerm(), context.getTermInformation().getVotedFor(),
-                    context.getPeerServerInfo(true));
+                    -1, -1, -1, -1, context.getTermInformation(), context.getPeerServerInfo(true));
 
             persistentProvider.saveSnapshot(snapshot);
 

@@ -1463,8 +1463,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         configParams.setHeartBeatInterval(new FiniteDuration(100, TimeUnit.MILLISECONDS));
         configParams.setElectionTimeoutFactor(100000);
         NonPersistentDataProvider noPersistence = new NonPersistentDataProvider(Runnable::run);
-        ElectionTermImpl termInfo = new ElectionTermImpl(noPersistence, id, LOG);
-        termInfo.update(1, LEADER_ID);
+        ElectionTermImpl termInfo = new ElectionTermImpl(noPersistence, id, LOG, new TermInfo(1, LEADER_ID));
         return new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
                 id, termInfo, -1, -1, Map.of(LEADER_ID, ""), configParams,
                 noPersistence, applyState -> actor.tell(applyState, actor), LOG,  MoreExecutors.directExecutor());
@@ -1550,8 +1549,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
             context.setCommitIndex(fromContext.getCommitIndex());
             context.setLastApplied(fromContext.getLastApplied());
-            context.getTermInformation().update(fromContext.getTermInformation().getCurrentTerm(),
-                    fromContext.getTermInformation().getVotedFor());
+            context.setTermInformation(fromContext.getTermInformation());
         }
 
         @Override

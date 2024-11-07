@@ -175,8 +175,18 @@ public class RaftActorContextImpl implements RaftActorContext {
     }
 
     @Override
-    public ElectionTerm getTermInformation() {
-        return termInformation;
+    public TermInfo getTermInformation() {
+        return termInformation.currentTerm();
+    }
+
+    @Override
+    public void setTermInformation(final TermInfo newElectionInfo) {
+        termInformation.update(newElectionInfo);
+    }
+
+    @Override
+    public void updateTermInformation(final TermInfo newElectionInfo) {
+        termInformation.updateAndPersist(newElectionInfo);
     }
 
     @Override

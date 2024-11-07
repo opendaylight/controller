@@ -51,32 +51,23 @@ import org.slf4j.LoggerFactory;
 
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class SnapshotManagerTest extends AbstractActorTest {
-
     @Mock
     private RaftActorContext mockRaftActorContext;
-
     @Mock
     private ConfigParams mockConfigParams;
-
     @Mock
     private ReplicatedLog mockReplicatedLog;
-
     @Mock
     private DataPersistenceProvider mockDataPersistenceProvider;
-
     @Mock
     private RaftActorBehavior mockRaftActorBehavior;
-
     @Mock
     private Consumer<Optional<OutputStream>> mockProcedure;
 
-    @Mock
-    private ElectionTerm mockElectionTerm;
+    private final TermInfo mockTermInfo = new TermInfo(5, "member5");
 
     private SnapshotManager snapshotManager;
-
     private TestActorFactory factory;
-
     private ActorRef actorRef;
 
     @Before
@@ -92,9 +83,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         doReturn(mockRaftActorBehavior).when(mockRaftActorContext).getCurrentBehavior();
         doReturn("123").when(mockRaftActorBehavior).getLeaderId();
 
-        doReturn(mockElectionTerm).when(mockRaftActorContext).getTermInformation();
-        doReturn(5L).when(mockElectionTerm).getCurrentTerm();
-        doReturn("member5").when(mockElectionTerm).getVotedFor();
+        doReturn(mockTermInfo).when(mockRaftActorContext).getTermInformation();
 
         doReturn(new FileBackedOutputStreamFactory(10000000, "target"))
                 .when(mockRaftActorContext).getFileBackedOutputStreamFactory();
@@ -276,8 +265,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         assertEquals("getLastAppliedIndex", 8L, snapshot.getLastAppliedIndex());
         assertEquals("getState", snapshotState, snapshot.getState());
         assertEquals("getUnAppliedEntries", List.of(lastLogEntry), snapshot.getUnAppliedEntries());
-        assertEquals("electionTerm", mockElectionTerm.getCurrentTerm(), snapshot.getElectionTerm());
-        assertEquals("electionVotedFor", mockElectionTerm.getVotedFor(), snapshot.getElectionVotedFor());
+        assertEquals(mockTermInfo, snapshot.termInfo());
 
         verify(mockReplicatedLog).snapshotPreCommit(7L, 1L);
     }

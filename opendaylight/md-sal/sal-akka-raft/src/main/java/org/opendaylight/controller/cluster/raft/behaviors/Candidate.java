@@ -14,6 +14,7 @@ import org.opendaylight.controller.cluster.raft.PeerInfo;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.TermInfo;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
@@ -36,8 +37,7 @@ import scala.concurrent.duration.FiniteDuration;
  * <li> Send RequestVote RPCs to all other servers
  * </ul>
  * <li> If votes received from majority of servers: become leader
- * <li> If AppendEntries RPC received from new leader: convert to
- * follower
+ * <li> If AppendEntries RPC received from new leader: convert to follower
  * <li> If election timeout elapses: start new election
  * </ul>
  */
@@ -162,7 +162,7 @@ public final class Candidate extends RaftActorBehavior {
                 log.info("{}: Term {} in \"{}\" message is greater than Candidate's term {} - switching to Follower",
                         logName, rpc.getTerm(), rpc, context.getTermInformation().getCurrentTerm());
 
-                context.getTermInformation().updateAndPersist(rpc.getTerm(), null);
+                context.updateTermInformation(new TermInfo(rpc.getTerm(), null));
 
                 // The raft paper does not say whether or not a Candidate can/should process a RequestVote in
                 // this case but doing so gains quicker convergence when the sender's log is more up-to-date.
@@ -184,7 +184,7 @@ public final class Candidate extends RaftActorBehavior {
         // Increment the election term and vote for self
         long currentTerm = context.getTermInformation().getCurrentTerm();
         long newTerm = currentTerm + 1;
-        context.getTermInformation().updateAndPersist(newTerm, context.getId());
+        context.updateTermInformation(new TermInfo(newTerm, context.getId()));
 
         log.info("{}: Starting new election term {}", logName, newTerm);
 

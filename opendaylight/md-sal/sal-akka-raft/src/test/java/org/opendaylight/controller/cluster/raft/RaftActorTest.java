@@ -157,7 +157,7 @@ public class RaftActorTest extends AbstractActorTest {
                 new MockRaftActorContext.MockPayload("D")));
 
         Snapshot snapshot = Snapshot.create(snapshotState, snapshotUnappliedEntries, lastIndexDuringSnapshotCapture, 1,
-                lastAppliedDuringSnapshotCapture, 1, -1, null, null);
+                lastAppliedDuringSnapshotCapture, 1, new TermInfo(-1), null);
         InMemorySnapshotStore.addSnapshot(persistenceId, snapshot);
 
         // add more entries after snapshot is taken
@@ -281,8 +281,7 @@ public class RaftActorTest extends AbstractActorTest {
         RaftActorRecoverySupport mockSupport = mock(RaftActorRecoverySupport.class);
         mockRaftActor.setRaftActorRecoverySupport(mockSupport);
 
-        Snapshot snapshot = Snapshot.create(ByteState.of(new byte[]{1}),
-                List.of(), 3, 1, 3, 1, -1, null, null);
+        Snapshot snapshot = Snapshot.create(ByteState.of(new byte[]{1}), List.of(), 3, 1, 3, 1, new TermInfo(-1), null);
         SnapshotOffer snapshotOffer = new SnapshotOffer(new SnapshotMetadata("test", 6, 12345), snapshot);
         mockRaftActor.handleRecover(snapshotOffer);
 
@@ -324,7 +323,7 @@ public class RaftActorTest extends AbstractActorTest {
         mockRaftActor.waitForRecoveryComplete();
 
         ApplySnapshot applySnapshot = new ApplySnapshot(
-            Snapshot.create(null, null, 0, 0, 0, 0, 0, persistenceId, null));
+            Snapshot.create(null, null, 0, 0, 0, 0, new TermInfo(0, persistenceId), null));
         when(mockSupport.handleSnapshotMessage(same(applySnapshot), any(ActorRef.class))).thenReturn(true);
         mockRaftActor.handleCommand(applySnapshot);
 
@@ -557,7 +556,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         leaderActor.getRaftActorContext().setCommitIndex(4);
         leaderActor.getRaftActorContext().setLastApplied(4);
-        leaderActor.getRaftActorContext().getTermInformation().update(1, persistenceId);
+        leaderActor.getRaftActorContext().setTermInformation(new TermInfo(1, persistenceId));
 
         leaderActor.waitForInitializeBehaviorComplete();
 
@@ -644,7 +643,7 @@ public class RaftActorTest extends AbstractActorTest {
         MockRaftActor followerActor = mockActorRef.underlyingActor();
         followerActor.getRaftActorContext().setCommitIndex(4);
         followerActor.getRaftActorContext().setLastApplied(4);
-        followerActor.getRaftActorContext().getTermInformation().update(1, persistenceId);
+        followerActor.getRaftActorContext().setTermInformation(new TermInfo(1, persistenceId));
 
         followerActor.waitForInitializeBehaviorComplete();
 
@@ -735,7 +734,7 @@ public class RaftActorTest extends AbstractActorTest {
         MockRaftActor leaderActor = mockActorRef.underlyingActor();
         leaderActor.getRaftActorContext().setCommitIndex(9);
         leaderActor.getRaftActorContext().setLastApplied(9);
-        leaderActor.getRaftActorContext().getTermInformation().update(1, persistenceId);
+        leaderActor.getRaftActorContext().setTermInformation(new TermInfo(1, persistenceId));
 
         leaderActor.waitForInitializeBehaviorComplete();
 
@@ -812,7 +811,7 @@ public class RaftActorTest extends AbstractActorTest {
         MockRaftActor leaderActor = mockActorRef.underlyingActor();
         leaderActor.getRaftActorContext().setCommitIndex(3);
         leaderActor.getRaftActorContext().setLastApplied(3);
-        leaderActor.getRaftActorContext().getTermInformation().update(1, persistenceId);
+        leaderActor.getRaftActorContext().setTermInformation(new TermInfo(1, persistenceId));
 
         leaderActor.waitForInitializeBehaviorComplete();
         for (int i = 0; i < 4; i++) {
@@ -856,7 +855,7 @@ public class RaftActorTest extends AbstractActorTest {
         MockRaftActor leaderActor = mockActorRef.underlyingActor();
         leaderActor.getRaftActorContext().setCommitIndex(3);
         leaderActor.getRaftActorContext().setLastApplied(3);
-        leaderActor.getRaftActorContext().getTermInformation().update(1, persistenceId);
+        leaderActor.getRaftActorContext().setTermInformation(new TermInfo(1, persistenceId));
         leaderActor.getReplicatedLog().setSnapshotIndex(3);
 
         leaderActor.waitForInitializeBehaviorComplete();
@@ -1102,7 +1101,7 @@ public class RaftActorTest extends AbstractActorTest {
                 new MockRaftActorContext.MockPayload("D")));
 
         Snapshot snapshot = Snapshot.create(snapshotState, snapshotUnappliedEntries,
-                snapshotLastIndex, 1, snapshotLastApplied, 1, 1, "member-1", null);
+                snapshotLastIndex, 1, snapshotLastApplied, 1, new TermInfo(1, "member-1"), null);
 
         InMemorySnapshotStore.addSnapshotSavedLatch(persistenceId);
 
@@ -1137,7 +1136,7 @@ public class RaftActorTest extends AbstractActorTest {
         // Test with data persistence disabled
 
         snapshot = Snapshot.create(EmptyState.INSTANCE, List.of(),
-                -1, -1, -1, -1, 5, "member-1", null);
+                -1, -1, -1, -1, new TermInfo(5, "member-1"), null);
 
         persistenceId = factory.generateActorId("test-actor-");
 
@@ -1168,7 +1167,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         List<MockPayload> state = List.of(new MockRaftActorContext.MockPayload("A"));
         Snapshot snapshot = Snapshot.create(ByteState.of(fromObject(state).toByteArray()),
-                List.of(), 5, 2, 5, 2, 2, "member-1", null);
+                List.of(), 5, 2, 5, 2, new TermInfo(2, "member-1"), null);
 
         InMemoryJournal.addEntry(persistenceId, 1, new SimpleReplicatedLogEntry(0, 1,
                 new MockRaftActorContext.MockPayload("B")));
@@ -1276,7 +1275,7 @@ public class RaftActorTest extends AbstractActorTest {
         MockRaftActor leaderActor = leaderActorRef.underlyingActor();
         leaderActor.waitForInitializeBehaviorComplete();
 
-        leaderActor.getRaftActorContext().getTermInformation().update(1, leaderId);
+        leaderActor.getRaftActorContext().setTermInformation(new TermInfo(1, leaderId));
 
         Leader leader = new Leader(leaderActor.getRaftActorContext());
         leaderActor.setCurrentBehavior(leader);
@@ -1318,7 +1317,7 @@ public class RaftActorTest extends AbstractActorTest {
         MockRaftActor leaderActor = leaderActorRef.underlyingActor();
         leaderActor.waitForInitializeBehaviorComplete();
 
-        leaderActor.getRaftActorContext().getTermInformation().update(1, leaderId);
+        leaderActor.getRaftActorContext().setTermInformation(new TermInfo(1, leaderId));
 
         Leader leader = new Leader(leaderActor.getRaftActorContext());
         leaderActor.setCurrentBehavior(leader);
@@ -1363,7 +1362,7 @@ public class RaftActorTest extends AbstractActorTest {
         MockRaftActor leaderActor = leaderActorRef.underlyingActor();
         leaderActor.waitForInitializeBehaviorComplete();
 
-        leaderActor.getRaftActorContext().getTermInformation().update(1, leaderId);
+        leaderActor.getRaftActorContext().setTermInformation(new TermInfo(1, leaderId));
         Leader leader = new Leader(leaderActor.getRaftActorContext());
         leaderActor.setCurrentBehavior(leader);
 

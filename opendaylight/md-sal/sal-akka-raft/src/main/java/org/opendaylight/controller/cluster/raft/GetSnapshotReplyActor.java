@@ -42,14 +42,12 @@ final class GetSnapshotReplyActor extends UntypedAbstractActor {
 
     @Override
     public void onReceive(final Object message) {
-        if (message instanceof CaptureSnapshotReply) {
-            Snapshot snapshot = Snapshot.create(
-                    ((CaptureSnapshotReply)message).getSnapshotState(),
-                    params.captureSnapshot.getUnAppliedEntries(),
-                    params.captureSnapshot.getLastIndex(), params.captureSnapshot.getLastTerm(),
-                    params.captureSnapshot.getLastAppliedIndex(), params.captureSnapshot.getLastAppliedTerm(),
-                    params.electionTerm.getCurrentTerm(), params.electionTerm.getVotedFor(),
-                    params.peerInformation);
+        if (message instanceof CaptureSnapshotReply msg) {
+            Snapshot snapshot = Snapshot.create(msg.getSnapshotState(),
+                params.captureSnapshot.getUnAppliedEntries(),
+                params.captureSnapshot.getLastIndex(), params.captureSnapshot.getLastTerm(),
+                params.captureSnapshot.getLastAppliedIndex(), params.captureSnapshot.getLastAppliedTerm(),
+                params.termInfo, params.serverConfig);
 
             LOG.debug("{}: Received CaptureSnapshotReply, sending {}", params.id, snapshot);
 
@@ -66,29 +64,26 @@ final class GetSnapshotReplyActor extends UntypedAbstractActor {
         }
     }
 
-    public static Props props(final CaptureSnapshot captureSnapshot, final ElectionTerm electionTerm,
+    public static Props props(final CaptureSnapshot captureSnapshot, final TermInfo termInfo,
             final ActorRef replyToActor, final FiniteDuration receiveTimeout, final String id,
             final ServerConfigurationPayload updatedPeerInfo) {
-        return Props.create(GetSnapshotReplyActor.class, new Params(captureSnapshot, electionTerm, replyToActor,
+        return Props.create(GetSnapshotReplyActor.class, new Params(captureSnapshot, termInfo, replyToActor,
                 receiveTimeout, id, updatedPeerInfo));
     }
 
-    private static final class Params {
-        final CaptureSnapshot captureSnapshot;
-        final ActorRef replyToActor;
-        final ElectionTerm electionTerm;
-        final FiniteDuration receiveTimeout;
-        final String id;
-        final ServerConfigurationPayload peerInformation;
-
-        Params(final CaptureSnapshot captureSnapshot, final ElectionTerm electionTerm, final ActorRef replyToActor,
-                final FiniteDuration receiveTimeout, final String id, final ServerConfigurationPayload peerInfo) {
-            this.captureSnapshot = requireNonNull(captureSnapshot);
-            this.electionTerm = requireNonNull(electionTerm);
-            this.replyToActor = requireNonNull(replyToActor);
-            this.receiveTimeout = requireNonNull(receiveTimeout);
-            this.id = requireNonNull(id);
-            peerInformation = peerInfo;
+    private record Params(
+            CaptureSnapshot captureSnapshot,
+            TermInfo termInfo,
+            ActorRef replyToActor,
+            FiniteDuration receiveTimeout,
+            String id,
+            ServerConfigurationPayload serverConfig) {
+        Params {
+            requireNonNull(captureSnapshot);
+            requireNonNull(termInfo);
+            requireNonNull(replyToActor);
+            requireNonNull(receiveTimeout);
+            requireNonNull(id);
         }
     }
 }

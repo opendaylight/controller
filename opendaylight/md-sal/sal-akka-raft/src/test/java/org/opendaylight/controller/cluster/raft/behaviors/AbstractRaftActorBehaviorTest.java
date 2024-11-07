@@ -28,6 +28,7 @@ import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.TermInfo;
 import org.opendaylight.controller.cluster.raft.TestActorFactory;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
@@ -97,7 +98,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         context.setPayloadVersion(payloadVersion);
 
         // First set the receivers term to a high number (1000)
-        context.getTermInformation().update(1000, "test");
+        context.setTermInformation(new TermInfo(1000, "test"));
 
         AppendEntries appendEntries = new AppendEntries(100, "leader-1", 0, 0, Collections.emptyList(), 101, -1,
                 (short)4);
@@ -123,7 +124,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
     public void testHandleAppendEntriesAddSameEntryToLog() {
         MockRaftActorContext context = createActorContext();
 
-        context.getTermInformation().update(2, "test");
+        context.setTermInformation(new TermInfo(2, "test"));
 
         // Prepare the receivers log
         MockRaftActorContext.MockPayload payload = new MockRaftActorContext.MockPayload("zero");
@@ -168,7 +169,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
 
         behavior = createBehavior(context);
 
-        context.getTermInformation().update(1, "test");
+        context.setTermInformation(new TermInfo(1, "test"));
 
         behavior.handleMessage(behaviorActor, new RequestVote(context.getTermInformation().getCurrentTerm(),
                 "test", 10000, 999));
@@ -188,7 +189,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
 
         behavior = createBehavior(context);
 
-        context.getTermInformation().update(1, "test");
+        context.setTermInformation(new TermInfo(1, "test"));
 
         int index = 2000;
         setLastLogEntry(context, context.getTermInformation().getCurrentTerm(), index,
@@ -213,7 +214,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
     public void testHandleRequestVoteWhenSenderTermLessThanCurrentTerm() {
         MockRaftActorContext context = createActorContext();
 
-        context.getTermInformation().update(1000, null);
+        context.setTermInformation(new TermInfo(1000, null));
 
         behavior = createBehavior(context);
 
@@ -231,7 +232,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
             return;
         }
 
-        context.getTermInformation().update(1, "test");
+        context.setTermInformation(new TermInfo(1, "test"));
 
         //log has 1 entry with replicatedToAllIndex = 0, does not do anything, returns the
         context.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 1, 1).build());
@@ -276,7 +277,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
 
         Payload payload = new MockRaftActorContext.MockPayload("");
         setLastLogEntry(actorContext, 1, 0, payload);
-        actorContext.getTermInformation().update(1, "test");
+        actorContext.setTermInformation(new TermInfo(1, "test"));
 
         RaftActorBehavior origBehavior = createBehavior(actorContext);
         RaftActorBehavior raftBehavior = origBehavior.handleMessage(actorRef, rpc);
