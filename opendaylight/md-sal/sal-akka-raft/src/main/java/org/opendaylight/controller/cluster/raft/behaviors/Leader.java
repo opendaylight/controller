@@ -45,7 +45,7 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
  * set commitIndex = N (§5.3, §5.4).
  * </ul>
  */
-public class Leader extends AbstractLeader {
+public non-sealed class Leader extends AbstractLeader {
     /**
      * Internal message sent to periodically check if this leader has become isolated and should transition
      * to {@link IsolatedLeader}.
@@ -56,7 +56,7 @@ public class Leader extends AbstractLeader {
     private final Stopwatch isolatedLeaderCheck = Stopwatch.createStarted();
     private @Nullable LeadershipTransferContext leadershipTransferContext;
 
-    Leader(final RaftActorContext context, @Nullable final AbstractLeader initializeFromLeader) {
+    Leader(final RaftActorContext context, final @Nullable AbstractLeader initializeFromLeader) {
         super(context, RaftState.Leader, initializeFromLeader);
     }
 

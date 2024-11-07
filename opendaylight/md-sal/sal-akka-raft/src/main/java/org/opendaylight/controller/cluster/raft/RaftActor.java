@@ -43,7 +43,6 @@ import org.opendaylight.controller.cluster.raft.base.messages.LeaderTransitionin
 import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
 import org.opendaylight.controller.cluster.raft.base.messages.SwitchBehavior;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
-import org.opendaylight.controller.cluster.raft.behaviors.AbstractRaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.behaviors.Follower;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
@@ -422,7 +421,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             if (newState == RaftState.Leader || newState == RaftState.Follower) {
                 getRaftActorContext().getTermInformation().updateAndPersist(message.getNewTerm(), "");
                 switchBehavior(behaviorStateTracker.capture(getCurrentBehavior()),
-                    AbstractRaftActorBehavior.createBehavior(context, message.getNewState()));
+                    RaftActorBehavior.createBehavior(context, message.getNewState()));
             } else {
                 LOG.warn("Switching to behavior : {} - not supported", newState);
             }

@@ -41,7 +41,7 @@ import scala.concurrent.duration.FiniteDuration;
  * <li> If election timeout elapses: start new election
  * </ul>
  */
-public final class Candidate extends AbstractRaftActorBehavior {
+public final class Candidate extends RaftActorBehavior {
     private final ImmutableList<String> votingPeers;
     private final int votesRequired;
 
