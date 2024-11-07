@@ -80,9 +80,11 @@ public class Follower extends RaftActorBehavior {
         initialSyncStatusTracker = new SyncStatusTracker(context.getActor(), getId(), context.getConfigParams()
             .getSyncIndexThreshold());
 
-        appendEntriesMessageAssembler = MessageAssembler.builder().logContext(logName())
-                .fileBackedStreamFactory(context.getFileBackedOutputStreamFactory())
-                .assembledMessageCallback((message, sender) -> handleMessage(sender, message)).build();
+        appendEntriesMessageAssembler = MessageAssembler.builder()
+            .logContext(logName)
+            .fileBackedStreamFactory(context.getFileBackedOutputStreamFactory())
+            .assembledMessageCallback((message, sender) -> handleMessage(sender, message))
+            .build();
 
         if (context.getPeerIds().isEmpty() && getLeaderId() == null) {
             actor().tell(TimeoutNow.INSTANCE, actor());
@@ -129,17 +131,17 @@ public class Follower extends RaftActorBehavior {
     }
 
     @Override
-    protected RaftActorBehavior handleAppendEntries(final ActorRef sender, final AppendEntries appendEntries) {
+    RaftActorBehavior handleAppendEntries(final ActorRef sender, final AppendEntries appendEntries) {
         int numLogEntries = appendEntries.getEntries().size();
         if (log.isTraceEnabled()) {
-            log.trace("{}: handleAppendEntries: {}", logName(), appendEntries);
+            log.trace("{}: handleAppendEntries: {}", logName, appendEntries);
         } else if (log.isDebugEnabled() && numLogEntries > 0) {
-            log.debug("{}: handleAppendEntries: {}", logName(), appendEntries);
+            log.debug("{}: handleAppendEntries: {}", logName, appendEntries);
         }
 
         if (snapshotTracker != null && !snapshotTracker.getLeaderId().equals(appendEntries.getLeaderId())) {
             log.debug("{}: snapshot install is in progress but the prior snapshot leaderId {} does not match the "
-                + "AppendEntries leaderId {}", logName(), snapshotTracker.getLeaderId(), appendEntries.getLeaderId());
+                + "AppendEntries leaderId {}", logName, snapshotTracker.getLeaderId(), appendEntries.getLeaderId());
             closeSnapshotTracker();
         }
 
@@ -149,7 +151,7 @@ public class Follower extends RaftActorBehavior {
                     lastIndex(), lastTerm(), context.getPayloadVersion(), false, needsLeaderAddress(),
                     appendEntries.getLeaderRaftVersion());
 
-            log.debug("{}: snapshot install is in progress, replying immediately with {}", logName(), reply);
+            log.debug("{}: snapshot install is in progress, replying immediately with {}", logName, reply);
             sender.tell(reply, actor());
 
             return this;
@@ -186,7 +188,7 @@ public class Follower extends RaftActorBehavior {
         }
 
         if (prevCommitIndex != context.getCommitIndex()) {
-            log.debug("{}: Commit index set to {}", logName(), context.getCommitIndex());
+            log.debug("{}: Commit index set to {}", logName, context.getCommitIndex());
         }
 
         AppendEntriesReply reply = new AppendEntriesReply(context.getId(), currentTerm(), true,
@@ -194,9 +196,9 @@ public class Follower extends RaftActorBehavior {
                 appendEntries.getLeaderRaftVersion());
 
         if (log.isTraceEnabled()) {
-            log.trace("{}: handleAppendEntries returning : {}", logName(), reply);
+            log.trace("{}: handleAppendEntries returning : {}", logName, reply);
         } else if (log.isDebugEnabled() && numLogEntries > 0) {
-            log.debug("{}: handleAppendEntries returning : {}", logName(), reply);
+            log.debug("{}: handleAppendEntries returning : {}", logName, reply);
         }
 
         // Reply to the leader before applying any previous state so as not to hold up leader consensus.
@@ -209,7 +211,7 @@ public class Follower extends RaftActorBehavior {
         if (appendEntries.getLeaderCommit() > context.getLastApplied() && context.getLastApplied() < lastIndex) {
             if (log.isDebugEnabled()) {
                 log.debug("{}: applyLogToStateMachine, appendEntries.getLeaderCommit(): {}, "
-                        + "context.getLastApplied(): {}, lastIndex(): {}", logName(),
+                        + "context.getLastApplied(): {}, lastIndex(): {}", logName,
                     appendEntries.getLeaderCommit(), context.getLastApplied(), lastIndex);
             }
 
@@ -232,7 +234,7 @@ public class Follower extends RaftActorBehavior {
             return true;
         }
 
-        log.debug("{}: Number of entries to be appended = {}", logName(), numLogEntries);
+        log.debug("{}: Number of entries to be appended = {}", logName, numLogEntries);
 
         long lastIndex = lastIndex();
         int addEntriesFrom = 0;
@@ -252,7 +254,7 @@ public class Follower extends RaftActorBehavior {
 
                 long existingEntryTerm = getLogEntryTerm(matchEntry.index());
 
-                log.debug("{}: matchEntry {} is present: existingEntryTerm: {}", logName(), matchEntry,
+                log.debug("{}: matchEntry {} is present: existingEntryTerm: {}", logName, matchEntry,
                         existingEntryTerm);
 
                 // existingEntryTerm == -1 means it's in the snapshot and not in the log. We don't know
@@ -263,7 +265,7 @@ public class Follower extends RaftActorBehavior {
 
                 if (!context.getRaftPolicy().applyModificationToStateBeforeConsensus()) {
                     log.info("{}: Removing entries from log starting at {}, commitIndex: {}, lastApplied: {}",
-                            logName(), matchEntry.index(), context.getCommitIndex(), context.getLastApplied());
+                            logName, matchEntry.index(), context.getCommitIndex(), context.getLastApplied());
 
                     // Entries do not match so remove all subsequent entries but only if the existing entries haven't
                     // been applied to the state yet.
@@ -274,7 +276,7 @@ public class Follower extends RaftActorBehavior {
                         // so we must send back a reply to force a snapshot to completely re-sync the
                         // follower's log and state.
 
-                        log.info("{}: Could not remove entries - sending reply to force snapshot", logName());
+                        log.info("{}: Could not remove entries - sending reply to force snapshot", logName);
                         sender.tell(new AppendEntriesReply(context.getId(), currentTerm(), false, lastIndex,
                                 lastTerm(), context.getPayloadVersion(), true, needsLeaderAddress(),
                                 appendEntries.getLeaderRaftVersion()), actor());
@@ -292,7 +294,7 @@ public class Follower extends RaftActorBehavior {
         }
 
         lastIndex = lastIndex();
-        log.debug("{}: After cleanup, lastIndex: {}, entries to be added from: {}", logName(), lastIndex,
+        log.debug("{}: After cleanup, lastIndex: {}, entries to be added from: {}", logName, lastIndex,
                 addEntriesFrom);
 
         // When persistence successfully completes for each new log entry appended, we need to determine if we
@@ -313,7 +315,7 @@ public class Follower extends RaftActorBehavior {
         for (int i = addEntriesFrom; i < numLogEntries; i++) {
             ReplicatedLogEntry entry = entries.get(i);
 
-            log.debug("{}: Append entry to log {}", logName(), entry.getData());
+            log.debug("{}: Append entry to log {}", logName, entry.getData());
 
             replLog.appendAndPersist(entry, appendAndPersistCallback, false);
 
@@ -324,7 +326,7 @@ public class Follower extends RaftActorBehavior {
             }
         }
 
-        log.debug("{}: Log size is now {}", logName(), replLog.size());
+        log.debug("{}: Log size is now {}", logName, replLog.size());
         return true;
     }
 
@@ -336,7 +338,7 @@ public class Follower extends RaftActorBehavior {
             // The follower's log is out of sync because the leader does have an entry at prevLogIndex and this
             // follower has no entries in it's log.
 
-            log.info("{}: The followers log is empty and the senders prevLogIndex is {}", logName(),
+            log.info("{}: The followers log is empty and the senders prevLogIndex is {}", logName,
                 appendEntries.getPrevLogIndex());
 
             sendOutOfSyncAppendEntriesReply(sender, false, appendEntries.getLeaderRaftVersion());
@@ -352,7 +354,7 @@ public class Follower extends RaftActorBehavior {
                     // in the follower's log or snapshot but it has a different term.
                     final var replLog = context.getReplicatedLog();
                     log.info("{}: The prevLogIndex {} was found in the log but the term {} is not equal to the append "
-                        + "entries prevLogTerm {} - lastIndex: {}, snapshotIndex: {}, snapshotTerm: {}", logName(),
+                        + "entries prevLogTerm {} - lastIndex: {}, snapshotIndex: {}, snapshotTerm: {}", logName,
                         appendEntries.getPrevLogIndex(), leadersPrevLogTermInFollowersLogOrSnapshot,
                         appendEntries.getPrevLogTerm(), lastIndex, replLog.getSnapshotIndex(),
                         replLog.getSnapshotTerm());
@@ -364,7 +366,7 @@ public class Follower extends RaftActorBehavior {
                 // The follower's log is out of sync because the Leader's prevLogIndex entry was not found in it's log
                 final var replLog = context.getReplicatedLog();
                 log.info("{}: The log is not empty but the prevLogIndex {} was not found in it - lastIndex: {}, "
-                        + "snapshotIndex: {}, snapshotTerm: {}", logName(), appendEntries.getPrevLogIndex(), lastIndex,
+                        + "snapshotIndex: {}, snapshotTerm: {}", logName, appendEntries.getPrevLogIndex(), lastIndex,
                         replLog.getSnapshotIndex(), replLog.getSnapshotTerm());
 
                 sendOutOfSyncAppendEntriesReply(sender, false, appendEntries.getLeaderRaftVersion());
@@ -379,7 +381,7 @@ public class Follower extends RaftActorBehavior {
                 // the previous entry in it's in-memory journal
                 final var replLog = context.getReplicatedLog();
                 log.info("{}: Cannot append entries because the replicatedToAllIndex {} does not appear to be in the "
-                        + "in-memory journal - lastIndex: {}, snapshotIndex: {}, snapshotTerm: {}", logName(),
+                        + "in-memory journal - lastIndex: {}, snapshotIndex: {}, snapshotTerm: {}", logName,
                         appendEntries.getReplicatedToAllIndex(), lastIndex, replLog.getSnapshotIndex(),
                         replLog.getSnapshotTerm());
 
@@ -391,7 +393,7 @@ public class Follower extends RaftActorBehavior {
             if (entries.size() > 0 && !isLogEntryPresent(entries.get(0).index() - 1)) {
                 final var replLog = context.getReplicatedLog();
                 log.info("{}: Cannot append entries because the calculated previousIndex {} was not found in the "
-                        + "in-memory journal - lastIndex: {}, snapshotIndex: {}, snapshotTerm: {}", logName(),
+                        + "in-memory journal - lastIndex: {}, snapshotIndex: {}, snapshotTerm: {}", logName,
                         entries.get(0).index() - 1, lastIndex, replLog.getSnapshotIndex(), replLog.getSnapshotTerm());
 
                 sendOutOfSyncAppendEntriesReply(sender, false, appendEntries.getLeaderRaftVersion());
@@ -409,7 +411,7 @@ public class Follower extends RaftActorBehavior {
                 lastTerm(), context.getPayloadVersion(), forceInstallSnapshot, needsLeaderAddress(),
                 leaderRaftVersion);
 
-        log.info("{}: Follower is out-of-sync so sending negative reply: {}", logName(), reply);
+        log.info("{}: Follower is out-of-sync so sending negative reply: {}", logName, reply);
         sender.tell(reply, actor());
     }
 
@@ -418,14 +420,12 @@ public class Follower extends RaftActorBehavior {
     }
 
     @Override
-    protected RaftActorBehavior handleAppendEntriesReply(final ActorRef sender,
-        final AppendEntriesReply appendEntriesReply) {
+    RaftActorBehavior handleAppendEntriesReply(final ActorRef sender, final AppendEntriesReply appendEntriesReply) {
         return this;
     }
 
     @Override
-    protected RaftActorBehavior handleRequestVoteReply(final ActorRef sender,
-        final RequestVoteReply requestVoteReply) {
+    RaftActorBehavior handleRequestVoteReply(final ActorRef sender, final RequestVoteReply requestVoteReply) {
         return this;
     }
 
@@ -454,7 +454,7 @@ public class Follower extends RaftActorBehavior {
         // This applies to all RPC messages and responses
         if (rpc.getTerm() > context.getTermInformation().getCurrentTerm() && shouldUpdateTerm(rpc)) {
             log.info("{}: Term {} in \"{}\" message is greater than follower's term {} - updating term",
-                logName(), rpc.getTerm(), rpc, context.getTermInformation().getCurrentTerm());
+                logName, rpc.getTerm(), rpc, context.getTermInformation().getCurrentTerm());
 
             context.getTermInformation().updateAndPersist(rpc.getTerm(), null);
         }
@@ -487,7 +487,7 @@ public class Follower extends RaftActorBehavior {
 
         if (canStartElection()) {
             if (message instanceof TimeoutNow) {
-                log.debug("{}: Received TimeoutNow - switching to Candidate", logName());
+                log.debug("{}: Received TimeoutNow - switching to Candidate", logName);
                 return internalSwitchBehavior(RaftState.Candidate);
             } else if (noLeaderMessageReceived) {
                 // Check the cluster state to see if the leader is known to be up before we go to Candidate.
@@ -496,19 +496,19 @@ public class Follower extends RaftActorBehavior {
                 // to Candidate,
                 long maxElectionTimeout = electionTimeoutInMillis * MAX_ELECTION_TIMEOUT_FACTOR;
                 if (isLeaderAvailabilityKnown() && lastLeaderMessageInterval < maxElectionTimeout) {
-                    log.debug("{}: Received ElectionTimeout but leader appears to be available", logName());
+                    log.debug("{}: Received ElectionTimeout but leader appears to be available", logName);
                     scheduleElection(electionDuration());
                 } else if (isThisFollowerIsolated()) {
-                    log.debug("{}: this follower is isolated. Do not switch to Candidate for now.", logName());
+                    log.debug("{}: this follower is isolated. Do not switch to Candidate for now.", logName);
                     setLeaderId(null);
                     scheduleElection(electionDuration());
                 } else {
-                    log.debug("{}: Received ElectionTimeout - switching to Candidate", logName());
+                    log.debug("{}: Received ElectionTimeout - switching to Candidate", logName);
                     return internalSwitchBehavior(RaftState.Candidate);
                 }
             } else {
                 log.debug("{}: Received ElectionTimeout but lastLeaderMessageInterval {} < election timeout {}",
-                        logName(), lastLeaderMessageInterval, context.getConfigParams().getElectionTimeOutInterval());
+                        logName, lastLeaderMessageInterval, context.getConfigParams().getElectionTimeOutInterval());
                 scheduleElection(electionDuration());
             }
         } else if (message instanceof ElectionTimeout) {
@@ -542,12 +542,12 @@ public class Follower extends RaftActorBehavior {
         CurrentClusterState state = cluster.orElseThrow().state();
         Set<Member> unreachable = state.getUnreachable();
 
-        log.debug("{}: Checking for leader {} in the cluster unreachable set {}", logName(), leaderAddress,
+        log.debug("{}: Checking for leader {} in the cluster unreachable set {}", logName, leaderAddress,
                 unreachable);
 
         for (Member m: unreachable) {
             if (leaderAddress.equals(m.address())) {
-                log.info("{}: Leader {} is unreachable", logName(), leaderAddress);
+                log.info("{}: Leader {} is unreachable", logName, leaderAddress);
                 return false;
             }
         }
@@ -555,18 +555,18 @@ public class Follower extends RaftActorBehavior {
         for (Member m: state.getMembers()) {
             if (leaderAddress.equals(m.address())) {
                 if (m.status() == MemberStatus.up() || m.status() == MemberStatus.weaklyUp()) {
-                    log.debug("{}: Leader {} cluster status is {} - leader is available", logName(),
+                    log.debug("{}: Leader {} cluster status is {} - leader is available", logName,
                             leaderAddress, m.status());
                     return true;
                 } else {
-                    log.debug("{}: Leader {} cluster status is {} - leader is unavailable", logName(),
+                    log.debug("{}: Leader {} cluster status is {} - leader is unavailable", logName,
                             leaderAddress, m.status());
                     return false;
                 }
             }
         }
 
-        log.debug("{}: Leader {} not found in the cluster member set", logName(), leaderAddress);
+        log.debug("{}: Leader {} not found in the cluster member set", logName, leaderAddress);
 
         return false;
     }
@@ -585,7 +585,7 @@ public class Follower extends RaftActorBehavior {
         final Iterable<Member> members = state.getMembers();
 
         log.debug("{}: Checking if this node is isolated in the cluster unreachable set {},"
-                        + "all members {} self member: {}", logName(), unreachable, members, selfMember);
+                        + "all members {} self member: {}", logName, unreachable, members, selfMember);
 
         // no unreachable peers means we cannot be isolated
         if (unreachable.isEmpty()) {
@@ -602,7 +602,7 @@ public class Follower extends RaftActorBehavior {
     }
 
     private void handleInstallSnapshot(final ActorRef sender, final InstallSnapshot installSnapshot) {
-        log.debug("{}: handleInstallSnapshot: {}", logName(), installSnapshot);
+        log.debug("{}: handleInstallSnapshot: {}", logName, installSnapshot);
 
         // update leader
         leaderId = installSnapshot.getLeaderId();
@@ -617,7 +617,7 @@ public class Follower extends RaftActorBehavior {
             isLastChunk = snapshotTracker.addChunk(installSnapshot.getChunkIndex(), installSnapshot.getData(),
                 installSnapshot.getLastChunkHashCode());
         } catch (IOException e) {
-            log.debug("{}: failed to add InstallSnapshot chunk", logName(), e);
+            log.debug("{}: failed to add InstallSnapshot chunk", logName, e);
             closeSnapshotTracker();
             sender.tell(new InstallSnapshotReply(currentTerm(), context.getId(), -1, false), actor());
             return;
@@ -626,24 +626,24 @@ public class Follower extends RaftActorBehavior {
         final var successReply = new InstallSnapshotReply(currentTerm(), context.getId(),
             installSnapshot.getChunkIndex(), true);
         if (!isLastChunk) {
-            log.debug("{}: handleInstallSnapshot returning: {}", logName(), successReply);
+            log.debug("{}: handleInstallSnapshot returning: {}", logName, successReply);
             sender.tell(successReply, actor());
             return;
         }
 
         // TODO: this message is confusing: the snapshot is *received*, not installed yet
-        log.info("{}: Snapshot installed from leader: {}", logName(), leaderId);
+        log.info("{}: Snapshot installed from leader: {}", logName, leaderId);
         final Snapshot.State snapshotState;
         try {
             snapshotState = context.getSnapshotManager().convertSnapshot(snapshotTracker.getSnapshotBytes());
         } catch (IOException e) {
-            log.debug("{}: failed to convert InstallSnapshot to state", logName(), e);
+            log.debug("{}: failed to convert InstallSnapshot to state", logName, e);
             closeSnapshotTracker();
             sender.tell(new InstallSnapshotReply(currentTerm(), context.getId(), -1, false), actor());
             return;
         }
 
-        log.debug("{}: Converted InstallSnapshot from leader: {} to state{}", logName(), leaderId,
+        log.debug("{}: Converted InstallSnapshot from leader: {} to state{}", logName, leaderId,
             snapshotState.needsMigration() ? " (needs migration)" : "");
 
         final var snapshot = Snapshot.create(snapshotState, List.of(),
@@ -655,7 +655,7 @@ public class Follower extends RaftActorBehavior {
         final var applySnapshotCallback = new ApplySnapshot.Callback() {
             @Override
             public void onSuccess() {
-                log.debug("{}: handleInstallSnapshot returning: {}", logName(), successReply);
+                log.debug("{}: handleInstallSnapshot returning: {}", logName, successReply);
                 sender.tell(successReply, actor());
             }
 

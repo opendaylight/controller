@@ -609,7 +609,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
                 List.of(), commitIndex, snapshotTerm, commitIndex, snapshotTerm,
                 -1, null, null), ByteSource.wrap(bs.toByteArray())));
         LeaderInstallSnapshotState fts = new LeaderInstallSnapshotState(
-                actorContext.getConfigParams().getMaximumMessageSliceSize(), leader.logName());
+                actorContext.getConfigParams().getMaximumMessageSliceSize(), leader.logName);
         fts.setSnapshotBytes(ByteSource.wrap(bs.toByteArray()));
         leader.getFollower(FOLLOWER_ID).setLeaderInstallSnapshotState(fts);
 
@@ -966,7 +966,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
                 List.of(), commitIndex, snapshotTerm, commitIndex, snapshotTerm,
                 -1, null, null), ByteSource.wrap(bs.toByteArray())));
         LeaderInstallSnapshotState fts = new LeaderInstallSnapshotState(
-                actorContext.getConfigParams().getMaximumMessageSliceSize(), leader.logName());
+                actorContext.getConfigParams().getMaximumMessageSliceSize(), leader.logName);
         fts.setSnapshotBytes(ByteSource.wrap(bs.toByteArray()));
         leader.getFollower(FOLLOWER_ID).setLeaderInstallSnapshotState(fts);
         while (!fts.isLastChunk(fts.getChunkIndex())) {

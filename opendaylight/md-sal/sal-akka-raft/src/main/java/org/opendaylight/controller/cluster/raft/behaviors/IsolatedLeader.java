@@ -36,8 +36,7 @@ public non-sealed class IsolatedLeader extends AbstractLeader {
 
     // we received an Append Entries reply, we should switch the Behavior to Leader
     @Override
-    protected RaftActorBehavior handleAppendEntriesReply(final ActorRef sender,
-            final AppendEntriesReply appendEntriesReply) {
+    RaftActorBehavior handleAppendEntriesReply(final ActorRef sender, final AppendEntriesReply appendEntriesReply) {
         RaftActorBehavior ret = super.handleAppendEntriesReply(sender, appendEntriesReply);
 
         // it can happen that this isolated leader interacts with a new leader in the cluster and

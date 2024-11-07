@@ -91,14 +91,13 @@ public non-sealed class Leader extends AbstractLeader {
 
         if (leadershipTransferContext != null && leadershipTransferContext.isExpired(
                 context.getConfigParams().getElectionTimeOutInterval().toMillis())) {
-            log.debug("{}: Leadership transfer expired", logName());
+            log.debug("{}: Leadership transfer expired", logName);
             leadershipTransferContext = null;
         }
     }
 
     @Override
-    protected RaftActorBehavior handleAppendEntriesReply(final ActorRef sender,
-            final AppendEntriesReply appendEntriesReply) {
+    RaftActorBehavior handleAppendEntriesReply(final ActorRef sender, final AppendEntriesReply appendEntriesReply) {
         RaftActorBehavior returnBehavior = super.handleAppendEntriesReply(sender, appendEntriesReply);
         tryToCompleteLeadershipTransfer(appendEntriesReply.getFollowerId());
         return returnBehavior;
@@ -123,7 +122,7 @@ public non-sealed class Leader extends AbstractLeader {
      * @param leadershipTransferCohort the cohort participating in the leadership transfer
      */
     public void transferLeadership(@NonNull final RaftActorLeadershipTransferCohort leadershipTransferCohort) {
-        log.debug("{}: Attempting to transfer leadership", logName());
+        log.debug("{}: Attempting to transfer leadership", logName);
 
         leadershipTransferContext = new LeadershipTransferContext(leadershipTransferCohort);
 
@@ -152,10 +151,10 @@ public non-sealed class Leader extends AbstractLeader {
         boolean isVoting = context.getPeerInfo(followerId).isVoting();
 
         log.debug("{}: tryToCompleteLeadershipTransfer: followerId: {}, matchIndex: {}, lastIndex: {}, isVoting: {}",
-                logName(), followerId, followerInfo.getMatchIndex(), lastIndex, isVoting);
+                logName, followerId, followerInfo.getMatchIndex(), lastIndex, isVoting);
 
         if (isVoting && followerInfo.getMatchIndex() == lastIndex) {
-            log.debug("{}: Follower's log matches - sending ElectionTimeout", logName());
+            log.debug("{}: Follower's log matches - sending ElectionTimeout", logName);
 
             // We can't be sure if the follower has applied all its log entries to its state so send an
             // additional AppendEntries with the latest commit index.
@@ -165,7 +164,7 @@ public non-sealed class Leader extends AbstractLeader {
             ActorSelection followerActor = context.getPeerActorSelection(followerId);
             followerActor.tell(TimeoutNow.INSTANCE, context.getActor());
 
-            log.debug("{}: Leader transfer complete", logName());
+            log.debug("{}: Leader transfer complete", logName);
 
             leadershipTransferContext.transferCohort.transferComplete();
             leadershipTransferContext = null;

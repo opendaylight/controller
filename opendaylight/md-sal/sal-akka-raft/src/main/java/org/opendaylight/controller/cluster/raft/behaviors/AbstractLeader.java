@@ -104,10 +104,12 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
             final @Nullable AbstractLeader initializeFromLeader) {
         super(context, state);
 
-        appendEntriesMessageSlicer = MessageSlicer.builder().logContext(logName())
+        appendEntriesMessageSlicer = MessageSlicer.builder()
+            .logContext(logName)
             .messageSliceSize(context.getConfigParams().getMaximumMessageSliceSize())
-            .expireStateAfterInactivity(context.getConfigParams().getElectionTimeOutInterval().toMillis() * 3,
-                    TimeUnit.MILLISECONDS).build();
+            .expireStateAfterInactivity(
+                context.getConfigParams().getElectionTimeOutInterval().toMillis() * 3, TimeUnit.MILLISECONDS)
+            .build();
 
         if (initializeFromLeader != null) {
             followerToLog.putAll(initializeFromLeader.followerToLog);
@@ -120,7 +122,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
             }
         }
 
-        log.debug("{}: Election: Leader has following peers: {}", logName(), getFollowerIds());
+        log.debug("{}: Election: Leader has following peers: {}", logName, getFollowerIds());
 
         updateMinReplicaCount();
 
@@ -194,31 +196,27 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
     }
 
     @Override
-    protected RaftActorBehavior handleAppendEntries(final ActorRef sender,
-        final AppendEntries appendEntries) {
-
-        log.debug("{}: handleAppendEntries: {}", logName(), appendEntries);
-
+    final RaftActorBehavior handleAppendEntries(final ActorRef sender, final AppendEntries appendEntries) {
+        log.debug("{}: handleAppendEntries: {}", logName, appendEntries);
         return this;
     }
 
     @Override
-    protected RaftActorBehavior handleAppendEntriesReply(final ActorRef sender,
-            final AppendEntriesReply appendEntriesReply) {
-        log.trace("{}: handleAppendEntriesReply: {}", logName(), appendEntriesReply);
+    RaftActorBehavior handleAppendEntriesReply(final ActorRef sender, final AppendEntriesReply appendEntriesReply) {
+        log.trace("{}: handleAppendEntriesReply: {}", logName, appendEntriesReply);
 
         // Update the FollowerLogInformation
         String followerId = appendEntriesReply.getFollowerId();
         FollowerLogInformation followerLogInformation = followerToLog.get(followerId);
 
         if (followerLogInformation == null) {
-            log.error("{}: handleAppendEntriesReply - unknown follower {}", logName(), followerId);
+            log.error("{}: handleAppendEntriesReply - unknown follower {}", logName, followerId);
             return this;
         }
 
         final var followerRaftVersion = appendEntriesReply.getRaftVersion();
         if (followerRaftVersion < RaftVersions.FLUORINE_VERSION) {
-            log.warn("{}: handleAppendEntriesReply - ignoring reply from follower {} raft version {}", logName(),
+            log.warn("{}: handleAppendEntriesReply - ignoring reply from follower {} raft version {}", logName,
                 followerId, followerRaftVersion);
             return this;
         }
@@ -227,7 +225,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         if (lastActivityNanos > context.getConfigParams().getElectionTimeOutInterval().toNanos()) {
             log.warn("{} : handleAppendEntriesReply delayed beyond election timeout, "
                     + "appendEntriesReply : {}, timeSinceLastActivity : {}, lastApplied : {}, commitIndex : {}",
-                    logName(), appendEntriesReply, TimeUnit.NANOSECONDS.toMillis(lastActivityNanos),
+                    logName, appendEntriesReply, TimeUnit.NANOSECONDS.toMillis(lastActivityNanos),
                     context.getLastApplied(), context.getCommitIndex());
         }
 
@@ -253,7 +251,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
             // However in this case the log terms won't match and the logs will conflict - this is handled
             // elsewhere.
             log.info("{}: handleAppendEntriesReply: follower {} lastIndex {} is ahead of our lastIndex {} "
-                    + "(snapshotIndex {}, snapshotTerm {}) - forcing install snaphot", logName(),
+                    + "(snapshotIndex {}, snapshotTerm {}) - forcing install snaphot", logName,
                     followerLogInformation.getId(), appendEntriesReply.getLogLastIndex(),
                     context.getReplicatedLog().lastIndex(), context.getReplicatedLog().getSnapshotIndex(),
                     context.getReplicatedLog().getSnapshotTerm());
@@ -280,7 +278,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
                 updated = true;
 
                 log.info("{}: handleAppendEntriesReply: follower {} last log term {} for index {} conflicts with the "
-                        + "leader's {} - set the follower's next index to {}", logName(),
+                        + "leader's {} - set the follower's next index to {}", logName,
                         followerId, appendEntriesReply.getLogLastTerm(), appendEntriesReply.getLogLastIndex(),
                         followersLastLogTermInLeadersLog, followerLogInformation.getNextIndex());
             } else {
@@ -288,7 +286,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
             }
         } else {
             log.info("{}: handleAppendEntriesReply - received unsuccessful reply: {}, leader snapshotIndex: {}, "
-                    + "snapshotTerm: {}, replicatedToAllIndex: {}", logName(), appendEntriesReply,
+                    + "snapshotTerm: {}, replicatedToAllIndex: {}", logName, appendEntriesReply,
                     context.getReplicatedLog().getSnapshotIndex(), context.getReplicatedLog().getSnapshotTerm(),
                     getReplicatedToAllIndex());
 
@@ -310,7 +308,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
                 updated = updateFollowerLogInformation(followerLogInformation, appendEntriesReply);
 
                 log.info("{}: follower {} appears to be behind the leader from the last snapshot - "
-                    + "updated: matchIndex: {}, nextIndex: {}", logName(), followerId,
+                    + "updated: matchIndex: {}, nextIndex: {}", logName, followerId,
                     followerLogInformation.getMatchIndex(), followerLogInformation.getNextIndex());
             } else {
                 // The follower's log conflicts with leader's log so decrement follower's next index
@@ -319,7 +317,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
                     updated = true;
 
                     log.info("{}: follower {} last log term {} conflicts with the leader's {} - dec next index to {}",
-                            logName(), followerId, appendEntriesReply.getLogLastTerm(),
+                            logName, followerId, appendEntriesReply.getLogLastTerm(),
                             followersLastLogTermInLeadersLogOrSnapshot, followerLogInformation.getNextIndex());
                 }
             }
@@ -327,7 +325,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
 
         if (log.isTraceEnabled()) {
             log.trace("{}: handleAppendEntriesReply from {}: commitIndex: {}, lastAppliedIndex: {}, currentTerm: {}",
-                    logName(), followerId, context.getCommitIndex(), context.getLastApplied(), currentTerm());
+                    logName, followerId, context.getCommitIndex(), context.getLastApplied(), currentTerm());
         }
 
         possiblyUpdateCommitIndex();
@@ -347,7 +345,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
             ReplicatedLogEntry replicatedLogEntry = context.getReplicatedLog().get(index);
             if (replicatedLogEntry == null) {
                 log.trace("{}: ReplicatedLogEntry not found for index {} - snapshotIndex: {}, journal size: {}",
-                        logName(), index, context.getReplicatedLog().getSnapshotIndex(),
+                        logName, index, context.getReplicatedLog().getSnapshotIndex(),
                         context.getReplicatedLog().size());
                 break;
             }
@@ -362,19 +360,19 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
                 break;
             }
 
-            log.trace("{}: checking Nth index {}", logName(), index);
+            log.trace("{}: checking Nth index {}", logName, index);
             for (FollowerLogInformation info : followerToLog.values()) {
                 final PeerInfo peerInfo = context.getPeerInfo(info.getId());
                 if (info.getMatchIndex() >= index && peerInfo != null && peerInfo.isVoting()) {
                     replicatedCount++;
                 } else if (log.isTraceEnabled()) {
-                    log.trace("{}: Not counting follower {} - matchIndex: {}, {}", logName(), info.getId(),
+                    log.trace("{}: Not counting follower {} - matchIndex: {}, {}", logName, info.getId(),
                             info.getMatchIndex(), peerInfo);
                 }
             }
 
             if (log.isTraceEnabled()) {
-                log.trace("{}: replicatedCount {}, minReplicationCount: {}", logName(), replicatedCount,
+                log.trace("{}: replicatedCount {}, minReplicationCount: {}", logName, replicatedCount,
                         minReplicationCount);
             }
 
@@ -385,22 +383,22 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
                 // reach consensus, as per §5.4.1: "once an entry from the current term is committed by
                 // counting replicas, then all prior entries are committed indirectly".
                 if (replicatedLogEntry.term() == currentTerm()) {
-                    log.trace("{}: Setting commit index to {}", logName(), index);
+                    log.trace("{}: Setting commit index to {}", logName, index);
                     context.setCommitIndex(index);
                 } else {
                     log.debug("{}: Not updating commit index to {} - retrieved log entry with index {}, "
-                            + "term {} does not match the current term {}", logName(), index,
+                            + "term {} does not match the current term {}", logName, index,
                             replicatedLogEntry.index(), replicatedLogEntry.term(), currentTerm());
                 }
             } else {
-                log.trace("{}: minReplicationCount not reached, actual {} - breaking", logName(), replicatedCount);
+                log.trace("{}: minReplicationCount not reached, actual {} - breaking", logName, replicatedCount);
                 break;
             }
         }
 
         // Apply the change to the state machine
         if (context.getCommitIndex() > context.getLastApplied()) {
-            log.debug("{}: Applying to log - commitIndex: {}, lastAppliedIndex: {}", logName(),
+            log.debug("{}: Applying to log - commitIndex: {}, lastAppliedIndex: {}", logName,
                     context.getCommitIndex(), context.getLastApplied());
 
             applyLogToStateMachine(context.getCommitIndex());
@@ -419,7 +417,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         if (updated && log.isDebugEnabled()) {
             log.debug(
                 "{}: handleAppendEntriesReply - FollowerLogInformation for {} updated: matchIndex: {}, nextIndex: {}",
-                logName(), followerLogInformation.getId(), followerLogInformation.getMatchIndex(),
+                logName, followerLogInformation.getId(), followerLogInformation.getMatchIndex(),
                 followerLogInformation.getNextIndex());
         }
         return updated;
@@ -477,7 +475,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
     }
 
     @Override
-    protected RaftActorBehavior handleRequestVoteReply(final ActorRef sender, final RequestVoteReply requestVoteReply) {
+    RaftActorBehavior handleRequestVoteReply(final ActorRef sender, final RequestVoteReply requestVoteReply) {
         return this;
     }
 
@@ -500,7 +498,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
                 && shouldUpdateTerm(rpc)) {
 
             log.info("{}: Term {} in \"{}\" message is greater than leader's term {} - switching to Follower",
-                logName(), rpc.getTerm(), rpc, context.getTermInformation().getCurrentTerm());
+                logName, rpc.getTerm(), rpc, context.getTermInformation().getCurrentTerm());
 
             context.getTermInformation().updateAndPersist(rpc.getTerm(), null);
 
@@ -513,7 +511,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
             // of other nodes available that can elect the requesting candidate. Since we're transferring
             // leadership, we should make every effort to get the requesting node elected.
             if (rpc instanceof RequestVote requestVote && context.getRaftActorLeadershipTransferCohort() != null) {
-                log.debug("{}: Leadership transfer in progress - processing RequestVote", logName());
+                log.debug("{}: Leadership transfer in progress - processing RequestVote", logName);
                 requestVote(sender, requestVote);
             }
 
@@ -542,20 +540,20 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
     }
 
     private void handleInstallSnapshotReply(final InstallSnapshotReply reply) {
-        log.debug("{}: handleInstallSnapshotReply: {}", logName(), reply);
+        log.debug("{}: handleInstallSnapshotReply: {}", logName, reply);
 
         final var followerId = reply.getFollowerId();
         final var followerLogInfo = followerToLog.get(followerId);
         if (followerLogInfo == null) {
             // This can happen during AddServer if it times out.
-            log.error("{}: FollowerLogInformation not found for follower {} in InstallSnapshotReply", logName(),
+            log.error("{}: FollowerLogInformation not found for follower {} in InstallSnapshotReply", logName,
                 followerId);
             return;
         }
 
         final var installSnapshotState = followerLogInfo.getInstallSnapshotState();
         if (installSnapshotState == null) {
-            log.error("{}: LeaderInstallSnapshotState not found for follower {} in InstallSnapshotReply", logName(),
+            log.error("{}: LeaderInstallSnapshotState not found for follower {} in InstallSnapshotReply", logName,
                 followerId);
             return;
         }
@@ -567,7 +565,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         final var replyChunkIndex = reply.getChunkIndex();
         if (replyChunkIndex != expectedChunkIndex) {
             log.error("{}: Chunk index {} in InstallSnapshotReply from follower {} does not match expected index {}",
-                logName(), replyChunkIndex, followerId, expectedChunkIndex);
+                logName, replyChunkIndex, followerId, expectedChunkIndex);
 
             if (replyChunkIndex == LeaderInstallSnapshotState.INVALID_CHUNK_INDEX) {
                 // Since the Follower did not find this index to be valid we should reset the follower snapshot
@@ -578,14 +576,14 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         }
 
         if (!reply.isSuccess()) {
-            log.warn("{}: Received failed InstallSnapshotReply - will retry: {}", logName(), reply);
+            log.warn("{}: Received failed InstallSnapshotReply - will retry: {}", logName, reply);
             installSnapshotState.markSendStatus(false);
             sendNextSnapshotChunk(followerId, followerLogInfo);
             return;
         }
 
         if (!installSnapshotState.isLastChunk(replyChunkIndex)) {
-            log.debug("{}: Success InstallSnapshotReply from {}, sending next chunk", logName(), followerId);
+            log.debug("{}: Success InstallSnapshotReply from {}, sending next chunk", logName, followerId);
             installSnapshotState.markSendStatus(true);
             sendNextSnapshotChunk(followerId, followerLogInfo);
             return;
@@ -598,7 +596,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         followerLogInfo.clearLeaderInstallSnapshotState();
 
         log.info("{}: Snapshot successfully installed on follower {} (last chunk {}) - matchIndex set to {}, "
-            + "nextIndex set to {}", logName(), followerId, replyChunkIndex, followerLogInfo.getMatchIndex(),
+            + "nextIndex set to {}", logName, followerId, replyChunkIndex, followerLogInfo.getMatchIndex(),
             followerLogInfo.getNextIndex());
 
         if (!anyFollowersInstallingSnapshot()) {
@@ -636,7 +634,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
     private void replicate(final Replicate replicate) {
         final long logIndex = replicate.logIndex();
 
-        log.debug("{}: Replicate message: identifier: {}, logIndex: {}, isSendImmediate: {}", logName(),
+        log.debug("{}: Replicate message: identifier: {}, logIndex: {}, isSendImmediate: {}", logName,
                 replicate.identifier(), logIndex, replicate.sendImmediate());
 
         // Create a tracker entry we will use this later to notify the
@@ -712,13 +710,13 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
 
                 if (!isHeartbeat && log.isDebugEnabled() || log.isTraceEnabled()) {
                     log.debug("{}: Checking sendAppendEntries for follower {}: active: {}, followerNextIndex: {}, "
-                            + "leaderLastIndex: {}, leaderSnapShotIndex: {}", logName(), followerId, isFollowerActive,
+                            + "leaderLastIndex: {}, leaderSnapShotIndex: {}", logName, followerId, isFollowerActive,
                             followerNextIndex, leaderLastIndex, leaderSnapShotIndex);
                 }
 
                 if (isFollowerActive && context.getReplicatedLog().isPresent(followerNextIndex)) {
 
-                    log.debug("{}: sendAppendEntries: {} is present for follower {}", logName(),
+                    log.debug("{}: sendAppendEntries: {} is present for follower {}", logName,
                             followerNextIndex, followerId);
 
                     if (followerLogInformation.okToReplicate(context.getCommitIndex())) {
@@ -735,7 +733,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
                     sendAppendEntries = true;
                     if (canInstallSnapshot(followerNextIndex)) {
                         log.info("{}: Initiating install snapshot to follower {}: follower nextIndex: {}, leader "
-                                + "snapshotIndex: {}, leader lastIndex: {}, leader log size: {}", logName(), followerId,
+                                + "snapshotIndex: {}, leader lastIndex: {}, leader log size: {}", logName, followerId,
                                 followerNextIndex, leaderSnapShotIndex, leaderLastIndex,
                                 context.getReplicatedLog().size());
 
@@ -744,7 +742,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
                         // It doesn't seem like we should ever reach here - most likely indicates sonething is
                         // wrong.
                         log.info("{}: Follower {} is behind but cannot install snapshot: follower nextIndex: {}, "
-                                + "leader snapshotIndex: {}, leader lastIndex: {}, leader log size: {}", logName(),
+                                + "leader snapshotIndex: {}, leader lastIndex: {}, leader log size: {}", logName,
                                 followerId, followerNextIndex, leaderSnapShotIndex, leaderLastIndex,
                                 context.getReplicatedLog().size());
                     }
@@ -780,7 +778,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         }
 
         final var firstEntry = entries.get(0);
-        log.debug("{}: Log entry size {} exceeds max payload size {}", logName(), firstEntry.getData().size(),
+        log.debug("{}: Log entry size {} exceeds max payload size {}", logName, firstEntry.getData().size(),
                 maxDataSize);
 
         // If an AppendEntries has already been serialized for the log index then reuse the
@@ -794,13 +792,13 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
                     getLogEntryIndex(followerNextIndex - 1), getLogEntryTerm(followerNextIndex - 1), entries,
                     context.getCommitIndex(), getReplicatedToAllIndex(), context.getPayloadVersion());
 
-            log.debug("{}: Serializing {} for slicing for follower {}", logName(), appendEntries,
+            log.debug("{}: Serializing {} for slicing for follower {}", logName, appendEntries,
                     followerLogInfo.getId());
 
             try (ObjectOutputStream out = new ObjectOutputStream(fileBackedStream)) {
                 out.writeObject(appendEntries);
             } catch (IOException e) {
-                log.error("{}: Error serializing {}", logName(), appendEntries, e);
+                log.error("{}: Error serializing {}", logName, appendEntries, e);
                 fileBackedStream.cleanup();
                 return List.of();
             }
@@ -808,15 +806,15 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
             sharedSerializedAppendEntriesStreams.put(logIndex, fileBackedStream);
 
             fileBackedStream.setOnCleanupCallback(index -> {
-                log.debug("{}: On SharedFileBackedOutputStream cleanup for index {}", logName(), index);
+                log.debug("{}: On SharedFileBackedOutputStream cleanup for index {}", logName, index);
                 sharedSerializedAppendEntriesStreams.remove(index);
             }, logIndex);
         } else {
-            log.debug("{}: Reusing SharedFileBackedOutputStream for follower {}", logName(), followerLogInfo.getId());
+            log.debug("{}: Reusing SharedFileBackedOutputStream for follower {}", logName, followerLogInfo.getId());
             fileBackedStream.incrementUsageCount();
         }
 
-        log.debug("{}: Slicing stream for index {}, follower {}", logName(), logIndex, followerLogInfo.getId());
+        log.debug("{}: Slicing stream for index {}, follower {}", logName, logIndex, followerLogInfo.getId());
 
         // Record that slicing is in progress for the follower.
         followerLogInfo.setSlicedLogEntryIndex(logIndex);
@@ -825,7 +823,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         appendEntriesMessageSlicer.slice(SliceOptions.builder().identifier(identifier)
                 .fileBackedOutputStream(fileBackedStream).sendTo(followerActor).replyTo(actor())
                 .onFailureCallback(failure -> {
-                    log.error("{}: Error slicing AppendEntries for follower {}", logName(),
+                    log.error("{}: Error slicing AppendEntries for follower {}", logName,
                             followerLogInfo.getId(), failure);
                     followerLogInfo.setSlicedLogEntryIndex(FollowerLogInformation.NO_INDEX);
                 }).build());
@@ -856,7 +854,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
             followerLogInformation.getRaftVersion(), followerLogInformation.needsLeaderAddress(getId()));
 
         if (!entries.isEmpty() || log.isTraceEnabled()) {
-            log.debug("{}: Sending AppendEntries to follower {}: {}", logName(), followerLogInformation.getId(),
+            log.debug("{}: Sending AppendEntries to follower {}: {}", logName, followerLogInformation.getId(),
                     appendEntries);
         }
 
@@ -898,7 +896,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
             getReplicatedToAllIndex(), followerId);
         if (captureInitiated) {
             followerLogInfo.setLeaderInstallSnapshotState(new LeaderInstallSnapshotState(
-                context.getConfigParams().getMaximumMessageSliceSize(), logName()));
+                context.getConfigParams().getMaximumMessageSliceSize(), logName));
         }
 
         return captureInitiated;
@@ -915,7 +913,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
 
 
     private void sendInstallSnapshot() {
-        log.debug("{}: sendInstallSnapshot", logName());
+        log.debug("{}: sendInstallSnapshot", logName);
         for (Entry<String, FollowerLogInformation> e : followerToLog.entrySet()) {
             String followerId = e.getKey();
             ActorSelection followerActor = context.getPeerActorSelection(followerId);
@@ -941,7 +939,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
             LeaderInstallSnapshotState installSnapshotState = followerLogInfo.getInstallSnapshotState();
             if (installSnapshotState == null) {
                 installSnapshotState = new LeaderInstallSnapshotState(
-                        context.getConfigParams().getMaximumMessageSliceSize(), logName());
+                        context.getConfigParams().getMaximumMessageSliceSize(), logName);
                 followerLogInfo.setLeaderInstallSnapshotState(installSnapshotState);
             }
 
@@ -955,7 +953,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
 
                 byte[] nextSnapshotChunk = installSnapshotState.getNextChunk();
 
-                log.debug("{}: next snapshot chunk size for follower {}: {}", logName(), followerLogInfo.getId(),
+                log.debug("{}: next snapshot chunk size for follower {}: {}", logName, followerLogInfo.getId(),
                         nextSnapshotChunk.length);
 
                 int nextChunkIndex = installSnapshotState.incrementChunkIndex();
@@ -966,11 +964,11 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
 
                 sendSnapshotChunk(followerActor, followerLogInfo, nextSnapshotChunk, nextChunkIndex, serverConfig);
 
-                log.debug("{}: InstallSnapshot sent to follower {}, Chunk: {}/{}", logName(), followerActor.path(),
+                log.debug("{}: InstallSnapshot sent to follower {}, Chunk: {}/{}", logName, followerActor.path(),
                         installSnapshotState.getChunkIndex(), installSnapshotState.getTotalChunks());
 
             } catch (IOException e) {
-                log.warn("{}: Unable to send chunk: {}/{}. Reseting snapshot progress. Snapshot state: {}", logName(),
+                log.warn("{}: Unable to send chunk: {}/{}. Reseting snapshot progress. Snapshot state: {}", logName,
                         installSnapshotState.getChunkIndex(), installSnapshotState.getTotalChunks(),
                         installSnapshotState, e);
                 installSnapshotState.reset();
@@ -1003,7 +1001,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         if (!snapshotHolder.isPresent()) {
             // Seems like we should never hit this case, but just in case we do, reset the snapshot progress so that it
             // can restart from the next AppendEntries.
-            log.warn("{}: Attempting to resend snapshot with no snapshot holder present.", logName());
+            log.warn("{}: Attempting to resend snapshot with no snapshot holder present.", logName);
             followerLogInfo.clearLeaderInstallSnapshotState();
             return false;
         }
@@ -1020,7 +1018,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
 
     private void sendHeartBeat() {
         if (!followerToLog.isEmpty()) {
-            log.trace("{}: Sending heartbeat", logName());
+            log.trace("{}: Sending heartbeat", logName);
             sendAppendEntries(context.getConfigParams().getHeartBeatInterval().toNanos(), true);
 
             appendEntriesMessageSlicer.checkExpiredSlicedMessageState();
