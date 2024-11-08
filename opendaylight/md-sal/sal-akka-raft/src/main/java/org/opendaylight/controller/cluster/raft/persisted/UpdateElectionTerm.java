@@ -27,16 +27,6 @@ public record UpdateElectionTerm(@NonNull TermInfo termInfo) implements Serializ
         this(new TermInfo(term, votedFor));
     }
 
-    @Deprecated()
-    public long getCurrentTerm() {
-        return termInfo.term();
-    }
-
-    @Deprecated()
-    public String getVotedFor() {
-        return termInfo.votedFor();
-    }
-
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)

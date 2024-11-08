@@ -30,11 +30,6 @@ public record TermInfo(long term, @Nullable String votedFor) implements Serializ
         this(term, null);
     }
 
-    @Deprecated
-    public @Nullable String getVotedFor() {
-        return votedFor();
-    }
-
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(TermInfo.class).omitNullValues()

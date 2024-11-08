@@ -64,7 +64,7 @@ class RaftActorRecoverySupport {
             case ApplyJournalEntries msg -> onRecoveredApplyLogEntries(msg.getToIndex());
             case DeleteEntries msg -> onDeleteEntries(msg);
             case ServerConfigurationPayload msg -> context.updatePeerIds(msg);
-            case UpdateElectionTerm msg -> context.setTermInfo(msg.termInfo());
+            case UpdateElectionTerm(var termInfo) -> context.setTermInfo(termInfo);
             case RecoveryCompleted msg -> {
                 onRecoveryCompletedMessage(persistentProvider);
                 return true;

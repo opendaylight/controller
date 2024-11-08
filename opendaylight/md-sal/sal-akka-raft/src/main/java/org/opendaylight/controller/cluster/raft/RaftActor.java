@@ -450,9 +450,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         }
 
         final var currentBehavior = context.getCurrentBehavior();
+        final var termInfo = context.termInfo();
         final var builder = newOnDemandRaftStateBuilder()
                 .commitIndex(context.getCommitIndex())
-                .currentTerm(context.currentTerm())
+                .currentTerm(termInfo.term())
                 .inMemoryJournalDataSize(replicatedLog().dataSize())
                 .inMemoryJournalLogSize(replicatedLog().size())
                 .isSnapshotCaptureInitiated(context.getSnapshotManager().isCapturing())
@@ -464,7 +465,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 .replicatedToAllIndex(currentBehavior.getReplicatedToAllIndex())
                 .snapshotIndex(replicatedLog().getSnapshotIndex())
                 .snapshotTerm(replicatedLog().getSnapshotTerm())
-                .votedFor(context.termInfo().getVotedFor())
+                .votedFor(termInfo.votedFor())
                 .isVoting(context.isVotingMember())
                 .peerAddresses(peerAddresses)
                 .peerVotingStates(peerVotingStates)

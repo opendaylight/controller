@@ -1386,7 +1386,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         super.assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(actorContext, actorRef, rpc);
 
         String expVotedFor = rpc instanceof RequestVote ? ((RequestVote)rpc).getCandidateId() : null;
-        assertEquals("New votedFor", expVotedFor, actorContext.termInfo().getVotedFor());
+        assertEquals("New votedFor", expVotedFor, actorContext.termInfo().votedFor());
     }
 
     @Override

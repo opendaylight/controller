@@ -2439,7 +2439,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
     protected void assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(final MockRaftActorContext actorContext,
             final ActorRef actorRef, final RaftRPC rpc) {
         super.assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(actorContext, actorRef, rpc);
-        assertEquals("New votedFor", null, actorContext.termInfo().getVotedFor());
+        assertEquals("New votedFor", null, actorContext.termInfo().votedFor());
     }
 
     private static class MockConfigParamsImpl extends DefaultConfigParamsImpl {

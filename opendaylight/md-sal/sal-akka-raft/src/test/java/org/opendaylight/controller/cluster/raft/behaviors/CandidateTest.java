@@ -364,10 +364,9 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
             final ActorRef actorRef, final RaftRPC rpc) {
         super.assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(actorContext, actorRef, rpc);
         if (rpc instanceof RequestVote requestVote) {
-            assertEquals("New votedFor", requestVote.getCandidateId(),
-                    actorContext.termInfo().getVotedFor());
+            assertEquals("New votedFor", requestVote.getCandidateId(), actorContext.termInfo().votedFor());
         } else {
-            assertEquals("New votedFor", null, actorContext.termInfo().getVotedFor());
+            assertEquals("New votedFor", null, actorContext.termInfo().votedFor());
         }
     }
 }
