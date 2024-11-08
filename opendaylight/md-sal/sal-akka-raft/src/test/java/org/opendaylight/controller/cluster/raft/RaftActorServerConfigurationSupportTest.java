@@ -1183,7 +1183,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         // Send an AppendEntries so node1 has a leaderId
 
-        long term = node1RaftActor.getRaftActorContext().getTermInformation().getCurrentTerm();
+        long term = node1RaftActor.getRaftActorContext().currentTerm();
         node1RaftActorRef.tell(new AppendEntries(term, "downNode1", -1L, -1L,
                 List.of(), 0, -1, (short)1), ActorRef.noSender());
 
@@ -1460,14 +1460,17 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
     private static RaftActorContextImpl newFollowerContext(final String id,
             final TestActorRef<? extends AbstractActor> actor) {
-        DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
+        final var configParams = new DefaultConfigParamsImpl();
         configParams.setHeartBeatInterval(new FiniteDuration(100, TimeUnit.MILLISECONDS));
         configParams.setElectionTimeoutFactor(100000);
-        NonPersistentDataProvider noPersistence = new NonPersistentDataProvider(Runnable::run);
-        ElectionTermImpl termInfo = new ElectionTermImpl(noPersistence, id, LOG, new TermInfo(1, LEADER_ID));
-        return new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
-                id, termInfo, -1, -1, Map.of(LEADER_ID, ""), configParams,
-                noPersistence, applyState -> actor.tell(applyState, actor), LOG,  MoreExecutors.directExecutor());
+        final var noPersistence = new NonPersistentDataProvider(Runnable::run);
+
+        final var termInfoStore = new PersistenceTermInfoStore(noPersistence, id, LOG);
+        termInfoStore.setTerm(new TermInfo(1, LEADER_ID));
+
+        return new RaftActorContextImpl(actor, actor.underlyingActor().getContext(), id, termInfoStore, -1, -1,
+            Map.of(LEADER_ID, ""), configParams, noPersistence,
+            applyState -> actor.tell(applyState, actor), LOG,  MoreExecutors.directExecutor());
     }
 
     abstract static class AbstractMockRaftActor extends MockRaftActor {
@@ -1550,7 +1553,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
             context.setCommitIndex(fromContext.getCommitIndex());
             context.setLastApplied(fromContext.getLastApplied());
-            context.setTermInformation(fromContext.getTermInformation());
+            context.setTermInfo(fromContext.termInfo());
         }
 
         @Override

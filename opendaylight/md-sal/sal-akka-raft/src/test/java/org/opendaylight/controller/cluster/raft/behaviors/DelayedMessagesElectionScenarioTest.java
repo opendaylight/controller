@@ -59,9 +59,9 @@ public class DelayedMessagesElectionScenarioTest extends AbstractLeaderElectionS
         verifyBehaviorState("member 2", member2Actor, RaftState.Follower);
         verifyBehaviorState("member 3", member3Actor, RaftState.Leader);
 
-        assertEquals("member 1 election term", 3, member1Context.getTermInformation().getCurrentTerm());
-        assertEquals("member 2 election term", 3, member2Context.getTermInformation().getCurrentTerm());
-        assertEquals("member 3 election term", 3, member3Context.getTermInformation().getCurrentTerm());
+        assertEquals("member 1 election term", 3, member1Context.currentTerm());
+        assertEquals("member 2 election term", 3, member2Context.currentTerm());
+        assertEquals("member 3 election term", 3, member3Context.currentTerm());
 
         testLog.info("forwardDelayedRequestVoteReplyFromOriginalFollowerMember3ToMember2 ending");
     }
@@ -83,7 +83,7 @@ public class DelayedMessagesElectionScenarioTest extends AbstractLeaderElectionS
         member3Actor.waitForExpectedMessages(RequestVoteReply.class);
 
         RequestVoteReply requestVoteReply = member3Actor.getCapturedMessage(RequestVoteReply.class);
-        assertEquals("getTerm", member3Context.getTermInformation().getCurrentTerm(), requestVoteReply.getTerm());
+        assertEquals("getTerm", member3Context.currentTerm(), requestVoteReply.getTerm());
         assertEquals("isVoteGranted", true, requestVoteReply.isVoteGranted());
 
         verifyBehaviorState("member 3", member3Actor, RaftState.Leader);
@@ -98,9 +98,9 @@ public class DelayedMessagesElectionScenarioTest extends AbstractLeaderElectionS
 
         member3Actor.waitForExpectedMessages(AppendEntriesReply.class);
 
-        assertEquals("member 1 election term", 3, member1Context.getTermInformation().getCurrentTerm());
-        assertEquals("member 2 election term", 3, member2Context.getTermInformation().getCurrentTerm());
-        assertEquals("member 3 election term", 3, member3Context.getTermInformation().getCurrentTerm());
+        assertEquals("member 1 election term", 3, member1Context.currentTerm());
+        assertEquals("member 2 election term", 3, member2Context.currentTerm());
+        assertEquals("member 3 election term", 3, member3Context.currentTerm());
 
         testLog.info("sendElectionTimeoutToFollowerMember3 ending");
     }
@@ -135,9 +135,9 @@ public class DelayedMessagesElectionScenarioTest extends AbstractLeaderElectionS
         member3Actor.waitForExpectedMessages(RequestVote.class);
         verifyBehaviorState("member 3", member3Actor, RaftState.Follower);
 
-        assertEquals("member 1 election term", 2, member1Context.getTermInformation().getCurrentTerm());
-        assertEquals("member 2 election term", 2, member2Context.getTermInformation().getCurrentTerm());
-        assertEquals("member 3 election term", 2, member3Context.getTermInformation().getCurrentTerm());
+        assertEquals("member 1 election term", 2, member1Context.currentTerm());
+        assertEquals("member 2 election term", 2, member2Context.currentTerm());
+        assertEquals("member 3 election term", 2, member3Context.currentTerm());
 
         testLog.info("forwardDelayedRequestVotesToLeaderMember1AndFollowerMember3 ending");
     }
@@ -168,9 +168,9 @@ public class DelayedMessagesElectionScenarioTest extends AbstractLeaderElectionS
         member2Actor.waitForBehaviorStateChange();
         verifyBehaviorState("member 2", member2Actor, RaftState.Candidate);
 
-        assertEquals("member 1 election term", 1, member1Context.getTermInformation().getCurrentTerm());
-        assertEquals("member 2 election term", 2, member2Context.getTermInformation().getCurrentTerm());
-        assertEquals("member 3 election term", 1, member3Context.getTermInformation().getCurrentTerm());
+        assertEquals("member 1 election term", 1, member1Context.currentTerm());
+        assertEquals("member 2 election term", 2, member2Context.currentTerm());
+        assertEquals("member 3 election term", 1, member3Context.currentTerm());
 
         testLog.info("sendInitialElectionTimeoutToFollowerMember2 ending");
     }

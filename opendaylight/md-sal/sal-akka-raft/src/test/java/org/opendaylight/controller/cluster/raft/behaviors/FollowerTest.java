@@ -174,7 +174,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         MockRaftActorContext context = createActorContext();
         long term = 1000;
-        context.setTermInformation(new TermInfo(term, null));
+        context.setTermInfo(new TermInfo(term, null));
 
         follower = createBehavior(context);
 
@@ -193,7 +193,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         MockRaftActorContext context = createActorContext();
         long term = 1000;
-        context.setTermInformation(new TermInfo(term, "test"));
+        context.setTermInfo(new TermInfo(term, "test"));
 
         follower = createBehavior(context);
 
@@ -558,7 +558,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         MockRaftActorContext context = createActorContext();
 
         // First set the receivers term to lower number
-        context.setTermInformation(new TermInfo(1, "test"));
+        context.setTermInfo(new TermInfo(1, "test"));
 
         // Prepare the receivers log
         MockRaftActorContext.SimpleReplicatedLog log = new MockRaftActorContext.SimpleReplicatedLog();
@@ -609,7 +609,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         MockRaftActorContext context = createActorContext();
 
         // First set the receivers term to lower number
-        context.setTermInformation(new TermInfo(1, "test"));
+        context.setTermInfo(new TermInfo(1, "test"));
 
         // Prepare the receivers log
         MockRaftActorContext.SimpleReplicatedLog log = new MockRaftActorContext.SimpleReplicatedLog();
@@ -659,7 +659,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         MockRaftActorContext context = createActorContext();
 
         // First set the receivers term to lower number
-        context.setTermInformation(new TermInfo(1, "test"));
+        context.setTermInfo(new TermInfo(1, "test"));
 
         // Prepare the receivers log
         MockRaftActorContext.SimpleReplicatedLog log = new MockRaftActorContext.SimpleReplicatedLog();
@@ -723,7 +723,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         MockRaftActorContext context = createActorContext();
 
-        context.setTermInformation(new TermInfo(1, "test"));
+        context.setTermInfo(new TermInfo(1, "test"));
 
         // Prepare the receivers log
         MockRaftActorContext.SimpleReplicatedLog log = new MockRaftActorContext.SimpleReplicatedLog();
@@ -796,7 +796,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         logStart("testHandleInstallSnapshot");
 
         MockRaftActorContext context = createActorContext();
-        context.setTermInformation(new TermInfo(1, "leader"));
+        context.setTermInfo(new TermInfo(1, "leader"));
 
         follower = createBehavior(context);
 
@@ -831,8 +831,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertEquals("getLastTerm", lastInstallSnapshot.getLastIncludedTerm(), snapshot.getLastTerm());
         assertEquals("getState type", ByteState.class, snapshot.getState().getClass());
         assertArrayEquals("getState", bsSnapshot.toByteArray(), ((ByteState)snapshot.getState()).getBytes());
-        assertEquals("getElectionTerm", 1, snapshot.getElectionTerm());
-        assertEquals("getElectionVotedFor", "leader", snapshot.getElectionVotedFor());
+        assertEquals(new TermInfo(1, "leader"), snapshot.termInfo());
         applySnapshot.getCallback().onSuccess();
 
         List<InstallSnapshotReply> replies = MessageCollectorActor.getAllMatching(
@@ -892,7 +891,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertEquals("isSuccess", true, reply.isSuccess());
         assertEquals("getLogLastIndex", context.getReplicatedLog().lastIndex(), reply.getLogLastIndex());
         assertEquals("getLogLastTerm", context.getReplicatedLog().lastTerm(), reply.getLogLastTerm());
-        assertEquals("getTerm", context.getTermInformation().getCurrentTerm(), reply.getTerm());
+        assertEquals("getTerm", context.currentTerm(), reply.getTerm());
 
         assertNotNull(follower.getSnapshotTracker());
     }
@@ -1387,7 +1386,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         super.assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(actorContext, actorRef, rpc);
 
         String expVotedFor = rpc instanceof RequestVote ? ((RequestVote)rpc).getCandidateId() : null;
-        assertEquals("New votedFor", expVotedFor, actorContext.getTermInformation().getVotedFor());
+        assertEquals("New votedFor", expVotedFor, actorContext.termInfo().getVotedFor());
     }
 
     @Override

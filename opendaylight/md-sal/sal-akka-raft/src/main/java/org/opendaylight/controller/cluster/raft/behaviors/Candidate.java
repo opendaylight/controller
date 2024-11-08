@@ -151,18 +151,18 @@ public final class Candidate extends RaftActorBehavior {
         }
 
         if (message instanceof RaftRPC rpc) {
-
-            log.debug("{}: RaftRPC message received {}, my term is {}", logName, rpc,
-                        context.getTermInformation().getCurrentTerm());
+            final var currentTerm = context.currentTerm();
+            log.debug("{}: RaftRPC message received {}, my term is {}", logName, rpc, currentTerm);
 
             // If RPC request or response contains term T > currentTerm:
             // set currentTerm = T, convert to follower (§5.1)
             // This applies to all RPC messages and responses
-            if (rpc.getTerm() > context.getTermInformation().getCurrentTerm()) {
+            final var rpcTerm = rpc.getTerm();
+            if (rpcTerm > currentTerm) {
                 log.info("{}: Term {} in \"{}\" message is greater than Candidate's term {} - switching to Follower",
-                        logName, rpc.getTerm(), rpc, context.getTermInformation().getCurrentTerm());
+                        logName, rpcTerm, rpc, currentTerm);
 
-                context.updateTermInformation(new TermInfo(rpc.getTerm(), null));
+                context.persistTermInfo(new TermInfo(rpcTerm, null));
 
                 // The raft paper does not say whether or not a Candidate can/should process a RequestVote in
                 // this case but doing so gains quicker convergence when the sender's log is more up-to-date.
@@ -182,9 +182,10 @@ public final class Candidate extends RaftActorBehavior {
         voteCount = 1;
 
         // Increment the election term and vote for self
-        long currentTerm = context.getTermInformation().getCurrentTerm();
-        long newTerm = currentTerm + 1;
-        context.updateTermInformation(new TermInfo(newTerm, context.getId()));
+        final long currentTerm = context.currentTerm();
+        final long newTerm = currentTerm + 1;
+        // note: current is updated
+        context.persistTermInfo(new TermInfo(newTerm, context.getId()));
 
         log.info("{}: Starting new election term {}", logName, newTerm);
 
@@ -194,8 +195,7 @@ public final class Candidate extends RaftActorBehavior {
         for (String peerId : votingPeers) {
             ActorSelection peerActor = context.getPeerActorSelection(peerId);
             if (peerActor != null) {
-                RequestVote requestVote = new RequestVote(
-                        context.getTermInformation().getCurrentTerm(),
+                RequestVote requestVote = new RequestVote(newTerm,
                         context.getId(),
                         context.getReplicatedLog().lastIndex(),
                         context.getReplicatedLog().lastTerm());

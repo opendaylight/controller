@@ -190,7 +190,7 @@ public abstract class RaftActorBehavior implements AutoCloseable {
 
         final var grantVote = canGrantVote(requestVote);
         if (grantVote) {
-            context.updateTermInformation(new TermInfo(requestVote.getTerm(), requestVote.getCandidateId()));
+            context.persistTermInfo(new TermInfo(requestVote.getTerm(), requestVote.getCandidateId()));
         }
 
         final var reply = new RequestVoteReply(currentTerm(), grantVote);
@@ -290,7 +290,7 @@ public abstract class RaftActorBehavior implements AutoCloseable {
      * @return the current term
      */
     final long currentTerm() {
-        return context.getTermInformation().getCurrentTerm();
+        return context.currentTerm();
     }
 
     /**
@@ -299,7 +299,7 @@ public abstract class RaftActorBehavior implements AutoCloseable {
      * @return the candidate for whom we voted in the current term
      */
     final String votedFor() {
-        return context.getTermInformation().getVotedFor();
+        return context.termInfo().votedFor();
     }
 
     /**
@@ -457,7 +457,7 @@ public abstract class RaftActorBehavior implements AutoCloseable {
         }
 
         log.info("{} :- Switching from behavior {} to {}, election term: {}", logName, state(),
-                newBehavior.state(), context.getTermInformation().getCurrentTerm());
+                newBehavior.state(), context.currentTerm());
         try {
             close();
         } catch (RuntimeException e) {

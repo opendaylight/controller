@@ -242,7 +242,7 @@ public class AbstractLeaderElectionScenarioTest {
             final Map<String, String> peerAddresses) {
         MockRaftActorContext context = new MockRaftActorContext(id, system, actor);
         context.setPeerAddresses(peerAddresses);
-        context.updateTermInformation(new TermInfo(1, ""));
+        context.persistTermInfo(new TermInfo(1, ""));
         return context;
     }
 

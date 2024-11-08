@@ -26,7 +26,6 @@ import org.junit.After;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
-import org.opendaylight.controller.cluster.raft.ElectionTerm;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorContextImpl;
@@ -41,6 +40,7 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
+import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,12 +68,12 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     @Test
     public void testWhenACandidateIsCreatedItIncrementsTheCurrentTermAndVotesForItself() {
         RaftActorContext raftActorContext = createActorContext();
-        long expectedTerm = raftActorContext.getTermInformation().getCurrentTerm();
+        long expectedTerm = raftActorContext.currentTerm();
 
         candidate = new Candidate(raftActorContext);
 
-        assertEquals("getCurrentTerm", expectedTerm + 1, raftActorContext.getTermInformation().getCurrentTerm());
-        assertEquals("getVotedFor", raftActorContext.getId(), raftActorContext.getTermInformation().getVotedFor());
+        assertEquals("getCurrentTerm", new TermInfo(expectedTerm + 1, raftActorContext.getId()),
+            raftActorContext.termInfo());
     }
 
     @Test
@@ -135,7 +135,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     @Test
     public void testBecomeLeaderOnReceivingMajorityVotesInFiveNodeCluster() {
         MockRaftActorContext raftActorContext = createActorContext();
-        raftActorContext.setTermInformation(new TermInfo(2L, "other"));
+        raftActorContext.setTermInfo(new TermInfo(2L, "other"));
         raftActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder()
                 .createEntries(0, 5, 1).build());
         raftActorContext.setCommitIndex(raftActorContext.getReplicatedLog().lastIndex());
@@ -169,10 +169,10 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
 
     @Test
     public void testBecomeLeaderOnReceivingMajorityVotesWithNonVotingPeers() {
-        final var mockElectionTerm = mock(ElectionTerm.class);
-        doReturn(new TermInfo(1L)).when(mockElectionTerm).currentTerm();
+        final var termInfoStore = mock(TermInfoStore.class);
+        doReturn(new TermInfo(1L)).when(termInfoStore).currentTerm();
         RaftActorContext raftActorContext = new RaftActorContextImpl(candidateActor, candidateActor.actorContext(),
-                "candidate", mockElectionTerm, -1, -1, setupPeers(4), new DefaultConfigParamsImpl(),
+                "candidate", termInfoStore, -1, -1, setupPeers(4), new DefaultConfigParamsImpl(),
                 new NonPersistentDataProvider(Runnable::run), applyState -> { }, LOG,  MoreExecutors.directExecutor());
         raftActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().build());
         raftActorContext.getPeerInfo("peer1").setVotingState(VotingState.NON_VOTING);
@@ -229,7 +229,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
         RaftActorBehavior newBehavior = candidate.handleMessage(peerActors[0], new AppendEntries(2, "test", 0, 0,
             List.of(), 0, -1, (short) 0));
 
-        assertTrue("New Behavior : " + newBehavior + " term = " + actorContext.getTermInformation().getCurrentTerm(),
+        assertTrue("New Behavior : " + newBehavior + " term = " + actorContext.currentTerm(),
                 newBehavior instanceof Follower);
     }
 
@@ -249,7 +249,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     @Test
     public void testHandleRequestVoteWhenSenderTermEqualToCurrentTermAndVotedForMatches() {
         MockRaftActorContext context = createActorContext();
-        context.setTermInformation(new TermInfo(1000, null));
+        context.setTermInfo(new TermInfo(1000, null));
 
         // Once a candidate is created it will immediately increment the current term so after
         // construction the currentTerm should be 1001
@@ -267,7 +267,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     @Test
     public void testHandleRequestVoteWhenSenderTermEqualToCurrentTermAndVotedForDoesNotMatch() {
         MockRaftActorContext context = createActorContext();
-        context.setTermInformation(new TermInfo(1000, null));
+        context.setTermInfo(new TermInfo(1000, null));
 
         // Once a candidate is created it will immediately increment the current term so after
         // construction the currentTerm should be 1001
@@ -305,7 +305,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     public void testHandleAppendEntriesAddSameEntryToLog() {
         MockRaftActorContext context = createActorContext();
 
-        context.setTermInformation(new TermInfo(2, "test"));
+        context.setTermInfo(new TermInfo(2, "test"));
 
         // Prepare the receivers log
         MockRaftActorContext.MockPayload payload = new MockRaftActorContext.MockPayload("zero");
@@ -323,7 +323,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
         // the test will fail because the Candidate will assume that
         // the message was sent to it from a lower term peer and will
         // thus respond with a failure
-        context.setTermInformation(new TermInfo(2, "test"));
+        context.setTermInfo(new TermInfo(2, "test"));
 
         // Send an unknown message so that the state of the RaftActor remains unchanged
         behavior.handleMessage(candidateActor, "unknown");
@@ -365,9 +365,9 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
         super.assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(actorContext, actorRef, rpc);
         if (rpc instanceof RequestVote requestVote) {
             assertEquals("New votedFor", requestVote.getCandidateId(),
-                    actorContext.getTermInformation().getVotedFor());
+                    actorContext.termInfo().getVotedFor());
         } else {
-            assertEquals("New votedFor", null, actorContext.getTermInformation().getVotedFor());
+            assertEquals("New votedFor", null, actorContext.termInfo().getVotedFor());
         }
     }
 }

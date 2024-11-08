@@ -80,7 +80,7 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         //follower1Actor.underlyingActor().startDropMessages(AppendEntries.class);
 
         currentTerm++;
-        assertEquals("Leader term", currentTerm, leaderContext.getTermInformation().getCurrentTerm());
+        assertEquals("Leader term", currentTerm, leaderContext.currentTerm());
         assertEquals("Leader journal lastIndex", -1, leaderContext.getReplicatedLog().lastIndex());
         assertEquals("Leader commit index", -1, leaderContext.getCommitIndex());
 
@@ -89,7 +89,7 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
 
         MessageCollectorActor.expectFirstMatching(follower1CollectorActor, SnapshotComplete.class);
 
-        assertEquals("Follower term", currentTerm, follower1Context.getTermInformation().getCurrentTerm());
+        assertEquals("Follower term", currentTerm, follower1Context.currentTerm());
         assertEquals("Follower journal lastIndex", -1, follower1Context.getReplicatedLog().lastIndex());
         assertEquals("Follower commit index", -1, follower1Context.getCommitIndex());
 
@@ -143,7 +143,7 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         createNewLeaderActor();
 
         currentTerm++;
-        assertEquals("Leader term", currentTerm, leaderContext.getTermInformation().getCurrentTerm());
+        assertEquals("Leader term", currentTerm, leaderContext.currentTerm());
         assertEquals("Leader journal lastIndex", -1, leaderContext.getReplicatedLog().lastIndex());
         assertEquals("Leader commit index", -1, leaderContext.getCommitIndex());
 
@@ -163,7 +163,7 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         followerInstance.stopDropMessages(AppendEntries.class);
         MessageCollectorActor.expectFirstMatching(follower1CollectorActor, SnapshotComplete.class);
 
-        assertEquals("Follower term", currentTerm, follower1Context.getTermInformation().getCurrentTerm());
+        assertEquals("Follower term", currentTerm, follower1Context.currentTerm());
         assertEquals("Follower journal lastIndex", 1, follower1Context.getReplicatedLog().lastIndex());
         assertEquals("Follower journal lastTerm", currentTerm, follower1Context.getReplicatedLog().lastTerm());
         assertEquals("Follower commit index", 1, follower1Context.getCommitIndex());
@@ -210,7 +210,7 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         createNewLeaderActor();
 
         currentTerm++;
-        assertEquals("Leader term", currentTerm, leaderContext.getTermInformation().getCurrentTerm());
+        assertEquals("Leader term", currentTerm, leaderContext.currentTerm());
         assertEquals("Leader journal lastIndex", -1, leaderContext.getReplicatedLog().lastIndex());
         assertEquals("Leader commit index", -1, leaderContext.getCommitIndex());
 
@@ -231,7 +231,7 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         followerInstance.stopDropMessages(AppendEntries.class);
         MessageCollectorActor.expectFirstMatching(follower1CollectorActor, SnapshotComplete.class);
 
-        assertEquals("Follower term", currentTerm, follower1Context.getTermInformation().getCurrentTerm());
+        assertEquals("Follower term", currentTerm, follower1Context.currentTerm());
         assertEquals("Follower journal lastIndex", 2, follower1Context.getReplicatedLog().lastIndex());
         assertEquals("Follower journal lastTerm", currentTerm, follower1Context.getReplicatedLog().lastTerm());
         assertEquals("Follower commit index", 2, follower1Context.getCommitIndex());
@@ -317,7 +317,7 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         createNewLeaderActor();
 
         currentTerm++;
-        assertEquals("Leader term", currentTerm, leaderContext.getTermInformation().getCurrentTerm());
+        assertEquals("Leader term", currentTerm, leaderContext.currentTerm());
         assertEquals("Leader journal lastIndex", -1, leaderContext.getReplicatedLog().lastIndex());
         assertEquals("Leader commit index", -1, leaderContext.getCommitIndex());
 
@@ -344,7 +344,7 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         followerInstance.stopDropMessages(AppendEntries.class);
         MessageCollectorActor.expectFirstMatching(follower1CollectorActor, SnapshotComplete.class);
 
-        assertEquals("Follower term", currentTerm, follower1Context.getTermInformation().getCurrentTerm());
+        assertEquals("Follower term", currentTerm, follower1Context.currentTerm());
         assertEquals("Follower journal lastIndex", lastIndex, follower1Context.getReplicatedLog().lastIndex());
         assertEquals("Follower journal lastTerm", currentTerm, follower1Context.getReplicatedLog().lastTerm());
         assertEquals("Follower commit index", lastIndex, follower1Context.getCommitIndex());
@@ -434,7 +434,7 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         // Verify leader's context after startup
 
         currentTerm = persistedTerm + 1;
-        assertEquals("Leader term", currentTerm, leaderContext.getTermInformation().getCurrentTerm());
+        assertEquals("Leader term", currentTerm, leaderContext.currentTerm());
         assertEquals("Leader server config", Set.copyOf(persistedServerConfig.getServerConfig()),
                 Set.copyOf(leaderContext.getPeerServerInfo(true).getServerConfig()));
         assertEquals("Leader isVotingMember", true, leaderContext.isVotingMember());
@@ -442,7 +442,7 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         // Verify follower's context after startup
 
         MessageCollectorActor.expectFirstMatching(follower1CollectorActor, AppendEntries.class);
-        assertEquals("Follower term", currentTerm, follower1Context.getTermInformation().getCurrentTerm());
+        assertEquals("Follower term", currentTerm, follower1Context.currentTerm());
         assertEquals("Follower server config", Set.copyOf(persistedServerConfig.getServerConfig()),
                 Set.copyOf(follower1Context.getPeerServerInfo(true).getServerConfig()));
         assertEquals("FollowerisVotingMember", false, follower1Context.isVotingMember());

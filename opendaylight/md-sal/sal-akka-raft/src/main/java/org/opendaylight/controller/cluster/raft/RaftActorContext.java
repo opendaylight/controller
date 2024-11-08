@@ -27,6 +27,7 @@ import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
+import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
 import org.slf4j.Logger;
 
 /**
@@ -81,16 +82,41 @@ public interface RaftActorContext {
     Optional<Cluster> getCluster();
 
     /**
+     * Return current term. This method is equivalent to {@code termInfo().term()}.
+     *
+     * @return current term
+     */
+    default long currentTerm() {
+        return termInfo().term();
+    }
+
+    /**
      * Returns the current term {@link TermInfo}.
      *
      * @return the {@link TermInfo}
      */
-    @NonNull TermInfo getTermInformation();
+    @NonNull TermInfo termInfo();
 
-    // Note: does not persist
-    void setTermInformation(@NonNull TermInfo newElectionInfo);
+    /**
+     * Sets, but does not persist, a {@link TermInfo}, so that {@link #termInfo()} returns it, unless we undergo
+     * recovery, in which case a prior {@link TermInfo} may be returned.
+     *
+     * @implSpec
+     *     Implementations need to route this request to the underlying {@link TermInfoStore#setTerm(TermInfo)}.
+     *
+     * @param termInfo {@link TermInfo} to set
+     */
+    void setTermInfo(@NonNull TermInfo termInfo);
 
-    void updateTermInformation(@NonNull TermInfo newElectionInfo);
+    /**
+     * Sets and persists a {@link TermInfo}, so that {@link #termInfo()} returns it, even if we undergo recovery.
+     *
+     * @implSpec
+     *     Implementations need to route this request to the underlying {@link TermInfoStore#persistTerm(TermInfo)}.
+     *
+     * @param termInfo {@link TermInfo} to persist
+     */
+    void persistTermInfo(@NonNull TermInfo termInfo);
 
     /**
      * Returns the index of highest log entry known to be committed.
@@ -98,7 +124,6 @@ public interface RaftActorContext {
      * @return index of highest log entry known to be committed.
      */
     long getCommitIndex();
-
 
     /**
      * Sets the index of highest log entry known to be committed.
