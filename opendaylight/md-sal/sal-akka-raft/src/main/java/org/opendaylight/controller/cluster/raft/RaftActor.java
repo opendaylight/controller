@@ -123,7 +123,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         delegatingPersistenceProvider = new RaftActorDelegatingPersistentDataProvider(null, persistentProvider);
 
         context = new RaftActorContextImpl(getSelf(), getContext(), id,
-            new ElectionTermImpl(persistentProvider, id, LOG), -1, -1, peerAddresses,
+            new PersistenceTermInfoStore(persistentProvider, id, LOG), -1, -1, peerAddresses,
             configParams.isPresent() ? configParams.orElseThrow() : new DefaultConfigParamsImpl(),
             delegatingPersistenceProvider, this::handleApplyState, LOG, this::executeInSelf);
 

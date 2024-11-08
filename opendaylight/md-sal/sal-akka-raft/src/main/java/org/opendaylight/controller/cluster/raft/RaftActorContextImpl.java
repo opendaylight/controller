@@ -34,6 +34,7 @@ import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPay
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
+import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
 import org.slf4j.Logger;
 
 /**
@@ -53,7 +54,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     private final String id;
 
-    private final @NonNull ElectionTerm termInformation;
+    private final @NonNull TermInfoStore termInformation;
 
     private long commitIndex;
 
@@ -95,7 +96,7 @@ public class RaftActorContextImpl implements RaftActorContext {
     private RaftActorLeadershipTransferCohort leadershipTransferCohort;
 
     public RaftActorContextImpl(final ActorRef actor, final ActorContext context, final String id,
-            final @NonNull ElectionTerm termInformation, final long commitIndex, final long lastApplied,
+            final @NonNull TermInfoStore termInformation, final long commitIndex, final long lastApplied,
             final @NonNull Map<String, String> peerAddresses,
             final @NonNull ConfigParams configParams, final @NonNull DataPersistenceProvider persistenceProvider,
             final @NonNull Consumer<ApplyState> applyStateConsumer, final @NonNull Logger logger,

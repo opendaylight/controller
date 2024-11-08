@@ -5,25 +5,24 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.raft;
+package org.opendaylight.controller.cluster.raft.spi;
 
+import com.google.common.annotations.Beta;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 
 /**
- * ElectionTerm contains information about a RaftActors election term. This information includes the last known current
- * term of the RaftActor and which candidate was voted for by the RaftActor in that term.
- *
- * <p>This class ensures that election term information is persisted.
+ * Storage for {@link TermInfo}. Provides access to current term and updates to it both transient, via
+ * {@link #update(TermInfo)} and persistent, via {@link #updateAndPersist(TermInfo)}.
  */
+@Beta
 @NonNullByDefault
-public interface ElectionTerm {
+public interface TermInfoStore {
     /**
      * Returns {@link TermInfo} for current term.
      *
      * @return {@link TermInfo} for current term
      */
-    // FIXME: really non-null?
+    // FIXME: really non-null? how does this start off?
     TermInfo currentTerm();
 
     /**

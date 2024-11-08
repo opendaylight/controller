@@ -13,28 +13,23 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
+import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
 import org.slf4j.Logger;
 
 /**
  * Implementation of ElectionTerm for the RaftActor.
  */
-class ElectionTermImpl implements ElectionTerm {
+final class PersistenceTermInfoStore implements TermInfoStore {
     private final DataPersistenceProvider persistence;
     private final Logger log;
     private final String logId;
 
-    private @NonNull TermInfo currentTerm;
+    private @NonNull TermInfo currentTerm = TermInfo.INITIAL;
 
-    ElectionTermImpl(final DataPersistenceProvider persistence, final String logId, final Logger log,
-            final TermInfo currentTerm) {
-        this.persistence = persistence;
-        this.logId = logId;
-        this.log = log;
-        this.currentTerm = requireNonNull(currentTerm);
-    }
-
-    ElectionTermImpl(final DataPersistenceProvider persistence, final String logId, final Logger log) {
-        this(persistence, logId, log, new TermInfo(0));
+    PersistenceTermInfoStore(final DataPersistenceProvider persistence, final String logId, final Logger log) {
+        this.persistence = requireNonNull(persistence);
+        this.logId = requireNonNull(logId);
+        this.log = requireNonNull(log);
     }
 
     @Override

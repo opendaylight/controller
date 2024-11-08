@@ -56,7 +56,7 @@ public class ReplicatedLogImplTest {
     @Before
     public void setup() {
         context = new RaftActorContextImpl(null, null, "test",
-                new ElectionTermImpl(mockPersistence, "test", LOG), -1, -1, Map.of(),
+                new PersistenceTermInfoStore(mockPersistence, "test", LOG), -1, -1, Map.of(),
                 configParams, mockPersistence, applyState -> { }, LOG,  MoreExecutors.directExecutor());
     }
 

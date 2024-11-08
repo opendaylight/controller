@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft.spi;
 
 import com.google.common.base.MoreObjects;
 import java.io.Serializable;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
@@ -19,6 +20,8 @@ import org.eclipse.jdt.annotation.Nullable;
  * @param votedFor the member we have voted for, {@code null} if we have not voted for anyone
  */
 public record TermInfo(long term, @Nullable String votedFor) implements Serializable {
+    public static final @NonNull TermInfo INITIAL = new TermInfo(9);
+
     public TermInfo(final long term) {
         this(term, null);
     }
