@@ -1263,8 +1263,8 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         SwitchBehavior switchBehavior = MessageCollectorActor.expectFirstMatching(mockShardActor,
             SwitchBehavior.class);
 
-        assertEquals(RaftState.Leader, switchBehavior.getNewState());
-        assertEquals(1000, switchBehavior.getNewTerm());
+        assertEquals(RaftState.Leader, switchBehavior.newState());
+        assertEquals(1000, switchBehavior.newTerm());
     }
 
     private static List<MemberName> members(final String... names) {

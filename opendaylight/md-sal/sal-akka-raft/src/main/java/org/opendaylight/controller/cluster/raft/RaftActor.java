@@ -27,6 +27,7 @@ import org.apache.pekko.actor.Status;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SnapshotProtocol;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.DelegatingPersistentDataProvider;
@@ -245,8 +246,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             getSender().tell(getOnDemandRaftState(), self());
         } else if (message instanceof InitiateCaptureSnapshot) {
             captureSnapshot();
-        } else if (message instanceof SwitchBehavior switchBehavior) {
-            switchBehavior(switchBehavior);
+        } else if (message instanceof SwitchBehavior(var newState, var newTerm)) {
+            switchBehavior(newState, newTerm);
         } else if (message instanceof LeaderTransitioning leaderTransitioning) {
             onLeaderTransitioning(leaderTransitioning);
         } else if (message instanceof Shutdown) {
@@ -416,15 +417,16 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         }
     }
 
-    private void switchBehavior(final SwitchBehavior message) {
+    @NonNullByDefault
+    private void switchBehavior(final RaftState newState, final long newTerm) {
         if (!getRaftActorContext().getRaftPolicy().automaticElectionsEnabled()) {
-            RaftState newState = message.getNewState();
-            if (newState == RaftState.Leader || newState == RaftState.Follower) {
-                getRaftActorContext().persistTermInfo(new TermInfo(message.getNewTerm(), ""));
-                switchBehavior(behaviorStateTracker.capture(getCurrentBehavior()),
-                    RaftActorBehavior.createBehavior(context, message.getNewState()));
-            } else {
-                LOG.warn("Switching to behavior : {} - not supported", newState);
+            switch (newState) {
+                case Follower, Leader -> {
+                    getRaftActorContext().persistTermInfo(new TermInfo(newTerm, ""));
+                    switchBehavior(behaviorStateTracker.capture(getCurrentBehavior()),
+                        RaftActorBehavior.createBehavior(context, newState));
+                }
+                default -> LOG.warn("Switching to behavior : {} - not supported", newState);
             }
         }
     }
