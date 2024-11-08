@@ -495,11 +495,11 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         // If RPC request or response contains term T > currentTerm:
         // set currentTerm = T, convert to follower (§5.1)
         // This applies to all RPC messages and responses
-        if (message instanceof RaftRPC rpc && rpc.getTerm() > context.getTermInformation().getCurrentTerm()
+        if (message instanceof RaftRPC rpc && rpc.getTerm() > context.getTermInformation().term()
                 && shouldUpdateTerm(rpc)) {
 
             log.info("{}: Term {} in \"{}\" message is greater than leader's term {} - switching to Follower",
-                logName, rpc.getTerm(), rpc, context.getTermInformation().getCurrentTerm());
+                logName, rpc.getTerm(), rpc, context.getTermInformation().term());
 
             context.updateTermInformation(new TermInfo(rpc.getTerm()));
 

@@ -108,7 +108,7 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
 
         waitUntilLeader(leaderActor);
 
-        currentTerm = leaderContext.getTermInformation().getCurrentTerm();
+        currentTerm = leaderContext.getTermInformation().term();
         assertEquals("Current term > " + initialTerm, true, currentTerm > initialTerm);
 
         leader = leaderActor.underlyingActor().getCurrentBehavior();

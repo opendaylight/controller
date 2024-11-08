@@ -221,7 +221,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         // The raft context is initialized with a couple log entries. However the commitIndex
         // is -1, simulating that the leader previously didn't get consensus and thus the log entries weren't
         // committed and applied. Now it regains leadership with a higher term (2).
-        long prevTerm = actorContext.getTermInformation().getCurrentTerm();
+        long prevTerm = actorContext.getTermInformation().term();
         long newTerm = prevTerm + 1;
         actorContext.setTermInformation(new TermInfo(newTerm, ""));
 
@@ -548,7 +548,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         actorContext.setLastApplied(0);
 
         final long newLogIndex = actorContext.getReplicatedLog().lastIndex() + 1;
-        final long term = actorContext.getTermInformation().getCurrentTerm();
+        final long term = actorContext.getTermInformation().term();
         final var data = new MockRaftActorContext.MockPayload("foo");
 
         actorContext.getReplicatedLog().append(new SimpleReplicatedLogEntry(newLogIndex, term, data));
@@ -1044,7 +1044,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         assertEquals(3, installSnapshot.getTotalChunks());
 
         followerActor.underlyingActor().clear();
-        leader.handleMessage(followerActor, new InstallSnapshotReply(actorContext.getTermInformation().getCurrentTerm(),
+        leader.handleMessage(followerActor, new InstallSnapshotReply(actorContext.getTermInformation().term(),
                 FOLLOWER_ID, installSnapshot.getChunkIndex(), true));
 
         installSnapshot = MessageCollectorActor.expectFirstMatching(followerActor, InstallSnapshot.class);
@@ -1053,14 +1053,14 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         assertEquals(3, installSnapshot.getTotalChunks());
 
         followerActor.underlyingActor().clear();
-        leader.handleMessage(followerActor, new InstallSnapshotReply(actorContext.getTermInformation().getCurrentTerm(),
+        leader.handleMessage(followerActor, new InstallSnapshotReply(actorContext.getTermInformation().term(),
                 FOLLOWER_ID, installSnapshot.getChunkIndex(), true));
 
         installSnapshot = MessageCollectorActor.expectFirstMatching(followerActor, InstallSnapshot.class);
 
         // Send snapshot reply one more time and make sure that a new snapshot message should not be sent to follower
         followerActor.underlyingActor().clear();
-        leader.handleMessage(followerActor, new InstallSnapshotReply(actorContext.getTermInformation().getCurrentTerm(),
+        leader.handleMessage(followerActor, new InstallSnapshotReply(actorContext.getTermInformation().term(),
                 FOLLOWER_ID, installSnapshot.getChunkIndex(), true));
 
         installSnapshot = MessageCollectorActor.getFirstMatching(followerActor, InstallSnapshot.class);
@@ -1119,7 +1119,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         followerActor.underlyingActor().clear();
 
-        leader.handleMessage(followerActor, new InstallSnapshotReply(actorContext.getTermInformation().getCurrentTerm(),
+        leader.handleMessage(followerActor, new InstallSnapshotReply(actorContext.getTermInformation().term(),
                 FOLLOWER_ID, -1, false));
 
         Uninterruptibles.sleepUninterruptibly(actorContext.getConfigParams().getHeartBeatInterval().toMillis(),
@@ -2271,7 +2271,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         MessageCollectorActor.clearMessages(followerActor);
 
         // Send normal payload first to prime commit index.
-        final long term = leaderActorContext.getTermInformation().getCurrentTerm();
+        final long term = leaderActorContext.getTermInformation().term();
         sendReplicate(leaderActorContext, term, 0);
 
         AppendEntries appendEntries = MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
@@ -2346,7 +2346,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leaderActorContext.setCommitIndex(-1);
         leaderActorContext.setLastApplied(-1);
 
-        final long term = leaderActorContext.getTermInformation().getCurrentTerm();
+        final long term = leaderActorContext.getTermInformation().term();
         leader = new Leader(leaderActorContext);
         leaderActorContext.setCurrentBehavior(leader);
 
@@ -2439,7 +2439,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
     protected void assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(final MockRaftActorContext actorContext,
             final ActorRef actorRef, final RaftRPC rpc) {
         super.assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(actorContext, actorRef, rpc);
-        assertEquals("New votedFor", null, actorContext.getTermInformation().getVotedFor());
+        assertEquals("New votedFor", null, actorContext.getTermInformation().votedFor());
     }
 
     private static class MockConfigParamsImpl extends DefaultConfigParamsImpl {

@@ -261,7 +261,7 @@ public class SnapshotManager implements SnapshotState {
 
             if (tempMin > -1 && context.getReplicatedLog().isPresent(tempMin)) {
                 log.debug("{}: fakeSnapshot purging log to {} for term {}", persistenceId(), tempMin,
-                        context.getTermInformation().getCurrentTerm());
+                        context.getTermInformation().term());
 
                 //use the term of the temp-min, since we check for isPresent, entry will not be null
                 ReplicatedLogEntry entry = context.getReplicatedLog().get(tempMin);

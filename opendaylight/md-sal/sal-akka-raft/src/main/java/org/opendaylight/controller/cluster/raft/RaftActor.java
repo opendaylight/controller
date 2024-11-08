@@ -452,7 +452,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         final var currentBehavior = context.getCurrentBehavior();
         final var builder = newOnDemandRaftStateBuilder()
                 .commitIndex(context.getCommitIndex())
-                .currentTerm(context.getTermInformation().getCurrentTerm())
+                .currentTerm(context.getTermInformation().term())
                 .inMemoryJournalDataSize(replicatedLog().dataSize())
                 .inMemoryJournalLogSize(replicatedLog().size())
                 .isSnapshotCaptureInitiated(context.getSnapshotManager().isCapturing())
@@ -464,7 +464,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 .replicatedToAllIndex(currentBehavior.getReplicatedToAllIndex())
                 .snapshotIndex(replicatedLog().getSnapshotIndex())
                 .snapshotTerm(replicatedLog().getSnapshotTerm())
-                .votedFor(context.getTermInformation().getVotedFor())
+                .votedFor(context.getTermInformation().votedFor())
                 .isVoting(context.isVotingMember())
                 .peerAddresses(peerAddresses)
                 .peerVotingStates(peerVotingStates)
@@ -581,8 +581,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     protected final void persistData(final ActorRef clientActor, final Identifier identifier, final Payload data,
             final boolean batchHint) {
         ReplicatedLogEntry replicatedLogEntry = new SimpleReplicatedLogEntry(
-            context.getReplicatedLog().lastIndex() + 1,
-            context.getTermInformation().getCurrentTerm(), data);
+            context.getReplicatedLog().lastIndex() + 1, context.getTermInformation().term(), data);
         replicatedLogEntry.setPersistencePending(true);
 
         LOG.debug("{}: Persist data {}", persistenceId(), replicatedLogEntry);
@@ -691,7 +690,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     protected Long getCurrentTerm() {
-        return context.getTermInformation().getCurrentTerm();
+        return context.getTermInformation().term();
     }
 
     protected RaftActorContext getRaftActorContext() {

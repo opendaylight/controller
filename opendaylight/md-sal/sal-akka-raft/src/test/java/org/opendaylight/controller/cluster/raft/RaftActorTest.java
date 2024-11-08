@@ -256,8 +256,8 @@ public class RaftActorTest extends AbstractActorTest {
 
         RaftActorContext newContext = actor.getRaftActorContext();
         assertEquals("electionTerm", updateEntry.getCurrentTerm(),
-                newContext.getTermInformation().getCurrentTerm());
-        assertEquals("votedFor", updateEntry.getVotedFor(), newContext.getTermInformation().getVotedFor());
+                newContext.getTermInformation().term());
+        assertEquals("votedFor", updateEntry.getVotedFor(), newContext.getTermInformation().votedFor());
 
         entries = InMemoryJournal.get(persistenceId, UpdateElectionTerm.class);
         assertEquals("UpdateElectionTerm entries", 1, entries.size());
@@ -905,22 +905,22 @@ public class RaftActorTest extends AbstractActorTest {
 
         leaderActor.handleCommand(new SwitchBehavior(RaftState.Follower, 100));
 
-        assertEquals(100, leaderActor.getRaftActorContext().getTermInformation().getCurrentTerm());
+        assertEquals(100, leaderActor.getRaftActorContext().getTermInformation().term());
         assertEquals(RaftState.Follower, leaderActor.getCurrentBehavior().state());
 
         leaderActor.handleCommand(new SwitchBehavior(RaftState.Leader, 110));
 
-        assertEquals(110, leaderActor.getRaftActorContext().getTermInformation().getCurrentTerm());
+        assertEquals(110, leaderActor.getRaftActorContext().getTermInformation().term());
         assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
 
         leaderActor.handleCommand(new SwitchBehavior(RaftState.Candidate, 125));
 
-        assertEquals(110, leaderActor.getRaftActorContext().getTermInformation().getCurrentTerm());
+        assertEquals(110, leaderActor.getRaftActorContext().getTermInformation().term());
         assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
 
         leaderActor.handleCommand(new SwitchBehavior(RaftState.IsolatedLeader, 125));
 
-        assertEquals(110, leaderActor.getRaftActorContext().getTermInformation().getCurrentTerm());
+        assertEquals(110, leaderActor.getRaftActorContext().getTermInformation().term());
         assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
     }
 
@@ -1131,8 +1131,8 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals("Last applied", snapshotLastApplied, context.getLastApplied());
         assertEquals("Commit index", snapshotLastApplied, context.getCommitIndex());
         assertEquals("Recovered state", snapshotState.getState(), mockRaftActor.getState());
-        assertEquals("Current term", 1L, context.getTermInformation().getCurrentTerm());
-        assertEquals("Voted for", "member-1", context.getTermInformation().getVotedFor());
+        assertEquals("Current term", 1L, context.getTermInformation().term());
+        assertEquals("Voted for", "member-1", context.getTermInformation().votedFor());
 
         // Test with data persistence disabled
 
@@ -1152,8 +1152,8 @@ public class RaftActorTest extends AbstractActorTest {
                 Uninterruptibles.awaitUninterruptibly(mockRaftActor.snapshotCommitted, 5, TimeUnit.SECONDS));
 
         context = mockRaftActor.getRaftActorContext();
-        assertEquals("Current term", 5L, context.getTermInformation().getCurrentTerm());
-        assertEquals("Voted for", "member-1", context.getTermInformation().getVotedFor());
+        assertEquals("Current term", 5L, context.getTermInformation().term());
+        assertEquals("Voted for", "member-1", context.getTermInformation().votedFor());
 
         TEST_LOG.info("testRestoreFromSnapshot ending");
     }
@@ -1188,8 +1188,8 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals("Last index", 0, context.getReplicatedLog().lastIndex());
         assertEquals("Last applied", -1, context.getLastApplied());
         assertEquals("Commit index", -1, context.getCommitIndex());
-        assertEquals("Current term", 0, context.getTermInformation().getCurrentTerm());
-        assertEquals("Voted for", null, context.getTermInformation().getVotedFor());
+        assertEquals("Current term", 0, context.getTermInformation().term());
+        assertEquals("Voted for", null, context.getTermInformation().votedFor());
 
         TEST_LOG.info("testRestoreFromSnapshotWithRecoveredData ending");
     }

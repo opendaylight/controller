@@ -397,7 +397,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         expectFirstMatching(follower1NotifierActor, RoleChanged.class,
             rc -> rc.getNewRole().equals(RaftState.Leader.name()));
 
-        currentTerm = follower1Context.getTermInformation().getCurrentTerm();
+        currentTerm = follower1Context.getTermInformation().term();
     }
 
     private void isolateLeader() {
@@ -462,7 +462,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         clearMessages(follower2CollectorActor);
 
         leaderContext = leaderActor.underlyingActor().getRaftActorContext();
-        currentTerm = leaderContext.getTermInformation().getCurrentTerm();
+        currentTerm = leaderContext.getTermInformation().term();
 
         follower1Context = follower1Actor.underlyingActor().getRaftActorContext();
         follower2Context = follower2Actor.underlyingActor().getRaftActorContext();

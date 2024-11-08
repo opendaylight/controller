@@ -84,7 +84,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         follower2Context = follower2Actor.underlyingActor().getRaftActorContext();
         follower2 = follower2Actor.underlyingActor().getCurrentBehavior();
 
-        currentTerm = leaderContext.getTermInformation().getCurrentTerm();
+        currentTerm = leaderContext.getTermInformation().term();
         assertTrue("Current term > " + initialTerm, currentTerm > initialTerm);
 
         leaderCollectorActor = leaderActor.underlyingActor().collectorActor();

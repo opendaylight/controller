@@ -1183,7 +1183,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         // Send an AppendEntries so node1 has a leaderId
 
-        long term = node1RaftActor.getRaftActorContext().getTermInformation().getCurrentTerm();
+        long term = node1RaftActor.getRaftActorContext().getTermInformation().term();
         node1RaftActorRef.tell(new AppendEntries(term, "downNode1", -1L, -1L,
                 List.of(), 0, -1, (short)1), ActorRef.noSender());
 

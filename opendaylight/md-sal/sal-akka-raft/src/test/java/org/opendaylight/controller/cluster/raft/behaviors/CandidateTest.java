@@ -68,12 +68,12 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     @Test
     public void testWhenACandidateIsCreatedItIncrementsTheCurrentTermAndVotesForItself() {
         RaftActorContext raftActorContext = createActorContext();
-        long expectedTerm = raftActorContext.getTermInformation().getCurrentTerm();
+        long expectedTerm = raftActorContext.getTermInformation().term();
 
         candidate = new Candidate(raftActorContext);
 
-        assertEquals("getCurrentTerm", expectedTerm + 1, raftActorContext.getTermInformation().getCurrentTerm());
-        assertEquals("getVotedFor", raftActorContext.getId(), raftActorContext.getTermInformation().getVotedFor());
+        assertEquals("getCurrentTerm", expectedTerm + 1, raftActorContext.getTermInformation().term());
+        assertEquals("getVotedFor", raftActorContext.getId(), raftActorContext.getTermInformation().votedFor());
     }
 
     @Test
@@ -229,7 +229,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
         RaftActorBehavior newBehavior = candidate.handleMessage(peerActors[0], new AppendEntries(2, "test", 0, 0,
             List.of(), 0, -1, (short) 0));
 
-        assertTrue("New Behavior : " + newBehavior + " term = " + actorContext.getTermInformation().getCurrentTerm(),
+        assertTrue("New Behavior : " + newBehavior + " term = " + actorContext.getTermInformation().term(),
                 newBehavior instanceof Follower);
     }
 
@@ -365,9 +365,9 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
         super.assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(actorContext, actorRef, rpc);
         if (rpc instanceof RequestVote requestVote) {
             assertEquals("New votedFor", requestVote.getCandidateId(),
-                    actorContext.getTermInformation().getVotedFor());
+                    actorContext.getTermInformation().votedFor());
         } else {
-            assertEquals("New votedFor", null, actorContext.getTermInformation().getVotedFor());
+            assertEquals("New votedFor", null, actorContext.getTermInformation().votedFor());
         }
     }
 }

@@ -253,8 +253,8 @@ public class RaftActorRecoverySupportTest {
         assertEquals("Commit index", lastAppliedDuringSnapshotCapture, context.getCommitIndex());
         assertEquals("Snapshot term", 1, context.getReplicatedLog().getSnapshotTerm());
         assertEquals("Snapshot index", lastAppliedDuringSnapshotCapture, context.getReplicatedLog().getSnapshotIndex());
-        assertEquals("Election term", electionTerm, context.getTermInformation().getCurrentTerm());
-        assertEquals("Election votedFor", electionVotedFor, context.getTermInformation().getVotedFor());
+        assertEquals("Election term", electionTerm, context.getTermInformation().term());
+        assertEquals("Election votedFor", electionVotedFor, context.getTermInformation().votedFor());
         assertFalse("Dynamic server configuration", context.isDynamicServerConfigurationInUse());
 
         verify(mockCohort).applyRecoverySnapshot(snapshotState);
@@ -311,8 +311,8 @@ public class RaftActorRecoverySupportTest {
 
         sendMessageToSupport(new UpdateElectionTerm(5, "member2"));
 
-        assertEquals("Current term", 5, context.getTermInformation().getCurrentTerm());
-        assertEquals("Voted For", "member2", context.getTermInformation().getVotedFor());
+        assertEquals("Current term", 5, context.getTermInformation().term());
+        assertEquals("Voted For", "member2", context.getTermInformation().votedFor());
     }
 
     @Test
@@ -342,8 +342,8 @@ public class RaftActorRecoverySupportTest {
         assertEquals("Snapshot term", -1, context.getReplicatedLog().getSnapshotTerm());
         assertEquals("Snapshot index", -1, context.getReplicatedLog().getSnapshotIndex());
 
-        assertEquals("Current term", 5, context.getTermInformation().getCurrentTerm());
-        assertEquals("Voted For", "member2", context.getTermInformation().getVotedFor());
+        assertEquals("Current term", 5, context.getTermInformation().term());
+        assertEquals("Voted For", "member2", context.getTermInformation().votedFor());
 
         sendMessageToSupport(RecoveryCompleted.getInstance(), true);
 
@@ -362,8 +362,8 @@ public class RaftActorRecoverySupportTest {
     public void testNoDataRecoveredWithPersistenceDisabled() {
         sendMessageToSupport(new UpdateElectionTerm(5, "member2"));
 
-        assertEquals("Current term", 5, context.getTermInformation().getCurrentTerm());
-        assertEquals("Voted For", "member2", context.getTermInformation().getVotedFor());
+        assertEquals("Current term", 5, context.getTermInformation().term());
+        assertEquals("Voted For", "member2", context.getTermInformation().votedFor());
 
         sendMessageToSupport(RecoveryCompleted.getInstance(), true);
 
@@ -447,8 +447,8 @@ public class RaftActorRecoverySupportTest {
         sendMessageToSupport(snapshotOffer);
 
         assertEquals("Journal log size", 0, context.getReplicatedLog().size());
-        assertEquals("Election term", electionTerm, context.getTermInformation().getCurrentTerm());
-        assertEquals("Election votedFor", electionVotedFor, context.getTermInformation().getVotedFor());
+        assertEquals("Election term", electionTerm, context.getTermInformation().term());
+        assertEquals("Election votedFor", electionVotedFor, context.getTermInformation().votedFor());
         assertTrue("Dynamic server configuration", context.isDynamicServerConfigurationInUse());
         assertEquals("Peer List", Set.of("follower1", "follower2"), Set.copyOf(context.getPeerIds()));
     }

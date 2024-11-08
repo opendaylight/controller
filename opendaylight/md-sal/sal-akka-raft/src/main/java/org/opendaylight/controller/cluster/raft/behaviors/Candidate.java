@@ -153,14 +153,14 @@ public final class Candidate extends RaftActorBehavior {
         if (message instanceof RaftRPC rpc) {
 
             log.debug("{}: RaftRPC message received {}, my term is {}", logName, rpc,
-                        context.getTermInformation().getCurrentTerm());
+                        context.getTermInformation().term());
 
             // If RPC request or response contains term T > currentTerm:
             // set currentTerm = T, convert to follower (§5.1)
             // This applies to all RPC messages and responses
-            if (rpc.getTerm() > context.getTermInformation().getCurrentTerm()) {
+            if (rpc.getTerm() > context.getTermInformation().term()) {
                 log.info("{}: Term {} in \"{}\" message is greater than Candidate's term {} - switching to Follower",
-                        logName, rpc.getTerm(), rpc, context.getTermInformation().getCurrentTerm());
+                        logName, rpc.getTerm(), rpc, context.getTermInformation().term());
 
                 context.updateTermInformation(new TermInfo(rpc.getTerm(), null));
 
@@ -182,7 +182,7 @@ public final class Candidate extends RaftActorBehavior {
         voteCount = 1;
 
         // Increment the election term and vote for self
-        long currentTerm = context.getTermInformation().getCurrentTerm();
+        long currentTerm = context.getTermInformation().term();
         long newTerm = currentTerm + 1;
         context.updateTermInformation(new TermInfo(newTerm, context.getId()));
 
@@ -195,7 +195,7 @@ public final class Candidate extends RaftActorBehavior {
             ActorSelection peerActor = context.getPeerActorSelection(peerId);
             if (peerActor != null) {
                 RequestVote requestVote = new RequestVote(
-                        context.getTermInformation().getCurrentTerm(),
+                        context.getTermInformation().term(),
                         context.getId(),
                         context.getReplicatedLog().lastIndex(),
                         context.getReplicatedLog().lastTerm());

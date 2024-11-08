@@ -290,7 +290,7 @@ public abstract class RaftActorBehavior implements AutoCloseable {
      * @return the current term
      */
     final long currentTerm() {
-        return context.getTermInformation().getCurrentTerm();
+        return context.getTermInformation().term();
     }
 
     /**
@@ -299,7 +299,7 @@ public abstract class RaftActorBehavior implements AutoCloseable {
      * @return the candidate for whom we voted in the current term
      */
     final String votedFor() {
-        return context.getTermInformation().getVotedFor();
+        return context.getTermInformation().votedFor();
     }
 
     /**
@@ -457,7 +457,7 @@ public abstract class RaftActorBehavior implements AutoCloseable {
         }
 
         log.info("{} :- Switching from behavior {} to {}, election term: {}", logName, state(),
-                newBehavior.state(), context.getTermInformation().getCurrentTerm());
+                newBehavior.state(), context.getTermInformation().term());
         try {
             close();
         } catch (RuntimeException e) {

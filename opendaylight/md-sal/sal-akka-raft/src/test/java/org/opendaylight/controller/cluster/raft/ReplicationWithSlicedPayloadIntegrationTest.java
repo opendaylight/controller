@@ -54,7 +54,7 @@ public class ReplicationWithSlicedPayloadIntegrationTest extends AbstractRaftAct
 
         waitUntilLeader(leaderActor);
 
-        currentTerm = leaderContext.getTermInformation().getCurrentTerm();
+        currentTerm = leaderContext.getTermInformation().term();
 
         // Send a large payload that exceeds the size threshold and needs to be sliced.
 

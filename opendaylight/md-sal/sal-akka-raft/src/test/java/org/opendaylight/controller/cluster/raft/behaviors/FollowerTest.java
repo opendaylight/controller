@@ -892,7 +892,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertEquals("isSuccess", true, reply.isSuccess());
         assertEquals("getLogLastIndex", context.getReplicatedLog().lastIndex(), reply.getLogLastIndex());
         assertEquals("getLogLastTerm", context.getReplicatedLog().lastTerm(), reply.getLogLastTerm());
-        assertEquals("getTerm", context.getTermInformation().getCurrentTerm(), reply.getTerm());
+        assertEquals("getTerm", context.getTermInformation().term(), reply.getTerm());
 
         assertNotNull(follower.getSnapshotTracker());
     }
@@ -1387,7 +1387,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         super.assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(actorContext, actorRef, rpc);
 
         String expVotedFor = rpc instanceof RequestVote ? ((RequestVote)rpc).getCandidateId() : null;
-        assertEquals("New votedFor", expVotedFor, actorContext.getTermInformation().getVotedFor());
+        assertEquals("New votedFor", expVotedFor, actorContext.getTermInformation().votedFor());
     }
 
     @Override

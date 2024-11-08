@@ -75,7 +75,7 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         member1Actor.waitForExpectedMessages(RequestVoteReply.class);
 
         RequestVoteReply requestVoteReply = member1Actor.getCapturedMessage(RequestVoteReply.class);
-        assertEquals("getTerm", member1Context.getTermInformation().getCurrentTerm(), requestVoteReply.getTerm());
+        assertEquals("getTerm", member1Context.getTermInformation().term(), requestVoteReply.getTerm());
         assertEquals("isVoteGranted", true, requestVoteReply.isVoteGranted());
 
         // Candidate member 3 should change to follower as its term should be less than the
@@ -90,9 +90,9 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         // newTerm should be 10.
 
         long newTerm = candidateElectionTerm + 1;
-        assertEquals("member 1 election term", newTerm, member1Context.getTermInformation().getCurrentTerm());
-        assertEquals("member 2 election term", newTerm, member2Context.getTermInformation().getCurrentTerm());
-        assertEquals("member 3 election term", newTerm, member3Context.getTermInformation().getCurrentTerm());
+        assertEquals("member 1 election term", newTerm, member1Context.getTermInformation().term());
+        assertEquals("member 2 election term", newTerm, member2Context.getTermInformation().term());
+        assertEquals("member 3 election term", newTerm, member3Context.getTermInformation().term());
 
         testLog.info("sendElectionTimeoutToFollowerMember1 ending");
     }
@@ -129,7 +129,7 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
             member3Actor.waitForExpectedMessages(RequestVoteReply.class);
 
             RequestVoteReply requestVoteReply = member3Actor.getCapturedMessage(RequestVoteReply.class);
-            assertEquals("getTerm", member3Context.getTermInformation().getCurrentTerm(), requestVoteReply.getTerm());
+            assertEquals("getTerm", member3Context.getTermInformation().term(), requestVoteReply.getTerm());
             assertEquals("isVoteGranted", false, requestVoteReply.isVoteGranted());
         }
 
@@ -141,11 +141,11 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         // to member 3's.
 
         assertEquals("member 1 election term", candidateElectionTerm,
-                member1Context.getTermInformation().getCurrentTerm());
+                member1Context.getTermInformation().term());
         assertEquals("member 2 election term", candidateElectionTerm,
-                member2Context.getTermInformation().getCurrentTerm());
+                member2Context.getTermInformation().term());
         assertEquals("member 3 election term", candidateElectionTerm,
-                member3Context.getTermInformation().getCurrentTerm());
+                member3Context.getTermInformation().term());
 
         testLog.info("resolvePartitionAndSendElectionTimeoutsToCandidateMember3 ending");
     }
@@ -177,7 +177,7 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         // The member 3 Candidate will start a new term and send RequestVotes. However it will be
         // partitioned from the cluster by having member 1 and 2 drop its RequestVote messages.
 
-        candidateElectionTerm = member3Context.getTermInformation().getCurrentTerm() + numCandidateElections;
+        candidateElectionTerm = member3Context.getTermInformation().term() + numCandidateElections;
 
         member1Actor.dropMessagesToBehavior(RequestVote.class, numCandidateElections);
 
@@ -201,10 +201,10 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         verifyBehaviorState("member 2", member2Actor, RaftState.Follower);
         verifyBehaviorState("member 3", member3Actor, RaftState.Candidate);
 
-        assertEquals("member 1 election term", 3, member1Context.getTermInformation().getCurrentTerm());
-        assertEquals("member 2 election term", 3, member2Context.getTermInformation().getCurrentTerm());
+        assertEquals("member 1 election term", 3, member1Context.getTermInformation().term());
+        assertEquals("member 2 election term", 3, member2Context.getTermInformation().term());
         assertEquals("member 3 election term", candidateElectionTerm,
-                member3Context.getTermInformation().getCurrentTerm());
+                member3Context.getTermInformation().term());
 
         testLog.info("setupPartitionedCandidateMember3AndSendElectionTimeouts ending");
     }
