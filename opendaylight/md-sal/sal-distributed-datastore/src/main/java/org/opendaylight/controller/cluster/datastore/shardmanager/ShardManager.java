@@ -934,20 +934,21 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     }
 
     private void onSwitchShardBehavior(final SwitchShardBehavior message) {
-        final ShardIdentifier identifier = message.getShardId();
+        final var shardId = message.shardId();
+        final var switchBehavior = new SwitchBehavior(message.newState(), message.term());
 
-        if (identifier != null) {
-            final ShardInformation info = localShards.get(identifier.getShardName());
+        if (shardId != null) {
+            final var info = localShards.get(shardId.getShardName());
             if (info == null) {
-                getSender().tell(new Status.Failure(
-                    new IllegalArgumentException("Shard " + identifier + " is not local")), getSelf());
+                getSender().tell(new Status.Failure(new IllegalArgumentException("Shard " + shardId + " is not local")),
+                    getSelf());
                 return;
             }
 
-            switchShardBehavior(info, new SwitchBehavior(message.getNewState(), message.getTerm()));
+            switchShardBehavior(info, switchBehavior);
         } else {
-            for (ShardInformation info : localShards.values()) {
-                switchShardBehavior(info, new SwitchBehavior(message.getNewState(), message.getTerm()));
+            for (var info : localShards.values()) {
+                switchShardBehavior(info, switchBehavior);
             }
         }
 
