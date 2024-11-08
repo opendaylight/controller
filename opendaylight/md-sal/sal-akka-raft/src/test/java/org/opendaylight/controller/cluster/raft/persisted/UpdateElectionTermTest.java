@@ -25,7 +25,6 @@ public class UpdateElectionTermTest {
         assertEquals(88, bytes.length);
         final var cloned = (UpdateElectionTerm) SerializationUtils.deserialize(bytes);
 
-        assertEquals("getCurrentTerm", expected.getCurrentTerm(), cloned.getCurrentTerm());
-        assertEquals("getVotedFor", expected.getVotedFor(), cloned.getVotedFor());
+        assertEquals("getCurrentTerm", expected.termInfo(), cloned.termInfo());
     }
 }

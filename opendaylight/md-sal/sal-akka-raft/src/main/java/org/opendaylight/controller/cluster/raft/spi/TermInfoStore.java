@@ -5,25 +5,21 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.raft;
+package org.opendaylight.controller.cluster.raft.spi;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 
 /**
- * ElectionTerm contains information about a RaftActors election term. This information includes the last known current
- * term of the RaftActor and which candidate was voted for by the RaftActor in that term.
- *
- * <p>This class ensures that election term information is persisted.
+ * Storage for {@link TermInfo}. Provides access to current term and updates to it both transient, via
+ * {@link #setTerm(TermInfo)} and persistent, via {@link #persistTerm(TermInfo)}.
  */
 @NonNullByDefault
-public interface ElectionTerm {
+public interface TermInfoStore {
     /**
-     * Returns {@link TermInfo} for current term.
+     * Returns {@link TermInfo} for current term. Freshly-initialized instances return {@link TermInfo#INITIAL}.
      *
      * @return {@link TermInfo} for current term
      */
-    // FIXME: really non-null?
     TermInfo currentTerm();
 
     /**
@@ -32,7 +28,7 @@ public interface ElectionTerm {
      *
      * @param newTerm new {@link TermInfo}
      */
-    void update(TermInfo newTerm);
+    void setTerm(TermInfo newTerm);
 
     /**
      * This method updates the in-memory election term state and persists it so it can be recovered on next restart.
@@ -41,5 +37,5 @@ public interface ElectionTerm {
      *
      * @param newTerm new {@link TermInfo}
      */
-    void updateAndPersist(TermInfo newTerm);
+    void persistTerm(TermInfo newTerm);
 }

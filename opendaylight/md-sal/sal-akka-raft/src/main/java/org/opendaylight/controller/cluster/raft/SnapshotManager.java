@@ -261,7 +261,7 @@ public class SnapshotManager implements SnapshotState {
 
             if (tempMin > -1 && context.getReplicatedLog().isPresent(tempMin)) {
                 log.debug("{}: fakeSnapshot purging log to {} for term {}", persistenceId(), tempMin,
-                        context.getTermInformation().getCurrentTerm());
+                        context.currentTerm());
 
                 //use the term of the temp-min, since we check for isPresent, entry will not be null
                 ReplicatedLogEntry entry = context.getReplicatedLog().get(tempMin);
@@ -371,7 +371,7 @@ public class SnapshotManager implements SnapshotState {
                     captureSnapshot.getUnAppliedEntries(),
                     captureSnapshot.getLastIndex(), captureSnapshot.getLastTerm(),
                     captureSnapshot.getLastAppliedIndex(), captureSnapshot.getLastAppliedTerm(),
-                    context.getTermInformation(), context.getPeerServerInfo(true));
+                    context.termInfo(), context.getPeerServerInfo(true));
 
             context.getPersistenceProvider().saveSnapshot(snapshot);
 
@@ -476,7 +476,7 @@ public class SnapshotManager implements SnapshotState {
                     context.setReplicatedLog(ReplicatedLogImpl.newInstance(snapshot, context));
                     context.setLastApplied(snapshot.getLastAppliedIndex());
                     context.setCommitIndex(snapshot.getLastAppliedIndex());
-                    context.setTermInformation(snapshot.termInfo());
+                    context.setTermInfo(snapshot.termInfo());
 
                     if (snapshot.getServerConfiguration() != null) {
                         context.updatePeerIds(snapshot.getServerConfiguration());

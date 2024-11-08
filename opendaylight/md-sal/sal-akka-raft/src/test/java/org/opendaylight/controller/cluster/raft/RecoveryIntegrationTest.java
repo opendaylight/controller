@@ -255,7 +255,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
 
     private void send2InitialPayloads() {
         waitUntilLeader(leaderActor);
-        currentTerm = leaderContext.getTermInformation().getCurrentTerm();
+        currentTerm = leaderContext.currentTerm();
 
         payload0 = sendPayloadData(leaderActor, "zero");
 

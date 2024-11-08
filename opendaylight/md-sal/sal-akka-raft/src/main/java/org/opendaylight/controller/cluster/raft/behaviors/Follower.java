@@ -453,11 +453,12 @@ public class Follower extends RaftActorBehavior {
         // If RPC request or response contains term T > currentTerm:
         // set currentTerm = T, convert to follower (§5.1)
         // This applies to all RPC messages and responses
-        if (rpc.getTerm() > context.getTermInformation().getCurrentTerm() && shouldUpdateTerm(rpc)) {
+        final var currentTerm = context.currentTerm();
+        final var rpcTerm = rpc.getTerm();
+        if (rpcTerm > currentTerm && shouldUpdateTerm(rpc)) {
             log.info("{}: Term {} in \"{}\" message is greater than follower's term {} - updating term",
-                logName, rpc.getTerm(), rpc, context.getTermInformation().getCurrentTerm());
-
-            context.updateTermInformation(new TermInfo(rpc.getTerm()));
+                logName, rpcTerm, rpc, currentTerm);
+            context.persistTermInfo(new TermInfo(rpcTerm));
         }
 
         if (rpc instanceof InstallSnapshot installSnapshot) {
@@ -650,7 +651,7 @@ public class Follower extends RaftActorBehavior {
         final var snapshot = Snapshot.create(snapshotState, List.of(),
             installSnapshot.getLastIncludedIndex(), installSnapshot.getLastIncludedTerm(),
             installSnapshot.getLastIncludedIndex(), installSnapshot.getLastIncludedTerm(),
-            context.getTermInformation(), installSnapshot.serverConfig());
+            context.termInfo(), installSnapshot.serverConfig());
 
         final var applySnapshotCallback = new ApplySnapshot.Callback() {
             @Override

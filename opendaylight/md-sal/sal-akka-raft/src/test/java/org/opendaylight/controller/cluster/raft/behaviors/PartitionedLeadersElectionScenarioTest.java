@@ -98,9 +98,9 @@ public class PartitionedLeadersElectionScenarioTest extends AbstractLeaderElecti
         verifyBehaviorState("member 2", member2Actor, RaftState.Leader);
         verifyBehaviorState("member 3", member3Actor, RaftState.Follower);
 
-        assertEquals("member 1 election term", 3, member1Context.getTermInformation().getCurrentTerm());
-        assertEquals("member 2 election term", 3, member2Context.getTermInformation().getCurrentTerm());
-        assertEquals("member 3 election term", 3, member3Context.getTermInformation().getCurrentTerm());
+        assertEquals("member 1 election term", 3, member1Context.currentTerm());
+        assertEquals("member 2 election term", 3, member2Context.currentTerm());
+        assertEquals("member 3 election term", 3, member3Context.currentTerm());
 
         testLog.info("resolvePartitionedLeadersWithLeaderMember2SendingHeartbeatFirst ending");
     }
@@ -134,9 +134,9 @@ public class PartitionedLeadersElectionScenarioTest extends AbstractLeaderElecti
         verifyBehaviorState("member 2", member2Actor, RaftState.Leader);
         verifyBehaviorState("member 3", member3Actor, RaftState.Follower);
 
-        assertEquals("member 1 election term", 3, member1Context.getTermInformation().getCurrentTerm());
-        assertEquals("member 2 election term", 3, member2Context.getTermInformation().getCurrentTerm());
-        assertEquals("member 3 election term", 3, member3Context.getTermInformation().getCurrentTerm());
+        assertEquals("member 1 election term", 3, member1Context.currentTerm());
+        assertEquals("member 2 election term", 3, member2Context.currentTerm());
+        assertEquals("member 3 election term", 3, member3Context.currentTerm());
 
         testLog.info("resolvePartitionedLeadersWithLeaderMember3SendingHeartbeatFirst ending");
     }
@@ -166,7 +166,7 @@ public class PartitionedLeadersElectionScenarioTest extends AbstractLeaderElecti
         member2Actor.waitForExpectedMessages(RequestVoteReply.class);
 
         RequestVoteReply requestVoteReply = member2Actor.getCapturedMessage(RequestVoteReply.class);
-        assertEquals("getTerm", member2Context.getTermInformation().getCurrentTerm(), requestVoteReply.getTerm());
+        assertEquals("getTerm", member2Context.currentTerm(), requestVoteReply.getTerm());
         assertEquals("isVoteGranted", true, requestVoteReply.isVoteGranted());
 
         member3Actor.waitForExpectedMessages(RequestVote.class);
@@ -182,9 +182,9 @@ public class PartitionedLeadersElectionScenarioTest extends AbstractLeaderElecti
         verifyBehaviorState("member 2", member2Actor, RaftState.Leader);
         verifyBehaviorState("member 3", member3Actor, RaftState.Leader);
 
-        assertEquals("member 1 election term", 3, member1Context.getTermInformation().getCurrentTerm());
-        assertEquals("member 2 election term", 3, member2Context.getTermInformation().getCurrentTerm());
-        assertEquals("member 3 election term", 2, member3Context.getTermInformation().getCurrentTerm());
+        assertEquals("member 1 election term", 3, member1Context.currentTerm());
+        assertEquals("member 2 election term", 3, member2Context.currentTerm());
+        assertEquals("member 3 election term", 2, member3Context.currentTerm());
 
         testLog.info("sendElectionTimeoutToNowCandidateMember2 ending");
     }
@@ -216,7 +216,7 @@ public class PartitionedLeadersElectionScenarioTest extends AbstractLeaderElecti
         member3Actor.waitForExpectedMessages(RequestVoteReply.class);
 
         RequestVoteReply requestVoteReply = member3Actor.getCapturedMessage(RequestVoteReply.class);
-        assertEquals("getTerm", member3Context.getTermInformation().getCurrentTerm(), requestVoteReply.getTerm());
+        assertEquals("getTerm", member3Context.currentTerm(), requestVoteReply.getTerm());
         assertEquals("isVoteGranted", true, requestVoteReply.isVoteGranted());
 
         // when member 3 switches to Leader it will immediately send out heartbeat AppendEntries to
@@ -231,9 +231,9 @@ public class PartitionedLeadersElectionScenarioTest extends AbstractLeaderElecti
         verifyBehaviorState("member 2", member2Actor, RaftState.Candidate);
         verifyBehaviorState("member 3", member3Actor, RaftState.Leader);
 
-        assertEquals("member 1 election term", 2, member1Context.getTermInformation().getCurrentTerm());
-        assertEquals("member 2 election term", 2, member2Context.getTermInformation().getCurrentTerm());
-        assertEquals("member 3 election term", 2, member3Context.getTermInformation().getCurrentTerm());
+        assertEquals("member 1 election term", 2, member1Context.currentTerm());
+        assertEquals("member 2 election term", 2, member2Context.currentTerm());
+        assertEquals("member 3 election term", 2, member3Context.currentTerm());
 
         testLog.info("sendInitialElectionTimeoutToFollowerMember3 ending");
     }
@@ -268,9 +268,9 @@ public class PartitionedLeadersElectionScenarioTest extends AbstractLeaderElecti
         member2Actor.waitForBehaviorStateChange();
         verifyBehaviorState("member 2", member2Actor, RaftState.Candidate);
 
-        assertEquals("member 1 election term", 2, member1Context.getTermInformation().getCurrentTerm());
-        assertEquals("member 2 election term", 2, member2Context.getTermInformation().getCurrentTerm());
-        assertEquals("member 3 election term", 1, member3Context.getTermInformation().getCurrentTerm());
+        assertEquals("member 1 election term", 2, member1Context.currentTerm());
+        assertEquals("member 2 election term", 2, member2Context.currentTerm());
+        assertEquals("member 3 election term", 1, member3Context.currentTerm());
 
         testLog.info("sendInitialElectionTimeoutToFollowerMember2 ending");
     }

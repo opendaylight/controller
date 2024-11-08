@@ -64,7 +64,7 @@ class RaftActorRecoverySupport {
             case ApplyJournalEntries msg -> onRecoveredApplyLogEntries(msg.getToIndex());
             case DeleteEntries msg -> onDeleteEntries(msg);
             case ServerConfigurationPayload msg -> context.updatePeerIds(msg);
-            case UpdateElectionTerm msg -> context.setTermInformation(msg.termInfo());
+            case UpdateElectionTerm msg -> context.setTermInfo(msg.termInfo());
             case RecoveryCompleted msg -> {
                 onRecoveryCompletedMessage(persistentProvider);
                 return true;
@@ -136,7 +136,7 @@ class RaftActorRecoverySupport {
         context.setReplicatedLog(ReplicatedLogImpl.newInstance(snapshot, context));
         context.setLastApplied(snapshot.getLastAppliedIndex());
         context.setCommitIndex(snapshot.getLastAppliedIndex());
-        context.setTermInformation(snapshot.termInfo());
+        context.setTermInfo(snapshot.termInfo());
 
         final Stopwatch timer = Stopwatch.createStarted();
 
@@ -308,7 +308,7 @@ class RaftActorRecoverySupport {
 
             Snapshot snapshot = Snapshot.create(
                     EmptyState.INSTANCE, Collections.<ReplicatedLogEntry>emptyList(),
-                    -1, -1, -1, -1, context.getTermInformation(), context.getPeerServerInfo(true));
+                    -1, -1, -1, -1, context.termInfo(), context.getPeerServerInfo(true));
 
             persistentProvider.saveSnapshot(snapshot);
 

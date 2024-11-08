@@ -84,7 +84,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         doReturn(mockRaftActorBehavior).when(mockRaftActorContext).getCurrentBehavior();
         doReturn("123").when(mockRaftActorBehavior).getLeaderId();
 
-        doReturn(mockTermInfo).when(mockRaftActorContext).getTermInformation();
+        doReturn(mockTermInfo).when(mockRaftActorContext).termInfo();
 
         doReturn(new FileBackedOutputStreamFactory(10000000, "target"))
                 .when(mockRaftActorContext).getFileBackedOutputStreamFactory();

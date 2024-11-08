@@ -75,7 +75,7 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         member1Actor.waitForExpectedMessages(RequestVoteReply.class);
 
         RequestVoteReply requestVoteReply = member1Actor.getCapturedMessage(RequestVoteReply.class);
-        assertEquals("getTerm", member1Context.getTermInformation().getCurrentTerm(), requestVoteReply.getTerm());
+        assertEquals("getTerm", member1Context.currentTerm(), requestVoteReply.getTerm());
         assertEquals("isVoteGranted", true, requestVoteReply.isVoteGranted());
 
         // Candidate member 3 should change to follower as its term should be less than the
@@ -90,9 +90,9 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         // newTerm should be 10.
 
         long newTerm = candidateElectionTerm + 1;
-        assertEquals("member 1 election term", newTerm, member1Context.getTermInformation().getCurrentTerm());
-        assertEquals("member 2 election term", newTerm, member2Context.getTermInformation().getCurrentTerm());
-        assertEquals("member 3 election term", newTerm, member3Context.getTermInformation().getCurrentTerm());
+        assertEquals("member 1 election term", newTerm, member1Context.currentTerm());
+        assertEquals("member 2 election term", newTerm, member2Context.currentTerm());
+        assertEquals("member 3 election term", newTerm, member3Context.currentTerm());
 
         testLog.info("sendElectionTimeoutToFollowerMember1 ending");
     }
@@ -129,7 +129,7 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
             member3Actor.waitForExpectedMessages(RequestVoteReply.class);
 
             RequestVoteReply requestVoteReply = member3Actor.getCapturedMessage(RequestVoteReply.class);
-            assertEquals("getTerm", member3Context.getTermInformation().getCurrentTerm(), requestVoteReply.getTerm());
+            assertEquals("getTerm", member3Context.currentTerm(), requestVoteReply.getTerm());
             assertEquals("isVoteGranted", false, requestVoteReply.isVoteGranted());
         }
 
@@ -140,12 +140,9 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         // Even though member 3 didn't get voted for, member 1 and 2 should have updated their term
         // to member 3's.
 
-        assertEquals("member 1 election term", candidateElectionTerm,
-                member1Context.getTermInformation().getCurrentTerm());
-        assertEquals("member 2 election term", candidateElectionTerm,
-                member2Context.getTermInformation().getCurrentTerm());
-        assertEquals("member 3 election term", candidateElectionTerm,
-                member3Context.getTermInformation().getCurrentTerm());
+        assertEquals("member 1 election term", candidateElectionTerm, member1Context.currentTerm());
+        assertEquals("member 2 election term", candidateElectionTerm, member2Context.currentTerm());
+        assertEquals("member 3 election term", candidateElectionTerm, member3Context.currentTerm());
 
         testLog.info("resolvePartitionAndSendElectionTimeoutsToCandidateMember3 ending");
     }
@@ -172,12 +169,12 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         member3Context.setReplicatedLog(candidateReplicatedLog);
         member3Context.setCommitIndex(candidateReplicatedLog.lastIndex());
         member3Context.setLastApplied(candidateReplicatedLog.lastIndex());
-        member3Context.setTermInformation(new TermInfo(2, member1Context.getId()));
+        member3Context.setTermInfo(new TermInfo(2, member1Context.getId()));
 
         // The member 3 Candidate will start a new term and send RequestVotes. However it will be
         // partitioned from the cluster by having member 1 and 2 drop its RequestVote messages.
 
-        candidateElectionTerm = member3Context.getTermInformation().getCurrentTerm() + numCandidateElections;
+        candidateElectionTerm = member3Context.currentTerm() + numCandidateElections;
 
         member1Actor.dropMessagesToBehavior(RequestVote.class, numCandidateElections);
 
@@ -201,10 +198,9 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         verifyBehaviorState("member 2", member2Actor, RaftState.Follower);
         verifyBehaviorState("member 3", member3Actor, RaftState.Candidate);
 
-        assertEquals("member 1 election term", 3, member1Context.getTermInformation().getCurrentTerm());
-        assertEquals("member 2 election term", 3, member2Context.getTermInformation().getCurrentTerm());
-        assertEquals("member 3 election term", candidateElectionTerm,
-                member3Context.getTermInformation().getCurrentTerm());
+        assertEquals("member 1 election term", 3, member1Context.currentTerm());
+        assertEquals("member 2 election term", 3, member2Context.currentTerm());
+        assertEquals("member 3 election term", candidateElectionTerm, member3Context.currentTerm());
 
         testLog.info("setupPartitionedCandidateMember3AndSendElectionTimeouts ending");
     }
@@ -232,7 +228,7 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         member2Context.setReplicatedLog(replicatedLog);
         member2Context.setCommitIndex(replicatedLog.lastIndex());
         member2Context.setLastApplied(replicatedLog.lastIndex());
-        member2Context.setTermInformation(new TermInfo(3, "member1"));
+        member2Context.setTermInfo(new TermInfo(3, "member1"));
 
         member2Actor.self().tell(new SetBehavior(new Follower(member2Context), member2Context),
                 ActorRef.noSender());
@@ -250,7 +246,7 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         member1Context.setReplicatedLog(replicatedLog);
         member1Context.setCommitIndex(replicatedLog.lastIndex());
         member1Context.setLastApplied(replicatedLog.lastIndex());
-        member1Context.setTermInformation(new TermInfo(3, "member1"));
+        member1Context.setTermInfo(new TermInfo(3, "member1"));
 
         initializeLeaderBehavior(member1Actor, member1Context, 1);
 

@@ -80,7 +80,7 @@ public class PreLeaderScenarioTest extends AbstractRaftActorIntegrationTest {
         assertEquals("Role change 3", RaftState.Leader.name(), roleChange.get(2).getNewRole());
 
         final long previousTerm = currentTerm;
-        currentTerm = follower1Context.getTermInformation().getCurrentTerm();
+        currentTerm = follower1Context.currentTerm();
 
         // Since it went to Leader, it should've appended and successfully replicated a NoopPaylod with the
         // new term to follower2 and committed both entries, including the first payload from the previous term.
@@ -163,7 +163,7 @@ public class PreLeaderScenarioTest extends AbstractRaftActorIntegrationTest {
         clearMessages(follower2CollectorActor);
 
         leaderContext = leaderActor.underlyingActor().getRaftActorContext();
-        currentTerm = leaderContext.getTermInformation().getCurrentTerm();
+        currentTerm = leaderContext.currentTerm();
 
         follower1Context = follower1Actor.underlyingActor().getRaftActorContext();
         follower2Context = follower2Actor.underlyingActor().getRaftActorContext();

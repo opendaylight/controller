@@ -98,7 +98,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         context.setPayloadVersion(payloadVersion);
 
         // First set the receivers term to a high number (1000)
-        context.setTermInformation(new TermInfo(1000, "test"));
+        context.setTermInfo(new TermInfo(1000, "test"));
 
         AppendEntries appendEntries = new AppendEntries(100, "leader-1", 0, 0, Collections.emptyList(), 101, -1,
                 (short)4);
@@ -124,7 +124,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
     public void testHandleAppendEntriesAddSameEntryToLog() {
         MockRaftActorContext context = createActorContext();
 
-        context.setTermInformation(new TermInfo(2, "test"));
+        context.setTermInfo(new TermInfo(2, "test"));
 
         // Prepare the receivers log
         MockRaftActorContext.MockPayload payload = new MockRaftActorContext.MockPayload("zero");
@@ -169,10 +169,9 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
 
         behavior = createBehavior(context);
 
-        context.setTermInformation(new TermInfo(1, "test"));
+        context.setTermInfo(new TermInfo(1, "test"));
 
-        behavior.handleMessage(behaviorActor, new RequestVote(context.getTermInformation().getCurrentTerm(),
-                "test", 10000, 999));
+        behavior.handleMessage(behaviorActor, new RequestVote(context.currentTerm(), "test", 10000, 999));
 
         RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(behaviorActor, RequestVoteReply.class);
         assertEquals("isVoteGranted", true, reply.isVoteGranted());
@@ -189,15 +188,13 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
 
         behavior = createBehavior(context);
 
-        context.setTermInformation(new TermInfo(1, "test"));
+        context.setTermInfo(new TermInfo(1, "test"));
 
         int index = 2000;
-        setLastLogEntry(context, context.getTermInformation().getCurrentTerm(), index,
-                new MockRaftActorContext.MockPayload(""));
+        setLastLogEntry(context, context.currentTerm(), index, new MockRaftActorContext.MockPayload(""));
 
-        behavior.handleMessage(behaviorActor, new RequestVote(
-                context.getTermInformation().getCurrentTerm(), "test",
-                index - 1, context.getTermInformation().getCurrentTerm()));
+        behavior.handleMessage(behaviorActor,
+            new RequestVote(context.currentTerm(), "test", index - 1, context.currentTerm()));
 
         RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(behaviorActor, RequestVoteReply.class);
         assertEquals("isVoteGranted", false, reply.isVoteGranted());
@@ -214,7 +211,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
     public void testHandleRequestVoteWhenSenderTermLessThanCurrentTerm() {
         MockRaftActorContext context = createActorContext();
 
-        context.setTermInformation(new TermInfo(1000, null));
+        context.setTermInfo(new TermInfo(1000, null));
 
         behavior = createBehavior(context);
 
@@ -232,7 +229,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
             return;
         }
 
-        context.setTermInformation(new TermInfo(1, "test"));
+        context.setTermInfo(new TermInfo(1, "test"));
 
         //log has 1 entry with replicatedToAllIndex = 0, does not do anything, returns the
         context.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 1, 1).build());
@@ -277,13 +274,13 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
 
         Payload payload = new MockRaftActorContext.MockPayload("");
         setLastLogEntry(actorContext, 1, 0, payload);
-        actorContext.setTermInformation(new TermInfo(1, "test"));
+        actorContext.setTermInfo(new TermInfo(1, "test"));
 
         RaftActorBehavior origBehavior = createBehavior(actorContext);
         RaftActorBehavior raftBehavior = origBehavior.handleMessage(actorRef, rpc);
 
         assertEquals("New raft state", RaftState.Follower, raftBehavior.state());
-        assertEquals("New election term", rpc.getTerm(), actorContext.getTermInformation().getCurrentTerm());
+        assertEquals("New election term", rpc.getTerm(), actorContext.currentTerm());
 
         origBehavior.close();
         raftBehavior.close();

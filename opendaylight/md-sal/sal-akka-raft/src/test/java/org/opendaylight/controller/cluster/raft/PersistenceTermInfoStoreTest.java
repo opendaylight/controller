@@ -29,7 +29,7 @@ import org.slf4j.Logger;
  * @author Thomas Pantelis
  */
 @ExtendWith(MockitoExtension.class)
-class ElectionTermImplTest {
+class PersistenceTermInfoStoreTest {
     @Mock
     private DataPersistenceProvider mockPersistence;
     @Mock
@@ -41,9 +41,9 @@ class ElectionTermImplTest {
 
     @Test
     void testUpdateAndPersist() throws Exception {
-        final var impl = new ElectionTermImpl(mockPersistence, "test", log);
+        final var impl = new PersistenceTermInfoStore(mockPersistence, "test", log);
         final var termInfo = new TermInfo(10, "member-1");
-        impl.updateAndPersist(termInfo);
+        impl.persistTerm(termInfo);
 
         assertEquals(termInfo, impl.currentTerm());
 

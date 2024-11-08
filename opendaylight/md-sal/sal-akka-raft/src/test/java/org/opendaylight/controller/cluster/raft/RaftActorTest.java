@@ -255,9 +255,7 @@ public class RaftActorTest extends AbstractActorTest {
         actor.waitForRecoveryComplete();
 
         RaftActorContext newContext = actor.getRaftActorContext();
-        assertEquals("electionTerm", updateEntry.getCurrentTerm(),
-                newContext.getTermInformation().getCurrentTerm());
-        assertEquals("votedFor", updateEntry.getVotedFor(), newContext.getTermInformation().getVotedFor());
+        assertEquals("electionTerm", updateEntry.termInfo(), newContext.termInfo());
 
         entries = InMemoryJournal.get(persistenceId, UpdateElectionTerm.class);
         assertEquals("UpdateElectionTerm entries", 1, entries.size());
@@ -557,7 +555,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         leaderActor.getRaftActorContext().setCommitIndex(4);
         leaderActor.getRaftActorContext().setLastApplied(4);
-        leaderActor.getRaftActorContext().setTermInformation(new TermInfo(1, persistenceId));
+        leaderActor.getRaftActorContext().setTermInfo(new TermInfo(1, persistenceId));
 
         leaderActor.waitForInitializeBehaviorComplete();
 
@@ -644,7 +642,7 @@ public class RaftActorTest extends AbstractActorTest {
         MockRaftActor followerActor = mockActorRef.underlyingActor();
         followerActor.getRaftActorContext().setCommitIndex(4);
         followerActor.getRaftActorContext().setLastApplied(4);
-        followerActor.getRaftActorContext().setTermInformation(new TermInfo(1, persistenceId));
+        followerActor.getRaftActorContext().setTermInfo(new TermInfo(1, persistenceId));
 
         followerActor.waitForInitializeBehaviorComplete();
 
@@ -735,7 +733,7 @@ public class RaftActorTest extends AbstractActorTest {
         MockRaftActor leaderActor = mockActorRef.underlyingActor();
         leaderActor.getRaftActorContext().setCommitIndex(9);
         leaderActor.getRaftActorContext().setLastApplied(9);
-        leaderActor.getRaftActorContext().setTermInformation(new TermInfo(1, persistenceId));
+        leaderActor.getRaftActorContext().setTermInfo(new TermInfo(1, persistenceId));
 
         leaderActor.waitForInitializeBehaviorComplete();
 
@@ -812,7 +810,7 @@ public class RaftActorTest extends AbstractActorTest {
         MockRaftActor leaderActor = mockActorRef.underlyingActor();
         leaderActor.getRaftActorContext().setCommitIndex(3);
         leaderActor.getRaftActorContext().setLastApplied(3);
-        leaderActor.getRaftActorContext().setTermInformation(new TermInfo(1, persistenceId));
+        leaderActor.getRaftActorContext().setTermInfo(new TermInfo(1, persistenceId));
 
         leaderActor.waitForInitializeBehaviorComplete();
         for (int i = 0; i < 4; i++) {
@@ -856,7 +854,7 @@ public class RaftActorTest extends AbstractActorTest {
         MockRaftActor leaderActor = mockActorRef.underlyingActor();
         leaderActor.getRaftActorContext().setCommitIndex(3);
         leaderActor.getRaftActorContext().setLastApplied(3);
-        leaderActor.getRaftActorContext().setTermInformation(new TermInfo(1, persistenceId));
+        leaderActor.getRaftActorContext().setTermInfo(new TermInfo(1, persistenceId));
         leaderActor.getReplicatedLog().setSnapshotIndex(3);
 
         leaderActor.waitForInitializeBehaviorComplete();
@@ -905,22 +903,22 @@ public class RaftActorTest extends AbstractActorTest {
 
         leaderActor.handleCommand(new SwitchBehavior(RaftState.Follower, 100));
 
-        assertEquals(100, leaderActor.getRaftActorContext().getTermInformation().getCurrentTerm());
+        assertEquals(100, leaderActor.getRaftActorContext().currentTerm());
         assertEquals(RaftState.Follower, leaderActor.getCurrentBehavior().state());
 
         leaderActor.handleCommand(new SwitchBehavior(RaftState.Leader, 110));
 
-        assertEquals(110, leaderActor.getRaftActorContext().getTermInformation().getCurrentTerm());
+        assertEquals(110, leaderActor.getRaftActorContext().currentTerm());
         assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
 
         leaderActor.handleCommand(new SwitchBehavior(RaftState.Candidate, 125));
 
-        assertEquals(110, leaderActor.getRaftActorContext().getTermInformation().getCurrentTerm());
+        assertEquals(110, leaderActor.getRaftActorContext().currentTerm());
         assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
 
         leaderActor.handleCommand(new SwitchBehavior(RaftState.IsolatedLeader, 125));
 
-        assertEquals(110, leaderActor.getRaftActorContext().getTermInformation().getCurrentTerm());
+        assertEquals(110, leaderActor.getRaftActorContext().currentTerm());
         assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
     }
 
@@ -1035,8 +1033,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         assertEquals("getId", persistenceId, reply.getId());
         Snapshot replySnapshot = reply.getSnapshot();
-        assertEquals("getElectionTerm", term, replySnapshot.getElectionTerm());
-        assertEquals("getElectionVotedFor", "member-1", replySnapshot.getElectionVotedFor());
+        assertEquals("getElectionTerm", new TermInfo(term, "member-1"), replySnapshot.termInfo());
         assertEquals("getLastAppliedIndex", 1L, replySnapshot.getLastAppliedIndex());
         assertEquals("getLastAppliedTerm", term, replySnapshot.getLastAppliedTerm());
         assertEquals("getLastIndex", 2L, replySnapshot.getLastIndex());
@@ -1069,8 +1066,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         assertEquals("getId", persistenceId, reply.getId());
         replySnapshot = reply.getSnapshot();
-        assertEquals("getElectionTerm", term, replySnapshot.getElectionTerm());
-        assertEquals("getElectionVotedFor", "member-1", replySnapshot.getElectionVotedFor());
+        assertEquals("getElectionTerm", new TermInfo(term, "member-1"), replySnapshot.termInfo());
         assertEquals("getLastAppliedIndex", -1L, replySnapshot.getLastAppliedIndex());
         assertEquals("getLastAppliedTerm", -1L, replySnapshot.getLastAppliedTerm());
         assertEquals("getLastIndex", -1L, replySnapshot.getLastIndex());
@@ -1114,8 +1110,7 @@ public class RaftActorTest extends AbstractActorTest {
         mockRaftActor.waitForRecoveryComplete();
 
         Snapshot savedSnapshot = InMemorySnapshotStore.waitForSavedSnapshot(persistenceId, Snapshot.class);
-        assertEquals("getElectionTerm", snapshot.getElectionTerm(), savedSnapshot.getElectionTerm());
-        assertEquals("getElectionVotedFor", snapshot.getElectionVotedFor(), savedSnapshot.getElectionVotedFor());
+        assertEquals("getElectionTerm", snapshot.termInfo(), savedSnapshot.termInfo());
         assertEquals("getLastAppliedIndex", snapshot.getLastAppliedIndex(), savedSnapshot.getLastAppliedIndex());
         assertEquals("getLastAppliedTerm", snapshot.getLastAppliedTerm(), savedSnapshot.getLastAppliedTerm());
         assertEquals("getLastIndex", snapshot.getLastIndex(), savedSnapshot.getLastIndex());
@@ -1131,8 +1126,7 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals("Last applied", snapshotLastApplied, context.getLastApplied());
         assertEquals("Commit index", snapshotLastApplied, context.getCommitIndex());
         assertEquals("Recovered state", snapshotState.getState(), mockRaftActor.getState());
-        assertEquals("Current term", 1L, context.getTermInformation().getCurrentTerm());
-        assertEquals("Voted for", "member-1", context.getTermInformation().getVotedFor());
+        assertEquals("Current term", new TermInfo(1, "member-1"), context.termInfo());
 
         // Test with data persistence disabled
 
@@ -1152,8 +1146,7 @@ public class RaftActorTest extends AbstractActorTest {
                 Uninterruptibles.awaitUninterruptibly(mockRaftActor.snapshotCommitted, 5, TimeUnit.SECONDS));
 
         context = mockRaftActor.getRaftActorContext();
-        assertEquals("Current term", 5L, context.getTermInformation().getCurrentTerm());
-        assertEquals("Voted for", "member-1", context.getTermInformation().getVotedFor());
+        assertEquals("Current term", new TermInfo(5, "member-1"), context.termInfo());
 
         TEST_LOG.info("testRestoreFromSnapshot ending");
     }
@@ -1188,8 +1181,7 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals("Last index", 0, context.getReplicatedLog().lastIndex());
         assertEquals("Last applied", -1, context.getLastApplied());
         assertEquals("Commit index", -1, context.getCommitIndex());
-        assertEquals("Current term", 0, context.getTermInformation().getCurrentTerm());
-        assertEquals("Voted for", null, context.getTermInformation().getVotedFor());
+        assertEquals("Current term", TermInfo.INITIAL, context.termInfo());
 
         TEST_LOG.info("testRestoreFromSnapshotWithRecoveredData ending");
     }
@@ -1276,7 +1268,7 @@ public class RaftActorTest extends AbstractActorTest {
         MockRaftActor leaderActor = leaderActorRef.underlyingActor();
         leaderActor.waitForInitializeBehaviorComplete();
 
-        leaderActor.getRaftActorContext().setTermInformation(new TermInfo(1, leaderId));
+        leaderActor.getRaftActorContext().setTermInfo(new TermInfo(1, leaderId));
 
         Leader leader = new Leader(leaderActor.getRaftActorContext());
         leaderActor.setCurrentBehavior(leader);
@@ -1318,7 +1310,7 @@ public class RaftActorTest extends AbstractActorTest {
         MockRaftActor leaderActor = leaderActorRef.underlyingActor();
         leaderActor.waitForInitializeBehaviorComplete();
 
-        leaderActor.getRaftActorContext().setTermInformation(new TermInfo(1, leaderId));
+        leaderActor.getRaftActorContext().setTermInfo(new TermInfo(1, leaderId));
 
         Leader leader = new Leader(leaderActor.getRaftActorContext());
         leaderActor.setCurrentBehavior(leader);
@@ -1363,7 +1355,7 @@ public class RaftActorTest extends AbstractActorTest {
         MockRaftActor leaderActor = leaderActorRef.underlyingActor();
         leaderActor.waitForInitializeBehaviorComplete();
 
-        leaderActor.getRaftActorContext().setTermInformation(new TermInfo(1, leaderId));
+        leaderActor.getRaftActorContext().setTermInfo(new TermInfo(1, leaderId));
         Leader leader = new Leader(leaderActor.getRaftActorContext());
         leaderActor.setCurrentBehavior(leader);
 

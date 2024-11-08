@@ -51,8 +51,7 @@ public class SnapshotTest {
         assertEquals("lastAppliedIndex", expected.getLastAppliedIndex(), cloned.getLastAppliedIndex());
         assertEquals("lastAppliedTerm", expected.getLastAppliedTerm(), cloned.getLastAppliedTerm());
         assertEquals("unAppliedEntries", expected.getUnAppliedEntries(), cloned.getUnAppliedEntries());
-        assertEquals("electionTerm", expected.getElectionTerm(), cloned.getElectionTerm());
-        assertEquals("electionVotedFor", expected.getElectionVotedFor(), cloned.getElectionVotedFor());
+        assertEquals("electionTerm", expected.termInfo(), cloned.termInfo());
         assertEquals("state", expected.getState(), cloned.getState());
         assertEquals("serverConfig", expected.getServerConfiguration().getServerConfig(),
                 cloned.getServerConfiguration().getServerConfig());
