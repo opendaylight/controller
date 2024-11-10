@@ -39,7 +39,6 @@ import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.VotingState;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
-import org.opendaylight.controller.cluster.raft.base.messages.CheckConsensusReached;
 import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
 import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.base.messages.SendInstallSnapshot;
@@ -337,6 +336,11 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         return this;
     }
 
+    // Invoked after persistence is complete to check if replication consensus has been reached.
+    public final void checkConsensusReached() {
+        possiblyUpdateCommitIndex();
+    }
+
     private void possiblyUpdateCommitIndex() {
         // Figure out if we can update the the commitIndex as follows:
         //   If there exists an index N such that N > commitIndex, a majority of matchIndex[i] ≥ N,
@@ -529,8 +533,6 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
             replicate(replicate);
         } else if (message instanceof InstallSnapshotReply installSnapshotReply) {
             handleInstallSnapshotReply(installSnapshotReply);
-        } else if (message instanceof CheckConsensusReached) {
-            possiblyUpdateCommitIndex();
         } else {
             return super.handleMessage(sender, message);
         }

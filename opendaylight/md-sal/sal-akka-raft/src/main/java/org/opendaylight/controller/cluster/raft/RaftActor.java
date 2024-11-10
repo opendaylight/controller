@@ -38,7 +38,6 @@ import org.opendaylight.controller.cluster.mgmt.api.FollowerInfo;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RoleChanged;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
-import org.opendaylight.controller.cluster.raft.base.messages.CheckConsensusReached;
 import org.opendaylight.controller.cluster.raft.base.messages.InitiateCaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.LeaderTransitioning;
 import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
@@ -613,7 +612,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 // Local persistence is complete so send the CheckConsensusReached message to the behavior (which
                 // normally should still be the leader) to check if consensus has now been reached in conjunction with
                 // follower replication.
-                getCurrentBehavior().handleMessage(getSelf(), CheckConsensusReached.INSTANCE);
+                if (getCurrentBehavior() instanceof AbstractLeader leader) {
+                    leader.checkConsensusReached();
+                }
             }
         }, true);
 
