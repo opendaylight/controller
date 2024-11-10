@@ -42,7 +42,7 @@ public non-sealed class PreLeader extends AbstractLeader {
                     context.getReplicatedLog().lastIndex());
             if (context.getLastApplied() >= context.getReplicatedLog().lastIndex()) {
                 // We've applied all entries - we can switch to Leader.
-                return internalSwitchBehavior(new Leader(context, this));
+                return switchBehavior(new Leader(context, this));
             } else {
                 return this;
             }

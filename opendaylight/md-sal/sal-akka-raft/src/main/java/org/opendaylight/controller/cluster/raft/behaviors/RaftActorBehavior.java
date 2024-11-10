@@ -433,25 +433,21 @@ public abstract class RaftActorBehavior implements AutoCloseable {
         };
     }
 
+    @Override
+    public abstract void close();
+
+    final RaftActorBehavior switchBehavior(final RaftState newState) {
+        return switchBehavior(createBehavior(context, newState));
+    }
+
     /**
      * Closes the current behavior and switches to the specified behavior, if possible.
      *
      * @param behavior the new behavior to switch to
      * @return the new behavior
      */
-    public RaftActorBehavior switchBehavior(final RaftActorBehavior behavior) {
-        return internalSwitchBehavior(behavior);
-    }
-
-    @Override
-    public abstract void close();
-
-    final RaftActorBehavior internalSwitchBehavior(final RaftState newState) {
-        return internalSwitchBehavior(createBehavior(context, newState));
-    }
-
     @SuppressWarnings("checkstyle:IllegalCatch")
-    final RaftActorBehavior internalSwitchBehavior(final RaftActorBehavior newBehavior) {
+    final RaftActorBehavior switchBehavior(final RaftActorBehavior newBehavior) {
         if (!context.getRaftPolicy().automaticElectionsEnabled()) {
             return this;
         }

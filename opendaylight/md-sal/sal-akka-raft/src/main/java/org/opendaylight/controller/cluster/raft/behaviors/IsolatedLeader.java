@@ -43,7 +43,7 @@ public non-sealed class IsolatedLeader extends AbstractLeader {
         // changes its state to Follower, hence we only need to switch to Leader if the state is still Isolated
         if (ret.state() == RaftState.IsolatedLeader && !isLeaderIsolated()) {
             log.info("IsolatedLeader {} switching from IsolatedLeader to Leader", getLeaderId());
-            return internalSwitchBehavior(new Leader(context, this));
+            return switchBehavior(new Leader(context, this));
         }
         return ret;
     }
