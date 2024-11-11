@@ -1518,11 +1518,6 @@ public class ShardTest extends AbstractShardTest {
                     latch.get().countDown();
                 }
             }
-
-            @Override
-            public RaftActorContext getRaftActorContext() {
-                return super.getRaftActorContext();
-            }
         }
 
         final Creator<Shard> creator = () -> new TestShard(newShardBuilder());
@@ -1536,7 +1531,7 @@ public class ShardTest extends AbstractShardTest {
         final NormalizedNode expectedRoot = readStore(shard, YangInstanceIdentifier.of());
 
         // Trigger creation of a snapshot by ensuring
-        final RaftActorContext raftActorContext = ((TestShard) shard.underlyingActor()).getRaftActorContext();
+        final RaftActorContext raftActorContext = shard.underlyingActor().getRaftActorContext();
         raftActorContext.getSnapshotManager().capture(mock(ReplicatedLogEntry.class), -1);
         awaitAndValidateSnapshot(latch, savedSnapshot, expectedRoot);
 

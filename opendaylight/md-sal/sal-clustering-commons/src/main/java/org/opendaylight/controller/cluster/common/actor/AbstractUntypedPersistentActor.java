@@ -14,19 +14,20 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// FIXME: override getContext(), getSelf() and others to be final to get rid of
-//        SpotBugs MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR violation
 public abstract class AbstractUntypedPersistentActor extends AbstractPersistentActor implements ExecuteInSelfActor {
-
     // The member name should be lower case but it's referenced in many subclasses. Suppressing the CS warning for now.
     @SuppressWarnings("checkstyle:MemberName")
     @SuppressFBWarnings("SLF4J_LOGGER_SHOULD_BE_PRIVATE")
     protected final Logger LOG = LoggerFactory.getLogger(getClass());
 
-    @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Akka class design")
     protected AbstractUntypedPersistentActor() {
         LOG.trace("Actor created {}", self());
         getContext().system().actorSelection("user/termination-monitor").tell(new Monitor(self()), self());
+    }
+
+    @Override
+    public final ActorContext getContext() {
+        return super.getContext();
     }
 
     @Override

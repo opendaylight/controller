@@ -86,11 +86,6 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
             (snapshotMessageSupport = super.newRaftActorSnapshotMessageSupport());
     }
 
-    @Override
-    public RaftActorContext getRaftActorContext() {
-        return super.getRaftActorContext();
-    }
-
     public RaftActorSnapshotMessageSupport getSnapshotMessageSupport() {
         return snapshotMessageSupport;
     }
