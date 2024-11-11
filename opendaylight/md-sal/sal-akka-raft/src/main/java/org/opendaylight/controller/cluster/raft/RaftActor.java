@@ -694,7 +694,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         return context.currentTerm();
     }
 
-    protected RaftActorContext getRaftActorContext() {
+    public final RaftActorContext getRaftActorContext() {
         return context;
     }
 
