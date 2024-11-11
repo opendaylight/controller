@@ -46,7 +46,7 @@ public class RoleChangeNotifier extends AbstractUntypedActor implements AutoClos
     public void preStart() throws Exception {
         super.preStart();
         LOG.info("RoleChangeNotifier:{} created and ready for shard:{}",
-            Serialization.serializedActorPath(getSelf()), memberId);
+            Serialization.serializedActorPath(self()), memberId);
     }
 
     @Override
@@ -66,14 +66,14 @@ public class RoleChangeNotifier extends AbstractUntypedActor implements AutoClos
             LOG.info("RoleChangeNotifier for {} , registered listener {}", memberId,
                 getSender().path().toString());
 
-            getSender().tell(new RegisterRoleChangeListenerReply(), getSelf());
+            getSender().tell(new RegisterRoleChangeListenerReply(), self());
 
             if (latestLeaderStateChanged != null) {
-                getSender().tell(latestLeaderStateChanged, getSelf());
+                getSender().tell(latestLeaderStateChanged, self());
             }
 
             if (latestRoleChangeNotification != null) {
-                getSender().tell(latestRoleChangeNotification, getSelf());
+                getSender().tell(latestRoleChangeNotification, self());
             }
 
 
@@ -88,13 +88,13 @@ public class RoleChangeNotifier extends AbstractUntypedActor implements AutoClos
                     roleChanged.getOldRole(), roleChanged.getNewRole());
 
             for (ActorRef listener : registeredListeners.values()) {
-                listener.tell(latestRoleChangeNotification, getSelf());
+                listener.tell(latestRoleChangeNotification, self());
             }
         } else if (message instanceof LeaderStateChanged leaderStateChanged) {
             latestLeaderStateChanged = leaderStateChanged;
 
             for (ActorRef listener : registeredListeners.values()) {
-                listener.tell(latestLeaderStateChanged, getSelf());
+                listener.tell(latestLeaderStateChanged, self());
             }
         } else {
             unknownMessage(message);

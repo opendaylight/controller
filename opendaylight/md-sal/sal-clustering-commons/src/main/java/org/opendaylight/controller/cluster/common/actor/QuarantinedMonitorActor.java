@@ -5,10 +5,8 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.common.actor;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.pekko.actor.Address;
@@ -29,7 +27,6 @@ import org.slf4j.LoggerFactory;
  * node to rejoin the cluster.
  *
  * @author Gary Wu gary.wu1@huawei.com
- *
  */
 public class QuarantinedMonitorActor extends UntypedAbstractActor {
     public static final String ADDRESS = "quarantined-monitor";
@@ -43,14 +40,18 @@ public class QuarantinedMonitorActor extends UntypedAbstractActor {
     private final Set<Address> addressSet = new HashSet<>();
     private int count = 0;
 
-    @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Akka class design")
     protected QuarantinedMonitorActor(final Effect callback) {
         this.callback = callback;
 
         LOG.debug("Created QuarantinedMonitorActor");
 
-        getContext().system().eventStream().subscribe(getSelf(), RemotingLifecycleEvent.class);
-        getContext().system().eventStream().subscribe(getSelf(), ClusterEvent.MemberDowned.class);
+        getContext().system().eventStream().subscribe(self(), RemotingLifecycleEvent.class);
+        getContext().system().eventStream().subscribe(self(), ClusterEvent.MemberDowned.class);
+    }
+
+    @Override
+    public final ActorContext getContext() {
+        return super.getContext();
     }
 
     @Override

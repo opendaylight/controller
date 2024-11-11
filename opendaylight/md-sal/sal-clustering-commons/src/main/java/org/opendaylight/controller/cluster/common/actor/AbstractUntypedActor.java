@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.common.actor;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -21,10 +20,14 @@ public abstract class AbstractUntypedActor extends AbstractActor implements Exec
     @SuppressFBWarnings(value = "SLF4J_LOGGER_SHOULD_BE_PRIVATE", justification = "Class identity is required")
     protected final Logger LOG = LoggerFactory.getLogger(getClass());
 
-    @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Akka class design")
     protected AbstractUntypedActor() {
-        LOG.debug("Actor created {}", getSelf());
-        getContext().system().actorSelection("user/termination-monitor").tell(new Monitor(getSelf()), getSelf());
+        LOG.debug("Actor created {}", self());
+        getContext().system().actorSelection("user/termination-monitor").tell(new Monitor(self()), self());
+    }
+
+    @Override
+    public final ActorContext getContext() {
+        return super.getContext();
     }
 
     @Override
@@ -36,9 +39,9 @@ public abstract class AbstractUntypedActor extends AbstractActor implements Exec
     @Override
     public Receive createReceive() {
         return receiveBuilder()
-                .match(ExecuteInSelfMessage.class, ExecuteInSelfMessage::run)
-                .matchAny(this::handleReceive)
-                .build();
+            .match(ExecuteInSelfMessage.class, ExecuteInSelfMessage::run)
+            .matchAny(this::handleReceive)
+            .build();
     }
 
     /**

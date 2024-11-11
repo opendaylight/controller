@@ -10,12 +10,9 @@ package org.opendaylight.controller.cluster.common.actor;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.persistence.AbstractPersistentActor;
-import org.eclipse.jdt.annotation.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// FIXME: override getContext(), getSelf() and others to be final to get rid of
-//        SpotBugs MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR violation
 public abstract class AbstractUntypedPersistentActor extends AbstractPersistentActor implements ExecuteInSelfActor {
 
     // The member name should be lower case but it's referenced in many subclasses. Suppressing the CS warning for now.
@@ -23,15 +20,24 @@ public abstract class AbstractUntypedPersistentActor extends AbstractPersistentA
     @SuppressFBWarnings("SLF4J_LOGGER_SHOULD_BE_PRIVATE")
     protected final Logger LOG = LoggerFactory.getLogger(getClass());
 
-    @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Akka class design")
     protected AbstractUntypedPersistentActor() {
-        LOG.trace("Actor created {}", getSelf());
-        getContext().system().actorSelection("user/termination-monitor").tell(new Monitor(getSelf()), getSelf());
+        LOG.trace("Actor created {}", self());
+        getContext().system().actorSelection("user/termination-monitor").tell(new Monitor(self()), self());
     }
 
     @Override
-    public final void executeInSelf(@NonNull final Runnable runnable) {
-        final ExecuteInSelfMessage message = new ExecuteInSelfMessage(runnable);
+    public final ActorContext getContext() {
+        return super.getContext();
+    }
+
+    @Override
+    public String persistenceId() {
+        return super.persistenceId();
+    }
+
+    @Override
+    public final void executeInSelf(final Runnable runnable) {
+        final var message = new ExecuteInSelfMessage(runnable);
         LOG.trace("Scheduling execution of {}", message);
         self().tell(message, ActorRef.noSender());
     }
@@ -39,9 +45,9 @@ public abstract class AbstractUntypedPersistentActor extends AbstractPersistentA
     @Override
     public final Receive createReceive() {
         return receiveBuilder()
-                .match(ExecuteInSelfMessage.class, ExecuteInSelfMessage::run)
-                .matchAny(this::handleCommand)
-                .build();
+            .match(ExecuteInSelfMessage.class, ExecuteInSelfMessage::run)
+            .matchAny(this::handleCommand)
+            .build();
     }
 
     @Override

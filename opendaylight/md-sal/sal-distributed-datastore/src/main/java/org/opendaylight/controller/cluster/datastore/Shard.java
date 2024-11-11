@@ -426,7 +426,7 @@ public class Shard extends RaftActor {
     private void onMakeLeaderLocal() {
         LOG.debug("{}: onMakeLeaderLocal received", persistenceId());
         if (isLeader()) {
-            getSender().tell(new Status.Success(null), getSelf());
+            getSender().tell(new Status.Success(null), self());
             return;
         }
 
@@ -442,11 +442,11 @@ public class Shard extends RaftActor {
             getSender().tell(new Failure(
                     new LeadershipTransferFailedException("We cannot initiate leadership transfer to local node. "
                             + "Currently there is no leader for " + persistenceId())),
-                    getSelf());
+                    self());
             return;
         }
 
-        leader.tell(new RequestLeadership(getId(), getSender()), getSelf());
+        leader.tell(new RequestLeadership(getId(), getSender()), self());
     }
 
     // Acquire our frontend tracking handle and verify generation matches
@@ -510,7 +510,7 @@ public class Shard extends RaftActor {
                 LOG.info("{}: not currently leader, rejecting request {}. isLeader: {}, isLeaderActive: {},"
                                 + "isLeadershipTransferInProgress: {}.",
                         persistenceId(), message, isLeader(), isLeaderActive(), isLeadershipTransferInProgress());
-                throw new NotLeaderException(getSelf());
+                throw new NotLeaderException(self());
             }
 
             final ABIVersion selectedVersion = selectVersion(message);
@@ -524,7 +524,7 @@ public class Shard extends RaftActor {
             }
 
             frontend.reconnect();
-            message.getReplyTo().tell(new ConnectClientSuccess(message.getTarget(), message.getSequence(), getSelf(),
+            message.getReplyTo().tell(new ConnectClientSuccess(message.getTarget(), message.getSequence(), self(),
                 ImmutableList.of(), store.getDataTree(), CLIENT_MAX_MESSAGES).toVersion(selectedVersion),
                 ActorRef.noSender());
         } catch (RequestException | RuntimeException e) {
@@ -539,7 +539,7 @@ public class Shard extends RaftActor {
             LOG.debug("{}: not currently active leader, rejecting request {}. isLeader: {}, isLeaderActive: {},"
                             + "isLeadershipTransferInProgress: {}, paused: {}",
                     persistenceId(), envelope, isLeader(), isLeaderActive(), isLeadershipTransferInProgress(), paused);
-            throw new NotLeaderException(getSelf());
+            throw new NotLeaderException(self());
         }
 
         final var request = envelope.getMessage();
@@ -651,7 +651,7 @@ public class Shard extends RaftActor {
         restoreFromSnapshot = null;
 
         //notify shard manager
-        getContext().parent().tell(new ActorInitialized(getSelf()), ActorRef.noSender());
+        getContext().parent().tell(new ActorInitialized(self()), ActorRef.noSender());
 
         // Being paranoid here - this method should only be called once but just in case...
         if (txCommitTimeoutCheckSchedule == null) {
@@ -661,7 +661,7 @@ public class Shard extends RaftActor {
             final var period = Duration.ofMillis(transactionCommitTimeout / 3);
             txCommitTimeoutCheckSchedule = getContext().system().scheduler()
                 // withFixedDelay to avoid bursts
-                .scheduleWithFixedDelay(period, period, getSelf(), TX_COMMIT_TIMEOUT_CHECK_MESSAGE,
+                .scheduleWithFixedDelay(period, period, self(), TX_COMMIT_TIMEOUT_CHECK_MESSAGE,
                     getContext().dispatcher(), ActorRef.noSender());
         }
     }
