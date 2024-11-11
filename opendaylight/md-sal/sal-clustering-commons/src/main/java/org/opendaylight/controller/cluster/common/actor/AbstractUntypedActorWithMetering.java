@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.cluster.common.actor;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 /**
  * Actor with its behaviour metered. Metering is enabled by configuration.
  */
@@ -16,14 +14,12 @@ public abstract class AbstractUntypedActorWithMetering extends AbstractUntypedAc
     // this is used in the metric name. Some transient actors do not have defined names
     private String actorNameOverride;
 
-    @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Akka class design")
     public AbstractUntypedActorWithMetering() {
         if (isMetricsCaptureEnabled()) {
             getContext().become(new MeteringBehavior(this));
         }
     }
 
-    @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Akka class design")
     public AbstractUntypedActorWithMetering(final String actorNameOverride) {
         this.actorNameOverride = actorNameOverride;
         if (isMetricsCaptureEnabled()) {
@@ -35,7 +31,7 @@ public abstract class AbstractUntypedActorWithMetering extends AbstractUntypedAc
         return new CommonConfig(getContext().system().settings().config()).isMetricCaptureEnabled();
     }
 
-    public String getActorNameOverride() {
+    public final String getActorNameOverride() {
         return actorNameOverride;
     }
 }
