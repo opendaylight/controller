@@ -46,7 +46,7 @@ public final class DataTreeNotificationListenerRegistrationActor extends Abstrac
         if (message instanceof CloseDataTreeNotificationListenerRegistration) {
             closeListenerRegistration();
             if (isValidSender(getSender())) {
-                getSender().tell(CloseDataTreeNotificationListenerRegistrationReply.getInstance(), getSelf());
+                getSender().tell(CloseDataTreeNotificationListenerRegistrationReply.getInstance(), self());
             }
         } else if (message instanceof SetRegistration setRegistration) {
             registration = setRegistration;
@@ -68,9 +68,9 @@ public final class DataTreeNotificationListenerRegistrationActor extends Abstrac
             reg.onClose.run();
 
             if (killSchedule == null) {
-                killSchedule = getContext().system().scheduler().scheduleOnce(FiniteDuration.create(killDelay,
-                        TimeUnit.MILLISECONDS), getSelf(), PoisonPill.getInstance(), getContext().dispatcher(),
-                        ActorRef.noSender());
+                killSchedule = getContext().system().scheduler()
+                    .scheduleOnce(FiniteDuration.create(killDelay, TimeUnit.MILLISECONDS), self(),
+                        PoisonPill.getInstance(), getContext().dispatcher(), ActorRef.noSender());
             }
         }
     }

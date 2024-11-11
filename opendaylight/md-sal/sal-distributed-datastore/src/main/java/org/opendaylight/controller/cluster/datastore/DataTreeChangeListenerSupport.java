@@ -37,7 +37,7 @@ final class DataTreeChangeListenerSupport extends LeaderLocalDelegateFactory<Reg
     void doRegistration(final RegisterDataTreeChangeListener message, final ActorRef registrationActor) {
         final ActorSelection listenerActor = processListenerRegistrationMessage(message);
 
-        final DOMDataTreeChangeListener listener = new ForwardingDataTreeChangeListener(listenerActor, getSelf());
+        final DOMDataTreeChangeListener listener = new ForwardingDataTreeChangeListener(listenerActor, self());
 
         LOG.debug("{}: Registering listenerActor {} for path {}", persistenceId(), listenerActor, message.getPath());
 
@@ -58,7 +58,7 @@ final class DataTreeChangeListenerSupport extends LeaderLocalDelegateFactory<Reg
 
         final EnableNotification msg = new EnableNotification(isLeader, persistenceId());
         for (ActorSelection dataChangeListener : leaderOnlyListenerActors) {
-            dataChangeListener.tell(msg, getSelf());
+            dataChangeListener.tell(msg, self());
         }
 
         if (hasLeader) {
@@ -112,7 +112,7 @@ final class DataTreeChangeListenerSupport extends LeaderLocalDelegateFactory<Reg
         final ActorSelection listenerActor = selectActor(message.getListenerActorPath());
 
         // We have a leader so enable the listener.
-        listenerActor.tell(new EnableNotification(true, persistenceId()), getSelf());
+        listenerActor.tell(new EnableNotification(true, persistenceId()), self());
 
         if (!message.isRegisterOnAllInstances()) {
             // This is a leader-only registration so store a reference to the listener actor so it can be notified

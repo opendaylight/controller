@@ -23,8 +23,8 @@ public abstract class AbstractUntypedActor extends AbstractActor implements Exec
 
     @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Akka class design")
     protected AbstractUntypedActor() {
-        LOG.debug("Actor created {}", getSelf());
-        getContext().system().actorSelection("user/termination-monitor").tell(new Monitor(getSelf()), getSelf());
+        LOG.debug("Actor created {}", self());
+        getContext().system().actorSelection("user/termination-monitor").tell(new Monitor(self()), self());
     }
 
     @Override

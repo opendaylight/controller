@@ -31,7 +31,7 @@ public class ClientActor extends UntypedAbstractActor {
     @Override
     public void onReceive(final Object message) {
         if (message instanceof KeyValue) {
-            target.tell(message, getSelf());
+            target.tell(message, self());
         } else if (message instanceof KeyValueSaved) {
             LOG.info("KeyValue saved");
         }

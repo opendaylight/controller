@@ -114,11 +114,11 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
 
         if (provider instanceof ClusterActorRefProvider) {
             cluster = Cluster.get(getContext().system());
-            cluster.subscribe(getSelf(),
-                    ClusterEvent.initialStateAsEvents(),
-                    ClusterEvent.MemberEvent.class,
-                    ClusterEvent.ReachableMember.class,
-                    ClusterEvent.UnreachableMember.class);
+            cluster.subscribe(self(),
+                ClusterEvent.initialStateAsEvents(),
+                ClusterEvent.MemberEvent.class,
+                ClusterEvent.ReachableMember.class,
+                ClusterEvent.UnreachableMember.class);
         }
 
         if (autoStartGossipTicks) {
@@ -128,20 +128,20 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
                 // interval
                 config.getGossipTickInterval(),
                 // target
-                getSelf(),
+                self(),
                 // message
                 GOSSIP_TICK,
                 // execution context
                 getContext().dispatcher(),
                 // sender
-                getSelf());
+                self());
         }
     }
 
     @Override
     public void postStop() {
         if (cluster != null) {
-            cluster.unsubscribe(getSelf());
+            cluster.unsubscribe(self());
         }
         if (gossipTask != null) {
             gossipTask.cancel();
@@ -189,7 +189,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
 
         //if its self, then stop itself
         if (selfAddress.equals(member.address())) {
-            getContext().stop(getSelf());
+            getContext().stop(self());
             return;
         }
 
@@ -202,7 +202,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
             clusterMembers.add(address);
         }
         peers.computeIfAbsent(address, input -> getContext().system()
-            .actorSelection(input.toString() + getSelf().path().toStringWithoutAddress()));
+            .actorSelection(input.toString() + self().path().toStringWithoutAddress()));
     }
 
     private void removePeer(final Address address) {
@@ -308,14 +308,14 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
         }
 
         if (!localIsOlder.isEmpty()) {
-            remote.tell(new GossipStatus(selfAddress, localVersions), getSelf());
+            remote.tell(new GossipStatus(selfAddress, localVersions), self());
         }
 
         if (!localIsNewer.isEmpty()) {
             //send newer buckets to remote
             bucketStore.getBucketsByMembers(localIsNewer, buckets -> {
                 LOG.trace("Buckets to send from {}: {}", selfAddress, buckets);
-                remote.tell(new GossipEnvelope(selfAddress, remote.path().address(), buckets), getSelf());
+                remote.tell(new GossipEnvelope(selfAddress, remote.path().address(), buckets), self());
             });
         }
     }
@@ -360,7 +360,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
              * XXX: we are leaking our reference here. That may be useful for establishing buckets monitoring,
              *      but can we identify which bucket is the local one?
              */
-            remoteGossiper.tell(new GossipStatus(selfAddress, versions), getSelf());
+            remoteGossiper.tell(new GossipStatus(selfAddress, versions), self());
         });
     }
 

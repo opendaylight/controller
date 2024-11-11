@@ -57,7 +57,7 @@ class DataTreeChangeListenerActor extends AbstractUntypedActor {
             case EnableNotification msg -> enableNotification(msg);
             case GetInfo msg -> {
                 getSender().tell(new DataTreeListenerInfo(listener.toString(), registeredPath.toString(),
-                    notificationsEnabled, notificationCount), getSelf());
+                    notificationsEnabled, notificationCount), self());
             }
             default -> unknownMessage(message);
         }
@@ -106,7 +106,7 @@ class DataTreeChangeListenerActor extends AbstractUntypedActor {
         //        success, so that we have reliable DTCL delivery via TransmitQueue.
         final var sender = getSender();
         if (sender != null && !sender.equals(getContext().system().deadLetters())) {
-            sender.tell(DataTreeChangedReply.getInstance(), getSelf());
+            sender.tell(DataTreeChangedReply.getInstance(), self());
         }
     }
 

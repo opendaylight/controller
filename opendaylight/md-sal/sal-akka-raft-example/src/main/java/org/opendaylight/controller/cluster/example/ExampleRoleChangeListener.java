@@ -83,9 +83,8 @@ public class ExampleRoleChangeListener extends AbstractUntypedActor implements A
 
     private void scheduleRegistrationListener(final FiniteDuration interval) {
         LOG.debug("--->scheduleRegistrationListener called.");
-        registrationSchedule = getContext().system().scheduler().schedule(
-            interval, interval, getSelf(), new RegisterListener(),
-            getContext().system().dispatcher(), getSelf());
+        registrationSchedule = getContext().system().scheduler()
+            .schedule(interval, interval, self(), new RegisterListener(), getContext().system().dispatcher(), self());
 
     }
 
@@ -108,11 +107,11 @@ public class ExampleRoleChangeListener extends AbstractUntypedActor implements A
         for (Map.Entry<String, Boolean> entry : notifierRegistrationStatus.entrySet()) {
             if (!entry.getValue()) {
                 try {
-                    LOG.debug("{} registering with {}", getSelf().path().toString(), entry.getKey());
+                    LOG.debug("{} registering with {}", self().path().toString(), entry.getKey());
                     ActorRef notifier = Await.result(
                         getContext().actorSelection(entry.getKey()).resolveOne(DURATION), DURATION);
 
-                    notifier.tell(new RegisterRoleChangeListener(), getSelf());
+                    notifier.tell(new RegisterRoleChangeListener(), self());
 
                 } catch (Exception e) {
                     LOG.error("ERROR!! Unable to send registration request to notifier {}", entry.getKey(), e);

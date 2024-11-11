@@ -132,10 +132,10 @@ class RaftActorServerConfigurationSupport {
         boolean isSelf = removeServer.getServerId().equals(raftContext.getId());
         if (isSelf && !raftContext.hasFollowers()) {
             sender.tell(new RemoveServerReply(ServerChangeStatus.NOT_SUPPORTED, raftActor.getLeaderId()),
-                    raftActor.getSelf());
+                    raftActor.self());
         } else if (!isSelf && !raftContext.getPeerIds().contains(removeServer.getServerId())) {
             sender.tell(new RemoveServerReply(ServerChangeStatus.DOES_NOT_EXIST, raftActor.getLeaderId()),
-                    raftActor.getSelf());
+                    raftActor.self());
         } else {
             String serverAddress = isSelf ? raftActor.self().path().toString() :
                 raftContext.getPeerAddress(removeServer.getServerId());
@@ -663,7 +663,7 @@ class RaftActorServerConfigurationSupport {
         void operationComplete(final RaftActor raftActor, final boolean succeeded) {
             if (peerAddress != null) {
                 raftActor.context().actorSelection(peerAddress).tell(
-                        new ServerRemoved(getOperation().getServerId()), raftActor.getSelf());
+                        new ServerRemoved(getOperation().getServerId()), raftActor.self());
             }
         }
 

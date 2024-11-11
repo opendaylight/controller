@@ -2195,21 +2195,21 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         public void handleCommand(final Object message) throws Exception {
             try {
                 if (messageInterceptor != null && messageInterceptor.canIntercept(message)) {
-                    getSender().tell(messageInterceptor.apply(message), getSelf());
+                    getSender().tell(messageInterceptor.apply(message), self());
                 } else {
                     super.handleCommand(message);
                 }
             } finally {
                 if (message instanceof FindPrimary) {
                     findPrimaryMessageReceived.countDown();
-                } else if (message instanceof ClusterEvent.MemberUp) {
-                    countDownIfOther(((ClusterEvent.MemberUp) message).member(), memberUpReceived);
-                } else if (message instanceof ClusterEvent.MemberRemoved) {
-                    countDownIfOther(((ClusterEvent.MemberRemoved) message).member(), memberRemovedReceived);
-                } else if (message instanceof ClusterEvent.UnreachableMember) {
-                    countDownIfOther(((ClusterEvent.UnreachableMember) message).member(), memberUnreachableReceived);
-                } else if (message instanceof ClusterEvent.ReachableMember) {
-                    countDownIfOther(((ClusterEvent.ReachableMember) message).member(), memberReachableReceived);
+                } else if (message instanceof ClusterEvent.MemberUp msg) {
+                    countDownIfOther(msg.member(), memberUpReceived);
+                } else if (message instanceof ClusterEvent.MemberRemoved msg) {
+                    countDownIfOther(msg.member(), memberRemovedReceived);
+                } else if (message instanceof ClusterEvent.UnreachableMember msg) {
+                    countDownIfOther(msg.member(), memberUnreachableReceived);
+                } else if (message instanceof ClusterEvent.ReachableMember msg) {
+                    countDownIfOther(msg.member(), memberReachableReceived);
                 }
             }
         }
@@ -2378,7 +2378,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
             } else {
                 super.onReceive(message);
                 if (message.getClass().equals(requestClass) && responseMsg != null) {
-                    getSender().tell(responseMsg, getSelf());
+                    getSender().tell(responseMsg, self());
                 }
             }
         }

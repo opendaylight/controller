@@ -25,8 +25,8 @@ public abstract class AbstractUntypedPersistentActor extends AbstractPersistentA
 
     @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Akka class design")
     protected AbstractUntypedPersistentActor() {
-        LOG.trace("Actor created {}", getSelf());
-        getContext().system().actorSelection("user/termination-monitor").tell(new Monitor(getSelf()), getSelf());
+        LOG.trace("Actor created {}", self());
+        getContext().system().actorSelection("user/termination-monitor").tell(new Monitor(self()), self());
     }
 
     @Override

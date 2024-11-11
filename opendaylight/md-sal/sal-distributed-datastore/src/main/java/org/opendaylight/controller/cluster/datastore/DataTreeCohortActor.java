@@ -190,7 +190,7 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
             } else {
                 getSender().tell(new Status.Failure(new IllegalArgumentException(String.format(
                         "Unexpected message %s in cohort behavior %s", command.getClass(),
-                        getClass().getSimpleName()))), getSelf());
+                        getClass().getSimpleName()))), self());
             }
         }
 
@@ -215,12 +215,12 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
 
         private void failed(final TransactionIdentifier txId, final ActorRef sender, final Throwable failure) {
             currentStateMap.remove(txId);
-            sender.tell(new Status.Failure(failure), getSelf());
+            sender.tell(new Status.Failure(failure), self());
         }
 
         private void success(final TransactionIdentifier txId, final ActorRef sender, final S nextStep) {
             currentStateMap.computeIfPresent(txId, (key, behaviour) -> nextBehaviour(txId, nextStep));
-            sender.tell(new Success(getSelf(), txId), getSelf());
+            sender.tell(new Success(self(), txId), self());
         }
 
         private void onAbort(final TransactionIdentifier txId) {
@@ -229,13 +229,13 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
             Futures.addCallback(abort(), new FutureCallback<Object>() {
                 @Override
                 public void onSuccess(final Object noop) {
-                    sender.tell(new Success(getSelf(), txId), getSelf());
+                    sender.tell(new Success(self(), txId), self());
                 }
 
                 @Override
                 public void onFailure(final Throwable failure) {
                     LOG.warn("Abort of transaction {} failed for cohort {}", txId, cohort, failure);
-                    sender.tell(new Status.Failure(failure), getSelf());
+                    sender.tell(new Status.Failure(failure), self());
                 }
             }, MoreExecutors.directExecutor());
         }

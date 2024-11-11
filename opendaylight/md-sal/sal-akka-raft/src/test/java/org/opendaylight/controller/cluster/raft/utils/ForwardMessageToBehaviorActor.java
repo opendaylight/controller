@@ -51,7 +51,7 @@ public class ForwardMessageToBehaviorActor extends MessageCollectorActor {
     }
 
     public void clear() {
-        clearMessages(getSelf());
+        clearMessages(self());
         behaviorChanges.clear();
     }
 }

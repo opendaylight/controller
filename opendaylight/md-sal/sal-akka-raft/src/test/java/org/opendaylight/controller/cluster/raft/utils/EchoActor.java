@@ -15,6 +15,6 @@ import org.apache.pekko.actor.UntypedAbstractActor;
 public class EchoActor extends UntypedAbstractActor {
     @Override
     public void onReceive(final Object message) {
-        getSender().tell(message, getSelf());
+        getSender().tell(message, self());
     }
 }

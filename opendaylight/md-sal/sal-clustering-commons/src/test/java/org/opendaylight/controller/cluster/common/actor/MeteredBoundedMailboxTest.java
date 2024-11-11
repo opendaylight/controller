@@ -74,7 +74,6 @@ public class MeteredBoundedMailboxTest {
      * For testing.
      */
     public static class PingPongActor extends UntypedAbstractActor {
-
         ReentrantLock lock;
 
         PingPongActor(final ReentrantLock lock) {
@@ -90,7 +89,7 @@ public class MeteredBoundedMailboxTest {
             lock.lock();
             try {
                 if ("ping".equals(message)) {
-                    getSender().tell("pong", getSelf());
+                    getSender().tell("pong", self());
                 }
             } finally {
                 lock.unlock();
