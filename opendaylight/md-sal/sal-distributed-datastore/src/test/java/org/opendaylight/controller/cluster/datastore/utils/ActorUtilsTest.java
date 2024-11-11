@@ -92,16 +92,16 @@ public class ActorUtilsTest extends AbstractActorTest {
                 if (resp == null) {
                     LOG.error("No expected FindPrimary response found for shard name {}", fp.getShardName());
                 } else {
-                    getSender().tell(resp, getSelf());
+                    getSender().tell(resp, self());
                 }
 
                 return;
             }
 
             if (found) {
-                getSender().tell(new LocalShardFound(actorRef), getSelf());
+                getSender().tell(new LocalShardFound(actorRef), self());
             } else {
-                getSender().tell(new LocalShardNotFound(((FindLocalShard) message).getShardName()), getSelf());
+                getSender().tell(new LocalShardNotFound(((FindLocalShard) message).getShardName()), self());
             }
         }
 

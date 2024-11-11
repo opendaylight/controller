@@ -28,8 +28,8 @@ abstract class LeaderLocalDelegateFactory<M> {
         this.shard = requireNonNull(shard);
     }
 
-    protected final ActorRef getSelf() {
-        return shard.getSelf();
+    protected final ActorRef self() {
+        return shard.self();
     }
 
     protected final Shard getShard() {
@@ -41,7 +41,7 @@ abstract class LeaderLocalDelegateFactory<M> {
     }
 
     protected final void tellSender(final Object message) {
-        shard.getSender().tell(message, getSelf());
+        shard.getSender().tell(message, self());
     }
 
     protected final ActorRef createActor(final Props props) {

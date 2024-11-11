@@ -49,8 +49,8 @@ public class QuarantinedMonitorActor extends UntypedAbstractActor {
 
         LOG.debug("Created QuarantinedMonitorActor");
 
-        getContext().system().eventStream().subscribe(getSelf(), RemotingLifecycleEvent.class);
-        getContext().system().eventStream().subscribe(getSelf(), ClusterEvent.MemberDowned.class);
+        getContext().system().eventStream().subscribe(self(), RemotingLifecycleEvent.class);
+        getContext().system().eventStream().subscribe(self(), ClusterEvent.MemberDowned.class);
     }
 
     @Override

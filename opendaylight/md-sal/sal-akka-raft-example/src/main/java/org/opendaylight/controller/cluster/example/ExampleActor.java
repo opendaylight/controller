@@ -113,7 +113,7 @@ public final class ExampleActor extends RaftActor implements RaftActorRecoveryCo
         if (data instanceof KeyValue kv) {
             state.put(kv.getKey(), kv.getValue());
             if (clientActor != null) {
-                clientActor.tell(new KeyValueSaved(), getSelf());
+                clientActor.tell(new KeyValueSaved(), self());
             }
         }
     }
@@ -129,7 +129,7 @@ public final class ExampleActor extends RaftActor implements RaftActorRecoveryCo
             LOG.error("Exception in creating snapshot", e);
         }
 
-        getSelf().tell(new CaptureSnapshotReply(new MapState(state), installSnapshotStream), null);
+        self().tell(new CaptureSnapshotReply(new MapState(state), installSnapshotStream), null);
     }
 
     @Override

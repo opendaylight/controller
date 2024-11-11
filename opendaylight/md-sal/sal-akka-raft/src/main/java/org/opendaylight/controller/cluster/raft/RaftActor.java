@@ -122,7 +122,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         persistentProvider = new PersistentDataProvider(this);
         delegatingPersistenceProvider = new RaftActorDelegatingPersistentDataProvider(null, persistentProvider);
 
-        context = new RaftActorContextImpl(getSelf(), getContext(), id,
+        context = new RaftActorContextImpl(self(), getContext(), id,
             new PersistenceTermInfoStore(persistentProvider, id, LOG), -1, -1, peerAddresses,
             configParams.isPresent() ? configParams.orElseThrow() : new DefaultConfigParamsImpl(),
             delegatingPersistenceProvider, this::handleApplyState, LOG, this::executeInSelf);
@@ -240,7 +240,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
             persistence().persistAsync(applyEntries, NoopProcedure.instance());
         } else if (message instanceof FindLeader) {
-            getSender().tell(new FindLeaderReply(getLeaderAddress()), getSelf());
+            getSender().tell(new FindLeaderReply(getLeaderAddress()), self());
         } else if (message instanceof GetOnDemandRaftState) {
             getSender().tell(getOnDemandRaftState(), self());
         } else if (message instanceof InitiateCaptureSnapshot) {
@@ -279,7 +279,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                     persistenceId(), message, getCurrentBehavior().state());
             message.getReplyTo().tell(new LeadershipTransferFailedException("Cannot transfer leader to "
                     + message.getRequestedFollowerId()
-                    + ". RequestLeadership message was sent to non-leader " + persistenceId()), getSelf());
+                    + ". RequestLeadership message was sent to non-leader " + persistenceId()), self());
             return;
         }
 
@@ -294,7 +294,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 }
 
                 LOG.debug("{}: Leadership transferred successfully to {}", persistenceId(), requestedFollowerId);
-                replyTo.tell(new Status.Success(null), getSelf());
+                replyTo.tell(new Status.Success(null), self());
             }
 
             @Override
@@ -304,7 +304,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                         new LeadershipTransferFailedException(
                                 "Failed to transfer leadership to " + requestedFollowerId
                                         + ". Follower is not ready to become leader")),
-                        getSelf());
+                        self());
             }
         }, message.getRequestedFollowerId(), RaftActorLeadershipTransferCohort.USE_DEFAULT_LEADER_TIMEOUT);
     }
@@ -412,7 +412,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         if (roleChangeNotifier != null && getRaftState() == RaftState.Follower
                 && leaderTransitioning.getLeaderId().equals(getCurrentBehavior().getLeaderId())) {
             roleChangeNotifier.tell(newLeaderStateChanged(getId(), null,
-                getCurrentBehavior().getLeaderPayloadVersion()), getSelf());
+                getCurrentBehavior().getLeaderPayloadVersion()), self());
         }
     }
 
@@ -512,7 +512,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 || oldBehaviorState.getLeaderPayloadVersion() != currentBehavior.getLeaderPayloadVersion()) {
             if (roleChangeNotifier != null) {
                 roleChangeNotifier.tell(newLeaderStateChanged(getId(), leaderId,
-                    currentBehavior.getLeaderPayloadVersion()), getSelf());
+                    currentBehavior.getLeaderPayloadVersion()), self());
             }
 
             onLeaderChanged(lastValidLeaderId, leaderId);
@@ -526,8 +526,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         }
 
         if (roleChangeNotifier != null && (oldBehavior == null || oldBehavior.state() != currentBehavior.state())) {
-            roleChangeNotifier.tell(new RoleChanged(getId(), oldBehaviorStateName ,
-                currentBehavior.state().name()), getSelf());
+            roleChangeNotifier.tell(new RoleChanged(getId(), oldBehaviorStateName,
+                currentBehavior.state().name()), self());
         }
     }
 
@@ -620,7 +620,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         if (wasAppended && hasFollowers()) {
             // Send log entry for replication.
-            getCurrentBehavior().handleMessage(getSelf(),
+            getCurrentBehavior().handleMessage(self(),
                 new Replicate(replicatedLogEntry.index(), !batchHint, clientActor, identifier));
         }
     }
@@ -870,7 +870,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     private String getLeaderAddress() {
         if (isLeader()) {
-            return getSelf().path().toString();
+            return self().path().toString();
         }
         String leaderId = getLeaderId();
         if (leaderId == null) {

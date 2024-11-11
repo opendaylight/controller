@@ -52,16 +52,16 @@ final class GetSnapshotReplyActor extends UntypedAbstractActor {
 
             LOG.debug("{}: Received CaptureSnapshotReply, sending {}", params.id, snapshot);
 
-            params.replyToActor.tell(new GetSnapshotReply(params.id, snapshot), getSelf());
-            getSelf().tell(PoisonPill.getInstance(), getSelf());
+            params.replyToActor.tell(new GetSnapshotReply(params.id, snapshot), self());
+            self().tell(PoisonPill.getInstance(), self());
         } else if (message instanceof ReceiveTimeout) {
             LOG.warn("{}: Got ReceiveTimeout for inactivity - did not receive CaptureSnapshotReply within {} ms",
                     params.id, params.receiveTimeout.toMillis());
 
             params.replyToActor.tell(new org.apache.pekko.actor.Status.Failure(new TimeoutException(String.format(
                     "Timed out after %d ms while waiting for CaptureSnapshotReply",
-                        params.receiveTimeout.toMillis()))), getSelf());
-            getSelf().tell(PoisonPill.getInstance(), getSelf());
+                        params.receiveTimeout.toMillis()))), self());
+            self().tell(PoisonPill.getInstance(), self());
         }
     }
 

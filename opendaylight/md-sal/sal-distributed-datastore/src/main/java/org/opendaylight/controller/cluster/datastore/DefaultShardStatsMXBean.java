@@ -264,7 +264,7 @@ final class DefaultShardStatsMXBean extends AbstractMXBean implements ShardStats
     @Override
     public void captureSnapshot() {
         if (shard != null) {
-            shard.getSelf().tell(new InitiateCaptureSnapshot(), ActorRef.noSender());
+            shard.self().tell(new InitiateCaptureSnapshot(), ActorRef.noSender());
         }
     }
 

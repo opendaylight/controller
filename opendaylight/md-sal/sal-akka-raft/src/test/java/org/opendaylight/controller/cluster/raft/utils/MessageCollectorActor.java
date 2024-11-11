@@ -43,9 +43,9 @@ public class MessageCollectorActor extends UntypedAbstractActor {
 
     @Override public void onReceive(final Object message) throws Exception {
         if (ARE_YOU_READY.equals(message)) {
-            getSender().tell("yes", getSelf());
+            getSender().tell("yes", self());
         } else if (GET_ALL_MESSAGES.equals(message)) {
-            getSender().tell(new ArrayList<>(messages), getSelf());
+            getSender().tell(new ArrayList<>(messages), self());
         } else if (CLEAR_MESSAGES.equals(message)) {
             messages.clear();
         } else if (message != null) {

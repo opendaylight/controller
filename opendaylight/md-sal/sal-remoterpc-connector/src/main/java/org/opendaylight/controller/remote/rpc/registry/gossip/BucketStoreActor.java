@@ -111,11 +111,11 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
     }
 
     static ExecuteInActor getLocalDataMessage() {
-        return actor -> actor.getSender().tell(actor.getLocalData(), actor.getSelf());
+        return actor -> actor.getSender().tell(actor.getLocalData(), actor.self());
     }
 
     static ExecuteInActor getRemoteBucketsMessage() {
-        return actor -> actor.getSender().tell(ImmutableMap.copyOf(actor.getRemoteBuckets()), actor.getSelf());
+        return actor -> actor.getSender().tell(ImmutableMap.copyOf(actor.getRemoteBuckets()), actor.self());
     }
 
     public final T getLocalData() {
@@ -160,7 +160,7 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
 
         if (GET_BUCKET_VERSIONS == message) {
             // FIXME: do we need to send ourselves?
-            getSender().tell(ImmutableMap.copyOf(versions), getSelf());
+            getSender().tell(ImmutableMap.copyOf(versions), self());
             return;
         }
 
@@ -297,7 +297,7 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
             }
         }
 
-        getSender().tell(buckets, getSelf());
+        getSender().tell(buckets, self());
     }
 
     private void removeBucket(final Address addr) {

@@ -35,7 +35,7 @@ public class MeteringBehavior extends AbstractPartialFunction<Object, BoxedUnit>
     private final PartialFunction<Object, BoxedUnit> receive;
 
     private MeteringBehavior(final String actorName, final AbstractActor meteredActor) {
-        actorQualifiedName = meteredActor.getSelf().path().parent().toStringWithoutAddress() + "/" + actorName;
+        actorQualifiedName = meteredActor.self().path().parent().toStringWithoutAddress() + "/" + actorName;
         msgProcessingTimer = metricRegistry.timer(MetricRegistry.name(actorQualifiedName, MSG_PROCESSING_RATE));
         receive = meteredActor.createReceive().onMessage();
     }
@@ -46,12 +46,11 @@ public class MeteringBehavior extends AbstractPartialFunction<Object, BoxedUnit>
      * @param actor whose behaviour needs to be metered
      */
     public MeteringBehavior(final AbstractUntypedActorWithMetering actor) {
-        this(actor.getActorNameOverride() != null ? actor.getActorNameOverride() : actor.getSelf().path().name(),
-                actor);
+        this(actor.getActorNameOverride() != null ? actor.getActorNameOverride() : actor.self().path().name(), actor);
     }
 
     public MeteringBehavior(final AbstractActor actor) {
-        this(actor.getSelf().path().name(), actor);
+        this(actor.self().path().name(), actor);
     }
 
     @Override

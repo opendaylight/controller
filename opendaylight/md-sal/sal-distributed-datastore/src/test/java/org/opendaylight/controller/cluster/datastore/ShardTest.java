@@ -182,7 +182,7 @@ public class ShardTest extends AbstractShardTest {
                     public void handleCommand(final Object message) {
                         if (message instanceof ElectionTimeout && firstElectionTimeout) {
                             firstElectionTimeout = false;
-                            final ActorRef self = getSelf();
+                            final ActorRef self = self();
                             new Thread(() -> {
                                 Uninterruptibles.awaitUninterruptibly(onChangeListenerRegistered, 5, TimeUnit.SECONDS);
                                 self.tell(message, self);

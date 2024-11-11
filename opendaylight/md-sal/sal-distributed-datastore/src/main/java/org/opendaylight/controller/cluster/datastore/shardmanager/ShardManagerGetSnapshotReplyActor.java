@@ -52,13 +52,13 @@ final class ShardManagerGetSnapshotReplyActor extends UntypedAbstractActor {
 
     @Override
     public void onReceive(final Object message) {
-        if (message instanceof GetSnapshotReply) {
-            onGetSnapshotReply((GetSnapshotReply)message);
+        if (message instanceof GetSnapshotReply msg) {
+            onGetSnapshotReply(msg);
         } else if (message instanceof Failure) {
             LOG.debug("{}: Received {}", params.id, message);
 
-            params.replyToActor.tell(message, getSelf());
-            getSelf().tell(PoisonPill.getInstance(), getSelf());
+            params.replyToActor.tell(message, self());
+            self().tell(PoisonPill.getInstance(), self());
         } else if (message instanceof ReceiveTimeout) {
             LOG.warn("{}: Timed out after {} ms while waiting for snapshot replies from {} shard(s). "
                 + "{} shard(s) {} did not respond", params.id, params.receiveTimeout.toMillis(),
@@ -66,8 +66,8 @@ final class ShardManagerGetSnapshotReplyActor extends UntypedAbstractActor {
             params.replyToActor.tell(new Failure(new TimeoutException(String.format(
                 "Timed out after %s ms while waiting for snapshot replies from %d shard(s). %d shard(s) %s "
                 + "did not respond.", params.receiveTimeout.toMillis(), params.shardNames.size(),
-                remainingShardNames.size(), remainingShardNames))), getSelf());
-            getSelf().tell(PoisonPill.getInstance(), getSelf());
+                remainingShardNames.size(), remainingShardNames))), self());
+            self().tell(PoisonPill.getInstance(), self());
         }
     }
 
@@ -83,8 +83,8 @@ final class ShardManagerGetSnapshotReplyActor extends UntypedAbstractActor {
 
             DatastoreSnapshot datastoreSnapshot = new DatastoreSnapshot(params.datastoreType,
                     params.shardManagerSnapshot, shardSnapshots);
-            params.replyToActor.tell(datastoreSnapshot, getSelf());
-            getSelf().tell(PoisonPill.getInstance(), getSelf());
+            params.replyToActor.tell(datastoreSnapshot, self());
+            self().tell(PoisonPill.getInstance(), self());
         }
     }
 
