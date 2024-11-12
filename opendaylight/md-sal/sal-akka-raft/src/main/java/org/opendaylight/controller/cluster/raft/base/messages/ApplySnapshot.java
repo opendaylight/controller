@@ -10,13 +10,22 @@ package org.opendaylight.controller.cluster.raft.base.messages;
 import static java.util.Objects.requireNonNull;
 
 import org.apache.pekko.dispatch.ControlMessage;
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 
 /**
  * Internal message, issued by follower to its actor.
  */
-public class ApplySnapshot implements ControlMessage {
+@NonNullByDefault
+public record ApplySnapshot(Snapshot snapshot, Callback callback) implements ControlMessage {
+
+    public interface Callback {
+
+        void onSuccess();
+
+        void onFailure();
+    }
+
     private static final Callback NOOP_CALLBACK = new Callback() {
         @Override
         public void onSuccess() {
@@ -29,29 +38,12 @@ public class ApplySnapshot implements ControlMessage {
         }
     };
 
-    private final Snapshot snapshot;
-    private final Callback callback;
+    public ApplySnapshot {
+        requireNonNull(snapshot);
+        requireNonNull(callback);
+    }
 
-    public ApplySnapshot(@NonNull Snapshot snapshot) {
+    public ApplySnapshot(final Snapshot snapshot) {
         this(snapshot, NOOP_CALLBACK);
-    }
-
-    public ApplySnapshot(@NonNull Snapshot snapshot, @NonNull Callback callback) {
-        this.snapshot = requireNonNull(snapshot);
-        this.callback = requireNonNull(callback);
-    }
-
-    public @NonNull Snapshot getSnapshot() {
-        return snapshot;
-    }
-
-    public @NonNull Callback getCallback() {
-        return callback;
-    }
-
-    public interface Callback {
-        void onSuccess();
-
-        void onFailure();
     }
 }

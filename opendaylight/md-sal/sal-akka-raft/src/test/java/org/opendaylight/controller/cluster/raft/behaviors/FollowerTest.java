@@ -821,7 +821,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         ApplySnapshot applySnapshot = MessageCollectorActor.expectFirstMatching(followerActor,
                 ApplySnapshot.class);
-        Snapshot snapshot = applySnapshot.getSnapshot();
+        Snapshot snapshot = applySnapshot.snapshot();
         assertNotNull(lastInstallSnapshot);
         assertEquals("getLastIndex", lastInstallSnapshot.getLastIncludedIndex(), snapshot.getLastIndex());
         assertEquals("getLastIncludedTerm", lastInstallSnapshot.getLastIncludedTerm(),
@@ -832,7 +832,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertEquals("getState type", ByteState.class, snapshot.getState().getClass());
         assertArrayEquals("getState", bsSnapshot.toByteArray(), ((ByteState)snapshot.getState()).getBytes());
         assertEquals(new TermInfo(1, "leader"), snapshot.termInfo());
-        applySnapshot.getCallback().onSuccess();
+        applySnapshot.callback().onSuccess();
 
         List<InstallSnapshotReply> replies = MessageCollectorActor.getAllMatching(
                 leaderActor, InstallSnapshotReply.class);
