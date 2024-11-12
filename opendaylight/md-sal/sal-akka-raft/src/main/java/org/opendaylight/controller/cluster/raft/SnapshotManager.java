@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.ByteSource;
 import java.io.IOException;
@@ -15,15 +17,16 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStream;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.SendInstallSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.SnapshotComplete;
-import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.spi.ImmutableRaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
 import org.slf4j.Logger;
 
@@ -34,29 +37,68 @@ import org.slf4j.Logger;
  * @author Thomas Pantelis
  */
 public class SnapshotManager implements SnapshotState {
+    /**
+     * The task being executed by this instance.
+     */
+    private sealed interface Task {
+        // Nothing else
+    }
 
-    @SuppressWarnings("checkstyle:MemberName")
-    private final SnapshotState IDLE = new Idle();
+    /**
+     * This instance is capturing current user state, for example to save a state snapshot prior to purging journal
+     * entries.
+     */
+    @NonNullByDefault
+    private record Capture(long lastSequenceNumber, CaptureSnapshot request) implements Task {
+        Capture {
+            requireNonNull(request);
+        }
+    }
 
-    @SuppressWarnings({"checkstyle:MemberName", "checkstyle:AbbreviationAsWordInName"})
-    private final SnapshotState PERSISTING = new Persisting();
+    /**
+     * This instance is just sitting here, doing nothing in particular.
+     */
+    @NonNullByDefault
+    private static final class Idle implements Task {
+        private static final Idle INSTANCE = new Idle();
+    }
 
-    @SuppressWarnings({"checkstyle:MemberName", "checkstyle:AbbreviationAsWordInName"})
-    private final SnapshotState CREATING = new Creating();
+    /**
+     * This instance is talking to persistence for some reason. We have started talking to persistence when it was
+     * at {@linkplain #lastSequenceNumber}.
+     */
+    private sealed interface Persist extends Task {
+        /**
+         * Returns the last sequence number reported by persistence when this task started.
+         *
+         * @return persistence last sequence number
+         */
+        long lastSequenceNumber();
+    }
 
-    private final Logger log;
+    /**
+     * This instance is persisting an {@link ApplySnapshot}.
+     */
+    @NonNullByDefault
+    private record PersistApply(long lastSequenceNumber, ApplySnapshot request) implements Persist {
+        PersistApply {
+            requireNonNull(request);
+        }
+    }
+
+    /**
+     * This instance is persisting a previously {@link Capture}d snapshot.
+     */
+    private record PersistCapture(long lastSequenceNumber) implements Persist {
+        // Nothing else
+    }
+
     private final RaftActorContext context;
-    private final LastAppliedTermInformationReader lastAppliedTermInformationReader =
-            new LastAppliedTermInformationReader();
+    private final Logger log;
 
-    private SnapshotState currentState = IDLE;
-    private CaptureSnapshot captureSnapshot;
-    private long lastSequenceNumber = -1;
-
-    private Consumer<Optional<OutputStream>> createSnapshotProcedure = null;
-
-    private ApplySnapshot applySnapshot;
     private RaftActorSnapshotCohort snapshotCohort = NoopRaftActorSnapshotCohort.INSTANCE;
+    private Consumer<Optional<OutputStream>> createSnapshotProcedure = null;
+    private @NonNull Task task = Idle.INSTANCE;
 
     /**
      * Constructs an instance.
@@ -70,54 +112,308 @@ public class SnapshotManager implements SnapshotState {
     }
 
     public boolean isApplying() {
-        return applySnapshot != null;
+        return task instanceof PersistApply;
     }
 
     @Override
     public boolean isCapturing() {
-        return currentState.isCapturing();
+        return !(task instanceof Idle);
+    }
+
+    @Override
+    public boolean capture(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex) {
+        if (task instanceof Idle) {
+            return capture(lastLogEntry, replicatedToAllIndex, null, false);
+        }
+        log.debug("capture should not be called in state {}", task);
+        return false;
+    }
+
+    private boolean capture(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex,
+            final String targetFollower, final boolean mandatoryTrim) {
+        final var request = newCaptureSnapshot(lastLogEntry, replicatedToAllIndex, mandatoryTrim);
+
+        final OutputStream installSnapshotStream;
+        if (targetFollower != null) {
+            installSnapshotStream = context.getFileBackedOutputStreamFactory().newInstance();
+            log.info("{}: Initiating snapshot capture {} to install on {}",
+                    persistenceId(), request, targetFollower);
+        } else {
+            installSnapshotStream = null;
+            log.info("{}: Initiating snapshot capture {}", persistenceId(), request);
+        }
+
+        final var lastSeq = context.getPersistenceProvider().getLastSequenceNumber();
+
+        log.debug("{}: lastSequenceNumber prior to capture: {}", persistenceId(), lastSeq);
+
+        task = new Capture(lastSeq, request);
+        return capture(installSnapshotStream);
+    }
+
+    @SuppressWarnings("checkstyle:IllegalCatch")
+    private boolean capture(final @Nullable OutputStream installSnapshotStream) {
+        try {
+            createSnapshotProcedure.accept(Optional.ofNullable(installSnapshotStream));
+        } catch (Exception e) {
+            task = Idle.INSTANCE;
+            log.error("Error creating snapshot", e);
+            return false;
+        }
+        return true;
     }
 
     @Override
     public boolean captureToInstall(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex,
             final String targetFollower) {
-        return currentState.captureToInstall(lastLogEntry, replicatedToAllIndex, targetFollower);
-    }
-
-    @Override
-    public boolean capture(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex) {
-        return currentState.capture(lastLogEntry, replicatedToAllIndex);
+        if (task instanceof Idle) {
+            return capture(lastLogEntry, replicatedToAllIndex, targetFollower, false);
+        }
+        log.debug("captureToInstall should not be called in state {}", task);
+        return false;
     }
 
     @Override
     public boolean captureWithForcedTrim(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex) {
-        return currentState.captureWithForcedTrim(lastLogEntry, replicatedToAllIndex);
+        if (task instanceof Idle) {
+            return capture(lastLogEntry, replicatedToAllIndex, null, true);
+        }
+        log.debug("captureWithForcedTrim should not be called in state {}", task);
+        return false;
     }
 
     @Override
     public void apply(final ApplySnapshot snapshot) {
-        currentState.apply(snapshot);
+        if (!(task instanceof Idle)) {
+            log.debug("apply should not be called in state {}", task);
+            return;
+        }
+
+        final var persistence = context.getPersistenceProvider();
+        final var lastSeq = persistence.getLastSequenceNumber();
+        final var persisting = new PersistApply(lastSeq, snapshot);
+
+        task = persisting;
+        log.debug("lastSequenceNumber prior to persisting applied snapshot: {}", lastSeq);
+        context.getPersistenceProvider().saveSnapshot(persisting.request.snapshot());
     }
 
     @Override
-    public void persist(final Snapshot.State state, final Optional<OutputStream> installSnapshotStream,
+    public void persist(final Snapshot.State snapshotState, final Optional<OutputStream> installSnapshotStream,
             final long totalMemory) {
-        currentState.persist(state, installSnapshotStream, totalMemory);
+        if (!(task instanceof Capture(final var lastSeq, final var request))) {
+            log.debug("persist should not be called in state {}", this);
+            return;
+        }
+
+        // create a snapshot object from the state provided and save it when snapshot is saved async,
+        // SaveSnapshotSuccess is raised.
+        final var snapshot = Snapshot.create(snapshotState, request.getUnAppliedEntries(),
+                request.getLastIndex(), request.getLastTerm(),
+                request.getLastAppliedIndex(), request.getLastAppliedTerm(),
+                context.termInfo(), context.getPeerServerInfo(true));
+
+        context.getPersistenceProvider().saveSnapshot(snapshot);
+
+        log.info("{}: Persisting of snapshot done: {}", persistenceId(), snapshot);
+
+        final var config = context.getConfigParams();
+        final long absoluteThreshold = config.getSnapshotDataThreshold();
+        final long dataThreshold = absoluteThreshold != 0 ? absoluteThreshold * ConfigParams.MEGABYTE
+                : totalMemory * config.getSnapshotDataThresholdPercentage() / 100;
+
+        final var replLog = context.getReplicatedLog();
+        final boolean dataSizeThresholdExceeded = replLog.dataSize() > dataThreshold;
+        final boolean logSizeExceededSnapshotBatchCount = replLog.size() >= config.getSnapshotBatchCount();
+
+        final var currentBehavior = context.getCurrentBehavior();
+        if (dataSizeThresholdExceeded || logSizeExceededSnapshotBatchCount || request.isMandatoryTrim()) {
+            if (log.isDebugEnabled()) {
+                if (dataSizeThresholdExceeded) {
+                    log.debug("{}: log data size {} exceeds the memory threshold {} - doing snapshotPreCommit "
+                            + "with index {}", context.getId(), replLog.dataSize(), dataThreshold,
+                            request.getLastAppliedIndex());
+                } else if (logSizeExceededSnapshotBatchCount) {
+                    log.debug("{}: log size {} exceeds the snapshot batch count {} - doing snapshotPreCommit with "
+                            + "index {}", context.getId(), replLog.size(), config.getSnapshotBatchCount(),
+                            request.getLastAppliedIndex());
+                } else {
+                    log.debug("{}: user triggered or root overwrite snapshot encountered, trimming log up to "
+                            + "last applied index {}", context.getId(), request.getLastAppliedIndex());
+                }
+            }
+
+            // We either exceeded the memory threshold or the log size exceeded the snapshot batch
+            // count so, to keep the log memory footprint in check, clear the log based on lastApplied.
+            // This could/should only happen if one of the followers is down as normally we keep
+            // removing from the log as entries are replicated to all.
+            replLog.snapshotPreCommit(request.getLastAppliedIndex(), request.getLastAppliedTerm());
+
+            // Don't reset replicatedToAllIndex to -1 as this may prevent us from trimming the log after an
+            // install snapshot to a follower.
+            if (request.getReplicatedToAllIndex() >= 0) {
+                currentBehavior.setReplicatedToAllIndex(request.getReplicatedToAllIndex());
+            }
+
+        } else if (request.getReplicatedToAllIndex() != -1) {
+            // clear the log based on replicatedToAllIndex
+            replLog.snapshotPreCommit(request.getReplicatedToAllIndex(),
+                request.getReplicatedToAllTerm());
+
+            currentBehavior.setReplicatedToAllIndex(request.getReplicatedToAllIndex());
+        } else {
+            // The replicatedToAllIndex was not found in the log
+            // This means that replicatedToAllIndex never moved beyond -1 or that it is already in the snapshot.
+            // In this scenario we may need to save the snapshot to the akka persistence
+            // snapshot for recovery but we do not need to do the replicated log trimming.
+            replLog.snapshotPreCommit(replLog.getSnapshotIndex(), replLog.getSnapshotTerm());
+        }
+
+        log.info("{}: Removed in-memory snapshotted entries, adjusted snaphsotIndex: {} and term: {}",
+                context.getId(), replLog.getSnapshotIndex(), replLog.getSnapshotTerm());
+
+        if (installSnapshotStream.isPresent()) {
+            // FIXME: ugly cast
+            final var snapshotStream = (FileBackedOutputStream) installSnapshotStream.orElseThrow();
+
+            if (context.getId().equals(currentBehavior.getLeaderId())) {
+                try {
+                    ByteSource snapshotBytes = snapshotStream.asByteSource();
+                    currentBehavior.handleMessage(context.getActor(), new SendInstallSnapshot(snapshot, snapshotBytes));
+                } catch (IOException e) {
+                    log.error("{}: Snapshot install failed due to an unrecoverable streaming error",
+                            context.getId(), e);
+                }
+            } else {
+                snapshotStream.cleanup();
+            }
+        }
+
+        task = new PersistCapture(lastSeq);
     }
 
     @Override
     public void commit(final long sequenceNumber, final long timeStamp) {
-        currentState.commit(sequenceNumber, timeStamp);
+        if (!(task instanceof Persist persist)) {
+            log.debug("commit should not be called in state {}", task);
+            return;
+        }
+
+        log.debug("{}: Snapshot success -  sequence number: {}", persistenceId(), sequenceNumber);
+        final var lastSequenceNumber = commit(persist);
+
+        final var persistence = context.getPersistenceProvider();
+        persistence.deleteSnapshots(new SnapshotSelectionCriteria(scala.Long.MaxValue(), timeStamp - 1, 0L, 0L));
+        persistence.deleteMessages(lastSequenceNumber);
+
+        snapshotComplete();
+    }
+
+    @SuppressWarnings("checkstyle:IllegalCatch")
+    private long commit(final Persist persist) {
+        return switch (persist) {
+            case PersistApply(var lastSeq, var apply) -> {
+                // not a nested record pattern to side-step https://github.com/spotbugs/spotbugs/issues/3196
+                final var snapshot = apply.snapshot();
+                final var callback = apply.callback();
+
+                try {
+                    // clears the followers log, sets the snapshot index to ensure adjusted-index works
+                    context.setReplicatedLog(ReplicatedLogImpl.newInstance(snapshot, context));
+                    context.setLastApplied(snapshot.getLastAppliedIndex());
+                    context.setCommitIndex(snapshot.getLastAppliedIndex());
+                    // FIXME: This may be coming from the leader: we do not want to pollute our TermInfo if it is for
+                    //        this term: we may need to know who we voted for in the next elections.
+                    //        This behavior means we report as if we voted for the leader.
+                    context.setTermInfo(snapshot.termInfo());
+
+                    if (snapshot.getServerConfiguration() != null) {
+                        context.updatePeerIds(snapshot.getServerConfiguration());
+                    }
+
+                    final var state = snapshot.getState();
+                    if (state != null && !(state instanceof EmptyState)) {
+                        snapshotCohort.applySnapshot(state);
+                    }
+
+                    callback.onSuccess();
+                } catch (Exception e) {
+                    log.error("{}: Error applying snapshot", context.getId(), e);
+                }
+                yield lastSeq;
+            }
+            case PersistCapture(final var lastSeq) -> {
+                context.getReplicatedLog().snapshotCommit();
+                yield lastSeq;
+            }
+        };
     }
 
     @Override
     public void rollback() {
-        currentState.rollback();
+        switch (task) {
+            case PersistApply persist -> {
+                // Nothing to rollback if we're applying a snapshot from the leader.
+                persist.request().callback().onFailure();
+                snapshotComplete();
+            }
+            case PersistCapture persist -> {
+                final var replLog = context.getReplicatedLog();
+                replLog.snapshotRollback();
+                log.info("{}: Replicated Log rolled back. Snapshot will be attempted in the next cycle. "
+                        + "snapshotIndex:{}, snapshotTerm:{}, log-size:{}", persistenceId(), replLog.getSnapshotIndex(),
+                        replLog.getSnapshotTerm(), replLog.size());
+                snapshotComplete();
+            }
+            default -> log.debug("rollback should not be called in state {}", task);
+        }
+    }
+
+    private void snapshotComplete() {
+        task = Idle.INSTANCE;
+        context.getActor().tell(SnapshotComplete.INSTANCE, context.getActor());
     }
 
     @Override
     public long trimLog(final long desiredTrimIndex) {
-        return currentState.trimLog(desiredTrimIndex);
+        if (!(task instanceof Idle)) {
+            log.debug("trimLog should not be called in state {}", task);
+            return -1;
+        }
+
+        //  we would want to keep the lastApplied as its used while capturing snapshots
+        long lastApplied = context.getLastApplied();
+        long tempMin = Math.min(desiredTrimIndex, lastApplied > -1 ? lastApplied - 1 : -1);
+
+        if (log.isTraceEnabled()) {
+            log.trace("{}: performSnapshotWithoutCapture: desiredTrimIndex: {}, lastApplied: {}, tempMin: {}",
+                    persistenceId(), desiredTrimIndex, lastApplied, tempMin);
+        }
+
+        if (tempMin > -1) {
+            final var replLog = context.getReplicatedLog();
+            if (replLog.isPresent(tempMin)) {
+                log.debug("{}: fakeSnapshot purging log to {} for term {}", persistenceId(), tempMin,
+                    context.currentTerm());
+
+                //use the term of the temp-min, since we check for isPresent, entry will not be null
+                final var entry = replLog.get(tempMin);
+                replLog.snapshotPreCommit(tempMin, entry.term());
+                replLog.snapshotCommit(false);
+                return tempMin;
+            }
+        }
+
+        final var currentBehavior = context.getCurrentBehavior();
+        if (tempMin > currentBehavior.getReplicatedToAllIndex()) {
+            // It is possible a follower was lagging and an install snapshot advanced its match index past the current
+            // replicatedToAllIndex. Since the follower is now caught up we should advance the replicatedToAllIndex
+            // (to tempMin). The fact that tempMin was not found in the log is likely due to a previous snapshot
+            // triggered by the memory threshold exceeded, in that case we trim the log to the last applied index even
+            // if previous entries weren't replicated to all followers.
+            currentBehavior.setReplicatedToAllIndex(tempMin);
+        }
+        return -1;
     }
 
     @SuppressWarnings("checkstyle:hiddenField")
@@ -134,16 +430,12 @@ public class SnapshotManager implements SnapshotState {
     }
 
     public long getLastSequenceNumber() {
-        return lastSequenceNumber;
+        return task instanceof Persist persist ? persist.lastSequenceNumber() : -1;
     }
 
     @VisibleForTesting
-    public CaptureSnapshot getCaptureSnapshot() {
-        return captureSnapshot;
-    }
-
-    private boolean hasFollowers() {
-        return context.hasFollowers();
+    public @Nullable CaptureSnapshot getCaptureSnapshot() {
+        return task instanceof Capture capture ? capture.request : null;
     }
 
     private String persistenceId() {
@@ -157,34 +449,26 @@ public class SnapshotManager implements SnapshotState {
      * @param replicatedToAllIndex the index of the last entry replicated to all followers.
      * @return a new CaptureSnapshot instance.
      */
-    public CaptureSnapshot newCaptureSnapshot(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex,
-                                              final boolean mandatoryTrim) {
-        final var lastAppliedTermInfoReader = lastAppliedTermInformationReader.init(context.getReplicatedLog(),
-            context.getLastApplied(), lastLogEntry, hasFollowers());
+    public @NonNull CaptureSnapshot newCaptureSnapshot(final RaftEntryMeta lastLogEntry,
+            final long replicatedToAllIndex, final boolean mandatoryTrim) {
+        final var replLog = context.getReplicatedLog();
+        final var lastAppliedEntry = computeLastAppliedEntry(lastLogEntry);
 
-        long lastAppliedIndex = lastAppliedTermInfoReader.getIndex();
-        long lastAppliedTerm = lastAppliedTermInfoReader.getTerm();
+        final var entry = replLog.get(replicatedToAllIndex);
+        final var replicatedToAllEntry = entry != null ? entry : new ImmutableRaftEntryMeta(-1, -1);
 
-        final long newReplicatedToAllIndex;
-        final long newReplicatedToAllTerm;
-        final var entry = context.getReplicatedLog().get(replicatedToAllIndex);
-        if (entry != null) {
-            newReplicatedToAllIndex = entry.index();
-            newReplicatedToAllTerm = entry.term();
-        } else {
-            newReplicatedToAllIndex = -1L;
-            newReplicatedToAllTerm = -1L;
-        }
+        long lastAppliedIndex = lastAppliedEntry.index();
+        long lastAppliedTerm = lastAppliedEntry.term();
 
-        final var unAppliedEntries = context.getReplicatedLog().getFrom(lastAppliedIndex + 1);
+        final var unAppliedEntries = replLog.getFrom(lastAppliedIndex + 1);
 
         final long lastLogEntryIndex;
         final long lastLogEntryTerm;
         if (lastLogEntry == null) {
             // When we don't have journal present, for example two captureSnapshots executed right after another with no
             // new journal we still want to preserve the index and term in the snapshot.
-            lastAppliedIndex = lastLogEntryIndex = context.getReplicatedLog().getSnapshotIndex();
-            lastAppliedTerm = lastLogEntryTerm = context.getReplicatedLog().getSnapshotTerm();
+            lastAppliedIndex = lastLogEntryIndex = replLog.getSnapshotIndex();
+            lastAppliedTerm = lastLogEntryTerm = replLog.getSnapshotTerm();
 
             log.debug("{}: Capturing Snapshot : lastLogEntry is null. Using snapshot values lastAppliedIndex {} and "
                     + "lastAppliedTerm {} instead.", persistenceId(), lastAppliedIndex, lastAppliedTerm);
@@ -194,380 +478,35 @@ public class SnapshotManager implements SnapshotState {
         }
 
         return new CaptureSnapshot(lastLogEntryIndex, lastLogEntryTerm, lastAppliedIndex, lastAppliedTerm,
-                newReplicatedToAllIndex, newReplicatedToAllTerm, unAppliedEntries, mandatoryTrim);
+            replicatedToAllEntry.index(), replicatedToAllEntry.term(), unAppliedEntries, mandatoryTrim);
     }
 
-    private abstract class AbstractSnapshotState implements SnapshotState {
-
-        @Override
-        public boolean isCapturing() {
-            return true;
-        }
-
-        @Override
-        public boolean capture(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex) {
-            log.debug("capture should not be called in state {}", this);
-            return false;
-        }
-
-        @Override
-        public boolean captureToInstall(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex,
-                final String targetFollower) {
-            log.debug("captureToInstall should not be called in state {}", this);
-            return false;
-        }
-
-        @Override
-        public boolean captureWithForcedTrim(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex) {
-            log.debug("captureWithForcedTrim should not be called in state {}", this);
-            return false;
-        }
-
-        @Override
-        public void apply(final ApplySnapshot snapshot) {
-            log.debug("apply should not be called in state {}", this);
-        }
-
-        @Override
-        public void persist(final Snapshot.State state, final Optional<OutputStream> installSnapshotStream,
-                final long totalMemory) {
-            log.debug("persist should not be called in state {}", this);
-        }
-
-        @Override
-        public void commit(final long sequenceNumber, final long timeStamp) {
-            log.debug("commit should not be called in state {}", this);
-        }
-
-        @Override
-        public void rollback() {
-            log.debug("rollback should not be called in state {}", this);
-        }
-
-        @Override
-        public long trimLog(final long desiredTrimIndex) {
-            log.debug("trimLog should not be called in state {}", this);
-            return -1;
-        }
-
-        protected long doTrimLog(final long desiredTrimIndex) {
-            //  we would want to keep the lastApplied as its used while capturing snapshots
-            long lastApplied = context.getLastApplied();
-            long tempMin = Math.min(desiredTrimIndex, lastApplied > -1 ? lastApplied - 1 : -1);
-
-            if (log.isTraceEnabled()) {
-                log.trace("{}: performSnapshotWithoutCapture: desiredTrimIndex: {}, lastApplied: {}, tempMin: {}",
-                        persistenceId(), desiredTrimIndex, lastApplied, tempMin);
-            }
-
-            if (tempMin > -1 && context.getReplicatedLog().isPresent(tempMin)) {
-                log.debug("{}: fakeSnapshot purging log to {} for term {}", persistenceId(), tempMin,
-                        context.currentTerm());
-
-                //use the term of the temp-min, since we check for isPresent, entry will not be null
-                ReplicatedLogEntry entry = context.getReplicatedLog().get(tempMin);
-                context.getReplicatedLog().snapshotPreCommit(tempMin, entry.term());
-                context.getReplicatedLog().snapshotCommit(false);
-                return tempMin;
-            }
-
-            final RaftActorBehavior currentBehavior = context.getCurrentBehavior();
-            if (tempMin > currentBehavior.getReplicatedToAllIndex()) {
-                // It's possible a follower was lagging and an install snapshot advanced its match index past
-                // the current replicatedToAllIndex. Since the follower is now caught up we should advance the
-                // replicatedToAllIndex (to tempMin). The fact that tempMin wasn't found in the log is likely
-                // due to a previous snapshot triggered by the memory threshold exceeded, in that case we
-                // trim the log to the last applied index even if previous entries weren't replicated to all followers.
-                currentBehavior.setReplicatedToAllIndex(tempMin);
-            }
-            return -1;
-        }
-    }
-
-    private final class Idle extends AbstractSnapshotState {
-        @Override
-        public boolean isCapturing() {
-            return false;
-        }
-
-        @SuppressWarnings("checkstyle:IllegalCatch")
-        private boolean capture(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex,
-                final String targetFollower, final boolean mandatoryTrim) {
-            captureSnapshot = newCaptureSnapshot(lastLogEntry, replicatedToAllIndex, mandatoryTrim);
-
-            OutputStream installSnapshotStream = null;
-            if (targetFollower != null) {
-                installSnapshotStream = context.getFileBackedOutputStreamFactory().newInstance();
-                log.info("{}: Initiating snapshot capture {} to install on {}",
-                        persistenceId(), captureSnapshot, targetFollower);
-            } else {
-                log.info("{}: Initiating snapshot capture {}", persistenceId(), captureSnapshot);
-            }
-
-            lastSequenceNumber = context.getPersistenceProvider().getLastSequenceNumber();
-
-            log.debug("{}: lastSequenceNumber prior to capture: {}", persistenceId(), lastSequenceNumber);
-
-            currentState = CREATING;
-
-            try {
-                createSnapshotProcedure.accept(Optional.ofNullable(installSnapshotStream));
-            } catch (Exception e) {
-                currentState = IDLE;
-                log.error("Error creating snapshot", e);
-                return false;
-            }
-
-            return true;
-        }
-
-        @Override
-        public boolean capture(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex) {
-            return capture(lastLogEntry, replicatedToAllIndex, null, false);
-        }
-
-        @Override
-        public boolean captureToInstall(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex,
-                final String targetFollower) {
-            return capture(lastLogEntry, replicatedToAllIndex, targetFollower, false);
-        }
-
-        @Override
-        public boolean captureWithForcedTrim(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex) {
-            return capture(lastLogEntry, replicatedToAllIndex, null, true);
-        }
-
-        @Override
-        public void apply(final ApplySnapshot toApply) {
-            applySnapshot = toApply;
-
-            lastSequenceNumber = context.getPersistenceProvider().getLastSequenceNumber();
-
-            log.debug("lastSequenceNumber prior to persisting applied snapshot: {}", lastSequenceNumber);
-
-            context.getPersistenceProvider().saveSnapshot(toApply.snapshot());
-
-            currentState = PERSISTING;
-        }
-
-        @Override
-        public String toString() {
-            return "Idle";
-        }
-
-        @Override
-        public long trimLog(final long desiredTrimIndex) {
-            return doTrimLog(desiredTrimIndex);
-        }
-    }
-
-    private final class Creating extends AbstractSnapshotState {
-        @Override
-        public void persist(final Snapshot.State snapshotState, final Optional<OutputStream> installSnapshotStream,
-                final long totalMemory) {
-            // create a snapshot object from the state provided and save it
-            // when snapshot is saved async, SaveSnapshotSuccess is raised.
-
-            Snapshot snapshot = Snapshot.create(snapshotState,
-                    captureSnapshot.getUnAppliedEntries(),
-                    captureSnapshot.getLastIndex(), captureSnapshot.getLastTerm(),
-                    captureSnapshot.getLastAppliedIndex(), captureSnapshot.getLastAppliedTerm(),
-                    context.termInfo(), context.getPeerServerInfo(true));
-
-            context.getPersistenceProvider().saveSnapshot(snapshot);
-
-            log.info("{}: Persisting of snapshot done: {}", persistenceId(), snapshot);
-
-            final ConfigParams config = context.getConfigParams();
-            final long absoluteThreshold = config.getSnapshotDataThreshold();
-            final long dataThreshold = absoluteThreshold != 0 ? absoluteThreshold * ConfigParams.MEGABYTE
-                    : totalMemory * config.getSnapshotDataThresholdPercentage() / 100;
-
-            final boolean dataSizeThresholdExceeded = context.getReplicatedLog().dataSize() > dataThreshold;
-            final boolean logSizeExceededSnapshotBatchCount =
-                    context.getReplicatedLog().size() >= config.getSnapshotBatchCount();
-
-            final RaftActorBehavior currentBehavior = context.getCurrentBehavior();
-            if (dataSizeThresholdExceeded || logSizeExceededSnapshotBatchCount || captureSnapshot.isMandatoryTrim()) {
-                if (log.isDebugEnabled()) {
-                    if (dataSizeThresholdExceeded) {
-                        log.debug("{}: log data size {} exceeds the memory threshold {} - doing snapshotPreCommit "
-                                + "with index {}", context.getId(), context.getReplicatedLog().dataSize(),
-                                dataThreshold, captureSnapshot.getLastAppliedIndex());
-                    } else if (logSizeExceededSnapshotBatchCount) {
-                        log.debug("{}: log size {} exceeds the snapshot batch count {} - doing snapshotPreCommit with "
-                                + "index {}", context.getId(), context.getReplicatedLog().size(),
-                                config.getSnapshotBatchCount(), captureSnapshot.getLastAppliedIndex());
-                    } else {
-                        log.debug("{}: user triggered or root overwrite snapshot encountered, trimming log up to "
-                                + "last applied index {}", context.getId(), captureSnapshot.getLastAppliedIndex());
-                    }
-                }
-
-                // We either exceeded the memory threshold or the log size exceeded the snapshot batch
-                // count so, to keep the log memory footprint in check, clear the log based on lastApplied.
-                // This could/should only happen if one of the followers is down as normally we keep
-                // removing from the log as entries are replicated to all.
-                context.getReplicatedLog().snapshotPreCommit(captureSnapshot.getLastAppliedIndex(),
-                        captureSnapshot.getLastAppliedTerm());
-
-                // Don't reset replicatedToAllIndex to -1 as this may prevent us from trimming the log after an
-                // install snapshot to a follower.
-                if (captureSnapshot.getReplicatedToAllIndex() >= 0) {
-                    currentBehavior.setReplicatedToAllIndex(captureSnapshot.getReplicatedToAllIndex());
-                }
-
-            } else if (captureSnapshot.getReplicatedToAllIndex() != -1) {
-                // clear the log based on replicatedToAllIndex
-                context.getReplicatedLog().snapshotPreCommit(captureSnapshot.getReplicatedToAllIndex(),
-                        captureSnapshot.getReplicatedToAllTerm());
-
-                currentBehavior.setReplicatedToAllIndex(captureSnapshot.getReplicatedToAllIndex());
-            } else {
-                // The replicatedToAllIndex was not found in the log
-                // This means that replicatedToAllIndex never moved beyond -1 or that it is already in the snapshot.
-                // In this scenario we may need to save the snapshot to the akka persistence
-                // snapshot for recovery but we do not need to do the replicated log trimming.
-                context.getReplicatedLog().snapshotPreCommit(context.getReplicatedLog().getSnapshotIndex(),
-                        context.getReplicatedLog().getSnapshotTerm());
-            }
-
-            log.info("{}: Removed in-memory snapshotted entries, adjusted snaphsotIndex: {} and term: {}",
-                    context.getId(), context.getReplicatedLog().getSnapshotIndex(),
-                    context.getReplicatedLog().getSnapshotTerm());
-
-            if (installSnapshotStream.isPresent()) {
-                if (context.getId().equals(currentBehavior.getLeaderId())) {
-                    try {
-                        ByteSource snapshotBytes = ((FileBackedOutputStream)installSnapshotStream.orElseThrow())
-                            .asByteSource();
-                        currentBehavior.handleMessage(context.getActor(),
-                                new SendInstallSnapshot(snapshot, snapshotBytes));
-                    } catch (IOException e) {
-                        log.error("{}: Snapshot install failed due to an unrecoverable streaming error",
-                                context.getId(), e);
-                    }
-                } else {
-                    ((FileBackedOutputStream)installSnapshotStream.orElseThrow()).cleanup();
-                }
-            }
-
-            captureSnapshot = null;
-            currentState = PERSISTING;
-        }
-
-        @Override
-        public String toString() {
-            return "Creating";
-        }
-
-    }
-
-    private final class Persisting extends AbstractSnapshotState {
-        @Override
-        @SuppressWarnings("checkstyle:IllegalCatch")
-        public void commit(final long sequenceNumber, final long timeStamp) {
-            log.debug("{}: Snapshot success -  sequence number: {}", persistenceId(), sequenceNumber);
-
-            if (applySnapshot != null) {
-                try {
-                    Snapshot snapshot = applySnapshot.snapshot();
-
-                    //clears the followers log, sets the snapshot index to ensure adjusted-index works
-                    context.setReplicatedLog(ReplicatedLogImpl.newInstance(snapshot, context));
-                    context.setLastApplied(snapshot.getLastAppliedIndex());
-                    context.setCommitIndex(snapshot.getLastAppliedIndex());
-                    context.setTermInfo(snapshot.termInfo());
-
-                    if (snapshot.getServerConfiguration() != null) {
-                        context.updatePeerIds(snapshot.getServerConfiguration());
-                    }
-
-                    if (!(snapshot.getState() instanceof EmptyState)) {
-                        snapshotCohort.applySnapshot(snapshot.getState());
-                    }
-
-                    applySnapshot.callback().onSuccess();
-                } catch (Exception e) {
-                    log.error("{}: Error applying snapshot", context.getId(), e);
-                }
-            } else {
-                context.getReplicatedLog().snapshotCommit();
-            }
-
-            context.getPersistenceProvider().deleteSnapshots(new SnapshotSelectionCriteria(scala.Long.MaxValue(),
-                    timeStamp - 1, 0L, 0L));
-
-            context.getPersistenceProvider().deleteMessages(lastSequenceNumber);
-
-            snapshotComplete();
-        }
-
-        @Override
-        public void rollback() {
-            // Nothing to rollback if we're applying a snapshot from the leader.
-            if (applySnapshot == null) {
-                context.getReplicatedLog().snapshotRollback();
-
-                log.info("{}: Replicated Log rolled back. Snapshot will be attempted in the next cycle."
-                        + "snapshotIndex:{}, snapshotTerm:{}, log-size:{}", persistenceId(),
-                        context.getReplicatedLog().getSnapshotIndex(),
-                        context.getReplicatedLog().getSnapshotTerm(),
-                        context.getReplicatedLog().size());
-            } else {
-                applySnapshot.callback().onFailure();
-            }
-
-            snapshotComplete();
-        }
-
-        private void snapshotComplete() {
-            lastSequenceNumber = -1;
-            applySnapshot = null;
-            currentState = IDLE;
-
-            context.getActor().tell(SnapshotComplete.INSTANCE, context.getActor());
-        }
-
-        @Override
-        public String toString() {
-            return "Persisting";
-        }
+    @NonNullByDefault
+    private RaftEntryMeta computeLastAppliedEntry(final @Nullable RaftEntryMeta lastLogEntry) {
+        return computeLastAppliedEntry(context.getReplicatedLog(), context.getLastApplied(), lastLogEntry,
+            context.hasFollowers());
     }
 
     @VisibleForTesting
-    static final class LastAppliedTermInformationReader {
-        private long index;
-        private long term;
-
-        LastAppliedTermInformationReader init(final ReplicatedLog log, final long originalIndex,
-                final @Nullable RaftEntryMeta lastLogEntry, final boolean hasFollowers) {
-            RaftEntryMeta entry = log.lookupMeta(originalIndex);
-            index = -1L;
-            term = -1L;
-            if (!hasFollowers) {
-                if (lastLogEntry != null) {
-                    // since we have persisted the last-log-entry to persistent journal before the capture,
-                    // we would want to snapshot from this entry.
-                    index = lastLogEntry.index();
-                    term = lastLogEntry.term();
-                }
-            } else if (entry != null) {
-                index = entry.index();
-                term = entry.term();
-            } else if (log.getSnapshotIndex() > -1) {
-                index = log.getSnapshotIndex();
-                term = log.getSnapshotTerm();
+    @NonNullByDefault
+    static RaftEntryMeta computeLastAppliedEntry(final ReplicatedLog log, final long originalIndex,
+            final @Nullable RaftEntryMeta lastLogEntry, final boolean hasFollowers) {
+        if (hasFollowers) {
+            final var entry = log.lookupMeta(originalIndex);
+            if (entry != null) {
+                return entry;
             }
-            return this;
+
+            final var snapshotIndex = log.getSnapshotIndex();
+            if (snapshotIndex > -1) {
+                return new ImmutableRaftEntryMeta(snapshotIndex, log.getSnapshotTerm());
+            }
+        } else if (lastLogEntry != null) {
+            // since we have persisted the last-log-entry to persistent journal before the capture, we would want
+            // to snapshot from this entry.
+            return lastLogEntry;
         }
 
-        long getIndex() {
-            return index;
-        }
-
-        long getTerm() {
-            return term;
-        }
+        return new ImmutableRaftEntryMeta(-1, -1);
     }
 }
