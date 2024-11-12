@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
 
 /**
  * Implementation of ReplicatedLog used by the RaftActor.

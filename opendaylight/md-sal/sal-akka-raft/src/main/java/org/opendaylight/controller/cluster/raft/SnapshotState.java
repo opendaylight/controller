@@ -12,6 +12,7 @@ import java.io.OutputStream;
 import java.util.Optional;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
 
 /**
  * Interface for a snapshot phase state.
