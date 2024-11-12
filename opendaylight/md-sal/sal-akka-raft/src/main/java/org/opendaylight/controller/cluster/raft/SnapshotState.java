@@ -20,6 +20,8 @@ import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
  * @author Moiz Raja
  * @author Thomas Pantelis
  */
+// FIXME: Find a better name for this interface. 'state' implies this is Persisted.Snapshot.State, but it actually is
+//        a manager thereof (see SnapshotManager).
 public interface SnapshotState {
     /**
      * Returns whether or not a capture is in progress.
