@@ -106,7 +106,7 @@ class RaftActorSnapshotMessageSupport {
     }
 
     private void onApplySnapshot(final ApplySnapshot message) {
-        log.info("{}: Applying snapshot on follower:  {}", context.getId(), message.getSnapshot());
+        log.info("{}: Applying snapshot on follower: {}", context.getId(), message.snapshot());
 
         context.getSnapshotManager().apply(message);
     }

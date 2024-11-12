@@ -344,7 +344,7 @@ public class SnapshotManager implements SnapshotState {
 
             log.debug("lastSequenceNumber prior to persisting applied snapshot: {}", lastSequenceNumber);
 
-            context.getPersistenceProvider().saveSnapshot(toApply.getSnapshot());
+            context.getPersistenceProvider().saveSnapshot(toApply.snapshot());
 
             currentState = PERSISTING;
         }
@@ -470,7 +470,7 @@ public class SnapshotManager implements SnapshotState {
 
             if (applySnapshot != null) {
                 try {
-                    Snapshot snapshot = applySnapshot.getSnapshot();
+                    Snapshot snapshot = applySnapshot.snapshot();
 
                     //clears the followers log, sets the snapshot index to ensure adjusted-index works
                     context.setReplicatedLog(ReplicatedLogImpl.newInstance(snapshot, context));
@@ -486,7 +486,7 @@ public class SnapshotManager implements SnapshotState {
                         snapshotCohort.applySnapshot(snapshot.getState());
                     }
 
-                    applySnapshot.getCallback().onSuccess();
+                    applySnapshot.callback().onSuccess();
                 } catch (Exception e) {
                     log.error("{}: Error applying snapshot", context.getId(), e);
                 }
@@ -514,7 +514,7 @@ public class SnapshotManager implements SnapshotState {
                         context.getReplicatedLog().getSnapshotTerm(),
                         context.getReplicatedLog().size());
             } else {
-                applySnapshot.getCallback().onFailure();
+                applySnapshot.callback().onFailure();
             }
 
             snapshotComplete();
