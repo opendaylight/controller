@@ -936,57 +936,60 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
      *  InstallSnapshot should qualify as a heartbeat too.
      */
     private void sendSnapshotChunk(final ActorSelection followerActor, final FollowerLogInformation followerLogInfo) {
-        if (snapshotHolder.isPresent()) {
-            LeaderInstallSnapshotState installSnapshotState = followerLogInfo.getInstallSnapshotState();
-            if (installSnapshotState == null) {
-                installSnapshotState = new LeaderInstallSnapshotState(
-                        context.getConfigParams().getMaximumMessageSliceSize(), logName);
-                followerLogInfo.setLeaderInstallSnapshotState(installSnapshotState);
-            }
-
-            try {
-                // Ensure the snapshot bytes are set - this is a no-op.
-                final var snapshot = snapshotHolder.orElseThrow();
-                installSnapshotState.setSnapshotBytes(snapshot.getSnapshotBytes());
-
-                if (!installSnapshotState.canSendNextChunk()) {
-                    return;
-                }
-
-                byte[] nextSnapshotChunk = installSnapshotState.getNextChunk();
-
-                log.debug("{}: next snapshot chunk size for follower {}: {}", logName, followerLogInfo.getId(),
-                        nextSnapshotChunk.length);
-
-                int nextChunkIndex = installSnapshotState.incrementChunkIndex();
-                ServerConfigurationPayload serverConfig = null;
-                if (installSnapshotState.isLastChunk(nextChunkIndex)) {
-                    serverConfig = context.getPeerServerInfo(true);
-                }
-
-                installSnapshotState.startChunkTimer();
-                followerActor.tell(
-                    new InstallSnapshot(currentTerm(), context.getId(),
-                        snapshot.getLastIncludedIndex(),
-                        snapshot.getLastIncludedTerm(),
-                        nextSnapshotChunk,
-                        nextChunkIndex,
-                        installSnapshotState.getTotalChunks(),
-                        OptionalInt.of(installSnapshotState.getLastChunkHashCode()),
-                        serverConfig,
-                        followerLogInfo.getRaftVersion()),
-                    actor());
-
-                log.debug("{}: InstallSnapshot sent to follower {}, Chunk: {}/{}", logName, followerActor.path(),
-                        installSnapshotState.getChunkIndex(), installSnapshotState.getTotalChunks());
-
-            } catch (IOException e) {
-                log.warn("{}: Unable to send chunk: {}/{}. Reseting snapshot progress. Snapshot state: {}", logName,
-                        installSnapshotState.getChunkIndex(), installSnapshotState.getTotalChunks(),
-                        installSnapshotState, e);
-                installSnapshotState.reset();
-            }
+        if (snapshotHolder.isEmpty()) {
+            // nothing to do
+            return;
         }
+
+        final var snapshot = snapshotHolder.orElseThrow();
+        LeaderInstallSnapshotState installSnapshotState = followerLogInfo.getInstallSnapshotState();
+        if (installSnapshotState == null) {
+            installSnapshotState = new LeaderInstallSnapshotState(
+                context.getConfigParams().getMaximumMessageSliceSize(), logName);
+            followerLogInfo.setLeaderInstallSnapshotState(installSnapshotState);
+        }
+
+        final byte[] data;
+        try {
+            // Ensure the snapshot bytes are set - this is a no-op.
+            installSnapshotState.setSnapshotBytes(snapshot.getSnapshotBytes());
+
+            if (installSnapshotState.canSendNextChunk()) {
+                data = installSnapshotState.getNextChunk();
+            } else {
+                return;
+            }
+        } catch (IOException e) {
+            log.warn("{}: Unable to send chunk: {}/{}. Reseting snapshot progress. Snapshot state: {}", logName,
+                installSnapshotState.getChunkIndex(), installSnapshotState.getTotalChunks(), installSnapshotState, e);
+            installSnapshotState.reset();
+            return;
+        }
+
+        log.debug("{}: next snapshot chunk size for follower {}: {}", logName, followerLogInfo.getId(), data.length);
+
+        final int chunkIndex = installSnapshotState.incrementChunkIndex();
+        final int totalChunks = installSnapshotState.getTotalChunks();
+        ServerConfigurationPayload serverConfig = null;
+        if (chunkIndex == totalChunks) {
+            serverConfig = context.getPeerServerInfo(true);
+        }
+
+        installSnapshotState.startChunkTimer();
+        followerActor.tell(
+            new InstallSnapshot(currentTerm(), context.getId(),
+                // snapshot term/index inforation
+                snapshot.getLastIncludedIndex(), snapshot.getLastIncludedTerm(),
+                // this chunk and its indexing info and previous hash code
+                data, chunkIndex, totalChunks, OptionalInt.of(installSnapshotState.getLastChunkHashCode()),
+                // server configuration, if present
+                serverConfig,
+                // make sure the follower understands this message
+                followerLogInfo.getRaftVersion()),
+            actor());
+
+        log.debug("{}: InstallSnapshot sent to follower {}, Chunk: {}/{}", logName, followerActor.path(),
+            chunkIndex, totalChunks);
     }
 
     private boolean resendSnapshotChunk(final ActorSelection followerActor,
