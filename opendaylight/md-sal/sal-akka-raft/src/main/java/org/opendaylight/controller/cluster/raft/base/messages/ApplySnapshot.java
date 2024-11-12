@@ -17,33 +17,8 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
  * Internal message, issued by follower to its actor.
  */
 @NonNullByDefault
-public record ApplySnapshot(Snapshot snapshot, Callback callback) implements ControlMessage {
-
-    public interface Callback {
-
-        void onSuccess();
-
-        void onFailure();
-    }
-
-    private static final Callback NOOP_CALLBACK = new Callback() {
-        @Override
-        public void onSuccess() {
-            // No-op
-        }
-
-        @Override
-        public void onFailure() {
-            // No-op
-        }
-    };
-
+public record ApplySnapshot(Snapshot snapshot) implements ControlMessage {
     public ApplySnapshot {
         requireNonNull(snapshot);
-        requireNonNull(callback);
-    }
-
-    public ApplySnapshot(final Snapshot snapshot) {
-        this(snapshot, NOOP_CALLBACK);
     }
 }

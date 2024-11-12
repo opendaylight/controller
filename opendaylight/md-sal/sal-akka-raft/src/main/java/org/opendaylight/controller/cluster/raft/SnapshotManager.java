@@ -20,6 +20,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStream;
+import org.opendaylight.controller.cluster.raft.base.messages.ApplyLeaderSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.SendInstallSnapshot;
@@ -80,9 +81,13 @@ public class SnapshotManager implements SnapshotState {
      * This instance is persisting an {@link ApplySnapshot}.
      */
     @NonNullByDefault
-    private record PersistApply(long lastSequenceNumber, ApplySnapshot request) implements Persist {
+    private record PersistApply(
+            long lastSequenceNumber,
+            ApplySnapshot request,
+            ApplyLeaderSnapshot.@Nullable Callback callback) implements Persist {
         PersistApply {
             requireNonNull(request);
+            requireNonNull(callback);
         }
     }
 
@@ -179,6 +184,18 @@ public class SnapshotManager implements SnapshotState {
         return false;
     }
 
+
+    @Override
+    public void applySnapshot(final ApplyLeaderSnapshot snapshot) {
+        if (!(task instanceof Idle)) {
+            log.debug("installSnapshot should not be called in state {}", task);
+            return;
+        }
+
+        // FIXME: implement this
+
+    }
+
     @Override
     public void apply(final ApplySnapshot snapshot) {
         if (!(task instanceof Idle)) {
@@ -188,7 +205,7 @@ public class SnapshotManager implements SnapshotState {
 
         final var persistence = context.getPersistenceProvider();
         final var lastSeq = persistence.getLastSequenceNumber();
-        final var persisting = new PersistApply(lastSeq, snapshot);
+        final var persisting = new PersistApply(lastSeq, snapshot, null);
 
         task = persisting;
         log.debug("lastSequenceNumber prior to persisting applied snapshot: {}", lastSeq);
@@ -309,10 +326,9 @@ public class SnapshotManager implements SnapshotState {
     @SuppressWarnings("checkstyle:IllegalCatch")
     private long commit(final Persist persist) {
         return switch (persist) {
-            case PersistApply(var lastSeq, var apply) -> {
+            case PersistApply(var lastSeq, var apply, var callback) -> {
                 // not a nested record pattern to side-step https://github.com/spotbugs/spotbugs/issues/3196
                 final var snapshot = apply.snapshot();
-                final var callback = apply.callback();
 
                 try {
                     // clears the followers log, sets the snapshot index to ensure adjusted-index works
@@ -333,7 +349,9 @@ public class SnapshotManager implements SnapshotState {
                         snapshotCohort.applySnapshot(state);
                     }
 
-                    callback.onSuccess();
+                    if (callback != null) {
+                        callback.onSuccess();
+                    }
                 } catch (Exception e) {
                     log.error("{}: Error applying snapshot", context.getId(), e);
                 }
@@ -351,7 +369,10 @@ public class SnapshotManager implements SnapshotState {
         switch (task) {
             case PersistApply persist -> {
                 // Nothing to rollback if we're applying a snapshot from the leader.
-                persist.request().callback().onFailure();
+                final var callback = persist.callback;
+                if (callback != null)  {
+                    callback.onFailure();
+                }
                 snapshotComplete();
             }
             case PersistCapture persist -> {
