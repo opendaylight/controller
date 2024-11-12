@@ -14,6 +14,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,8 +25,9 @@ import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.persistence.SaveSnapshotSuccess;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.raft.MockRaftActor.MockSnapshotState;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
-import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
+import org.opendaylight.controller.cluster.raft.base.messages.ApplyLeaderSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
@@ -39,6 +42,7 @@ import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
+import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
@@ -655,7 +659,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         List<InstallSnapshotReply> installSnapshotReplies = MessageCollectorActor.expectMatching(
                 leaderCollectorActor, InstallSnapshotReply.class, expTotalChunks);
         int index = 1;
-        for (InstallSnapshotReply installSnapshotReply: installSnapshotReplies) {
+        for (InstallSnapshotReply installSnapshotReply : installSnapshotReplies) {
             assertEquals("InstallSnapshotReply getTerm", currentTerm, installSnapshotReply.getTerm());
             assertEquals("InstallSnapshotReply getChunkIndex", index++, installSnapshotReply.getChunkIndex());
             assertEquals("InstallSnapshotReply getFollowerId", follower2Id, installSnapshotReply.getFollowerId());
@@ -663,12 +667,19 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         }
 
         // Verify follower 2 applies the snapshot.
-        ApplySnapshot applySnapshot = MessageCollectorActor.expectFirstMatching(follower2CollectorActor,
-                ApplySnapshot.class);
-        verifySnapshot("Follower 2", applySnapshot.snapshot(), currentTerm, lastAppliedIndex, currentTerm,
-                lastAppliedIndex);
-        assertEquals("Persisted Snapshot getUnAppliedEntries size", 0,
-                applySnapshot.snapshot().getUnAppliedEntries().size());
+        final var applySnapshot = MessageCollectorActor.expectFirstMatching(follower2CollectorActor,
+                ApplyLeaderSnapshot.class);
+        final MockSnapshotState state;
+        try (var ois = new ObjectInputStream(applySnapshot.snapshot().openStream())) {
+            state = (MockSnapshotState) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            throw new AssertionError(e);
+        }
+
+        final var snapshot = Snapshot.ofTermLeader(state, applySnapshot.lastEntry(), TermInfo.INITIAL,
+            applySnapshot.serverConfig());
+        verifySnapshot("Follower 2", snapshot, currentTerm, lastAppliedIndex, currentTerm, lastAppliedIndex);
+        assertEquals("Persisted Snapshot getUnAppliedEntries size", 0, snapshot.getUnAppliedEntries().size());
 
         // Wait for the snapshot to complete.
         MessageCollectorActor.expectFirstMatching(leaderCollectorActor, SaveSnapshotSuccess.class);
@@ -687,7 +698,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
                 Set.copyOf(persistedSnapshot.getServerConfiguration().getServerConfig()));
 
             assertEquals("Follower 2 snapshot server config", expServerInfo,
-                Set.copyOf(applySnapshot.snapshot().getServerConfiguration().getServerConfig()));
+                Set.copyOf(applySnapshot.serverConfig().getServerConfig()));
 
             ServerConfigurationPayload follower2ServerConfig = follower2Context.getPeerServerInfo(true);
             assertNotNull("Follower 2 server config is null", follower2ServerConfig);
