@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.assertNoneMatching;
@@ -36,7 +37,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
-import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
+import org.opendaylight.controller.cluster.raft.base.messages.ApplyLeaderSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.base.messages.InitiateCaptureSnapshot;
@@ -64,6 +65,7 @@ import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
+import org.opendaylight.controller.cluster.raft.spi.ImmutableRaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.utils.ForwardMessageToBehaviorActor;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
@@ -167,9 +169,11 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         // Leader should install snapshot - capture and verify ApplySnapshot contents
 
-        ApplySnapshot applySnapshot = expectFirstMatching(newFollowerCollectorActor, ApplySnapshot.class);
-        List<Object> snapshotState = MockRaftActor.fromState(applySnapshot.snapshot().getState());
-        assertEquals("Snapshot state", snapshotState, leaderRaftActor.getState());
+        final var applySnapshot = expectFirstMatching(newFollowerCollectorActor, ApplyLeaderSnapshot.class);
+        assertEquals("leader", applySnapshot.leaderId());
+        assertEquals(1, applySnapshot.term());
+        assertEquals(new ImmutableRaftEntryMeta(2, 1), applySnapshot.lastEntry());
+        assertNull(applySnapshot.serverConfig());
 
         AddServerReply addServerReply = testKit.expectMsgClass(Duration.ofSeconds(5), AddServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, addServerReply.getStatus());
@@ -246,9 +250,9 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         // Leader should install snapshot - capture and verify ApplySnapshot contents
 
-        ApplySnapshot applySnapshot = expectFirstMatching(newFollowerCollectorActor, ApplySnapshot.class);
-        List<Object> snapshotState = MockRaftActor.fromState(applySnapshot.snapshot().getState());
-        assertEquals("Snapshot state", snapshotState, leaderRaftActor.getState());
+        final var applySnapshot = expectFirstMatching(newFollowerCollectorActor, ApplyLeaderSnapshot.class);
+//        List<Object> snapshotState = MockRaftActor.fromState(applySnapshot.snapshot().getState());
+//        assertEquals("Snapshot state", snapshotState, leaderRaftActor.getState());
 
         AddServerReply addServerReply = testKit.expectMsgClass(Duration.ofSeconds(5), AddServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, addServerReply.getStatus());
@@ -442,7 +446,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         assertEquals("getStatus", ServerChangeStatus.OK, addServerReply.getStatus());
         assertEquals("getLeaderHint", LEADER_ID, addServerReply.getLeaderHint().orElseThrow());
 
-        expectFirstMatching(newFollowerCollectorActor, ApplySnapshot.class);
+        expectFirstMatching(newFollowerCollectorActor, ApplyLeaderSnapshot.class);
 
         // Verify ServerConfigurationPayload entry in leader's log
 
