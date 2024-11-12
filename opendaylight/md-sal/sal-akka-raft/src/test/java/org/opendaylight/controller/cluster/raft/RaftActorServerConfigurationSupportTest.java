@@ -168,7 +168,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         // Leader should install snapshot - capture and verify ApplySnapshot contents
 
         ApplySnapshot applySnapshot = expectFirstMatching(newFollowerCollectorActor, ApplySnapshot.class);
-        List<Object> snapshotState = MockRaftActor.fromState(applySnapshot.getSnapshot().getState());
+        List<Object> snapshotState = MockRaftActor.fromState(applySnapshot.snapshot().getState());
         assertEquals("Snapshot state", snapshotState, leaderRaftActor.getState());
 
         AddServerReply addServerReply = testKit.expectMsgClass(Duration.ofSeconds(5), AddServerReply.class);
@@ -247,7 +247,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         // Leader should install snapshot - capture and verify ApplySnapshot contents
 
         ApplySnapshot applySnapshot = expectFirstMatching(newFollowerCollectorActor, ApplySnapshot.class);
-        List<Object> snapshotState = MockRaftActor.fromState(applySnapshot.getSnapshot().getState());
+        List<Object> snapshotState = MockRaftActor.fromState(applySnapshot.snapshot().getState());
         assertEquals("Snapshot state", snapshotState, leaderRaftActor.getState());
 
         AddServerReply addServerReply = testKit.expectMsgClass(Duration.ofSeconds(5), AddServerReply.class);

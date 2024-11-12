@@ -665,10 +665,10 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         // Verify follower 2 applies the snapshot.
         ApplySnapshot applySnapshot = MessageCollectorActor.expectFirstMatching(follower2CollectorActor,
                 ApplySnapshot.class);
-        verifySnapshot("Follower 2", applySnapshot.getSnapshot(), currentTerm, lastAppliedIndex, currentTerm,
+        verifySnapshot("Follower 2", applySnapshot.snapshot(), currentTerm, lastAppliedIndex, currentTerm,
                 lastAppliedIndex);
         assertEquals("Persisted Snapshot getUnAppliedEntries size", 0,
-                applySnapshot.getSnapshot().getUnAppliedEntries().size());
+                applySnapshot.snapshot().getUnAppliedEntries().size());
 
         // Wait for the snapshot to complete.
         MessageCollectorActor.expectFirstMatching(leaderCollectorActor, SaveSnapshotSuccess.class);
@@ -687,7 +687,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
                 Set.copyOf(persistedSnapshot.getServerConfiguration().getServerConfig()));
 
             assertEquals("Follower 2 snapshot server config", expServerInfo,
-                Set.copyOf(applySnapshot.getSnapshot().getServerConfiguration().getServerConfig()));
+                Set.copyOf(applySnapshot.snapshot().getServerConfiguration().getServerConfig()));
 
             ServerConfigurationPayload follower2ServerConfig = follower2Context.getPeerServerInfo(true);
             assertNotNull("Follower 2 server config is null", follower2ServerConfig);
