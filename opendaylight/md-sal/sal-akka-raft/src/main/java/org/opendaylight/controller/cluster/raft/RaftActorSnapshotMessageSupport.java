@@ -15,6 +15,7 @@ import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.persistence.SaveSnapshotFailure;
 import org.apache.pekko.persistence.SaveSnapshotSuccess;
 import org.apache.pekko.util.Timeout;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
@@ -32,12 +33,19 @@ import scala.concurrent.duration.FiniteDuration;
  * @author Thomas Pantelis
  */
 class RaftActorSnapshotMessageSupport {
-    static final Object COMMIT_SNAPSHOT = new Object() {
+    @NonNullByDefault
+    static final class CommitSnapshot {
+        static final CommitSnapshot INSTANCE = new CommitSnapshot();
+
+        private CommitSnapshot() {
+            // Hidden on purpose
+        }
+
         @Override
         public String toString() {
             return "commit_snapshot";
         }
-    };
+    }
 
     private final RaftActorContext context;
     private final RaftActorSnapshotCohort cohort;
@@ -60,24 +68,18 @@ class RaftActorSnapshotMessageSupport {
     }
 
     boolean handleSnapshotMessage(final Object message, final ActorRef sender) {
-        if (message instanceof ApplySnapshot applySnapshot) {
-            onApplySnapshot(applySnapshot);
-        } else if (message instanceof SaveSnapshotSuccess saveSnapshotSuccess) {
-            onSaveSnapshotSuccess(saveSnapshotSuccess);
-        } else if (message instanceof SaveSnapshotFailure saveSnapshotFailure) {
-            onSaveSnapshotFailure(saveSnapshotFailure);
-        } else if (message instanceof CaptureSnapshotReply captureSnapshotReply) {
-            onCaptureSnapshotReply(captureSnapshotReply);
-        } else if (COMMIT_SNAPSHOT.equals(message)) {
-            context.getSnapshotManager().commit(-1, -1);
-        } else if (message instanceof GetSnapshot getSnapshot) {
-            onGetSnapshot(sender, getSnapshot);
-        } else if (message instanceof SnapshotComplete) {
-            log.debug("{}: SnapshotComplete received", context.getId());
-        } else {
-            return false;
+        switch (message) {
+            case ApplySnapshot msg -> onApplySnapshot(msg);
+            case SaveSnapshotSuccess msg -> onSaveSnapshotSuccess(msg);
+            case SaveSnapshotFailure msg -> onSaveSnapshotFailure(msg);
+            case CaptureSnapshotReply msg -> onCaptureSnapshotReply(msg);
+            case CommitSnapshot msg -> context.getSnapshotManager().commit(-1, -1);
+            case GetSnapshot msg -> onGetSnapshot(sender, msg);
+            case SnapshotComplete msg -> log.debug("{}: SnapshotComplete received", context.getId());
+            default -> {
+                return false;
+            }
         }
-
         return true;
     }
 

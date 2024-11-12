@@ -85,7 +85,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
     static final String NEW_SERVER_ID = "new-server";
     static final String NEW_SERVER_ID2 = "new-server2";
     private static final Logger LOG = LoggerFactory.getLogger(RaftActorServerConfigurationSupportTest.class);
-    private static final Class<?> COMMIT_MESSAGE_CLASS = RaftActorSnapshotMessageSupport.COMMIT_SNAPSHOT.getClass();
+    private static final Class<?> COMMIT_MESSAGE_CLASS = RaftActorSnapshotMessageSupport.CommitSnapshot.class;
     private static final boolean NO_PERSISTENCE = false;
     private static final boolean PERSISTENT = true;
 

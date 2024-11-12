@@ -764,7 +764,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                     // Make saving Snapshot successful
                     // Committing the snapshot here would end up calling commit in the creating state which would
                     // be a state violation. That's why now we send a message to commit the snapshot.
-                    self().tell(RaftActorSnapshotMessageSupport.COMMIT_SNAPSHOT, self());
+                    self().tell(RaftActorSnapshotMessageSupport.CommitSnapshot.INSTANCE, self());
                 }
             });
         }
