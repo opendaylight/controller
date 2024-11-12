@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft;
 
 import org.opendaylight.controller.cluster.raft.messages.Payload;
+import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
 
 /**
  * Represents one entry in the replicated log.

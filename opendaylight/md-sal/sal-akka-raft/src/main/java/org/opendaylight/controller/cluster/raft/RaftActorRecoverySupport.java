@@ -23,6 +23,7 @@ import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPay
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
+import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
 import org.slf4j.Logger;
 
 /**
