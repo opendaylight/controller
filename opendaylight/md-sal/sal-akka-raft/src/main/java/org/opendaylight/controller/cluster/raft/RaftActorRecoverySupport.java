@@ -13,7 +13,6 @@ import java.util.concurrent.TimeUnit;
 import org.apache.pekko.persistence.RecoveryCompleted;
 import org.apache.pekko.persistence.SnapshotOffer;
 import org.opendaylight.controller.cluster.PersistentDataProvider;
-import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.messages.PersistentPayload;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
@@ -92,7 +91,7 @@ class RaftActorRecoverySupport {
 
         log.debug("{}: Restore snapshot: {}", context.getId(), restoreFromSnapshot);
 
-        context.getSnapshotManager().apply(new ApplySnapshot(restoreFromSnapshot));
+        context.getSnapshotManager().applyFromRecovery(restoreFromSnapshot);
     }
 
     private ReplicatedLog replicatedLog() {

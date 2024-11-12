@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.assertNoneMatching;
@@ -18,6 +19,7 @@ import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorAct
 import com.google.common.base.Stopwatch;
 import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.MoreExecutors;
+import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import java.time.Duration;
 import java.util.List;
@@ -36,7 +38,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
-import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
+import org.opendaylight.controller.cluster.raft.MockRaftActor.MockSnapshotState;
+import org.opendaylight.controller.cluster.raft.base.messages.ApplyLeaderSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.base.messages.InitiateCaptureSnapshot;
@@ -64,6 +67,7 @@ import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
+import org.opendaylight.controller.cluster.raft.spi.ImmutableRaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.utils.ForwardMessageToBehaviorActor;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
@@ -79,11 +83,11 @@ import scala.concurrent.duration.FiniteDuration;
  * @author Thomas Pantelis
  */
 public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
-    static final String LEADER_ID = "leader";
-    static final String FOLLOWER_ID = "follower";
-    static final String FOLLOWER_ID2 = "follower2";
-    static final String NEW_SERVER_ID = "new-server";
-    static final String NEW_SERVER_ID2 = "new-server2";
+    private static final String LEADER_ID = "leader";
+    private static final String FOLLOWER_ID = "follower";
+    private static final String FOLLOWER_ID2 = "follower2";
+    private static final String NEW_SERVER_ID = "new-server";
+    private static final String NEW_SERVER_ID2 = "new-server2";
     private static final Logger LOG = LoggerFactory.getLogger(RaftActorServerConfigurationSupportTest.class);
     private static final Class<?> COMMIT_MESSAGE_CLASS = RaftActorSnapshotMessageSupport.CommitSnapshot.class;
     private static final boolean NO_PERSISTENCE = false;
@@ -167,9 +171,11 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         // Leader should install snapshot - capture and verify ApplySnapshot contents
 
-        ApplySnapshot applySnapshot = expectFirstMatching(newFollowerCollectorActor, ApplySnapshot.class);
-        List<Object> snapshotState = MockRaftActor.fromState(applySnapshot.snapshot().getState());
-        assertEquals("Snapshot state", snapshotState, leaderRaftActor.getState());
+        final var applySnapshot = expectFirstMatching(newFollowerCollectorActor, ApplyLeaderSnapshot.class);
+        assertEquals("leader", applySnapshot.leaderId());
+        assertEquals(1, applySnapshot.term());
+        assertEquals(ImmutableRaftEntryMeta.of(2, 1), applySnapshot.lastEntry());
+        assertNull(applySnapshot.serverConfig());
 
         AddServerReply addServerReply = testKit.expectMsgClass(Duration.ofSeconds(5), AddServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, addServerReply.getStatus());
@@ -222,7 +228,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
     }
 
     @Test
-    public void testAddServerWithNoExistingFollower() {
+    public void testAddServerWithNoExistingFollower() throws Exception {
         LOG.info("testAddServerWithNoExistingFollower starting");
 
         setupNewFollower();
@@ -246,8 +252,13 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         // Leader should install snapshot - capture and verify ApplySnapshot contents
 
-        ApplySnapshot applySnapshot = expectFirstMatching(newFollowerCollectorActor, ApplySnapshot.class);
-        List<Object> snapshotState = MockRaftActor.fromState(applySnapshot.snapshot().getState());
+        final var applySnapshot = expectFirstMatching(newFollowerCollectorActor, ApplyLeaderSnapshot.class);
+        final MockSnapshotState state;
+        try (var ois = new ObjectInputStream(applySnapshot.snapshot().openStream())) {
+            state = (MockSnapshotState) ois.readObject();
+        }
+
+        List<Object> snapshotState = MockRaftActor.fromState(state);
         assertEquals("Snapshot state", snapshotState, leaderRaftActor.getState());
 
         AddServerReply addServerReply = testKit.expectMsgClass(Duration.ofSeconds(5), AddServerReply.class);
@@ -442,7 +453,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         assertEquals("getStatus", ServerChangeStatus.OK, addServerReply.getStatus());
         assertEquals("getLeaderHint", LEADER_ID, addServerReply.getLeaderHint().orElseThrow());
 
-        expectFirstMatching(newFollowerCollectorActor, ApplySnapshot.class);
+        expectFirstMatching(newFollowerCollectorActor, ApplyLeaderSnapshot.class);
 
         // Verify ServerConfigurationPayload entry in leader's log
 
