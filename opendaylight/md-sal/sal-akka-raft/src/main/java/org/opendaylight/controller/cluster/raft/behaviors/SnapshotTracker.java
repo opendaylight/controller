@@ -14,6 +14,7 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.OptionalInt;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStream;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.slf4j.Logger;
@@ -64,10 +65,12 @@ class SnapshotTracker implements AutoCloseable {
             throw new InvalidChunkException("Expected chunkIndex " + (lastChunkIndex + 1) + " got " + chunkIndex);
         }
 
-        if (maybeLastChunkHashCode.isPresent() && maybeLastChunkHashCode.orElseThrow() != lastChunkHashCode) {
-            throw new InvalidChunkException("The hash code of the recorded last chunk does not match "
-                    + "the senders hash code, expected " + lastChunkHashCode + " was "
-                    + maybeLastChunkHashCode.orElseThrow());
+        if (maybeLastChunkHashCode.isPresent()) {
+            final var actualChunkHashCode = maybeLastChunkHashCode.orElseThrow();
+            if (actualChunkHashCode != lastChunkHashCode) {
+                throw new InvalidChunkException("The hash code of the recorded last chunk does not match the sender's "
+                    + "hash code, expected " + lastChunkHashCode + " was " + actualChunkHashCode);
+            }
         }
 
         bufferedStream.write(chunk);
@@ -79,7 +82,7 @@ class SnapshotTracker implements AutoCloseable {
         return sealed;
     }
 
-    ByteSource getSnapshotBytes() throws IOException {
+    @NonNull ByteSource getSnapshotBytes() throws IOException {
         if (!sealed) {
             throw new IllegalStateException("lastChunk not received yet");
         }
