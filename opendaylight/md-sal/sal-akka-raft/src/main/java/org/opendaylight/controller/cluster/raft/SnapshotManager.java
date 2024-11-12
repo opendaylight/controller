@@ -20,7 +20,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStream;
-import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
+import org.opendaylight.controller.cluster.raft.base.messages.ApplyLeaderSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.SendInstallSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.SnapshotComplete;
@@ -77,12 +77,15 @@ public class SnapshotManager implements SnapshotState {
     }
 
     /**
-     * This instance is persisting an {@link ApplySnapshot}.
+     * This instance is persisting an {@link ApplyLeaderSnapshot}.
      */
     @NonNullByDefault
-    private record PersistApply(long lastSequenceNumber, ApplySnapshot request) implements Persist {
+    private record PersistApply(
+            long lastSequenceNumber,
+            Snapshot snapshot,
+            ApplyLeaderSnapshot.@Nullable Callback callback) implements Persist {
         PersistApply {
-            requireNonNull(request);
+            requireNonNull(snapshot);
         }
     }
 
@@ -183,19 +186,49 @@ public class SnapshotManager implements SnapshotState {
     }
 
     @Override
-    public void apply(final ApplySnapshot snapshot) {
+    public void applyFromLeader(final ApplyLeaderSnapshot snapshot) {
         if (!(task instanceof Idle)) {
-            log.debug("apply should not be called in state {}", task);
+            log.debug("applySnapshot should not be called in state {}", task);
             return;
         }
 
+        final var snapshotBytes = snapshot.snapshot();
+        log.info("{}: Applying snapshot on follower: {}", context.getId(), snapshotBytes);
+
+        final Snapshot.State snapshotState;
+        try {
+            snapshotState = convertSnapshot(snapshotBytes);
+        } catch (IOException e) {
+            log.debug("{}: failed to convert InstallSnapshot to state", context.getId(), e);
+            snapshot.callback().onFailure();
+            return;
+        }
+
+        log.debug("{}: Converted InstallSnapshot from leader: {} to state{}", context.getId(), snapshot.leaderId(),
+            snapshotState.needsMigration() ? " (needs migration)" : "");
+        persistSnapshot(
+            Snapshot.ofTermLeader(snapshotState, snapshot.lastEntry(), context.termInfo(), snapshot.serverConfig()),
+            snapshot.callback());
+    }
+
+    @Override
+    public void applyFromRecovery(final Snapshot snapshot) {
+        if (task instanceof Idle) {
+            persistSnapshot(requireNonNull(snapshot), null);
+        } else {
+            log.debug("apply should not be called in state {}", task);
+        }
+    }
+
+    @NonNullByDefault
+    private void persistSnapshot(final Snapshot snapshot, final ApplyLeaderSnapshot.@Nullable Callback callback) {
         final var persistence = context.getPersistenceProvider();
         final var lastSeq = persistence.getLastSequenceNumber();
-        final var persisting = new PersistApply(lastSeq, snapshot);
+        final var persisting = new PersistApply(lastSeq, snapshot, callback);
 
         task = persisting;
         log.debug("lastSequenceNumber prior to persisting applied snapshot: {}", lastSeq);
-        context.getPersistenceProvider().saveSnapshot(persisting.request.snapshot());
+        context.getPersistenceProvider().saveSnapshot(persisting.snapshot);
     }
 
     @Override
@@ -312,11 +345,7 @@ public class SnapshotManager implements SnapshotState {
     @SuppressWarnings("checkstyle:IllegalCatch")
     private long commit(final Persist persist) {
         return switch (persist) {
-            case PersistApply(var lastSeq, var apply) -> {
-                // not a nested record pattern to side-step https://github.com/spotbugs/spotbugs/issues/3196
-                final var snapshot = apply.snapshot();
-                final var callback = apply.callback();
-
+            case PersistApply(var lastSeq, var snapshot, var callback) -> {
                 try {
                     // clears the followers log, sets the snapshot index to ensure adjusted-index works
                     context.setReplicatedLog(ReplicatedLogImpl.newInstance(snapshot, context));
@@ -337,7 +366,9 @@ public class SnapshotManager implements SnapshotState {
                         snapshotCohort.applySnapshot(state);
                     }
 
-                    callback.onSuccess();
+                    if (callback != null) {
+                        callback.onSuccess();
+                    }
                 } catch (Exception e) {
                     log.error("{}: Error applying snapshot", context.getId(), e);
                 }
@@ -355,7 +386,10 @@ public class SnapshotManager implements SnapshotState {
         switch (task) {
             case PersistApply persist -> {
                 // Nothing to rollback if we're applying a snapshot from the leader.
-                persist.request().callback().onFailure();
+                final var callback = persist.callback;
+                if (callback != null)  {
+                    callback.onFailure();
+                }
                 snapshotComplete();
             }
             case PersistCapture persist -> {
@@ -456,7 +490,7 @@ public class SnapshotManager implements SnapshotState {
         final var lastAppliedEntry = computeLastAppliedEntry(lastLogEntry);
 
         final var entry = replLog.get(replicatedToAllIndex);
-        final var replicatedToAllEntry = entry != null ? entry : new ImmutableRaftEntryMeta(-1, -1);
+        final var replicatedToAllEntry = entry != null ? entry : ImmutableRaftEntryMeta.of(-1, -1);
 
         long lastAppliedIndex = lastAppliedEntry.index();
         long lastAppliedTerm = lastAppliedEntry.term();
@@ -500,7 +534,7 @@ public class SnapshotManager implements SnapshotState {
 
             final var snapshotIndex = log.getSnapshotIndex();
             if (snapshotIndex > -1) {
-                return new ImmutableRaftEntryMeta(snapshotIndex, log.getSnapshotTerm());
+                return ImmutableRaftEntryMeta.of(snapshotIndex, log.getSnapshotTerm());
             }
         } else if (lastLogEntry != null) {
             // since we have persisted the last-log-entry to persistent journal before the capture, we would want
@@ -508,6 +542,6 @@ public class SnapshotManager implements SnapshotState {
             return lastLogEntry;
         }
 
-        return new ImmutableRaftEntryMeta(-1, -1);
+        return ImmutableRaftEntryMeta.of(-1, -1);
     }
 }

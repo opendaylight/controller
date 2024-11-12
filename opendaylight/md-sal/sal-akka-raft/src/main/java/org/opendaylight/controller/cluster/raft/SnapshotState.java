@@ -10,7 +10,8 @@ package org.opendaylight.controller.cluster.raft;
 
 import java.io.OutputStream;
 import java.util.Optional;
-import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.opendaylight.controller.cluster.raft.base.messages.ApplyLeaderSnapshot;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
 
@@ -60,9 +61,17 @@ public interface SnapshotState {
     /**
      * Applies a snapshot on a follower that was installed by the leader.
      *
-     * @param snapshot the Snapshot to apply.
+     * @param snapshot the {@link ApplyLeaderSnapshot} to apply.
      */
-    void apply(ApplySnapshot snapshot);
+    @NonNullByDefault
+    void applyFromLeader(ApplyLeaderSnapshot snapshot);
+
+    /**
+     * Applies a snapshot from recovery.
+     *
+     * @param snapshot the {@link Snapshot} to apply.
+     */
+    void applyFromRecovery(Snapshot snapshot);
 
     /**
      * Persists a snapshot.

@@ -16,7 +16,7 @@ import org.apache.pekko.persistence.SaveSnapshotFailure;
 import org.apache.pekko.persistence.SaveSnapshotSuccess;
 import org.apache.pekko.util.Timeout;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
+import org.opendaylight.controller.cluster.raft.base.messages.ApplyLeaderSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.base.messages.SnapshotComplete;
@@ -69,7 +69,7 @@ class RaftActorSnapshotMessageSupport {
 
     boolean handleSnapshotMessage(final Object message, final ActorRef sender) {
         switch (message) {
-            case ApplySnapshot msg -> onApplySnapshot(msg);
+            case ApplyLeaderSnapshot msg -> context.getSnapshotManager().applyFromLeader(msg);
             case SaveSnapshotSuccess msg -> onSaveSnapshotSuccess(msg);
             case SaveSnapshotFailure msg -> onSaveSnapshotFailure(msg);
             case CaptureSnapshotReply msg -> onCaptureSnapshotReply(msg);
@@ -103,12 +103,6 @@ class RaftActorSnapshotMessageSupport {
         log.info("{}: SaveSnapshotSuccess received for snapshot, sequenceNr: {}", context.getId(), sequenceNumber);
 
         context.getSnapshotManager().commit(sequenceNumber, success.metadata().timestamp());
-    }
-
-    private void onApplySnapshot(final ApplySnapshot message) {
-        log.info("{}: Applying snapshot on follower: {}", context.getId(), message.snapshot());
-
-        context.getSnapshotManager().apply(message);
     }
 
     private void onGetSnapshot(final ActorRef sender, final GetSnapshot getSnapshot) {
