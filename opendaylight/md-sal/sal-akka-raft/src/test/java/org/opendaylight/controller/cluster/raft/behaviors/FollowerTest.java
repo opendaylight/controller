@@ -48,7 +48,7 @@ import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.VotingState;
-import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
+import org.opendaylight.controller.cluster.raft.base.messages.ApplyLeaderSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
@@ -61,7 +61,6 @@ import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
-import org.opendaylight.controller.cluster.raft.persisted.ByteState;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
@@ -792,7 +791,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
      * the follower its applied correctly.
      */
     @Test
-    public void testHandleInstallSnapshot() {
+    public void testHandleInstallSnapshot() throws Exception {
         logStart("testHandleInstallSnapshot");
 
         MockRaftActorContext context = createActorContext();
@@ -818,28 +817,22 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
             lastIncludedIndex++;
             chunkIndex++;
         }
-
-        ApplySnapshot applySnapshot = MessageCollectorActor.expectFirstMatching(followerActor,
-                ApplySnapshot.class);
-        Snapshot snapshot = applySnapshot.snapshot();
         assertNotNull(lastInstallSnapshot);
-        assertEquals("getLastIndex", lastInstallSnapshot.getLastIncludedIndex(), snapshot.getLastIndex());
+
+        final var applySnapshot = MessageCollectorActor.expectFirstMatching(followerActor, ApplyLeaderSnapshot.class);
+
+        assertEquals("getLastIndex", lastInstallSnapshot.getLastIncludedIndex(), applySnapshot.lastEntry().index());
         assertEquals("getLastIncludedTerm", lastInstallSnapshot.getLastIncludedTerm(),
-                snapshot.getLastAppliedTerm());
-        assertEquals("getLastAppliedIndex", lastInstallSnapshot.getLastIncludedIndex(),
-                snapshot.getLastAppliedIndex());
-        assertEquals("getLastTerm", lastInstallSnapshot.getLastIncludedTerm(), snapshot.getLastTerm());
-        assertEquals("getState type", ByteState.class, snapshot.getState().getClass());
-        assertArrayEquals("getState", bsSnapshot.toByteArray(), ((ByteState)snapshot.getState()).getBytes());
-        assertEquals(new TermInfo(1, "leader"), snapshot.termInfo());
+            applySnapshot.lastEntry().term());
+        assertEquals("getLastTerm", lastInstallSnapshot.getLastIncludedTerm(), lastInstallSnapshot.getTerm());
+        assertArrayEquals("getState", bsSnapshot.toByteArray(), applySnapshot.snapshot().read());
         applySnapshot.callback().onSuccess();
 
-        List<InstallSnapshotReply> replies = MessageCollectorActor.getAllMatching(
-                leaderActor, InstallSnapshotReply.class);
+        final var replies = MessageCollectorActor.getAllMatching(leaderActor, InstallSnapshotReply.class);
         assertEquals("InstallSnapshotReply count", totalChunks, replies.size());
 
         chunkIndex = 1;
-        for (InstallSnapshotReply reply: replies) {
+        for (var reply : replies) {
             assertEquals("getChunkIndex", chunkIndex++, reply.getChunkIndex());
             assertEquals("getTerm", 1, reply.getTerm());
             assertEquals("isSuccess", true, reply.isSuccess());

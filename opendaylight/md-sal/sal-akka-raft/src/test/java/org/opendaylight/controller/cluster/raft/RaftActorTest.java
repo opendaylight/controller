@@ -25,6 +25,7 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
@@ -62,7 +63,7 @@ import org.opendaylight.controller.cluster.raft.AbstractRaftActorIntegrationTest
 import org.opendaylight.controller.cluster.raft.AbstractRaftActorIntegrationTest.TestRaftActor;
 import org.opendaylight.controller.cluster.raft.MockRaftActor.MockSnapshotState;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
-import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
+import org.opendaylight.controller.cluster.raft.base.messages.ApplyLeaderSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.base.messages.LeaderTransitioning;
@@ -85,6 +86,7 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
+import org.opendaylight.controller.cluster.raft.spi.ImmutableRaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
@@ -321,8 +323,9 @@ public class RaftActorTest extends AbstractActorTest {
         // Wait for akka's recovery to complete so it doesn't interfere.
         mockRaftActor.waitForRecoveryComplete();
 
-        ApplySnapshot applySnapshot = new ApplySnapshot(
-            Snapshot.create(null, null, 0, 0, 0, 0, new TermInfo(0, persistenceId), null));
+        final var applySnapshot = new ApplyLeaderSnapshot(persistenceId, 0, ImmutableRaftEntryMeta.of(0, 0),
+            ByteSource.wrap(new byte[1]), null, mock(ApplyLeaderSnapshot.Callback.class));
+
         when(mockSupport.handleSnapshotMessage(same(applySnapshot), any(ActorRef.class))).thenReturn(true);
         mockRaftActor.handleCommand(applySnapshot);
 
