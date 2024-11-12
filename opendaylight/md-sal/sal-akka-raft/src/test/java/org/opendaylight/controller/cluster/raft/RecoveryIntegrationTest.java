@@ -17,7 +17,7 @@ import org.apache.pekko.persistence.SaveSnapshotSuccess;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
-import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
+import org.opendaylight.controller.cluster.raft.base.messages.ApplyLeaderSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
@@ -172,7 +172,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         leaderActor.tell(new SetPeerAddress(follower2Id, follower2Actor.path().toString()), ActorRef.noSender());
 
         // The leader should install a snapshot so wait for the follower to receive ApplySnapshot.
-        MessageCollectorActor.expectFirstMatching(follower2CollectorActor, ApplySnapshot.class);
+        MessageCollectorActor.expectFirstMatching(follower2CollectorActor, ApplyLeaderSnapshot.class);
 
         // Wait for the follower to persist the snapshot.
         MessageCollectorActor.expectFirstMatching(follower2CollectorActor, SaveSnapshotSuccess.class);

@@ -13,9 +13,9 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.io.OutputStream;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.pekko.actor.ActorRef;
@@ -28,12 +28,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
-import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
+import org.opendaylight.controller.cluster.raft.base.messages.ApplyLeaderSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.ByteState;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
-import org.opendaylight.controller.cluster.raft.spi.TermInfo;
+import org.opendaylight.controller.cluster.raft.spi.ImmutableRaftEntryMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,18 +47,16 @@ public class RaftActorSnapshotMessageSupportTest {
 
     @Mock
     private DataPersistenceProvider mockPersistence;
-
     @Mock
     private RaftActorBehavior mockBehavior;
-
     @Mock
     private RaftActorSnapshotCohort mockCohort;
-
     @Mock
     private SnapshotManager mockSnapshotManager;
-
     @Mock
-    ActorRef mockRaftActorRef;
+    private ActorRef mockRaftActorRef;
+    @Mock
+    private ApplyLeaderSnapshot.Callback mockCallback;
 
     private RaftActorSnapshotMessageSupport support;
 
@@ -93,18 +90,12 @@ public class RaftActorSnapshotMessageSupportTest {
 
     @Test
     public void testOnApplySnapshot() {
+        final var snapshot = new ApplyLeaderSnapshot("leaderId", 1, ImmutableRaftEntryMeta.of(2, 1),
+            ByteSource.wrap(new byte[] { 1, 2, 3, 4, 5 }), null, mockCallback);
 
-        long lastAppliedDuringSnapshotCapture = 1;
-        long lastIndexDuringSnapshotCapture = 2;
-        byte[] snapshotBytes = {1,2,3,4,5};
+        sendMessageToSupport(snapshot);
 
-        Snapshot snapshot = Snapshot.create(ByteState.of(snapshotBytes), List.of(), lastIndexDuringSnapshotCapture, 1,
-            lastAppliedDuringSnapshotCapture, 1, new TermInfo(-1), null);
-
-        ApplySnapshot applySnapshot = new ApplySnapshot(snapshot);
-        sendMessageToSupport(applySnapshot);
-
-        verify(mockSnapshotManager).apply(applySnapshot);
+        verify(mockSnapshotManager).applyFromLeader(snapshot);
     }
 
     @Test
