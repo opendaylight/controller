@@ -9,10 +9,10 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
+import com.google.common.io.ByteSource;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -42,7 +42,6 @@ import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 
 /**
@@ -635,25 +634,17 @@ public class Follower extends RaftActorBehavior {
 
         // TODO: this message is confusing: the snapshot is *received*, not installed yet
         log.info("{}: Snapshot installed from leader: {}", logName, leaderId);
-        final Snapshot.State snapshotState;
+        final ByteSource snapshotBytes;
         try {
-            snapshotState = context.getSnapshotManager().convertSnapshot(snapshotTracker.getSnapshotBytes());
+            snapshotBytes = snapshotTracker.getSnapshotBytes();
         } catch (IOException e) {
-            log.debug("{}: failed to convert InstallSnapshot to state", logName, e);
+            log.debug("{}: failed to reconstract InstallSnapshot state", logName, e);
             closeSnapshotTracker();
             sender.tell(new InstallSnapshotReply(currentTerm(), context.getId(), -1, false), actor());
             return;
         }
 
-        log.debug("{}: Converted InstallSnapshot from leader: {} to state{}", logName, leaderId,
-            snapshotState.needsMigration() ? " (needs migration)" : "");
-
-        final var snapshot = Snapshot.create(snapshotState, List.of(),
-            installSnapshot.getLastIncludedIndex(), installSnapshot.getLastIncludedTerm(),
-            installSnapshot.getLastIncludedIndex(), installSnapshot.getLastIncludedTerm(),
-            context.termInfo(), installSnapshot.serverConfig());
-
-        final var applySnapshotCallback = new ApplySnapshot.Callback() {
+        actor().tell(new ApplySnapshot(snapshotBytes, new ApplySnapshot.Callback() {
             @Override
             public void onSuccess() {
                 log.debug("{}: handleInstallSnapshot returning: {}", logName, successReply);
@@ -664,9 +655,7 @@ public class Follower extends RaftActorBehavior {
             public void onFailure() {
                 sender.tell(new InstallSnapshotReply(currentTerm(), context.getId(), -1, false), actor());
             }
-        };
-
-        actor().tell(new ApplySnapshot(snapshot, applySnapshotCallback), actor());
+        }), actor());
 
         closeSnapshotTracker();
     }
