@@ -8,10 +8,15 @@
 
 package org.opendaylight.controller.cluster.raft;
 
+import com.google.common.io.ByteSource;
 import java.io.OutputStream;
 import java.util.Optional;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
+import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.spi.ImmutableRaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
 
 /**
@@ -56,6 +61,10 @@ public interface SnapshotState {
      * @return true if capture was started
      */
     boolean captureWithForcedTrim(RaftEntryMeta lastLogEntry, long replicatedToAllIndex);
+
+    @NonNullByDefault
+    void installSnapshot(String leaderId, long term, ImmutableRaftEntryMeta lastEntry, ByteSource snapshot,
+        @Nullable ServerConfigurationPayload serverConfig);
 
     /**
      * Applies a snapshot on a follower that was installed by the leader.
