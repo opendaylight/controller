@@ -950,7 +950,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
             try {
                 // Ensure the snapshot bytes are set - this is a no-op.
-                installSnapshotState.setSnapshotBytes(snapshotHolder.orElseThrow().getSnapshotBytes());
+                final var snapshot = snapshotHolder.orElseThrow();
+                installSnapshotState.setSnapshotBytes(snapshot.getSnapshotBytes());
 
                 if (!installSnapshotState.canSendNextChunk()) {
                     return;
@@ -967,7 +968,18 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                     serverConfig = context.getPeerServerInfo(true);
                 }
 
-                sendSnapshotChunk(followerActor, followerLogInfo, nextSnapshotChunk, nextChunkIndex, serverConfig);
+                installSnapshotState.startChunkTimer();
+                followerActor.tell(
+                    new InstallSnapshot(currentTerm(), context.getId(),
+                        snapshot.getLastIncludedIndex(),
+                        snapshot.getLastIncludedTerm(),
+                        nextSnapshotChunk,
+                        nextChunkIndex,
+                        installSnapshotState.getTotalChunks(),
+                        OptionalInt.of(installSnapshotState.getLastChunkHashCode()),
+                        serverConfig,
+                        followerLogInfo.getRaftVersion()),
+                    actor());
 
                 log.debug("{}: InstallSnapshot sent to follower {}, Chunk: {}/{}", logName(), followerActor.path(),
                         installSnapshotState.getChunkIndex(), installSnapshotState.getTotalChunks());
@@ -979,26 +991,6 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                 installSnapshotState.reset();
             }
         }
-    }
-
-    private void sendSnapshotChunk(final ActorSelection followerActor, final FollowerLogInformation followerLogInfo,
-                                   final byte[] snapshotChunk, final int chunkIndex,
-                                   final @Nullable ServerConfigurationPayload serverConfig) {
-        LeaderInstallSnapshotState installSnapshotState = followerLogInfo.getInstallSnapshotState();
-
-        installSnapshotState.startChunkTimer();
-        followerActor.tell(
-                new InstallSnapshot(currentTerm(), context.getId(),
-                        snapshotHolder.orElseThrow().getLastIncludedIndex(),
-                        snapshotHolder.orElseThrow().getLastIncludedTerm(),
-                        snapshotChunk,
-                        chunkIndex,
-                        installSnapshotState.getTotalChunks(),
-                        OptionalInt.of(installSnapshotState.getLastChunkHashCode()),
-                        serverConfig,
-                        followerLogInfo.getRaftVersion()),
-                actor()
-        );
     }
 
     private boolean resendSnapshotChunk(final ActorSelection followerActor,
