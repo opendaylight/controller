@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.raft.persisted;
 
+import com.google.common.base.MoreObjects;
+
 /**
  * Empty Snapshot State implementation.
  *
@@ -20,6 +22,11 @@ public final class EmptyState implements Snapshot.State {
 
     private EmptyState() {
         // Hidden on purpose
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this).toString();
     }
 
     @java.io.Serial

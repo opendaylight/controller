@@ -46,5 +46,8 @@ public abstract class ShardDataTreeSnapshot {
     public abstract Optional<NormalizedNode> getRootNode();
 
     public abstract void serialize(ObjectOutput out) throws IOException;
+
+    @Override
+    public abstract String toString();
 }
 
