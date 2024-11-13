@@ -17,8 +17,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 /**
  * Abstract base class for snapshots of the ShardDataTree.
- *
- * @author Robert Varga
  */
 @Beta
 public abstract class ShardDataTreeSnapshot {
@@ -46,5 +44,8 @@ public abstract class ShardDataTreeSnapshot {
     public abstract Optional<NormalizedNode> getRootNode();
 
     public abstract void serialize(ObjectOutput out) throws IOException;
+
+    @Override
+    public abstract String toString();
 }
 

@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft.persisted;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.base.MoreObjects;
 import java.util.Arrays;
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -40,32 +41,16 @@ public final class ByteState implements Snapshot.State {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + Arrays.hashCode(bytes);
-        return result;
+        return Arrays.hashCode(bytes);
     }
 
     @Override
     public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        ByteState other = (ByteState) obj;
-        if (!Arrays.equals(bytes, other.bytes)) {
-            return false;
-        }
-        return true;
+        return this == obj || obj instanceof ByteState other && Arrays.equals(bytes, other.bytes);
     }
 
     @Override
     public String toString() {
-        return "ByteState [bytes=" + Arrays.toString(bytes) + "]";
+        return MoreObjects.toStringHelper(this).add("length", bytes.length).toString();
     }
 }
