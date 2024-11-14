@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.raft;
 
 import com.google.common.annotations.VisibleForTesting;
-import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.apache.pekko.actor.ActorRef;
@@ -127,8 +127,7 @@ class RaftActorSnapshotMessageSupport {
 
             cohort.createSnapshot(snapshotReplyActor, Optional.empty());
         } else {
-            Snapshot snapshot = Snapshot.create(
-                    EmptyState.INSTANCE, Collections.<ReplicatedLogEntry>emptyList(),
+            Snapshot snapshot = Snapshot.create(EmptyState.INSTANCE, List.of(),
                     -1, -1, -1, -1, context.termInfo(), context.getPeerServerInfo(true));
 
             sender.tell(new GetSnapshotReply(context.getId(), snapshot), context.getActor());
