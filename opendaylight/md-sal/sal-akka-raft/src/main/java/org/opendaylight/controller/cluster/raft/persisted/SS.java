@@ -43,8 +43,11 @@ final class SS implements Externalizable {
     public void writeExternal(final ObjectOutput out) throws IOException {
         WritableObjects.writeLongs(out, snapshot.getLastIndex(), snapshot.getLastTerm());
         WritableObjects.writeLongs(out, snapshot.getLastAppliedIndex(), snapshot.getLastAppliedTerm());
-        WritableObjects.writeLong(out, snapshot.getElectionTerm());
-        out.writeObject(snapshot.getElectionVotedFor());
+
+        final var termInfo = snapshot.termInfo();
+        WritableObjects.writeLong(out, termInfo.term());
+        out.writeObject(termInfo.votedFor());
+
         out.writeObject(snapshot.getServerConfiguration());
 
         final var unAppliedEntries = snapshot.getUnAppliedEntries();
