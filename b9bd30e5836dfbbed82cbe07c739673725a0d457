@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d8efdecd_be2a1692",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 328,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2024-11-19T18:40:19Z",
+      "side": 1,
+      "message": "duplicate access",
+      "range": {
+        "startLine": 328,
+        "startChar": 46,
+        "endLine": 328,
+        "endChar": 79
+      },
+      "revId": "b9bd30e5836dfbbed82cbe07c739673725a0d457",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5d4edc8b_128ebe82",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 478,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2024-11-19T18:40:19Z",
+      "side": 1,
+      "message": "pass down to constructor",
+      "range": {
+        "startLine": 478,
+        "startChar": 12,
+        "endLine": 478,
+        "endChar": 69
+      },
+      "revId": "b9bd30e5836dfbbed82cbe07c739673725a0d457",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
