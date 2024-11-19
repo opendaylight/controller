@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2a7c8245_3693d491",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/base/messages/ApplyLeaderSnapshot.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2024-11-19T19:15:22Z",
+      "side": 1,
+      "message": "Strong correlation to InstallSnapshot, and this really is specific to SnapshotManager/RaftActor integration. This should live in SnapshotManager as @VisibleForTesting",
+      "range": {
+        "startLine": 27,
+        "startChar": 14,
+        "endLine": 27,
+        "endChar": 33
+      },
+      "revId": "d7f7b9470236ec9dfb9ecbf5f4434b7fb339c56e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3620e61c_08be4b43",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/base/messages/ApplySnapshot.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2024-11-19T19:15:22Z",
+      "side": 1,
+      "message": "should be eliminated",
+      "range": {
+        "startLine": 20,
+        "startChar": 14,
+        "endLine": 20,
+        "endChar": 27
+      },
+      "revId": "d7f7b9470236ec9dfb9ecbf5f4434b7fb339c56e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2c249299_7f3e985f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/SnapshotTracker.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2024-11-19T19:15:22Z",
+      "side": 1,
+      "message": "ifPresent(actualChunkHashCode -\u003e {",
+      "range": {
+        "startLine": 68,
+        "startChar": 35,
+        "endLine": 69,
+        "endChar": 81
+      },
+      "revId": "d7f7b9470236ec9dfb9ecbf5f4434b7fb339c56e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "21a44176_c29d8056",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/SnapshotTracker.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2024-11-19T19:15:22Z",
+      "side": 1,
+      "message": "why not an IOException?",
+      "range": {
+        "startLine": 87,
+        "startChar": 22,
+        "endLine": 87,
+        "endChar": 43
+      },
+      "revId": "d7f7b9470236ec9dfb9ecbf5f4434b7fb339c56e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
