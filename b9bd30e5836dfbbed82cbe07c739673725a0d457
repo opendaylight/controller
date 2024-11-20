@@ -69,6 +69,30 @@
       },
       "revId": "b9bd30e5836dfbbed82cbe07c739673725a0d457",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6ce9423b_9af64f11",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 478,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2024-11-20T12:04:32Z",
+      "side": 1,
+      "message": "will be addressed separately",
+      "parentUuid": "5d4edc8b_128ebe82",
+      "range": {
+        "startLine": 478,
+        "startChar": 12,
+        "endLine": 478,
+        "endChar": 69
+      },
+      "revId": "b9bd30e5836dfbbed82cbe07c739673725a0d457",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
