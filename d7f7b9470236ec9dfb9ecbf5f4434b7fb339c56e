@@ -47,6 +47,30 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "f46f68f9_aaae4093",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/base/messages/ApplySnapshot.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2024-11-21T09:27:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3620e61c_08be4b43",
+      "range": {
+        "startLine": 20,
+        "startChar": 14,
+        "endLine": 20,
+        "endChar": 27
+      },
+      "revId": "d7f7b9470236ec9dfb9ecbf5f4434b7fb339c56e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "2c249299_7f3e985f",
@@ -60,6 +84,30 @@
       "writtenOn": "2024-11-19T19:15:22Z",
       "side": 1,
       "message": "ifPresent(actualChunkHashCode -\u003e {",
+      "range": {
+        "startLine": 68,
+        "startChar": 35,
+        "endLine": 69,
+        "endChar": 81
+      },
+      "revId": "d7f7b9470236ec9dfb9ecbf5f4434b7fb339c56e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "669f3c3a_bd3b7db4",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/SnapshotTracker.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2024-11-21T09:27:16Z",
+      "side": 1,
+      "message": "can\u0027t be done because InvalidChunkException is checked",
+      "parentUuid": "2c249299_7f3e985f",
       "range": {
         "startLine": 68,
         "startChar": 35,
