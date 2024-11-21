@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import static org.apache.pekko.actor.ActorRef.noSender;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -16,14 +17,12 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 
-import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.time.Duration;
 import java.util.Collections;
@@ -268,19 +267,8 @@ public class ShardTest extends AbstractShardTest {
 
         shard.underlyingActor().getRaftActorContext().getSnapshotManager().applyFromRecovery(snapshot);
 
-        final Stopwatch sw = Stopwatch.createStarted();
-        while (sw.elapsed(TimeUnit.SECONDS) <= 5) {
-            Uninterruptibles.sleepUninterruptibly(75, TimeUnit.MILLISECONDS);
-
-            try {
-                assertEquals("Root node", expected, readStore(shard, root));
-                return;
-            } catch (final AssertionError e) {
-                // try again
-            }
-        }
-
-        fail("Snapshot was not applied");
+        await().atMost(Duration.ofSeconds(5)).pollDelay(Duration.ofMillis(75))
+            .untilAsserted(() -> assertEquals("Root node", expected, readStore(shard, root)));
     }
 
     @Test
@@ -300,18 +288,8 @@ public class ShardTest extends AbstractShardTest {
 
         shard.underlyingActor().applyState(null, null, payloadForModification(store, writeMod, nextTransactionId()));
 
-        final Stopwatch sw = Stopwatch.createStarted();
-        while (sw.elapsed(TimeUnit.SECONDS) <= 5) {
-            Uninterruptibles.sleepUninterruptibly(75, TimeUnit.MILLISECONDS);
-
-            final NormalizedNode actual = readStore(shard, TestModel.TEST_PATH);
-            if (actual != null) {
-                assertEquals("Applied state", node, actual);
-                return;
-            }
-        }
-
-        fail("State was not applied");
+        await().atMost(Duration.ofSeconds(5)).pollDelay(Duration.ofMillis(75))
+            .untilAsserted(() -> assertEquals("Applied state", node, readStore(shard, TestModel.TEST_PATH)));
     }
 
     @Test
