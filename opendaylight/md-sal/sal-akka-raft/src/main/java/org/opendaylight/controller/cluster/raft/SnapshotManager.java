@@ -20,11 +20,12 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStream;
-import org.opendaylight.controller.cluster.raft.base.messages.ApplyLeaderSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.SendInstallSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.SnapshotComplete;
+import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
+import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.ImmutableRaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
@@ -37,6 +38,34 @@ import org.slf4j.Logger;
  * @author Thomas Pantelis
  */
 public class SnapshotManager implements SnapshotState {
+    /**
+     * Internal message, issued by follower behavior to its actor, eventually routed to {@link SnapshotManager}.
+     * Metadata matches information conveyed in {@link InstallSnapshot}.
+     */
+    @NonNullByDefault
+    public record ApplyLeaderSnapshot(
+            String leaderId,
+            long term,
+            ImmutableRaftEntryMeta lastEntry,
+            ByteSource snapshot,
+            @Nullable ServerConfigurationPayload serverConfig,
+            ApplyLeaderSnapshot.Callback callback) {
+        public ApplyLeaderSnapshot {
+            requireNonNull(leaderId);
+            requireNonNull(lastEntry);
+            requireNonNull(snapshot);
+            requireNonNull(callback);
+            // TODO: sanity check term vs. lastEntry ?
+        }
+
+        public interface Callback {
+
+            void onSuccess();
+
+            void onFailure();
+        }
+    }
+
     /**
      * The task being executed by this instance.
      */
@@ -185,7 +214,12 @@ public class SnapshotManager implements SnapshotState {
         return false;
     }
 
-    @Override
+    /**
+     * Applies a snapshot on a follower that was installed by the leader.
+     *
+     * @param snapshot the {@link ApplyLeaderSnapshot} to apply.
+     */
+    @NonNullByDefault
     public void applyFromLeader(final ApplyLeaderSnapshot snapshot) {
         if (!(task instanceof Idle)) {
             log.debug("applySnapshot should not be called in state {}", task);
@@ -211,7 +245,12 @@ public class SnapshotManager implements SnapshotState {
             snapshot.callback());
     }
 
-    @Override
+    /**
+     * Applies a snapshot from recovery.
+     *
+     * @param snapshot the {@link Snapshot} to apply.
+     */
+    @NonNullByDefault
     public void applyFromRecovery(final Snapshot snapshot) {
         if (task instanceof Idle) {
             persistSnapshot(requireNonNull(snapshot), null);
