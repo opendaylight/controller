@@ -39,7 +39,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.MockRaftActor.MockSnapshotState;
-import org.opendaylight.controller.cluster.raft.base.messages.ApplyLeaderSnapshot;
+import org.opendaylight.controller.cluster.raft.SnapshotManager.ApplyLeaderSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.base.messages.InitiateCaptureSnapshot;
