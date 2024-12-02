@@ -3,6 +3,29 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "d4618082_968720d2",
+        "filename": ".github/workflows/gerrit-verify.yaml",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1
+      },
+      "writtenOn": "2024-12-02T14:43:55Z",
+      "side": 1,
+      "message": "9627b9a144f2a2cad70707ddfae87c87dce60729  # v0.8",
+      "range": {
+        "startLine": 56,
+        "startChar": 40,
+        "endLine": 56,
+        "endChar": 88
+      },
+      "revId": "ba7b5a5357db43e1cc3918d55600a7d6a721c6c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "3699c75d_5b26afe9",
         "filename": ".github/workflows/gerrit-verify.yaml",
         "patchSetId": 1
@@ -20,6 +43,69 @@
         "endLine": 93,
         "endChar": 27
       },
+      "revId": "ba7b5a5357db43e1cc3918d55600a7d6a721c6c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0956dba9_1c1e2d9b",
+        "filename": ".github/workflows/gerrit-verify.yaml",
+        "patchSetId": 1
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1
+      },
+      "writtenOn": "2024-12-02T14:43:55Z",
+      "side": 1,
+      "message": "im-open/workflow-conclusion@e4f7c4980600fbe0818173e30931d3550801b992  # v2.2.3",
+      "range": {
+        "startLine": 105,
+        "startChar": 14,
+        "endLine": 105,
+        "endChar": 106
+      },
+      "revId": "ba7b5a5357db43e1cc3918d55600a7d6a721c6c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1cd0d2de_a0bdb898",
+        "filename": ".github/workflows/gerrit-verify.yaml",
+        "patchSetId": 1
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1
+      },
+      "writtenOn": "2024-12-02T14:43:55Z",
+      "side": 1,
+      "message": "9627b9a144f2a2cad70707ddfae87c87dce60729  # v0.8",
+      "range": {
+        "startLine": 108,
+        "startChar": 40,
+        "endLine": 108,
+        "endChar": 88
+      },
+      "revId": "ba7b5a5357db43e1cc3918d55600a7d6a721c6c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a66d98cf_1534d1db",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1
+      },
+      "writtenOn": "2024-12-02T14:43:55Z",
+      "side": 1,
+      "message": "Please use the updated GHA for gerrit review (vote) and getting the workflow conclusion",
       "revId": "ba7b5a5357db43e1cc3918d55600a7d6a721c6c5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
