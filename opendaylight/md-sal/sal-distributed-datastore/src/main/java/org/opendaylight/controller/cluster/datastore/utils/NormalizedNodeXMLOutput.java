@@ -8,15 +8,14 @@
 package org.opendaylight.controller.cluster.datastore.utils;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import javanet.staxutils.IndentingXMLStreamWriter;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
 import org.opendaylight.yangtools.yang.data.codec.xml.XMLStreamNormalizedNodeStreamWriter;
 import org.slf4j.Logger;
@@ -42,22 +41,24 @@ public final class NormalizedNodeXMLOutput {
 
     public static void toStream(final OutputStream outStream, final NormalizedNode node)
             throws XMLStreamException, IOException {
-        XMLStreamWriter xmlWriter = XOF.createXMLStreamWriter(outStream);
-
-        IndentingXMLStreamWriter indenting = new IndentingXMLStreamWriter(xmlWriter);
-        try (NormalizedNodeStreamWriter streamWriter = XMLStreamNormalizedNodeStreamWriter.createSchemaless(
-                indenting)) {
+        final var indenting = new IndentingXMLStreamWriter(XOF.createXMLStreamWriter(outStream));
+        try (var streamWriter = XMLStreamNormalizedNodeStreamWriter.createSchemaless(indenting)) {
             NormalizedNodeWriter nodeWriter = NormalizedNodeWriter.forStreamWriter(streamWriter);
             nodeWriter.write(node);
             nodeWriter.flush();
         }
     }
 
-    public static void toFile(final File file, final NormalizedNode node) {
-        try (FileOutputStream outStream = new FileOutputStream(file)) {
+    public static void toFile(final Path file, final NormalizedNode node) {
+        try (var outStream = Files.newOutputStream(file)) {
             toStream(outStream, node);
         } catch (IOException | XMLStreamException e) {
             LOG.error("Error writing NormalizedNode to file {}", file, e);
         }
+    }
+
+    @Deprecated
+    public static void toFile(final File file, final NormalizedNode node) {
+        toFile(file.toPath(), node);
     }
 }
