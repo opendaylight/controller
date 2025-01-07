@@ -12,7 +12,8 @@ import static java.util.Objects.requireNonNull;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigObject;
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,11 +27,11 @@ abstract class AbstractModuleShardConfigProvider implements ModuleShardConfigPro
     private static final Logger LOG = LoggerFactory.getLogger(AbstractModuleShardConfigProvider.class);
 
     static final Config loadConfigFromPath(final String configPath) {
-        final File configFile = new File(configPath);
+        final var configFile = Path.of(configPath);
         Config config = null;
-        if (configFile.exists()) {
+        if (Files.exists(configFile)) {
             LOG.info("Config file exists - reading config from it");
-            config = ConfigFactory.parseFile(configFile);
+            config = ConfigFactory.parseFile(configFile.toFile());
         } else {
             LOG.warn("Reading Config from resource");
             config = ConfigFactory.load(configPath);
