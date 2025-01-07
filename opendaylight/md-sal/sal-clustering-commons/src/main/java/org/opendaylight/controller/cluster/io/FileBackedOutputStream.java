@@ -11,13 +11,14 @@ import com.google.common.io.ByteSource;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.ref.Cleaner;
 import java.lang.ref.Cleaner.Cleanable;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.checkerframework.checker.lock.qual.Holding;
 import org.eclipse.jdt.annotation.NonNull;
@@ -41,7 +42,7 @@ public class FileBackedOutputStream extends OutputStream {
     private static final Cleaner FILE_CLEANER = Cleaner.create();
 
     private final int fileThreshold;
-    private final String fileDirectory;
+    private final Path fileDirectory;
 
     @GuardedBy("this")
     private MemoryOutputStream memory = new MemoryOutputStream();
@@ -50,7 +51,7 @@ public class FileBackedOutputStream extends OutputStream {
     private OutputStream out = memory;
 
     @GuardedBy("this")
-    private File file;
+    private Path file;
 
     @GuardedBy("this")
     private Cleanable fileCleanup;
@@ -68,9 +69,31 @@ public class FileBackedOutputStream extends OutputStream {
      * @param fileDirectory the directory in which to create the file if needed. If null, the default temp file
      *                      location is used.
      */
-    public FileBackedOutputStream(final int fileThreshold, @Nullable final String fileDirectory) {
+    public FileBackedOutputStream(final int fileThreshold, final @Nullable String fileDirectory) {
+        this(fileThreshold, fileDirectory != null ? Path.of(fileDirectory) : null);
+    }
+
+    /**
+     * Creates a new instance that uses the given file threshold, and does not reset the data when the
+     * {@link ByteSource} returned by {@link #asByteSource} is finalized.
+     *
+     * @param fileThreshold the number of bytes before the stream should switch to buffering to a file
+     * @param fileDirectory the directory in which to create the file if needed. If null, the default temp file
+     *                      location is used.
+     */
+    public FileBackedOutputStream(final int fileThreshold, final @Nullable Path fileDirectory) {
         this.fileThreshold = fileThreshold;
         this.fileDirectory = fileDirectory;
+    }
+
+    /**
+     * Creates a new instance that uses the given file threshold, and does not reset the data when the
+     * {@link ByteSource} returned by {@link #asByteSource} is finalized. Uses default temp file location.
+     *
+     * @param fileThreshold the number of bytes before the stream should switch to buffering to a file
+     */
+    public FileBackedOutputStream(final int fileThreshold) {
+        this(fileThreshold, (Path) null);
     }
 
     /**
@@ -89,7 +112,7 @@ public class FileBackedOutputStream extends OutputStream {
                 public InputStream openStream() throws IOException {
                     synchronized (FileBackedOutputStream.this) {
                         if (file != null) {
-                            return Files.newInputStream(file.toPath());
+                            return Files.newInputStream(file);
                         } else {
                             return new ByteArrayInputStream(memory.buf(), 0, memory.count());
                         }
@@ -179,17 +202,16 @@ public class FileBackedOutputStream extends OutputStream {
         }
 
         if (file == null && memory.count() + len > fileThreshold) {
-            final File temp = File.createTempFile("FileBackedOutputStream", null,
-                    fileDirectory == null ? null : new File(fileDirectory));
-            temp.deleteOnExit();
-            final Cleaner.Cleanable cleanup = FILE_CLEANER.register(this, () -> deleteFile(temp));
+            final var temp = fileDirectory == null ? Files.createTempFile("FileBackedOutputStream", null)
+                : Files.createTempFile(fileDirectory, "FileBackedOutputStream", null);
+            final var cleanup = FILE_CLEANER.register(this, () -> deleteFile(temp));
 
             LOG.debug("Byte count {} has exceeded threshold {} - switching to file: {}", memory.count() + len,
                     fileThreshold, temp);
 
             final OutputStream transfer;
             try {
-                transfer = Files.newOutputStream(temp.toPath());
+                transfer = Files.newOutputStream(temp, StandardOpenOption.DELETE_ON_CLOSE);
                 try {
                     transfer.write(memory.buf(), 0, memory.count());
                     transfer.flush();
@@ -214,10 +236,12 @@ public class FileBackedOutputStream extends OutputStream {
         }
     }
 
-    private static void deleteFile(final File file) {
+    private static void deleteFile(final Path file) {
         LOG.debug("Deleting temp file {}", file);
-        if (!file.delete()) {
-            LOG.warn("Could not delete temp file {}", file);
+        try {
+            Files.deleteIfExists(file);
+        } catch (IOException e) {
+            LOG.warn("Could not delete temp file {}", file, e);
         }
     }
 

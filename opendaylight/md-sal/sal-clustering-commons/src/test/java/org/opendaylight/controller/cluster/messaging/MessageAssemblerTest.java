@@ -68,8 +68,8 @@ public class MessageAssemblerTest extends AbstractMessagingTest {
 
     @Test
     public void testSingleMessageSlice() {
-        try (MessageAssembler assembler = newMessageAssembler("testSingleMessageSlice")) {
-            final FileBackedOutputStream fileBackStream = spy(new FileBackedOutputStream(100000000, null));
+        try (var assembler = newMessageAssembler("testSingleMessageSlice")) {
+            final var fileBackStream = spy(new FileBackedOutputStream(100000000));
             doReturn(fileBackStream).when(mockFiledBackedStreamFactory).newInstance();
 
             final MessageSliceIdentifier identifier = new MessageSliceIdentifier(IDENTIFIER, 1);
