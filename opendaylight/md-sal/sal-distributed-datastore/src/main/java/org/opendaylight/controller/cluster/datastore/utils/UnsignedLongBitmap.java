@@ -12,7 +12,6 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Maps;
 import com.google.common.primitives.UnsignedLong;
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -183,7 +182,7 @@ public abstract class UnsignedLongBitmap implements Immutable {
             return new HashMap<>();
         }
 
-        final var ret = Maps.<UnsignedLong, Boolean>newHashMapWithExpectedSize(size);
+        final var ret = HashMap.<UnsignedLong, Boolean>newHashMap(size);
         putEntries(ret);
         return ret;
     }
