@@ -30,7 +30,7 @@ import org.opendaylight.yangtools.concepts.WritableObjects;
  * <p>Unlike a {@code RangeSet}, though, this class takes advantage of knowing that an unsigned long is a discrete unit
  * and can be stored in a simple {@code long}.
  */
-abstract class UnsignedLongSet {
+abstract sealed class UnsignedLongSet permits ImmutableUnsignedLongSet, MutableUnsignedLongSet {
     @Beta
     @VisibleForTesting
     public static final class Entry implements Comparable<Entry>, Immutable {
