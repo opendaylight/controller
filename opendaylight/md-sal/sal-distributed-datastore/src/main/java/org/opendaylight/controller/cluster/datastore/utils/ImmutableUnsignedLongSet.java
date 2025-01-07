@@ -12,7 +12,6 @@ import com.google.common.collect.ImmutableSortedSet;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.NavigableSet;
 import java.util.TreeSet;
 import org.eclipse.jdt.annotation.NonNull;
@@ -58,21 +57,24 @@ public final class ImmutableUnsignedLongSet extends UnsignedLongSet implements I
         if (size == 0) {
             return EMPTY;
         }
+        return new ImmutableUnsignedLongSet(size <= ARRAY_MAX_ELEMENTS ? readArrayRanges(in, size)
+            : readTreeRanges(in, size));
+    }
 
-        final NavigableSet<Entry> ranges;
-        if (size <= ARRAY_MAX_ELEMENTS) {
-            final var entries = new ArrayList<Entry>(size);
-            for (int i = 0; i < size; ++i) {
-                entries.add(Entry.readUnsigned(in));
-            }
-            ranges = ImmutableSortedSet.copyOf(entries);
-        } else {
-            ranges = new TreeSet<>();
-            for (int i = 0; i < size; ++i) {
-                ranges.add(Entry.readUnsigned(in));
-            }
+    private static ImmutableSortedSet<Entry> readArrayRanges(final DataInput in, final int size) throws IOException {
+        final var ranges = new Entry[size];
+        for (int i = 0; i < size; ++i) {
+            ranges[i] = Entry.readUnsigned(in);
         }
-        return new ImmutableUnsignedLongSet(ranges);
+        return ImmutableSortedSet.copyOf(ranges);
+    }
+
+    private static TreeSet<Entry> readTreeRanges(final DataInput in, final int size) throws IOException {
+        final var ranges = new TreeSet<Entry>();
+        for (int i = 0; i < size; ++i) {
+            ranges.add(Entry.readUnsigned(in));
+        }
+        return ranges;
     }
 
     @Override
