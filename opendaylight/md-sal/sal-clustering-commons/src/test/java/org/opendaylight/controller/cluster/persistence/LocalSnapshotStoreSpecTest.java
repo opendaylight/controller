@@ -8,8 +8,9 @@
 package org.opendaylight.controller.cluster.persistence;
 
 import com.typesafe.config.ConfigFactory;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import org.apache.commons.io.FileUtils;
 import org.apache.pekko.persistence.snapshot.SnapshotStoreSpec;
 import org.junit.runner.RunWith;
@@ -24,8 +25,10 @@ import org.scalatestplus.junit.JUnitRunner;
  */
 @RunWith(JUnitRunner.class)
 public class LocalSnapshotStoreSpecTest extends SnapshotStoreSpec {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
-    static final File SNAPSHOT_DIR = new File("target/snapshots");
+
+    static final Path SNAPSHOT_DIR = Path.of("target", "snapshots");
 
     public LocalSnapshotStoreSpecTest() {
         super(ConfigFactory.load("LocalSnapshotStoreTest.conf"));
@@ -34,26 +37,25 @@ public class LocalSnapshotStoreSpecTest extends SnapshotStoreSpec {
     @Override
     public void afterAll() {
         super.afterAll();
-        FileUtils.deleteQuietly(SNAPSHOT_DIR);
+        FileUtils.deleteQuietly(SNAPSHOT_DIR.toFile());
     }
 
     static void cleanSnapshotDir() {
-        if (!SNAPSHOT_DIR.exists()) {
-            return;
-        }
-
-        try {
-            FileUtils.cleanDirectory(SNAPSHOT_DIR);
-        } catch (IOException e) {
-            // Ignore
+        if (Files.exists(SNAPSHOT_DIR)) {
+            try {
+                FileUtils.cleanDirectory(SNAPSHOT_DIR.toFile());
+            } catch (IOException e) {
+                // Ignore
+            }
         }
     }
 
     static void createSnapshotDir() {
-        if (!SNAPSHOT_DIR.exists() && !SNAPSHOT_DIR.mkdirs()) {
-            throw new RuntimeException("Failed to create " + SNAPSHOT_DIR);
+        try {
+            Files.createDirectories(SNAPSHOT_DIR);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to create " + SNAPSHOT_DIR, e);
         }
-
         cleanSnapshotDir();
     }
 }

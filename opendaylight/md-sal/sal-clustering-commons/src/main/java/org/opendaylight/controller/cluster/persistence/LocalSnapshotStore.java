@@ -10,19 +10,16 @@ package org.opendaylight.controller.cluster.persistence;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.io.ByteStreams;
 import com.typesafe.config.Config;
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayDeque;
 import java.util.Arrays;
@@ -66,11 +63,11 @@ public final class LocalSnapshotStore extends SnapshotStore {
     private final InputOutputStreamFactory streamFactory;
     private final ExecutionContext executionContext;
     private final int maxLoadAttempts;
-    private final File snapshotDir;
+    private final Path snapshotDir;
 
     public LocalSnapshotStore(final Config config) {
         executionContext = context().system().dispatchers().lookup(config.getString("stream-dispatcher"));
-        snapshotDir = new File(config.getString("dir"));
+        snapshotDir = Path.of(config.getString("dir"));
 
         final int localMaxLoadAttempts = config.getInt("max-load-attempts");
         maxLoadAttempts = localMaxLoadAttempts > 0 ? localMaxLoadAttempts : 1;
@@ -89,11 +86,9 @@ public final class LocalSnapshotStore extends SnapshotStore {
 
     @Override
     public void preStart() throws Exception {
-        if (!snapshotDir.isDirectory()) {
-            // Try to create the directory, on failure double check if someone else beat us to it.
-            if (!snapshotDir.mkdirs() && !snapshotDir.isDirectory()) {
-                throw new IOException("Failed to create snapshot directory " + snapshotDir.getCanonicalPath());
-            }
+        if (!Files.isDirectory(snapshotDir)) {
+            // Try to create the directory including any non-existing parents
+            Files.createDirectories(snapshotDir);
         }
 
         super.preStart();
@@ -123,7 +118,7 @@ public final class LocalSnapshotStore extends SnapshotStore {
 
     private Optional<SelectedSnapshot> doLoad(final Deque<SnapshotMetadata> metadatas) throws IOException {
         SnapshotMetadata metadata = metadatas.removeFirst();
-        File file = toSnapshotFile(metadata);
+        final var file = toSnapshotFile(metadata);
 
         LOG.debug("doLoad {}", file);
 
@@ -144,10 +139,10 @@ public final class LocalSnapshotStore extends SnapshotStore {
         }
     }
 
-    private Object deserialize(final File file) throws IOException {
+    private Object deserialize(final Path file) throws IOException {
         return JavaSerializer.currentSystem().withValue((ExtendedActorSystem) context().system(),
             (Callable<Object>) () -> {
-                try (ObjectInputStream in = new ObjectInputStream(streamFactory.createInputStream(file))) {
+                try (var in = new ObjectInputStream(streamFactory.createInputStream(file.toFile()))) {
                     return in.readObject();
                 } catch (ClassNotFoundException e) {
                     throw new IOException("Error loading snapshot file " + file, e);
@@ -158,18 +153,15 @@ public final class LocalSnapshotStore extends SnapshotStore {
             });
     }
 
-    private Object tryDeserializeAkkaSnapshot(final File file) throws IOException {
+    private Object tryDeserializeAkkaSnapshot(final Path file) throws IOException {
         LOG.debug("tryDeserializeAkkaSnapshot {}", file);
 
         // The snapshot was probably previously stored via akka's LocalSnapshotStore which wraps the data
         // in a Snapshot instance and uses the SnapshotSerializer to serialize it to a byte[]. So we'll use
         // the SnapshotSerializer to try to de-serialize it.
 
-        SnapshotSerializer snapshotSerializer = new SnapshotSerializer((ExtendedActorSystem) context().system());
-
-        try (InputStream in = new BufferedInputStream(new FileInputStream(file))) {
-            return ((Snapshot)snapshotSerializer.fromBinary(ByteStreams.toByteArray(in))).data();
-        }
+        final var snapshotSerializer = new SnapshotSerializer((ExtendedActorSystem) context().system());
+        return ((Snapshot) snapshotSerializer.fromBinary(Files.readAllBytes(file))).data();
     }
 
     @Override
@@ -180,12 +172,12 @@ public final class LocalSnapshotStore extends SnapshotStore {
     }
 
     private Void doSave(final SnapshotMetadata metadata, final Object snapshot) throws IOException {
-        final File actual = toSnapshotFile(metadata);
-        final File temp = File.createTempFile(actual.getName(), null, snapshotDir);
+        final var actual = toSnapshotFile(metadata).toFile();
+        final var temp = File.createTempFile(actual.getName(), null, snapshotDir.toFile());
 
         LOG.debug("Saving to temp file: {}", temp);
 
-        try (ObjectOutputStream out = new ObjectOutputStream(streamFactory.createOutputStream(temp))) {
+        try (var out = new ObjectOutputStream(streamFactory.createOutputStream(temp))) {
             out.writeObject(snapshot);
         } catch (IOException e) {
             LOG.error("Error saving snapshot file {}. Deleting file..", temp, e);
@@ -228,14 +220,15 @@ public final class LocalSnapshotStore extends SnapshotStore {
     }
 
     private Void doDelete(final String persistenceId, final SnapshotSelectionCriteria criteria) {
-        final List<File> files = getSnapshotMetadatas(persistenceId, criteria).stream()
-                .flatMap(md -> Stream.of(toSnapshotFile(md))).collect(Collectors.toList());
+        final var files = getSnapshotMetadatas(persistenceId, criteria).stream()
+                .flatMap(md -> Stream.of(toSnapshotFile(md)))
+                .collect(Collectors.toList());
 
         LOG.debug("Deleting files: {}", files);
 
         files.forEach(file -> {
             try {
-                Files.delete(file.toPath());
+                Files.delete(file);
             } catch (IOException | SecurityException e) {
                 LOG.error("Unable to delete snapshot file: {}, persistenceId: {} ", file, persistenceId);
             }
@@ -261,7 +254,7 @@ public final class LocalSnapshotStore extends SnapshotStore {
     private Collection<File> getSnapshotFiles(final String persistenceId) {
         String encodedPersistenceId = encode(persistenceId);
 
-        File[] files = snapshotDir.listFiles((dir, name) -> {
+        final var files = snapshotDir.toFile().listFiles((dir, name) -> {
             int persistenceIdEndIndex = name.lastIndexOf('-', name.lastIndexOf('-') - 1);
             return PERSISTENCE_ID_START_INDEX + encodedPersistenceId.length() == persistenceIdEndIndex
                     && name.startsWith(encodedPersistenceId, PERSISTENCE_ID_START_INDEX) && !name.endsWith(".tmp");
@@ -317,8 +310,8 @@ public final class LocalSnapshotStore extends SnapshotStore {
         }
     }
 
-    private File toSnapshotFile(final SnapshotMetadata metadata) {
-        return new File(snapshotDir, String.format("snapshot-%s-%d-%d", encode(metadata.persistenceId()),
+    private Path toSnapshotFile(final SnapshotMetadata metadata) {
+        return snapshotDir.resolve("snapshot-%s-%d-%d".formatted(encode(metadata.persistenceId()),
             metadata.sequenceNr(), metadata.timestamp()));
     }
 
