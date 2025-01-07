@@ -33,6 +33,8 @@ import org.opendaylight.yangtools.concepts.WritableObjects;
 public abstract sealed class UnsignedLongBitmap implements Immutable {
     @VisibleForTesting
     static final class Regular extends UnsignedLongBitmap {
+        private static final @NonNull UnsignedLongBitmap EMPTY = new Regular(new long[0], new boolean[0]);
+
         private final long[] keys;
         private final boolean[] values;
 
@@ -132,14 +134,12 @@ public abstract sealed class UnsignedLongBitmap implements Immutable {
         }
     }
 
-    private static final @NonNull UnsignedLongBitmap EMPTY = new Regular(new long[0], new boolean[0]);
-
     private UnsignedLongBitmap() {
         // Hidden on purpose
     }
 
     public static @NonNull UnsignedLongBitmap of() {
-        return EMPTY;
+        return Regular.EMPTY;
     }
 
     public static @NonNull UnsignedLongBitmap of(final long keyBits, final boolean value) {
