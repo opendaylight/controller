@@ -23,6 +23,7 @@ import static java.util.Objects.requireNonNull;
 import io.netty.buffer.ByteBufAllocator;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -49,7 +50,7 @@ public final class SegmentedByteBufJournal implements RaftJournal {
     private final Collection<EntryReader> readers = ConcurrentHashMap.newKeySet();
     private final @NonNull ByteBufAllocator allocator;
     private final @NonNull StorageLevel storageLevel;
-    private final @NonNull File directory;
+    private final @NonNull Path directory;
     private final @NonNull String name;
     private final @NonNull EntryWriter writer;
     private final int maxSegmentSize;
@@ -63,7 +64,7 @@ public final class SegmentedByteBufJournal implements RaftJournal {
     private JournalSegment currentSegment;
     private volatile long commitIndex;
 
-    SegmentedByteBufJournal(final String name, final StorageLevel storageLevel, final File directory,
+    SegmentedByteBufJournal(final String name, final StorageLevel storageLevel, final Path directory,
             final int maxSegmentSize, final int maxEntrySize, final int maxEntriesPerSegment, final double indexDensity,
             final boolean flushOnCommit, final ByteBufAllocator allocator) {
         this.name = requireNonNull(name, "name cannot be null");
@@ -149,7 +150,8 @@ public final class SegmentedByteBufJournal implements RaftJournal {
      * Asserts that enough disk space is available to allocate a new segment.
      */
     private void assertDiskSpace() {
-        if (directory.getUsableSpace() < maxSegmentSize * SEGMENT_BUFFER_FACTOR) {
+        // FIXME: Use FileStore.getUsableSpace() instead
+        if (directory.toFile().getUsableSpace() < maxSegmentSize * SEGMENT_BUFFER_FACTOR) {
             throw new StorageException.OutOfDiskSpace("Not enough space to allocate a new journal segment");
         }
     }
@@ -307,18 +309,20 @@ public final class SegmentedByteBufJournal implements RaftJournal {
      */
     private Collection<JournalSegment> loadSegments() {
         // Ensure log directories are created.
-        directory.mkdirs();
+        final var dirFile = directory.toFile();
+        dirFile.mkdirs();
 
         final var segmentsMap = new TreeMap<Long, JournalSegment>();
 
         // Iterate through all files in the log directory.
-        for (var file : directory.listFiles(File::isFile)) {
+        for (var file : dirFile.listFiles(File::isFile)) {
 
             // If the file looks like a segment file, attempt to load the segment.
-            if (JournalSegmentFile.isSegmentFile(name, file)) {
+            final var filePath = file.toPath();
+            if (JournalSegmentFile.isSegmentFile(name, filePath)) {
                 final JournalSegmentFile segmentFile;
                 try {
-                    segmentFile = JournalSegmentFile.openExisting(file.toPath(), allocator);
+                    segmentFile = JournalSegmentFile.openExisting(filePath, allocator);
                 } catch (IOException e) {
                     throw new StorageException(e);
                 }
@@ -472,7 +476,7 @@ public final class SegmentedByteBufJournal implements RaftJournal {
 
         private String name = DEFAULT_NAME;
         private StorageLevel storageLevel = StorageLevel.DISK;
-        private File directory = new File(DEFAULT_DIRECTORY);
+        private Path directory = Path.of(DEFAULT_DIRECTORY);
         private int maxSegmentSize = DEFAULT_MAX_SEGMENT_SIZE;
         private int maxEntrySize = DEFAULT_MAX_ENTRY_SIZE;
         private int maxEntriesPerSegment = DEFAULT_MAX_ENTRIES_PER_SEGMENT;
@@ -517,7 +521,7 @@ public final class SegmentedByteBufJournal implements RaftJournal {
          */
         @SuppressWarnings("checkstyle:hiddenField")
         public Builder withDirectory(final String directory) {
-            return withDirectory(new File(requireNonNull(directory, "directory cannot be null")));
+            return withDirectory(Path.of(requireNonNull(directory, "directory cannot be null")));
         }
 
         /**
@@ -528,9 +532,23 @@ public final class SegmentedByteBufJournal implements RaftJournal {
          * @throws NullPointerException If the {@code directory} is {@code null}
          */
         @SuppressWarnings("checkstyle:hiddenField")
-        public Builder withDirectory(final File directory) {
+        public Builder withDirectory(final Path directory) {
             this.directory = requireNonNull(directory, "directory cannot be null");
             return this;
+        }
+
+        /**
+         * Sets the journal directory.
+         *
+         * @param directory The log directory.
+         * @return The builder instance
+         * @throws NullPointerException If the {@code directory} is {@code null}
+         * @deprecated Use {@link #withDirectory(Path)} instead
+         */
+        @Deprecated
+        @SuppressWarnings("checkstyle:hiddenField")
+        public Builder withDirectory(final File directory) {
+            return withDirectory(requireNonNull(directory, "directory cannot be null").toPath());
         }
 
         /**

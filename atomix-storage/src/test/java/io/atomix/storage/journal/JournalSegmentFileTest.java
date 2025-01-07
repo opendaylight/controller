@@ -18,7 +18,7 @@ package io.atomix.storage.journal;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.File;
+import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -34,7 +34,7 @@ class JournalSegmentFileTest {
 
     @Test
     void testCreateSegmentFile() {
-        final var file = JournalSegmentFile.createSegmentFile("foo", new File(System.getProperty("user.dir")), 1);
+        final var file = JournalSegmentFile.createSegmentFile("foo", Path.of(System.getProperty("user.dir")), 1);
         assertTrue(JournalSegmentFile.isSegmentFile("foo", file));
     }
 }
