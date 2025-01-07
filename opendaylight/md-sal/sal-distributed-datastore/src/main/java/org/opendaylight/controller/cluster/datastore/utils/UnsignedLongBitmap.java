@@ -83,14 +83,8 @@ public abstract class UnsignedLongBitmap implements Immutable {
 
         @Override
         public boolean equals(final Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (!(obj instanceof Regular)) {
-                return false;
-            }
-            final var other = (Regular) obj;
-            return Arrays.equals(keys, other.keys) && Arrays.equals(values, other.values);
+            return obj == this || obj instanceof Regular other && Arrays.equals(keys, other.keys)
+                && Arrays.equals(values, other.values);
         }
     }
 
@@ -135,14 +129,7 @@ public abstract class UnsignedLongBitmap implements Immutable {
 
         @Override
         public boolean equals(final Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (!(obj instanceof Singleton)) {
-                return false;
-            }
-            final var other = (Singleton) obj;
-            return key == other.key && value == other.value;
+            return obj == this || obj instanceof Singleton other && key == other.key && value == other.value;
         }
     }
 
