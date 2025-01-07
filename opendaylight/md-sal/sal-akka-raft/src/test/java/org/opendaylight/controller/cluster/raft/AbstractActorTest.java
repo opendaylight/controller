@@ -5,11 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import org.apache.commons.io.FileUtils;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.testkit.javadsl.TestKit;
@@ -19,6 +18,7 @@ import org.opendaylight.yangtools.util.AbstractStringIdentifier;
 
 public abstract class AbstractActorTest {
     protected static final class MockIdentifier extends AbstractStringIdentifier<MockIdentifier> {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
         public MockIdentifier(final String string) {
@@ -47,11 +47,6 @@ public abstract class AbstractActorTest {
     }
 
     protected static void deleteJournal() throws IOException {
-        File journal = new File("journal");
-
-        if (journal.exists()) {
-            FileUtils.deleteDirectory(journal);
-        }
+        FileUtils.deleteDirectory(Path.of("journal").toFile());
     }
-
 }
