@@ -30,7 +30,7 @@ import org.opendaylight.yangtools.concepts.WritableObjects;
  * A more efficient equivalent of {@code ImmutableMap<UnsignedLong, Boolean>}.
  */
 @Beta
-public abstract class UnsignedLongBitmap implements Immutable {
+public abstract sealed class UnsignedLongBitmap implements Immutable {
     @VisibleForTesting
     static final class Regular extends UnsignedLongBitmap {
         private final long[] keys;
