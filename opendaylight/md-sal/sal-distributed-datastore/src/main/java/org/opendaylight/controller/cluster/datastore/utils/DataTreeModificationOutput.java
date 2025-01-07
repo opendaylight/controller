@@ -9,9 +9,10 @@ package org.opendaylight.controller.cluster.datastore.utils;
 
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import javax.xml.stream.XMLStreamException;
 import org.opendaylight.controller.cluster.datastore.util.AbstractDataTreeModificationCursor;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
@@ -29,15 +30,22 @@ public final class DataTreeModificationOutput {
     private static final Logger LOG = LoggerFactory.getLogger(DataTreeModificationOutput.class);
 
     private DataTreeModificationOutput() {
+        // Hidden on purpose
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public static void toFile(final File file, final DataTreeModification modification) {
-        try (FileOutputStream outStream = new FileOutputStream(file)) {
+    public static void toFile(final Path file, final DataTreeModification modification) {
+        try (var outStream = Files.newOutputStream(file)) {
             modification.applyToCursor(new DataTreeModificationOutputCursor(new DataOutputStream(outStream)));
         } catch (IOException | RuntimeException e) {
             LOG.error("Error writing DataTreeModification to file {}", file, e);
         }
+    }
+
+    @Deprecated
+    @SuppressWarnings("checkstyle:IllegalCatch")
+    public static void toFile(final File file, final DataTreeModification modification) {
+        toFile(file.toPath(), modification);
     }
 
     private static class DataTreeModificationOutputCursor extends AbstractDataTreeModificationCursor {
