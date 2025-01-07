@@ -148,13 +148,13 @@ public abstract sealed class UnsignedLongBitmap implements Immutable {
 
     public static @NonNull UnsignedLongBitmap copyOf(final Map<UnsignedLong, Boolean> map) {
         final int size = map.size();
-        switch (size) {
-            case 0:
-                return of();
-            case 1:
+        return switch (size) {
+            case 0 -> of();
+            case 1 -> {
                 final var entry = map.entrySet().iterator().next();
-                return of(entry.getKey().longValue(), entry.getValue());
-            default:
+                yield of(entry.getKey().longValue(), entry.getValue());
+            }
+            default -> {
                 final var entries = new ArrayList<>(map.entrySet());
                 entries.sort(Comparator.comparing(Entry::getKey));
 
@@ -168,8 +168,9 @@ public abstract sealed class UnsignedLongBitmap implements Immutable {
                     ++idx;
                 }
 
-                return new Regular(keys, values);
-        }
+                yield new Regular(keys, values);
+            }
+        };
     }
 
     public abstract boolean isEmpty();
@@ -188,12 +189,10 @@ public abstract sealed class UnsignedLongBitmap implements Immutable {
     }
 
     public static @NonNull UnsignedLongBitmap readFrom(final @NonNull DataInput in, final int size) throws IOException {
-        switch (size) {
-            case 0:
-                return of();
-            case 1:
-                return new Singleton(WritableObjects.readLong(in), in.readBoolean());
-            default:
+        return switch (size) {
+            case 0 -> of();
+            case 1 -> new Singleton(WritableObjects.readLong(in), in.readBoolean());
+            default -> {
                 final var keys = new long[size];
                 final var values = new boolean[size];
                 for (int i = 0; i < size; ++i) {
@@ -212,8 +211,9 @@ public abstract sealed class UnsignedLongBitmap implements Immutable {
                     prevKey = key;
                 }
 
-                return new Regular(keys, values);
-        }
+                yield new Regular(keys, values);
+            }
+        };
     }
 
     public void writeEntriesTo(final @NonNull DataOutput out, final int size) throws IOException {
