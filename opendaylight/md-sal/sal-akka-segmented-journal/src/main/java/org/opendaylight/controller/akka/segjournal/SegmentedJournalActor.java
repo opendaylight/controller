@@ -22,7 +22,8 @@ import io.atomix.storage.journal.JournalSerdes;
 import io.atomix.storage.journal.SegmentedByteBufJournal;
 import io.atomix.storage.journal.SegmentedJournal;
 import io.atomix.storage.journal.StorageLevel;
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
@@ -205,7 +206,7 @@ abstract sealed class SegmentedJournalActor extends AbstractActor {
         private long batch = 0;
         private long unflushedBytes = 0;
 
-        Delayed(final String persistenceId, final File directory, final StorageLevel storage,
+        Delayed(final String persistenceId, final Path directory, final StorageLevel storage,
                 final int maxEntrySize, final int maxSegmentSize, final int maxUnflushedBytes) {
             super(persistenceId, directory, storage, maxEntrySize, maxSegmentSize);
             this.maxUnflushedBytes = maxUnflushedBytes;
@@ -263,7 +264,7 @@ abstract sealed class SegmentedJournalActor extends AbstractActor {
     }
 
     private static final class Immediate extends SegmentedJournalActor {
-        Immediate(final String persistenceId, final File directory, final StorageLevel storage,
+        Immediate(final String persistenceId, final Path directory, final StorageLevel storage,
                 final int maxEntrySize, final int maxSegmentSize) {
             super(persistenceId, directory, storage, maxEntrySize, maxSegmentSize);
         }
@@ -298,7 +299,7 @@ abstract sealed class SegmentedJournalActor extends AbstractActor {
     private final StorageLevel storage;
     private final int maxSegmentSize;
     private final int maxEntrySize;
-    private final File directory;
+    private final Path directory;
 
     // Tracks the time it took us to write a batch of messages
     private Timer batchWriteTime;
@@ -317,7 +318,7 @@ abstract sealed class SegmentedJournalActor extends AbstractActor {
     private SegmentedJournal<Long> deleteJournal;
     private long lastDelete;
 
-    private SegmentedJournalActor(final String persistenceId, final File directory, final StorageLevel storage,
+    private SegmentedJournalActor(final String persistenceId, final Path directory, final StorageLevel storage,
             final int maxEntrySize, final int maxSegmentSize) {
         this.persistenceId = requireNonNull(persistenceId);
         this.directory = requireNonNull(directory);
@@ -326,7 +327,7 @@ abstract sealed class SegmentedJournalActor extends AbstractActor {
         this.maxSegmentSize = maxSegmentSize;
     }
 
-    static Props props(final String persistenceId, final File directory, final StorageLevel storage,
+    static Props props(final String persistenceId, final Path directory, final StorageLevel storage,
             final int maxEntrySize, final int maxSegmentSize, final int maxUnflushedBytes) {
         final var pid = requireNonNull(persistenceId);
         return maxUnflushedBytes > 0
@@ -368,7 +369,7 @@ abstract sealed class SegmentedJournalActor extends AbstractActor {
         super.preStart();
 
         final var registry = MetricsReporter.getInstance(MeteringBehavior.DOMAIN).getMetricsRegistry();
-        final var actorName = self().path().parent().toStringWithoutAddress() + '/' + directory.getName();
+        final var actorName = self().path().parent().toStringWithoutAddress() + '/' + directory.toFile().getName();
 
         batchWriteTime = registry.timer(MetricRegistry.name(actorName, "batchWriteTime"));
         messageWriteCount = registry.meter(MetricRegistry.name(actorName, "messageWriteCount"));
@@ -440,7 +441,7 @@ abstract sealed class SegmentedJournalActor extends AbstractActor {
     private void handleReadHighestSequenceNr(final ReadHighestSequenceNr message) {
         LOG.debug("{}: looking for highest sequence on {}", persistenceId, message);
         final Long sequence;
-        if (directory.isDirectory()) {
+        if (Files.isDirectory(directory)) {
             ensureOpen();
             flushWrites();
             sequence = dataJournal.lastWrittenSequenceNr();

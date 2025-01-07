@@ -15,6 +15,7 @@ import static org.opendaylight.controller.akka.segjournal.BenchmarkUtils.toMetri
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.io.Serializable;
+import java.nio.file.Files;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -40,7 +41,7 @@ public final class BenchmarkMain {
     private static final String BENCHMARK = "benchmark";
     private static final Logger LOG = LoggerFactory.getLogger("benchmark");
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         final var config = buildConfig(args);
         final var benchmark = new BenchmarkMain(config);
         Runtime.getRuntime().addShutdownHook(new Thread(benchmark::shutdown));
@@ -53,7 +54,7 @@ public final class BenchmarkMain {
     private final ScheduledExecutorService executor;
     private ActorRef actor;
 
-    private BenchmarkMain(BenchmarkConfig config) {
+    private BenchmarkMain(final BenchmarkConfig config) {
         this.config = config;
         system = ActorSystem.create(BENCHMARK);
         executor = Executors.newSingleThreadScheduledExecutor(
@@ -63,7 +64,7 @@ public final class BenchmarkMain {
     void execute() {
         LOG.info("Starting with settings");
         LOG.info("\tstorage            : {}", config.storage());
-        LOG.info("\tworking dir        : {}", config.workingDir().getAbsolutePath());
+        LOG.info("\tworking dir        : {}", config.workingDir().toAbsolutePath());
         LOG.info("\tmaxEntrySize       : {}", formatBytes(config.maxEntrySize()));
         LOG.info("\tmaxSegmentSize     : {}", formatBytes(config.maxSegmentSize()));
         LOG.info("\tmaxUnflushedBytes  : {}", formatBytes(config.maxUnflushedBytes()));
@@ -170,8 +171,9 @@ public final class BenchmarkMain {
         if (actor != null) {
             system.stop(actor);
         }
-        if (config.workingDir().exists()) {
-            FileUtils.deleteQuietly(config.workingDir());
+        final var workDir = config.workingDir();
+        if (Files.exists(workDir)) {
+            FileUtils.deleteQuietly(workDir.toFile());
         }
         system.terminate();
         LOG.info("Done.");
