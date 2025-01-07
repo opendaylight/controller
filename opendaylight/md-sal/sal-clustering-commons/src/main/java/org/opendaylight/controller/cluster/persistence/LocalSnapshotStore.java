@@ -10,13 +10,9 @@ package org.opendaylight.controller.cluster.persistence;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.io.ByteStreams;
 import com.typesafe.config.Config;
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.URLDecoder;
@@ -166,10 +162,7 @@ public final class LocalSnapshotStore extends SnapshotStore {
         // the SnapshotSerializer to try to de-serialize it.
 
         SnapshotSerializer snapshotSerializer = new SnapshotSerializer((ExtendedActorSystem) context().system());
-
-        try (InputStream in = new BufferedInputStream(new FileInputStream(file))) {
-            return ((Snapshot)snapshotSerializer.fromBinary(ByteStreams.toByteArray(in))).data();
-        }
+        return ((Snapshot) snapshotSerializer.fromBinary(Files.readAllBytes(file.toPath()))).data();
     }
 
     @Override

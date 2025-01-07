@@ -15,11 +15,10 @@ import static org.opendaylight.controller.cluster.persistence.LocalSnapshotStore
 import static org.opendaylight.controller.cluster.persistence.LocalSnapshotStoreSpecTest.createSnapshotDir;
 
 import com.typesafe.config.ConfigFactory;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.pekko.actor.ActorRef;
@@ -69,7 +68,7 @@ public class LocalSnapshotStoreTest {
 
     @AfterClass
     public static void staticCleanup() {
-        FileUtils.deleteQuietly(SNAPSHOT_DIR);
+        FileUtils.deleteQuietly(SNAPSHOT_DIR.toFile());
         TestKit.shutdownActorSystem(system);
     }
 
@@ -95,8 +94,8 @@ public class LocalSnapshotStoreTest {
 
         createSnapshotFile("member-1-shard-default-oper", "foo", 0, 1000);
         createSnapshotFile("member-1-shard-toaster-oper", "foo", 0, 1000);
-        new File(SNAPSHOT_DIR, "other").createNewFile();
-        new File(SNAPSHOT_DIR, "other-1485349217290").createNewFile();
+        Files.createFile(SNAPSHOT_DIR.resolve("other"));
+        Files.createFile(SNAPSHOT_DIR.resolve("other-1485349217290"));
 
         SnapshotMetadata metadata3 = new SnapshotMetadata(PERSISTENCE_ID, 1, 3000);
 
@@ -168,7 +167,7 @@ public class LocalSnapshotStoreTest {
         SnapshotSerializer snapshotSerializer = new SnapshotSerializer((ExtendedActorSystem) system);
 
         String name = toSnapshotName(PERSISTENCE_ID, 1, 1000);
-        try (FileOutputStream fos = new FileOutputStream(new File(SNAPSHOT_DIR, name))) {
+        try (var fos = Files.newOutputStream(SNAPSHOT_DIR.resolve(name))) {
             fos.write(snapshotSerializer.toBinary(new Snapshot("one")));
         }
 
@@ -188,7 +187,7 @@ public class LocalSnapshotStoreTest {
     private static void createSnapshotFile(final String persistenceId, final String payload, final int seqNr,
             final int timestamp) throws IOException {
         String name = toSnapshotName(persistenceId, seqNr, timestamp);
-        try (FileOutputStream fos = new FileOutputStream(new File(SNAPSHOT_DIR, name))) {
+        try (var fos = Files.newOutputStream(SNAPSHOT_DIR.resolve(name))) {
             if (payload != null) {
                 fos.write(SerializationUtils.serialize(payload));
             }
