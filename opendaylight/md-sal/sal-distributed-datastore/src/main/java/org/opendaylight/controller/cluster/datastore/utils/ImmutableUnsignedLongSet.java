@@ -24,7 +24,27 @@ public final class ImmutableUnsignedLongSet extends UnsignedLongSet implements I
     // TreeSet has a large per-entry overhead (40-64 bytes as of OpenJDK 21), so we prefer allocating
     // an ImmutableSortedSet, which is backed by an array of up to this many elements. For larger sizes we opt to pay
     // the TreeMap overhead so as not to create huge objects on the heap.
-    private static final int DEFAULT_MAX_ARRAY = 4096;
+    //
+    // Assuming each Entry costs 32 bytes (as of OpenJDK 21).
+    //
+    //  size() | Entry objects | Array size | TreeSet.Entry objects | total memory usage
+    //  --------------------------------------------------------------------------------------
+    //   32K     ~1MiB           128/256KiB   1.25 - 2MiB             1.1-1.25MiB vs 2.25-3MiB
+    //   64K     ~2MiB           256/512KiB   2.5  - 4MiB             2.25-2.5MiB vs 4.5-6MiB
+    //
+    // From performance perspective, ImmutableSortedSet performs a bisect search, so the amount of jumping around is
+    // roughly the same, except the access pattern might be more recognizable by the CPU prefetch logic.
+    //
+    // We take into consideration G1 GC (default in OpenJDK 21), documentation here:
+    // https://docs.oracle.com/en/java/javase/21/gctuning/garbage-first-g1-garbage-collector1.html#GUID-D74F3CC7-CC9F-45B5-B03D-510AEEAC2DAC
+    //
+    // We aim to have arrays always smaller than half a region, i.e. always strictly less than 512KiB, we need to
+    // account for Object[] sizing. In OpenJDK 21, arrays have 16 bytes of overhead, so we store just a tad fewer than
+    // 65536 entries, just to be on the safe side.
+    //
+    // This should work fine with heaps of up to 2GiB. At 8GiB heap we can expect objects to reliably fit into a single
+    // 4MiB region.
+    private static final int DEFAULT_MAX_ARRAY = 65532;
     private static final String PROP_MAX_ARRAY =
         "org.opendaylight.controller.cluster.datastore.utils.ImmutableUnsignedLongSet.max-array";
     private static final int MAX_ARRAY;
