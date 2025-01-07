@@ -179,14 +179,13 @@ public abstract class UnsignedLongBitmap implements Immutable {
 
     public final @NonNull HashMap<UnsignedLong, Boolean> mutableCopy() {
         final int size = size();
-        switch (size) {
-            case 0:
-                return new HashMap<>();
-            default:
-                final var ret = Maps.<UnsignedLong, Boolean>newHashMapWithExpectedSize(size);
-                putEntries(ret);
-                return ret;
+        if (size == 0) {
+            return new HashMap<>();
         }
+
+        final var ret = Maps.<UnsignedLong, Boolean>newHashMapWithExpectedSize(size);
+        putEntries(ret);
+        return ret;
     }
 
     public static @NonNull UnsignedLongBitmap readFrom(final @NonNull DataInput in, final int size) throws IOException {
