@@ -9,11 +9,10 @@ package org.opendaylight.controller.cluster.io;
 
 import com.google.common.io.ByteSource;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import net.jpountz.lz4.LZ4Factory;
 import net.jpountz.lz4.LZ4FrameInputStream;
 import net.jpountz.lz4.LZ4FrameOutputStream;
@@ -47,20 +46,21 @@ final class LZ4InputOutputStreamSupport extends InputOutputStreamFactory {
 
     @Override
     public InputStream createInputStream(final File file) throws IOException {
-        final FileInputStream fileInput = new FileInputStream(file);
+        final var path = file.toPath();
+        final var fileInput = Files.newInputStream(path);
         try {
             return new LZ4FrameInputStream(fileInput, LZ4_FACTORY.safeDecompressor(), HASH_FACTORY.hash32());
         } catch (IOException e) {
             fileInput.close();
             LOG.warn("Error loading file with lz4 decompression, using default one", e);
-            return defaultCreateInputStream(file);
+            return defaultCreateInputStream(path);
         }
     }
 
     @Override
     public OutputStream createOutputStream(final File file) throws IOException {
-        return new LZ4FrameOutputStream(new FileOutputStream(file), blocksize, -1, LZ4_FACTORY.fastCompressor(),
-            HASH_FACTORY.hash32(), Bits.BLOCK_INDEPENDENCE);
+        return new LZ4FrameOutputStream(Files.newOutputStream(file.toPath()), blocksize, -1,
+            LZ4_FACTORY.fastCompressor(), HASH_FACTORY.hash32(), Bits.BLOCK_INDEPENDENCE);
     }
 
     @Override
