@@ -16,8 +16,9 @@ import static org.junit.Assert.fail;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Uninterruptibles;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
@@ -35,7 +36,7 @@ import org.slf4j.LoggerFactory;
  */
 public class FileBackedOutputStreamTest {
     private static final Logger LOG = LoggerFactory.getLogger(FileBackedOutputStreamTest.class);
-    private static final String TEMP_DIR = "target/FileBackedOutputStreamTest";
+    private static final Path TEMP_DIR = Path.of("target", "FileBackedOutputStreamTest");
 
     @BeforeClass
     public static void staticSetup() {
@@ -61,8 +62,8 @@ public class FileBackedOutputStreamTest {
     @Test
     public void testFileThresholdNotReached() throws IOException {
         LOG.info("testFileThresholdNotReached starting");
-        try (FileBackedOutputStream fbos = new FileBackedOutputStream(10, TEMP_DIR)) {
-            byte[] bytes = new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9};
+        try (var fbos = new FileBackedOutputStream(10, TEMP_DIR)) {
+            final var bytes = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
             fbos.write(bytes[0]);
             fbos.write(bytes, 1, bytes.length - 1);
 
@@ -117,8 +118,8 @@ public class FileBackedOutputStreamTest {
     @Test
     public void testFileThresholdReachedWithWriteByte() throws IOException {
         LOG.info("testFileThresholdReachedWithWriteByte starting");
-        try (FileBackedOutputStream fbos = new FileBackedOutputStream(2, TEMP_DIR)) {
-            byte[] bytes = new byte[]{0, 1, 2};
+        try (var fbos = new FileBackedOutputStream(2, TEMP_DIR)) {
+            final byte[] bytes = new byte[] { 0, 1, 2 };
             fbos.write(bytes[0]);
             fbos.write(bytes[1]);
 
@@ -139,8 +140,8 @@ public class FileBackedOutputStreamTest {
     @Test(expected = IOException.class)
     public void testWriteAfterAsByteSource() throws IOException {
         LOG.info("testWriteAfterAsByteSource starting");
-        try (FileBackedOutputStream fbos = new FileBackedOutputStream(3, TEMP_DIR)) {
-            byte[] bytes = new byte[]{0, 1, 2};
+        try (var fbos = new FileBackedOutputStream(3, TEMP_DIR)) {
+            final var bytes = new byte[]{ 0, 1, 2 };
             fbos.write(bytes);
 
             assertNull("Found unexpected temp file", findTempFileName(TEMP_DIR));
@@ -179,30 +180,35 @@ public class FileBackedOutputStreamTest {
         fail("Temp file was not deleted");
     }
 
-    static String findTempFileName(final String dirPath) {
-        String[] files = new File(dirPath).list();
+    static String findTempFileName(final Path dirPath) {
+        final var files = dirPath.toFile().list();
         assertNotNull(files);
         assertTrue("Found more than one temp file: " + Arrays.toString(files), files.length < 2);
         return files.length == 1 ? files[0] : null;
     }
 
-    static boolean deleteFile(final String file) {
-        return new File(file).delete();
+    static void deleteFile(final Path file) {
+        try {
+            Files.delete(file);
+        } catch (IOException e) {
+            LOG.warn("Failed to delete {}", file, e);
+        }
     }
 
-    static void deleteTempFiles(final String path) {
-        String[] files = new File(path).list();
+    static void deleteTempFiles(final Path path) {
+        final var files = path.toFile().list();
         if (files != null) {
-            for (String file : files) {
-                deleteFile(path + File.separator + file);
+            for (var file : files) {
+                deleteFile(path.resolve(file));
             }
         }
     }
 
-    static void createDir(final String path) {
-        File dir = new File(path);
-        if (!dir.exists() && !dir.mkdirs()) {
-            throw new RuntimeException("Failed to create temp dir " + path);
+    static void createDir(final Path path) {
+        try {
+            Files.createDirectories(path);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to create temp dir " + path, e);
         }
     }
 }
