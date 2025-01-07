@@ -28,12 +28,12 @@ final class PlainInputOutputStreamSupport extends InputOutputStreamFactory {
 
     @Override
     public InputStream createInputStream(final File file) throws IOException {
-        return defaultCreateInputStream(file);
+        return defaultCreateInputStream(file.toPath());
     }
 
     @Override
     public OutputStream createOutputStream(final File file) throws IOException {
-        return defaultCreateOutputStream(file);
+        return defaultCreateOutputStream(file.toPath());
     }
 
     @Override

@@ -14,12 +14,11 @@ import com.google.common.io.ByteSource;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import net.jpountz.lz4.LZ4FrameOutputStream;
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -49,11 +48,11 @@ public abstract class InputOutputStreamFactory {
 
     public abstract @NonNull OutputStream wrapOutputStream(OutputStream output) throws IOException;
 
-    static @NonNull BufferedInputStream defaultCreateInputStream(final File file) throws FileNotFoundException {
-        return new BufferedInputStream(new FileInputStream(file));
+    static @NonNull BufferedInputStream defaultCreateInputStream(final Path file) throws IOException {
+        return new BufferedInputStream(Files.newInputStream(file));
     }
 
-    static @NonNull BufferedOutputStream defaultCreateOutputStream(final File file) throws FileNotFoundException {
-        return new BufferedOutputStream(new FileOutputStream(file));
+    static @NonNull BufferedOutputStream defaultCreateOutputStream(final Path file) throws IOException {
+        return new BufferedOutputStream(Files.newOutputStream(file));
     }
 }
