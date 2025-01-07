@@ -12,17 +12,34 @@ import com.google.common.collect.ImmutableSortedSet;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.NavigableSet;
 import java.util.TreeSet;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.Immutable;
 import org.opendaylight.yangtools.concepts.WritableObject;
+import org.slf4j.LoggerFactory;
 
 @Beta
 public final class ImmutableUnsignedLongSet extends UnsignedLongSet implements Immutable, WritableObject {
-    // Do not all
-    private static final int ARRAY_MAX_ELEMENTS = 4096;
+    // TreeSet has a large per-entry overhead (40-64 bytes as of OpenJDK 21), so we prefer allocating
+    // an ImmutableSortedSet, which is backed by an array of up to this many elements. For larger sizes we opt to pay
+    // the TreeMap overhead so as not to create huge objects on the heap.
+    private static final int DEFAULT_MAX_ARRAY = 4096;
+    private static final String PROP_MAX_ARRAY =
+        "org.opendaylight.controller.cluster.datastore.utils.ImmutableUnsignedLongSet.max-array";
+    private static final int MAX_ARRAY;
+
+    static {
+        final var logger = LoggerFactory.getLogger(ImmutableUnsignedLongSet.class);
+        final int value = Integer.getInteger(PROP_MAX_ARRAY, DEFAULT_MAX_ARRAY);
+        if (value < 0) {
+            logger.warn("Ignoring invalid property {} value {}", PROP_MAX_ARRAY, value);
+            MAX_ARRAY = DEFAULT_MAX_ARRAY;
+        } else {
+            MAX_ARRAY = value;
+        }
+        logger.debug("Using arrays for up to {} elements", MAX_ARRAY);
+    }
 
     private static final @NonNull ImmutableUnsignedLongSet EMPTY =
         new ImmutableUnsignedLongSet(ImmutableSortedSet.of());
@@ -32,13 +49,12 @@ public final class ImmutableUnsignedLongSet extends UnsignedLongSet implements I
     }
 
     static @NonNull ImmutableUnsignedLongSet copyOf(final MutableUnsignedLongSet mutable) {
-        if (mutable.isEmpty()) {
+        final var size = mutable.rangeSize();
+        if (size == 0) {
             return of();
         }
-        if (mutable.rangeSize() <= ARRAY_MAX_ELEMENTS) {
-            return new ImmutableUnsignedLongSet(ImmutableSortedSet.copyOfSorted(mutable.trustedRanges()));
-        }
-        return new ImmutableUnsignedLongSet(new TreeSet<>(mutable.trustedRanges()));
+        return new ImmutableUnsignedLongSet(size <= MAX_ARRAY ? ImmutableSortedSet.copyOfSorted(mutable.trustedRanges())
+            : new TreeSet<>(mutable.trustedRanges()));
     }
 
     public static @NonNull ImmutableUnsignedLongSet of() {
@@ -60,10 +76,10 @@ public final class ImmutableUnsignedLongSet extends UnsignedLongSet implements I
         }
 
         final NavigableSet<Entry> ranges;
-        if (size <= ARRAY_MAX_ELEMENTS) {
-            final var entries = new ArrayList<Entry>(size);
+        if (size <= MAX_ARRAY) {
+            final var entries = new Entry[size];
             for (int i = 0; i < size; ++i) {
-                entries.add(Entry.readUnsigned(in));
+                entries[i] = Entry.readUnsigned(in);
             }
             ranges = ImmutableSortedSet.copyOf(entries);
         } else {
