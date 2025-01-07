@@ -19,10 +19,10 @@ import com.google.common.base.Ticker;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import io.atomix.storage.journal.StorageLevel;
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import net.sourceforge.argparse4j.ArgumentParsers;
@@ -46,7 +46,7 @@ final class BenchmarkUtils {
     private static final String[] BYTE_SFX = {"G", "M", "K"};
     private static final int[] BYTE_THRESH = {1024 * 1024 * 1024, 1024 * 1024, 1024};
 
-    record BenchmarkConfig(StorageLevel storage, File workingDir, int maxEntrySize, int maxSegmentSize,
+    record BenchmarkConfig(StorageLevel storage, Path workingDir, int maxEntrySize, int maxSegmentSize,
         int maxUnflushedBytes, int payloadSize, int messagesNum) {
     }
 
@@ -161,9 +161,9 @@ final class BenchmarkUtils {
         }
     }
 
-    private static File createTempDirectory() {
+    private static Path createTempDirectory() {
         try {
-            return Files.createTempDirectory(PROG_NAME).toFile();
+            return Files.createTempDirectory(PROG_NAME);
         } catch (IOException e) {
             printAndExit("Cannot create temp directory", e);
         }
@@ -182,7 +182,7 @@ final class BenchmarkUtils {
         System.exit(1);
     }
 
-    static String formatBytes(int bytes) {
+    static String formatBytes(final int bytes) {
         for (int i = 0; i < 3; i++) {
             if (bytes > BYTE_THRESH[i]) {
                 return bytes / BYTE_THRESH[i] + BYTE_SFX[i];
