@@ -11,7 +11,8 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import javax.inject.Singleton;
 import org.kohsuke.MetaInfServices;
 import org.osgi.service.component.annotations.Activate;
@@ -25,20 +26,15 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class FileAkkaConfigurationReader implements AkkaConfigurationReader {
     private static final Logger LOG = LoggerFactory.getLogger(FileAkkaConfigurationReader.class);
-    private static final String CUSTOM_AKKA_CONF_PATH = "./configuration/initial/pekko.conf";
-    private static final String FACTORY_AKKA_CONF_PATH = "./configuration/factory/pekko.conf";
+    private static final Path CUSTOM_AKKA_CONF_PATH = Path.of("configuration", "initial", "pekko.conf");
+    private static final Path FACTORY_AKKA_CONF_PATH = Path.of("configuration", "factory", "pekko.conf");
 
     @Override
     public Config read() {
-        File customConfigFile = new File(CUSTOM_AKKA_CONF_PATH);
-        checkState(customConfigFile.exists(), "%s is missing", customConfigFile);
-
-        File factoryConfigFile = new File(FACTORY_AKKA_CONF_PATH);
-        if (factoryConfigFile.exists()) {
-            return ConfigFactory.parseFile(customConfigFile).withFallback(ConfigFactory.parseFile(factoryConfigFile));
-        }
-
-        return ConfigFactory.parseFile(customConfigFile);
+        checkState(Files.exists(CUSTOM_AKKA_CONF_PATH), "%s is missing", CUSTOM_AKKA_CONF_PATH);
+        final var parsed = ConfigFactory.parseFile(CUSTOM_AKKA_CONF_PATH.toFile());
+        return Files.exists(FACTORY_AKKA_CONF_PATH)
+            ? parsed.withFallback(ConfigFactory.parseFile(FACTORY_AKKA_CONF_PATH.toFile())) : parsed;
     }
 
     @Activate
