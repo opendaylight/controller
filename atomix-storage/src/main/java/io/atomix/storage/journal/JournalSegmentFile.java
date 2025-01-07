@@ -19,7 +19,6 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
 import io.netty.buffer.ByteBufAllocator;
-import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
@@ -50,10 +49,10 @@ final class JournalSegmentFile {
         this.file = requireNonNull(file);
     }
 
-    static @NonNull JournalSegmentFile createNew(final String name, final File directory,
+    static @NonNull JournalSegmentFile createNew(final String name, final Path directory,
             final ByteBufAllocator allocator, final JournalSegmentDescriptor descriptor) throws IOException {
         final var file = createSegmentFile(name, directory, descriptor.id());
-        final var raf = new RandomAccessFile(file, "rw");
+        final var raf = new RandomAccessFile(file.toFile(), "rw");
         try {
             raf.setLength(descriptor.maxSegmentSize());
             raf.write(descriptor.toArray());
@@ -61,7 +60,7 @@ final class JournalSegmentFile {
             raf.close();
             throw e;
         }
-        return new JournalSegmentFile(file.toPath(), allocator, descriptor, raf);
+        return new JournalSegmentFile(file, allocator, descriptor, raf);
     }
 
     static @NonNull JournalSegmentFile openExisting(final Path path, final ByteBufAllocator allocator)
@@ -165,8 +164,8 @@ final class JournalSegmentFile {
      *
      * @throws NullPointerException if {@code file} is null
      */
-    public static boolean isSegmentFile(final String name, final File file) {
-        return isSegmentFile(name, file.getName());
+    public static boolean isSegmentFile(final String name, final Path file) {
+        return isSegmentFile(name, file.toFile().getName());
     }
 
     /**
@@ -200,7 +199,7 @@ final class JournalSegmentFile {
     /**
      * Creates a segment file for the given directory, log name, segment ID, and segment version.
      */
-    static File createSegmentFile(final String name, final File directory, final long id) {
-        return new File(directory, String.format("%s-%d.log", requireNonNull(name, "name cannot be null"), id));
+    static Path createSegmentFile(final String name, final Path directory, final long id) {
+        return directory.resolve("%s-%d.log".formatted(requireNonNull(name, "name cannot be null"), id));
     }
 }
