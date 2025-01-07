@@ -11,10 +11,10 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.Beta;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.nio.file.Files;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -55,8 +55,8 @@ public final class DefaultDatastoreSnapshotRestore implements DatastoreSnapshotR
     @Activate
     @SuppressWarnings("checkstyle:IllegalCatch")
     void activate() {
-        final File restoreDirectoryFile = new File(restoreDirectoryPath);
-        final String[] files = restoreDirectoryFile.list();
+        final var restoreDirectoryFile = new File(restoreDirectoryPath);
+        final var files = restoreDirectoryFile.list();
         if (files == null || files.length == 0) {
             LOG.debug("Restore directory {} does not exist or is empty", restoreDirectoryFile);
             return;
@@ -69,21 +69,23 @@ public final class DefaultDatastoreSnapshotRestore implements DatastoreSnapshotR
             return;
         }
 
-        final File restoreFile = new File(restoreDirectoryFile, files[0]);
+        final var restoreFile = restoreDirectoryFile.toPath().resolve(files[0]);
         LOG.info("Clustered datastore will be restored from file {}", restoreFile);
 
-        try (FileInputStream fis = new FileInputStream(restoreFile)) {
-            DatastoreSnapshotList snapshots = deserialize(fis);
+        try (var fis = Files.newInputStream(restoreFile)) {
+            final var snapshots = deserialize(fis);
             LOG.debug("Deserialized {} snapshots", snapshots.size());
 
-            for (DatastoreSnapshot snapshot: snapshots) {
+            for (var snapshot: snapshots) {
                 datastoreSnapshots.put(snapshot.getType(), snapshot);
             }
         } catch (ClassNotFoundException | IOException e) {
             LOG.error("Error reading clustered datastore restore file {}", restoreFile, e);
         } finally {
-            if (!restoreFile.delete()) {
-                LOG.error("Could not delete clustered datastore restore file {}", restoreFile);
+            try {
+                Files.delete(restoreFile);
+            } catch (IOException e) {
+                LOG.error("Could not delete clustered datastore restore file {}", restoreFile, e);
             }
         }
     }

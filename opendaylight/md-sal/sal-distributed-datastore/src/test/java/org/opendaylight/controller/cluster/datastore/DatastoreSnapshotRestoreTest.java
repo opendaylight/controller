@@ -14,7 +14,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.io.FileOutputStream;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -73,7 +73,7 @@ public class DatastoreSnapshotRestoreTest {
 
         DatastoreSnapshotList snapshotList = new DatastoreSnapshotList(Arrays.asList(configSnapshot, operSnapshot));
 
-        try (FileOutputStream fos = new FileOutputStream(backupFile)) {
+        try (var fos = Files.newOutputStream(backupFile.toPath())) {
             SerializationUtils.serialize(snapshotList, fos);
         }
 
