@@ -18,6 +18,7 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDist
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
 
 import java.io.File;
+import java.nio.file.Path;
 import javax.inject.Inject;
 import org.junit.Before;
 import org.ops4j.pax.exam.Configuration;
@@ -40,7 +41,7 @@ public abstract class AbstractMdsalTestBase {
     private static final String ETC_ORG_OPS4J_PAX_URL_MVN_CFG = "etc/org.ops4j.pax.url.mvn.cfg";
     private static final String ETC_ORG_OPS4J_PAX_LOGGING_CFG = "etc/org.ops4j.pax.logging.cfg";
 
-    private static final String PAX_EXAM_UNPACK_DIRECTORY = "target/exam";
+    private static final File PAX_EXAM_UNPACK_DIRECTORY = Path.of("target", "exam").toFile();
     private static final String KARAF_DEBUG_PORT = "5005";
     private static final String KARAF_DEBUG_PROP = "karaf.debug";
     private static final String KEEP_UNPACK_DIRECTORY_PROP = "karaf.keep.unpack";
@@ -125,7 +126,7 @@ public abstract class AbstractMdsalTestBase {
                 when(Boolean.getBoolean(KARAF_DEBUG_PROP))
                         .useOptions(KarafDistributionOption.debugConfiguration(KARAF_DEBUG_PORT, true)),
                 karafDistributionConfiguration().frameworkUrl(getKarafDistro())
-                        .unpackDirectory(new File(PAX_EXAM_UNPACK_DIRECTORY)).useDeployFolder(false),
+                        .unpackDirectory(PAX_EXAM_UNPACK_DIRECTORY).useDeployFolder(false),
                 when(Boolean.getBoolean(KEEP_UNPACK_DIRECTORY_PROP)).useOptions(keepRuntimeFolder()),
                 features(getFeatureRepo(), getFeatureName()),
                 mvnLocalRepoOption(),
@@ -139,7 +140,7 @@ public abstract class AbstractMdsalTestBase {
 
         final String karafVersion = MavenUtils.getArtifactVersion("org.apache.karaf.features",
                 "org.apache.karaf.features.core");
-        options = OptionUtils.combine(options, new VMOption[] {
+        options = OptionUtils.combine(options,
             new VMOption("--add-reads=java.xml=java.logging"),
             new VMOption("--add-exports=java.base/org.apache.karaf.specs.locator=java.xml,ALL-UNNAMED"),
             new VMOption("--patch-module"),
@@ -163,8 +164,7 @@ public abstract class AbstractMdsalTestBase {
             new VMOption("--add-exports=java.base/sun.net.www.protocol.jar=ALL-UNNAMED"),
             new VMOption("--add-exports=jdk.naming.rmi/com.sun.jndi.url.rmi=ALL-UNNAMED"),
             new VMOption("-classpath"),
-            new VMOption("lib/jdk9plus/*" + File.pathSeparator + "lib/boot/*")
-        });
+            new VMOption("lib/jdk9plus/*" + File.pathSeparator + "lib/boot/*"));
 
         return OptionUtils.combine(options, getAdditionalOptions());
     }
