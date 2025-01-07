@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.io;
 
 import com.google.common.base.Preconditions;
+import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -25,7 +26,11 @@ public class SharedFileBackedOutputStream extends FileBackedOutputStream {
     private Consumer onCleanupCallback;
     private Object onCleanupContext;
 
-    public SharedFileBackedOutputStream(int fileThreshold, String fileDirectory) {
+    public SharedFileBackedOutputStream(final int fileThreshold, final String fileDirectory) {
+        super(fileThreshold, fileDirectory);
+    }
+
+    public SharedFileBackedOutputStream(final int fileThreshold, final Path fileDirectory) {
         super(fileThreshold, fileDirectory);
     }
 
@@ -50,7 +55,7 @@ public class SharedFileBackedOutputStream extends FileBackedOutputStream {
      * Sets the callback to be notified when {@link FileBackedOutputStream#cleanup()} is called to delete the backing
      * file.
      */
-    public <T> void setOnCleanupCallback(Consumer<T> callback, T context) {
+    public <T> void setOnCleanupCallback(final Consumer<T> callback, final T context) {
         onCleanupCallback = callback;
         onCleanupContext = context;
     }
