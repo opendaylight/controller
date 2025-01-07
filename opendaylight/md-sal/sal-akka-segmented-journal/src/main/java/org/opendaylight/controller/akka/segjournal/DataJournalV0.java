@@ -15,8 +15,8 @@ import io.atomix.storage.journal.JournalWriter;
 import io.atomix.storage.journal.SegmentedByteBufJournal;
 import io.atomix.storage.journal.SegmentedJournal;
 import io.atomix.storage.journal.StorageLevel;
-import java.io.File;
 import java.io.Serializable;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.pekko.actor.ActorSystem;
@@ -39,7 +39,7 @@ final class DataJournalV0 extends DataJournal {
     private final SegmentedJournal<DataJournalEntry> entries;
 
     DataJournalV0(final String persistenceId, final Histogram messageSize, final ActorSystem system,
-            final StorageLevel storage, final File directory, final int maxEntrySize, final int maxSegmentSize) {
+            final StorageLevel storage, final Path directory, final int maxEntrySize, final int maxSegmentSize) {
         super(persistenceId, messageSize);
 
         final var serdes = JournalSerdes.builder()
