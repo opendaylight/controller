@@ -160,13 +160,11 @@ abstract sealed class UnsignedLongSet permits ImmutableUnsignedLongSet, MutableU
 
         final int size = ranges.size();
         switch (size) {
-            case 0:
-                break;
-            case 1:
-                helper.add("span", ranges.first());
-                break;
-            default:
-                helper.add("span", Entry.of(ranges.first().lowerBits, ranges.last().upperBits));
+            case 0 -> {
+                // no 'span' attribute
+            }
+            case 1 -> helper.add("span", ranges.first());
+            default -> helper.add("span", Entry.of(ranges.first().lowerBits, ranges.last().upperBits));
         }
 
         return helper.add("size", size).toString();
