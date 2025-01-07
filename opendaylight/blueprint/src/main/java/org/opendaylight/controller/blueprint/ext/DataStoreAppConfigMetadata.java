@@ -10,9 +10,10 @@ package org.opendaylight.controller.blueprint.ext;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.MoreExecutors;
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
@@ -21,7 +22,6 @@ import javax.xml.stream.XMLStreamException;
 import org.apache.aries.blueprint.services.ExtendedBlueprintContainer;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.blueprint.ext.DataStoreAppConfigDefaultXMLReader.ConfigURLProvider;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataObjectModification;
 import org.opendaylight.mdsal.binding.api.DataObjectModification.ModificationType;
@@ -58,8 +58,8 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
     static final String DEFAULT_CONFIG_FILE_NAME = "default-config-file-name";
     static final String LIST_KEY_VALUE = "list-key-value";
 
-    private static final String DEFAULT_APP_CONFIG_FILE_PATH = "etc" + File.separator + "opendaylight" + File.separator
-            + "datastore" + File.separator + "initial" + File.separator + "config";
+    private static final Path DEFAULT_APP_CONFIG_FILE_PATH =
+        Path.of("etc", "opendaylight", "datastore", "initial", "config");
 
     private final Element defaultAppConfigElement;
     private final String defaultAppConfigFileName;
@@ -161,8 +161,8 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
         future.addCallback(new FutureCallback<Optional<DataObject>>() {
             @Override
             public void onSuccess(final Optional<DataObject> possibleAppConfig) {
-                LOG.debug("{}: Read of app config {} succeeded: {}", logName(), bindingContext
-                        .appConfigBindingClass.getName(), possibleAppConfig);
+                LOG.debug("{}: Read of app config {} succeeded: {}", logName(),
+                    bindingContext.appConfigBindingClass.getName(), possibleAppConfig);
 
                 setInitialAppConfig(possibleAppConfig);
             }
@@ -235,23 +235,18 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
 
     private DataObject createDefaultInstance() {
         try {
-            ConfigURLProvider inputStreamProvider = appConfigFileName -> {
-                File appConfigFile = new File(DEFAULT_APP_CONFIG_FILE_PATH, appConfigFileName);
-                LOG.debug("{}: parsePossibleDefaultAppConfigXMLFile looking for file {}", logName(),
-                        appConfigFile.getAbsolutePath());
+            final var reader = new DataStoreAppConfigDefaultXMLReader<>(logName(), defaultAppConfigFileName,
+                getOSGiService(DOMSchemaService.class), bindingSerializer, bindingContext, appConfigFileName -> {
+                    final var appConfigFile = DEFAULT_APP_CONFIG_FILE_PATH.resolve(appConfigFileName);
+                    final var absPath = appConfigFile.toAbsolutePath();
+                    LOG.debug("{}: parsePossibleDefaultAppConfigXMLFile looking for file {}", logName(), absPath);
 
-                if (!appConfigFile.exists()) {
+                    if (Files.exists(appConfigFile)) {
+                        LOG.debug("{}: Found file {}", logName(), absPath);
+                        return Optional.of(appConfigFile.toUri().toURL());
+                    }
                     return Optional.empty();
-                }
-
-                LOG.debug("{}: Found file {}", logName(), appConfigFile.getAbsolutePath());
-
-                return Optional.of(appConfigFile.toURI().toURL());
-            };
-
-            DataStoreAppConfigDefaultXMLReader<?> reader = new DataStoreAppConfigDefaultXMLReader<>(logName(),
-                    defaultAppConfigFileName, getOSGiService(DOMSchemaService.class), bindingSerializer, bindingContext,
-                    inputStreamProvider);
+                });
             return reader.createDefaultInstance(dataSchema -> {
                 // Fallback if file cannot be read, try XML from Config
                 NormalizedNode dataNode = parsePossibleDefaultAppConfigElement(dataSchema);
@@ -299,5 +294,4 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
             appConfigChangeListenerReg = null;
         }
     }
-
 }
