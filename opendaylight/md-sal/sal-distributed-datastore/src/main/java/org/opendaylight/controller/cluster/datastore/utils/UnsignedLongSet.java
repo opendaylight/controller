@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.datastore.utils;
 
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.RangeSet;
@@ -31,31 +30,18 @@ import org.opendaylight.yangtools.concepts.WritableObjects;
  * and can be stored in a simple {@code long}.
  */
 abstract sealed class UnsignedLongSet permits ImmutableUnsignedLongSet, MutableUnsignedLongSet {
-    @Beta
     @VisibleForTesting
-    public static final class Entry implements Comparable<Entry>, Immutable {
-        public final long lowerBits;
-        public final long upperBits;
-
-        private Entry(final long lowerBits, final long upperBits) {
-            this.lowerBits = lowerBits;
-            this.upperBits = upperBits;
+    record Entry(long lowerBits, long upperBits) implements Comparable<Entry>, Immutable {
+        Entry(final long longBits) {
+            this(longBits, longBits);
         }
 
-        static @NonNull Entry of(final long longBits) {
-            return of(longBits, longBits);
+        @NonNull Entry withLowerBits(final long newLowerBits) {
+            return new Entry(newLowerBits, upperBits);
         }
 
-        static @NonNull Entry of(final long lowerBits, final long upperBits) {
-            return new Entry(lowerBits, upperBits);
-        }
-
-        @NonNull Entry withLower(final long newLowerBits) {
-            return of(newLowerBits, upperBits);
-        }
-
-        @NonNull Entry withUpper(final long newUpperBits) {
-            return of(lowerBits, newUpperBits);
+        @NonNull Entry withUpperBits(final long newUpperBits) {
+            return new Entry(lowerBits, newUpperBits);
         }
 
         // These two methods provide the same serialization format as the one we've used to serialize
@@ -110,7 +96,7 @@ abstract sealed class UnsignedLongSet permits ImmutableUnsignedLongSet, MutableU
     }
 
     public final boolean contains(final long longBits) {
-        final var head = ranges.floor(Entry.of(longBits));
+        final var head = ranges.floor(new Entry(longBits));
         return head != null
             && Long.compareUnsigned(head.lowerBits, longBits) <= 0
             && Long.compareUnsigned(head.upperBits, longBits) >= 0;
@@ -158,7 +144,7 @@ abstract sealed class UnsignedLongSet permits ImmutableUnsignedLongSet, MutableU
                 // no 'span' attribute
             }
             case 1 -> helper.add("span", ranges.first());
-            default -> helper.add("span", Entry.of(ranges.first().lowerBits, ranges.last().upperBits));
+            default -> helper.add("span", new Entry(ranges.first().lowerBits, ranges.last().upperBits));
         }
 
         return helper.add("size", size).toString();
