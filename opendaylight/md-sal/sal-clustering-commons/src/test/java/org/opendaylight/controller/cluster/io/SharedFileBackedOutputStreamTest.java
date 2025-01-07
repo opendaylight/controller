@@ -13,6 +13,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.function.Consumer;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -30,7 +31,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SharedFileBackedOutputStreamTest {
     private static final Logger LOG = LoggerFactory.getLogger(SharedFileBackedOutputStreamTest.class);
-    private static final String TEMP_DIR = "target/FileBackedOutputStreamTest";
+    private static final Path TEMP_DIR = Path.of("target", "FileBackedOutputStreamTest");
 
     @BeforeClass
     public static void staticSetup() {
