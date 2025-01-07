@@ -89,14 +89,8 @@ abstract class UnsignedLongSet {
 
         @Override
         public boolean equals(final Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (!(obj instanceof Entry)) {
-                return false;
-            }
-            final var other = (Entry) obj;
-            return lowerBits == other.lowerBits && upperBits == other.upperBits;
+            return obj == this || obj instanceof Entry other && lowerBits == other.lowerBits
+                && upperBits == other.upperBits;
         }
 
         @Override
