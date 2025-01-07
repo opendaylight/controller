@@ -145,7 +145,7 @@ abstract class UnsignedLongSet {
 
     @Override
     public final boolean equals(final Object obj) {
-        return obj == this || obj instanceof UnsignedLongSet && ranges.equals(((UnsignedLongSet) obj).ranges);
+        return obj == this || obj instanceof UnsignedLongSet other && ranges.equals(other.ranges);
     }
 
     @Override
