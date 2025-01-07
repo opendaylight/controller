@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.datastore.utils;
 
 import com.google.common.annotations.Beta;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableRangeSet;
 import com.google.common.collect.Range;
 import com.google.common.primitives.UnsignedLong;
@@ -188,7 +187,11 @@ public final class MutableUnsignedLongSet extends UnsignedLongSet implements Mut
 
     // Provides compatibility with RangeSet<UnsignedLong> using [lower, upper + 1)
     public ImmutableRangeSet<UnsignedLong> toRangeSet() {
-        return ImmutableRangeSet.copyOf(Collections2.transform(trustedRanges(), entry -> Range.closedOpen(
-            UnsignedLong.fromLongBits(entry.lowerBits()), UnsignedLong.fromLongBits(entry.upperBits() + 1))));
+        final var builder = ImmutableRangeSet.<UnsignedLong>builder();
+        for (var entry : trustedRanges()) {
+            builder.add(Range.closedOpen(
+                UnsignedLong.fromLongBits(entry.lowerBits()), UnsignedLong.fromLongBits(entry.upperBits() + 1)));
+        }
+        return builder.build();
     }
 }
