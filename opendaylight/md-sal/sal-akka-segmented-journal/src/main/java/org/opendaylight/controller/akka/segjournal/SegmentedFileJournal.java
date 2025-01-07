@@ -8,15 +8,16 @@
 package org.opendaylight.controller.akka.segjournal;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
 import static org.apache.pekko.actor.ActorRef.noSender;
 
 import com.typesafe.config.Config;
 import io.atomix.storage.journal.SegmentedJournal;
 import io.atomix.storage.journal.StorageLevel;
-import java.io.File;
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -50,19 +51,25 @@ public class SegmentedFileJournal extends AsyncWriteJournal {
     private static final Logger LOG = LoggerFactory.getLogger(SegmentedFileJournal.class);
 
     private final Map<String, ActorRef> handlers = new HashMap<>();
-    private final File rootDir;
+    private final Path rootDir;
     private final StorageLevel storage;
     private final int maxEntrySize;
     private final int maxSegmentSize;
     private final int maxUnflushedBytes;
 
     public SegmentedFileJournal(final Config config) {
-        rootDir = new File(config.getString(STORAGE_ROOT_DIRECTORY));
-        if (!rootDir.exists()) {
+        rootDir = Path.of(config.getString(STORAGE_ROOT_DIRECTORY));
+        if (!Files.exists(rootDir)) {
             LOG.debug("Creating directory {}", rootDir);
-            checkState(rootDir.mkdirs(), "Failed to create root directory %s", rootDir);
+            try {
+                Files.createDirectories(rootDir);
+            } catch (IOException e) {
+                throw new IllegalStateException("Failed to create root directory " + rootDir, e);
+            }
         }
-        checkArgument(rootDir.isDirectory(), "%s is not a directory", rootDir);
+        if (!Files.isDirectory(rootDir)) {
+            throw new IllegalArgumentException(rootDir + " is not a directory");
+        }
 
         maxEntrySize = getBytes(config, STORAGE_MAX_ENTRY_SIZE, STORAGE_MAX_ENTRY_SIZE_DEFAULT);
         maxSegmentSize = getBytes(config, STORAGE_MAX_SEGMENT_SIZE, STORAGE_MAX_SEGMENT_SIZE_DEFAULT);
@@ -116,7 +123,7 @@ public class SegmentedFileJournal extends AsyncWriteJournal {
 
     private ActorRef createHandler(final String persistenceId) {
         final var directoryName = URLEncoder.encode(persistenceId, StandardCharsets.UTF_8);
-        final var directory = new File(rootDir, directoryName);
+        final var directory = rootDir.resolve(directoryName);
         LOG.debug("Creating handler for {} in directory {}", persistenceId, directory);
 
         final var handler = context().actorOf(SegmentedJournalActor.props(persistenceId, directory, storage,

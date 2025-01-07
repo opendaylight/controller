@@ -8,7 +8,7 @@
 package org.opendaylight.controller.akka.segjournal;
 
 import com.typesafe.config.ConfigFactory;
-import java.io.File;
+import java.nio.file.Path;
 import org.apache.commons.io.FileUtils;
 import org.apache.pekko.persistence.japi.journal.JavaJournalSpec;
 import org.junit.runner.RunWith;
@@ -18,7 +18,7 @@ import org.scalatestplus.junit.JUnitRunner;
 public class SegmentedFileJournalSpecTest extends JavaJournalSpec {
     private static final long serialVersionUID = 1L;
 
-    private static final File JOURNAL_DIR = new File("target/segmented-journal");
+    private static final Path JOURNAL_DIR = Path.of("target", "segmented-journal");
 
     public SegmentedFileJournalSpecTest() {
         super(ConfigFactory.load("SegmentedFileJournalTest.conf"));
@@ -26,13 +26,13 @@ public class SegmentedFileJournalSpecTest extends JavaJournalSpec {
 
     @Override
     public void beforeAll() {
-        FileUtils.deleteQuietly(JOURNAL_DIR);
+        FileUtils.deleteQuietly(JOURNAL_DIR.toFile());
         super.beforeAll();
     }
 
     @Override
     public void afterAll() {
         super.afterAll();
-        FileUtils.deleteQuietly(JOURNAL_DIR);
+        FileUtils.deleteQuietly(JOURNAL_DIR.toFile());
     }
 }

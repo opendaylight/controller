@@ -17,7 +17,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import io.atomix.storage.journal.StorageLevel;
-import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Files;
@@ -49,7 +48,7 @@ import scala.concurrent.Future;
 
 @ExtendWith(MockitoExtension.class)
 class SegmentedFileJournalTest {
-    private static final File DIRECTORY = new File("target/sfj-test");
+    private static final Path DIRECTORY = Path.of("target", "sfj-test");
     private static final int SEGMENT_SIZE = 1024 * 1024;
     private static final int MESSAGE_SIZE = 512 * 1024;
     private static final int FLUSH_SIZE = 16 * 1024;
@@ -76,14 +75,14 @@ class SegmentedFileJournalTest {
     @BeforeEach
     void before() {
         kit = new TestKit(SYSTEM);
-        FileUtils.deleteQuietly(DIRECTORY);
+        FileUtils.deleteQuietly(DIRECTORY.toFile());
         actor = actor();
     }
 
     @AfterEach
     void after() {
         actor.tell(PoisonPill.getInstance(), ActorRef.noSender());
-        FileUtils.deleteQuietly(DIRECTORY);
+        FileUtils.deleteQuietly(DIRECTORY.toFile());
     }
 
     @Test
@@ -229,15 +228,14 @@ class SegmentedFileJournalTest {
     private void assertReplayCount(final int expected) {
         // Cast fixes an Eclipse warning 'generic array created'
         reset((Object) firstCallback);
-        AsyncMessage<Void> replay = SegmentedJournalActor.replayMessages(0, Long.MAX_VALUE, Long.MAX_VALUE,
-            firstCallback);
+        final var replay = SegmentedJournalActor.replayMessages(0, Long.MAX_VALUE, Long.MAX_VALUE, firstCallback);
         actor.tell(replay, ActorRef.noSender());
         assertNull(get(replay));
         verify(firstCallback, times(expected)).accept(any(PersistentRepr.class));
     }
 
     private static void assertFileCount(final long dataFiles, final long deleteFiles) throws IOException {
-        List<File> contents = Files.list(DIRECTORY.toPath()).map(Path::toFile).collect(Collectors.toList());
+        final var contents = Files.list(DIRECTORY).map(Path::toFile).collect(Collectors.toList());
         assertEquals(dataFiles, contents.stream().filter(file -> file.getName().startsWith("data-")).count());
         assertEquals(deleteFiles, contents.stream().filter(file -> file.getName().startsWith("delete-")).count());
     }
