@@ -41,13 +41,13 @@ public final class MutableUnsignedLongSet extends UnsignedLongSet implements Mut
     }
 
     public void add(final long longBits) {
-        addOne(trustedRanges(), Entry.of(longBits));
+        addOne(trustedRanges(), new Entry(longBits));
     }
 
     public void addAll(final UnsignedLongSet other) {
         final var ranges = trustedRanges();
         for (var range : other.trustedRanges()) {
-            if (range.lowerBits == range.upperBits) {
+            if (range.lowerBits() == range.upperBits()) {
                 addOne(ranges, range);
             } else {
                 addRange(ranges, range);
@@ -56,19 +56,19 @@ public final class MutableUnsignedLongSet extends UnsignedLongSet implements Mut
     }
 
     private static void addOne(final NavigableSet<Entry> ranges, final Entry range) {
-        final long longBits = range.lowerBits;
+        final long longBits = range.lowerBits();
 
         // We need Iterator.remove() to perform efficient merge below
         final var headIt = ranges.headSet(range, true).descendingIterator();
         if (headIt.hasNext()) {
             final var head = headIt.next();
-            if (Long.compareUnsigned(head.upperBits, longBits) >= 0) {
+            if (Long.compareUnsigned(head.upperBits(), longBits) >= 0) {
                 // Already contained, this is a no-op
                 return;
             }
 
             // Merge into head entry if possible
-            if (head.upperBits + 1 == longBits) {
+            if (head.upperBits() + 1 == longBits) {
                 // We will be replacing head
                 headIt.remove();
 
@@ -76,16 +76,16 @@ public final class MutableUnsignedLongSet extends UnsignedLongSet implements Mut
                 final var tailIt = ranges.tailSet(range, false).iterator();
                 if (tailIt.hasNext()) {
                     final var tail = tailIt.next();
-                    if (tail.lowerBits - 1 == longBits) {
+                    if (tail.lowerBits() - 1 == longBits) {
                         // Update tail.lowerBits to include contents of head
                         tailIt.remove();
-                        ranges.add(tail.withLower(head.lowerBits));
+                        ranges.add(tail.withLowerBits(head.lowerBits()));
                         return;
                     }
                 }
 
                 // Update head.upperBits
-                ranges.add(head.withUpper(longBits));
+                ranges.add(head.withUpperBits(longBits));
                 return;
             }
         }
@@ -94,10 +94,10 @@ public final class MutableUnsignedLongSet extends UnsignedLongSet implements Mut
         if (tailIt.hasNext()) {
             final var tail = tailIt.next();
             // Merge into tail entry if possible
-            if (tail.lowerBits - 1 == longBits) {
+            if (tail.lowerBits() - 1 == longBits) {
                 // Update tail.lowerBits
                 tailIt.remove();
-                ranges.add(tail.withLower(longBits));
+                ranges.add(tail.withLowerBits(longBits));
                 return;
             }
         }
@@ -112,16 +112,16 @@ public final class MutableUnsignedLongSet extends UnsignedLongSet implements Mut
         final boolean hasFloor = headIt.hasNext();
         if (hasFloor) {
             final var floor = headIt.next();
-            if (Long.compareUnsigned(floor.upperBits, range.upperBits) < 0
-                && Long.compareUnsigned(floor.upperBits + 1, range.lowerBits) >= 0) {
+            if (Long.compareUnsigned(floor.upperBits(), range.upperBits()) < 0
+                && Long.compareUnsigned(floor.upperBits() + 1, range.lowerBits()) >= 0) {
                 headIt.remove();
-                ranges.add(expandFloor(ranges, floor, range.upperBits));
+                ranges.add(expandFloor(ranges, floor, range.upperBits()));
                 return;
             }
         }
 
         // If the end of the range is already covered by an existing range, we can expand that
-        final var tailIt = ranges.headSet(Entry.of(range.upperBits), true).descendingIterator();
+        final var tailIt = ranges.headSet(new Entry(range.upperBits()), true).descendingIterator();
         if (tailIt.hasNext()) {
             final var upper = tailIt.next();
             tailIt.remove();
@@ -132,7 +132,7 @@ public final class MutableUnsignedLongSet extends UnsignedLongSet implements Mut
                 ranges.headSet(upper, false).clear();
             }
 
-            ranges.add(expandCeiling(ranges, upper, range.lowerBits, range.upperBits));
+            ranges.add(expandCeiling(ranges, upper, range.lowerBits(), range.upperBits()));
             return;
         }
 
@@ -147,7 +147,7 @@ public final class MutableUnsignedLongSet extends UnsignedLongSet implements Mut
         final long nextLower = upperBits + 1;
         while (tailIt.hasNext()) {
             final var tail = tailIt.next();
-            if (Long.compareUnsigned(tail.lowerBits, nextLower) > 0) {
+            if (Long.compareUnsigned(tail.lowerBits(), nextLower) > 0) {
                 // There is gap, nothing more to cleanup
                 break;
             }
@@ -155,21 +155,21 @@ public final class MutableUnsignedLongSet extends UnsignedLongSet implements Mut
             // We can merge this entry into floor...
             tailIt.remove();
 
-            if (Long.compareUnsigned(tail.upperBits, nextLower) >= 0) {
+            if (Long.compareUnsigned(tail.upperBits(), nextLower) >= 0) {
                 // ... but we need to expand floor accordingly and after that we are done
-                return floor.withUpper(tail.upperBits);
+                return floor.withUpperBits(tail.upperBits());
             }
         }
 
         // Expand floor to include this range and we are done
-        return floor.withUpper(upperBits);
+        return floor.withUpperBits(upperBits);
     }
 
     private static @NonNull Entry expandCeiling(final NavigableSet<Entry> ranges, final Entry ceiling,
             final long lowerBits, final long upperBits) {
-        if (Long.compareUnsigned(ceiling.upperBits, upperBits) >= 0) {
+        if (Long.compareUnsigned(ceiling.upperBits(), upperBits) >= 0) {
             // Upper end is already covered
-            return ceiling.withLower(lowerBits);
+            return ceiling.withLowerBits(lowerBits);
         }
 
         // We are expanding the entry's upper boundary, we need to check if we need to coalesce following entries
@@ -177,18 +177,18 @@ public final class MutableUnsignedLongSet extends UnsignedLongSet implements Mut
         final var tailIt = ranges.tailSet(ceiling, false).iterator();
         if (tailIt.hasNext()) {
             final var tail = tailIt.next();
-            if (Long.compareUnsigned(tail.lowerBits, newUpper + 1) <= 0) {
+            if (Long.compareUnsigned(tail.lowerBits(), newUpper + 1) <= 0) {
                 tailIt.remove();
-                newUpper = tail.upperBits;
+                newUpper = tail.upperBits();
             }
         }
 
-        return Entry.of(lowerBits, newUpper);
+        return new Entry(lowerBits, newUpper);
     }
 
     // Provides compatibility with RangeSet<UnsignedLong> using [lower, upper + 1)
     public ImmutableRangeSet<UnsignedLong> toRangeSet() {
         return ImmutableRangeSet.copyOf(Collections2.transform(trustedRanges(), entry -> Range.closedOpen(
-            UnsignedLong.fromLongBits(entry.lowerBits), UnsignedLong.fromLongBits(entry.upperBits + 1))));
+            UnsignedLong.fromLongBits(entry.lowerBits()), UnsignedLong.fromLongBits(entry.upperBits() + 1))));
     }
 }
