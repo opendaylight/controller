@@ -78,7 +78,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
     }
 
     public void initReplicatedLog() {
-        SimpleReplicatedLog replicatedLog = new SimpleReplicatedLog();
+        final var replicatedLog = new SimpleReplicatedLog();
         long term = currentTerm();
         replicatedLog.append(new SimpleReplicatedLogEntry(0, term, new MockPayload("1")));
         replicatedLog.append(new SimpleReplicatedLogEntry(1, term, new MockPayload("2")));
