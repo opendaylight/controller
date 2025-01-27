@@ -21,7 +21,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
-import org.slf4j.Logger;
 
 /**
  * Unit tests for ElectionTermImpl.
@@ -32,8 +31,6 @@ import org.slf4j.Logger;
 class PersistenceTermInfoStoreTest {
     @Mock
     private DataPersistenceProvider mockPersistence;
-    @Mock
-    private Logger log;
     @Captor
     private ArgumentCaptor<UpdateElectionTerm> message;
     @Captor
@@ -41,7 +38,7 @@ class PersistenceTermInfoStoreTest {
 
     @Test
     void testUpdateAndPersist() throws Exception {
-        final var impl = new PersistenceTermInfoStore(mockPersistence, "test", log);
+        final var impl = new PersistenceTermInfoStore(mockPersistence, "test");
         final var termInfo = new TermInfo(10, "member-1");
         impl.persistTerm(termInfo);
 

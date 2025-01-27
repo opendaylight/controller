@@ -122,8 +122,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         persistentProvider = new PersistentDataProvider(this);
         delegatingPersistenceProvider = new RaftActorDelegatingPersistentDataProvider(null, persistentProvider);
 
-        context = new RaftActorContextImpl(self(), getContext(), id,
-            new PersistenceTermInfoStore(persistentProvider, id, LOG), -1, -1, peerAddresses,
+        context = new RaftActorContextImpl(self(), getContext(), new LocalAccess(id, persistentProvider),
+            -1, -1, peerAddresses,
             configParams.isPresent() ? configParams.orElseThrow() : new DefaultConfigParamsImpl(),
             delegatingPersistenceProvider, this::handleApplyState, LOG, this::executeInSelf);
 

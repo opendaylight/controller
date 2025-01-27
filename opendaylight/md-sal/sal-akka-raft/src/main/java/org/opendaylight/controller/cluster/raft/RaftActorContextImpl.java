@@ -52,8 +52,8 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     private final @NonNull Executor executor;
 
-    private final String id;
-
+    // Cached from LocalAccess instance
+    private final @NonNull String id;
     private final @NonNull TermInfoStore termInformation;
 
     private long commitIndex;
@@ -95,16 +95,15 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     private RaftActorLeadershipTransferCohort leadershipTransferCohort;
 
-    public RaftActorContextImpl(final ActorRef actor, final ActorContext context, final String id,
-            final @NonNull TermInfoStore termInformation, final long commitIndex, final long lastApplied,
-            final @NonNull Map<String, String> peerAddresses,
+    public RaftActorContextImpl(final ActorRef actor, final ActorContext context, final @NonNull LocalAccess localStore,
+            final long commitIndex, final long lastApplied, final @NonNull Map<String, String> peerAddresses,
             final @NonNull ConfigParams configParams, final @NonNull DataPersistenceProvider persistenceProvider,
             final @NonNull Consumer<ApplyState> applyStateConsumer, final @NonNull Logger logger,
             final @NonNull Executor executor) {
         this.actor = actor;
         this.context = context;
-        this.id = id;
-        this.termInformation = requireNonNull(termInformation);
+        id = localStore.logId();
+        termInformation = localStore.termInfoStore();
         this.executor = requireNonNull(executor);
         this.commitIndex = commitIndex;
         this.lastApplied = lastApplied;

@@ -65,13 +65,12 @@ public class RaftActorSnapshotMessageSupportTest {
 
     @Before
     public void setup() {
-        context = new RaftActorContextImpl(mockRaftActorRef, null, "test",
-                new PersistenceTermInfoStore(mockPersistence, "test", LOG), -1, -1, Map.of(),
-                configParams, mockPersistence, applyState -> { }, LOG,  MoreExecutors.directExecutor()) {
-            @Override
-            public SnapshotManager getSnapshotManager() {
-                return mockSnapshotManager;
-            }
+        context = new RaftActorContextImpl(mockRaftActorRef, null, new LocalAccess("test", mockPersistence), -1, -1,
+            Map.of(), configParams, mockPersistence, applyState -> { }, LOG, MoreExecutors.directExecutor()) {
+                @Override
+                public SnapshotManager getSnapshotManager() {
+                    return mockSnapshotManager;
+                }
         };
 
         support = new RaftActorSnapshotMessageSupport(context, mockCohort);

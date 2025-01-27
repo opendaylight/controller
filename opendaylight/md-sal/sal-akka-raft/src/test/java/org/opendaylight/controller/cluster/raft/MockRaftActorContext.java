@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft;
 
 import static java.util.Objects.requireNonNull;
@@ -24,6 +23,7 @@ import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.actor.Props;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
@@ -33,7 +33,6 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
-import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
 import org.opendaylight.controller.cluster.raft.spi.TestTermInfoStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,23 +44,23 @@ public class MockRaftActorContext extends RaftActorContextImpl {
     private RaftPolicy raftPolicy;
     private Consumer<Optional<OutputStream>> createSnapshotProcedure = out -> { };
 
-    private static TermInfoStore newElectionTerm() {
-        return new TestTermInfoStore();
-    }
-
     private static DataPersistenceProvider createProvider() {
         return new NonPersistentDataProvider(Runnable::run);
     }
 
+    @NonNullByDefault
+    private static LocalAccess newLocalAccess(final String id) {
+        return new LocalAccess(id, new TestTermInfoStore(1, ""));
+    }
+
     public MockRaftActorContext() {
-        super(null, null, "test", newElectionTerm(), -1, -1, new HashMap<>(),
-                new DefaultConfigParamsImpl(), createProvider(), applyState -> { }, LOG,
-                MoreExecutors.directExecutor());
+        super(null, null, newLocalAccess("test"), -1, -1, new HashMap<>(),
+            new DefaultConfigParamsImpl(), createProvider(), applyState -> { }, LOG, MoreExecutors.directExecutor());
         setReplicatedLog(new MockReplicatedLogBuilder().build());
     }
 
     public MockRaftActorContext(final String id, final ActorSystem system, final ActorRef actor) {
-        super(actor, null, id, newElectionTerm(), -1, -1, new HashMap<>(),
+        super(actor, null, newLocalAccess(id), -1, -1, new HashMap<>(),
             new DefaultConfigParamsImpl(), createProvider(), applyState -> actor.tell(applyState, actor), LOG,
             MoreExecutors.directExecutor());
 
@@ -69,7 +68,6 @@ public class MockRaftActorContext extends RaftActorContextImpl {
 
         initReplicatedLog();
     }
-
 
     public void initReplicatedLog() {
         SimpleReplicatedLog replicatedLog = new SimpleReplicatedLog();

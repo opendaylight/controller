@@ -7,27 +7,21 @@
  */
 package org.opendaylight.controller.cluster.raft.spi;
 
-import static java.util.Objects.requireNonNull;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 @NonNullByDefault
-public final class TestTermInfoStore implements TermInfoStore {
-    private TermInfo current = new TermInfo(1, "");
-
-    @Override
-    public TermInfo currentTerm() {
-        return current;
+public final class TestTermInfoStore extends AbstractTermInfoStore  {
+    public TestTermInfoStore() {
+        super();
     }
 
-    @Override
-    public void setTerm(final TermInfo newElectionInfo) {
-        current = requireNonNull(newElectionInfo);
+    public TestTermInfoStore(final long term, final @Nullable String votedFor) {
+        super(term, votedFor);
     }
 
     @Override
     public void persistTerm(final TermInfo newElectionInfo) {
         setTerm(newElectionInfo);
-        // TODO: write to some persistent state?
     }
 }

@@ -98,10 +98,8 @@ public class RaftActorRecoverySupportTest {
     public void setup() {
         mockActorSystem = ActorSystem.create();
         mockActorRef = mockActorSystem.actorOf(Props.create(DoNothingActor.class));
-        context = new RaftActorContextImpl(mockActorRef, null, localId,
-                new PersistenceTermInfoStore(mockPersistentProvider, "test", LOG), -1, -1,
-                Map.of(), configParams, mockPersistence, applyState -> {
-        }, LOG, MoreExecutors.directExecutor());
+        context = new RaftActorContextImpl(mockActorRef, null, new LocalAccess(localId, mockPersistentProvider), -1, -1,
+            Map.of(), configParams, mockPersistence, applyState -> { }, LOG, MoreExecutors.directExecutor());
 
         support = new RaftActorRecoverySupport(context, mockCohort);
 

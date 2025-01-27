@@ -67,8 +67,8 @@ import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
+import org.opendaylight.controller.cluster.raft.spi.FailingTermInfoStore;
 import org.opendaylight.controller.cluster.raft.spi.ImmutableRaftEntryMeta;
-import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.utils.ForwardMessageToBehaviorActor;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
@@ -1474,13 +1474,10 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         final var configParams = new DefaultConfigParamsImpl();
         configParams.setHeartBeatInterval(new FiniteDuration(100, TimeUnit.MILLISECONDS));
         configParams.setElectionTimeoutFactor(100000);
-        final var noPersistence = new NonPersistentDataProvider(Runnable::run);
 
-        final var termInfoStore = new PersistenceTermInfoStore(noPersistence, id, LOG);
-        termInfoStore.setTerm(new TermInfo(1, LEADER_ID));
-
-        return new RaftActorContextImpl(actor, actor.underlyingActor().getContext(), id, termInfoStore, -1, -1,
-            Map.of(LEADER_ID, ""), configParams, noPersistence,
+        return new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
+            new LocalAccess(id, new FailingTermInfoStore(1, LEADER_ID)),
+            -1, -1, Map.of(LEADER_ID, ""), configParams, new NonPersistentDataProvider(Runnable::run),
             applyState -> actor.tell(applyState, actor), LOG,  MoreExecutors.directExecutor());
     }
 
