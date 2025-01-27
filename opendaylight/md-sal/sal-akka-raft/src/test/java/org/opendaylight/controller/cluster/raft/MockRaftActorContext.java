@@ -63,14 +63,12 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         super(actor, null, newLocalAccess(id), -1, -1, new HashMap<>(),
             new DefaultConfigParamsImpl(), createProvider(), applyState -> actor.tell(applyState, actor), LOG,
             MoreExecutors.directExecutor());
-
         this.system = system;
-
         initReplicatedLog();
     }
 
     public void initReplicatedLog() {
-        SimpleReplicatedLog replicatedLog = new SimpleReplicatedLog();
+        final var replicatedLog = new SimpleReplicatedLog();
         long term = currentTerm();
         replicatedLog.append(new SimpleReplicatedLogEntry(0, term, new MockPayload("1")));
         replicatedLog.append(new SimpleReplicatedLogEntry(1, term, new MockPayload("2")));
