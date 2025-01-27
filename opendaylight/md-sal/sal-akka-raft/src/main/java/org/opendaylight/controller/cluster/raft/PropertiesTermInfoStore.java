@@ -1,0 +1,77 @@
+/*
+ * Copyright (c) 2025 PANTHEON.tech, s.r.o. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+package org.opendaylight.controller.cluster.raft;
+
+import static java.util.Objects.requireNonNull;
+
+import com.google.common.base.MoreObjects;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Properties;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.opendaylight.controller.cluster.raft.spi.TermInfo;
+import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * A {@link TermInfoStore} based on an atomic {@link Properties} file.
+ */
+@NonNullByDefault
+final class PropertiesTermInfoStore implements TermInfoStore {
+    private static final Logger LOG = LoggerFactory.getLogger(PropertiesTermInfoStore.class);
+    private static final String PROP_ID = "id";
+    private static final String PROP_TERM = "term";
+    private static final String PROP_VOTED_FOR = "votedFor";
+
+    private final String logId;
+    private final Path propFile;
+
+    private TermInfo currentTerm = TermInfo.INITIAL;
+
+    PropertiesTermInfoStore(final String logId, final Path propFile) {
+        this.logId = requireNonNull(logId);
+        this.propFile = requireNonNull(propFile);
+    }
+
+    @Override
+    public TermInfo currentTerm() {
+        return currentTerm;
+    }
+
+    @Override
+    public void setTerm(final TermInfo newTerm) {
+        doSetTerm(requireNonNull(newTerm));
+    }
+
+    private void doSetTerm(final TermInfo newTerm) {
+        currentTerm = requireNonNull(newTerm);
+        LOG.debug("{}: Set currentTerm={}, votedFor={}", logId, newTerm.term(), newTerm.votedFor());
+    }
+
+    @Override
+    public void persistTerm(final TermInfo newTerm) throws IOException {
+        final var props = new Properties(3);
+        props.setProperty(PROP_ID, "id");
+        props.setProperty(PROP_TERM, String.valueOf(newTerm.term()));
+        final var votedFor = newTerm.votedFor();
+        if (votedFor != null) {
+            props.setProperty(PROP_VOTED_FOR, votedFor);
+        }
+
+        // FIXME: persist
+        //        persistence.persist(new UpdateElectionTerm(newTerm), NoopProcedure.instance());
+        //        doSetTerm(newTerm);
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this).add("file", propFile).toString();
+    }
+}
