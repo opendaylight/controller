@@ -26,12 +26,8 @@
       <artifactId>org.eclipse.jdt.annotation</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
-      <artifactId>concepts</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
-      <artifactId>util</artifactId>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>atomix-storage</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
@@ -44,6 +40,14 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>repackaged-pekko</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>concepts</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>util</artifactId>
     </dependency>
     <dependency>
       <groupId>org.scala-lang</groupId>

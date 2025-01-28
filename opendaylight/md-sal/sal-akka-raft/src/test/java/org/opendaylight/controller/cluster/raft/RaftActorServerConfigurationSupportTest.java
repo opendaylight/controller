@@ -69,6 +69,7 @@ import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.FailingTermInfoStore;
 import org.opendaylight.controller.cluster.raft.spi.ImmutableRaftEntryMeta;
+import org.opendaylight.controller.cluster.raft.spi.NoopEntryStore;
 import org.opendaylight.controller.cluster.raft.utils.ForwardMessageToBehaviorActor;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
@@ -1476,7 +1477,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         configParams.setElectionTimeoutFactor(100000);
 
         return new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
-            new LocalAccess(id, new FailingTermInfoStore(1, LEADER_ID)),
+            new LocalAccess(id, new FailingTermInfoStore(1, LEADER_ID), new NoopEntryStore()),
             -1, -1, Map.of(LEADER_ID, ""), configParams, new NonPersistentDataProvider(Runnable::run),
             applyState -> actor.tell(applyState, actor), LOG,  MoreExecutors.directExecutor());
     }
