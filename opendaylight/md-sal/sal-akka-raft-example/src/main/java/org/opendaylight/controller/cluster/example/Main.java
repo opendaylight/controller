@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.example;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,16 +36,18 @@ public final class Main {
 
     @SuppressWarnings("checkstyle:RegexpSingleLineJava")
     public static void main(final String[] args) throws Exception {
+        final var baseDir = Path.of(".");
+
         ActorRef example1Actor =
-            ACTOR_SYSTEM.actorOf(ExampleActor.props("example-1",
+            ACTOR_SYSTEM.actorOf(ExampleActor.props(baseDir, "example-1",
                 withoutPeer("example-1"), Optional.empty()), "example-1");
 
         ActorRef example2Actor =
-            ACTOR_SYSTEM.actorOf(ExampleActor.props("example-2",
+            ACTOR_SYSTEM.actorOf(ExampleActor.props(baseDir, "example-2",
                 withoutPeer("example-2"), Optional.empty()), "example-2");
 
         ActorRef example3Actor =
-            ACTOR_SYSTEM.actorOf(ExampleActor.props("example-3",
+            ACTOR_SYSTEM.actorOf(ExampleActor.props(baseDir, "example-3",
                 withoutPeer("example-3"), Optional.empty()), "example-3");
 
 
@@ -77,7 +80,7 @@ public final class Main {
                         int num = Integer.parseInt(actor);
                         String actorName = "example-" + num;
                         examples.add(num - 1,
-                            ACTOR_SYSTEM.actorOf(ExampleActor.props(actorName,
+                            ACTOR_SYSTEM.actorOf(ExampleActor.props(baseDir, actorName,
                                 withoutPeer(actorName), Optional.empty()), actorName));
                         System.out.println("Created actor : " + actorName);
                         continue;

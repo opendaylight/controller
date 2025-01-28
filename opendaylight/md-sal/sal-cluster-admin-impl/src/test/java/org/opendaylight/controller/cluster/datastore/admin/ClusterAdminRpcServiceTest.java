@@ -17,7 +17,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.opendaylight.controller.cluster.datastore.MemberNode.verifyNoShardPresent;
 import static org.opendaylight.controller.cluster.datastore.MemberNode.verifyRaftPeersPresent;
@@ -26,6 +25,7 @@ import static org.opendaylight.controller.cluster.datastore.MemberNode.verifyRaf
 import com.google.common.collect.Lists;
 import java.io.File;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,9 +39,10 @@ import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.PoisonPill;
 import org.apache.pekko.actor.Status.Success;
 import org.apache.pekko.cluster.Cluster;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.databroker.ClientBackedDataStore;
 import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
@@ -92,7 +93,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
  *
  * @author Thomas Pantelis
  */
-public class ClusterAdminRpcServiceTest {
+class ClusterAdminRpcServiceTest {
     record ExpState(String name, boolean voting) {
         ExpState {
             requireNonNull(name);
@@ -114,14 +115,17 @@ public class ClusterAdminRpcServiceTest {
 
     private final List<MemberNode> memberNodes = new ArrayList<>();
 
-    @Before
-    public void setUp() {
+    @TempDir
+    private Path stateDir;
+
+    @BeforeEach
+    void beforeEach() {
         InMemoryJournal.clear();
         InMemorySnapshotStore.clear();
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void afterEach() {
         for (var member : Lists.reverse(memberNodes)) {
             member.cleanup();
         }
@@ -129,8 +133,8 @@ public class ClusterAdminRpcServiceTest {
     }
 
     @Test
-    public void testBackupDatastore() throws Exception {
-        final var node = MemberNode.builder(memberNodes)
+    void testBackupDatastore() throws Exception {
+        final var node = MemberNode.builder(stateDir, memberNodes)
             .akkaConfig("Member1")
             .moduleShardsConfig("module-shards-member1.conf")
             .waitForShardLeader("cars", "people")
@@ -188,26 +192,26 @@ public class ClusterAdminRpcServiceTest {
     }
 
     @Test
-    public void testGetPrefixShardRole() throws Exception {
+    void testGetPrefixShardRole() throws Exception {
         String name = "testGetPrefixShardRole";
         String moduleShardsConfig = "module-shards-default-member-1.conf";
 
-        final var member1 = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name)
+        final var member1 = MemberNode.builder(stateDir, memberNodes).akkaConfig("Member1").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).build();
 
         member1.kit().waitUntilLeader(member1.configDataStore().getActorUtils(), "default");
     }
 
     @Test
-    public void testModuleShardLeaderMovement() throws Exception {
+    void testModuleShardLeaderMovement() throws Exception {
         String name = "testModuleShardLeaderMovement";
         String moduleShardsConfig = "module-shards-member1.conf";
 
-        final var member1 = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name)
+        final var member1 = MemberNode.builder(stateDir, memberNodes).akkaConfig("Member1").testName(name)
                 .waitForShardLeader("cars").moduleShardsConfig(moduleShardsConfig).build();
-        final var replicaNode2 = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name)
+        final var replicaNode2 = MemberNode.builder(stateDir, memberNodes).akkaConfig("Member2").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).build();
-        final var replicaNode3 = MemberNode.builder(memberNodes).akkaConfig("Member3").testName(name)
+        final var replicaNode3 = MemberNode.builder(stateDir, memberNodes).akkaConfig("Member3").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).build();
 
         member1.waitForMembersUp("member-2", "member-3");
@@ -240,20 +244,20 @@ public class ClusterAdminRpcServiceTest {
     }
 
     @Test
-    public void testAddShardReplica() throws Exception {
+    void testAddShardReplica() throws Exception {
         String name = "testAddShardReplica";
         String moduleShardsConfig = "module-shards-cars-member-1.conf";
-        final var leaderNode1 = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name)
+        final var leaderNode1 = MemberNode.builder(stateDir, memberNodes).akkaConfig("Member1").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).waitForShardLeader("cars").build();
 
-        final var newReplicaNode2 = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name)
+        final var newReplicaNode2 = MemberNode.builder(stateDir, memberNodes).akkaConfig("Member2").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).build();
 
         leaderNode1.waitForMembersUp("member-2");
 
         doAddShardReplica(newReplicaNode2, "cars", "member-1");
 
-        var newReplicaNode3 = MemberNode.builder(memberNodes).akkaConfig("Member3").testName(name)
+        var newReplicaNode3 = MemberNode.builder(stateDir, memberNodes).akkaConfig("Member3").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).build();
 
         leaderNode1.waitForMembersUp("member-3");
@@ -293,7 +297,7 @@ public class ClusterAdminRpcServiceTest {
         Cluster.get(leaderNode1.kit().getSystem()).down(Cluster.get(newReplicaNode3.kit().getSystem()).selfAddress());
         newReplicaNode3.cleanup();
 
-        newReplicaNode3 = MemberNode.builder(memberNodes).akkaConfig("Member3").testName(name)
+        newReplicaNode3 = MemberNode.builder(stateDir, memberNodes).akkaConfig("Member3").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).createOperDatastore(false).build();
 
         verifyRaftState(newReplicaNode3.configDataStore(), "cars", verifier);
@@ -301,9 +305,9 @@ public class ClusterAdminRpcServiceTest {
     }
 
     @Test
-    public void testAddShardReplicaFailures() throws Exception {
+    void testAddShardReplicaFailures() throws Exception {
         String name = "testAddShardReplicaFailures";
-        final var memberNode = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name)
+        final var memberNode = MemberNode.builder(stateDir, memberNodes).akkaConfig("Member1").testName(name)
                 .moduleShardsConfig("module-shards-cars-member-1.conf").build();
 
         final var service = new ClusterAdminRpcService(memberNode.configDataStore(), memberNode.operDataStore(), null);
@@ -392,12 +396,12 @@ public class ClusterAdminRpcServiceTest {
     private static <T> T verifySuccessfulRpcResult(final RpcResult<T> rpcResult) {
         if (!rpcResult.isSuccessful()) {
             final var errors = rpcResult.getErrors();
-            if (errors.size() > 0) {
-                final var error = errors.get(0);
-                throw new AssertionError("Rpc failed with error: " + error, error.getCause());
+            if (errors.isEmpty()) {
+                throw new AssertionError("Rpc failed with no error");
             }
 
-            fail("Rpc failed with no error");
+            final var error = errors.getFirst();
+            throw new AssertionError("Rpc failed with error: " + error, error.getCause());
         }
 
         return rpcResult.getResult();
@@ -412,18 +416,18 @@ public class ClusterAdminRpcServiceTest {
     }
 
     @Test
-    public void testRemoveShardReplica() throws Exception {
+    void testRemoveShardReplica() throws Exception {
         String name = "testRemoveShardReplica";
         String moduleShardsConfig = "module-shards-member1-and-2-and-3.conf";
-        final var leaderNode1 = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name)
+        final var leaderNode1 = MemberNode.builder(stateDir, memberNodes).akkaConfig("Member1").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).datastoreContextBuilder(
                         DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(300).shardElectionTimeoutFactor(1))
                 .build();
 
-        final var replicaNode2 = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name)
+        final var replicaNode2 = MemberNode.builder(stateDir, memberNodes).akkaConfig("Member2").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).build();
 
-        final var replicaNode3 = MemberNode.builder(memberNodes).akkaConfig("Member3").testName(name)
+        final var replicaNode3 = MemberNode.builder(stateDir, memberNodes).akkaConfig("Member3").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).build();
 
         leaderNode1.configDataStore().waitTillReady();
@@ -452,7 +456,7 @@ public class ClusterAdminRpcServiceTest {
         Cluster.get(leaderNode1.kit().getSystem()).down(Cluster.get(replicaNode2.kit().getSystem()).selfAddress());
         replicaNode2.cleanup();
 
-        final var newPeplicaNode2 = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name)
+        final var newPeplicaNode2 = MemberNode.builder(stateDir, memberNodes).akkaConfig("Member2").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).build();
 
         newPeplicaNode2.configDataStore().waitTillReady();
@@ -475,18 +479,18 @@ public class ClusterAdminRpcServiceTest {
     }
 
     @Test
-    public void testRemoveShardLeaderReplica() throws Exception {
+    void testRemoveShardLeaderReplica() throws Exception {
         String name = "testRemoveShardLeaderReplica";
         String moduleShardsConfig = "module-shards-member1-and-2-and-3.conf";
-        final var leaderNode1 = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name)
+        final var leaderNode1 = MemberNode.builder(stateDir, memberNodes).akkaConfig("Member1").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).datastoreContextBuilder(
                         DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(300).shardElectionTimeoutFactor(1))
                 .build();
 
-        final var replicaNode2 = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name)
+        final var replicaNode2 = MemberNode.builder(stateDir, memberNodes).akkaConfig("Member2").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).build();
 
-        final var replicaNode3 = MemberNode.builder(memberNodes).akkaConfig("Member3").testName(name)
+        final var replicaNode3 = MemberNode.builder(stateDir, memberNodes).akkaConfig("Member3").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).build();
 
         leaderNode1.configDataStore().waitTillReady();
@@ -519,10 +523,10 @@ public class ClusterAdminRpcServiceTest {
     }
 
     @Test
-    public void testAddReplicasForAllShards() throws Exception {
+    void testAddReplicasForAllShards() throws Exception {
         String name = "testAddReplicasForAllShards";
         String moduleShardsConfig = "module-shards-member1.conf";
-        final var leaderNode1 = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name)
+        final var leaderNode1 = MemberNode.builder(stateDir, memberNodes).akkaConfig("Member1").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).waitForShardLeader("cars", "people").build();
 
         final var petsModuleConfig = new ModuleShardConfiguration(XMLNamespace.of("pets-ns"), "pets-module", "pets",
@@ -532,7 +536,7 @@ public class ClusterAdminRpcServiceTest {
         leaderNode1.kit().expectMsgClass(Success.class);
         leaderNode1.kit().waitUntilLeader(leaderNode1.configDataStore().getActorUtils(), "pets");
 
-        final var newReplicaNode2 = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name)
+        final var newReplicaNode2 = MemberNode.builder(stateDir, memberNodes).akkaConfig("Member2").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).build();
 
         leaderNode1.waitForMembersUp("member-2");
@@ -569,18 +573,18 @@ public class ClusterAdminRpcServiceTest {
     }
 
     @Test
-    public void testRemoveAllShardReplicas() throws Exception {
+    void testRemoveAllShardReplicas() throws Exception {
         String name = "testRemoveAllShardReplicas";
         String moduleShardsConfig = "module-shards-member1-and-2-and-3.conf";
-        final var leaderNode1 = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name)
+        final var leaderNode1 = MemberNode.builder(stateDir, memberNodes).akkaConfig("Member1").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).datastoreContextBuilder(
                         DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(300).shardElectionTimeoutFactor(1))
                 .build();
 
-        final var replicaNode2 = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name)
+        final var replicaNode2 = MemberNode.builder(stateDir, memberNodes).akkaConfig("Member2").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).build();
 
-        final var replicaNode3 = MemberNode.builder(memberNodes).akkaConfig("Member3").testName(name)
+        final var replicaNode3 = MemberNode.builder(stateDir, memberNodes).akkaConfig("Member3").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).build();
 
         leaderNode1.configDataStore().waitTillReady();
@@ -631,18 +635,18 @@ public class ClusterAdminRpcServiceTest {
     }
 
     @Test
-    public void testChangeMemberVotingStatesForShard() throws Exception {
+    void testChangeMemberVotingStatesForShard() throws Exception {
         String name = "testChangeMemberVotingStatusForShard";
         String moduleShardsConfig = "module-shards-member1-and-2-and-3.conf";
-        final var leaderNode1 = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name)
+        final var leaderNode1 = MemberNode.builder(stateDir, memberNodes).akkaConfig("Member1").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).datastoreContextBuilder(
                         DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(300).shardElectionTimeoutFactor(1))
                 .build();
 
-        final var replicaNode2 = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name)
+        final var replicaNode2 = MemberNode.builder(stateDir, memberNodes).akkaConfig("Member2").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).build();
 
-        final var replicaNode3 = MemberNode.builder(memberNodes).akkaConfig("Member3").testName(name)
+        final var replicaNode3 = MemberNode.builder(stateDir, memberNodes).akkaConfig("Member3").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).build();
 
         leaderNode1.configDataStore().waitTillReady();
@@ -674,10 +678,10 @@ public class ClusterAdminRpcServiceTest {
     }
 
     @Test
-    public void testChangeMemberVotingStatesForSingleNodeShard() throws Exception {
+    void testChangeMemberVotingStatesForSingleNodeShard() throws Exception {
         String name = "testChangeMemberVotingStatesForSingleNodeShard";
         String moduleShardsConfig = "module-shards-member1.conf";
-        final var leaderNode = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name)
+        final var leaderNode = MemberNode.builder(stateDir, memberNodes).akkaConfig("Member1").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).datastoreContextBuilder(
                         DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(300).shardElectionTimeoutFactor(1))
                 .build();
@@ -703,10 +707,10 @@ public class ClusterAdminRpcServiceTest {
     }
 
     @Test
-    public void testChangeMemberVotingStatesForAllShards() throws Exception {
+    void testChangeMemberVotingStatesForAllShards() throws Exception {
         String name = "testChangeMemberVotingStatesForAllShards";
         String moduleShardsConfig = "module-shards-member1-and-2-and-3.conf";
-        final var leaderNode1 = MemberNode.builder(memberNodes)
+        final var leaderNode1 = MemberNode.builder(stateDir, memberNodes)
             .akkaConfig("Member1")
             .testName(name)
             .moduleShardsConfig(moduleShardsConfig)
@@ -715,10 +719,10 @@ public class ClusterAdminRpcServiceTest {
                 .shardElectionTimeoutFactor(1))
             .build();
 
-        final var replicaNode2 = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name)
+        final var replicaNode2 = MemberNode.builder(stateDir, memberNodes).akkaConfig("Member2").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).build();
 
-        final var replicaNode3 = MemberNode.builder(memberNodes).akkaConfig("Member3").testName(name)
+        final var replicaNode3 = MemberNode.builder(stateDir, memberNodes).akkaConfig("Member3").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).build();
 
         leaderNode1.configDataStore().waitTillReady();
@@ -756,7 +760,7 @@ public class ClusterAdminRpcServiceTest {
     }
 
     @Test
-    public void testFlipMemberVotingStates() throws Exception {
+    void testFlipMemberVotingStates() throws Exception {
         String name = "testFlipMemberVotingStates";
 
         final var persistedServerConfig = new ClusterConfig(
@@ -767,15 +771,15 @@ public class ClusterAdminRpcServiceTest {
         setupPersistedServerConfigPayload(persistedServerConfig, "member-3", name, "cars", "people");
 
         String moduleShardsConfig = "module-shards-member1-and-2-and-3.conf";
-        final var leaderNode1 = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name)
+        final var leaderNode1 = MemberNode.builder(stateDir, memberNodes).akkaConfig("Member1").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).datastoreContextBuilder(DatastoreContext.newBuilder()
                         .shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(10))
                 .build();
 
-        final var replicaNode2 = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name)
+        final var replicaNode2 = MemberNode.builder(stateDir, memberNodes).akkaConfig("Member2").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).build();
 
-        final var replicaNode3 = MemberNode.builder(memberNodes).akkaConfig("Member3").testName(name)
+        final var replicaNode3 = MemberNode.builder(stateDir, memberNodes).akkaConfig("Member3").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).build();
 
         leaderNode1.configDataStore().waitTillReady();
@@ -844,7 +848,7 @@ public class ClusterAdminRpcServiceTest {
     }
 
     @Test
-    public void testFlipMemberVotingStatesWithNoInitialLeader() throws Exception {
+    void testFlipMemberVotingStatesWithNoInitialLeader() throws Exception {
         String name = "testFlipMemberVotingStatesWithNoInitialLeader";
 
         // Members 1, 2, and 3 are initially started up as non-voting. Members 4, 5, and 6 are initially
@@ -859,15 +863,15 @@ public class ClusterAdminRpcServiceTest {
         setupPersistedServerConfigPayload(persistedServerConfig, "member-3", name, "cars", "people");
 
         String moduleShardsConfig = "module-shards-member1-and-2-and-3.conf";
-        final var replicaNode1 = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name)
+        final var replicaNode1 = MemberNode.builder(stateDir, memberNodes).akkaConfig("Member1").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).datastoreContextBuilder(
                         DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(300).shardElectionTimeoutFactor(1))
                 .build();
 
-        final var replicaNode2 = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name)
+        final var replicaNode2 = MemberNode.builder(stateDir, memberNodes).akkaConfig("Member2").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).build();
 
-        final var replicaNode3 = MemberNode.builder(memberNodes).akkaConfig("Member3").testName(name)
+        final var replicaNode3 = MemberNode.builder(stateDir, memberNodes).akkaConfig("Member3").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).build();
 
         // Initially there won't be a leader b/c all the up nodes are non-voting.
@@ -917,7 +921,7 @@ public class ClusterAdminRpcServiceTest {
     }
 
     @Test
-    public void testFlipMemberVotingStatesWithVotingMembersDown() throws Exception {
+    void testFlipMemberVotingStatesWithVotingMembersDown() throws Exception {
         String name = "testFlipMemberVotingStatesWithVotingMembersDown";
 
         // Members 4, 5, and 6 are initially non-voting and simulated as down by not starting them up.
@@ -931,15 +935,15 @@ public class ClusterAdminRpcServiceTest {
         setupPersistedServerConfigPayload(persistedServerConfig, "member-3", name, "cars", "people");
 
         String moduleShardsConfig = "module-shards-member1-and-2-and-3.conf";
-        final var leaderNode1 = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name)
+        final var leaderNode1 = MemberNode.builder(stateDir, memberNodes).akkaConfig("Member1").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).datastoreContextBuilder(
                         DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(300).shardElectionTimeoutFactor(1))
                 .build();
 
-        final var replicaNode2 = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name)
+        final var replicaNode2 = MemberNode.builder(stateDir, memberNodes).akkaConfig("Member2").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).build();
 
-        final var replicaNode3 = MemberNode.builder(memberNodes).akkaConfig("Member3").testName(name)
+        final var replicaNode3 = MemberNode.builder(stateDir, memberNodes).akkaConfig("Member3").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).build();
 
         leaderNode1.configDataStore().waitTillReady();

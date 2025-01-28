@@ -28,7 +28,7 @@ public abstract class AbstractActorTest extends AbstractTest {
         system = null;
     }
 
-    protected static ActorSystem getSystem() {
+    protected static final ActorSystem getSystem() {
         return system;
     }
 }

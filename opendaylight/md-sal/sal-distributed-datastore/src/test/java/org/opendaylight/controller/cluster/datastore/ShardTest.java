@@ -24,6 +24,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.HashSet;
@@ -175,7 +176,7 @@ public class ShardTest extends AbstractShardTest {
 
             @Override
             public Shard create() {
-                return new Shard(newShardBuilder()) {
+                return new Shard(stateDir(), newShardBuilder()) {
                     @Override
                     public void handleCommand(final Object message) {
                         if (message instanceof ElectionTimeout && firstElectionTimeout) {
@@ -230,8 +231,8 @@ public class ShardTest extends AbstractShardTest {
         final ShardIdentifier peerID = ShardIdentifier.create("inventory", MemberName.forName("member-2"),
                 "config");
         final TestActorRef<Shard> shard = actorFactory.createTestActor(newShardBuilder()
-            .peerAddresses(Collections.<String, String>singletonMap(peerID.toString(), null))
-            .props().withDispatcher(Dispatchers.DefaultDispatcherId()), "testPeerAddressResolved");
+            .peerAddresses(Collections.singletonMap(peerID.toString(), null))
+            .props(stateDir()).withDispatcher(Dispatchers.DefaultDispatcherId()), "testPeerAddressResolved");
 
         final String address = "pekko://foobar";
         shard.tell(new PeerAddressResolved(peerID.toString(), address), noSender());
@@ -764,7 +765,7 @@ public class ShardTest extends AbstractShardTest {
         final ShardTestKit testKit = new ShardTestKit(getSystem());
         final DataTree dataTree = createDelegatingMockDataTree();
         final TestActorRef<Shard> shard = actorFactory.createTestActor(
-            newShardBuilder().dataTree(dataTree).props().withDispatcher(Dispatchers.DefaultDispatcherId()),
+            newShardBuilder().dataTree(dataTree).props(stateDir()).withDispatcher(Dispatchers.DefaultDispatcherId()),
             "testCommitWhenTransactionHasModifications-" + local);
 
         ShardTestKit.waitUntilLeader(shard);
@@ -808,7 +809,7 @@ public class ShardTest extends AbstractShardTest {
 
         final ShardTestKit testKit = new ShardTestKit(getSystem());
         final TestActorRef<Shard> shard = actorFactory.createTestActor(
-            newShardBuilder().dataTree(dataTree).props().withDispatcher(Dispatchers.DefaultDispatcherId()),
+            newShardBuilder().dataTree(dataTree).props(stateDir()).withDispatcher(Dispatchers.DefaultDispatcherId()),
             "testCommitPhaseFailure");
 
         ShardTestKit.waitUntilLeader(shard);
@@ -880,7 +881,7 @@ public class ShardTest extends AbstractShardTest {
 
         final ShardTestKit testKit = new ShardTestKit(getSystem());
         final TestActorRef<Shard> shard = actorFactory.createTestActor(
-            newShardBuilder().dataTree(dataTree).props().withDispatcher(Dispatchers.DefaultDispatcherId()),
+            newShardBuilder().dataTree(dataTree).props(stateDir()).withDispatcher(Dispatchers.DefaultDispatcherId()),
             "testPreCommitPhaseFailure");
 
         ShardTestKit.waitUntilLeader(shard);
@@ -936,7 +937,7 @@ public class ShardTest extends AbstractShardTest {
 
         final ShardTestKit testKit = new ShardTestKit(getSystem());
         final TestActorRef<Shard> shard = actorFactory.createTestActor(
-            newShardBuilder().dataTree(dataTree).props().withDispatcher(Dispatchers.DefaultDispatcherId()),
+            newShardBuilder().dataTree(dataTree).props(stateDir()).withDispatcher(Dispatchers.DefaultDispatcherId()),
             "testCanCommitPhaseFailure");
 
         ShardTestKit.waitUntilLeader(shard);
@@ -993,7 +994,7 @@ public class ShardTest extends AbstractShardTest {
 
         final ShardTestKit testKit = new ShardTestKit(getSystem());
         final TestActorRef<Shard> shard = actorFactory.createTestActor(
-            newShardBuilder().dataTree(dataTree).props().withDispatcher(Dispatchers.DefaultDispatcherId()),
+            newShardBuilder().dataTree(dataTree).props(stateDir()).withDispatcher(Dispatchers.DefaultDispatcherId()),
             "testImmediateCommitWithCanCommitPhaseFailure-" + local);
 
         ShardTestKit.waitUntilLeader(shard);
@@ -1041,7 +1042,7 @@ public class ShardTest extends AbstractShardTest {
     @Test
     public void testAbortWithCommitPending() throws Exception {
         final ShardTestKit testKit = new ShardTestKit(getSystem());
-        final Creator<Shard> creator = () -> new Shard(newShardBuilder());
+        final Creator<Shard> creator = () -> new Shard(stateDir(), newShardBuilder());
 
         final TestActorRef<Shard> shard = actorFactory.createTestActor(Props.create(Shard.class,
             new DelegatingShardCreator(creator)).withDispatcher(Dispatchers.DefaultDispatcherId()),
@@ -1480,9 +1481,8 @@ public class ShardTest extends AbstractShardTest {
         dataStoreContextBuilder.persistent(persistent);
 
         final class TestShard extends Shard {
-
-            TestShard(final AbstractBuilder<?, ?> builder) {
-                super(builder);
+            TestShard(final Path stateDir, final AbstractBuilder<?, ?> builder) {
+                super(stateDir, builder);
                 setPersistence(new TestPersistentDataProvider(super.persistence()));
             }
 
@@ -1497,7 +1497,7 @@ public class ShardTest extends AbstractShardTest {
             }
         }
 
-        final Creator<Shard> creator = () -> new TestShard(newShardBuilder());
+        final Creator<Shard> creator = () -> new TestShard(stateDir(), newShardBuilder());
 
         final TestActorRef<Shard> shard = actorFactory.createTestActor(Props.create(Shard.class,
             new DelegatingShardCreator(creator)).withDispatcher(Dispatchers.DefaultDispatcherId()), shardActorName);
@@ -1566,13 +1566,13 @@ public class ShardTest extends AbstractShardTest {
                 .shardJournalRecoveryLogBatchSize(3).shardSnapshotBatchCount(5000).persistent(true).build();
 
         final Props persistentProps = Shard.builder().id(shardID).datastoreContext(persistentContext)
-                .schemaContextProvider(() -> SCHEMA_CONTEXT).props();
+                .schemaContextProvider(() -> SCHEMA_CONTEXT).props(stateDir());
 
         final DatastoreContext nonPersistentContext = DatastoreContext.newBuilder()
                 .shardJournalRecoveryLogBatchSize(3).shardSnapshotBatchCount(5000).persistent(false).build();
 
         final Props nonPersistentProps = Shard.builder().id(shardID).datastoreContext(nonPersistentContext)
-                .schemaContextProvider(() -> SCHEMA_CONTEXT).props();
+                .schemaContextProvider(() -> SCHEMA_CONTEXT).props(stateDir());
 
         final TestActorRef<Shard> shard1 = actorFactory.createTestActor(persistentProps, "testPersistence1");
 
@@ -1664,7 +1664,7 @@ public class ShardTest extends AbstractShardTest {
         setupInMemorySnapshotStore();
 
         final TestActorRef<Shard> shard = actorFactory.createTestActor(
-            newShardBuilder().props().withDispatcher(Dispatchers.DefaultDispatcherId()),
+            newShardBuilder().props(stateDir()).withDispatcher(Dispatchers.DefaultDispatcherId()),
             actorFactory.generateActorId(testName + "-shard"));
 
         testKit.waitUntilNoLeader(shard);
@@ -1694,7 +1694,7 @@ public class ShardTest extends AbstractShardTest {
         setupInMemorySnapshotStore();
 
         final TestActorRef<Shard> shard = actorFactory.createTestActor(
-            newShardBuilder().props().withDispatcher(Dispatchers.DefaultDispatcherId()),
+            newShardBuilder().props(stateDir()).withDispatcher(Dispatchers.DefaultDispatcherId()),
             actorFactory.generateActorId(testName + "-shard"));
 
         testKit.waitUntilNoLeader(shard);
@@ -1729,14 +1729,14 @@ public class ShardTest extends AbstractShardTest {
                     .datastoreContext(dataStoreContextBuilder.shardElectionTimeoutFactor(1000).build())
                     .peerAddresses(Collections.singletonMap(leaderShardID.toString(),
                         "pekko://test/user/" + leaderShardID.toString()))
-                    .schemaContextProvider(() -> SCHEMA_CONTEXT).props()
+                    .schemaContextProvider(() -> SCHEMA_CONTEXT).props(stateDir())
                     .withDispatcher(Dispatchers.DefaultDispatcherId()), followerShardID.toString());
 
         final TestActorRef<Shard> leaderShard = actorFactory
                 .createTestActor(Shard.builder().id(leaderShardID).datastoreContext(newDatastoreContext())
                     .peerAddresses(Collections.singletonMap(followerShardID.toString(),
                         "pekko://test/user/" + followerShardID.toString()))
-                    .schemaContextProvider(() -> SCHEMA_CONTEXT).props()
+                    .schemaContextProvider(() -> SCHEMA_CONTEXT).props(stateDir())
                     .withDispatcher(Dispatchers.DefaultDispatcherId()), leaderShardID.toString());
 
         leaderShard.tell(TimeoutNow.INSTANCE, noSender());
@@ -1764,7 +1764,7 @@ public class ShardTest extends AbstractShardTest {
                 .withDispatcher(Dispatchers.DefaultDispatcherId()));
 
         final ActorRef shard = parent.underlyingActor().context().actorOf(
-                newShardBuilder().props().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                newShardBuilder().props(stateDir()).withDispatcher(Dispatchers.DefaultDispatcherId()),
                 "testServerRemoved");
 
         shard.tell(new ServerRemoved("test"), noSender());

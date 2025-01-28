@@ -108,7 +108,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
     }
 
     protected Props newShardProps() {
-        return newShardBuilder().props();
+        return newShardBuilder().props(stateDir());
     }
 
     protected Shard.Builder newShardBuilder() {
@@ -123,7 +123,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
 
         final CountDownLatch recoveryComplete = new CountDownLatch(1);
 
-        final Creator<Shard> creator = () -> new Shard(newShardBuilder()) {
+        final Creator<Shard> creator = () -> new Shard(stateDir(), newShardBuilder()) {
             @Override
             protected void onRecoveryComplete() {
                 try {
