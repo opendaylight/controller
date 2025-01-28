@@ -22,10 +22,12 @@ import org.apache.aries.util.AriesFrameworkUtil;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.blueprint.ext.OpendaylightNamespaceHandler;
 import org.opendaylight.yangtools.util.xml.UntrustedXML;
+import org.osgi.annotation.bundle.Header;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
+import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -48,8 +50,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Pantelis
  */
-public class BlueprintBundleTracker implements BundleActivator, BundleTrackerCustomizer<Bundle>, BlueprintListener,
-        SynchronousBundleListener {
+@Header(name = Constants.BUNDLE_ACTIVATOR, value = "${@class}")
+public final class BlueprintBundleTracker
+        implements BundleActivator, BundleTrackerCustomizer<Bundle>, BlueprintListener, SynchronousBundleListener {
     private static final Logger LOG = LoggerFactory.getLogger(BlueprintBundleTracker.class);
     private static final String ODL_CUSTOM_BLUEPRINT_FILE_PATH = "org/opendaylight/blueprint/";
     private static final String STANDARD_BLUEPRINT_FILE_PATH = "OSGI-INF/blueprint/";
