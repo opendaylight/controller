@@ -11,7 +11,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.Mockito.verify;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import org.apache.pekko.japi.Procedure;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -28,7 +32,7 @@ import org.opendaylight.controller.cluster.raft.spi.TermInfo;
  * @author Thomas Pantelis
  */
 @ExtendWith(MockitoExtension.class)
-class PersistenceTermInfoStoreTest {
+class PropertiesTermInfoStoreTest {
     @Mock
     private DataPersistenceProvider mockPersistence;
     @Captor
@@ -36,9 +40,21 @@ class PersistenceTermInfoStoreTest {
     @Captor
     private ArgumentCaptor<Procedure<UpdateElectionTerm>> procedure;
 
+    private Path stateFile;
+
+    @BeforeEach
+    void beforeEach() throws Exception {
+        stateFile = Files.createTempFile(PropertiesTermInfoStoreTest.class.getName(), null);
+    }
+
+    @AfterEach
+    void afterEach() throws Exception {
+        Files.deleteIfExists(stateFile);
+    }
+
     @Test
     void testUpdateAndPersist() throws Exception {
-        final var impl = new PersistenceTermInfoStore(mockPersistence, "test");
+        final var impl = new PropertiesTermInfoStore("test", stateFile);
         final var termInfo = new TermInfo(10, "member-1");
         impl.storeAndSetTerm(termInfo);
 
