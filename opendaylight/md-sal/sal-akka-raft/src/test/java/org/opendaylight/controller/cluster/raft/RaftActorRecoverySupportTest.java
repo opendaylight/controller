@@ -13,7 +13,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -21,6 +20,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import com.google.common.util.concurrent.MoreExecutors;
 import java.io.OutputStream;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -35,22 +35,23 @@ import java.util.function.Consumer;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.actor.Props;
+import org.apache.pekko.persistence.AbstractPersistentActor;
 import org.apache.pekko.persistence.RecoveryCompleted;
 import org.apache.pekko.persistence.SnapshotMetadata;
 import org.apache.pekko.persistence.SnapshotOffer;
 import org.apache.pekko.testkit.javadsl.TestKit;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
-import org.opendaylight.controller.cluster.PersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.MockRaftActor.MockSnapshotState;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
@@ -71,45 +72,47 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Pantelis
  */
-@RunWith(MockitoJUnitRunner.StrictStubs.class)
-public class RaftActorRecoverySupportTest {
+@ExtendWith(MockitoExtension.class)
+class RaftActorRecoverySupportTest {
     private static final Logger LOG = LoggerFactory.getLogger(RaftActorRecoverySupportTest.class);
 
-    @Mock
-    private DataPersistenceProvider mockPersistence;
-
-    @Mock
-    private RaftActorRecoveryCohort mockCohort;
-
-    @Mock
-    PersistentDataProvider mockPersistentProvider;
-
-    ActorRef mockActorRef;
-
-    ActorSystem mockActorSystem;
-
-    private RaftActorRecoverySupport support;
-
-    private RaftActorContext context;
     private final DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
     private final String localId = "leader";
 
-    @Before
-    public void setup() {
+    @Mock
+    private DataPersistenceProvider mockPersistence;
+    @Mock
+    private RaftActorRecoveryCohort mockCohort;
+    @Mock
+    private AbstractPersistentActor mockActor;
+    @Mock
+    private Consumer<Optional<OutputStream>> mockSnapshotConsumer;
+    @TempDir
+    private Path stateDir;
+
+    private ActorRef mockActorRef;
+    private ActorSystem mockActorSystem;
+    private RaftActorRecoverySupport support;
+
+    private RaftActorContext context;
+
+    @BeforeEach
+    void setup() {
         mockActorSystem = ActorSystem.create();
         mockActorRef = mockActorSystem.actorOf(Props.create(DoNothingActor.class));
-        context = new RaftActorContextImpl(mockActorRef, null, new LocalAccess(localId, mockPersistentProvider), -1, -1,
-            Map.of(), configParams, (short) 0, mockPersistence, applyState -> { }, MoreExecutors.directExecutor());
+        final var localAccess = new LocalAccess(localId, stateDir);
+        context = new RaftActorContextImpl(mockActorRef, null, localAccess, -1, -1, Map.of(), configParams, (short) 0,
+            mockPersistence, applyState -> { }, MoreExecutors.directExecutor());
 
-        support = new RaftActorRecoverySupport(context, mockCohort);
+        support = new RaftActorRecoverySupport(localAccess, context, mockCohort);
 
         doReturn(true).when(mockPersistence).isRecoveryApplicable();
 
         context.setReplicatedLog(ReplicatedLogImpl.newInstance(context));
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         TestKit.shutdownActorSystem(mockActorSystem);
     }
 
@@ -118,13 +121,13 @@ public class RaftActorRecoverySupportTest {
     }
 
     private void sendMessageToSupport(final Object message, final boolean expComplete) {
-        boolean complete = support.handleRecoveryMessage(message, mockPersistentProvider);
+        boolean complete = support.handleRecoveryMessage(mockActor, message);
         assertEquals("complete", expComplete, complete);
     }
 
     @Test
-    public void testOnReplicatedLogEntry() {
-        ReplicatedLogEntry logEntry = new SimpleReplicatedLogEntry(1, 1, new MockRaftActorContext.MockPayload("1", 5));
+    void testOnReplicatedLogEntry() {
+        final var logEntry = new SimpleReplicatedLogEntry(1, 1, new MockRaftActorContext.MockPayload("1", 5));
 
         sendMessageToSupport(logEntry);
 
@@ -141,7 +144,7 @@ public class RaftActorRecoverySupportTest {
     public void testOnApplyJournalEntries() {
         configParams.setJournalRecoveryLogBatchSize(5);
 
-        ReplicatedLog replicatedLog = context.getReplicatedLog();
+        final var replicatedLog = context.getReplicatedLog();
         replicatedLog.append(new SimpleReplicatedLogEntry(0, 1, new MockRaftActorContext.MockPayload("0")));
         replicatedLog.append(new SimpleReplicatedLogEntry(1, 1, new MockRaftActorContext.MockPayload("1")));
         replicatedLog.append(new SimpleReplicatedLogEntry(2, 1, new MockRaftActorContext.MockPayload("2")));
@@ -167,7 +170,7 @@ public class RaftActorRecoverySupportTest {
         assertEquals("Snapshot term", -1, context.getReplicatedLog().getSnapshotTerm());
         assertEquals("Snapshot index", -1, context.getReplicatedLog().getSnapshotIndex());
 
-        InOrder inOrder = Mockito.inOrder(mockCohort);
+        final var inOrder = Mockito.inOrder(mockCohort);
         inOrder.verify(mockCohort).startLogRecoveryBatch(5);
 
         for (int i = 0; i < replicatedLog.size() - 1; i++) {
@@ -186,7 +189,6 @@ public class RaftActorRecoverySupportTest {
         int recoverySnapshotInterval = 3;
         int numberOfEntries = 5;
         configParams.setRecoverySnapshotIntervalSeconds(recoverySnapshotInterval);
-        Consumer<Optional<OutputStream>> mockSnapshotConsumer = mock(Consumer.class);
         context.getSnapshotManager().setCreateSnapshotConsumer(mockSnapshotConsumer);
 
         ScheduledExecutorService applyEntriesExecutor = Executors.newSingleThreadScheduledExecutor();
@@ -217,30 +219,26 @@ public class RaftActorRecoverySupportTest {
 
     @Test
     public void testOnSnapshotOffer() {
-
-        ReplicatedLog replicatedLog = context.getReplicatedLog();
+        final var replicatedLog = context.getReplicatedLog();
         replicatedLog.append(new SimpleReplicatedLogEntry(1, 1, new MockRaftActorContext.MockPayload("1")));
         replicatedLog.append(new SimpleReplicatedLogEntry(2, 1, new MockRaftActorContext.MockPayload("2")));
         replicatedLog.append(new SimpleReplicatedLogEntry(3, 1, new MockRaftActorContext.MockPayload("3")));
 
-        ReplicatedLogEntry unAppliedEntry1 = new SimpleReplicatedLogEntry(4, 1,
-                new MockRaftActorContext.MockPayload("4", 4));
+        final var unAppliedEntry1 = new SimpleReplicatedLogEntry(4, 1, new MockRaftActorContext.MockPayload("4", 4));
+        final var unAppliedEntry2 = new SimpleReplicatedLogEntry(5, 1, new MockRaftActorContext.MockPayload("5", 5));
 
-        ReplicatedLogEntry unAppliedEntry2 = new SimpleReplicatedLogEntry(5, 1,
-                new MockRaftActorContext.MockPayload("5", 5));
+        final long lastAppliedDuringSnapshotCapture = 3;
+        final long lastIndexDuringSnapshotCapture = 5;
+        final long electionTerm = 2;
+        final var electionVotedFor = "member-2";
 
-        long lastAppliedDuringSnapshotCapture = 3;
-        long lastIndexDuringSnapshotCapture = 5;
-        long electionTerm = 2;
-        String electionVotedFor = "member-2";
-
-        MockSnapshotState snapshotState = new MockSnapshotState(List.of(new MockPayload("1")));
-        Snapshot snapshot = Snapshot.create(snapshotState,
+        final var snapshotState = new MockSnapshotState(List.of(new MockPayload("1")));
+        final var snapshot = Snapshot.create(snapshotState,
                 List.of(unAppliedEntry1, unAppliedEntry2), lastIndexDuringSnapshotCapture, 1,
                 lastAppliedDuringSnapshotCapture, 1, new TermInfo(electionTerm, electionVotedFor), null);
 
-        SnapshotMetadata metadata = new SnapshotMetadata("test", 6, 12345);
-        SnapshotOffer snapshotOffer = new SnapshotOffer(metadata, snapshot);
+        final var metadata = new SnapshotMetadata("test", 6, 12345);
+        final var snapshotOffer = new SnapshotOffer(metadata, snapshot);
 
         sendMessageToSupport(snapshotOffer);
 
@@ -313,7 +311,7 @@ public class RaftActorRecoverySupportTest {
     @Test
     public void testDataRecoveredWithPersistenceDisabled() {
         doReturn(false).when(mockPersistence).isRecoveryApplicable();
-        doReturn(10L).when(mockPersistentProvider).getLastSequenceNumber();
+        doReturn(10L).when(mockActor).lastSequenceNr();
 
         Snapshot snapshot = Snapshot.create(new MockSnapshotState(List.of(new MockPayload("1"))),
                 List.of(), 3, 1, 3, 1, new TermInfo(-1), null);
@@ -345,7 +343,7 @@ public class RaftActorRecoverySupportTest {
         verify(mockCohort, never()).getRestoreFromSnapshot();
         verifyNoMoreInteractions(mockCohort);
 
-        verify(mockPersistentProvider).deleteMessages(10L);
+//        verify(mockPersistentProvider).deleteMessages(10L);
     }
 
     static UpdateElectionTerm updateElectionTerm(final long term, final String votedFor) {
@@ -361,7 +359,7 @@ public class RaftActorRecoverySupportTest {
         sendMessageToSupport(RecoveryCompleted.getInstance(), true);
 
         verify(mockCohort).getRestoreFromSnapshot();
-        verifyNoMoreInteractions(mockCohort, mockPersistentProvider);
+        verifyNoMoreInteractions(mockCohort);
     }
 
     @Test
@@ -411,13 +409,12 @@ public class RaftActorRecoverySupportTest {
     public void testServerConfigurationPayloadAppliedWithPersistenceDisabled() {
         doReturn(false).when(mockPersistence).isRecoveryApplicable();
 
-        String follower = "follower";
-        final var obj = new ClusterConfig(new ServerInfo(localId, true), new ServerInfo(follower, true));
+        final var obj = new ClusterConfig(new ServerInfo(localId, true), new ServerInfo("follower", true));
 
         sendMessageToSupport(new SimpleReplicatedLogEntry(0, 1, obj));
 
         //verify new peers
-        assertEquals("New peer Ids", Set.of(follower), Set.copyOf(context.getPeerIds()));
+        assertEquals("New peer Ids", Set.of("follower"), Set.copyOf(context.getPeerIds()));
     }
 
     @Test

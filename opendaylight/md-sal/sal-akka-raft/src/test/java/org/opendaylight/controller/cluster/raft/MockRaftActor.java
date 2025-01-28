@@ -8,6 +8,7 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static java.util.Objects.requireNonNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
@@ -15,6 +16,7 @@ import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -54,8 +56,8 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     private final Function<Runnable, Void> pauseLeaderFunction;
 
     protected MockRaftActor(final AbstractBuilder<?, ?> builder) {
-        super(builder.id, builder.peerAddresses != null ? builder.peerAddresses :
-            Collections.emptyMap(), Optional.ofNullable(builder.config), PAYLOAD_VERSION);
+        super(builder.baseDir, builder.id, builder.peerAddresses != null ? builder.peerAddresses : Map.of(),
+            Optional.ofNullable(builder.config), PAYLOAD_VERSION);
         state = Collections.synchronizedList(new ArrayList<>());
         actorDelegate = mock(RaftActor.class);
         recoveryCohortDelegate = mock(RaftActorRecoveryCohort.class);
@@ -255,13 +257,14 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         return restoreFromSnapshot;
     }
 
-    public static Props props(final String id, final Map<String, String> peerAddresses, final ConfigParams config) {
-        return builder().id(id).peerAddresses(peerAddresses).config(config).props();
+    public static Props props(final String id, final Path baseDir, final Map<String, String> peerAddresses,
+            final ConfigParams config) {
+        return builder().id(id).baseDir(baseDir).peerAddresses(peerAddresses).config(config).props();
     }
 
-    public static Props props(final String id, final Map<String, String> peerAddresses,
+    public static Props props(final String id, final Path baseDir, final Map<String, String> peerAddresses,
                               final ConfigParams config, final DataPersistenceProvider dataPersistenceProvider) {
-        return builder().id(id).peerAddresses(peerAddresses).config(config)
+        return builder().id(id).baseDir(baseDir).peerAddresses(peerAddresses).config(config)
                 .dataPersistenceProvider(dataPersistenceProvider).props();
     }
 
@@ -270,7 +273,8 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     public static class AbstractBuilder<T extends AbstractBuilder<T, A>, A extends MockRaftActor> {
-        private Map<String, String> peerAddresses = Collections.emptyMap();
+        private final Class<A> actorClass;
+        private Map<String, String> peerAddresses = Map.of();
         private String id;
         private ConfigParams config;
         private DataPersistenceProvider dataPersistenceProvider;
@@ -278,9 +282,9 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         private RaftActorSnapshotMessageSupport snapshotMessageSupport;
         private Snapshot restoreFromSnapshot;
         private Optional<Boolean> persistent = Optional.empty();
-        private final Class<A> actorClass;
         private Function<Runnable, Void> pauseLeaderFunction;
         private RaftActorSnapshotCohort snapshotCohort;
+        private Path baseDir;
 
         protected AbstractBuilder(final Class<A> actorClass) {
             this.actorClass = actorClass;
@@ -338,6 +342,11 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
 
         public T snapshotCohort(final RaftActorSnapshotCohort newSnapshotCohort) {
             snapshotCohort = newSnapshotCohort;
+            return self();
+        }
+
+        public T baseDir(final Path newBaseDir) {
+            baseDir = requireNonNull(newBaseDir);
             return self();
         }
 

@@ -78,6 +78,7 @@ public class MigratedMessagesTest extends AbstractActorTest {
 
             @Override
             public void applySnapshot(final Snapshot.State snapshotState) {
+                // Nothing
             }
 
             @Override
@@ -86,9 +87,9 @@ public class MigratedMessagesTest extends AbstractActorTest {
             }
         };
 
-        TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.builder().id(id)
-                .config(config).snapshotCohort(snapshotCohort).persistent(Optional.of(Boolean.TRUE)).props()
-                    .withDispatcher(Dispatchers.DefaultDispatcherId()), id);
+        TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.builder()
+            .id(id).baseDir(baseDir()).config(config).snapshotCohort(snapshotCohort)
+            .persistent(Optional.of(Boolean.TRUE)).props().withDispatcher(Dispatchers.DefaultDispatcherId()), id);
         MockRaftActor mockRaftActor = raftActorRef.underlyingActor();
 
         mockRaftActor.waitForRecoveryComplete();
@@ -117,6 +118,7 @@ public class MigratedMessagesTest extends AbstractActorTest {
 
             @Override
             public void applySnapshot(final State newState) {
+                // Nothing
             }
 
             @Override
@@ -126,9 +128,8 @@ public class MigratedMessagesTest extends AbstractActorTest {
         };
 
         TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.builder().id(id)
-                .config(config).snapshotCohort(snapshotCohort).persistent(Optional.of(persistent))
-                .peerAddresses(ImmutableMap.of("peer", "")).props()
-                    .withDispatcher(Dispatchers.DefaultDispatcherId()), id);
+            .baseDir(baseDir()).config(config).snapshotCohort(snapshotCohort).persistent(Optional.of(persistent))
+            .peerAddresses(ImmutableMap.of("peer", "")).props().withDispatcher(Dispatchers.DefaultDispatcherId()), id);
         MockRaftActor mockRaftActor = raftActorRef.underlyingActor();
 
         mockRaftActor.waitForRecoveryComplete();
@@ -142,5 +143,4 @@ public class MigratedMessagesTest extends AbstractActorTest {
 
         return raftActorRef;
     }
-
 }
