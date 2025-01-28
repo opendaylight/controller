@@ -12,6 +12,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.io.ByteSource;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -458,7 +459,12 @@ public class Follower extends RaftActorBehavior {
         if (rpcTerm > currentTerm && shouldUpdateTerm(rpc)) {
             log.info("{}: Term {} in \"{}\" message is greater than follower's term {} - updating term",
                 logName, rpcTerm, rpc, currentTerm);
-            context.persistTermInfo(new TermInfo(rpcTerm));
+            try {
+                context.persistTermInfo(new TermInfo(rpcTerm));
+            } catch (IOException e) {
+                // FIXME: do not mask IOException
+                throw new UncheckedIOException(e);
+            }
         }
 
         if (rpc instanceof InstallSnapshot installSnapshot) {
