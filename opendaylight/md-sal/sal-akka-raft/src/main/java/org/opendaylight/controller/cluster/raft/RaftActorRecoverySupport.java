@@ -318,7 +318,11 @@ class RaftActorRecoverySupport {
         if (orig == null) {
             // No original info observed, seed it after recovery and trigger a snapshot
             final var current = infoStore.currentTerm();
-            infoStore.persistTerm(current);
+            try {
+                infoStore.persistTerm(current);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
 
             // From this point on we will not update TermInfo from Akka persistence
             log.info("{}: Local TermInfo store seeded with {}", context.getId(), current);
