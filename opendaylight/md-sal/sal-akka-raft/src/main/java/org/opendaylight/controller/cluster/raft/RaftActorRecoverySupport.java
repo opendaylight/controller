@@ -10,6 +10,8 @@ package org.opendaylight.controller.cluster.raft;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.Stopwatch;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.apache.pekko.persistence.AbstractPersistentActor;
@@ -56,7 +58,11 @@ class RaftActorRecoverySupport {
         this.localAccess = requireNonNull(localAccess);
         this.context = requireNonNull(context);
         this.cohort = requireNonNull(cohort);
-        origTermInfo = localAccess.termInfoStore().loadAndSetTerm();
+        try {
+            origTermInfo = localAccess.termInfoStore().loadAndSetTerm();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     boolean handleRecoveryMessage(final AbstractPersistentActor actor, final Object message) {
@@ -311,7 +317,11 @@ class RaftActorRecoverySupport {
         if (orig == null) {
             // No original info observed, seed it after recovery and trigger a snapshot
             final var current = infoStore.currentTerm();
-            infoStore.storeAndSetTerm(current);
+            try {
+                infoStore.storeAndSetTerm(current);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
 
             // From this point on we will not update TermInfo from Akka persistence
             LOG.info("{}: Local TermInfo store seeded with {}", context.getId(), current);

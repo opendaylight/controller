@@ -13,6 +13,8 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.HashMap;
@@ -426,7 +428,12 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         if (!getRaftActorContext().getRaftPolicy().automaticElectionsEnabled()) {
             switch (newState) {
                 case Follower, Leader -> {
-                    getRaftActorContext().persistTermInfo(new TermInfo(newTerm, ""));
+                    try {
+                        getRaftActorContext().persistTermInfo(new TermInfo(newTerm, ""));
+                    } catch (IOException e) {
+                        // FIXME: do not mask IOException
+                        throw new UncheckedIOException(e);
+                    }
                     switchBehavior(behaviorStateTracker.capture(getCurrentBehavior()),
                         RaftActorBehavior.createBehavior(context, newState));
                 }
