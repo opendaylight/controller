@@ -34,6 +34,7 @@ import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
+import org.opendaylight.controller.cluster.raft.spi.EntryStore;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
 import org.slf4j.Logger;
@@ -56,6 +57,7 @@ public class RaftActorContextImpl implements RaftActorContext {
     // Cached from LocalAccess instance
     private final @NonNull String id;
     private final @NonNull TermInfoStore termInformation;
+    private final @NonNull EntryStore entryStore;
 
     private long commitIndex;
 
@@ -105,6 +107,7 @@ public class RaftActorContextImpl implements RaftActorContext {
         this.context = context;
         id = localStore.logId();
         termInformation = localStore.termInfoStore();
+        entryStore = localStore.entryStore();
         this.executor = requireNonNull(executor);
         this.commitIndex = commitIndex;
         this.lastApplied = lastApplied;
@@ -220,7 +223,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     public ReplicatedLog getReplicatedLog() {
-        return replicatedLog;
+        return requireNonNull(replicatedLog);
     }
 
     @Override
@@ -451,5 +454,10 @@ public class RaftActorContextImpl implements RaftActorContext {
     @SuppressWarnings("checkstyle:hiddenField")
     public void setRaftActorLeadershipTransferCohort(final RaftActorLeadershipTransferCohort leadershipTransferCohort) {
         this.leadershipTransferCohort = leadershipTransferCohort;
+    }
+
+    @Override
+    public final EntryStore entryStore() {
+        return entryStore;
     }
 }
