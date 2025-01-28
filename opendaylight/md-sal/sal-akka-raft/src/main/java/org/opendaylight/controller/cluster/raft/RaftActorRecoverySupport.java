@@ -168,17 +168,18 @@ class RaftActorRecoverySupport {
                     logEntry.index(), logEntry.size());
         }
 
-        if (logEntry.getData() instanceof ServerConfigurationPayload payload) {
+        final var data = logEntry.getData();
+        if (data instanceof ServerConfigurationPayload payload) {
             context.updatePeerIds(payload);
         }
 
-        if (isMigratedPayload(logEntry)) {
+        if (isMigratedSerializable(data)) {
             hasMigratedDataRecovered = true;
         }
 
         if (context.getPersistenceProvider().isRecoveryApplicable()) {
             replicatedLog().append(logEntry);
-        } else if (!isPersistentPayload(logEntry)) {
+        } else if (!(data instanceof PersistentPayload)) {
             dataRecoveredWithPersistenceDisabled = true;
         }
     }
@@ -325,10 +326,6 @@ class RaftActorRecoverySupport {
         } else {
             possiblyRestoreFromSnapshot();
         }
-    }
-
-    private static boolean isPersistentPayload(final ReplicatedLogEntry repLogEntry) {
-        return repLogEntry.getData() instanceof PersistentPayload;
     }
 
     private static boolean isMigratedPayload(final ReplicatedLogEntry repLogEntry) {
