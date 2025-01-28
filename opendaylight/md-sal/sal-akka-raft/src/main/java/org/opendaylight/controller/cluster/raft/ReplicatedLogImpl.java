@@ -7,10 +7,8 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
-import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
 
@@ -36,23 +34,22 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog {
     }
 
     static ReplicatedLog newInstance(final RaftActorContext context) {
-        return new ReplicatedLogImpl(-1L, -1L, Collections.<ReplicatedLogEntry>emptyList(), context);
+        return new ReplicatedLogImpl(-1L, -1L, List.of(), context);
     }
 
     @Override
     public boolean removeFromAndPersist(final long logEntryIndex) {
-        long adjustedIndex = removeFrom(logEntryIndex);
+        final var adjustedIndex = removeFrom(logEntryIndex);
         if (adjustedIndex >= 0) {
-            context.getPersistenceProvider().persist(new DeleteEntries(logEntryIndex), NoopProcedure.instance());
+            context.entryStore().removeFrom(logEntryIndex);
             return true;
         }
-
         return false;
     }
 
     @Override
     public boolean shouldCaptureSnapshot(final long logIndex) {
-        final ConfigParams config = context.getConfigParams();
+        final var config = context.getConfigParams();
         if ((logIndex + 1) % config.getSnapshotBatchCount() == 0) {
             return true;
         }
@@ -102,11 +99,11 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog {
             return false;
         }
 
-        final var provider = context.getPersistenceProvider();
+        final var entryStore = context.entryStore();
         if (doAsync) {
-            provider.persistAsync(replicatedLogEntry, entry -> persistCallback(entry, callback));
+            entryStore.persist(replicatedLogEntry, entry -> persistCallback(entry, callback));
         } else {
-            provider.persist(replicatedLogEntry, entry -> syncPersistCallback(entry, callback));
+            entryStore.persistAndSync(replicatedLogEntry, entry -> syncPersistCallback(entry, callback));
         }
         return true;
     }
