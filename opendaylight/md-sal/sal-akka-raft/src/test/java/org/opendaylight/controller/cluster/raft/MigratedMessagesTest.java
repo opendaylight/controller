@@ -29,7 +29,6 @@ import org.opendaylight.controller.cluster.raft.persisted.ByteState;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
-import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
@@ -63,9 +62,8 @@ public class MigratedMessagesTest extends AbstractActorTest {
         TEST_LOG.info("testNoSnapshotAfterStartupWithNoMigratedMessages starting");
         String id = factory.generateActorId("test-actor-");
 
-        InMemoryJournal.addEntry(id, 1, new UpdateElectionTerm(1, id));
-        InMemoryJournal.addEntry(id, 2, new SimpleReplicatedLogEntry(0, 1, new MockRaftActorContext.MockPayload("A")));
-        InMemoryJournal.addEntry(id, 3, new ApplyJournalEntries(0));
+        InMemoryJournal.addEntry(id, 1, new SimpleReplicatedLogEntry(0, 1, new MockRaftActorContext.MockPayload("A")));
+        InMemoryJournal.addEntry(id, 2, new ApplyJournalEntries(0));
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
         config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
@@ -78,6 +76,7 @@ public class MigratedMessagesTest extends AbstractActorTest {
 
             @Override
             public void applySnapshot(final Snapshot.State snapshotState) {
+                // Nothing
             }
 
             @Override
@@ -86,9 +85,9 @@ public class MigratedMessagesTest extends AbstractActorTest {
             }
         };
 
-        TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.builder().id(id)
-                .config(config).snapshotCohort(snapshotCohort).persistent(Optional.of(Boolean.TRUE)).props()
-                    .withDispatcher(Dispatchers.DefaultDispatcherId()), id);
+        TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.builder()
+            .id(id).baseDir(baseDir()).config(config).snapshotCohort(snapshotCohort)
+            .persistent(Optional.of(Boolean.TRUE)).props().withDispatcher(Dispatchers.DefaultDispatcherId()), id);
         MockRaftActor mockRaftActor = raftActorRef.underlyingActor();
 
         mockRaftActor.waitForRecoveryComplete();
@@ -117,6 +116,7 @@ public class MigratedMessagesTest extends AbstractActorTest {
 
             @Override
             public void applySnapshot(final State newState) {
+                // Nothing
             }
 
             @Override
@@ -126,9 +126,8 @@ public class MigratedMessagesTest extends AbstractActorTest {
         };
 
         TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.builder().id(id)
-                .config(config).snapshotCohort(snapshotCohort).persistent(Optional.of(persistent))
-                .peerAddresses(ImmutableMap.of("peer", "")).props()
-                    .withDispatcher(Dispatchers.DefaultDispatcherId()), id);
+            .baseDir(baseDir()).config(config).snapshotCohort(snapshotCohort).persistent(Optional.of(persistent))
+            .peerAddresses(ImmutableMap.of("peer", "")).props().withDispatcher(Dispatchers.DefaultDispatcherId()), id);
         MockRaftActor mockRaftActor = raftActorRef.underlyingActor();
 
         mockRaftActor.waitForRecoveryComplete();
@@ -142,5 +141,4 @@ public class MigratedMessagesTest extends AbstractActorTest {
 
         return raftActorRef;
     }
-
 }
