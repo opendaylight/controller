@@ -13,6 +13,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.io.UncheckedIOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -504,7 +505,12 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
             LOG.info("{}: Term {} in \"{}\" message is greater than leader's term {} - switching to Follower",
                 logName, rpc.getTerm(), rpc, context.currentTerm());
 
-            context.persistTermInfo(new TermInfo(rpc.getTerm()));
+            try {
+                context.persistTermInfo(new TermInfo(rpc.getTerm()));
+            } catch (IOException e) {
+                // FIXME: do not mask IOException
+                throw new UncheckedIOException(e);
+            }
 
             // This is a special case. Normally when stepping down as leader we don't process and reply to the
             // RaftRPC as per raft. But if we're in the process of transferring leadership and we get a
