@@ -32,6 +32,7 @@ public interface EntryWriter {
     /**
      * Appends an entry to the journal.
      *
+     * @param <T> Internal representation type
      * @param mapper a {@link ToByteBufMapper} to use with entry
      * @param entry entry to append
      * @return the on-disk size of the entry

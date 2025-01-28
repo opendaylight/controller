@@ -16,4 +16,5 @@
 /**
  * Storage primitives for a RAFT journal.
  */
+@org.osgi.annotation.bundle.Export
 package org.opendaylight.controller.raft.journal;

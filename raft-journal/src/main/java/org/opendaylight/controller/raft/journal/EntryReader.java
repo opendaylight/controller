@@ -33,6 +33,7 @@ public interface EntryReader extends AutoCloseable {
     /**
      * Try to move to the next binary data block.
      *
+     * @param <T> Internal representation type
      * @param mapper callback to be invoked on binary data
      * @return processed binary data, or {@code null}
      */
