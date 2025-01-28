@@ -11,6 +11,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -181,7 +182,7 @@ public class RaftActorContextImpl implements RaftActorContext {
     }
 
     @Override
-    public void persistTermInfo(final TermInfo newElectionInfo) {
+    public void persistTermInfo(final TermInfo newElectionInfo) throws IOException {
         termInformation.storeAndSetTerm(newElectionInfo);
     }
 

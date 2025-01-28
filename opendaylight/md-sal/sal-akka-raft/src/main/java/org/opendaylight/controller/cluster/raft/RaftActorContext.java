@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft;
 
 import com.google.common.annotations.VisibleForTesting;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -114,8 +115,9 @@ public interface RaftActorContext {
      *     Implementations need to route this request to the underlying {@link TermInfoStore#storeAndSetTerm(TermInfo)}.
      *
      * @param termInfo {@link TermInfo} to persist
+     * @throws IOException when an I/O error occurs
      */
-    void persistTermInfo(@NonNull TermInfo termInfo);
+    void persistTermInfo(@NonNull TermInfo termInfo) throws IOException;
 
     /**
      * Returns the index of highest log entry known to be committed.
