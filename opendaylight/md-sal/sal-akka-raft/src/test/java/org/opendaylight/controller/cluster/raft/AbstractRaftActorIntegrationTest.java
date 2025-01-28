@@ -13,6 +13,7 @@ import static org.junit.Assert.assertNotNull;
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.OutputStream;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -118,12 +119,11 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
     }
 
     public static class TestRaftActor extends MockRaftActor {
-
+        private final ConcurrentHashMap<Class<?>, Predicate<?>> dropMessages = new ConcurrentHashMap<>();
         private final ActorRef collectorActor;
-        private final Map<Class<?>, Predicate<?>> dropMessages = new ConcurrentHashMap<>();
 
-        TestRaftActor(final Builder builder) {
-            super(builder);
+        TestRaftActor(final Path stateDir, final Builder builder) {
+            super(stateDir, builder);
             collectorActor = builder.collectorActor;
         }
 
@@ -293,8 +293,9 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         InvalidActorNameException lastEx = null;
         for (int i = 0; i < 10; i++) {
             try {
-                return factory.createTestActor(builder.props().withDispatcher(Dispatchers.DefaultDispatcherId())
-                        .withMailbox(Mailboxes.DefaultMailboxId()), id);
+                return factory.createTestActor(builder.props(stateDir())
+                    .withDispatcher(Dispatchers.DefaultDispatcherId())
+                    .withMailbox(Mailboxes.DefaultMailboxId()), id);
             } catch (InvalidActorNameException e) {
                 lastEx = e;
                 Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);

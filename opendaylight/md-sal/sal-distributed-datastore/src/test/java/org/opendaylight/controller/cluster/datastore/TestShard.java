@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static java.util.Objects.requireNonNull;
 
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
@@ -51,8 +52,8 @@ public class TestShard extends Shard {
 
     private final Map<Class<?>, Predicate<?>> dropMessages = new ConcurrentHashMap<>();
 
-    protected TestShard(final AbstractBuilder<?, ?> builder) {
-        super(builder);
+    protected TestShard(final Path stateDir, final AbstractBuilder<?, ?> builder) {
+        super(stateDir, builder);
     }
 
     @Override

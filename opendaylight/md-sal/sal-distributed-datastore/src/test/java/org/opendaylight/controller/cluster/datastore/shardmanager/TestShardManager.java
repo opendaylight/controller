@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore.shardmanager;
 
+import java.nio.file.Path;
 import java.util.Map;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Props;
@@ -16,8 +17,8 @@ import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 
 public class TestShardManager extends ShardManager {
-    TestShardManager(final AbstractShardManagerCreator<?> builder) {
-        super(builder);
+    TestShardManager(final Path stateDir, final AbstractShardManagerCreator<?> builder) {
+        super(stateDir, builder);
     }
 
     @Override
@@ -38,7 +39,7 @@ public class TestShardManager extends ShardManager {
     protected ActorRef newShardActor(final ShardInformation info) {
         final var shardName = info.getShardName();
         final var shardId = info.getShardId();
-        final var newInfo = new ShardInformation(shardName, shardId, getPeerAddresses(info.getShardName()),
+        final var newInfo = new ShardInformation(stateDir, shardName, shardId, getPeerAddresses(info.getShardName()),
             info.getDatastoreContext(),
             TestShard.builder().restoreFromSnapshot(info.getBuilder().getRestoreFromSnapshot()), peerAddressResolver);
         newInfo.setSchemaContext(info.getSchemaContext());
@@ -53,16 +54,16 @@ public class TestShardManager extends ShardManager {
                                         final Map<String, String> peerAddresses,
                                         final DatastoreContext datastoreContext,
                                         final Map<String, DatastoreSnapshot.ShardSnapshot> shardSnapshots) {
-        return new ShardInformation(shardName, shardId, peerAddresses,
+        return new ShardInformation(stateDir, shardName, shardId, peerAddresses,
                 datastoreContext, TestShard.builder().restoreFromSnapshot(shardSnapshots.get(shardName)),
                 peerAddressResolver);
     }
 
     public static class TestShardManagerCreator extends AbstractShardManagerCreator<TestShardManagerCreator> {
         @Override
-        public Props props() {
+        public Props props(final Path stateDir) {
             verify();
-            return Props.create(TestShardManager.class, this);
+            return Props.create(TestShardManager.class, stateDir, this);
         }
     }
 

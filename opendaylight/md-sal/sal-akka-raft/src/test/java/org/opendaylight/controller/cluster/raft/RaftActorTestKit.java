@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft;
 import static org.junit.Assert.fail;
 
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.nio.file.Path;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.apache.pekko.actor.ActorRef;
@@ -30,9 +31,9 @@ public class RaftActorTestKit extends TestKit {
     private static final Logger LOG = LoggerFactory.getLogger(RaftActorTestKit.class);
     private final ActorRef raftActor;
 
-    public RaftActorTestKit(final ActorSystem actorSystem, final String actorName) {
+    public RaftActorTestKit(final Path stateDir, final ActorSystem actorSystem, final String actorName) {
         super(actorSystem);
-        raftActor = getSystem().actorOf(MockRaftActor.builder().id(actorName).props(), actorName);
+        raftActor = getSystem().actorOf(MockRaftActor.builder().id(actorName).props(stateDir), actorName);
     }
 
     public ActorRef getRaftActor() {

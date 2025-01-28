@@ -16,6 +16,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -69,7 +70,7 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Testing overrides")
-    protected AbstractDataStore(final ActorSystem actorSystem, final ClusterWrapper cluster,
+    protected AbstractDataStore(final Path stateDir, final ActorSystem actorSystem, final ClusterWrapper cluster,
             final Configuration configuration, final DatastoreContextFactory datastoreContextFactory,
             final DatastoreSnapshot restoreFromSnapshot) {
         requireNonNull(actorSystem, "actorSystem should not be null");
@@ -94,7 +95,7 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
             .distributedDataStore(this);
 
         actorUtils = new ActorUtils(actorSystem,
-            createShardManager(actorSystem, creator, shardDispatcher, shardManagerId), cluster, configuration,
+            createShardManager(stateDir, actorSystem, creator, shardDispatcher, shardManagerId), cluster, configuration,
             baseDatastoreContext, primaryShardInfoCache);
 
         final Props clientProps = DistributedDataStoreClientActor.props(cluster.getCurrentMemberName(),
@@ -298,14 +299,14 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private static ActorRef createShardManager(final ActorSystem actorSystem,
+    private static ActorRef createShardManager(final Path stateDir, final ActorSystem actorSystem,
             final AbstractShardManagerCreator<?> creator, final String shardDispatcher,
             final ShardManagerIdentifier shardManagerId) {
         Exception lastException = null;
 
         for (int i = 0; i < 100; i++) {
             try {
-                return actorSystem.actorOf(creator.props().withDispatcher(shardDispatcher),
+                return actorSystem.actorOf(creator.props(stateDir).withDispatcher(shardDispatcher),
                     shardManagerId.toActorName());
             } catch (Exception e) {
                 lastException = e;

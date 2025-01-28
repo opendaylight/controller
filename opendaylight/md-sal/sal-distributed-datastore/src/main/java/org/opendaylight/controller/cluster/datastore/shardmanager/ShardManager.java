@@ -11,6 +11,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.SettableFuture;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,6 +46,7 @@ import org.apache.pekko.persistence.SaveSnapshotSuccess;
 import org.apache.pekko.persistence.SnapshotOffer;
 import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.apache.pekko.util.Timeout;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActorWithMetering;
 import org.opendaylight.controller.cluster.common.actor.Dispatchers;
@@ -124,23 +126,25 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     @VisibleForTesting
     final Map<String, ShardInformation> localShards = new HashMap<>();
 
+    final @NonNull Path stateDir;
+
     // The type of a ShardManager reflects the type of the datastore itself
     // A data store could be of type config/operational
     private final String type;
-
     private final ClusterWrapper cluster;
-
     private final Configuration configuration;
 
     @VisibleForTesting
     final String shardDispatcherPath;
 
+    private final Set<String> shardReplicaOperationsInProgress = new HashSet<>();
+    private final Map<String, CompositeOnComplete<Boolean>> shardActorsStopping = new HashMap<>();
+    private final Set<Consumer<String>> shardAvailabilityCallbacks = new HashSet<>();
     private final ShardManagerInfo shardManagerMBean;
 
     private DatastoreContextFactory datastoreContextFactory;
 
     private final SettableFuture<Empty> readinessFuture;
-
     private final PrimaryShardInfoFutureCache primaryShardInfoCache;
 
     @VisibleForTesting
@@ -152,15 +156,13 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     private ShardManagerSnapshot currentSnapshot;
 
-    private final Set<String> shardReplicaOperationsInProgress = new HashSet<>();
 
-    private final Map<String, CompositeOnComplete<Boolean>> shardActorsStopping = new HashMap<>();
-
-    private final Set<Consumer<String>> shardAvailabilityCallbacks = new HashSet<>();
-
-    private ShardManager(final  String possiblePersistenceId, final AbstractShardManagerCreator<?> builder) {
+    private ShardManager(final Path stateDir, final String possiblePersistenceId,
+            final AbstractShardManagerCreator<?> builder) {
         super(possiblePersistenceId != null ? possiblePersistenceId
             : "shard-manager-" + builder.getDatastoreContextFactory().getBaseDatastoreContext().getDataStoreName());
+
+        this.stateDir = requireNonNull(stateDir);
 
         cluster = builder.getCluster();
         configuration = builder.getConfiguration();
@@ -183,8 +185,8 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         shardManagerMBean.registerMBean();
     }
 
-    ShardManager(final AbstractShardManagerCreator<?> builder) {
-        this(builder.getDatastoreContextFactory().getBaseDatastoreContext().getShardManagerPersistenceId(),
+    ShardManager(final Path stateDir, final AbstractShardManagerCreator<?> builder) {
+        this(stateDir, builder.getDatastoreContextFactory().getBaseDatastoreContext().getShardManagerPersistenceId(),
             builder);
     }
 
@@ -550,7 +552,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         LOG.debug("{} doCreateShard: shardId: {}, memberNames: {}, peerAddresses: {}, isActiveMember: {}",
                 logName(), shardId, moduleShardConfig.getShardMemberNames(), peerAddresses, isActiveMember);
 
-        ShardInformation info = new ShardInformation(shardName, shardId, peerAddresses,
+        ShardInformation info = new ShardInformation(stateDir, shardName, shardId, peerAddresses,
                 shardDatastoreContext, createShard.getShardBuilder(), peerAddressResolver);
         info.setActiveMember(isActiveMember);
         localShards.put(info.getShardName(), info);
@@ -1086,7 +1088,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                                         final Map<String, String> peerAddresses,
                                         final DatastoreContext datastoreContext,
                                         final Map<String, DatastoreSnapshot.ShardSnapshot> shardSnapshots) {
-        return new ShardInformation(shardName, shardId, peerAddresses,
+        return new ShardInformation(stateDir, shardName, shardId, peerAddresses,
                 datastoreContext, Shard.builder().restoreFromSnapshot(shardSnapshots.get(shardName)),
                 peerAddressResolver);
     }
@@ -1201,8 +1203,8 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             DatastoreContext datastoreContext = newShardDatastoreContextBuilder(shardName)
                     .customRaftPolicyImplementation(DisableElectionsRaftPolicy.class.getName()).build();
 
-            shardInfo = new ShardInformation(shardName, shardId, getPeerAddresses(shardName), datastoreContext,
-                    Shard.builder(), peerAddressResolver);
+            shardInfo = new ShardInformation(stateDir, shardName, shardId, getPeerAddresses(shardName),
+                datastoreContext, Shard.builder(), peerAddressResolver);
             shardInfo.setActiveMember(false);
             shardInfo.setSchemaContext(modelContext);
             localShards.put(shardName, shardInfo);

@@ -7,12 +7,19 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static java.util.Objects.requireNonNull;
+
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Comparator;
 import org.apache.commons.io.FileUtils;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.testkit.javadsl.TestKit;
+import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.opendaylight.yangtools.util.AbstractStringIdentifier;
 
@@ -26,24 +33,43 @@ public abstract class AbstractActorTest {
         }
     }
 
-    private static ActorSystem system;
+    private static ActorSystem ACTOR_SYSTEM;
+
+    // FIXME: @TempDir when we have JUnit5
+    private Path stateDir;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
         deleteJournal();
         System.setProperty("shard.persistent", "false");
-        system = ActorSystem.create("test");
+        ACTOR_SYSTEM = ActorSystem.create("test");
     }
 
     @AfterClass
     public static void tearDownClass() throws Exception {
         deleteJournal();
-        TestKit.shutdownActorSystem(system);
-        system = null;
+        TestKit.shutdownActorSystem(ACTOR_SYSTEM);
+        ACTOR_SYSTEM = null;
     }
 
-    protected ActorSystem getSystem() {
-        return system;
+    @Before
+    public void beforeEach() throws Exception {
+        stateDir = Files.createTempDirectory(getClass().getName());
+    }
+
+    @After
+    public void afterEach() throws Exception {
+        try (var paths = Files.walk(stateDir)) {
+            paths.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+        }
+    }
+
+    protected static final ActorSystem getSystem() {
+        return ACTOR_SYSTEM;
+    }
+
+    protected final Path stateDir() {
+        return requireNonNull(stateDir);
     }
 
     protected static void deleteJournal() throws IOException {
