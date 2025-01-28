@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft.spi;
 
+import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -37,14 +38,16 @@ public interface TermInfoStore {
      * term.
      *
      * @param newTerm new {@link TermInfo}
+     * @throws IOException if an I/O error occurs
      */
-    void storeAndSetTerm(TermInfo newTerm);
+    void storeAndSetTerm(TermInfo newTerm) throws IOException;
 
     /**
      * Attempt to load the last persisted {@link TermInfo}, if available. If successful, {@link #currentTerm()} is
      * updated.
      *
      * @return the persisted {@link TermInfo}, or {@code null} of none is available
+     * @throws IOException if an I/O error occurs
      */
-    @Nullable TermInfo loadAndSetTerm();
+    @Nullable TermInfo loadAndSetTerm() throws IOException;
 }

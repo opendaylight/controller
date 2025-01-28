@@ -8,6 +8,8 @@
 package org.opendaylight.controller.cluster.raft.behaviors;
 
 import com.google.common.collect.ImmutableList;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import org.apache.pekko.actor.ActorRef;
 import org.opendaylight.controller.cluster.raft.PeerInfo;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
@@ -167,7 +169,12 @@ public final class Candidate extends RaftActorBehavior {
                 LOG.info("{}: Term {} in \"{}\" message is greater than Candidate's term {} - switching to Follower",
                         logName, rpcTerm, rpc, currentTerm);
 
-                context.persistTermInfo(new TermInfo(rpcTerm, null));
+                try {
+                    context.persistTermInfo(new TermInfo(rpcTerm, null));
+                } catch (IOException e) {
+                    // FIXME: do not mask IOException
+                    throw new UncheckedIOException(e);
+                }
 
                 // The raft paper does not say whether or not a Candidate can/should process a RequestVote in
                 // this case but doing so gains quicker convergence when the sender's log is more up-to-date.
@@ -189,8 +196,13 @@ public final class Candidate extends RaftActorBehavior {
         // Increment the election term and vote for self
         final long currentTerm = context.currentTerm();
         final long newTerm = currentTerm + 1;
-        // note: current is updated
-        context.persistTermInfo(new TermInfo(newTerm, context.getId()));
+        try {
+            // note: also updates current
+            context.persistTermInfo(new TermInfo(newTerm, context.getId()));
+        } catch (IOException e) {
+            // FIXME: do not mask IOException
+            throw new UncheckedIOException(e);
+        }
 
         LOG.info("{}: Starting new election term {}", logName, newTerm);
 
