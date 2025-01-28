@@ -13,6 +13,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
@@ -113,10 +114,11 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     private RaftActorServerConfigurationSupport serverConfigurationSupport;
     private boolean shuttingDown;
 
-    protected RaftActor(final @NonNull String memberId, final Map<String, String> peerAddresses,
-            final Optional<ConfigParams> configParams, final short payloadVersion) {
+    protected RaftActor(final @NonNull Path stateDir, final @NonNull String memberId,
+            final Map<String, String> peerAddresses, final Optional<ConfigParams> configParams,
+            final short payloadVersion) {
         super(memberId);
-        localAccess = new LocalAccess(memberId, persistentProvider);
+        localAccess = new LocalAccess(memberId, stateDir.resolve(memberId));
 
         context = new RaftActorContextImpl(self(), getContext(), localAccess, -1, -1, peerAddresses,
             configParams.orElseGet(DefaultConfigParamsImpl::new), payloadVersion, delegatingPersistenceProvider,
@@ -162,7 +164,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             raftRecovery = newRaftActorRecoverySupport();
         }
 
-        boolean recoveryComplete = raftRecovery.handleRecoveryMessage(message, persistentProvider);
+        boolean recoveryComplete = raftRecovery.handleRecoveryMessage(this, message);
         if (recoveryComplete) {
             onRecoveryComplete();
 
@@ -174,7 +176,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     @VisibleForTesting
     RaftActorRecoverySupport newRaftActorRecoverySupport() {
-        return new RaftActorRecoverySupport(context, getRaftActorRecoveryCohort());
+        return new RaftActorRecoverySupport(localAccess, context, getRaftActorRecoveryCohort());
     }
 
     @VisibleForTesting

@@ -82,7 +82,7 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataTreeConfiguration;
 import org.opendaylight.yangtools.yang.data.tree.impl.di.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
-public abstract class AbstractDistributedDataStoreIntegrationTest {
+public abstract class AbstractDistributedDataStoreIntegrationTest extends AbstractTest {
     @Parameter
     public Class<? extends ClientBackedDataStore> testParameter;
 
@@ -97,7 +97,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
 
     @Test
     public void testWriteTransactionWithSingleShard() throws Exception {
-        final var testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
+        final var testKit = new IntegrationTestKit(stateDir(), getSystem(), datastoreContextBuilder);
         try (var dataStore = testKit.setupDataStore(testParameter, "transactionIntegrationTest", "test-1")) {
 
             testKit.testWriteTransaction(dataStore, TestModel.TEST_PATH, TestModel.EMPTY_TEST);
@@ -108,7 +108,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
 
     @Test
     public void testWriteTransactionWithMultipleShards() throws Exception {
-        final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
+        final var testKit = new IntegrationTestKit(stateDir(), getSystem(), datastoreContextBuilder);
         try (var dataStore = testKit.setupDataStore(testParameter, "testWriteTransactionWithMultipleShards",
             "cars-1", "people-1")) {
 
@@ -149,7 +149,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
 
     @Test
     public void testReadWriteTransactionWithSingleShard() throws Exception {
-        final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
+        final var testKit = new IntegrationTestKit(stateDir(), getSystem(), datastoreContextBuilder);
         try (var dataStore = testKit.setupDataStore(testParameter, "testReadWriteTransactionWithSingleShard",
             "test-1")) {
 
@@ -183,7 +183,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
 
     @Test
     public void testReadWriteTransactionWithMultipleShards() throws Exception {
-        final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
+        final var testKit = new IntegrationTestKit(stateDir(), getSystem(), datastoreContextBuilder);
         try (var dataStore = testKit.setupDataStore(testParameter, "testReadWriteTransactionWithMultipleShards",
             "cars-1", "people-1")) {
 
@@ -229,7 +229,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
 
     @Test
     public void testSingleTransactionsWritesInQuickSuccession() throws Exception {
-        final var testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
+        final var testKit = new IntegrationTestKit(stateDir(), getSystem(), datastoreContextBuilder);
         try (var dataStore = testKit.setupDataStore(testParameter, "testSingleTransactionsWritesInQuickSuccession",
             "cars-1")) {
 
@@ -282,7 +282,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
     @SuppressWarnings("checkstyle:IllegalCatch")
     private void testTransactionCommitFailureWithNoShardLeader(final boolean writeOnly, final String testName)
             throws Exception {
-        final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
+        final var testKit = new IntegrationTestKit(stateDir(), getSystem(), datastoreContextBuilder);
         final String shardName = "default";
 
         // We don't want the shard to become the leader so prevent shard
@@ -371,7 +371,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
 
     @Test
     public void testTransactionAbort() throws Exception {
-        final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
+        final var testKit = new IntegrationTestKit(stateDir(), getSystem(), datastoreContextBuilder);
         try (var dataStore = testKit.setupDataStore(testParameter, "transactionAbortIntegrationTest", "test-1")) {
 
             final DOMStoreWriteTransaction writeTx = dataStore.newWriteOnlyTransaction();
@@ -392,7 +392,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
     @Test
     @SuppressWarnings("checkstyle:IllegalCatch")
     public void testTransactionChainWithSingleShard() throws Exception {
-        final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
+        final var testKit = new IntegrationTestKit(stateDir(), getSystem(), datastoreContextBuilder);
         try (var dataStore = testKit.setupDataStore(testParameter, "testTransactionChainWithSingleShard", "test-1")) {
 
             // 1. Create a Tx chain and write-only Tx
@@ -466,7 +466,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
 
     @Test
     public void testTransactionChainWithMultipleShards() throws Exception {
-        final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
+        final var testKit = new IntegrationTestKit(stateDir(), getSystem(), datastoreContextBuilder);
         try (var dataStore = testKit.setupDataStore(testParameter, "testTransactionChainWithMultipleShards",
             "cars-1", "people-1")) {
 
@@ -522,7 +522,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
 
     @Test
     public void testCreateChainedTransactionsInQuickSuccession() throws Exception {
-        final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
+        final var testKit = new IntegrationTestKit(stateDir(), getSystem(), datastoreContextBuilder);
         try (var dataStore = testKit.setupDataStore(testParameter, "testCreateChainedTransactionsInQuickSuccession",
             "cars-1")) {
 
@@ -567,7 +567,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
 
     @Test
     public void testCreateChainedTransactionAfterEmptyTxReadied() throws Exception {
-        final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
+        final var testKit = new IntegrationTestKit(stateDir(), getSystem(), datastoreContextBuilder);
         try (var dataStore = testKit.setupDataStore(testParameter, "testCreateChainedTransactionAfterEmptyTxReadied",
             "test-1")) {
 
@@ -588,7 +588,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
 
     @Test
     public void testCreateChainedTransactionWhenPreviousNotReady() throws Exception {
-        final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
+        final var testKit = new IntegrationTestKit(stateDir(), getSystem(), datastoreContextBuilder);
         try (var dataStore = testKit.setupDataStore(testParameter, "testCreateChainedTransactionWhenPreviousNotReady",
             "test-1")) {
 
@@ -608,7 +608,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
 
     @Test
     public void testCreateChainedTransactionAfterClose() throws Exception {
-        final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
+        final var testKit = new IntegrationTestKit(stateDir(), getSystem(), datastoreContextBuilder);
         try (var dataStore = testKit.setupDataStore(testParameter, "testCreateChainedTransactionAfterClose",
             "test-1")) {
 
@@ -623,7 +623,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
 
     @Test
     public void testChainWithReadOnlyTxAfterPreviousReady() throws Exception {
-        final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
+        final var testKit = new IntegrationTestKit(stateDir(), getSystem(), datastoreContextBuilder);
         try (var dataStore = testKit.setupDataStore(testParameter, "testChainWithReadOnlyTxAfterPreviousReady",
             "test-1")) {
 
@@ -663,7 +663,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
 
     @Test
     public void testChainedTransactionFailureWithSingleShard() throws Exception {
-        final var testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
+        final var testKit = new IntegrationTestKit(stateDir(), getSystem(), datastoreContextBuilder);
         try (var dataStore = testKit.setupDataStore(testParameter, "testChainedTransactionFailureWithSingleShard",
             "cars-1")) {
 
@@ -699,7 +699,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
 
     @Test
     public void testChainedTransactionFailureWithMultipleShards() throws Exception {
-        final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
+        final var testKit = new IntegrationTestKit(stateDir(), getSystem(), datastoreContextBuilder);
         try (var dataStore = testKit.setupDataStore(testParameter, "testChainedTransactionFailureWithMultipleShards",
             "cars-1", "people-1")) {
 
@@ -738,7 +738,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
 
     @Test
     public void testDataTreeChangeListenerRegistration() throws Exception {
-        final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
+        final var testKit = new IntegrationTestKit(stateDir(), getSystem(), datastoreContextBuilder);
         try (var dataStore = testKit.setupDataStore(testParameter, "testDataTreeChangeListenerRegistration",
             "test-1")) {
 
@@ -780,7 +780,7 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
 
     @Test
     public void testRestoreFromDatastoreSnapshot() throws Exception {
-        final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
+        final var testKit = new IntegrationTestKit(stateDir(), getSystem(), datastoreContextBuilder);
         final String name = "transactionIntegrationTest";
 
         final ContainerNode carsNode = CarsModel.newCarsNode(
@@ -827,7 +827,8 @@ public abstract class AbstractDistributedDataStoreIntegrationTest {
     @Ignore("ClientBackedDatastore does not have stable indexes/term, the snapshot index seems to fluctuate")
     // FIXME: re-enable this test
     public void testSnapshotOnRootOverwrite() throws Exception {
-        final var testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder.snapshotOnRootOverwrite(true));
+        final var testKit = new IntegrationTestKit(stateDir(), getSystem(),
+            datastoreContextBuilder.snapshotOnRootOverwrite(true));
         try (var dataStore = testKit.setupDataStore(testParameter, "testRootOverwrite",
             "module-shards-default-cars-member1.conf", true, "cars", "default")) {
 

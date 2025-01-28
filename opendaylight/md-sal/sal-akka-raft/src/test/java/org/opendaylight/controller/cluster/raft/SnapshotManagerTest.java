@@ -113,7 +113,6 @@ public class SnapshotManagerTest extends AbstractActorTest {
         assertFalse(snapshotManager.isCapturing());
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
     public void testCaptureToInstall() {
 

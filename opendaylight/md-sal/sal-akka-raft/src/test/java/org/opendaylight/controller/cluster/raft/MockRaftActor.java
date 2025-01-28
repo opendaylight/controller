@@ -15,6 +15,7 @@ import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -53,9 +54,9 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     final CountDownLatch snapshotCommitted = new CountDownLatch(1);
     private final Function<Runnable, Void> pauseLeaderFunction;
 
-    protected MockRaftActor(final AbstractBuilder<?, ?> builder) {
-        super(builder.id, builder.peerAddresses != null ? builder.peerAddresses :
-            Collections.emptyMap(), Optional.ofNullable(builder.config), PAYLOAD_VERSION);
+    protected MockRaftActor(final Path stateDir, final AbstractBuilder<?, ?> builder) {
+        super(stateDir, builder.id, builder.peerAddresses != null ? builder.peerAddresses : Map.of(),
+            Optional.ofNullable(builder.config), PAYLOAD_VERSION);
         state = Collections.synchronizedList(new ArrayList<>());
         actorDelegate = mock(RaftActor.class);
         recoveryCohortDelegate = mock(RaftActorRecoveryCohort.class);
@@ -255,14 +256,15 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         return restoreFromSnapshot;
     }
 
-    public static Props props(final String id, final Map<String, String> peerAddresses, final ConfigParams config) {
-        return builder().id(id).peerAddresses(peerAddresses).config(config).props();
+    public static Props props(final String id, final Path stateDir, final Map<String, String> peerAddresses,
+            final ConfigParams config) {
+        return builder().id(id).peerAddresses(peerAddresses).config(config).props(stateDir);
     }
 
-    public static Props props(final String id, final Map<String, String> peerAddresses,
-                              final ConfigParams config, final DataPersistenceProvider dataPersistenceProvider) {
+    public static Props props(final String id, final Path stateDir, final Map<String, String> peerAddresses,
+            final ConfigParams config, final DataPersistenceProvider dataPersistenceProvider) {
         return builder().id(id).peerAddresses(peerAddresses).config(config)
-                .dataPersistenceProvider(dataPersistenceProvider).props();
+                .dataPersistenceProvider(dataPersistenceProvider).props(stateDir);
     }
 
     public static Builder builder() {
@@ -270,7 +272,8 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     public static class AbstractBuilder<T extends AbstractBuilder<T, A>, A extends MockRaftActor> {
-        private Map<String, String> peerAddresses = Collections.emptyMap();
+        private final Class<A> actorClass;
+        private Map<String, String> peerAddresses = Map.of();
         private String id;
         private ConfigParams config;
         private DataPersistenceProvider dataPersistenceProvider;
@@ -278,7 +281,6 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         private RaftActorSnapshotMessageSupport snapshotMessageSupport;
         private Snapshot restoreFromSnapshot;
         private Optional<Boolean> persistent = Optional.empty();
-        private final Class<A> actorClass;
         private Function<Runnable, Void> pauseLeaderFunction;
         private RaftActorSnapshotCohort snapshotCohort;
 
@@ -341,8 +343,9 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
             return self();
         }
 
-        public Props props() {
-            return Props.create(actorClass, this);
+        public Props props(final Path stateDir) {
+            // FIXME: do not pass down builder, but rather values
+            return Props.create(actorClass, stateDir, this);
         }
     }
 

@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static java.util.Objects.requireNonNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
@@ -19,6 +20,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -29,6 +31,7 @@ import org.apache.pekko.cluster.Cluster;
 import org.apache.pekko.cluster.ClusterEvent.CurrentClusterState;
 import org.apache.pekko.cluster.Member;
 import org.apache.pekko.cluster.MemberStatus;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.databroker.ClientBackedDataStore;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
@@ -61,13 +64,17 @@ public class IntegrationTestKit extends ShardTestKit {
     protected DatastoreSnapshot restoreFromSnapshot;
     private final int commitTimeout;
 
-    public IntegrationTestKit(final ActorSystem actorSystem, final Builder datastoreContextBuilder) {
-        this(actorSystem, datastoreContextBuilder, 7);
+    private final @NonNull Path stateDir;
+
+    public IntegrationTestKit(final Path stateDir, final ActorSystem actorSystem,
+            final Builder datastoreContextBuilder) {
+        this(stateDir, actorSystem, datastoreContextBuilder, 7);
     }
 
-    public IntegrationTestKit(final ActorSystem actorSystem, final Builder datastoreContextBuilder,
+    public IntegrationTestKit(final Path stateDir, final ActorSystem actorSystem, final Builder datastoreContextBuilder,
             final int commitTimeout) {
         super(actorSystem);
+        this.stateDir = requireNonNull(stateDir);
         this.datastoreContextBuilder = datastoreContextBuilder;
         this.commitTimeout = commitTimeout;
     }
@@ -116,10 +123,10 @@ public class IntegrationTestKit extends ShardTestKit {
         doReturn(datastoreContext).when(mockContextFactory).getBaseDatastoreContext();
         doReturn(datastoreContext).when(mockContextFactory).getShardDatastoreContext(anyString());
 
-        final var constructor = implementation.getDeclaredConstructor(ActorSystem.class, ClusterWrapper.class,
-            Configuration.class, DatastoreContextFactory.class, DatastoreSnapshot.class);
+        final var constructor = implementation.getDeclaredConstructor(Path.class, ActorSystem.class,
+            ClusterWrapper.class, Configuration.class, DatastoreContextFactory.class, DatastoreSnapshot.class);
 
-        final var dataStore = constructor.newInstance(getSystem(), cluster, config, mockContextFactory,
+        final var dataStore = constructor.newInstance(stateDir, getSystem(), cluster, config, mockContextFactory,
             restoreFromSnapshot);
 
         dataStore.onModelContextUpdated(schemaContext);

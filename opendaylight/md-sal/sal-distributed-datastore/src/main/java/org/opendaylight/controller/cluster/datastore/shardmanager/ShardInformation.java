@@ -11,6 +11,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -20,6 +21,7 @@ import java.util.Set;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Props;
 import org.apache.pekko.serialization.Serialization;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.Shard;
@@ -41,6 +43,7 @@ public final class ShardInformation {
     private final Map<String, String> initialPeerAddresses;
     private final ShardPeerAddressResolver addressResolver;
     private final ShardIdentifier shardId;
+    private final @NonNull Path stateDir;
     private final String shardName;
 
     // This reference indirection is required to have the ability to update the SchemaContext
@@ -65,9 +68,11 @@ public final class ShardInformation {
     private Shard.AbstractBuilder<?, ?> builder;
     private boolean activeMember = true;
 
-    ShardInformation(final String shardName, final ShardIdentifier shardId,
+
+    ShardInformation(final Path stateDir, final String shardName, final ShardIdentifier shardId,
             final Map<String, String> initialPeerAddresses, final DatastoreContext datastoreContext,
             final Shard.AbstractBuilder<?, ?> builder, final ShardPeerAddressResolver addressResolver) {
+        this.stateDir = requireNonNull(stateDir);
         this.shardName = shardName;
         this.shardId = shardId;
         this.initialPeerAddresses = initialPeerAddresses;
@@ -78,7 +83,8 @@ public final class ShardInformation {
 
     Props newProps() {
         Props props = requireNonNull(builder).id(shardId).peerAddresses(initialPeerAddresses)
-                .datastoreContext(datastoreContext).schemaContextProvider(schemaContextProvider::modelContext).props();
+                .datastoreContext(datastoreContext).schemaContextProvider(schemaContextProvider::modelContext)
+                .props(stateDir);
         builder = null;
         return props;
     }

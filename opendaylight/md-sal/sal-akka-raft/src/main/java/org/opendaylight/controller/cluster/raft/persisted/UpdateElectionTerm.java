@@ -17,7 +17,11 @@ import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 
 /**
  * Message class to persist election term information.
+ *
+ * @deprecated This class exists only for backward compatibility and testing thereof. It will be removed in the next
+ *             major release.
  */
+@Deprecated(since = "11.0.0", forRemoval = true)
 public record UpdateElectionTerm(@NonNull TermInfo termInfo) implements Serializable {
     public UpdateElectionTerm {
         requireNonNull(termInfo);

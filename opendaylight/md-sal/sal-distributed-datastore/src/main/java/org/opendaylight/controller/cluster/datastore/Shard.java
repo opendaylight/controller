@@ -18,9 +18,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Range;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -195,8 +195,8 @@ public class Shard extends RaftActor {
 
     private final ActorRef exportActor;
 
-    Shard(final AbstractBuilder<?, ?> builder) {
-        super(builder.getId().toString(), builder.getPeerAddresses(),
+    Shard(final Path stateDir, final AbstractBuilder<?, ?> builder) {
+        super(stateDir, builder.getId().toString(), builder.getPeerAddresses(),
                 Optional.of(builder.getDatastoreContext().getShardRaftConfig()), DataStoreVersions.CURRENT_VERSION);
 
         shardName = builder.getId().getShardName();
@@ -790,7 +790,7 @@ public class Shard extends RaftActor {
     public abstract static class AbstractBuilder<T extends AbstractBuilder<T, S>, S extends Shard> {
         private final Class<? extends S> shardClass;
         private ShardIdentifier id;
-        private Map<String, String> peerAddresses = Collections.emptyMap();
+        private Map<String, String> peerAddresses = Map.of();
         private DatastoreContext datastoreContext;
         private Supplier<@NonNull EffectiveModelContext> schemaContextProvider;
         private DatastoreSnapshot.ShardSnapshot restoreFromSnapshot;
@@ -885,10 +885,10 @@ public class Shard extends RaftActor {
             requireNonNull(schemaContextProvider, "schemaContextProvider should not be null");
         }
 
-        public Props props() {
+        public Props props(final Path stateDir) {
             sealed = true;
             verify();
-            return Props.create(shardClass, this);
+            return Props.create(shardClass, stateDir, this);
         }
     }
 
