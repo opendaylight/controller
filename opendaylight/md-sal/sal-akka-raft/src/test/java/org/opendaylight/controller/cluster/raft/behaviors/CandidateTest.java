@@ -38,6 +38,7 @@ import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.spi.NoopEntryStore;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.spi.TestTermInfoStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
@@ -169,7 +170,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     @Test
     public void testBecomeLeaderOnReceivingMajorityVotesWithNonVotingPeers() {
         RaftActorContext raftActorContext = new RaftActorContextImpl(candidateActor, candidateActor.actorContext(),
-            new LocalAccess("candidate", new TestTermInfoStore(1, null)), -1, -1, setupPeers(4),
+            new LocalAccess("candidate", new TestTermInfoStore(1, null), new NoopEntryStore()), -1, -1, setupPeers(4),
             new DefaultConfigParamsImpl(), new NonPersistentDataProvider(Runnable::run), applyState -> { }, LOG,
             MoreExecutors.directExecutor());
         raftActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().build());
