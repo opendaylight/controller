@@ -267,7 +267,7 @@ public class SnapshotManager implements SnapshotState {
 
         task = persisting;
         log.debug("lastSequenceNumber prior to persisting applied snapshot: {}", lastSeq);
-        context.getPersistenceProvider().saveSnapshot(persisting.snapshot);
+        persistence.saveSnapshot(persisting.snapshot);
     }
 
     @Override

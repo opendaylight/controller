@@ -98,20 +98,18 @@ final class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
     @Override
     public boolean appendAndPersist(final ReplicatedLogEntry replicatedLogEntry,
             final Consumer<ReplicatedLogEntry> callback, final boolean doAsync)  {
-
         context.getLogger().debug("{}: Append log entry and persist {} ", context.getId(), replicatedLogEntry);
 
         if (!append(replicatedLogEntry)) {
             return false;
         }
 
+        final var provider = context.getPersistenceProvider();
         if (doAsync) {
-            context.getPersistenceProvider().persistAsync(replicatedLogEntry,
-                entry -> persistCallback(entry, callback));
+            provider.persistAsync(replicatedLogEntry, entry -> persistCallback(entry, callback));
         } else {
-            context.getPersistenceProvider().persist(replicatedLogEntry, entry -> syncPersistCallback(entry, callback));
+            provider.persist(replicatedLogEntry, entry -> syncPersistCallback(entry, callback));
         }
-
         return true;
     }
 
