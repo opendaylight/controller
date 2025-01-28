@@ -68,8 +68,8 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         assertEquals("Follower commit index", 2, follower1Context.getCommitIndex());
         assertEquals("Follower applied state", expSnapshotState, followerInstance.getState());
 
-        // Persisted journal should only contain the ServerConfigurationPayload and 2 UpdateElectionTerm entries.
-        assertEquals("Leader persisted journal size", 3, InMemoryJournal.get(leaderId).size());
+        // Persisted journal should only contain the ServerConfigurationPayload and the original UpdateElectionTerm
+        assertEquals("Leader persisted journal size", 2, InMemoryJournal.get(leaderId).size());
 
         // Restart the leader
 
@@ -387,7 +387,7 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
     private void createNewLeaderActor() {
         expSnapshotState.clear();
         leaderActor = newTestRaftActor(leaderId, TestRaftActor.newBuilder().peerAddresses(peerAddresses)
-                .config(leaderConfigParams).persistent(Optional.of(Boolean.FALSE)));
+            .config(leaderConfigParams).persistent(Optional.of(Boolean.FALSE)));
         leaderInstance = leaderActor.underlyingActor();
         leaderCollectorActor = leaderInstance.collectorActor();
         waitUntilLeader(leaderActor);
@@ -419,7 +419,7 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
 
         leaderConfigParams = newLeaderConfigParams();
         leaderActor = newTestRaftActor(leaderId, TestRaftActor.newBuilder().peerAddresses(peerAddresses)
-                .config(leaderConfigParams).persistent(Optional.of(Boolean.FALSE)));
+            .config(leaderConfigParams).persistent(Optional.of(Boolean.FALSE)));
 
         followerInstance = follower1Actor.underlyingActor();
         follower1CollectorActor = followerInstance.collectorActor();

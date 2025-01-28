@@ -75,7 +75,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
     @SuppressWarnings("checkstyle:IllegalCatch")
     private void testTransactionWritesWithShardNotInitiallyReady(final String testName, final boolean writeOnly)
             throws Exception {
-        final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
+        final var testKit = new IntegrationTestKit(stateDir(), getSystem(), datastoreContextBuilder);
         final String shardName = "test-1";
 
         // Setup the InMemoryJournal to block shard recovery to ensure
@@ -162,7 +162,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
     @Test
     @SuppressWarnings("checkstyle:IllegalCatch")
     public void testTransactionReadsWithShardNotInitiallyReady() throws Exception {
-        final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
+        final var testKit = new IntegrationTestKit(stateDir(), getSystem(), datastoreContextBuilder);
         final String testName = "testTransactionReadsWithShardNotInitiallyReady";
         final String shardName = "test-1";
 
@@ -223,7 +223,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
     @Test(expected = NotInitializedException.class)
     @SuppressWarnings("checkstyle:IllegalCatch")
     public void testTransactionCommitFailureWithShardNotInitialized() throws Exception {
-        final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
+        final var testKit = new IntegrationTestKit(stateDir(), getSystem(), datastoreContextBuilder);
         final String testName = "testTransactionCommitFailureWithShardNotInitialized";
         final String shardName = "test-1";
 
@@ -289,7 +289,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
     @Test(expected = NotInitializedException.class)
     @SuppressWarnings("checkstyle:IllegalCatch")
     public void testTransactionReadFailureWithShardNotInitialized() throws Exception {
-        final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
+        final var testKit = new IntegrationTestKit(stateDir(), getSystem(), datastoreContextBuilder);
         final String testName = "testTransactionReadFailureWithShardNotInitialized";
         final String shardName = "test-1";
 

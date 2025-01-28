@@ -15,6 +15,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +28,7 @@ import org.apache.pekko.cluster.Cluster;
 import org.apache.pekko.cluster.ClusterEvent.CurrentClusterState;
 import org.apache.pekko.cluster.Member;
 import org.apache.pekko.cluster.MemberStatus;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.databroker.ClientBackedDataStore;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
@@ -64,8 +66,8 @@ public class MemberNode {
      *                callers to cleanup instances on test completion.
      * @return a Builder instance
      */
-    public static Builder builder(final List<MemberNode> members) {
-        return new Builder(members);
+    public static Builder builder(final Path stateDir, final List<MemberNode> members) {
+        return new Builder(stateDir, members);
     }
 
     public IntegrationTestKit kit() {
@@ -184,6 +186,7 @@ public class MemberNode {
     }
 
     public static class Builder {
+        private final @NonNull Path stateDir;
         private final List<MemberNode> members;
         private String moduleShardsConfig;
         private String akkaConfig;
@@ -195,7 +198,8 @@ public class MemberNode {
         private DatastoreContext.Builder datastoreContextBuilder = DatastoreContext.newBuilder()
                 .shardHeartbeatIntervalInMillis(300).shardElectionTimeoutFactor(30);
 
-        Builder(final List<MemberNode> members) {
+        Builder(final Path stateDir, final List<MemberNode> members) {
+            this.stateDir = requireNonNull(stateDir);
             this.members = members;
         }
 
@@ -304,7 +308,7 @@ public class MemberNode {
             String member1Address = useAkkaArtery ? MEMBER_1_ADDRESS : MEMBER_1_ADDRESS.replace("pekko", "pekko.tcp");
             Cluster.get(system).join(AddressFromURIString.parse(member1Address));
 
-            node.kit = new IntegrationTestKit(system, datastoreContextBuilder);
+            node.kit = new IntegrationTestKit(stateDir, system, datastoreContextBuilder);
 
             String memberName = new ClusterWrapperImpl(system).getCurrentMemberName().getName();
             node.kit.getDatastoreContextBuilder().shardManagerPersistenceId("shard-manager-config-" + memberName);

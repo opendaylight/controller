@@ -29,6 +29,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.AbstractMap;
 import java.util.Arrays;
@@ -215,7 +216,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
     }
 
     private Props newShardMgrProps(final Configuration config) {
-        return newTestShardMgrBuilder(config).readinessFuture(ready).props();
+        return newTestShardMgrBuilder(config).readinessFuture(ready).props(stateDir());
     }
 
     private ActorSystem newActorSystem(final String config) {
@@ -250,12 +251,12 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
 
 
     private Props newPropsShardMgrWithMockShardActor() {
-        return newTestShardMgrBuilderWithMockShardActor().props().withDispatcher(
+        return newTestShardMgrBuilderWithMockShardActor().props(stateDir()).withDispatcher(
                 Dispatchers.DefaultDispatcherId());
     }
 
     private Props newPropsShardMgrWithMockShardActor(final ActorRef shardActor) {
-        return newTestShardMgrBuilderWithMockShardActor(shardActor).props()
+        return newTestShardMgrBuilderWithMockShardActor(shardActor).props(stateDir())
                 .withDispatcher(Dispatchers.DefaultDispatcherId());
     }
 
@@ -340,7 +341,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         final CountDownLatch newShardActorLatch = new CountDownLatch(2);
         class LocalShardManager extends ShardManager {
             LocalShardManager(final AbstractShardManagerCreator<?> creator) {
-                super(creator);
+                super(stateDir(), creator);
             }
 
             @Override
@@ -358,7 +359,9 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         }
 
         final Creator<ShardManager> creator = new Creator<>() {
+            @java.io.Serial
             private static final long serialVersionUID = 1L;
+
             @Override
             public ShardManager create() {
                 return new LocalShardManager(
@@ -680,7 +683,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         final TestActorRef<TestShardManager> shardManager1 = TestActorRef.create(system1,
                 newTestShardMgrBuilderWithMockShardActor()
                     .cluster(new ClusterWrapperImpl(system1))
-                    .props().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                    .props(stateDir()).withDispatcher(Dispatchers.DefaultDispatcherId()),
                 shardManagerID);
 
         // Create an ActorSystem ShardManager actor for member-2.
@@ -698,7 +701,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         final TestActorRef<TestShardManager> shardManager2 = TestActorRef.create(system2,
                 newTestShardMgrBuilder(mockConfig2).shardActor(mockShardActor2)
                     .cluster(new ClusterWrapperImpl(system2))
-                    .props().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                    .props(stateDir()).withDispatcher(Dispatchers.DefaultDispatcherId()),
                 shardManagerID);
 
         final TestKit kit = new TestKit(system1);
@@ -751,7 +754,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
 
         final TestActorRef<TestShardManager> shardManager1 = TestActorRef.create(system1,
                 newTestShardMgrBuilder().shardActor(mockShardActor1).cluster(
-                        new ClusterWrapperImpl(system1)).props().withDispatcher(
+                        new ClusterWrapperImpl(system1)).props(stateDir()).withDispatcher(
                                 Dispatchers.DefaultDispatcherId()), shardManagerID);
 
         // Create an ActorSystem ShardManager actor for member-2.
@@ -767,7 +770,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
 
         final TestActorRef<TestShardManager> shardManager2 = TestActorRef.create(system2,
                 newTestShardMgrBuilder(mockConfig2).shardActor(mockShardActor2).cluster(
-                        new ClusterWrapperImpl(system2)).props().withDispatcher(
+                        new ClusterWrapperImpl(system2)).props(stateDir()).withDispatcher(
                                 Dispatchers.DefaultDispatcherId()), shardManagerID);
 
         final TestKit kit = new TestKit(system1);
@@ -856,7 +859,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         final PrimaryShardInfoFutureCache primaryShardInfoCache = new PrimaryShardInfoFutureCache();
         final TestActorRef<TestShardManager> shardManager1 = TestActorRef.create(system1,
                 newTestShardMgrBuilder().shardActor(mockShardActor1).cluster(new ClusterWrapperImpl(system1))
-                        .primaryShardInfoCache(primaryShardInfoCache).props()
+                        .primaryShardInfoCache(primaryShardInfoCache).props(stateDir())
                         .withDispatcher(Dispatchers.DefaultDispatcherId()),
                 shardManagerID);
 
@@ -873,7 +876,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
 
         final TestActorRef<TestShardManager> shardManager2 = TestActorRef.create(system2,
                 newTestShardMgrBuilder(mockConfig2).shardActor(mockShardActor2).cluster(
-                        new ClusterWrapperImpl(system2)).props().withDispatcher(
+                        new ClusterWrapperImpl(system2)).props(stateDir()).withDispatcher(
                                 Dispatchers.DefaultDispatcherId()), shardManagerID);
 
         final TestKit kit = new TestKit(system1);
@@ -954,7 +957,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         final TestActorRef<TestShardManager> shardManager256 = TestActorRef.create(system256,
                 newTestShardMgrBuilder(mockConfig).shardActor(mockShardActor256)
                         .cluster(new ClusterWrapperImpl(system256))
-                        .primaryShardInfoCache(primaryShardInfoCache).props()
+                        .primaryShardInfoCache(primaryShardInfoCache).props(stateDir())
                         .withDispatcher(Dispatchers.DefaultDispatcherId()),
                 shardManagerID);
 
@@ -969,7 +972,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
 
         final TestActorRef<TestShardManager> shardManager2 = TestActorRef.create(system2,
                 newTestShardMgrBuilder(mockConfig).shardActor(mockShardActor2).cluster(
-                        new ClusterWrapperImpl(system2)).props().withDispatcher(
+                        new ClusterWrapperImpl(system2)).props(stateDir()).withDispatcher(
                                 Dispatchers.DefaultDispatcherId()), shardManagerID);
 
         final TestKit kit256 = new TestKit(system256);
@@ -1455,7 +1458,8 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         DatastoreSnapshot restoreFromSnapshot = new DatastoreSnapshot(shardMrgIDSuffix, snapshot,
                 Collections.<ShardSnapshot>emptyList());
         TestActorRef<TestShardManager> shardManager = actorFactory.createTestActor(newTestShardMgrBuilder(mockConfig)
-                .restoreFromSnapshot(restoreFromSnapshot).props().withDispatcher(Dispatchers.DefaultDispatcherId()));
+                .restoreFromSnapshot(restoreFromSnapshot).props(stateDir())
+                .withDispatcher(Dispatchers.DefaultDispatcherId()));
 
         shardManager.underlyingActor().waitForRecoveryComplete();
 
@@ -1507,7 +1511,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         ActorRef mockDefaultShardActor = newMockShardActor(system1, Shard.DEFAULT_NAME, "member-1");
         final TestActorRef<TestShardManager> newReplicaShardManager = TestActorRef.create(system1,
                 newTestShardMgrBuilder(mockConfig).shardActor(mockDefaultShardActor)
-                        .cluster(new ClusterWrapperImpl(system1)).props()
+                        .cluster(new ClusterWrapperImpl(system1)).props(stateDir())
                         .withDispatcher(Dispatchers.DefaultDispatcherId()),
                 shardManagerID);
 
@@ -1524,7 +1528,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
                 name);
         final TestActorRef<TestShardManager> leaderShardManager = TestActorRef.create(system2,
                 newTestShardMgrBuilder(mockConfig).shardActor(mockShardLeaderActor)
-                        .cluster(new ClusterWrapperImpl(system2)).props()
+                        .cluster(new ClusterWrapperImpl(system2)).props(stateDir())
                         .withDispatcher(Dispatchers.DefaultDispatcherId()),
                 shardManagerID);
 
@@ -1669,7 +1673,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
 
         ActorRef mockNewReplicaShardActor = newMockShardActor(getSystem(), "astronauts", "member-1");
         final TestActorRef<TestShardManager> shardManager = actorFactory.createTestActor(
-            newTestShardMgrBuilder(mockConfig).shardActor(mockNewReplicaShardActor).props()
+            newTestShardMgrBuilder(mockConfig).shardActor(mockNewReplicaShardActor).props(stateDir())
             .withDispatcher(Dispatchers.DefaultDispatcherId()), shardMgrID);
         shardManager.underlyingActor().setMessageInterceptor(newFindPrimaryInterceptor(mockShardLeaderKit.getRef()));
 
@@ -1716,7 +1720,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         MockConfiguration mockConfig = new MockConfiguration(ImmutableMap.of("astronauts", Arrays.asList("member-2")));
 
         final ActorRef newReplicaShardManager = actorFactory
-                .createActor(newTestShardMgrBuilder(mockConfig).shardActor(mockShardActor).props()
+                .createActor(newTestShardMgrBuilder(mockConfig).shardActor(mockShardActor).props(stateDir())
                     .withDispatcher(Dispatchers.DefaultDispatcherId()), shardMgrID);
 
         newReplicaShardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
@@ -1785,8 +1789,9 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         ActorRef mockDefaultShardActor = newMockShardActor(system1, Shard.DEFAULT_NAME, "member-1");
 
         final TestActorRef<TestShardManager> newReplicaShardManager = TestActorRef.create(system1,
-                newTestShardMgrBuilder().configuration(mockConfig).shardActor(mockDefaultShardActor).cluster(
-                        new ClusterWrapperImpl(system1)).props().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                newTestShardMgrBuilder().configuration(mockConfig).shardActor(mockDefaultShardActor)
+                    .cluster(new ClusterWrapperImpl(system1)).props(stateDir())
+                    .withDispatcher(Dispatchers.DefaultDispatcherId()),
                 shardManagerID);
 
         // Create an ActorSystem ShardManager actor for member-2.
@@ -1802,8 +1807,9 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         LOG.error("Mock Shard Leader Actor : {}", mockShardLeaderActor);
 
         final TestActorRef<TestShardManager> leaderShardManager = TestActorRef.create(system2,
-                newTestShardMgrBuilder().configuration(mockConfig).shardActor(mockShardLeaderActor).cluster(
-                        new ClusterWrapperImpl(system2)).props().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                newTestShardMgrBuilder().configuration(mockConfig).shardActor(mockShardLeaderActor)
+                    .cluster(new ClusterWrapperImpl(system2)).props(stateDir())
+                    .withDispatcher(Dispatchers.DefaultDispatcherId()),
                 shardManagerID);
 
         // Because mockShardLeaderActor is created at the top level of the actor system it has an address like so,
@@ -1884,7 +1890,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
 
         final TestActorRef<TestShardManager> shardManager = TestActorRef.create(getSystem(),
             newTestShardMgrBuilder().configuration(mockConfig).shardActor(mockShardActor)
-            .cluster(new MockClusterWrapper()).props()
+            .cluster(new MockClusterWrapper()).props(stateDir())
             .withDispatcher(Dispatchers.DefaultDispatcherId()),
             shardMgrID);
 
@@ -1944,7 +1950,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         ActorRef shard = actorFactory.createActor(MessageCollectorActor.props(), shardId);
 
         TestActorRef<TestShardManager> shardManager = actorFactory
-                .createTestActor(newTestShardMgrBuilder(mockConfig).addShardActor("default", shard).props()
+                .createTestActor(newTestShardMgrBuilder(mockConfig).addShardActor("default", shard).props(stateDir())
                     .withDispatcher(Dispatchers.DefaultDispatcherId()));
 
         shardManager.underlyingActor().waitForRecoveryComplete();
@@ -2016,7 +2022,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         ActorRef shard2 = actorFactory.createActor(MessageCollectorActor.props(), shardId2);
 
         ActorRef shardManager = actorFactory.createActor(newTestShardMgrBuilder(mockConfig)
-            .addShardActor("shard1", shard1).addShardActor("shard2", shard2).props());
+            .addShardActor("shard1", shard1).addShardActor("shard2", shard2).props(stateDir()));
 
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
         shardManager.tell(new ActorInitialized(shard1), ActorRef.noSender());
@@ -2168,8 +2174,8 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         private CountDownLatch memberReachableReceived = new CountDownLatch(1);
         private volatile MessageInterceptor messageInterceptor;
 
-        TestShardManager(final Builder builder) {
-            super(builder);
+        TestShardManager(final Path stateDir, final Builder builder) {
+            super(stateDir, builder);
             shardActor = builder.shardActor;
             shardActors = builder.shardActors;
         }
@@ -2315,9 +2321,9 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         }
 
         @Override
-        public Props props() {
+        public Props props(final Path stateDir) {
             verify();
-            return Props.create(shardManagerClass, this);
+            return Props.create(shardManagerClass, stateDir, this);
         }
     }
 
