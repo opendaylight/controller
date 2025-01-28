@@ -56,8 +56,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.tree.api.ModificationType;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 
-public class DataTreeCohortIntegrationTest {
-
+public class DataTreeCohortIntegrationTest extends AbstractTest {
     private static final DataValidationFailedException FAILED_CAN_COMMIT =
             new DataValidationFailedException(YangInstanceIdentifier.class, TestModel.TEST_PATH, "Test failure.");
     private static final FluentFuture<PostCanCommitStep> FAILED_CAN_COMMIT_FUTURE =
@@ -95,7 +94,7 @@ public class DataTreeCohortIntegrationTest {
         doReturn(PostCanCommitStep.NOOP_SUCCESSFUL_FUTURE).when(cohort).canCommit(any(Object.class),
                 any(EffectiveModelContext.class), anyCollection());
         ArgumentCaptor<Collection> candidateCapt = ArgumentCaptor.forClass(Collection.class);
-        IntegrationTestKit kit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
+        final var kit = new IntegrationTestKit(stateDir(), getSystem(), datastoreContextBuilder);
 
         try (var dataStore = kit.setupDataStore(ClientBackedDataStore.class, "testSuccessfulCanCommitWithNoopPostStep",
             "test-1")) {
@@ -136,7 +135,7 @@ public class DataTreeCohortIntegrationTest {
         doReturn(FAILED_CAN_COMMIT_FUTURE).when(failedCohort).canCommit(any(Object.class),
                 any(EffectiveModelContext.class), anyCollection());
 
-        final var kit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
+        final var kit = new IntegrationTestKit(stateDir(), getSystem(), datastoreContextBuilder);
         try (var dataStore = kit.setupDataStore(ClientBackedDataStore.class, "testFailedCanCommit", "test-1")) {
             dataStore.registerCommitCohort(TEST_ID, failedCohort);
 
@@ -161,7 +160,7 @@ public class DataTreeCohortIntegrationTest {
         final var cohort = mock(DOMDataTreeCommitCohort.class);
         doReturn(PostCanCommitStep.NOOP_SUCCESSFUL_FUTURE).when(cohort).canCommit(any(Object.class),
                 any(EffectiveModelContext.class), anyCollection());
-        final var kit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
+        final var kit = new IntegrationTestKit(stateDir(), getSystem(), datastoreContextBuilder);
 
         try (var dataStore = kit.setupDataStore(ClientBackedDataStore.class, "testCanCommitWithMultipleListEntries",
             "cars-1")) {
@@ -279,7 +278,7 @@ public class DataTreeCohortIntegrationTest {
         doReturn(FluentFutures.immediateFluentFuture(stepToAbort)).when(cohortToAbort).canCommit(any(Object.class),
                 any(EffectiveModelContext.class), anyCollection());
 
-        var kit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
+        var kit = new IntegrationTestKit(stateDir(), getSystem(), datastoreContextBuilder);
         try (var dataStore = kit.setupDataStore(ClientBackedDataStore.class, "testAbortAfterCanCommit",
                 "test-1", "cars-1")) {
             dataStore.registerCommitCohort(TEST_ID, cohortToAbort);

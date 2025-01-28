@@ -41,9 +41,9 @@ public class RaftActorLeadershipTransferCohortTest extends AbstractActorTest {
     private void setup(final String testName) {
         String persistenceId = factory.generateActorId(testName + "-leader-");
         config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
-        mockRaftActor = factory.<MockRaftActor>createTestActor(MockRaftActor.builder().id(persistenceId).config(config)
-                .pauseLeaderFunction(pauseLeaderFunction).props().withDispatcher(Dispatchers.DefaultDispatcherId()),
-                persistenceId).underlyingActor();
+        mockRaftActor = factory.<MockRaftActor>createTestActor(MockRaftActor.builder().id(persistenceId)
+            .config(config).pauseLeaderFunction(pauseLeaderFunction).props(stateDir())
+            .withDispatcher(Dispatchers.DefaultDispatcherId()), persistenceId).underlyingActor();
         cohort = new RaftActorLeadershipTransferCohort(mockRaftActor);
         cohort.addOnComplete(onComplete);
         mockRaftActor.waitForInitializeBehaviorComplete();

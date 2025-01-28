@@ -1099,7 +1099,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         RaftActorSnapshotCohort snapshotCohort = newRaftActorSnapshotCohort(followerRaftActor);
         Builder builder = MockRaftActor.builder().persistent(Optional.of(Boolean.TRUE)).id(id)
                 .peerAddresses(Map.of("leader", "")).config(config).snapshotCohort(snapshotCohort);
-        TestActorRef<MockRaftActor> followerActorRef = actorFactory.createTestActor(builder.props()
+        TestActorRef<MockRaftActor> followerActorRef = actorFactory.createTestActor(builder.props(stateDir())
                 .withDispatcher(Dispatchers.DefaultDispatcherId()), id);
         followerRaftActor.set(followerActorRef.underlyingActor());
         followerRaftActor.get().waitForInitializeBehaviorComplete();
@@ -1154,7 +1154,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         RaftActorSnapshotCohort snapshotCohort = newRaftActorSnapshotCohort(followerRaftActor);
         Builder builder = MockRaftActor.builder().persistent(Optional.of(Boolean.TRUE)).id(id)
                 .peerAddresses(Map.of("leader", "")).config(config).snapshotCohort(snapshotCohort);
-        TestActorRef<MockRaftActor> followerActorRef = actorFactory.createTestActor(builder.props()
+        TestActorRef<MockRaftActor> followerActorRef = actorFactory.createTestActor(builder.props(stateDir())
                 .withDispatcher(Dispatchers.DefaultDispatcherId()), id);
         followerRaftActor.set(followerActorRef.underlyingActor());
         followerRaftActor.get().waitForInitializeBehaviorComplete();
@@ -1201,7 +1201,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         actorFactory.killActor(followerActorRef, new TestKit(getSystem()));
 
-        followerActorRef = actorFactory.createTestActor(builder.props()
+        followerActorRef = actorFactory.createTestActor(builder.props(stateDir())
                 .withDispatcher(Dispatchers.DefaultDispatcherId()), id);
         followerRaftActor.set(followerActorRef.underlyingActor());
         followerRaftActor.get().waitForInitializeBehaviorComplete();
@@ -1229,7 +1229,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         RaftActorSnapshotCohort snapshotCohort = newRaftActorSnapshotCohort(followerRaftActor);
         Builder builder = MockRaftActor.builder().persistent(Optional.of(Boolean.TRUE)).id(id)
                 .peerAddresses(Map.of("leader", "")).config(config).snapshotCohort(snapshotCohort);
-        TestActorRef<MockRaftActor> followerActorRef = actorFactory.createTestActor(builder.props()
+        TestActorRef<MockRaftActor> followerActorRef = actorFactory.createTestActor(builder.props(stateDir())
                 .withDispatcher(Dispatchers.DefaultDispatcherId()), id);
         followerRaftActor.set(followerActorRef.underlyingActor());
         followerRaftActor.get().waitForInitializeBehaviorComplete();

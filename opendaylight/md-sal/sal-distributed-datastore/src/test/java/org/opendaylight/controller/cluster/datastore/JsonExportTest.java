@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Rule;
@@ -74,7 +73,7 @@ public class JsonExportTest extends AbstractShardTest {
                 payloadForModification(source, writeMod, nextTransactionId())));
 
         final int nListEntries = 16;
-        final Set<Integer> listEntryKeys = new HashSet<>();
+        final var listEntryKeys = new HashSet<Integer>();
 
         // Add some ModificationPayload entries
         for (int i = 1; i <= nListEntries; i++) {

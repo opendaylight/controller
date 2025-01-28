@@ -14,7 +14,6 @@ import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorAct
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.expectMatching;
 
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -205,11 +204,10 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
 
     private static void verifyLeaderStateChangedMessages(final ActorRef notifierActor,
             final String... expLeaderIds) {
-        List<LeaderStateChanged> leaderStateChanges = expectMatching(notifierActor, LeaderStateChanged.class,
-                expLeaderIds.length);
+        final var leaderStateChanges = expectMatching(notifierActor, LeaderStateChanged.class, expLeaderIds.length);
 
         Collections.reverse(leaderStateChanges);
-        Iterator<LeaderStateChanged> actual = leaderStateChanges.iterator();
+        final var actual = leaderStateChanges.iterator();
         for (int i = expLeaderIds.length - 1; i >= 0; i--) {
             assertEquals("getLeaderId", expLeaderIds[i], actual.next().getLeaderId());
         }
