@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.databroker;
 
+import java.nio.file.Path;
 import org.apache.pekko.actor.ActorSystem;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
@@ -22,12 +23,10 @@ import org.opendaylight.controller.cluster.datastore.shardmanager.TestShardManag
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 
 public class TestClientBackedDataStore extends ClientBackedDataStore implements LocalShardStore {
-
-    public TestClientBackedDataStore(final ActorSystem actorSystem, final ClusterWrapper cluster,
-                                     final Configuration configuration,
-                                     final DatastoreContextFactory datastoreContextFactory,
-                                     final DatastoreSnapshot restoreFromSnapshot) {
-        super(actorSystem, cluster, configuration, datastoreContextFactory, restoreFromSnapshot);
+    public TestClientBackedDataStore(final Path stateDir, final ActorSystem actorSystem, final ClusterWrapper cluster,
+            final Configuration configuration, final DatastoreContextFactory datastoreContextFactory,
+            final DatastoreSnapshot restoreFromSnapshot) {
+        super(stateDir, actorSystem, cluster, configuration, datastoreContextFactory, restoreFromSnapshot);
     }
 
     TestClientBackedDataStore(final ActorUtils actorUtils, final ClientIdentifier identifier,

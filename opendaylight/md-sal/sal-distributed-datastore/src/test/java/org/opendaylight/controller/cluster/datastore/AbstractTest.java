@@ -8,13 +8,17 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import com.typesafe.config.ConfigFactory;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicLong;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.testkit.javadsl.TestKit;
 import org.eclipse.jdt.annotation.NonNull;
 import org.junit.After;
+import org.junit.Before;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
@@ -37,7 +41,10 @@ public abstract class AbstractTest {
     private static final AtomicLong HISTORY_COUNTER = new AtomicLong();
     private static final AtomicLong TX_COUNTER = new AtomicLong();
 
-    private final Collection<ActorSystem> actorSystems = new ArrayList<>();
+    private final ArrayList<ActorSystem> actorSystems = new ArrayList<>();
+
+    // FIXME: @TempDir when we have JUnit5
+    private Path stateDir;
 
     protected static void setUpStatic() {
         HISTORY_COUNTER.set(1L);
@@ -60,11 +67,23 @@ public abstract class AbstractTest {
         return newHistoryId(HISTORY_COUNTER.incrementAndGet());
     }
 
+    @Before
+    public final void setupStateDir() throws Exception {
+        stateDir = Files.createTempDirectory(getClass().getName());
+    }
+
     @After
-    public void actorSystemCleanup() {
+    public void actorSystemCleanup() throws Exception {
         for (var system : actorSystems) {
             TestKit.shutdownActorSystem(system, true);
         }
+        try (var paths = Files.walk(stateDir)) {
+            paths.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+        }
+    }
+
+    protected final Path stateDir() {
+        return stateDir;
     }
 
     protected ActorSystem newActorSystem(final String name, final String config) {

@@ -11,6 +11,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.util.concurrent.SettableFuture;
+import java.nio.file.Path;
 import org.apache.pekko.actor.Props;
 import org.opendaylight.controller.cluster.datastore.AbstractDataStore;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
@@ -49,7 +50,7 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
 
     public T cluster(final ClusterWrapper newCluster) {
         checkSealed();
-        this.cluster = newCluster;
+        cluster = newCluster;
         return self();
     }
 
@@ -59,7 +60,7 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
 
     public T configuration(final Configuration newConfiguration) {
         checkSealed();
-        this.configuration = newConfiguration;
+        configuration = newConfiguration;
         return self();
     }
 
@@ -69,7 +70,7 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
 
     public T datastoreContextFactory(final DatastoreContextFactory newDatastoreContextFactory) {
         checkSealed();
-        this.datastoreContextFactory = requireNonNull(newDatastoreContextFactory);
+        datastoreContextFactory = requireNonNull(newDatastoreContextFactory);
         return self();
     }
 
@@ -79,7 +80,7 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
 
     public T distributedDataStore(final AbstractDataStore newDistributedDataStore) {
         checkSealed();
-        this.distributedDataStore = newDistributedDataStore;
+        distributedDataStore = newDistributedDataStore;
         return self();
     }
 
@@ -89,7 +90,7 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
 
     public T readinessFuture(final SettableFuture<Empty> newReadinessFuture) {
         checkSealed();
-        this.readinessFuture = newReadinessFuture;
+        readinessFuture = newReadinessFuture;
         return self();
     }
 
@@ -99,7 +100,7 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
 
     public T primaryShardInfoCache(final PrimaryShardInfoFutureCache newPrimaryShardInfoCache) {
         checkSealed();
-        this.primaryShardInfoCache = newPrimaryShardInfoCache;
+        primaryShardInfoCache = newPrimaryShardInfoCache;
         return self();
     }
 
@@ -109,7 +110,7 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
 
     public T restoreFromSnapshot(final DatastoreSnapshot newRestoreFromSnapshot) {
         checkSealed();
-        this.restoreFromSnapshot = newRestoreFromSnapshot;
+        restoreFromSnapshot = newRestoreFromSnapshot;
         return self();
     }
 
@@ -123,8 +124,8 @@ public abstract class AbstractShardManagerCreator<T extends AbstractShardManager
         requireNonNull(primaryShardInfoCache, "primaryShardInfoCache should not be null");
     }
 
-    public Props props() {
+    public Props props(final Path stateDir) {
         verify();
-        return Props.create(ShardManager.class, this);
+        return Props.create(ShardManager.class, stateDir, this);
     }
 }

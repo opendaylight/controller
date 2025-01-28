@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.databroker;
 
 import com.google.common.annotations.VisibleForTesting;
+import java.nio.file.Path;
 import org.apache.pekko.actor.ActorSystem;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
@@ -26,11 +27,10 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
  * Implements a distributed DOMStore using ClientActor.
  */
 public class ClientBackedDataStore extends AbstractDataStore {
-
-    public ClientBackedDataStore(final ActorSystem actorSystem, final ClusterWrapper cluster,
+    public ClientBackedDataStore(final Path stateDir, final ActorSystem actorSystem, final ClusterWrapper cluster,
             final Configuration configuration, final DatastoreContextFactory datastoreContextFactory,
             final DatastoreSnapshot restoreFromSnapshot) {
-        super(actorSystem, cluster, configuration, datastoreContextFactory, restoreFromSnapshot);
+        super(stateDir, actorSystem, cluster, configuration, datastoreContextFactory, restoreFromSnapshot);
     }
 
     @VisibleForTesting

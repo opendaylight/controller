@@ -93,7 +93,7 @@ public class DistributedDataStoreWithSegmentedJournalIntegrationTest
 
     @Test
     public void testManyWritesDeletes() throws Exception {
-        final IntegrationTestKit testKit = new IntegrationTestKit(getSystem(), datastoreContextBuilder);
+        final var testKit = new IntegrationTestKit(stateDir(), getSystem(), datastoreContextBuilder);
         CollectionNodeBuilder<MapEntryNode, SystemMapNode> carMapBuilder = ImmutableNodes.mapNodeBuilder(CAR_QNAME);
 
         try (var dataStore = testKit.setupDataStore(testParameter, "testManyWritesDeletes",

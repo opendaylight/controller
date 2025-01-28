@@ -11,8 +11,8 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
+import java.nio.file.Path;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
 
 /**
@@ -21,6 +21,8 @@ import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
 @NonNullByDefault
 @VisibleForTesting
 public final class LocalAccess {
+    private static final Path TERM_INFO_PROPS = Path.of("TermInfo.properties");
+
     private final String memberId;
     private final TermInfoStore termInfoStore;
 
@@ -31,8 +33,8 @@ public final class LocalAccess {
     }
 
     @VisibleForTesting
-    LocalAccess(final String memberId, final DataPersistenceProvider persistence) {
-        this(memberId, new PersistenceTermInfoStore(persistence, memberId));
+    LocalAccess(final String memberId, final Path stateDir) {
+        this(memberId, new PropertiesTermInfoStore(memberId, stateDir.resolve(TERM_INFO_PROPS)));
     }
 
     String memberId() {

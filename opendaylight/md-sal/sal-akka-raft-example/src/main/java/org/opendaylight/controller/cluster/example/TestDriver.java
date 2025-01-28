@@ -7,11 +7,14 @@
  */
 package org.opendaylight.controller.cluster.example;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.collect.Lists;
 import com.typesafe.config.ConfigFactory;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +22,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.example.messages.PrintRole;
 import org.opendaylight.controller.cluster.example.messages.PrintState;
 import org.opendaylight.controller.cluster.raft.ConfigParams;
@@ -30,16 +34,22 @@ import org.opendaylight.controller.cluster.raft.ConfigParams;
  * a thread and starts push logs to the actor its assigned to.
  */
 @SuppressWarnings("checkstyle:RegexpSingleLineJava")
-public class TestDriver {
+public final class TestDriver {
     private static Map<String, String> allPeers = new HashMap<>();
     private static Map<String, ActorRef> clientActorRefs  = new HashMap<>();
     private static Map<String, ActorRef> actorRefs = new HashMap<>();
     private static LogGenerator logGenerator = new LogGenerator();
-    private int nameCounter = 0;
     private static ConfigParams configParams = new ExampleConfigParamsImpl();
 
     private static ActorSystem actorSystem;
     private static ActorSystem listenerActorSystem;
+
+    private final @NonNull Path baseDir;
+    private int nameCounter = 0;
+
+    private TestDriver(final Path baseDir) {
+        this.baseDir = requireNonNull(baseDir);
+    }
 
     /**
      * Create nodes, add clients and start logging.
@@ -69,7 +79,7 @@ public class TestDriver {
         listenerActorSystem = ActorSystem.create("raft-test-listener", ConfigFactory
             .load().getConfig("raft-test-listener"));
 
-        TestDriver td = new TestDriver();
+        TestDriver td = new TestDriver(Path.of("."));
 
         System.out.println("Enter command (type bye to exit):");
 
@@ -142,8 +152,8 @@ public class TestDriver {
         }
     }
 
-    public static ActorRef createExampleActor(final String name) {
-        return actorSystem.actorOf(ExampleActor.props(name, withoutPeer(name),
+    public static ActorRef createExampleActor(final Path baseDir, final String name) {
+        return actorSystem.actorOf(ExampleActor.props(baseDir, name, withoutPeer(name),
             Optional.of(configParams)), name);
     }
 
@@ -154,7 +164,7 @@ public class TestDriver {
         }
 
         for (String s : allPeers.keySet())  {
-            ActorRef exampleActor = createExampleActor(s);
+            ActorRef exampleActor = createExampleActor(baseDir, s);
             actorRefs.put(s, exampleActor);
             System.out.println("Created node:" + s);
         }
@@ -204,7 +214,7 @@ public class TestDriver {
         String address = "pekko://default/user/" + actorName;
         allPeers.put(actorName, address);
 
-        ActorRef exampleActor = createExampleActor(actorName);
+        ActorRef exampleActor = createExampleActor(baseDir, actorName);
         actorRefs.put(actorName, exampleActor);
 
         addClientsToNode(actorName, 1);
