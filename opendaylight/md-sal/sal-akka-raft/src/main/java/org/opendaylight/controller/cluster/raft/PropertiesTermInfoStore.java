@@ -11,7 +11,6 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -60,7 +59,7 @@ final class PropertiesTermInfoStore implements TermInfoStore {
     }
 
     @Override
-    public void storeAndSetTerm(final TermInfo newTerm) {
+    public void storeAndSetTerm(final TermInfo newTerm) throws IOException {
         final var props = new Properties(2);
         props.setProperty(PROP_TERM, Long.toString(newTerm.term()));
         final var votedFor = newTerm.votedFor();
@@ -68,34 +67,33 @@ final class PropertiesTermInfoStore implements TermInfoStore {
             props.setProperty(PROP_VOTED_FOR, votedFor);
         }
 
-        try {
-            saveFile(props);
-        } catch (IOException e) {
-            // TODO: do wrap IO exception
-            throw new UncheckedIOException(e);
-        }
-
+        saveFile(props);
         doSetTerm(newTerm);
     }
 
     @Override
-    public @Nullable TermInfo loadAndSetTerm() {
+    public @Nullable TermInfo loadAndSetTerm() throws IOException {
         final Properties props;
         try {
             props = loadFile();
         } catch (NoSuchFileException e) {
             LOG.debug("{} does not exist", propFile, e);
             return null;
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
         }
 
         final var termProp = props.getProperty(PROP_TERM);
         if (termProp == null) {
-            throw new IllegalStateException("Missing " + PROP_TERM + " in " + props);
+            throw new IOException("Missing " + PROP_TERM + " in " + props);
         }
 
-        final var newTerm = new TermInfo(Long.parseLong(termProp), props.getProperty(PROP_VOTED_FOR));
+        final long term;
+        try {
+            term = Long.parseLong(termProp);
+        } catch (NumberFormatException e) {
+            throw new IOException("Malformed term " + termProp, e);
+        }
+
+        final var newTerm = new TermInfo(term, props.getProperty(PROP_VOTED_FOR));
         doSetTerm(newTerm);
         return newTerm;
     }
