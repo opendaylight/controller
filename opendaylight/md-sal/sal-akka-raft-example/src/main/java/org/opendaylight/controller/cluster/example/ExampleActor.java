@@ -11,6 +11,7 @@ import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -56,16 +57,16 @@ public final class ExampleActor extends RaftActor implements RaftActorRecoveryCo
 
     private long persistIdentifier = 1;
 
-    public ExampleActor(final String id, final Map<String, String> peerAddresses,
+    public ExampleActor(final Path baseDir, final String id, final Map<String, String> peerAddresses,
             final Optional<ConfigParams> configParams) {
-        super(id, peerAddresses, configParams, (short)0);
+        super(baseDir, id, peerAddresses, configParams, (short)0);
         setPersistence(true);
         roleChangeNotifier = getContext().actorOf(RoleChangeNotifier.getProps(id), id + "-notifier");
     }
 
-    public static Props props(final String id, final Map<String, String> peerAddresses,
+    public static Props props(final Path baseDir, final String id, final Map<String, String> peerAddresses,
             final Optional<ConfigParams> configParams) {
-        return Props.create(ExampleActor.class, id, peerAddresses, configParams);
+        return Props.create(ExampleActor.class, baseDir, id, peerAddresses, configParams);
     }
 
     @Override
