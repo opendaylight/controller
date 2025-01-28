@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import static java.util.Objects.requireNonNull;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -28,8 +26,8 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog {
     private ReplicatedLogImpl(final long snapshotIndex, final long snapshotTerm,
             final List<ReplicatedLogEntry> unAppliedEntries,
             final RaftActorContext context) {
-        super(snapshotIndex, snapshotTerm, unAppliedEntries, context.getId());
-        this.context = requireNonNull(context);
+        super(context.getId(), snapshotIndex, snapshotTerm, unAppliedEntries);
+        this.context = context;
     }
 
     static ReplicatedLog newInstance(final Snapshot snapshot, final RaftActorContext context) {

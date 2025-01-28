@@ -58,7 +58,7 @@ public interface RaftActorContext {
      *
      * @return the identifier
      */
-    String getId();
+    @NonNull String getId();
 
     /**
      * Returns the reference to the RaftActor.

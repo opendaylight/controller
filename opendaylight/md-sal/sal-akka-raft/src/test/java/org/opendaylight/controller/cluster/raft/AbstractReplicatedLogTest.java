@@ -322,6 +322,10 @@ public class AbstractReplicatedLogTest {
     }
 
     static class MockAbstractReplicatedLog extends AbstractReplicatedLog {
+        MockAbstractReplicatedLog() {
+            super("", -1L, -1L, List.of());
+        }
+
         @Override
         public boolean removeFromAndPersist(final long index) {
             return true;

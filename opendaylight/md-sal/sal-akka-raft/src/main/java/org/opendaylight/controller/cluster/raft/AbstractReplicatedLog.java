@@ -7,10 +7,11 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
@@ -24,7 +25,7 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractReplicatedLog implements ReplicatedLog {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractReplicatedLog.class);
 
-    private final String logContext;
+    private final String logId;
 
     // We define this as ArrayList so we can use ensureCapacity.
     private ArrayList<ReplicatedLogEntry> journal;
@@ -38,20 +39,16 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
     private long previousSnapshotTerm = -1;
     private int dataSize = 0;
 
-    protected AbstractReplicatedLog(final long snapshotIndex, final long snapshotTerm,
-            final List<ReplicatedLogEntry> unAppliedEntries, final String logContext) {
+    protected AbstractReplicatedLog(final @NonNull String logId, final long snapshotIndex, final long snapshotTerm,
+            final List<ReplicatedLogEntry> unAppliedEntries) {
+        this.logId = requireNonNull(logId);
         this.snapshotIndex = snapshotIndex;
         this.snapshotTerm = snapshotTerm;
-        this.logContext = logContext;
 
         journal = new ArrayList<>(unAppliedEntries.size());
         for (var entry : unAppliedEntries) {
             append(entry);
         }
-    }
-
-    protected AbstractReplicatedLog() {
-        this(-1L, -1L, List.of(), "");
     }
 
     protected int adjustedIndex(final long logEntryIndex) {
@@ -130,7 +127,7 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
             return true;
         }
 
-        LOG.warn("{}: Cannot append new entry - new index {} is not greater than the last index {}", logContext,
+        LOG.warn("{}: Cannot append new entry - new index {} is not greater than the last index {}", logId,
             entryIndex, lastIndex, new Exception("stack trace"));
         return false;
     }
@@ -162,7 +159,7 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
                 return copyJournalEntries(adjustedIndex, maxIndex, maxDataSize);
             }
         } else {
-            return Collections.emptyList();
+            return List.of();
         }
     }
 
@@ -270,7 +267,7 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
             for (ReplicatedLogEntry logEntry : journal) {
                 newDataSize += logEntry.size();
             }
-            LOG.trace("{}: Updated dataSize from {} to {}", logContext, dataSize, newDataSize);
+            LOG.trace("{}: Updated dataSize from {} to {}", logId, dataSize, newDataSize);
             dataSize = newDataSize;
         }
     }
