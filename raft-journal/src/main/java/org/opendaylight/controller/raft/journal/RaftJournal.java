@@ -15,6 +15,7 @@
  */
 package org.opendaylight.controller.raft.journal;
 
+import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -50,7 +51,7 @@ public interface RaftJournal extends AutoCloseable {
      * @param index The index at which to start the reader.
      * @return A new journal reader.
      */
-    EntryReader openReader(long index);
+    EntryReader openReader(long index) throws IOException;
 
     /**
      * Opens a new {@link EntryReader} reading only committed entries.
@@ -58,14 +59,14 @@ public interface RaftJournal extends AutoCloseable {
      * @param index The index at which to start the reader.
      * @return A new journal reader.
      */
-    EntryReader openCommitsReader(long index);
+    EntryReader openCommitsReader(long index) throws IOException;
 
     /**
      * Compacts the journal up to the given index. The semantics of compaction are not specified by this interface.
      *
      * @param index The index up to which to compact the journal.
      */
-    void compact(long index);
+    void compact(long index) throws IOException;
 
     @Override
     void close();

@@ -91,13 +91,8 @@ final class DiskFileReader extends FileReader {
         return setAndSlice(position, size);
     }
 
-    private void readAtLeast(final int readPosition, final int readAtLeast) {
-        final int bytesRead;
-        try {
-            bytesRead = buffer.writeBytes(channel, readPosition, readAtLeast);
-        } catch (IOException e) {
-            throw new StorageException(e);
-        }
+    private void readAtLeast(final int readPosition, final int readAtLeast) throws IOException {
+        final int bytesRead = buffer.writeBytes(channel, readPosition, readAtLeast);
         verify(bytesRead >= readAtLeast, "Short read %s, expected %s", bytesRead, readAtLeast);
     }
 

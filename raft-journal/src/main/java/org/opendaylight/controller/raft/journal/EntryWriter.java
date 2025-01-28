@@ -15,6 +15,7 @@
  */
 package org.opendaylight.controller.raft.journal;
 
+import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -36,15 +37,14 @@ public interface EntryWriter {
      * @param entry entry to append
      * @return the on-disk size of the entry
      */
-    // FIXME: throws IOException
-    <T> int append(ToByteBufMapper<T> mapper, T entry);
+    <T> int append(ToByteBufMapper<T> mapper, T entry) throws IOException;
 
     /**
      * Commits entries up to the given index.
      *
      * @param index The index up to which to commit entries.
      */
-    void commit(long index);
+    void commit(long index) throws IOException;
 
     /**
      * Resets the head of the journal to the given index.
@@ -52,12 +52,10 @@ public interface EntryWriter {
      * @param index the next index to write
      * @throws IndexOutOfBoundsException if the journal cannot be reset to specified index
      */
-    // FIXME: throws IOException
-    void reset(long index);
+    void reset(long index) throws IOException;
 
     /**
      * Flushes written entries to disk.
      */
-    // FIXME: throws IOException
-    void flush();
+    void flush() throws IOException;
 }

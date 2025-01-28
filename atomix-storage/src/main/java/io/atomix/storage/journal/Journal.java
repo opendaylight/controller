@@ -16,6 +16,7 @@
 package io.atomix.storage.journal;
 
 import io.atomix.storage.journal.JournalReader.Mode;
+import java.io.IOException;
 
 /**
  * Journal.
@@ -50,7 +51,7 @@ public interface Journal<E> extends AutoCloseable {
      * @param index The index at which to start the reader.
      * @return A new journal reader.
      */
-    default JournalReader<E> openReader(final long index) {
+    default JournalReader<E> openReader(final long index) throws IOException {
         return openReader(index, Mode.ALL);
     }
 
@@ -61,14 +62,14 @@ public interface Journal<E> extends AutoCloseable {
      * @param mode the reader mode
      * @return A new journal reader.
      */
-    JournalReader<E> openReader(long index, Mode mode);
+    JournalReader<E> openReader(long index, Mode mode) throws IOException ;
 
     /**
      * Compacts the journal up to the given index. The semantics of compaction are not specified by this interface.
      *
      * @param index The index up to which to compact the journal.
      */
-    void compact(long index);
+    void compact(long index) throws IOException;
 
     @Override
     void close();

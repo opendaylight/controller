@@ -19,6 +19,7 @@ package io.atomix.storage.journal;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
+import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.raft.journal.FromByteBufMapper;
 import org.opendaylight.controller.raft.journal.RaftJournal;
@@ -56,7 +57,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
     }
 
     @Override
-    public JournalReader<E> openReader(final long index) {
+    public JournalReader<E> openReader(final long index) throws IOException {
         return openReader(index, JournalReader.Mode.ALL);
     }
 
@@ -68,7 +69,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
      * @return The journal reader.
      */
     @Override
-    public JournalReader<E> openReader(final long index, final JournalReader.Mode mode) {
+    public JournalReader<E> openReader(final long index, final JournalReader.Mode mode) throws IOException {
         final var byteReader = switch (mode) {
             case ALL -> journal.openReader(index);
             case COMMITS -> journal.openCommitsReader(index);
@@ -77,7 +78,7 @@ public final class SegmentedJournal<E> implements Journal<E> {
     }
 
     @Override
-    public void compact(final long index) {
+    public void compact(final long index) throws IOException {
         journal.compact(index);
     }
 

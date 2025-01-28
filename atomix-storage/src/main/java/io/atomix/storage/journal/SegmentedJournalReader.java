@@ -18,6 +18,7 @@ package io.atomix.storage.journal;
 
 import static java.util.Objects.requireNonNull;
 
+import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.raft.journal.EntryReader;
@@ -42,17 +43,17 @@ final class SegmentedJournalReader<E> implements JournalReader<E> {
     }
 
     @Override
-    public void reset() {
+    public void reset() throws IOException {
         reader.reset();
     }
 
     @Override
-    public void reset(final long index) {
+    public void reset(final long index) throws IOException {
         reader.reset(index);
     }
 
     @Override
-    public <T> @Nullable T tryNext(final EntryMapper<E, T> entryMapper) {
+    public <T> @Nullable T tryNext(final EntryMapper<E, T> entryMapper) throws IOException {
         return reader.tryNext((index, buf) -> {
             final var size = buf.readableBytes();
             return requireNonNull(entryMapper.mapEntry(index, mapper.bytesToObject(index, buf), size));

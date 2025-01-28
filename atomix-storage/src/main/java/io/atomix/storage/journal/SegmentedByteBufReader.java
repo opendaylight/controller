@@ -19,6 +19,7 @@ package io.atomix.storage.journal;
 import static java.util.Objects.requireNonNull;
 
 import io.netty.buffer.ByteBuf;
+import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.raft.journal.EntryReader;
 import org.opendaylight.controller.raft.journal.FromByteBufMapper;
@@ -33,7 +34,7 @@ sealed class SegmentedByteBufReader implements EntryReader permits SegmentedComm
     private JournalSegmentReader currentReader;
     private long nextIndex;
 
-    SegmentedByteBufReader(final SegmentedByteBufJournal journal, final JournalSegment segment) {
+    SegmentedByteBufReader(final SegmentedByteBufJournal journal, final JournalSegment segment) throws IOException {
         this.journal = requireNonNull(journal);
         currentSegment = requireNonNull(segment);
         currentReader = segment.createReader();
@@ -46,7 +47,7 @@ sealed class SegmentedByteBufReader implements EntryReader permits SegmentedComm
     }
 
     @Override
-    public final void reset() {
+    public final void reset() throws IOException {
         currentReader.close();
         currentSegment = journal.firstSegment();
         currentReader = currentSegment.createReader();
@@ -54,7 +55,7 @@ sealed class SegmentedByteBufReader implements EntryReader permits SegmentedComm
     }
 
     @Override
-    public final void reset(final long index) {
+    public final void reset(final long index) throws IOException {
         // If the current segment is not open, it has been replaced. Reset the segments.
         if (!currentSegment.isOpen()) {
             reset();
@@ -68,7 +69,7 @@ sealed class SegmentedByteBufReader implements EntryReader permits SegmentedComm
         }
     }
 
-    private void resetCurrentReader(final long index) {
+    private void resetCurrentReader(final long index) throws IOException {
         final var position = currentSegment.lookup(index - 1);
         if (position != null) {
             nextIndex = position.index();
@@ -83,7 +84,7 @@ sealed class SegmentedByteBufReader implements EntryReader permits SegmentedComm
     /**
      * Rewinds the journal to the given index.
      */
-    private void rewind(final long index) {
+    private void rewind(final long index) throws IOException {
         if (currentSegment.firstIndex() >= index) {
             final var segment = journal.segment(index - 1);
             if (segment != null) {
@@ -95,14 +96,14 @@ sealed class SegmentedByteBufReader implements EntryReader permits SegmentedComm
         resetCurrentReader(index);
     }
 
-    private void forwardTo(final long index) {
+    private void forwardTo(final long index) throws IOException {
         while (nextIndex < index && tryAdvance(nextIndex) != null) {
             // No-op -- nextIndex value is updated in tryAdvance()
         }
     }
 
     @Override
-    public final <T> T tryNext(final FromByteBufMapper<T> mapper) {
+    public final <T> T tryNext(final FromByteBufMapper<T> mapper) throws IOException {
         final var index = nextIndex;
         final var bytes = tryAdvance(index);
         return bytes == null ? null : mapper.bytesToObject(index, bytes);
@@ -118,7 +119,7 @@ sealed class SegmentedByteBufReader implements EntryReader permits SegmentedComm
      * @param index next index
      * @return Entry bytes, or {@code null}
      */
-    ByteBuf tryAdvance(final long index) {
+    ByteBuf tryAdvance(final long index) throws IOException {
         var buf = currentReader.readBytes();
         if (buf == null) {
             final var nextSegment = journal.tryNextSegment(currentSegment.firstIndex());

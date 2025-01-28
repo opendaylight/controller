@@ -53,7 +53,7 @@ abstract sealed class FileWriter permits DiskFileWriter, MappedFileWriter {
      *
      * @param position position to write to
      */
-    abstract void writeEmptyHeader(int position);
+    abstract void writeEmptyHeader(int position) throws IOException;
 
     /**
      * Allocate file space. Note that the allocated space may be a buffer disconnected from the file. Any modifications
@@ -65,7 +65,7 @@ abstract sealed class FileWriter permits DiskFileWriter, MappedFileWriter {
      */
     abstract ByteBuf startWrite(int position, int size);
 
-    abstract void commitWrite(int position, ByteBuf entry);
+    abstract void commitWrite(int position, ByteBuf entry) throws IOException;
 
     /**
      * Flushes written entries to disk.

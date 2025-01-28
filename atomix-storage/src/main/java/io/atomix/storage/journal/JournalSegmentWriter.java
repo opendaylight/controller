@@ -19,7 +19,6 @@ import static io.atomix.storage.journal.SegmentEntry.HEADER_BYTES;
 import static java.util.Objects.requireNonNull;
 
 import io.atomix.storage.journal.JournalSegment.Inactive;
-import io.atomix.storage.journal.StorageException.TooLarge;
 import io.atomix.storage.journal.index.JournalIndex;
 import java.io.EOFException;
 import java.io.IOException;
@@ -75,7 +74,7 @@ final class JournalSegmentWriter {
      * @param entry the entry
      * @return the entry size, or {@code null} if segment has no space
      */
-    <T> @Nullable Integer append(final ToByteBufMapper<T> mapper, final T entry) {
+    <T> @Nullable Integer append(final ToByteBufMapper<T> mapper, final T entry) throws IOException {
         // we are appending at this index and position
         final long index = nextIndex();
         final int position = currentPosition;
@@ -105,14 +104,12 @@ final class JournalSegmentWriter {
             if (writeLimit == maxEntrySize) {
                 // - it is the entry and/or mapper. This is not exactly accurate, as there may be other serialization
                 //   fault. This is as good as it gets.
-                throw new TooLarge("Serialized entry size exceeds maximum allowed bytes (" + maxEntrySize + ")", e);
+                throw new EntryTooBigException(maxEntrySize, e);
             }
 
             // - it is us, as we do not have the capacity to hold maxEntrySize bytes
             LOG.trace("Tail serialization with {} bytes available failed", writeLimit, e);
             return null;
-        } catch (IOException e) {
-            throw new StorageException(e);
         }
 
         // Determine length, trim disktEntry and compute checksum.
@@ -136,7 +133,7 @@ final class JournalSegmentWriter {
      *
      * @param index The index to which to truncate the log.
      */
-    void truncate(final long index) {
+    void truncate(final long index) throws IOException {
         // If the index is greater than or equal to the last index, skip the truncate.
         if (index >= segment.lastIndex()) {
             return;
@@ -156,11 +153,7 @@ final class JournalSegmentWriter {
     /**
      * Flushes written entries to disk.
      */
-    void flush() {
-        try {
-            fileWriter.flush();
-        } catch (IOException e) {
-            throw new StorageException(e);
-        }
+    void flush() throws IOException {
+        fileWriter.flush();
     }
 }

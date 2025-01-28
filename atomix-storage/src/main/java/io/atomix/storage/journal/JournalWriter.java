@@ -15,6 +15,7 @@
  */
 package io.atomix.storage.journal;
 
+import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNull;
 
 /**
@@ -36,14 +37,14 @@ public interface JournalWriter<E> {
      * @param entry The entry to append.
      * @return The appended indexed entry.
      */
-    <T extends E> @NonNull Indexed<T> append(T entry);
+    <T extends E> @NonNull Indexed<T> append(T entry) throws IOException;
 
     /**
      * Commits entries up to the given index.
      *
      * @param index The index up to which to commit entries.
      */
-    void commit(long index);
+    void commit(long index) throws IOException;
 
     /**
      * Resets the head of the journal to the given index.
@@ -51,10 +52,10 @@ public interface JournalWriter<E> {
      * @param index the next index to write
      * @throws IndexOutOfBoundsException if the journal cannot be reset to specified index
      */
-    void reset(long index);
+    void reset(long index) throws IOException;
 
     /**
      * Flushes written entries to disk.
      */
-    void flush();
+    void flush() throws IOException;
 }
