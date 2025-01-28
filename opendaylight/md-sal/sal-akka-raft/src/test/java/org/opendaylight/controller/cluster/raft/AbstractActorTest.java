@@ -7,12 +7,19 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static java.util.Objects.requireNonNull;
+
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Comparator;
 import org.apache.commons.io.FileUtils;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.testkit.javadsl.TestKit;
+import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.opendaylight.yangtools.util.AbstractStringIdentifier;
 
@@ -28,6 +35,8 @@ public abstract class AbstractActorTest {
 
     private static ActorSystem system;
 
+    private Path baseDir;
+
     @BeforeClass
     public static void setUpClass() throws Exception {
         deleteJournal();
@@ -42,8 +51,24 @@ public abstract class AbstractActorTest {
         system = null;
     }
 
-    protected ActorSystem getSystem() {
+    @Before
+    public void beforeEach() throws Exception {
+        baseDir = Files.createTempDirectory(getClass().getName());
+    }
+
+    @After
+    public void afterEach() throws Exception {
+        try (var paths = Files.walk(baseDir)) {
+            paths.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+        }
+    }
+
+    protected final ActorSystem getSystem() {
         return system;
+    }
+
+    protected final Path baseDir() {
+        return requireNonNull(baseDir);
     }
 
     protected static void deleteJournal() throws IOException {

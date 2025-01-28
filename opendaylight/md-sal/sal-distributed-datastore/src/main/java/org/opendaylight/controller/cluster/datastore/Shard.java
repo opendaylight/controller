@@ -18,6 +18,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Range;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
@@ -196,7 +197,7 @@ public class Shard extends RaftActor {
     private final ActorRef exportActor;
 
     Shard(final AbstractBuilder<?, ?> builder) {
-        super(builder.getId().toString(), builder.getPeerAddresses(),
+        super(builder.getBaseDir(), builder.getId().toString(), builder.getPeerAddresses(),
                 Optional.of(builder.getDatastoreContext().getShardRaftConfig()), DataStoreVersions.CURRENT_VERSION);
 
         shardName = builder.getId().getShardName();
@@ -790,6 +791,7 @@ public class Shard extends RaftActor {
     public abstract static class AbstractBuilder<T extends AbstractBuilder<T, S>, S extends Shard> {
         private final Class<? extends S> shardClass;
         private ShardIdentifier id;
+        private Path baseDir;
         private Map<String, String> peerAddresses = Collections.emptyMap();
         private DatastoreContext datastoreContext;
         private Supplier<@NonNull EffectiveModelContext> schemaContextProvider;
@@ -809,6 +811,12 @@ public class Shard extends RaftActor {
         @SuppressWarnings("unchecked")
         private T self() {
             return (T) this;
+        }
+
+        public T baseDir(final Path newBaseDir) {
+            checkSealed();
+            baseDir = requireNonNull(newBaseDir);
+            return self();
         }
 
         public T id(final ShardIdentifier newId) {
@@ -849,6 +857,10 @@ public class Shard extends RaftActor {
 
         public ShardIdentifier getId() {
             return id;
+        }
+
+        public Path getBaseDir() {
+            return baseDir;
         }
 
         public Map<String, String> getPeerAddresses() {
