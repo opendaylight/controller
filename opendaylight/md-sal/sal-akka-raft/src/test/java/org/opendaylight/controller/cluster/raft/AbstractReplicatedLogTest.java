@@ -24,27 +24,22 @@ import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
 
-/**
-* Unit tests for AbstractReplicatedLogImplTest.
-*/
-public class AbstractReplicatedLogImplTest {
-
-    private MockAbstractReplicatedLogImpl replicatedLogImpl;
+public class AbstractReplicatedLogTest {
+    private MockAbstractReplicatedLog replicatedLogImpl;
 
     @Before
     public void setUp() {
-        replicatedLogImpl = new MockAbstractReplicatedLogImpl();
+        replicatedLogImpl = new MockAbstractReplicatedLog();
         // create a set of initial entries in the in-memory log
         replicatedLogImpl.append(new SimpleReplicatedLogEntry(0, 1, new MockPayload("A")));
         replicatedLogImpl.append(new SimpleReplicatedLogEntry(1, 1, new MockPayload("B")));
         replicatedLogImpl.append(new SimpleReplicatedLogEntry(2, 1, new MockPayload("C")));
         replicatedLogImpl.append(new SimpleReplicatedLogEntry(3, 2, new MockPayload("D")));
-
     }
 
     @Test
     public void testEmptyLog() {
-        replicatedLogImpl = new MockAbstractReplicatedLogImpl();
+        replicatedLogImpl = new MockAbstractReplicatedLog();
 
         assertEquals("size", 0, replicatedLogImpl.size());
         assertEquals("dataSize", 0, replicatedLogImpl.dataSize());
@@ -326,7 +321,7 @@ public class AbstractReplicatedLogImplTest {
 
     }
 
-    static class MockAbstractReplicatedLogImpl extends AbstractReplicatedLogImpl {
+    static class MockAbstractReplicatedLog extends AbstractReplicatedLog {
         @Override
         public boolean removeFromAndPersist(final long index) {
             return true;
