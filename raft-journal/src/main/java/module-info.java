@@ -13,6 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * Storage primitives for a RAFT journal.
+ */
 module org.opendaylight.controller.raft.journal {
     exports org.opendaylight.controller.raft.journal;
 
@@ -20,4 +23,5 @@ module org.opendaylight.controller.raft.journal {
 
     // Annotations
     requires static transitive org.eclipse.jdt.annotation;
+    requires static org.osgi.annotation.bundle;
 }
