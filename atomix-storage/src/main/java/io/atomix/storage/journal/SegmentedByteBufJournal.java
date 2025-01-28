@@ -23,12 +23,12 @@ import static java.util.Objects.requireNonNull;
 import io.netty.buffer.ByteBufAllocator;
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.Collection;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.function.BiFunction;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -42,6 +42,13 @@ import org.slf4j.LoggerFactory;
  * A {@link RaftJournal} Implementation.
  */
 public final class SegmentedByteBufJournal implements RaftJournal {
+    @FunctionalInterface
+    @NonNullByDefault
+    private interface EntryReaderCtor {
+
+        EntryReader invoke(SegmentedByteBufJournal journal, JournalSegment segment) throws IOException;
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(SegmentedByteBufJournal.class);
     private static final int SEGMENT_BUFFER_FACTOR = 3;
 
@@ -65,7 +72,7 @@ public final class SegmentedByteBufJournal implements RaftJournal {
 
     SegmentedByteBufJournal(final String name, final StorageLevel storageLevel, final File directory,
             final int maxSegmentSize, final int maxEntrySize, final int maxEntriesPerSegment, final double indexDensity,
-            final boolean flushOnCommit, final ByteBufAllocator allocator) {
+            final boolean flushOnCommit, final ByteBufAllocator allocator) throws IOException {
         this.name = requireNonNull(name, "name cannot be null");
         this.storageLevel = requireNonNull(storageLevel, "storageLevel cannot be null");
         this.directory = requireNonNull(directory, "directory cannot be null");
@@ -90,16 +97,21 @@ public final class SegmentedByteBufJournal implements RaftJournal {
      *
      * @return the total size of the journal
      */
-    public long size() {
-        return segments.values().stream()
-            .mapToLong(segment -> {
-                try {
-                    return segment.file().size();
-                } catch (IOException e) {
-                    throw new StorageException(e);
-                }
-            })
-            .sum();
+    public long size() throws IOException {
+        try {
+            return segments.values().stream()
+                .mapToLong(segment -> {
+                    try {
+                        return segment.file().size();
+                    } catch (IOException e) {
+                        throw new UncheckedIOException(e);
+                    }
+                })
+                .sum();
+        } catch (UncheckedIOException e) {
+            LOG.trace("Propagating failure", e);
+            throw e.getCause();
+        }
     }
 
     @Override
@@ -118,21 +130,20 @@ public final class SegmentedByteBufJournal implements RaftJournal {
     }
 
     @Override
-    public EntryReader openReader(final long index) {
+    public EntryReader openReader(final long index) throws IOException {
         return openReader(index, SegmentedByteBufReader::new);
     }
 
     @NonNullByDefault
-    private EntryReader openReader(final long index,
-            final BiFunction<SegmentedByteBufJournal, JournalSegment, EntryReader> constructor) {
-        final var reader = constructor.apply(this, segment(index));
+    private EntryReader openReader(final long index, final EntryReaderCtor constructor) throws IOException {
+        final var reader = constructor.invoke(this, segment(index));
         reader.reset(index);
         readers.add(reader);
         return reader;
     }
 
     @Override
-    public EntryReader openCommitsReader(final long index) {
+    public EntryReader openCommitsReader(final long index) throws IOException {
         return openReader(index, SegmentedCommitsByteBufReader::new);
     }
 
@@ -148,9 +159,9 @@ public final class SegmentedByteBufJournal implements RaftJournal {
     /**
      * Asserts that enough disk space is available to allocate a new segment.
      */
-    private void assertDiskSpace() {
+    private void assertDiskSpace() throws OutOfDiskSpaceException {
         if (directory.getUsableSpace() < maxSegmentSize * SEGMENT_BUFFER_FACTOR) {
-            throw new StorageException.OutOfDiskSpace("Not enough space to allocate a new journal segment");
+            throw new OutOfDiskSpaceException("Not enough space to allocate a new journal segment");
         }
     }
 
@@ -160,7 +171,7 @@ public final class SegmentedByteBufJournal implements RaftJournal {
      * @param index the starting index of the journal
      * @return the first segment
      */
-    JournalSegment resetSegments(final long index) {
+    JournalSegment resetSegments(final long index) throws IOException {
         assertOpen();
 
         // If the index already equals the first segment index, skip the reset.
@@ -169,8 +180,11 @@ public final class SegmentedByteBufJournal implements RaftJournal {
             return firstSegment;
         }
 
-        segments.values().forEach(JournalSegment::delete);
+        for (var segment : segments.values()) {
+            segment.delete();
+        }
         segments.clear();
+
         final var newSegment = createInitialSegment();
         currentSegment = newSegment;
         return newSegment;
@@ -210,10 +224,11 @@ public final class SegmentedByteBufJournal implements RaftJournal {
     /**
      * Creates and returns the next segment.
      *
-     * @return The next segment.
+     * @return The next segment
+     * @throws IOException if next segment cannot be created
      * @throws IllegalStateException if the segment manager is not open
      */
-    synchronized @NonNull JournalSegment createNextSegment() {
+    synchronized @NonNull JournalSegment createNextSegment() throws IOException {
         assertOpen();
         assertDiskSpace();
 
@@ -249,7 +264,7 @@ public final class SegmentedByteBufJournal implements RaftJournal {
      *
      * @param segment The segment to remove.
      */
-    synchronized void removeSegment(final JournalSegment segment) {
+    synchronized void removeSegment(final JournalSegment segment) throws IOException {
         segments.remove(segment.firstIndex());
         segment.delete();
 
@@ -264,26 +279,21 @@ public final class SegmentedByteBufJournal implements RaftJournal {
      * @param firstIndex index of first entry
      * @param A new segment
      */
-    private @NonNull JournalSegment createSegment(final long segmentId, final long firstIndex) {
-        final JournalSegmentFile file;
-        try {
-            file = JournalSegmentFile.createNew(name, directory, allocator, JournalSegmentDescriptor.builder()
-                .withId(segmentId)
-                .withIndex(firstIndex)
-                .withMaxSegmentSize(maxSegmentSize)
-                .withMaxEntries(maxEntriesPerSegment)
-                .withUpdated(System.currentTimeMillis())
-                .build());
-        } catch (IOException e) {
-            throw new StorageException(e);
-        }
+    private @NonNull JournalSegment createSegment(final long segmentId, final long firstIndex) throws IOException {
+        final var file = JournalSegmentFile.createNew(name, directory, allocator, JournalSegmentDescriptor.builder()
+            .withId(segmentId)
+            .withIndex(firstIndex)
+            .withMaxSegmentSize(maxSegmentSize)
+            .withMaxEntries(maxEntriesPerSegment)
+            .withUpdated(System.currentTimeMillis())
+            .build());
 
         final var segment = new JournalSegment(file, storageLevel, maxEntrySize, indexDensity);
         LOG.debug("Created segment: {}", segment);
         return segment;
     }
 
-    private @NonNull JournalSegment createInitialSegment() {
+    private @NonNull JournalSegment createInitialSegment() throws IOException {
         final var segment = createSegment(1, 1);
         segments.put(1L, segment);
         return segment;
@@ -294,7 +304,7 @@ public final class SegmentedByteBufJournal implements RaftJournal {
      *
      * @return the last segment
      */
-    private JournalSegment ensureLastSegment() {
+    private JournalSegment ensureLastSegment() throws IOException {
         final var lastEntry = segments.lastEntry();
         // if there is no segment, create an initial segment starting at index 1.
         return lastEntry != null ? lastEntry.getValue() : createInitialSegment();
@@ -305,7 +315,7 @@ public final class SegmentedByteBufJournal implements RaftJournal {
      *
      * @return A collection of segments for the log.
      */
-    private Collection<JournalSegment> loadSegments() {
+    private Collection<JournalSegment> loadSegments() throws IOException {
         // Ensure log directories are created.
         directory.mkdirs();
 
@@ -316,12 +326,7 @@ public final class SegmentedByteBufJournal implements RaftJournal {
 
             // If the file looks like a segment file, attempt to load the segment.
             if (JournalSegmentFile.isSegmentFile(name, file)) {
-                final JournalSegmentFile segmentFile;
-                try {
-                    segmentFile = JournalSegmentFile.openExisting(file.toPath(), allocator);
-                } catch (IOException e) {
-                    throw new StorageException(e);
-                }
+                final var segmentFile = JournalSegmentFile.openExisting(file.toPath(), allocator);
 
                 // Load the segment.
                 LOG.debug("Loaded disk segment: {} ({})", segmentFile.segmentId(), segmentFile.path());
@@ -357,7 +362,7 @@ public final class SegmentedByteBufJournal implements RaftJournal {
      *
      * @param index The index at which to reset readers.
      */
-    void resetHead(final long index) {
+    void resetHead(final long index) throws IOException {
         for (var reader : readers) {
             if (reader.nextIndex() < index) {
                 reader.reset(index);
@@ -370,7 +375,7 @@ public final class SegmentedByteBufJournal implements RaftJournal {
      *
      * @param index The index at which to reset readers.
      */
-    void resetTail(final long index) {
+    void resetTail(final long index) throws IOException {
         for (var reader : readers) {
             if (reader.nextIndex() >= index) {
                 reader.reset(index);
@@ -405,13 +410,15 @@ public final class SegmentedByteBufJournal implements RaftJournal {
     }
 
     @Override
-    public void compact(final long index) {
+    public void compact(final long index) throws IOException {
         final var firstIndex = getCompactableIndex(index);
         if (firstIndex != 0) {
             final var compactSegments = segments.headMap(firstIndex);
             if (!compactSegments.isEmpty()) {
                 LOG.debug("{} - Compacting {} segment(s)", name, compactSegments.size());
-                compactSegments.values().forEach(JournalSegment::delete);
+                for (var segment : compactSegments.values()) {
+                    segment.delete();
+                }
                 compactSegments.clear();
                 resetHead(firstIndex);
             }
@@ -649,7 +656,7 @@ public final class SegmentedByteBufJournal implements RaftJournal {
          *
          * @return {@link SegmentedByteBufJournal} instance built.
          */
-        public SegmentedByteBufJournal build() {
+        public SegmentedByteBufJournal build() throws IOException {
             return new SegmentedByteBufJournal(name, storageLevel, directory, maxSegmentSize, maxEntrySize,
                 maxEntriesPerSegment, indexDensity, flushOnCommit, byteBufAllocator);
         }

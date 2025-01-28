@@ -19,6 +19,7 @@ package io.atomix.storage.journal;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
+import java.io.IOException;
 import org.opendaylight.controller.raft.journal.EntryWriter;
 import org.opendaylight.controller.raft.journal.ToByteBufMapper;
 
@@ -31,7 +32,7 @@ final class SegmentedByteBufWriter implements EntryWriter {
     private JournalSegment currentSegment;
     private JournalSegmentWriter currentWriter;
 
-    SegmentedByteBufWriter(final SegmentedByteBufJournal journal) {
+    SegmentedByteBufWriter(final SegmentedByteBufJournal journal) throws IOException {
         this.journal = requireNonNull(journal);
         currentSegment = journal.lastSegment();
         currentWriter = currentSegment.acquireWriter();
@@ -43,7 +44,7 @@ final class SegmentedByteBufWriter implements EntryWriter {
     }
 
     @Override
-    public void commit(final long index) {
+    public void commit(final long index) throws IOException {
         if (index > journal.getCommitIndex()) {
             journal.setCommitIndex(index);
             if (journal.isFlushOnCommit()) {
@@ -53,13 +54,13 @@ final class SegmentedByteBufWriter implements EntryWriter {
     }
 
     @Override
-    public <T> int append(final ToByteBufMapper<T> mapper, final T entry) {
+    public <T> int append(final ToByteBufMapper<T> mapper, final T entry) throws IOException {
         final var size = currentWriter.append(mapper, entry);
         return size != null ? size : appendToNextSegment(mapper, entry);
     }
 
     //  Slow path: we do not have enough capacity
-    private <T> int appendToNextSegment(final ToByteBufMapper<T> mapper, final T entry) {
+    private <T> int appendToNextSegment(final ToByteBufMapper<T> mapper, final T entry) throws IOException {
         currentWriter.flush();
         currentSegment.releaseWriter();
         currentSegment = journal.createNextSegment();
@@ -68,7 +69,7 @@ final class SegmentedByteBufWriter implements EntryWriter {
     }
 
     @Override
-    public void reset(final long index) {
+    public void reset(final long index) throws IOException {
         final var commitIndex = journal.getCommitIndex();
         if (index <= commitIndex) {
             // also catches index == 0, which is not a valid next index
@@ -103,7 +104,7 @@ final class SegmentedByteBufWriter implements EntryWriter {
     }
 
     @Override
-    public void flush() {
+    public void flush() throws IOException {
         currentWriter.flush();
     }
 }

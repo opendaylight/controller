@@ -46,12 +46,8 @@ final class DiskFileWriter extends FileWriter {
     }
 
     @Override
-    void writeEmptyHeader(final int position) {
-        try {
-            ZERO_ENTRY_HEADER.getBytes(0, channel, position, HEADER_BYTES);
-        } catch (IOException e) {
-            throw new StorageException(e);
-        }
+    void writeEmptyHeader(final int position) throws IOException {
+        ZERO_ENTRY_HEADER.getBytes(0, channel, position, HEADER_BYTES);
     }
 
     @Override
@@ -60,22 +56,14 @@ final class DiskFileWriter extends FileWriter {
     }
 
     @Override
-    void commitWrite(final int position, final ByteBuf entry) {
-        try {
-            entry.readBytes(channel, position, entry.readableBytes());
-        } catch (IOException e) {
-            throw new StorageException(e);
-        }
+    void commitWrite(final int position, final ByteBuf entry) throws IOException {
+        entry.readBytes(channel, position, entry.readableBytes());
     }
 
     @Override
-    void flush() {
+    void flush() throws IOException {
         if (channel.isOpen()) {
-            try {
-                channel.force(true);
-            } catch (IOException e) {
-                throw new StorageException(e);
-            }
+            channel.force(true);
         }
     }
 

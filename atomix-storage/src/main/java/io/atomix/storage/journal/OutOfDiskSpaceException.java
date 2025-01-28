@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 PANTHEON.tech, s.r.o. and others.  All rights reserved.
+ * Copyright (c) 2025 PANTHEON.tech, s.r.o. and others.  All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,21 +15,20 @@
  */
 package io.atomix.storage.journal;
 
-import io.netty.buffer.ByteBuf;
+import static java.util.Objects.requireNonNull;
+
+import com.google.common.annotations.Beta;
 import java.io.IOException;
-import org.opendaylight.controller.raft.journal.EntryReader;
 
 /**
- * A {@link EntryReader} traversing only committed entries.
+ * Exception thrown when storage runs out of disk space.
  */
-final class SegmentedCommitsByteBufReader extends SegmentedByteBufReader {
-    SegmentedCommitsByteBufReader(final SegmentedByteBufJournal journal, final JournalSegment segment)
-            throws IOException {
-        super(journal, segment);
-    }
+@Beta
+public final class OutOfDiskSpaceException extends IOException {
+    @java.io.Serial
+    private static final long serialVersionUID = 1L;
 
-    @Override
-    ByteBuf tryAdvance(final long index) throws IOException {
-        return index <= journal.getCommitIndex() ? super.tryAdvance(index) : null;
+    public OutOfDiskSpaceException(final String message) {
+        super(requireNonNull(message));
     }
 }

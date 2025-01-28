@@ -77,13 +77,17 @@ public abstract class AbstractJournalTest {
     }
 
     private SegmentedJournal<TestEntry> createJournal() {
-        return new SegmentedJournal<>(SegmentedByteBufJournal.builder()
-            .withName("test")
-            .withDirectory(PATH.toFile())
-            .withStorageLevel(storageLevel)
-            .withMaxSegmentSize(maxSegmentSize)
-            .withIndexDensity(.2)
-            .build(), NAMESPACE.toReadMapper(), NAMESPACE.toWriteMapper());
+        try {
+            return new SegmentedJournal<>(SegmentedByteBufJournal.builder()
+                .withName("test")
+                .withDirectory(PATH.toFile())
+                .withStorageLevel(storageLevel)
+                .withMaxSegmentSize(maxSegmentSize)
+                .withIndexDensity(.2)
+                .build(), NAMESPACE.toReadMapper(), NAMESPACE.toWriteMapper());
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
     }
 
     @Test
@@ -412,6 +416,10 @@ public abstract class AbstractJournalTest {
     }
 
     private static @Nullable Indexed<TestEntry> tryNext(final JournalReader<TestEntry> reader) {
-        return reader.tryNext(Indexed::new);
+        try {
+            return reader.tryNext(Indexed::new);
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
     }
 }

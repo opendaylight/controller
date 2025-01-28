@@ -92,7 +92,7 @@ final class JournalSegment {
         final JournalSegmentFile file,
         final StorageLevel storageLevel,
         final int maxEntrySize,
-        final double indexDensity) {
+        final double indexDensity) throws IOException {
         this.file = requireNonNull(file);
         this.storageLevel = requireNonNull(storageLevel);
         this.maxEntrySize = maxEntrySize;
@@ -106,8 +106,6 @@ final class JournalSegment {
             } finally {
                 fileReader.release();
             }
-        } catch (IOException e) {
-            throw new StorageException(e);
         }
     }
 
@@ -152,17 +150,12 @@ final class JournalSegment {
     /**
      * Acquires a reference to the log segment.
      */
-    private Active acquire() {
+    private Active acquire() throws IOException {
         return references.getAndIncrement() == 0 ? activate() : (Active) state;
     }
 
-    private Active activate() {
-        final Active ret;
-        try {
-            ret = ((Inactive) state).activate(this);
-        } catch (IOException e) {
-            throw new StorageException(e);
-        }
+    private Active activate() throws IOException {
+        final var ret = ((Inactive) state).activate(this);
         state = ret;
         return ret;
     }
@@ -184,7 +177,7 @@ final class JournalSegment {
      *
      * @return The segment writer.
      */
-    JournalSegmentWriter acquireWriter() {
+    JournalSegmentWriter acquireWriter() throws IOException {
         checkOpen();
         return acquire().writer();
     }
@@ -201,7 +194,7 @@ final class JournalSegment {
      *
      * @return A new segment reader.
      */
-    JournalSegmentReader createReader() {
+    JournalSegmentReader createReader() throws IOException {
         checkOpen();
 
         final var reader = new JournalSegmentReader(this, acquire().access().newFileReader(), maxEntrySize);
@@ -255,25 +248,17 @@ final class JournalSegment {
         }
     }
 
-    private void finishClose() {
-        try {
-            file.close();
-        } catch (IOException e) {
-            throw new StorageException(e);
-        }
+    private void finishClose() throws IOException {
+        file.close();
     }
 
     /**
      * Deletes the segment.
      */
-    void delete() {
+    void delete() throws IOException {
         close();
         LOG.debug("Deleting segment: {}", this);
-        try {
-            Files.deleteIfExists(file.path());
-        } catch (IOException e) {
-            throw new StorageException(e);
-        }
+        Files.deleteIfExists(file.path());
     }
 
     @Override

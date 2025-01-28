@@ -16,7 +16,9 @@ import io.atomix.storage.journal.SegmentedByteBufJournal;
 import io.atomix.storage.journal.SegmentedJournal;
 import io.atomix.storage.journal.StorageLevel;
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.pekko.actor.ActorSystem;
@@ -39,7 +41,8 @@ final class DataJournalV0 extends DataJournal {
     private final SegmentedJournal<DataJournalEntry> entries;
 
     DataJournalV0(final String persistenceId, final Histogram messageSize, final ActorSystem system,
-            final StorageLevel storage, final File directory, final int maxEntrySize, final int maxSegmentSize) {
+            final StorageLevel storage, final File directory, final int maxEntrySize, final int maxSegmentSize)
+                throws IOException {
         super(persistenceId, messageSize);
 
         final var serdes = JournalSerdes.builder()
@@ -62,12 +65,20 @@ final class DataJournalV0 extends DataJournal {
 
     @Override
     void deleteTo(final long sequenceNr) {
-        entries.writer().commit(sequenceNr);
+        try {
+            entries.writer().commit(sequenceNr);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     @Override
     void compactTo(final long sequenceNr) {
-        entries.compact(sequenceNr + 1);
+        try {
+            entries.compact(sequenceNr + 1);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     @Override
@@ -78,7 +89,11 @@ final class DataJournalV0 extends DataJournal {
 
     @Override
     void flush() {
-        entries.writer().flush();
+        try {
+            entries.writer().flush();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     @Override
@@ -97,14 +112,19 @@ final class DataJournalV0 extends DataJournal {
     private void handleReplayMessages(final JournalReader<DataJournalEntry> reader, final ReplayMessages message) {
         int count = 0;
         while (count < message.max && reader.getNextIndex() <= message.toSequenceNr) {
-            final var repr = reader.tryNext((index, entry, size) -> {
-                LOG.trace("{}: replay index={} entry={}", persistenceId, index, entry);
-                updateLargestSize(size);
-                if (entry instanceof FromPersistence fromPersistence) {
-                    return fromPersistence.toRepr(persistenceId, index);
-                }
-                throw new VerifyException("Unexpected entry " + entry);
-            });
+            final PersistentRepr repr;
+            try {
+                repr = reader.tryNext((index, entry, size) -> {
+                    LOG.trace("{}: replay index={} entry={}", persistenceId, index, entry);
+                    updateLargestSize(size);
+                    if (entry instanceof FromPersistence fromPersistence) {
+                        return fromPersistence.toRepr(persistenceId, index);
+                    }
+                    throw new VerifyException("Unexpected entry " + entry);
+                });
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
 
             if (repr == null) {
                 break;
@@ -137,7 +157,11 @@ final class DataJournalV0 extends DataJournal {
                 LOG.warn("{}: failed to write out request {}/{} reverting to {}", persistenceId, i, count,
                     prevNextIndex, e);
                 responses.add(e);
-                writer.reset(prevNextIndex);
+                try {
+                    writer.reset(prevNextIndex);
+                } catch (IOException ioe) {
+                    throw new UncheckedIOException("Failed to reset writer", ioe);
+                }
                 continue;
             }
             responses.add(null);
@@ -146,7 +170,8 @@ final class DataJournalV0 extends DataJournal {
         return new WrittenMessages(message, responses, writtenBytes);
     }
 
-    private long writePayload(final JournalWriter<DataJournalEntry> writer, final List<PersistentRepr> reprs) {
+    private long writePayload(final JournalWriter<DataJournalEntry> writer, final List<PersistentRepr> reprs)
+            throws IOException {
         long bytes = 0;
         for (var repr : reprs) {
             final Object payload = repr.payload();

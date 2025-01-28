@@ -23,6 +23,8 @@ import io.atomix.storage.journal.SegmentedByteBufJournal;
 import io.atomix.storage.journal.SegmentedJournal;
 import io.atomix.storage.journal.StorageLevel;
 import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
@@ -422,13 +424,18 @@ abstract sealed class SegmentedJournalActor extends AbstractActor {
 
             lastDelete = to;
             final var deleteWriter = deleteJournal.writer();
-            final var entry = deleteWriter.append(lastDelete);
-            deleteWriter.commit(entry.index());
-            dataJournal.deleteTo(lastDelete);
+            final Indexed<Long> entry;
+            try {
+                entry = deleteWriter.append(lastDelete);
+                deleteWriter.commit(entry.index());
+                dataJournal.deleteTo(lastDelete);
 
-            LOG.debug("{}: compaction started", persistenceId);
-            dataJournal.compactTo(lastDelete);
-            deleteJournal.compact(entry.index());
+                LOG.debug("{}: compaction started", persistenceId);
+                dataJournal.compactTo(lastDelete);
+                deleteJournal.compact(entry.index());
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
             LOG.debug("{}: compaction finished", persistenceId);
         } else {
             LOG.debug("{}: entries up to {} already deleted", persistenceId, lastDelete);
@@ -501,17 +508,22 @@ abstract sealed class SegmentedJournalActor extends AbstractActor {
         }
 
         final var sw = Stopwatch.createStarted();
-        deleteJournal = new SegmentedJournal<>(SegmentedByteBufJournal.builder()
-            .withDirectory(directory)
-            .withName("delete")
-            .withMaxSegmentSize(DELETE_SEGMENT_SIZE)
-            .build(), READ_MAPPER, WRITE_MAPPER);
-        final var lastDeleteRecovered = deleteJournal.openReader(deleteJournal.lastIndex())
-            .tryNext((index, value, length) -> value);
-        lastDelete = lastDeleteRecovered == null ? 0 : lastDeleteRecovered;
+        try {
+            deleteJournal = new SegmentedJournal<>(SegmentedByteBufJournal.builder()
+                .withDirectory(directory)
+                .withName("delete")
+                .withMaxSegmentSize(DELETE_SEGMENT_SIZE)
+                .build(), READ_MAPPER, WRITE_MAPPER);
+            final var lastDeleteRecovered = deleteJournal.openReader(deleteJournal.lastIndex())
+                .tryNext((index, value, length) -> value);
+            lastDelete = lastDeleteRecovered == null ? 0 : lastDeleteRecovered;
 
-        dataJournal = new DataJournalV0(persistenceId, messageSize, context().system(), storage, directory,
-            maxEntrySize, maxSegmentSize);
+            dataJournal = new DataJournalV0(persistenceId, messageSize, context().system(), storage, directory,
+                maxEntrySize, maxSegmentSize);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+
         dataJournal.deleteTo(lastDelete);
         LOG.debug("{}: journal open in {} with last index {}, deleted to {}", persistenceId, sw,
             dataJournal.lastWrittenSequenceNr(), lastDelete);

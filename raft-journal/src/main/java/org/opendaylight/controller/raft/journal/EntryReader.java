@@ -15,6 +15,7 @@
  */
 package org.opendaylight.controller.raft.journal;
 
+import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -37,19 +38,19 @@ public interface EntryReader extends AutoCloseable {
      * @param mapper callback to be invoked on binary data
      * @return processed binary data, or {@code null}
      */
-    <T> @Nullable T tryNext(FromByteBufMapper<T> mapper);
+    <T> @Nullable T tryNext(FromByteBufMapper<T> mapper) throws IOException;
 
     /**
      * Resets the reader to the start.
      */
-    void reset();
+    void reset() throws IOException;
 
     /**
      * Resets the reader to the given index.
      *
      * @param index the next index to read
      */
-    void reset(long index);
+    void reset(long index) throws IOException;
 
     @Override
     void close();
