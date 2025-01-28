@@ -13,6 +13,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
+import org.opendaylight.controller.cluster.raft.spi.EntryStore;
 import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
 
 /**
@@ -23,16 +24,18 @@ import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
 public final class LocalAccess {
     private final String logId;
     private final TermInfoStore termInfoStore;
+    private final EntryStore entryStore;
 
     @VisibleForTesting
-    public LocalAccess(final String logId, final TermInfoStore termInfoStore) {
+    public LocalAccess(final String logId, final TermInfoStore termInfoStore, final EntryStore entryStore) {
         this.logId = requireNonNull(logId);
         this.termInfoStore = requireNonNull(termInfoStore);
+        this.entryStore = requireNonNull(entryStore);
     }
 
     @VisibleForTesting
     LocalAccess(final String logId, final DataPersistenceProvider persistence) {
-        this(logId, new PersistenceTermInfoStore(persistence, logId));
+        this(logId, new PersistenceTermInfoStore(persistence, logId), new PersistenceEntryStore(logId, persistence));
     }
 
     String logId() {
@@ -41,6 +44,10 @@ public final class LocalAccess {
 
     TermInfoStore termInfoStore() {
         return termInfoStore;
+    }
+
+    EntryStore entryStore() {
+        return entryStore;
     }
 
     // FIXME: pretty much all of ReplicatedLog storage access, but not the indexing bits (at least not for now).
@@ -52,6 +59,10 @@ public final class LocalAccess {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this).add("logId", logId).add("termInfo", termInfoStore).toString();
+        return MoreObjects.toStringHelper(this)
+            .add("logId", logId)
+            .add("termInfo", termInfoStore)
+            .add("entry", entryStore)
+            .toString();
     }
 }
