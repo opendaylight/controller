@@ -11,7 +11,6 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -58,7 +57,7 @@ final class PropertiesTermInfoStore implements TermInfoStore {
     }
 
     @Override
-    public void persistTerm(final TermInfo newTerm) {
+    public void persistTerm(final TermInfo newTerm) throws IOException {
         final var props = new Properties(2);
         props.setProperty(PROP_TERM, String.valueOf(newTerm.term()));
         final var votedFor = newTerm.votedFor();
@@ -66,13 +65,7 @@ final class PropertiesTermInfoStore implements TermInfoStore {
             props.setProperty(PROP_VOTED_FOR, votedFor);
         }
 
-        try {
-            saveFile(props);
-        } catch (IOException e) {
-            // TODO: do wrap IO exception
-            throw new UncheckedIOException(e);
-        }
-
+        saveFile(props);
         doSetTerm(newTerm);
     }
 
