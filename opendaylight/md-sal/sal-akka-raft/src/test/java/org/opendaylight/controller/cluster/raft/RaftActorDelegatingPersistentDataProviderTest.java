@@ -17,6 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
@@ -39,19 +40,16 @@ public class RaftActorDelegatingPersistentDataProviderTest {
 
     @Mock
     private ReplicatedLogEntry mockPersistentLogEntry;
-
     @Mock
     private ReplicatedLogEntry mockNonPersistentLogEntry;
-
     @Mock
     private DataPersistenceProvider mockDelegateProvider;
-
     @Mock
     private PersistentDataProvider mockPersistentProvider;
-
-    @SuppressWarnings("rawtypes")
     @Mock
-    private Procedure mockProcedure;
+    private Procedure<Object> mockProcedure;
+    @Captor
+    private ArgumentCaptor<Procedure<Object>> procedureCaptor;
 
     private RaftActorDelegatingPersistentDataProvider provider;
 
@@ -62,7 +60,6 @@ public class RaftActorDelegatingPersistentDataProviderTest {
         provider = new RaftActorDelegatingPersistentDataProvider(mockDelegateProvider, mockPersistentProvider);
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testPersistWithPersistenceEnabled() {
         doReturn(true).when(mockDelegateProvider).isRecoveryApplicable();
@@ -77,14 +74,12 @@ public class RaftActorDelegatingPersistentDataProviderTest {
         verify(mockDelegateProvider).persist(OTHER_DATA_OBJECT, mockProcedure);
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
     public void testPersistWithPersistenceDisabled() throws Exception {
         doReturn(false).when(mockDelegateProvider).isRecoveryApplicable();
 
         provider.persist(mockPersistentLogEntry, mockProcedure);
 
-        ArgumentCaptor<Procedure> procedureCaptor = ArgumentCaptor.forClass(Procedure.class);
         verify(mockPersistentProvider).persist(eq(PERSISTENT_PAYLOAD), procedureCaptor.capture());
         verify(mockDelegateProvider, never()).persist(mockNonPersistentLogEntry, mockProcedure);
         procedureCaptor.getValue().apply(PERSISTENT_PAYLOAD);
