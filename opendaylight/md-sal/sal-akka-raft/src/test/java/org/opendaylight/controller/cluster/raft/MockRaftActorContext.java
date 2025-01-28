@@ -33,6 +33,7 @@ import org.opendaylight.controller.cluster.raft.persisted.ByteState;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
+import org.opendaylight.controller.cluster.raft.spi.NoopEntryStore;
 import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.spi.TestTermInfoStore;
 import org.slf4j.Logger;
@@ -51,7 +52,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
 
     @NonNullByDefault
     private static LocalAccess newLocalAccess(final String id) {
-        return new LocalAccess(id, new TestTermInfoStore(1, ""));
+        return new LocalAccess(id, new TestTermInfoStore(1, ""), new NoopEntryStore());
     }
 
     public MockRaftActorContext() {
