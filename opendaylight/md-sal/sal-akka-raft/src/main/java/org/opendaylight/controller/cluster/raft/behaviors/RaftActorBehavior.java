@@ -9,6 +9,8 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import static java.util.Objects.requireNonNull;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import org.apache.pekko.actor.ActorRef;
@@ -181,7 +183,12 @@ public abstract class RaftActorBehavior implements AutoCloseable {
 
         final var grantVote = canGrantVote(requestVote);
         if (grantVote) {
-            context.persistTermInfo(new TermInfo(requestVote.getTerm(), requestVote.getCandidateId()));
+            try {
+                context.persistTermInfo(new TermInfo(requestVote.getTerm(), requestVote.getCandidateId()));
+            } catch (IOException e) {
+                // FIXME: do not mask IOException
+                throw new UncheckedIOException(e);
+            }
         }
 
         final var reply = new RequestVoteReply(currentTerm(), grantVote);

@@ -11,14 +11,12 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.Properties;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
 import org.slf4j.Logger;
@@ -59,7 +57,7 @@ final class PropertiesTermInfoStore implements TermInfoStore {
     }
 
     @Override
-    public void persistTerm(final TermInfo newTerm) {
+    public void persistTerm(final TermInfo newTerm) throws IOException {
         final var props = new Properties(2);
         props.setProperty(PROP_TERM, String.valueOf(newTerm.term()));
         final var votedFor = newTerm.votedFor();
@@ -67,20 +65,8 @@ final class PropertiesTermInfoStore implements TermInfoStore {
             props.setProperty(PROP_VOTED_FOR, votedFor);
         }
 
-        try {
-            saveFile(props);
-        } catch (IOException e) {
-            // TODO: do wrap IO exception
-            throw new UncheckedIOException(e);
-        }
-
+        saveFile(props);
         doSetTerm(newTerm);
-    }
-
-    @Override
-    public @Nullable TermInfo readTerm() throws IOException {
-        // FIXME: implement this
-        return null;
     }
 
     @Override
