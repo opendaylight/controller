@@ -282,7 +282,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
 
     protected TestActorRef<TestRaftActor> newTestRaftActor(final String id, final Map<String, String> newPeerAddresses,
             final ConfigParams configParams) {
-        return newTestRaftActor(id, TestRaftActor.newBuilder().peerAddresses(newPeerAddresses != null
+        return newTestRaftActor(id, TestRaftActor.newBuilder().baseDir(baseDir()).peerAddresses(newPeerAddresses != null
                 ? newPeerAddresses : Map.of()).config(configParams));
     }
 

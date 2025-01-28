@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft.spi;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * Storage for {@link TermInfo}. Provides access to current term and updates to it both transient, via
@@ -38,4 +39,12 @@ public interface TermInfoStore {
      * @param newTerm new {@link TermInfo}
      */
     void storeAndSetTerm(TermInfo newTerm);
+
+    /**
+     * Attempt to load the last persisted {@link TermInfo}, if available. If successful, {@link #currentTerm()} is
+     * updated.
+     *
+     * @return the persisted {@link TermInfo}, or {@code null} of none is available
+     */
+    @Nullable TermInfo loadAndSetTerm();
 }

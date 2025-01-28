@@ -305,7 +305,7 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
 
         DefaultConfigParamsImpl follower2ConfigParams = newFollowerConfigParams();
         follower2ConfigParams.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
-        follower2Actor = newTestRaftActor(follower2Id, TestRaftActor.newBuilder().peerAddresses(
+        follower2Actor = newTestRaftActor(follower2Id, TestRaftActor.newBuilder().baseDir(baseDir()).peerAddresses(
                 Map.of(leaderId, testActorPath(leaderId), follower1Id, follower1Actor.path().toString()))
                     .config(follower2ConfigParams).persistent(Optional.of(Boolean.FALSE)));
         TestRaftActor follower2Instance = follower2Actor.underlyingActor();
@@ -387,7 +387,7 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
     private void createNewLeaderActor() {
         expSnapshotState.clear();
         leaderActor = newTestRaftActor(leaderId, TestRaftActor.newBuilder().peerAddresses(peerAddresses)
-                .config(leaderConfigParams).persistent(Optional.of(Boolean.FALSE)));
+            .baseDir(baseDir()).config(leaderConfigParams).persistent(Optional.of(Boolean.FALSE)));
         leaderInstance = leaderActor.underlyingActor();
         leaderCollectorActor = leaderInstance.collectorActor();
         waitUntilLeader(leaderActor);
@@ -411,7 +411,7 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         InMemoryJournal.addEntry(follower1Id, 2, persistedServerConfigEntry);
 
         DefaultConfigParamsImpl followerConfigParams = newFollowerConfigParams();
-        follower1Actor = newTestRaftActor(follower1Id, follower1Builder.peerAddresses(
+        follower1Actor = newTestRaftActor(follower1Id, follower1Builder.baseDir(baseDir()).peerAddresses(
                 Map.of(leaderId, testActorPath(leaderId))).config(followerConfigParams)
                     .persistent(Optional.of(Boolean.FALSE)));
 
@@ -419,7 +419,7 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
 
         leaderConfigParams = newLeaderConfigParams();
         leaderActor = newTestRaftActor(leaderId, TestRaftActor.newBuilder().peerAddresses(peerAddresses)
-                .config(leaderConfigParams).persistent(Optional.of(Boolean.FALSE)));
+            .baseDir(baseDir()).config(leaderConfigParams).persistent(Optional.of(Boolean.FALSE)));
 
         followerInstance = follower1Actor.underlyingActor();
         follower1CollectorActor = followerInstance.collectorActor();
