@@ -427,8 +427,8 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         DefaultConfigParamsImpl followerConfigParams = new DefaultConfigParamsImpl();
         followerConfigParams.setHeartBeatInterval(new FiniteDuration(100, TimeUnit.MILLISECONDS));
         followerConfigParams.setElectionTimeoutFactor(1000);
-        follower1Actor = newTestRaftActor(follower1Id, TestRaftActor.newBuilder().peerAddresses(
-                ImmutableMap.of(leaderId, testActorPath(leaderId), follower2Id, testActorPath(follower2Id)))
+        follower1Actor = newTestRaftActor(follower1Id, TestRaftActor.newBuilder().baseDir(baseDir())
+            .peerAddresses(ImmutableMap.of(leaderId, testActorPath(leaderId), follower2Id, testActorPath(follower2Id)))
                 .config(followerConfigParams).roleChangeNotifier(follower1NotifierActor));
 
         follower2Actor = newTestRaftActor(follower2Id, ImmutableMap.of(leaderId, testActorPath(leaderId),
@@ -444,8 +444,8 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         leaderNotifierActor = factory.createActor(MessageCollectorActor.props(),
                 factory.generateActorId(leaderId + "-notifier"));
 
-        leaderActor = newTestRaftActor(leaderId, TestRaftActor.newBuilder().peerAddresses(peerAddresses)
-                .config(leaderConfigParams).roleChangeNotifier(leaderNotifierActor));
+        leaderActor = newTestRaftActor(leaderId, TestRaftActor.newBuilder().baseDir(baseDir())
+            .peerAddresses(peerAddresses).config(leaderConfigParams).roleChangeNotifier(leaderNotifierActor));
 
         follower1CollectorActor = follower1Actor.underlyingActor().collectorActor();
         follower2CollectorActor = follower2Actor.underlyingActor().collectorActor();

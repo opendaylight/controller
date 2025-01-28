@@ -14,7 +14,6 @@ import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorAct
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.expectMatching;
 
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -159,21 +158,21 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
         follower1Actor = newTestRaftActor(follower1Id, TestRaftActor.newBuilder().peerAddresses(
                 Map.of(leaderId, testActorPath(leaderId), follower2Id, testActorPath(follower2Id),
                         follower3Id, testActorPath(follower3Id)))
-                .config(newFollowerConfigParams()).roleChangeNotifier(follower1NotifierActor));
+                .baseDir(baseDir()).config(newFollowerConfigParams()).roleChangeNotifier(follower1NotifierActor));
 
         follower2NotifierActor = factory.createActor(MessageCollectorActor.props(),
                 factory.generateActorId(follower2Id + "-notifier"));
         follower2Actor = newTestRaftActor(follower2Id,TestRaftActor.newBuilder().peerAddresses(
                 Map.of(leaderId, testActorPath(leaderId), follower1Id, follower1Actor.path().toString(),
                         follower3Id, testActorPath(follower3Id)))
-                .config(newFollowerConfigParams()).roleChangeNotifier(follower2NotifierActor));
+                .baseDir(baseDir()).config(newFollowerConfigParams()).roleChangeNotifier(follower2NotifierActor));
 
         follower3NotifierActor = factory.createActor(MessageCollectorActor.props(),
                 factory.generateActorId(follower3Id + "-notifier"));
         follower3Actor = newTestRaftActor(follower3Id,TestRaftActor.newBuilder().peerAddresses(
                 Map.of(leaderId, testActorPath(leaderId), follower1Id, follower1Actor.path().toString(),
                         follower2Id, follower2Actor.path().toString()))
-                .config(newFollowerConfigParams()).roleChangeNotifier(follower3NotifierActor));
+                .baseDir(baseDir()).config(newFollowerConfigParams()).roleChangeNotifier(follower3NotifierActor));
 
         peerAddresses = Map.of(
                 follower1Id, follower1Actor.path().toString(),
@@ -185,7 +184,7 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
         leaderNotifierActor = factory.createActor(MessageCollectorActor.props(),
                 factory.generateActorId(leaderId + "-notifier"));
         leaderActor = newTestRaftActor(leaderId, TestRaftActor.newBuilder().peerAddresses(peerAddresses)
-                .config(leaderConfigParams).roleChangeNotifier(leaderNotifierActor));
+                .baseDir(baseDir()).config(leaderConfigParams).roleChangeNotifier(leaderNotifierActor));
 
         follower1CollectorActor = follower1Actor.underlyingActor().collectorActor();
         follower2CollectorActor = follower2Actor.underlyingActor().collectorActor();
@@ -205,11 +204,10 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
 
     private static void verifyLeaderStateChangedMessages(final ActorRef notifierActor,
             final String... expLeaderIds) {
-        List<LeaderStateChanged> leaderStateChanges = expectMatching(notifierActor, LeaderStateChanged.class,
-                expLeaderIds.length);
+        final var leaderStateChanges = expectMatching(notifierActor, LeaderStateChanged.class, expLeaderIds.length);
 
         Collections.reverse(leaderStateChanges);
-        Iterator<LeaderStateChanged> actual = leaderStateChanges.iterator();
+        final var actual = leaderStateChanges.iterator();
         for (int i = expLeaderIds.length - 1; i >= 0; i--) {
             assertEquals("getLeaderId", expLeaderIds[i], actual.next().getLeaderId());
         }
@@ -236,7 +234,8 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
     public void testLeaderTransferSkippedOnShutdownWithNoFollowers() throws Exception {
         testLog.info("testLeaderTransferSkippedOnShutdownWithNoFollowers starting");
 
-        leaderActor = newTestRaftActor(leaderId, TestRaftActor.newBuilder().config(newLeaderConfigParams()));
+        leaderActor = newTestRaftActor(leaderId,
+            TestRaftActor.newBuilder().baseDir(baseDir()).config(newLeaderConfigParams()));
         waitUntilLeader(leaderActor);
 
         sendShutDown(leaderActor);
