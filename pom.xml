@@ -28,6 +28,7 @@
 
     <module>pekko</module>
     <module>atomix-storage</module>
+    <module>bnd-parent</module>
     <module>bundle-parent</module>
     <module>benchmark</module>
     <module>jolokia</module>
