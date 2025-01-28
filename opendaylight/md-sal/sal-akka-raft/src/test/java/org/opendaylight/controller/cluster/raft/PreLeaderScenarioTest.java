@@ -109,7 +109,7 @@ public class PreLeaderScenarioTest extends AbstractRaftActorIntegrationTest {
 
         follower1Actor = newTestRaftActor(follower1Id, TestRaftActor.newBuilder().peerAddresses(
                 ImmutableMap.of(leaderId, testActorPath(leaderId), follower2Id, testActorPath(follower2Id)))
-                .config(followerConfigParams));
+                .baseDir(baseDir()).config(followerConfigParams));
         follower1Actor.underlyingActor().waitForRecoveryComplete();
         follower1Context = follower1Actor.underlyingActor().getRaftActorContext();
 
@@ -135,7 +135,7 @@ public class PreLeaderScenarioTest extends AbstractRaftActorIntegrationTest {
         followerConfigParams.setSnapshotBatchCount(snapshotBatchCount);
         follower1Actor = newTestRaftActor(follower1Id, TestRaftActor.newBuilder().peerAddresses(
                 ImmutableMap.of(leaderId, testActorPath(leaderId), follower2Id, testActorPath(follower2Id)))
-                .config(followerConfigParams).roleChangeNotifier(follower1NotifierActor));
+                .baseDir(baseDir()).config(followerConfigParams).roleChangeNotifier(follower1NotifierActor));
 
         follower2Actor = newTestRaftActor(follower2Id, ImmutableMap.of(leaderId, testActorPath(leaderId),
                 follower1Id, testActorPath(follower1Id)), followerConfigParams);

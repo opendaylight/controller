@@ -7,10 +7,9 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.same;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -19,44 +18,45 @@ import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Map;
 import java.util.function.Consumer;
 import org.apache.pekko.japi.Procedure;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.internal.matchers.Same;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Unit tests for ReplicatedLogImpl.
  *
  * @author Thomas Pantelis
  */
-@RunWith(MockitoJUnitRunner.StrictStubs.class)
-public class ReplicatedLogImplTest {
-    private static final Logger LOG = LoggerFactory.getLogger(RaftActorRecoverySupportTest.class);
-
+@ExtendWith(MockitoExtension.class)
+class ReplicatedLogImplTest extends LocalAccessTest {
     @Mock
     private DataPersistenceProvider mockPersistence;
-
     @Mock
     private RaftActorBehavior mockBehavior;
+    @Mock
+    private Consumer<ReplicatedLogEntry> mockCallback;
+
+    @Captor
+    private ArgumentCaptor<Procedure<Object>> procedureCaptor;
 
     private RaftActorContext context;
     private final DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
 
-    @Before
+    @BeforeEach
     public void setup() {
-        context = new RaftActorContextImpl(null, null, new LocalAccess("test", mockPersistence), -1, -1, Map.of(),
-            configParams, (short) 0, mockPersistence, applyState -> { }, MoreExecutors.directExecutor());
+        context = new RaftActorContextImpl(null, null, localAccess, -1, -1, Map.of(), configParams, (short) 0,
+            mockPersistence, applyState -> { }, MoreExecutors.directExecutor());
     }
 
     private void verifyPersist(final Object message) throws Exception {
@@ -66,55 +66,51 @@ public class ReplicatedLogImplTest {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private void verifyPersist(final Object message, final ArgumentMatcher<?> matcher, final boolean async)
             throws Exception {
-        ArgumentCaptor<Procedure> procedure = ArgumentCaptor.forClass(Procedure.class);
         if (async) {
-            verify(mockPersistence).persistAsync(argThat(matcher), procedure.capture());
+            verify(mockPersistence).persistAsync(argThat(matcher), procedureCaptor.capture());
         } else {
-            verify(mockPersistence).persist(argThat(matcher), procedure.capture());
+            verify(mockPersistence).persist(argThat(matcher), procedureCaptor.capture());
         }
 
-        procedure.getValue().apply(message);
+        procedureCaptor.getValue().apply(message);
     }
 
     @Test
     @SuppressWarnings("unchecked")
     public void testAppendAndPersistExpectingNoCapture() throws Exception {
-        ReplicatedLog log = ReplicatedLogImpl.newInstance(context);
+        final var log = ReplicatedLogImpl.newInstance(context);
 
-        ReplicatedLogEntry logEntry1 = new SimpleReplicatedLogEntry(1, 1, new MockPayload("1"));
+        final var logEntry1 = new SimpleReplicatedLogEntry(1, 1, new MockPayload("1"));
 
         log.appendAndPersist(logEntry1, null, true);
 
         verifyPersist(logEntry1);
 
-        assertEquals("size", 1, log.size());
+        assertEquals(1, log.size());
 
         reset(mockPersistence);
 
-        ReplicatedLogEntry logEntry2 = new SimpleReplicatedLogEntry(2, 1, new MockPayload("2"));
-        Consumer<ReplicatedLogEntry> mockCallback = mock(Consumer.class);
+        final var logEntry2 = new SimpleReplicatedLogEntry(2, 1, new MockPayload("2"));
         log.appendAndPersist(logEntry2, mockCallback, true);
 
         verifyPersist(logEntry2);
 
         verify(mockCallback).accept(same(logEntry2));
 
-        assertEquals("size", 2, log.size());
+        assertEquals(2, log.size());
     }
 
-    @SuppressWarnings("unchecked")
     @Test
-    public void testAppendAndPersisWithDuplicateEntry() throws Exception {
-        ReplicatedLog log = ReplicatedLogImpl.newInstance(context);
+    void testAppendAndPersisWithDuplicateEntry() throws Exception {
+        final var log = ReplicatedLogImpl.newInstance(context);
 
-        Consumer<ReplicatedLogEntry> mockCallback = mock(Consumer.class);
-        ReplicatedLogEntry logEntry = new SimpleReplicatedLogEntry(1, 1, new MockPayload("1"));
+        final var logEntry = new SimpleReplicatedLogEntry(1, 1, new MockPayload("1"));
 
         log.appendAndPersist(logEntry, mockCallback, true);
 
         verifyPersist(logEntry);
 
-        assertEquals("size", 1, log.size());
+        assertEquals(1, log.size());
 
         reset(mockPersistence, mockCallback);
 
@@ -122,17 +118,17 @@ public class ReplicatedLogImplTest {
 
         verifyNoMoreInteractions(mockPersistence, mockCallback);
 
-        assertEquals("size", 1, log.size());
+        assertEquals(1, log.size());
     }
 
     @Test
-    public void testAppendAndPersistExpectingCaptureDueToJournalCount() throws Exception {
+    void testAppendAndPersistExpectingCaptureDueToJournalCount() throws Exception {
         configParams.setSnapshotBatchCount(2);
 
-        ReplicatedLog log = ReplicatedLogImpl.newInstance(context);
+        final var log = ReplicatedLogImpl.newInstance(context);
 
-        final ReplicatedLogEntry logEntry1 = new SimpleReplicatedLogEntry(2, 1, new MockPayload("2"));
-        final ReplicatedLogEntry logEntry2 = new SimpleReplicatedLogEntry(3, 1, new MockPayload("3"));
+        final var logEntry1 = new SimpleReplicatedLogEntry(2, 1, new MockPayload("2"));
+        final var logEntry2 = new SimpleReplicatedLogEntry(3, 1, new MockPayload("3"));
 
         log.appendAndPersist(logEntry1, null, true);
         verifyPersist(logEntry1);
@@ -142,18 +138,17 @@ public class ReplicatedLogImplTest {
         log.appendAndPersist(logEntry2, null, true);
         verifyPersist(logEntry2);
 
-
-        assertEquals("size", 2, log.size());
+        assertEquals(2, log.size());
     }
 
     @Test
     public void testAppendAndPersistExpectingCaptureDueToDataSize() throws Exception {
         context.setTotalMemoryRetriever(() -> 100);
 
-        ReplicatedLog log = ReplicatedLogImpl.newInstance(context);
+        final var log = ReplicatedLogImpl.newInstance(context);
 
         int dataSize = 600;
-        ReplicatedLogEntry logEntry = new SimpleReplicatedLogEntry(2, 1, new MockPayload("2", dataSize));
+        var logEntry = new SimpleReplicatedLogEntry(2, 1, new MockPayload("2", dataSize));
 
         log.appendAndPersist(logEntry, null, true);
         verifyPersist(logEntry);
@@ -165,13 +160,13 @@ public class ReplicatedLogImplTest {
         log.appendAndPersist(logEntry, null, true);
         verifyPersist(logEntry);
 
-        assertEquals("size", 2, log.size());
+        assertEquals(2, log.size());
     }
 
     @Test
     public void testRemoveFromAndPersist() throws Exception {
 
-        ReplicatedLog log = ReplicatedLogImpl.newInstance(context);
+        final var log = ReplicatedLogImpl.newInstance(context);
 
         log.append(new SimpleReplicatedLogEntry(0, 1, new MockPayload("0")));
         log.append(new SimpleReplicatedLogEntry(1, 1, new MockPayload("1")));
@@ -179,10 +174,10 @@ public class ReplicatedLogImplTest {
 
         log.removeFromAndPersist(1);
 
-        DeleteEntries deleteEntries = new DeleteEntries(1);
+        final var deleteEntries = new DeleteEntries(1);
         verifyPersist(deleteEntries, match(deleteEntries), false);
 
-        assertEquals("size", 1, log.size());
+        assertEquals(1, log.size());
 
         reset(mockPersistence);
 
@@ -193,7 +188,7 @@ public class ReplicatedLogImplTest {
 
     @Test
     public void testCommitFakeSnapshot() {
-        ReplicatedLog log = ReplicatedLogImpl.newInstance(context);
+        final var log = ReplicatedLogImpl.newInstance(context);
 
         log.append(new SimpleReplicatedLogEntry(0, 1, new MockPayload("0")));
         final int dataSizeAfterFirstPayload = log.dataSize();
