@@ -21,8 +21,8 @@ import org.slf4j.LoggerFactory;
  * Abstract class handling the mapping of
  * logical LogEntry Index and the physical list index.
  */
-public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractReplicatedLogImpl.class);
+public abstract class AbstractReplicatedLog implements ReplicatedLog {
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractReplicatedLog.class);
 
     private final String logContext;
 
@@ -38,20 +38,20 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
     private long previousSnapshotTerm = -1;
     private int dataSize = 0;
 
-    protected AbstractReplicatedLogImpl(final long snapshotIndex, final long snapshotTerm,
+    protected AbstractReplicatedLog(final long snapshotIndex, final long snapshotTerm,
             final List<ReplicatedLogEntry> unAppliedEntries, final String logContext) {
         this.snapshotIndex = snapshotIndex;
         this.snapshotTerm = snapshotTerm;
         this.logContext = logContext;
 
         journal = new ArrayList<>(unAppliedEntries.size());
-        for (ReplicatedLogEntry entry: unAppliedEntries) {
+        for (var entry : unAppliedEntries) {
             append(entry);
         }
     }
 
-    protected AbstractReplicatedLogImpl() {
-        this(-1L, -1L, Collections.emptyList(), "");
+    protected AbstractReplicatedLog() {
+        this(-1L, -1L, List.of(), "");
     }
 
     protected int adjustedIndex(final long logEntryIndex) {

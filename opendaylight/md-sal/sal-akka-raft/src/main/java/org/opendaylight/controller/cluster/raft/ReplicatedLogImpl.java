@@ -19,7 +19,7 @@ import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
 /**
  * Implementation of ReplicatedLog used by the RaftActor.
  */
-final class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
+final class ReplicatedLogImpl extends AbstractReplicatedLog {
     private static final int DATA_SIZE_DIVIDER = 5;
 
     private final RaftActorContext context;

@@ -145,7 +145,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         this.raftPolicy = raftPolicy;
     }
 
-    public static class SimpleReplicatedLog extends AbstractReplicatedLogImpl {
+    public static class SimpleReplicatedLog extends AbstractReplicatedLog {
         @Override
         public int dataSize() {
             return -1;
