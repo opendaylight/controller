@@ -1097,7 +1097,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         final AtomicReference<MockRaftActor> followerRaftActor = new AtomicReference<>();
         RaftActorSnapshotCohort snapshotCohort = newRaftActorSnapshotCohort(followerRaftActor);
-        Builder builder = MockRaftActor.builder().persistent(Optional.of(Boolean.TRUE)).id(id)
+        Builder builder = MockRaftActor.builder().persistent(Optional.of(Boolean.TRUE)).id(id).baseDir(baseDir())
                 .peerAddresses(Map.of("leader", "")).config(config).snapshotCohort(snapshotCohort);
         TestActorRef<MockRaftActor> followerActorRef = actorFactory.createTestActor(builder.props()
                 .withDispatcher(Dispatchers.DefaultDispatcherId()), id);
@@ -1152,7 +1152,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         final AtomicReference<MockRaftActor> followerRaftActor = new AtomicReference<>();
         RaftActorSnapshotCohort snapshotCohort = newRaftActorSnapshotCohort(followerRaftActor);
-        Builder builder = MockRaftActor.builder().persistent(Optional.of(Boolean.TRUE)).id(id)
+        Builder builder = MockRaftActor.builder().persistent(Optional.of(Boolean.TRUE)).id(id).baseDir(baseDir())
                 .peerAddresses(Map.of("leader", "")).config(config).snapshotCohort(snapshotCohort);
         TestActorRef<MockRaftActor> followerActorRef = actorFactory.createTestActor(builder.props()
                 .withDispatcher(Dispatchers.DefaultDispatcherId()), id);
@@ -1227,7 +1227,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         final AtomicReference<MockRaftActor> followerRaftActor = new AtomicReference<>();
         RaftActorSnapshotCohort snapshotCohort = newRaftActorSnapshotCohort(followerRaftActor);
-        Builder builder = MockRaftActor.builder().persistent(Optional.of(Boolean.TRUE)).id(id)
+        Builder builder = MockRaftActor.builder().persistent(Optional.of(Boolean.TRUE)).id(id).baseDir(baseDir())
                 .peerAddresses(Map.of("leader", "")).config(config).snapshotCohort(snapshotCohort);
         TestActorRef<MockRaftActor> followerActorRef = actorFactory.createTestActor(builder.props()
                 .withDispatcher(Dispatchers.DefaultDispatcherId()), id);
