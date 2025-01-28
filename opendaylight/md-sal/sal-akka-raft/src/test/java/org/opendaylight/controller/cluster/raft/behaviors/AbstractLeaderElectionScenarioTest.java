@@ -13,6 +13,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -242,7 +243,11 @@ public class AbstractLeaderElectionScenarioTest {
             final Map<String, String> peerAddresses) {
         MockRaftActorContext context = new MockRaftActorContext(id, system, actor);
         context.setPeerAddresses(peerAddresses);
-        context.persistTermInfo(new TermInfo(1, ""));
+        try {
+            context.persistTermInfo(new TermInfo(1, ""));
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
         return context;
     }
 
