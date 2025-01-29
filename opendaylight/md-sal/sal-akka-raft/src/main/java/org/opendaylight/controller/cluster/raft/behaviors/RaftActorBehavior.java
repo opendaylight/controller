@@ -10,14 +10,10 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 import static java.util.Objects.requireNonNull;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Cancellable;
-import org.apache.pekko.cluster.Cluster;
-import org.apache.pekko.cluster.Member;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
@@ -510,18 +506,18 @@ public abstract class RaftActorBehavior implements AutoCloseable {
         }
 
         log.debug("{}: Found higher term in RequestVote rpc, verifying whether it's safe to update term.", logName);
-        final Optional<Cluster> maybeCluster = context.getCluster();
-        if (!maybeCluster.isPresent()) {
+        final var maybeCluster = context.getCluster();
+        if (maybeCluster.isEmpty()) {
             return true;
         }
 
-        final Cluster cluster = maybeCluster.orElseThrow();
+        final var cluster = maybeCluster.orElseThrow();
 
-        final Set<Member> unreachable = cluster.state().getUnreachable();
+        final var unreachable = cluster.state().getUnreachable();
         log.debug("{}: Cluster state: {}", logName, unreachable);
 
-        for (Member member : unreachable) {
-            for (String role : member.getRoles()) {
+        for (var member : unreachable) {
+            for (var role : member.getRoles()) {
                 if (requestVote.getCandidateId().startsWith(role)) {
                     log.debug("{}: Unreachable member: {}, matches candidateId in: {}, not updating term", logName,
                         member, requestVote);
