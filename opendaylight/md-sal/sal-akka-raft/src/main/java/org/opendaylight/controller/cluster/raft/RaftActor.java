@@ -13,12 +13,12 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.PoisonPill;
@@ -493,14 +493,29 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         if (currentBehavior instanceof AbstractLeader leader) {
             builder.followerInfoList(leader.getFollowerIds().stream()
                 .map(leader::getFollower)
-                .map(info -> new FollowerInfo(info.getId(), info.getNextIndex(), info.getMatchIndex(),
-                    info.isFollowerActive(), DurationFormatUtils.formatDurationHMS(
-                        TimeUnit.NANOSECONDS.toMillis(info.nanosSinceLastActivity())),
-                    context.getPeerInfo(info.getId()).isVoting()))
+                .map(this::formatLogInfo)
                 .collect(ImmutableList.toImmutableList()));
         }
 
         return builder.build();
+    }
+
+    private @NonNull FollowerInfo formatLogInfo(final FollowerLogInformation logInfo) {
+        final var followerId = logInfo.getId();
+        final var peerInfo = context.getPeerInfo(followerId);
+
+        // "HH:mm:ss.SSS"
+        final var d = Duration.ofNanos(logInfo.nanosSinceLastActivity());
+        final var hrs = d.toHours();
+        var sinceLast = "%02d:%02d:%02d.%03d".formatted(hrs, d.toMinutesPart(), d.toSecondsPart(), d.toMillisPart());
+        if (hrs > 23) {
+            LOG.warn("{}: reporting follower {} time since active as 23:59:59.999 instead of {}", memberId(),
+                followerId, sinceLast);
+            sinceLast = "23:59:59.999";
+        }
+
+        return new FollowerInfo(followerId, logInfo.getNextIndex(), logInfo.getMatchIndex(), logInfo.isFollowerActive(),
+            sinceLast, peerInfo.isVoting());
     }
 
     protected OnDemandRaftState.AbstractBuilder<?, ?> newOnDemandRaftStateBuilder() {
