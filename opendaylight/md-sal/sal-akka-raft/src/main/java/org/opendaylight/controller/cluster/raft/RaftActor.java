@@ -170,7 +170,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         }
     }
 
-    protected RaftActorRecoverySupport newRaftActorRecoverySupport() {
+    @VisibleForTesting
+    RaftActorRecoverySupport newRaftActorRecoverySupport() {
         return new RaftActorRecoverySupport(context, getRaftActorRecoveryCohort());
     }
 
@@ -181,8 +182,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     @VisibleForTesting
     @SuppressWarnings("checkstyle:IllegalCatch")
-    protected void changeCurrentBehavior(final RaftActorBehavior newBehavior) {
-        final RaftActorBehavior currentBehavior = getCurrentBehavior();
+    final void changeCurrentBehavior(final RaftActorBehavior newBehavior) {
+        final var currentBehavior = getCurrentBehavior();
         if (currentBehavior != null) {
             try {
                 currentBehavior.close();
@@ -191,7 +192,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             }
         }
 
-        final BehaviorState state = behaviorStateTracker.capture(currentBehavior);
+        final var state = behaviorStateTracker.capture(currentBehavior);
         setCurrentBehavior(newBehavior);
         handleBehaviorChange(state, newBehavior);
     }

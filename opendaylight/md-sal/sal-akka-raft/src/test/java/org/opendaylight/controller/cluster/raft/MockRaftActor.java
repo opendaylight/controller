@@ -76,7 +76,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     @Override
-    public RaftActorRecoverySupport newRaftActorRecoverySupport() {
+    RaftActorRecoverySupport newRaftActorRecoverySupport() {
         return raftActorRecoverySupport != null ? raftActorRecoverySupport : super.newRaftActorRecoverySupport();
     }
 
@@ -158,7 +158,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     @Override
-    protected void initializeBehavior() {
+    void initializeBehavior() {
         super.initializeBehavior();
         initializeBehaviorComplete.countDown();
     }
