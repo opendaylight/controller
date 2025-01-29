@@ -18,8 +18,10 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,7 +33,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.SerializationUtils;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.Status.Success;
@@ -714,22 +715,22 @@ public final class ClusterAdminRpcService {
         return ask(shardManager, message, SHARD_MGR_TIMEOUT);
     }
 
-    @SuppressWarnings("checkstyle:IllegalCatch")
     private static void saveSnapshotsToFile(final DatastoreSnapshotList snapshots, final String fileName,
             final SettableFuture<RpcResult<BackupDatastoreOutput>> returnFuture) {
-        try (FileOutputStream fos = new FileOutputStream(fileName)) {
-            SerializationUtils.serialize(snapshots, fos);
-
-            returnFuture.set(newSuccessfulResult(new BackupDatastoreOutputBuilder().build()));
-            LOG.info("Successfully backed up datastore to file {}", fileName);
-        } catch (IOException | RuntimeException e) {
+        try (var oos = new ObjectOutputStream(Files.newOutputStream(Path.of(fileName)))) {
+            oos.writeObject(snapshots);
+        } catch (IOException e) {
             onDatastoreBackupFailure(fileName, returnFuture, e);
+            return;
         }
+
+        returnFuture.set(newSuccessfulResult(new BackupDatastoreOutputBuilder().build()));
+        LOG.info("Successfully backed up datastore to file {}", fileName);
     }
 
     private static <T> void onDatastoreBackupFailure(final String fileName,
             final SettableFuture<RpcResult<T>> returnFuture, final Throwable failure) {
-        onMessageFailure(String.format("Failed to back up datastore to file %s", fileName), returnFuture, failure);
+        onMessageFailure("Failed to back up datastore to file " + fileName, returnFuture, failure);
     }
 
     @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
