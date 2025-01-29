@@ -13,7 +13,6 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -115,10 +114,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     private boolean shuttingDown;
 
-    @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Akka class design")
     protected RaftActor(final String id, final Map<String, String> peerAddresses,
-         final Optional<ConfigParams> configParams, final short payloadVersion) {
-
+            final Optional<ConfigParams> configParams, final short payloadVersion) {
         persistentProvider = new PersistentDataProvider(this);
         delegatingPersistenceProvider = new RaftActorDelegatingPersistentDataProvider(null, persistentProvider);
 
@@ -129,6 +126,23 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         context.setPayloadVersion(payloadVersion);
         context.setReplicatedLog(ReplicatedLogImpl.newInstance(context));
+    }
+
+    // FIXME: This is a bad name a bit and the RaftActorContext documentation does not help much. At the end of the day,
+    //        this identifier:
+    //          - is unique locally, as we use it for persistenceId
+    //          - is unique within a RAFT instance, i.e. we use it for identifying members
+    //          - is constructed from ShardIdentifier -- which is a combination of:
+    //            - RAFT instance: shard name + datastore type
+    //            - cluster member name
+    //        We should call this 'memberId' or something similar and propagate that naming
+    protected final @NonNull String getId() {
+        return context.getId();
+    }
+
+    @Override
+    public final @NonNull String persistenceId() {
+        return getId();
     }
 
     @Override
@@ -628,10 +642,6 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     private ReplicatedLog replicatedLog() {
         return context.getReplicatedLog();
-    }
-
-    protected String getId() {
-        return context.getId();
     }
 
     @VisibleForTesting

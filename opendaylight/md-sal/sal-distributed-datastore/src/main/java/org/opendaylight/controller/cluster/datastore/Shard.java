@@ -154,9 +154,6 @@ public class Shard extends RaftActor {
     // The state of this Shard
     private final ShardDataTree store;
 
-    /// The name of this shard
-    private final String name;
-
     private final String shardName;
 
     private final DefaultShardStatsMXBean shardMBean;
@@ -198,10 +195,11 @@ public class Shard extends RaftActor {
         super(builder.getId().toString(), builder.getPeerAddresses(),
                 Optional.of(builder.getDatastoreContext().getShardRaftConfig()), DataStoreVersions.CURRENT_VERSION);
 
-        name = builder.getId().toString();
         shardName = builder.getId().getShardName();
         datastoreContext = builder.getDatastoreContext();
         restoreFromSnapshot = builder.getRestoreFromSnapshot();
+
+        final var name = getId();
         frontendMetadata = new FrontendMetadata(name);
         exportOnRecovery = datastoreContext.getExportOnRecovery();
 
@@ -213,7 +211,7 @@ public class Shard extends RaftActor {
 
         setPersistence(datastoreContext.isPersistent());
 
-        LOG.info("Shard created : {}, persistent : {}", name, datastoreContext.isPersistent());
+        LOG.info("Shard created : {}, persistent : {}", getId(), datastoreContext.isPersistent());
 
         ShardDataTreeChangeListenerPublisherActorProxy treeChangeListenerPublisher =
                 new ShardDataTreeChangeListenerPublisherActorProxy(getContext(), name + "-DTCL-publisher", name);
@@ -290,12 +288,12 @@ public class Shard extends RaftActor {
         switch (exportOnRecovery) {
             case Json:
                 if (message instanceof SnapshotOffer) {
-                    exportActor.tell(new JsonExportActor.ExportSnapshot(store.readCurrentData().orElseThrow(), name),
+                    exportActor.tell(new JsonExportActor.ExportSnapshot(store.readCurrentData().orElseThrow(), getId()),
                             ActorRef.noSender());
                 } else if (message instanceof ReplicatedLogEntry replicatedLogEntry) {
                     exportActor.tell(new JsonExportActor.ExportJournal(replicatedLogEntry), ActorRef.noSender());
                 } else if (message instanceof RecoveryCompleted) {
-                    exportActor.tell(new JsonExportActor.FinishExport(name), ActorRef.noSender());
+                    exportActor.tell(new JsonExportActor.FinishExport(getId()), ActorRef.noSender());
                     exportActor.tell(PoisonPill.getInstance(), ActorRef.noSender());
                 }
                 break;
@@ -748,11 +746,6 @@ public class Shard extends RaftActor {
         return OnDemandShardState.newBuilder()
             .treeChangeListenerActors(treeChangeSupport.getListenerActors())
             .commitCohortActors(store.getCohortActors());
-    }
-
-    @Override
-    public final String persistenceId() {
-        return name;
     }
 
     @Override

@@ -148,11 +148,6 @@ public final class ExampleActor extends RaftActor implements RaftActorRecoveryCo
     }
 
     @Override
-    public String persistenceId() {
-        return getId();
-    }
-
-    @Override
     protected RaftActorRecoveryCohort getRaftActorRecoveryCohort() {
         return this;
     }

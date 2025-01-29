@@ -208,10 +208,6 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         return roleChangeNotifier;
     }
 
-    @Override public String persistenceId() {
-        return getId();
-    }
-
     protected void newBehavior(final RaftActorBehavior newBehavior) {
         self().tell(newBehavior, ActorRef.noSender());
     }
