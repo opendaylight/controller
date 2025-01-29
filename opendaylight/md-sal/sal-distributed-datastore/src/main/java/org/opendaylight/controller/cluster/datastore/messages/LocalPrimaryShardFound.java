@@ -9,7 +9,7 @@ package org.opendaylight.controller.cluster.datastore.messages;
 
 import static java.util.Objects.requireNonNull;
 
-import org.apache.commons.lang3.ObjectUtils;
+import java.util.Objects;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.yang.data.tree.api.ReadOnlyDataTree;
 
@@ -39,6 +39,6 @@ public class LocalPrimaryShardFound {
     @Override
     public String toString() {
         return "LocalPrimaryShardFound [primaryPath=" + primaryPath
-                + ", localShardDataTree=" + ObjectUtils.identityToString(localShardDataTree) + "]";
+                + ", localShardDataTree=" + Objects.toIdentityString(localShardDataTree) + "]";
     }
 }
