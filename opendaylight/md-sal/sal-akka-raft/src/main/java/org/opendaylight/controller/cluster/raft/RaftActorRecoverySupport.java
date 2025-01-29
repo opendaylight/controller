@@ -154,9 +154,9 @@ class RaftActorRecoverySupport {
         }
 
         timer.stop();
+        final var replLog = replicatedLog();
         log.info("Recovery snapshot applied for {} in {}: snapshotIndex={}, snapshotTerm={}, journal-size={}",
-                context.getId(), timer, replicatedLog().getSnapshotIndex(), replicatedLog().getSnapshotTerm(),
-                replicatedLog().size());
+                context.getId(), timer, replLog.getSnapshotIndex(), replLog.getSnapshotTerm(), replLog.size());
     }
 
     private void onRecoveredJournalLogEntry(final ReplicatedLogEntry logEntry) {
@@ -289,10 +289,11 @@ class RaftActorRecoverySupport {
             recoverySnapshotTimer = null;
         }
 
+        final var replLog = replicatedLog();
         log.info("{}: Recovery completed {} - Switching actor to Follower - last log index = {}, last log term = {}, "
                 + "snapshot index = {}, snapshot term = {}, journal size = {}", context.getId(), recoveryTime,
-                replicatedLog().lastIndex(), replicatedLog().lastTerm(), replicatedLog().getSnapshotIndex(),
-                replicatedLog().getSnapshotTerm(), replicatedLog().size());
+                replLog.lastIndex(), replLog.lastTerm(), replLog.getSnapshotIndex(), replLog.getSnapshotTerm(),
+                replLog.size());
 
         if (dataRecoveredWithPersistenceDisabled
                 || hasMigratedDataRecovered && !context.getPersistenceProvider().isRecoveryApplicable()) {
@@ -317,7 +318,7 @@ class RaftActorRecoverySupport {
         } else if (hasMigratedDataRecovered) {
             log.info("{}: Snapshot capture initiated after recovery due to migrated messages", context.getId());
 
-            context.getSnapshotManager().capture(replicatedLog().lastMeta(), -1);
+            context.getSnapshotManager().capture(replLog.lastMeta(), -1);
         } else {
             possiblyRestoreFromSnapshot();
         }
