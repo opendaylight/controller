@@ -75,17 +75,17 @@ public final class ExampleActor extends RaftActor implements RaftActorRecoveryCo
         } else if (message instanceof PrintState) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("State of the node:{} has entries={}, {}",
-                    getId(), state.size(), getReplicatedLogState());
+                    memberId(), state.size(), getReplicatedLogState());
             }
 
         } else if (message instanceof PrintRole) {
             if (LOG.isDebugEnabled()) {
                 if (getRaftState() == RaftState.Leader || getRaftState() == RaftState.IsolatedLeader) {
                     final String followers = ((Leader)getCurrentBehavior()).printFollowerStates();
-                    LOG.debug("{} = {}, Peers={}, followers={}", getId(), getRaftState(),
+                    LOG.debug("{} = {}, Peers={}, followers={}", memberId(), getRaftState(),
                         getRaftActorContext().getPeerIds(), followers);
                 } else {
-                    LOG.debug("{} = {}, Peers={}", getId(), getRaftState(),
+                    LOG.debug("{} = {}, Peers={}", memberId(), getRaftState(),
                         getRaftActorContext().getPeerIds());
                 }
 

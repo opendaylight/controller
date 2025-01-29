@@ -102,12 +102,12 @@ final class FrontendClientMetadataBuilder {
         final var singleHistoryMeta = currentHistories.get(new LocalHistoryIdentifier(clientId, 0));
         if (singleHistoryMeta == null) {
             final var tree = shard.getDataStore();
-            singleHistory = StandaloneFrontendHistory.create(shard.getId(), clientId, tree);
+            singleHistory = StandaloneFrontendHistory.create(shard.memberId(), clientId, tree);
         } else {
             singleHistory = singleHistoryMeta.toLeaderState(shard);
         }
 
-        return new LeaderFrontendState.Enabled(shard.getId(), clientId, shard.getDataStore(),
+        return new LeaderFrontendState.Enabled(shard.memberId(), clientId, shard.getDataStore(),
             purgedHistories.mutableCopy(), singleHistory, histories);
     }
 
