@@ -39,7 +39,7 @@ final class DataTreeChangeListenerSupport extends LeaderLocalDelegateFactory<Reg
 
         final DOMDataTreeChangeListener listener = new ForwardingDataTreeChangeListener(listenerActor, self());
 
-        LOG.debug("{}: Registering listenerActor {} for path {}", persistenceId(), listenerActor, message.getPath());
+        LOG.debug("{}: Registering listenerActor {} for path {}", shardName(), listenerActor, message.getPath());
 
         final ShardDataTree shardDataTree = getShard().getDataStore();
         shardDataTree.registerTreeChangeListener(message.getPath(),
@@ -54,9 +54,9 @@ final class DataTreeChangeListenerSupport extends LeaderLocalDelegateFactory<Reg
 
     @Override
     void onLeadershipChange(final boolean isLeader, final boolean hasLeader) {
-        LOG.debug("{}: onLeadershipChange, isLeader: {}, hasLeader : {}", persistenceId(), isLeader, hasLeader);
+        LOG.debug("{}: onLeadershipChange, isLeader: {}, hasLeader : {}", shardName(), isLeader, hasLeader);
 
-        final EnableNotification msg = new EnableNotification(isLeader, persistenceId());
+        final EnableNotification msg = new EnableNotification(isLeader, shardName());
         for (ActorSelection dataChangeListener : leaderOnlyListenerActors) {
             dataChangeListener.tell(msg, self());
         }
@@ -80,14 +80,14 @@ final class DataTreeChangeListenerSupport extends LeaderLocalDelegateFactory<Reg
 
     @Override
     void onMessage(final RegisterDataTreeChangeListener message, final boolean isLeader, final boolean hasLeader) {
-        LOG.debug("{}: onMessage {}, isLeader: {}, hasLeader: {}", persistenceId(), message, isLeader, hasLeader);
+        LOG.debug("{}: onMessage {}, isLeader: {}, hasLeader: {}", shardName(), message, isLeader, hasLeader);
 
         final ActorRef registrationActor = createActor(DataTreeNotificationListenerRegistrationActor.props());
 
         if (hasLeader && message.isRegisterOnAllInstances() || isLeader) {
             doRegistration(message, registrationActor);
         } else {
-            LOG.debug("{}: Shard does not have a leader - delaying registration", persistenceId());
+            LOG.debug("{}: Shard does not have a leader - delaying registration", shardName());
 
             final var delayedReg = new DelayedDataTreeChangeListenerRegistration(message, registrationActor);
             final Collection<DelayedDataTreeChangeListenerRegistration> delayedRegList;
@@ -103,7 +103,7 @@ final class DataTreeChangeListenerSupport extends LeaderLocalDelegateFactory<Reg
         }
 
         LOG.debug("{}: sending RegisterDataTreeNotificationListenerReply, listenerRegistrationPath = {} ",
-                persistenceId(), registrationActor.path());
+                shardName(), registrationActor.path());
 
         tellSender(new RegisterDataTreeNotificationListenerReply(registrationActor));
     }
@@ -112,7 +112,7 @@ final class DataTreeChangeListenerSupport extends LeaderLocalDelegateFactory<Reg
         final ActorSelection listenerActor = selectActor(message.getListenerActorPath());
 
         // We have a leader so enable the listener.
-        listenerActor.tell(new EnableNotification(true, persistenceId()), self());
+        listenerActor.tell(new EnableNotification(true, shardName()), self());
 
         if (!message.isRegisterOnAllInstances()) {
             // This is a leader-only registration so store a reference to the listener actor so it can be notified

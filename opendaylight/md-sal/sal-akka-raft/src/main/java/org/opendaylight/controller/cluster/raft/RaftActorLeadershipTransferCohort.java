@@ -100,13 +100,13 @@ public class RaftActorLeadershipTransferCohort {
         raftActor.pauseLeader(new TimedRunnable(context.getConfigParams().getElectionTimeOutInterval(), raftActor) {
             @Override
             protected void doRun() {
-                LOG.debug("{}: pauseLeader successfully completed - doing transfer", raftActor.persistenceId());
+                LOG.debug("{}: pauseLeader successfully completed - doing transfer", raftActor.getId());
                 doTransfer();
             }
 
             @Override
             protected void doCancel() {
-                LOG.debug("{}: pauseLeader timed out - continuing with transfer", raftActor.persistenceId());
+                LOG.debug("{}: pauseLeader timed out - continuing with transfer", raftActor.getId());
                 doTransfer();
             }
         });
@@ -123,7 +123,7 @@ public class RaftActorLeadershipTransferCohort {
             isTransferring = true;
             leader.transferLeadership(this);
         } else {
-            LOG.debug("{}: No longer the leader - skipping transfer", raftActor.persistenceId());
+            LOG.debug("{}: No longer the leader - skipping transfer", raftActor.getId());
             finish(true);
         }
     }
@@ -132,7 +132,7 @@ public class RaftActorLeadershipTransferCohort {
      * This method is invoked to abort leadership transfer on failure.
      */
     public void abortTransfer() {
-        LOG.debug("{}: leader transfer aborted", raftActor.persistenceId());
+        LOG.debug("{}: leader transfer aborted", raftActor.getId());
         finish(false);
     }
 
@@ -140,7 +140,7 @@ public class RaftActorLeadershipTransferCohort {
      * This method is invoked when leadership transfer was carried out and complete.
      */
     public void transferComplete() {
-        LOG.debug("{}: leader transfer complete - waiting for new leader", raftActor.persistenceId());
+        LOG.debug("{}: leader transfer complete - waiting for new leader", raftActor.getId());
 
         // We'll give it a little time for the new leader to be elected to give the derived class a
         // chance to possibly complete work that was suspended while we were transferring. The
@@ -153,14 +153,14 @@ public class RaftActorLeadershipTransferCohort {
         FiniteDuration timeout = FiniteDuration.create(newLeaderTimeoutInMillis, TimeUnit.MILLISECONDS);
         newLeaderTimer = raftActor.getContext().system().scheduler().scheduleOnce(timeout, raftActor.self(),
             (Runnable) () -> {
-                LOG.debug("{}: leader not elected in time", raftActor.persistenceId());
+                LOG.debug("{}: leader not elected in time", raftActor.getId());
                 finish(true);
             }, raftActor.getContext().system().dispatcher(), raftActor.self());
     }
 
     void onNewLeader(final String newLeader) {
         if (newLeader != null && newLeaderTimer != null) {
-            LOG.debug("{}: leader changed to {}", raftActor.persistenceId(), newLeader);
+            LOG.debug("{}: leader changed to {}", raftActor.getId(), newLeader);
             newLeaderTimer.cancel();
             finish(true);
         }
@@ -171,10 +171,10 @@ public class RaftActorLeadershipTransferCohort {
         if (transferTimer.isRunning()) {
             transferTimer.stop();
             if (success) {
-                LOG.info("{}: Successfully transferred leadership to {} in {}", raftActor.persistenceId(),
+                LOG.info("{}: Successfully transferred leadership to {} in {}", raftActor.getId(),
                         raftActor.getLeaderId(), transferTimer);
             } else {
-                LOG.warn("{}: Failed to transfer leadership in {}", raftActor.persistenceId(), transferTimer);
+                LOG.warn("{}: Failed to transfer leadership in {}", raftActor.getId(), transferTimer);
                 raftActor.unpauseLeader();
             }
         }

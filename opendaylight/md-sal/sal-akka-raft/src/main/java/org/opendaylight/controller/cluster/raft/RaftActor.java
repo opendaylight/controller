@@ -136,11 +136,12 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     //            - RAFT instance: shard name + datastore type
     //            - cluster member name
     //        We should call this 'memberId' or something similar and propagate that naming
-    protected final @NonNull String getId() {
+    public final @NonNull String getId() {
         return context.getId();
     }
 
     @Override
+    @Deprecated(since = "11.0.0", forRemoval = true)
     public final @NonNull String persistenceId() {
         return getId();
     }
@@ -153,8 +154,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     @Override
     public void preStart() throws Exception {
-        LOG.info("Starting recovery for {} with journal batch size {}", persistenceId(),
-                context.getConfigParams().getJournalRecoveryLogBatchSize());
+        LOG.info("Starting recovery for {} with journal batch size {}", getId(),
+            context.getConfigParams().getJournalRecoveryLogBatchSize());
 
         super.preStart();
 
@@ -251,8 +252,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
             possiblyHandleBehaviorMessage(message);
         } else if (message instanceof ApplyJournalEntries applyEntries) {
-            LOG.debug("{}: Persisting ApplyJournalEntries with index={}", persistenceId(), applyEntries.getToIndex());
-
+            LOG.debug("{}: Persisting ApplyJournalEntries with index={}", getId(), applyEntries.getToIndex());
             persistence().persistAsync(applyEntries, NoopProcedure.instance());
         } else if (message instanceof FindLeader) {
             getSender().tell(new FindLeaderReply(getLeaderAddress()), self());
@@ -275,10 +275,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         } else if (!possiblyHandleBehaviorMessage(message)) {
             if (message instanceof JournalProtocol.Response response
                 && delegatingPersistenceProvider.handleJournalResponse(response)) {
-                LOG.debug("{}: handled a journal response", persistenceId());
+                LOG.debug("{}: handled a journal response", getId());
             } else if (message instanceof SnapshotProtocol.Response response
                 && delegatingPersistenceProvider.handleSnapshotResponse(response)) {
-                LOG.debug("{}: handled a snapshot response", persistenceId());
+                LOG.debug("{}: handled a snapshot response", getId());
             } else {
                 handleNonRaftCommand(message);
             }
@@ -286,19 +286,20 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     private void onRequestLeadership(final RequestLeadership message) {
-        LOG.debug("{}: onRequestLeadership {}", persistenceId(), message);
+        LOG.debug("{}: onRequestLeadership {}", getId(), message);
+        final var requestedFollowerId = message.getRequestedFollowerId();
+
         if (!isLeader()) {
             // non-leader cannot satisfy leadership request
             LOG.warn("{}: onRequestLeadership {} was sent to non-leader."
                     + " Current behavior: {}. Sending failure response",
-                    persistenceId(), message, getCurrentBehavior().state());
+                    getId(), message, getCurrentBehavior().state());
             message.getReplyTo().tell(new LeadershipTransferFailedException("Cannot transfer leader to "
-                    + message.getRequestedFollowerId()
-                    + ". RequestLeadership message was sent to non-leader " + persistenceId()), self());
+                    + requestedFollowerId
+                    + ". RequestLeadership message was sent to non-leader " + getId()), self());
             return;
         }
 
-        final String requestedFollowerId = message.getRequestedFollowerId();
         final ActorRef replyTo = message.getReplyTo();
         initiateLeadershipTransfer(new RaftActorLeadershipTransferCohort.OnComplete() {
             @Override
@@ -308,20 +309,20 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                     onFailure(raftActorRef);
                 }
 
-                LOG.debug("{}: Leadership transferred successfully to {}", persistenceId(), requestedFollowerId);
+                LOG.debug("{}: Leadership transferred successfully to {}", getId(), requestedFollowerId);
                 replyTo.tell(new Status.Success(null), self());
             }
 
             @Override
             public void onFailure(final ActorRef raftActorRef) {
-                LOG.debug("{}: LeadershipTransfer request from {} failed", persistenceId(), requestedFollowerId);
+                LOG.debug("{}: LeadershipTransfer request from {} failed", getId(), requestedFollowerId);
                 replyTo.tell(new Status.Failure(
                         new LeadershipTransferFailedException(
                                 "Failed to transfer leadership to " + requestedFollowerId
                                         + ". Follower is not ready to become leader")),
                         self());
             }
-        }, message.getRequestedFollowerId(), RaftActorLeadershipTransferCohort.USE_DEFAULT_LEADER_TIMEOUT);
+        }, requestedFollowerId, RaftActorLeadershipTransferCohort.USE_DEFAULT_LEADER_TIMEOUT);
     }
 
     private boolean possiblyHandleBehaviorMessage(final Object message) {
@@ -342,7 +343,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     private void initiateLeadershipTransfer(final RaftActorLeadershipTransferCohort.OnComplete onComplete,
             final @Nullable String followerId, final long newLeaderTimeoutInMillis) {
-        LOG.debug("{}: Initiating leader transfer", persistenceId());
+        LOG.debug("{}: Initiating leader transfer", getId());
 
         RaftActorLeadershipTransferCohort leadershipTransferInProgress = context.getRaftActorLeadershipTransferCohort();
         if (leadershipTransferInProgress == null) {
@@ -366,13 +367,13 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             leadershipTransferInProgress.init();
 
         } else {
-            LOG.debug("{}: prior leader transfer in progress - adding callback", persistenceId());
+            LOG.debug("{}: prior leader transfer in progress - adding callback", getId());
             leadershipTransferInProgress.addOnComplete(onComplete);
         }
     }
 
     private void onShutDown() {
-        LOG.debug("{}: onShutDown", persistenceId());
+        LOG.debug("{}: onShutDown", getId());
 
         if (shuttingDown) {
             return;
@@ -396,13 +397,13 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             initiateLeadershipTransfer(new RaftActorLeadershipTransferCohort.OnComplete() {
                 @Override
                 public void onSuccess(final ActorRef raftActorRef) {
-                    LOG.debug("{}: leader transfer succeeded - sending PoisonPill", persistenceId());
+                    LOG.debug("{}: leader transfer succeeded - sending PoisonPill", getId());
                     raftActorRef.tell(PoisonPill.getInstance(), raftActorRef);
                 }
 
                 @Override
                 public void onFailure(final ActorRef raftActorRef) {
-                    LOG.debug("{}: leader transfer failed - sending PoisonPill", persistenceId());
+                    LOG.debug("{}: leader transfer failed - sending PoisonPill", getId());
                     raftActorRef.tell(PoisonPill.getInstance(), raftActorRef);
                 }
             }, null, TimeUnit.MILLISECONDS.convert(2, TimeUnit.SECONDS));
@@ -422,7 +423,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     private void onLeaderTransitioning(final LeaderTransitioning leaderTransitioning) {
-        LOG.debug("{}: onLeaderTransitioning: {}", persistenceId(), leaderTransitioning);
+        LOG.debug("{}: onLeaderTransitioning: {}", getId(), leaderTransitioning);
         final var roleChangeNotifier = roleChangeNotifier();
         if (roleChangeNotifier != null && getRaftState() == RaftState.Follower
                 && leaderTransitioning.getLeaderId().equals(getCurrentBehavior().getLeaderId())) {
@@ -440,7 +441,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                     switchBehavior(behaviorStateTracker.capture(getCurrentBehavior()),
                         RaftActorBehavior.createBehavior(context, newState));
                 }
-                default -> LOG.warn("Switching to behavior : {} - not supported", newState);
+                default -> LOG.warn("{}: Switching to behavior : {} - not supported", getId(), newState);
             }
         }
     }
@@ -547,23 +548,22 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     private void handleApplyState(final ApplyState applyState) {
-        long startTime = System.nanoTime();
+        final long startTime = System.nanoTime();
 
         final var entry = applyState.getReplicatedLogEntry();
         final var payload = entry.getData();
         if (LOG.isDebugEnabled()) {
-            LOG.debug("{}: Applying state for log index {} data {}",
-                persistenceId(), entry.index(), payload);
+            LOG.debug("{}: Applying state for log index {} data {}", getId(), entry.index(), payload);
         }
 
         if (!(payload instanceof NoopPayload) && !(payload instanceof ServerConfigurationPayload)) {
             applyState(applyState.getClientActor(), applyState.getIdentifier(), payload);
         }
 
-        long elapsedTime = System.nanoTime() - startTime;
+        final long elapsedTime = System.nanoTime() - startTime;
         if (elapsedTime >= APPLY_STATE_DELAY_THRESHOLD_IN_NANOS) {
-            LOG.debug("ApplyState took more time than expected. Elapsed Time = {} ms ApplyState = {}",
-                    TimeUnit.NANOSECONDS.toMillis(elapsedTime), applyState);
+            LOG.debug("{}: ApplyState took more time than expected. Elapsed Time = {} ms ApplyState = {}", getId(),
+                TimeUnit.NANOSECONDS.toMillis(elapsedTime), applyState);
         }
 
         // Send the ApplyState message back to self to handle further processing asynchronously.
@@ -578,9 +578,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     @Override
     public long snapshotSequenceNr() {
         // When we do a snapshot capture, we also capture and save the sequence-number of the persistent journal,
-        // so that we can delete the persistent journal based on the saved sequence-number
-        // However , when akka replays the journal during recovery, it replays it from the sequence number when the
-        // snapshot was saved and not the number we saved. We would want to override it , by asking akka to use the
+        // so that we can delete the persistent journal based on the saved sequence-number.
+        // However, when Akka replays the journal during recovery, it replays it from the sequence number when the
+        // snapshot was saved and not the number we saved. We would want to override it, by asking Akka to use the
         // last-sequence number known to us.
         return context.getSnapshotManager().getLastSequenceNumber();
     }
@@ -601,7 +601,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             context.getReplicatedLog().lastIndex() + 1, context.currentTerm(), data);
         replicatedLogEntry.setPersistencePending(true);
 
-        LOG.debug("{}: Persist data {}", persistenceId(), replicatedLogEntry);
+        LOG.debug("{}: Persist data {}", getId(), replicatedLogEntry);
 
         final RaftActorContext raftContext = getRaftActorContext();
 
@@ -718,7 +718,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         String oldRaftPolicy = context.getConfigParams().getCustomRaftPolicyImplementationClass();
         String newRaftPolicy = configParams.getCustomRaftPolicyImplementationClass();
 
-        LOG.debug("{}: RaftPolicy used with prev.config {}, RaftPolicy used with newConfig {}", persistenceId(),
+        LOG.debug("{}: RaftPolicy used with prev.config {}, RaftPolicy used with newConfig {}", getId(),
             oldRaftPolicy, newRaftPolicy);
         context.setConfigParams(configParams);
         if (!Objects.equals(oldRaftPolicy, newRaftPolicy)) {
@@ -730,8 +730,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 String previousLeaderId = behavior.getLeaderId();
                 short previousLeaderPayloadVersion = behavior.getLeaderPayloadVersion();
 
-                LOG.debug("{}: Re-initializing to Follower with previous leaderId {}", persistenceId(),
-                        previousLeaderId);
+                LOG.debug("{}: Re-initializing to Follower with previous leaderId {}", getId(), previousLeaderId);
 
                 changeCurrentBehavior(new Follower(context, previousLeaderId, previousLeaderPayloadVersion));
             } else {
@@ -754,7 +753,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             setPersistence(new PersistentDataProvider(this));
 
             if (getCurrentBehavior() != null) {
-                LOG.info("{}: Persistence has been enabled - capturing snapshot", persistenceId());
+                LOG.info("{}: Persistence has been enabled - capturing snapshot", getId());
                 captureSnapshot();
             }
         } else if (!persistent && (currentPersistence == null || currentPersistence.isRecoveryApplicable())) {
@@ -888,7 +887,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             return null;
         }
         String peerAddress = context.getPeerAddress(leaderId);
-        LOG.debug("{}: getLeaderAddress leaderId = {} peerAddress = {}", persistenceId(), leaderId, peerAddress);
+        LOG.debug("{}: getLeaderAddress leaderId = {} peerAddress = {}", getId(), leaderId, peerAddress);
 
         return peerAddress;
     }
@@ -919,13 +918,13 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             initiateLeadershipTransfer(new RaftActorLeadershipTransferCohort.OnComplete() {
                 @Override
                 public void onSuccess(final ActorRef raftActorRef) {
-                    LOG.debug("{}: leader transfer succeeded after change to non-voting", persistenceId());
+                    LOG.debug("{}: leader transfer succeeded after change to non-voting", getId());
                     ensureFollowerState();
                 }
 
                 @Override
                 public void onFailure(final ActorRef raftActorRef) {
-                    LOG.debug("{}: leader transfer failed after change to non-voting", persistenceId());
+                    LOG.debug("{}: leader transfer failed after change to non-voting", getId());
                     ensureFollowerState();
                 }
 

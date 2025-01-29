@@ -123,7 +123,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     @Override
     protected void applyState(final ActorRef clientActor, final Identifier identifier, final Object data) {
         actorDelegate.applyState(clientActor, identifier, data);
-        LOG.info("{}: applyState called: {}", persistenceId(), data);
+        LOG.info("{}: applyState called: {}", getId(), data);
 
         state.add(data);
     }
@@ -178,13 +178,13 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
 
     @Override
     public void createSnapshot(final ActorRef actorRef, final Optional<OutputStream> installSnapshotStream) {
-        LOG.info("{}: createSnapshot called", persistenceId());
+        LOG.info("{}: createSnapshot called", getId());
         snapshotCohortDelegate.createSnapshot(actorRef, installSnapshotStream);
     }
 
     @Override
     public void applySnapshot(final Snapshot.State newState) {
-        LOG.info("{}: applySnapshot called", persistenceId());
+        LOG.info("{}: applySnapshot called", getId());
         applySnapshotState(newState);
         snapshotCohortDelegate.applySnapshot(newState);
     }

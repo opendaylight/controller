@@ -266,7 +266,7 @@ public class Shard extends RaftActor {
 
     @Override
     public final void postStop() throws Exception {
-        LOG.info("Stopping Shard {}", persistenceId());
+        LOG.info("Stopping Shard {}", getId());
 
         super.postStop();
 
@@ -280,8 +280,7 @@ public class Shard extends RaftActor {
 
     @Override
     protected final void handleRecover(final Object message) {
-        LOG.debug("{}: onReceiveRecover: Received message {} from {}", persistenceId(), message.getClass(),
-            getSender());
+        LOG.debug("{}: onReceiveRecover: Received message {} from {}", getId(), message.getClass(), getSender());
 
         super.handleRecover(message);
 
@@ -313,7 +312,7 @@ public class Shard extends RaftActor {
         try (var context = appendEntriesReplyTracker.received(message)) {
             final var maybeError = context.error();
             if (maybeError.isPresent()) {
-                LOG.trace("{} : AppendEntriesReply failed to arrive at the expected interval {}", persistenceId(),
+                LOG.trace("{} : AppendEntriesReply failed to arrive at the expected interval {}", getId(),
                     maybeError.orElseThrow());
             }
 
@@ -387,12 +386,11 @@ public class Shard extends RaftActor {
                 }
             }
         } catch (RequestException e) {
-            LOG.debug("{}: request {} failed", persistenceId(), envelope, e);
+            LOG.debug("{}: request {} failed", getId(), envelope, e);
             envelope.sendFailure(e, ticker().read() - now);
         } catch (Exception e) {
-            LOG.debug("{}: request {} caused failure", persistenceId(), envelope, e);
-            envelope.sendFailure(new RuntimeRequestException("Request failed to process", e),
-                ticker().read() - now);
+            LOG.debug("{}: request {} caused failure", getId(), envelope, e);
+            envelope.sendFailure(new RuntimeRequestException("Request failed to process", e), ticker().read() - now);
         }
     }
 
@@ -420,7 +418,7 @@ public class Shard extends RaftActor {
     }
 
     private void onMakeLeaderLocal() {
-        LOG.debug("{}: onMakeLeaderLocal received", persistenceId());
+        LOG.debug("{}: onMakeLeaderLocal received", getId());
         if (isLeader()) {
             getSender().tell(new Status.Success(null), self());
             return;
@@ -436,9 +434,10 @@ public class Shard extends RaftActor {
             // request. We can also let the caller retry by sending a flag
             // in the response indicating the request is "reTryable".
             getSender().tell(new Failure(
-                    new LeadershipTransferFailedException("We cannot initiate leadership transfer to local node. "
-                            + "Currently there is no leader for " + persistenceId())),
-                    self());
+                new LeadershipTransferFailedException(
+                    "We cannot initiate leadership transfer to local node. "
+                        + "Currently there is no leader for " + getId())),
+                self());
             return;
         }
 
@@ -455,16 +454,16 @@ public class Shard extends RaftActor {
                 return existing;
             }
             if (cmp > 0) {
-                LOG.debug("{}: rejecting request from outdated client {}", persistenceId(), clientId);
+                LOG.debug("{}: rejecting request from outdated client {}", getId(), clientId);
                 throw new RetiredGenerationException(clientId.getGeneration(),
                     existing.getIdentifier().getGeneration());
             }
 
-            LOG.info("{}: retiring state {}, outdated by request from client {}", persistenceId(), existing, clientId);
+            LOG.info("{}: retiring state {}, outdated by request from client {}", getId(), existing, clientId);
             existing.retire();
             knownFrontends.remove(clientId.getFrontendId());
         } else {
-            LOG.debug("{}: client {} is not yet known", persistenceId(), clientId);
+            LOG.debug("{}: client {} is not yet known", getId(), clientId);
         }
 
         return null;
@@ -504,17 +503,17 @@ public class Shard extends RaftActor {
 
             if (!isLeader() || !isLeaderActive()) {
                 LOG.info("{}: not currently leader, rejecting request {}. isLeader: {}, isLeaderActive: {},"
-                                + "isLeadershipTransferInProgress: {}.",
-                        persistenceId(), message, isLeader(), isLeaderActive(), isLeadershipTransferInProgress());
+                    + "isLeadershipTransferInProgress: {}.",
+                    getId(), message, isLeader(), isLeaderActive(), isLeadershipTransferInProgress());
                 throw new NotLeaderException(self());
             }
 
             final ABIVersion selectedVersion = selectVersion(message);
             final LeaderFrontendState frontend;
             if (existing == null) {
-                frontend = new LeaderFrontendState.Enabled(persistenceId(), clientId, store);
+                frontend = new LeaderFrontendState.Enabled(getId(), clientId, store);
                 knownFrontends.put(clientId.getFrontendId(), frontend);
-                LOG.debug("{}: created state {} for client {}", persistenceId(), frontend, clientId);
+                LOG.debug("{}: created state {} for client {}", getId(), frontend, clientId);
             } else {
                 frontend = existing;
             }
@@ -533,8 +532,8 @@ public class Shard extends RaftActor {
         // We are not the leader, hence we want to fail-fast.
         if (!isLeader() || paused || !isLeaderActive()) {
             LOG.debug("{}: not currently active leader, rejecting request {}. isLeader: {}, isLeaderActive: {},"
-                            + "isLeadershipTransferInProgress: {}, paused: {}",
-                    persistenceId(), envelope, isLeader(), isLeaderActive(), isLeadershipTransferInProgress(), paused);
+                + "isLeadershipTransferInProgress: {}, paused: {}",
+                getId(), envelope, isLeader(), isLeaderActive(), isLeadershipTransferInProgress(), paused);
             throw new NotLeaderException(self());
         }
 
@@ -545,7 +544,7 @@ public class Shard extends RaftActor {
             case LocalHistoryRequest<?> req -> getFrontend(req.getTarget().getClientId())
                 .handleLocalHistoryRequest(req, envelope, now);
             default -> {
-                LOG.warn("{}: rejecting unsupported request {}", persistenceId(), request);
+                LOG.warn("{}: rejecting unsupported request {}", getId(), request);
                 throw new UnsupportedRequestException(request);
             }
         };
@@ -635,10 +634,10 @@ public class Shard extends RaftActor {
     @Override
     protected final RaftActorRecoveryCohort getRaftActorRecoveryCohort() {
         if (restoreFromSnapshot == null) {
-            return ShardRecoveryCoordinator.create(store, persistenceId(), LOG);
+            return ShardRecoveryCoordinator.create(store, getId(), LOG);
         }
 
-        return ShardRecoveryCoordinator.forSnapshot(store, persistenceId(), LOG, restoreFromSnapshot.getSnapshot());
+        return ShardRecoveryCoordinator.forSnapshot(store, getId(), LOG, restoreFromSnapshot.getSnapshot());
     }
 
     @Override
@@ -666,17 +665,17 @@ public class Shard extends RaftActor {
     protected final void applyState(final ActorRef clientActor, final Identifier identifier, final Object data) {
         if (data instanceof Payload payload) {
             if (payload instanceof DisableTrackingPayload disableTracking) {
-                LOG.debug("{}: ignoring legacy {}", persistenceId(), disableTracking);
+                LOG.debug("{}: ignoring legacy {}", getId(), disableTracking);
                 return;
             }
 
             try {
                 store.applyReplicatedPayload(identifier, payload);
             } catch (DataValidationFailedException | IOException e) {
-                LOG.error("{}: Error applying replica {}", persistenceId(), identifier, e);
+                LOG.error("{}: Error applying replica {}", getId(), identifier, e);
             }
         } else {
-            LOG.error("{}: Unknown state for {} received {}", persistenceId(), identifier, data);
+            LOG.error("{}: Unknown state for {} received {}", getId(), identifier, data);
         }
     }
 
@@ -690,8 +689,8 @@ public class Shard extends RaftActor {
         if (!isLeader) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug(
-                    "{}: onStateChanged: Closing all transaction chains because shard {} is no longer the leader",
-                    persistenceId(), getId());
+                    "{}: onStateChanged: Closing all transaction chains because shard is no longer the leader",
+                    getId());
             }
 
             paused = false;
@@ -706,7 +705,7 @@ public class Shard extends RaftActor {
 
         if (!isLeader()) {
             if (!knownFrontends.isEmpty()) {
-                LOG.debug("{}: removing frontend state for {}", persistenceId(), knownFrontends.keySet());
+                LOG.debug("{}: removing frontend state for {}", getId(), knownFrontends.keySet());
                 knownFrontends = ImmutableMap.of();
             }
 
@@ -714,13 +713,13 @@ public class Shard extends RaftActor {
         } else {
             // We have become the leader, we need to reconstruct frontend state
             knownFrontends = verifyNotNull(frontendMetadata.toLeaderState(this));
-            LOG.debug("{}: became leader with frontend state for {}", persistenceId(), knownFrontends.keySet());
+            LOG.debug("{}: became leader with frontend state for {}", getId(), knownFrontends.keySet());
         }
     }
 
     @Override
     protected final void pauseLeader(final Runnable operation) {
-        LOG.debug("{}: In pauseLeader, operation: {}", persistenceId(), operation);
+        LOG.debug("{}: In pauseLeader, operation: {}", getId(), operation);
         paused = true;
 
         // Tell-based protocol can replay transaction state, so it is safe to blow it up when we are paused.
@@ -732,7 +731,7 @@ public class Shard extends RaftActor {
 
     @Override
     protected final void unpauseLeader() {
-        LOG.debug("{}: In unpauseLeader", persistenceId());
+        LOG.debug("{}: In unpauseLeader", getId());
         paused = false;
 
         store.setRunOnPendingTransactionsComplete(null);
