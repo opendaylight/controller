@@ -196,36 +196,28 @@ public abstract class RaftActorBehavior implements AutoCloseable {
     }
 
     final boolean canGrantVote(final RequestVote requestVote) {
-        boolean grantVote = false;
-
         //  Reply false if term < currentTerm (§5.1)
         if (requestVote.getTerm() < currentTerm()) {
-            grantVote = false;
-
-            // If votedFor is null or candidateId, and candidate’s log is at
-            // least as up-to-date as receiver’s log, grant vote (§5.2, §5.4)
-        } else if (votedFor() == null || votedFor()
-                .equals(requestVote.getCandidateId())) {
-
-            boolean candidateLatest = false;
-
-            // From §5.4.1
-            // Raft determines which of two logs is more up-to-date
-            // by comparing the index and term of the last entries in the
-            // logs. If the logs have last entries with different terms, then
-            // the log with the later term is more up-to-date. If the logs
-            // end with the same term, then whichever log is longer is
-            // more up-to-date.
-            if (requestVote.getLastLogTerm() > lastTerm()
-                || requestVote.getLastLogTerm() == lastTerm() && requestVote.getLastLogIndex() >= lastIndex()) {
-                candidateLatest = true;
-            }
-
-            if (candidateLatest) {
-                grantVote = true;
-            }
+            return false;
         }
-        return grantVote;
+
+        // If votedFor is null or candidateId, and candidate’s log is at least as up-to-date as receiver’s log, we can
+        // grant vote (§5.2, §5.4).
+        final var votedFor = votedFor();
+        if (votedFor != null && !votedFor.equals(requestVote.getCandidateId())) {
+            return false;
+        }
+
+        // From §5.4.1
+        // Raft determines which of two logs is more up-to-date
+        // by comparing the index and term of the last entries in the
+        // logs. If the logs have last entries with different terms, then
+        // the log with the later term is more up-to-date. If the logs
+        // end with the same term, then whichever log is longer is
+        // more up-to-date.
+        final var lastTerm = lastTerm();
+        final var reqLastLogTerm = requestVote.getLastLogTerm();
+        return reqLastLogTerm > lastTerm || reqLastLogTerm == lastTerm && requestVote.getLastLogIndex() >= lastIndex();
     }
 
     /**
