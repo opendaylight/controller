@@ -37,7 +37,7 @@ abstract class LeaderLocalDelegateFactory<M> {
     }
 
     protected final String shardName() {
-        return shard.getId();
+        return shard.memberId();
     }
 
     protected final void tellSender(final Object message) {

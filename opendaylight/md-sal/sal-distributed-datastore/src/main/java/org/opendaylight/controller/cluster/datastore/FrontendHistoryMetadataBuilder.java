@@ -84,11 +84,11 @@ final class FrontendHistoryMetadataBuilder implements Identifiable<LocalHistoryI
      */
     @NonNull AbstractFrontendHistory toLeaderState(final @NonNull Shard shard) {
         if (identifier.getHistoryId() == 0) {
-            return StandaloneFrontendHistory.recreate(shard.getId(), identifier.getClientId(),
+            return StandaloneFrontendHistory.recreate(shard.memberId(), identifier.getClientId(),
                 shard.getDataStore(), closedTransactions, purgedTransactions);
         }
 
-        return LocalFrontendHistory.recreate(shard.getId(), shard.getDataStore(),
+        return LocalFrontendHistory.recreate(shard.memberId(), shard.getDataStore(),
             shard.getDataStore().recreateTransactionChain(identifier, closed), closedTransactions, purgedTransactions);
     }
 }

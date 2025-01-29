@@ -669,7 +669,7 @@ class RaftActorServerConfigurationSupport {
 
         @Override
         boolean includeSelfInNewConfiguration(final RaftActor raftActor) {
-            return !getOperation().getServerId().equals(raftActor.getId());
+            return !getOperation().getServerId().equals(raftActor.memberId());
         }
 
         @Override
