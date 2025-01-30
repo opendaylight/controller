@@ -78,7 +78,8 @@ final class PropertiesTermInfoStore implements TermInfoStore {
         doSetTerm(newTerm);
     }
 
-    @Nullable TermInfo loadAndSetTerm() {
+    @Override
+    public @Nullable TermInfo loadAndSetTerm() {
         final Properties props;
         try {
             props = loadFile();
