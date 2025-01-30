@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.raft.persisted;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
-import java.io.Serializable;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
@@ -18,7 +17,8 @@ import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 /**
  * Message class to persist election term information.
  */
-public record UpdateElectionTerm(@NonNull TermInfo termInfo) implements Serializable {
+@Deprecated
+public record UpdateElectionTerm(@NonNull TermInfo termInfo) implements LegacySerializable {
     public UpdateElectionTerm {
         requireNonNull(termInfo);
     }
@@ -35,8 +35,9 @@ public record UpdateElectionTerm(@NonNull TermInfo termInfo) implements Serializ
             .toString();
     }
 
+    @Override
     @java.io.Serial
-    private Object writeReplace() {
+    public Object writeReplace() {
         return new UT(termInfo);
     }
 }

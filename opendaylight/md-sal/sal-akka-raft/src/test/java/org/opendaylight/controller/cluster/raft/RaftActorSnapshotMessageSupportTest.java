@@ -22,29 +22,25 @@ import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.persistence.SaveSnapshotFailure;
 import org.apache.pekko.persistence.SaveSnapshotSuccess;
 import org.apache.pekko.persistence.SnapshotMetadata;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.ApplyLeaderSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.ByteState;
 import org.opendaylight.controller.cluster.raft.spi.ImmutableRaftEntryMeta;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Unit tests for RaftActorSnapshotMessageSupport.
  *
  * @author Thomas Pantelis
  */
-@RunWith(MockitoJUnitRunner.StrictStubs.class)
-public class RaftActorSnapshotMessageSupportTest {
-    private static final Logger LOG = LoggerFactory.getLogger(RaftActorRecoverySupportTest.class);
-
+@ExtendWith(MockitoExtension.class)
+class RaftActorSnapshotMessageSupportTest extends LocalAccessTest {
     @Mock
     private DataPersistenceProvider mockPersistence;
     @Mock
@@ -63,10 +59,11 @@ public class RaftActorSnapshotMessageSupportTest {
     private RaftActorContext context;
     private final DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
 
-    @Before
-    public void setup() {
-        context = new RaftActorContextImpl(mockRaftActorRef, null, new LocalAccess("test", mockPersistence), -1, -1,
-            Map.of(), configParams, (short) 0, mockPersistence, applyState -> { }, MoreExecutors.directExecutor()) {
+    @Override
+    @BeforeEach
+    void beforeEach() throws Exception {
+        context = new RaftActorContextImpl(mockRaftActorRef, null, localAccess, -1, -1, Map.of(), configParams,
+            (short) 0, mockPersistence, applyState -> { }, MoreExecutors.directExecutor()) {
                 @Override
                 public SnapshotManager getSnapshotManager() {
                     return mockSnapshotManager;

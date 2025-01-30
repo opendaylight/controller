@@ -15,6 +15,7 @@ import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -53,9 +54,9 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     final CountDownLatch snapshotCommitted = new CountDownLatch(1);
     private final Function<Runnable, Void> pauseLeaderFunction;
 
-    protected MockRaftActor(final AbstractBuilder<?, ?> builder) {
-        super(builder.id, builder.peerAddresses != null ? builder.peerAddresses :
-            Collections.emptyMap(), Optional.ofNullable(builder.config), PAYLOAD_VERSION);
+    protected MockRaftActor(final Path basePath, final AbstractBuilder<?, ?> builder) {
+        super(basePath, builder.id, builder.peerAddresses != null ? builder.peerAddresses : Map.of(),
+            Optional.ofNullable(builder.config), PAYLOAD_VERSION);
         state = Collections.synchronizedList(new ArrayList<>());
         actorDelegate = mock(RaftActor.class);
         recoveryCohortDelegate = mock(RaftActorRecoveryCohort.class);
