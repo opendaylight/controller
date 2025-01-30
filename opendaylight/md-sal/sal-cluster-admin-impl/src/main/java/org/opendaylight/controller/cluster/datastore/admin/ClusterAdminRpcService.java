@@ -22,19 +22,16 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.pekko.actor.ActorRef;
-import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.Status.Success;
 import org.apache.pekko.dispatch.OnComplete;
 import org.apache.pekko.pattern.Patterns;
@@ -183,6 +180,13 @@ public final class ClusterAdminRpcService {
             (DeactivateEosDatacenter) this::deactivateEosDatacenter);
     }
 
+    private ActorUtils actorUtils(final DataStoreType dataStoreType) {
+        return switch (dataStoreType) {
+            case Config -> configDataStore.getActorUtils();
+            case Operational -> operDataStore.getActorUtils();
+        };
+    }
+
     @VisibleForTesting
     ListenableFuture<RpcResult<AddShardReplicaOutput>> addShardReplica(final AddShardReplicaInput input) {
         final String shardName = input.getShardName();
@@ -256,20 +260,14 @@ public final class ClusterAdminRpcService {
     }
 
     private ListenableFuture<RpcResult<LocateShardOutput>> locateShard(final LocateShardInput input) {
-        final ActorUtils utils;
-        switch (input.getDataStoreType()) {
-            case Config:
-                utils = configDataStore.getActorUtils();
-                break;
-            case Operational:
-                utils = operDataStore.getActorUtils();
-                break;
-            default:
-                return newFailedRpcResultFuture("Unhandled datastore in " + input);
+        final var dataStoreType = input.getDataStoreType();
+        if (dataStoreType == null) {
+            return newFailedRpcResultFuture("A valid DataStoreType must be specified");
         }
 
-        final SettableFuture<RpcResult<LocateShardOutput>> ret = SettableFuture.create();
-        utils.findPrimaryShardAsync(input.getShardName()).onComplete(new OnComplete<PrimaryShardInfo>() {
+        final var actorUtils = actorUtils(dataStoreType);
+        final var ret = SettableFuture.<RpcResult<LocateShardOutput>>create();
+        actorUtils.findPrimaryShardAsync(input.getShardName()).onComplete(new OnComplete<>() {
             @Override
             public void onComplete(final Throwable failure, final PrimaryShardInfo success) throws Throwable {
                 if (failure != null) {
@@ -284,32 +282,30 @@ public final class ClusterAdminRpcService {
                     return;
                 }
 
-                final ActorSelection actorPath = success.getPrimaryShardActor();
                 ret.set(newSuccessfulResult(new LocateShardOutputBuilder()
                     .setMemberNode(new LeaderActorRefBuilder()
-                        .setLeaderActorRef(actorPath.toSerializationFormat())
+                        .setLeaderActorRef(success.getPrimaryShardActor().toSerializationFormat())
                         .build())
                     .build()));
             }
-        }, utils.getClientDispatcher());
+        }, actorUtils.getClientDispatcher());
 
         return ret;
     }
 
     @VisibleForTesting
     ListenableFuture<RpcResult<MakeLeaderLocalOutput>> makeLeaderLocal(final MakeLeaderLocalInput input) {
-        final String shardName = input.getShardName();
+        final var shardName = input.getShardName();
         if (Strings.isNullOrEmpty(shardName)) {
             return newFailedRpcResultFuture("A valid shard name must be specified");
         }
 
-        DataStoreType dataStoreType = input.getDataStoreType();
+        final var dataStoreType = input.getDataStoreType();
         if (dataStoreType == null) {
             return newFailedRpcResultFuture("A valid DataStoreType must be specified");
         }
 
-        ActorUtils actorUtils = dataStoreType == DataStoreType.Config
-                ? configDataStore.getActorUtils() : operDataStore.getActorUtils();
+        final var actorUtils = actorUtils(dataStoreType);
 
         LOG.info("Moving leader to local node {} for shard {}, datastoreType {}",
                 actorUtils.getCurrentMemberName().getName(), shardName, dataStoreType);
@@ -686,17 +682,15 @@ public final class ClusterAdminRpcService {
     private <T> void sendMessageToManagerForConfiguredShards(final DataStoreType dataStoreType,
             final List<Entry<ListenableFuture<T>, ShardResultBuilder>> shardResultData,
             final Function<String, Object> messageSupplier) {
-        ActorUtils actorUtils = dataStoreType == DataStoreType.Config ? configDataStore.getActorUtils()
-                : operDataStore.getActorUtils();
-        Set<String> allShardNames = actorUtils.getConfiguration().getAllShardNames();
+        final var actorUtils = actorUtils(dataStoreType);
+        final var allShardNames = actorUtils.getConfiguration().getAllShardNames();
 
         LOG.debug("Sending message to all shards {} for data store {}", allShardNames, actorUtils.getDataStoreName());
 
-        for (String shardName: allShardNames) {
-            ListenableFuture<T> future = this.ask(actorUtils.getShardManager(), messageSupplier.apply(shardName),
-                                                  SHARD_MGR_TIMEOUT);
-            shardResultData.add(new SimpleEntry<>(future,
-                    new ShardResultBuilder().setShardName(shardName).setDataStoreType(dataStoreType)));
+        for (var shardName: allShardNames) {
+            shardResultData.add(Map.entry(
+                this.<T>ask(actorUtils.getShardManager(), messageSupplier.apply(shardName), SHARD_MGR_TIMEOUT),
+                new ShardResultBuilder().setShardName(shardName).setDataStoreType(dataStoreType)));
         }
     }
 
@@ -709,10 +703,7 @@ public final class ClusterAdminRpcService {
     }
 
     private <T> ListenableFuture<T> sendMessageToShardManager(final DataStoreType dataStoreType, final Object message) {
-        ActorRef shardManager = dataStoreType == DataStoreType.Config
-                ? configDataStore.getActorUtils().getShardManager()
-                        : operDataStore.getActorUtils().getShardManager();
-        return ask(shardManager, message, SHARD_MGR_TIMEOUT);
+        return ask(actorUtils(dataStoreType).getShardManager(), message, SHARD_MGR_TIMEOUT);
     }
 
     private static void saveSnapshotsToFile(final DatastoreSnapshotList snapshots, final String fileName,
