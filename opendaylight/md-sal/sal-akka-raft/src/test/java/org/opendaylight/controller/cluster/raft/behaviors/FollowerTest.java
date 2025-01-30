@@ -106,9 +106,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
     @Override
     protected  MockRaftActorContext createActorContext(final ActorRef actorRef) {
-        MockRaftActorContext context = new MockRaftActorContext("follower", getSystem(), actorRef);
-        context.setPayloadVersion(payloadVersion);
-        ((DefaultConfigParamsImpl)context.getConfigParams()).setPeerAddressResolver(
+        MockRaftActorContext context = new MockRaftActorContext("follower", getSystem(), actorRef, payloadVersion);
+        ((DefaultConfigParamsImpl) context.getConfigParams()).setPeerAddressResolver(
             peerId -> leaderActor.path().toString());
         return context;
     }

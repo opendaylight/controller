@@ -54,20 +54,27 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         return new LocalAccess(id, new TestTermInfoStore(1, ""));
     }
 
-    public MockRaftActorContext() {
-        super(null, null, newLocalAccess("test"), -1, -1, new HashMap<>(),
-            new DefaultConfigParamsImpl(), createProvider(), applyState -> { }, LOG, MoreExecutors.directExecutor());
+    public MockRaftActorContext(final int payloadVersion) {
+        super(null, null, newLocalAccess("test"), -1, -1, new HashMap<>(), new DefaultConfigParamsImpl(),
+            (short) payloadVersion, createProvider(), applyState -> { }, LOG, MoreExecutors.directExecutor());
         setReplicatedLog(new MockReplicatedLogBuilder().build());
     }
 
-    public MockRaftActorContext(final String id, final ActorSystem system, final ActorRef actor) {
-        super(actor, null, newLocalAccess(id), -1, -1, new HashMap<>(),
-            new DefaultConfigParamsImpl(), createProvider(), applyState -> actor.tell(applyState, actor), LOG,
+    public MockRaftActorContext(final String id, final ActorSystem system, final ActorRef actor,
+            final int payloadVersion) {
+        super(actor, null, newLocalAccess(id), -1, -1, new HashMap<>(), new DefaultConfigParamsImpl(),
+            (short) payloadVersion, createProvider(), applyState -> actor.tell(applyState, actor), LOG,
             MoreExecutors.directExecutor());
-
         this.system = system;
-
         initReplicatedLog();
+    }
+
+    public MockRaftActorContext() {
+        this(0);
+    }
+
+    public MockRaftActorContext(final String id, final ActorSystem system, final ActorRef actor) {
+        this(id, system, actor, 0);
     }
 
     public void initReplicatedLog() {

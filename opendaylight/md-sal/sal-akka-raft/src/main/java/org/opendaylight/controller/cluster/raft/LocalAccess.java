@@ -21,22 +21,22 @@ import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
 @NonNullByDefault
 @VisibleForTesting
 public final class LocalAccess {
-    private final String logId;
+    private final String memberId;
     private final TermInfoStore termInfoStore;
 
     @VisibleForTesting
-    public LocalAccess(final String logId, final TermInfoStore termInfoStore) {
-        this.logId = requireNonNull(logId);
+    public LocalAccess(final String memberId, final TermInfoStore termInfoStore) {
+        this.memberId = requireNonNull(memberId);
         this.termInfoStore = requireNonNull(termInfoStore);
     }
 
     @VisibleForTesting
-    LocalAccess(final String logId, final DataPersistenceProvider persistence) {
-        this(logId, new PersistenceTermInfoStore(persistence, logId));
+    LocalAccess(final String memberId, final DataPersistenceProvider persistence) {
+        this(memberId, new PersistenceTermInfoStore(persistence, memberId));
     }
 
-    String logId() {
-        return logId;
+    String memberId() {
+        return memberId;
     }
 
     TermInfoStore termInfoStore() {
@@ -52,6 +52,6 @@ public final class LocalAccess {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this).add("logId", logId).add("termInfo", termInfoStore).toString();
+        return MoreObjects.toStringHelper(this).add("memberId", memberId).add("termInfo", termInfoStore).toString();
     }
 }
