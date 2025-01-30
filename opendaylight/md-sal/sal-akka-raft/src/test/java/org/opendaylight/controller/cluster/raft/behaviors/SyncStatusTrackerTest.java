@@ -10,6 +10,7 @@
 package org.opendaylight.controller.cluster.raft.behaviors;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -44,7 +45,7 @@ public class SyncStatusTrackerTest extends AbstractActorTest {
         FollowerInitialSyncUpStatus status =
                 MessageCollectorActor.getFirstMatching(listener, FollowerInitialSyncUpStatus.class);
 
-        assertEquals(false, status.isInitialSyncDone());
+        assertFalse(status.isInitialSyncDone());
         MessageCollectorActor.clearMessages(listener);
 
         // At a minimum the follower should have the commit index that the new leader sent it in the first message
@@ -73,7 +74,7 @@ public class SyncStatusTrackerTest extends AbstractActorTest {
 
         assertNotNull("No sync status message was received", status);
 
-        assertEquals(false, status.isInitialSyncDone());
+        assertFalse(status.isInitialSyncDone());
         MessageCollectorActor.clearMessages(listener);
 
         // If the follower is not caught up yet it should not receive any further notification
@@ -88,7 +89,7 @@ public class SyncStatusTrackerTest extends AbstractActorTest {
 
         status = MessageCollectorActor.getFirstMatching(listener, FollowerInitialSyncUpStatus.class);
 
-        assertEquals(true, status.isInitialSyncDone());
+        assertTrue(status.isInitialSyncDone());
         MessageCollectorActor.clearMessages(listener);
 
         // When a new leader starts sending update messages a new syncStatus notification should be immediately
@@ -97,7 +98,7 @@ public class SyncStatusTrackerTest extends AbstractActorTest {
 
         status = MessageCollectorActor.getFirstMatching(listener, FollowerInitialSyncUpStatus.class);
 
-        assertEquals(false, status.isInitialSyncDone());
+        assertFalse(status.isInitialSyncDone());
         MessageCollectorActor.clearMessages(listener);
 
         // If an update is received from a new leader which is still below the minimum expected index then
