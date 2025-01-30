@@ -125,8 +125,8 @@ public class SnapshotManager implements SnapshotState {
         // Nothing else
     }
 
-    private final RaftActorContext context;
-    private final Logger log;
+    private final @NonNull RaftActorContext context;
+    private final @NonNull Logger log;
 
     private RaftActorSnapshotCohort snapshotCohort = NoopRaftActorSnapshotCohort.INSTANCE;
     private Consumer<Optional<OutputStream>> createSnapshotProcedure = null;
@@ -138,9 +138,9 @@ public class SnapshotManager implements SnapshotState {
      * @param context the RaftActorContext
      * @param logger the Logger
      */
-    public SnapshotManager(final RaftActorContext context, final Logger logger) {
+    public SnapshotManager(final RaftActorContext context) {
+        log = context.getLogger();
         this.context = context;
-        log = logger;
     }
 
     public boolean isApplying() {

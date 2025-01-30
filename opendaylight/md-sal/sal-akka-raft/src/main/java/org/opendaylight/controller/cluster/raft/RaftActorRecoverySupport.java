@@ -7,12 +7,18 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.Stopwatch;
-import java.util.Collections;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+import org.apache.pekko.persistence.AbstractPersistentActor;
 import org.apache.pekko.persistence.RecoveryCompleted;
 import org.apache.pekko.persistence.SnapshotOffer;
-import org.opendaylight.controller.cluster.PersistentDataProvider;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.messages.PersistentPayload;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
@@ -23,6 +29,7 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
+import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.slf4j.Logger;
 
 /**
@@ -31,8 +38,11 @@ import org.slf4j.Logger;
  * @author Thomas Pantelis
  */
 class RaftActorRecoverySupport {
-    private final RaftActorContext context;
-    private final RaftActorRecoveryCohort cohort;
+    private final @NonNull LocalAccess localAccess;
+    private final @NonNull RaftActorContext context;
+    private final @NonNull RaftActorRecoveryCohort cohort;
+    private final @Nullable TermInfo origTermInfo;
+    private final @NonNull Logger log;
 
     private int currentRecoveryBatchCount;
     private boolean dataRecoveredWithPersistenceDisabled;
@@ -41,15 +51,22 @@ class RaftActorRecoverySupport {
 
     private Stopwatch recoveryTimer;
     private Stopwatch recoverySnapshotTimer;
-    private final Logger log;
 
-    RaftActorRecoverySupport(final RaftActorContext context, final RaftActorRecoveryCohort cohort) {
-        this.context = context;
-        this.cohort = cohort;
+    RaftActorRecoverySupport(final @NonNull LocalAccess localAccess, final RaftActorContext context,
+            final RaftActorRecoveryCohort cohort) {
+        this.localAccess = requireNonNull(localAccess);
         log = context.getLogger();
+        this.context = context;
+        this.cohort = requireNonNull(cohort);
+
+        try {
+            origTermInfo = localAccess.termInfoStore().readTerm();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
-    boolean handleRecoveryMessage(final Object message, final PersistentDataProvider persistentProvider) {
+    boolean handleRecoveryMessage(final AbstractPersistentActor actor, final Object message) {
         log.trace("{}: handleRecoveryMessage: {}", context.getId(), message);
 
         anyDataRecovered = anyDataRecovered || !(message instanceof RecoveryCompleted);
@@ -66,7 +83,7 @@ class RaftActorRecoverySupport {
             case ServerConfigurationPayload msg -> context.updatePeerIds(msg);
             case UpdateElectionTerm(var termInfo) -> context.setTermInfo(termInfo);
             case RecoveryCompleted msg -> {
-                onRecoveryCompletedMessage(persistentProvider);
+                onRecoveryCompletedMessage(actor);
                 return true;
             }
             default -> {
@@ -114,7 +131,7 @@ class RaftActorRecoverySupport {
 
         Snapshot snapshot = (Snapshot) offer.snapshot();
 
-        for (ReplicatedLogEntry entry: snapshot.getUnAppliedEntries()) {
+        for (var entry : snapshot.getUnAppliedEntries()) {
             if (isMigratedPayload(entry)) {
                 hasMigratedDataRecovered = true;
             }
@@ -124,9 +141,8 @@ class RaftActorRecoverySupport {
             // We may have just transitioned to disabled and have a snapshot containing state data and/or log
             // entries - we don't want to preserve these, only the server config and election term info.
 
-            snapshot = Snapshot.create(
-                    EmptyState.INSTANCE, Collections.emptyList(), -1, -1, -1, -1,
-                    snapshot.termInfo(), snapshot.getServerConfiguration());
+            snapshot = Snapshot.create(EmptyState.INSTANCE, List.of(), -1, -1, -1, -1,
+                snapshot.termInfo(), snapshot.getServerConfiguration());
         }
 
         // Create a replicated log with the snapshot information
@@ -271,7 +287,7 @@ class RaftActorRecoverySupport {
         currentRecoveryBatchCount = 0;
     }
 
-    private void onRecoveryCompletedMessage(final PersistentDataProvider persistentProvider) {
+    private void onRecoveryCompletedMessage(final AbstractPersistentActor raftActor) {
         if (currentRecoveryBatchCount > 0) {
             endCurrentLogRecoveryBatch();
         }
@@ -295,6 +311,24 @@ class RaftActorRecoverySupport {
                 replLog.lastIndex(), replLog.lastTerm(), replLog.getSnapshotIndex(), replLog.getSnapshotTerm(),
                 replLog.size());
 
+
+        // Populate property-based storage if needed, or roll-back any voting information leaked by recovery process
+        final var infoStore = localAccess.termInfoStore();
+        final var orig = origTermInfo;
+        if (orig == null) {
+            // No original info observed, seed it after recovery and trigger a snapshot
+            final var current = infoStore.currentTerm();
+            infoStore.persistTerm(current);
+
+            // From this point on we will not update TermInfo from Akka persistence
+            log.info("{}: Local TermInfo store seeded with {}", context.getId(), current);
+            hasMigratedDataRecovered = true;
+        } else {
+            // Undo whatever recovery has done to what we have observed
+            log.debug("{}: restoring local {}", context.getId(), orig);
+            infoStore.setTerm(orig);
+        }
+
         if (dataRecoveredWithPersistenceDisabled
                 || hasMigratedDataRecovered && !context.getPersistenceProvider().isRecoveryApplicable()) {
             if (hasMigratedDataRecovered) {
@@ -308,13 +342,11 @@ class RaftActorRecoverySupport {
             // messages. Either way, we persist a snapshot and delete all the messages from the akka journal
             // to clean out unwanted messages.
 
-            Snapshot snapshot = Snapshot.create(
-                    EmptyState.INSTANCE, Collections.<ReplicatedLogEntry>emptyList(),
-                    -1, -1, -1, -1, context.termInfo(), context.getPeerServerInfo(true));
+            Snapshot snapshot = Snapshot.create(EmptyState.INSTANCE, List.of(), -1, -1, -1, -1,
+                context.termInfo(), context.getPeerServerInfo(true));
 
-            persistentProvider.saveSnapshot(snapshot);
-
-            persistentProvider.deleteMessages(persistentProvider.getLastSequenceNumber());
+            raftActor.saveSnapshot(snapshot);
+            raftActor.deleteMessages(raftActor.lastSequenceNr());
         } else if (hasMigratedDataRecovered) {
             log.info("{}: Snapshot capture initiated after recovery due to migrated messages", context.getId());
 

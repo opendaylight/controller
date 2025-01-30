@@ -35,6 +35,7 @@ import java.util.function.Consumer;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.actor.Props;
+import org.apache.pekko.persistence.AbstractPersistentActor;
 import org.apache.pekko.persistence.RecoveryCompleted;
 import org.apache.pekko.persistence.SnapshotMetadata;
 import org.apache.pekko.persistence.SnapshotOffer;
@@ -77,9 +78,10 @@ public class RaftActorRecoverySupportTest {
 
     @Mock
     private DataPersistenceProvider mockPersistence;
-
     @Mock
     private RaftActorRecoveryCohort mockCohort;
+    @Mock
+    private AbstractPersistentActor mockActor;
 
     @Mock
     PersistentDataProvider mockPersistentProvider;
@@ -98,10 +100,11 @@ public class RaftActorRecoverySupportTest {
     public void setup() {
         mockActorSystem = ActorSystem.create();
         mockActorRef = mockActorSystem.actorOf(Props.create(DoNothingActor.class));
-        context = new RaftActorContextImpl(mockActorRef, null, new LocalAccess(localId, mockPersistentProvider), -1, -1,
+        final var localAccess = new LocalAccess(localId, mockPersistentProvider);
+        context = new RaftActorContextImpl(mockActorRef, null, localAccess, -1, -1,
             Map.of(), configParams, (short) 0, mockPersistence, applyState -> { }, LOG, MoreExecutors.directExecutor());
 
-        support = new RaftActorRecoverySupport(context, mockCohort);
+        support = new RaftActorRecoverySupport(localAccess, context, mockCohort);
 
         doReturn(true).when(mockPersistence).isRecoveryApplicable();
 
@@ -118,7 +121,7 @@ public class RaftActorRecoverySupportTest {
     }
 
     private void sendMessageToSupport(final Object message, final boolean expComplete) {
-        boolean complete = support.handleRecoveryMessage(message, mockPersistentProvider);
+        boolean complete = support.handleRecoveryMessage(mockActor, message);
         assertEquals("complete", expComplete, complete);
     }
 
@@ -313,7 +316,7 @@ public class RaftActorRecoverySupportTest {
     @Test
     public void testDataRecoveredWithPersistenceDisabled() {
         doReturn(false).when(mockPersistence).isRecoveryApplicable();
-        doReturn(10L).when(mockPersistentProvider).getLastSequenceNumber();
+        doReturn(10L).when(mockActor).lastSequenceNr();
 
         Snapshot snapshot = Snapshot.create(new MockSnapshotState(List.of(new MockPayload("1"))),
                 List.of(), 3, 1, 3, 1, new TermInfo(-1), null);
