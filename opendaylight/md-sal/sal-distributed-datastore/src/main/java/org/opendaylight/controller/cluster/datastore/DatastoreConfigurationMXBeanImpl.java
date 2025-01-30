@@ -105,11 +105,6 @@ final class DatastoreConfigurationMXBeanImpl extends AbstractMXBean implements D
     }
 
     @Override
-    public long getTransactionCreationInitialRateLimit() {
-        return context.getTransactionCreationInitialRateLimit();
-    }
-
-    @Override
     public boolean getTransactionContextDebugEnabled() {
         return context.isTransactionDebugContextEnabled();
     }

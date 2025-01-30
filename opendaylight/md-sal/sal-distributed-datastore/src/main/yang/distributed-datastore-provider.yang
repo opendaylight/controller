@@ -8,6 +8,10 @@ module distributed-datastore-provider {
         "This module contains the base YANG definitions for
          the distributed datastore provider implementation";
 
+    revision "2025-01-30" {
+        description "Obsolete transaction-creation-initial-rate-limit";
+    }
+
     revision "2023-12-29" {
         description "Remote use-tell-based-protocol and shard-snapshot-chunk-size leaves";
     }
@@ -192,6 +196,7 @@ module distributed-datastore-provider {
             description "The initial number of transactions per second that are allowed before the data store
                          should begin applying back pressure. This number is only used as an initial guidance,
                          subsequently the datastore measures the latency for a commit and auto-adjusts the rate limit";
+            status obsolete;
         }
 
         leaf transaction-debug-context-enabled {

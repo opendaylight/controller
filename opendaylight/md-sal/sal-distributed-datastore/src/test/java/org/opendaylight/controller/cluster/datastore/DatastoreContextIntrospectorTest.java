@@ -23,8 +23,8 @@ import static org.opendaylight.mdsal.common.api.LogicalDatastoreType.OPERATIONAL
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Test;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev231229.DataStoreProperties.ExportOnRecovery;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev231229.DataStorePropertiesContainer;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev250130.DataStoreProperties.ExportOnRecovery;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev250130.DataStorePropertiesContainer;
 import org.opendaylight.yangtools.binding.data.codec.impl.di.DefaultBindingDOMCodecFactory;
 import org.opendaylight.yangtools.binding.runtime.spi.BindingRuntimeHelpers;
 
@@ -97,7 +97,6 @@ public class DatastoreContextIntrospectorTest {
         assertEquals(800, context.getShardRaftConfig().getSnapshotDataThreshold());
         assertEquals(21, context.getShardRaftConfig().getElectionTimeoutFactor());
         assertEquals(901, context.getShardBatchedModificationCount());
-        assertEquals(200, context.getTransactionCreationInitialRateLimit());
         assertEquals(600, context.getInitialPayloadSerializedBufferCapacity());
         assertEquals("persistence-export", context.getRecoveryExportBaseDir());
         assertEquals(ExportOnRecovery.Json, context.getExportOnRecovery());
@@ -130,7 +129,6 @@ public class DatastoreContextIntrospectorTest {
         assertEquals(100, context.getShardRaftConfig().getSnapshotDataThresholdPercentage());
         assertEquals(800, context.getShardRaftConfig().getSnapshotDataThreshold());
         assertEquals(22, context.getShardRaftConfig().getElectionTimeoutFactor());
-        assertEquals(200, context.getTransactionCreationInitialRateLimit());
         assertTrue(context.isPersistent());
 
         updated = introspector.update(null);
