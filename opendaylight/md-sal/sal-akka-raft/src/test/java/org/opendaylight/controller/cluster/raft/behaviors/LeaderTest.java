@@ -13,6 +13,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -138,7 +139,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         // The follower would normally reply - simulate that explicitly here.
         leader.handleMessage(followerActor, new AppendEntriesReply(
                 FOLLOWER_ID, term, true, lastIndex - 1, term, (short)0));
-        assertEquals("isFollowerActive", true, leader.getFollower(FOLLOWER_ID).isFollowerActive());
+        assertTrue("isFollowerActive", leader.getFollower(FOLLOWER_ID).isFollowerActive());
 
         followerActor.underlyingActor().clear();
 
@@ -191,7 +192,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         long lastIndex = actorContext.getReplicatedLog().lastIndex();
         leader.handleMessage(followerActor, new AppendEntriesReply(
                 FOLLOWER_ID, term, true, lastIndex, term, (short)0));
-        assertEquals("isFollowerActive", true, leader.getFollower(FOLLOWER_ID).isFollowerActive());
+        assertTrue("isFollowerActive", leader.getFollower(FOLLOWER_ID).isFollowerActive());
 
         followerActor.underlyingActor().clear();
 
@@ -284,7 +285,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         long lastIndex = actorContext.getReplicatedLog().lastIndex();
         leader.handleMessage(followerActor, new AppendEntriesReply(
                 FOLLOWER_ID, term, true, lastIndex, term, (short) 0));
-        assertEquals("isFollowerActive", true, leader.getFollower(FOLLOWER_ID).isFollowerActive());
+        assertTrue("isFollowerActive", leader.getFollower(FOLLOWER_ID).isFollowerActive());
 
         followerActor.underlyingActor().clear();
 
@@ -327,7 +328,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         long lastIndex = actorContext.getReplicatedLog().lastIndex();
         leader.handleMessage(followerActor, new AppendEntriesReply(
                 FOLLOWER_ID, term, true, lastIndex, term, (short)0));
-        assertEquals("isFollowerActive", true, leader.getFollower(FOLLOWER_ID).isFollowerActive());
+        assertTrue("isFollowerActive", leader.getFollower(FOLLOWER_ID).isFollowerActive());
 
         followerActor.underlyingActor().clear();
 
@@ -367,7 +368,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         long lastIndex = actorContext.getReplicatedLog().lastIndex();
         leader.handleMessage(followerActor, new AppendEntriesReply(
                 FOLLOWER_ID, term, true, lastIndex, term, (short)0));
-        assertEquals("isFollowerActive", true, leader.getFollower(FOLLOWER_ID).isFollowerActive());
+        assertTrue("isFollowerActive", leader.getFollower(FOLLOWER_ID).isFollowerActive());
 
         followerActor.underlyingActor().clear();
 
@@ -378,7 +379,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         }
 
         // We are expecting six messages here -- a request to replicate and a consensus-reached message
-        List<AppendEntries> allMessages = MessageCollectorActor.getAllMatching(followerActor, AppendEntries.class);
+        var allMessages = MessageCollectorActor.getAllMatching(followerActor, AppendEntries.class);
         assertEquals("The number of request/consensus appends collected", 6, allMessages.size());
         for (int i = 0; i < 3; i++) {
             assertRequestEntry(lastIndex, allMessages, i);
@@ -438,7 +439,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         long lastIndex = actorContext.getReplicatedLog().lastIndex();
         leader.handleMessage(followerActor, new AppendEntriesReply(
                 FOLLOWER_ID, term, true, lastIndex, term, (short)0));
-        assertEquals("isFollowerActive", true, leader.getFollower(FOLLOWER_ID).isFollowerActive());
+        assertTrue("isFollowerActive", leader.getFollower(FOLLOWER_ID).isFollowerActive());
 
         followerActor.underlyingActor().clear();
 
@@ -484,7 +485,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         long lastIndex = actorContext.getReplicatedLog().lastIndex();
         leader.handleMessage(followerActor, new AppendEntriesReply(
                 FOLLOWER_ID, term, true, lastIndex, term, (short)0));
-        assertEquals("isFollowerActive", true, leader.getFollower(FOLLOWER_ID).isFollowerActive());
+        assertTrue("isFollowerActive", leader.getFollower(FOLLOWER_ID).isFollowerActive());
 
         followerActor.underlyingActor().clear();
 
@@ -521,7 +522,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         long lastIndex = actorContext.getReplicatedLog().lastIndex();
         leader.handleMessage(followerActor, new AppendEntriesReply(
                 FOLLOWER_ID, term, true, lastIndex, term, (short)0));
-        assertEquals("isFollowerActive", true, leader.getFollower(FOLLOWER_ID).isFollowerActive());
+        assertTrue("isFollowerActive", leader.getFollower(FOLLOWER_ID).isFollowerActive());
 
         followerActor.underlyingActor().clear();
 
@@ -678,9 +679,9 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         RaftActorBehavior raftBehavior = leader.handleMessage(
                 leaderActor, new Replicate(newEntryIndex, true, null, new MockIdentifier("state-id")));
 
-        assertTrue(raftBehavior instanceof Leader);
+        assertInstanceOf(Leader.class, raftBehavior);
 
-        assertEquals("isCapturing", true, actorContext.getSnapshotManager().isCapturing());
+        assertTrue("isCapturing", actorContext.getSnapshotManager().isCapturing());
     }
 
     @Test
@@ -721,7 +722,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         leader.handleMessage(leaderActor, new Replicate(newEntryIndex, true, null, new MockIdentifier("state-id")));
 
-        assertEquals("isCapturing", true, actorContext.getSnapshotManager().isCapturing());
+        assertTrue("isCapturing", actorContext.getSnapshotManager().isCapturing());
 
         CaptureSnapshot cs = actorContext.getSnapshotManager().getCaptureSnapshot();
 
@@ -785,7 +786,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leader.handleMessage(leaderActor, new AppendEntriesReply(FOLLOWER_ID, 1, false, 1, 1, (short) 1, true, false,
                 RaftVersions.CURRENT_VERSION));
 
-        assertEquals("isCapturing", true, actorContext.getSnapshotManager().isCapturing());
+        assertTrue("isCapturing", actorContext.getSnapshotManager().isCapturing());
 
         CaptureSnapshot cs = actorContext.getSnapshotManager().getCaptureSnapshot();
         assertEquals(3, cs.getLastAppliedIndex());
@@ -1670,7 +1671,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         AppendEntriesReply appendEntriesReply = MessageCollectorActor.expectFirstMatching(leaderActor,
                 AppendEntriesReply.class);
 
-        assertEquals(false, appendEntriesReply.isSuccess());
+        assertFalse(appendEntriesReply.isSuccess());
         assertEquals(RaftState.Follower, leaderActor.underlyingActor().getFirstBehaviorChange().state());
 
         MessageCollectorActor.clearMessages(leaderActor);
@@ -1695,7 +1696,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         AppendEntriesReply appendEntriesReply = MessageCollectorActor.expectFirstMatching(leaderActor,
                 AppendEntriesReply.class);
 
-        assertEquals(false, appendEntriesReply.isSuccess());
+        assertFalse(appendEntriesReply.isSuccess());
         assertEquals(RaftState.Leader, leaderActor.underlyingActor().getFirstBehaviorChange().state());
 
         MessageCollectorActor.clearMessages(leaderActor);
@@ -2439,7 +2440,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
     protected void assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(final MockRaftActorContext actorContext,
             final ActorRef actorRef, final RaftRPC rpc) {
         super.assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(actorContext, actorRef, rpc);
-        assertEquals("New votedFor", null, actorContext.termInfo().votedFor());
+        assertNull("New votedFor", actorContext.termInfo().votedFor());
     }
 
     private static class MockConfigParamsImpl extends DefaultConfigParamsImpl {

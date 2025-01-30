@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft.behaviors;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
 import org.apache.pekko.actor.ActorRef;
@@ -84,7 +85,7 @@ public class DelayedMessagesElectionScenarioTest extends AbstractLeaderElectionS
 
         RequestVoteReply requestVoteReply = member3Actor.getCapturedMessage(RequestVoteReply.class);
         assertEquals("getTerm", member3Context.currentTerm(), requestVoteReply.getTerm());
-        assertEquals("isVoteGranted", true, requestVoteReply.isVoteGranted());
+        assertTrue("isVoteGranted", requestVoteReply.isVoteGranted());
 
         verifyBehaviorState("member 3", member3Actor, RaftState.Leader);
 

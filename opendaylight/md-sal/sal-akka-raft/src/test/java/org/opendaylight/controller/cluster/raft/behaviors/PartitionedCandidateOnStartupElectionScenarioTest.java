@@ -8,6 +8,8 @@
 package org.opendaylight.controller.cluster.raft.behaviors;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
 import org.apache.pekko.actor.ActorRef;
@@ -76,7 +78,7 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
 
         RequestVoteReply requestVoteReply = member1Actor.getCapturedMessage(RequestVoteReply.class);
         assertEquals("getTerm", member1Context.currentTerm(), requestVoteReply.getTerm());
-        assertEquals("isVoteGranted", true, requestVoteReply.isVoteGranted());
+        assertTrue("isVoteGranted", requestVoteReply.isVoteGranted());
 
         // Candidate member 3 should change to follower as its term should be less than the
         // RequestVote term (member 1 started a new term higher than the other member's terms).
@@ -130,7 +132,7 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
 
             RequestVoteReply requestVoteReply = member3Actor.getCapturedMessage(RequestVoteReply.class);
             assertEquals("getTerm", member3Context.currentTerm(), requestVoteReply.getTerm());
-            assertEquals("isVoteGranted", false, requestVoteReply.isVoteGranted());
+            assertFalse("isVoteGranted", requestVoteReply.isVoteGranted());
         }
 
         verifyBehaviorState("member 1", member1Actor, RaftState.Follower);

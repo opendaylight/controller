@@ -87,7 +87,7 @@ public class MigratedMessagesTest extends AbstractActorTest {
         };
 
         TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.builder().id(id)
-                .config(config).snapshotCohort(snapshotCohort).persistent(Optional.of(true)).props()
+                .config(config).snapshotCohort(snapshotCohort).persistent(Optional.of(Boolean.TRUE)).props()
                     .withDispatcher(Dispatchers.DefaultDispatcherId()), id);
         MockRaftActor mockRaftActor = raftActorRef.underlyingActor();
 
