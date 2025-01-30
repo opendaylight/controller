@@ -5,12 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.datastore.utils;
+package org.opendaylight.controller.cluster.raft.spi;
 
 import static com.google.common.base.Verify.verify;
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.primitives.UnsignedLong;
 import java.io.DataInput;
@@ -29,7 +28,6 @@ import org.opendaylight.yangtools.concepts.WritableObjects;
 /**
  * A more efficient equivalent of {@code ImmutableMap<UnsignedLong, Boolean>}.
  */
-@Beta
 public abstract sealed class UnsignedLongBitmap implements Immutable {
     @VisibleForTesting
     static final class Regular extends UnsignedLongBitmap {

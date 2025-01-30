@@ -14,8 +14,8 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNull;
-import org.opendaylight.controller.cluster.datastore.utils.ImmutableUnsignedLongSet;
-import org.opendaylight.controller.cluster.datastore.utils.UnsignedLongBitmap;
+import org.opendaylight.controller.cluster.raft.spi.ImmutableUnsignedLongSet;
+import org.opendaylight.controller.cluster.raft.spi.UnsignedLongBitmap;
 import org.opendaylight.yangtools.concepts.WritableObject;
 import org.opendaylight.yangtools.concepts.WritableObjects;
 

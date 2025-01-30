@@ -5,14 +5,15 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.datastore.utils;
+package org.opendaylight.controller.cluster.raft.spi;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import com.google.common.base.VerifyException;
@@ -21,16 +22,16 @@ import com.google.common.primitives.UnsignedLong;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Map;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.opendaylight.controller.cluster.datastore.utils.UnsignedLongBitmap.Regular;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.opendaylight.controller.cluster.raft.spi.UnsignedLongBitmap.Regular;
 import org.opendaylight.yangtools.concepts.WritableObjects;
 
-@RunWith(MockitoJUnitRunner.StrictStubs.class)
-public class UnsignedLongBitmapTest {
+@ExtendWith(MockitoExtension.class)
+class UnsignedLongBitmapTest {
     @Test
-    public void testEmpty() throws IOException {
+    void testEmpty() {
         final var empty = UnsignedLongBitmap.of();
         assertTrue(empty.isEmpty());
         assertEquals(empty, empty);
@@ -43,13 +44,13 @@ public class UnsignedLongBitmapTest {
         assertEquals("Mismatched size: expected 0, got 1", ex.getMessage());
 
         // Should not do anything
-        empty.writeEntriesTo(mock(DataOutput.class), 0);
+        assertDoesNotThrow(() -> empty.writeEntriesTo(mock(DataOutput.class), 0));
 
         assertSame(empty, assertWriteToReadFrom(empty));
     }
 
     @Test
-    public void testSingleton() {
+    void testSingleton() {
         final var one = UnsignedLongBitmap.of(0, false);
         assertFalse(one.isEmpty());
         assertEquals(1, one.size());
@@ -73,7 +74,7 @@ public class UnsignedLongBitmapTest {
     }
 
     @Test
-    public void testRegular() {
+    void testRegular() {
         final var one = UnsignedLongBitmap.copyOf(Map.of(UnsignedLong.ZERO, false, UnsignedLong.ONE, true));
         assertFalse(one.isEmpty());
         assertEquals(2, one.size());
@@ -126,16 +127,16 @@ public class UnsignedLongBitmapTest {
     }
 
     @Test
-    public void testKeyOrder() throws IOException {
+    void testKeyOrder() {
         assertInvalidKey(0);
         assertInvalidKey(1);
     }
 
-    private static void assertInvalidKey(final long second) throws IOException {
+    private static void assertInvalidKey(final long second) {
         final var out = ByteStreams.newDataOutput();
-        WritableObjects.writeLong(out, 1);
+        assertDoesNotThrow(() -> WritableObjects.writeLong(out, 1));
         out.writeBoolean(false);
-        WritableObjects.writeLong(out, second);
+        assertDoesNotThrow(() -> WritableObjects.writeLong(out, second));
         out.writeBoolean(true);
 
         final var ex = assertThrows(IOException.class,
@@ -144,7 +145,7 @@ public class UnsignedLongBitmapTest {
     }
 
     @Test
-    public void testInvalidArrays() {
+    void testInvalidArrays() {
         assertThrows(VerifyException.class, () -> new Regular(new long[0], new boolean[] { false, false }));
     }
 }

@@ -14,7 +14,7 @@ import com.google.common.io.ByteStreams;
 import java.io.IOException;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.datastore.persisted.AbstractIdentifiablePayload.SerialForm;
-import org.opendaylight.controller.cluster.datastore.utils.ImmutableUnsignedLongSet;
+import org.opendaylight.controller.cluster.raft.spi.ImmutableUnsignedLongSet;
 
 /**
  * Serialization proxy for {@link SkipTransactionsPayload}.

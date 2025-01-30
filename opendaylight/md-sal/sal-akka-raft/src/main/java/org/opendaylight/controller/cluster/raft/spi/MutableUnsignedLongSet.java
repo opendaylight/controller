@@ -5,9 +5,8 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.datastore.utils;
+package org.opendaylight.controller.cluster.raft.spi;
 
-import com.google.common.annotations.Beta;
 import com.google.common.collect.ImmutableRangeSet;
 import com.google.common.collect.Range;
 import com.google.common.primitives.UnsignedLong;
@@ -16,9 +15,8 @@ import java.util.TreeSet;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.Mutable;
 
-@Beta
 public final class MutableUnsignedLongSet extends UnsignedLongSet implements Mutable {
-    MutableUnsignedLongSet(final TreeSet<Entry> ranges) {
+    MutableUnsignedLongSet(final TreeSet<EntryImpl> ranges) {
         super(ranges);
     }
 
@@ -40,7 +38,7 @@ public final class MutableUnsignedLongSet extends UnsignedLongSet implements Mut
     }
 
     public void add(final long longBits) {
-        addOne(trustedRanges(), new Entry(longBits));
+        addOne(trustedRanges(), new EntryImpl(longBits));
     }
 
     public void addAll(final UnsignedLongSet other) {
@@ -54,7 +52,7 @@ public final class MutableUnsignedLongSet extends UnsignedLongSet implements Mut
         }
     }
 
-    private static void addOne(final NavigableSet<Entry> ranges, final Entry range) {
+    private static void addOne(final NavigableSet<EntryImpl> ranges, final EntryImpl range) {
         final long longBits = range.lowerBits();
 
         // We need Iterator.remove() to perform efficient merge below
@@ -105,7 +103,7 @@ public final class MutableUnsignedLongSet extends UnsignedLongSet implements Mut
         ranges.add(range);
     }
 
-    private static void addRange(final NavigableSet<Entry> ranges, final Entry range) {
+    private static void addRange(final NavigableSet<EntryImpl> ranges, final EntryImpl range) {
         // If the start of the range is already covered by an existing range, we can expand that
         final var headIt = ranges.headSet(range, true).descendingIterator();
         final boolean hasFloor = headIt.hasNext();
@@ -120,7 +118,7 @@ public final class MutableUnsignedLongSet extends UnsignedLongSet implements Mut
         }
 
         // If the end of the range is already covered by an existing range, we can expand that
-        final var tailIt = ranges.headSet(new Entry(range.upperBits()), true).descendingIterator();
+        final var tailIt = ranges.headSet(new EntryImpl(range.upperBits()), true).descendingIterator();
         if (tailIt.hasNext()) {
             final var upper = tailIt.next();
             tailIt.remove();
@@ -139,7 +137,7 @@ public final class MutableUnsignedLongSet extends UnsignedLongSet implements Mut
         ranges.add(range);
     }
 
-    private static @NonNull Entry expandFloor(final NavigableSet<Entry> ranges, final Entry floor,
+    private static @NonNull EntryImpl expandFloor(final NavigableSet<EntryImpl> ranges, final EntryImpl floor,
             final long upperBits) {
         // Acquire any ranges after floor and clean them up
         final var tailIt = ranges.tailSet(floor, false).iterator();
@@ -164,7 +162,7 @@ public final class MutableUnsignedLongSet extends UnsignedLongSet implements Mut
         return floor.withUpperBits(upperBits);
     }
 
-    private static @NonNull Entry expandCeiling(final NavigableSet<Entry> ranges, final Entry ceiling,
+    private static @NonNull EntryImpl expandCeiling(final NavigableSet<EntryImpl> ranges, final EntryImpl ceiling,
             final long lowerBits, final long upperBits) {
         if (Long.compareUnsigned(ceiling.upperBits(), upperBits) >= 0) {
             // Upper end is already covered
@@ -182,7 +180,7 @@ public final class MutableUnsignedLongSet extends UnsignedLongSet implements Mut
             }
         }
 
-        return new Entry(lowerBits, newUpper);
+        return new EntryImpl(lowerBits, newUpper);
     }
 
     // Provides compatibility with RangeSet<UnsignedLong> using [lower, upper + 1)

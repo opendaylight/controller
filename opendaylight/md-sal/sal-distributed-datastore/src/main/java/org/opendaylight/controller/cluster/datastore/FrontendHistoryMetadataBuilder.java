@@ -18,9 +18,9 @@ import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.persisted.FrontendHistoryMetadata;
-import org.opendaylight.controller.cluster.datastore.utils.ImmutableUnsignedLongSet;
-import org.opendaylight.controller.cluster.datastore.utils.MutableUnsignedLongSet;
-import org.opendaylight.controller.cluster.datastore.utils.UnsignedLongBitmap;
+import org.opendaylight.controller.cluster.raft.spi.ImmutableUnsignedLongSet;
+import org.opendaylight.controller.cluster.raft.spi.MutableUnsignedLongSet;
+import org.opendaylight.controller.cluster.raft.spi.UnsignedLongBitmap;
 import org.opendaylight.yangtools.concepts.Identifiable;
 
 final class FrontendHistoryMetadataBuilder implements Identifiable<LocalHistoryIdentifier> {

@@ -17,7 +17,7 @@ import java.util.Optional;
 import java.util.SortedSet;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.controller.cluster.datastore.utils.MutableUnsignedLongSet;
+import org.opendaylight.controller.cluster.raft.spi.MutableUnsignedLongSet;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 
 /**

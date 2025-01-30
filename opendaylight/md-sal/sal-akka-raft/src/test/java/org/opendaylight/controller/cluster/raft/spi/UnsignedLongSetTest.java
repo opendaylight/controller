@@ -5,16 +5,16 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.datastore.utils;
+package org.opendaylight.controller.cluster.raft.spi;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import java.io.ByteArrayInputStream;
@@ -23,14 +23,14 @@ import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.StrictStubs.class)
-public class UnsignedLongSetTest {
+@ExtendWith(MockitoExtension.class)
+class UnsignedLongSetTest {
     @Test
-    public void testOperations() {
+    void testOperations() {
         final var set = MutableUnsignedLongSet.of();
         assertEquals("MutableUnsignedLongSet{size=0}", set.toString());
         assertFalse(set.contains(0));
@@ -74,8 +74,7 @@ public class UnsignedLongSetTest {
     }
 
     @Test
-    public void testSerialization() throws IOException {
-
+    void testSerialization() throws Exception {
         final var set = MutableUnsignedLongSet.of(0, 1, 4, 3).immutableCopy();
 
         final var bos = new ByteArrayOutputStream();
@@ -96,13 +95,13 @@ public class UnsignedLongSetTest {
     }
 
     @Test
-    public void testToRangeSet() {
+    void testToRangeSet() {
         final var set = MutableUnsignedLongSet.of(0, 1, 4, 3);
         assertEquals("[[0..2), [3..5)]", set.toRangeSet().toString());
     }
 
     @Test
-    public void testEmptyCopy() {
+    void testEmptyCopy() {
         final var orig = MutableUnsignedLongSet.of();
         assertSame(ImmutableUnsignedLongSet.of(), orig.immutableCopy());
         final var copy = orig.mutableCopy();
@@ -111,7 +110,7 @@ public class UnsignedLongSetTest {
     }
 
     @Test
-    public void testMutableCopy() {
+    void testMutableCopy() {
         final var orig = MutableUnsignedLongSet.of();
         orig.add(-1);
         assertEquals("MutableUnsignedLongSet{span=[18446744073709551615..18446744073709551615], size=1}",
@@ -128,19 +127,19 @@ public class UnsignedLongSetTest {
     }
 
     @Test
-    public void testWriteRangesTo() throws IOException {
+    void testWriteRangesTo() throws IOException {
         ImmutableUnsignedLongSet.of().writeRangesTo(mock(DataOutput.class), 0);
     }
 
     @Test
-    public void testWriteRangesToViolation() {
+    void testWriteRangesToViolation() {
         final var ex = assertThrows(IOException.class,
             () -> ImmutableUnsignedLongSet.of().writeRangesTo(mock(DataOutput.class), 1));
         assertEquals("Mismatched size: expected 0, got 1", ex.getMessage());
     }
 
     @Test
-    public void testAddRange() {
+    void testAddRange() {
         var set = sparseSet();
         set.addAll(MutableUnsignedLongSet.of(1, 2));
         assertRanges("[[1..2], [5..6], [9..10], [13..14]]", set);

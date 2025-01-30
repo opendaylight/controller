@@ -5,9 +5,8 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.datastore.utils;
+package org.opendaylight.controller.cluster.raft.spi;
 
-import com.google.common.annotations.Beta;
 import com.google.common.collect.ImmutableSortedSet;
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -18,7 +17,9 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.Immutable;
 import org.opendaylight.yangtools.concepts.WritableObject;
 
-@Beta
+/**
+ * An immutable {@link UnsignedLongSet}.
+ */
 public final class ImmutableUnsignedLongSet extends UnsignedLongSet implements Immutable, WritableObject {
     // Do not all
     private static final int ARRAY_MAX_ELEMENTS = 4096;
@@ -26,7 +27,7 @@ public final class ImmutableUnsignedLongSet extends UnsignedLongSet implements I
     private static final @NonNull ImmutableUnsignedLongSet EMPTY =
         new ImmutableUnsignedLongSet(ImmutableSortedSet.of());
 
-    private ImmutableUnsignedLongSet(final NavigableSet<Entry> ranges) {
+    private ImmutableUnsignedLongSet(final NavigableSet<EntryImpl> ranges) {
         super(ranges);
     }
 
@@ -40,6 +41,11 @@ public final class ImmutableUnsignedLongSet extends UnsignedLongSet implements I
         return new ImmutableUnsignedLongSet(new TreeSet<>(mutable.trustedRanges()));
     }
 
+    /**
+     * Return an empty {@link ImmutableUnsignedLongSet}.
+     *
+     * @return an empty {@link ImmutableUnsignedLongSet}
+     */
     public static @NonNull ImmutableUnsignedLongSet of() {
         return EMPTY;
     }
@@ -61,18 +67,19 @@ public final class ImmutableUnsignedLongSet extends UnsignedLongSet implements I
             : readTreeRanges(in, size));
     }
 
-    private static ImmutableSortedSet<Entry> readArrayRanges(final DataInput in, final int size) throws IOException {
-        final var ranges = new Entry[size];
+    private static ImmutableSortedSet<EntryImpl> readArrayRanges(final DataInput in, final int size)
+            throws IOException {
+        final var ranges = new EntryImpl[size];
         for (int i = 0; i < size; ++i) {
-            ranges[i] = Entry.readUnsigned(in);
+            ranges[i] = EntryImpl.readUnsigned(in);
         }
         return ImmutableSortedSet.copyOf(ranges);
     }
 
-    private static TreeSet<Entry> readTreeRanges(final DataInput in, final int size) throws IOException {
-        final var ranges = new TreeSet<Entry>();
+    private static TreeSet<EntryImpl> readTreeRanges(final DataInput in, final int size) throws IOException {
+        final var ranges = new TreeSet<EntryImpl>();
         for (int i = 0; i < size; ++i) {
-            ranges.add(Entry.readUnsigned(in));
+            ranges.add(EntryImpl.readUnsigned(in));
         }
         return ranges;
     }

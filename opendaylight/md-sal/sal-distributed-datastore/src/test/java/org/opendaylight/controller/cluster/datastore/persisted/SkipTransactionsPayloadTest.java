@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore.persisted;
 
-import org.opendaylight.controller.cluster.datastore.utils.MutableUnsignedLongSet;
+import org.opendaylight.controller.cluster.raft.spi.MutableUnsignedLongSet;
 
 public class SkipTransactionsPayloadTest extends AbstractIdentifiablePayloadTest<SkipTransactionsPayload> {
     public SkipTransactionsPayloadTest() {

@@ -29,9 +29,9 @@ import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
-import org.opendaylight.controller.cluster.datastore.utils.ImmutableUnsignedLongSet;
-import org.opendaylight.controller.cluster.datastore.utils.MutableUnsignedLongSet;
-import org.opendaylight.controller.cluster.datastore.utils.UnsignedLongBitmap;
+import org.opendaylight.controller.cluster.raft.spi.ImmutableUnsignedLongSet;
+import org.opendaylight.controller.cluster.raft.spi.MutableUnsignedLongSet;
+import org.opendaylight.controller.cluster.raft.spi.UnsignedLongBitmap;
 
 public class FrontendShardDataTreeSnapshotMetadataTest {
 
