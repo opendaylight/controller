@@ -119,7 +119,6 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         MockRaftActorContext actorContext = createActorContextWithFollower();
         actorContext.setCommitIndex(-1);
-        actorContext.setPayloadVersion(payloadVersion);
 
         long term = 1;
         actorContext.setTermInfo(new TermInfo(term, ""));
@@ -1256,14 +1255,13 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         configParams.setHeartBeatInterval(new FiniteDuration(50, TimeUnit.MILLISECONDS));
         configParams.setElectionTimeoutFactor(100000);
-        MockRaftActorContext context = new MockRaftActorContext(id, getSystem(), actorRef);
+        MockRaftActorContext context = new MockRaftActorContext(id, getSystem(), actorRef, payloadVersion);
         context.setConfigParams(configParams);
-        context.setPayloadVersion(payloadVersion);
         return context;
     }
 
     private MockRaftActorContext createActorContextWithFollower() {
-        MockRaftActorContext actorContext = createActorContext();
+        MockRaftActorContext actorContext = createActorContext(payloadVersion);
         actorContext.setPeerAddresses(Map.of(FOLLOWER_ID, followerActor.path().toString()));
         return actorContext;
     }

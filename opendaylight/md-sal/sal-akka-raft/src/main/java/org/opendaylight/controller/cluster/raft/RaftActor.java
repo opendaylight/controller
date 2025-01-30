@@ -94,37 +94,29 @@ import org.opendaylight.yangtools.concepts.Immutable;
 public abstract class RaftActor extends AbstractUntypedPersistentActor {
     private static final long APPLY_STATE_DELAY_THRESHOLD_IN_NANOS = TimeUnit.MILLISECONDS.toNanos(50);
 
-    /**
-     * This context should NOT be passed directly to any other actor it is
-     * only to be consumed by the RaftActorBehaviors.
-     */
+    // This context should NOT be passed directly to any other actor it is  only to be consumed
+    // by the RaftActorBehaviors.
+    private final @NonNull LocalAccess localAccess;
+    private final @NonNull PersistentDataProvider persistentProvider = new PersistentDataProvider(this);
+    private final @NonNull DelegatingPersistentDataProvider delegatingPersistenceProvider =
+        new RaftActorDelegatingPersistentDataProvider(null, persistentProvider);
+    private final @NonNull BehaviorStateTracker behaviorStateTracker = new BehaviorStateTracker();
+
+    // FIXME: should be valid only after recovery
     private final RaftActorContextImpl context;
 
-    private final DelegatingPersistentDataProvider delegatingPersistenceProvider;
-
-    private final PersistentDataProvider persistentProvider;
-
-    private final BehaviorStateTracker behaviorStateTracker = new BehaviorStateTracker();
-
     private RaftActorRecoverySupport raftRecovery;
-
     private RaftActorSnapshotMessageSupport snapshotSupport;
-
     private RaftActorServerConfigurationSupport serverConfigurationSupport;
-
     private boolean shuttingDown;
 
-    protected RaftActor(final String memberId, final Map<String, String> peerAddresses,
+    protected RaftActor(final @NonNull String memberId, final Map<String, String> peerAddresses,
             final Optional<ConfigParams> configParams, final short payloadVersion) {
-        persistentProvider = new PersistentDataProvider(this);
-        delegatingPersistenceProvider = new RaftActorDelegatingPersistentDataProvider(null, persistentProvider);
+        localAccess = new LocalAccess(memberId, persistentProvider);
 
-        context = new RaftActorContextImpl(self(), getContext(), new LocalAccess(memberId, persistentProvider),
-            -1, -1, peerAddresses,
-            configParams.isPresent() ? configParams.orElseThrow() : new DefaultConfigParamsImpl(),
-            delegatingPersistenceProvider, this::handleApplyState, LOG, this::executeInSelf);
-
-        context.setPayloadVersion(payloadVersion);
+        context = new RaftActorContextImpl(self(), getContext(), localAccess, -1, -1, peerAddresses,
+            configParams.orElseGet(DefaultConfigParamsImpl::new), payloadVersion, delegatingPersistenceProvider,
+            this::handleApplyState, LOG, this::executeInSelf);
         context.setReplicatedLog(ReplicatedLogImpl.newInstance(context));
     }
 
@@ -134,7 +126,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
      * @return The member name
      */
     public final @NonNull String memberId() {
-        return context.getId();
+        return localAccess.memberId();
     }
 
     @Override
