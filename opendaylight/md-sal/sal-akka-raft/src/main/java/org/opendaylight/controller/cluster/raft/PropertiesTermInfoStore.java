@@ -17,6 +17,7 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.Properties;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
 import org.slf4j.Logger;
@@ -67,6 +68,12 @@ final class PropertiesTermInfoStore implements TermInfoStore {
 
         saveFile(props);
         doSetTerm(newTerm);
+    }
+
+    @Override
+    public @Nullable TermInfo readTerm() throws IOException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     @Override
