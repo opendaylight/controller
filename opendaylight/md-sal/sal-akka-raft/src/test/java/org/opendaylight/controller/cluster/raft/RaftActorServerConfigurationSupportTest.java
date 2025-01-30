@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -543,7 +544,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         assertEquals("getStatus", ServerChangeStatus.NO_LEADER, addServerReply.getStatus());
 
         assertEquals("Leader peers size", 0, leaderActorContext.getPeerIds().size());
-        assertEquals("isCapturing", false, leaderActorContext.getSnapshotManager().isCapturing());
+        assertFalse("isCapturing", leaderActorContext.getSnapshotManager().isCapturing());
 
         LOG.info("testAddServerWithLeaderChangeBeforePriorSnapshotComplete ending");
     }
@@ -636,7 +637,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         TestActorRef<MockRaftActor> noLeaderActor = actorFactory.createTestActor(
                 MockRaftActor.builder().id(LEADER_ID).peerAddresses(Map.of(FOLLOWER_ID,
-                        followerActor.path().toString())).config(configParams).persistent(Optional.of(false))
+                        followerActor.path().toString())).config(configParams).persistent(Optional.of(Boolean.FALSE))
                         .props().withDispatcher(Dispatchers.DefaultDispatcherId()),
                 actorFactory.generateActorId(LEADER_ID));
         noLeaderActor.underlyingActor().waitForInitializeBehaviorComplete();
@@ -742,7 +743,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         TestActorRef<MockRaftActor> followerRaftActor = actorFactory.createTestActor(
                 MockRaftActor.builder().id(FOLLOWER_ID).peerAddresses(Map.of(LEADER_ID,
-                        leaderActor.path().toString())).config(configParams).persistent(Optional.of(false))
+                        leaderActor.path().toString())).config(configParams).persistent(Optional.of(Boolean.FALSE))
                         .props().withDispatcher(Dispatchers.DefaultDispatcherId()),
                 actorFactory.generateActorId(FOLLOWER_ID));
         followerRaftActor.underlyingActor().waitForInitializeBehaviorComplete();
@@ -764,7 +765,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         configParams.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
         TestActorRef<MockRaftActor> noLeaderActor = actorFactory.createTestActor(
                 MockRaftActor.builder().id(LEADER_ID).peerAddresses(Map.of(FOLLOWER_ID,
-                        followerActor.path().toString())).config(configParams).persistent(Optional.of(false))
+                        followerActor.path().toString())).config(configParams).persistent(Optional.of(Boolean.FALSE))
                         .props().withDispatcher(Dispatchers.DefaultDispatcherId()),
                 actorFactory.generateActorId(LEADER_ID));
 
@@ -774,12 +775,12 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         ReplicatedLogEntry serverConfigEntry = new SimpleReplicatedLogEntry(1, 1,
                 new ServerConfigurationPayload(List.of()));
         boolean handled = support.handleMessage(new ApplyState(null, null, serverConfigEntry), ActorRef.noSender());
-        assertEquals("Message handled", true, handled);
+        assertTrue("Message handled", handled);
 
         ReplicatedLogEntry nonServerConfigEntry = new SimpleReplicatedLogEntry(1, 1,
                 new MockRaftActorContext.MockPayload("1"));
         handled = support.handleMessage(new ApplyState(null, null, nonServerConfigEntry), ActorRef.noSender());
-        assertEquals("Message handled", false, handled);
+        assertFalse("Message handled", handled);
 
         LOG.info("testOnApplyState ending");
     }
@@ -793,7 +794,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         TestActorRef<MockRaftActor> leaderActor = actorFactory.createTestActor(
                 MockRaftActor.builder().id(LEADER_ID).peerAddresses(Map.of(FOLLOWER_ID,
-                        followerActor.path().toString())).config(configParams).persistent(Optional.of(false))
+                        followerActor.path().toString())).config(configParams).persistent(Optional.of(Boolean.FALSE))
                         .props().withDispatcher(Dispatchers.DefaultDispatcherId()),
                 actorFactory.generateActorId(LEADER_ID));
         leaderActor.underlyingActor().waitForInitializeBehaviorComplete();
@@ -835,7 +836,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         TestActorRef<MockRaftActor> followerRaftActor = actorFactory.createTestActor(
                 MockRaftActor.builder().id(FOLLOWER_ID).peerAddresses(Map.of(LEADER_ID,
-                        leaderActor.path().toString())).config(configParams).persistent(Optional.of(false))
+                        leaderActor.path().toString())).config(configParams).persistent(Optional.of(Boolean.FALSE))
                         .props().withDispatcher(Dispatchers.DefaultDispatcherId()),
                 actorFactory.generateActorId(FOLLOWER_ID));
         followerRaftActor.underlyingActor().waitForInitializeBehaviorComplete();
@@ -1169,14 +1170,14 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         verifyServerConfigurationPayloadEntry(node1RaftActor.getRaftActorContext().getReplicatedLog(),
                 nonVotingServer(node1ID), nonVotingServer(node2ID), votingServer("downNode1"),
                 votingServer("downNode2"));
-        assertEquals("isVotingMember", false, node1RaftActor.getRaftActorContext().isVotingMember());
+        assertFalse("isVotingMember", node1RaftActor.getRaftActorContext().isVotingMember());
         assertEquals("getRaftState", RaftState.Follower, node1RaftActor.getRaftState());
         assertEquals("getLeaderId", null, node1RaftActor.getLeaderId());
 
         verifyServerConfigurationPayloadEntry(node2RaftActor.getRaftActorContext().getReplicatedLog(),
                 nonVotingServer(node1ID), nonVotingServer(node2ID), votingServer("downNode1"),
                 votingServer("downNode2"));
-        assertEquals("isVotingMember", false, node2RaftActor.getRaftActorContext().isVotingMember());
+        assertFalse("isVotingMember", node2RaftActor.getRaftActorContext().isVotingMember());
 
         // For the test, we send a ChangeServersVotingStatus message to node1 to flip the voting states for
         // each server, ie node1 and node2 to voting and the 2 down nodes to non-voting. This should cause
@@ -1202,7 +1203,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         // ChangeServersVotingStatus message, it will try to elect a leader.
 
         AbstractRaftActorIntegrationTest.verifyRaftState(node1RaftActorRef,
-            rs -> assertEquals("getLeader", null, rs.getLeader()));
+            rs -> assertNull("getLeader", rs.getLeader()));
 
         // Update node2's peer address and send the message again
 
@@ -1218,7 +1219,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         verifyServerConfigurationPayloadEntry(node1RaftActor.getRaftActorContext().getReplicatedLog(),
                 votingServer(node1ID), votingServer(node2ID), nonVotingServer("downNode1"),
                 nonVotingServer("downNode2"));
-        assertEquals("isVotingMember", true, node1RaftActor.getRaftActorContext().isVotingMember());
+        assertTrue("isVotingMember", node1RaftActor.getRaftActorContext().isVotingMember());
         assertEquals("getRaftState", RaftState.Leader, node1RaftActor.getRaftState());
 
         apply = MessageCollectorActor.expectFirstMatching(node2Collector, ApplyJournalEntries.class);
@@ -1226,7 +1227,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         verifyServerConfigurationPayloadEntry(node2RaftActor.getRaftActorContext().getReplicatedLog(),
                 votingServer(node1ID), votingServer(node2ID), nonVotingServer("downNode1"),
                 nonVotingServer("downNode2"));
-        assertEquals("isVotingMember", true, node2RaftActor.getRaftActorContext().isVotingMember());
+        assertTrue("isVotingMember", node2RaftActor.getRaftActorContext().isVotingMember());
         assertEquals("getRaftState", RaftState.Follower, node2RaftActor.getRaftState());
 
         LOG.info("testChangeToVotingWithNoLeader ending");
@@ -1354,7 +1355,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         MessageCollectorActor.expectFirstMatching(node1Collector, ApplyJournalEntries.class);
         verifyServerConfigurationPayloadEntry(node1RaftActor.getRaftActorContext().getReplicatedLog(),
                 votingServer(node1ID), votingServer(node2ID));
-        assertEquals("isVotingMember", true, node1RaftActor.getRaftActorContext().isVotingMember());
+        assertTrue("isVotingMember", node1RaftActor.getRaftActorContext().isVotingMember());
         assertEquals("getRaftState", RaftState.Follower, node1RaftActor.getRaftState());
 
         LOG.info("testChangeToVotingWithNoLeaderAndForwardedToOtherNodeAfterElectionTimeout ending");
@@ -1419,7 +1420,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         MessageCollectorActor.expectFirstMatching(node1Collector, ApplyJournalEntries.class);
         verifyServerConfigurationPayloadEntry(node1RaftActor.getRaftActorContext().getReplicatedLog(),
                 votingServer(node1ID), votingServer(node2ID));
-        assertEquals("isVotingMember", true, node1RaftActor.getRaftActorContext().isVotingMember());
+        assertTrue("isVotingMember", node1RaftActor.getRaftActorContext().isVotingMember());
         assertEquals("getRaftState", RaftState.Follower, node1RaftActor.getRaftState());
 
         MessageCollectorActor.expectFirstMatching(node2Collector, ApplyJournalEntries.class);

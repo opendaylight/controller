@@ -1234,7 +1234,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
             member3Cars.tell(new StopDropMessages<>(AppendEntries.class), null);
 
             await("Is tx stuck in COMMIT_PENDING")
-                    .atMost(10, TimeUnit.SECONDS).untilAtomic(submitDone, equalTo(true));
+                    .atMost(10, TimeUnit.SECONDS).untilAtomic(submitDone, equalTo(Boolean.TRUE));
 
         }
 

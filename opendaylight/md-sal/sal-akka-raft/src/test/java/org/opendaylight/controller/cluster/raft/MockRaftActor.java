@@ -8,7 +8,7 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import com.google.common.io.ByteSource;
@@ -92,7 +92,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
 
     public void waitForRecoveryComplete() {
         try {
-            assertEquals("Recovery complete", true, recoveryComplete.await(5,  TimeUnit.SECONDS));
+            assertTrue("Recovery complete", recoveryComplete.await(5,  TimeUnit.SECONDS));
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -100,7 +100,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
 
     public void waitForInitializeBehaviorComplete() {
         try {
-            assertEquals("Behavior initialized", true, initializeBehaviorComplete.await(5,  TimeUnit.SECONDS));
+            assertTrue("Behavior initialized", initializeBehaviorComplete.await(5,  TimeUnit.SECONDS));
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
