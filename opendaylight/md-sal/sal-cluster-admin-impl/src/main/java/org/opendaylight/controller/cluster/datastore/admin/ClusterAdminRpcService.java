@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,6 +36,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Status.Success;
+import org.apache.pekko.dispatch.Mapper;
 import org.apache.pekko.dispatch.OnComplete;
 import org.apache.pekko.pattern.Patterns;
 import org.apache.pekko.util.Timeout;
@@ -124,7 +126,6 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.concurrent.Future;
 
 /**
  * Implements the yang RPCs defined in the generated ClusterAdminService interface.
@@ -132,7 +133,7 @@ import scala.concurrent.Future;
  * @author Thomas Pantelis
  */
 public final class ClusterAdminRpcService {
-    private static final Timeout SHARD_MGR_TIMEOUT = new Timeout(1, TimeUnit.MINUTES);
+    private static final Duration SHARD_MGR_TIMEOUT = Duration.ofMinutes(1);
 
     private static final Logger LOG = LoggerFactory.getLogger(ClusterAdminRpcService.class);
     private static final @NonNull RpcResult<LocateShardOutput> LOCAL_SHARD_RESULT =
@@ -521,19 +522,20 @@ public final class ClusterAdminRpcService {
                 builder.put(new ShardIdentifier(type, shardName), future);
 
                 final var disp = utils.getClientDispatcher();
-                utils.findPrimaryShardAsync(shardName)
-                    .flatMap(info ->
-                        Patterns.ask(info.getPrimaryShardActor(), GetKnownClients.INSTANCE, SHARD_MGR_TIMEOUT), disp)
-                    .onComplete(new OnComplete<>() {
-                        @Override
-                        public void onComplete(final Throwable failure, final Object success) {
-                            if (failure == null) {
-                                future.set((GetKnownClientsReply) success);
-                            } else {
-                                future.setException(failure);
-                            }
-                        }
-                    }, disp);
+                utils.findPrimaryShardAsync(shardName).map(new Mapper<PrimaryShardInfo, Void>() {
+                    @Override
+                    public Void apply(final PrimaryShardInfo info) {
+                        Patterns.ask(info.getPrimaryShardActor(), GetKnownClients.INSTANCE, SHARD_MGR_TIMEOUT)
+                            .whenCompleteAsync((success, failure) -> {
+                                if (failure == null) {
+                                    future.set((GetKnownClientsReply) success);
+                                } else {
+                                    future.setException(failure);
+                                }
+                            }, disp);
+                        return null;
+                    }
+                }, disp);
             }
         }
 
@@ -726,23 +728,18 @@ public final class ClusterAdminRpcService {
                 failure.getMessage())).build());
     }
 
-    private <T> ListenableFuture<T> ask(final ActorRef actor, final Object message, final Timeout timeout) {
-        final SettableFuture<T> returnFuture = SettableFuture.create();
-
-        @SuppressWarnings("unchecked")
-        Future<T> askFuture = (Future<T>) Patterns.ask(actor, message, timeout);
-        askFuture.onComplete(new OnComplete<T>() {
-            @Override
-            public void onComplete(final Throwable failure, final T resp) {
-                if (failure != null) {
-                    returnFuture.setException(failure);
-                } else {
-                    returnFuture.set(resp);
-                }
+    private <T> ListenableFuture<T> ask(final ActorRef actor, final Object message, final Duration timeout) {
+        final var ret = SettableFuture.<T>create();
+        Patterns.ask(actor, message, timeout).whenCompleteAsync((resp, failure) -> {
+            if (failure == null) {
+                @SuppressWarnings("unchecked")
+                final var cast = (T) resp;
+                ret.set(cast);
+            } else {
+                ret.setException(failure);
             }
         }, configDataStore.getActorUtils().getClientDispatcher());
-
-        return returnFuture;
+        return ret;
     }
 
     private static <T> ListenableFuture<RpcResult<T>> newFailedRpcResultFuture(final String message) {
