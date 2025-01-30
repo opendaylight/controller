@@ -25,11 +25,6 @@ final class DatastoreInfoMXBeanImpl extends AbstractMXBean implements DatastoreI
     }
 
     @Override
-    public double getTransactionCreationRateLimit() {
-        return actorUtils.getTxCreationLimit();
-    }
-
-    @Override
     public long getAskTimeoutExceptionCount() {
         return actorUtils.getAskTimeoutExceptionCount();
     }

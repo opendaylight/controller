@@ -46,7 +46,10 @@ public interface DatastoreConfigurationMXBean {
 
     boolean isPersistent();
 
-    long getTransactionCreationInitialRateLimit();
+    @Deprecated(since = "11.0.0", forRemoval = true)
+    default long getTransactionCreationInitialRateLimit() {
+        return 100;
+    }
 
     boolean getTransactionContextDebugEnabled();
 

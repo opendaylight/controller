@@ -122,7 +122,6 @@ public class ActorUtils {
     private DatastoreContext datastoreContext;
     private FiniteDuration operationDuration;
     private Timeout operationTimeout;
-    private TransactionRateLimiter txRateLimiter;
     private Timeout transactionCommitOperationTimeout;
     private Timeout shardInitializationTimeout;
 
@@ -163,8 +162,6 @@ public class ActorUtils {
     }
 
     private void setCachedProperties() {
-        txRateLimiter = new TransactionRateLimiter(this);
-
         operationDuration = FiniteDuration.create(datastoreContext.getOperationTimeoutInMillis(),
             TimeUnit.MILLISECONDS);
         operationTimeout = new Timeout(operationDuration);
@@ -476,28 +473,12 @@ public class ActorUtils {
         return datastoreContext.getDataStoreName();
     }
 
-    /**
-     * Get the current transaction creation rate limit.
-     *
-     * @return the rate limit
-     */
-    public double getTxCreationLimit() {
-        return txRateLimiter.getTxCreationLimit();
-    }
-
     public long getAskTimeoutExceptionCount() {
         return askTimeoutCounter.sum();
     }
 
     public void resetAskTimeoutExceptionCount() {
         askTimeoutCounter.reset();
-    }
-
-    /**
-     * Try to acquire a transaction creation permit. Will block if no permits are available.
-     */
-    public void acquireTxCreationPermit() {
-        txRateLimiter.acquire();
     }
 
     /**

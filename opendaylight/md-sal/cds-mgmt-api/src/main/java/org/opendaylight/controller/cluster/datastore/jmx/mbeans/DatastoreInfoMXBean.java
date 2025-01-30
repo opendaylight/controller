@@ -17,7 +17,10 @@ import javax.management.MXBean;
 @MXBean
 public interface DatastoreInfoMXBean {
 
-    double getTransactionCreationRateLimit();
+    @Deprecated(since = "11.0.0", forRemoval = true)
+    default double getTransactionCreationRateLimit() {
+        return Double.NaN;
+    }
 
     /**
      * Return the number of {@code AskTimeoutException}s encountered by the datastore.
