@@ -40,6 +40,11 @@ abstract class AbstractTermInfoStore implements TermInfoStore {
     }
 
     @Override
+    public final @Nullable TermInfo loadAndSetTerm() {
+        return null;
+    }
+
+    @Override
     public final String toString() {
         return MoreObjects.toStringHelper(this).add("current", current).toString();
     }

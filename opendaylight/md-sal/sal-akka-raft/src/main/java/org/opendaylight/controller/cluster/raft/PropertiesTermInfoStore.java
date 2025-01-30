@@ -59,7 +59,7 @@ final class PropertiesTermInfoStore implements TermInfoStore {
     }
 
     @Override
-    public void persistTerm(final TermInfo newTerm) {
+    public void storeAndSetTerm(final TermInfo newTerm) {
         final var props = new Properties(2);
         props.setProperty(PROP_TERM, String.valueOf(newTerm.term()));
         final var votedFor = newTerm.votedFor();
@@ -78,7 +78,7 @@ final class PropertiesTermInfoStore implements TermInfoStore {
     }
 
     @Override
-    public @Nullable TermInfo readTerm() throws IOException {
+    public @Nullable TermInfo loadAndSetTerm() {
         // FIXME: implement this
         return null;
     }

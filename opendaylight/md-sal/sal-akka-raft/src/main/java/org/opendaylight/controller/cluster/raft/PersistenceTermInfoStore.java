@@ -9,7 +9,8 @@ package org.opendaylight.controller.cluster.raft;
 
 import static java.util.Objects.requireNonNull;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
@@ -20,13 +21,14 @@ import org.slf4j.LoggerFactory;
 /**
  * Implementation of ElectionTerm for the RaftActor.
  */
+@NonNullByDefault
 final class PersistenceTermInfoStore implements TermInfoStore {
     private static final Logger LOG = LoggerFactory.getLogger(PersistenceTermInfoStore.class);
 
     private final DataPersistenceProvider persistence;
     private final String logId;
 
-    private @NonNull TermInfo currentTerm = TermInfo.INITIAL;
+    private TermInfo currentTerm = TermInfo.INITIAL;
 
     PersistenceTermInfoStore(final DataPersistenceProvider persistence, final String logId) {
         this.persistence = requireNonNull(persistence);
@@ -47,7 +49,12 @@ final class PersistenceTermInfoStore implements TermInfoStore {
     @Override
     public void storeAndSetTerm(final TermInfo newTerm) {
         setTerm(newTerm);
-        // FIXME : Maybe first persist then update the state
         persistence.persist(new UpdateElectionTerm(newTerm), NoopProcedure.instance());
+    }
+
+    @Override
+    public @Nullable TermInfo loadAndSetTerm() {
+        // We cannot load TermInfo directly
+        return null;
     }
 }
