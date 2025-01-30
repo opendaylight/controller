@@ -95,7 +95,9 @@ public class SnapshotManagerTest extends AbstractActorTest {
         doReturn(new FileBackedOutputStreamFactory(10000000, "target"))
                 .when(mockRaftActorContext).getFileBackedOutputStreamFactory();
 
-        snapshotManager = new SnapshotManager(mockRaftActorContext, LoggerFactory.getLogger(this.getClass()));
+        doReturn(LoggerFactory.getLogger(SnapshotManagerTest.class)).when(mockRaftActorContext).getLogger();
+
+        snapshotManager = new SnapshotManager(mockRaftActorContext);
         factory = new TestActorFactory(getSystem());
 
         actorRef = factory.createActor(MessageCollectorActor.props(), factory.generateActorId("test-"));
