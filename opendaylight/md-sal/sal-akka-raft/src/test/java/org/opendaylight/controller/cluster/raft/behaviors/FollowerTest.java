@@ -181,7 +181,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, RequestVoteReply.class);
 
-        assertEquals("isVoteGranted", true, reply.isVoteGranted());
+        assertTrue("isVoteGranted", reply.isVoteGranted());
         assertEquals("getTerm", term, reply.getTerm());
         verify(follower).scheduleElection(any(FiniteDuration.class));
     }
@@ -200,7 +200,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, RequestVoteReply.class);
 
-        assertEquals("isVoteGranted", false, reply.isVoteGranted());
+        assertFalse("isVoteGranted", reply.isVoteGranted());
         verify(follower, never()).scheduleElection(any(FiniteDuration.class));
     }
 
@@ -519,7 +519,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor,
                 AppendEntriesReply.class);
 
-        assertEquals("isSuccess", false, reply.isSuccess());
+        assertFalse("isSuccess", reply.isSuccess());
     }
 
     @Test
@@ -541,7 +541,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
 
-        assertEquals("isSuccess", true, reply.isSuccess());
+        assertTrue("isSuccess", reply.isSuccess());
     }
 
     /**
@@ -835,7 +835,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         for (var reply : replies) {
             assertEquals("getChunkIndex", chunkIndex++, reply.getChunkIndex());
             assertEquals("getTerm", 1, reply.getTerm());
-            assertEquals("isSuccess", true, reply.isSuccess());
+            assertTrue("isSuccess", reply.isSuccess());
             assertEquals("getFollowerId", context.getId(), reply.getFollowerId());
         }
 
@@ -881,7 +881,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         follower.handleMessage(leaderActor, appendEntries);
 
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
-        assertEquals("isSuccess", true, reply.isSuccess());
+        assertTrue("isSuccess", reply.isSuccess());
         assertEquals("getLogLastIndex", context.getReplicatedLog().lastIndex(), reply.getLogLastIndex());
         assertEquals("getLogLastTerm", context.getReplicatedLog().lastTerm(), reply.getLogLastTerm());
         assertEquals("getTerm", context.currentTerm(), reply.getTerm());
@@ -924,7 +924,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         follower.handleMessage(leaderActor, appendEntries);
 
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
-        assertEquals("isSuccess", true, reply.isSuccess());
+        assertTrue("isSuccess", reply.isSuccess());
         assertEquals("getLogLastIndex", 2, reply.getLogLastIndex());
         assertEquals("getLogLastTerm", 2, reply.getLogLastTerm());
         assertEquals("getTerm", 2, reply.getTerm());
@@ -1001,7 +1001,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         InstallSnapshotReply reply = MessageCollectorActor.expectFirstMatching(leaderActor,
                 InstallSnapshotReply.class);
 
-        assertEquals("isSuccess", false, reply.isSuccess());
+        assertFalse("isSuccess", reply.isSuccess());
         assertEquals("getChunkIndex", -1, reply.getChunkIndex());
         assertEquals("getTerm", 1, reply.getTerm());
         assertEquals("getFollowerId", context.getId(), reply.getFollowerId());
@@ -1093,7 +1093,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         final AtomicReference<MockRaftActor> followerRaftActor = new AtomicReference<>();
         RaftActorSnapshotCohort snapshotCohort = newRaftActorSnapshotCohort(followerRaftActor);
-        Builder builder = MockRaftActor.builder().persistent(Optional.of(true)).id(id)
+        Builder builder = MockRaftActor.builder().persistent(Optional.of(Boolean.TRUE)).id(id)
                 .peerAddresses(Map.of("leader", "")).config(config).snapshotCohort(snapshotCohort);
         TestActorRef<MockRaftActor> followerActorRef = actorFactory.createTestActor(builder.props()
                 .withDispatcher(Dispatchers.DefaultDispatcherId()), id);
@@ -1112,7 +1112,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         followerActorRef.tell(appendEntries, leaderActor);
 
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
-        assertEquals("isSuccess", true, reply.isSuccess());
+        assertTrue("isSuccess", reply.isSuccess());
 
         final Snapshot snapshot = InMemorySnapshotStore.waitForSavedSnapshot(id, Snapshot.class);
 
@@ -1148,7 +1148,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         final AtomicReference<MockRaftActor> followerRaftActor = new AtomicReference<>();
         RaftActorSnapshotCohort snapshotCohort = newRaftActorSnapshotCohort(followerRaftActor);
-        Builder builder = MockRaftActor.builder().persistent(Optional.of(true)).id(id)
+        Builder builder = MockRaftActor.builder().persistent(Optional.of(Boolean.TRUE)).id(id)
                 .peerAddresses(Map.of("leader", "")).config(config).snapshotCohort(snapshotCohort);
         TestActorRef<MockRaftActor> followerActorRef = actorFactory.createTestActor(builder.props()
                 .withDispatcher(Dispatchers.DefaultDispatcherId()), id);
@@ -1168,7 +1168,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         followerActorRef.tell(appendEntries, leaderActor);
 
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
-        assertEquals("isSuccess", true, reply.isSuccess());
+        assertTrue("isSuccess", reply.isSuccess());
 
         final Snapshot snapshot = InMemorySnapshotStore.waitForSavedSnapshot(id, Snapshot.class);
 
@@ -1177,7 +1177,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         // We expect the ApplyJournalEntries for index 2 to remain in the persisted log b/c it's still queued for
         // persistence by the time we initiate capture so the last persisted journal sequence number doesn't include it.
         // This is OK - on recovery it will be a no-op since index 2 has already been applied.
-        List<Object> journalEntries = InMemoryJournal.get(id, Object.class);
+        final var journalEntries = InMemoryJournal.get(id, Object.class);
         assertEquals("Persisted journal entries size: " + journalEntries, 1, journalEntries.size());
         assertEquals("Persisted journal entry type", ApplyJournalEntries.class, journalEntries.get(0).getClass());
         assertEquals("ApplyJournalEntries index", 2, ((ApplyJournalEntries)journalEntries.get(0)).getToIndex());
@@ -1223,7 +1223,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         final AtomicReference<MockRaftActor> followerRaftActor = new AtomicReference<>();
         RaftActorSnapshotCohort snapshotCohort = newRaftActorSnapshotCohort(followerRaftActor);
-        Builder builder = MockRaftActor.builder().persistent(Optional.of(true)).id(id)
+        Builder builder = MockRaftActor.builder().persistent(Optional.of(Boolean.TRUE)).id(id)
                 .peerAddresses(Map.of("leader", "")).config(config).snapshotCohort(snapshotCohort);
         TestActorRef<MockRaftActor> followerActorRef = actorFactory.createTestActor(builder.props()
                 .withDispatcher(Dispatchers.DefaultDispatcherId()), id);
@@ -1243,7 +1243,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         followerActorRef.tell(appendEntries, leaderActor);
 
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
-        assertEquals("isSuccess", true, reply.isSuccess());
+        assertTrue("isSuccess", reply.isSuccess());
 
         final Snapshot snapshot = InMemorySnapshotStore.waitForSavedSnapshot(id, Snapshot.class);
 
@@ -1360,7 +1360,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertEquals("getLogLastIndex", expLogLastIndex, reply.getLogLastIndex());
         assertEquals("getPayloadVersion", payloadVersion, reply.getPayloadVersion());
         assertEquals("isForceInstallSnapshot", expForceInstallSnapshot, reply.isForceInstallSnapshot());
-        assertEquals("isNeedsLeaderAddress", false, reply.isNeedsLeaderAddress());
+        assertFalse("isNeedsLeaderAddress", reply.isNeedsLeaderAddress());
     }
 
 
@@ -1385,6 +1385,6 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     @Override
     protected void handleAppendEntriesAddSameEntryToLogReply(final ActorRef replyActor) {
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(replyActor, AppendEntriesReply.class);
-        assertEquals("isSuccess", true, reply.isSuccess());
+        assertTrue("isSuccess", reply.isSuccess());
     }
 }

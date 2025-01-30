@@ -385,9 +385,9 @@ public class RaftActorRecoverySupportTest {
         //verify new peers
         assertTrue("Dynamic server configuration", context.isDynamicServerConfigurationInUse());
         assertEquals("New peer Ids", Set.of(follower1, follower2, follower3), Set.copyOf(context.getPeerIds()));
-        assertEquals("follower1 isVoting", true, context.getPeerInfo(follower1).isVoting());
-        assertEquals("follower2 isVoting", false, context.getPeerInfo(follower2).isVoting());
-        assertEquals("follower3 isVoting", true, context.getPeerInfo(follower3).isVoting());
+        assertTrue("follower1 isVoting", context.getPeerInfo(follower1).isVoting());
+        assertFalse("follower2 isVoting", context.getPeerInfo(follower2).isVoting());
+        assertTrue("follower3 isVoting", context.getPeerInfo(follower3).isVoting());
 
         sendMessageToSupport(new ApplyJournalEntries(0));
 

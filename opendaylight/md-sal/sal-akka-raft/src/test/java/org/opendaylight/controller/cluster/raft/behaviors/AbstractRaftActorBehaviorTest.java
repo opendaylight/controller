@@ -11,6 +11,7 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -115,7 +116,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
 
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(behaviorActor, AppendEntriesReply.class);
 
-        assertEquals("isSuccess", false, reply.isSuccess());
+        assertFalse("isSuccess", reply.isSuccess());
         assertEquals("getPayloadVersion", payloadVersion, reply.getPayloadVersion());
     }
 
@@ -174,7 +175,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         behavior.handleMessage(behaviorActor, new RequestVote(context.currentTerm(), "test", 10000, 999));
 
         RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(behaviorActor, RequestVoteReply.class);
-        assertEquals("isVoteGranted", true, reply.isVoteGranted());
+        assertTrue("isVoteGranted", reply.isVoteGranted());
     }
 
     /**
@@ -197,10 +198,8 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
             new RequestVote(context.currentTerm(), "test", index - 1, context.currentTerm()));
 
         RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(behaviorActor, RequestVoteReply.class);
-        assertEquals("isVoteGranted", false, reply.isVoteGranted());
+        assertFalse("isVoteGranted", reply.isVoteGranted());
     }
-
-
 
     /**
      * This test verifies that the receiving RaftActor will not grant a vote
@@ -218,7 +217,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         behavior.handleMessage(behaviorActor, new RequestVote(999, "test", 10000, 999));
 
         RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(behaviorActor, RequestVoteReply.class);
-        assertEquals("isVoteGranted", false, reply.isVoteGranted());
+        assertFalse("isVoteGranted", reply.isVoteGranted());
     }
 
     @Test
