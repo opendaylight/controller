@@ -15,6 +15,9 @@ import java.util.TreeSet;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.Mutable;
 
+/**
+ * A mutable {@link UnsignedLongSet}.
+ */
 public final class MutableUnsignedLongSet extends UnsignedLongSet implements Mutable {
     MutableUnsignedLongSet(final TreeSet<EntryImpl> ranges) {
         super(ranges);
@@ -38,7 +41,7 @@ public final class MutableUnsignedLongSet extends UnsignedLongSet implements Mut
     }
 
     public void add(final long longBits) {
-        addOne(trustedRanges(), new EntryImpl(longBits));
+        addOne(trustedRanges(), new Entry1(longBits));
     }
 
     public void addAll(final UnsignedLongSet other) {
@@ -118,7 +121,7 @@ public final class MutableUnsignedLongSet extends UnsignedLongSet implements Mut
         }
 
         // If the end of the range is already covered by an existing range, we can expand that
-        final var tailIt = ranges.headSet(new EntryImpl(range.upperBits()), true).descendingIterator();
+        final var tailIt = ranges.headSet(new Entry1(range.upperBits()), true).descendingIterator();
         if (tailIt.hasNext()) {
             final var upper = tailIt.next();
             tailIt.remove();
@@ -137,7 +140,7 @@ public final class MutableUnsignedLongSet extends UnsignedLongSet implements Mut
         ranges.add(range);
     }
 
-    private static @NonNull EntryImpl expandFloor(final NavigableSet<EntryImpl> ranges, final EntryImpl floor,
+    private static @NonNull EntryN expandFloor(final NavigableSet<EntryImpl> ranges, final EntryImpl floor,
             final long upperBits) {
         // Acquire any ranges after floor and clean them up
         final var tailIt = ranges.tailSet(floor, false).iterator();
@@ -162,7 +165,7 @@ public final class MutableUnsignedLongSet extends UnsignedLongSet implements Mut
         return floor.withUpperBits(upperBits);
     }
 
-    private static @NonNull EntryImpl expandCeiling(final NavigableSet<EntryImpl> ranges, final EntryImpl ceiling,
+    private static @NonNull EntryN expandCeiling(final NavigableSet<EntryImpl> ranges, final EntryImpl ceiling,
             final long lowerBits, final long upperBits) {
         if (Long.compareUnsigned(ceiling.upperBits(), upperBits) >= 0) {
             // Upper end is already covered
@@ -180,7 +183,7 @@ public final class MutableUnsignedLongSet extends UnsignedLongSet implements Mut
             }
         }
 
-        return new EntryImpl(lowerBits, newUpper);
+        return new EntryN(lowerBits, newUpper);
     }
 
     // Provides compatibility with RangeSet<UnsignedLong> using [lower, upper + 1)

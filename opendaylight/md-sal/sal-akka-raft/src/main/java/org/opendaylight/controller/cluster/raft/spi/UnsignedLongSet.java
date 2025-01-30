@@ -10,16 +10,12 @@ package org.opendaylight.controller.cluster.raft.spi;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.NavigableSet;
 import java.util.TreeSet;
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.yangtools.concepts.Immutable;
-import org.opendaylight.yangtools.concepts.WritableObjects;
 
 /**
  * A class holding an equivalent of {@code Set<UnsignedLong>}. It is geared towards efficiently tracking ranges of
@@ -28,80 +24,103 @@ import org.opendaylight.yangtools.concepts.WritableObjects;
  * <p>Unlike a {@code RangeSet}, though, this class takes advantage of knowing that an unsigned long is a discrete unit
  * and can be stored in a simple {@code long}.
  */
+@NonNullByDefault
 public abstract sealed class UnsignedLongSet permits ImmutableUnsignedLongSet, MutableUnsignedLongSet {
     /**
      * A single entry tracked in this set. It represents all discrete values in the range
      * {@code [lowerBits(), upperBits()]}.
      *
      * <p>The equivalent construct in {@code RangeSet<UnsignedLong>} terms is
-     * {@code Range.closedOpen(UnsignedLong.fromLongBits(lowerBits), UnsignedLong.fromLongBits(upperBits + 1))}. We are
-     * saving two objects with this specialization.
+     * {@code Range.closedOpen(UnsignedLong.fromLongBits(lowerBits), UnsignedLong.fromLongBits(upperBits + 1))}.
+     *
+     * <p>We are saving two objects with this specialization and are more expressive by using closed range.
      */
-    @NonNullByDefault
-    public sealed interface Entry extends Comparable<Entry>, Immutable permits EntryImpl {
+    public sealed interface Entry extends Immutable permits EntryImpl {
 
         long lowerBits();
 
         long upperBits();
     }
 
-    /**
-     * Internal implementation of {@link Entry}. Separated out to hide the default constructor, which does not perform
-     * lower/upper sanity check.
-     */
-    // TODO: would it make sense to separate out
-    record EntryImpl(long lowerBits, long upperBits) implements Entry {
-        EntryImpl(final long longBits) {
-            this(longBits, longBits);
-
-        }
-
-        @NonNull EntryImpl withLowerBits(final long newLowerBits) {
-            return new EntryImpl(newLowerBits, upperBits);
-        }
-
-        @NonNull EntryImpl withUpperBits(final long newUpperBits) {
-            return new EntryImpl(lowerBits, newUpperBits);
-        }
-
-        // These two methods provide the same serialization format as the one we've used to serialize
-        // Range<UnsignedLong>
-        static @NonNull EntryImpl readUnsigned(final DataInput in) throws IOException {
-            final byte hdr = WritableObjects.readLongHeader(in);
-            final long first = WritableObjects.readFirstLong(in, hdr);
-            final long second = WritableObjects.readSecondLong(in, hdr) - 1;
-            if (Long.compareUnsigned(first, second) > 0) {
-                throw new IOException("Lower endpoint " + Long.toUnsignedString(first) + " is greater than upper "
-                    + "endpoint " + Long.toUnsignedString(second));
-            }
-
-            return new EntryImpl(first, second);
-        }
-
-        void writeUnsigned(final @NonNull DataOutput out) throws IOException {
-            WritableObjects.writeLongs(out, lowerBits, upperBits + 1);
-        }
-
+    // Internal access and common implementation details.
+    sealed interface EntryImpl extends Comparable<EntryImpl>, Entry {
         @Override
         @SuppressWarnings("checkstyle:parameterName")
-        public int compareTo(final Entry o) {
-            return Long.compareUnsigned(lowerBits, o.lowerBits());
+        default int compareTo(final EntryImpl o) {
+            // Tailored to our algorithm: this is all we need to do to attain correct NavigableMap organization.
+            // The rest of the magic is what we do with the TreeMap, i.e. how we merge entries when expanding.
+            return Long.compareUnsigned(lowerBits(), o.lowerBits());
+        }
+
+        default EntryN withLowerBits(final long newLowerBits) {
+            return new EntryN(newLowerBits, upperBits());
+        }
+
+        default EntryN withUpperBits(final long newUpperBits) {
+            return new EntryN(lowerBits(), newUpperBits);
+        }
+
+        default int hashCodeImpl() {
+            return Long.hashCode(lowerBits()) * 31 + Long.hashCode(upperBits());
+        }
+
+        default boolean equalsImpl(final @Nullable Object obj) {
+            return obj == this || obj instanceof Entry other
+                && lowerBits() == other.lowerBits() && upperBits() == other.upperBits();
+        }
+
+        default String toStringImpl() {
+            return "[" + Long.toUnsignedString(lowerBits()) + ".." + Long.toUnsignedString(upperBits()) + "]";
+        }
+    }
+
+    /**
+     * A {@code [lowerBits..lowerBits]} entry.
+     *
+     * @param lowerBits lower and upper bound
+     */
+    record Entry1(long lowerBits) implements EntryImpl {
+        @Override
+        public long upperBits() {
+            return lowerBits;
         }
 
         @Override
         public int hashCode() {
-            return Long.hashCode(lowerBits) * 31 + Long.hashCode(upperBits);
+            return hashCodeImpl();
         }
 
         @Override
-        public boolean equals(final Object obj) {
-            return obj == this || obj instanceof Entry other && lowerBits == other.lowerBits()
-                && upperBits == other.upperBits();
+        public boolean equals(final @Nullable Object obj) {
+            return equalsImpl(obj);
         }
 
         @Override
         public String toString() {
-            return "[" + Long.toUnsignedString(lowerBits) + ".." + Long.toUnsignedString(upperBits) + "]";
+            return toStringImpl();
+        }
+    }
+
+    /**
+     * A {@code [lowerBits..upperBits]} entry.
+     *
+     * @param lowerBits lower bound
+     * @param upperBits upper bound
+     */
+    record EntryN(long lowerBits, long upperBits) implements EntryImpl {
+        @Override
+        public int hashCode() {
+            return hashCodeImpl();
+        }
+
+        @Override
+        public boolean equals(final @Nullable Object obj) {
+            return equalsImpl(obj);
+        }
+
+        @Override
+        public String toString() {
+            return toStringImpl();
         }
     }
 
@@ -109,7 +128,7 @@ public abstract sealed class UnsignedLongSet permits ImmutableUnsignedLongSet, M
     // that for a contains() operation we just need the first headSet() entry. For insert operations we just update
     // either the lower bound or the upper bound of an existing entry. When we do, we also look at prev/next entry and
     // if they are contiguous with the updated entry, we adjust the entry once more and remove the prev/next entry.
-    private final @NonNull NavigableSet<EntryImpl> ranges;
+    private final NavigableSet<EntryImpl> ranges;
 
     UnsignedLongSet(final NavigableSet<EntryImpl> ranges) {
         this.ranges = requireNonNull(ranges);
@@ -122,10 +141,10 @@ public abstract sealed class UnsignedLongSet permits ImmutableUnsignedLongSet, M
      * @return {@code true} if this set contains the value
      */
     public final boolean contains(final long longBits) {
-        final var head = ranges.floor(new EntryImpl(longBits));
+        final var head = ranges.floor(new Entry1(longBits));
         return head != null
-            && Long.compareUnsigned(head.lowerBits, longBits) <= 0
-            && Long.compareUnsigned(head.upperBits, longBits) >= 0;
+            && Long.compareUnsigned(head.lowerBits(), longBits) <= 0
+            && Long.compareUnsigned(head.upperBits(), longBits) >= 0;
     }
 
     /**
@@ -146,22 +165,22 @@ public abstract sealed class UnsignedLongSet permits ImmutableUnsignedLongSet, M
      *
      * @return an immutable copy of this set
      */
-    public abstract @NonNull ImmutableUnsignedLongSet immutableCopy();
+    public abstract ImmutableUnsignedLongSet immutableCopy();
 
     /**
      * Returns an mutable copy of this set.
      *
      * @return an mutable copy of this set
      */
-    public final @NonNull MutableUnsignedLongSet mutableCopy() {
+    public final MutableUnsignedLongSet mutableCopy() {
         return new MutableUnsignedLongSet(new TreeSet<>(ranges));
     }
 
-    public final @NonNull NavigableSet<? extends Entry> ranges() {
+    public final NavigableSet<? extends Entry> ranges() {
         return Collections.unmodifiableNavigableSet(ranges);
     }
 
-    final @NonNull NavigableSet<EntryImpl> trustedRanges() {
+    final NavigableSet<EntryImpl> trustedRanges() {
         return ranges;
     }
 
@@ -171,7 +190,7 @@ public abstract sealed class UnsignedLongSet permits ImmutableUnsignedLongSet, M
     }
 
     @Override
-    public final boolean equals(final Object obj) {
+    public final boolean equals(final @Nullable Object obj) {
         return obj == this || obj instanceof UnsignedLongSet other && ranges.equals(other.ranges);
     }
 
@@ -185,7 +204,7 @@ public abstract sealed class UnsignedLongSet permits ImmutableUnsignedLongSet, M
                 // no 'span' attribute
             }
             case 1 -> helper.add("span", ranges.first());
-            default -> helper.add("span", new EntryImpl(ranges.first().lowerBits, ranges.last().upperBits));
+            default -> helper.add("span", new EntryN(ranges.first().lowerBits(), ranges.last().upperBits()));
         }
 
         return helper.add("size", size).toString();
