@@ -16,6 +16,7 @@ import java.util.TreeSet;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.Immutable;
 import org.opendaylight.yangtools.concepts.WritableObject;
+import org.opendaylight.yangtools.concepts.WritableObjects;
 
 /**
  * An immutable {@link UnsignedLongSet}.
@@ -71,7 +72,7 @@ public final class ImmutableUnsignedLongSet extends UnsignedLongSet implements I
             throws IOException {
         final var ranges = new EntryImpl[size];
         for (int i = 0; i < size; ++i) {
-            ranges[i] = EntryImpl.readUnsigned(in);
+            ranges[i] = readEntry(in);
         }
         return ImmutableSortedSet.copyOf(ranges);
     }
@@ -79,9 +80,23 @@ public final class ImmutableUnsignedLongSet extends UnsignedLongSet implements I
     private static TreeSet<EntryImpl> readTreeRanges(final DataInput in, final int size) throws IOException {
         final var ranges = new TreeSet<EntryImpl>();
         for (int i = 0; i < size; ++i) {
-            ranges.add(EntryImpl.readUnsigned(in));
+            ranges.add(readEntry(in));
         }
         return ranges;
+    }
+
+    // These two methods provide the same serialization format as the one we've used to serialize Range<UnsignedLong>
+    private static EntryImpl readEntry(final DataInput in) throws IOException {
+        final byte hdr = WritableObjects.readLongHeader(in);
+        final long first = WritableObjects.readFirstLong(in, hdr);
+        final long second = WritableObjects.readSecondLong(in, hdr) - 1;
+
+        final int cmp = Long.compareUnsigned(first, second);
+        if (cmp > 0) {
+            throw new IOException("Lower endpoint " + Long.toUnsignedString(first) + " is greater than upper "
+                + "endpoint " + Long.toUnsignedString(second));
+        }
+        return cmp == 0 ? new Entry1(first) : new EntryN(first, second);
     }
 
     @Override
@@ -100,7 +115,7 @@ public final class ImmutableUnsignedLongSet extends UnsignedLongSet implements I
 
     private void writeRanges(final @NonNull DataOutput out) throws IOException {
         for (var range : trustedRanges()) {
-            range.writeUnsigned(out);
+            WritableObjects.writeLongs(out, range.lowerBits(), range.upperBits() + 1);
         }
     }
 }

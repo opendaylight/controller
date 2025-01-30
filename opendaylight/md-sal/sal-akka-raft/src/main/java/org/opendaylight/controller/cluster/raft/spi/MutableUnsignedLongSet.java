@@ -15,6 +15,9 @@ import java.util.TreeSet;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.Mutable;
 
+/**
+ * A mutable {@link UnsignedLongSet}.
+ */
 public final class MutableUnsignedLongSet extends UnsignedLongSet implements Mutable {
     MutableUnsignedLongSet(final TreeSet<EntryImpl> ranges) {
         super(ranges);
@@ -38,7 +41,7 @@ public final class MutableUnsignedLongSet extends UnsignedLongSet implements Mut
     }
 
     public void add(final long longBits) {
-        addOne(trustedRanges(), new EntryImpl(longBits));
+        addOne(trustedRanges(), new Entry1(longBits));
     }
 
     public void addAll(final UnsignedLongSet other) {
@@ -118,7 +121,7 @@ public final class MutableUnsignedLongSet extends UnsignedLongSet implements Mut
         }
 
         // If the end of the range is already covered by an existing range, we can expand that
-        final var tailIt = ranges.headSet(new EntryImpl(range.upperBits()), true).descendingIterator();
+        final var tailIt = ranges.headSet(new Entry1(range.upperBits()), true).descendingIterator();
         if (tailIt.hasNext()) {
             final var upper = tailIt.next();
             tailIt.remove();
@@ -180,7 +183,7 @@ public final class MutableUnsignedLongSet extends UnsignedLongSet implements Mut
             }
         }
 
-        return new EntryImpl(lowerBits, newUpper);
+        return new EntryN(lowerBits, newUpper);
     }
 
     // Provides compatibility with RangeSet<UnsignedLong> using [lower, upper + 1)
