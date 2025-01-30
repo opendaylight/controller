@@ -143,7 +143,6 @@ public class SnapshotManagerTest extends AbstractActorTest {
         MessageCollectorActor.clearMessages(actorRef);
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
     public void testCapture() {
         boolean capture = snapshotManager.capture(new SimpleReplicatedLogEntry(9, 1,
@@ -154,7 +153,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         assertTrue(snapshotManager.isCapturing());
 
         verify(mockProcedure).accept(outputStreamCaptor.capture());
-        assertEquals("isPresent", false, outputStreamCaptor.getValue().isPresent());
+        assertFalse("isPresent", outputStreamCaptor.getValue().isPresent());
 
         CaptureSnapshot captureSnapshot = snapshotManager.getCaptureSnapshot();
 
@@ -173,7 +172,6 @@ public class SnapshotManagerTest extends AbstractActorTest {
         MessageCollectorActor.clearMessages(actorRef);
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
     public void testCaptureWithNullLastLogEntry() {
         boolean capture = snapshotManager.capture(null, 1);
@@ -183,7 +181,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         assertTrue(snapshotManager.isCapturing());
 
         verify(mockProcedure).accept(outputStreamCaptor.capture());
-        assertEquals("isPresent", false, outputStreamCaptor.getValue().isPresent());
+        assertFalse("isPresent", outputStreamCaptor.getValue().isPresent());
 
         CaptureSnapshot captureSnapshot = snapshotManager.getCaptureSnapshot();
 
@@ -360,7 +358,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         verify(mockProcedure).accept(outputStreamCaptor.capture());
 
         Optional<OutputStream> installSnapshotStream = outputStreamCaptor.getValue();
-        assertEquals("isPresent", true, installSnapshotStream.isPresent());
+        assertTrue("isPresent", installSnapshotStream.isPresent());
 
         installSnapshotStream.orElseThrow().write(snapshotState.getBytes());
 

@@ -47,8 +47,8 @@ public class AbstractReplicatedLogTest {
         assertEquals("getSnapshotTerm", -1, replicatedLogImpl.getSnapshotTerm());
         assertEquals("lastIndex", -1, replicatedLogImpl.lastIndex());
         assertEquals("lastTerm", -1, replicatedLogImpl.lastTerm());
-        assertEquals("isPresent", false, replicatedLogImpl.isPresent(0));
-        assertEquals("isInSnapshot", false, replicatedLogImpl.isInSnapshot(0));
+        assertFalse("isPresent", replicatedLogImpl.isPresent(0));
+        assertFalse("isInSnapshot", replicatedLogImpl.isInSnapshot(0));
         assertNull("get(0)", replicatedLogImpl.get(0));
         assertNull("last", replicatedLogImpl.last());
 

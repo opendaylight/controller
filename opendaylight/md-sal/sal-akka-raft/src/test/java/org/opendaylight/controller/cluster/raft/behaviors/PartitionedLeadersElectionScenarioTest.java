@@ -8,6 +8,8 @@
 package org.opendaylight.controller.cluster.raft.behaviors;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
 import org.apache.pekko.actor.ActorRef;
@@ -127,7 +129,7 @@ public class PartitionedLeadersElectionScenarioTest extends AbstractLeaderElecti
         member3Actor.waitForExpectedMessages(AppendEntriesReply.class);
 
         AppendEntriesReply appendEntriesReply = member3Actor.getCapturedMessage(AppendEntriesReply.class);
-        assertEquals("isSuccess", false, appendEntriesReply.isSuccess());
+        assertFalse("isSuccess", appendEntriesReply.isSuccess());
         assertEquals("getTerm", 3, appendEntriesReply.getTerm());
 
         verifyBehaviorState("member 1", member1Actor, RaftState.Follower);
@@ -167,7 +169,7 @@ public class PartitionedLeadersElectionScenarioTest extends AbstractLeaderElecti
 
         RequestVoteReply requestVoteReply = member2Actor.getCapturedMessage(RequestVoteReply.class);
         assertEquals("getTerm", member2Context.currentTerm(), requestVoteReply.getTerm());
-        assertEquals("isVoteGranted", true, requestVoteReply.isVoteGranted());
+        assertTrue("isVoteGranted", requestVoteReply.isVoteGranted());
 
         member3Actor.waitForExpectedMessages(RequestVote.class);
 
@@ -217,7 +219,7 @@ public class PartitionedLeadersElectionScenarioTest extends AbstractLeaderElecti
 
         RequestVoteReply requestVoteReply = member3Actor.getCapturedMessage(RequestVoteReply.class);
         assertEquals("getTerm", member3Context.currentTerm(), requestVoteReply.getTerm());
-        assertEquals("isVoteGranted", true, requestVoteReply.isVoteGranted());
+        assertTrue("isVoteGranted", requestVoteReply.isVoteGranted());
 
         // when member 3 switches to Leader it will immediately send out heartbeat AppendEntries to
         // the followers. Wait for AppendEntries to member 1 and its AppendEntriesReply. The
