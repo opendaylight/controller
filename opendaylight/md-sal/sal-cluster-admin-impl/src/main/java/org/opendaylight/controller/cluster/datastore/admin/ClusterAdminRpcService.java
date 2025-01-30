@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore.admin;
 
+import static java.util.Objects.requireNonNull;
 import static org.apache.pekko.dispatch.Futures.promise;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -633,44 +634,44 @@ public final class ClusterAdminRpcService {
             final Function<Map<ShardResultKey, ShardResult>, T> resultDataSupplier,
             final String failureLogMsgPrefix) {
         final var ret = SettableFuture.<RpcResult<T>>create();
-        final var shardResults = new HashMap<ShardResultKey, ShardResult>();
+
+        final class WaitCallback implements FutureCallback<Success> {
+            private final HashMap<ShardResultKey, ShardResult> shardResults = new HashMap<>();
+            private final ShardResultBuilder builder;
+
+            WaitCallback(final ShardResultBuilder builder) {
+                this.builder = requireNonNull(builder);
+            }
+
+            @Override
+            public synchronized void onSuccess(final Success result) {
+                LOG.debug("onSuccess for shard {}, type {}", builder.getShardName(), builder.getDataStoreType());
+                complete(builder.setSucceeded(Boolean.TRUE).build());
+            }
+
+            @Override
+            public synchronized void onFailure(final Throwable failure) {
+                LOG.warn("{} for shard {}, type {}", failureLogMsgPrefix, builder.getShardName(),
+                    builder.getDataStoreType(), failure);
+                complete(builder
+                    .setSucceeded(Boolean.FALSE)
+                    .setErrorMessage(Throwables.getRootCause(failure).getMessage())
+                    .build());
+            }
+
+            private void complete(final ShardResult sr) {
+                shardResults.put(sr.key(), sr);
+                final var expected = shardResultData.size();
+                final var actual = shardResults.size();
+                LOG.debug("checkIfComplete: expected {}, actual {}", expected, actual);
+                if (expected == actual) {
+                    ret.set(newSuccessfulResult(resultDataSupplier.apply(shardResults)));
+                }
+            }
+        }
 
         for (var entry : shardResultData) {
-            Futures.addCallback(entry.getKey(), new FutureCallback<Success>() {
-                @Override
-                public void onSuccess(final Success result) {
-                    synchronized (shardResults) {
-                        final ShardResultBuilder builder = entry.getValue();
-                        LOG.debug("onSuccess for shard {}, type {}", builder.getShardName(),
-                            builder.getDataStoreType());
-                        final ShardResult sr = builder.setSucceeded(Boolean.TRUE).build();
-                        shardResults.put(sr.key(), sr);
-                        checkIfComplete();
-                    }
-                }
-
-                @Override
-                public void onFailure(final Throwable failure) {
-                    synchronized (shardResults) {
-                        ShardResultBuilder builder = entry.getValue();
-                        LOG.warn("{} for shard {}, type {}", failureLogMsgPrefix, builder.getShardName(),
-                                builder.getDataStoreType(), failure);
-                        final ShardResult sr = builder
-                                .setSucceeded(Boolean.FALSE)
-                                .setErrorMessage(Throwables.getRootCause(failure).getMessage())
-                                .build();
-                        shardResults.put(sr.key(), sr);
-                        checkIfComplete();
-                    }
-                }
-
-                void checkIfComplete() {
-                    LOG.debug("checkIfComplete: expected {}, actual {}", shardResultData.size(), shardResults.size());
-                    if (shardResults.size() == shardResultData.size()) {
-                        ret.set(newSuccessfulResult(resultDataSupplier.apply(shardResults)));
-                    }
-                }
-            }, MoreExecutors.directExecutor());
+            Futures.addCallback(entry.getKey(), new WaitCallback(entry.getValue()), MoreExecutors.directExecutor());
         }
         return ret;
     }
