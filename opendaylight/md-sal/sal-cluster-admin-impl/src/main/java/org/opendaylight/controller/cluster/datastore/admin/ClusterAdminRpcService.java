@@ -29,6 +29,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Status.Success;
 import org.apache.pekko.dispatch.OnComplete;
@@ -643,11 +644,8 @@ public final class ClusterAdminRpcService {
 
     private static ChangeShardMembersVotingStatus toChangeShardMembersVotingStatus(final String shardName,
             final List<MemberVotingState> memberVotingStatus) {
-        Map<String, Boolean> serverVotingStatusMap = new HashMap<>();
-        for (MemberVotingState memberStatus: memberVotingStatus) {
-            serverVotingStatusMap.put(memberStatus.getMemberName(), memberStatus.getVoting());
-        }
-        return new ChangeShardMembersVotingStatus(shardName, serverVotingStatusMap);
+        return new ChangeShardMembersVotingStatus(shardName, memberVotingStatus.stream()
+            .collect(Collectors.toMap(MemberVotingState::getMemberName, MemberVotingState::getVoting)));
     }
 
     private static <T> SettableFuture<RpcResult<T>> waitForShardResults(
