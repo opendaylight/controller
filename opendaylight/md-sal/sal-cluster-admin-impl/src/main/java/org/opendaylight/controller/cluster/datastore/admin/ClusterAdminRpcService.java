@@ -530,7 +530,33 @@ public final class ClusterAdminRpcService {
 
     private ListenableFuture<RpcResult<GetKnownClientsForAllShardsOutput>> getKnownClientsForAllShards(
             final GetKnownClientsForAllShardsInput input) {
-        final var allShardReplies = getAllShardLeadersClients();
+        final var builder = ImmutableMap.<ShardIdentifier, ListenableFuture<GetKnownClientsReply>>builder();
+
+        for (var type : DataStoreType.values()) {
+            final var utils = actorUtils(type);
+
+            for (var shardName : utils.getConfiguration().getAllShardNames()) {
+                final var future = SettableFuture.<GetKnownClientsReply>create();
+                builder.put(new ShardIdentifier(type, shardName), future);
+
+                final var disp = utils.getClientDispatcher();
+                utils.findPrimaryShardAsync(shardName)
+                    .flatMap(info ->
+                        Patterns.ask(info.getPrimaryShardActor(), GetKnownClients.INSTANCE, SHARD_MGR_TIMEOUT), disp)
+                    .onComplete(new OnComplete<>() {
+                        @Override
+                        public void onComplete(final Throwable failure, final Object success) {
+                            if (failure == null) {
+                                future.set((GetKnownClientsReply) success);
+                            } else {
+                                future.setException(failure);
+                            }
+                        }
+                    }, disp);
+            }
+        }
+
+        final var allShardReplies = builder.build();
         return Futures.whenAllComplete(allShardReplies.values()).call(() -> processReplies(allShardReplies),
             MoreExecutors.directExecutor());
     }
@@ -736,38 +762,6 @@ public final class ClusterAdminRpcService {
         }, configDataStore.getActorUtils().getClientDispatcher());
 
         return returnFuture;
-    }
-
-    private ImmutableMap<ShardIdentifier, ListenableFuture<GetKnownClientsReply>> getAllShardLeadersClients() {
-        final ImmutableMap.Builder<ShardIdentifier, ListenableFuture<GetKnownClientsReply>> builder =
-                ImmutableMap.builder();
-
-        addAllShardsClients(builder, DataStoreType.Config, configDataStore.getActorUtils());
-        addAllShardsClients(builder, DataStoreType.Operational, operDataStore.getActorUtils());
-
-        return builder.build();
-    }
-
-    private static void addAllShardsClients(
-            final ImmutableMap.Builder<ShardIdentifier, ListenableFuture<GetKnownClientsReply>> builder,
-            final DataStoreType type, final ActorUtils utils) {
-        for (String shardName : utils.getConfiguration().getAllShardNames()) {
-            final SettableFuture<GetKnownClientsReply> future = SettableFuture.create();
-            builder.put(new ShardIdentifier(type, shardName), future);
-
-            utils.findPrimaryShardAsync(shardName).flatMap(
-                info -> Patterns.ask(info.getPrimaryShardActor(), GetKnownClients.INSTANCE, SHARD_MGR_TIMEOUT),
-                utils.getClientDispatcher()).onComplete(new OnComplete<>() {
-                    @Override
-                    public void onComplete(final Throwable failure, final Object success) {
-                        if (failure == null) {
-                            future.set((GetKnownClientsReply) success);
-                        } else {
-                            future.setException(failure);
-                        }
-                    }
-                }, utils.getClientDispatcher());
-        }
     }
 
     private static <T> ListenableFuture<RpcResult<T>> newFailedRpcResultFuture(final String message) {
