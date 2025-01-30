@@ -24,7 +24,7 @@ import org.opendaylight.controller.cluster.raft.ConfigParams;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.PeerAddressResolver;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev231229.DataStoreProperties.ExportOnRecovery;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev250130.DataStoreProperties.ExportOnRecovery;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import scala.concurrent.duration.FiniteDuration;
 
@@ -58,7 +58,6 @@ public class DatastoreContext implements ClientActorConfig {
     public static final int DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD = 0;
     public static final int DEFAULT_SHARD_ELECTION_TIMEOUT_FACTOR = 2;
     public static final int DEFAULT_SHARD_CANDIDATE_ELECTION_TIMEOUT_DIVISOR = 1;
-    public static final int DEFAULT_TX_CREATION_INITIAL_RATE_LIMIT = 100;
     public static final String UNKNOWN_DATA_STORE_TYPE = "unknown";
     public static final int DEFAULT_SHARD_BATCHED_MODIFICATION_COUNT = 1000;
     public static final long DEFAULT_SHARD_COMMIT_QUEUE_EXPIRY_TIMEOUT_IN_MS =
@@ -85,7 +84,6 @@ public class DatastoreContext implements ClientActorConfig {
     private boolean persistent = DEFAULT_PERSISTENT;
     private boolean snapshotOnRootOverwrite = DEFAULT_SNAPSHOT_ON_ROOT_OVERWRITE;
     private AkkaConfigurationReader configurationReader = DEFAULT_CONFIGURATION_READER;
-    private long transactionCreationInitialRateLimit = DEFAULT_TX_CREATION_INITIAL_RATE_LIMIT;
     private String dataStoreName = UNKNOWN_DATA_STORE_TYPE;
     private LogicalDatastoreType logicalStoreType = LogicalDatastoreType.OPERATIONAL;
     private YangInstanceIdentifier storeRoot = YangInstanceIdentifier.of();
@@ -133,7 +131,6 @@ public class DatastoreContext implements ClientActorConfig {
         persistent = other.persistent;
         snapshotOnRootOverwrite = other.snapshotOnRootOverwrite;
         configurationReader = other.configurationReader;
-        transactionCreationInitialRateLimit = other.transactionCreationInitialRateLimit;
         dataStoreName = other.dataStoreName;
         logicalStoreType = other.logicalStoreType;
         storeRoot = other.storeRoot;
@@ -243,10 +240,6 @@ public class DatastoreContext implements ClientActorConfig {
 
     public YangInstanceIdentifier getStoreRoot() {
         return storeRoot;
-    }
-
-    public long getTransactionCreationInitialRateLimit() {
-        return transactionCreationInitialRateLimit;
     }
 
     public String getShardManagerPersistenceId() {
@@ -522,8 +515,9 @@ public class DatastoreContext implements ClientActorConfig {
             return this;
         }
 
+        @Deprecated(since = "11.0.0", forRemoval = true)
         public Builder transactionCreationInitialRateLimit(final long initialRateLimit) {
-            datastoreContext.transactionCreationInitialRateLimit = initialRateLimit;
+            // no-op
             return this;
         }
 
@@ -531,16 +525,10 @@ public class DatastoreContext implements ClientActorConfig {
             datastoreContext.logicalStoreType = requireNonNull(logicalStoreType);
 
             // Retain compatible naming
-            switch (logicalStoreType) {
-                case CONFIGURATION:
-                    dataStoreName("config");
-                    break;
-                case OPERATIONAL:
-                    dataStoreName("operational");
-                    break;
-                default:
-                    dataStoreName(logicalStoreType.name());
-            }
+            dataStoreName(switch (logicalStoreType) {
+                case CONFIGURATION -> "config";
+                case OPERATIONAL -> "operational";
+            });
 
             return this;
         }
