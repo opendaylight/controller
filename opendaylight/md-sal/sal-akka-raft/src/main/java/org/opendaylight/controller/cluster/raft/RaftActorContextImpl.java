@@ -331,7 +331,7 @@ public class RaftActorContextImpl implements RaftActorContext {
     @Override
     public SnapshotManager getSnapshotManager() {
         if (snapshotManager == null) {
-            snapshotManager = new SnapshotManager(this, log);
+            snapshotManager = new SnapshotManager(this);
         }
         return snapshotManager;
     }
