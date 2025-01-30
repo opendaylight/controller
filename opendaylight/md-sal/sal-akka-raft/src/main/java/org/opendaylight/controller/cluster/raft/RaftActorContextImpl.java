@@ -79,7 +79,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     private final DataPersistenceProvider persistenceProvider;
 
-    private short payloadVersion;
+    private final short payloadVersion;
 
     private boolean votingMember = true;
 
@@ -97,17 +97,19 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     public RaftActorContextImpl(final ActorRef actor, final ActorContext context, final @NonNull LocalAccess localStore,
             final long commitIndex, final long lastApplied, final @NonNull Map<String, String> peerAddresses,
-            final @NonNull ConfigParams configParams, final @NonNull DataPersistenceProvider persistenceProvider,
+            final @NonNull ConfigParams configParams, final short payloadVersion,
+            final @NonNull DataPersistenceProvider persistenceProvider,
             final @NonNull Consumer<ApplyState> applyStateConsumer, final @NonNull Logger logger,
             final @NonNull Executor executor) {
         this.actor = actor;
         this.context = context;
-        id = localStore.logId();
+        id = localStore.memberId();
         termInformation = localStore.termInfoStore();
         this.executor = requireNonNull(executor);
         this.commitIndex = commitIndex;
         this.lastApplied = lastApplied;
         this.configParams = requireNonNull(configParams);
+        this.payloadVersion = payloadVersion;
         this.persistenceProvider = requireNonNull(persistenceProvider);
         log = requireNonNull(logger);
         this.applyStateConsumer = requireNonNull(applyStateConsumer);
@@ -118,11 +120,6 @@ public class RaftActorContextImpl implements RaftActorContext {
         for (Map.Entry<String, String> e : requireNonNull(peerAddresses).entrySet()) {
             peerInfoMap.put(e.getKey(), new PeerInfo(e.getKey(), e.getValue(), VotingState.VOTING));
         }
-    }
-
-    @VisibleForTesting
-    public void setPayloadVersion(final short payloadVersion) {
-        this.payloadVersion = payloadVersion;
     }
 
     @Override

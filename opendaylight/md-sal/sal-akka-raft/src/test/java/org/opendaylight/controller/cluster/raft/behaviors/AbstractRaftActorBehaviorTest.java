@@ -17,7 +17,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.apache.pekko.actor.ActorRef;
@@ -94,15 +93,12 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
      */
     @Test
     public void testHandleAppendEntriesSenderTermLessThanReceiverTerm() {
-        MockRaftActorContext context = createActorContext();
-        short payloadVersion = 5;
-        context.setPayloadVersion(payloadVersion);
+        MockRaftActorContext context = createActorContext(5);
 
         // First set the receivers term to a high number (1000)
         context.setTermInfo(new TermInfo(1000, "test"));
 
-        AppendEntries appendEntries = new AppendEntries(100, "leader-1", 0, 0, Collections.emptyList(), 101, -1,
-                (short)4);
+        AppendEntries appendEntries = new AppendEntries(100, "leader-1", 0, 0, List.of(), 101, -1, (short) 4);
 
         behavior = createBehavior(context);
 
@@ -117,9 +113,8 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(behaviorActor, AppendEntriesReply.class);
 
         assertFalse("isSuccess", reply.isSuccess());
-        assertEquals("getPayloadVersion", payloadVersion, reply.getPayloadVersion());
+        assertEquals("getPayloadVersion", 5, reply.getPayloadVersion());
     }
-
 
     @Test
     public void testHandleAppendEntriesAddSameEntryToLog() {
@@ -312,15 +307,23 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
     }
 
     protected MockRaftActorContext createActorContext() {
-        return new MockRaftActorContext();
+        return createActorContext(0);
     }
 
-    protected MockRaftActorContext createActorContext(final ActorRef actor) {
-        return new MockRaftActorContext("test", getSystem(), actor);
+    protected MockRaftActorContext createActorContext(final int payloadVersion) {
+        return new MockRaftActorContext(payloadVersion);
+    }
+
+    protected final MockRaftActorContext createActorContext(final ActorRef actor) {
+        return new MockRaftActorContext("test", getSystem(), actor, 0);
+    }
+
+    protected MockRaftActorContext createActorContext(final ActorRef actor, final int payloadVersion) {
+        return new MockRaftActorContext("test", getSystem(), actor, payloadVersion);
     }
 
     protected AppendEntries createAppendEntriesWithNewerTerm() {
-        return new AppendEntries(100, "leader-1", 0, 0, Collections.emptyList(), 1, -1, (short)0);
+        return new AppendEntries(100, "leader-1", 0, 0, List.of(), 1, -1, (short)0);
     }
 
     protected AppendEntriesReply createAppendEntriesReplyWithNewerTerm() {

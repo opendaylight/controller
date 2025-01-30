@@ -91,7 +91,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
             Props.create(ForwardMessageToBehaviorActor.class), actorFactory.generateActorId("follower"));
 
     private Leader leader;
-    private final short payloadVersion = 5;
+    private final short ourPayloadVersion = 5;
 
     @Override
     @After
@@ -119,7 +119,6 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         MockRaftActorContext actorContext = createActorContextWithFollower();
         actorContext.setCommitIndex(-1);
-        actorContext.setPayloadVersion(payloadVersion);
 
         long term = 1;
         actorContext.setTermInfo(new TermInfo(term, ""));
@@ -134,7 +133,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         assertEquals("getPrevLogIndex", -1, appendEntries.getPrevLogIndex());
         assertEquals("getPrevLogTerm", -1, appendEntries.getPrevLogTerm());
         assertEquals("Entries size", 0, appendEntries.getEntries().size());
-        assertEquals("getPayloadVersion", payloadVersion, appendEntries.getPayloadVersion());
+        assertEquals("getPayloadVersion", ourPayloadVersion, appendEntries.getPayloadVersion());
 
         // The follower would normally reply - simulate that explicitly here.
         leader.handleMessage(followerActor, new AppendEntriesReply(
@@ -155,7 +154,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         assertEquals("Entries size", 1, appendEntries.getEntries().size());
         assertEquals("Entry getIndex", lastIndex, appendEntries.getEntries().get(0).index());
         assertEquals("Entry getTerm", term, appendEntries.getEntries().get(0).term());
-        assertEquals("getPayloadVersion", payloadVersion, appendEntries.getPayloadVersion());
+        assertEquals("getPayloadVersion", ourPayloadVersion, appendEntries.getPayloadVersion());
     }
 
 
@@ -1244,26 +1243,35 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
     @Override
     protected MockRaftActorContext createActorContext() {
-        return createActorContext(leaderActor);
+        return createActorContext(ourPayloadVersion);
     }
 
     @Override
-    protected MockRaftActorContext createActorContext(final ActorRef actorRef) {
-        return createActorContext(LEADER_ID, actorRef);
+    protected MockRaftActorContext createActorContext(final int payloadVersion) {
+        return createActorContext(leaderActor, payloadVersion);
+    }
+
+    @Override
+    protected MockRaftActorContext createActorContext(final ActorRef actorRef, final int payloadVersion) {
+        return createActorContext(LEADER_ID, actorRef, payloadVersion);
     }
 
     private MockRaftActorContext createActorContext(final String id, final ActorRef actorRef) {
+        return createActorContext(id, actorRef, 0);
+    }
+
+    private MockRaftActorContext createActorContext(final String id, final ActorRef actorRef,
+            final int payloadVersion) {
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         configParams.setHeartBeatInterval(new FiniteDuration(50, TimeUnit.MILLISECONDS));
         configParams.setElectionTimeoutFactor(100000);
-        MockRaftActorContext context = new MockRaftActorContext(id, getSystem(), actorRef);
+        MockRaftActorContext context = new MockRaftActorContext(id, getSystem(), actorRef, payloadVersion);
         context.setConfigParams(configParams);
-        context.setPayloadVersion(payloadVersion);
         return context;
     }
 
     private MockRaftActorContext createActorContextWithFollower() {
-        MockRaftActorContext actorContext = createActorContext();
+        MockRaftActorContext actorContext = createActorContext(ourPayloadVersion);
         actorContext.setPeerAddresses(Map.of(FOLLOWER_ID, followerActor.path().toString()));
         return actorContext;
     }
@@ -1719,10 +1727,10 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         FollowerLogInformation followerInfo = leader.getFollower(FOLLOWER_ID);
 
-        assertEquals(payloadVersion, leader.getLeaderPayloadVersion());
+        assertEquals(ourPayloadVersion, leader.getLeaderPayloadVersion());
         assertEquals(RaftVersions.FLUORINE_VERSION, followerInfo.getRaftVersion());
 
-        AppendEntriesReply reply = new AppendEntriesReply(FOLLOWER_ID, 1, true, 2, 1, payloadVersion);
+        AppendEntriesReply reply = new AppendEntriesReply(FOLLOWER_ID, 1, true, 2, 1, ourPayloadVersion);
 
         RaftActorBehavior raftActorBehavior = leader.handleAppendEntriesReply(followerActor, reply);
 
@@ -1748,7 +1756,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         assertEquals(2, followerInfo.getMatchIndex());
         assertEquals(3, followerInfo.getNextIndex());
-        assertEquals(payloadVersion, followerInfo.getPayloadVersion());
+        assertEquals(ourPayloadVersion, followerInfo.getPayloadVersion());
         assertEquals(RaftVersions.CURRENT_VERSION, followerInfo.getRaftVersion());
     }
 

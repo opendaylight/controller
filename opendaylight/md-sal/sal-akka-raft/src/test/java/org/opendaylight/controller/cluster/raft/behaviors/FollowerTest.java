@@ -75,7 +75,7 @@ import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import scala.concurrent.duration.FiniteDuration;
 
 public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
-    private final short payloadVersion = 5;
+    private final short ourPayloadVersion = 5;
 
     private final ActorRef followerActor = actorFactory.createActor(
             MessageCollectorActor.props(), actorFactory.generateActorId("follower"));
@@ -100,15 +100,19 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
     @Override
-    protected  MockRaftActorContext createActorContext() {
-        return createActorContext(followerActor);
+    protected MockRaftActorContext createActorContext() {
+        return createActorContext(ourPayloadVersion);
     }
 
     @Override
-    protected  MockRaftActorContext createActorContext(final ActorRef actorRef) {
-        MockRaftActorContext context = new MockRaftActorContext("follower", getSystem(), actorRef);
-        context.setPayloadVersion(payloadVersion);
-        ((DefaultConfigParamsImpl)context.getConfigParams()).setPeerAddressResolver(
+    protected  MockRaftActorContext createActorContext(final int payloadVersion) {
+        return createActorContext(followerActor, payloadVersion);
+    }
+
+    @Override
+    protected  MockRaftActorContext createActorContext(final ActorRef actorRef, final int payloadVersion) {
+        MockRaftActorContext context = new MockRaftActorContext("follower", getSystem(), actorRef, payloadVersion);
+        ((DefaultConfigParamsImpl) context.getConfigParams()).setPeerAddressResolver(
             peerId -> leaderActor.path().toString());
         return context;
     }
@@ -259,7 +263,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         logStart("testHandleFirstAppendEntriesWithPrevIndexMinusOneAndReplicatedToAllIndexPresentInLog");
 
         MockRaftActorContext context = createActorContext();
-        context.getReplicatedLog().clear(0,2);
+        context.getReplicatedLog().clear(0, 2);
         context.getReplicatedLog().append(newReplicatedLogEntry(1, 100, "bar"));
         context.getReplicatedLog().setSnapshotIndex(99);
 
@@ -284,7 +288,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         logStart("testHandleFirstAppendEntriesWithPrevIndexMinusOneAndReplicatedToAllIndexPresentInSnapshot");
 
         MockRaftActorContext context = createActorContext();
-        context.getReplicatedLog().clear(0,2);
+        context.getReplicatedLog().clear(0, 2);
         context.getReplicatedLog().setSnapshotIndex(100);
 
         List<ReplicatedLogEntry> entries = List.of(newReplicatedLogEntry(2, 101, "foo"));
@@ -309,7 +313,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
                "testFirstAppendEntriesWithNoPrevIndexAndReplicatedToAllPresentInSnapshotButCalculatedPrevEntryMissing");
 
         MockRaftActorContext context = createActorContext();
-        context.getReplicatedLog().clear(0,2);
+        context.getReplicatedLog().clear(0, 2);
         context.getReplicatedLog().setSnapshotIndex(100);
 
         List<ReplicatedLogEntry> entries = List.of(newReplicatedLogEntry(2, 105, "foo"));
@@ -1358,7 +1362,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertEquals("getFollowerId", expFollowerId, reply.getFollowerId());
         assertEquals("getLogLastTerm", expLogLastTerm, reply.getLogLastTerm());
         assertEquals("getLogLastIndex", expLogLastIndex, reply.getLogLastIndex());
-        assertEquals("getPayloadVersion", payloadVersion, reply.getPayloadVersion());
+        assertEquals("getPayloadVersion", ourPayloadVersion, reply.getPayloadVersion());
         assertEquals("isForceInstallSnapshot", expForceInstallSnapshot, reply.isForceInstallSnapshot());
         assertFalse("isNeedsLeaderAddress", reply.isNeedsLeaderAddress());
     }
