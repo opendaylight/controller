@@ -11,7 +11,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -604,27 +603,26 @@ public final class ClusterAdminRpcService {
 
     private static RpcResult<GetKnownClientsForAllShardsOutput> processReplies(
             final ImmutableMap<ShardIdentifier, ListenableFuture<GetKnownClientsReply>> allShardReplies) {
-        final Map<ShardResultKey, ShardResult> result = Maps.newHashMapWithExpectedSize(allShardReplies.size());
-        for (Entry<ShardIdentifier, ListenableFuture<GetKnownClientsReply>> entry : allShardReplies.entrySet()) {
-            final ListenableFuture<GetKnownClientsReply> future = entry.getValue();
-            final ShardResultBuilder builder = new ShardResultBuilder()
-                    .setDataStoreType(entry.getKey().getDataStoreType())
-                    .setShardName(entry.getKey().getShardName());
+        final var result = allShardReplies.entrySet().stream()
+            .map(entry -> {
+                final var shardId = entry.getKey();
+                final var future = entry.getValue();
+                final var builder = new ShardResultBuilder()
+                        .setDataStoreType(shardId.getDataStoreType())
+                        .setShardName(shardId.getShardName());
 
-            final GetKnownClientsReply reply;
-            try {
-                reply = Futures.getDone(future);
-            } catch (ExecutionException e) {
-                LOG.debug("Shard {} failed to answer", entry.getKey(), e);
-                final ShardResult sr = builder
+                final GetKnownClientsReply reply;
+                try {
+                    reply = Futures.getDone(future);
+                } catch (ExecutionException e) {
+                    LOG.debug("Shard {} failed to answer", entry.getKey(), e);
+                    return builder
                         .setSucceeded(Boolean.FALSE)
                         .setErrorMessage(e.getCause().getMessage())
                         .build();
-                result.put(sr.key(), sr);
-                continue;
-            }
+                }
 
-            final ShardResult sr = builder
+                return builder
                     .setSucceeded(Boolean.TRUE)
                     .addAugmentation(new ShardResult1Builder()
                         .setKnownClients(reply.getClients().stream()
@@ -636,9 +634,8 @@ public final class ClusterAdminRpcService {
                             .collect(BindingMap.toMap()))
                         .build())
                     .build();
-
-            result.put(sr.key(), sr);
-        }
+            })
+            .collect(BindingMap.toMap());
 
         return RpcResultBuilder.success(new GetKnownClientsForAllShardsOutputBuilder().setShardResult(result).build())
                 .build();
