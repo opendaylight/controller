@@ -171,8 +171,8 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     public void testBecomeLeaderOnReceivingMajorityVotesWithNonVotingPeers() {
         RaftActorContext raftActorContext = new RaftActorContextImpl(candidateActor, candidateActor.actorContext(),
             new LocalAccess("candidate", new TestTermInfoStore(1, null)), -1, -1, setupPeers(4),
-            new DefaultConfigParamsImpl(), new NonPersistentDataProvider(Runnable::run), applyState -> { }, LOG,
-            MoreExecutors.directExecutor());
+            new DefaultConfigParamsImpl(), (short) 0, new NonPersistentDataProvider(Runnable::run), applyState -> { },
+            LOG, MoreExecutors.directExecutor());
         raftActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().build());
         raftActorContext.getPeerInfo("peer1").setVotingState(VotingState.NON_VOTING);
         raftActorContext.getPeerInfo("peer4").setVotingState(VotingState.NON_VOTING);
@@ -342,8 +342,8 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     }
 
     @Override
-    protected MockRaftActorContext createActorContext() {
-        return new MockRaftActorContext("candidate", getSystem(), candidateActor);
+    protected MockRaftActorContext createActorContext(final int payloadVersion) {
+        return new MockRaftActorContext("candidate", getSystem(), candidateActor, payloadVersion);
     }
 
     private Map<String, String> setupPeers(final int count) {

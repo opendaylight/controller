@@ -1478,7 +1478,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         return new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
             new LocalAccess(id, new FailingTermInfoStore(1, LEADER_ID)),
-            -1, -1, Map.of(LEADER_ID, ""), configParams, new NonPersistentDataProvider(Runnable::run),
+            -1, -1, Map.of(LEADER_ID, ""), configParams, (short) 0,  new NonPersistentDataProvider(Runnable::run),
             applyState -> actor.tell(applyState, actor), LOG,  MoreExecutors.directExecutor());
     }
 
