@@ -78,7 +78,7 @@ final class PropertiesTermInfoStore implements TermInfoStore {
     }
 
     @Override
-    public @Nullable TermInfo readTerm() throws IOException {
+    public @Nullable TermInfo readTerm() {
         // FIXME: implement this
         return null;
     }

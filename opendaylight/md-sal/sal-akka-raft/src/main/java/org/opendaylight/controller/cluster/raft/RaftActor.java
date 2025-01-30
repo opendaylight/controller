@@ -162,7 +162,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             raftRecovery = newRaftActorRecoverySupport();
         }
 
-        boolean recoveryComplete = raftRecovery.handleRecoveryMessage(message, persistentProvider);
+        boolean recoveryComplete = raftRecovery.handleRecoveryMessage(this, message);
         if (recoveryComplete) {
             onRecoveryComplete();
 
@@ -174,7 +174,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     @VisibleForTesting
     RaftActorRecoverySupport newRaftActorRecoverySupport() {
-        return new RaftActorRecoverySupport(context, getRaftActorRecoveryCohort());
+        return new RaftActorRecoverySupport(localAccess, context, getRaftActorRecoveryCohort());
     }
 
     @VisibleForTesting
