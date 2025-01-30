@@ -119,7 +119,6 @@ import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.common.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
-import org.opendaylight.yangtools.yang.common.Uint32;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
@@ -509,9 +508,12 @@ public final class ClusterAdminRpcService {
         final var opTimeout = timeout != null ? Timeout.apply(timeout.longValue(), TimeUnit.SECONDS)
                 : SHARD_MGR_TIMEOUT;
 
+        final var message = new GetSnapshot(opTimeout);
+
         final var ret = SettableFuture.<RpcResult<BackupDatastoreOutput>>create();
-        Futures.addCallback(
-            this.<DatastoreSnapshot>sendMessageToShardManagers(new GetSnapshot(opTimeout)),
+        Futures.addCallback(Futures.<DatastoreSnapshot>allAsList(
+            sendMessageToShardManager(DataStoreType.Config, message),
+            sendMessageToShardManager(DataStoreType.Operational, message)),
             new FutureCallback<>() {
                 @Override
                 public void onSuccess(final List<DatastoreSnapshot> snapshots) {
@@ -685,14 +687,6 @@ public final class ClusterAdminRpcService {
                 this.<T>ask(actorUtils.getShardManager(), messageSupplier.apply(shardName), SHARD_MGR_TIMEOUT),
                 new ShardResultBuilder().setShardName(shardName).setDataStoreType(dataStoreType)));
         }
-    }
-
-    private <T> ListenableFuture<List<T>> sendMessageToShardManagers(final Object message) {
-        Timeout timeout = SHARD_MGR_TIMEOUT;
-        ListenableFuture<T> configFuture = ask(configDataStore.getActorUtils().getShardManager(), message, timeout);
-        ListenableFuture<T> operFuture = ask(operDataStore.getActorUtils().getShardManager(), message, timeout);
-
-        return Futures.allAsList(configFuture, operFuture);
     }
 
     private <T> ListenableFuture<T> sendMessageToShardManager(final DataStoreType dataStoreType, final Object message) {
