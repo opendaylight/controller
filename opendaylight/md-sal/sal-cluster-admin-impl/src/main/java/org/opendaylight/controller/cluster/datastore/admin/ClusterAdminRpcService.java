@@ -188,74 +188,74 @@ public final class ClusterAdminRpcService {
 
     @VisibleForTesting
     ListenableFuture<RpcResult<AddShardReplicaOutput>> addShardReplica(final AddShardReplicaInput input) {
-        final String shardName = input.getShardName();
+        final var shardName = input.getShardName();
         if (Strings.isNullOrEmpty(shardName)) {
             return newFailedRpcResultFuture("A valid shard name must be specified");
         }
 
-        DataStoreType dataStoreType = input.getDataStoreType();
+        final var dataStoreType = input.getDataStoreType();
         if (dataStoreType == null) {
             return newFailedRpcResultFuture("A valid DataStoreType must be specified");
         }
 
         LOG.info("Adding replica for shard {}", shardName);
 
-        final var returnFuture = SettableFuture.<RpcResult<AddShardReplicaOutput>>create();
-        Futures.addCallback(sendMessageToShardManager(dataStoreType, new AddShardReplica(shardName)),
-            new FutureCallback<Success>() {
+        final var ret = SettableFuture.<RpcResult<AddShardReplicaOutput>>create();
+        Futures.addCallback(
+            this.<Success>sendMessageToShardManager(dataStoreType, new AddShardReplica(shardName)),
+            new FutureCallback<>() {
                 @Override
                 public void onSuccess(final Success success) {
                     LOG.info("Successfully added replica for shard {}", shardName);
-                    returnFuture.set(newSuccessfulResult(new AddShardReplicaOutputBuilder().build()));
+                    ret.set(newSuccessfulResult(new AddShardReplicaOutputBuilder().build()));
                 }
 
                 @Override
                 public void onFailure(final Throwable failure) {
-                    onMessageFailure(String.format("Failed to add replica for shard %s", shardName),
-                        returnFuture, failure);
+                    onMessageFailure(String.format("Failed to add replica for shard %s", shardName), ret, failure);
                 }
             }, MoreExecutors.directExecutor());
-
-        return returnFuture;
+        return ret;
     }
 
     @VisibleForTesting
     ListenableFuture<RpcResult<RemoveShardReplicaOutput>> removeShardReplica(final RemoveShardReplicaInput input) {
-        final String shardName = input.getShardName();
+        final var shardName = input.getShardName();
         if (Strings.isNullOrEmpty(shardName)) {
             return newFailedRpcResultFuture("A valid shard name must be specified");
         }
 
-        DataStoreType dataStoreType = input.getDataStoreType();
+        final var dataStoreType = input.getDataStoreType();
         if (dataStoreType == null) {
             return newFailedRpcResultFuture("A valid DataStoreType must be specified");
         }
 
-        final String memberName = input.getMemberName();
+        final var memberName = input.getMemberName();
         if (Strings.isNullOrEmpty(memberName)) {
             return newFailedRpcResultFuture("A valid member name must be specified");
         }
 
         LOG.info("Removing replica for shard {} memberName {}, datastoreType {}", shardName, memberName, dataStoreType);
 
-        final SettableFuture<RpcResult<RemoveShardReplicaOutput>> returnFuture = SettableFuture.create();
-        ListenableFuture<Success> future = sendMessageToShardManager(dataStoreType,
-                new RemoveShardReplica(shardName, MemberName.forName(memberName)));
-        Futures.addCallback(future, new FutureCallback<Success>() {
-            @Override
-            public void onSuccess(final Success success) {
-                LOG.info("Successfully removed replica for shard {}", shardName);
-                returnFuture.set(newSuccessfulResult(new RemoveShardReplicaOutputBuilder().build()));
-            }
+        final var ret = SettableFuture.<RpcResult<RemoveShardReplicaOutput>>create();
 
-            @Override
-            public void onFailure(final Throwable failure) {
-                onMessageFailure(String.format("Failed to remove replica for shard %s", shardName),
-                        returnFuture, failure);
-            }
-        }, MoreExecutors.directExecutor());
+        Futures.addCallback(
+            this.<Success>sendMessageToShardManager(dataStoreType,
+                new RemoveShardReplica(shardName, MemberName.forName(memberName))),
+            new FutureCallback<>() {
+                @Override
+                public void onSuccess(final Success success) {
+                    LOG.info("Successfully removed replica for shard {}", shardName);
+                    ret.set(newSuccessfulResult(new RemoveShardReplicaOutputBuilder().build()));
+                }
 
-        return returnFuture;
+                @Override
+                public void onFailure(final Throwable failure) {
+                    onMessageFailure("Failed to remove replica for shard " + shardName, ret, failure);
+                }
+            }, MoreExecutors.directExecutor());
+
+        return ret;
     }
 
     private ListenableFuture<RpcResult<LocateShardOutput>> locateShard(final LocateShardInput input) {
@@ -309,10 +309,8 @@ public final class ClusterAdminRpcService {
         LOG.info("Moving leader to local node {} for shard {}, datastoreType {}",
                 actorUtils.getCurrentMemberName().getName(), shardName, dataStoreType);
 
-        final Future<ActorRef> localShardReply = actorUtils.findLocalShardAsync(shardName);
-
-        final scala.concurrent.Promise<Object> makeLeaderLocalAsk = org.apache.pekko.dispatch.Futures.promise();
-        localShardReply.onComplete(new OnComplete<ActorRef>() {
+        final var makeLeaderLocalAsk = org.apache.pekko.dispatch.Futures.<Object>promise();
+        actorUtils.findLocalShardAsync(shardName).onComplete(new OnComplete<ActorRef>() {
             @Override
             public void onComplete(final Throwable failure, final ActorRef actorRef) {
                 if (failure != null) {
@@ -320,30 +318,29 @@ public final class ClusterAdminRpcService {
                             + " local shard.", shardName, dataStoreType, failure);
                     makeLeaderLocalAsk.failure(failure);
                 } else {
-                    makeLeaderLocalAsk
-                            .completeWith(actorUtils
-                                    .executeOperationAsync(actorRef, MakeLeaderLocal.INSTANCE, makeLeaderLocalTimeout));
+                    makeLeaderLocalAsk.completeWith(
+                        actorUtils.executeOperationAsync(actorRef, MakeLeaderLocal.INSTANCE, makeLeaderLocalTimeout));
                 }
             }
         }, actorUtils.getClientDispatcher());
 
-        final SettableFuture<RpcResult<MakeLeaderLocalOutput>> future = SettableFuture.create();
+        final var ret = SettableFuture.<RpcResult<MakeLeaderLocalOutput>>create();
         makeLeaderLocalAsk.future().onComplete(new OnComplete<>() {
             @Override
             public void onComplete(final Throwable failure, final Object success) {
                 if (failure != null) {
                     LOG.error("Leadership transfer failed for shard {}.", shardName, failure);
-                    future.set(RpcResultBuilder.<MakeLeaderLocalOutput>failed().withError(ErrorType.APPLICATION,
-                            "leadership transfer failed", failure).build());
-                    return;
+                    ret.set(RpcResultBuilder.<MakeLeaderLocalOutput>failed()
+                        .withError(ErrorType.APPLICATION, "leadership transfer failed", failure)
+                        .build());
+                } else {
+                    LOG.debug("Leadership transfer complete");
+                    ret.set(RpcResultBuilder.success(new MakeLeaderLocalOutputBuilder().build()).build());
                 }
-
-                LOG.debug("Leadership transfer complete");
-                future.set(RpcResultBuilder.success(new MakeLeaderLocalOutputBuilder().build()).build());
             }
         }, actorUtils.getClientDispatcher());
 
-        return future;
+        return ret;
     }
 
     @VisibleForTesting ListenableFuture<RpcResult<AddReplicasForAllShardsOutput>> addReplicasForAllShards(
@@ -384,7 +381,7 @@ public final class ClusterAdminRpcService {
     @VisibleForTesting
     ListenableFuture<RpcResult<ChangeMemberVotingStatesForShardOutput>> changeMemberVotingStatesForShard(
             final ChangeMemberVotingStatesForShardInput input) {
-        final String shardName = input.getShardName();
+        final var shardName = input.getShardName();
         if (Strings.isNullOrEmpty(shardName)) {
             return newFailedRpcResultFuture("A valid shard name must be specified");
         }
@@ -403,23 +400,23 @@ public final class ClusterAdminRpcService {
         LOG.info("Change member voting states for shard {}: {}", shardName,
                 changeVotingStatus.getMeberVotingStatusMap());
 
-        final var returnFuture = SettableFuture.<RpcResult<ChangeMemberVotingStatesForShardOutput>>create();
-        Futures.addCallback(sendMessageToShardManager(dataStoreType, changeVotingStatus),
-            new FutureCallback<Success>() {
+        final var ret = SettableFuture.<RpcResult<ChangeMemberVotingStatesForShardOutput>>create();
+        Futures.addCallback(
+            this.<Success>sendMessageToShardManager(dataStoreType, changeVotingStatus),
+            new FutureCallback<>() {
                 @Override
                 public void onSuccess(final Success success) {
                     LOG.info("Successfully changed member voting states for shard {}", shardName);
-                    returnFuture.set(newSuccessfulResult(new ChangeMemberVotingStatesForShardOutputBuilder().build()));
+                    ret.set(newSuccessfulResult(new ChangeMemberVotingStatesForShardOutputBuilder().build()));
                 }
 
                 @Override
                 public void onFailure(final Throwable failure) {
                     onMessageFailure(String.format("Failed to change member voting states for shard %s", shardName),
-                        returnFuture, failure);
+                        ret, failure);
                 }
             }, MoreExecutors.directExecutor());
-
-        return returnFuture;
+        return ret;
     }
 
     @VisibleForTesting
@@ -461,45 +458,43 @@ public final class ClusterAdminRpcService {
     }
 
     private ListenableFuture<RpcResult<GetShardRoleOutput>> getShardRole(final GetShardRoleInput input) {
-        final String shardName = input.getShardName();
+        final var shardName = input.getShardName();
         if (Strings.isNullOrEmpty(shardName)) {
             return newFailedRpcResultFuture("A valid shard name must be specified");
         }
 
-        DataStoreType dataStoreType = input.getDataStoreType();
+        final var dataStoreType = input.getDataStoreType();
         if (dataStoreType == null) {
             return newFailedRpcResultFuture("A valid DataStoreType must be specified");
         }
 
         LOG.info("Getting role for shard {}, datastore type {}", shardName, dataStoreType);
 
-        final SettableFuture<RpcResult<GetShardRoleOutput>> returnFuture = SettableFuture.create();
-        ListenableFuture<GetShardRoleReply> future = sendMessageToShardManager(dataStoreType,
-                new GetShardRole(shardName));
-        Futures.addCallback(future, new FutureCallback<GetShardRoleReply>() {
-            @Override
-            public void onSuccess(final GetShardRoleReply reply) {
-                if (reply == null) {
-                    returnFuture.set(ClusterAdminRpcService.<GetShardRoleOutput>newFailedRpcResultBuilder(
+        final var ret = SettableFuture.<RpcResult<GetShardRoleOutput>>create();
+        Futures.addCallback(
+            this.<GetShardRoleReply>sendMessageToShardManager(dataStoreType, new GetShardRole(shardName)),
+            new FutureCallback<>() {
+                @Override
+                public void onSuccess(final GetShardRoleReply reply) {
+                    if (reply == null) {
+                        ret.set(ClusterAdminRpcService.<GetShardRoleOutput>newFailedRpcResultBuilder(
                             "No Shard role present. Please retry..").build());
-                    return;
-                }
-                LOG.info("Successfully received role:{} for shard {}", reply.getRole(), shardName);
-                final GetShardRoleOutputBuilder builder = new GetShardRoleOutputBuilder();
-                if (reply.getRole() != null) {
-                    builder.setRole(reply.getRole());
-                }
-                returnFuture.set(newSuccessfulResult(builder.build()));
-            }
+                        return;
+                    }
 
-            @Override
-            public void onFailure(final Throwable failure) {
-                returnFuture.set(ClusterAdminRpcService.<GetShardRoleOutput>newFailedRpcResultBuilder(
+                    final var role = reply.getRole();
+                    LOG.info("Successfully received role:{} for shard {}", role, shardName);
+                    ret.set(newSuccessfulResult(new GetShardRoleOutputBuilder().setRole(role).build()));
+                }
+
+                @Override
+                public void onFailure(final Throwable failure) {
+                    ret.set(ClusterAdminRpcService.<GetShardRoleOutput>newFailedRpcResultBuilder(
                         "Failed to get shard role.", failure).build());
-            }
-        }, MoreExecutors.directExecutor());
+                }
+            }, MoreExecutors.directExecutor());
 
-        return returnFuture;
+        return ret;
     }
 
     @VisibleForTesting
@@ -510,31 +505,30 @@ public final class ClusterAdminRpcService {
             return newFailedRpcResultFuture("A valid file path must be specified");
         }
 
-        final Uint32 timeout = input.getTimeout();
-        final Timeout opTimeout = timeout != null ? Timeout.apply(timeout.longValue(), TimeUnit.SECONDS)
+        final var timeout = input.getTimeout();
+        final var opTimeout = timeout != null ? Timeout.apply(timeout.longValue(), TimeUnit.SECONDS)
                 : SHARD_MGR_TIMEOUT;
 
-        final SettableFuture<RpcResult<BackupDatastoreOutput>> returnFuture = SettableFuture.create();
-        ListenableFuture<List<DatastoreSnapshot>> future = sendMessageToShardManagers(new GetSnapshot(opTimeout));
-        Futures.addCallback(future, new FutureCallback<>() {
-            @Override
-            public void onSuccess(final List<DatastoreSnapshot> snapshots) {
-                saveSnapshotsToFile(new DatastoreSnapshotList(snapshots), input.getFilePath(), returnFuture);
-            }
+        final var ret = SettableFuture.<RpcResult<BackupDatastoreOutput>>create();
+        Futures.addCallback(
+            this.<DatastoreSnapshot>sendMessageToShardManagers(new GetSnapshot(opTimeout)),
+            new FutureCallback<>() {
+                @Override
+                public void onSuccess(final List<DatastoreSnapshot> snapshots) {
+                    saveSnapshotsToFile(new DatastoreSnapshotList(snapshots), input.getFilePath(), ret);
+                }
 
-            @Override
-            public void onFailure(final Throwable failure) {
-                onDatastoreBackupFailure(input.getFilePath(), returnFuture, failure);
-            }
-        }, MoreExecutors.directExecutor());
-
-        return returnFuture;
+                @Override
+                public void onFailure(final Throwable failure) {
+                    onDatastoreBackupFailure(input.getFilePath(), ret, failure);
+                }
+            }, MoreExecutors.directExecutor());
+        return ret;
     }
 
     private ListenableFuture<RpcResult<GetKnownClientsForAllShardsOutput>> getKnownClientsForAllShards(
             final GetKnownClientsForAllShardsInput input) {
-        final ImmutableMap<ShardIdentifier, ListenableFuture<GetKnownClientsReply>> allShardReplies =
-                getAllShardLeadersClients();
+        final var allShardReplies = getAllShardLeadersClients();
         return Futures.whenAllComplete(allShardReplies.values()).call(() -> processReplies(allShardReplies),
             MoreExecutors.directExecutor());
     }
@@ -542,43 +536,42 @@ public final class ClusterAdminRpcService {
     private ListenableFuture<RpcResult<ActivateEosDatacenterOutput>> activateEosDatacenter(
             final ActivateEosDatacenterInput input) {
         LOG.debug("Activating EOS Datacenter");
-        final SettableFuture<RpcResult<ActivateEosDatacenterOutput>> future = SettableFuture.create();
+        final var ret = SettableFuture.<RpcResult<ActivateEosDatacenterOutput>>create();
         Futures.addCallback(dataCenterControl.activateDataCenter(), new FutureCallback<>() {
             @Override
             public void onSuccess(final Empty result) {
                 LOG.debug("Successfully activated datacenter.");
-                future.set(RpcResultBuilder.<ActivateEosDatacenterOutput>success().build());
+                ret.set(RpcResultBuilder.<ActivateEosDatacenterOutput>success().build());
             }
 
             @Override
             public void onFailure(final Throwable failure) {
-                future.set(ClusterAdminRpcService.<ActivateEosDatacenterOutput>newFailedRpcResultBuilder(
+                ret.set(ClusterAdminRpcService.<ActivateEosDatacenterOutput>newFailedRpcResultBuilder(
                         "Failed to activate datacenter.", failure).build());
             }
         }, MoreExecutors.directExecutor());
-
-        return future;
+        return ret;
     }
 
     private ListenableFuture<RpcResult<DeactivateEosDatacenterOutput>> deactivateEosDatacenter(
             final DeactivateEosDatacenterInput input) {
         LOG.debug("Deactivating EOS Datacenter");
-        final SettableFuture<RpcResult<DeactivateEosDatacenterOutput>> future = SettableFuture.create();
+        final var ret = SettableFuture.<RpcResult<DeactivateEosDatacenterOutput>>create();
         Futures.addCallback(dataCenterControl.deactivateDataCenter(), new FutureCallback<>() {
             @Override
             public void onSuccess(final Empty result) {
                 LOG.debug("Successfully deactivated datacenter.");
-                future.set(RpcResultBuilder.<DeactivateEosDatacenterOutput>success().build());
+                ret.set(RpcResultBuilder.<DeactivateEosDatacenterOutput>success().build());
             }
 
             @Override
             public void onFailure(final Throwable failure) {
-                future.set(ClusterAdminRpcService.<DeactivateEosDatacenterOutput>newFailedRpcResultBuilder(
+                ret.set(ClusterAdminRpcService.<DeactivateEosDatacenterOutput>newFailedRpcResultBuilder(
                         "Failed to deactivate datacenter.", failure).build());
             }
         }, MoreExecutors.directExecutor());
 
-        return future;
+        return ret;
     }
 
     private static RpcResult<GetKnownClientsForAllShardsOutput> processReplies(
@@ -636,9 +629,10 @@ public final class ClusterAdminRpcService {
             final List<Entry<ListenableFuture<Success>, ShardResultBuilder>> shardResultData,
             final Function<Map<ShardResultKey, ShardResult>, T> resultDataSupplier,
             final String failureLogMsgPrefix) {
-        final SettableFuture<RpcResult<T>> returnFuture = SettableFuture.create();
-        final Map<ShardResultKey, ShardResult> shardResults = new HashMap<>();
-        for (final Entry<ListenableFuture<Success>, ShardResultBuilder> entry : shardResultData) {
+        final var ret = SettableFuture.<RpcResult<T>>create();
+        final var shardResults = new HashMap<ShardResultKey, ShardResult>();
+
+        for (var entry : shardResultData) {
             Futures.addCallback(entry.getKey(), new FutureCallback<Success>() {
                 @Override
                 public void onSuccess(final Success result) {
@@ -670,12 +664,12 @@ public final class ClusterAdminRpcService {
                 void checkIfComplete() {
                     LOG.debug("checkIfComplete: expected {}, actual {}", shardResultData.size(), shardResults.size());
                     if (shardResults.size() == shardResultData.size()) {
-                        returnFuture.set(newSuccessfulResult(resultDataSupplier.apply(shardResults)));
+                        ret.set(newSuccessfulResult(resultDataSupplier.apply(shardResults)));
                     }
                 }
             }, MoreExecutors.directExecutor());
         }
-        return returnFuture;
+        return ret;
     }
 
     private <T> void sendMessageToManagerForConfiguredShards(final DataStoreType dataStoreType,
