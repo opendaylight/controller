@@ -8,8 +8,10 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -104,21 +106,21 @@ public class RaftActorContextImplTest extends AbstractActorTest {
         context.updatePeerIds(new ServerConfigurationPayload(List.of(new ServerInfo("self", false),
                 new ServerInfo("peer2", true), new ServerInfo("peer3", false))));
         verifyPeerInfo(context, "peer1", null);
-        verifyPeerInfo(context, "peer2", true);
-        verifyPeerInfo(context, "peer3", false);
-        assertEquals("isVotingMember", false, context.isVotingMember());
+        verifyPeerInfo(context, "peer2", Boolean.TRUE);
+        verifyPeerInfo(context, "peer3", Boolean.FALSE);
+        assertFalse("isVotingMember", context.isVotingMember());
 
         context.updatePeerIds(new ServerConfigurationPayload(List.of(new ServerInfo("self", true),
                 new ServerInfo("peer2", true), new ServerInfo("peer3", true))));
-        verifyPeerInfo(context, "peer2", true);
-        verifyPeerInfo(context, "peer3", true);
-        assertEquals("isVotingMember", true, context.isVotingMember());
+        verifyPeerInfo(context, "peer2", Boolean.TRUE);
+        verifyPeerInfo(context, "peer3", Boolean.TRUE);
+        assertTrue("isVotingMember", context.isVotingMember());
 
         context.updatePeerIds(new ServerConfigurationPayload(List.of(new ServerInfo("peer2", true),
                 new ServerInfo("peer3", true))));
-        verifyPeerInfo(context, "peer2", true);
-        verifyPeerInfo(context, "peer3", true);
-        assertEquals("isVotingMember", false, context.isVotingMember());
+        verifyPeerInfo(context, "peer2", Boolean.TRUE);
+        verifyPeerInfo(context, "peer3", Boolean.TRUE);
+        assertFalse("isVotingMember", context.isVotingMember());
     }
 
     private static DataPersistenceProvider createProvider() {
