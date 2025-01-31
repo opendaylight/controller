@@ -7,13 +7,22 @@ module odl-controller-cds-types {
 
   description "Common type definitions related to clustered data store.";
 
+  revision 2025-01-31 {
+    description "Tightened up member-name constract to be non-empty";
+  }
+
   revision 2019-10-24 {
     description "Initial revision.";
   }
 
   typedef member-name {
     description "Cluster member name.";
-    type string;
+    type string {
+      length "1..max" {
+        error-app-tag "cds-types";
+        error-message "Member name must not be empty";
+      }
+    }
   }
 
   typedef frontend-type {
