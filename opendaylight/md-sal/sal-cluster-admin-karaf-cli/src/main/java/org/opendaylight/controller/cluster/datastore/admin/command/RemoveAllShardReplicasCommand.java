@@ -13,6 +13,7 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opendaylight.mdsal.binding.api.RpcService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.cds.types.rev250131.MemberName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.RemoveAllShardReplicas;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.RemoveAllShardReplicasInputBuilder;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -30,7 +31,7 @@ public class RemoveAllShardReplicasCommand extends AbstractRpcAction {
     protected ListenableFuture<? extends RpcResult<?>> invokeRpc() {
         return rpcService.getRpc(RemoveAllShardReplicas.class)
                 .invoke(new RemoveAllShardReplicasInputBuilder()
-                        .setMemberName(memberName)
+                        .setMemberName(new MemberName(memberName))
                         .build());
     }
 }

@@ -14,11 +14,11 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opendaylight.mdsal.binding.api.RpcService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.cds.types.rev250131.MemberName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.ChangeMemberVotingStatesForShard;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.ChangeMemberVotingStatesForShardInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.DataStoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.ShardName;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.member.voting.states.input.MemberVotingState;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.member.voting.states.input.MemberVotingStateBuilder;
 import org.opendaylight.yangtools.binding.util.BindingMap;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -40,16 +40,14 @@ public class ChangeMemberVotingStatesForShardCommand extends AbstractRpcAction {
 
     @Override
     protected ListenableFuture<? extends RpcResult<?>> invokeRpc() {
-        final MemberVotingState memberVotingState = new MemberVotingStateBuilder()
-                .setMemberName(memberName)
-                .setVoting(voting)
-                .build();
-
         return rpcService.getRpc(ChangeMemberVotingStatesForShard.class)
                 .invoke(new ChangeMemberVotingStatesForShardInputBuilder()
                         .setShardName(new ShardName(shardName))
                         .setDataStoreType(DataStoreType.forName(dataStoreType))
-                        .setMemberVotingState(BindingMap.of(memberVotingState))
+                        .setMemberVotingState(BindingMap.of(new MemberVotingStateBuilder()
+                            .setMemberName(new MemberName(memberName))
+                            .setVoting(voting)
+                            .build()))
                         .build());
     }
 }

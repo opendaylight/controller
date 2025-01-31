@@ -9,6 +9,7 @@ module cluster-admin {
   revision "2025-01-31" {
     description "A number of modeling updates:
                  - split out 'shard-name' typedef
+                 - use 'member-name' from odl-controller-cds-types
                  - 'member-voting-state' now expresses what it means
                  - 'local' is now a presence container, a better modeling practice,
                  - choice/case statements are spelled out for codegen ergonomy";
@@ -86,7 +87,7 @@ module cluster-admin {
       description "The list of member voting states";
 
       leaf member-name {
-        type string;
+        type cds:member-name;
       }
 
       leaf voting {
@@ -117,7 +118,7 @@ module cluster-admin {
 
       leaf member-name {
         mandatory true;
-        type string;
+        type cds:member-name;
         description "The cluster member from which the shard replica should be removed";
       }
     }
@@ -152,7 +153,7 @@ module cluster-admin {
     input {
       leaf member-name {
         mandatory true;
-        type string;
+        type cds:member-name;
         description "The cluster member from which the shard replicas should be removed";
       }
     }

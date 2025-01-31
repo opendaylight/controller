@@ -83,9 +83,9 @@ public final class FrontendType implements Comparable<FrontendType>, WritableIde
         return name;
     }
 
-    public org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.cds.types.rev191024
+    public org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.cds.types.rev250131
         . @NonNull FrontendType toYang() {
-        return new org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.cds.types.rev191024
+        return new org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.cds.types.rev250131
                 .FrontendType(name);
     }
 

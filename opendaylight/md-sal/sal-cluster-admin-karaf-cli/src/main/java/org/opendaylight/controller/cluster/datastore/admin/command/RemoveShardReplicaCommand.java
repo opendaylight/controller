@@ -13,6 +13,7 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.opendaylight.mdsal.binding.api.RpcService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.cds.types.rev250131.MemberName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.DataStoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.RemoveShardReplica;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.RemoveShardReplicaInputBuilder;
@@ -37,7 +38,7 @@ public class RemoveShardReplicaCommand extends AbstractRpcAction {
                 .invoke(new RemoveShardReplicaInputBuilder()
                         .setShardName(new ShardName(shardName))
                         .setDataStoreType(DataStoreType.forName(dataStoreType))
-                        .setMemberName(memberName)
+                        .setMemberName(new MemberName(memberName))
                         .build());
     }
 }
