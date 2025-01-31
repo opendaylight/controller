@@ -16,9 +16,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.opendaylight.controller.cluster.datastore.MemberNode.verifyNoShardPresent;
 import static org.opendaylight.controller.cluster.datastore.MemberNode.verifyRaftPeersPresent;
 import static org.opendaylight.controller.cluster.datastore.MemberNode.verifyRaftState;
@@ -76,6 +76,12 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.shard.result.output.ShardResult;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.shard.result.output.ShardResultBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.shard.result.output.ShardResultKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.shard.result.output.shard.result.result.FailureCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.shard.result.output.shard.result.result.FailureCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.shard.result.output.shard.result.result.SuccessCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.shard.result.output.shard.result.result.SuccessCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.shard.result.output.shard.result.result.failure._case.FailureBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.shard.result.output.shard.result.result.success._case.SuccessBuilder;
 import org.opendaylight.yangtools.binding.util.BindingMap;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.XMLNamespace;
@@ -1027,19 +1033,23 @@ public class ClusterAdminRpcServiceTest {
         }
 
         for (var result : shardResults.values()) {
-            var exp = expResultsMap.remove(result.getShardName() + "-" + result.getDataStoreType());
-            assertNotNull(String.format("Unexpected result for shard %s, type %s", result.getShardName(),
-                    result.getDataStoreType()), exp);
-            assertEquals("isSucceeded", exp.getSucceeded(), result.getSucceeded());
-            if (exp.getSucceeded()) {
-                assertNull("Expected null error message", result.getErrorMessage());
-            } else {
-                assertNotNull("Expected error message", result.getErrorMessage());
-            }
+            assertResult(expResultsMap.remove(result.getShardName() + "-" + result.getDataStoreType()), result);
         }
 
-        if (!expResultsMap.isEmpty()) {
-            fail("Missing shard results for " + expResultsMap.keySet());
+        assertEquals(Map.of(), expResultsMap);
+    }
+
+    private static void assertResult(final ShardResult expected, final ShardResult actual) {
+        assertNotNull(
+            "Unexpected result for shard %s, type %s".formatted(actual.getShardName(), actual.getDataStoreType()),
+            expected);
+
+        final var expResult = expected.getResult();
+        switch (expResult) {
+            case FailureCase failure -> assertNotNull("Expected error message",
+                assertInstanceOf(FailureCase.class, actual.getResult()).getFailure().getMessage());
+            case SuccessCase success -> assertInstanceOf(SuccessCase.class, actual.getResult());
+            default -> throw new AssertionError("Unexpected expected result " + expResult);
         }
     }
 
@@ -1047,7 +1057,7 @@ public class ClusterAdminRpcServiceTest {
         return new ShardResultBuilder()
             .setDataStoreType(type)
             .setShardName(new ShardName(shardName))
-            .setSucceeded(TRUE)
+            .setResult(new SuccessCaseBuilder().setSuccess(new SuccessBuilder().build()).build())
             .build();
     }
 
@@ -1055,7 +1065,7 @@ public class ClusterAdminRpcServiceTest {
         return new ShardResultBuilder()
             .setDataStoreType(type)
             .setShardName(new ShardName(shardName))
-            .setSucceeded(FALSE)
+            .setResult(new FailureCaseBuilder().setFailure(new FailureBuilder().build()).build())
             .build();
     }
 }
