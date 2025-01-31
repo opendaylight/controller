@@ -9,7 +9,9 @@ module cluster-admin {
   revision "2025-01-31" {
     description "A number of modeling updates:
                  - split out 'shard-name' typedef
-                 - 'member-voting-state' now expresses what it means";
+                 - 'member-voting-state' now expresses what it means
+                 - 'local' is now a presence container, a better modeling practice,
+                 - choice/case statements are spelled out for codegen ergonomy";
   }
 
   revision "2015-10-13" {
@@ -245,16 +247,18 @@ module cluster-admin {
         description "Location of the hypothetical cluster member node. Relationship to the input parameters
                      and the transport protocol.";
 
-        leaf local {
-          description "Local node is the best node to talk to when it comes from efficiency perspective
-                       of underlying implementation. The requester of this RPC is advised to contact
-                       any services to the specified shard via the channel on which this RPC was invoked.";
-          type empty;
+        case local-case {
+          container local {
+            presence "Local node is the best node to talk to when it comes from efficiency perspective
+                      of underlying implementation. The requester of this RPC is advised to contact
+                      any services to the specified shard via the channel on which this RPC was invoked.";
+          }
         }
-
-        leaf leader-actor-ref {
-          description "Actor reference to the actor which is currently acting as the leader.";
-          type string;
+        case leader-actor-ref-case {
+          leaf leader-actor-ref {
+            description "Actor reference to the actor which is currently acting as the leader.";
+            type string;
+          }
         }
       }
     }

@@ -111,8 +111,9 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.ShardName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.get.known.clients._for.all.shards.output.ShardResult1Builder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.get.known.clients._for.all.shards.output.shard.result.KnownClientsBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.locate.shard.output.member.node.LeaderActorRefBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.locate.shard.output.member.node.LocalBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.locate.shard.output.member.node.LeaderActorRefCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.locate.shard.output.member.node.LocalCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.locate.shard.output.member.node.local._case.LocalBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.member.voting.states.input.MemberVotingState;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.member.voting.states.input.MemberVotingStateKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.shard.result.output.ShardResult;
@@ -139,7 +140,7 @@ public final class ClusterAdminRpcService {
     private static final Logger LOG = LoggerFactory.getLogger(ClusterAdminRpcService.class);
     private static final @NonNull RpcResult<LocateShardOutput> LOCAL_SHARD_RESULT =
             RpcResultBuilder.success(new LocateShardOutputBuilder()
-                .setMemberNode(new LocalBuilder().setLocal(Empty.value()).build())
+                .setMemberNode(new LocalCaseBuilder().setLocal(new LocalBuilder().build()).build())
                 .build())
             .build();
 
@@ -286,7 +287,7 @@ public final class ClusterAdminRpcService {
                 }
 
                 ret.set(newSuccessfulResult(new LocateShardOutputBuilder()
-                    .setMemberNode(new LeaderActorRefBuilder()
+                    .setMemberNode(new LeaderActorRefCaseBuilder()
                         .setLeaderActorRef(success.getPrimaryShardActor().toSerializationFormat())
                         .build())
                     .build()));
