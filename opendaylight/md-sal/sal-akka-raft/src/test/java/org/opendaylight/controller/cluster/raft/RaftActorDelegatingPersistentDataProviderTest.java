@@ -23,7 +23,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.PersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
-import org.opendaylight.controller.cluster.raft.messages.PersistentPayload;
+import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 
 /**
  * Unit tests for RaftActorDelegatingPersistentDataProvider.
@@ -32,7 +32,7 @@ import org.opendaylight.controller.cluster.raft.messages.PersistentPayload;
  */
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class RaftActorDelegatingPersistentDataProviderTest {
-    private static final Payload PERSISTENT_PAYLOAD = new TestPersistentPayload();
+    private static final ClusterConfig PERSISTENT_PAYLOAD = new ClusterConfig();
 
     private static final Payload NON_PERSISTENT_PAYLOAD = new TestNonPersistentPayload();
 
@@ -111,10 +111,5 @@ public class RaftActorDelegatingPersistentDataProviderTest {
             // Not needed
             throw new UnsupportedOperationException();
         }
-    }
-
-    static class TestPersistentPayload extends TestNonPersistentPayload implements PersistentPayload {
-        @java.io.Serial
-        private static final long serialVersionUID = 1L;
     }
 }

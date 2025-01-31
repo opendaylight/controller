@@ -71,7 +71,7 @@ final class SS implements Externalizable {
         long lastAppliedTerm = WritableObjects.readSecondLong(in, hdr);
         long electionTerm = WritableObjects.readLong(in);
         String electionVotedFor = (String) in.readObject();
-        ServerConfigurationPayload serverConfig = (ServerConfigurationPayload) in.readObject();
+        ClusterConfig serverConfig = (ClusterConfig) in.readObject();
 
         int size = in.readInt();
         var unAppliedEntries = ImmutableList.<ReplicatedLogEntry>builderWithExpectedSize(size);

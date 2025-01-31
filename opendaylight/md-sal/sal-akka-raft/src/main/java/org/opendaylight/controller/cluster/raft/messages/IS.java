@@ -16,7 +16,7 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.OptionalInt;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
-import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
+import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.yangtools.concepts.WritableObjects;
 
 /**
@@ -85,8 +85,8 @@ final class IS implements Externalizable {
 
         OptionalInt lastChunkHashCode = getFlag(flags, LAST_CHUNK_HASHCODE) ? OptionalInt.of(in.readInt())
             : OptionalInt.empty();
-        ServerConfigurationPayload serverConfig = getFlag(flags, SERVER_CONFIG)
-                ? requireNonNull((ServerConfigurationPayload) in.readObject()) : null;
+        ClusterConfig serverConfig = getFlag(flags, SERVER_CONFIG)
+                ? requireNonNull((ClusterConfig) in.readObject()) : null;
 
         byte[] data = (byte[])in.readObject();
 

@@ -51,7 +51,7 @@ import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.messages.UnInitializedFollowerSnapshotReply;
-import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
+import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import scala.concurrent.duration.FiniteDuration;
@@ -970,7 +970,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
 
         final int chunkIndex = installSnapshotState.incrementChunkIndex();
         final int totalChunks = installSnapshotState.getTotalChunks();
-        ServerConfigurationPayload serverConfig = null;
+        ClusterConfig serverConfig = null;
         if (chunkIndex == totalChunks) {
             serverConfig = context.getPeerServerInfo(true);
         }

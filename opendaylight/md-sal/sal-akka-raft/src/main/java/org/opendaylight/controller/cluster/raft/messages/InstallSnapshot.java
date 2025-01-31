@@ -19,7 +19,7 @@ import java.io.ObjectOutput;
 import java.util.OptionalInt;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
-import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
+import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 
 /**
  * Message sent from a leader to install a snapshot chunk on a follower.
@@ -36,7 +36,7 @@ public final class InstallSnapshot extends RaftRPC {
     private final int totalChunks;
     @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "Handled via writeReplace()")
     private final OptionalInt lastChunkHashCode;
-    private final @Nullable ServerConfigurationPayload serverConfig;
+    private final @Nullable ClusterConfig serverConfig;
     private final short recipientRaftVersion;
 
     @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = """
@@ -45,7 +45,7 @@ public final class InstallSnapshot extends RaftRPC {
         large.""")
     public InstallSnapshot(final long term, final String leaderId, final long lastIncludedIndex,
             final long lastIncludedTerm, final byte[] data, final int chunkIndex, final int totalChunks,
-            final OptionalInt lastChunkHashCode, final @Nullable ServerConfigurationPayload serverConfig,
+            final OptionalInt lastChunkHashCode, final @Nullable ClusterConfig serverConfig,
             final short recipientRaftVersion) {
         super(term);
         this.leaderId = leaderId;
@@ -99,7 +99,7 @@ public final class InstallSnapshot extends RaftRPC {
         return lastChunkHashCode;
     }
 
-    public @Nullable ServerConfigurationPayload serverConfig() {
+    public @Nullable ClusterConfig serverConfig() {
         return serverConfig;
     }
 
@@ -167,15 +167,9 @@ public final class InstallSnapshot extends RaftRPC {
             int chunkIndex = in.readInt();
             int totalChunks = in.readInt();
 
-            OptionalInt lastChunkHashCode = in.readByte() == 1 ? OptionalInt.of(in.readInt()) : OptionalInt.empty();
-            ServerConfigurationPayload serverConfig;
-            if (in.readByte() == 1) {
-                serverConfig = requireNonNull((ServerConfigurationPayload) in.readObject());
-            } else {
-                serverConfig = null;
-            }
-
-            byte[] data = (byte[])in.readObject();
+            final var lastChunkHashCode = in.readByte() == 1 ? OptionalInt.of(in.readInt()) : OptionalInt.empty();
+            final var serverConfig = in.readByte() == 1 ? requireNonNull((ClusterConfig) in.readObject()) : null;
+            final var data = (byte[]) in.readObject();
 
             installSnapshot = new InstallSnapshot(term, leaderId, lastIncludedIndex, lastIncludedTerm, data,
                     chunkIndex, totalChunks, lastChunkHashCode, serverConfig, RaftVersions.CURRENT_VERSION);

@@ -78,9 +78,9 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ByteState;
+import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
-import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
@@ -1199,7 +1199,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         String persistenceId = factory.generateActorId("test-actor-");
         InMemoryJournal.addEntry(persistenceId, 1,  new SimpleReplicatedLogEntry(0, 1,
-                new ServerConfigurationPayload(List.of(new ServerInfo(persistenceId, false)))));
+                new ClusterConfig(new ServerInfo(persistenceId, false))));
 
         TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.builder().id(persistenceId)
                 .config(config).props().withDispatcher(Dispatchers.DefaultDispatcherId()), persistenceId);

@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft.persisted;
 
 import static java.util.Objects.requireNonNull;
 
+import java.io.Serializable;
 import org.eclipse.jdt.annotation.NonNull;
 
 /**
@@ -17,7 +18,7 @@ import org.eclipse.jdt.annotation.NonNull;
  *
  * @author Thomas Pantelis
  */
-public record ServerInfo(@NonNull String peerId, boolean isVoting) {
+public record ServerInfo(@NonNull String peerId, boolean isVoting) implements Serializable {
     public ServerInfo {
         requireNonNull(peerId);
     }

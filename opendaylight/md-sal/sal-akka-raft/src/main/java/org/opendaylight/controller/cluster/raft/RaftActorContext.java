@@ -24,7 +24,7 @@ import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStreamFactory;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
-import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
+import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
@@ -183,11 +183,11 @@ public interface RaftActorContext {
     @Nullable String getPeerAddress(String peerId);
 
     /**
-     * Updates the peers and information to match the given ServerConfigurationPayload.
+     * Updates the peers and information to match the given ClusterConfig.
      *
-     * @param serverCfgPayload the ServerConfigurationPayload.
+     * @param serverCfgPayload the ClusterConfig.
      */
-    void updatePeerIds(ServerConfigurationPayload serverCfgPayload);
+    void updatePeerIds(ClusterConfig serverCfgPayload);
 
     /**
      * Returns the PeerInfo instances for each peer.
@@ -315,13 +315,12 @@ public interface RaftActorContext {
     void setDynamicServerConfigurationInUse();
 
     /**
-     * Returns the peer information as a ServerConfigurationPayload if dynamic server configurations have been applied.
+     * Returns the peer information as a ClusterConfig if dynamic server configurations have been applied.
      *
      * @param includeSelf include this peer's info.
-     * @return the peer information as a ServerConfigurationPayload or null if no dynamic server configurations have
-     *         been applied.
+     * @return the peer information as a ClusterConfig or null if no dynamic server configurations have been applied.
      */
-    @Nullable ServerConfigurationPayload getPeerServerInfo(boolean includeSelf);
+    @Nullable ClusterConfig getPeerServerInfo(boolean includeSelf);
 
     /**
      * Determines if this peer is a voting member of the cluster.

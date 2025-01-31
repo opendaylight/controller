@@ -7,11 +7,11 @@
  */
 package org.opendaylight.controller.cluster.raft.persisted;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 import org.apache.commons.lang3.SerializationUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
@@ -21,9 +21,9 @@ import org.opendaylight.controller.cluster.raft.spi.TermInfo;
  *
  * @author Thomas Pantelis
  */
-public class SnapshotTest {
+class SnapshotTest {
     @Test
-    public void testSerialization() {
+    void testSerialization() {
         testSerialization(new byte[]{1, 2, 3, 4, 5, 6, 7}, List.of(
                 new SimpleReplicatedLogEntry(6, 2, new MockPayload("payload"))), 491);
         testSerialization(new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9}, List.of(), 345);
@@ -37,8 +37,7 @@ public class SnapshotTest {
         long lastAppliedTerm = 1;
         long electionTerm = 3;
         String electionVotedFor = "member-1";
-        ServerConfigurationPayload serverConfig = new ServerConfigurationPayload(List.of(
-                new ServerInfo("1", true), new ServerInfo("2", false)));
+        final var serverConfig = new ClusterConfig(new ServerInfo("1", true), new ServerInfo("2", false));
 
         final var expected = Snapshot.create(ByteState.of(state), unapplied, lastIndex, lastTerm, lastAppliedIndex,
                 lastAppliedTerm, new TermInfo(electionTerm, electionVotedFor), serverConfig);
@@ -46,14 +45,13 @@ public class SnapshotTest {
         assertEquals(expectedSize, bytes.length);
         final var cloned = (Snapshot) SerializationUtils.deserialize(bytes);
 
-        assertEquals("lastIndex", expected.getLastIndex(), cloned.getLastIndex());
-        assertEquals("lastTerm", expected.getLastTerm(), cloned.getLastTerm());
-        assertEquals("lastAppliedIndex", expected.getLastAppliedIndex(), cloned.getLastAppliedIndex());
-        assertEquals("lastAppliedTerm", expected.getLastAppliedTerm(), cloned.getLastAppliedTerm());
-        assertEquals("unAppliedEntries", expected.getUnAppliedEntries(), cloned.getUnAppliedEntries());
-        assertEquals("electionTerm", expected.termInfo(), cloned.termInfo());
-        assertEquals("state", expected.getState(), cloned.getState());
-        assertEquals("serverConfig", expected.getServerConfiguration().getServerConfig(),
-                cloned.getServerConfiguration().getServerConfig());
+        assertEquals(expected.getLastIndex(), cloned.getLastIndex());
+        assertEquals(expected.getLastTerm(), cloned.getLastTerm());
+        assertEquals(expected.getLastAppliedIndex(), cloned.getLastAppliedIndex());
+        assertEquals(expected.getLastAppliedTerm(), cloned.getLastAppliedTerm());
+        assertEquals(expected.getUnAppliedEntries(), cloned.getUnAppliedEntries());
+        assertEquals(expected.termInfo(), cloned.termInfo());
+        assertEquals(expected.getState(), cloned.getState());
+        assertEquals(expected.getServerConfiguration().serverInfo(), cloned.getServerConfiguration().serverInfo());
     }
 }
