@@ -96,6 +96,16 @@ public class ClusterAdminRpcServiceTest {
     private static final MemberName MEMBER_1 = MemberName.forName("member-1");
     private static final MemberName MEMBER_2 = MemberName.forName("member-2");
     private static final MemberName MEMBER_3 = MemberName.forName("member-3");
+    private static final org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.cds.types.rev250131
+        .MemberName MEMBER_1B = new org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller
+            .cds.types.rev250131.MemberName("member-1");
+    private static final org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.cds.types.rev250131
+        .MemberName MEMBER_2B = new org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller
+            .cds.types.rev250131.MemberName("member-2");
+    private static final org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.cds.types.rev250131
+        .MemberName MEMBER_3B = new org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller
+        .cds.types.rev250131.MemberName("member-3");
+
     private final List<MemberNode> memberNodes = new ArrayList<>();
 
     @Before
@@ -422,7 +432,7 @@ public class ClusterAdminRpcServiceTest {
             null);
 
         var rpcResult = service3.removeShardReplica(new RemoveShardReplicaInputBuilder()
-            .setShardName(new ShardName("cars")).setMemberName("member-3")
+            .setShardName(new ShardName("cars")).setMemberName(MEMBER_3B)
             .setDataStoreType(DataStoreType.Config)
             .build()).get(10, TimeUnit.SECONDS);
         verifySuccessfulRpcResult(rpcResult);
@@ -449,7 +459,7 @@ public class ClusterAdminRpcServiceTest {
 
         rpcResult = service1.removeShardReplica(new RemoveShardReplicaInputBuilder()
             .setShardName(new ShardName("cars"))
-            .setMemberName("member-2")
+            .setMemberName(MEMBER_2B)
             .setDataStoreType(DataStoreType.Config)
             .build()).get(10, TimeUnit.SECONDS);
         verifySuccessfulRpcResult(rpcResult);
@@ -488,7 +498,7 @@ public class ClusterAdminRpcServiceTest {
 
         final var rpcResult = service1.removeShardReplica(new RemoveShardReplicaInputBuilder()
             .setShardName(new ShardName("cars"))
-            .setMemberName("member-1")
+            .setMemberName(MEMBER_1B)
             .setDataStoreType(DataStoreType.Config)
             .build()).get(10, TimeUnit.SECONDS);
         verifySuccessfulRpcResult(rpcResult);
@@ -594,7 +604,7 @@ public class ClusterAdminRpcServiceTest {
             null);
 
         var rpcResult = service3.removeAllShardReplicas(
-                new RemoveAllShardReplicasInputBuilder().setMemberName("member-3").build())
+                new RemoveAllShardReplicasInputBuilder().setMemberName(MEMBER_3B).build())
             .get(10, TimeUnit.SECONDS);
         final var result = verifySuccessfulRpcResult(rpcResult);
         verifyShardResults(result.getShardResult(), successShardResult("cars", DataStoreType.Config),
@@ -643,8 +653,8 @@ public class ClusterAdminRpcServiceTest {
         var rpcResult = service3.changeMemberVotingStatesForShard(new ChangeMemberVotingStatesForShardInputBuilder()
             .setShardName(new ShardName("cars")).setDataStoreType(DataStoreType.Config)
             .setMemberVotingState(BindingMap.of(
-                new MemberVotingStateBuilder().setMemberName("member-2").setVoting(FALSE).build(),
-                new MemberVotingStateBuilder().setMemberName("member-3").setVoting(FALSE).build()))
+                new MemberVotingStateBuilder().setMemberName(MEMBER_2B).setVoting(FALSE).build(),
+                new MemberVotingStateBuilder().setMemberName(MEMBER_3B).setVoting(FALSE).build()))
             .build())
             .get(10, TimeUnit.SECONDS);
         verifySuccessfulRpcResult(rpcResult);
@@ -676,7 +686,7 @@ public class ClusterAdminRpcServiceTest {
             new ChangeMemberVotingStatesForShardInputBuilder()
                 .setShardName(new ShardName("cars")).setDataStoreType(DataStoreType.Config)
                 .setMemberVotingState(BindingMap.of(new MemberVotingStateBuilder()
-                    .setMemberName("member-1")
+                    .setMemberName(MEMBER_1B)
                     .setVoting(FALSE)
                     .build()))
                 .build())
@@ -721,8 +731,8 @@ public class ClusterAdminRpcServiceTest {
         final var rpcResult = service3.changeMemberVotingStatesForAllShards(
             new ChangeMemberVotingStatesForAllShardsInputBuilder()
                 .setMemberVotingState(BindingMap.of(
-                        new MemberVotingStateBuilder().setMemberName("member-2").setVoting(FALSE).build(),
-                        new MemberVotingStateBuilder().setMemberName("member-3").setVoting(FALSE).build()))
+                        new MemberVotingStateBuilder().setMemberName(MEMBER_2B).setVoting(FALSE).build(),
+                        new MemberVotingStateBuilder().setMemberName(MEMBER_3B).setVoting(FALSE).build()))
                 .build())
                 .get(10, TimeUnit.SECONDS);
         final var result = verifySuccessfulRpcResult(rpcResult);
