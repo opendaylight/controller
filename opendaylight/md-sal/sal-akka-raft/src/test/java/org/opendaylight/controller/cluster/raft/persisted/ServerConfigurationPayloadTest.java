@@ -7,34 +7,32 @@
  */
 package org.opendaylight.controller.cluster.raft.persisted;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.List;
 import org.apache.commons.lang3.SerializationUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for ServerConfigurationPayload.
  *
  * @author Thomas Pantelis
  */
-public class ServerConfigurationPayloadTest {
+class ServerConfigurationPayloadTest {
     @Test
-    public void testSerialization() {
-        final var expected = new ServerConfigurationPayload(List.of(new ServerInfo("1", true),
-            new ServerInfo("2", false)));
+    void testSerialization() {
+        final var expected = new ClusterConfig(new ServerInfo("1", true), new ServerInfo("2", false));
 
         final var bytes = SerializationUtils.serialize(expected);
         assertEquals(125, bytes.length);
-        final var cloned = (ServerConfigurationPayload) SerializationUtils.deserialize(bytes);
+        final var cloned = (ClusterConfig) SerializationUtils.deserialize(bytes);
 
-        assertEquals("getServerConfig", expected.getServerConfig(), cloned.getServerConfig());
+        assertEquals(expected.serverInfo(), cloned.serverInfo());
     }
 
     @Test
-    public void testSize() {
-        final var expected = new ServerConfigurationPayload(List.of(new ServerInfo("1", true)));
+    void testSize() {
+        final var expected = new ClusterConfig(new ServerInfo("1", true));
         assertTrue(expected.size() > 0);
     }
 }

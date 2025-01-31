@@ -12,6 +12,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.assertNoneMatching;
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.clearMessages;
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.expectFirstMatching;
@@ -63,7 +64,7 @@ import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.controller.cluster.raft.messages.UnInitializedFollowerSnapshotReply;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ByteState;
-import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
+import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
@@ -218,12 +219,12 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         assertEquals("Leader persisted ReplicatedLogImplEntry entries", 0,
                 InMemoryJournal.get(LEADER_ID, SimpleReplicatedLogEntry.class).size());
         assertEquals("Leader persisted ServerConfigurationPayload entries", 1,
-                InMemoryJournal.get(LEADER_ID, ServerConfigurationPayload.class).size());
+                InMemoryJournal.get(LEADER_ID, ClusterConfig.class).size());
 
         assertEquals("New follower persisted ReplicatedLogImplEntry entries", 0,
                 InMemoryJournal.get(NEW_SERVER_ID, SimpleReplicatedLogEntry.class).size());
         assertEquals("New follower persisted ServerConfigurationPayload entries", 1,
-                InMemoryJournal.get(NEW_SERVER_ID, ServerConfigurationPayload.class).size());
+                InMemoryJournal.get(NEW_SERVER_ID, ClusterConfig.class).size());
 
         LOG.info("testAddServerWithExistingFollower ending");
     }
@@ -772,8 +773,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         RaftActorServerConfigurationSupport support = new RaftActorServerConfigurationSupport(
                 noLeaderActor.underlyingActor());
 
-        ReplicatedLogEntry serverConfigEntry = new SimpleReplicatedLogEntry(1, 1,
-                new ServerConfigurationPayload(List.of()));
+        ReplicatedLogEntry serverConfigEntry = new SimpleReplicatedLogEntry(1, 1, new ClusterConfig());
         boolean handled = support.handleMessage(new ApplyState(null, null, serverConfigEntry), ActorRef.noSender());
         assertTrue("Message handled", handled);
 
@@ -1137,9 +1137,9 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         // via the server config. The server config will also contain 2 voting peers that are down (ie no
         // actors created).
 
-        ServerConfigurationPayload persistedServerConfig = new ServerConfigurationPayload(List.of(
+        final var persistedServerConfig = new ClusterConfig(
                 new ServerInfo(node1ID, false), new ServerInfo(node2ID, false),
-                new ServerInfo("downNode1", true), new ServerInfo("downNode2", true)));
+                new ServerInfo("downNode1", true), new ServerInfo("downNode2", true));
         SimpleReplicatedLogEntry persistedServerConfigEntry = new SimpleReplicatedLogEntry(0, 1, persistedServerConfig);
 
         InMemoryJournal.addEntry(node1ID, 1, new UpdateElectionTerm(1, "downNode1"));
@@ -1244,8 +1244,8 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
                 ? actorFactory.createTestActorPath(node1ID) : peerId.equals(node2ID)
                         ? actorFactory.createTestActorPath(node2ID) : null;
 
-        ServerConfigurationPayload persistedServerConfig = new ServerConfigurationPayload(List.of(
-                new ServerInfo(node1ID, false), new ServerInfo(node2ID, true)));
+        final var persistedServerConfig = new ClusterConfig(
+                new ServerInfo(node1ID, false), new ServerInfo(node2ID, true));
         SimpleReplicatedLogEntry persistedServerConfigEntry = new SimpleReplicatedLogEntry(0, 1, persistedServerConfig);
 
         InMemoryJournal.addEntry(node1ID, 1, new UpdateElectionTerm(1, "node1"));
@@ -1288,7 +1288,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         assertEquals("getStatus", ServerChangeStatus.NO_LEADER, reply.getStatus());
 
         assertEquals("Server config", Set.of(nonVotingServer(node1ID), votingServer(node2ID)),
-            Set.copyOf(node1RaftActor.getRaftActorContext().getPeerServerInfo(true).getServerConfig()));
+            Set.copyOf(node1RaftActor.getRaftActorContext().getPeerServerInfo(true).serverInfo()));
         assertEquals("getRaftState", RaftState.Follower, node1RaftActor.getRaftState());
 
         LOG.info("testChangeToVotingWithNoLeaderAndElectionTimeout ending");
@@ -1310,8 +1310,8 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         configParams.setElectionTimeoutFactor(3);
         configParams.setPeerAddressResolver(peerAddressResolver);
 
-        ServerConfigurationPayload persistedServerConfig = new ServerConfigurationPayload(List.of(
-                new ServerInfo(node1ID, false), new ServerInfo(node2ID, false)));
+        final var persistedServerConfig = new ClusterConfig(
+                new ServerInfo(node1ID, false), new ServerInfo(node2ID, false));
         SimpleReplicatedLogEntry persistedServerConfigEntry = new SimpleReplicatedLogEntry(0, 1, persistedServerConfig);
 
         InMemoryJournal.addEntry(node1ID, 1, new UpdateElectionTerm(1, "node1"));
@@ -1376,8 +1376,8 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
                 ? actorFactory.createTestActorPath(node1ID) : peerId.equals(node2ID)
                         ? actorFactory.createTestActorPath(node2ID) : null);
 
-        ServerConfigurationPayload persistedServerConfig = new ServerConfigurationPayload(List.of(
-                new ServerInfo(node1ID, false), new ServerInfo(node2ID, true)));
+        final var persistedServerConfig = new ClusterConfig(
+                new ServerInfo(node1ID, false), new ServerInfo(node2ID, true));
         SimpleReplicatedLogEntry persistedServerConfigEntry = new SimpleReplicatedLogEntry(0, 1, persistedServerConfig);
 
         InMemoryJournal.addEntry(node1ID, 1, new UpdateElectionTerm(1, "node1"));
@@ -1465,9 +1465,8 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
     private static void verifyServerConfigurationPayloadEntry(final ReplicatedLog log, final ServerInfo... expected) {
         ReplicatedLogEntry logEntry = log.get(log.lastIndex());
-        assertEquals("Last log entry payload class", ServerConfigurationPayload.class, logEntry.getData().getClass());
-        ServerConfigurationPayload payload = (ServerConfigurationPayload)logEntry.getData();
-        assertEquals("Server config", Set.of(expected), Set.copyOf(payload.getServerConfig()));
+        final var payload = assertInstanceOf(ClusterConfig.class, logEntry.getData());
+        assertEquals("Server config", Set.of(expected), Set.copyOf(payload.serverInfo()));
     }
 
     private static RaftActorContextImpl newFollowerContext(final String id,

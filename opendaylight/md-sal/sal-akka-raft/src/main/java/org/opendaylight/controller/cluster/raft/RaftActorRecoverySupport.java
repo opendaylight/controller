@@ -13,12 +13,11 @@ import java.util.concurrent.TimeUnit;
 import org.apache.pekko.persistence.RecoveryCompleted;
 import org.apache.pekko.persistence.SnapshotOffer;
 import org.opendaylight.controller.cluster.PersistentDataProvider;
-import org.opendaylight.controller.cluster.raft.messages.PersistentPayload;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
+import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
 import org.opendaylight.controller.cluster.raft.persisted.MigratedSerializable;
-import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
@@ -63,7 +62,7 @@ class RaftActorRecoverySupport {
             case ReplicatedLogEntry msg -> onRecoveredJournalLogEntry(msg);
             case ApplyJournalEntries msg -> onRecoveredApplyLogEntries(msg.getToIndex());
             case DeleteEntries msg -> onDeleteEntries(msg);
-            case ServerConfigurationPayload msg -> context.updatePeerIds(msg);
+            case ClusterConfig msg -> context.updatePeerIds(msg);
             case UpdateElectionTerm(var termInfo) -> context.setTermInfo(termInfo);
             case RecoveryCompleted msg -> {
                 onRecoveryCompletedMessage(persistentProvider);
@@ -166,17 +165,17 @@ class RaftActorRecoverySupport {
         }
 
         final var data = logEntry.getData();
-        if (data instanceof ServerConfigurationPayload payload) {
-            context.updatePeerIds(payload);
-        }
-
         if (isMigratedSerializable(data)) {
             hasMigratedDataRecovered = true;
         }
 
+        if (data instanceof ClusterConfig clusterConfig) {
+            context.updatePeerIds(clusterConfig);
+        }
+
         if (context.getPersistenceProvider().isRecoveryApplicable()) {
             replicatedLog().append(logEntry);
-        } else if (!(data instanceof PersistentPayload)) {
+        } else if (!(data instanceof ClusterConfig)) {
             dataRecoveredWithPersistenceDisabled = true;
         }
     }
@@ -232,8 +231,8 @@ class RaftActorRecoverySupport {
     private void batchRecoveredLogEntry(final ReplicatedLogEntry logEntry) {
         initRecoveryTimers();
 
-        if (logEntry.getData() instanceof ServerConfigurationPayload) {
-            // FIXME: explain why ServerConfigurationPayload is special
+        if (logEntry.getData() instanceof ClusterConfig) {
+            // FIXME: explain why ClusterConfig is special
             return;
         }
 

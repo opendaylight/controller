@@ -18,7 +18,7 @@ import org.apache.pekko.actor.UntypedAbstractActor;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshotReply;
-import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
+import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.slf4j.Logger;
@@ -67,7 +67,7 @@ final class GetSnapshotReplyActor extends UntypedAbstractActor {
 
     public static Props props(final CaptureSnapshot captureSnapshot, final TermInfo termInfo,
             final ActorRef replyToActor, final FiniteDuration receiveTimeout, final String id,
-            final ServerConfigurationPayload updatedPeerInfo) {
+            final ClusterConfig updatedPeerInfo) {
         return Props.create(GetSnapshotReplyActor.class, new Params(captureSnapshot, termInfo, replyToActor,
                 receiveTimeout, id, updatedPeerInfo));
     }
@@ -78,7 +78,7 @@ final class GetSnapshotReplyActor extends UntypedAbstractActor {
             ActorRef replyToActor,
             FiniteDuration receiveTimeout,
             String id,
-            ServerConfigurationPayload serverConfig) {
+            ClusterConfig serverConfig) {
         Params {
             requireNonNull(captureSnapshot);
             requireNonNull(termInfo);

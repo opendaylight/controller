@@ -55,8 +55,8 @@ import org.opendaylight.controller.cluster.raft.MockRaftActor.MockSnapshotState;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
+import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
-import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
@@ -374,11 +374,11 @@ public class RaftActorRecoverySupportTest {
         context.addToPeers(follower2, null, VotingState.VOTING);
 
         //add new Server
-        ServerConfigurationPayload obj = new ServerConfigurationPayload(List.of(
+        var obj = new ClusterConfig(
                 new ServerInfo(localId, true),
                 new ServerInfo(follower1, true),
                 new ServerInfo(follower2, false),
-                new ServerInfo(follower3, true)));
+                new ServerInfo(follower3, true));
 
         sendMessageToSupport(new SimpleReplicatedLogEntry(0, 1, obj));
 
@@ -395,10 +395,10 @@ public class RaftActorRecoverySupportTest {
         verify(mockCohort, never()).appendRecoveredLogEntry(any(Payload.class));
 
         //remove existing follower1
-        obj = new ServerConfigurationPayload(List.of(
+        obj = new ClusterConfig(
                 new ServerInfo(localId, true),
                 new ServerInfo("follower2", true),
-                new ServerInfo("follower3", true)));
+                new ServerInfo("follower3", true));
 
         sendMessageToSupport(new SimpleReplicatedLogEntry(1, 1, obj));
 
@@ -412,8 +412,7 @@ public class RaftActorRecoverySupportTest {
         doReturn(false).when(mockPersistence).isRecoveryApplicable();
 
         String follower = "follower";
-        ServerConfigurationPayload obj = new ServerConfigurationPayload(List.of(
-                new ServerInfo(localId, true), new ServerInfo(follower, true)));
+        final var obj = new ClusterConfig(new ServerInfo(localId, true), new ServerInfo(follower, true));
 
         sendMessageToSupport(new SimpleReplicatedLogEntry(0, 1, obj));
 
@@ -425,10 +424,10 @@ public class RaftActorRecoverySupportTest {
     public void testOnSnapshotOfferWithServerConfiguration() {
         long electionTerm = 2;
         String electionVotedFor = "member-2";
-        ServerConfigurationPayload serverPayload = new ServerConfigurationPayload(List.of(
+        final var serverPayload = new ClusterConfig(
                 new ServerInfo(localId, true),
                 new ServerInfo("follower1", true),
-                new ServerInfo("follower2", true)));
+                new ServerInfo("follower2", true));
 
         MockSnapshotState snapshotState = new MockSnapshotState(List.of(new MockPayload("1")));
         Snapshot snapshot = Snapshot.create(snapshotState, List.of(),

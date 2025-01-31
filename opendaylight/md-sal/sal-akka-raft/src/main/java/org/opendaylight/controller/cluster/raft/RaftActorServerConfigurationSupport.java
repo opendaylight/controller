@@ -34,7 +34,7 @@ import org.opendaylight.controller.cluster.raft.messages.ServerChangeReply;
 import org.opendaylight.controller.cluster.raft.messages.ServerChangeStatus;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.controller.cluster.raft.messages.UnInitializedFollowerSnapshotReply;
-import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
+import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.util.AbstractUUIDIdentifier;
@@ -145,7 +145,7 @@ class RaftActorServerConfigurationSupport {
 
     private boolean onApplyState(final ApplyState applyState) {
         Payload data = applyState.getReplicatedLogEntry().getData();
-        if (data instanceof ServerConfigurationPayload) {
+        if (data instanceof ClusterConfig) {
             currentOperationState.onApplyState(applyState);
             return true;
         }
@@ -238,9 +238,9 @@ class RaftActorServerConfigurationSupport {
         protected void persistNewServerConfiguration(final ServerOperationContext<?> operationContext) {
             raftContext.setDynamicServerConfigurationInUse();
 
-            ServerConfigurationPayload payload = raftContext.getPeerServerInfo(
+            ClusterConfig payload = raftContext.getPeerServerInfo(
                     operationContext.includeSelfInNewConfiguration(raftActor));
-            LOG.debug("{}: New server configuration : {}", raftContext.getId(), payload.getServerConfig());
+            LOG.debug("{}: New server configuration : {}", raftContext.getId(), payload.serverInfo());
 
             raftActor.persistData(operationContext.getClientRequestor(), operationContext.getContextId(),
                     payload, false);
@@ -741,7 +741,7 @@ class RaftActorServerConfigurationSupport {
         private void initiateLocalLeaderElection() {
             LOG.debug("{}: Sending local ElectionTimeout to start leader election", raftContext.getId());
 
-            ServerConfigurationPayload previousServerConfig = raftContext.getPeerServerInfo(true);
+            final var previousServerConfig = raftContext.getPeerServerInfo(true);
             if (!updateLocalPeerInfo()) {
                 return;
             }
@@ -768,7 +768,7 @@ class RaftActorServerConfigurationSupport {
                 return false;
             }
 
-            raftContext.updatePeerIds(new ServerConfigurationPayload(newServerInfoList));
+            raftContext.updatePeerIds(new ClusterConfig(newServerInfoList));
             if (raftActor.getCurrentBehavior() instanceof AbstractLeader leader) {
                 leader.updateMinReplicaCount();
             }
@@ -795,12 +795,12 @@ class RaftActorServerConfigurationSupport {
     }
 
     private class WaitingForLeaderElected extends OperationState {
-        private final ServerConfigurationPayload previousServerConfig;
+        private final ClusterConfig previousServerConfig;
         private final ChangeServersVotingStatusContext operationContext;
         private final Cancellable timer;
 
         WaitingForLeaderElected(final ChangeServersVotingStatusContext operationContext,
-                final ServerConfigurationPayload previousServerConfig) {
+                final ClusterConfig previousServerConfig) {
             this.operationContext = operationContext;
             this.previousServerConfig = previousServerConfig;
 

@@ -54,7 +54,7 @@ import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier
 import org.opendaylight.controller.cluster.datastore.messages.CreateShard;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.raft.RaftState;
-import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
+import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
@@ -743,8 +743,8 @@ public class ClusterAdminRpcServiceTest {
     public void testFlipMemberVotingStates() throws Exception {
         String name = "testFlipMemberVotingStates";
 
-        final var persistedServerConfig = new ServerConfigurationPayload(List.of(
-            new ServerInfo("member-1", true), new ServerInfo("member-2", true), new ServerInfo("member-3", false)));
+        final var persistedServerConfig = new ClusterConfig(
+            new ServerInfo("member-1", true), new ServerInfo("member-2", true), new ServerInfo("member-3", false));
 
         setupPersistedServerConfigPayload(persistedServerConfig, "member-1", name, "cars", "people");
         setupPersistedServerConfigPayload(persistedServerConfig, "member-2", name, "cars", "people");
@@ -833,10 +833,10 @@ public class ClusterAdminRpcServiceTest {
 
         // Members 1, 2, and 3 are initially started up as non-voting. Members 4, 5, and 6 are initially
         // non-voting and simulated as down by not starting them up.
-        final var persistedServerConfig = new ServerConfigurationPayload(List.of(
+        final var persistedServerConfig = new ClusterConfig(
                 new ServerInfo("member-1", false), new ServerInfo("member-2", false),
                 new ServerInfo("member-3", false), new ServerInfo("member-4", true),
-                new ServerInfo("member-5", true), new ServerInfo("member-6", true)));
+                new ServerInfo("member-5", true), new ServerInfo("member-6", true));
 
         setupPersistedServerConfigPayload(persistedServerConfig, "member-1", name, "cars", "people");
         setupPersistedServerConfigPayload(persistedServerConfig, "member-2", name, "cars", "people");
@@ -905,10 +905,10 @@ public class ClusterAdminRpcServiceTest {
         String name = "testFlipMemberVotingStatesWithVotingMembersDown";
 
         // Members 4, 5, and 6 are initially non-voting and simulated as down by not starting them up.
-        final var persistedServerConfig = new ServerConfigurationPayload(List.of(
+        final var persistedServerConfig = new ClusterConfig(
                 new ServerInfo("member-1", true), new ServerInfo("member-2", true),
                 new ServerInfo("member-3", true), new ServerInfo("member-4", false),
-                new ServerInfo("member-5", false), new ServerInfo("member-6", false)));
+                new ServerInfo("member-5", false), new ServerInfo("member-6", false));
 
         setupPersistedServerConfigPayload(persistedServerConfig, "member-1", name, "cars", "people");
         setupPersistedServerConfigPayload(persistedServerConfig, "member-2", name, "cars", "people");
@@ -961,13 +961,13 @@ public class ClusterAdminRpcServiceTest {
         });
     }
 
-    private static void setupPersistedServerConfigPayload(final ServerConfigurationPayload serverConfig,
+    private static void setupPersistedServerConfigPayload(final ClusterConfig serverConfig,
             final String member, final String datastoreTypeSuffix, final String... shards) {
         String[] datastoreTypes = { "config_", "oper_" };
         for (String type : datastoreTypes) {
             for (String shard : shards) {
-                final var newServerInfo = new ArrayList<ServerInfo>(serverConfig.getServerConfig().size());
-                for (var info : serverConfig.getServerConfig()) {
+                final var newServerInfo = new ArrayList<ServerInfo>(serverConfig.serverInfo().size());
+                for (var info : serverConfig.serverInfo()) {
                     newServerInfo.add(new ServerInfo(ShardIdentifier.create(shard, MemberName.forName(info.peerId()),
                             type + datastoreTypeSuffix).toString(), info.isVoting()));
                 }
@@ -975,8 +975,8 @@ public class ClusterAdminRpcServiceTest {
                 final String shardID = ShardIdentifier.create(shard, MemberName.forName(member),
                         type + datastoreTypeSuffix).toString();
                 InMemoryJournal.addEntry(shardID, 1, new UpdateElectionTerm(1, null));
-                InMemoryJournal.addEntry(shardID, 2, new SimpleReplicatedLogEntry(0, 1,
-                        new ServerConfigurationPayload(newServerInfo)));
+                InMemoryJournal.addEntry(shardID, 2,
+                    new SimpleReplicatedLogEntry(0, 1, new ClusterConfig(newServerInfo)));
             }
         }
     }

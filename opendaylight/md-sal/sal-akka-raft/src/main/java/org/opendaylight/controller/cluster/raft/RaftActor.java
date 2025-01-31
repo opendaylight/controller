@@ -52,8 +52,8 @@ import org.opendaylight.controller.cluster.raft.client.messages.Shutdown;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.messages.RequestLeadership;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
+import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.NoopPayload;
-import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.yangtools.concepts.Identifier;
@@ -560,7 +560,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             LOG.debug("{}: Applying state for log index {} data {}", memberId(), entry.index(), payload);
         }
 
-        if (!(payload instanceof NoopPayload) && !(payload instanceof ServerConfigurationPayload)) {
+        if (!(payload instanceof NoopPayload) && !(payload instanceof ClusterConfig)) {
             applyState(applyState.getClientActor(), applyState.getIdentifier(), payload);
         }
 
