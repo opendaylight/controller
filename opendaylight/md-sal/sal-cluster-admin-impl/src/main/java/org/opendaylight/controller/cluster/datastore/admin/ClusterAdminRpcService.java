@@ -109,8 +109,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.RemoveShardReplicaOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.RemoveShardReplicaOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.ShardName;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.get.known.clients._for.all.shards.output.ShardResult1Builder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.get.known.clients._for.all.shards.output.shard.result.KnownClientsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.get.known.clients._for.all.shards.output.Success1Builder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.get.known.clients._for.all.shards.output.shard.result.result.success._case.success.KnownClientsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.locate.shard.output.member.node.LeaderActorRefCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.locate.shard.output.member.node.LocalCaseBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.locate.shard.output.member.node.local._case.LocalBuilder;
@@ -119,6 +119,11 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.shard.result.output.ShardResult;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.shard.result.output.ShardResultBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.shard.result.output.ShardResultKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.shard.result.output.shard.result.result.FailureCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.shard.result.output.shard.result.result.SuccessCase;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.shard.result.output.shard.result.result.SuccessCaseBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.shard.result.output.shard.result.result.failure._case.FailureBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.shard.result.output.shard.result.result.success._case.SuccessBuilder;
 import org.opendaylight.yangtools.binding.util.BindingMap;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.common.Empty;
@@ -602,21 +607,25 @@ public final class ClusterAdminRpcService {
                 } catch (ExecutionException e) {
                     LOG.debug("Shard {} failed to answer", entry.getKey(), e);
                     return builder
-                        .setSucceeded(Boolean.FALSE)
-                        .setErrorMessage(e.getCause().getMessage())
+                        .setResult(new FailureCaseBuilder()
+                            .setFailure(new FailureBuilder().setMessage(e.getCause().getMessage()).build())
+                            .build())
                         .build();
                 }
 
                 return builder
-                    .setSucceeded(Boolean.TRUE)
-                    .addAugmentation(new ShardResult1Builder()
-                        .setKnownClients(reply.getClients().stream()
-                            .map(client -> new KnownClientsBuilder()
-                                .setMember(client.getFrontendId().getMemberName().toYang())
-                                .setType(client.getFrontendId().getClientType().toYang())
-                                .setGeneration(client.getYangGeneration())
+                    .setResult(new SuccessCaseBuilder()
+                        .setSuccess(new SuccessBuilder()
+                            .addAugmentation(new Success1Builder()
+                                .setKnownClients(reply.getClients().stream()
+                                    .map(client -> new KnownClientsBuilder()
+                                        .setMember(client.getFrontendId().getMemberName().toYang())
+                                        .setType(client.getFrontendId().getClientType().toYang())
+                                        .setGeneration(client.getYangGeneration())
+                                        .build())
+                                    .collect(BindingMap.toMap()))
                                 .build())
-                            .collect(BindingMap.toMap()))
+                            .build())
                         .build())
                     .build();
             })
@@ -640,6 +649,10 @@ public final class ClusterAdminRpcService {
         final var ret = SettableFuture.<RpcResult<T>>create();
 
         final class WaitCallback implements FutureCallback<Success> {
+            private static final @NonNull SuccessCase SUCCESS = new SuccessCaseBuilder()
+                .setSuccess(new SuccessBuilder().build())
+                .build();
+
             private final ShardResultBuilder builder;
 
             WaitCallback(final ShardResultBuilder builder) {
@@ -649,7 +662,7 @@ public final class ClusterAdminRpcService {
             @Override
             public void onSuccess(final Success result) {
                 LOG.debug("onSuccess for shard {}, type {}", builder.getShardName(), builder.getDataStoreType());
-                complete(builder.setSucceeded(Boolean.TRUE).build());
+                complete(builder.setResult(SUCCESS).build());
             }
 
             @Override
@@ -657,8 +670,11 @@ public final class ClusterAdminRpcService {
                 LOG.warn("{} for shard {}, type {}", failureLogMsgPrefix, builder.getShardName(),
                     builder.getDataStoreType(), failure);
                 complete(builder
-                    .setSucceeded(Boolean.FALSE)
-                    .setErrorMessage(Throwables.getRootCause(failure).getMessage())
+                    .setResult(new FailureCaseBuilder()
+                        .setFailure(new FailureBuilder()
+                            .setMessage(Throwables.getRootCause(failure).getMessage())
+                            .build())
+                        .build())
                     .build());
             }
 

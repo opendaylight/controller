@@ -12,7 +12,8 @@ module cluster-admin {
                  - use 'member-name' from odl-controller-cds-types
                  - 'member-voting-state' now expresses what it means
                  - 'local' is now a presence container, a better modeling practice,
-                 - choice/case statements are spelled out for codegen ergonomy";
+                 - choice/case statements are spelled out for codegen ergonomy,
+                 - 'shard-result' error reporting has been cleaned up clarity and ergonomy";
   }
 
   revision "2015-10-13" {
@@ -59,24 +60,32 @@ module cluster-admin {
     }
   }
 
-  grouping shard-operation-result {
-    uses datastore-shard-id;
-
-    // FIXME: this needs an update w.r.t.: succeeded=true, error-message="well, maybe not?"
-    leaf succeeded {
-      type boolean;
-    }
-
-    leaf error-message {
-      type string;
-    }
-  }
-
   grouping shard-result-output {
     list shard-result {
       key "shard-name data-store-type";
-      uses shard-operation-result;
       description "The list of results, one per shard";
+
+      uses datastore-shard-id;
+
+      choice result {
+        mandatory true;
+
+        case success-case {
+          container success {
+            presence "Indicates the operation was successful";
+          }
+        }
+        case failure-case {
+          container failure {
+            presence "Indicates the operation was unsuccessful";
+
+            leaf message {
+              type string;
+              description "Indicates the operation failed with this message, which should be descriptive, if possible.";
+            }
+          }
+        }
+      }
     }
   }
 
@@ -271,10 +280,8 @@ module cluster-admin {
 
     output {
       uses shard-result-output {
-        augment shard-result {
+        augment shard-result/result/success-case/success {
           list known-clients {
-            when "../succeeded = true";
-
             uses cds:client-identifier;
             key "member type";
           }
