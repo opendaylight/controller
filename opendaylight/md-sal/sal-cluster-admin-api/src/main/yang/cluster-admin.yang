@@ -1,278 +1,289 @@
 module cluster-admin {
-    yang-version 1;
-    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:cluster:admin";
-    prefix "cluster-admin";
+  yang-version 1;
+  namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:cluster:admin";
+  prefix "cluster-admin";
 
+  description
+    "This module contains YANG RPC definitions for administering a cluster.";
+
+  revision "2025-01-31" {
+    description "Split out 'shard-name' typedef.";
+  }
+
+  revision "2015-10-13" {
+    description "Initial revision.";
+  }
+
+  import odl-controller-cds-types { prefix cds; }
+
+  typedef data-store-type {
+    type enumeration {
+      enum config {
+        value 1;
+      }
+      enum operational {
+        value 2;
+      }
+    }
+  }
+
+  typedef shard-name {
+    description "A valid name for a shard.";
+    type string {
+      length "1..max" {
+        error-app-tag "odl-named-shards";
+        error-message "Shard name must not be empty";
+      }
+    }
+  }
+
+  grouping datastore-shard-id {
     description
-        "This module contains YANG RPC definitions for administering a cluster.";
+      "Grouping holding combined identifiers of a shard -- its name and datastore type";
 
-    revision "2015-10-13" {
-        description "Initial revision.";
+    leaf shard-name {
+      mandatory true;
+      type shard-name;
+      description "The name of the shard.";
     }
 
-    import odl-controller-cds-types { prefix cds; }
+    leaf data-store-type {
+      mandatory true;
+      type data-store-type;
+      description "The type of the data store to which the shard belongs";
+    }
+  }
 
-    typedef data-store-type {
-        type enumeration {
-            enum config {
-                value 1;
-            }
-            enum operational {
-                value 2;
-            }
-        }
+  grouping shard-operation-result {
+    uses datastore-shard-id;
+
+    // FIXME: this needs an update w.r.t.: succeeded=true, error-message="well, maybe not?"
+    leaf succeeded {
+      type boolean;
     }
 
-    grouping datastore-shard-id {
-        description "Grouping holding combined identifiers of a shard -- its name and datastore type";
+    leaf error-message {
+      type string;
+    }
+  }
 
-        leaf shard-name {
-            description "The name of the shard.";
-            mandatory true;
-            type string {
-                length "1..max" {
-                    error-app-tag "odl-named-shards";
-                    error-message "Shard name must not be empty";
-                }
-            }
-        }
+  grouping shard-result-output {
+    list shard-result {
+      key "shard-name data-store-type";
+      uses shard-operation-result;
+      description "The list of results, one per shard";
+    }
+  }
 
-        leaf data-store-type {
-            mandatory true;
-            type data-store-type;
-            description "The type of the data store to which the shard belongs";
-        }
+  grouping member-voting-states-input {
+    list member-voting-state {
+      description "The list of member voting states";
+
+      leaf member-name {
+        type string;
+      }
+
+      leaf voting {
+        type boolean;
+      }
+    }
+  }
+
+  rpc add-shard-replica {
+    description "Adds a replica of a shard to this node and joins it to an existing cluster. The shard must
+                 already have a module configuration defined for it and there must already be a shard existing on
+                 another node with a leader. This RPC first contacts peer member seed nodes searching for a shard.
+                 When found, an AddServer message is sent to the shard leader and applied as described in the Raft
+                 paper.";
+
+    input {
+      uses datastore-shard-id;
+    }
+  }
+
+  rpc remove-shard-replica {
+    description "Removes an existing replica of a shard from this node via the RemoveServer mechanism as
+                 described in the Raft paper.";
+
+    input {
+      uses datastore-shard-id;
+
+      leaf member-name {
+        mandatory true;
+        type string;
+        description "The cluster member from which the shard replica should be removed";
+      }
+    }
+  }
+
+  rpc make-leader-local {
+    description "Attempts to move the shard leader of the given module based shard to the local node.
+                 The rpc returns a response after handling of the underlying MakeLeaderLocal message completes.
+                 This operation fails if there is no current shard leader due to lack of network connectivity or
+                 a cluster majority. In addition, if the local node is not up to date with the current leader,
+                 an attempt is made to first sync the local node with the leader. If this cannot be achieved
+                 within two election timeout periods the operation fails.";
+
+    input {
+      uses datastore-shard-id;
+    }
+  }
+
+  rpc add-replicas-for-all-shards {
+    description "Adds replicas on this node for all currently defined shards. This is equivalent to issuing
+                 an add-shard-replica RPC for all shards.";
+
+    output {
+      uses shard-result-output;
+    }
+  }
+
+  rpc remove-all-shard-replicas {
+    description "Removes replicas for all shards on this node. This is equivalent to issuing
+                 a remove-shard-replica for all shards and essentially removes this node from a cluster.";
+
+    input {
+      leaf member-name {
+        mandatory true;
+        type string;
+        description "The cluster member from which the shard replicas should be removed";
+      }
     }
 
-    grouping shard-operation-result {
+    output {
+      uses shard-result-output;
+    }
+  }
+
+  rpc change-member-voting-states-for-shard {
+    description "Changes the voting states, either voting or non-voting, of cluster members for a shard.
+                 Non-voting members will no longer participate in leader elections and consensus but will be
+                 replicated. This is useful for having a set of members serve as a backup cluster in case the
+                 primary voting cluster suffers catastrophic failure. This RPC can be issued to any cluster member
+                 and will be forwarded to the leader.";
+
+    input {
+      uses datastore-shard-id;
+      uses member-voting-states-input;
+    }
+  }
+
+  rpc change-member-voting-states-for-all-shards {
+    description "Changes the voting states, either voting or non-voting, of cluster members for all shards.
+                 Non-voting members will no longer participate in leader elections and consensus but will be
+                 replicated. This is useful for having a set of members serve as a backup cluster in case the
+                 primary voting cluster suffers catastrophic failure. This RPC can be issued to any cluster member
+                 and will be forwarded to the leader.";
+
+    input {
+      uses member-voting-states-input;
+    }
+
+    output {
+      uses shard-result-output;
+    }
+  }
+
+  rpc flip-member-voting-states-for-all-shards {
+    description "Flips the voting states of all cluster members for all shards, such that if a member
+                 was voting it becomes non-voting and vice versa.";
+
+    output {
+      uses shard-result-output;
+    }
+  }
+
+  rpc backup-datastore {
+    description "Creates a backup file of the datastore state";
+
+    input {
+      leaf file-path {
+        type string;
+        description "The path and name of the file in which to store the backup.";
+      }
+
+      leaf timeout {
+        type uint32 {
+          range 1..max;
+        }
+        units "seconds";
+        description "Optional timeout in seconds for the backup operation which will override all the different
+                     timeouts that are being hit on the backend.";
+      }
+    }
+  }
+
+  rpc get-shard-role {
+    description "Returns the current role for the requested module shard.";
+
+    input {
         uses datastore-shard-id;
-
-        leaf succeeded {
-            type boolean;
-        }
-
-        leaf error-message {
-            type string;
-        }
     }
 
-    grouping shard-result-output {
-        list shard-result {
-            key "shard-name data-store-type";
-            uses shard-operation-result;
+    output {
+      leaf role {
+        type string;
+        description "Current role for the given shard, if not present the shard currently does not have a role";
+      }
+    }
+  }
 
-            description "The list of results, one per shard";
-        }
+  rpc locate-shard {
+    description "Return the transport-level information about where a shard has a home.";
+
+    input {
+        uses datastore-shard-id;
     }
 
-    grouping member-voting-states-input {
-        list member-voting-state {
-            leaf member-name {
-                type string;
-            }
+    output {
+      choice member-node {
+        description "Location of the hypothetical cluster member node. Relationship to the input parameters
+                     and the transport protocol.";
 
-            leaf voting {
-                type boolean;
-            }
-
-            description "The list of member voting states";
+        leaf local {
+          description "Local node is the best node to talk to when it comes from efficiency perspective
+                       of underlying implementation. The requester of this RPC is advised to contact
+                       any services to the specified shard via the channel on which this RPC was invoked.";
+          type empty;
         }
+
+        leaf leader-actor-ref {
+          description "Actor reference to the actor which is currently acting as the leader.";
+          type string;
+        }
+      }
     }
+  }
 
-    rpc add-shard-replica {
-        input {
-            uses datastore-shard-id;
+  rpc get-known-clients-for-all-shards {
+    description "Request all shards to report their known frontend clients. This is useful for determining what
+                 generation should a resurrected member node should use.";
+
+    output {
+      uses shard-result-output {
+        augment shard-result {
+          list known-clients {
+            when "../succeeded = true";
+
+            uses cds:client-identifier;
+            key "member type";
+          }
         }
-
-        description "Adds a replica of a shard to this node and joins it to an existing cluster. The shard must
-                     already have a module configuration defined for it and there must already be a shard existing on
-                     another node with a leader. This RPC first contacts peer member seed nodes searching for a shard.
-                     When found, an AddServer message is sent to the shard leader and applied as described in the Raft
-                     paper.";
+      }
     }
+  }
 
-    rpc remove-shard-replica {
-        input {
-            uses datastore-shard-id;
+  rpc activate-eos-datacenter {
+    description "Activates the datacenter that the node this rpc is called on belongs to. The caller must maintain
+                 only a single active datacenter at a time as the singleton components will interfere with each
+                 other otherwise. This only needs to be used if configuring multiple datacenters or if not using
+                 default datacenter.";
+  }
 
-            leaf member-name {
-                mandatory true;
-                type string;
-                description "The cluster member from which the shard replica should be removed";
-            }
-        }
-
-        description "Removes an existing replica of a shard from this node via the RemoveServer mechanism as
-                     described in the Raft paper.";
-    }
-
-    rpc make-leader-local {
-        input {
-            uses datastore-shard-id;
-        }
-
-        description "Attempts to move the shard leader of the given module based shard to the local node.
-                     The rpc returns a response after handling of the underlying MakeLeaderLocal message completes.
-                     This operation fails if there is no current shard leader due to lack of network connectivity or
-                     a cluster majority. In addition, if the local node is not up to date with the current leader,
-                     an attempt is made to first sync the local node with the leader. If this cannot be achieved
-                     within two election timeout periods the operation fails.";
-    }
-
-    rpc add-replicas-for-all-shards {
-        output {
-            uses shard-result-output;
-        }
-
-        description "Adds replicas on this node for all currently defined shards. This is equivalent to issuing
-                     an add-shard-replica RPC for all shards.";
-    }
-
-    rpc remove-all-shard-replicas {
-        input {
-            leaf member-name {
-                mandatory true;
-                type string;
-                description "The cluster member from which the shard replicas should be removed";
-            }
-        }
-
-        output {
-            uses shard-result-output;
-        }
-
-        description "Removes replicas for all shards on this node. This is equivalent to issuing
-                     a remove-shard-replica for all shards and essentially removes this node from a cluster.";
-    }
-
-    rpc change-member-voting-states-for-shard {
-        input {
-            uses datastore-shard-id;
-            uses member-voting-states-input;
-        }
-
-        description "Changes the voting states, either voting or non-voting, of cluster members for a shard.
-                     Non-voting members will no longer participate in leader elections and consensus but will be
-                     replicated. This is useful for having a set of members serve as a backup cluster in case the
-                     primary voting cluster suffers catastrophic failure. This RPC can be issued to any cluster member
-                     and will be forwarded to the leader.";
-    }
-
-    rpc change-member-voting-states-for-all-shards {
-        input {
-            uses member-voting-states-input;
-        }
-
-        output {
-            uses shard-result-output;
-        }
-
-        description "Changes the voting states, either voting or non-voting, of cluster members for all shards.
-                     Non-voting members will no longer participate in leader elections and consensus but will be
-                     replicated. This is useful for having a set of members serve as a backup cluster in case the
-                     primary voting cluster suffers catastrophic failure. This RPC can be issued to any cluster member
-                     and will be forwarded to the leader.";
-    }
-
-    rpc flip-member-voting-states-for-all-shards {
-        output {
-            uses shard-result-output;
-        }
-
-        description "Flips the voting states of all cluster members for all shards, such that if a member
-                     was voting it becomes non-voting and vice versa.";
-    }
-
-    rpc backup-datastore {
-        input {
-            leaf file-path {
-              type string;
-              description "The path and name of the file in which to store the backup.";
-            }
-
-            leaf timeout {
-              type uint32 {
-                range 1..max;
-              }
-              units "seconds";
-              description "Optional timeout in seconds for the backup operation which will override all the different
-                           timeouts that are being hit on the backend.";
-            }
-        }
-
-        description "Creates a backup file of the datastore state";
-    }
-
-    rpc get-shard-role {
-        input {
-            uses datastore-shard-id;
-        }
-
-        output {
-            leaf role {
-                type string;
-                description "Current role for the given shard, if not present the shard currently does not have a role";
-            }
-        }
-
-        description "Returns the current role for the requested module shard.";
-    }
-
-    rpc locate-shard {
-        description "Return the transport-level information about where a shard has a home.";
-        input {
-            uses datastore-shard-id;
-        }
-
-        output {
-            choice member-node {
-                description "Location of the hypothetical cluster member node. Relationship to the input parameters
-                             and the transport protocol.";
-
-                leaf local {
-                    description "Local node is the best node to talk to when it comes from efficiency perspective
-                                 of underlying implementation. The requester of this RPC is advised to contact
-                                 any services to the specified shard via the channel on which this RPC was invoked.";
-                    type empty;
-                }
-
-                leaf leader-actor-ref {
-                    description "Actor reference to the actor which is currently acting as the leader.";
-                    type string;
-                }
-            }
-        }
-    }
-
-    rpc get-known-clients-for-all-shards {
-        description "Request all shards to report their known frontend clients. This is useful for determining what
-                     generation should a resurrected member node should use.";
-
-        output {
-            uses shard-result-output {
-                augment shard-result {
-                    list known-clients {
-                        when "../succeeded = true";
-
-                        uses cds:client-identifier;
-                        key "member type";
-                    }
-                }
-            }
-        }
-    }
-
-    rpc activate-eos-datacenter {
-        description "Activates the datacenter that the node this rpc is called on belongs to. The caller must maintain
-                     only a single active datacenter at a time as the singleton components will interfere with each
-                     other otherwise. This only needs to be used if configuring multiple datacenters or if not using
-                     default datacenter.";
-    }
-
-    rpc deactivate-eos-datacenter {
-        description "Deactivates the datacenter that the node this rpc is called on belongs to. The caller must maintain
-                     only a single active datacenter at a time as the singleton components will interfere with each
-                     other otherwise. This only needs to be used if configuring multiple datacenters or if not using
-                     default datacenter.";
-    }
+  rpc deactivate-eos-datacenter {
+    description "Deactivates the datacenter that the node this rpc is called on belongs to. The caller must maintain
+                 only a single active datacenter at a time as the singleton components will interfere with each
+                 other otherwise. This only needs to be used if configuring multiple datacenters or if not using
+                 default datacenter.";
+  }
 }
