@@ -41,7 +41,7 @@ import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply;
 import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
-import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
+import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.spi.ImmutableRaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 
@@ -322,7 +322,7 @@ public class Follower extends RaftActorBehavior {
 
             shouldCaptureSnapshot.compareAndSet(false, replLog.shouldCaptureSnapshot(entry.index()));
 
-            if (entry.getData() instanceof ServerConfigurationPayload serverConfiguration) {
+            if (entry.getData() instanceof ClusterConfig serverConfiguration) {
                 context.updatePeerIds(serverConfiguration);
             }
         }

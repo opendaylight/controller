@@ -30,7 +30,7 @@ import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStreamFactory;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
-import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
+import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
@@ -262,10 +262,10 @@ public class RaftActorContextImpl implements RaftActorContext {
     }
 
     @Override
-    public void updatePeerIds(final ServerConfigurationPayload serverConfig) {
+    public void updatePeerIds(final ClusterConfig serverConfig) {
         boolean newVotingMember = false;
         var currentPeers = new HashSet<>(getPeerIds());
-        for (var server : serverConfig.getServerConfig()) {
+        for (var server : serverConfig.serverInfo()) {
             if (getId().equals(server.peerId())) {
                 newVotingMember = server.isVoting();
             } else {
@@ -372,13 +372,13 @@ public class RaftActorContextImpl implements RaftActorContext {
     }
 
     @Override
-    public ServerConfigurationPayload getPeerServerInfo(final boolean includeSelf) {
+    public ClusterConfig getPeerServerInfo(final boolean includeSelf) {
         if (!isDynamicServerConfigurationInUse()) {
             return null;
         }
         final var peers = getPeers();
         final var newConfig = ImmutableList.<ServerInfo>builderWithExpectedSize(peers.size() + (includeSelf ? 1 : 0));
-        for (PeerInfo peer : peers) {
+        for (var peer : peers) {
             newConfig.add(new ServerInfo(peer.getId(), peer.isVoting()));
         }
 
@@ -386,7 +386,7 @@ public class RaftActorContextImpl implements RaftActorContext {
             newConfig.add(new ServerInfo(getId(), votingMember));
         }
 
-        return new ServerConfigurationPayload(newConfig.build());
+        return new ClusterConfig(newConfig.build());
     }
 
     @Override

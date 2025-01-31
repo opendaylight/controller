@@ -13,7 +13,7 @@ import org.apache.pekko.japi.Procedure;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.DelegatingPersistentDataProvider;
 import org.opendaylight.controller.cluster.PersistentDataProvider;
-import org.opendaylight.controller.cluster.raft.messages.PersistentPayload;
+import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 
 /**
  * The DelegatingPersistentDataProvider used by RaftActor to override the configured persistent provider to
@@ -42,13 +42,15 @@ class RaftActorDelegatingPersistentDataProvider extends DelegatingPersistentData
 
     private <T> void doPersist(final T entry, final Procedure<T> procedure, final boolean async) {
         if (!getDelegate().isRecoveryApplicable() && entry instanceof ReplicatedLogEntry replicatedLogEntry
-            && replicatedLogEntry.getData() instanceof PersistentPayload payload) {
-            // We persist the Payload but not the ReplicatedLogEntry to avoid gaps in the journal indexes on recovery
-            // if data persistence is later enabled.
+            && replicatedLogEntry.getData() instanceof ClusterConfig serverConfig) {
+            // TODO: revisit this statement with EntryStore
+            //
+            //   We persist the ClusterConfig but not the ReplicatedLogEntry to avoid gaps in the journal indexes
+            //   on recovery if data persistence is later enabled.
             if (async) {
-                persistentProvider.persistAsync(payload, p -> procedure.apply(entry));
+                persistentProvider.persistAsync(serverConfig, p -> procedure.apply(entry));
             } else {
-                persistentProvider.persist(payload, p -> procedure.apply(entry));
+                persistentProvider.persist(serverConfig, p -> procedure.apply(entry));
             }
         } else if (async) {
             super.persistAsync(entry, procedure);

@@ -49,11 +49,11 @@ public final class Snapshot implements Serializable {
     private final long lastAppliedIndex;
     private final long lastAppliedTerm;
     private final @NonNull TermInfo termInfo;
-    private final ServerConfigurationPayload serverConfig;
+    private final ClusterConfig serverConfig;
 
     private Snapshot(final State state, final List<ReplicatedLogEntry> unAppliedEntries, final long lastIndex,
             final long lastTerm, final long lastAppliedIndex, final long lastAppliedTerm, final TermInfo termInfo,
-            final ServerConfigurationPayload serverConfig) {
+            final ClusterConfig serverConfig) {
         this.state = state;
         this.unAppliedEntries = unAppliedEntries;
         this.lastIndex = lastIndex;
@@ -66,13 +66,13 @@ public final class Snapshot implements Serializable {
 
     public static Snapshot create(final State state, final List<ReplicatedLogEntry> entries, final long lastIndex,
             final long lastTerm, final long lastAppliedIndex, final long lastAppliedTerm, final TermInfo termInfo,
-            final ServerConfigurationPayload serverConfig) {
+            final ClusterConfig serverConfig) {
         return new Snapshot(state, entries, lastIndex, lastTerm, lastAppliedIndex, lastAppliedTerm, termInfo,
             serverConfig);
     }
 
     public static Snapshot ofTermLeader(final State state, final RaftEntryMeta lastIncluded, final TermInfo termInfo,
-            final ServerConfigurationPayload serverConfig) {
+            final ClusterConfig serverConfig) {
         return new Snapshot(state, List.of(), lastIncluded.index(), lastIncluded.term(),
             lastIncluded.index(), lastIncluded.term(), termInfo, serverConfig);
     }
@@ -115,7 +115,7 @@ public final class Snapshot implements Serializable {
         return termInfo.votedFor();
     }
 
-    public ServerConfigurationPayload getServerConfiguration() {
+    public ClusterConfig getServerConfiguration() {
         return serverConfig;
     }
 

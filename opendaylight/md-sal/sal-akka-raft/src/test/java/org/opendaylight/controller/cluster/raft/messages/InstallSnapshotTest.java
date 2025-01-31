@@ -10,12 +10,11 @@ package org.opendaylight.controller.cluster.raft.messages;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-import java.util.List;
 import java.util.OptionalInt;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
-import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
+import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 
 /**
@@ -43,8 +42,7 @@ public class InstallSnapshotTest {
             }
         }
 
-        var serverConfig = new ServerConfigurationPayload(List.of(
-                new ServerInfo("leader", true), new ServerInfo("follower", false)));
+        var serverConfig = new ClusterConfig(new ServerInfo("leader", true), new ServerInfo("follower", false));
         assertInstallSnapshot(fullSize, new InstallSnapshot(3L, "leaderId", 11L, 2L, data, 5, 6, OptionalInt.of(54321),
             serverConfig, raftVersion));
 

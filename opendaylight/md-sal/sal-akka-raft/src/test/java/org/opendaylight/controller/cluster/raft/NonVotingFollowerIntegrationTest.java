@@ -11,7 +11,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -24,7 +23,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.base.messages.SnapshotComplete;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
-import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
+import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
@@ -293,9 +292,9 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         //
         // We also add another voting follower actor into the mix even though it shoildn't affect the
         // outcome.
-        ServerConfigurationPayload persistedServerConfig = new ServerConfigurationPayload(List.of(
+        final var persistedServerConfig = new ClusterConfig(
                 new ServerInfo(leaderId, true), new ServerInfo(follower1Id, false),
-                new ServerInfo(follower2Id, true), new ServerInfo("downPeer", false)));
+                new ServerInfo(follower2Id, true), new ServerInfo("downPeer", false));
         SimpleReplicatedLogEntry persistedServerConfigEntry = new SimpleReplicatedLogEntry(0, currentTerm,
                 persistedServerConfig);
 
@@ -401,8 +400,8 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
 
         // Set up a persisted ServerConfigurationPayload with the leader voting and the follower non-voting.
 
-        ServerConfigurationPayload persistedServerConfig = new ServerConfigurationPayload(List.of(
-                new ServerInfo(leaderId, true), new ServerInfo(follower1Id, false)));
+        final var persistedServerConfig = new ClusterConfig(
+                new ServerInfo(leaderId, true), new ServerInfo(follower1Id, false));
         SimpleReplicatedLogEntry persistedServerConfigEntry = new SimpleReplicatedLogEntry(0, persistedTerm,
                 persistedServerConfig);
 
@@ -437,16 +436,16 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
 
         currentTerm = persistedTerm + 1;
         assertEquals("Leader term", currentTerm, leaderContext.currentTerm());
-        assertEquals("Leader server config", Set.copyOf(persistedServerConfig.getServerConfig()),
-                Set.copyOf(leaderContext.getPeerServerInfo(true).getServerConfig()));
+        assertEquals("Leader server config", Set.copyOf(persistedServerConfig.serverInfo()),
+                Set.copyOf(leaderContext.getPeerServerInfo(true).serverInfo()));
         assertTrue("Leader isVotingMember", leaderContext.isVotingMember());
 
         // Verify follower's context after startup
 
         MessageCollectorActor.expectFirstMatching(follower1CollectorActor, AppendEntries.class);
         assertEquals("Follower term", currentTerm, follower1Context.currentTerm());
-        assertEquals("Follower server config", Set.copyOf(persistedServerConfig.getServerConfig()),
-                Set.copyOf(follower1Context.getPeerServerInfo(true).getServerConfig()));
+        assertEquals("Follower server config", Set.copyOf(persistedServerConfig.serverInfo()),
+                Set.copyOf(follower1Context.getPeerServerInfo(true).serverInfo()));
         assertFalse("FollowerisVotingMember", follower1Context.isVotingMember());
     }
 }

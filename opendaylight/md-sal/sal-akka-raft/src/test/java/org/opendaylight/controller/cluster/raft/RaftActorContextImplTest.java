@@ -21,7 +21,6 @@ import static org.mockito.Mockito.verify;
 
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.apache.pekko.actor.Props;
 import org.apache.pekko.testkit.TestActorRef;
@@ -29,7 +28,7 @@ import org.junit.After;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
-import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
+import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.spi.TestTermInfoStore;
 import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
@@ -102,21 +101,20 @@ public class RaftActorContextImplTest extends AbstractActorTest {
             new DefaultConfigParamsImpl(), (short) 0, createProvider(), applyState -> { }, LOG,
             MoreExecutors.directExecutor());
 
-        context.updatePeerIds(new ServerConfigurationPayload(List.of(new ServerInfo("self", false),
-                new ServerInfo("peer2", true), new ServerInfo("peer3", false))));
+        context.updatePeerIds(new ClusterConfig(
+            new ServerInfo("self", false), new ServerInfo("peer2", true), new ServerInfo("peer3", false)));
         verifyPeerInfo(context, "peer1", null);
         verifyPeerInfo(context, "peer2", Boolean.TRUE);
         verifyPeerInfo(context, "peer3", Boolean.FALSE);
         assertFalse("isVotingMember", context.isVotingMember());
 
-        context.updatePeerIds(new ServerConfigurationPayload(List.of(new ServerInfo("self", true),
-                new ServerInfo("peer2", true), new ServerInfo("peer3", true))));
+        context.updatePeerIds(new ClusterConfig(
+            new ServerInfo("self", true), new ServerInfo("peer2", true), new ServerInfo("peer3", true)));
         verifyPeerInfo(context, "peer2", Boolean.TRUE);
         verifyPeerInfo(context, "peer3", Boolean.TRUE);
         assertTrue("isVotingMember", context.isVotingMember());
 
-        context.updatePeerIds(new ServerConfigurationPayload(List.of(new ServerInfo("peer2", true),
-                new ServerInfo("peer3", true))));
+        context.updatePeerIds(new ClusterConfig(new ServerInfo("peer2", true), new ServerInfo("peer3", true)));
         verifyPeerInfo(context, "peer2", Boolean.TRUE);
         verifyPeerInfo(context, "peer3", Boolean.TRUE);
         assertFalse("isVotingMember", context.isVotingMember());
