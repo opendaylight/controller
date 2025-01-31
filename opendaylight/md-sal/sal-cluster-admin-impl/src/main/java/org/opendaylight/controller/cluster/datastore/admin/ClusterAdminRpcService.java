@@ -236,7 +236,7 @@ public final class ClusterAdminRpcService {
         }
 
         final var memberName = input.getMemberName();
-        if (Strings.isNullOrEmpty(memberName)) {
+        if (memberName == null) {
             return newFailedRpcResultFuture("A valid member name must be specified");
         }
 
@@ -246,7 +246,7 @@ public final class ClusterAdminRpcService {
 
         Futures.addCallback(
             this.<Success>sendMessageToShardManager(dataStoreType,
-                new RemoveShardReplica(shardName.getValue(), MemberName.forName(memberName))),
+                new RemoveShardReplica(shardName.getValue(), MemberName.forName(memberName.getValue()))),
             new FutureCallback<>() {
                 @Override
                 public void onSuccess(final Success success) {
@@ -362,13 +362,13 @@ public final class ClusterAdminRpcService {
         LOG.info("Removing replicas for all shards");
 
         final var memberName = input.getMemberName();
-        if (Strings.isNullOrEmpty(memberName)) {
+        if (memberName == null) {
             return newFailedRpcResultFuture("A valid member name must be specified");
         }
 
         return waitForShardResults(
             sendMessageToManagerForConfiguredShards(
-                shardName -> new RemoveShardReplica(shardName, MemberName.forName(memberName))),
+                shardName -> new RemoveShardReplica(shardName, MemberName.forName(memberName.getValue()))),
             result -> new RemoveAllShardReplicasOutputBuilder().setShardResult(result).build(),
             "Failed to remove replica");
     }
@@ -629,7 +629,7 @@ public final class ClusterAdminRpcService {
     private static ChangeShardMembersVotingStatus toChangeShardMembersVotingStatus(final ShardName shardName,
             final Map<MemberVotingStateKey, MemberVotingState> memberVotingStatus) {
         return new ChangeShardMembersVotingStatus(shardName.getValue(), memberVotingStatus.values().stream()
-            .collect(Collectors.toMap(MemberVotingState::getMemberName, MemberVotingState::getVoting)));
+            .collect(Collectors.toMap(state -> state.getMemberName().getValue(), MemberVotingState::getVoting)));
     }
 
     private static <T> SettableFuture<RpcResult<T>> waitForShardResults(
