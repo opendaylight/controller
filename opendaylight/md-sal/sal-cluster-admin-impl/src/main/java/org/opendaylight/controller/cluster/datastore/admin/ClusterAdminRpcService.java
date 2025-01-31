@@ -114,6 +114,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.locate.shard.output.member.node.LeaderActorRefBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.locate.shard.output.member.node.LocalBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.member.voting.states.input.MemberVotingState;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.member.voting.states.input.MemberVotingStateKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.shard.result.output.ShardResult;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.shard.result.output.ShardResultBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.shard.result.output.ShardResultKey;
@@ -625,8 +626,8 @@ public final class ClusterAdminRpcService {
     }
 
     private static ChangeShardMembersVotingStatus toChangeShardMembersVotingStatus(final ShardName shardName,
-            final List<MemberVotingState> memberVotingStatus) {
-        return new ChangeShardMembersVotingStatus(shardName.getValue(), memberVotingStatus.stream()
+            final Map<MemberVotingStateKey, MemberVotingState> memberVotingStatus) {
+        return new ChangeShardMembersVotingStatus(shardName.getValue(), memberVotingStatus.values().stream()
             .collect(Collectors.toMap(MemberVotingState::getMemberName, MemberVotingState::getVoting)));
     }
 
