@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.datastore.admin.command;
 
 
 import com.google.common.util.concurrent.ListenableFuture;
-import java.util.List;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
@@ -21,6 +20,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.ShardName;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.member.voting.states.input.MemberVotingState;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.member.voting.states.input.MemberVotingStateBuilder;
+import org.opendaylight.yangtools.binding.util.BindingMap;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 
 @Service
@@ -49,7 +49,7 @@ public class ChangeMemberVotingStatesForShardCommand extends AbstractRpcAction {
                 .invoke(new ChangeMemberVotingStatesForShardInputBuilder()
                         .setShardName(new ShardName(shardName))
                         .setDataStoreType(DataStoreType.forName(dataStoreType))
-                        .setMemberVotingState(List.of(memberVotingState))
+                        .setMemberVotingState(BindingMap.of(memberVotingState))
                         .build());
     }
 }

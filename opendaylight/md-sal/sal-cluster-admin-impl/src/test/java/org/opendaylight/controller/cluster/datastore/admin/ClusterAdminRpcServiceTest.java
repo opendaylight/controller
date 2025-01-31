@@ -76,6 +76,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.shard.result.output.ShardResult;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.shard.result.output.ShardResultBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.shard.result.output.ShardResultKey;
+import org.opendaylight.yangtools.binding.util.BindingMap;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.XMLNamespace;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
@@ -641,7 +642,7 @@ public class ClusterAdminRpcServiceTest {
 
         var rpcResult = service3.changeMemberVotingStatesForShard(new ChangeMemberVotingStatesForShardInputBuilder()
             .setShardName(new ShardName("cars")).setDataStoreType(DataStoreType.Config)
-            .setMemberVotingState(List.of(
+            .setMemberVotingState(BindingMap.of(
                 new MemberVotingStateBuilder().setMemberName("member-2").setVoting(FALSE).build(),
                 new MemberVotingStateBuilder().setMemberName("member-3").setVoting(FALSE).build()))
             .build())
@@ -674,7 +675,7 @@ public class ClusterAdminRpcServiceTest {
         final var rpcResult = service.changeMemberVotingStatesForShard(
             new ChangeMemberVotingStatesForShardInputBuilder()
                 .setShardName(new ShardName("cars")).setDataStoreType(DataStoreType.Config)
-                .setMemberVotingState(List.of(new MemberVotingStateBuilder()
+                .setMemberVotingState(BindingMap.of(new MemberVotingStateBuilder()
                     .setMemberName("member-1")
                     .setVoting(FALSE)
                     .build()))
@@ -719,7 +720,7 @@ public class ClusterAdminRpcServiceTest {
 
         final var rpcResult = service3.changeMemberVotingStatesForAllShards(
             new ChangeMemberVotingStatesForAllShardsInputBuilder()
-                .setMemberVotingState(List.of(
+                .setMemberVotingState(BindingMap.of(
                         new MemberVotingStateBuilder().setMemberName("member-2").setVoting(FALSE).build(),
                         new MemberVotingStateBuilder().setMemberName("member-3").setVoting(FALSE).build()))
                 .build())
