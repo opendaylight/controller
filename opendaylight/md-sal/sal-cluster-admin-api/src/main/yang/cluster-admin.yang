@@ -7,7 +7,9 @@ module cluster-admin {
     "This module contains YANG RPC definitions for administering a cluster.";
 
   revision "2025-01-31" {
-    description "Split out 'shard-name' typedef.";
+    description "A number of modeling updates:
+                 - split out 'shard-name' typedef
+                 - 'member-voting-state' now expresses what it means";
   }
 
   revision "2015-10-13" {
@@ -77,6 +79,8 @@ module cluster-admin {
 
   grouping member-voting-states-input {
     list member-voting-state {
+      key member-name;
+      min-elements 1;
       description "The list of member voting states";
 
       leaf member-name {
@@ -84,6 +88,7 @@ module cluster-admin {
       }
 
       leaf voting {
+        mandatory true;
         type boolean;
       }
     }
