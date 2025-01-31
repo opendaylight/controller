@@ -11,17 +11,20 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
 import org.eclipse.jdt.annotation.NonNull;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.DataStoreType;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.DatastoreShardId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.DataStoreType;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.DatastoreShardId;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.ShardName;
+import org.opendaylight.yangtools.binding.DataContainer;
 import org.opendaylight.yangtools.concepts.Identifier;
 
-final class ShardIdentifier implements Identifier {
+final class ShardIdentifier implements Identifier, DatastoreShardId {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
-    private final @NonNull String shardName;
+    private final @NonNull ShardName shardName;
     private final @NonNull DataStoreType type;
 
-    ShardIdentifier(final DataStoreType type, final String shardName) {
+    ShardIdentifier(final DataStoreType type, final ShardName shardName) {
         this.type = requireNonNull(type);
         this.shardName = requireNonNull(shardName);
     }
@@ -30,10 +33,12 @@ final class ShardIdentifier implements Identifier {
         this(id.getDataStoreType(), id.getShardName());
     }
 
-    public @NonNull String getShardName() {
+    @Override
+    public @NonNull ShardName getShardName() {
         return shardName;
     }
 
+    @Override
     public @NonNull DataStoreType getDataStoreType() {
         return type;
     }
@@ -45,14 +50,14 @@ final class ShardIdentifier implements Identifier {
 
     @Override
     public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof ShardIdentifier)) {
-            return false;
-        }
-        final ShardIdentifier other = (ShardIdentifier) obj;
-        return type.equals(other.type) && shardName.equals(other.shardName);
+        return this == obj || obj instanceof ShardIdentifier other
+            && type.equals(other.type) && shardName.equals(other.shardName);
+    }
+
+    @Override
+    public Class<? extends DataContainer> implementedInterface() {
+        // Should never be called
+        throw new UnsupportedOperationException();
     }
 
     @Override

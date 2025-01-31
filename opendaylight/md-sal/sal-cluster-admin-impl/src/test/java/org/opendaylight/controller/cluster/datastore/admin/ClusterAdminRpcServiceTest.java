@@ -61,20 +61,21 @@ import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddReplicasForAllShardsInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddShardReplicaInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.BackupDatastoreInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ChangeMemberVotingStatesForAllShardsInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ChangeMemberVotingStatesForShardInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.DataStoreType;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.FlipMemberVotingStatesForAllShardsInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.MakeLeaderLocalInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveAllShardReplicasInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveShardReplicaInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.member.voting.states.input.MemberVotingStateBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.shard.result.output.ShardResult;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.shard.result.output.ShardResultBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.shard.result.output.ShardResultKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.AddReplicasForAllShardsInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.AddShardReplicaInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.BackupDatastoreInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.ChangeMemberVotingStatesForAllShardsInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.ChangeMemberVotingStatesForShardInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.DataStoreType;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.FlipMemberVotingStatesForAllShardsInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.MakeLeaderLocalInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.RemoveAllShardReplicasInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.RemoveShardReplicaInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.ShardName;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.member.voting.states.input.MemberVotingStateBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.shard.result.output.ShardResult;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.shard.result.output.ShardResultBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.shard.result.output.ShardResultKey;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.XMLNamespace;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
@@ -296,13 +297,16 @@ public class ClusterAdminRpcServiceTest {
             .get(10, TimeUnit.SECONDS);
         verifyFailedRpcResult(rpcResult);
 
-        rpcResult = service.addShardReplica(new AddShardReplicaInputBuilder().setShardName("cars").build())
+        rpcResult = service.addShardReplica(new AddShardReplicaInputBuilder()
+            .setShardName(new ShardName("cars"))
+            .build())
             .get(10, TimeUnit.SECONDS);
         verifyFailedRpcResult(rpcResult);
 
-        rpcResult = service.addShardReplica(new AddShardReplicaInputBuilder().setShardName("people")
-                .setDataStoreType(DataStoreType.Config)
-                .build())
+        rpcResult = service.addShardReplica(new AddShardReplicaInputBuilder()
+            .setShardName(new ShardName("people"))
+            .setDataStoreType(DataStoreType.Config)
+            .build())
             .get(10, TimeUnit.SECONDS);
         verifyFailedRpcResult(rpcResult);
     }
@@ -335,7 +339,7 @@ public class ClusterAdminRpcServiceTest {
         final var service = new ClusterAdminRpcService(memberNode.configDataStore(), memberNode.operDataStore(), null);
 
         var rpcResult = service.addShardReplica(new AddShardReplicaInputBuilder()
-            .setShardName(shardName)
+            .setShardName(new ShardName(shardName))
             .setDataStoreType(DataStoreType.Config)
             .build()).get(10, TimeUnit.SECONDS);
         verifySuccessfulRpcResult(rpcResult);
@@ -345,7 +349,7 @@ public class ClusterAdminRpcServiceTest {
         assertEquals(Optional.empty(), memberNode.operDataStore().getActorUtils().findLocalShard(shardName));
 
         rpcResult = service.addShardReplica(new AddShardReplicaInputBuilder()
-            .setShardName(shardName)
+            .setShardName(new ShardName(shardName))
             .setDataStoreType(DataStoreType.Operational)
             .build()).get(10, TimeUnit.SECONDS);
         verifySuccessfulRpcResult(rpcResult);
@@ -359,7 +363,7 @@ public class ClusterAdminRpcServiceTest {
 
         final var rpcResult = service.makeLeaderLocal(new MakeLeaderLocalInputBuilder()
             .setDataStoreType(DataStoreType.Config)
-            .setShardName(shardName)
+            .setShardName(new ShardName(shardName))
             .build()).get(10, TimeUnit.SECONDS);
 
         verifySuccessfulRpcResult(rpcResult);
@@ -417,7 +421,7 @@ public class ClusterAdminRpcServiceTest {
             null);
 
         var rpcResult = service3.removeShardReplica(new RemoveShardReplicaInputBuilder()
-            .setShardName("cars").setMemberName("member-3")
+            .setShardName(new ShardName("cars")).setMemberName("member-3")
             .setDataStoreType(DataStoreType.Config)
             .build()).get(10, TimeUnit.SECONDS);
         verifySuccessfulRpcResult(rpcResult);
@@ -443,7 +447,7 @@ public class ClusterAdminRpcServiceTest {
             null);
 
         rpcResult = service1.removeShardReplica(new RemoveShardReplicaInputBuilder()
-            .setShardName("cars")
+            .setShardName(new ShardName("cars"))
             .setMemberName("member-2")
             .setDataStoreType(DataStoreType.Config)
             .build()).get(10, TimeUnit.SECONDS);
@@ -482,7 +486,7 @@ public class ClusterAdminRpcServiceTest {
             null);
 
         final var rpcResult = service1.removeShardReplica(new RemoveShardReplicaInputBuilder()
-            .setShardName("cars")
+            .setShardName(new ShardName("cars"))
             .setMemberName("member-1")
             .setDataStoreType(DataStoreType.Config)
             .build()).get(10, TimeUnit.SECONDS);
@@ -636,7 +640,7 @@ public class ClusterAdminRpcServiceTest {
             null);
 
         var rpcResult = service3.changeMemberVotingStatesForShard(new ChangeMemberVotingStatesForShardInputBuilder()
-            .setShardName("cars").setDataStoreType(DataStoreType.Config)
+            .setShardName(new ShardName("cars")).setDataStoreType(DataStoreType.Config)
             .setMemberVotingState(List.of(
                 new MemberVotingStateBuilder().setMemberName("member-2").setVoting(FALSE).build(),
                 new MemberVotingStateBuilder().setMemberName("member-3").setVoting(FALSE).build()))
@@ -669,7 +673,7 @@ public class ClusterAdminRpcServiceTest {
 
         final var rpcResult = service.changeMemberVotingStatesForShard(
             new ChangeMemberVotingStatesForShardInputBuilder()
-                .setShardName("cars").setDataStoreType(DataStoreType.Config)
+                .setShardName(new ShardName("cars")).setDataStoreType(DataStoreType.Config)
                 .setMemberVotingState(List.of(new MemberVotingStateBuilder()
                     .setMemberName("member-1")
                     .setVoting(FALSE)
@@ -1029,10 +1033,18 @@ public class ClusterAdminRpcServiceTest {
     }
 
     private static ShardResult successShardResult(final String shardName, final DataStoreType type) {
-        return new ShardResultBuilder().setDataStoreType(type).setShardName(shardName).setSucceeded(TRUE).build();
+        return new ShardResultBuilder()
+            .setDataStoreType(type)
+            .setShardName(new ShardName(shardName))
+            .setSucceeded(TRUE)
+            .build();
     }
 
     private static ShardResult failedShardResult(final String shardName, final DataStoreType type) {
-        return new ShardResultBuilder().setDataStoreType(type).setShardName(shardName).setSucceeded(FALSE).build();
+        return new ShardResultBuilder()
+            .setDataStoreType(type)
+            .setShardName(new ShardName(shardName))
+            .setSucceeded(FALSE)
+            .build();
     }
 }
