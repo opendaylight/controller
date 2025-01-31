@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9e3f8e63_ea925f03",
+        "filename": "atomix-storage/src/main/java/io/atomix/storage/journal/JournalSegmentFile.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2025-01-31T23:53:54Z",
+      "side": 1,
+      "message": "getFileName().toString()",
+      "range": {
+        "startLine": 168,
+        "startChar": 40,
+        "endLine": 168,
+        "endChar": 57
+      },
+      "revId": "3ca5da155d0bbecd0afd2387dab533c4a112886d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
