@@ -18,23 +18,28 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStream;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Helper class that maintains state for a snapshot that is being installed in chunks on a Follower.
  */
 class SnapshotTracker implements AutoCloseable {
-    private final Logger log;
+    private static final Logger LOG = LoggerFactory.getLogger(SnapshotTracker.class);
+
     private final int totalChunks;
     private final String leaderId;
     private final BufferedOutputStream bufferedStream;
     private final FileBackedOutputStream fileBackedStream;
+    private final @NonNull String logName;
+
     private int lastChunkIndex = LeaderInstallSnapshotState.FIRST_CHUNK_INDEX - 1;
     private boolean sealed = false;
     private int lastChunkHashCode = LeaderInstallSnapshotState.INITIAL_LAST_CHUNK_HASH_CODE;
     private long count;
 
-    SnapshotTracker(final Logger log, final int totalChunks, final String leaderId, final RaftActorContext context) {
-        this.log = log;
+    SnapshotTracker(final String logName, final int totalChunks, final String leaderId,
+            final RaftActorContext context) {
+        this.logName = requireNonNull(logName);
         this.totalChunks = totalChunks;
         this.leaderId = requireNonNull(leaderId);
         fileBackedStream = context.getFileBackedOutputStreamFactory().newInstance();
@@ -53,8 +58,8 @@ class SnapshotTracker implements AutoCloseable {
      */
     boolean addChunk(final int chunkIndex, final byte[] chunk, final OptionalInt maybeLastChunkHashCode)
             throws IOException {
-        log.debug("addChunk: chunkIndex={}, lastChunkIndex={}, collectedChunks.size={}, lastChunkHashCode={}",
-                chunkIndex, lastChunkIndex, count, lastChunkHashCode);
+        LOG.debug("{}: addChunk: chunkIndex={}, lastChunkIndex={}, collectedChunks.size={}, lastChunkHashCode={}",
+            logName, chunkIndex, lastChunkIndex, count, lastChunkHashCode);
 
         if (sealed) {
             throw new InvalidChunkException("Invalid chunk received with chunkIndex " + chunkIndex

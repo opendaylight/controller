@@ -48,7 +48,6 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
-import org.slf4j.LoggerFactory;
 
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class SnapshotManagerTest extends AbstractActorTest {
@@ -95,7 +94,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         doReturn(new FileBackedOutputStreamFactory(10000000, "target"))
                 .when(mockRaftActorContext).getFileBackedOutputStreamFactory();
 
-        snapshotManager = new SnapshotManager(mockRaftActorContext, LoggerFactory.getLogger(this.getClass()));
+        snapshotManager = new SnapshotManager(mockRaftActorContext);
         factory = new TestActorFactory(getSystem());
 
         actorRef = factory.createActor(MessageCollectorActor.props(), factory.generateActorId("test-"));

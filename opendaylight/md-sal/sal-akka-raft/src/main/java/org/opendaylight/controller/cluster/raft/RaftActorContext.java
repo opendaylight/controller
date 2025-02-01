@@ -28,7 +28,6 @@ import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
-import org.slf4j.Logger;
 
 /**
  * The RaftActorContext contains that portion of the RaftActors state that
@@ -166,13 +165,6 @@ public interface RaftActorContext {
      * @return the ActorSystem.
      */
     @NonNull ActorSystem getActorSystem();
-
-    /**
-     * Returns the logger to be used for logging messages.
-     *
-     * @return the logger.
-     */
-    @NonNull Logger getLogger();
 
     /**
      * Gets the address of a peer as a String. This is the same format in which a consumer would provide the address.

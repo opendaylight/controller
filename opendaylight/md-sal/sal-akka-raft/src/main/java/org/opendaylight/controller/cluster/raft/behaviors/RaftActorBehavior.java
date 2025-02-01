@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import static java.util.Objects.requireNonNull;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import org.apache.pekko.actor.ActorRef;
@@ -29,12 +28,15 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Abstract class that provides common code for a RaftActor behavior.
  */
 public abstract class RaftActorBehavior implements AutoCloseable {
+    private static final Logger LOG = LoggerFactory.getLogger(RaftActorBehavior.class);
+
     /**
      * Information about the RaftActor whose behavior this class represents.
      */
@@ -44,12 +46,6 @@ public abstract class RaftActorBehavior implements AutoCloseable {
      * The RaftState corresponding to his behavior.
      */
     private final @NonNull RaftState state;
-
-    /**
-     * Used for message logging.
-     */
-    @SuppressFBWarnings("SLF4J_LOGGER_SHOULD_BE_PRIVATE")
-    final @NonNull Logger log;
 
     /**
      * Prepended to log messages to provide appropriate context.
@@ -69,7 +65,6 @@ public abstract class RaftActorBehavior implements AutoCloseable {
     RaftActorBehavior(final RaftActorContext context, final RaftState state) {
         this.context = requireNonNull(context);
         this.state = requireNonNull(state);
-        log = context.getLogger();
         logName = context.getId() + " (" + state + ")";
     }
 
@@ -149,11 +144,11 @@ public abstract class RaftActorBehavior implements AutoCloseable {
      */
     final RaftActorBehavior appendEntries(final ActorRef sender, final AppendEntries appendEntries) {
         // 1. Reply false if term < currentTerm (§5.1)
-        if (appendEntries.getTerm() < currentTerm()) {
-            log.info("{}: Cannot append entries because sender's term {} is less than {}", logName,
-                    appendEntries.getTerm(), currentTerm());
-
-            sender.tell(new AppendEntriesReply(context.getId(), currentTerm(), false, lastIndex(), lastTerm(),
+        final var term = appendEntries.getTerm();
+        final var current = currentTerm();
+        if (term < current) {
+            LOG.info("{}: Cannot append entries because sender's term {} is less than {}", logName, term, current);
+            sender.tell(new AppendEntriesReply(context.getId(), current, false, lastIndex(), lastTerm(),
                     context.getPayloadVersion(), false, false, appendEntries.getLeaderRaftVersion()), actor());
             return this;
         }
@@ -181,7 +176,7 @@ public abstract class RaftActorBehavior implements AutoCloseable {
      * @return a new behavior if it was changed or the current behavior
      */
     final RaftActorBehavior requestVote(final ActorRef sender, final RequestVote requestVote) {
-        log.debug("{}: In requestVote:  {} - currentTerm: {}, votedFor: {}, lastIndex: {}, lastTerm: {}", logName,
+        LOG.debug("{}: In requestVote:  {} - currentTerm: {}, votedFor: {}, lastIndex: {}, lastTerm: {}", logName,
                 requestVote, currentTerm(), votedFor(), lastIndex(), lastTerm());
 
         final var grantVote = canGrantVote(requestVote);
@@ -190,7 +185,7 @@ public abstract class RaftActorBehavior implements AutoCloseable {
         }
 
         final var reply = new RequestVoteReply(currentTerm(), grantVote);
-        log.debug("{}: requestVote returning: {}", logName, reply);
+        LOG.debug("{}: requestVote returning: {}", logName, reply);
         sender.tell(reply, actor());
         return this;
     }
@@ -372,16 +367,16 @@ public abstract class RaftActorBehavior implements AutoCloseable {
                 // Send a local message to the local RaftActor (it's derived class to be
                 // specific to apply the log to it's index)
 
-                final ApplyState applyState = getApplyStateFor(replicatedLogEntry);
+                final var applyState = getApplyStateFor(replicatedLogEntry);
 
-                log.debug("{}: Setting last applied to {}", logName, i);
+                LOG.debug("{}: Setting last applied to {}", logName, i);
 
                 context.setLastApplied(i);
                 context.getApplyStateConsumer().accept(applyState);
             } else {
                 //if one index is not present in the log, no point in looping
                 // around as the rest wont be present either
-                log.warn("{}: Missing index {} from log. Cannot apply state. Ignoring {} to {}", logName, i, i, index);
+                LOG.warn("{}: Missing index {} from log. Cannot apply state. Ignoring {} to {}", logName, i, i, index);
                 break;
             }
         }
@@ -444,12 +439,12 @@ public abstract class RaftActorBehavior implements AutoCloseable {
             return this;
         }
 
-        log.info("{} :- Switching from behavior {} to {}, election term: {}", logName, state(),
+        LOG.info("{} :- Switching from behavior {} to {}, election term: {}", logName, state(),
                 newBehavior.state(), context.currentTerm());
         try {
             close();
         } catch (RuntimeException e) {
-            log.error("{}: Failed to close behavior : {}", logName, state(), e);
+            LOG.warn("{}: Failed to close behavior : {}", logName, state(), e);
         }
         return newBehavior;
     }
@@ -497,7 +492,7 @@ public abstract class RaftActorBehavior implements AutoCloseable {
             return true;
         }
 
-        log.debug("{}: Found higher term in RequestVote rpc, verifying whether it's safe to update term.", logName);
+        LOG.debug("{}: Found higher term in RequestVote rpc, verifying whether it's safe to update term.", logName);
         final var maybeCluster = context.getCluster();
         if (maybeCluster.isEmpty()) {
             return true;
@@ -506,19 +501,19 @@ public abstract class RaftActorBehavior implements AutoCloseable {
         final var cluster = maybeCluster.orElseThrow();
 
         final var unreachable = cluster.state().getUnreachable();
-        log.debug("{}: Cluster state: {}", logName, unreachable);
+        LOG.debug("{}: Cluster state: {}", logName, unreachable);
 
         for (var member : unreachable) {
             for (var role : member.getRoles()) {
                 if (requestVote.getCandidateId().startsWith(role)) {
-                    log.debug("{}: Unreachable member: {}, matches candidateId in: {}, not updating term", logName,
+                    LOG.debug("{}: Unreachable member: {}, matches candidateId in: {}, not updating term", logName,
                         member, requestVote);
                     return false;
                 }
             }
         }
 
-        log.debug("{}: Candidate in requestVote:{} with higher term appears reachable, updating term.", logName,
+        LOG.debug("{}: Candidate in requestVote:{} with higher term appears reachable, updating term.", logName,
             requestVote);
         return true;
     }

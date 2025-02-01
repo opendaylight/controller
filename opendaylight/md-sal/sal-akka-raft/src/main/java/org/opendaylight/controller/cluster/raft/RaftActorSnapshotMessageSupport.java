@@ -25,6 +25,7 @@ import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshotReply
 import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
@@ -47,16 +48,16 @@ class RaftActorSnapshotMessageSupport {
         }
     }
 
+    private static final Logger LOG = LoggerFactory.getLogger(RaftActorSnapshotMessageSupport.class);
+
     private final RaftActorContext context;
     private final RaftActorSnapshotCohort cohort;
-    private final Logger log;
 
     private FiniteDuration snapshotReplyActorTimeout = FiniteDuration.create(30, TimeUnit.SECONDS);
 
     RaftActorSnapshotMessageSupport(final RaftActorContext context, final RaftActorSnapshotCohort cohort) {
         this.context = context;
         this.cohort = cohort;
-        log = context.getLogger();
 
         context.getSnapshotManager().setCreateSnapshotConsumer(
             outputStream -> cohort.createSnapshot(context.getActor(), outputStream));
@@ -75,7 +76,7 @@ class RaftActorSnapshotMessageSupport {
             case CaptureSnapshotReply msg -> onCaptureSnapshotReply(msg);
             case CommitSnapshot msg -> context.getSnapshotManager().commit(-1, -1);
             case GetSnapshot msg -> onGetSnapshot(sender, msg);
-            case SnapshotComplete msg -> log.debug("{}: SnapshotComplete received", context.getId());
+            case SnapshotComplete msg -> LOG.debug("{}: SnapshotComplete received", context.getId());
             default -> {
                 return false;
             }
@@ -84,14 +85,14 @@ class RaftActorSnapshotMessageSupport {
     }
 
     private void onCaptureSnapshotReply(final CaptureSnapshotReply reply) {
-        log.debug("{}: CaptureSnapshotReply received by actor", context.getId());
+        LOG.debug("{}: CaptureSnapshotReply received by actor", context.getId());
 
         context.getSnapshotManager().persist(reply.getSnapshotState(), reply.getInstallSnapshotStream(),
                 context.getTotalMemory());
     }
 
     private void onSaveSnapshotFailure(final SaveSnapshotFailure saveSnapshotFailure) {
-        log.error("{}: SaveSnapshotFailure received for snapshot Cause:",
+        LOG.error("{}: SaveSnapshotFailure received for snapshot Cause:",
                 context.getId(), saveSnapshotFailure.cause());
 
         context.getSnapshotManager().rollback();
@@ -100,13 +101,13 @@ class RaftActorSnapshotMessageSupport {
     private void onSaveSnapshotSuccess(final SaveSnapshotSuccess success) {
         long sequenceNumber = success.metadata().sequenceNr();
 
-        log.info("{}: SaveSnapshotSuccess received for snapshot, sequenceNr: {}", context.getId(), sequenceNumber);
+        LOG.info("{}: SaveSnapshotSuccess received for snapshot, sequenceNr: {}", context.getId(), sequenceNumber);
 
         context.getSnapshotManager().commit(sequenceNumber, success.metadata().timestamp());
     }
 
     private void onGetSnapshot(final ActorRef sender, final GetSnapshot getSnapshot) {
-        log.debug("{}: onGetSnapshot", context.getId());
+        LOG.debug("{}: onGetSnapshot", context.getId());
 
 
         if (context.getPersistenceProvider().isRecoveryApplicable()) {

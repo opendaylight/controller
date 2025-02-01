@@ -12,6 +12,8 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Leader which is termed as isolated.
@@ -26,6 +28,8 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
  * If no, then the state is switched back to Leader.
  */
 public non-sealed class IsolatedLeader extends AbstractLeader {
+    private static final Logger LOG = LoggerFactory.getLogger(IsolatedLeader.class);
+
     IsolatedLeader(final RaftActorContext context, final @Nullable AbstractLeader initializeFromLeader) {
         super(context, RaftState.IsolatedLeader, initializeFromLeader);
     }
@@ -37,12 +41,12 @@ public non-sealed class IsolatedLeader extends AbstractLeader {
     // we received an Append Entries reply, we should switch the Behavior to Leader
     @Override
     RaftActorBehavior handleAppendEntriesReply(final ActorRef sender, final AppendEntriesReply appendEntriesReply) {
-        RaftActorBehavior ret = super.handleAppendEntriesReply(sender, appendEntriesReply);
+        final var ret = super.handleAppendEntriesReply(sender, appendEntriesReply);
 
         // it can happen that this isolated leader interacts with a new leader in the cluster and
         // changes its state to Follower, hence we only need to switch to Leader if the state is still Isolated
         if (ret.state() == RaftState.IsolatedLeader && !isLeaderIsolated()) {
-            log.info("IsolatedLeader {} switching from IsolatedLeader to Leader", getLeaderId());
+            LOG.info("{}: IsolatedLeader {} switching from IsolatedLeader to Leader", getId(), getLeaderId());
             return internalSwitchBehavior(new Leader(context, this));
         }
         return ret;
