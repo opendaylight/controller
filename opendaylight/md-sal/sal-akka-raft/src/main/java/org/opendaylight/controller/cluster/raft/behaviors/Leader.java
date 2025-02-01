@@ -14,7 +14,6 @@ import com.google.common.base.Stopwatch;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.apache.pekko.actor.ActorRef;
-import org.apache.pekko.actor.ActorSelection;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.FollowerLogInformation;
@@ -23,6 +22,8 @@ import org.opendaylight.controller.cluster.raft.RaftActorLeadershipTransferCohor
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The behavior of a RaftActor when it is in the Leader state.
@@ -46,6 +47,8 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
  * </ul>
  */
 public non-sealed class Leader extends AbstractLeader {
+    private static final Logger LOG = LoggerFactory.getLogger(Leader.class);
+
     /**
      * Internal message sent to periodically check if this leader has become isolated and should transition
      * to {@link IsolatedLeader}.
@@ -70,8 +73,8 @@ public non-sealed class Leader extends AbstractLeader {
 
         if (ISOLATED_LEADER_CHECK.equals(originalMessage)) {
             if (isLeaderIsolated()) {
-                log.warn("{}: At least {} followers need to be active, Switching {} from Leader to IsolatedLeader",
-                    context.getId(), getMinIsolatedLeaderPeerCount(), getLeaderId());
+                LOG.warn("{}: At least {} followers need to be active, Switching {} from Leader to IsolatedLeader",
+                    logName, getMinIsolatedLeaderPeerCount(), getLeaderId());
                 return internalSwitchBehavior(new IsolatedLeader(context, this));
             } else {
                 return this;
@@ -91,7 +94,7 @@ public non-sealed class Leader extends AbstractLeader {
 
         if (leadershipTransferContext != null && leadershipTransferContext.isExpired(
                 context.getConfigParams().getElectionTimeOutInterval().toMillis())) {
-            log.debug("{}: Leadership transfer expired", logName);
+            LOG.debug("{}: Leadership transfer expired", logName);
             leadershipTransferContext = null;
         }
     }
@@ -122,7 +125,7 @@ public non-sealed class Leader extends AbstractLeader {
      * @param leadershipTransferCohort the cohort participating in the leadership transfer
      */
     public void transferLeadership(@NonNull final RaftActorLeadershipTransferCohort leadershipTransferCohort) {
-        log.debug("{}: Attempting to transfer leadership", logName);
+        LOG.debug("{}: Attempting to transfer leadership", logName);
 
         leadershipTransferContext = new LeadershipTransferContext(leadershipTransferCohort);
 
@@ -150,21 +153,21 @@ public non-sealed class Leader extends AbstractLeader {
         long lastIndex = context.getReplicatedLog().lastIndex();
         boolean isVoting = context.getPeerInfo(followerId).isVoting();
 
-        log.debug("{}: tryToCompleteLeadershipTransfer: followerId: {}, matchIndex: {}, lastIndex: {}, isVoting: {}",
+        LOG.debug("{}: tryToCompleteLeadershipTransfer: followerId: {}, matchIndex: {}, lastIndex: {}, isVoting: {}",
                 logName, followerId, followerInfo.getMatchIndex(), lastIndex, isVoting);
 
         if (isVoting && followerInfo.getMatchIndex() == lastIndex) {
-            log.debug("{}: Follower's log matches - sending ElectionTimeout", logName);
+            LOG.debug("{}: Follower's log matches - sending ElectionTimeout", logName);
 
             // We can't be sure if the follower has applied all its log entries to its state so send an
             // additional AppendEntries with the latest commit index.
             sendAppendEntries(0, false);
 
             // Now send a TimeoutNow message to the matching follower to immediately start an election.
-            ActorSelection followerActor = context.getPeerActorSelection(followerId);
+            final var followerActor = context.getPeerActorSelection(followerId);
             followerActor.tell(TimeoutNow.INSTANCE, context.getActor());
 
-            log.debug("{}: Leader transfer complete", logName);
+            LOG.debug("{}: Leader transfer complete", logName);
 
             leadershipTransferContext.transferCohort.transferComplete();
             leadershipTransferContext = null;

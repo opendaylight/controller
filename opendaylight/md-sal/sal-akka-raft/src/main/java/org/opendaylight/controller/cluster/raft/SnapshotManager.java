@@ -30,6 +30,7 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.ImmutableRaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Manages the capturing of snapshots for a RaftActor.
@@ -125,8 +126,9 @@ public class SnapshotManager implements SnapshotState {
         // Nothing else
     }
 
-    private final RaftActorContext context;
-    private final Logger log;
+    private static final Logger LOG = LoggerFactory.getLogger(SnapshotManager.class);
+
+    private final @NonNull RaftActorContext context;
 
     private RaftActorSnapshotCohort snapshotCohort = NoopRaftActorSnapshotCohort.INSTANCE;
     private Consumer<Optional<OutputStream>> createSnapshotProcedure = null;
@@ -136,11 +138,13 @@ public class SnapshotManager implements SnapshotState {
      * Constructs an instance.
      *
      * @param context the RaftActorContext
-     * @param logger the Logger
      */
-    public SnapshotManager(final RaftActorContext context, final Logger logger) {
-        this.context = context;
-        log = logger;
+    public SnapshotManager(final RaftActorContext context) {
+        this.context = requireNonNull(context);
+    }
+
+    private String memberId() {
+        return context.getId();
     }
 
     public boolean isApplying() {
@@ -157,7 +161,7 @@ public class SnapshotManager implements SnapshotState {
         if (task instanceof Idle) {
             return capture(lastLogEntry, replicatedToAllIndex, null, false);
         }
-        log.debug("capture should not be called in state {}", task);
+        LOG.debug("{}: Capture should not be called in state {}", memberId(), task);
         return false;
     }
 
@@ -168,16 +172,15 @@ public class SnapshotManager implements SnapshotState {
         final OutputStream installSnapshotStream;
         if (targetFollower != null) {
             installSnapshotStream = context.getFileBackedOutputStreamFactory().newInstance();
-            log.info("{}: Initiating snapshot capture {} to install on {}",
-                    persistenceId(), request, targetFollower);
+            LOG.info("{}: Initiating snapshot capture {} to install on {}", memberId(), request, targetFollower);
         } else {
             installSnapshotStream = null;
-            log.info("{}: Initiating snapshot capture {}", persistenceId(), request);
+            LOG.info("{}: Initiating snapshot capture {}", memberId(), request);
         }
 
         final var lastSeq = context.getPersistenceProvider().getLastSequenceNumber();
 
-        log.debug("{}: lastSequenceNumber prior to capture: {}", persistenceId(), lastSeq);
+        LOG.debug("{}: lastSequenceNumber prior to capture: {}", memberId(), lastSeq);
 
         task = new Capture(lastSeq, request);
         return capture(installSnapshotStream);
@@ -189,7 +192,7 @@ public class SnapshotManager implements SnapshotState {
             createSnapshotProcedure.accept(Optional.ofNullable(installSnapshotStream));
         } catch (Exception e) {
             task = Idle.INSTANCE;
-            log.error("Error creating snapshot", e);
+            LOG.error("{}: Error creating snapshot", memberId(), e);
             return false;
         }
         return true;
@@ -201,7 +204,7 @@ public class SnapshotManager implements SnapshotState {
         if (task instanceof Idle) {
             return capture(lastLogEntry, replicatedToAllIndex, targetFollower, false);
         }
-        log.debug("captureToInstall should not be called in state {}", task);
+        LOG.debug("{}: captureToInstall should not be called in state {}", memberId(), task);
         return false;
     }
 
@@ -210,7 +213,7 @@ public class SnapshotManager implements SnapshotState {
         if (task instanceof Idle) {
             return capture(lastLogEntry, replicatedToAllIndex, null, true);
         }
-        log.debug("captureWithForcedTrim should not be called in state {}", task);
+        LOG.debug("{}: captureWithForcedTrim should not be called in state {}", memberId(), task);
         return false;
     }
 
@@ -222,23 +225,23 @@ public class SnapshotManager implements SnapshotState {
     @NonNullByDefault
     public void applyFromLeader(final ApplyLeaderSnapshot snapshot) {
         if (!(task instanceof Idle)) {
-            log.debug("applySnapshot should not be called in state {}", task);
+            LOG.debug("{}: applySnapshot should not be called in state {}", memberId(), task);
             return;
         }
 
         final var snapshotBytes = snapshot.snapshot();
-        log.info("{}: Applying snapshot on follower: {}", context.getId(), snapshotBytes);
+        LOG.info("{}: Applying snapshot on follower: {}", memberId(), snapshotBytes);
 
         final Snapshot.State snapshotState;
         try {
             snapshotState = convertSnapshot(snapshotBytes);
         } catch (IOException e) {
-            log.debug("{}: failed to convert InstallSnapshot to state", context.getId(), e);
+            LOG.debug("{}: failed to convert InstallSnapshot to state", memberId(), e);
             snapshot.callback().onFailure();
             return;
         }
 
-        log.debug("{}: Converted InstallSnapshot from leader: {} to state{}", context.getId(), snapshot.leaderId(),
+        LOG.debug("{}: Converted InstallSnapshot from leader: {} to state{}", memberId(), snapshot.leaderId(),
             snapshotState.needsMigration() ? " (needs migration)" : "");
         persistSnapshot(
             Snapshot.ofTermLeader(snapshotState, snapshot.lastEntry(), context.termInfo(), snapshot.serverConfig()),
@@ -255,7 +258,7 @@ public class SnapshotManager implements SnapshotState {
         if (task instanceof Idle) {
             persistSnapshot(requireNonNull(snapshot), null);
         } else {
-            log.debug("apply should not be called in state {}", task);
+            LOG.debug("{}: apply should not be called in state {}", memberId(), task);
         }
     }
 
@@ -266,7 +269,7 @@ public class SnapshotManager implements SnapshotState {
         final var persisting = new PersistApply(lastSeq, snapshot, callback);
 
         task = persisting;
-        log.debug("lastSequenceNumber prior to persisting applied snapshot: {}", lastSeq);
+        LOG.debug("{}: lastSequenceNumber prior to persisting applied snapshot: {}", memberId(), lastSeq);
         persistence.saveSnapshot(persisting.snapshot);
     }
 
@@ -274,7 +277,7 @@ public class SnapshotManager implements SnapshotState {
     public void persist(final Snapshot.State snapshotState, final Optional<OutputStream> installSnapshotStream,
             final long totalMemory) {
         if (!(task instanceof Capture(final var lastSeq, final var request))) {
-            log.debug("persist should not be called in state {}", this);
+            LOG.debug("{}: persist should not be called in state {}", memberId(), task);
             return;
         }
 
@@ -287,7 +290,7 @@ public class SnapshotManager implements SnapshotState {
 
         context.getPersistenceProvider().saveSnapshot(snapshot);
 
-        log.info("{}: Persisting of snapshot done: {}", persistenceId(), snapshot);
+        LOG.info("{}: Persisting of snapshot done: {}", memberId(), snapshot);
 
         final var config = context.getConfigParams();
         final long absoluteThreshold = config.getSnapshotDataThreshold();
@@ -300,18 +303,18 @@ public class SnapshotManager implements SnapshotState {
 
         final var currentBehavior = context.getCurrentBehavior();
         if (dataSizeThresholdExceeded || logSizeExceededSnapshotBatchCount || request.isMandatoryTrim()) {
-            if (log.isDebugEnabled()) {
+            if (LOG.isDebugEnabled()) {
+                final var lastAppliedIndex = request.getLastAppliedIndex();
                 if (dataSizeThresholdExceeded) {
-                    log.debug("{}: log data size {} exceeds the memory threshold {} - doing snapshotPreCommit "
-                            + "with index {}", context.getId(), replLog.dataSize(), dataThreshold,
-                            request.getLastAppliedIndex());
+                    LOG.debug("{}: log data size {} exceeds the memory threshold {} - doing snapshotPreCommit "
+                            + "with index {}", memberId(), replLog.dataSize(), dataThreshold, lastAppliedIndex);
                 } else if (logSizeExceededSnapshotBatchCount) {
-                    log.debug("{}: log size {} exceeds the snapshot batch count {} - doing snapshotPreCommit with "
-                            + "index {}", context.getId(), replLog.size(), config.getSnapshotBatchCount(),
-                            request.getLastAppliedIndex());
+                    LOG.debug(
+                        "{}: log size {} exceeds the snapshot batch count {} - doing snapshotPreCommit with index {}",
+                        memberId(), replLog.size(), config.getSnapshotBatchCount(), lastAppliedIndex);
                 } else {
-                    log.debug("{}: user triggered or root overwrite snapshot encountered, trimming log up to "
-                            + "last applied index {}", context.getId(), request.getLastAppliedIndex());
+                    LOG.debug("{}: user triggered or root overwrite snapshot encountered, trimming log up to "
+                            + "last applied index {}", memberId(), lastAppliedIndex);
                 }
             }
 
@@ -341,8 +344,8 @@ public class SnapshotManager implements SnapshotState {
             replLog.snapshotPreCommit(replLog.getSnapshotIndex(), replLog.getSnapshotTerm());
         }
 
-        log.info("{}: Removed in-memory snapshotted entries, adjusted snaphsotIndex: {} and term: {}",
-                context.getId(), replLog.getSnapshotIndex(), replLog.getSnapshotTerm());
+        LOG.info("{}: Removed in-memory snapshotted entries, adjusted snaphsotIndex: {} and term: {}", memberId(),
+            replLog.getSnapshotIndex(), replLog.getSnapshotTerm());
 
         if (installSnapshotStream.isPresent()) {
             // FIXME: ugly cast
@@ -350,11 +353,10 @@ public class SnapshotManager implements SnapshotState {
 
             if (context.getId().equals(currentBehavior.getLeaderId())) {
                 try {
-                    ByteSource snapshotBytes = snapshotStream.asByteSource();
+                    final var snapshotBytes = snapshotStream.asByteSource();
                     currentBehavior.handleMessage(context.getActor(), new SendInstallSnapshot(snapshot, snapshotBytes));
                 } catch (IOException e) {
-                    log.error("{}: Snapshot install failed due to an unrecoverable streaming error",
-                            context.getId(), e);
+                    LOG.error("{}: Snapshot install failed due to an unrecoverable streaming error", memberId(), e);
                 }
             } else {
                 snapshotStream.cleanup();
@@ -367,11 +369,11 @@ public class SnapshotManager implements SnapshotState {
     @Override
     public void commit(final long sequenceNumber, final long timeStamp) {
         if (!(task instanceof Persist persist)) {
-            log.debug("commit should not be called in state {}", task);
+            LOG.debug("{}: commit should not be called in state {}", memberId(), task);
             return;
         }
 
-        log.debug("{}: Snapshot success -  sequence number: {}", persistenceId(), sequenceNumber);
+        LOG.debug("{}: Snapshot success -  sequence number: {}", memberId(), sequenceNumber);
         final var lastSequenceNumber = commit(persist);
 
         final var persistence = context.getPersistenceProvider();
@@ -409,7 +411,7 @@ public class SnapshotManager implements SnapshotState {
                         callback.onSuccess();
                     }
                 } catch (Exception e) {
-                    log.error("{}: Error applying snapshot", context.getId(), e);
+                    LOG.error("{}: Error applying snapshot", memberId(), e);
                 }
                 yield lastSeq;
             }
@@ -434,12 +436,12 @@ public class SnapshotManager implements SnapshotState {
             case PersistCapture persist -> {
                 final var replLog = context.getReplicatedLog();
                 replLog.snapshotRollback();
-                log.info("{}: Replicated Log rolled back. Snapshot will be attempted in the next cycle. "
-                        + "snapshotIndex:{}, snapshotTerm:{}, log-size:{}", persistenceId(), replLog.getSnapshotIndex(),
+                LOG.info("{}: Replicated Log rolled back. Snapshot will be attempted in the next cycle. "
+                        + "snapshotIndex:{}, snapshotTerm:{}, log-size:{}", memberId(), replLog.getSnapshotIndex(),
                         replLog.getSnapshotTerm(), replLog.size());
                 snapshotComplete();
             }
-            default -> log.debug("rollback should not be called in state {}", task);
+            default -> LOG.debug("{}: rollback should not be called in state {}", memberId(), task);
         }
     }
 
@@ -451,7 +453,7 @@ public class SnapshotManager implements SnapshotState {
     @Override
     public long trimLog(final long desiredTrimIndex) {
         if (!(task instanceof Idle)) {
-            log.debug("trimLog should not be called in state {}", task);
+            LOG.debug("{}: trimLog should not be called in state {}", memberId(), task);
             return -1;
         }
 
@@ -459,16 +461,15 @@ public class SnapshotManager implements SnapshotState {
         long lastApplied = context.getLastApplied();
         long tempMin = Math.min(desiredTrimIndex, lastApplied > -1 ? lastApplied - 1 : -1);
 
-        if (log.isTraceEnabled()) {
-            log.trace("{}: performSnapshotWithoutCapture: desiredTrimIndex: {}, lastApplied: {}, tempMin: {}",
-                    persistenceId(), desiredTrimIndex, lastApplied, tempMin);
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("{}: performSnapshotWithoutCapture: desiredTrimIndex: {}, lastApplied: {}, tempMin: {}",
+                    memberId(), desiredTrimIndex, lastApplied, tempMin);
         }
 
         if (tempMin > -1) {
             final var replLog = context.getReplicatedLog();
             if (replLog.isPresent(tempMin)) {
-                log.debug("{}: fakeSnapshot purging log to {} for term {}", persistenceId(), tempMin,
-                    context.currentTerm());
+                LOG.debug("{}: fakeSnapshot purging log to {} for term {}", memberId(), tempMin, context.currentTerm());
 
                 //use the term of the temp-min, since we check for isPresent, entry will not be null
                 final var entry = replLog.get(tempMin);
@@ -512,10 +513,6 @@ public class SnapshotManager implements SnapshotState {
         return task instanceof Capture capture ? capture.request : null;
     }
 
-    private String persistenceId() {
-        return context.getId();
-    }
-
     /**
      * Constructs a CaptureSnapshot instance.
      *
@@ -544,8 +541,8 @@ public class SnapshotManager implements SnapshotState {
             lastAppliedIndex = lastLogEntryIndex = replLog.getSnapshotIndex();
             lastAppliedTerm = lastLogEntryTerm = replLog.getSnapshotTerm();
 
-            log.debug("{}: Capturing Snapshot : lastLogEntry is null. Using snapshot values lastAppliedIndex {} and "
-                    + "lastAppliedTerm {} instead.", persistenceId(), lastAppliedIndex, lastAppliedTerm);
+            LOG.debug("{}: Capturing Snapshot : lastLogEntry is null. Using snapshot values lastAppliedIndex {} and "
+                    + "lastAppliedTerm {} instead.", memberId(), lastAppliedIndex, lastAppliedTerm);
         } else {
             lastLogEntryIndex = lastLogEntry.index();
             lastLogEntryTerm = lastLogEntry.term();

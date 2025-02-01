@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractReplicatedLog implements ReplicatedLog {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractReplicatedLog.class);
 
-    private final String logId;
+    final @NonNull String memberId;
 
     // We define this as ArrayList so we can use ensureCapacity.
     private ArrayList<ReplicatedLogEntry> journal;
@@ -39,9 +39,9 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
     private long previousSnapshotTerm = -1;
     private int dataSize = 0;
 
-    protected AbstractReplicatedLog(final @NonNull String logId, final long snapshotIndex, final long snapshotTerm,
+    protected AbstractReplicatedLog(final @NonNull String memberId, final long snapshotIndex, final long snapshotTerm,
             final List<ReplicatedLogEntry> unAppliedEntries) {
-        this.logId = requireNonNull(logId);
+        this.memberId = requireNonNull(memberId);
         this.snapshotIndex = snapshotIndex;
         this.snapshotTerm = snapshotTerm;
 
@@ -127,7 +127,7 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
             return true;
         }
 
-        LOG.warn("{}: Cannot append new entry - new index {} is not greater than the last index {}", logId,
+        LOG.warn("{}: Cannot append new entry - new index {} is not greater than the last index {}", memberId,
             entryIndex, lastIndex, new Exception("stack trace"));
         return false;
     }
@@ -267,7 +267,7 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
             for (ReplicatedLogEntry logEntry : journal) {
                 newDataSize += logEntry.size();
             }
-            LOG.trace("{}: Updated dataSize from {} to {}", logId, dataSize, newDataSize);
+            LOG.trace("{}: Updated dataSize from {} to {}", memberId, dataSize, newDataSize);
             dataSize = newDataSize;
         }
     }
