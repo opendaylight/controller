@@ -32,20 +32,15 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.karaf.tooling</groupId>
-                <artifactId>karaf-services-maven-plugin</artifactId>
-                <version>${karaf.version}</version>
-                <executions>
-                    <execution>
-                        <id>service-metadata-generate</id>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>service-metadata-generate</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Karaf-Commands>org.opendaylight.controller.cluster.datastore.admin.command</Karaf-Commands>
+                    </instructions>
+                </configuration>
             </plugin>
         </plugins>
     </build>
-
 </project>
