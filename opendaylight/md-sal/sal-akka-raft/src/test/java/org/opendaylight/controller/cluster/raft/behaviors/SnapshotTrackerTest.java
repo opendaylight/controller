@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft.behaviors;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -28,13 +29,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStream;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStreamFactory;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class SnapshotTrackerTest {
-    private static final Logger LOG = LoggerFactory.getLogger(SnapshotTrackerTest.class);
-
     private final HashMap<String, String> data = new HashMap<>();
 
     @Mock
@@ -64,7 +61,7 @@ public class SnapshotTrackerTest {
 
     @Test
     public void testAddChunks() throws IOException {
-        try (SnapshotTracker tracker = new SnapshotTracker(LOG, 3, "leader", mockContext)) {
+        try (var tracker = new SnapshotTracker("test", 3, "leader", mockContext)) {
             tracker.addChunk(1, chunk1, OptionalInt.of(LeaderInstallSnapshotState.INITIAL_LAST_CHUNK_HASH_CODE));
             tracker.addChunk(2, chunk2, OptionalInt.of(Arrays.hashCode(chunk1)));
             tracker.addChunk(3, chunk3, OptionalInt.of(Arrays.hashCode(chunk2)));
@@ -76,43 +73,47 @@ public class SnapshotTrackerTest {
         verify(fbos).cleanup();
     }
 
-    @Test(expected = SnapshotTracker.InvalidChunkException.class)
+    @Test
     public void testAddChunkWhenAlreadySealed() throws IOException {
-        try (SnapshotTracker tracker = new SnapshotTracker(LOG, 2, "leader", mockContext)) {
+        try (var tracker = new SnapshotTracker("test", 2, "leader", mockContext)) {
             tracker.addChunk(1, chunk1, OptionalInt.empty());
             tracker.addChunk(2, chunk2, OptionalInt.empty());
-            tracker.addChunk(3, chunk3, OptionalInt.empty());
+            assertThrows(SnapshotTracker.InvalidChunkException.class,
+                () -> tracker.addChunk(3, chunk3, OptionalInt.empty()));
         }
     }
 
-    @Test(expected = SnapshotTracker.InvalidChunkException.class)
+    @Test
     public void testInvalidFirstChunkIndex() throws IOException {
-        try (SnapshotTracker tracker = new SnapshotTracker(LOG, 2, "leader", mockContext)) {
-            tracker.addChunk(LeaderInstallSnapshotState.FIRST_CHUNK_INDEX - 1, chunk1, OptionalInt.empty());
+        try (var tracker = new SnapshotTracker("test", 2, "leader", mockContext)) {
+            assertThrows(SnapshotTracker.InvalidChunkException.class,
+                () -> tracker.addChunk(LeaderInstallSnapshotState.FIRST_CHUNK_INDEX - 1, chunk1, OptionalInt.empty()));
         }
     }
 
-    @Test(expected = SnapshotTracker.InvalidChunkException.class)
+    @Test
     public void testOutOfSequenceChunk() throws IOException {
-        try (SnapshotTracker tracker = new SnapshotTracker(LOG, 2, "leader", mockContext)) {
+        try (var tracker = new SnapshotTracker("test", 2, "leader", mockContext)) {
             tracker.addChunk(1, chunk1, OptionalInt.empty());
-            tracker.addChunk(3, chunk3, OptionalInt.empty());
+            assertThrows(SnapshotTracker.InvalidChunkException.class,
+                () -> tracker.addChunk(3, chunk3, OptionalInt.empty()));
         }
     }
 
-    @Test(expected = SnapshotTracker.InvalidChunkException.class)
+    @Test
     public void testInvalidLastChunkHashCode() throws IOException {
-        try (SnapshotTracker tracker = new SnapshotTracker(LOG, 2, "leader", mockContext)) {
+        try (var tracker = new SnapshotTracker("test", 2, "leader", mockContext)) {
             tracker.addChunk(1, chunk1, OptionalInt.of(LeaderInstallSnapshotState.INITIAL_LAST_CHUNK_HASH_CODE));
-            tracker.addChunk(2, chunk2, OptionalInt.of(1));
+            assertThrows(SnapshotTracker.InvalidChunkException.class,
+                () -> tracker.addChunk(2, chunk2, OptionalInt.of(1)));
         }
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testGetSnapshotBytesWhenNotSealed() throws IOException {
-        try (SnapshotTracker tracker = new SnapshotTracker(LOG, 2, "leader", mockContext)) {
+        try (var tracker = new SnapshotTracker("test", 2, "leader", mockContext)) {
             tracker.addChunk(1, chunk1, OptionalInt.empty());
-            tracker.getSnapshotBytes();
+            assertThrows(IllegalStateException.class, tracker::getSnapshotBytes);
         }
     }
 

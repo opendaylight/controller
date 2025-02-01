@@ -13,11 +13,15 @@ import java.util.function.Consumer;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of ReplicatedLog used by the RaftActor.
  */
 final class ReplicatedLogImpl extends AbstractReplicatedLog {
+    private static final Logger LOG = LoggerFactory.getLogger(ReplicatedLogImpl.class);
+
     private static final int DATA_SIZE_DIVIDER = 5;
 
     private final RaftActorContext context;
@@ -96,7 +100,7 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog {
     @Override
     public boolean appendAndPersist(final ReplicatedLogEntry replicatedLogEntry,
             final Consumer<ReplicatedLogEntry> callback, final boolean doAsync)  {
-        context.getLogger().debug("{}: Append log entry and persist {} ", context.getId(), replicatedLogEntry);
+        LOG.debug("{}: Append log entry and persist {} ", context.getId(), replicatedLogEntry);
 
         if (!append(replicatedLogEntry)) {
             return false;
@@ -118,7 +122,7 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog {
 
     private void syncPersistCallback(final ReplicatedLogEntry persistedLogEntry,
             final Consumer<ReplicatedLogEntry> callback) {
-        context.getLogger().debug("{}: persist complete {}", context.getId(), persistedLogEntry);
+        LOG.debug("{}: persist complete {}", context.getId(), persistedLogEntry);
 
         dataSizeSinceLastSnapshot += persistedLogEntry.size();
 

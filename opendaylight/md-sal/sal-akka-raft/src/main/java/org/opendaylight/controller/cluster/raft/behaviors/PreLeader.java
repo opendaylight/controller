@@ -12,6 +12,8 @@ import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.persisted.NoopPayload;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The behavior of a RaftActor when it is in the PreLeader state. This state performs all the duties of
@@ -29,6 +31,8 @@ import org.opendaylight.controller.cluster.raft.persisted.NoopPayload;
  * @author Thomas Pantelis
  */
 public non-sealed class PreLeader extends AbstractLeader {
+    private static final Logger LOG = LoggerFactory.getLogger(PreLeader.class);
+
     public PreLeader(final RaftActorContext context) {
         super(context, RaftState.PreLeader);
 
@@ -38,14 +42,12 @@ public non-sealed class PreLeader extends AbstractLeader {
     @Override
     public RaftActorBehavior handleMessage(final ActorRef sender, final Object message) {
         if (message instanceof ApplyState) {
-            log.debug("{}: Received {} - lastApplied: {}, lastIndex: {}", logName, message, context.getLastApplied(),
-                    context.getReplicatedLog().lastIndex());
-            if (context.getLastApplied() >= context.getReplicatedLog().lastIndex()) {
+            final var lastApplied = context.getLastApplied();
+            final var lastIndex = context.getReplicatedLog().lastIndex();
+            LOG.debug("{}: Received {} - lastApplied: {}, lastIndex: {}", logName, message, lastApplied, lastIndex);
+            return lastApplied < lastIndex ? this
                 // We've applied all entries - we can switch to Leader.
-                return internalSwitchBehavior(new Leader(context, this));
-            } else {
-                return this;
-            }
+                : internalSwitchBehavior(new Leader(context, this));
         } else {
             return super.handleMessage(sender, message);
         }

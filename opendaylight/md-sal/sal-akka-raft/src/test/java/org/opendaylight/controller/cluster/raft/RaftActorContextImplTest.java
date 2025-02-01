@@ -56,13 +56,13 @@ public class RaftActorContextImplTest extends AbstractActorTest {
 
     @Test
     public void testGetPeerAddress() {
-        Map<String, String> peerMap = new HashMap<>();
+        final var peerMap = new HashMap<String, String>();
         peerMap.put("peer1", "peerAddress1");
         peerMap.put("peer2", null);
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         RaftActorContextImpl context = new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
             new LocalAccess("test", new TestTermInfoStore()), -1, -1, peerMap, configParams, (short) 0,
-            createProvider(), applyState -> { }, LOG,  MoreExecutors.directExecutor());
+            createProvider(), applyState -> { },  MoreExecutors.directExecutor());
 
         assertEquals("getPeerAddress", "peerAddress1", context.getPeerAddress("peer1"));
         assertEquals("getPeerAddress", null, context.getPeerAddress("peer2"));
@@ -86,7 +86,7 @@ public class RaftActorContextImplTest extends AbstractActorTest {
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         RaftActorContextImpl context = new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
             new LocalAccess("test", new TestTermInfoStore()), -1, -1, Map.of("peer1", "peerAddress1"), configParams,
-            (short) 0, createProvider(), applyState -> { }, LOG, MoreExecutors.directExecutor());
+            (short) 0, createProvider(), applyState -> { }, MoreExecutors.directExecutor());
 
         context.setPeerAddress("peer1", "peerAddress1_1");
         assertEquals("getPeerAddress", "peerAddress1_1", context.getPeerAddress("peer1"));
@@ -99,7 +99,7 @@ public class RaftActorContextImplTest extends AbstractActorTest {
     public void testUpdatePeerIds() {
         RaftActorContextImpl context = new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
             new LocalAccess("self", new TestTermInfoStore()), -1, -1, Map.of("peer1", "peerAddress1"),
-            new DefaultConfigParamsImpl(), (short) 0, createProvider(), applyState -> { }, LOG,
+            new DefaultConfigParamsImpl(), (short) 0, createProvider(), applyState -> { },
             MoreExecutors.directExecutor());
 
         context.updatePeerIds(new ServerConfigurationPayload(List.of(new ServerInfo("self", false),
