@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorRefProvider;
 import org.apache.pekko.actor.Address;
@@ -35,8 +34,10 @@ import org.apache.pekko.persistence.SaveSnapshotFailure;
 import org.apache.pekko.persistence.SaveSnapshotSuccess;
 import org.apache.pekko.persistence.SnapshotOffer;
 import org.apache.pekko.persistence.SnapshotSelectionCriteria;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActorWithMetering;
 import org.opendaylight.controller.remote.rpc.RemoteOpsProviderConfig;
+import org.slf4j.Logger;
 
 /**
  * A store that syncs its data across nodes in the cluster.
@@ -50,8 +51,9 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
         AbstractUntypedPersistentActorWithMetering {
     // Internal marker interface for messages which are just bridges to execute a method
     @FunctionalInterface
-    private interface ExecuteInActor extends Consumer<BucketStoreActor<?>> {
+    private interface ExecuteInActor {
 
+        void accept(@NonNull BucketStoreActor<?> actor);
     }
 
     /**
@@ -71,7 +73,6 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
     private final SetMultimap<ActorRef, Address> watchedActors = HashMultimap.create(1, 1);
 
     private final RemoteOpsProviderConfig config;
-    private final String persistenceId;
 
     /**
      * Cluster address for this node.
@@ -87,9 +88,9 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
     private boolean persisting;
 
     protected BucketStoreActor(final RemoteOpsProviderConfig config, final String persistenceId, final T initialData) {
+        super(persistenceId);
         this.config = requireNonNull(config);
         this.initialData = requireNonNull(initialData);
-        this.persistenceId = requireNonNull(persistenceId);
     }
 
     @Override
@@ -97,6 +98,8 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
     public final ActorRef getSender() {
         return super.getSender();
     }
+
+    protected abstract Logger log();
 
     static ExecuteInActor getBucketsByMembersMessage(final Collection<Address> members) {
         return actor -> actor.getBucketsByMembers(members);
@@ -128,11 +131,6 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
 
     public final Map<Address, Long> getVersions() {
         return versions;
-    }
-
-    @Override
-    public final String persistenceId() {
-        return persistenceId;
     }
 
     @Override
@@ -168,11 +166,11 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
             case ExecuteInActor execute -> execute.accept(this);
             case Terminated terminated -> actorTerminated(terminated);
             case DeleteSnapshotsSuccess deleteSuccess ->
-                LOG.debug("{}: got command: {}", persistenceId(), deleteSuccess);
+                log().debug("{}: got command: {}", persistenceId(), deleteSuccess);
             case DeleteSnapshotsFailure deleteFailure ->
-                LOG.warn("{}: failed to delete prior snapshots", persistenceId(), deleteFailure.cause());
+                log().warn("{}: failed to delete prior snapshots", persistenceId(), deleteFailure.cause());
             default -> {
-                LOG.debug("Unhandled message [{}]", message);
+                log().debug("Unhandled message [{}]", message);
                 unhandled(message);
             }
         }
@@ -181,19 +179,19 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
     private void handleSnapshotMessage(final Object message) {
         switch (message) {
             case SaveSnapshotFailure saveFailure -> {
-                LOG.error("{}: failed to persist state", persistenceId(), saveFailure.cause());
+                log().error("{}: failed to persist state", persistenceId(), saveFailure.cause());
                 persisting = false;
                 self().tell(PoisonPill.getInstance(), ActorRef.noSender());
             }
             case SaveSnapshotSuccess saveSuccess -> {
-                LOG.debug("{}: got command: {}", persistenceId(), saveSuccess);
+                log().debug("{}: got command: {}", persistenceId(), saveSuccess);
                 deleteSnapshots(new SnapshotSelectionCriteria(scala.Long.MaxValue(),
                     saveSuccess.metadata().timestamp() - 1, 0L, 0L));
                 persisting = false;
                 unstash();
             }
             default -> {
-                LOG.debug("{}: stashing command {}", persistenceId(), message);
+                log().debug("{}: stashing command {}", persistenceId(), message);
                 stash();
             }
         }
@@ -204,7 +202,7 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
         switch (message) {
             case RecoveryCompleted msg -> onRecoveryCompleted(msg);
             case SnapshotOffer msg -> onSnapshotOffer(msg);
-            default -> LOG.warn("{}: ignoring recovery message {}", persistenceId(), message);
+            default -> log().warn("{}: ignoring recovery message {}", persistenceId(), message);
         }
     }
 
@@ -215,14 +213,14 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
         incarnation = current;
         initialData = null;
 
-        LOG.debug("{}: persisting new incarnation {}", persistenceId(), incarnation);
+        log().debug("{}: persisting new incarnation {}", persistenceId(), incarnation);
         persisting = true;
         saveSnapshot(incarnation);
     }
 
     private void onSnapshotOffer(final SnapshotOffer msg) {
         incarnation = (Integer) msg.snapshot();
-        LOG.debug("{}: recovered incarnation {}", persistenceId(), incarnation);
+        log().debug("{}: recovered incarnation {}", persistenceId(), incarnation);
     }
 
     protected final RemoteOpsProviderConfig getConfig() {
@@ -235,7 +233,7 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
         versions.put(selfAddress, local.getVersion());
 
         if (bumpIncarnation) {
-            LOG.debug("Version wrapped. incrementing incarnation");
+            log().debug("Version wrapped. incrementing incarnation");
 
             verify(incarnation < Integer.MAX_VALUE, "Ran out of incarnations, cannot continue");
             incarnation = incarnation + 1;
@@ -317,7 +315,7 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
      */
     @VisibleForTesting
     void updateRemoteBuckets(final Map<Address, Bucket<?>> receivedBuckets) {
-        LOG.debug("{}: receiveUpdateRemoteBuckets: {}", selfAddress, receivedBuckets);
+        log().debug("{}: receiveUpdateRemoteBuckets: {}", selfAddress, receivedBuckets);
         if (receivedBuckets == null || receivedBuckets.isEmpty()) {
             //nothing to do
             return;
@@ -335,7 +333,7 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
             @SuppressWarnings("unchecked")
             final var receivedBucket = (Bucket<T>) entry.getValue();
             if (receivedBucket == null) {
-                LOG.debug("Ignoring null bucket from {}", addr);
+                log().debug("Ignoring null bucket from {}", addr);
                 continue;
             }
 
@@ -343,7 +341,7 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
             final long remoteVersion = receivedBucket.getVersion();
             final Long localVersion = versions.get(addr);
             if (localVersion != null && remoteVersion <= localVersion.longValue()) {
-                LOG.debug("Ignoring down-versioned bucket from {} ({} local {} remote)", addr, localVersion,
+                log().debug("Ignoring down-versioned bucket from {} ({} local {} remote)", addr, localVersion,
                     remoteVersion);
                 continue;
             }
@@ -359,10 +357,10 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
                 curRef.ifPresent(ref -> addWatch(addr, ref));
             }
 
-            LOG.debug("Updating bucket from {} to version {}", entry.getKey(), remoteVersion);
+            log().debug("Updating bucket from {} to version {}", entry.getKey(), remoteVersion);
         }
 
-        LOG.debug("State after update - Local Bucket [{}], Remote Buckets [{}]", localBucket, remoteBuckets);
+        log().debug("State after update - Local Bucket [{}], Remote Buckets [{}]", localBucket, remoteBuckets);
 
         onBucketsUpdated(newBuckets);
     }
@@ -370,7 +368,7 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
     private void addWatch(final Address addr, final ActorRef ref) {
         if (!watchedActors.containsKey(ref)) {
             getContext().watch(ref);
-            LOG.debug("Watching {}", ref);
+            log().debug("Watching {}", ref);
         }
         watchedActors.put(ref, addr);
     }
@@ -379,18 +377,18 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
         watchedActors.remove(ref, addr);
         if (!watchedActors.containsKey(ref)) {
             getContext().unwatch(ref);
-            LOG.debug("No longer watching {}", ref);
+            log().debug("No longer watching {}", ref);
         }
     }
 
     private void actorTerminated(final Terminated message) {
-        LOG.info("Actor termination {} received", message);
+        log().info("Actor termination {} received", message);
 
         for (var addr : watchedActors.removeAll(message.getActor())) {
             versions.remove(addr);
             final Bucket<T> bucket = remoteBuckets.remove(addr);
             if (bucket != null) {
-                LOG.debug("Source actor dead, removing bucket {} from {}", bucket, addr);
+                log().debug("Source actor dead, removing bucket {} from {}", bucket, addr);
                 onBucketRemoved(addr, bucket);
             }
         }

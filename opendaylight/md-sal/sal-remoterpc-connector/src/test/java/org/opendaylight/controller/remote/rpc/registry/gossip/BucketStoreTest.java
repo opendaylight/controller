@@ -24,6 +24,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.remote.rpc.RemoteOpsProviderConfig;
 import org.opendaylight.controller.remote.rpc.TerminationMonitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BucketStoreTest {
     /**
@@ -143,6 +145,7 @@ public class BucketStoreTest {
     }
 
     private static final class TestingBucketStoreActor extends BucketStoreActor<T> {
+        private static final Logger LOG = LoggerFactory.getLogger(TestingBucketStoreActor.class);
 
         protected TestingBucketStoreActor(final RemoteOpsProviderConfig config,
                                           final String persistenceId,
@@ -152,12 +155,17 @@ public class BucketStoreTest {
 
         @Override
         protected void onBucketRemoved(final Address address, final Bucket<T> bucket) {
-
+            // No-op
         }
 
         @Override
         protected void onBucketsUpdated(final Map<Address, Bucket<T>> newBuckets) {
+            // No-op
+        }
 
+        @Override
+        protected Logger log() {
+            return LOG;
         }
     }
 }

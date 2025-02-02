@@ -33,18 +33,23 @@ import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.util.AbstractStringIdentifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A sample actor showing how the RaftActor is to be extended.
  */
 public final class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, RaftActorSnapshotCohort {
     private static final class PayloadIdentifier extends AbstractStringIdentifier<PayloadIdentifier> {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
         PayloadIdentifier(final long identifier) {
             super(String.valueOf(identifier));
         }
     }
+
+    private static final Logger LOG = LoggerFactory.getLogger(ExampleActor.class);
 
     private final Map<String, String> state = new HashMap<>();
     private final ActorRef roleChangeNotifier;

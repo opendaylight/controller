@@ -102,6 +102,8 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
 import org.opendaylight.yangtools.yang.data.tree.api.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.data.tree.api.TreeType;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A Shard represents a portion of the logical data tree.
@@ -133,6 +135,8 @@ public class Shard extends RaftActor {
             return "resumeNextPendingTransaction";
         }
     };
+
+    private static final Logger LOG = LoggerFactory.getLogger(Shard.class);
 
     // FIXME: shard names should be encapsulated in their own class and this should be exposed as a constant.
     public static final String DEFAULT_NAME = "default";
@@ -211,7 +215,7 @@ public class Shard extends RaftActor {
 
         setPersistence(datastoreContext.isPersistent());
 
-        LOG.info("Shard created : {}, persistent : {}", memberId(), datastoreContext.isPersistent());
+        LOG.info("{}: Shard created, persistent : {}", memberId(), datastoreContext.isPersistent());
 
         ShardDataTreeChangeListenerPublisherActorProxy treeChangeListenerPublisher =
                 new ShardDataTreeChangeListenerPublisherActorProxy(getContext(), name + "-DTCL-publisher", name);
@@ -266,7 +270,7 @@ public class Shard extends RaftActor {
 
     @Override
     public final void postStop() throws Exception {
-        LOG.info("Stopping Shard {}", memberId());
+        LOG.info("{}: Stopping Shard", memberId());
 
         super.postStop();
 
@@ -378,10 +382,13 @@ public class Shard extends RaftActor {
                 final long executionTimeNanos = ticker().read() - now;
                 if (success instanceof SliceableMessage) {
                     dispatchers.getDispatcher(DispatcherType.Serialization).execute(() ->
-                        responseMessageSlicer.slice(SliceOptions.builder().identifier(success.getTarget())
+                        responseMessageSlicer.slice(SliceOptions.builder()
+                            .identifier(success.getTarget())
                             .message(envelope.newSuccessEnvelope(success, executionTimeNanos))
                             .sendTo(envelope.getMessage().getReplyTo()).replyTo(self())
-                            .onFailureCallback(t -> LOG.warn("Error slicing response {}", success, t)).build()));
+                            .onFailureCallback(
+                                t -> LOG.warn("{}: Error slicing response {}", memberId(), success, t))
+                            .build()));
                 } else {
                     envelope.sendSuccess(success, executionTimeNanos);
                 }

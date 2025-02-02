@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.cluster.common.actor;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import static java.util.Objects.requireNonNull;
+
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.persistence.AbstractPersistentActor;
 import org.eclipse.jdt.annotation.NonNull;
@@ -15,14 +16,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class AbstractUntypedPersistentActor extends AbstractPersistentActor implements ExecuteInSelfActor {
-    // The member name should be lower case but it's referenced in many subclasses. Suppressing the CS warning for now.
-    @SuppressWarnings("checkstyle:MemberName")
-    @SuppressFBWarnings("SLF4J_LOGGER_SHOULD_BE_PRIVATE")
-    protected final Logger LOG = LoggerFactory.getLogger(getClass());
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractUntypedPersistentActor.class);
 
-    protected AbstractUntypedPersistentActor() {
-        LOG.trace("Actor created {}", self());
+    private final @NonNull String persistenceId;
+
+    protected AbstractUntypedPersistentActor(final String persistenceId) {
+        this.persistenceId = requireNonNull(persistenceId);
+        LOG.trace("{}: Actor created {}", persistenceId, self());
         getContext().system().actorSelection("user/termination-monitor").tell(new Monitor(self()), self());
+    }
+
+    @Override
+    @Deprecated(since = "11.0.0", forRemoval = true)
+    public final String persistenceId() {
+        return persistenceId;
     }
 
     @Override
@@ -33,16 +40,16 @@ public abstract class AbstractUntypedPersistentActor extends AbstractPersistentA
     @Override
     public final void executeInSelf(@NonNull final Runnable runnable) {
         final ExecuteInSelfMessage message = new ExecuteInSelfMessage(runnable);
-        LOG.trace("Scheduling execution of {}", message);
+        LOG.trace("{}: Scheduling execution of {}", persistenceId, message);
         self().tell(message, ActorRef.noSender());
     }
 
     @Override
     public final Receive createReceive() {
         return receiveBuilder()
-                .match(ExecuteInSelfMessage.class, ExecuteInSelfMessage::run)
-                .matchAny(this::handleCommand)
-                .build();
+            .match(ExecuteInSelfMessage.class, ExecuteInSelfMessage::run)
+            .matchAny(this::handleCommand)
+            .build();
     }
 
     @Override
@@ -55,11 +62,11 @@ public abstract class AbstractUntypedPersistentActor extends AbstractPersistentA
     protected abstract void handleCommand(Object message) throws Exception;
 
     protected void ignoreMessage(final Object message) {
-        LOG.debug("Unhandled message {} ", message);
+        LOG.debug("{}: Unhandled message {}", persistenceId, message);
     }
 
     protected void unknownMessage(final Object message) {
-        LOG.debug("Received unhandled message {}", message);
+        LOG.debug("{}: Received unhandled message {}", persistenceId, message);
         unhandled(message);
     }
 }

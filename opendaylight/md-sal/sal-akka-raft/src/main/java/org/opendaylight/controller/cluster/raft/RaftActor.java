@@ -58,6 +58,8 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.concepts.Immutable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * RaftActor encapsulates a state machine that needs to be kept synchronized in a cluster. It implements the RAFT
@@ -92,6 +94,7 @@ import org.opendaylight.yangtools.concepts.Immutable;
  * </ul>
  */
 public abstract class RaftActor extends AbstractUntypedPersistentActor {
+    private static final Logger LOG = LoggerFactory.getLogger(RaftActor.class);
     private static final long APPLY_STATE_DELAY_THRESHOLD_IN_NANOS = TimeUnit.MILLISECONDS.toNanos(50);
 
     // This context should NOT be passed directly to any other actor it is  only to be consumed
@@ -112,6 +115,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     protected RaftActor(final @NonNull String memberId, final Map<String, String> peerAddresses,
             final Optional<ConfigParams> configParams, final short payloadVersion) {
+        super(memberId);
         localAccess = new LocalAccess(memberId, persistentProvider);
 
         context = new RaftActorContextImpl(self(), getContext(), localAccess, -1, -1, peerAddresses,
@@ -126,13 +130,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
      * @return The member name
      */
     public final @NonNull String memberId() {
-        return localAccess.memberId();
-    }
-
-    @Override
-    @Deprecated(since = "11.0.0", forRemoval = true)
-    public final @NonNull String persistenceId() {
-        return memberId();
+        return persistenceId();
     }
 
     @Override
@@ -143,7 +141,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     @Override
     public void preStart() throws Exception {
-        LOG.info("Starting recovery for {} with journal batch size {}", memberId(),
+        LOG.info("{}: Starting recovery with journal batch size {}", memberId(),
             context.getConfigParams().getJournalRecoveryLogBatchSize());
 
         super.preStart();
@@ -906,8 +904,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         if (!snapshotManager.isCapturing()) {
             final long idx = getCurrentBehavior().getReplicatedToAllIndex();
             final var last = replicatedLog().lastMeta();
-            LOG.debug("Take a snapshot of current state. lastReplicatedLog is {} and replicatedToAllIndex is {}",
-                last, idx);
+            LOG.debug("{}: Take a snapshot of current state. lastReplicatedLog is {} and replicatedToAllIndex is {}",
+                memberId(), last, idx);
 
             snapshotManager.captureWithForcedTrim(last, idx);
         }

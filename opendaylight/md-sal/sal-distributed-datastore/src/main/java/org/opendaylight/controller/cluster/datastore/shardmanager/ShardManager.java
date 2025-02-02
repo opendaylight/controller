@@ -160,9 +160,10 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     private final Set<Consumer<String>> shardAvailabilityCallbacks = new HashSet<>();
 
-    private final String persistenceId;
+    private ShardManager(final  String possiblePersistenceId, final AbstractShardManagerCreator<?> builder) {
+        super(possiblePersistenceId != null ? possiblePersistenceId
+            : "shard-manager-" + builder.getDatastoreContextFactory().getBaseDatastoreContext().getDataStoreName());
 
-    ShardManager(final AbstractShardManagerCreator<?> builder) {
         cluster = builder.getCluster();
         configuration = builder.getConfiguration();
         datastoreContextFactory = builder.getDatastoreContextFactory();
@@ -172,9 +173,6 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         readinessFuture = builder.getReadinessFuture();
         primaryShardInfoCache = builder.getPrimaryShardInfoCache();
         restoreFromSnapshot = builder.getRestoreFromSnapshot();
-
-        String possiblePersistenceId = datastoreContextFactory.getBaseDatastoreContext().getShardManagerPersistenceId();
-        persistenceId = possiblePersistenceId != null ? possiblePersistenceId : "shard-manager-" + type;
 
         peerAddressResolver = new ShardPeerAddressResolver(type, cluster.getCurrentMemberName());
 
@@ -187,6 +185,11 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         shardManagerMBean.registerMBean();
     }
 
+    ShardManager(final AbstractShardManagerCreator<?> builder) {
+        this(builder.getDatastoreContextFactory().getBaseDatastoreContext().getShardManagerPersistenceId(),
+            builder);
+    }
+
     @Override
     @Deprecated(since = "11.0.0", forRemoval = true)
     public final ActorRef getSender() {
@@ -195,13 +198,12 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     @Override
     public void preStart() {
-        LOG.info("Starting ShardManager {}", persistenceId);
+        LOG.info("Starting ShardManager {}", persistenceId());
     }
 
     @Override
     public void postStop() {
         LOG.info("Stopping ShardManager {}", persistenceId());
-
         shardManagerMBean.unregisterMBean();
     }
 
@@ -721,7 +723,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         try {
             shardId = ShardIdentifier.fromShardIdString(actorName);
         } catch (IllegalArgumentException e) {
-            LOG.debug("{}: ignoring actor {}", persistenceId, actorName, e);
+            LOG.debug("{}: ignoring actor {}", persistenceId(), actorName, e);
             return;
         }
 
@@ -1161,11 +1163,6 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 });
     }
 
-    @Override
-    public String persistenceId() {
-        return persistenceId;
-    }
-
     @VisibleForTesting
     ShardManagerInfoMBean getMBean() {
         return shardManagerMBean;
@@ -1502,18 +1499,18 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             @Override
             public void onComplete(final Throwable failure, final Object response) {
                 if (failure != null) {
-                    LOG.debug("{}: Received failure from FindLocalShard for shard {}", persistenceId, shardName,
+                    LOG.debug("{}: Received failure from FindLocalShard for shard {}", persistenceId(), shardName,
                         failure);
                     sender.tell(new Status.Failure(new RuntimeException(
                         String.format("Failed to find local shard %s", shardName), failure)), self());
                 } if (response instanceof LocalShardFound msg) {
                     self().tell((RunnableMessage) () -> onLocalShardFound.accept(msg), sender);
                 } else if (response instanceof LocalShardNotFound) {
-                    LOG.debug("{}: Local shard {} does not exist", persistenceId, shardName);
+                    LOG.debug("{}: Local shard {} does not exist", persistenceId(), shardName);
                     sender.tell(new Status.Failure(new IllegalArgumentException(
                         String.format("Local shard %s does not exist", shardName))), self());
                 } else {
-                    LOG.debug("{}: Failed to find local shard {}: received response: {}", persistenceId, shardName,
+                    LOG.debug("{}: Failed to find local shard {}: received response: {}", persistenceId(), shardName,
                         response);
                     sender.tell(new Status.Failure(response instanceof Throwable throwable ? throwable
                         : new RuntimeException(String.format("Failed to find local shard %s: received response: %s",

@@ -15,8 +15,8 @@ import java.util.Set;
 import org.apache.pekko.actor.ActorRef;
 import org.opendaylight.controller.remote.rpc.registry.ActionRegistry;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry;
-import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.AddOrUpdateRoutes;
-import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.RemoveRoutes;
+import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.AddOrUpdateRoutes;
+import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.RemoveRoutes;
 import org.opendaylight.mdsal.dom.api.DOMActionAvailabilityExtension;
 import org.opendaylight.mdsal.dom.api.DOMActionImplementation;
 import org.opendaylight.mdsal.dom.api.DOMActionInstance;
@@ -73,6 +73,6 @@ final class OpsListener implements DOMRpcAvailabilityListener, DOMActionAvailabi
     public void onActionsChanged(final Set<DOMActionInstance> removed, final Set<DOMActionInstance> added) {
         LOG.debug("adding registration for [{}]", added);
         LOG.debug("removing registration for [{}]", removed);
-        actionRegistry.tell(new ActionRegistry.Messages.UpdateActions(added, removed), ActorRef.noSender());
+        actionRegistry.tell(new ActionRegistry.UpdateActions(added, removed), ActorRef.noSender());
     }
 }
