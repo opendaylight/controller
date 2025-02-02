@@ -7,39 +7,44 @@
  */
 package org.opendaylight.controller.cluster.datastore.utils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.mock;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
+import com.google.common.util.concurrent.Futures;
 import org.apache.pekko.actor.ActorSelection;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
-import scala.concurrent.Future;
 
 /**
  * Unit tests for PrimaryShardInfoFutureCache.
  *
  * @author Thomas Pantelis
  */
-public class PrimaryShardInfoFutureCacheTest {
+@ExtendWith(MockitoExtension.class)
+class PrimaryShardInfoFutureCacheTest {
+    @Mock
+    private ActorSelection actorSelection;
+
+    private final PrimaryShardInfoFutureCache cache = new PrimaryShardInfoFutureCache();
 
     @Test
-    public void testOperations() {
-        PrimaryShardInfoFutureCache cache = new PrimaryShardInfoFutureCache();
+    void testOperations() throws Exception {
+        assertNull(cache.getIfPresent("foo"));
 
-        assertEquals("getIfPresent", null, cache.getIfPresent("foo"));
-
-        PrimaryShardInfo shardInfo = new PrimaryShardInfo(mock(ActorSelection.class),
-                DataStoreVersions.CURRENT_VERSION);
+        final var shardInfo = new PrimaryShardInfo(actorSelection, DataStoreVersions.CURRENT_VERSION);
         cache.putSuccessful("foo", shardInfo);
 
-        Future<PrimaryShardInfo> future = cache.getIfPresent("foo");
-        assertNotNull("Null future", future);
-        assertEquals("getIfPresent", shardInfo, future.value().get().get());
+        final var future = cache.getIfPresent("foo");
+        assertNotNull(future);
+        assertEquals(shardInfo, Futures.getDone(future.toCompletableFuture()));
 
         cache.remove("foo");
 
-        assertEquals("getIfPresent", null, cache.getIfPresent("foo"));
+        assertNull(cache.getIfPresent("foo"));
     }
 }

@@ -17,6 +17,7 @@ import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtil
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.actor.Status;
@@ -39,7 +40,6 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.CursorAwareDataTreeModification;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeSnapshot;
-import scala.concurrent.Future;
 
 public abstract class AbstractDataStoreClientBehaviorTest {
 
@@ -171,7 +171,7 @@ public abstract class AbstractDataStoreClientBehaviorTest {
     private static ActorUtils createActorContextMock(final ActorSystem system, final ActorRef actor) {
         final var actorUtils = mock(ActorUtils.class);
         doReturn(ExecutionContexts.global()).when(actorUtils).getClientDispatcher();
-        doReturn(Future.successful(new PrimaryShardInfo(system.actorSelection(actor.path()), (short) 0)))
+        doReturn(CompletableFuture.completedStage(new PrimaryShardInfo(system.actorSelection(actor.path()), (short) 0)))
             .when(actorUtils).findPrimaryShardAsync(SHARD);
         return actorUtils;
     }

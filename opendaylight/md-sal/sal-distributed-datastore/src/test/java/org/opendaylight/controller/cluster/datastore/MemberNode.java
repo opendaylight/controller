@@ -36,9 +36,6 @@ import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftStat
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.slf4j.LoggerFactory;
-import scala.concurrent.Await;
-import scala.concurrent.Future;
-import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Class that represents a cluster member node for unit tests. It encapsulates an actor system with
@@ -136,8 +133,8 @@ public class MemberNode {
             final RaftStateVerifier verifier) throws Exception {
         ActorUtils actorUtils = datastore.getActorUtils();
 
-        Future<ActorRef> future = actorUtils.findLocalShardAsync(shardName);
-        ActorRef shardActor = Await.result(future, FiniteDuration.create(10, TimeUnit.SECONDS));
+        final var shardActor = actorUtils.findLocalShardAsync(shardName).toCompletableFuture()
+            .get(10, TimeUnit.SECONDS);
 
         AssertionError lastError = null;
         Stopwatch sw = Stopwatch.createStarted();

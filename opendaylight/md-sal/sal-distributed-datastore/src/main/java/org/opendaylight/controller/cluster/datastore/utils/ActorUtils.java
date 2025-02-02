@@ -9,18 +9,22 @@ package org.opendaylight.controller.cluster.datastore.utils;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.lang.invoke.VarHandle;
+import java.time.Duration;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.LongAdder;
+import java.util.function.BiConsumer;
 import org.apache.pekko.actor.ActorPath;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.ActorSystem;
-import org.apache.pekko.dispatch.Mapper;
-import org.apache.pekko.dispatch.OnComplete;
 import org.apache.pekko.pattern.AskTimeoutException;
 import org.apache.pekko.pattern.Patterns;
 import org.apache.pekko.util.Timeout;
@@ -54,7 +58,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
 import scala.concurrent.ExecutionContextExecutor;
-import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
@@ -63,11 +66,11 @@ import scala.concurrent.duration.FiniteDuration;
  * not be passed to actors especially remote actors.
  */
 public class ActorUtils {
-    private static final class AskTimeoutCounter extends OnComplete<Object> implements ExecutionContextExecutor {
+    private static final class AskTimeoutCounter implements BiConsumer<Object, Throwable>, ExecutionContextExecutor {
         private LongAdder ateExceptions = new LongAdder();
 
         @Override
-        public void onComplete(final Throwable failure, final Object success) throws Throwable {
+        public void accept(final Object success, final Throwable failure) {
             if (failure instanceof AskTimeoutException) {
                 ateExceptions.increment();
             }
@@ -96,18 +99,6 @@ public class ActorUtils {
     private static final Logger LOG = LoggerFactory.getLogger(ActorUtils.class);
     private static final String DISTRIBUTED_DATA_STORE_METRIC_REGISTRY = "distributed-data-store";
     private static final String METRIC_RATE = "rate";
-    private static final Mapper<Throwable, Throwable> FIND_PRIMARY_FAILURE_TRANSFORMER = new Mapper<>() {
-        @Override
-        public Throwable apply(final Throwable failure) {
-            if (failure instanceof AskTimeoutException) {
-                // A timeout exception most likely means the shard isn't initialized.
-                return new NotInitializedException(
-                        "Timed out trying to find the primary shard. Most likely cause is the "
-                        + "shard is not initialized yet.");
-            }
-            return failure;
-        }
-    };
     public static final String BOUNDED_MAILBOX = "bounded-mailbox";
     public static final String COMMIT = "commit";
 
@@ -120,10 +111,10 @@ public class ActorUtils {
     private final Dispatchers dispatchers;
 
     private DatastoreContext datastoreContext;
-    private FiniteDuration operationDuration;
-    private Timeout operationTimeout;
+    private long operationDurationMillis;
+    private Duration operationTimeout;
     private Timeout transactionCommitOperationTimeout;
-    private Timeout shardInitializationTimeout;
+    private Duration shardInitializationTimeout;
 
     private volatile EffectiveModelContext schemaContext;
 
@@ -162,14 +153,13 @@ public class ActorUtils {
     }
 
     private void setCachedProperties() {
-        operationDuration = FiniteDuration.create(datastoreContext.getOperationTimeoutInMillis(),
-            TimeUnit.MILLISECONDS);
-        operationTimeout = new Timeout(operationDuration);
+        operationDurationMillis = datastoreContext.getOperationTimeoutInMillis();
+        operationTimeout = Duration.ofMillis(datastoreContext.getOperationTimeoutInMillis());
 
         transactionCommitOperationTimeout = new Timeout(FiniteDuration.create(
                 datastoreContext.getShardTransactionCommitTimeoutInSeconds(), TimeUnit.SECONDS));
 
-        shardInitializationTimeout = new Timeout(datastoreContext.getShardInitializationTimeout().duration().$times(2));
+        shardInitializationTimeout = datastoreContext.getShardInitializationTimeout().multipliedBy(2);
     }
 
     public DatastoreContext getDatastoreContext() {
@@ -220,35 +210,51 @@ public class ActorUtils {
         return schemaContext;
     }
 
-    public Future<PrimaryShardInfo> findPrimaryShardAsync(final String shardName) {
-        final var ret = primaryShardInfoCache.getIfPresent(shardName);
-        if (ret != null) {
-            return ret;
+    public CompletionStage<PrimaryShardInfo> findPrimaryShardAsync(final String shardName) {
+        final var cached = primaryShardInfoCache.getIfPresent(shardName);
+        if (cached != null) {
+            return cached;
         }
 
-        return executeOperationAsync(shardManager, new FindPrimary(shardName, true), shardInitializationTimeout)
-            .transform(new Mapper<>() {
-                @Override
-                public PrimaryShardInfo checkedApply(final Object response) throws UnknownMessageException {
-                    if (response instanceof RemotePrimaryShardFound found) {
-                        LOG.debug("findPrimaryShardAsync received: {}", found);
-                        return onPrimaryShardFound(shardName, found.getPrimaryPath(), found.getPrimaryVersion(), null);
-                    } else if (response instanceof LocalPrimaryShardFound found) {
-                        LOG.debug("findPrimaryShardAsync received: {}", found);
-                        return onPrimaryShardFound(shardName, found.getPrimaryPath(), DataStoreVersions.CURRENT_VERSION,
-                            found.getLocalShardDataTree());
-                    } else if (response instanceof NotInitializedException notInitialized) {
-                        throw notInitialized;
-                    } else if (response instanceof PrimaryNotFoundException primaryNotFound) {
-                        throw primaryNotFound;
-                    } else if (response instanceof NoShardLeaderException noShardLeader) {
-                        throw noShardLeader;
-                    }
+        final var future = new CompletableFuture<PrimaryShardInfo>();
 
-                    throw new UnknownMessageException(String.format(
-                        "FindPrimary returned unkown response: %s", response));
+        executeOperationAsync(shardManager, new FindPrimary(shardName, true), shardInitializationTimeout)
+            .whenCompleteAsync((response, failure) -> {
+                if (failure != null) {
+                    // A timeout exception most likely means the shard isn't initialized.
+                    future.completeExceptionally(failure instanceof AskTimeoutException
+                        ? new NotInitializedException(
+                            "Timed out trying to find the primary shard. Most likely cause is the "
+                                + "shard is not initialized yet.")
+                        : failure);
+                    return;
                 }
-            }, FIND_PRIMARY_FAILURE_TRANSFORMER, getClientDispatcher());
+
+                final Throwable cause;
+                switch (response) {
+                    case LocalPrimaryShardFound found -> {
+                        LOG.debug("findPrimaryShardAsync received: {}", found);
+                        future.complete(
+                            onPrimaryShardFound(shardName, found.getPrimaryPath(), DataStoreVersions.CURRENT_VERSION,
+                                found.getLocalShardDataTree()));
+                        return;
+                    }
+                    case RemotePrimaryShardFound found -> {
+                        LOG.debug("findPrimaryShardAsync received: {}", found);
+                        future.complete(
+                            onPrimaryShardFound(shardName, found.getPrimaryPath(), found.getPrimaryVersion(), null));
+                        return;
+                    }
+                    case NotInitializedException notInitialized -> cause = notInitialized;
+                    case PrimaryNotFoundException primaryNotFound -> cause = primaryNotFound;
+                    case NoShardLeaderException noShardLeader -> cause = noShardLeader;
+                    default -> cause = new UnknownMessageException("FindPrimary returned unkown response: " + response);
+                }
+
+                future.completeExceptionally(cause);
+            }, getClientDispatcher());
+
+        return future.minimalCompletionStage();
     }
 
     private PrimaryShardInfo onPrimaryShardFound(final String shardName, final String primaryActorPath,
@@ -283,24 +289,32 @@ public class ActorUtils {
      *
      * @param shardName the name of the local shard that needs to be found
      */
-    public Future<ActorRef> findLocalShardAsync(final String shardName) {
-        return executeOperationAsync(shardManager, new FindLocalShard(shardName, true), shardInitializationTimeout)
-            .map(new Mapper<>() {
-                @Override
-                public ActorRef checkedApply(final Object response) throws Throwable {
-                    if (response instanceof LocalShardFound found) {
-                        LOG.debug("Local shard found {}", found.getPath());
-                        return found.getPath();
-                    } else if (response instanceof NotInitializedException) {
-                        throw (NotInitializedException)response;
-                    } else if (response instanceof LocalShardNotFound) {
-                        throw new LocalShardNotFoundException(
-                            String.format("Local shard for %s does not exist.", shardName));
-                    }
+    public CompletionStage<ActorRef> findLocalShardAsync(final String shardName) {
+        final var future = new CompletableFuture<ActorRef>();
 
-                    throw new UnknownMessageException("FindLocalShard returned unkown response: " + response);
+        executeOperationAsync(shardManager, new FindLocalShard(shardName, true), shardInitializationTimeout)
+            .whenCompleteAsync((response, failure) -> {
+                final Throwable fail;
+                if (failure == null) {
+                    switch (response) {
+                        case LocalShardFound found -> {
+                            LOG.debug("Local shard found {}", found.getPath());
+                            future.complete(found.getPath());
+                            return;
+                        }
+                        case NotInitializedException notInit -> fail = notInit;
+                        case LocalShardNotFound notFound -> fail = new LocalShardNotFoundException(
+                            "Local shard for %s does not exist.".formatted(shardName));
+                        default -> fail = new UnknownMessageException(
+                            "FindLocalShard returned unkown response: " + response);
+                    }
+                } else {
+                    fail = failure;
                 }
+                future.completeExceptionally(fail);
             }, getClientDispatcher());
+
+        return future.minimalCompletionStage();
     }
 
     /**
@@ -310,15 +324,13 @@ public class ActorUtils {
      * @param message the message to send
      * @return The response of the operation
      */
-    @SuppressWarnings("checkstyle:IllegalCatch")
     public Object executeOperation(final ActorRef actor, final Object message) {
-        Future<Object> future = executeOperationAsync(actor, message, operationTimeout);
-
+        final var future = executeOperationAsync(actor, message, operationTimeout);
         try {
-            return Await.result(future, operationDuration);
-        } catch (Exception e) {
-            throw new TimeoutException("Sending message " + message.getClass().toString()
-                    + " to actor " + actor.toString() + " failed. Try again later.", e);
+            return future.toCompletableFuture().get(operationDurationMillis, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException | ExecutionException | java.util.concurrent.TimeoutException e) {
+            throw new TimeoutException(
+                "Sending message " + message.getClass() + " to actor " + actor + " failed. Try again later.", e);
         }
     }
 
@@ -329,19 +341,18 @@ public class ActorUtils {
      * @param message the message
      * @return the response message
      */
-    @SuppressWarnings("checkstyle:IllegalCatch")
     public Object executeOperation(final ActorSelection actor, final Object message) {
-        Future<Object> future = executeOperationAsync(actor, message);
-
+        final var future = executeOperationAsync(actor, message);
         try {
-            return Await.result(future, operationDuration);
-        } catch (Exception e) {
-            throw new TimeoutException("Sending message " + message.getClass().toString()
-                    + " to actor " + actor.toString() + " failed. Try again later.", e);
+            return future.toCompletableFuture().get(operationDurationMillis, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException | ExecutionException | java.util.concurrent.TimeoutException e) {
+            throw new TimeoutException(
+                "Sending message " + message.getClass() + " to actor " + actor + " failed. Try again later.", e);
         }
     }
 
-    public Future<Object> executeOperationAsync(final ActorRef actor, final Object message, final Timeout timeout) {
+    public CompletionStage<Object> executeOperationAsync(final ActorRef actor, final Object message,
+            final Duration timeout) {
         Preconditions.checkArgument(actor != null, "actor must not be null");
         Preconditions.checkArgument(message != null, "message must not be null");
 
@@ -355,10 +366,10 @@ public class ActorUtils {
      * @param actor the ActorSelection
      * @param message the message to send
      * @param timeout the operation timeout
-     * @return a Future containing the eventual result
+     * @return a {@link CompletionStage} containing the eventual result
      */
-    public Future<Object> executeOperationAsync(final ActorSelection actor, final Object message,
-            final Timeout timeout) {
+    public CompletionStage<Object> executeOperationAsync(final ActorSelection actor, final Object message,
+            final Duration timeout) {
         Preconditions.checkArgument(actor != null, "actor must not be null");
         Preconditions.checkArgument(message != null, "message must not be null");
 
@@ -372,9 +383,9 @@ public class ActorUtils {
      *
      * @param actor the ActorSelection
      * @param message the message to send
-     * @return a Future containing the eventual result
+     * @return a {@link CompletionStage} containing the eventual result
      */
-    public Future<Object> executeOperationAsync(final ActorSelection actor, final Object message) {
+    public CompletionStage<Object> executeOperationAsync(final ActorSelection actor, final Object message) {
         return executeOperationAsync(actor, message, operationTimeout);
     }
 
@@ -412,11 +423,12 @@ public class ActorUtils {
         return clusterWrapper.getCurrentMemberName();
     }
 
-    public FiniteDuration getOperationDuration() {
-        return operationDuration;
+    @VisibleForTesting
+    public long getOperationDurationMillis() {
+        return operationDurationMillis;
     }
 
-    public Timeout getOperationTimeout() {
+    public Duration getOperationTimeout() {
         return operationTimeout;
     }
 
@@ -512,13 +524,14 @@ public class ActorUtils {
         return shardStrategyFactory;
     }
 
-    protected Future<Object> doAsk(final ActorRef actorRef, final Object message, final Timeout timeout) {
+    protected CompletionStage<Object> doAsk(final ActorRef actorRef, final Object message, final Duration timeout) {
         return Patterns.ask(actorRef, message, timeout);
     }
 
-    protected Future<Object> doAsk(final ActorSelection actorRef, final Object message, final Timeout timeout) {
+    protected CompletionStage<Object> doAsk(final ActorSelection actorRef, final Object message,
+            final Duration timeout) {
         final var ret = Patterns.ask(actorRef, message, timeout);
-        ret.onComplete(askTimeoutCounter, askTimeoutCounter);
+        ret.whenCompleteAsync(askTimeoutCounter, askTimeoutCounter);
         return ret;
     }
 
