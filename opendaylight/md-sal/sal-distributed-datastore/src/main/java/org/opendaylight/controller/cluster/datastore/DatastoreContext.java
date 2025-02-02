@@ -11,6 +11,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
+import java.time.Duration;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -48,7 +49,7 @@ public class DatastoreContext implements ClientActorConfig {
     public static final int DEFAULT_ISOLATED_LEADER_CHECK_INTERVAL_IN_MILLIS =
             DEFAULT_HEARTBEAT_INTERVAL_IN_MILLIS * 10;
     public static final int DEFAULT_SHARD_TX_COMMIT_QUEUE_CAPACITY = 50000;
-    public static final Timeout DEFAULT_SHARD_INITIALIZATION_TIMEOUT = new Timeout(5, TimeUnit.MINUTES);
+    public static final Duration DEFAULT_SHARD_INITIALIZATION_TIMEOUT = Duration.ofMinutes(5);
     public static final Timeout DEFAULT_SHARD_LEADER_ELECTION_TIMEOUT = new Timeout(30, TimeUnit.SECONDS);
     public static final int DEFAULT_INITIAL_SETTLE_TIMEOUT_MULTIPLIER = 3;
     public static final boolean DEFAULT_PERSISTENT = true;
@@ -78,7 +79,7 @@ public class DatastoreContext implements ClientActorConfig {
     private String dataStoreMXBeanType;
     private int shardTransactionCommitTimeoutInSeconds = DEFAULT_SHARD_TX_COMMIT_TIMEOUT_IN_SECONDS;
     private int shardTransactionCommitQueueCapacity = DEFAULT_SHARD_TX_COMMIT_QUEUE_CAPACITY;
-    private Timeout shardInitializationTimeout = DEFAULT_SHARD_INITIALIZATION_TIMEOUT;
+    private Duration shardInitializationTimeout = DEFAULT_SHARD_INITIALIZATION_TIMEOUT;
     private Timeout shardLeaderElectionTimeout = DEFAULT_SHARD_LEADER_ELECTION_TIMEOUT;
     private int initialSettleTimeoutMultiplier = DEFAULT_INITIAL_SETTLE_TIMEOUT_MULTIPLIER;
     private boolean persistent = DEFAULT_PERSISTENT;
@@ -196,7 +197,7 @@ public class DatastoreContext implements ClientActorConfig {
         return shardTransactionCommitQueueCapacity;
     }
 
-    public Timeout getShardInitializationTimeout() {
+    public Duration getShardInitializationTimeout() {
         return shardInitializationTimeout;
     }
 
@@ -462,7 +463,7 @@ public class DatastoreContext implements ClientActorConfig {
         }
 
         public Builder shardInitializationTimeout(final long timeout, final TimeUnit unit) {
-            datastoreContext.shardInitializationTimeout = new Timeout(timeout, unit);
+            datastoreContext.shardInitializationTimeout = Duration.of(timeout, unit.toChronoUnit());
             return this;
         }
 

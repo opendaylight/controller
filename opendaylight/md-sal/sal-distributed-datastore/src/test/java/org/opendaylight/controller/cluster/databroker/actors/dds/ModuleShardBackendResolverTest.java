@@ -18,6 +18,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -49,7 +51,6 @@ import org.opendaylight.controller.cluster.datastore.utils.PrimaryShardInfoFutur
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
-import scala.concurrent.Future;
 
 @ExtendWith(MockitoExtension.class)
 class ModuleShardBackendResolverTest {
@@ -75,14 +76,15 @@ class ModuleShardBackendResolverTest {
     private ModuleShardBackendResolver moduleShardBackendResolver;
     private TestProbe contextProbe;
     private TestProbe shardManagerProbe;
-    private Future<PrimaryShardInfo> future;
+    private CompletionStage<PrimaryShardInfo> future;
 
     @BeforeEach
     void beforeEach() {
         system = ActorSystem.apply();
         contextProbe = new TestProbe(system, "context");
         shardManagerProbe = new TestProbe(system, "ShardManager");
-        future = Future.successful(new PrimaryShardInfo(system.actorSelection(contextProbe.ref().path()), (short) 0));
+        future = CompletableFuture.completedStage(
+            new PrimaryShardInfo(system.actorSelection(contextProbe.ref().path()), (short) 0));
         doReturn(shardManagerProbe.ref()).when(actorUtils).getShardManager();
         moduleShardBackendResolver = new ModuleShardBackendResolver(CLIENT_ID, actorUtils);
     }
