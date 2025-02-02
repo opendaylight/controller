@@ -91,7 +91,7 @@ final class DatastoreConfigurationMXBeanImpl extends AbstractMXBean implements D
 
     @Override
     public long getShardInitializationTimeoutInSeconds() {
-        return context.getShardInitializationTimeout().duration().toSeconds();
+        return context.getShardInitializationTimeout().toSeconds();
     }
 
     @Override
