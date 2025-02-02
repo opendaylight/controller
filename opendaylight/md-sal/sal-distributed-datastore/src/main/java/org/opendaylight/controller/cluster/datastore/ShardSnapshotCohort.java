@@ -29,6 +29,7 @@ import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Participates in raft snapshotting on behalf of a Shard actor.
@@ -36,25 +37,24 @@ import org.slf4j.Logger;
  * @author Thomas Pantelis
  */
 final class ShardSnapshotCohort implements RaftActorSnapshotCohort {
+    private static final Logger LOG = LoggerFactory.getLogger(ShardSnapshotCohort.class);
     private static final FrontendType SNAPSHOT_APPLY = FrontendType.forName("snapshot-apply");
 
     private final InputOutputStreamFactory streamFactory;
     private final ActorRef snapshotActor;
     private final ShardDataTree store;
-    private final String logId;
-    private final Logger log;
+    private final String memberName;
 
     ShardSnapshotCohort(final InputOutputStreamFactory streamFactory, final LocalHistoryIdentifier applyHistoryId,
-            final ActorRef snapshotActor, final ShardDataTree store, final Logger log, final String logId) {
+            final ActorRef snapshotActor, final ShardDataTree store, final String memberName) {
         this.streamFactory = requireNonNull(streamFactory);
         this.snapshotActor = requireNonNull(snapshotActor);
         this.store = requireNonNull(store);
-        this.log = log;
-        this.logId = logId;
+        this.memberName = requireNonNull(memberName);
     }
 
     static ShardSnapshotCohort create(final ActorContext actorContext, final MemberName memberName,
-            final ShardDataTree store, final Logger log, final String logId, final DatastoreContext context) {
+            final ShardDataTree store, final String logId, final DatastoreContext context) {
         final var applyHistoryId = new LocalHistoryIdentifier(ClientIdentifier.create(
             FrontendIdentifier.create(memberName, SNAPSHOT_APPLY), 0), 0);
         final var streamFactory = context.isUseLz4Compression()
@@ -62,14 +62,14 @@ final class ShardSnapshotCohort implements RaftActorSnapshotCohort {
         // Create a snapshot actor. This actor will act as a worker to offload snapshot serialization for all requests.
         final var snapshotActor = actorContext.actorOf(ShardSnapshotActor.props(streamFactory),
             "shard-" + memberName.getName() + ':' + "snapshot-read");
-        return new ShardSnapshotCohort(streamFactory, applyHistoryId, snapshotActor, store, log, logId);
+        return new ShardSnapshotCohort(streamFactory, applyHistoryId, snapshotActor, store, logId);
     }
 
     @Override
     public void createSnapshot(final ActorRef actorRef, final Optional<OutputStream> installSnapshotStream) {
         // Forward the request to the snapshot actor
         final var snapshot = store.takeStateSnapshot();
-        log.debug("{}: requesting serialization of snapshot {}", logId, snapshot);
+        LOG.debug("{}: requesting serialization of snapshot {}", memberName, snapshot);
         ShardSnapshotActor.requestSnapshot(snapshotActor, snapshot, installSnapshotStream, actorRef);
     }
 
@@ -77,7 +77,7 @@ final class ShardSnapshotCohort implements RaftActorSnapshotCohort {
     @SuppressWarnings("checkstyle:IllegalCatch")
     public void applySnapshot(final Snapshot.State snapshotState) {
         if (!(snapshotState instanceof ShardSnapshotState shardSnapshotState)) {
-            log.debug("{}: applySnapshot ignoring snapshot: {}", logId, snapshotState);
+            LOG.debug("{}: applySnapshot ignoring snapshot: {}", memberName, snapshotState);
             return;
         }
 
@@ -87,14 +87,14 @@ final class ShardSnapshotCohort implements RaftActorSnapshotCohort {
         // we can safely commit everything in here. We not need to worry about event notifications
         // as they would have already been disabled on the follower
 
-        log.info("{}: Applying snapshot", logId);
+        LOG.info("{}: Applying snapshot", memberName);
         try {
             store.applySnapshot(snapshot);
         } catch (Exception e) {
-            log.error("{}: Failed to apply snapshot {}", logId, snapshot, e);
+            LOG.error("{}: Failed to apply snapshot {}", memberName, snapshot, e);
             return;
         }
-        log.info("{}: Done applying snapshot", logId);
+        LOG.info("{}: Done applying snapshot", memberName);
     }
 
     @Override
