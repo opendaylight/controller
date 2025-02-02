@@ -14,8 +14,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-import com.google.common.collect.ImmutableMap;
-import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.pekko.actor.ActorRef;
@@ -30,10 +29,10 @@ import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.opendaylight.controller.remote.rpc.registry.ActionRegistry.Messages.UpdateRemoteActionEndpoints;
 import org.opendaylight.controller.remote.rpc.registry.ActionRegistry.RemoteActionEndpoint;
-import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.UpdateRemoteEndpoints;
+import org.opendaylight.controller.remote.rpc.registry.ActionRegistry.UpdateRemoteActionEndpoints;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.RemoteRpcEndpoint;
+import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.UpdateRemoteEndpoints;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMActionInstance;
 import org.opendaylight.mdsal.dom.api.DOMActionProviderService;
@@ -90,12 +89,10 @@ public class OpsRegistrarTest {
                 LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.of(firstActionQName));
 
         final TestKit senderKit = new TestKit(system);
-        firstEndpoint = new RemoteRpcEndpoint(senderKit.getRef(), Collections.singletonList(firstEndpointId));
-        secondEndpoint = new RemoteRpcEndpoint(senderKit.getRef(), Collections.singletonList(secondEndpointId));
-        firstActionEndpoint = new RemoteActionEndpoint(senderKit.getRef(),
-                Collections.singletonList(firstActionInstance));
-        secondActionEndpoint = new RemoteActionEndpoint(senderKit.getRef(),
-                Collections.singletonList(secondActionInstance));
+        firstEndpoint = new RemoteRpcEndpoint(senderKit.getRef(), List.of(firstEndpointId));
+        secondEndpoint = new RemoteRpcEndpoint(senderKit.getRef(), List.of(secondEndpointId));
+        firstActionEndpoint = new RemoteActionEndpoint(senderKit.getRef(), List.of(firstActionInstance));
+        secondActionEndpoint = new RemoteActionEndpoint(senderKit.getRef(), List.of(secondActionInstance));
 
         doReturn(oldReg).when(rpcService).registerRpcImplementation(any(RemoteRpcImplementation.class),
             eq(firstEndpoint.getRpcs()));
@@ -117,9 +114,8 @@ public class OpsRegistrarTest {
 
     @Test
     public void testHandleReceiveAddEndpoint() {
-        final Map<Address, Optional<RemoteRpcEndpoint>> endpoints = ImmutableMap.of(
-                endpointAddress, Optional.of(firstEndpoint));
-        testActorRef.tell(new UpdateRemoteEndpoints(endpoints), ActorRef.noSender());
+        testActorRef.tell(new UpdateRemoteEndpoints(Map.of(endpointAddress, Optional.of(firstEndpoint))),
+            ActorRef.noSender());
 
         verify(rpcService).registerRpcImplementation(any(RemoteRpcImplementation.class),
             eq(firstEndpoint.getRpcs()));
@@ -128,9 +124,7 @@ public class OpsRegistrarTest {
 
     @Test
     public void testHandleReceiveRemoveEndpoint() {
-        final Map<Address, Optional<RemoteRpcEndpoint>> endpoints = ImmutableMap.of(
-                endpointAddress, Optional.empty());
-        testActorRef.tell(new UpdateRemoteEndpoints(endpoints), ActorRef.noSender());
+        testActorRef.tell(new UpdateRemoteEndpoints(Map.of(endpointAddress, Optional.empty())), ActorRef.noSender());
         verifyNoMoreInteractions(rpcService, oldReg, newReg);
     }
 
@@ -138,13 +132,13 @@ public class OpsRegistrarTest {
     public void testHandleReceiveUpdateRpcEndpoint() {
         final InOrder inOrder = inOrder(rpcService, oldReg, newReg);
 
-        testActorRef.tell(new UpdateRemoteEndpoints(ImmutableMap.of(endpointAddress, Optional.of(firstEndpoint))),
+        testActorRef.tell(new UpdateRemoteEndpoints(Map.of(endpointAddress, Optional.of(firstEndpoint))),
                 ActorRef.noSender());
 
         inOrder.verify(rpcService).registerRpcImplementation(any(RemoteRpcImplementation.class),
                 eq(firstEndpoint.getRpcs()));
 
-        testActorRef.tell(new UpdateRemoteEndpoints(ImmutableMap.of(endpointAddress, Optional.of(secondEndpoint))),
+        testActorRef.tell(new UpdateRemoteEndpoints(Map.of(endpointAddress, Optional.of(secondEndpoint))),
                 ActorRef.noSender());
 
         inOrder.verify(rpcService).registerRpcImplementation(any(RemoteRpcImplementation.class),
@@ -160,13 +154,13 @@ public class OpsRegistrarTest {
     public void testHandleReceiveUpdateActionEndpoint() {
         final InOrder inOrder = inOrder(actionService, oldActionReg, newActionReg);
 
-        testActorRef.tell(new UpdateRemoteActionEndpoints(ImmutableMap.of(endpointAddress,
+        testActorRef.tell(new UpdateRemoteActionEndpoints(Map.of(endpointAddress,
                 Optional.of(firstActionEndpoint))), ActorRef.noSender());
 
         inOrder.verify(actionService).registerActionImplementation(any(RemoteActionImplementation.class),
                 eq(firstActionEndpoint.getActions()));
 
-        testActorRef.tell(new UpdateRemoteActionEndpoints(ImmutableMap.of(endpointAddress,
+        testActorRef.tell(new UpdateRemoteActionEndpoints(Map.of(endpointAddress,
                 Optional.of(secondActionEndpoint))), ActorRef.noSender());
 
         inOrder.verify(actionService).registerActionImplementation(any(RemoteActionImplementation.class),

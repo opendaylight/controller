@@ -62,8 +62,8 @@ import scala.concurrent.duration.FiniteDuration;
  * @author Thomas Pantelis
  */
 public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest {
-
     private static final class MockIdentifier extends AbstractStringIdentifier<MockIdentifier> {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
         protected MockIdentifier(final String string) {
@@ -176,7 +176,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
                     try {
                         collectorActor.tell(message, ActorRef.noSender());
                     } catch (Exception e) {
-                        LOG.error("MessageCollectorActor error", e);
+                        throw new AssertionError(e);
                     }
                 }
             }

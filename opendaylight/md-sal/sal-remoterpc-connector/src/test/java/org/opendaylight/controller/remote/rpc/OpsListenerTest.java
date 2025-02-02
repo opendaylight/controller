@@ -8,7 +8,7 @@
 package org.opendaylight.controller.remote.rpc;
 
 import com.typesafe.config.ConfigFactory;
-import java.util.Collections;
+import java.util.Set;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.testkit.javadsl.TestKit;
@@ -53,8 +53,8 @@ public class OpsListenerTest {
         final ActorRef rpcRegistry = probeReg.getRef();
 
         final OpsListener opsListener = new OpsListener(rpcRegistry, rpcRegistry);
-        opsListener.onRpcAvailable(Collections.singleton(RPC_ID));
-        probeReg.expectMsgClass(RpcRegistry.Messages.AddOrUpdateRoutes.class);
+        opsListener.onRpcAvailable(Set.of(RPC_ID));
+        probeReg.expectMsgClass(RpcRegistry.AddOrUpdateRoutes.class);
     }
 
     @Test
@@ -64,8 +64,8 @@ public class OpsListenerTest {
         final ActorRef actionRegistry = probeReg.getRef();
 
         final OpsListener opsListener = new OpsListener(actionRegistry, actionRegistry);
-        opsListener.onActionsChanged(Collections.emptySet(),Collections.singleton(ACTION_INSTANCE));
-        probeReg.expectMsgClass(ActionRegistry.Messages.UpdateActions.class);
+        opsListener.onActionsChanged(Set.of(), Set.of(ACTION_INSTANCE));
+        probeReg.expectMsgClass(ActionRegistry.UpdateActions.class);
     }
 
     @Test
@@ -75,8 +75,8 @@ public class OpsListenerTest {
         final ActorRef rpcRegistry = probeReg.getRef();
 
         final OpsListener opsListener = new OpsListener(rpcRegistry, rpcRegistry);
-        opsListener.onRpcUnavailable(Collections.singleton(RPC_ID));
-        probeReg.expectMsgClass(RpcRegistry.Messages.RemoveRoutes.class);
+        opsListener.onRpcUnavailable(Set.of(RPC_ID));
+        probeReg.expectMsgClass(RpcRegistry.RemoveRoutes.class);
     }
 
 //    @Test

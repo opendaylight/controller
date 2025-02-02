@@ -8,7 +8,6 @@
 package org.opendaylight.controller.remote.rpc.registry;
 
 import static java.util.Objects.requireNonNull;
-import static org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActor.LOG;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
@@ -28,6 +27,8 @@ import org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreAccess;
 import org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreActor;
 import org.opendaylight.controller.remote.rpc.registry.mbeans.RemoteActionRegistryMXBeanImpl;
 import org.opendaylight.mdsal.dom.api.DOMActionInstance;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Registry to look up cluster nodes that have registered for a given Action.
@@ -36,6 +37,8 @@ import org.opendaylight.mdsal.dom.api.DOMActionInstance;
  * cluster-wide information.
  */
 public class ActionRegistry extends BucketStoreActor<ActionRoutingTable> {
+    private static final Logger LOG = LoggerFactory.getLogger(ActionRegistry.class);
+
     private final ActorRef rpcRegistrar;
 
     private RemoteActionRegistryMXBeanImpl mxBean;
@@ -60,6 +63,11 @@ public class ActionRegistry extends BucketStoreActor<ActionRoutingTable> {
     }
 
     @Override
+    protected Logger log() {
+        return LOG;
+    }
+
+    @Override
     public void preStart() {
         super.preStart();
         mxBean = new RemoteActionRegistryMXBeanImpl(new BucketStoreAccess(self(), getContext().dispatcher(),
@@ -77,41 +85,36 @@ public class ActionRegistry extends BucketStoreActor<ActionRoutingTable> {
 
     @Override
     protected void handleCommand(final Object message) throws Exception {
-        if (message instanceof ActionRegistry.Messages.UpdateActions updateActions) {
+        if (message instanceof UpdateActions msg) {
             LOG.debug("handling updatesActionRoutes message");
-            updatesActionRoutes(updateActions);
+            LOG.debug("addedActions: {}", msg.getAddedActions());
+            LOG.debug("removedActions: {}", msg.getRemovedActions());
+            updateLocalBucket(getLocalData().updateActions(msg.getAddedActions(), msg.getRemovedActions()));
         } else {
             super.handleCommand(message);
         }
     }
 
-    private void updatesActionRoutes(final Messages.UpdateActions msg) {
-        LOG.debug("addedActions: {}", msg.getAddedActions());
-        LOG.debug("removedActions: {}", msg.getRemovedActions());
-        updateLocalBucket(getLocalData().updateActions(msg.getAddedActions(), msg.getRemovedActions()));
-    }
-
     @Override
     protected void onBucketRemoved(final Address address, final Bucket<ActionRoutingTable> bucket) {
-        rpcRegistrar.tell(new Messages.UpdateRemoteActionEndpoints(ImmutableMap.of(address, Optional.empty())),
+        rpcRegistrar.tell(new UpdateRemoteActionEndpoints(ImmutableMap.of(address, Optional.empty())),
             ActorRef.noSender());
     }
 
     @Override
     protected void onBucketsUpdated(final Map<Address, Bucket<ActionRoutingTable>> buckets) {
         LOG.debug("Updating buckets for action registry");
-        final Map<Address, Optional<RemoteActionEndpoint>> endpoints = new HashMap<>(buckets.size());
+        final var endpoints = HashMap.<Address, Optional<RemoteActionEndpoint>>newHashMap(buckets.size());
 
-        for (Map.Entry<Address, Bucket<ActionRoutingTable>> e : buckets.entrySet()) {
-            final ActionRoutingTable table = e.getValue().getData();
-
-            final Collection<DOMActionInstance> actions = table.getItems();
-            endpoints.put(e.getKey(), actions.isEmpty() ? Optional.empty()
+        for (var entry : buckets.entrySet()) {
+            final var table = entry.getValue().getData();
+            final var actions = table.getItems();
+            endpoints.put(entry.getKey(), actions.isEmpty() ? Optional.empty()
                 : Optional.of(new RemoteActionEndpoint(table.getInvoker(), actions)));
         }
 
         if (!endpoints.isEmpty()) {
-            rpcRegistrar.tell(new Messages.UpdateRemoteActionEndpoints(endpoints), ActorRef.noSender());
+            rpcRegistrar.tell(new UpdateRemoteActionEndpoints(endpoints), ActorRef.noSender());
         }
     }
 
@@ -134,56 +137,47 @@ public class ActionRegistry extends BucketStoreActor<ActionRoutingTable> {
         }
     }
 
-        /**
-         * All messages used by the ActionRegistry.
-         */
-    public static class Messages {
-        abstract static class AbstractActionRouteMessage {
-            final Collection<DOMActionInstance> addedActions;
-            final Collection<DOMActionInstance> removedActions;
+    abstract static class AbstractActionRouteMessage {
+        final ImmutableList<DOMActionInstance> addedActions;
+        final ImmutableList<DOMActionInstance> removedActions;
 
-            AbstractActionRouteMessage(final Collection<DOMActionInstance> addedActions,
-                                       final Collection<DOMActionInstance> removedActions) {
-                this.addedActions = ImmutableList.copyOf(addedActions);
-                this.removedActions = ImmutableList.copyOf(removedActions);
-            }
-
-            Collection<DOMActionInstance> getAddedActions() {
-                return addedActions;
-            }
-
-            Collection<DOMActionInstance> getRemovedActions() {
-                return removedActions;
-            }
-
-
-            @Override
-            public String toString() {
-                return "ContainsRoute{" + "addedActions=" + addedActions + " removedActions=" + removedActions + '}';
-            }
+        AbstractActionRouteMessage(final Collection<DOMActionInstance> addedActions,
+                final Collection<DOMActionInstance> removedActions) {
+            this.addedActions = ImmutableList.copyOf(addedActions);
+            this.removedActions = ImmutableList.copyOf(removedActions);
         }
 
-
-        public static final class UpdateActions extends AbstractActionRouteMessage {
-            public UpdateActions(final Collection<DOMActionInstance> addedActions,
-                                 final Collection<DOMActionInstance> removedActions) {
-                super(addedActions, removedActions);
-            }
-
+        ImmutableList<DOMActionInstance> getAddedActions() {
+            return addedActions;
         }
 
-        public static final class UpdateRemoteActionEndpoints {
-            private final Map<Address, Optional<RemoteActionEndpoint>> actionEndpoints;
+        ImmutableList<DOMActionInstance> getRemovedActions() {
+            return removedActions;
+        }
 
-            @VisibleForTesting
-            public UpdateRemoteActionEndpoints(final Map<Address, Optional<RemoteActionEndpoint>>
-                                                                   actionEndpoints) {
-                this.actionEndpoints = ImmutableMap.copyOf(actionEndpoints);
-            }
+        @Override
+        public String toString() {
+            return "ContainsRoute{" + "addedActions=" + addedActions + " removedActions=" + removedActions + '}';
+        }
+    }
 
-            public Map<Address, Optional<RemoteActionEndpoint>> getActionEndpoints() {
-                return actionEndpoints;
-            }
+    public static final class UpdateActions extends AbstractActionRouteMessage {
+        public UpdateActions(final Collection<DOMActionInstance> addedActions,
+                final Collection<DOMActionInstance> removedActions) {
+            super(addedActions, removedActions);
+        }
+    }
+
+    public static final class UpdateRemoteActionEndpoints {
+        private final Map<Address, Optional<RemoteActionEndpoint>> actionEndpoints;
+
+        @VisibleForTesting
+        public UpdateRemoteActionEndpoints(final Map<Address, Optional<RemoteActionEndpoint>> actionEndpoints) {
+            this.actionEndpoints = ImmutableMap.copyOf(actionEndpoints);
+        }
+
+        public Map<Address, Optional<RemoteActionEndpoint>> getActionEndpoints() {
+            return actionEndpoints;
         }
     }
 }

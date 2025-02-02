@@ -11,13 +11,10 @@ package org.opendaylight.controller.cluster.common.actor;
  * Actor with its behaviour metered. Metering is enabled by configuration.
  */
 public abstract class AbstractUntypedPersistentActorWithMetering extends AbstractUntypedPersistentActor {
-    public AbstractUntypedPersistentActorWithMetering() {
-        if (isMetricsCaptureEnabled()) {
+    protected AbstractUntypedPersistentActorWithMetering(final String persistanceId) {
+        super(persistanceId);
+        if (new CommonConfig(getContext().system().settings().config()).isMetricCaptureEnabled()) {
             getContext().become(new MeteringBehavior(this));
         }
-    }
-
-    private boolean isMetricsCaptureEnabled() {
-        return new CommonConfig(getContext().system().settings().config()).isMetricCaptureEnabled();
     }
 }

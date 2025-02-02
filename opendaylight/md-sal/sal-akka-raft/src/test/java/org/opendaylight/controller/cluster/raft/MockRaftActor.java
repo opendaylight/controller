@@ -32,8 +32,12 @@ import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.yangtools.concepts.Identifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort, RaftActorSnapshotCohort {
+    private static final Logger LOG = LoggerFactory.getLogger(MockRaftActor.class);
+
     public static final short PAYLOAD_VERSION = 5;
 
     final RaftActor actorDelegate;

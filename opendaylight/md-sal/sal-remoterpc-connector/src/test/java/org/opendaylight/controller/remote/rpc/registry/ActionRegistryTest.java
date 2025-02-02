@@ -44,9 +44,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.common.actor.AkkaConfigurationReader;
 import org.opendaylight.controller.remote.rpc.RemoteOpsProviderConfig;
-import org.opendaylight.controller.remote.rpc.registry.ActionRegistry.Messages.UpdateActions;
-import org.opendaylight.controller.remote.rpc.registry.ActionRegistry.Messages.UpdateRemoteActionEndpoints;
 import org.opendaylight.controller.remote.rpc.registry.ActionRegistry.RemoteActionEndpoint;
+import org.opendaylight.controller.remote.rpc.registry.ActionRegistry.UpdateActions;
+import org.opendaylight.controller.remote.rpc.registry.ActionRegistry.UpdateRemoteActionEndpoints;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Bucket;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMActionInstance;
@@ -182,7 +182,7 @@ public class ActionRegistryTest {
 
         List<DOMActionInstance> addedRouteIds = createRouteIds();
 
-        registry1.tell(new ActionRegistry.Messages.UpdateActions(addedRouteIds,
+        registry1.tell(new ActionRegistry.UpdateActions(addedRouteIds,
                 Collections.emptyList()), ActorRef.noSender());
 
         // Bucket store should get an update bucket message. Updated bucket contains added action.
@@ -299,7 +299,7 @@ public class ActionRegistryTest {
 
     }
 
-    private static void assertEndpoints(final ActionRegistry.Messages.UpdateRemoteActionEndpoints msg,
+    private static void assertEndpoints(final ActionRegistry.UpdateRemoteActionEndpoints msg,
                                         final Address address, final TestKit invoker) {
         final Map<Address, Optional<RemoteActionEndpoint>> endpoints = msg.getActionEndpoints();
         assertEquals(1, endpoints.size());
