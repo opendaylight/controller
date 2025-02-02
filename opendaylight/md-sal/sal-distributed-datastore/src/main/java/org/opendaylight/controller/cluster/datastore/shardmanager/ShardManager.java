@@ -104,7 +104,6 @@ import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.concurrent.ExecutionContext;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
 
@@ -316,24 +315,20 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     }
 
     void onShutDown() {
-        List<Future<Boolean>> stopFutures = new ArrayList<>(localShards.size());
-        for (ShardInformation info : localShards.values()) {
+        final var stopFutures = new ArrayList<Future<Boolean>>(localShards.size());
+        for (var info : localShards.values()) {
             if (info.getActor() != null) {
                 LOG.debug("{}: Issuing gracefulStop to shard {}", persistenceId(), info.getShardId());
-
-                FiniteDuration duration = info.getDatastoreContext().getShardRaftConfig()
-                        .getElectionTimeOutInterval().$times(2);
-                stopFutures.add(Patterns.gracefulStop(info.getActor(), duration, Shutdown.INSTANCE));
+                stopFutures.add(Patterns.gracefulStop(info.getActor(), info.getDatastoreContext().getShardRaftConfig()
+                    .getElectionTimeOutInterval().$times(2), Shutdown.INSTANCE));
             }
         }
 
         LOG.info("Shutting down ShardManager {} - waiting on {} shards", persistenceId(), stopFutures.size());
 
-        ExecutionContext dispatcher = new Dispatchers(context().system().dispatchers())
+        final var dispatcher = new Dispatchers(context().system().dispatchers())
                 .getDispatcher(Dispatchers.DispatcherType.Client);
-        Future<Iterable<Boolean>> combinedFutures = Futures.sequence(stopFutures, dispatcher);
-
-        combinedFutures.onComplete(new OnComplete<Iterable<Boolean>>() {
+        Futures.sequence(stopFutures, dispatcher).onComplete(new OnComplete<Iterable<Boolean>>() {
             @Override
             public void onComplete(final Throwable failure, final Iterable<Boolean> results) {
                 LOG.debug("{}: All shards shutdown - sending PoisonPill to self", persistenceId());
@@ -342,17 +337,18 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
                 if (failure != null) {
                     LOG.warn("{}: An error occurred attempting to shut down the shards", persistenceId(), failure);
-                } else {
-                    int nfailed = 0;
-                    for (Boolean result : results) {
-                        if (!result) {
-                            nfailed++;
-                        }
-                    }
+                    return;
+                }
 
-                    if (nfailed > 0) {
-                        LOG.warn("{}: {} shards did not shut down gracefully", persistenceId(), nfailed);
+                int nfailed = 0;
+                for (Boolean result : results) {
+                    if (!result) {
+                        nfailed++;
                     }
+                }
+
+                if (nfailed > 0) {
+                    LOG.warn("{}: {} shards did not shut down gracefully", persistenceId(), nfailed);
                 }
             }
         }, dispatcher);
@@ -445,10 +441,10 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             LOG.debug("{} : Sending Shutdown to Shard actor {} with {} ms timeout", persistenceId(), shardActor,
                     timeoutInMS);
 
-            final Future<Boolean> stopFuture = Patterns.gracefulStop(shardActor,
+            final var stopFuture = Patterns.gracefulStop(shardActor,
                     FiniteDuration.apply(timeoutInMS, TimeUnit.MILLISECONDS), Shutdown.INSTANCE);
 
-            final CompositeOnComplete<Boolean> onComplete = new CompositeOnComplete<>() {
+            final var onComplete = new CompositeOnComplete<Boolean>() {
                 @Override
                 public void onComplete(final Throwable failure, final Boolean result) {
                     if (failure == null) {
@@ -480,7 +476,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         LOG.debug("{}: onGetSnapshot", persistenceId());
 
         List<String> notInitialized = null;
-        for (ShardInformation shardInfo : localShards.values()) {
+        for (var shardInfo : localShards.values()) {
             if (!shardInfo.isShardInitialized()) {
                 if (notInitialized == null) {
                     notInitialized = new ArrayList<>();
@@ -500,7 +496,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 new ArrayList<>(localShards.keySet()), type, currentSnapshot , getSender(), persistenceId(),
                 datastoreContextFactory.getBaseDatastoreContext().getShardInitializationTimeout().duration()));
 
-        for (ShardInformation shardInfo: localShards.values()) {
+        for (var shardInfo : localShards.values()) {
             shardInfo.getActor().tell(getSnapshot, replyActor);
         }
     }
@@ -563,7 +559,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                     peerAddressResolver).build();
         }
 
-        ShardIdentifier shardId = getShardIdentifier(cluster.getCurrentMemberName(), shardName);
+        final var shardId = getShardIdentifier(cluster.getCurrentMemberName(), shardName);
 
         boolean shardWasInRecoveredSnapshot = currentSnapshot != null
                 && currentSnapshot.getShardList().contains(shardName);
@@ -1535,9 +1531,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 changeServersVotingStatus, shardActorRef.path());
 
         Timeout timeout = new Timeout(datastoreContext.getShardLeaderElectionTimeout().duration().$times(2));
-        Future<Object> futureObj = Patterns.ask(shardActorRef, changeServersVotingStatus, timeout);
-
-        futureObj.onComplete(new OnComplete<>() {
+        Patterns.ask(shardActorRef, changeServersVotingStatus, timeout).onComplete(new OnComplete<>() {
             @Override
             public void onComplete(final Throwable failure, final Object response) {
                 shardReplicaOperationsInProgress.remove(shardName);
@@ -1547,25 +1541,26 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                     sender.tell(new Status.Failure(new RuntimeException(
                         String.format("ChangeServersVotingStatus request to local shard %s failed",
                             shardActorRef.path()), failure)), self());
+                    return;
+                }
+
+                LOG.debug("{}: Received {} from local shard {}", persistenceId(), response, shardActorRef.path());
+
+                final var replyMsg = (ServerChangeReply) response;
+                if (replyMsg.getStatus() == ServerChangeStatus.OK) {
+                    LOG.debug("{}: ChangeServersVotingStatus succeeded for shard {}", persistenceId(), shardName);
+                    sender.tell(new Status.Success(null), self());
+                } else if (replyMsg.getStatus() == ServerChangeStatus.INVALID_REQUEST) {
+                    sender.tell(new Status.Failure(new IllegalArgumentException(String.format(
+                        "The requested voting state change for shard %s is invalid. At least one member "
+                            + "must be voting", shardId.getShardName()))), self());
                 } else {
-                    LOG.debug("{}: Received {} from local shard {}", persistenceId(), response, shardActorRef.path());
+                    LOG.warn("{}: ChangeServersVotingStatus failed for shard {} with status {}",
+                        persistenceId(), shardName, replyMsg.getStatus());
 
-                    ServerChangeReply replyMsg = (ServerChangeReply) response;
-                    if (replyMsg.getStatus() == ServerChangeStatus.OK) {
-                        LOG.debug("{}: ChangeServersVotingStatus succeeded for shard {}", persistenceId(), shardName);
-                        sender.tell(new Status.Success(null), self());
-                    } else if (replyMsg.getStatus() == ServerChangeStatus.INVALID_REQUEST) {
-                        sender.tell(new Status.Failure(new IllegalArgumentException(String.format(
-                                "The requested voting state change for shard %s is invalid. At least one member "
-                                + "must be voting", shardId.getShardName()))), self());
-                    } else {
-                        LOG.warn("{}: ChangeServersVotingStatus failed for shard {} with status {}",
-                                persistenceId(), shardName, replyMsg.getStatus());
-
-                        Exception error = getServerChangeException(ChangeServersVotingStatus.class,
-                                replyMsg.getStatus(), shardActorRef.path().toString(), shardId);
-                        sender.tell(new Status.Failure(error), self());
-                    }
+                    Exception error = getServerChangeException(ChangeServersVotingStatus.class,
+                        replyMsg.getStatus(), shardActorRef.path().toString(), shardId);
+                    sender.tell(new Status.Failure(error), self());
                 }
             }
         }, new Dispatchers(context().system().dispatchers()).getDispatcher(Dispatchers.DispatcherType.Client));
