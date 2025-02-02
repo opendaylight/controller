@@ -34,6 +34,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.ConfigFactory;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -116,9 +117,6 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataTreeConfiguration;
 import org.opendaylight.yangtools.yang.data.tree.impl.di.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.collection.Set;
-import scala.concurrent.Await;
-import scala.concurrent.Future;
-import scala.concurrent.duration.FiniteDuration;
 
 /**
  * End-to-end distributed data store tests that exercise remote shards and transactions.
@@ -885,11 +883,10 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
             sendDatastoreContextUpdate(leaderDistributedDataStore, leaderDatastoreContextBuilder
                 .shardElectionTimeoutFactor(100));
 
-            final FiniteDuration duration = FiniteDuration.create(5, TimeUnit.SECONDS);
-            final Future<ActorRef> future = leaderDistributedDataStore.getActorUtils().findLocalShardAsync("cars");
-            final ActorRef leaderActor = Await.result(future, duration);
+            final var future = leaderDistributedDataStore.getActorUtils().findLocalShardAsync("cars");
+            final var leaderActor = future.toCompletableFuture().get(5, TimeUnit.SECONDS);
 
-            final Future<Boolean> stopFuture = Patterns.gracefulStop(leaderActor, duration, Shutdown.INSTANCE);
+            final var stopFuture = Patterns.gracefulStop(leaderActor, Duration.ofSeconds(5), Shutdown.INSTANCE);
 
             // Commit the 2 transactions. They should finish and succeed.
 
@@ -898,7 +895,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
             // Wait for the leader actor stopped.
 
-            final Boolean stopped = Await.result(stopFuture, duration);
+            final var stopped = stopFuture.toCompletableFuture().get(5, TimeUnit.SECONDS);
             assertEquals("Stopped", Boolean.TRUE, stopped);
 
             // Verify leadership was transferred by reading the committed data from the other nodes.

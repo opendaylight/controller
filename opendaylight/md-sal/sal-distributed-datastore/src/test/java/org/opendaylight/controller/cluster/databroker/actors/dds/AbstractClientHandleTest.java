@@ -19,6 +19,7 @@ import static org.opendaylight.controller.cluster.databroker.actors.dds.TestUtil
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.dispatch.ExecutionContexts;
@@ -52,7 +53,6 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeSnapshot;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
-import scala.concurrent.Future;
 
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
 public abstract class AbstractClientHandleTest<T extends AbstractClientHandle<AbstractProxyTransaction>> {
@@ -199,7 +199,7 @@ public abstract class AbstractClientHandleTest<T extends AbstractClientHandle<Ab
 
     private static ActorUtils createActorContextMock(final ActorSystem system, final ActorRef actor) {
         final var actorUtils = mock(ActorUtils.class);
-        doReturn(Future.successful(new PrimaryShardInfo(system.actorSelection(actor.path()), (short) 0)))
+        doReturn(CompletableFuture.completedStage(new PrimaryShardInfo(system.actorSelection(actor.path()), (short) 0)))
             .when(actorUtils).findPrimaryShardAsync(any());
         doReturn(ExecutionContexts.global()).when(actorUtils).getClientDispatcher();
 

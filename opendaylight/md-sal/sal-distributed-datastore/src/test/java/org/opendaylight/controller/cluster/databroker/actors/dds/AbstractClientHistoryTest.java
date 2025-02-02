@@ -18,6 +18,7 @@ import static org.mockito.Mockito.verify;
 
 import com.google.common.primitives.UnsignedLong;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.dispatch.ExecutionContexts;
@@ -32,7 +33,6 @@ import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
-import scala.concurrent.Future;
 
 public abstract class AbstractClientHistoryTest<T extends AbstractClientHistory> {
     protected static final String SHARD_NAME = "default";
@@ -177,7 +177,7 @@ public abstract class AbstractClientHistoryTest<T extends AbstractClientHistory>
 
     protected final ActorUtils createActorUtilsMock(final ActorSystem system, final ActorRef actor) {
         final var actorUtils = mock(ActorUtils.class);
-        doReturn(Future.successful(new PrimaryShardInfo(system.actorSelection(actor.path()), (short) 0)))
+        doReturn(CompletableFuture.completedStage(new PrimaryShardInfo(system.actorSelection(actor.path()), (short) 0)))
             .when(actorUtils).findPrimaryShardAsync(any());
         doReturn(1000).when(datastoreContext).getShardBatchedModificationCount();
         doReturn(datastoreContext).when(actorUtils).getDatastoreContext();
