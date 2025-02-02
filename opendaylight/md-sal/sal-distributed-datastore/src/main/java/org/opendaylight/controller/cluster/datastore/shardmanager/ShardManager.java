@@ -11,6 +11,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.SettableFuture;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -30,13 +31,11 @@ import org.apache.pekko.actor.OneForOneStrategy;
 import org.apache.pekko.actor.PoisonPill;
 import org.apache.pekko.actor.Status;
 import org.apache.pekko.actor.SupervisorStrategy;
-import org.apache.pekko.actor.SupervisorStrategy.Directive;
 import org.apache.pekko.cluster.ClusterEvent;
 import org.apache.pekko.cluster.ClusterEvent.MemberWeaklyUp;
 import org.apache.pekko.cluster.Member;
 import org.apache.pekko.dispatch.Futures;
 import org.apache.pekko.dispatch.OnComplete;
-import org.apache.pekko.japi.Function;
 import org.apache.pekko.pattern.Patterns;
 import org.apache.pekko.persistence.DeleteSnapshotsFailure;
 import org.apache.pekko.persistence.DeleteSnapshotsSuccess;
@@ -412,12 +411,11 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             LOG.debug("{} : Sending Shutdown to Shard actor {} with {} ms timeout", logName(), shardActor,
                     timeoutInMS);
 
-            final var stopFuture = Patterns.gracefulStop(shardActor,
-                    FiniteDuration.apply(timeoutInMS, TimeUnit.MILLISECONDS), Shutdown.INSTANCE);
+            final var stopFuture = Patterns.gracefulStop(shardActor, Duration.ofMillis(timeoutInMS), Shutdown.INSTANCE);
 
             final var onComplete = new CompositeOnComplete<Boolean>() {
                 @Override
-                public void onComplete(final Throwable failure, final Boolean result) {
+                public void accept(final Boolean result, final Throwable failure) {
                     if (failure == null) {
                         LOG.debug("{} : Successfully shut down Shard actor {}", logName(), shardActor);
                     } else {
@@ -435,7 +433,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             };
 
             shardActorsStopping.put(shardName, onComplete);
-            stopFuture.onComplete(onComplete, new Dispatchers(context().system().dispatchers())
+            stopFuture.whenCompleteAsync(onComplete, new Dispatchers(context().system().dispatchers())
                     .getDispatcher(Dispatchers.DispatcherType.Client));
         }
 
@@ -505,12 +503,9 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         LOG.debug("{} : Stop is in progress for shard {} - adding OnComplete callback to defer {}", logName(),
                 shardName, messageToDefer);
         final ActorRef sender = getSender();
-        stopOnComplete.addOnComplete(new OnComplete<Boolean>() {
-            @Override
-            public void onComplete(final Throwable failure, final Boolean result) {
-                LOG.debug("{} : Stop complete for shard {} - re-queing {}", logName(), shardName, messageToDefer);
-                self().tell(messageToDefer, sender);
-            }
+        stopOnComplete.addOnComplete((result, failure) -> {
+            LOG.debug("{} : Stop complete for shard {} - re-queing {}", logName(), shardName, messageToDefer);
+            self().tell(messageToDefer, sender);
         });
 
         return true;
@@ -746,19 +741,20 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
                 shardInformation.addOnShardInitialized(onShardInitialized);
 
-                FiniteDuration timeout = shardInformation.getDatastoreContext()
-                        .getShardInitializationTimeout().duration();
+                final FiniteDuration timeout;
                 if (shardInformation.isShardInitialized()) {
                     // If the shard is already initialized then we'll wait enough time for the shard to
                     // elect a leader, ie 2 times the election timeout.
                     timeout = FiniteDuration.create(shardInformation.getDatastoreContext().getShardRaftConfig()
                             .getElectionTimeOutInterval().toMillis() * 2, TimeUnit.MILLISECONDS);
+                } else {
+                    timeout = shardInformation.getDatastoreContext().getShardInitializationTimeout().duration();
                 }
 
                 LOG.debug("{}: Scheduling {} ms timer to wait for shard {}", logName(), timeout.toMillis(),
                         shardInformation);
 
-                Cancellable timeoutSchedule = getContext().system().scheduler().scheduleOnce(
+                final var timeoutSchedule = getContext().system().scheduler().scheduleOnce(
                         timeout, self(),
                         new ShardNotInitializedTimeout(shardInformation, onShardInitialized, sender),
                         getContext().dispatcher(), self());
@@ -1121,12 +1117,10 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     @Override
     public SupervisorStrategy supervisorStrategy() {
-
-        return new OneForOneStrategy(10, FiniteDuration.create(1, TimeUnit.MINUTES),
-                (Function<Throwable, Directive>) t -> {
-                    LOG.warn("Supervisor Strategy caught unexpected exception - resuming", t);
-                    return SupervisorStrategy.resume();
-                });
+        return new OneForOneStrategy(10, Duration.ofMinutes(1), t -> {
+            LOG.warn("Supervisor Strategy caught unexpected exception - resuming", t);
+            return SupervisorStrategy.resume();
+        });
     }
 
     @VisibleForTesting

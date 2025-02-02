@@ -9,36 +9,34 @@ package org.opendaylight.controller.cluster.datastore.utils;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.pekko.dispatch.OnComplete;
+import java.util.function.BiConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * An OnComplete implementation that aggrgates other OnComplete tasks.
  *
- * @author Thomas Pantelis
- *
  * @param <T> the result type
+ * @author Thomas Pantelis
  */
-public abstract class CompositeOnComplete<T> extends OnComplete<T> {
+public abstract class CompositeOnComplete<T> implements BiConsumer<T, Throwable> {
     private static final Logger LOG = LoggerFactory.getLogger(CompositeOnComplete.class);
 
-    private final List<OnComplete<T>> onCompleteTasks = new ArrayList<>();
+    private final List<BiConsumer<T, Throwable>> onCompleteTasks = new ArrayList<>();
 
-    public void addOnComplete(OnComplete<T> task) {
+    public final void addOnComplete(final BiConsumer<T, Throwable> task) {
         onCompleteTasks.add(task);
     }
 
     @SuppressWarnings({ "checkstyle:IllegalCatch", "squid:S1181" /*  Throwable and Error should not be caught */ })
-    protected void notifyOnCompleteTasks(Throwable failure, T result) {
-        for (OnComplete<T> task: onCompleteTasks) {
+    protected final void notifyOnCompleteTasks(final Throwable failure, final T result) {
+        for (var task : onCompleteTasks) {
             try {
-                task.onComplete(failure, result);
+                task.accept(result, failure);
             } catch (Throwable e) {
                 LOG.error("Caught unexpected exception", e);
             }
         }
-
         onCompleteTasks.clear();
     }
 }
