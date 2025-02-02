@@ -212,89 +212,57 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     @Override
     public void handleCommand(final Object message) throws Exception {
-        if (message instanceof FindPrimary msg) {
-            findPrimary(msg);
-        } else if (message instanceof FindLocalShard msg) {
-            findLocalShard(msg);
-        } else if (message instanceof UpdateSchemaContext msg) {
-            updateSchemaContext(msg);
-        } else if (message instanceof ActorInitialized msg) {
-            onActorInitialized(msg);
-        } else if (message instanceof ClusterEvent.MemberUp msg) {
-            memberUp(msg);
-        } else if (message instanceof ClusterEvent.MemberWeaklyUp msg) {
-            memberWeaklyUp(msg);
-        } else if (message instanceof ClusterEvent.MemberExited msg) {
-            memberExited(msg);
-        } else if (message instanceof ClusterEvent.MemberRemoved msg) {
-            memberRemoved(msg);
-        } else if (message instanceof ClusterEvent.UnreachableMember msg) {
-            memberUnreachable(msg);
-        } else if (message instanceof ClusterEvent.ReachableMember msg) {
-            memberReachable(msg);
-        } else if (message instanceof DatastoreContextFactory msg) {
-            onDatastoreContextFactory(msg);
-        } else if (message instanceof RoleChangeNotification msg) {
-            onRoleChangeNotification(msg);
-        } else if (message instanceof FollowerInitialSyncUpStatus msg) {
-            onFollowerInitialSyncStatus(msg);
-        } else if (message instanceof ShardNotInitializedTimeout msg) {
-            onShardNotInitializedTimeout(msg);
-        } else if (message instanceof ShardLeaderStateChanged msg) {
-            onLeaderStateChanged(msg);
-        } else if (message instanceof SwitchShardBehavior msg) {
-            onSwitchShardBehavior(msg);
-        } else if (message instanceof CreateShard msg) {
-            onCreateShard(msg);
-        } else if (message instanceof AddShardReplica msg) {
-            onAddShardReplica(msg);
-        } else if (message instanceof ForwardedAddServerReply msg) {
-            onAddServerReply(msg.shardInfo, msg.addServerReply, getSender(), msg.leaderPath, msg.removeShardOnFailure);
-        } else if (message instanceof ForwardedAddServerFailure msg) {
-            onAddServerFailure(msg.shardName, msg.failureMessage, msg.failure, getSender(), msg.removeShardOnFailure);
-        } else if (message instanceof RemoveShardReplica msg) {
-            onRemoveShardReplica(msg);
-        } else if (message instanceof WrappedShardResponse msg) {
-            onWrappedShardResponse(msg);
-        } else if (message instanceof GetSnapshot msg) {
-            onGetSnapshot(msg);
-        } else if (message instanceof ServerRemoved msg) {
-            onShardReplicaRemoved(msg);
-        } else if (message instanceof ChangeShardMembersVotingStatus msg) {
-            onChangeShardServersVotingStatus(msg);
-        } else if (message instanceof FlipShardMembersVotingStatus msg) {
-            onFlipShardMembersVotingStatus(msg);
-        } else if (message instanceof SaveSnapshotSuccess msg) {
-            onSaveSnapshotSuccess(msg);
-        } else if (message instanceof SaveSnapshotFailure msg) {
-            LOG.error("{}: SaveSnapshotFailure received for saving snapshot of shards", logName(), msg.cause());
-        } else if (message instanceof Shutdown) {
-            onShutDown();
-        } else if (message instanceof GetLocalShardIds) {
-            onGetLocalShardIds();
-        } else if (message instanceof GetShardRole msg) {
-            onGetShardRole(msg);
-        } else if (message instanceof RunnableMessage msg) {
-            msg.run();
-        } else if (message instanceof RegisterForShardAvailabilityChanges msg) {
-            onRegisterForShardAvailabilityChanges(msg);
-        } else if (message instanceof DeleteSnapshotsFailure msg) {
-            LOG.warn("{}: Failed to delete prior snapshots", logName(), msg.cause());
-        } else if (message instanceof DeleteSnapshotsSuccess) {
-            LOG.debug("{}: Successfully deleted prior snapshots", logName());
-        } else if (message instanceof RegisterRoleChangeListenerReply) {
-            LOG.trace("{}: Received RegisterRoleChangeListenerReply", logName());
-        } else if (message instanceof ClusterEvent.MemberEvent msg) {
-            LOG.trace("{}: Received other ClusterEvent.MemberEvent: {}", logName(), msg);
-        } else {
-            unknownMessage(message);
+        switch (message) {
+            case FindPrimary msg -> findPrimary(msg);
+            case FindLocalShard msg -> findLocalShard(msg);
+            case UpdateSchemaContext msg -> updateSchemaContext(msg);
+            case ActorInitialized msg -> onActorInitialized(msg);
+            case ClusterEvent.MemberUp msg -> memberUp(msg);
+            case ClusterEvent.MemberWeaklyUp msg -> memberWeaklyUp(msg);
+            case ClusterEvent.MemberExited msg -> memberExited(msg);
+            case ClusterEvent.MemberRemoved msg -> memberRemoved(msg);
+            case ClusterEvent.UnreachableMember msg -> memberUnreachable(msg);
+            case ClusterEvent.ReachableMember msg -> memberReachable(msg);
+            case DatastoreContextFactory msg -> onDatastoreContextFactory(msg);
+            case RoleChangeNotification msg -> onRoleChangeNotification(msg);
+            case FollowerInitialSyncUpStatus msg -> onFollowerInitialSyncStatus(msg);
+            case ShardNotInitializedTimeout msg -> onShardNotInitializedTimeout(msg);
+            case ShardLeaderStateChanged msg -> onLeaderStateChanged(msg);
+            case SwitchShardBehavior msg -> onSwitchShardBehavior(msg);
+            case CreateShard msg -> onCreateShard(msg);
+            case AddShardReplica msg -> onAddShardReplica(msg);
+            case ForwardedAddServerReply msg -> onAddServerReply(msg.shardInfo, msg.addServerReply, getSender(),
+                msg.leaderPath, msg.removeShardOnFailure);
+            case ForwardedAddServerFailure msg -> onAddServerFailure(msg.shardName, msg.failureMessage, msg.failure,
+                getSender(), msg.removeShardOnFailure);
+            case RemoveShardReplica msg -> onRemoveShardReplica(msg);
+            case WrappedShardResponse msg -> onWrappedShardResponse(msg);
+            case GetSnapshot msg -> onGetSnapshot(msg);
+            case ServerRemoved msg -> onShardReplicaRemoved(msg);
+            case ChangeShardMembersVotingStatus msg -> onChangeShardServersVotingStatus(msg);
+            case FlipShardMembersVotingStatus msg -> onFlipShardMembersVotingStatus(msg);
+            case SaveSnapshotSuccess msg -> onSaveSnapshotSuccess(msg);
+            case SaveSnapshotFailure msg ->
+                LOG.error("{}: SaveSnapshotFailure received for saving snapshot of shards", logName(), msg.cause());
+            case Shutdown msg -> onShutDown();
+            case GetLocalShardIds msg -> onGetLocalShardIds();
+            case GetShardRole msg -> onGetShardRole(msg);
+            case RunnableMessage msg -> msg.run();
+            case RegisterForShardAvailabilityChanges msg -> onRegisterForShardAvailabilityChanges(msg);
+            case DeleteSnapshotsFailure msg -> LOG.warn("{}: Failed to delete prior snapshots", logName(), msg.cause());
+            case DeleteSnapshotsSuccess msg -> LOG.debug("{}: Successfully deleted prior snapshots", logName());
+            case RegisterRoleChangeListenerReply msg ->
+                LOG.trace("{}: Received RegisterRoleChangeListenerReply", logName());
+            case ClusterEvent.MemberEvent msg ->
+                LOG.trace("{}: Received other ClusterEvent.MemberEvent: {}", logName(), msg);
+            default -> unknownMessage(message);
         }
     }
 
     private void onRegisterForShardAvailabilityChanges(final RegisterForShardAvailabilityChanges message) {
         LOG.debug("{}: onRegisterForShardAvailabilityChanges: {}", logName(), message);
 
-        final Consumer<String> callback = message.getCallback();
+        final var callback = message.getCallback();
         shardAvailabilityCallbacks.add(callback);
 
         getSender().tell(new Status.Success((Registration)
@@ -359,9 +327,8 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     }
 
     private void onWrappedShardResponse(final WrappedShardResponse message) {
-        if (message.getResponse() instanceof RemoveServerReply) {
-            onRemoveServerReply(getSender(), message.getShardId(), (RemoveServerReply) message.getResponse(),
-                    message.getLeaderPath());
+        if (message.getResponse() instanceof RemoveServerReply reply) {
+            onRemoveServerReply(getSender(), message.getShardId(), reply, message.getLeaderPath());
         }
     }
 
@@ -1030,8 +997,8 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         }
 
         final Collection<String> visitedAddresses;
-        if (message instanceof RemoteFindPrimary) {
-            visitedAddresses = ((RemoteFindPrimary)message).getVisitedAddresses();
+        if (message instanceof RemoteFindPrimary msg) {
+            visitedAddresses = msg.getVisitedAddresses();
         } else {
             visitedAddresses = new ArrayList<>(1);
         }
@@ -1067,12 +1034,12 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             public void onComplete(final Throwable failure, final Object response) {
                 if (failure != null) {
                     handler.onFailure(failure);
-                } else if (response instanceof RemotePrimaryShardFound msg) {
-                    handler.onRemotePrimaryShardFound(msg);
-                } else if (response instanceof LocalPrimaryShardFound msg) {
-                    handler.onLocalPrimaryFound(msg);
-                } else {
-                    handler.onUnknownResponse(response);
+                    return;
+                }
+                switch (response) {
+                    case RemotePrimaryShardFound msg -> handler.onRemotePrimaryShardFound(msg);
+                    case LocalPrimaryShardFound msg -> handler.onLocalPrimaryFound(msg);
+                    default -> handler.onUnknownResponse(response);
                 }
             }
         }, new Dispatchers(context().system().dispatchers()).getDispatcher(Dispatchers.DispatcherType.Client));
@@ -1500,18 +1467,24 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                         failure);
                     sender.tell(new Status.Failure(new RuntimeException(
                         String.format("Failed to find local shard %s", shardName), failure)), self());
-                } if (response instanceof LocalShardFound msg) {
-                    self().tell((RunnableMessage) () -> onLocalShardFound.accept(msg), sender);
-                } else if (response instanceof LocalShardNotFound) {
-                    LOG.debug("{}: Local shard {} does not exist", logName(), shardName);
-                    sender.tell(new Status.Failure(new IllegalArgumentException(
-                        String.format("Local shard %s does not exist", shardName))), self());
-                } else {
-                    LOG.debug("{}: Failed to find local shard {}: received response: {}", logName(), shardName,
-                        response);
-                    sender.tell(new Status.Failure(response instanceof Throwable throwable ? throwable
-                        : new RuntimeException(String.format("Failed to find local shard %s: received response: %s",
-                            shardName, response))), self());
+                    return;
+                }
+
+                switch (response) {
+                    case LocalShardFound msg ->
+                        self().tell((RunnableMessage) () -> onLocalShardFound.accept(msg), sender);
+                    case LocalShardNotFound msg -> {
+                        LOG.debug("{}: Local shard {} does not exist", logName(), shardName);
+                        sender.tell(new Status.Failure(new IllegalArgumentException(
+                            String.format("Local shard %s does not exist", shardName))), self());
+                    }
+                    default -> {
+                        LOG.debug("{}: Failed to find local shard {}: received response: {}", logName(), shardName,
+                            response);
+                        sender.tell(new Status.Failure(response instanceof Throwable throwable ? throwable
+                            : new RuntimeException(String.format("Failed to find local shard %s: received response: %s",
+                                shardName, response))), self());
+                    }
                 }
             }
         }, new Dispatchers(context().system().dispatchers()).getDispatcher(Dispatchers.DispatcherType.Client));
@@ -1707,7 +1680,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         public void onUnknownResponse(final Object response) {
             LOG.debug("{}: Failed to find leader for shard {}: received response: {}", persistenceId, shardName,
                 response);
-            targetActor.tell(new Status.Failure(response instanceof Throwable ? (Throwable) response
+            targetActor.tell(new Status.Failure(response instanceof Throwable throwable ? throwable
                     : new RuntimeException(String.format("Failed to find leader for shard %s: received response: %s",
                         shardName, response))), shardManagerActor);
         }
