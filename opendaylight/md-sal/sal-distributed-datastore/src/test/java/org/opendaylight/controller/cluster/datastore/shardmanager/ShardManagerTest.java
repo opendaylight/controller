@@ -57,7 +57,6 @@ import org.apache.pekko.cluster.Cluster;
 import org.apache.pekko.cluster.ClusterEvent;
 import org.apache.pekko.cluster.Member;
 import org.apache.pekko.dispatch.Dispatchers;
-import org.apache.pekko.dispatch.OnComplete;
 import org.apache.pekko.japi.Creator;
 import org.apache.pekko.pattern.Patterns;
 import org.apache.pekko.persistence.RecoveryCompleted;
@@ -1014,18 +1013,13 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         path = found.getPrimaryPath();
         assertTrue("Unexpected primary path " + path + " which must still not on member-256",
             path.contains("member-256-shard-default-config"));
-        Future<PrimaryShardInfo> futurePrimaryShard = primaryShardInfoCache.getIfPresent("default");
-        futurePrimaryShard.onComplete(new OnComplete<PrimaryShardInfo>() {
-            @Override
-            public void onComplete(final Throwable failure, final PrimaryShardInfo futurePrimaryShardInfo) {
-                if (failure != null) {
-                    assertTrue("Primary shard info is unexpectedly removed from primaryShardInfoCache", false);
-                } else {
-                    assertEquals("Expected primaryShardInfoCache entry",
-                        primaryShardInfo, futurePrimaryShardInfo);
-                }
+        primaryShardInfoCache.getIfPresent("default").whenComplete((futurePrimaryShardInfo, failure) -> {
+            if (failure != null) {
+                assertTrue("Primary shard info is unexpectedly removed from primaryShardInfoCache", false);
+            } else {
+                assertEquals("Expected primaryShardInfoCache entry", primaryShardInfo, futurePrimaryShardInfo);
             }
-        }, system256.dispatchers().defaultGlobalDispatcher());
+        });
 
         LOG.info("testShardAvailabilityChangeOnMemberWithNameContainedInLeaderIdUnreachable ending");
     }

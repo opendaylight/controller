@@ -13,8 +13,8 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
 import com.typesafe.config.ConfigFactory;
@@ -22,6 +22,8 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
@@ -29,10 +31,8 @@ import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.actor.Address;
 import org.apache.pekko.actor.Props;
 import org.apache.pekko.actor.UntypedAbstractActor;
-import org.apache.pekko.dispatch.Futures;
 import org.apache.pekko.japi.Creator;
 import org.apache.pekko.testkit.javadsl.TestKit;
-import org.apache.pekko.util.Timeout;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -58,7 +58,6 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
-import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
 
 public class ActorUtilsTest extends AbstractActorTest {
@@ -195,7 +194,7 @@ public class ActorUtilsTest extends AbstractActorTest {
 
         ActorSelection actor = actorUtils.actorSelection(shardActorRef.path());
 
-        Future<Object> future = actorUtils.executeOperationAsync(actor, "hello");
+        final var future = actorUtils.executeOperationAsync(actor, "hello");
 
         Object result = Await.result(future, FiniteDuration.create(3, TimeUnit.SECONDS));
         assertEquals("Result", "hello", result);
@@ -327,12 +326,13 @@ public class ActorUtilsTest extends AbstractActorTest {
         ActorUtils actorUtils = new ActorUtils(getSystem(), shardManager, mock(ClusterWrapper.class),
                 mock(Configuration.class), dataStoreContext, new PrimaryShardInfoFutureCache()) {
             @Override
-            protected Future<Object> doAsk(final ActorRef actorRef, final Object message, final Timeout timeout) {
-                return Futures.successful((Object) new RemotePrimaryShardFound(expPrimaryPath, expPrimaryVersion));
+            protected CompletionStage<Object> doAsk(final ActorRef actorRef, final Object message,
+                    final Duration timeout) {
+                return CompletableFuture.completedStage(new RemotePrimaryShardFound(expPrimaryPath, expPrimaryVersion));
             }
         };
 
-        Future<PrimaryShardInfo> foobar = actorUtils.findPrimaryShardAsync("foobar");
+        final var foobar = actorUtils.findPrimaryShardAsync("foobar");
         PrimaryShardInfo actual = Await.result(foobar, FiniteDuration.apply(5000, TimeUnit.MILLISECONDS));
 
         assertNotNull(actual);
@@ -341,7 +341,7 @@ public class ActorUtilsTest extends AbstractActorTest {
                 expPrimaryPath.endsWith(actual.getPrimaryShardActor().pathString()));
         assertEquals("getPrimaryShardVersion", expPrimaryVersion, actual.getPrimaryShardVersion());
 
-        Future<PrimaryShardInfo> cached = actorUtils.getPrimaryShardInfoCache().getIfPresent("foobar");
+        final var cached = actorUtils.getPrimaryShardInfoCache().getIfPresent("foobar");
 
         PrimaryShardInfo cachedInfo = Await.result(cached, FiniteDuration.apply(1, TimeUnit.MILLISECONDS));
 
@@ -368,12 +368,13 @@ public class ActorUtilsTest extends AbstractActorTest {
         ActorUtils actorUtils = new ActorUtils(getSystem(), shardManager, mock(ClusterWrapper.class),
                 mock(Configuration.class), dataStoreContext, new PrimaryShardInfoFutureCache()) {
             @Override
-            protected Future<Object> doAsk(final ActorRef actorRef, final Object message, final Timeout timeout) {
-                return Futures.successful((Object) new LocalPrimaryShardFound(expPrimaryPath, mockDataTree));
+            protected CompletionStage<Object> doAsk(final ActorRef actorRef, final Object message,
+                    final Duration timeout) {
+                return CompletableFuture.completedStage(new LocalPrimaryShardFound(expPrimaryPath, mockDataTree));
             }
         };
 
-        Future<PrimaryShardInfo> foobar = actorUtils.findPrimaryShardAsync("foobar");
+        final var foobar = actorUtils.findPrimaryShardAsync("foobar");
         PrimaryShardInfo actual = Await.result(foobar, FiniteDuration.apply(5000, TimeUnit.MILLISECONDS));
 
         assertNotNull(actual);
@@ -383,7 +384,7 @@ public class ActorUtilsTest extends AbstractActorTest {
                 expPrimaryPath.endsWith(actual.getPrimaryShardActor().pathString()));
         assertEquals("getPrimaryShardVersion", DataStoreVersions.CURRENT_VERSION, actual.getPrimaryShardVersion());
 
-        Future<PrimaryShardInfo> cached = actorUtils.getPrimaryShardInfoCache().getIfPresent("foobar");
+        final var cached = actorUtils.getPrimaryShardInfoCache().getIfPresent("foobar");
 
         PrimaryShardInfo cachedInfo = Await.result(cached, FiniteDuration.apply(1, TimeUnit.MILLISECONDS));
 
@@ -407,7 +408,7 @@ public class ActorUtilsTest extends AbstractActorTest {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private static void testFindPrimaryExceptions(final Object expectedException) {
+    private static void testFindPrimaryExceptions(final Exception expectedException) {
         ActorRef shardManager = getSystem().actorOf(MessageCollectorActor.props());
 
         DatastoreContext dataStoreContext = DatastoreContext.newBuilder()
@@ -417,24 +418,17 @@ public class ActorUtilsTest extends AbstractActorTest {
         ActorUtils actorUtils = new ActorUtils(getSystem(), shardManager, mock(ClusterWrapper.class),
                 mock(Configuration.class), dataStoreContext, new PrimaryShardInfoFutureCache()) {
             @Override
-            protected Future<Object> doAsk(final ActorRef actorRef, final Object message, final Timeout timeout) {
-                return Futures.successful(expectedException);
+            protected CompletionStage<Object> doAsk(final ActorRef actorRef, final Object message,
+                    final Duration timeout) {
+                return CompletableFuture.completedStage(expectedException);
             }
         };
 
-        Future<PrimaryShardInfo> foobar = actorUtils.findPrimaryShardAsync("foobar");
+        final var foobar = actorUtils.findPrimaryShardAsync("foobar");
 
-        try {
-            Await.result(foobar, FiniteDuration.apply(100, TimeUnit.MILLISECONDS));
-            fail("Expected" + expectedException.getClass().toString());
-        } catch (Exception e) {
-            if (!expectedException.getClass().isInstance(e)) {
-                fail("Expected Exception of type " + expectedException.getClass().toString());
-            }
-        }
+        assertThrows(expectedException.getClass(),
+            () -> Await.result(foobar, FiniteDuration.apply(100, TimeUnit.MILLISECONDS)));
 
-        Future<PrimaryShardInfo> cached = actorUtils.getPrimaryShardInfoCache().getIfPresent("foobar");
-
-        assertNull(cached);
+        assertNull(actorUtils.getPrimaryShardInfoCache().getIfPresent("foobar"));
     }
 }

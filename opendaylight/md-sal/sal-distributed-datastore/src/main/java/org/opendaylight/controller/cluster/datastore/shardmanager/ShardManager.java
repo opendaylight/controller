@@ -104,7 +104,6 @@ import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
-import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Manages the shards for a data store. The ShardManager has the following jobs:
@@ -254,7 +253,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 LOG.trace("{}: Received RegisterRoleChangeListenerReply", logName());
             case ClusterEvent.MemberEvent msg ->
                 LOG.trace("{}: Received other ClusterEvent.MemberEvent: {}", logName(), msg);
-                default -> unknownMessage(message);
+            default -> unknownMessage(message);
         }
     }
 
@@ -463,7 +462,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
         ActorRef replyActor = getContext().actorOf(ShardManagerGetSnapshotReplyActor.props(
                 new ArrayList<>(localShards.keySet()), type, currentSnapshot , getSender(), logName(),
-                datastoreContextFactory.getBaseDatastoreContext().getShardInitializationTimeout().duration()));
+                datastoreContextFactory.getBaseDatastoreContext().getShardInitializationTimeout()));
 
         for (var shardInfo : localShards.values()) {
             shardInfo.getActor().tell(getSnapshot, replyActor);
@@ -741,21 +740,20 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
                 shardInformation.addOnShardInitialized(onShardInitialized);
 
-                final FiniteDuration timeout;
+                final Duration timeout;
                 if (shardInformation.isShardInitialized()) {
                     // If the shard is already initialized then we'll wait enough time for the shard to
                     // elect a leader, ie 2 times the election timeout.
-                    timeout = FiniteDuration.create(shardInformation.getDatastoreContext().getShardRaftConfig()
-                            .getElectionTimeOutInterval().toMillis() * 2, TimeUnit.MILLISECONDS);
+                    timeout = Duration.ofMillis(shardInformation.getDatastoreContext().getShardRaftConfig()
+                            .getElectionTimeOutInterval().toMillis() * 2);
                 } else {
-                    timeout = shardInformation.getDatastoreContext().getShardInitializationTimeout().duration();
+                    timeout = shardInformation.getDatastoreContext().getShardInitializationTimeout();
                 }
 
                 LOG.debug("{}: Scheduling {} ms timer to wait for shard {}", logName(), timeout.toMillis(),
                         shardInformation);
 
-                final var timeoutSchedule = getContext().system().scheduler().scheduleOnce(
-                        timeout, self(),
+                final var timeoutSchedule = getContext().system().scheduler().scheduleOnce(timeout, self(),
                         new ShardNotInitializedTimeout(shardInformation, onShardInitialized, sender),
                         getContext().dispatcher(), self());
 
@@ -1021,13 +1019,9 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     }
 
     private void findPrimary(final String shardName, final FindPrimaryResponseHandler handler) {
-        Timeout findPrimaryTimeout = new Timeout(datastoreContextFactory.getBaseDatastoreContext()
-                .getShardInitializationTimeout().duration().$times(2));
-
-        Future<Object> futureObj = Patterns.ask(self(), new FindPrimary(shardName, true), findPrimaryTimeout);
-        futureObj.onComplete(new OnComplete<>() {
-            @Override
-            public void onComplete(final Throwable failure, final Object response) {
+        Patterns.ask(self(), new FindPrimary(shardName, true),
+            datastoreContextFactory.getBaseDatastoreContext().getShardInitializationTimeout().multipliedBy(2))
+            .whenCompleteAsync((response, failure) -> {
                 if (failure != null) {
                     handler.onFailure(failure);
                     return;
@@ -1037,8 +1031,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                     case LocalPrimaryShardFound msg -> handler.onLocalPrimaryFound(msg);
                     default -> handler.onUnknownResponse(response);
                 }
-            }
-        }, new Dispatchers(context().system().dispatchers()).getDispatcher(Dispatchers.DispatcherType.Client));
+            }, new Dispatchers(context().system().dispatchers()).getDispatcher(Dispatchers.DispatcherType.Client));
     }
 
     /**
@@ -1449,13 +1442,9 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     private void findLocalShard(final String shardName, final ActorRef sender,
             final Consumer<LocalShardFound> onLocalShardFound) {
-        Timeout findLocalTimeout = new Timeout(datastoreContextFactory.getBaseDatastoreContext()
-                .getShardInitializationTimeout().duration().$times(2));
-
-        Future<Object> futureObj = Patterns.ask(self(), new FindLocalShard(shardName, true), findLocalTimeout);
-        futureObj.onComplete(new OnComplete<>() {
-            @Override
-            public void onComplete(final Throwable failure, final Object response) {
+        Patterns.ask(self(), new FindLocalShard(shardName, true),
+            datastoreContextFactory.getBaseDatastoreContext().getShardInitializationTimeout().multipliedBy(2))
+            .whenCompleteAsync((response, failure) -> {
                 if (failure != null) {
                     LOG.debug("{}: Received failure from FindLocalShard for shard {}", logName(), shardName,
                         failure);
@@ -1480,8 +1469,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                                 shardName, response))), self());
                     }
                 }
-            }
-        }, new Dispatchers(context().system().dispatchers()).getDispatcher(Dispatchers.DispatcherType.Client));
+            }, new Dispatchers(context().system().dispatchers()).getDispatcher(Dispatchers.DispatcherType.Client));
     }
 
     private void changeShardMembersVotingStatus(final ChangeServersVotingStatus changeServersVotingStatus,

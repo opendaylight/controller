@@ -12,15 +12,17 @@ import com.codahale.metrics.Timer;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.lang.invoke.VarHandle;
+import java.time.Duration;
 import java.util.Optional;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.LongAdder;
+import java.util.function.BiConsumer;
 import org.apache.pekko.actor.ActorPath;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.dispatch.Mapper;
-import org.apache.pekko.dispatch.OnComplete;
 import org.apache.pekko.pattern.AskTimeoutException;
 import org.apache.pekko.pattern.Patterns;
 import org.apache.pekko.util.Timeout;
@@ -63,11 +65,11 @@ import scala.concurrent.duration.FiniteDuration;
  * not be passed to actors especially remote actors.
  */
 public class ActorUtils {
-    private static final class AskTimeoutCounter extends OnComplete<Object> implements ExecutionContextExecutor {
+    private static final class AskTimeoutCounter implements BiConsumer<Object, Throwable>, ExecutionContextExecutor {
         private LongAdder ateExceptions = new LongAdder();
 
         @Override
-        public void onComplete(final Throwable failure, final Object success) throws Throwable {
+        public void accept(final Object success, final Throwable failure) {
             if (failure instanceof AskTimeoutException) {
                 ateExceptions.increment();
             }
@@ -121,9 +123,9 @@ public class ActorUtils {
 
     private DatastoreContext datastoreContext;
     private FiniteDuration operationDuration;
-    private Timeout operationTimeout;
+    private Duration operationTimeout;
     private Timeout transactionCommitOperationTimeout;
-    private Timeout shardInitializationTimeout;
+    private Duration shardInitializationTimeout;
 
     private volatile EffectiveModelContext schemaContext;
 
@@ -164,12 +166,12 @@ public class ActorUtils {
     private void setCachedProperties() {
         operationDuration = FiniteDuration.create(datastoreContext.getOperationTimeoutInMillis(),
             TimeUnit.MILLISECONDS);
-        operationTimeout = new Timeout(operationDuration);
+        operationTimeout = Duration.ofMillis(datastoreContext.getOperationTimeoutInMillis());
 
         transactionCommitOperationTimeout = new Timeout(FiniteDuration.create(
                 datastoreContext.getShardTransactionCommitTimeoutInSeconds(), TimeUnit.SECONDS));
 
-        shardInitializationTimeout = new Timeout(datastoreContext.getShardInitializationTimeout().duration().$times(2));
+        shardInitializationTimeout = datastoreContext.getShardInitializationTimeout().multipliedBy(2);
     }
 
     public DatastoreContext getDatastoreContext() {
@@ -220,7 +222,7 @@ public class ActorUtils {
         return schemaContext;
     }
 
-    public Future<PrimaryShardInfo> findPrimaryShardAsync(final String shardName) {
+    public CompletionStage<PrimaryShardInfo> findPrimaryShardAsync(final String shardName) {
         final var ret = primaryShardInfoCache.getIfPresent(shardName);
         if (ret != null) {
             return ret;
@@ -312,8 +314,7 @@ public class ActorUtils {
      */
     @SuppressWarnings("checkstyle:IllegalCatch")
     public Object executeOperation(final ActorRef actor, final Object message) {
-        Future<Object> future = executeOperationAsync(actor, message, operationTimeout);
-
+        final var future = executeOperationAsync(actor, message, operationTimeout);
         try {
             return Await.result(future, operationDuration);
         } catch (Exception e) {
@@ -331,7 +332,7 @@ public class ActorUtils {
      */
     @SuppressWarnings("checkstyle:IllegalCatch")
     public Object executeOperation(final ActorSelection actor, final Object message) {
-        Future<Object> future = executeOperationAsync(actor, message);
+        final var future = executeOperationAsync(actor, message);
 
         try {
             return Await.result(future, operationDuration);
@@ -341,7 +342,8 @@ public class ActorUtils {
         }
     }
 
-    public Future<Object> executeOperationAsync(final ActorRef actor, final Object message, final Timeout timeout) {
+    public CompletionStage<Object> executeOperationAsync(final ActorRef actor, final Object message,
+            final Duration timeout) {
         Preconditions.checkArgument(actor != null, "actor must not be null");
         Preconditions.checkArgument(message != null, "message must not be null");
 
@@ -355,10 +357,10 @@ public class ActorUtils {
      * @param actor the ActorSelection
      * @param message the message to send
      * @param timeout the operation timeout
-     * @return a Future containing the eventual result
+     * @return a {@link CompletionStage} containing the eventual result
      */
-    public Future<Object> executeOperationAsync(final ActorSelection actor, final Object message,
-            final Timeout timeout) {
+    public CompletionStage<Object> executeOperationAsync(final ActorSelection actor, final Object message,
+            final Duration timeout) {
         Preconditions.checkArgument(actor != null, "actor must not be null");
         Preconditions.checkArgument(message != null, "message must not be null");
 
@@ -372,9 +374,9 @@ public class ActorUtils {
      *
      * @param actor the ActorSelection
      * @param message the message to send
-     * @return a Future containing the eventual result
+     * @return a {@link CompletionStage} containing the eventual result
      */
-    public Future<Object> executeOperationAsync(final ActorSelection actor, final Object message) {
+    public CompletionStage<Object> executeOperationAsync(final ActorSelection actor, final Object message) {
         return executeOperationAsync(actor, message, operationTimeout);
     }
 
@@ -416,7 +418,7 @@ public class ActorUtils {
         return operationDuration;
     }
 
-    public Timeout getOperationTimeout() {
+    public Duration getOperationTimeout() {
         return operationTimeout;
     }
 
@@ -512,13 +514,14 @@ public class ActorUtils {
         return shardStrategyFactory;
     }
 
-    protected Future<Object> doAsk(final ActorRef actorRef, final Object message, final Timeout timeout) {
+    protected CompletionStage<Object> doAsk(final ActorRef actorRef, final Object message, final Duration timeout) {
         return Patterns.ask(actorRef, message, timeout);
     }
 
-    protected Future<Object> doAsk(final ActorSelection actorRef, final Object message, final Timeout timeout) {
+    protected CompletionStage<Object> doAsk(final ActorSelection actorRef, final Object message,
+            final Duration timeout) {
         final var ret = Patterns.ask(actorRef, message, timeout);
-        ret.onComplete(askTimeoutCounter, askTimeoutCounter);
+        ret.whenCompleteAsync(askTimeoutCounter, askTimeoutCounter);
         return ret;
     }
 
