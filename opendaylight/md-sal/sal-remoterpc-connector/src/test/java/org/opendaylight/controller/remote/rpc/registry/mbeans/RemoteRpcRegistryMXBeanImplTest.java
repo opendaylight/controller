@@ -55,7 +55,7 @@ public class RemoteRpcRegistryMXBeanImplTest {
         final DOMRpcIdentifier localRpcIdentifier = DOMRpcIdentifier.create(
                 LOCAL_QNAME, YangInstanceIdentifier.of(LOCAL_QNAME));
 
-        buckets = Lists.newArrayList(emptyRpcIdentifier, localRpcIdentifier);
+        buckets = List.of(emptyRpcIdentifier, localRpcIdentifier);
 
         final RemoteOpsProviderConfig config = new RemoteOpsProviderConfig.Builder("system").build();
         final TestKit invoker = new TestKit(system);
@@ -72,7 +72,7 @@ public class RemoteRpcRegistryMXBeanImplTest {
 
     @After
     public void tearDown() {
-        TestKit.shutdownActorSystem(system, Boolean.TRUE);
+        TestKit.shutdownActorSystem(system, true);
     }
 
     @Test
@@ -85,7 +85,7 @@ public class RemoteRpcRegistryMXBeanImplTest {
 
     @Test
     public void testGetGlobalRpc() {
-        testActor.tell(new RpcRegistry.Messages.AddOrUpdateRoutes(Lists.newArrayList(buckets)), ActorRef.noSender());
+        testActor.tell(new RpcRegistry.AddOrUpdateRoutes(buckets), ActorRef.noSender());
         final Set<String> globalRpc = mxBean.getGlobalRpc();
 
         assertNotNull(globalRpc);
@@ -105,7 +105,7 @@ public class RemoteRpcRegistryMXBeanImplTest {
 
     @Test
     public void testGetLocalRegisteredRoutedRpc() {
-        testActor.tell(new RpcRegistry.Messages.AddOrUpdateRoutes(Lists.newArrayList(buckets)), ActorRef.noSender());
+        testActor.tell(new RpcRegistry.AddOrUpdateRoutes(buckets), ActorRef.noSender());
         final Set<String> localRegisteredRoutedRpc = mxBean.getLocalRegisteredRoutedRpc();
 
         assertNotNull(localRegisteredRoutedRpc);
@@ -125,7 +125,7 @@ public class RemoteRpcRegistryMXBeanImplTest {
 
     @Test
     public void testFindRpcByName() {
-        testActor.tell(new RpcRegistry.Messages.AddOrUpdateRoutes(Lists.newArrayList(buckets)), ActorRef.noSender());
+        testActor.tell(new RpcRegistry.AddOrUpdateRoutes(buckets), ActorRef.noSender());
         final Map<String, String> rpcByName = mxBean.findRpcByName("");
 
         assertNotNull(rpcByName);
@@ -143,7 +143,7 @@ public class RemoteRpcRegistryMXBeanImplTest {
 
     @Test
     public void testFindRpcByRoute() {
-        testActor.tell(new RpcRegistry.Messages.AddOrUpdateRoutes(Lists.newArrayList(buckets)), ActorRef.noSender());
+        testActor.tell(new RpcRegistry.AddOrUpdateRoutes(buckets), ActorRef.noSender());
         final Map<String, String> rpcByRoute = mxBean.findRpcByRoute("");
 
         assertNotNull(rpcByRoute);
@@ -159,7 +159,7 @@ public class RemoteRpcRegistryMXBeanImplTest {
 
     @Test
     public void testGetBucketVersions() {
-        testActor.tell(new RpcRegistry.Messages.AddOrUpdateRoutes(Lists.newArrayList(buckets)), ActorRef.noSender());
+        testActor.tell(new RpcRegistry.AddOrUpdateRoutes(Lists.newArrayList(buckets)), ActorRef.noSender());
         final String bucketVersions = mxBean.getBucketVersions();
 
         assertTrue(bucketVersions.contains(testActor.provider().getDefaultAddress().toString()));

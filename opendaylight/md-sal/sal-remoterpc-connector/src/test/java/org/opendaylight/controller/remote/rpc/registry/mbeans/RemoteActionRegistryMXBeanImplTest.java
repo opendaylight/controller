@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.remote.rpc.registry.mbeans;
 
-import com.google.common.collect.Lists;
 import com.typesafe.config.ConfigFactory;
 import java.util.Collections;
 import java.util.List;
@@ -55,7 +54,7 @@ public class RemoteActionRegistryMXBeanImplTest {
         final DOMActionInstance localActionIdentifier = DOMActionInstance.of(
                 LOCAL_SCHEMA_PATH, LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.of(LOCAL_QNAME));
 
-        buckets = Lists.newArrayList(emptyActionIdentifier, localActionIdentifier);
+        buckets = List.of(emptyActionIdentifier, localActionIdentifier);
 
         final RemoteOpsProviderConfig config = new RemoteOpsProviderConfig.Builder("system").build();
         final TestKit invoker = new TestKit(system);
@@ -72,7 +71,7 @@ public class RemoteActionRegistryMXBeanImplTest {
 
     @After
     public void tearDown() {
-        TestKit.shutdownActorSystem(system, Boolean.TRUE);
+        TestKit.shutdownActorSystem(system, true);
     }
 
     @Test
@@ -85,8 +84,7 @@ public class RemoteActionRegistryMXBeanImplTest {
 
     @Test
     public void testGetLocalRegisteredRoutedAction() {
-        testActor.tell(new ActionRegistry.Messages.UpdateActions(Lists.newArrayList(buckets),
-                Collections.emptyList()), ActorRef.noSender());
+        testActor.tell(new ActionRegistry.UpdateActions(buckets, List.of()), ActorRef.noSender());
         final Set<String> localRegisteredRoutedAction = mxBean.getLocalRegisteredAction();
 
         Assert.assertNotNull(localRegisteredRoutedAction);
@@ -107,8 +105,7 @@ public class RemoteActionRegistryMXBeanImplTest {
 
     @Test
     public void testFindActionByName() {
-        testActor.tell(new ActionRegistry.Messages.UpdateActions(Lists.newArrayList(buckets),
-                Collections.emptyList()), ActorRef.noSender());
+        testActor.tell(new ActionRegistry.UpdateActions(buckets, List.of()), ActorRef.noSender());
         final Map<String, String> rpcByName = mxBean.findActionByName("");
 
         Assert.assertNotNull(rpcByName);
@@ -126,8 +123,7 @@ public class RemoteActionRegistryMXBeanImplTest {
 
     @Test
     public void testFindActionByRoute() {
-        testActor.tell(new ActionRegistry.Messages.UpdateActions(Lists.newArrayList(buckets),
-                Collections.emptyList()), ActorRef.noSender());
+        testActor.tell(new ActionRegistry.UpdateActions(buckets, List.of()), ActorRef.noSender());
         final Map<String, String> rpcByRoute = mxBean.findActionByRoute("");
 
         Assert.assertNotNull(rpcByRoute);
@@ -143,8 +139,7 @@ public class RemoteActionRegistryMXBeanImplTest {
 
     @Test
     public void testGetBucketVersions() {
-        testActor.tell(new ActionRegistry.Messages.UpdateActions(Lists.newArrayList(buckets),
-                Collections.emptyList()), ActorRef.noSender());
+        testActor.tell(new ActionRegistry.UpdateActions(buckets, List.of()), ActorRef.noSender());
         final String bucketVersions = mxBean.getBucketVersions();
 
         Assert.assertTrue(bucketVersions.contains(testActor.provider().getDefaultAddress().toString()));

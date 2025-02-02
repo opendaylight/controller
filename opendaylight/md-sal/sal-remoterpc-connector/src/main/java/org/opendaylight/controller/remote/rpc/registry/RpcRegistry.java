@@ -18,20 +18,19 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Address;
 import org.apache.pekko.actor.Props;
 import org.opendaylight.controller.remote.rpc.RemoteOpsProviderConfig;
-import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.AddOrUpdateRoutes;
-import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.RemoveRoutes;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Bucket;
 import org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreAccess;
 import org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreActor;
 import org.opendaylight.controller.remote.rpc.registry.mbeans.RemoteRpcRegistryMXBeanImpl;
 import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Registry to look up cluster nodes that have registered for a given RPC.
@@ -40,13 +39,14 @@ import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
  * cluster-wide information.
  */
 public class RpcRegistry extends BucketStoreActor<RoutingTable> {
+    private static final Logger LOG = LoggerFactory.getLogger(RpcRegistry.class);
+
     private final ActorRef rpcRegistrar;
     private RemoteRpcRegistryMXBeanImpl mxBean;
 
     public RpcRegistry(final RemoteOpsProviderConfig config, final ActorRef rpcInvoker, final ActorRef rpcRegistrar) {
         super(config, config.getRpcRegistryPersistenceId(), new RoutingTable(rpcInvoker, ImmutableSet.of()));
         this.rpcRegistrar = requireNonNull(rpcRegistrar);
-
     }
 
     /**
@@ -60,6 +60,11 @@ public class RpcRegistry extends BucketStoreActor<RoutingTable> {
     public static Props props(final RemoteOpsProviderConfig config, final ActorRef rpcInvoker,
                               final ActorRef rpcRegistrar) {
         return Props.create(RpcRegistry.class, config, rpcInvoker, rpcRegistrar);
+    }
+
+    @Override
+    protected Logger log() {
+        return LOG;
     }
 
     @Override
@@ -80,12 +85,10 @@ public class RpcRegistry extends BucketStoreActor<RoutingTable> {
 
     @Override
     protected void handleCommand(final Object message) throws Exception {
-        if (message instanceof AddOrUpdateRoutes addRoutes) {
-            receiveAddRoutes(addRoutes);
-        } else if (message instanceof RemoveRoutes removeRoutes) {
-            receiveRemoveRoutes(removeRoutes);
-        } else {
-            super.handleCommand(message);
+        switch (message) {
+            case AddOrUpdateRoutes addRoutes -> receiveAddRoutes(addRoutes);
+            case RemoveRoutes removeRoutes -> receiveRemoveRoutes(removeRoutes);
+            default -> super.handleCommand(message);
         }
     }
 
@@ -106,24 +109,22 @@ public class RpcRegistry extends BucketStoreActor<RoutingTable> {
 
     @Override
     protected void onBucketRemoved(final Address address, final Bucket<RoutingTable> bucket) {
-        rpcRegistrar.tell(new Messages.UpdateRemoteEndpoints(ImmutableMap.of(address, Optional.empty())),
-                ActorRef.noSender());
+        rpcRegistrar.tell(new UpdateRemoteEndpoints(ImmutableMap.of(address, Optional.empty())), ActorRef.noSender());
     }
 
     @Override
     protected void onBucketsUpdated(final Map<Address, Bucket<RoutingTable>> buckets) {
-        final Map<Address, Optional<RemoteRpcEndpoint>> endpoints = new HashMap<>(buckets.size());
+        final var endpoints = HashMap.<Address, Optional<RemoteRpcEndpoint>>newHashMap(buckets.size());
 
-        for (Entry<Address, Bucket<RoutingTable>> e : buckets.entrySet()) {
-            final RoutingTable table = e.getValue().getData();
-
-            final Collection<DOMRpcIdentifier> rpcs = table.getItems();
-            endpoints.put(e.getKey(), rpcs.isEmpty() ? Optional.empty()
+        for (var eentry : buckets.entrySet()) {
+            final var table = eentry.getValue().getData();
+            final var rpcs = table.getItems();
+            endpoints.put(eentry.getKey(), rpcs.isEmpty() ? Optional.empty()
                     : Optional.of(new RemoteRpcEndpoint(table.getInvoker(), rpcs)));
         }
 
         if (!endpoints.isEmpty()) {
-            rpcRegistrar.tell(new Messages.UpdateRemoteEndpoints(endpoints), ActorRef.noSender());
+            rpcRegistrar.tell(new UpdateRemoteEndpoints(endpoints), ActorRef.noSender());
         }
     }
 
@@ -146,54 +147,48 @@ public class RpcRegistry extends BucketStoreActor<RoutingTable> {
         }
     }
 
-    /**
-     * All messages used by the RpcRegistry.
-     */
-    public static class Messages {
-        abstract static class AbstractRouteMessage {
-            final List<DOMRpcIdentifier> rpcRouteIdentifiers;
+    abstract static class AbstractRouteMessage {
+        final List<DOMRpcIdentifier> rpcRouteIdentifiers;
 
-            AbstractRouteMessage(final Collection<DOMRpcIdentifier> rpcRouteIdentifiers) {
-                checkArgument(rpcRouteIdentifiers != null && !rpcRouteIdentifiers.isEmpty(),
-                        "Route Identifiers must be supplied");
-                this.rpcRouteIdentifiers = ImmutableList.copyOf(rpcRouteIdentifiers);
-            }
-
-            List<DOMRpcIdentifier> getRouteIdentifiers() {
-                return rpcRouteIdentifiers;
-            }
-
-            @Override
-            public String toString() {
-                return "ContainsRoute{" + "routeIdentifiers=" + rpcRouteIdentifiers + '}';
-            }
+        AbstractRouteMessage(final Collection<DOMRpcIdentifier> rpcRouteIdentifiers) {
+            checkArgument(rpcRouteIdentifiers != null && !rpcRouteIdentifiers.isEmpty(),
+                "Route Identifiers must be supplied");
+            this.rpcRouteIdentifiers = ImmutableList.copyOf(rpcRouteIdentifiers);
         }
 
-        public static final class AddOrUpdateRoutes extends Messages.AbstractRouteMessage {
-            public AddOrUpdateRoutes(final Collection<DOMRpcIdentifier> rpcRouteIdentifiers) {
-                super(rpcRouteIdentifiers);
-            }
-
+        List<DOMRpcIdentifier> getRouteIdentifiers() {
+            return rpcRouteIdentifiers;
         }
 
-        public static final class RemoveRoutes extends AbstractRouteMessage {
-            public RemoveRoutes(final Collection<DOMRpcIdentifier> rpcRouteIdentifiers) {
-                super(rpcRouteIdentifiers);
-            }
+        @Override
+        public String toString() {
+            return "ContainsRoute{" + "routeIdentifiers=" + rpcRouteIdentifiers + '}';
+        }
+    }
+
+    public static final class AddOrUpdateRoutes extends AbstractRouteMessage {
+        public AddOrUpdateRoutes(final Collection<DOMRpcIdentifier> rpcRouteIdentifiers) {
+            super(rpcRouteIdentifiers);
         }
 
-        public static final class UpdateRemoteEndpoints {
-            private final Map<Address, Optional<RemoteRpcEndpoint>> rpcEndpoints;
+    }
 
+    public static final class RemoveRoutes extends AbstractRouteMessage {
+        public RemoveRoutes(final Collection<DOMRpcIdentifier> rpcRouteIdentifiers) {
+            super(rpcRouteIdentifiers);
+        }
+    }
 
-            @VisibleForTesting
-            public UpdateRemoteEndpoints(final Map<Address, Optional<RemoteRpcEndpoint>> rpcEndpoints) {
-                this.rpcEndpoints = ImmutableMap.copyOf(rpcEndpoints);
-            }
+    public static final class UpdateRemoteEndpoints {
+        private final ImmutableMap<Address, Optional<RemoteRpcEndpoint>> rpcEndpoints;
 
-            public Map<Address, Optional<RemoteRpcEndpoint>> getRpcEndpoints() {
-                return rpcEndpoints;
-            }
+        @VisibleForTesting
+        public UpdateRemoteEndpoints(final Map<Address, Optional<RemoteRpcEndpoint>> rpcEndpoints) {
+            this.rpcEndpoints = ImmutableMap.copyOf(rpcEndpoints);
+        }
+
+        public Map<Address, Optional<RemoteRpcEndpoint>> getRpcEndpoints() {
+            return rpcEndpoints;
         }
     }
 }
