@@ -20,8 +20,8 @@ import com.google.common.collect.Range;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
@@ -137,7 +137,7 @@ public class Shard extends RaftActor {
     // FIXME: shard names should be encapsulated in their own class and this should be exposed as a constant.
     public static final String DEFAULT_NAME = "default";
 
-    private static final Collection<ABIVersion> SUPPORTED_ABIVERSIONS;
+    private static final List<ABIVersion> SUPPORTED_ABIVERSIONS;
 
     // Make sure to keep this in sync with the journal configuration in factory-pekko.conf
     public static final String NON_PERSISTENT_JOURNAL_ID = "pekko.persistence.non-persistent.journal";
@@ -447,7 +447,7 @@ public class Shard extends RaftActor {
 
     // Acquire our frontend tracking handle and verify generation matches
     private @Nullable LeaderFrontendState findFrontend(final ClientIdentifier clientId) throws RequestException {
-        final LeaderFrontendState existing = knownFrontends.get(clientId.getFrontendId());
+        final var existing = knownFrontends.get(clientId.getFrontendId());
         if (existing != null) {
             final int cmp = Long.compareUnsigned(existing.getIdentifier().getGeneration(), clientId.getGeneration());
             if (cmp == 0) {
@@ -471,7 +471,7 @@ public class Shard extends RaftActor {
     }
 
     private LeaderFrontendState getFrontend(final ClientIdentifier clientId) throws RequestException {
-        final LeaderFrontendState ret = findFrontend(clientId);
+        final var ret = findFrontend(clientId);
         if (ret != null) {
             return ret;
         }
@@ -481,8 +481,8 @@ public class Shard extends RaftActor {
     }
 
     private static @NonNull ABIVersion selectVersion(final ConnectClientRequest message) {
-        final Range<ABIVersion> clientRange = Range.closed(message.getMinVersion(), message.getMaxVersion());
-        for (ABIVersion v : SUPPORTED_ABIVERSIONS) {
+        final var clientRange = Range.closed(message.getMinVersion(), message.getMaxVersion());
+        for (var v : SUPPORTED_ABIVERSIONS) {
             if (clientRange.contains(v)) {
                 return v;
             }
@@ -495,9 +495,9 @@ public class Shard extends RaftActor {
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     private void handleConnectClient(final ConnectClientRequest message) {
+        final var clientId = message.getTarget();
         try {
-            final ClientIdentifier clientId = message.getTarget();
-            final LeaderFrontendState existing = findFrontend(clientId);
+            final var existing = findFrontend(clientId);
             if (existing != null) {
                 existing.touch();
             }
@@ -521,8 +521,7 @@ public class Shard extends RaftActor {
 
             frontend.reconnect();
             message.getReplyTo().tell(new ConnectClientSuccess(message.getTarget(), message.getSequence(), self(),
-                ImmutableList.of(), store.getDataTree(), CLIENT_MAX_MESSAGES).toVersion(selectedVersion),
-                ActorRef.noSender());
+                List.of(), store.getDataTree(), CLIENT_MAX_MESSAGES).toVersion(selectedVersion), ActorRef.noSender());
         } catch (RequestException | RuntimeException e) {
             message.getReplyTo().tell(new Failure(e), ActorRef.noSender());
         }
@@ -634,11 +633,8 @@ public class Shard extends RaftActor {
 
     @Override
     protected final RaftActorRecoveryCohort getRaftActorRecoveryCohort() {
-        if (restoreFromSnapshot == null) {
-            return ShardRecoveryCoordinator.create(store, memberId(), LOG);
-        }
-
-        return ShardRecoveryCoordinator.forSnapshot(store, memberId(), LOG, restoreFromSnapshot.getSnapshot());
+        return restoreFromSnapshot == null ? ShardRecoveryCoordinator.create(store, memberId())
+            : ShardRecoveryCoordinator.forSnapshot(store, memberId(), restoreFromSnapshot.getSnapshot());
     }
 
     @Override

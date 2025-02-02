@@ -11,7 +11,6 @@ import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import java.io.File;
-import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
 import org.opendaylight.controller.cluster.datastore.utils.NormalizedNodeXMLOutput;
 import org.opendaylight.controller.cluster.raft.RaftActorRecoveryCohort;
@@ -19,6 +18,7 @@ import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Coordinates persistence recovery of journal log entries and snapshots for a shard. Each snapshot
@@ -31,8 +31,8 @@ import org.slf4j.Logger;
  */
 abstract class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
     private static final class Simple extends ShardRecoveryCoordinator {
-        Simple(final ShardDataTree store, final String shardName, final Logger log) {
-            super(store, shardName, log);
+        Simple(final ShardDataTree store, final String memberId) {
+            super(store, memberId);
         }
 
         @Override
@@ -44,8 +44,8 @@ abstract class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
     private static final class WithSnapshot extends ShardRecoveryCoordinator {
         private final Snapshot restoreFromSnapshot;
 
-        WithSnapshot(final ShardDataTree store, final String shardName, final Logger log, final Snapshot snapshot) {
-            super(store, shardName, log);
+        WithSnapshot(final ShardDataTree store, final String memberId, final Snapshot snapshot) {
+            super(store, memberId);
             restoreFromSnapshot = requireNonNull(snapshot);
         }
 
@@ -55,30 +55,30 @@ abstract class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
         }
     }
 
+    private static final Logger LOG = LoggerFactory.getLogger(ShardRecoveryCoordinator.class);
+
     private final ShardDataTree store;
-    private final String shardName;
-    private final Logger log;
+    private final String memberId;
 
     private boolean open;
 
-    ShardRecoveryCoordinator(final ShardDataTree store, final String shardName, final Logger log) {
+    ShardRecoveryCoordinator(final ShardDataTree store, final String memberId) {
         this.store = requireNonNull(store);
-        this.shardName = requireNonNull(shardName);
-        this.log = requireNonNull(log);
+        this.memberId = requireNonNull(memberId);
     }
 
-    static ShardRecoveryCoordinator create(final ShardDataTree store, final String shardName, final Logger log) {
-        return new Simple(store, shardName, log);
+    static ShardRecoveryCoordinator create(final ShardDataTree store, final String memberId) {
+        return new Simple(store, memberId);
     }
 
-    static ShardRecoveryCoordinator forSnapshot(final ShardDataTree store, final String shardName, final Logger log,
+    static ShardRecoveryCoordinator forSnapshot(final ShardDataTree store, final String memberId,
             final Snapshot snapshot) {
-        return new WithSnapshot(store, shardName, log, snapshot);
+        return new WithSnapshot(store, memberId, snapshot);
     }
 
     @Override
     public void startLogRecoveryBatch(final int maxBatchSize) {
-        log.debug("{}: starting log recovery batch with max size {}", shardName, maxBatchSize);
+        LOG.debug("{}: starting log recovery batch with max size {}", memberId, maxBatchSize);
         open = true;
     }
 
@@ -90,9 +90,9 @@ abstract class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
         try {
             store.applyRecoveryPayload(payload);
         } catch (Exception e) {
-            log.error("{}: failed to apply payload {}", shardName, payload, e);
+            LOG.error("{}: failed to apply payload {}", memberId, payload, e);
             throw new IllegalStateException(String.format("%s: Failed to apply recovery payload %s",
-                shardName, payload), e);
+                memberId, payload), e);
         }
     }
 
@@ -106,8 +106,8 @@ abstract class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
     }
 
     private File writeRoot(final String kind, final NormalizedNode node) {
-        final File file = new File(System.getProperty("karaf.data", "."),
-            "failed-recovery-" + kind + "-" + shardName + ".xml");
+        final var file = new File(System.getProperty("karaf.data", "."),
+            "failed-recovery-" + kind + "-" + memberId + ".xml");
         NormalizedNodeXMLOutput.toFile(file, node);
         return file;
     }
@@ -120,21 +120,20 @@ abstract class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
     public void applyRecoverySnapshot(final Snapshot.State snapshotState) {
-        if (!(snapshotState instanceof ShardSnapshotState)) {
-            log.debug("{}: applyRecoverySnapshot ignoring snapshot: {}", shardName, snapshotState);
+        if (!(snapshotState instanceof ShardSnapshotState shardSnapshotState)) {
+            LOG.debug("{}: applyRecoverySnapshot ignoring snapshot: {}", memberId, snapshotState);
             return;
         }
 
-        log.debug("{}: Applying recovered snapshot", shardName);
-        final ShardSnapshotState shardSnapshotState = (ShardSnapshotState)snapshotState;
+        LOG.debug("{}: Applying recovered snapshot", memberId);
         try {
             store.applyRecoverySnapshot(shardSnapshotState);
         } catch (Exception e) {
-            final ShardDataTreeSnapshot shardSnapshot = shardSnapshotState.getSnapshot();
-            final File f = writeRoot("snapshot", shardSnapshot.getRootNode().orElse(null));
-            throw new IllegalStateException(String.format(
-                    "%s: Failed to apply recovery snapshot %s. Node data was written to file %s",
-                    shardName, shardSnapshot, f), e);
+            final var shardSnapshot = shardSnapshotState.getSnapshot();
+            final var file = writeRoot("snapshot", shardSnapshot.getRootNode().orElse(null));
+            throw new IllegalStateException(
+                "%s: Failed to apply recovery snapshot %s. Node data was written to file %s".formatted(
+                    memberId, shardSnapshot, file), e);
         }
     }
 }

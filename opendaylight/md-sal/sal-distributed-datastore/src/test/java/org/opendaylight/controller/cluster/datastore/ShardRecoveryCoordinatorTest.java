@@ -34,12 +34,8 @@ import org.opendaylight.yangtools.yang.data.tree.api.SchemaValidationFailedExcep
 import org.opendaylight.yangtools.yang.data.tree.api.TreeType;
 import org.opendaylight.yangtools.yang.data.tree.impl.di.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ShardRecoveryCoordinatorTest extends AbstractTest {
-    private static final Logger FOO_LOGGER = LoggerFactory.getLogger("foo");
-
     private ShardDataTree peopleDataTree;
     private EffectiveModelContext peopleSchemaContext;
     private EffectiveModelContext carsSchemaContext;
@@ -53,7 +49,7 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
         final Shard mockShard = Mockito.mock(Shard.class);
 
         peopleDataTree = new ShardDataTree(mockShard, peopleSchemaContext, TreeType.OPERATIONAL);
-        coordinator = ShardRecoveryCoordinator.create(peopleDataTree, "foobar", FOO_LOGGER);
+        coordinator = ShardRecoveryCoordinator.create(peopleDataTree, "foobar");
         coordinator.startLogRecoveryBatch(10);
     }
 
