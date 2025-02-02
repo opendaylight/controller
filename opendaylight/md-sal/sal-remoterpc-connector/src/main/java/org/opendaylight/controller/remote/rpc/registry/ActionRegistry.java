@@ -8,6 +8,7 @@
 package org.opendaylight.controller.remote.rpc.registry;
 
 import static java.util.Objects.requireNonNull;
+import static org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActor.LOG;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
@@ -41,7 +42,7 @@ public class ActionRegistry extends BucketStoreActor<ActionRoutingTable> {
 
     public ActionRegistry(final RemoteOpsProviderConfig config, final ActorRef rpcInvoker,
                           final ActorRef rpcRegistrar) {
-        super(config, config.getRpcRegistryPersistenceId(), new ActionRoutingTable(rpcInvoker, ImmutableSet.of()));
+        super(config, config.getActionRegistryPersistenceId(), new ActionRoutingTable(rpcInvoker, ImmutableSet.of()));
         this.rpcRegistrar = requireNonNull(rpcRegistrar);
     }
 
