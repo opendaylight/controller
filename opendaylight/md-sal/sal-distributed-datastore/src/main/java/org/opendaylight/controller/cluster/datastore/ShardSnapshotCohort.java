@@ -55,57 +55,51 @@ final class ShardSnapshotCohort implements RaftActorSnapshotCohort {
 
     static ShardSnapshotCohort create(final ActorContext actorContext, final MemberName memberName,
             final ShardDataTree store, final Logger log, final String logId, final DatastoreContext context) {
-        final LocalHistoryIdentifier applyHistoryId = new LocalHistoryIdentifier(ClientIdentifier.create(
+        final var applyHistoryId = new LocalHistoryIdentifier(ClientIdentifier.create(
             FrontendIdentifier.create(memberName, SNAPSHOT_APPLY), 0), 0);
-        final String snapshotActorName = "shard-" + memberName.getName() + ':' + "snapshot-read";
-
-        final InputOutputStreamFactory streamFactory = context.isUseLz4Compression()
+        final var streamFactory = context.isUseLz4Compression()
                 ? InputOutputStreamFactory.lz4("256KB") : InputOutputStreamFactory.simple();
-        // Create a snapshot actor. This actor will act as a worker to offload snapshot serialization for all
-        // requests.
-        final ActorRef snapshotActor = actorContext.actorOf(ShardSnapshotActor.props(streamFactory),
-                snapshotActorName);
-
+        // Create a snapshot actor. This actor will act as a worker to offload snapshot serialization for all requests.
+        final var snapshotActor = actorContext.actorOf(ShardSnapshotActor.props(streamFactory),
+            "shard-" + memberName.getName() + ':' + "snapshot-read");
         return new ShardSnapshotCohort(streamFactory, applyHistoryId, snapshotActor, store, log, logId);
     }
 
     @Override
     public void createSnapshot(final ActorRef actorRef, final Optional<OutputStream> installSnapshotStream) {
         // Forward the request to the snapshot actor
-        final ShardDataTreeSnapshot snapshot = store.takeStateSnapshot();
+        final var snapshot = store.takeStateSnapshot();
         log.debug("{}: requesting serialization of snapshot {}", logId, snapshot);
-
         ShardSnapshotActor.requestSnapshot(snapshotActor, snapshot, installSnapshotStream, actorRef);
     }
 
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
     public void applySnapshot(final Snapshot.State snapshotState) {
-        if (!(snapshotState instanceof ShardSnapshotState)) {
+        if (!(snapshotState instanceof ShardSnapshotState shardSnapshotState)) {
             log.debug("{}: applySnapshot ignoring snapshot: {}", logId, snapshotState);
+            return;
         }
 
-        final ShardDataTreeSnapshot snapshot = ((ShardSnapshotState)snapshotState).getSnapshot();
+        final var snapshot = shardSnapshotState.getSnapshot();
 
         // Since this will be done only on Recovery or when this actor is a Follower
         // we can safely commit everything in here. We not need to worry about event notifications
         // as they would have already been disabled on the follower
 
         log.info("{}: Applying snapshot", logId);
-
         try {
             store.applySnapshot(snapshot);
         } catch (Exception e) {
             log.error("{}: Failed to apply snapshot {}", logId, snapshot, e);
             return;
         }
-
         log.info("{}: Done applying snapshot", logId);
     }
 
     @Override
     public State deserializeSnapshot(final ByteSource snapshotBytes) throws IOException {
-        try (ObjectInputStream in = new ObjectInputStream(streamFactory.createInputStream(snapshotBytes))) {
+        try (var in = new ObjectInputStream(streamFactory.createInputStream(snapshotBytes))) {
             return ShardDataTreeSnapshot.deserialize(in);
         }
     }
