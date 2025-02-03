@@ -23,6 +23,8 @@ import org.opendaylight.mdsal.dom.api.DOMActionService;
 import org.opendaylight.mdsal.dom.api.DOMRpcProviderService;
 import org.opendaylight.mdsal.dom.api.DOMRpcService;
 import org.opendaylight.yangtools.concepts.Registration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
@@ -30,6 +32,8 @@ import scala.concurrent.duration.FiniteDuration;
  * {@link OpsListener} with the local {@link DOMRpcService}.
  */
 public class OpsManager extends AbstractUntypedActor {
+    private static final Logger LOG = LoggerFactory.getLogger(OpsManager.class);
+
     private final DOMRpcProviderService rpcProvisionRegistry;
     private final RemoteOpsProviderConfig config;
     private final DOMRpcService rpcServices;
@@ -42,9 +46,10 @@ public class OpsManager extends AbstractUntypedActor {
     private ActorRef rpcRegistry;
     private ActorRef opsRegistrar;
 
-    OpsManager(final DOMRpcProviderService rpcProvisionRegistry, final DOMRpcService rpcServices,
+    OpsManager(final String logName, final DOMRpcProviderService rpcProvisionRegistry, final DOMRpcService rpcServices,
                final RemoteOpsProviderConfig config, final DOMActionProviderService actionProviderService,
                final DOMActionService actionService) {
+        super(logName);
         this.rpcProvisionRegistry = requireNonNull(rpcProvisionRegistry);
         this.rpcServices = requireNonNull(rpcServices);
         this.config = requireNonNull(config);
@@ -52,41 +57,39 @@ public class OpsManager extends AbstractUntypedActor {
         this.actionService = requireNonNull(actionService);
     }
 
-    public static Props props(final DOMRpcProviderService rpcProvisionRegistry, final DOMRpcService rpcServices,
-                              final RemoteOpsProviderConfig config,
-                              final DOMActionProviderService actionProviderService,
-                              final DOMActionService actionService) {
-        requireNonNull(rpcProvisionRegistry, "RpcProviderService can not be null!");
-        requireNonNull(rpcServices, "RpcService can not be null!");
-        requireNonNull(config, "RemoteOpsProviderConfig can not be null!");
-        requireNonNull(actionProviderService, "ActionProviderService can not be null!");
-        requireNonNull(actionService, "ActionService can not be null!");
-        return Props.create(OpsManager.class, rpcProvisionRegistry, rpcServices, config,
-                actionProviderService, actionService);
+    public static Props props(final String logName, final DOMRpcProviderService rpcProvisionRegistry,
+            final DOMRpcService rpcServices, final RemoteOpsProviderConfig config,
+            final DOMActionProviderService actionProviderService, final DOMActionService actionService) {
+        return Props.create(OpsManager.class, logName,
+            requireNonNull(rpcProvisionRegistry, "RpcProviderService can not be null!"),
+            requireNonNull(rpcServices, "RpcService can not be null!"),
+            requireNonNull(config, "RemoteOpsProviderConfig can not be null!"),
+            requireNonNull(actionProviderService, "ActionProviderService can not be null!"),
+            requireNonNull(actionService, "ActionService can not be null!"));
     }
 
     @Override
     public void preStart() throws Exception {
         super.preStart();
 
-        opsInvoker = getContext().actorOf(OpsInvoker.props(rpcServices, actionService)
+        opsInvoker = getContext().actorOf(OpsInvoker.props(logName, rpcServices, actionService)
                 .withMailbox(config.getMailBoxName()), config.getRpcBrokerName());
-        LOG.debug("Listening for RPC invocation requests with {}", opsInvoker);
+        LOG.debug("{}: Listening for RPC invocation requests with {}", logName, opsInvoker);
 
         opsRegistrar = getContext().actorOf(OpsRegistrar.props(config, rpcProvisionRegistry, actionProvisionRegistry)
                 .withMailbox(config.getMailBoxName()), config.getRpcRegistrarName());
-        LOG.debug("Registering remote RPCs with {}", opsRegistrar);
+        LOG.debug("{}: Registering remote RPCs with {}", logName, opsRegistrar);
 
         rpcRegistry = getContext().actorOf(RpcRegistry.props(config, opsInvoker, opsRegistrar)
                 .withMailbox(config.getMailBoxName()), config.getRpcRegistryName());
-        LOG.debug("Propagating RPC information with {}", rpcRegistry);
+        LOG.debug("{}: Propagating RPC information with {}", logName, rpcRegistry);
 
         actionRegistry = getContext().actorOf(ActionRegistry.props(config, opsInvoker, opsRegistrar)
                 .withMailbox(config.getMailBoxName()), config.getActionRegistryName());
-        LOG.debug("Propagating action information with {}", actionRegistry);
+        LOG.debug("{}: Propagating action information with {}", logName, actionRegistry);
 
-        final OpsListener opsListener = new OpsListener(rpcRegistry, actionRegistry);
-        LOG.debug("Registering local availability listener {}", opsListener);
+        final var opsListener = new OpsListener(rpcRegistry, actionRegistry);
+        LOG.debug("{}: Registering local availability listener {}", logName, opsListener);
         listenerReg = rpcServices.registerRpcListener(opsListener);
     }
 
@@ -108,7 +111,7 @@ public class OpsManager extends AbstractUntypedActor {
     @Override
     public SupervisorStrategy supervisorStrategy() {
         return new OneForOneStrategy(10, FiniteDuration.create(1, TimeUnit.MINUTES), t -> {
-            LOG.error("An exception happened actor will be resumed", t);
+            LOG.error("{}: An exception happened actor will be resumed", logName, t);
             return SupervisorStrategy.resume();
         });
     }

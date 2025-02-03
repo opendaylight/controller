@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.remote.rpc;
 
+import java.util.concurrent.atomic.AtomicLong;
 import org.apache.pekko.actor.ActorRef;
-import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.actor.PoisonPill;
 import org.opendaylight.controller.cluster.ActorSystemProvider;
 import org.opendaylight.mdsal.dom.api.DOMActionProviderService;
@@ -37,6 +37,7 @@ public final class OSGiRemoteOpsProvider {
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(OSGiRemoteOpsProvider.class);
+    private static final AtomicLong INCARNATION = new AtomicLong();
 
     private ActorRef opsManager;
 
@@ -46,12 +47,13 @@ public final class OSGiRemoteOpsProvider {
             @Reference final DOMActionProviderService actionProviderService,
             @Reference final DOMActionService actionService, final Config config) {
         LOG.info("Remote Operations service starting");
-        final ActorSystem actorSystem = actorSystemProvider.getActorSystem();
-        final RemoteOpsProviderConfig opsConfig = RemoteOpsProviderConfig.newInstance(actorSystem.name(),
+        final var actorSystem = actorSystemProvider.getActorSystem();
+        final var opsConfig = RemoteOpsProviderConfig.newInstance(actorSystem.name(),
             config.metricCapture(), config.boundedMailboxCapacity());
 
-        opsManager = actorSystem.actorOf(OpsManager.props(rpcProviderService, rpcService, opsConfig,
-                actionProviderService, actionService), opsConfig.getRpcManagerName());
+        opsManager = actorSystem.actorOf(
+            OpsManager.props(Long.toUnsignedString(INCARNATION.incrementAndGet(), 16), rpcProviderService, rpcService,
+                opsConfig, actionProviderService, actionService), opsConfig.getRpcManagerName());
         LOG.debug("Ops Manager started at {}", opsManager);
         LOG.info("Remote Operations service started");
     }

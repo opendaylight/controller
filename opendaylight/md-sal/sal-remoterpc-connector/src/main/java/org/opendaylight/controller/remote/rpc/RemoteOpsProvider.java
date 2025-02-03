@@ -24,43 +24,44 @@ import org.slf4j.LoggerFactory;
  * default RPc implementation so remote invocation of rpcs.
  */
 public class RemoteOpsProvider implements AutoCloseable {
-
     private static final Logger LOG = LoggerFactory.getLogger(RemoteOpsProvider.class);
 
+    private final String logName;
     private final DOMRpcProviderService rpcProvisionRegistry;
     private final RemoteOpsProviderConfig config;
     private final ActorSystem actorSystem;
     private final DOMRpcService rpcService;
-    private final DOMActionProviderService actionProvisionRegistry;
+    private final DOMActionProviderService actionProviderService;
     private final DOMActionService actionService;
 
     private ActorRef opsManager;
 
-    public RemoteOpsProvider(final ActorSystem actorSystem, final DOMRpcProviderService rpcProvisionRegistry,
-                             final DOMRpcService rpcService, final RemoteOpsProviderConfig config,
-                             final DOMActionProviderService actionProviderService,
-                             final DOMActionService actionService) {
+    public RemoteOpsProvider(final String logName, final ActorSystem actorSystem,
+            final DOMRpcProviderService rpcProvisionRegistry, final DOMRpcService rpcService,
+            final RemoteOpsProviderConfig config, final DOMActionProviderService actionProviderService,
+            final DOMActionService actionService) {
+        this.logName = requireNonNull(logName);
         this.actorSystem = requireNonNull(actorSystem);
         this.rpcProvisionRegistry = requireNonNull(rpcProvisionRegistry);
         this.rpcService = requireNonNull(rpcService);
         this.config = requireNonNull(config);
-        this.actionProvisionRegistry = requireNonNull(actionProviderService);
+        this.actionProviderService = requireNonNull(actionProviderService);
         this.actionService = requireNonNull(actionService);
     }
 
     @Override
     public void close() {
         if (opsManager != null) {
-            LOG.info("Stopping Ops Manager at {}", opsManager);
+            LOG.info("{}, Stopping Ops Manager at {}", logName, opsManager);
             opsManager.tell(PoisonPill.getInstance(), ActorRef.noSender());
             opsManager = null;
         }
     }
 
     public void start() {
-        LOG.info("Starting Remote Ops service...");
-        opsManager = actorSystem.actorOf(OpsManager.props(rpcProvisionRegistry, rpcService, config,
-                actionProvisionRegistry, actionService), config.getRpcManagerName());
+        LOG.info("{}: Starting Remote Ops service...", logName);
+        opsManager = actorSystem.actorOf(OpsManager.props(logName, rpcProvisionRegistry, rpcService, config,
+                actionProviderService, actionService), config.getRpcManagerName());
         LOG.debug("Ops Manager started at {}", opsManager);
     }
 }
