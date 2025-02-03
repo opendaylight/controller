@@ -13,10 +13,11 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 import java.nio.charset.StandardCharsets;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
@@ -28,11 +29,20 @@ public final class MemberName implements Comparable<MemberName>, WritableIdentif
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
+    private static final VarHandle VH;
+
+    static {
+        try {
+            VH = MethodHandles.lookup().findVarHandle(MemberName.class, "serialized", byte[].class);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
+
     private final @NonNull String name;
 
-    @SuppressFBWarnings(value = "VO_VOLATILE_REFERENCE_TO_ARRAY",
-            justification = "The array elements are non-volatile but we don't access them.")
-    private volatile byte[] serialized;
+    @SuppressWarnings("unused")
+    private byte[] serialized;
 
     private MemberName(final String name) {
         this.name = requireNonNull(name);
@@ -93,12 +103,15 @@ public final class MemberName implements Comparable<MemberName>, WritableIdentif
     }
 
     private byte[] getSerialized() {
-        byte[] local = serialized;
-        if (local == null) {
-            local = name.getBytes(StandardCharsets.UTF_8);
-            serialized = local;
-        }
-        return local;
+        final var local = (byte[]) VH.getAcquire(this);
+        return local != null ? local : loadSerialized();
+    }
+
+    private byte[] loadSerialized() {
+        final var bytes = name.getBytes(StandardCharsets.UTF_8);
+        // we do not care which bytes are cached
+        VH.setRelease(this, bytes);
+        return bytes;
     }
 
     @java.io.Serial
