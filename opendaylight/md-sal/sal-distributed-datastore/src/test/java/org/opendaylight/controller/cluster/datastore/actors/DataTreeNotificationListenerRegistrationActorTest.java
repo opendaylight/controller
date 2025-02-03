@@ -42,7 +42,7 @@ public class DataTreeNotificationListenerRegistrationActorTest extends AbstractA
 
     @Test
     public void testOnReceiveCloseListenerRegistrationAfterSetRegistration() {
-        final ActorRef subject = getSystem().actorOf(DataTreeNotificationListenerRegistrationActor.props(),
+        final var subject = getSystem().actorOf(DataTreeNotificationListenerRegistrationActor.props("test"),
                 "testOnReceiveCloseListenerRegistrationAfterSetRegistration");
         kit.watch(subject);
 
@@ -60,7 +60,7 @@ public class DataTreeNotificationListenerRegistrationActorTest extends AbstractA
 
     @Test
     public void testOnReceiveCloseListenerRegistrationBeforeSetRegistration() {
-        final ActorRef subject = getSystem().actorOf(DataTreeNotificationListenerRegistrationActor.props(),
+        final var subject = getSystem().actorOf(DataTreeNotificationListenerRegistrationActor.props("test"),
                 "testOnReceiveSetRegistrationAfterPriorClose");
         kit.watch(subject);
 
@@ -82,7 +82,7 @@ public class DataTreeNotificationListenerRegistrationActorTest extends AbstractA
         final Registration mockListenerReg2 = mock(Registration.class);
         final Runnable mockOnClose2 = mock(Runnable.class);
 
-        final ActorRef subject = getSystem().actorOf(DataTreeNotificationListenerRegistrationActor.props(),
+        final var subject = getSystem().actorOf(DataTreeNotificationListenerRegistrationActor.props("test"),
             "testOnReceiveSetRegistrationAfterPriorClose");
         kit.watch(subject);
 

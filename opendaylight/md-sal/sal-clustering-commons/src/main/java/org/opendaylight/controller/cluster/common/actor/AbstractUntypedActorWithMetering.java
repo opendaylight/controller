@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.common.actor;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 /**
  * Actor with its behaviour metered. Metering is enabled by configuration.
  */
@@ -14,13 +16,15 @@ public abstract class AbstractUntypedActorWithMetering extends AbstractUntypedAc
     // this is used in the metric name. Some transient actors do not have defined names
     private String actorNameOverride;
 
-    public AbstractUntypedActorWithMetering() {
+    protected AbstractUntypedActorWithMetering(final @NonNull String name) {
+        super(name);
         if (isMetricsCaptureEnabled()) {
             getContext().become(new MeteringBehavior(this));
         }
     }
 
-    public AbstractUntypedActorWithMetering(final String actorNameOverride) {
+    protected AbstractUntypedActorWithMetering(final @NonNull String name, final String actorNameOverride) {
+        super(name);
         this.actorNameOverride = actorNameOverride;
         if (isMetricsCaptureEnabled()) {
             getContext().become(new MeteringBehavior(this));

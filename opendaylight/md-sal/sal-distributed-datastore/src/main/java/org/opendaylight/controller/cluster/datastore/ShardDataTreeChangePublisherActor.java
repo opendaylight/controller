@@ -16,6 +16,8 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Actor used to generate and publish DataTreeChange notifications.
@@ -24,18 +26,19 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
  */
 public final class ShardDataTreeChangePublisherActor
         extends ShardDataTreeNotificationPublisherActor<DefaultShardDataTreeChangeListenerPublisher> {
+    private static final Logger LOG = LoggerFactory.getLogger(ShardDataTreeChangePublisherActor.class);
 
-    private ShardDataTreeChangePublisherActor(final String name, final String logContext) {
-        super(new DefaultShardDataTreeChangeListenerPublisher(logContext), name, logContext);
+    private ShardDataTreeChangePublisherActor(final String name, final String logName) {
+        super(logName, new DefaultShardDataTreeChangeListenerPublisher(logName), name);
     }
 
     @Override
     protected void handleReceive(final Object message) {
         if (message instanceof RegisterListener reg) {
-            LOG.debug("{}: Received {}", logContext(), reg);
+            LOG.debug("{}: Received {}", logName, reg);
             if (reg.initialState.isPresent()) {
                 DefaultShardDataTreeChangeListenerPublisher.notifySingleListener(reg.path, reg.listener,
-                        reg.initialState.orElseThrow(), logContext());
+                        reg.initialState.orElseThrow(), logName);
             } else {
                 reg.listener.onInitialData();
             }

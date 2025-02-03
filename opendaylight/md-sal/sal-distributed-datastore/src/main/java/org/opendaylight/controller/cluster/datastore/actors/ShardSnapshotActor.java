@@ -20,12 +20,12 @@ import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnap
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
 import org.opendaylight.controller.cluster.io.InputOutputStreamFactory;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This is an offload actor, which is given an isolated snapshot of the data tree. It performs the potentially
  * time-consuming operation of serializing the snapshot.
- *
- * @author Robert Varga
  */
 public final class ShardSnapshotActor extends AbstractUntypedActorWithMetering {
     // Internal message
@@ -54,7 +54,8 @@ public final class ShardSnapshotActor extends AbstractUntypedActorWithMetering {
         }
     }
 
-    //actor name override used for metering. This does not change the "real" actor name
+    private static final Logger LOG = LoggerFactory.getLogger(ShardSnapshotActor.class);
+    // actor name override used for metering. This does not change the "real" actor name
     private static final String ACTOR_NAME_FOR_METERING = "shard-snapshot";
 
     private final InputOutputStreamFactory streamFactory;
@@ -74,13 +75,13 @@ public final class ShardSnapshotActor extends AbstractUntypedActorWithMetering {
     }
 
     private void onSerializeSnapshot(final SerializeSnapshot request) {
-        Optional<OutputStream> installSnapshotStream = request.getInstallSnapshotStream();
+        final var installSnapshotStream = request.getInstallSnapshotStream();
         if (installSnapshotStream.isPresent()) {
-            try (ObjectOutputStream out = getOutputStream(installSnapshotStream.orElseThrow())) {
+            try (var out = getOutputStream(installSnapshotStream.orElseThrow())) {
                 request.getSnapshot().serialize(out);
             } catch (IOException e) {
                 // TODO - we should communicate the failure in the CaptureSnapshotReply.
-                LOG.error("Error serializing snapshot", e);
+                LOG.error("Error serializing snapshot", logName, e);
             }
         }
 

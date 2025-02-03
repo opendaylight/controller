@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -30,20 +32,26 @@ import org.opendaylight.mdsal.dom.api.DOMDataTreeCandidate;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCommitCohort;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Proxy actor which acts as a facade to the user-provided commit cohort. Responsible for
  * decapsulating DataTreeChanged messages and dispatching their context to the user.
  */
 final class DataTreeCohortActor extends AbstractUntypedActor {
+    private static final Logger LOG = LoggerFactory.getLogger(DataTreeCohortActor.class);
+
     private final Idle idleState = new Idle();
     private final DOMDataTreeCommitCohort cohort;
     private final YangInstanceIdentifier registeredPath;
     private final Map<TransactionIdentifier, CohortBehaviour<?, ?>> currentStateMap = new HashMap<>();
 
-    private DataTreeCohortActor(final DOMDataTreeCommitCohort cohort, final YangInstanceIdentifier registeredPath) {
-        this.cohort = Objects.requireNonNull(cohort);
-        this.registeredPath = Objects.requireNonNull(registeredPath);
+    private DataTreeCohortActor(final String logName, final DOMDataTreeCommitCohort cohort,
+            final YangInstanceIdentifier registeredPath) {
+        super(logName);
+        this.cohort = requireNonNull(cohort);
+        this.registeredPath = requireNonNull(registeredPath);
     }
 
     @Override
@@ -62,8 +70,8 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
         CommitProtocolCommand<?> command = (CommitProtocolCommand<?>)message;
         CohortBehaviour<?, ?> currentState = currentStateMap.computeIfAbsent(command.getTxId(), key -> idleState);
 
-        LOG.debug("handleReceive for cohort {} - currentState: {}, message: {}", cohort.getClass().getName(),
-                currentState, message);
+        LOG.debug("{}: handleReceive for cohort {} - currentState: {}, message: {}", logName,
+            cohort.getClass().getName(), currentState, message);
 
         currentState.handle(command);
     }
@@ -234,7 +242,7 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
 
                 @Override
                 public void onFailure(final Throwable failure) {
-                    LOG.warn("Abort of transaction {} failed for cohort {}", txId, cohort, failure);
+                    LOG.warn("{}: Abort of transaction {} failed for cohort {}", logName, txId, cohort, failure);
                     sender.tell(new Status.Failure(failure), self());
                 }
             }, MoreExecutors.directExecutor());
@@ -339,7 +347,8 @@ final class DataTreeCohortActor extends AbstractUntypedActor {
     private interface NoopThreePhaseCommitStep extends ThreePhaseCommitStep {
     }
 
-    static Props props(final DOMDataTreeCommitCohort cohort, final YangInstanceIdentifier registeredPath) {
-        return Props.create(DataTreeCohortActor.class, cohort, registeredPath);
+    static Props props(final String logName, final DOMDataTreeCommitCohort cohort,
+            final YangInstanceIdentifier registeredPath) {
+        return Props.create(DataTreeCohortActor.class, logName, cohort, registeredPath);
     }
 }

@@ -35,6 +35,10 @@ public final class DataTreeNotificationListenerRegistrationActor extends Abstrac
     private Cancellable killSchedule = null;
     private boolean closed;
 
+    private DataTreeNotificationListenerRegistrationActor(final String logName) {
+        super(logName);
+    }
+
     @Override
     @Deprecated(since = "11.0.0", forRemoval = true)
     public ActorRef getSender() {
@@ -75,8 +79,8 @@ public final class DataTreeNotificationListenerRegistrationActor extends Abstrac
         }
     }
 
-    public static Props props() {
-        return Props.create(DataTreeNotificationListenerRegistrationActor.class);
+    public static Props props(final String logName) {
+        return Props.create(DataTreeNotificationListenerRegistrationActor.class, logName);
     }
 
     @NonNullByDefault
