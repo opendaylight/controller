@@ -41,10 +41,8 @@ public class ShardDataTreeNotificationPublisherActor<T extends ShardDataTreeNoti
 
     @Override
     protected void handleReceive(final Object message) {
-        if (message instanceof PublishNotifications) {
-            PublishNotifications toPublish = (PublishNotifications)message;
+        if (message instanceof PublishNotifications toPublish) {
             timer.start();
-
             try {
                 publisher.publishChanges(toPublish.candidate);
             } finally {
