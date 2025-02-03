@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore.actors;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Cancellable;
@@ -20,7 +21,6 @@ import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataTreeNotificationListenerRegistration;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataTreeNotificationListenerRegistrationReply;
 import org.opendaylight.yangtools.concepts.Registration;
-import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Actor co-located with a shard. It exists only to terminate the registration when
@@ -43,18 +43,22 @@ public final class DataTreeNotificationListenerRegistrationActor extends Abstrac
 
     @Override
     protected void handleReceive(final Object message) {
-        if (message instanceof CloseDataTreeNotificationListenerRegistration) {
-            closeListenerRegistration();
-            if (isValidSender(getSender())) {
-                getSender().tell(CloseDataTreeNotificationListenerRegistrationReply.getInstance(), self());
-            }
-        } else if (message instanceof SetRegistration setRegistration) {
-            registration = setRegistration;
-            if (closed) {
+        switch (message) {
+            case CloseDataTreeNotificationListenerRegistration msg -> {
                 closeListenerRegistration();
+
+                final var sender = getSender();
+                if (isValidSender(sender)) {
+                    sender.tell(CloseDataTreeNotificationListenerRegistrationReply.getInstance(), self());
+                }
             }
-        } else {
-            unknownMessage(message);
+            case SetRegistration msg -> {
+                registration = msg;
+                if (closed) {
+                    closeListenerRegistration();
+                }
+            }
+            default -> unknownMessage(message);
         }
     }
 
@@ -68,9 +72,8 @@ public final class DataTreeNotificationListenerRegistrationActor extends Abstrac
             reg.onClose.run();
 
             if (killSchedule == null) {
-                killSchedule = getContext().system().scheduler()
-                    .scheduleOnce(FiniteDuration.create(killDelay, TimeUnit.MILLISECONDS), self(),
-                        PoisonPill.getInstance(), getContext().dispatcher(), ActorRef.noSender());
+                killSchedule = getContext().system().scheduler().scheduleOnce(Duration.ofMillis(killDelay), self(),
+                    PoisonPill.getInstance(), getContext().dispatcher(), ActorRef.noSender());
             }
         }
     }
