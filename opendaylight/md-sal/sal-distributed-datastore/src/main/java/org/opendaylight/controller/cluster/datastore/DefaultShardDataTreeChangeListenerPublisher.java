@@ -46,9 +46,11 @@ final class DefaultShardDataTreeChangeListenerPublisher extends AbstractDOMStore
 
     @Override
     protected void notifyListener(final Reg registration, final List<DataTreeCandidate> changes) {
-        final var listener = registration.listener();
-        LOG.debug("{}: notifyListener: listener: {}", logContext, listener);
-        listener.onDataTreeChanged(changes);
+        if (registration.notClosed()) {
+            final var listener = registration.listener();
+            LOG.debug("{}: notifyListener: listener: {}", logContext, listener);
+            listener.onDataTreeChanged(changes);
+        }
     }
 
     @Override
