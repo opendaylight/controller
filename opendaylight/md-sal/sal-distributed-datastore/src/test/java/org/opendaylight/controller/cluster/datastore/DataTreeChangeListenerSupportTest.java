@@ -21,10 +21,9 @@ import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.o
 import static org.opendaylight.controller.md.cluster.datastore.model.TestModel.testNodeWithOuter;
 
 import java.time.Duration;
-import java.util.AbstractMap.SimpleEntry;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
-import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.pattern.Patterns;
 import org.apache.pekko.testkit.TestActorRef;
@@ -70,8 +69,7 @@ public class DataTreeChangeListenerSupportTest extends AbstractShardTest {
 
     @Test
     public void testChangeListenerWithNoInitialData() {
-        MockDataTreeChangeListener listener = registerChangeListener(TEST_PATH, 0).getKey();
-
+        final var listener = registerChangeListener(TEST_PATH, 0).getKey();
         listener.expectNoMoreChanges("Unexpected initial change event");
     }
 
@@ -79,8 +77,8 @@ public class DataTreeChangeListenerSupportTest extends AbstractShardTest {
     public void testInitialChangeListenerEventWithContainerPath() throws DataValidationFailedException {
         writeToStore(shard.getDataStore(), TEST_PATH, EMPTY_TEST);
 
-        Entry<MockDataTreeChangeListener, ActorSelection> entry = registerChangeListener(TEST_PATH, 1);
-        MockDataTreeChangeListener listener = entry.getKey();
+        final var entry = registerChangeListener(TEST_PATH, 1);
+        final var listener = entry.getKey();
 
         listener.waitForChangeEvents();
         listener.verifyNotifiedData(TEST_PATH);
@@ -92,7 +90,7 @@ public class DataTreeChangeListenerSupportTest extends AbstractShardTest {
         listener.verifyNotifiedData(TEST_PATH);
 
         listener.reset(1);
-        TestKit kit = new TestKit(getSystem());
+        final var kit = new TestKit(getSystem());
         entry.getValue().tell(CloseDataTreeNotificationListenerRegistration.getInstance(), kit.getRef());
         kit.expectMsgClass(Duration.ofSeconds(5), CloseDataTreeNotificationListenerRegistrationReply.class);
 
@@ -104,7 +102,7 @@ public class DataTreeChangeListenerSupportTest extends AbstractShardTest {
     public void testInitialChangeListenerEventWithListPath() throws DataValidationFailedException {
         mergeToStore(shard.getDataStore(), TEST_PATH, testNodeWithOuter(1, 2));
 
-        MockDataTreeChangeListener listener = registerChangeListener(OUTER_LIST_PATH, 1).getKey();
+        final var listener = registerChangeListener(OUTER_LIST_PATH, 1).getKey();
 
         listener.waitForChangeEvents();
         listener.verifyNotifiedData(OUTER_LIST_PATH);
@@ -114,8 +112,7 @@ public class DataTreeChangeListenerSupportTest extends AbstractShardTest {
     public void testInitialChangeListenerEventWithWildcardedListPath() throws DataValidationFailedException {
         mergeToStore(shard.getDataStore(), TEST_PATH, testNodeWithOuter(1, 2));
 
-        MockDataTreeChangeListener listener =
-                registerChangeListener(OUTER_LIST_PATH.node(OUTER_LIST_QNAME), 1).getKey();
+        final var listener = registerChangeListener(OUTER_LIST_PATH.node(OUTER_LIST_QNAME), 1).getKey();
 
         listener.waitForChangeEvents();
         listener.verifyNotifiedData(outerEntryPath(1), outerEntryPath(2));
@@ -126,7 +123,7 @@ public class DataTreeChangeListenerSupportTest extends AbstractShardTest {
         mergeToStore(shard.getDataStore(), TEST_PATH, testNodeWithOuter(outerNode(
                 outerEntry(1, innerNode("one", "two")), outerEntry(2, innerNode("three", "four")))));
 
-        MockDataTreeChangeListener listener = registerChangeListener(
+        final var listener = registerChangeListener(
                 OUTER_LIST_PATH.node(OUTER_LIST_QNAME).node(INNER_LIST_QNAME).node(INNER_LIST_QNAME), 1).getKey();
 
         listener.waitForChangeEvents();
@@ -135,7 +132,7 @@ public class DataTreeChangeListenerSupportTest extends AbstractShardTest {
 
         // Register for a specific outer list entry
 
-        MockDataTreeChangeListener listener2 = registerChangeListener(
+        final var listener2 = registerChangeListener(
                 OUTER_LIST_PATH.node(outerEntryKey(1)).node(INNER_LIST_QNAME).node(INNER_LIST_QNAME), 1).getKey();
 
         listener2.waitForChangeEvents();
@@ -145,8 +142,8 @@ public class DataTreeChangeListenerSupportTest extends AbstractShardTest {
         listener.reset(1);
         listener2.reset(1);
 
-        mergeToStore(shard.getDataStore(), TEST_PATH, testNodeWithOuter(outerNode(
-                outerEntry(1, innerNode("three")))));
+        mergeToStore(shard.getDataStore(), TEST_PATH,
+            testNodeWithOuter(outerNode(outerEntry(1, innerNode("three")))));
 
         listener.waitForChangeEvents();
         listener.verifyNotifiedData(innerEntryPath(1, "three"));
@@ -158,8 +155,8 @@ public class DataTreeChangeListenerSupportTest extends AbstractShardTest {
     @SuppressWarnings("checkstyle:IllegalCatch")
     private Entry<MockDataTreeChangeListener, ActorSelection> registerChangeListener(final YangInstanceIdentifier path,
             final int expectedEvents) {
-        MockDataTreeChangeListener listener = new MockDataTreeChangeListener(expectedEvents);
-        ActorRef dclActor = actorFactory.createActor(DataTreeChangeListenerActor.props(listener, TestModel.TEST_PATH));
+        final var listener = new MockDataTreeChangeListener(expectedEvents);
+        final var dclActor = actorFactory.createActor(DataTreeChangeListenerActor.props(listener, TestModel.TEST_PATH));
 
         RegisterDataTreeNotificationListenerReply reply;
         try {
@@ -169,9 +166,9 @@ public class DataTreeChangeListenerSupportTest extends AbstractShardTest {
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new AssertionError(e);
         }
-        return new SimpleEntry<>(listener, getSystem().actorSelection(reply.getListenerRegistrationPath()));
+        return Map.entry(listener, getSystem().actorSelection(reply.getListenerRegistrationPath()));
     }
 
     private void createShard() {
