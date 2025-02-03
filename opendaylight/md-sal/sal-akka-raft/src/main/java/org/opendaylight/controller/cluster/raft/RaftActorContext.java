@@ -111,7 +111,7 @@ public interface RaftActorContext {
      * Sets and persists a {@link TermInfo}, so that {@link #termInfo()} returns it, even if we undergo recovery.
      *
      * @implSpec
-     *     Implementations need to route this request to the underlying {@link TermInfoStore#persistTerm(TermInfo)}.
+     *     Implementations need to route this request to the underlying {@link TermInfoStore#storeAndSetTerm(TermInfo)}.
      *
      * @param termInfo {@link TermInfo} to persist
      */

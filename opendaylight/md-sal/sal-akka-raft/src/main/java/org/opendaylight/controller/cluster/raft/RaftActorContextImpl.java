@@ -182,7 +182,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     public void persistTermInfo(final TermInfo newElectionInfo) {
-        termInformation.persistTerm(newElectionInfo);
+        termInformation.storeAndSetTerm(newElectionInfo);
     }
 
     @Override

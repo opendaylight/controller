@@ -45,7 +45,7 @@ final class PersistenceTermInfoStore implements TermInfoStore {
     }
 
     @Override
-    public void persistTerm(final TermInfo newTerm) {
+    public void storeAndSetTerm(final TermInfo newTerm) {
         setTerm(newTerm);
         // FIXME : Maybe first persist then update the state
         persistence.persist(new UpdateElectionTerm(newTerm), NoopProcedure.instance());

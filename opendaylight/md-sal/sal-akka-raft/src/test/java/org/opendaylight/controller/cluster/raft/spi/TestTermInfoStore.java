@@ -21,7 +21,7 @@ public final class TestTermInfoStore extends AbstractTermInfoStore  {
     }
 
     @Override
-    public void persistTerm(final TermInfo newElectionInfo) {
+    public void storeAndSetTerm(final TermInfo newElectionInfo) {
         setTerm(newElectionInfo);
     }
 }

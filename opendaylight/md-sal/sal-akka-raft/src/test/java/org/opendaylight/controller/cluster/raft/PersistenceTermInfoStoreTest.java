@@ -40,7 +40,7 @@ class PersistenceTermInfoStoreTest {
     void testUpdateAndPersist() throws Exception {
         final var impl = new PersistenceTermInfoStore(mockPersistence, "test");
         final var termInfo = new TermInfo(10, "member-1");
-        impl.persistTerm(termInfo);
+        impl.storeAndSetTerm(termInfo);
 
         assertEquals(termInfo, impl.currentTerm());
 

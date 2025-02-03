@@ -11,7 +11,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  * Storage for {@link TermInfo}. Provides access to current term and updates to it both transient, via
- * {@link #setTerm(TermInfo)} and persistent, via {@link #persistTerm(TermInfo)}.
+ * {@link #setTerm(TermInfo)} and persistent, via {@link #storeAndSetTerm(TermInfo)}.
  */
 @NonNullByDefault
 public interface TermInfoStore {
@@ -37,5 +37,5 @@ public interface TermInfoStore {
      *
      * @param newTerm new {@link TermInfo}
      */
-    void persistTerm(TermInfo newTerm);
+    void storeAndSetTerm(TermInfo newTerm);
 }
