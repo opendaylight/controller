@@ -8,12 +8,14 @@
 package org.opendaylight.controller.cluster.notifications;
 
 import java.util.HashMap;
-import java.util.Map;
 import org.apache.pekko.actor.ActorPath;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Props;
 import org.apache.pekko.serialization.Serialization;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The RoleChangeNotifier is responsible for receiving Raft role and leader state change messages and notifying
@@ -22,14 +24,15 @@ import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
  * <p>The RoleChangeNotifier is instantiated by the Shard and injected into the RaftActor.
  */
 public class RoleChangeNotifier extends AbstractUntypedActor implements AutoCloseable {
-    private final Map<ActorPath, ActorRef> registeredListeners = new HashMap<>();
-    private final String memberId;
+    private static final Logger LOG = LoggerFactory.getLogger(RoleChangeNotifier.class);
+
+    private final HashMap<ActorPath, ActorRef> registeredListeners = new HashMap<>();
 
     private RoleChangeNotification latestRoleChangeNotification = null;
     private LeaderStateChanged latestLeaderStateChanged;
 
-    public RoleChangeNotifier(final String memberId) {
-        this.memberId = memberId;
+    public RoleChangeNotifier(final @NonNull String memberId) {
+        super(memberId);
     }
 
     public static Props getProps(final String memberId) {
@@ -45,8 +48,7 @@ public class RoleChangeNotifier extends AbstractUntypedActor implements AutoClos
     @Override
     public void preStart() throws Exception {
         super.preStart();
-        LOG.info("RoleChangeNotifier:{} created and ready for shard:{}",
-            Serialization.serializedActorPath(self()), memberId);
+        LOG.info("{}: RoleChangeNotifier:{} created and ready", logName, Serialization.serializedActorPath(self()));
     }
 
     @Override
@@ -63,8 +65,7 @@ public class RoleChangeNotifier extends AbstractUntypedActor implements AutoClos
             }
             registeredListeners.put(getSender().path(), getSender());
 
-            LOG.info("RoleChangeNotifier for {} , registered listener {}", memberId,
-                getSender().path().toString());
+            LOG.info("{}: RoleChangeNotifier registered listener {}", logName, getSender().path().toString());
 
             getSender().tell(new RegisterRoleChangeListenerReply(), self());
 
@@ -80,8 +81,8 @@ public class RoleChangeNotifier extends AbstractUntypedActor implements AutoClos
         } else if (message instanceof RoleChanged roleChanged) {
             // this message is sent by RaftActor. Notify registered listeners when this message is received.
 
-            LOG.info("RoleChangeNotifier for {} , received role change from {} to {}", memberId,
-                roleChanged.getOldRole(), roleChanged.getNewRole());
+            LOG.info("{}: RoleChangeNotifier for received role change from {} to {}", logName, roleChanged.getOldRole(),
+                roleChanged.getNewRole());
 
             latestRoleChangeNotification =
                 new RoleChangeNotification(roleChanged.getMemberId(),

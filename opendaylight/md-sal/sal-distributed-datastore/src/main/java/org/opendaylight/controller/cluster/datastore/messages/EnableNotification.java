@@ -5,23 +5,11 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.messages;
 
-public class EnableNotification {
-    private final boolean enabled;
-    private final String logContext;
-
-    public EnableNotification(boolean enabled, String logContext) {
-        this.enabled = enabled;
-        this.logContext = logContext;
-    }
-
+public record EnableNotification(boolean enabled) {
+    @Deprecated
     public boolean isEnabled() {
         return enabled;
-    }
-
-    public String getLogContext() {
-        return logContext;
     }
 }

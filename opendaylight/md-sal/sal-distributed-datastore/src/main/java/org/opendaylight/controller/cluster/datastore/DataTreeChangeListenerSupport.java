@@ -82,7 +82,7 @@ final class DataTreeChangeListenerSupport extends LeaderLocalDelegateFactory<Reg
     void onMessage(final RegisterDataTreeChangeListener message, final boolean isLeader, final boolean hasLeader) {
         LOG.debug("{}: onMessage {}, isLeader: {}, hasLeader: {}", shardName(), message, isLeader, hasLeader);
 
-        final ActorRef registrationActor = createActor(DataTreeNotificationListenerRegistrationActor.props());
+        final var registrationActor = createActor(DataTreeNotificationListenerRegistrationActor.props(shardName()));
 
         if (hasLeader && message.isRegisterOnAllInstances() || isLeader) {
             doRegistration(message, registrationActor);

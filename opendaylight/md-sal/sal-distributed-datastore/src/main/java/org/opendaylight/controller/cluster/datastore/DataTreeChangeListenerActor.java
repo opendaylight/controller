@@ -20,27 +20,32 @@ import org.opendaylight.controller.cluster.datastore.messages.OnInitialData;
 import org.opendaylight.controller.cluster.mgmt.api.DataTreeListenerInfo;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Proxy actor which acts as a facade to the user-provided listener. Responsible for decapsulating
  * DataTreeChanged messages and dispatching their context to the user.
  */
 class DataTreeChangeListenerActor extends AbstractUntypedActor {
+    private static final Logger LOG = LoggerFactory.getLogger(DataTreeChangeListenerActor.class);
+
     private final DOMDataTreeChangeListener listener;
     private final YangInstanceIdentifier registeredPath;
 
     private boolean notificationsEnabled = false;
     private long notificationCount;
-    private String logContext = "";
 
-    DataTreeChangeListenerActor(final DOMDataTreeChangeListener listener,
+    DataTreeChangeListenerActor(final String logName, final DOMDataTreeChangeListener listener,
             final YangInstanceIdentifier registeredPath) {
+        super(logName);
         this.listener = requireNonNull(listener);
         this.registeredPath = requireNonNull(registeredPath);
     }
 
-    static Props props(final DOMDataTreeChangeListener listener, final YangInstanceIdentifier registeredPath) {
-        return Props.create(DataTreeChangeListenerActor.class, listener, registeredPath);
+    static Props props(final String logName, final DOMDataTreeChangeListener listener,
+            final YangInstanceIdentifier registeredPath) {
+        return Props.create(DataTreeChangeListenerActor.class, logName, listener, registeredPath);
     }
 
     @Override
@@ -65,11 +70,11 @@ class DataTreeChangeListenerActor extends AbstractUntypedActor {
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     void onInitialData(final OnInitialData message) {
-        LOG.debug("{}: Notifying onInitialData to listener {}", logContext, listener);
+        LOG.debug("{}: Notifying onInitialData to listener {}", logName, listener);
         try {
             listener.onInitialData();
         } catch (Exception e) {
-            LOG.error("{}: Error notifying listener {}", logContext, listener, e);
+            LOG.error("{}: Error notifying listener {}", logName, listener, e);
         }
     }
 
@@ -78,16 +83,16 @@ class DataTreeChangeListenerActor extends AbstractUntypedActor {
         // Do nothing if notifications are not enabled
         if (!notificationsEnabled) {
             LOG.debug("{}: Notifications not enabled for listener {} - dropping change notification",
-                    logContext, listener);
+                logName, listener);
             return;
         }
 
         final var changes = message.getChanges();
-        LOG.debug("{}: Sending {} change notification(s) to listener {}", logContext, changes.size(), listener);
+        LOG.debug("{}: Sending {} change notification(s) to listener {}", logName, changes.size(), listener);
         if (LOG.isTraceEnabled() && !changes.isEmpty()) {
-            LOG.trace("{}: detailed change follow", logContext);
+            LOG.trace("{}: detailed change follow", logName);
             for (int i = 0, size = changes.size(); i < size; ++i) {
-                LOG.trace("{}: change {}: {}", logContext, i, changes.get(i));
+                LOG.trace("{}: change {}: {}", logName, i, changes.get(i));
             }
         }
 
@@ -96,7 +101,7 @@ class DataTreeChangeListenerActor extends AbstractUntypedActor {
         try {
             listener.onDataTreeChanged(changes);
         } catch (Exception e) {
-            LOG.error("{}: Error notifying listener {}", logContext, listener, e);
+            LOG.error("{}: Error notifying listener {}", logName, listener, e);
         }
 
         // TODO: do we really need this?
@@ -111,9 +116,8 @@ class DataTreeChangeListenerActor extends AbstractUntypedActor {
     }
 
     private void enableNotification(final EnableNotification message) {
-        logContext = message.getLogContext();
         notificationsEnabled = message.isEnabled();
-        LOG.debug("{}: {} notifications for listener {}", logContext, notificationsEnabled ? "Enabled" : "Disabled",
+        LOG.debug("{}: {} notifications for listener {}", logName, notificationsEnabled ? "Enabled" : "Disabled",
                 listener);
     }
 }
