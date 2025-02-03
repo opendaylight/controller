@@ -208,7 +208,7 @@ public class Shard extends RaftActor {
         exportOnRecovery = datastoreContext.getExportOnRecovery();
 
         exportActor = switch (exportOnRecovery) {
-            case Json -> getContext().actorOf(JsonExportActor.props(builder.getSchemaContext(),
+            case Json -> getContext().actorOf(JsonExportActor.props(name, builder.getSchemaContext(),
                 datastoreContext.getRecoveryExportBaseDir()));
             case Off -> null;
         };
