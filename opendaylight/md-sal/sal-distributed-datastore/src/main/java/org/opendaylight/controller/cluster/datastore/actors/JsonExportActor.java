@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.datastore.actors;
 
-import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import com.google.gson.stream.JsonWriter;
@@ -17,7 +16,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import org.apache.pekko.actor.Props;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -35,6 +33,8 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidateNode;
 import org.opendaylight.yangtools.yang.data.tree.api.ModificationType;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.opendaylight.yangtools.yang.model.util.SchemaInferenceStack;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class JsonExportActor extends AbstractUntypedActor {
     // Internal messages
@@ -65,16 +65,19 @@ public final class JsonExportActor extends AbstractUntypedActor {
         }
     }
 
-    private final List<ReplicatedLogEntry> entries = new ArrayList<>();
+    private static final Logger LOG = LoggerFactory.getLogger(JsonExportActor.class);
+
+    private final ArrayList<ReplicatedLogEntry> entries = new ArrayList<>();
     private final @NonNull EffectiveModelContext schemaContext;
     private final @NonNull Path baseDirPath;
 
-    private JsonExportActor(final EffectiveModelContext schemaContext, final Path dirPath) {
+    private JsonExportActor(final String logName, final EffectiveModelContext schemaContext, final Path dirPath) {
+        super(logName);
         this.schemaContext = requireNonNull(schemaContext);
         baseDirPath = requireNonNull(dirPath);
     }
 
-    public static Props props(final EffectiveModelContext schemaContext, final String dirPath) {
+    public static Props props(final String logName, final EffectiveModelContext schemaContext, final String dirPath) {
         return Props.create(JsonExportActor.class, schemaContext, Paths.get(dirPath));
     }
 
@@ -92,17 +95,19 @@ public final class JsonExportActor extends AbstractUntypedActor {
     }
 
     private void onExportSnapshot(final ExportSnapshot exportSnapshot) {
-        final Path snapshotDir = baseDirPath.resolve("snapshots");
+        final var snapshotDir = baseDirPath.resolve("snapshots");
         createDir(snapshotDir);
 
-        final Path filePath = snapshotDir.resolve(exportSnapshot.id + "-snapshot.json");
-        LOG.debug("Creating JSON file : {}", filePath);
+        final var filePath = snapshotDir.resolve(exportSnapshot.id + "-snapshot.json");
+        LOG.debug("{}: Creating JSON file : {}", logName, filePath);
 
-        final NormalizedNode root = exportSnapshot.dataTreeCandidate.getRootNode().getDataAfter();
-        checkState(root instanceof NormalizedNodeContainer, "Unexpected root %s", root);
+        final var root = exportSnapshot.dataTreeCandidate.getRootNode().getDataAfter();
+        if (!(root instanceof NormalizedNodeContainer<?> rootContainer)) {
+            throw new IllegalStateException("Unexpected root" + root);
+        }
 
-        writeSnapshot(filePath, (NormalizedNodeContainer<?>) root);
-        LOG.debug("Created JSON file: {}", filePath);
+        writeSnapshot(filePath, rootContainer);
+        LOG.debug("{}: Created JSON file: {}", logName, filePath);
     }
 
     private void onExportJournal(final ExportJournal exportJournal) {
@@ -110,17 +115,17 @@ public final class JsonExportActor extends AbstractUntypedActor {
     }
 
     private void onFinishExport(final FinishExport finishExport) {
-        final Path journalDir = baseDirPath.resolve("journals");
+        final var journalDir = baseDirPath.resolve("journals");
         createDir(journalDir);
 
-        final Path filePath = journalDir.resolve(finishExport.id + "-journal.json");
-        LOG.debug("Creating JSON file : {}", filePath);
+        final var filePath = journalDir.resolve(finishExport.id + "-journal.json");
+        LOG.debug("{}: Creating JSON file : {}", logName, filePath);
         writeJournal(filePath);
-        LOG.debug("Created JSON file: {}", filePath);
+        LOG.debug("{}: Created JSON file: {}", logName, filePath);
     }
 
     private void writeSnapshot(final Path path, final NormalizedNodeContainer<?> root) {
-        try (JsonWriter jsonWriter = new JsonWriter(Files.newBufferedWriter(path))) {
+        try (var jsonWriter = new JsonWriter(Files.newBufferedWriter(path))) {
             jsonWriter.beginObject();
 
             try (var nnWriter = NormalizedNodeWriter.forStreamWriter(JSONNormalizedNodeStreamWriter.createNestedWriter(
@@ -134,12 +139,12 @@ public final class JsonExportActor extends AbstractUntypedActor {
 
             jsonWriter.endObject();
         } catch (IOException e) {
-            LOG.error("Failed to export stapshot to {}", path, e);
+            LOG.error("{}: Failed to export stapshot to {}", logName, path, e);
         }
     }
 
     private void writeJournal(final Path path) {
-        try (JsonWriter jsonWriter = new JsonWriter(Files.newBufferedWriter(path))) {
+        try (var jsonWriter = new JsonWriter(Files.newBufferedWriter(path))) {
             jsonWriter.beginObject().name("Entries");
             jsonWriter.beginArray();
             for (var entry : entries) {
@@ -154,7 +159,7 @@ public final class JsonExportActor extends AbstractUntypedActor {
             jsonWriter.endArray();
             jsonWriter.endObject();
         } catch (IOException e) {
-            LOG.error("Failed to export journal to {}", path, e);
+            LOG.error("{}: Failed to export journal to {}", logName, path, e);
         }
     }
 
@@ -167,27 +172,20 @@ public final class JsonExportActor extends AbstractUntypedActor {
     private static void doWriteNode(final JsonWriter writer, final YangInstanceIdentifier path,
             final DataTreeCandidateNode node) throws IOException {
         switch (node.modificationType()) {
-            case APPEARED:
-            case DISAPPEARED:
-            case SUBTREE_MODIFIED:
-                NodeIterator iterator = new NodeIterator(null, path, node.childNodes().iterator());
+            case null -> throw new NullPointerException();
+            case APPEARED, DISAPPEARED, SUBTREE_MODIFIED -> {
+                var iterator = new NodeIterator(null, path, node.childNodes().iterator());
                 do {
                     iterator = iterator.next(writer);
                 } while (iterator != null);
-                break;
-            case DELETE:
-            case UNMODIFIED:
-            case WRITE:
-                outputNodeInfo(writer, path, node);
-                break;
-            default:
-                outputDefault(writer, path, node);
+            }
+            case DELETE, UNMODIFIED, WRITE -> outputNodeInfo(writer, path, node);
         }
     }
 
     private static void outputNodeInfo(final JsonWriter writer, final YangInstanceIdentifier path,
                                        final DataTreeCandidateNode node) throws IOException {
-        final ModificationType modificationType = node.modificationType();
+        final var modificationType = node.modificationType();
 
         writer.beginObject().name("Node");
         writer.beginArray();
@@ -215,7 +213,7 @@ public final class JsonExportActor extends AbstractUntypedActor {
         try {
             Files.createDirectories(path);
         } catch (IOException e) {
-            LOG.warn("Directory {} cannot be created", path, e);
+            LOG.warn("{}: Directory {} cannot be created", logName, path, e);
         }
     }
 

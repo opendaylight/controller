@@ -11,6 +11,8 @@ import com.google.common.base.Stopwatch;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Actor used to generate and publish data tree notifications. This is used to offload the potentially
@@ -20,23 +22,20 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
  */
 public class ShardDataTreeNotificationPublisherActor<T extends ShardDataTreeNotificationPublisher>
         extends AbstractUntypedActor {
-    private final T publisher;
-    private final Stopwatch timer = Stopwatch.createUnstarted();
-    private final String name;
-    private final String logContext;
+    private static final Logger LOG = LoggerFactory.getLogger(ShardDataTreeNotificationPublisherActor.class);
 
-    protected ShardDataTreeNotificationPublisherActor(final T publisher, final String name, final String logContext) {
+    private final Stopwatch timer = Stopwatch.createUnstarted();
+    private final T publisher;
+    private final String name;
+
+    protected ShardDataTreeNotificationPublisherActor(final String logName, final T publisher, final String name) {
+        super(logName);
         this.publisher = publisher;
         this.name = name;
-        this.logContext = logContext;
     }
 
     protected T publisher() {
         return publisher;
-    }
-
-    protected String logContext() {
-        return logContext;
     }
 
     @Override
@@ -50,9 +49,9 @@ public class ShardDataTreeNotificationPublisherActor<T extends ShardDataTreeNoti
 
                 if (elapsedTime >= ShardDataTreeNotificationPublisher.PUBLISH_DELAY_THRESHOLD_IN_MS) {
                     LOG.warn("{}: Generation of change events for {} took longer than expected. Elapsed time: {}",
-                            logContext, name, timer);
+                            logName, name, timer);
                 } else {
-                    LOG.debug("{}: Elapsed time for generation of change events for {}: {}", logContext, name, timer);
+                    LOG.debug("{}: Elapsed time for generation of change events for {}: {}", logName, name, timer);
                 }
 
                 timer.reset();

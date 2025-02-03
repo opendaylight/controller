@@ -27,18 +27,19 @@ import org.slf4j.LoggerFactory;
 final class DefaultShardDataTreeChangeListenerPublisher extends AbstractDOMStoreTreeChangePublisher
         implements ShardDataTreeChangeListenerPublisher {
     private static final Logger LOG = LoggerFactory.getLogger(DefaultShardDataTreeChangeListenerPublisher.class);
-    private String logContext;
 
-    DefaultShardDataTreeChangeListenerPublisher(final String logContext) {
-        this.logContext = logContext;
+    private String logName;
+
+    DefaultShardDataTreeChangeListenerPublisher(final String logName) {
+        this.logName = logName;
     }
 
     @Override
     public void publishChanges(final DataTreeCandidate candidate) {
         if (LOG.isTraceEnabled()) {
-            LOG.trace("{}: publishChanges: {}", logContext, candidate);
+            LOG.trace("{}: publishChanges: {}", logName, candidate);
         } else {
-            LOG.debug("{}: publishChanges: rootPath: {}", logContext, candidate.getRootPath());
+            LOG.debug("{}: publishChanges: rootPath: {}", logName, candidate.getRootPath());
         }
 
         processCandidateTree(candidate);
@@ -48,7 +49,7 @@ final class DefaultShardDataTreeChangeListenerPublisher extends AbstractDOMStore
     protected void notifyListener(final Reg registration, final List<DataTreeCandidate> changes) {
         if (registration.notClosed()) {
             final var listener = registration.listener();
-            LOG.debug("{}: notifyListener: listener: {}", logContext, listener);
+            LOG.debug("{}: notifyListener: listener: {}", logName, listener);
             listener.onDataTreeChanged(changes);
         }
     }
@@ -65,7 +66,7 @@ final class DefaultShardDataTreeChangeListenerPublisher extends AbstractDOMStore
         registerTreeChangeListener(treeId, listener, onRegistration);
 
         if (initialState.isPresent()) {
-            notifySingleListener(treeId, listener, initialState.orElseThrow(), logContext);
+            notifySingleListener(treeId, listener, initialState.orElseThrow(), logName);
         } else {
             listener.onInitialData();
         }
@@ -73,16 +74,15 @@ final class DefaultShardDataTreeChangeListenerPublisher extends AbstractDOMStore
 
     void registerTreeChangeListener(final YangInstanceIdentifier treeId, final DOMDataTreeChangeListener listener,
             final Consumer<Registration> onRegistration) {
-        LOG.debug("{}: registerTreeChangeListener: path: {}, listener: {}", logContext, treeId, listener);
+        LOG.debug("{}: registerTreeChangeListener: path: {}, listener: {}", logName, treeId, listener);
         onRegistration.accept(super.registerTreeChangeListener(treeId, listener));
     }
 
     static void notifySingleListener(final YangInstanceIdentifier treeId, final DOMDataTreeChangeListener listener,
             final DataTreeCandidate state, final String logContext) {
         LOG.debug("{}: notifySingleListener: path: {}, listener: {}", logContext, treeId, listener);
-        DefaultShardDataTreeChangeListenerPublisher publisher =
-                new DefaultShardDataTreeChangeListenerPublisher(logContext);
-        publisher.logContext = logContext;
+        final var publisher = new DefaultShardDataTreeChangeListenerPublisher(logContext);
+        publisher.logName = logContext;
         publisher.registerTreeChangeListener(treeId, listener);
 
         if (!publisher.processCandidateTree(state)) {

@@ -7,20 +7,21 @@
  */
 package org.opendaylight.controller.remote.rpc;
 
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.apache.pekko.actor.ActorSystem;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.opendaylight.mdsal.dom.api.DOMActionProviderService;
 import org.opendaylight.mdsal.dom.api.DOMActionService;
 import org.opendaylight.mdsal.dom.api.DOMRpcProviderService;
 import org.opendaylight.mdsal.dom.api.DOMRpcService;
 
-public class RemoteOpsProviderFactoryTest {
-
+@ExtendWith(MockitoExtension.class)
+class RemoteOpsProviderFactoryTest {
     @Mock
     private DOMRpcProviderService providerService;
     @Mock
@@ -34,51 +35,45 @@ public class RemoteOpsProviderFactoryTest {
     @Mock
     private DOMActionService actionService;
 
-    @Before
-    public void setUp() {
-        initMocks(this);
+    @Test
+    void testCreateInstance() {
+        assertNotNull(new RemoteOpsProvider("", actorSystem, providerService, rpcService, providerConfig,
+            actionProviderService, actionService));
     }
 
     @Test
-    public void testCreateInstance() {
-        Assert.assertNotNull(RemoteOpsProviderFactory
-                .createInstance(providerService, rpcService, actorSystem, providerConfig,
-                        actionProviderService, actionService));
+    void testCreateInstanceMissingProvideService() {
+        assertThrows(NullPointerException.class, () -> new RemoteOpsProvider("", actorSystem, null, rpcService,
+            providerConfig, actionProviderService, actionService));
     }
 
-    @Test(expected = NullPointerException.class)
-    public void testCreateInstanceMissingProvideService() {
-        RemoteOpsProviderFactory.createInstance(null, rpcService, actorSystem, providerConfig,
-                actionProviderService, actionService);
+    @Test
+    void testCreateInstanceMissingRpcService() {
+        assertThrows(NullPointerException.class, () -> new RemoteOpsProvider("", actorSystem, providerService, null,
+            providerConfig, actionProviderService, actionService));
     }
 
-    @Test(expected = NullPointerException.class)
-    public void testCreateInstanceMissingRpcService() {
-        RemoteOpsProviderFactory.createInstance(providerService, null, actorSystem, providerConfig,
-                actionProviderService, actionService);
+    @Test
+    void testCreateInstanceMissingActorSystem() {
+        assertThrows(NullPointerException.class, () -> new RemoteOpsProvider("", null, providerService, rpcService,
+            providerConfig, actionProviderService, actionService));
     }
 
-    @Test(expected = NullPointerException.class)
-    public void testCreateInstanceMissingActorSystem() {
-        RemoteOpsProviderFactory.createInstance(providerService, rpcService, null, providerConfig,
-                actionProviderService, actionService);
+    @Test
+    void testCreateInstanceMissingProviderConfig() {
+        assertThrows(NullPointerException.class, () -> new RemoteOpsProvider("", actorSystem, providerService,
+            rpcService, null, actionProviderService, actionService));
     }
 
-    @Test(expected = NullPointerException.class)
-    public void testCreateInstanceMissingProviderConfig() {
-        RemoteOpsProviderFactory.createInstance(providerService, rpcService, actorSystem, null,
-                actionProviderService, actionService);
+    @Test
+    void testCreateInstanceMissingActionProvider() {
+        assertThrows(NullPointerException.class, () -> new RemoteOpsProvider("", actorSystem, providerService,
+            rpcService, providerConfig, null, actionService));
     }
 
-    @Test(expected = NullPointerException.class)
-    public void testCreateInstanceMissingActionProvider() {
-        RemoteOpsProviderFactory.createInstance(providerService, rpcService, actorSystem, providerConfig,
-                null, actionService);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void testCreateInstanceMissingActionService() {
-        RemoteOpsProviderFactory.createInstance(providerService, rpcService, actorSystem, providerConfig,
-                actionProviderService, null);
+    @Test
+    void testCreateInstanceMissingActionService() {
+        assertThrows(NullPointerException.class, () -> new RemoteOpsProvider("", actorSystem, providerService,
+            rpcService, providerConfig, actionProviderService, null));
     }
 }

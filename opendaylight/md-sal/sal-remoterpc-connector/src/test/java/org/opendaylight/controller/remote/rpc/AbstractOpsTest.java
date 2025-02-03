@@ -108,9 +108,9 @@ public class AbstractOpsTest {
         MockitoAnnotations.initMocks(this);
 
         rpcRegistry1Probe = new TestKit(node1);
-        rpcInvoker1 = node1.actorOf(OpsInvoker.props(domRpcService1, domActionService1));
+        rpcInvoker1 = node1.actorOf(OpsInvoker.props("test1", domRpcService1, domActionService1));
         rpcRegistry2Probe = new TestKit(node2);
-        rpcInvoker2 = node2.actorOf(OpsInvoker.props(domRpcService2, domActionService2));
+        rpcInvoker2 = node2.actorOf(OpsInvoker.props("test2", domRpcService2, domActionService2));
         remoteRpcImpl1 = new RemoteRpcImplementation(rpcInvoker2, config1);
         remoteRpcImpl2 = new RemoteRpcImplementation(rpcInvoker1, config2);
         remoteActionImpl1 = new RemoteActionImplementation(rpcInvoker2, config1);

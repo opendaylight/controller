@@ -139,7 +139,8 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
         selfAddress = provider.getDefaultAddress();
 
         if (provider instanceof ClusterActorRefProvider) {
-            getContext().actorOf(Gossiper.props(config).withMailbox(config.getMailBoxName()), "gossiper");
+            getContext().actorOf(Gossiper.props(persistenceId(), config)
+                .withMailbox(config.getMailBoxName()), "gossiper");
         }
     }
 

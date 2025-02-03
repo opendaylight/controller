@@ -17,8 +17,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import org.apache.pekko.actor.ActorRef;
@@ -33,6 +31,8 @@ import org.apache.pekko.cluster.ClusterEvent;
 import org.apache.pekko.cluster.Member;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActorWithMetering;
 import org.opendaylight.controller.remote.rpc.RemoteOpsProviderConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
@@ -58,6 +58,8 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
         }
     };
 
+    private static final Logger LOG = LoggerFactory.getLogger(Gossiper.class);
+
     private final boolean autoStartGossipTicks;
     private final RemoteOpsProviderConfig config;
 
@@ -82,16 +84,17 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
 
     private BucketStoreAccess bucketStore;
 
-    Gossiper(final RemoteOpsProviderConfig config, final Boolean autoStartGossipTicks) {
+    Gossiper(final String logName, final RemoteOpsProviderConfig config, final Boolean autoStartGossipTicks) {
+        super(logName);
         this.config = requireNonNull(config);
         this.autoStartGossipTicks = autoStartGossipTicks;
     }
 
-    Gossiper(final RemoteOpsProviderConfig config) {
-        this(config, Boolean.TRUE);
+    Gossiper(final String logName, final RemoteOpsProviderConfig config) {
+        this(logName, config, Boolean.TRUE);
     }
 
-    public static Props props(final RemoteOpsProviderConfig config) {
+    public static Props props(final String logName, final RemoteOpsProviderConfig config) {
         return Props.create(Gossiper.class, config);
     }
 
@@ -185,7 +188,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
      * @param member who went down
      */
     private void receiveMemberRemoveOrUnreachable(final Member member) {
-        LOG.debug("Received memberDown or Unreachable: {}", member);
+        LOG.debug("{}: Received memberDown or Unreachable: {}", logName, member);
 
         //if its self, then stop itself
         if (selfAddress.equals(member.address())) {
@@ -194,7 +197,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
         }
 
         removePeer(member.address());
-        LOG.debug("Removed member [{}], Active member list [{}]", member.address(), clusterMembers);
+        LOG.debug("{}: Removed member [{}], Active member list [{}]", logName, member.address(), clusterMembers);
     }
 
     private void addPeer(final Address address) {
@@ -217,7 +220,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
      * @param member the member to add
      */
     private void receiveMemberUpOrReachable(final Member member) {
-        LOG.debug("Received memberUp or reachable: {}", member);
+        LOG.debug("{}: Received memberUp or reachable: {}", logName, member);
 
         //ignore up notification for self
         if (selfAddress.equals(member.address())) {
@@ -225,7 +228,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
         }
 
         addPeer(member.address());
-        LOG.debug("Added member [{}], Active member list [{}]", member.address(), clusterMembers);
+        LOG.debug("{}: Added member [{}], Active member list [{}]", logName, member.address(), clusterMembers);
     }
 
     /**
@@ -251,7 +254,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
                 break;
         }
 
-        LOG.trace("Gossiping to [{}]", address);
+        LOG.trace("{}: Gossiping to [{}]", logName, address);
         getLocalStatusAndSendTo(verifyNotNull(peers.get(address)));
     }
 
@@ -280,21 +283,21 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
 
     private void processRemoteStatus(final ActorRef remote, final GossipStatus status,
             final Map<Address, Long> localVersions) {
-        final Map<Address, Long> remoteVersions = status.versions();
+        final var remoteVersions = status.versions();
 
-        //diff between remote list and local
-        final Set<Address> localIsOlder = new HashSet<>(remoteVersions.keySet());
+        // diff between remote list and local
+        final var localIsOlder = new HashSet<>(remoteVersions.keySet());
         localIsOlder.removeAll(localVersions.keySet());
 
-        //diff between local list and remote
-        final Set<Address> localIsNewer = new HashSet<>(localVersions.keySet());
+        // diff between local list and remote
+        final var localIsNewer = new HashSet<>(localVersions.keySet());
         localIsNewer.removeAll(remoteVersions.keySet());
 
 
-        for (Entry<Address, Long> entry : remoteVersions.entrySet()) {
-            Address address = entry.getKey();
-            Long remoteVersion = entry.getValue();
-            Long localVersion = localVersions.get(address);
+        for (var entry : remoteVersions.entrySet()) {
+            final var address = entry.getKey();
+            final var remoteVersion = entry.getValue();
+            final var localVersion = localVersions.get(address);
             if (localVersion == null || remoteVersion == null) {
                 //this condition is taken care of by above diffs
                 continue;
@@ -314,7 +317,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
         if (!localIsNewer.isEmpty()) {
             //send newer buckets to remote
             bucketStore.getBucketsByMembers(localIsNewer, buckets -> {
-                LOG.trace("Buckets to send from {}: {}", selfAddress, buckets);
+                LOG.trace("{}: Buckets to send from {}: {}", logName, selfAddress, buckets);
                 remote.tell(new GossipEnvelope(selfAddress, remote.path().address(), buckets), self());
             });
         }
@@ -329,7 +332,8 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
     void receiveGossip(final GossipEnvelope envelope) {
         //TODO: Add more validations
         if (!selfAddress.equals(envelope.to())) {
-            LOG.trace("Ignoring message intended for someone else. From [{}] to [{}]", envelope.from(), envelope.to());
+            LOG.trace("{}: Ignoring message intended for someone else. From [{}] to [{}]", logName, envelope.from(),
+                envelope.to());
             return;
         }
 
@@ -355,7 +359,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
     @VisibleForTesting
     void getLocalStatusAndSendTo(final ActorSelection remoteGossiper) {
         bucketStore.getBucketVersions(versions -> {
-            LOG.trace("Sending bucket versions to [{}]", remoteGossiper);
+            LOG.trace("{}: Sending bucket versions to [{}]", logName, remoteGossiper);
             /*
              * XXX: we are leaking our reference here. That may be useful for establishing buckets monitoring,
              *      but can we identify which bucket is the local one?

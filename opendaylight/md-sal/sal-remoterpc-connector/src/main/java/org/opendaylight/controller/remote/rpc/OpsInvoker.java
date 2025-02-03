@@ -33,6 +33,8 @@ import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.stmt.SchemaNodeIdentifier.Absolute;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Actor receiving invocation requests from remote nodes, routing them to
@@ -50,18 +52,22 @@ import org.opendaylight.yangtools.yang.model.api.stmt.SchemaNodeIdentifier.Absol
  * </ul>
  */
 final class OpsInvoker extends AbstractUntypedActor {
+    private static final Logger LOG = LoggerFactory.getLogger(OpsInvoker.class);
+
     private final DOMRpcService rpcService;
     private final DOMActionService actionService;
 
-    private OpsInvoker(final DOMRpcService rpcService, final DOMActionService actionService) {
+    private OpsInvoker(final String logName, final DOMRpcService rpcService, final DOMActionService actionService) {
+        super(logName);
         this.rpcService = requireNonNull(rpcService);
         this.actionService = requireNonNull(actionService);
     }
 
-    static Props props(final DOMRpcService rpcService, final DOMActionService actionService) {
+    static Props props(final String logName, final DOMRpcService rpcService, final DOMActionService actionService) {
         return Props.create(OpsInvoker.class,
-            requireNonNull(rpcService, "DOMRpcService can not be null"),
-            requireNonNull(actionService, "DOMActionService can not be null"));
+            requireNonNull(logName, "logName cannot be null"),
+            requireNonNull(rpcService, "DOMRpcService cannot be null"),
+            requireNonNull(actionService, "DOMActionService cannot be null"));
     }
 
     @Override
@@ -73,7 +79,7 @@ final class OpsInvoker extends AbstractUntypedActor {
     @Override
     protected void handleReceive(final Object message) {
         if (message instanceof ExecuteRpc executeRpc) {
-            LOG.debug("Handling ExecuteOps Message");
+            LOG.debug("{}: Handling ExecuteOps Message", logName);
             execute(executeRpc);
         } else if (message instanceof ExecuteAction executeAction) {
             execute(executeAction);
@@ -84,14 +90,14 @@ final class OpsInvoker extends AbstractUntypedActor {
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     private void execute(final ExecuteRpc msg) {
-        LOG.debug("Executing RPC {}", msg.getType());
+        LOG.debug("{}: Executing RPC {}", logName, msg.getType());
         final ActorRef sender = getSender();
 
         final ListenableFuture<? extends DOMRpcResult> future;
         try {
             future = rpcService.invokeRpc(msg.getType(), msg.getInput());
         } catch (final RuntimeException e) {
-            LOG.debug("Failed to invoke RPC {}", msg.getType(), e);
+            LOG.debug("{}: Failed to invoke RPC {}", logName, msg.getType(), e);
             sender.tell(new Failure(e), self());
             return;
         }
@@ -99,7 +105,7 @@ final class OpsInvoker extends AbstractUntypedActor {
         Futures.addCallback(future, new AbstractCallback<QName, DOMRpcResult>(getSender(), msg.getType()) {
             @Override
             Object nullResponse(final QName type) {
-                LOG.warn("Execution of {} resulted in null result", type);
+                LOG.warn("{}: Execution of {} resulted in null result", logName, type);
                 return new RpcResponse(null);
             }
 
@@ -117,7 +123,7 @@ final class OpsInvoker extends AbstractUntypedActor {
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     private void execute(final ExecuteAction msg) {
-        LOG.debug("Executing Action {}", msg.getType());
+        LOG.debug("{}: Executing Action {}", logName, msg.getType());
 
         final ActorRef sender = getSender();
 
@@ -125,7 +131,7 @@ final class OpsInvoker extends AbstractUntypedActor {
         try {
             future = actionService.invokeAction(msg.getType(), msg.getPath(), msg.getInput());
         } catch (final RuntimeException e) {
-            LOG.debug("Failed to invoke action {}", msg.getType(), e);
+            LOG.debug("{}: Failed to invoke action {}", logName, msg.getType(), e);
             sender.tell(new Failure(e), self());
             return;
         }
@@ -168,15 +174,15 @@ final class OpsInvoker extends AbstractUntypedActor {
                 response = response(type, result);
             }
 
-            LOG.debug("Sending response for execution of {} : {}", type, response);
+            LOG.debug("{}, Sending response for execution of {} : {}", logName, type, response);
             replyTo.tell(response, self());
         }
 
         @Override
         public final void onFailure(final Throwable failure) {
-            LOG.debug("Failed to execute operation {}", type, failure);
-            LOG.error("Failed to execute operation {} due to {}. More details are available on DEBUG level.", type,
-                Throwables.getRootCause(failure).getMessage());
+            LOG.debug("{}: Failed to execute operation {}", logName, type, failure);
+            LOG.error("{}: Failed to execute operation {} due to {}. More details are available on DEBUG level.",
+                logName, type, Throwables.getRootCause(failure).getMessage());
             replyTo.tell(new Failure(failure), self());
         }
 

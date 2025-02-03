@@ -14,11 +14,14 @@ import java.util.concurrent.TimeUnit;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Cancellable;
 import org.apache.pekko.actor.Props;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.controller.cluster.example.messages.RegisterListener;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListener;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListenerReply;
 import org.opendaylight.controller.cluster.notifications.RoleChangeNotification;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
 import scala.concurrent.duration.FiniteDuration;
 
@@ -35,17 +38,19 @@ import scala.concurrent.duration.FiniteDuration;
  * It starts the scheduler again when it receives a new registration
  */
 public class ExampleRoleChangeListener extends AbstractUntypedActor implements AutoCloseable {
+    private static final Logger LOG = LoggerFactory.getLogger(ExampleRoleChangeListener.class);
+
     // the akka url should be set to the notifiers actor-system and domain.
     private static final String NOTIFIER_AKKA_URL = "pekko://raft-test@127.0.0.1:2550/user/";
     private static final FiniteDuration DURATION = new FiniteDuration(100, TimeUnit.MILLISECONDS);
     private static final FiniteDuration SCHEDULER_DURATION = new FiniteDuration(1, TimeUnit.SECONDS);
-    private static final String[] SHARDS_TO_MONITOR = new String[] {"example"};
 
     private final Map<String, Boolean> notifierRegistrationStatus = new HashMap<>();
 
     private Cancellable registrationSchedule = null;
 
-    public ExampleRoleChangeListener(final String memberName) {
+    public ExampleRoleChangeListener(final @NonNull String memberName) {
+        super(memberName);
         scheduleRegistrationListener(SCHEDULER_DURATION);
         populateRegistry(memberName);
     }
@@ -72,7 +77,7 @@ public class ExampleRoleChangeListener extends AbstractUntypedActor implements A
 
         } else if (message instanceof RoleChangeNotification notification) {
             // called by the Notifier
-            LOG.info("Role Change Notification received for member:{}, old role:{}, new role:{}",
+            LOG.info("{}: Role Change Notification received for member: {}, old role: {}, new role: {}", logName,
                 notification.getMemberId(), notification.getOldRole(), notification.getNewRole());
 
             // the apps dependent on such notifications can be called here
@@ -82,15 +87,17 @@ public class ExampleRoleChangeListener extends AbstractUntypedActor implements A
     }
 
     private void scheduleRegistrationListener(final FiniteDuration interval) {
-        LOG.debug("--->scheduleRegistrationListener called.");
+        LOG.debug("{}: scheduleRegistrationListener called", logName);
         registrationSchedule = getContext().system().scheduler()
             .schedule(interval, interval, self(), new RegisterListener(), getContext().system().dispatcher(), self());
 
     }
 
     private void populateRegistry(final String memberName) {
-        String notifier = new StringBuilder().append(NOTIFIER_AKKA_URL).append(memberName)
-                .append("/").append(memberName).append("-notifier").toString();
+        final var notifier = new StringBuilder()
+            .append(NOTIFIER_AKKA_URL)
+            .append(memberName).append("/")
+            .append(memberName).append("-notifier").toString();
 
         if (!notifierRegistrationStatus.containsKey(notifier)) {
             notifierRegistrationStatus.put(notifier, false);
@@ -104,43 +111,41 @@ public class ExampleRoleChangeListener extends AbstractUntypedActor implements A
     @SuppressWarnings("checkstyle:IllegalCatch")
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     private void sendRegistrationRequests() {
-        for (Map.Entry<String, Boolean> entry : notifierRegistrationStatus.entrySet()) {
+        for (var entry : notifierRegistrationStatus.entrySet()) {
             if (!entry.getValue()) {
                 try {
-                    LOG.debug("{} registering with {}", self().path().toString(), entry.getKey());
+                    LOG.debug("{}: registering {} with {}", logName, self().path(), entry.getKey());
                     ActorRef notifier = Await.result(
                         getContext().actorSelection(entry.getKey()).resolveOne(DURATION), DURATION);
 
                     notifier.tell(new RegisterRoleChangeListener(), self());
 
                 } catch (Exception e) {
-                    LOG.error("ERROR!! Unable to send registration request to notifier {}", entry.getKey(), e);
+                    LOG.error("{}: Unable to send registration request to notifier {}", logName, entry.getKey(), e);
                 }
             }
         }
     }
 
     private void handleRegisterRoleChangeListenerReply(final String senderId) {
-        if (notifierRegistrationStatus.containsKey(senderId)) {
-            notifierRegistrationStatus.put(senderId, true);
+        final var prev = notifierRegistrationStatus.putIfAbsent(senderId, Boolean.TRUE);
+        if (prev != null) {
+            LOG.warn("{}: RegisterRoleChangeListenerReply received from notifier which is not known to Listener:{}",
+                logName, senderId);
+            return;
+        }
 
-            //cancel the schedule when listener is registered with all notifiers
-            if (!registrationSchedule.isCancelled()) {
-                boolean cancelScheduler = true;
-                for (Boolean value : notifierRegistrationStatus.values()) {
-                    cancelScheduler = cancelScheduler && value;
-                }
-                if (cancelScheduler) {
-                    registrationSchedule.cancel();
-                }
+        // cancel the schedule when listener is registered with all notifiers
+        if (!registrationSchedule.isCancelled()) {
+            boolean cancelScheduler = true;
+            for (var value : notifierRegistrationStatus.values()) {
+                cancelScheduler = cancelScheduler && value;
             }
-        } else {
-            LOG.info(
-                "Unexpected, RegisterRoleChangeListenerReply received from notifier which is not known to Listener:{}",
-                senderId);
+            if (cancelScheduler) {
+                registrationSchedule.cancel();
+            }
         }
     }
-
 
     @Override
     public void close() {

@@ -39,14 +39,15 @@ final class RootDataTreeChangeListenerActor extends DataTreeChangeListenerActor 
     private Map<ActorRef, Object> initialMessages = new LinkedHashMap<>();
     private Deque<DataTreeChanged> otherMessages = new ArrayDeque<>();
 
-    private RootDataTreeChangeListenerActor(final DOMDataTreeChangeListener listener, final int shardCount) {
-        super(listener, YangInstanceIdentifier.of());
+    private RootDataTreeChangeListenerActor(final String logName, final DOMDataTreeChangeListener listener,
+            final int shardCount) {
+        super(logName, listener, YangInstanceIdentifier.of());
         this.shardCount = shardCount;
     }
 
     @Override
     void onInitialData(final OnInitialData message) {
-        final ActorRef sender = getSender();
+        final var sender = getSender();
         verifyNotNull(initialMessages, "Received OnInitialData from %s after initial convergence", sender);
 
         final Object prev = initialMessages.put(sender, message);
@@ -134,7 +135,7 @@ final class RootDataTreeChangeListenerActor extends DataTreeChangeListenerActor 
         otherMessages = null;
     }
 
-    static Props props(final DOMDataTreeChangeListener instance, final int shardCount) {
-        return Props.create(RootDataTreeChangeListenerActor.class, instance, shardCount);
+    static Props props(final String logName, final DOMDataTreeChangeListener instance, final int shardCount) {
+        return Props.create(RootDataTreeChangeListenerActor.class, logName, instance, shardCount);
     }
 }
