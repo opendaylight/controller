@@ -16,7 +16,7 @@ public final class FailingTermInfoStore extends AbstractTermInfoStore {
     }
 
     @Override
-    public void persistTerm(final TermInfo newTerm) {
+    public void storeAndSetTerm(final TermInfo newTerm) {
         throw new UnsupportedOperationException();
     }
 }
