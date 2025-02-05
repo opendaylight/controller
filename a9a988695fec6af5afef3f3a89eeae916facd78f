@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2d87a02b_c0a3e0ae",
+        "filename": "opendaylight/md-sal/sal-akka-segmented-journal/src/main/java/org/opendaylight/controller/akka/segjournal/SegmentedJournalActor.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 372,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2025-02-05T05:59:55Z",
+      "side": 1,
+      "message": "getFileName()",
+      "range": {
+        "startLine": 372,
+        "startChar": 96,
+        "endLine": 372,
+        "endChar": 112
+      },
+      "revId": "a9a988695fec6af5afef3f3a89eeae916facd78f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
