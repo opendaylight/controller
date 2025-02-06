@@ -137,6 +137,7 @@ public class Shard extends RaftActor {
     };
 
     private static final Logger LOG = LoggerFactory.getLogger(Shard.class);
+    private static final Path STATE_PATH = Path.of("odl.cluster.server");
 
     // FIXME: shard names should be encapsulated in their own class and this should be exposed as a constant.
     public static final String DEFAULT_NAME = "default";
@@ -147,8 +148,8 @@ public class Shard extends RaftActor {
     public static final String NON_PERSISTENT_JOURNAL_ID = "pekko.persistence.non-persistent.journal";
 
     static {
-        final ABIVersion[] values = ABIVersion.values();
-        final ABIVersion[] real = Arrays.copyOfRange(values, 1, values.length - 1);
+        final var values = ABIVersion.values();
+        final var real = Arrays.copyOfRange(values, 1, values.length - 1);
         SUPPORTED_ABIVERSIONS = ImmutableList.copyOf(real).reverse();
     }
 
@@ -196,8 +197,8 @@ public class Shard extends RaftActor {
     private final ActorRef exportActor;
 
     Shard(final Path stateDir, final AbstractBuilder<?, ?> builder) {
-        super(stateDir, builder.getId().toString(), builder.getPeerAddresses(),
-                Optional.of(builder.getDatastoreContext().getShardRaftConfig()), DataStoreVersions.CURRENT_VERSION);
+        super(stateDir.resolve(STATE_PATH), builder.getId().toString(), builder.getPeerAddresses(),
+            Optional.of(builder.getDatastoreContext().getShardRaftConfig()), DataStoreVersions.CURRENT_VERSION);
 
         shardName = builder.getId().getShardName();
         datastoreContext = builder.getDatastoreContext();
