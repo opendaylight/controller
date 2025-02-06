@@ -646,9 +646,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
                 .withChild(ImmutableNodes.leafNode(TestModel.JUNK_QNAME, "junk"))
                 .build());
 
-            final var ex = assertThrows(ExecutionException.class, () -> writeTx.commit().get(5, TimeUnit.SECONDS))
-                .getCause();
-            assertThat(ex, instanceOf(TransactionCommitFailedException.class));
+            final var ex = assertThrows(ExecutionException.class, () -> writeTx.commit().get(5, TimeUnit.SECONDS));
+            assertInstanceOf(TransactionCommitFailedException.class, ex.getCause());
 
             verify(listener, timeout(5000)).onFailure(any());
 
@@ -732,10 +731,10 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         // Wait for the commit to be replicated to the follower.
 
-        MemberNode.verifyRaftState(followerDistributedDataStore, "cars",
+        verifyRaftState(followerDistributedDataStore, "cars",
             raftState -> assertEquals("getLastApplied", 1, raftState.getLastApplied()));
 
-        MemberNode.verifyRaftState(followerDistributedDataStore, "people",
+        verifyRaftState(followerDistributedDataStore, "people",
             raftState -> assertEquals("getLastApplied", 1, raftState.getLastApplied()));
 
         // Prepare, ready and canCommit a WO tx that writes to 2 shards. This will become the current tx in
@@ -941,7 +940,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         sendDatastoreContextUpdate(leaderDistributedDataStore, leaderDatastoreContextBuilder
                 .shardIsolatedLeaderCheckIntervalInMillis(200));
 
-        MemberNode.verifyRaftState(leaderDistributedDataStore, "cars",
+        verifyRaftState(leaderDistributedDataStore, "cars",
             raftState -> assertEquals("getRaftState", "IsolatedLeader", raftState.getRaftState()));
 
         final var noShardLeaderCohort = noShardLeaderWriteTx.ready();
@@ -964,13 +963,11 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         // continuation of canCommit(): readied transaction will complete commit, but will report an OLFE
         final var ex = assertThrows(ExecutionException.class,
             () -> canCommit.get(commitTimeout, TimeUnit.SECONDS)).getCause();
-        assertThat(ex, instanceOf(OptimisticLockFailedException.class));
+        assertInstanceOf(OptimisticLockFailedException.class, ex);
         assertEquals("Optimistic lock failed for path " + CarsModel.BASE_PATH, ex.getMessage());
-        final var cause = ex.getCause();
-        assertThat(cause, instanceOf(ConflictingModificationAppliedException.class));
-        final var cmae = (ConflictingModificationAppliedException) cause;
-        assertEquals("Node was created by other transaction.", cmae.getMessage());
-        assertEquals(CarsModel.BASE_PATH, cmae.getPath());
+        final var cause = assertInstanceOf(ConflictingModificationAppliedException.class, ex.getCause());
+        assertEquals("Node was created by other transaction.", cause.getMessage());
+        assertEquals(CarsModel.BASE_PATH, cause.getPath());
     }
 
     @Test

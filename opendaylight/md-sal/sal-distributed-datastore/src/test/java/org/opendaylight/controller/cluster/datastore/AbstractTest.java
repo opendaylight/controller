@@ -7,12 +7,15 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import com.google.common.base.Stopwatch;
+import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.ConfigFactory;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.testkit.javadsl.TestKit;
@@ -25,6 +28,11 @@ import org.opendaylight.controller.cluster.access.concepts.FrontendType;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.cluster.databroker.ClientBackedDataStore;
+import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
+import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
+import scala.concurrent.Await;
+import scala.concurrent.duration.FiniteDuration;
 
 public abstract class AbstractTest {
     protected static final MemberName MEMBER_NAME = MemberName.forName("member-1");
@@ -91,4 +99,36 @@ public abstract class AbstractTest {
         actorSystems.add(system);
         return system;
     }
+
+    @FunctionalInterface
+    public interface RaftStateVerifier {
+
+        void verify(OnDemandRaftState raftState);
+    }
+
+    public static final void verifyRaftState(final ClientBackedDataStore datastore, final String shardName,
+            final RaftStateVerifier verifier) throws Exception {
+        final var actorUtils = datastore.getActorUtils();
+
+        final var future = actorUtils.findLocalShardAsync(shardName);
+        final var shardActor = Await.result(future, FiniteDuration.create(10, TimeUnit.SECONDS));
+
+        AssertionError lastError = null;
+        Stopwatch sw = Stopwatch.createStarted();
+        while (sw.elapsed(TimeUnit.SECONDS) <= 5) {
+            final var raftState =
+                (OnDemandRaftState) actorUtils.executeOperation(shardActor, GetOnDemandRaftState.INSTANCE);
+
+            try {
+                verifier.verify(raftState);
+                return;
+            } catch (AssertionError e) {
+                lastError = e;
+                Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
+            }
+        }
+
+        throw lastError;
+    }
+
 }

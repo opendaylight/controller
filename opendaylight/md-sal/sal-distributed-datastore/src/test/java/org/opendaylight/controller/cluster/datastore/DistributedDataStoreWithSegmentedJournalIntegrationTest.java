@@ -142,7 +142,7 @@ public class DistributedDataStoreWithSegmentedJournalIntegrationTest
             Stopwatch sw = Stopwatch.createStarted();
             AtomicBoolean done = new AtomicBoolean(false);
             while (!done.get()) {
-                MemberNode.verifyRaftState(dataStore, "cars", raftState -> {
+                verifyRaftState(dataStore, "cars", raftState -> {
                     if (raftState.getLastApplied() == raftState.getLastLogIndex()) {
                         done.set(true);
                     }
