@@ -12,7 +12,7 @@
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>bundle-parent</artifactId>
-    <version>14.0.5</version>
+    <version>14.0.7</version>
     <relativePath/>
   </parent>
 
@@ -21,6 +21,10 @@
   <packaging>bundle</packaging>
   <name>${project.artifactId}</name>
   <version>10.0.7-SNAPSHOT</version>
+
+  <properties>
+    <odlparent.modernizer.enforce>false</odlparent.modernizer.enforce>
+  </properties>
 
   <dependencyManagement>
     <dependencies>

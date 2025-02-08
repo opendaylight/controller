@@ -29,6 +29,7 @@
   <packaging>bundle</packaging>
 
   <properties>
+    <odlparent.modernizer.enforce>false</odlparent.modernizer.enforce>
     <odlparent.spotbugs.enforce>false</odlparent.spotbugs.enforce>
   </properties>
 

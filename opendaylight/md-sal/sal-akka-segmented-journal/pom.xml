@@ -19,6 +19,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <artifactId>sal-akka-segmented-journal</artifactId>
     <packaging>bundle</packaging>
 
+    <properties>
+        <odlparent.modernizer.enforce>false</odlparent.modernizer.enforce>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.google.guava</groupId>
