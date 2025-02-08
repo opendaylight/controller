@@ -11,6 +11,10 @@
   <artifactId>sal-distributed-datastore</artifactId>
   <packaging>bundle</packaging>
 
+  <properties>
+    <odlparent.modernizer.enforce>false</odlparent.modernizer.enforce>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>com.github.spotbugs</groupId>
