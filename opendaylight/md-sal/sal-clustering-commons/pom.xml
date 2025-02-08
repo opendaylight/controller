@@ -11,6 +11,10 @@
   <artifactId>sal-clustering-commons</artifactId>
   <packaging>bundle</packaging>
 
+  <properties>
+    <odlparent.modernizer.enforce>false</odlparent.modernizer.enforce>
+  </properties>
+
   <dependencies>
     <dependency>
       <!-- Enforce Netty’s optional dependency on servlet API -->
