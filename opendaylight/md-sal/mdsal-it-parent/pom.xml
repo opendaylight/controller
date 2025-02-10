@@ -117,6 +117,9 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
                 <!-- CONTROLLER-1799: Use the same repository for Pax Exam as is used for Maven -->
                 <org.ops4j.pax.url.mvn.localRepository>${settings.localRepository}</org.ops4j.pax.url.mvn.localRepository>
               </systemPropertyVariables>
+
+              <!-- Needed because of the mockito override above -->
+              <argLine>@{argLine}</argLine>
           </configuration>
       </plugin>
       <plugin>
