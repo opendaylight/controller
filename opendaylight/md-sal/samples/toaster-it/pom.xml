@@ -10,10 +10,6 @@
   </parent>
   <artifactId>sample-toaster-it</artifactId>
 
-  <properties>
-    <skipTests>true</skipTests>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>

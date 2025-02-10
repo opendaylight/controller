@@ -9,10 +9,6 @@
   </parent>
   <artifactId>sal-binding-it</artifactId>
 
-  <properties>
-    <skipTests>true</skipTests>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
