@@ -19,7 +19,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>mdsal-it-parent</artifactId>
-  <version>10.0.7-SNAPSHOT</version>
+  <version>10.0.7</version>
   <packaging>pom</packaging>
 
   <properties>
@@ -37,7 +37,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>controller-artifacts</artifactId>
-        <version>10.0.7-SNAPSHOT</version>
+        <version>10.0.7</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
