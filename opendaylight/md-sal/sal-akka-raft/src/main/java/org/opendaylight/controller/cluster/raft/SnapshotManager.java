@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  * @author Moiz Raja
  * @author Thomas Pantelis
  */
-public class SnapshotManager implements SnapshotState {
+public class SnapshotManager {
     /**
      * Internal message, issued by follower behavior to its actor, eventually routed to {@link SnapshotManager}.
      * Metadata matches information conveyed in {@link InstallSnapshot}.
@@ -151,12 +151,22 @@ public class SnapshotManager implements SnapshotState {
         return task instanceof PersistApply;
     }
 
-    @Override
+    /**
+     * Returns whether or not a capture is in progress.
+     *
+     * @return true when a snapshot is being captured, false otherwise
+     */
     public boolean isCapturing() {
         return !(task instanceof Idle);
     }
 
-    @Override
+    /**
+     * Initiates a capture snapshot.
+     *
+     * @param lastLogEntry the last entry in the replicated log
+     * @param replicatedToAllIndex the current replicatedToAllIndex
+     * @return true if capture was started
+     */
     public boolean capture(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex) {
         if (task instanceof Idle) {
             return capture(lastLogEntry, replicatedToAllIndex, null, false);
@@ -198,7 +208,14 @@ public class SnapshotManager implements SnapshotState {
         return true;
     }
 
-    @Override
+    /**
+     * Initiates a capture snapshot for the purposing of installing the snapshot on a follower.
+     *
+     * @param lastLogEntry the last entry in the replicated log
+     * @param replicatedToAllIndex the current replicatedToAllIndex
+     * @param targetFollower the id of the follower on which to install
+     * @return true if capture was started
+     */
     public boolean captureToInstall(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex,
             final String targetFollower) {
         if (task instanceof Idle) {
@@ -208,7 +225,13 @@ public class SnapshotManager implements SnapshotState {
         return false;
     }
 
-    @Override
+    /**
+     * Initiates a capture snapshot, while enforcing trimming of the log up to lastAppliedIndex.
+     *
+     * @param lastLogEntry the last entry in the replicated log
+     * @param replicatedToAllIndex the current replicatedToAllIndex
+     * @return true if capture was started
+     */
     public boolean captureWithForcedTrim(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex) {
         if (task instanceof Idle) {
             return capture(lastLogEntry, replicatedToAllIndex, null, true);
@@ -273,7 +296,14 @@ public class SnapshotManager implements SnapshotState {
         persistence.saveSnapshot(persisting.snapshot);
     }
 
-    @Override
+    /**
+     * Persists a snapshot.
+     *
+     * @param snapshotState the snapshot State
+     * @param installSnapshotStream Optional OutputStream that is present if the snapshot is to also be installed
+     *        on a follower.
+     * @param totalMemory the total memory threshold
+     */
     public void persist(final Snapshot.State snapshotState, final Optional<OutputStream> installSnapshotStream,
             final long totalMemory) {
         if (!(task instanceof Capture(final var lastSeq, final var request))) {
@@ -366,7 +396,12 @@ public class SnapshotManager implements SnapshotState {
         task = new PersistCapture(lastSeq);
     }
 
-    @Override
+    /**
+     * Commit the snapshot by trimming the log.
+     *
+     * @param sequenceNumber the sequence number of the persisted snapshot
+     * @param timeStamp the time stamp of the persisted snapshot
+     */
     public void commit(final long sequenceNumber, final long timeStamp) {
         if (!(task instanceof Persist persist)) {
             LOG.debug("{}: commit should not be called in state {}", memberId(), task);
@@ -422,7 +457,9 @@ public class SnapshotManager implements SnapshotState {
         };
     }
 
-    @Override
+    /**
+     * Rolls back the snapshot on failure.
+     */
     public void rollback() {
         switch (task) {
             case PersistApply persist -> {
@@ -450,7 +487,12 @@ public class SnapshotManager implements SnapshotState {
         context.getActor().tell(SnapshotComplete.INSTANCE, context.getActor());
     }
 
-    @Override
+    /**
+     * Trims the in-memory log.
+     *
+     * @param desiredTrimIndex the desired index to trim from
+     * @return the actual trim index
+     */
     public long trimLog(final long desiredTrimIndex) {
         if (!(task instanceof Idle)) {
             LOG.debug("{}: trimLog should not be called in state {}", memberId(), task);
