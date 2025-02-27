@@ -1,0 +1,8 @@
+Verified+1: jenkins-releng ODL
+Code-Review+2: Robert Varga <nite@hq.sk>
+Verified+1: ODL Required.GHA <releng+odl.required.gha@linuxfoundation.org>
+Submitted-by: Robert Varga <nite@hq.sk>
+Submitted-at: Thu, 27 Feb 2025 09:23:44 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/c/controller/+/115664
+Project: controller
+Branch: refs/heads/10.0.x
