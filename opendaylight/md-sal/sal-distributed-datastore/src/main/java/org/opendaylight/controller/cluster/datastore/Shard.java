@@ -607,7 +607,7 @@ public class Shard extends RaftActor {
     // applyState() will be invoked once consensus is reached on the payload
     // non-final for mocking
     void persistPayload(final Identifier id, final Payload payload, final boolean batchHint) {
-        final boolean canSkipPayload = !hasFollowers() && !persistence().isRecoveryApplicable();
+        final boolean canSkipPayload = !hasFollowers() && !isRecoveryApplicable();
         if (canSkipPayload) {
             applyState(self(), id, payload);
         } else {

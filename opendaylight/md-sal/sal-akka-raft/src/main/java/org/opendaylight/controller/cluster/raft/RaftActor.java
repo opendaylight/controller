@@ -750,15 +750,19 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         }
     }
 
-    public final DataPersistenceProvider persistence() {
+    public final boolean isRecoveryApplicable() {
+        return persistence().isRecoveryApplicable();
+    }
+
+    protected final DataPersistenceProvider persistence() {
         return delegatingPersistenceProvider.getDelegate();
     }
 
-    public void setPersistence(final DataPersistenceProvider provider) {
+    protected final void setPersistence(final DataPersistenceProvider provider) {
         delegatingPersistenceProvider.setDelegate(provider);
     }
 
-    protected void setPersistence(final boolean persistent) {
+    protected final void setPersistence(final boolean persistent) {
         DataPersistenceProvider currentPersistence = persistence();
         if (persistent && (currentPersistence == null || !currentPersistence.isRecoveryApplicable())) {
             setPersistence(new PersistentDataProvider(this));

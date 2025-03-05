@@ -1576,11 +1576,11 @@ public class ShardTest extends AbstractShardTest {
 
         final TestActorRef<Shard> shard1 = actorFactory.createTestActor(persistentProps, "testPersistence1");
 
-        assertTrue("Recovery Applicable", shard1.underlyingActor().persistence().isRecoveryApplicable());
+        assertTrue("Recovery Applicable", shard1.underlyingActor().isRecoveryApplicable());
 
         final TestActorRef<Shard> shard2 = actorFactory.createTestActor(nonPersistentProps, "testPersistence2");
 
-        assertFalse("Recovery Not Applicable", shard2.underlyingActor().persistence().isRecoveryApplicable());
+        assertFalse("Recovery Not Applicable", shard2.underlyingActor().isRecoveryApplicable());
     }
 
     @Test
@@ -1589,17 +1589,17 @@ public class ShardTest extends AbstractShardTest {
 
         final TestActorRef<Shard> shard = actorFactory.createTestActor(newShardProps(), "testOnDatastoreContext");
 
-        assertTrue("isRecoveryApplicable", shard.underlyingActor().persistence().isRecoveryApplicable());
+        assertTrue("isRecoveryApplicable", shard.underlyingActor().isRecoveryApplicable());
 
         ShardTestKit.waitUntilLeader(shard);
 
         shard.tell(dataStoreContextBuilder.persistent(false).build(), noSender());
 
-        assertFalse("isRecoveryApplicable", shard.underlyingActor().persistence().isRecoveryApplicable());
+        assertFalse("isRecoveryApplicable", shard.underlyingActor().isRecoveryApplicable());
 
         shard.tell(dataStoreContextBuilder.persistent(true).build(), noSender());
 
-        assertTrue("isRecoveryApplicable", shard.underlyingActor().persistence().isRecoveryApplicable());
+        assertTrue("isRecoveryApplicable", shard.underlyingActor().isRecoveryApplicable());
     }
 
     @Test
