@@ -759,7 +759,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     protected final void setPersistence(final DataPersistenceProvider provider) {
-        delegatingPersistenceProvider.setDelegate(provider);
+        delegatingPersistenceProvider.setDelegate(requireNonNull(provider));
     }
 
     protected final void setPersistence(final boolean persistent) {
