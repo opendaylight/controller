@@ -181,7 +181,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             try {
                 currentBehavior.close();
             } catch (Exception e) {
-                LOG.warn("{}: Error closing behavior {}", persistence(), currentBehavior, e);
+                LOG.warn("{}: Error closing behavior {}", persistenceId(), currentBehavior, e);
             }
         }
 
