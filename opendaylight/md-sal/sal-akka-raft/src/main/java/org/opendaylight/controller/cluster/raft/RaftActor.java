@@ -763,25 +763,38 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     protected final void setPersistence(final boolean persistent) {
-        DataPersistenceProvider currentPersistence = persistence();
-        if (persistent && (currentPersistence == null || !currentPersistence.isRecoveryApplicable())) {
+        if (persistent) {
+            setPersistent();
+        } else {
+            setTransient();
+        }
+    }
+
+    private void setPersistent() {
+        final var currentPersistence = persistence();
+        if (currentPersistence == null || !currentPersistence.isRecoveryApplicable()) {
             setPersistence(new PersistentDataProvider(this));
 
             if (getCurrentBehavior() != null) {
                 LOG.info("{}: Persistence has been enabled - capturing snapshot", memberId());
                 captureSnapshot();
             }
-        } else if (!persistent && (currentPersistence == null || currentPersistence.isRecoveryApplicable())) {
+        }
+    }
+
+    private void setTransient() {
+        final var currentPersistence = persistence();
+        if (currentPersistence == null || currentPersistence.isRecoveryApplicable()) {
             setPersistence(new NonPersistentDataProvider(this) {
                 /*
                  * The way snapshotting works is,
                  * <ol>
-                 * <li> RaftActor calls createSnapshot on the Shard
-                 * <li> Shard sends a CaptureSnapshotReply and RaftActor then calls saveSnapshot
-                 * <li> When saveSnapshot is invoked on the akka-persistence API it uses the SnapshotStore to save
-                 * the snapshot. The SnapshotStore sends SaveSnapshotSuccess or SaveSnapshotFailure. When the
-                 * RaftActor gets SaveSnapshot success it commits the snapshot to the in-memory journal. This
-                 * commitSnapshot is mimicking what is done in SaveSnapshotSuccess.
+                 *   <li>RaftActor calls createSnapshot on the Shard
+                 *   <li>Shard sends a CaptureSnapshotReply and RaftActor then calls saveSnapshot
+                 *   <li>When saveSnapshot is invoked on the akka-persistence API it uses the SnapshotStore to save
+                 *       the snapshot. The SnapshotStore sends SaveSnapshotSuccess or SaveSnapshotFailure. When the
+                 *       RaftActor gets SaveSnapshot success it commits the snapshot to the in-memory journal. This
+                 *       commitSnapshot is mimicking what is done in SaveSnapshotSuccess.
                  * </ol>
                  */
                 @Override
