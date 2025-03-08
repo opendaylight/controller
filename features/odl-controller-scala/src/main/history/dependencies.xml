@@ -3,7 +3,7 @@
     <feature version="0.0.0">
         <bundle>mvn:org.scala-lang.modules/scala-java8-compat_2.13/1.0.2</bundle>
         <bundle>mvn:org.scala-lang.modules/scala-parser-combinators_2.13/1.1.2</bundle>
-        <bundle>mvn:org.scala-lang/scala-library/2.13.15</bundle>
-        <bundle>mvn:org.scala-lang/scala-reflect/2.13.15</bundle>
+        <bundle>mvn:org.scala-lang/scala-library/2.13.16</bundle>
+        <bundle>mvn:org.scala-lang/scala-reflect/2.13.16</bundle>
     </feature>
 </features>
