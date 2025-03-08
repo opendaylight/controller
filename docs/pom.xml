@@ -12,7 +12,7 @@
     <parent>
         <groupId>org.opendaylight.odlparent</groupId>
         <artifactId>odlparent</artifactId>
-        <version>14.0.7</version>
+        <version>14.0.8</version>
         <relativePath/>
     </parent>
 
@@ -206,14 +206,14 @@
                         <link>https://junit.org/junit4/javadoc/4.13/</link>
                         <link>https://hamcrest.org/JavaHamcrest/javadoc/3.0/</link>
                         <link>https://www.slf4j.org/apidocs/</link>
-                        <link>https://guava.dev/releases/33.3.1-jre/api/docs/</link>
+                        <link>https://guava.dev/releases/33.4.0-jre/api/docs/</link>
                         <link>https://doc.akka.io/japi/akka/2.6/</link>
                         <link>https://netty.io/4.1/api/</link>
                         <link>https://commons.apache.org/proper/commons-lang/javadocs/api-release/</link>
 
-                        <link>https://www.javadoc.io/doc/org.opendaylight.odlparent/odlparent-docs/14.0.7/</link>
-                        <link>https://www.javadoc.io/doc/org.opendaylight.yangtools/yangtools-docs/14.0.10/</link>
-                        <link>https://www.javadoc.io/doc/org.opendaylight.mdsal/mdsal-docs/14.0.10/</link>
+                        <link>https://www.javadoc.io/doc/org.opendaylight.odlparent/odlparent-docs/14.0.8/</link>
+                        <link>https://www.javadoc.io/doc/org.opendaylight.yangtools/yangtools-docs/14.0.11/</link>
+                        <link>https://www.javadoc.io/doc/org.opendaylight.mdsal/mdsal-docs/14.0.11/</link>
                     </links>
                     <groups>
                         <group>
