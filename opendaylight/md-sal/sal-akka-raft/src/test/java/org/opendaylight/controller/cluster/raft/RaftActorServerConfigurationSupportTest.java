@@ -1522,7 +1522,8 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
                 @Override
                 public void createSnapshot(final ActorRef actorRef,
                         final Optional<OutputStream> installSnapshotStream) {
-                    actorRef.tell(new CaptureSnapshotReply(ByteState.empty(), installSnapshotStream), actorRef);
+                    actorRef.tell(new CaptureSnapshotReply(ByteState.empty(), installSnapshotStream.orElse(null)),
+                        actorRef);
                 }
 
                 @Override
@@ -1578,7 +1579,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
                 SerializationUtils.serialize(snapshotState, installSnapshotStream.orElseThrow());
             }
 
-            actorRef.tell(new CaptureSnapshotReply(snapshotState, installSnapshotStream), actorRef);
+            actorRef.tell(new CaptureSnapshotReply(snapshotState, installSnapshotStream.orElse(null)), actorRef);
         }
 
         static Props props(final Path stateDir, final Map<String, String> peerAddresses,

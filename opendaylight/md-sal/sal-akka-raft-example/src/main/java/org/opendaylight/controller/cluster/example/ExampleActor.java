@@ -135,7 +135,7 @@ public final class ExampleActor extends RaftActor implements RaftActorRecoveryCo
             LOG.error("Exception in creating snapshot", e);
         }
 
-        self().tell(new CaptureSnapshotReply(new MapState(state), installSnapshotStream), null);
+        self().tell(new CaptureSnapshotReply(new MapState(state), installSnapshotStream.orElse(null)), null);
     }
 
     @Override

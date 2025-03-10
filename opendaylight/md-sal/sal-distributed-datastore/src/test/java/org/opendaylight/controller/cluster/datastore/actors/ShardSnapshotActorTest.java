@@ -43,9 +43,9 @@ public class ShardSnapshotActorTest extends AbstractActorTest {
             Optional.ofNullable(installSnapshotStream), kit.getRef());
 
         final CaptureSnapshotReply reply = kit.expectMsgClass(Duration.ofSeconds(3), CaptureSnapshotReply.class);
-        assertNotNull("getSnapshotState is null", reply.getSnapshotState());
-        assertEquals("SnapshotState type", ShardSnapshotState.class, reply.getSnapshotState().getClass());
-        assertEquals("Snapshot", snapshot, ((ShardSnapshotState)reply.getSnapshotState()).getSnapshot());
+        assertNotNull("getSnapshotState is null", reply.snapshotState());
+        assertEquals("SnapshotState type", ShardSnapshotState.class, reply.snapshotState().getClass());
+        assertEquals("Snapshot", snapshot, ((ShardSnapshotState)reply.snapshotState()).getSnapshot());
 
         if (installSnapshotStream != null) {
             final ShardDataTreeSnapshot deserialized;

@@ -329,7 +329,7 @@ public class RaftActorTest extends AbstractActorTest {
         when(mockSupport.handleSnapshotMessage(same(applySnapshot), any(ActorRef.class))).thenReturn(true);
         mockRaftActor.handleCommand(applySnapshot);
 
-        CaptureSnapshotReply captureSnapshotReply = new CaptureSnapshotReply(ByteState.empty(), Optional.empty());
+        CaptureSnapshotReply captureSnapshotReply = new CaptureSnapshotReply(ByteState.empty(), null);
         when(mockSupport.handleSnapshotMessage(same(captureSnapshotReply), any(ActorRef.class))).thenReturn(true);
         mockRaftActor.handleCommand(captureSnapshotReply);
 
@@ -693,8 +693,7 @@ public class RaftActorTest extends AbstractActorTest {
                 new MockRaftActorContext.MockPayload("foo-2"),
                 new MockRaftActorContext.MockPayload("foo-3"),
                 new MockRaftActorContext.MockPayload("foo-4")));
-        followerActor.handleCommand(new CaptureSnapshotReply(ByteState.of(snapshotBytes.toByteArray()),
-                Optional.empty()));
+        followerActor.handleCommand(new CaptureSnapshotReply(ByteState.of(snapshotBytes.toByteArray()), null));
         assertTrue(followerActor.getRaftActorContext().getSnapshotManager().isCapturing());
 
         // The commit is needed to complete the snapshot creation process
@@ -785,8 +784,7 @@ public class RaftActorTest extends AbstractActorTest {
                 new MockRaftActorContext.MockPayload("foo-2"),
                 new MockRaftActorContext.MockPayload("foo-3"),
                 new MockRaftActorContext.MockPayload("foo-4")));
-        leaderActor.handleCommand(new CaptureSnapshotReply(ByteState.of(snapshotBytes.toByteArray()),
-                Optional.empty()));
+        leaderActor.handleCommand(new CaptureSnapshotReply(ByteState.of(snapshotBytes.toByteArray()), null));
         assertTrue(leaderActor.getRaftActorContext().getSnapshotManager().isCapturing());
 
         assertEquals("Real snapshot didn't clear the log till replicatedToAllIndex", 0,
@@ -833,8 +831,7 @@ public class RaftActorTest extends AbstractActorTest {
                 leaderActor.getReplicatedLog().lastMeta(), -1, "member1");
 
         // Now send a CaptureSnapshotReply
-        mockActorRef.tell(new CaptureSnapshotReply(ByteState.of(fromObject("foo").toByteArray()), Optional.empty()),
-            mockActorRef);
+        mockActorRef.tell(new CaptureSnapshotReply(ByteState.of(fromObject("foo").toByteArray()), null), mockActorRef);
 
         // Trimming log in this scenario is a no-op
         assertEquals(-1, leaderActor.getReplicatedLog().getSnapshotIndex());
@@ -875,8 +872,7 @@ public class RaftActorTest extends AbstractActorTest {
                 new MockRaftActorContext.MockPayload("duh"), false);
 
         // Now send a CaptureSnapshotReply
-        mockActorRef.tell(new CaptureSnapshotReply(ByteState.of(fromObject("foo").toByteArray()),
-                Optional.empty()), mockActorRef);
+        mockActorRef.tell(new CaptureSnapshotReply(ByteState.of(fromObject("foo").toByteArray()), null), mockActorRef);
 
         // Trimming log in this scenario is a no-op
         assertEquals(3, leaderActor.getReplicatedLog().getSnapshotIndex());
@@ -1035,8 +1031,7 @@ public class RaftActorTest extends AbstractActorTest {
                 eq(Optional.empty()));
 
         byte[] stateSnapshot = new byte[]{1,2,3};
-        replyActor.getValue().tell(new CaptureSnapshotReply(ByteState.of(stateSnapshot), Optional.empty()),
-                ActorRef.noSender());
+        replyActor.getValue().tell(new CaptureSnapshotReply(ByteState.of(stateSnapshot), null), ActorRef.noSender());
 
         GetSnapshotReply reply = kit.expectMsgClass(GetSnapshotReply.class);
 

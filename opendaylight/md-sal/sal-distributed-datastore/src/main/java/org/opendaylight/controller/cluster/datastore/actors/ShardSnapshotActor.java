@@ -85,7 +85,7 @@ public final class ShardSnapshotActor extends AbstractUntypedActorWithMetering {
         }
 
         request.getReplyTo().tell(new CaptureSnapshotReply(new ShardSnapshotState(request.getSnapshot()),
-                installSnapshotStream), ActorRef.noSender());
+                installSnapshotStream.orElse(null)), ActorRef.noSender());
     }
 
     private ObjectOutputStream getOutputStream(final OutputStream outputStream) throws IOException {

@@ -1310,7 +1310,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
             public void createSnapshot(final ActorRef actorRef, final Optional<OutputStream> installSnapshotStream) {
                 try {
                     actorRef.tell(new CaptureSnapshotReply(new MockSnapshotState(followerRaftActor.get().getState()),
-                            installSnapshotStream), actorRef);
+                            installSnapshotStream.orElse(null)), actorRef);
                 } catch (RuntimeException e) {
                     throw e;
                 } catch (Exception e) {

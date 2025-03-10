@@ -190,7 +190,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
                 SerializationUtils.serialize(snapshotState, installSnapshotStream.orElseThrow());
             }
 
-            actorRef.tell(new CaptureSnapshotReply(snapshotState, installSnapshotStream), actorRef);
+            actorRef.tell(new CaptureSnapshotReply(snapshotState, installSnapshotStream.orElse(null)), actorRef);
         }
 
         public ActorRef collectorActor() {

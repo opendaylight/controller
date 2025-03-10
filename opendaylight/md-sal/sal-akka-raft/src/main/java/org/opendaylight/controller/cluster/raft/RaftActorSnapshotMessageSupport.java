@@ -87,7 +87,7 @@ class RaftActorSnapshotMessageSupport {
     private void onCaptureSnapshotReply(final CaptureSnapshotReply reply) {
         LOG.debug("{}: CaptureSnapshotReply received by actor", context.getId());
 
-        context.getSnapshotManager().persist(reply.getSnapshotState(), reply.getInstallSnapshotStream(),
+        context.getSnapshotManager().persist(reply.snapshotState(), Optional.ofNullable(reply.installSnapshotStream()),
                 context.getTotalMemory());
     }
 

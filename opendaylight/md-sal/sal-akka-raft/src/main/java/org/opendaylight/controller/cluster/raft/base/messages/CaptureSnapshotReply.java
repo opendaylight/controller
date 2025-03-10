@@ -10,26 +10,26 @@ package org.opendaylight.controller.cluster.raft.base.messages;
 import static java.util.Objects.requireNonNull;
 
 import java.io.OutputStream;
-import java.util.Optional;
 import org.apache.pekko.dispatch.ControlMessage;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 
-public class CaptureSnapshotReply implements ControlMessage {
-    private final Snapshot.State snapshotState;
-    private final Optional<OutputStream> installSnapshotStream;
+public final class CaptureSnapshotReply implements ControlMessage {
+    private final Snapshot.@NonNull State snapshotState;
+    private final @Nullable OutputStream installSnapshotStream;
 
     public CaptureSnapshotReply(final Snapshot.@NonNull State snapshotState,
-            final @NonNull Optional<OutputStream> installSnapshotStream) {
+            final @Nullable OutputStream installSnapshotStream) {
         this.snapshotState = requireNonNull(snapshotState);
-        this.installSnapshotStream = requireNonNull(installSnapshotStream);
+        this.installSnapshotStream = installSnapshotStream;
     }
 
-    public Snapshot.@NonNull State getSnapshotState() {
+    public Snapshot.@NonNull State snapshotState() {
         return snapshotState;
     }
 
-    public @NonNull Optional<OutputStream> getInstallSnapshotStream() {
+    public @Nullable OutputStream installSnapshotStream() {
         return installSnapshotStream;
     }
 }
