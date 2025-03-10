@@ -126,16 +126,16 @@ public final class ExampleActor extends RaftActor implements RaftActorRecoveryCo
 
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public void createSnapshot(final ActorRef actorRef, final Optional<OutputStream> installSnapshotStream) {
-        try {
-            if (installSnapshotStream.isPresent()) {
-                SerializationUtils.serialize((Serializable) state, installSnapshotStream.orElseThrow());
+    public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
+        if (installSnapshotStream != null) {
+            try {
+                SerializationUtils.serialize((Serializable) state, installSnapshotStream);
+            } catch (RuntimeException e) {
+                LOG.error("Exception in creating snapshot", e);
             }
-        } catch (RuntimeException e) {
-            LOG.error("Exception in creating snapshot", e);
         }
 
-        self().tell(new CaptureSnapshotReply(new MapState(state), installSnapshotStream.orElse(null)), null);
+        self().tell(new CaptureSnapshotReply(new MapState(state), installSnapshotStream), null);
     }
 
     @Override

@@ -60,7 +60,7 @@ class RaftActorSnapshotMessageSupport {
         this.cohort = cohort;
 
         context.getSnapshotManager().setCreateSnapshotConsumer(
-            outputStream -> cohort.createSnapshot(context.getActor(), outputStream));
+            outputStream -> cohort.createSnapshot(context.getActor(), outputStream.orElse(null)));
         context.getSnapshotManager().setSnapshotCohort(cohort);
     }
 
@@ -120,7 +120,7 @@ class RaftActorSnapshotMessageSupport {
             ActorRef snapshotReplyActor = context.actorOf(GetSnapshotReplyActor.props(captureSnapshot,
                     context.termInfo(), sender, timeout, context.getId(), context.getPeerServerInfo(true)));
 
-            cohort.createSnapshot(snapshotReplyActor, Optional.empty());
+            cohort.createSnapshot(snapshotReplyActor, null);
         } else {
             Snapshot snapshot = Snapshot.create(EmptyState.INSTANCE, List.of(),
                     -1, -1, -1, -1, context.termInfo(), context.getPeerServerInfo(true));

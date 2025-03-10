@@ -12,9 +12,9 @@ import static java.util.Objects.requireNonNull;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.util.Optional;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Props;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActorWithMetering;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
@@ -24,32 +24,30 @@ import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotRep
 /**
  * This is an offload actor, which is given an isolated snapshot of the data tree. It performs the potentially
  * time-consuming operation of serializing the snapshot.
- *
- * @author Robert Varga
  */
 public final class ShardSnapshotActor extends AbstractUntypedActorWithMetering {
     // Internal message
     private static final class SerializeSnapshot {
         private final ShardDataTreeSnapshot snapshot;
-        private final Optional<OutputStream> installSnapshotStream;
+        private final OutputStream installSnapshotStream;
         private final ActorRef replyTo;
 
-        SerializeSnapshot(final ShardDataTreeSnapshot snapshot, final Optional<OutputStream> installSnapshotStream,
+        SerializeSnapshot(final ShardDataTreeSnapshot snapshot, final @Nullable OutputStream installSnapshotStream,
                 final ActorRef replyTo) {
             this.snapshot = requireNonNull(snapshot);
-            this.installSnapshotStream = requireNonNull(installSnapshotStream);
+            this.installSnapshotStream = installSnapshotStream;
             this.replyTo = requireNonNull(replyTo);
         }
 
-        ShardDataTreeSnapshot getSnapshot() {
+        ShardDataTreeSnapshot snapshot() {
             return snapshot;
         }
 
-        Optional<OutputStream> getInstallSnapshotStream() {
+        @Nullable OutputStream installSnapshotStream() {
             return installSnapshotStream;
         }
 
-        ActorRef getReplyTo() {
+        ActorRef replyTo() {
             return replyTo;
         }
     }
@@ -74,18 +72,18 @@ public final class ShardSnapshotActor extends AbstractUntypedActorWithMetering {
     }
 
     private void onSerializeSnapshot(final SerializeSnapshot request) {
-        Optional<OutputStream> installSnapshotStream = request.getInstallSnapshotStream();
-        if (installSnapshotStream.isPresent()) {
-            try (ObjectOutputStream out = getOutputStream(installSnapshotStream.orElseThrow())) {
-                request.getSnapshot().serialize(out);
+        final var installSnapshotStream = request.installSnapshotStream();
+        if (installSnapshotStream != null) {
+            try (var out = getOutputStream(installSnapshotStream)) {
+                request.snapshot().serialize(out);
             } catch (IOException e) {
                 // TODO - we should communicate the failure in the CaptureSnapshotReply.
                 LOG.error("Error serializing snapshot", e);
             }
         }
 
-        request.getReplyTo().tell(new CaptureSnapshotReply(new ShardSnapshotState(request.getSnapshot()),
-                installSnapshotStream.orElse(null)), ActorRef.noSender());
+        request.replyTo().tell(new CaptureSnapshotReply(new ShardSnapshotState(request.snapshot()),
+            installSnapshotStream), ActorRef.noSender());
     }
 
     private ObjectOutputStream getOutputStream(final OutputStream outputStream) throws IOException {
@@ -102,7 +100,7 @@ public final class ShardSnapshotActor extends AbstractUntypedActorWithMetering {
      * @param replyTo the actor to which to send the CaptureSnapshotReply
      */
     public static void requestSnapshot(final ActorRef snapshotActor, final ShardDataTreeSnapshot snapshot,
-            final Optional<OutputStream> installSnapshotStream, final ActorRef replyTo) {
+            final @Nullable OutputStream installSnapshotStream, final ActorRef replyTo) {
         snapshotActor.tell(new SerializeSnapshot(snapshot, installSnapshotStream, replyTo), ActorRef.noSender());
     }
 

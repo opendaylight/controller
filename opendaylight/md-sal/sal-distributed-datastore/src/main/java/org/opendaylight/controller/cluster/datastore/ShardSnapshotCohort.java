@@ -13,7 +13,6 @@ import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.OutputStream;
-import java.util.Optional;
 import org.apache.pekko.actor.ActorContext;
 import org.apache.pekko.actor.ActorRef;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
@@ -66,7 +65,7 @@ final class ShardSnapshotCohort implements RaftActorSnapshotCohort {
     }
 
     @Override
-    public void createSnapshot(final ActorRef actorRef, final Optional<OutputStream> installSnapshotStream) {
+    public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
         // Forward the request to the snapshot actor
         final var snapshot = store.takeStateSnapshot();
         LOG.debug("{}: requesting serialization of snapshot {}", memberName, snapshot);

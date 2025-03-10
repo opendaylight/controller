@@ -39,8 +39,7 @@ public class ShardSnapshotActorTest extends AbstractActorTest {
         final NormalizedNode expectedRoot = snapshot.getRootNode().orElseThrow();
 
         ByteArrayOutputStream installSnapshotStream = withInstallSnapshot ? new ByteArrayOutputStream() : null;
-        ShardSnapshotActor.requestSnapshot(snapshotActor, snapshot,
-            Optional.ofNullable(installSnapshotStream), kit.getRef());
+        ShardSnapshotActor.requestSnapshot(snapshotActor, snapshot, installSnapshotStream, kit.getRef());
 
         final CaptureSnapshotReply reply = kit.expectMsgClass(Duration.ofSeconds(3), CaptureSnapshotReply.class);
         assertNotNull("getSnapshotState is null", reply.snapshotState());

@@ -9,8 +9,8 @@ package org.opendaylight.controller.cluster.raft;
 
 import com.google.common.io.ByteSource;
 import java.io.OutputStream;
-import java.util.Optional;
 import org.apache.pekko.actor.ActorRef;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 
@@ -20,21 +20,24 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
  * @author Thomas Pantelis
  */
 public final class NoopRaftActorSnapshotCohort implements RaftActorSnapshotCohort {
-    public static final NoopRaftActorSnapshotCohort INSTANCE = new NoopRaftActorSnapshotCohort();
+    public static final @NonNull NoopRaftActorSnapshotCohort INSTANCE = new NoopRaftActorSnapshotCohort();
 
     private NoopRaftActorSnapshotCohort() {
+        // Hidden on purpose
     }
 
     @Override
-    public void createSnapshot(ActorRef actorRef, Optional<OutputStream> installSnapshotStream) {
+    public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
+        // No-op
     }
 
     @Override
-    public void applySnapshot(State snapshotState) {
+    public void applySnapshot(final State snapshotState) {
+        // No-op
     }
 
     @Override
-    public State deserializeSnapshot(ByteSource snapshotBytes) {
+    public State deserializeSnapshot(final ByteSource snapshotBytes) {
         return EmptyState.INSTANCE;
     }
 }
