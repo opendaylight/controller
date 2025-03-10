@@ -44,7 +44,7 @@ final class GetSnapshotReplyActor extends UntypedAbstractActor {
     @Override
     public void onReceive(final Object message) {
         if (message instanceof CaptureSnapshotReply msg) {
-            Snapshot snapshot = Snapshot.create(msg.getSnapshotState(),
+            Snapshot snapshot = Snapshot.create(msg.snapshotState(),
                 params.captureSnapshot.getUnAppliedEntries(),
                 params.captureSnapshot.getLastIndex(), params.captureSnapshot.getLastTerm(),
                 params.captureSnapshot.getLastAppliedIndex(), params.captureSnapshot.getLastAppliedTerm(),

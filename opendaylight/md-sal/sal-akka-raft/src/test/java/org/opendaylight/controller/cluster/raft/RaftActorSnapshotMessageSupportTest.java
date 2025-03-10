@@ -100,10 +100,10 @@ class RaftActorSnapshotMessageSupportTest {
     @Test
     public void testOnCaptureSnapshotReply() {
         ByteState state = ByteState.of(new byte[]{1,2,3,4,5});
-        Optional<OutputStream> optionalStream = Optional.of(mock(OutputStream.class));
-        sendMessageToSupport(new CaptureSnapshotReply(state, optionalStream));
+        final var stream = mock(OutputStream.class);
+        sendMessageToSupport(new CaptureSnapshotReply(state, stream));
 
-        verify(mockSnapshotManager).persist(eq(state), eq(optionalStream), anyLong());
+        verify(mockSnapshotManager).persist(eq(state), eq(Optional.of(stream)), anyLong());
     }
 
     @Test
