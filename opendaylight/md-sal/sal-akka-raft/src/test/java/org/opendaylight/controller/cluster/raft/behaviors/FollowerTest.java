@@ -1307,10 +1307,10 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
             final AtomicReference<MockRaftActor> followerRaftActor) {
         RaftActorSnapshotCohort snapshotCohort = new RaftActorSnapshotCohort() {
             @Override
-            public void createSnapshot(final ActorRef actorRef, final Optional<OutputStream> installSnapshotStream) {
+            public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
                 try {
                     actorRef.tell(new CaptureSnapshotReply(new MockSnapshotState(followerRaftActor.get().getState()),
-                            installSnapshotStream.orElse(null)), actorRef);
+                            installSnapshotStream), actorRef);
                 } catch (RuntimeException e) {
                     throw e;
                 } catch (Exception e) {

@@ -129,7 +129,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
             }
 
             @Override
-            public void createSnapshot(final ActorRef actorRef, final Optional<OutputStream> installSnapshotStream) {
+            public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
             }
 
             @Override

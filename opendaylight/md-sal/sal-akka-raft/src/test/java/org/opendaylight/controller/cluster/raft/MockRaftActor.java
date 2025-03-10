@@ -182,7 +182,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     @Override
-    public void createSnapshot(final ActorRef actorRef, final Optional<OutputStream> installSnapshotStream) {
+    public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
         LOG.info("{}: createSnapshot called", memberId());
         snapshotCohortDelegate.createSnapshot(actorRef, installSnapshotStream);
     }
