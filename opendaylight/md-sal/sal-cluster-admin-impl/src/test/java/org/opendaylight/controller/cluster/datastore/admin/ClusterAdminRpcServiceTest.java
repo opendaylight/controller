@@ -23,7 +23,6 @@ import static org.opendaylight.controller.cluster.datastore.MemberNode.verifyRaf
 import static org.opendaylight.controller.cluster.datastore.MemberNode.verifyRaftState;
 
 import com.google.common.collect.Lists;
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -141,17 +140,16 @@ class ClusterAdminRpcServiceTest {
             .testName("testBackupDatastore")
             .build();
 
-        final var fileName = "target/testBackupDatastore";
-        final var file = new File(fileName);
-        file.delete();
+        final var file = Path.of("target", "testBackupDatastore");
+        Files.deleteIfExists(file);
 
         final var service = new ClusterAdminRpcService(node.configDataStore(), node.operDataStore(), null);
 
-        var rpcResult = service.backupDatastore(new BackupDatastoreInputBuilder().setFilePath(fileName).build())
+        var rpcResult = service.backupDatastore(new BackupDatastoreInputBuilder().setFilePath(file.toString()).build())
             .get(5, TimeUnit.SECONDS);
         verifySuccessfulRpcResult(rpcResult);
 
-        try (var fis = Files.newInputStream(file.toPath())) {
+        try (var fis = Files.newInputStream(file)) {
             final List<DatastoreSnapshot> snapshots = SerializationUtils.deserialize(fis);
             assertEquals("DatastoreSnapshot size", 2, snapshots.size());
 
@@ -161,7 +159,7 @@ class ClusterAdminRpcServiceTest {
             verifyDatastoreSnapshot(node.configDataStore().getActorUtils().getDataStoreName(),
                     map.get(node.configDataStore().getActorUtils().getDataStoreName()), "cars", "people");
         } finally {
-            new File(fileName).delete();
+            Files.deleteIfExists(file);
         }
 
         // Test failure by killing a shard.
@@ -174,7 +172,7 @@ class ClusterAdminRpcServiceTest {
         carsShardActor.tell(PoisonPill.getInstance(), ActorRef.noSender());
         node.kit().expectTerminated(carsShardActor);
 
-        rpcResult = service.backupDatastore(new BackupDatastoreInputBuilder().setFilePath(fileName).build())
+        rpcResult = service.backupDatastore(new BackupDatastoreInputBuilder().setFilePath(file.toString()).build())
                 .get(5, TimeUnit.SECONDS);
         assertFalse("isSuccessful", rpcResult.isSuccessful());
         assertEquals("getErrors", 1, rpcResult.getErrors().size());
