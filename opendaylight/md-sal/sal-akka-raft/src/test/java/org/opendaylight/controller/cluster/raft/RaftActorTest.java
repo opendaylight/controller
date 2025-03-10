@@ -16,6 +16,7 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -1027,8 +1028,7 @@ public class RaftActorTest extends AbstractActorTest {
         raftActorRef.tell(GetSnapshot.INSTANCE, kit.getRef());
 
         ArgumentCaptor<ActorRef> replyActor = ArgumentCaptor.forClass(ActorRef.class);
-        verify(mockRaftActor.snapshotCohortDelegate, timeout(5000)).createSnapshot(replyActor.capture(),
-                eq(Optional.empty()));
+        verify(mockRaftActor.snapshotCohortDelegate, timeout(5000)).createSnapshot(replyActor.capture(), isNull());
 
         byte[] stateSnapshot = new byte[]{1,2,3};
         replyActor.getValue().tell(new CaptureSnapshotReply(ByteState.of(stateSnapshot), null), ActorRef.noSender());

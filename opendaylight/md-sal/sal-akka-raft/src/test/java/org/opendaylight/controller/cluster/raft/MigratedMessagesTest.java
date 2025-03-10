@@ -72,9 +72,8 @@ public class MigratedMessagesTest extends AbstractActorTest {
 
         RaftActorSnapshotCohort snapshotCohort = new RaftActorSnapshotCohort() {
             @Override
-            public void createSnapshot(final ActorRef actorRef, final Optional<OutputStream> installSnapshotStream) {
-                actorRef.tell(new CaptureSnapshotReply(ByteState.empty(), installSnapshotStream.orElse(null)),
-                    actorRef);
+            public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
+                actorRef.tell(new CaptureSnapshotReply(ByteState.empty(), installSnapshotStream), actorRef);
             }
 
             @Override
@@ -114,8 +113,8 @@ public class MigratedMessagesTest extends AbstractActorTest {
 
         RaftActorSnapshotCohort snapshotCohort = new RaftActorSnapshotCohort() {
             @Override
-            public void createSnapshot(final ActorRef actorRef, final Optional<OutputStream> installSnapshotStream) {
-                actorRef.tell(new CaptureSnapshotReply(snapshotState, installSnapshotStream.orElse(null)), actorRef);
+            public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
+                actorRef.tell(new CaptureSnapshotReply(snapshotState, installSnapshotStream), actorRef);
             }
 
             @Override

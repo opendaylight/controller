@@ -1520,10 +1520,8 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
             super(stateDir, id, peerAddresses, config, persistent, collectorActor);
             snapshotCohortDelegate = new RaftActorSnapshotCohort() {
                 @Override
-                public void createSnapshot(final ActorRef actorRef,
-                        final Optional<OutputStream> installSnapshotStream) {
-                    actorRef.tell(new CaptureSnapshotReply(ByteState.empty(), installSnapshotStream.orElse(null)),
-                        actorRef);
+                public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
+                    actorRef.tell(new CaptureSnapshotReply(ByteState.empty(), installSnapshotStream), actorRef);
                 }
 
                 @Override
@@ -1573,13 +1571,13 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         @Override
         @SuppressWarnings("checkstyle:IllegalCatch")
-        public void createSnapshot(final ActorRef actorRef, final Optional<OutputStream> installSnapshotStream) {
+        public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
             MockSnapshotState snapshotState = new MockSnapshotState(List.copyOf(getState()));
-            if (installSnapshotStream.isPresent()) {
-                SerializationUtils.serialize(snapshotState, installSnapshotStream.orElseThrow());
+            if (installSnapshotStream != null) {
+                SerializationUtils.serialize(snapshotState, installSnapshotStream);
             }
 
-            actorRef.tell(new CaptureSnapshotReply(snapshotState, installSnapshotStream.orElse(null)), actorRef);
+            actorRef.tell(new CaptureSnapshotReply(snapshotState, installSnapshotStream), actorRef);
         }
 
         static Props props(final Path stateDir, final Map<String, String> peerAddresses,

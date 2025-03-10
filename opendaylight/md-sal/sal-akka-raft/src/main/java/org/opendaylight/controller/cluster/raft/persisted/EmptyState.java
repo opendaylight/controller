@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft.persisted;
 
 import com.google.common.base.MoreObjects;
+import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * Empty Snapshot State implementation.
@@ -18,7 +19,7 @@ public final class EmptyState implements Snapshot.State {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
-    public static final EmptyState INSTANCE = new EmptyState();
+    public static final @NonNull EmptyState INSTANCE = new EmptyState();
 
     private EmptyState() {
         // Hidden on purpose

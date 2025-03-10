@@ -18,7 +18,6 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -183,14 +182,13 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         }
 
         @Override
-        @SuppressWarnings("checkstyle:IllegalCatch")
-        public void createSnapshot(final ActorRef actorRef, final Optional<OutputStream> installSnapshotStream) {
+        public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
             MockSnapshotState snapshotState = new MockSnapshotState(List.copyOf(getState()));
-            if (installSnapshotStream.isPresent()) {
-                SerializationUtils.serialize(snapshotState, installSnapshotStream.orElseThrow());
+            if (installSnapshotStream != null) {
+                SerializationUtils.serialize(snapshotState, installSnapshotStream);
             }
 
-            actorRef.tell(new CaptureSnapshotReply(snapshotState, installSnapshotStream.orElse(null)), actorRef);
+            actorRef.tell(new CaptureSnapshotReply(snapshotState, installSnapshotStream), actorRef);
         }
 
         public ActorRef collectorActor() {
