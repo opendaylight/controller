@@ -11,8 +11,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.text.WordUtils;
 import org.apache.pekko.util.Timeout;
@@ -69,8 +67,6 @@ public class DatastoreContext implements ClientActorConfig {
 
     public static final long DEFAULT_SYNC_INDEX_THRESHOLD = 10;
 
-    private static final Set<String> GLOBAL_DATASTORE_NAMES = ConcurrentHashMap.newKeySet();
-
     private final DefaultConfigParamsImpl raftConfig = new DefaultConfigParamsImpl();
 
     private FiniteDuration shardTransactionIdleTimeout = DatastoreContext.DEFAULT_SHARD_TRANSACTION_IDLE_TIMEOUT;
@@ -100,10 +96,6 @@ public class DatastoreContext implements ClientActorConfig {
     private boolean useLz4Compression = false;
     private ExportOnRecovery exportOnRecovery = DEFAULT_EXPORT_ON_RECOVERY;
     private String recoveryExportBaseDir = DEFAULT_RECOVERY_EXPORT_BASE_DIR;
-
-    public static Set<String> getGlobalDatastoreNames() {
-        return GLOBAL_DATASTORE_NAMES;
-    }
 
     DatastoreContext() {
         setShardJournalRecoveryLogBatchSize(DEFAULT_JOURNAL_RECOVERY_BATCH_SIZE);
@@ -645,10 +637,6 @@ public class DatastoreContext implements ClientActorConfig {
         }
 
         public DatastoreContext build() {
-            if (datastoreContext.dataStoreName != null) {
-                GLOBAL_DATASTORE_NAMES.add(datastoreContext.dataStoreName);
-            }
-
             return datastoreContext;
         }
     }
