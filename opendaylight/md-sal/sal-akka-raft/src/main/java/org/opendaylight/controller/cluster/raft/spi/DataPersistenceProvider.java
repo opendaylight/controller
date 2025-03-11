@@ -6,7 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.cluster;
+package org.opendaylight.controller.cluster.raft.spi;
 
 import org.apache.pekko.japi.Procedure;
 import org.apache.pekko.persistence.JournalProtocol;
@@ -19,7 +19,6 @@ import org.eclipse.jdt.annotation.NonNull;
  * API.
  */
 public interface DataPersistenceProvider {
-
     /**
      * Returns whether or not persistence recovery is applicable/enabled.
      *

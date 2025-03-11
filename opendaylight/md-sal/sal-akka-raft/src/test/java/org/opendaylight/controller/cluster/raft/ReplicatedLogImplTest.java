@@ -29,11 +29,11 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.internal.matchers.Same;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 
 /**
  * Unit tests for ReplicatedLogImpl.

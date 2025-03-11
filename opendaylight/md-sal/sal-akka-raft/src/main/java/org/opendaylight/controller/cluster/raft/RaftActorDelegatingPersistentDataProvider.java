@@ -10,10 +10,10 @@ package org.opendaylight.controller.cluster.raft;
 import static java.util.Objects.requireNonNull;
 
 import org.apache.pekko.japi.Procedure;
-import org.opendaylight.controller.cluster.DataPersistenceProvider;
-import org.opendaylight.controller.cluster.DelegatingPersistentDataProvider;
-import org.opendaylight.controller.cluster.PersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
+import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
+import org.opendaylight.controller.cluster.raft.spi.DelegatingPersistentDataProvider;
+import org.opendaylight.controller.cluster.raft.spi.PersistentDataProvider;
 
 /**
  * The DelegatingPersistentDataProvider used by RaftActor to override the configured persistent provider to
