@@ -17,7 +17,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import org.apache.pekko.actor.ActorRef;
@@ -35,12 +34,8 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.spi.TestTermInfoStore;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class MockRaftActorContext extends RaftActorContextImpl {
-    private static final Logger LOG = LoggerFactory.getLogger(MockRaftActorContext.class);
-
     private ActorSystem system;
     private RaftPolicy raftPolicy;
     private Consumer<Optional<OutputStream>> createSnapshotProcedure = out -> { };
@@ -87,19 +82,23 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         setLastApplied(replicatedLog.lastIndex());
     }
 
-    @Override public ActorRef actorOf(final Props props) {
+    @Override
+    public ActorRef actorOf(final Props props) {
         return system.actorOf(props);
     }
 
-    @Override public ActorSelection actorSelection(final String path) {
+    @Override
+    public ActorSelection actorSelection(final String path) {
         return system.actorSelection(path);
     }
 
-    @Override public ActorSystem getActorSystem() {
+    @Override
+    public ActorSystem getActorSystem() {
         return system;
     }
 
-    @Override public ActorSelection getPeerActorSelection(final String peerId) {
+    @Override
+    public ActorSelection getPeerActorSelection(final String peerId) {
         String peerAddress = getPeerAddress(peerId);
         if (peerAddress != null) {
             return actorSelection(peerAddress);
@@ -193,6 +192,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
     }
 
     public static final class MockPayload extends Payload {
+        @java.io.Serial
         private static final long serialVersionUID = 3121380393130864247L;
 
         private final String data;
@@ -233,8 +233,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
 
         @Override
         public boolean equals(final Object obj) {
-            return this == obj || obj instanceof MockPayload other && Objects.equals(data, other.data)
-                && size == other.size;
+            return this == obj || obj instanceof MockPayload other && size == other.size && data.equals(other.data);
         }
 
         @Override
@@ -244,6 +243,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
     }
 
     private static final class MockPayloadProxy implements Serializable {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
         private final String value;
@@ -254,7 +254,8 @@ public class MockRaftActorContext extends RaftActorContextImpl {
             this.size = size;
         }
 
-        Object readResolve() {
+        @java.io.Serial
+        private Object readResolve() {
             return new MockPayload(value, size);
         }
     }
@@ -262,15 +263,14 @@ public class MockRaftActorContext extends RaftActorContextImpl {
     public static class MockReplicatedLogBuilder {
         private final ReplicatedLog mockLog = new SimpleReplicatedLog();
 
-        public  MockReplicatedLogBuilder createEntries(final int start, final int end, final int term) {
+        public MockReplicatedLogBuilder createEntries(final int start, final int end, final int term) {
             for (int i = start; i < end; i++) {
-                mockLog.append(new SimpleReplicatedLogEntry(i, term,
-                        new MockRaftActorContext.MockPayload(Integer.toString(i))));
+                mockLog.append(new SimpleReplicatedLogEntry(i, term, new MockPayload(Integer.toString(i))));
             }
             return this;
         }
 
-        public  MockReplicatedLogBuilder addEntry(final int index, final int term, final MockPayload payload) {
+        public MockReplicatedLogBuilder addEntry(final int index, final int term, final MockPayload payload) {
             mockLog.append(new SimpleReplicatedLogEntry(index, term, payload));
             return this;
         }
