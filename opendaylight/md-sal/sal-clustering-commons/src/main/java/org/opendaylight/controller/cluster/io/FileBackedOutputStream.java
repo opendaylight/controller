@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.io;
 
 import com.google.common.io.ByteSource;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -58,7 +57,8 @@ public class FileBackedOutputStream extends OutputStream {
     @GuardedBy("this")
     private ByteSource source;
 
-    private volatile long count;
+    @GuardedBy("this")
+    private long count;
 
     /**
      * Creates a new instance that uses the given file threshold, and does not reset the data when the
@@ -98,7 +98,9 @@ public class FileBackedOutputStream extends OutputStream {
 
                 @Override
                 public long size() {
-                    return count;
+                    synchronized (FileBackedOutputStream.this) {
+                        return count;
+                    }
                 }
             };
         }
@@ -107,8 +109,6 @@ public class FileBackedOutputStream extends OutputStream {
     }
 
     @Override
-    @SuppressFBWarnings(value = "VO_VOLATILE_INCREMENT", justification = "Findbugs erroneously complains that the "
-        + "increment of count needs to be atomic even though it is inside a synchronized block.")
     public synchronized void write(final int value) throws IOException {
         possiblySwitchToFile(1);
         out.write(value);
