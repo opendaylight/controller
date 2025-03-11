@@ -22,7 +22,6 @@ import static org.opendaylight.controller.cluster.datastore.MemberNode.verifyNoS
 import static org.opendaylight.controller.cluster.datastore.MemberNode.verifyRaftPeersPresent;
 import static org.opendaylight.controller.cluster.datastore.MemberNode.verifyRaftState;
 
-import com.google.common.collect.Lists;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -125,9 +124,7 @@ class ClusterAdminRpcServiceTest {
 
     @AfterEach
     void afterEach() {
-        for (var member : Lists.reverse(memberNodes)) {
-            member.cleanup();
-        }
+        memberNodes.reversed().forEach(MemberNode::cleanup);
         memberNodes.clear();
     }
 
