@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  * @author Moiz Raja
  * @author Thomas Pantelis
  */
-public class SnapshotManager {
+public final class SnapshotManager {
     /**
      * Internal message, issued by follower behavior to its actor, eventually routed to {@link SnapshotManager}.
      * Metadata matches information conveyed in {@link InstallSnapshot}.
@@ -139,7 +139,7 @@ public class SnapshotManager {
      *
      * @param context the RaftActorContext
      */
-    public SnapshotManager(final RaftActorContext context) {
+    SnapshotManager(final RaftActorContext context) {
         this.context = requireNonNull(context);
     }
 
@@ -232,7 +232,7 @@ public class SnapshotManager {
      * @param replicatedToAllIndex the current replicatedToAllIndex
      * @return true if capture was started
      */
-    public boolean captureWithForcedTrim(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex) {
+    boolean captureWithForcedTrim(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex) {
         if (task instanceof Idle) {
             return capture(lastLogEntry, replicatedToAllIndex, null, true);
         }
@@ -246,7 +246,7 @@ public class SnapshotManager {
      * @param snapshot the {@link ApplyLeaderSnapshot} to apply.
      */
     @NonNullByDefault
-    public void applyFromLeader(final ApplyLeaderSnapshot snapshot) {
+    void applyFromLeader(final ApplyLeaderSnapshot snapshot) {
         if (!(task instanceof Idle)) {
             LOG.debug("{}: applySnapshot should not be called in state {}", memberId(), task);
             return;
@@ -304,7 +304,7 @@ public class SnapshotManager {
      *        on a follower.
      * @param totalMemory the total memory threshold
      */
-    public void persist(final Snapshot.State snapshotState, final Optional<OutputStream> installSnapshotStream,
+    void persist(final Snapshot.State snapshotState, final Optional<OutputStream> installSnapshotStream,
             final long totalMemory) {
         if (!(task instanceof Capture(final var lastSeq, final var request))) {
             LOG.debug("{}: persist should not be called in state {}", memberId(), task);
@@ -402,7 +402,7 @@ public class SnapshotManager {
      * @param sequenceNumber the sequence number of the persisted snapshot
      * @param timeStamp the time stamp of the persisted snapshot
      */
-    public void commit(final long sequenceNumber, final long timeStamp) {
+    void commit(final long sequenceNumber, final long timeStamp) {
         if (!(task instanceof Persist persist)) {
             LOG.debug("{}: commit should not be called in state {}", memberId(), task);
             return;
@@ -460,7 +460,7 @@ public class SnapshotManager {
     /**
      * Rolls back the snapshot on failure.
      */
-    public void rollback() {
+    void rollback() {
         switch (task) {
             case PersistApply persist -> {
                 // Nothing to rollback if we're applying a snapshot from the leader.
@@ -542,11 +542,11 @@ public class SnapshotManager {
         this.snapshotCohort = snapshotCohort;
     }
 
-    public Snapshot.@NonNull State convertSnapshot(final ByteSource snapshotBytes) throws IOException {
+    Snapshot.@NonNull State convertSnapshot(final ByteSource snapshotBytes) throws IOException {
         return snapshotCohort.deserializeSnapshot(snapshotBytes);
     }
 
-    public long getLastSequenceNumber() {
+    long getLastSequenceNumber() {
         return task instanceof Persist persist ? persist.lastSequenceNumber() : -1;
     }
 
@@ -562,8 +562,8 @@ public class SnapshotManager {
      * @param replicatedToAllIndex the index of the last entry replicated to all followers.
      * @return a new CaptureSnapshot instance.
      */
-    public @NonNull CaptureSnapshot newCaptureSnapshot(final RaftEntryMeta lastLogEntry,
-            final long replicatedToAllIndex, final boolean mandatoryTrim) {
+    @NonNull CaptureSnapshot newCaptureSnapshot(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex,
+            final boolean mandatoryTrim) {
         final var replLog = context.getReplicatedLog();
         final var lastAppliedEntry = computeLastAppliedEntry(lastLogEntry);
 
