@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.protobuf.ByteString;
+import org.eclipse.jdt.annotation.NonNull;
 import org.junit.After;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.AbstractActorTest;
@@ -306,19 +307,19 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         return createBehavior(createActorContext());
     }
 
-    protected MockRaftActorContext createActorContext() {
+    protected @NonNull MockRaftActorContext createActorContext() {
         return createActorContext(0);
     }
 
-    protected MockRaftActorContext createActorContext(final int payloadVersion) {
+    protected @NonNull MockRaftActorContext createActorContext(final int payloadVersion) {
         return new MockRaftActorContext(payloadVersion);
     }
 
-    protected final MockRaftActorContext createActorContext(final ActorRef actor) {
+    protected static final @NonNull MockRaftActorContext createActorContext(final ActorRef actor) {
         return new MockRaftActorContext("test", getSystem(), actor, 0);
     }
 
-    protected MockRaftActorContext createActorContext(final ActorRef actor, final int payloadVersion) {
+    protected @NonNull MockRaftActorContext createActorContext(final ActorRef actor, final int payloadVersion) {
         return new MockRaftActorContext("test", getSystem(), actor, payloadVersion);
     }
 
