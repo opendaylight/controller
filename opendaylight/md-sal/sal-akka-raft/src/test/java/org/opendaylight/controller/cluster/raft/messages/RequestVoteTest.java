@@ -7,27 +7,28 @@
  */
 package org.opendaylight.controller.cluster.raft.messages;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 import org.apache.commons.lang3.SerializationUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for RequestVote.
  *
  * @author Thomas Pantelis
  */
-public class RequestVoteTest {
+class RequestVoteTest {
     @Test
-    public void testSerialization() {
+    void testSerialization() {
         final var expected = new RequestVote(4, "candidateId", 3, 2);
         final var bytes = SerializationUtils.serialize(expected);
         assertEquals(97, bytes.length);
-        final var cloned = (RequestVote) SerializationUtils.deserialize(bytes);
+        final var cloned = assertInstanceOf(RequestVote.class, SerializationUtils.deserialize(bytes));
 
-        assertEquals("getTerm", expected.getTerm(), cloned.getTerm());
-        assertEquals("getCandidateId", expected.getCandidateId(), cloned.getCandidateId());
-        assertEquals("getLastLogIndex", expected.getLastLogIndex(), cloned.getLastLogIndex());
-        assertEquals("getLastLogTerm", expected.getLastLogTerm(), cloned.getLastLogTerm());
+        assertEquals(expected.getTerm(), cloned.getTerm());
+        assertEquals(expected.getCandidateId(), cloned.getCandidateId());
+        assertEquals(expected.getLastLogIndex(), cloned.getLastLogIndex());
+        assertEquals(expected.getLastLogTerm(), cloned.getLastLogTerm());
     }
 }
