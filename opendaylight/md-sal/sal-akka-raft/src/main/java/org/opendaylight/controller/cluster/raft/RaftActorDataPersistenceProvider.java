@@ -10,10 +10,11 @@ package org.opendaylight.controller.cluster.raft;
 import static java.util.Objects.requireNonNull;
 
 import org.apache.pekko.japi.Procedure;
+import org.apache.pekko.persistence.JournalProtocol;
+import org.apache.pekko.persistence.SnapshotProtocol;
+import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
-import org.opendaylight.controller.cluster.raft.spi.DelegatingPersistentDataProvider;
-import org.opendaylight.controller.cluster.raft.spi.PersistentDataProvider;
 
 /**
  * The DelegatingPersistentDataProvider used by RaftActor to override the configured persistent provider to
@@ -21,13 +22,28 @@ import org.opendaylight.controller.cluster.raft.spi.PersistentDataProvider;
  *
  * @author Thomas Pantelis
  */
-final class RaftActorDataPersistenceProvider extends DelegatingPersistentDataProvider {
+final class RaftActorDataPersistenceProvider implements DataPersistenceProvider {
     private final PersistentDataProvider persistentProvider;
+
+    private DataPersistenceProvider delegate;
 
     RaftActorDataPersistenceProvider(final DataPersistenceProvider delegate,
             final PersistentDataProvider persistentProvider) {
-        super(delegate);
+        this.delegate = delegate;
         this.persistentProvider = requireNonNull(persistentProvider);
+    }
+
+    DataPersistenceProvider getDelegate() {
+        return delegate;
+    }
+
+    void setDelegate(final DataPersistenceProvider delegate) {
+        this.delegate = requireNonNull(delegate);
+    }
+
+    @Override
+    public boolean isRecoveryApplicable() {
+        return delegate.isRecoveryApplicable();
     }
 
     @Override
@@ -41,7 +57,7 @@ final class RaftActorDataPersistenceProvider extends DelegatingPersistentDataPro
     }
 
     private <T> void doPersist(final T entry, final Procedure<T> procedure, final boolean async) {
-        if (!getDelegate().isRecoveryApplicable() && entry instanceof ReplicatedLogEntry replicatedLogEntry
+        if (!delegate.isRecoveryApplicable() && entry instanceof ReplicatedLogEntry replicatedLogEntry
             && replicatedLogEntry.getData() instanceof ClusterConfig serverConfig) {
             // TODO: revisit this statement with EntryStore
             //
@@ -52,10 +68,43 @@ final class RaftActorDataPersistenceProvider extends DelegatingPersistentDataPro
             } else {
                 persistentProvider.persist(serverConfig, p -> procedure.apply(entry));
             }
-        } else if (async) {
-            super.persistAsync(entry, procedure);
-        } else {
-            super.persist(entry, procedure);
+            return;
         }
+
+        if (async) {
+            delegate.persistAsync(entry, procedure);
+        } else {
+            delegate.persist(entry, procedure);
+        }
+    }
+
+    @Override
+    public void saveSnapshot(final Object entry) {
+        delegate.saveSnapshot(entry);
+    }
+
+    @Override
+    public void deleteSnapshots(final SnapshotSelectionCriteria criteria) {
+        delegate.deleteSnapshots(criteria);
+    }
+
+    @Override
+    public void deleteMessages(final long sequenceNumber) {
+        delegate.deleteMessages(sequenceNumber);
+    }
+
+    @Override
+    public long getLastSequenceNumber() {
+        return delegate.getLastSequenceNumber();
+    }
+
+    @Override
+    public boolean handleJournalResponse(final JournalProtocol.Response response) {
+        return delegate.handleJournalResponse(response);
+    }
+
+    @Override
+    public boolean handleSnapshotResponse(final SnapshotProtocol.Response response) {
+        return delegate.handleSnapshotResponse(response);
     }
 }

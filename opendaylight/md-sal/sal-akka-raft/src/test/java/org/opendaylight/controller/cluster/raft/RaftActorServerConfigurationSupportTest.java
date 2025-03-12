@@ -71,7 +71,6 @@ import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.FailingTermInfoStore;
 import org.opendaylight.controller.cluster.raft.spi.ImmutableRaftEntryMeta;
-import org.opendaylight.controller.cluster.raft.spi.NonPersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.utils.ForwardMessageToBehaviorActor;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;

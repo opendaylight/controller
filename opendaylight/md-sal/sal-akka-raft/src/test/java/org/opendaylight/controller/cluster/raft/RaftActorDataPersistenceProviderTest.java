@@ -23,7 +23,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
-import org.opendaylight.controller.cluster.raft.spi.PersistentDataProvider;
 
 /**
  * Unit tests for RaftActorDelegatingPersistentDataProvider.

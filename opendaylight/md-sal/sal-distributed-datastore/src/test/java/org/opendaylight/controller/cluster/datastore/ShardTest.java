@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static java.util.Objects.requireNonNull;
 import static org.apache.pekko.actor.ActorRef.noSender;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.startsWith;
@@ -40,7 +41,11 @@ import org.apache.pekko.actor.Props;
 import org.apache.pekko.actor.Status.Failure;
 import org.apache.pekko.dispatch.Dispatchers;
 import org.apache.pekko.japi.Creator;
+import org.apache.pekko.japi.Procedure;
+import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SaveSnapshotSuccess;
+import org.apache.pekko.persistence.SnapshotProtocol;
+import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.apache.pekko.testkit.TestActorRef;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -99,7 +104,6 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
-import org.opendaylight.controller.cluster.raft.spi.DelegatingPersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
@@ -1463,19 +1467,62 @@ public class ShardTest extends AbstractShardTest {
     }
 
     private void testCreateSnapshot(final boolean persistent, final String shardActorName) throws Exception {
-        final AtomicReference<CountDownLatch> latch = new AtomicReference<>(new CountDownLatch(1));
+        final var latch = new AtomicReference<>(new CountDownLatch(1));
+        final var savedSnapshot = new AtomicReference<>();
 
-        final AtomicReference<Object> savedSnapshot = new AtomicReference<>();
-        class TestPersistentDataProvider extends DelegatingPersistentDataProvider {
-            TestPersistentDataProvider(final DataPersistenceProvider delegate) {
-                super(delegate);
+        final class TestDataPersistenceProvider implements DataPersistenceProvider {
+            private final DataPersistenceProvider delegate;
+
+            TestDataPersistenceProvider(final DataPersistenceProvider delegate) {
+                this.delegate = requireNonNull(delegate);
             }
 
             @Override
-            public void saveSnapshot(final Object obj) {
-                savedSnapshot.set(obj);
-                super.saveSnapshot(obj);
+            public boolean isRecoveryApplicable() {
+                return delegate.isRecoveryApplicable();
             }
+
+            @Override
+            public <T> void persist(final T entry, final Procedure<T> procedure) {
+                delegate.persist(entry, procedure);
+            }
+
+            @Override
+            public <T> void persistAsync(final T entry, final Procedure<T> procedure) {
+                delegate.persistAsync(entry, procedure);
+            }
+
+            @Override
+            public void saveSnapshot(final Object entry) {
+                savedSnapshot.set(entry);
+                delegate.saveSnapshot(entry);
+            }
+
+            @Override
+            public void deleteSnapshots(final SnapshotSelectionCriteria criteria) {
+                delegate.deleteSnapshots(criteria);
+            }
+
+            @Override
+            public void deleteMessages(final long sequenceNumber) {
+                delegate.deleteMessages(sequenceNumber);
+            }
+
+            @Override
+            public long getLastSequenceNumber() {
+                return delegate.getLastSequenceNumber();
+            }
+
+            @Override
+            public boolean handleJournalResponse(final JournalProtocol.Response response) {
+                return delegate.handleJournalResponse(response);
+            }
+
+            @Override
+            public boolean handleSnapshotResponse(final SnapshotProtocol.Response response) {
+                return delegate.handleSnapshotResponse(response);
+            }
+
         }
 
         dataStoreContextBuilder.persistent(persistent);
@@ -1483,7 +1530,7 @@ public class ShardTest extends AbstractShardTest {
         final class TestShard extends Shard {
             TestShard(final Path stateDir, final AbstractBuilder<?, ?> builder) {
                 super(stateDir, builder);
-                setPersistence(new TestPersistentDataProvider(super.persistence()));
+                setPersistence(new TestDataPersistenceProvider(super.persistence()));
             }
 
             @Override

@@ -30,8 +30,6 @@ import org.opendaylight.controller.cluster.raft.persisted.ByteState;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
-import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
-import org.opendaylight.controller.cluster.raft.spi.NonPersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.spi.TestTermInfoStore;
 
@@ -40,7 +38,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
     private RaftPolicy raftPolicy;
     private Consumer<Optional<OutputStream>> createSnapshotProcedure = out -> { };
 
-    private static DataPersistenceProvider createProvider() {
+    private static NonPersistentDataProvider createProvider() {
         return new NonPersistentDataProvider(Runnable::run);
     }
 

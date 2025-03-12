@@ -15,8 +15,7 @@ import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.eclipse.jdt.annotation.NonNull;
 
 /**
- * DataPersistenceProvider provides methods to persist data and is an abstraction of the akka-persistence persistence
- * API.
+ * This interface provides methods to persist data and is an abstraction of the akka-persistence persistence API.
  */
 public interface DataPersistenceProvider {
     /**

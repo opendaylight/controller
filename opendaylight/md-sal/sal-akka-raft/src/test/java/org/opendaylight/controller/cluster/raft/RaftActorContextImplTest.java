@@ -28,12 +28,8 @@ import org.junit.After;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
-import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
-import org.opendaylight.controller.cluster.raft.spi.NonPersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.spi.TestTermInfoStore;
 import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Unit tests for RaftActorContextImpl.
@@ -42,11 +38,8 @@ import org.slf4j.LoggerFactory;
  */
 public class RaftActorContextImplTest extends AbstractActorTest {
     private final TestActorFactory actorFactory = new TestActorFactory(getSystem());
-
     private final TestActorRef<DoNothingActor> actor = actorFactory.createTestActor(
             Props.create(DoNothingActor.class), actorFactory.generateActorId("actor"));
-
-    private static final Logger LOG = LoggerFactory.getLogger(RaftActorContextImplTest.class);
 
     @After
     public void tearDown() {
@@ -120,7 +113,7 @@ public class RaftActorContextImplTest extends AbstractActorTest {
         assertFalse("isVotingMember", context.isVotingMember());
     }
 
-    private static DataPersistenceProvider createProvider() {
+    private static NonPersistentDataProvider createProvider() {
         return new NonPersistentDataProvider(Runnable::run);
     }
 
