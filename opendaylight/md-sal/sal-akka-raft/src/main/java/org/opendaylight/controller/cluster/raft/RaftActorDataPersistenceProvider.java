@@ -21,10 +21,10 @@ import org.opendaylight.controller.cluster.raft.spi.PersistentDataProvider;
  *
  * @author Thomas Pantelis
  */
-class RaftActorDelegatingPersistentDataProvider extends DelegatingPersistentDataProvider {
+final class RaftActorDataPersistenceProvider extends DelegatingPersistentDataProvider {
     private final PersistentDataProvider persistentProvider;
 
-    RaftActorDelegatingPersistentDataProvider(final DataPersistenceProvider delegate,
+    RaftActorDataPersistenceProvider(final DataPersistenceProvider delegate,
             final PersistentDataProvider persistentProvider) {
         super(delegate);
         this.persistentProvider = requireNonNull(persistentProvider);

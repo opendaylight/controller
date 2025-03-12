@@ -55,7 +55,6 @@ import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.NoopPayload;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
-import org.opendaylight.controller.cluster.raft.spi.DelegatingPersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.spi.NonPersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.spi.PersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
@@ -103,9 +102,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     // This context should NOT be passed directly to any other actor it is  only to be consumed
     // by the RaftActorBehaviors.
     private final @NonNull LocalAccess localAccess;
-    private final @NonNull PersistentDataProvider persistentProvider = new PersistentDataProvider(this);
-    private final @NonNull DelegatingPersistentDataProvider delegatingPersistenceProvider =
-        new RaftActorDelegatingPersistentDataProvider(null, persistentProvider);
+    private final @NonNull RaftActorDataPersistenceProvider dataPersistenceProvider =
+        new RaftActorDataPersistenceProvider(null, new PersistentDataProvider(this));
     private final @NonNull BehaviorStateTracker behaviorStateTracker = new BehaviorStateTracker();
 
     // FIXME: should be valid only after recovery
@@ -123,7 +121,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         localAccess = new LocalAccess(memberId, stateDir.resolve(memberId));
 
         context = new RaftActorContextImpl(self(), getContext(), localAccess, -1, -1, peerAddresses,
-            configParams.orElseGet(DefaultConfigParamsImpl::new), payloadVersion, delegatingPersistenceProvider,
+            configParams.orElseGet(DefaultConfigParamsImpl::new), payloadVersion, dataPersistenceProvider,
             this::handleApplyState, this::executeInSelf);
         context.setReplicatedLog(ReplicatedLogImpl.newInstance(context));
     }
@@ -265,10 +263,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             onRequestLeadership(requestLeadership);
         } else if (!possiblyHandleBehaviorMessage(message)) {
             if (message instanceof JournalProtocol.Response response
-                && delegatingPersistenceProvider.handleJournalResponse(response)) {
+                && dataPersistenceProvider.handleJournalResponse(response)) {
                 LOG.debug("{}: handled a journal response", memberId());
             } else if (message instanceof SnapshotProtocol.Response response
-                && delegatingPersistenceProvider.handleSnapshotResponse(response)) {
+                && dataPersistenceProvider.handleSnapshotResponse(response)) {
                 LOG.debug("{}: handled a snapshot response", memberId());
             } else {
                 handleNonRaftCommand(message);
@@ -755,11 +753,11 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     protected final DataPersistenceProvider persistence() {
-        return delegatingPersistenceProvider.getDelegate();
+        return dataPersistenceProvider.getDelegate();
     }
 
     protected final void setPersistence(final DataPersistenceProvider provider) {
-        delegatingPersistenceProvider.setDelegate(requireNonNull(provider));
+        dataPersistenceProvider.setDelegate(requireNonNull(provider));
     }
 
     protected final void setPersistence(final boolean persistent) {

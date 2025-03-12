@@ -31,7 +31,7 @@ import org.opendaylight.controller.cluster.raft.spi.PersistentDataProvider;
  * @author Thomas Pantelis
  */
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
-public class RaftActorDelegatingPersistentDataProviderTest {
+public class RaftActorDataPersistenceProviderTest {
     private static final ClusterConfig PERSISTENT_PAYLOAD = new ClusterConfig();
 
     private static final Payload NON_PERSISTENT_PAYLOAD = new TestNonPersistentPayload();
@@ -51,13 +51,13 @@ public class RaftActorDelegatingPersistentDataProviderTest {
     @Captor
     private ArgumentCaptor<Procedure<Object>> procedureCaptor;
 
-    private RaftActorDelegatingPersistentDataProvider provider;
+    private RaftActorDataPersistenceProvider provider;
 
     @Before
     public void setup() {
         doReturn(PERSISTENT_PAYLOAD).when(mockPersistentLogEntry).getData();
         doReturn(NON_PERSISTENT_PAYLOAD).when(mockNonPersistentLogEntry).getData();
-        provider = new RaftActorDelegatingPersistentDataProvider(mockDelegateProvider, mockPersistentProvider);
+        provider = new RaftActorDataPersistenceProvider(mockDelegateProvider, mockPersistentProvider);
     }
 
     @Test
