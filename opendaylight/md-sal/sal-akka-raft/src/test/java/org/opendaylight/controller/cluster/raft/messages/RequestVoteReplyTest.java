@@ -7,25 +7,26 @@
  */
 package org.opendaylight.controller.cluster.raft.messages;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 import org.apache.commons.lang3.SerializationUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for RequestVoteReply.
  *
  * @author Thomas Pantelis
  */
-public class RequestVoteReplyTest {
+class RequestVoteReplyTest {
     @Test
-    public void testSerialization() {
+    void testSerialization() {
         final var expected = new RequestVoteReply(5, true);
         final var bytes = SerializationUtils.serialize(expected);
         assertEquals(78, bytes.length);
-        final var cloned = (RequestVoteReply) SerializationUtils.deserialize(bytes);
+        final var cloned = assertInstanceOf(RequestVoteReply.class, SerializationUtils.deserialize(bytes));
 
-        assertEquals("getTerm", expected.getTerm(), cloned.getTerm());
-        assertEquals("isVoteGranted", expected.isVoteGranted(), cloned.isVoteGranted());
+        assertEquals(expected.getTerm(), cloned.getTerm());
+        assertEquals(expected.isVoteGranted(), cloned.isVoteGranted());
     }
 }

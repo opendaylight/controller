@@ -7,12 +7,12 @@
  */
 package org.opendaylight.controller.cluster.raft.messages;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
-import java.util.Iterator;
 import java.util.List;
 import org.apache.commons.lang3.SerializationUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
@@ -23,12 +23,12 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
  *
  * @author Thomas Pantelis
  */
-public class AppendEntriesTest {
+class AppendEntriesTest {
     @Test
-    public void testSerialization() {
-        ReplicatedLogEntry entry1 = new SimpleReplicatedLogEntry(1, 2, new MockPayload("payload1"));
+    void testSerialization() {
+        var entry1 = new SimpleReplicatedLogEntry(1, 2, new MockPayload("payload1"));
 
-        ReplicatedLogEntry entry2 = new SimpleReplicatedLogEntry(3, 4, new MockPayload("payload2"));
+        var entry2 = new SimpleReplicatedLogEntry(3, 4, new MockPayload("payload2"));
 
         short payloadVersion = 5;
 
@@ -39,9 +39,9 @@ public class AppendEntriesTest {
 
         var bytes = SerializationUtils.serialize(expected);
         assertEquals(285, bytes.length);
-        var cloned = (AppendEntries) SerializationUtils.deserialize(bytes);
+        var cloned = assertInstanceOf(AppendEntries.class, SerializationUtils.deserialize(bytes));
 
-        verifyAppendEntries(expected, cloned, RaftVersions.CURRENT_VERSION);
+        assertAppendEntries(expected, cloned, RaftVersions.CURRENT_VERSION);
 
         // With leader address
 
@@ -50,34 +50,34 @@ public class AppendEntriesTest {
 
         bytes = SerializationUtils.serialize(expected);
         assertEquals(301, bytes.length);
-        cloned = (AppendEntries) SerializationUtils.deserialize(bytes);
+        cloned = assertInstanceOf(AppendEntries.class, SerializationUtils.deserialize(bytes));
 
-        verifyAppendEntries(expected, cloned, RaftVersions.CURRENT_VERSION);
+        assertAppendEntries(expected, cloned, RaftVersions.CURRENT_VERSION);
     }
 
-    private static void verifyAppendEntries(final AppendEntries expected, final AppendEntries actual,
+    private static void assertAppendEntries(final AppendEntries expected, final AppendEntries actual,
             final short recipientRaftVersion) {
-        assertEquals("getLeaderId", expected.getLeaderId(), actual.getLeaderId());
-        assertEquals("getTerm", expected.getTerm(), actual.getTerm());
-        assertEquals("getLeaderCommit", expected.getLeaderCommit(), actual.getLeaderCommit());
-        assertEquals("getPrevLogIndex", expected.getPrevLogIndex(), actual.getPrevLogIndex());
-        assertEquals("getPrevLogTerm", expected.getPrevLogTerm(), actual.getPrevLogTerm());
-        assertEquals("getReplicatedToAllIndex", expected.getReplicatedToAllIndex(), actual.getReplicatedToAllIndex());
-        assertEquals("getPayloadVersion", expected.getPayloadVersion(), actual.getPayloadVersion());
+        assertEquals(expected.getLeaderId(), actual.getLeaderId());
+        assertEquals(expected.getTerm(), actual.getTerm());
+        assertEquals(expected.getLeaderCommit(), actual.getLeaderCommit());
+        assertEquals(expected.getPrevLogIndex(), actual.getPrevLogIndex());
+        assertEquals(expected.getPrevLogTerm(), actual.getPrevLogTerm());
+        assertEquals(expected.getReplicatedToAllIndex(), actual.getReplicatedToAllIndex());
+        assertEquals(expected.getPayloadVersion(), actual.getPayloadVersion());
 
-        assertEquals("getEntries size", expected.getEntries().size(), actual.getEntries().size());
-        Iterator<ReplicatedLogEntry> iter = expected.getEntries().iterator();
-        for (ReplicatedLogEntry e: actual.getEntries()) {
-            verifyReplicatedLogEntry(iter.next(), e);
+        assertEquals(expected.getEntries().size(), actual.getEntries().size());
+        var iter = expected.getEntries().iterator();
+        for (var entry : actual.getEntries()) {
+            assertReplicatedLogEntry(iter.next(), entry);
         }
 
-        assertEquals("getLeaderAddress", expected.leaderAddress(), actual.leaderAddress());
-        assertEquals("getLeaderRaftVersion", RaftVersions.CURRENT_VERSION, actual.getLeaderRaftVersion());
+        assertEquals(expected.leaderAddress(), actual.leaderAddress());
+        assertEquals(RaftVersions.CURRENT_VERSION, actual.getLeaderRaftVersion());
     }
 
-    private static void verifyReplicatedLogEntry(final ReplicatedLogEntry expected, final ReplicatedLogEntry actual) {
-        assertEquals("getIndex", expected.index(), actual.index());
-        assertEquals("getTerm", expected.term(), actual.term());
-        assertEquals("getData", expected.getData().toString(), actual.getData().toString());
+    private static void assertReplicatedLogEntry(final ReplicatedLogEntry expected, final ReplicatedLogEntry actual) {
+        assertEquals(expected.index(), actual.index());
+        assertEquals(expected.term(), actual.term());
+        assertEquals(expected.getData().toString(), actual.getData().toString());
     }
 }
