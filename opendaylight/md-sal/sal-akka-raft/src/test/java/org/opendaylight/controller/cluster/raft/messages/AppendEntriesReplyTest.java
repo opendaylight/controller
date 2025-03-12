@@ -7,10 +7,11 @@
  */
 package org.opendaylight.controller.cluster.raft.messages;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 import org.apache.commons.lang3.SerializationUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
 
 /**
@@ -18,23 +19,23 @@ import org.opendaylight.controller.cluster.raft.RaftVersions;
  *
  * @author Thomas Pantelis
  */
-public class AppendEntriesReplyTest {
+class AppendEntriesReplyTest {
     @Test
-    public void testSerialization() {
+    void testSerialization() {
         final var expected = new AppendEntriesReply("follower", 5, true, 100, 4, (short)6, true, true,
             RaftVersions.CURRENT_VERSION);
 
         final var bytes = SerializationUtils.serialize(expected);
         assertEquals(98, bytes.length);
-        final var cloned = (AppendEntriesReply) SerializationUtils.deserialize(bytes);
+        final var cloned = assertInstanceOf(AppendEntriesReply.class, SerializationUtils.deserialize(bytes));
 
-        assertEquals("getTerm", expected.getTerm(), cloned.getTerm());
-        assertEquals("getFollowerId", expected.getFollowerId(), cloned.getFollowerId());
-        assertEquals("getLogLastTerm", expected.getLogLastTerm(), cloned.getLogLastTerm());
-        assertEquals("getLogLastIndex", expected.getLogLastIndex(), cloned.getLogLastIndex());
-        assertEquals("getPayloadVersion", expected.getPayloadVersion(), cloned.getPayloadVersion());
-        assertEquals("getRaftVersion", expected.getRaftVersion(), cloned.getRaftVersion());
-        assertEquals("isForceInstallSnapshot", expected.isForceInstallSnapshot(), cloned.isForceInstallSnapshot());
-        assertEquals("isNeedsLeaderAddress", expected.isNeedsLeaderAddress(), cloned.isNeedsLeaderAddress());
+        assertEquals(expected.getTerm(), cloned.getTerm());
+        assertEquals(expected.getFollowerId(), cloned.getFollowerId());
+        assertEquals(expected.getLogLastTerm(), cloned.getLogLastTerm());
+        assertEquals(expected.getLogLastIndex(), cloned.getLogLastIndex());
+        assertEquals(expected.getPayloadVersion(), cloned.getPayloadVersion());
+        assertEquals(expected.getRaftVersion(), cloned.getRaftVersion());
+        assertEquals(expected.isForceInstallSnapshot(), cloned.isForceInstallSnapshot());
+        assertEquals(expected.isNeedsLeaderAddress(), cloned.isNeedsLeaderAddress());
     }
 }
