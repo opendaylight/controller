@@ -45,7 +45,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     final RaftActorRecoveryCohort recoveryCohortDelegate;
     volatile RaftActorSnapshotCohort snapshotCohortDelegate;
     private final CountDownLatch recoveryComplete = new CountDownLatch(1);
-    private final List<Object> state;
+    private final List<Object> state = Collections.synchronizedList(new ArrayList<>());
     private final ActorRef roleChangeNotifier;
     protected final CountDownLatch initializeBehaviorComplete = new CountDownLatch(1);
     private RaftActorRecoverySupport raftActorRecoverySupport;
@@ -57,7 +57,6 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     protected MockRaftActor(final Path stateDir, final AbstractBuilder<?, ?> builder) {
         super(stateDir, builder.id, builder.peerAddresses != null ? builder.peerAddresses : Map.of(),
             Optional.ofNullable(builder.config), PAYLOAD_VERSION);
-        state = Collections.synchronizedList(new ArrayList<>());
         actorDelegate = mock(RaftActor.class);
         recoveryCohortDelegate = mock(RaftActorRecoveryCohort.class);
 
