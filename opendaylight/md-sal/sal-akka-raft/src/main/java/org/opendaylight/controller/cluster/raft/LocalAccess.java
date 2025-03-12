@@ -19,20 +19,18 @@ import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
  * The concept of {@link RaftActor}'s access to its local state.
  */
 @NonNullByDefault
-@VisibleForTesting
-public final class LocalAccess {
+final class LocalAccess {
     private static final Path TERM_INFO_PROPS = Path.of("TermInfo.properties");
 
     private final String memberId;
     private final TermInfoStore termInfoStore;
 
     @VisibleForTesting
-    public LocalAccess(final String memberId, final TermInfoStore termInfoStore) {
+    LocalAccess(final String memberId, final TermInfoStore termInfoStore) {
         this.memberId = requireNonNull(memberId);
         this.termInfoStore = requireNonNull(termInfoStore);
     }
 
-    @VisibleForTesting
     LocalAccess(final String memberId, final Path stateDir) {
         this(memberId, new PropertiesTermInfoStore(memberId, stateDir.resolve(TERM_INFO_PROPS)));
     }

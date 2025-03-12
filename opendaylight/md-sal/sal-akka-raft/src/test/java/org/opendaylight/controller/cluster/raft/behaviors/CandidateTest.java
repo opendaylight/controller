@@ -12,7 +12,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.util.concurrent.MoreExecutors;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,11 +22,8 @@ import org.apache.pekko.dispatch.Dispatchers;
 import org.apache.pekko.testkit.TestActorRef;
 import org.junit.After;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
-import org.opendaylight.controller.cluster.raft.LocalAccess;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
-import org.opendaylight.controller.cluster.raft.RaftActorContextImpl;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.VotingState;
@@ -38,9 +34,7 @@ import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.spi.NonPersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
-import org.opendaylight.controller.cluster.raft.spi.TestTermInfoStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -169,10 +163,8 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
 
     @Test
     public void testBecomeLeaderOnReceivingMajorityVotesWithNonVotingPeers() {
-        RaftActorContext raftActorContext = new RaftActorContextImpl(candidateActor, candidateActor.actorContext(),
-            new LocalAccess("candidate", new TestTermInfoStore(1, null)), -1, -1, setupPeers(4),
-            new DefaultConfigParamsImpl(), (short) 0, new NonPersistentDataProvider(Runnable::run), applyState -> { },
-            MoreExecutors.directExecutor());
+        final var raftActorContext = createActorContext();
+        raftActorContext.setPeerAddresses(setupPeers(4));
         raftActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().build());
         raftActorContext.getPeerInfo("peer1").setVotingState(VotingState.NON_VOTING);
         raftActorContext.getPeerInfo("peer4").setVotingState(VotingState.NON_VOTING);
