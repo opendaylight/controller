@@ -20,10 +20,11 @@ import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 /**
  * A DataPersistenceProvider implementation with persistence enabled.
  */
-public class PersistentDataProvider implements DataPersistenceProvider {
+// Non-final for testing
+class PersistentDataProvider implements DataPersistenceProvider {
     private final AbstractPersistentActor persistentActor;
 
-    public PersistentDataProvider(final AbstractPersistentActor persistentActor) {
+    PersistentDataProvider(final AbstractPersistentActor persistentActor) {
         this.persistentActor = requireNonNull(persistentActor, "persistentActor can't be null");
     }
 
