@@ -7,12 +7,13 @@
  */
 package org.opendaylight.controller.cluster.raft.messages;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 import java.util.OptionalInt;
 import org.apache.commons.lang3.SerializationUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
@@ -22,14 +23,14 @@ import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
  *
  * @author Thomas Pantelis
  */
-public class InstallSnapshotTest {
+class InstallSnapshotTest {
     @Test
-    public void testCurrentSerialization() {
+    void testCurrentSerialization() {
         testSerialization(RaftVersions.CURRENT_VERSION, 1262, 1125);
     }
 
     @Test
-    public void testFluorineSerialization() {
+    void testFluorineSerialization() {
         testSerialization(RaftVersions.FLUORINE_VERSION, 1302, 1165);
     }
 
@@ -53,26 +54,20 @@ public class InstallSnapshotTest {
     private static void assertInstallSnapshot(final int expectedSize, final InstallSnapshot expected) {
         final var bytes = SerializationUtils.serialize(expected);
         assertEquals(expectedSize, bytes.length);
-        verifyInstallSnapshot(expected, (InstallSnapshot) SerializationUtils.deserialize(bytes));
+        assertInstallSnapshot(expected, assertInstanceOf(InstallSnapshot.class, SerializationUtils.deserialize(bytes)));
     }
 
-    private static void verifyInstallSnapshot(final InstallSnapshot expected, final InstallSnapshot actual) {
-        assertEquals("getTerm", expected.getTerm(), actual.getTerm());
-        assertEquals("getChunkIndex", expected.getChunkIndex(), actual.getChunkIndex());
-        assertEquals("getTotalChunks", expected.getTotalChunks(), actual.getTotalChunks());
-        assertEquals("getLastIncludedTerm", expected.getLastIncludedTerm(), actual.getLastIncludedTerm());
-        assertEquals("getLastIncludedIndex", expected.getLastIncludedIndex(), actual.getLastIncludedIndex());
-        assertEquals("getLeaderId", expected.getLeaderId(), actual.getLeaderId());
-        assertEquals("getChunkIndex", expected.getChunkIndex(), actual.getChunkIndex());
-        assertArrayEquals("getData", expected.getData(), actual.getData());
+    private static void assertInstallSnapshot(final InstallSnapshot expected, final InstallSnapshot actual) {
+        assertEquals(expected.getTerm(), actual.getTerm());
+        assertEquals(expected.getChunkIndex(), actual.getChunkIndex());
+        assertEquals(expected.getTotalChunks(), actual.getTotalChunks());
+        assertEquals(expected.getLastIncludedTerm(), actual.getLastIncludedTerm());
+        assertEquals(expected.getLastIncludedIndex(), actual.getLastIncludedIndex());
+        assertEquals(expected.getLeaderId(), actual.getLeaderId());
+        assertEquals(expected.getChunkIndex(), actual.getChunkIndex());
+        assertArrayEquals(expected.getData(), actual.getData());
 
-        assertEquals("getLastChunkHashCode present", expected.getLastChunkHashCode().isPresent(),
-                actual.getLastChunkHashCode().isPresent());
-        if (expected.getLastChunkHashCode().isPresent()) {
-            assertEquals("getLastChunkHashCode", expected.getLastChunkHashCode(),
-                    actual.getLastChunkHashCode());
-        }
-
+        assertEquals(expected.getLastChunkHashCode(), actual.getLastChunkHashCode());
         assertEquals(expected.serverConfig(), actual.serverConfig());
     }
 }

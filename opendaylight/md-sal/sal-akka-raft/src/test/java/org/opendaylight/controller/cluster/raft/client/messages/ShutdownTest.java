@@ -7,23 +7,22 @@
  */
 package org.opendaylight.controller.cluster.raft.client.messages;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 import org.apache.commons.lang3.SerializationUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for Shutdown.
  *
  * @author Thomas Pantelis
  */
-public class ShutdownTest {
+class ShutdownTest {
     @Test
-    public void test() {
+    void test() {
         final var bytes = SerializationUtils.serialize(Shutdown.INSTANCE);
         assertEquals(86, bytes.length);
-        final var cloned = SerializationUtils.deserialize(bytes);
-        assertSame("Cloned instance", Shutdown.INSTANCE, cloned);
+        assertSame(Shutdown.INSTANCE, SerializationUtils.deserialize(bytes));
     }
 }
