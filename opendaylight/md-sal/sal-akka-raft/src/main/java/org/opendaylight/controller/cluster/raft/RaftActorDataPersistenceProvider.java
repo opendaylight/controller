@@ -14,6 +14,7 @@ import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SnapshotProtocol;
 import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
+import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 
 /**
@@ -79,7 +80,7 @@ final class RaftActorDataPersistenceProvider implements DataPersistenceProvider 
     }
 
     @Override
-    public void saveSnapshot(final Object entry) {
+    public void saveSnapshot(final Snapshot entry) {
         delegate.saveSnapshot(entry);
     }
 

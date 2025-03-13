@@ -16,6 +16,7 @@ import org.apache.pekko.persistence.DeleteSnapshotsSuccess;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SnapshotProtocol;
 import org.apache.pekko.persistence.SnapshotSelectionCriteria;
+import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 
 /**
@@ -45,7 +46,7 @@ class PersistentDataProvider implements DataPersistenceProvider {
     }
 
     @Override
-    public void saveSnapshot(final Object snapshot) {
+    public void saveSnapshot(final Snapshot snapshot) {
         persistentActor.saveSnapshot(snapshot);
     }
 

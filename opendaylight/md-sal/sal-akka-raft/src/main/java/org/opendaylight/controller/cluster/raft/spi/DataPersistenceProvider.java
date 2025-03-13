@@ -5,42 +5,43 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft.spi;
 
 import org.apache.pekko.japi.Procedure;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SnapshotProtocol;
 import org.apache.pekko.persistence.SnapshotSelectionCriteria;
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 
 /**
  * This interface provides methods to persist data and is an abstraction of the akka-persistence persistence API.
  */
+@NonNullByDefault
 public interface DataPersistenceProvider {
     /**
      * Returns whether or not persistence recovery is applicable/enabled.
      *
-     * @return true if recovery is applicable, otherwise false, in which case the provider is not persistent and may
-     *         not have anything to be recovered
+     * @return {@code true} if recovery is applicable, otherwise false, in which case the provider is not persistent and
+     *         may not have anything to be recovered
      */
     boolean isRecoveryApplicable();
 
     /**
      * Persists an entry to the applicable journal synchronously.
      *
+     * @param <T> the type of the journal entry
      * @param entry the journal entry to persist
      * @param procedure the callback when persistence is complete
-     * @param <T> the type of the journal entry
      */
     <T> void persist(T entry, Procedure<T> procedure);
 
     /**
      * Persists an entry to the applicable journal asynchronously.
      *
+     * @param <T> the type of the journal entry
      * @param entry the journal entry to persist
      * @param procedure the callback when persistence is complete
-     * @param <T> the type of the journal entry
      */
     <T> void persistAsync(T entry, Procedure<T> procedure);
 
@@ -49,7 +50,7 @@ public interface DataPersistenceProvider {
      *
      * @param snapshot the snapshot object to save
      */
-    void saveSnapshot(Object snapshot);
+    void saveSnapshot(Snapshot snapshot);
 
     /**
      * Deletes snapshots based on the given criteria.
@@ -78,7 +79,7 @@ public interface DataPersistenceProvider {
      * @param response A {@link JournalProtocol} response
      * @return {@code true} if the response was handled
      */
-    boolean handleJournalResponse(JournalProtocol.@NonNull Response response);
+    boolean handleJournalResponse(JournalProtocol.Response response);
 
     /**
      * Receive and potentially handle a {@link SnapshotProtocol} response.
@@ -86,5 +87,5 @@ public interface DataPersistenceProvider {
      * @param response A {@link SnapshotProtocol} response
      * @return {@code true} if the response was handled
      */
-    boolean handleSnapshotResponse(SnapshotProtocol.@NonNull Response response);
+    boolean handleSnapshotResponse(SnapshotProtocol.Response response);
 }

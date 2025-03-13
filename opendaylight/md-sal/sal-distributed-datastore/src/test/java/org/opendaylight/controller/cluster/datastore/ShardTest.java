@@ -1493,7 +1493,7 @@ public class ShardTest extends AbstractShardTest {
             }
 
             @Override
-            public void saveSnapshot(final Object entry) {
+            public void saveSnapshot(final Snapshot entry) {
                 savedSnapshot.set(entry);
                 delegate.saveSnapshot(entry);
             }
@@ -1522,7 +1522,6 @@ public class ShardTest extends AbstractShardTest {
             public boolean handleSnapshotResponse(final SnapshotProtocol.Response response) {
                 return delegate.handleSnapshotResponse(response);
             }
-
         }
 
         dataStoreContextBuilder.persistent(persistent);

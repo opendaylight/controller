@@ -14,6 +14,7 @@ import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SnapshotProtocol;
 import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
+import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +47,7 @@ class NonPersistentDataProvider implements DataPersistenceProvider {
     }
 
     @Override
-    public void saveSnapshot(final Object snapshot) {
+    public void saveSnapshot(final Snapshot snapshot) {
         // no-op
     }
 
