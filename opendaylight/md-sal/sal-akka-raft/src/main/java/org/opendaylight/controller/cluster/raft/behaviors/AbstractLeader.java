@@ -887,24 +887,23 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
      * @return true if capture was initiated, false otherwise.
      */
     public boolean initiateCaptureSnapshot(final String followerId) {
-        FollowerLogInformation followerLogInfo = followerToLog.get(followerId);
+        final var followerLogInfo = followerToLog.get(followerId);
         if (snapshotHolder.isPresent()) {
             // If a snapshot is present in the memory, most likely another install is in progress no need to capture
             // snapshot. This could happen if another follower needs an install when one is going on.
-            final ActorSelection followerActor = context.getPeerActorSelection(followerId);
+            final var followerActor = context.getPeerActorSelection(followerId);
 
             // Note: sendSnapshotChunk will set the LeaderInstallSnapshotState.
-            sendSnapshotChunk(followerActor, followerLogInfo);
+            sendSnapshotChunk(followerActor, followerLogInfo, snapshotHolder.orElseThrow());
             return true;
         }
 
-        boolean captureInitiated = context.getSnapshotManager().captureToInstall(context.getReplicatedLog().lastMeta(),
-            getReplicatedToAllIndex(), followerId);
+        final var captureInitiated = context.getSnapshotManager()
+            .captureToInstall(context.getReplicatedLog().lastMeta(), getReplicatedToAllIndex(), followerId);
         if (captureInitiated) {
             followerLogInfo.setLeaderInstallSnapshotState(new LeaderInstallSnapshotState(
                 context.getConfigParams().getMaximumMessageSliceSize(), logName));
         }
-
         return captureInitiated;
     }
 
@@ -912,11 +911,9 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         // If the follower's nextIndex is -1 then we might as well send it a snapshot
         // Otherwise send it a snapshot only if the nextIndex is not present in the log but is present
         // in the snapshot
-        return nextIndex == -1 || !context.getReplicatedLog().isPresent(nextIndex)
-                && context.getReplicatedLog().isInSnapshot(nextIndex);
-
+        final var replLog = context.getReplicatedLog();
+        return nextIndex == -1 || !replLog.isPresent(nextIndex) && replLog.isInSnapshot(nextIndex);
     }
-
 
     private void sendInstallSnapshot() {
         LOG.debug("{}: sendInstallSnapshot", logName);
@@ -936,18 +933,18 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         }
     }
 
-    /**
-     *  Sends a snapshot chunk to a given follower
-     *  InstallSnapshot should qualify as a heartbeat too.
-     */
     private void sendSnapshotChunk(final ActorSelection followerActor, final FollowerLogInformation followerLogInfo) {
-        if (snapshotHolder.isEmpty()) {
-            // nothing to do
-            return;
+        if (snapshotHolder.isPresent()) {
+            sendSnapshotChunk(followerActor, followerLogInfo, snapshotHolder.orElseThrow());
         }
+    }
 
-        final var snapshot = snapshotHolder.orElseThrow();
-        LeaderInstallSnapshotState installSnapshotState = followerLogInfo.getInstallSnapshotState();
+    /**
+     * Sends a snapshot chunk to a given follower. InstallSnapshot should qualify as a heartbeat too.
+     */
+    private void sendSnapshotChunk(final ActorSelection followerActor, final FollowerLogInformation followerLogInfo,
+            final SnapshotHolder snapshot) {
+        var installSnapshotState = followerLogInfo.getInstallSnapshotState();
         if (installSnapshotState == null) {
             installSnapshotState = new LeaderInstallSnapshotState(
                 context.getConfigParams().getMaximumMessageSliceSize(), logName);
@@ -999,7 +996,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
 
     private boolean resendSnapshotChunk(final ActorSelection followerActor,
                                         final FollowerLogInformation followerLogInfo) {
-        if (!snapshotHolder.isPresent()) {
+        if (snapshotHolder.isEmpty()) {
             // Seems like we should never hit this case, but just in case we do, reset the snapshot progress so that it
             // can restart from the next AppendEntries.
             LOG.warn("{}: Attempting to resend snapshot with no snapshot holder present.", logName);
@@ -1012,8 +1009,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         installSnapshotState.resetChunkTimer();
         installSnapshotState.markSendStatus(false);
 
-        sendSnapshotChunk(followerActor, followerLogInfo);
-
+        sendSnapshotChunk(followerActor, followerLogInfo, snapshotHolder.orElseThrow());
         return true;
     }
 
