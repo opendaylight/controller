@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.raft;
 import static java.util.Objects.requireNonNull;
 
 import org.apache.pekko.japi.Procedure;
-import org.apache.pekko.persistence.AbstractPersistentActor;
 import org.apache.pekko.persistence.DeleteMessagesSuccess;
 import org.apache.pekko.persistence.DeleteSnapshotsSuccess;
 import org.apache.pekko.persistence.JournalProtocol;
@@ -24,9 +23,9 @@ import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
  */
 // Non-final for testing
 class PersistentDataProvider implements DataPersistenceProvider {
-    private final AbstractPersistentActor persistentActor;
+    private final RaftActor persistentActor;
 
-    PersistentDataProvider(final AbstractPersistentActor persistentActor) {
+    PersistentDataProvider(final RaftActor persistentActor) {
         this.persistentActor = requireNonNull(persistentActor, "persistentActor can't be null");
     }
 
