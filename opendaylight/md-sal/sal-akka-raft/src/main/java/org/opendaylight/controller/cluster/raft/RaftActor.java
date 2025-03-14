@@ -605,32 +605,30 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
      */
     protected final void persistData(final ActorRef clientActor, final Identifier identifier, final Payload data,
             final boolean batchHint) {
-        ReplicatedLogEntry replicatedLogEntry = new SimpleReplicatedLogEntry(
-            context.getReplicatedLog().lastIndex() + 1, context.currentTerm(), data);
-        replicatedLogEntry.setPersistencePending(true);
+        final var replLog = replicatedLog();
+        final var logEntry = new SimpleReplicatedLogEntry(replLog.lastIndex() + 1, context.currentTerm(), data);
+        logEntry.setPersistencePending(true);
 
-        LOG.debug("{}: Persist data {}", memberId(), replicatedLogEntry);
+        LOG.debug("{}: Persist data {}", memberId(), logEntry);
 
-        final RaftActorContext raftContext = getRaftActorContext();
-
-        boolean wasAppended = replicatedLog().appendAndPersist(replicatedLogEntry, persistedLogEntry -> {
+        boolean wasAppended = replLog.appendAndPersist(logEntry, persistedEntry -> {
             // Clear the persistence pending flag in the log entry.
-            persistedLogEntry.setPersistencePending(false);
+            persistedEntry.setPersistencePending(false);
 
             if (!hasFollowers()) {
                 // Increment the Commit Index and the Last Applied values
-                raftContext.setCommitIndex(persistedLogEntry.index());
-                raftContext.setLastApplied(persistedLogEntry.index());
+                context.setCommitIndex(persistedEntry.index());
+                context.setLastApplied(persistedEntry.index());
 
                 // Apply the state immediately.
-                handleApplyState(new ApplyState(clientActor, identifier, persistedLogEntry));
+                handleApplyState(new ApplyState(clientActor, identifier, persistedEntry));
 
                 // Send a ApplyJournalEntries message so that we write the fact that we applied
                 // the state to durable storage
-                self().tell(new ApplyJournalEntries(persistedLogEntry.index()), self());
+                self().tell(new ApplyJournalEntries(persistedEntry.index()), self());
 
             } else {
-                context.getReplicatedLog().captureSnapshotIfReady(replicatedLogEntry);
+                context.getReplicatedLog().captureSnapshotIfReady(persistedEntry);
 
                 // Local persistence is complete so send the CheckConsensusReached message to the behavior (which
                 // normally should still be the leader) to check if consensus has now been reached in conjunction with
@@ -644,7 +642,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         if (wasAppended && hasFollowers()) {
             // Send log entry for replication.
             getCurrentBehavior().handleMessage(self(),
-                new Replicate(replicatedLogEntry.index(), !batchHint, clientActor, identifier));
+                new Replicate(logEntry.index(), !batchHint, clientActor, identifier));
         }
     }
 
