@@ -1468,7 +1468,7 @@ public class ShardTest extends AbstractShardTest {
 
     private void testCreateSnapshot(final boolean persistent, final String shardActorName) throws Exception {
         final var latch = new AtomicReference<>(new CountDownLatch(1));
-        final var savedSnapshot = new AtomicReference<>();
+        final var savedSnapshot = new AtomicReference<Snapshot>();
 
         final class TestDataPersistenceProvider implements DataPersistenceProvider {
             private final DataPersistenceProvider delegate;
@@ -1563,13 +1563,13 @@ public class ShardTest extends AbstractShardTest {
     }
 
     private static void awaitAndValidateSnapshot(final AtomicReference<CountDownLatch> latch,
-            final AtomicReference<Object> savedSnapshot, final NormalizedNode expectedRoot)
+            final AtomicReference<Snapshot> savedSnapshot, final NormalizedNode expectedRoot)
                     throws InterruptedException {
         assertTrue("Snapshot saved", latch.get().await(5, TimeUnit.SECONDS));
 
         assertTrue("Invalid saved snapshot " + savedSnapshot.get(), savedSnapshot.get() instanceof Snapshot);
 
-        verifySnapshot((Snapshot) savedSnapshot.get(), expectedRoot);
+        verifySnapshot(savedSnapshot.get(), expectedRoot);
 
         latch.set(new CountDownLatch(1));
         savedSnapshot.set(null);
