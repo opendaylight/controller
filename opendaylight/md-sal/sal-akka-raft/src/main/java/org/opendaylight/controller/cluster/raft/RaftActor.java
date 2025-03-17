@@ -54,7 +54,6 @@ import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.NoopPayload;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.yangtools.concepts.Identifier;
@@ -101,8 +100,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     // This context should NOT be passed directly to any other actor it is  only to be consumed
     // by the RaftActorBehaviors.
     private final @NonNull LocalAccess localAccess;
-    private final @NonNull RaftActorDataPersistenceProvider dataPersistenceProvider =
-        new RaftActorDataPersistenceProvider(null, new PersistentDataProvider(this));
+    private final @NonNull RaftActorDataPersistenceProvider dataPersistenceProvider;
     private final @NonNull BehaviorStateTracker behaviorStateTracker = new BehaviorStateTracker();
 
     // FIXME: should be valid only after recovery
@@ -118,6 +116,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             final short payloadVersion) {
         super(memberId);
         localAccess = new LocalAccess(memberId, stateDir.resolve(memberId));
+        dataPersistenceProvider = new RaftActorDataPersistenceProvider(this);
 
         context = new RaftActorContextImpl(self(), getContext(), localAccess, -1, -1, peerAddresses,
             configParams.orElseGet(DefaultConfigParamsImpl::new), payloadVersion, dataPersistenceProvider,
@@ -749,57 +748,27 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         return persistence().isRecoveryApplicable();
     }
 
-    protected final DataPersistenceProvider persistence() {
-        return dataPersistenceProvider.getDelegate();
+    protected final @NonNull DataPersistenceProvider persistence() {
+        return dataPersistenceProvider.delegate();
     }
 
+    @Deprecated
+    @VisibleForTesting
     protected final void setPersistence(final DataPersistenceProvider provider) {
         dataPersistenceProvider.setDelegate(requireNonNull(provider));
     }
 
     protected final void setPersistence(final boolean persistent) {
         if (persistent) {
-            setPersistent();
-        } else {
-            setTransient();
-        }
-    }
-
-    private void setPersistent() {
-        final var currentPersistence = persistence();
-        if (currentPersistence == null || !currentPersistence.isRecoveryApplicable()) {
-            setPersistence(new PersistentDataProvider(this));
-
-            if (getCurrentBehavior() != null) {
-                LOG.info("{}: Persistence has been enabled - capturing snapshot", memberId());
-                captureSnapshot();
-            }
-        }
-    }
-
-    private void setTransient() {
-        final var currentPersistence = persistence();
-        if (currentPersistence == null || currentPersistence.isRecoveryApplicable()) {
-            setPersistence(new NonPersistentDataProvider(this) {
-                /*
-                 * The way snapshotting works is,
-                 * <ol>
-                 *   <li>RaftActor calls createSnapshot on the Shard
-                 *   <li>Shard sends a CaptureSnapshotReply and RaftActor then calls saveSnapshot
-                 *   <li>When saveSnapshot is invoked on the akka-persistence API it uses the SnapshotStore to save
-                 *       the snapshot. The SnapshotStore sends SaveSnapshotSuccess or SaveSnapshotFailure. When the
-                 *       RaftActor gets SaveSnapshot success it commits the snapshot to the in-memory journal. This
-                 *       commitSnapshot is mimicking what is done in SaveSnapshotSuccess.
-                 * </ol>
-                 */
-                @Override
-                public void saveSnapshot(final Snapshot object) {
-                    // Make saving Snapshot successful
-                    // Committing the snapshot here would end up calling commit in the creating state which would
-                    // be a state violation. That's why now we send a message to commit the snapshot.
-                    self().tell(RaftActorSnapshotMessageSupport.CommitSnapshot.INSTANCE, self());
+            if (!dataPersistenceProvider.isRecoveryApplicable()) {
+                dataPersistenceProvider.becomePersistent();
+                if (getCurrentBehavior() != null) {
+                    LOG.info("{}: Persistence has been enabled - capturing snapshot", memberId());
+                    captureSnapshot();
                 }
-            });
+            }
+        } else {
+            dataPersistenceProvider.setTransient();
         }
     }
 

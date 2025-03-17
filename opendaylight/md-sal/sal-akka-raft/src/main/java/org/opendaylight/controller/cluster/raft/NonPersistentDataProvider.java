@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.pekko.japi.Procedure;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SnapshotProtocol;
@@ -22,6 +23,7 @@ import org.slf4j.LoggerFactory;
 /**
  * A DataPersistenceProvider implementation with persistence disabled, essentially a no-op.
  */
+@VisibleForTesting
 class NonPersistentDataProvider implements DataPersistenceProvider {
     private static final Logger LOG = LoggerFactory.getLogger(NonPersistentDataProvider.class);
 
@@ -32,7 +34,7 @@ class NonPersistentDataProvider implements DataPersistenceProvider {
     }
 
     @Override
-    public boolean isRecoveryApplicable() {
+    public final boolean isRecoveryApplicable() {
         return false;
     }
 
