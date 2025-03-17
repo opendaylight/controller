@@ -10,6 +10,8 @@ package org.opendaylight.controller.cluster.raft;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
@@ -98,8 +100,8 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog {
     }
 
     @Override
-    public boolean appendAndPersist(final ReplicatedLogEntry replicatedLogEntry,
-            final Consumer<ReplicatedLogEntry> callback, final boolean doAsync)  {
+    public <T extends ReplicatedLogEntry> boolean appendAndPersist(final T replicatedLogEntry,
+            final Consumer<T> callback, final boolean doAsync)  {
         LOG.debug("{}: Append log entry and persist {} ", context.getId(), replicatedLogEntry);
 
         if (!append(replicatedLogEntry)) {
@@ -115,13 +117,13 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog {
         return true;
     }
 
-    private void persistCallback(final ReplicatedLogEntry persistedLogEntry,
-            final Consumer<ReplicatedLogEntry> callback) {
+    private <T extends ReplicatedLogEntry> void persistCallback(final @NonNull T persistedLogEntry,
+            final @Nullable Consumer<T> callback) {
         context.getExecutor().execute(() -> syncPersistCallback(persistedLogEntry, callback));
     }
 
-    private void syncPersistCallback(final ReplicatedLogEntry persistedLogEntry,
-            final Consumer<ReplicatedLogEntry> callback) {
+    private <T extends ReplicatedLogEntry> void syncPersistCallback(final @NonNull T persistedLogEntry,
+            final @Nullable Consumer<T> callback) {
         LOG.debug("{}: persist complete {}", context.getId(), persistedLogEntry);
 
         dataSizeSinceLastSnapshot += persistedLogEntry.size();

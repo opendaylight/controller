@@ -43,11 +43,4 @@ public interface ReplicatedLogEntry extends RaftEntryMeta {
      * @return true if persistence is pending, false otherwise.
      */
     boolean isPersistencePending();
-
-    /**
-     * Sets whether or not persistence is pending for this entry.
-     *
-     * @param pending the new setting.
-     */
-    void setPersistencePending(boolean pending);
 }

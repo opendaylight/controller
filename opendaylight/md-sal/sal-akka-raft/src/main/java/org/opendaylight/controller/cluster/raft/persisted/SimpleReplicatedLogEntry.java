@@ -73,7 +73,11 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Seria
         return persistencePending;
     }
 
-    @Override
+    /**
+     * Sets whether or not persistence is pending for this entry.
+     *
+     * @param pending the new setting.
+     */
     public void setPersistencePending(final boolean pending) {
         persistencePending = pending;
     }

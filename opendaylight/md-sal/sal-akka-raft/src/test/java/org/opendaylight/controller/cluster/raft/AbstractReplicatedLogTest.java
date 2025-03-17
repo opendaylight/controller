@@ -332,8 +332,8 @@ public class AbstractReplicatedLogTest {
         }
 
         @Override
-        public boolean appendAndPersist(final ReplicatedLogEntry replicatedLogEntry,
-                final Consumer<ReplicatedLogEntry> callback, final boolean doAsync) {
+        public <T extends ReplicatedLogEntry> boolean appendAndPersist(final T replicatedLogEntry,
+                final Consumer<T> callback, final boolean doAsync) {
             if (callback != null) {
                 callback.accept(replicatedLogEntry);
             }
