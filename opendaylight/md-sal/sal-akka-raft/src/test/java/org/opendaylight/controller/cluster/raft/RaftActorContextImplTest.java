@@ -54,7 +54,7 @@ public class RaftActorContextImplTest extends AbstractActorTest {
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         RaftActorContextImpl context = new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
             new LocalAccess("test", new TestTermInfoStore()), -1, -1, peerMap, configParams, (short) 0,
-            createProvider(), applyState -> { },  MoreExecutors.directExecutor());
+            TestDataProvider.INSTANCE, applyState -> { },  MoreExecutors.directExecutor());
 
         assertEquals("getPeerAddress", "peerAddress1", context.getPeerAddress("peer1"));
         assertEquals("getPeerAddress", null, context.getPeerAddress("peer2"));
@@ -78,7 +78,7 @@ public class RaftActorContextImplTest extends AbstractActorTest {
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         RaftActorContextImpl context = new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
             new LocalAccess("test", new TestTermInfoStore()), -1, -1, Map.of("peer1", "peerAddress1"), configParams,
-            (short) 0, createProvider(), applyState -> { }, MoreExecutors.directExecutor());
+            (short) 0, TestDataProvider.INSTANCE, applyState -> { }, MoreExecutors.directExecutor());
 
         context.setPeerAddress("peer1", "peerAddress1_1");
         assertEquals("getPeerAddress", "peerAddress1_1", context.getPeerAddress("peer1"));
@@ -91,7 +91,7 @@ public class RaftActorContextImplTest extends AbstractActorTest {
     public void testUpdatePeerIds() {
         RaftActorContextImpl context = new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
             new LocalAccess("self", new TestTermInfoStore()), -1, -1, Map.of("peer1", "peerAddress1"),
-            new DefaultConfigParamsImpl(), (short) 0, createProvider(), applyState -> { },
+            new DefaultConfigParamsImpl(), (short) 0, TestDataProvider.INSTANCE, applyState -> { },
             MoreExecutors.directExecutor());
 
         context.updatePeerIds(new ClusterConfig(
@@ -111,10 +111,6 @@ public class RaftActorContextImplTest extends AbstractActorTest {
         verifyPeerInfo(context, "peer2", Boolean.TRUE);
         verifyPeerInfo(context, "peer3", Boolean.TRUE);
         assertFalse("isVotingMember", context.isVotingMember());
-    }
-
-    private static NonPersistentDataProvider createProvider() {
-        return new NonPersistentDataProvider(Runnable::run);
     }
 
     private static void verifyPeerInfo(final RaftActorContextImpl context, final String peerId, final Boolean voting) {

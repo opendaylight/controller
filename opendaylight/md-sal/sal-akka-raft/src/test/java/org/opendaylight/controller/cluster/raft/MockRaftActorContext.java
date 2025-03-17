@@ -38,10 +38,6 @@ public class MockRaftActorContext extends RaftActorContextImpl {
     private RaftPolicy raftPolicy;
     private Consumer<Optional<OutputStream>> createSnapshotProcedure = out -> { };
 
-    private static NonPersistentDataProvider createProvider() {
-        return new NonPersistentDataProvider(Runnable::run);
-    }
-
     @NonNullByDefault
     private static LocalAccess newLocalAccess(final String id) {
         return new LocalAccess(id, new TestTermInfoStore(1, ""));
@@ -49,14 +45,14 @@ public class MockRaftActorContext extends RaftActorContextImpl {
 
     public MockRaftActorContext(final int payloadVersion) {
         super(null, null, newLocalAccess("test"), -1, -1, new HashMap<>(), new DefaultConfigParamsImpl(),
-            (short) payloadVersion, createProvider(), applyState -> { }, MoreExecutors.directExecutor());
+            (short) payloadVersion, TestDataProvider.INSTANCE, applyState -> { }, MoreExecutors.directExecutor());
         setReplicatedLog(new MockReplicatedLogBuilder().build());
     }
 
     public MockRaftActorContext(final String id, final ActorSystem system, final ActorRef actor,
             final int payloadVersion) {
         super(actor, null, newLocalAccess(id), -1, -1, new HashMap<>(), new DefaultConfigParamsImpl(),
-            (short) payloadVersion, createProvider(), applyState -> actor.tell(applyState, actor),
+            (short) payloadVersion, TestDataProvider.INSTANCE, applyState -> actor.tell(applyState, actor),
             MoreExecutors.directExecutor());
         this.system = system;
         initReplicatedLog();
