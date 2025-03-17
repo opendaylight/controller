@@ -64,8 +64,8 @@ public final class ShardSnapshotActor extends AbstractUntypedActorWithMetering {
 
     @Override
     protected void handleReceive(final Object message) {
-        if (message instanceof SerializeSnapshot) {
-            onSerializeSnapshot((SerializeSnapshot) message);
+        if (message instanceof SerializeSnapshot req) {
+            onSerializeSnapshot(req);
         } else {
             unknownMessage(message);
         }
