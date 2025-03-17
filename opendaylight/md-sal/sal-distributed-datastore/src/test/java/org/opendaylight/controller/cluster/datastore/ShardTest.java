@@ -35,13 +35,13 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.Props;
 import org.apache.pekko.actor.Status.Failure;
 import org.apache.pekko.dispatch.Dispatchers;
 import org.apache.pekko.japi.Creator;
-import org.apache.pekko.japi.Procedure;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SaveSnapshotSuccess;
 import org.apache.pekko.persistence.SnapshotProtocol;
@@ -1483,13 +1483,13 @@ public class ShardTest extends AbstractShardTest {
             }
 
             @Override
-            public <T> void persist(final T entry, final Procedure<T> procedure) {
-                delegate.persist(entry, procedure);
+            public <T> void persist(final T entry, final Consumer<T> callback) {
+                delegate.persist(entry, callback);
             }
 
             @Override
-            public <T> void persistAsync(final T entry, final Procedure<T> procedure) {
-                delegate.persistAsync(entry, procedure);
+            public <T> void persistAsync(final T entry, final Consumer<T> callback) {
+                delegate.persistAsync(entry, callback);
             }
 
             @Override

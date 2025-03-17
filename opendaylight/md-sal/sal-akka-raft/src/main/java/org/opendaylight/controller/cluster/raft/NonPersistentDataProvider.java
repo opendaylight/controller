@@ -10,22 +10,18 @@ package org.opendaylight.controller.cluster.raft;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
-import org.apache.pekko.japi.Procedure;
+import java.util.function.Consumer;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SnapshotProtocol;
 import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * A DataPersistenceProvider implementation with persistence disabled, essentially a no-op.
  */
 @VisibleForTesting
 abstract class NonPersistentDataProvider implements DataPersistenceProvider {
-    private static final Logger LOG = LoggerFactory.getLogger(NonPersistentDataProvider.class);
-
     private final ExecuteInSelfActor actor;
 
     NonPersistentDataProvider(final ExecuteInSelfActor actor) {
@@ -38,13 +34,15 @@ abstract class NonPersistentDataProvider implements DataPersistenceProvider {
     }
 
     @Override
-    public final <T> void persist(final T entry, final Procedure<T> procedure) {
-        invokeProcedure(procedure, entry);
+    public final <T> void persist(final T entry, final Consumer<T> callback) {
+        callback.accept(requireNonNull(entry));
     }
 
     @Override
-    public final <T> void persistAsync(final T entry, final Procedure<T> procedure) {
-        actor.executeInSelf(() -> invokeProcedure(procedure, entry));
+    public final <T> void persistAsync(final T entry, final Consumer<T> callback) {
+        requireNonNull(entry);
+        requireNonNull(callback);
+        actor.executeInSelf(() -> callback.accept(entry));
     }
 
     @Override
@@ -60,15 +58,6 @@ abstract class NonPersistentDataProvider implements DataPersistenceProvider {
     @Override
     public final long getLastSequenceNumber() {
         return -1;
-    }
-
-    @SuppressWarnings("checkstyle:IllegalCatch")
-    private static <T> void invokeProcedure(final Procedure<T> procedure, final T argument) {
-        try {
-            procedure.apply(argument);
-        } catch (Exception e) {
-            LOG.error("An unexpected error occurred", e);
-        }
     }
 
     @Override
