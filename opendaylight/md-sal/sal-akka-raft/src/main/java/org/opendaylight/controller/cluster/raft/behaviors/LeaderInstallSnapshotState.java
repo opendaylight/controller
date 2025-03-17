@@ -12,11 +12,11 @@ import com.google.common.base.Stopwatch;
 import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Encapsulates the leader state and logic for sending snapshot chunks to a follower.
@@ -101,7 +101,7 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
         chunkTimer.reset();
     }
 
-    boolean isChunkTimedOut(final FiniteDuration timeout) {
+    boolean isChunkTimedOut(final Duration timeout) {
         return chunkTimer.elapsed(TimeUnit.SECONDS) > timeout.toSeconds();
     }
 

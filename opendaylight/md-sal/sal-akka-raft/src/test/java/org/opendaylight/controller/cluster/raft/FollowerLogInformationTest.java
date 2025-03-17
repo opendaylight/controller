@@ -13,9 +13,9 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
-import scala.concurrent.duration.FiniteDuration;
 
 public class FollowerLogInformationTest {
 
@@ -26,7 +26,7 @@ public class FollowerLogInformationTest {
         context.setCommitIndex(10);
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
-        configParams.setHeartBeatInterval(new FiniteDuration(500, TimeUnit.MILLISECONDS));
+        configParams.setHeartBeatInterval(Duration.ofMillis(500));
         configParams.setElectionTimeoutFactor(1);
         context.setConfigParams(configParams);
 

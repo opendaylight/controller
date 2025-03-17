@@ -11,8 +11,8 @@ import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.time.Duration;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Cancellable;
 import org.eclipse.jdt.annotation.NonNull;
@@ -31,7 +31,6 @@ import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Abstract class that provides common code for a RaftActor behavior.
@@ -241,10 +240,9 @@ public abstract class RaftActorBehavior implements AutoCloseable {
      *
      * @return a random election duration
      */
-    FiniteDuration electionDuration() {
-        long variance = ThreadLocalRandom.current().nextInt(context.getConfigParams().getElectionTimeVariance());
+    Duration electionDuration() {
         return context.getConfigParams().getElectionTimeOutInterval()
-            .$plus(new FiniteDuration(variance, TimeUnit.MILLISECONDS));
+            .plusMillis(ThreadLocalRandom.current().nextInt(context.getConfigParams().getElectionTimeVariance()));
     }
 
     /**
@@ -266,7 +264,7 @@ public abstract class RaftActorBehavior implements AutoCloseable {
      * @param interval the duration after which we should trigger a new election
      */
     // Non-final for testing
-    final void scheduleElection(final FiniteDuration interval) {
+    final void scheduleElection(final Duration interval) {
         stopElection();
 
         // Schedule an election. When the scheduler triggers an ElectionTimeout message is sent to itself

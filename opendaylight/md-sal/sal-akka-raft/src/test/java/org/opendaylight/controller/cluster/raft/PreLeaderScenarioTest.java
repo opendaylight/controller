@@ -13,8 +13,8 @@ import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorAct
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.expectMatching;
 
 import com.google.common.collect.ImmutableMap;
+import java.time.Duration;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import org.apache.pekko.actor.ActorRef;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.notifications.RoleChanged;
@@ -25,7 +25,6 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.persisted.NoopPayload;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
-import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Tests PreLeader raft state functionality end-to-end.
@@ -131,7 +130,7 @@ public class PreLeaderScenarioTest extends AbstractRaftActorIntegrationTest {
                 factory.generateActorId(follower1Id + "-notifier"));
 
         followerConfigParams = newFollowerConfigParams();
-        followerConfigParams.setHeartBeatInterval(new FiniteDuration(100, TimeUnit.MILLISECONDS));
+        followerConfigParams.setHeartBeatInterval(Duration.ofMillis(100));
         followerConfigParams.setSnapshotBatchCount(snapshotBatchCount);
         follower1Actor = newTestRaftActor(follower1Id, TestRaftActor.newBuilder().peerAddresses(
                 ImmutableMap.of(leaderId, testActorPath(leaderId), follower2Id, testActorPath(follower2Id)))
@@ -145,7 +144,7 @@ public class PreLeaderScenarioTest extends AbstractRaftActorIntegrationTest {
                 .put(follower2Id, follower2Actor.path().toString()).build();
 
         leaderConfigParams = newLeaderConfigParams();
-        leaderConfigParams.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+        leaderConfigParams.setHeartBeatInterval(Duration.ofDays(1));
         leaderActor = newTestRaftActor(leaderId, peerAddresses, leaderConfigParams);
 
         follower1CollectorActor = follower1Actor.underlyingActor().collectorActor();

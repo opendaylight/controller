@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.time.Duration;
 import org.apache.pekko.actor.ActorRef;
 import org.opendaylight.controller.cluster.raft.PeerInfo;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
@@ -25,7 +26,6 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.concurrent.duration.FiniteDuration;
 
 /**
  * The behavior of a RaftActor when it is in the Candidate raft state.
@@ -127,8 +127,8 @@ public final class Candidate extends RaftActorBehavior {
     }
 
     @Override
-    FiniteDuration electionDuration() {
-        return super.electionDuration().$div(context.getConfigParams().getCandidateElectionTimeoutDivisor());
+    Duration electionDuration() {
+        return super.electionDuration().dividedBy(context.getConfigParams().getCandidateElectionTimeoutDivisor());
     }
 
 

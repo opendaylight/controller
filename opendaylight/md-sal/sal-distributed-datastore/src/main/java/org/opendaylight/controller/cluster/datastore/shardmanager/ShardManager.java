@@ -292,8 +292,9 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         for (var info : localShards.values()) {
             if (info.getActor() != null) {
                 LOG.debug("{}: Issuing gracefulStop to shard {}", logName(), info.getShardId());
-                stopFutures.add(Patterns.gracefulStop(info.getActor(), info.getDatastoreContext().getShardRaftConfig()
-                    .getElectionTimeOutInterval().$times(2), Shutdown.INSTANCE));
+                stopFutures.add(Patterns.gracefulStop(info.getActor(), FiniteDuration.fromNanos(
+                    info.getDatastoreContext().getShardRaftConfig().getElectionTimeOutInterval().toNanos()).$times(2),
+                    Shutdown.INSTANCE));
             }
         }
 
@@ -408,7 +409,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         final ActorRef shardActor = shardInformation.getActor();
         if (shardActor != null) {
             long timeoutInMS = Math.max(shardInformation.getDatastoreContext().getShardRaftConfig()
-                    .getElectionTimeOutInterval().$times(3).toMillis(), 10000);
+                    .getElectionTimeOutInterval().multipliedBy(3).toMillis(), 10000);
 
             LOG.debug("{} : Sending Shutdown to Shard actor {} with {} ms timeout", logName(), shardActor,
                     timeoutInMS);
@@ -1258,9 +1259,10 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         shardReplicaOperationsInProgress.remove(shardName);
 
         if (removeShardOnFailure) {
-            ShardInformation shardInfo = localShards.remove(shardName);
-            if (shardInfo.getActor() != null) {
-                shardInfo.getActor().tell(PoisonPill.getInstance(), self());
+            final var shardInfo = localShards.remove(shardName);
+            final var actor = shardInfo.getActor();
+            if (actor != null) {
+                actor.tell(PoisonPill.getInstance(), self());
             }
         }
 

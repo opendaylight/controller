@@ -86,7 +86,7 @@ public class DatastoreContextIntrospectorTest {
         assertEquals(100, context.getShardTransactionCommitTimeoutInSeconds());
         assertEquals(199, context.getShardRaftConfig().getJournalRecoveryLogBatchSize());
         assertEquals(212, context.getShardRaftConfig().getSnapshotBatchCount());
-        assertEquals(101, context.getShardRaftConfig().getHeartBeatInterval().length());
+        assertEquals(101, context.getShardRaftConfig().getHeartBeatInterval().toMillis());
         assertEquals(567, context.getShardTransactionCommitQueueCapacity());
         assertEquals(82, context.getShardInitializationTimeout().duration().toSeconds());
         assertEquals(66, context.getShardLeaderElectionTimeout().duration().toSeconds());
@@ -120,9 +120,9 @@ public class DatastoreContextIntrospectorTest {
         assertEquals(100, context.getShardTransactionCommitTimeoutInSeconds());
         assertEquals(199, context.getShardRaftConfig().getJournalRecoveryLogBatchSize());
         assertEquals(212, context.getShardRaftConfig().getSnapshotBatchCount());
-        assertEquals(102, context.getShardRaftConfig().getHeartBeatInterval().length());
+        assertEquals(102, context.getShardRaftConfig().getHeartBeatInterval().toMillis());
         assertEquals(567, context.getShardTransactionCommitQueueCapacity());
-        assertEquals(82, context.getShardInitializationTimeout().duration().toSeconds());
+        assertEquals(82, context.getShardInitializationTimeout().duration().length());
         assertEquals(66, context.getShardLeaderElectionTimeout().duration().toSeconds());
         assertEquals(6, context.getInitialSettleTimeoutMultiplier());
         assertEquals(123, context.getShardRaftConfig().getIsolatedCheckIntervalInMillis());
@@ -166,7 +166,7 @@ public class DatastoreContextIntrospectorTest {
         assertEquals(212, context.getShardRaftConfig().getSnapshotBatchCount());
         assertEquals(DEFAULT_OPERATION_TIMEOUT_IN_MS, context.getOperationTimeoutInMillis());
         assertEquals(DEFAULT_HEARTBEAT_INTERVAL_IN_MILLIS,
-                context.getShardRaftConfig().getHeartBeatInterval().length());
+                context.getShardRaftConfig().getHeartBeatInterval().toMillis());
         assertEquals(567, context.getShardTransactionCommitQueueCapacity());
         assertEquals(DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD_PERCENTAGE,
                 context.getShardRaftConfig().getSnapshotDataThresholdPercentage());

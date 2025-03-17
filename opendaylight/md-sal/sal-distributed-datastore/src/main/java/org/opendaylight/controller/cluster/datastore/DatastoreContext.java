@@ -11,6 +11,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.text.WordUtils;
 import org.apache.pekko.util.Timeout;
@@ -261,8 +262,7 @@ public class DatastoreContext implements ClientActorConfig {
     }
 
     private void setHeartbeatInterval(final long shardHeartbeatIntervalInMillis) {
-        raftConfig.setHeartBeatInterval(new FiniteDuration(shardHeartbeatIntervalInMillis,
-                TimeUnit.MILLISECONDS));
+        raftConfig.setHeartBeatInterval(Duration.ofMillis(shardHeartbeatIntervalInMillis));
     }
 
     private void setShardJournalRecoveryLogBatchSize(final int shardJournalRecoveryLogBatchSize) {

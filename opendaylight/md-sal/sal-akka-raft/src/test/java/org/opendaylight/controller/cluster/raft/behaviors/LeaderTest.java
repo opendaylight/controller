@@ -23,6 +23,7 @@ import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +40,7 @@ import org.apache.pekko.actor.Terminated;
 import org.apache.pekko.protobuf.ByteString;
 import org.apache.pekko.testkit.TestActorRef;
 import org.apache.pekko.testkit.javadsl.TestKit;
+import org.eclipse.jdt.annotation.NonNull;
 import org.junit.After;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.messaging.MessageSlice;
@@ -310,8 +312,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         MockRaftActorContext actorContext = createActorContextWithFollower();
         actorContext.setConfigParams(new DefaultConfigParamsImpl() {
             @Override
-            public FiniteDuration getHeartBeatInterval() {
-                return FiniteDuration.apply(5, TimeUnit.SECONDS);
+            public Duration getHeartBeatInterval() {
+                return Duration.ofSeconds(5);
             }
         });
 
@@ -335,7 +337,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
             sendReplicate(actorContext, lastIndex + i + 1);
         }
 
-        List<AppendEntries> allMessages = MessageCollectorActor.getAllMatching(followerActor, AppendEntries.class);
+        final var allMessages = MessageCollectorActor.getAllMatching(followerActor, AppendEntries.class);
         // We expect only 1 message to be sent because of two reasons,
         // - an append entries reply was not received
         // - the heartbeat interval has not expired
@@ -350,8 +352,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         MockRaftActorContext actorContext = createActorContextWithFollower();
         actorContext.setConfigParams(new DefaultConfigParamsImpl() {
             @Override
-            public FiniteDuration getHeartBeatInterval() {
-                return FiniteDuration.apply(5, TimeUnit.SECONDS);
+            public Duration getHeartBeatInterval() {
+                return Duration.ofSeconds(5);
             }
         });
 
@@ -421,8 +423,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         MockRaftActorContext actorContext = createActorContextWithFollower();
         actorContext.setConfigParams(new DefaultConfigParamsImpl() {
             @Override
-            public FiniteDuration getHeartBeatInterval() {
-                return FiniteDuration.apply(500, TimeUnit.MILLISECONDS);
+            public Duration getHeartBeatInterval() {
+                return Duration.ofMillis(500);
             }
         });
 
@@ -467,8 +469,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         MockRaftActorContext actorContext = createActorContextWithFollower();
         actorContext.setConfigParams(new DefaultConfigParamsImpl() {
             @Override
-            public FiniteDuration getHeartBeatInterval() {
-                return FiniteDuration.apply(100, TimeUnit.MILLISECONDS);
+            public Duration getHeartBeatInterval() {
+                return Duration.ofMillis(100);
             }
         });
 
@@ -504,8 +506,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         MockRaftActorContext actorContext = createActorContextWithFollower();
         actorContext.setConfigParams(new DefaultConfigParamsImpl() {
             @Override
-            public FiniteDuration getHeartBeatInterval() {
-                return FiniteDuration.apply(100, TimeUnit.MILLISECONDS);
+            public Duration getHeartBeatInterval() {
+                return Duration.ofMillis(100);
             }
         });
 
@@ -1009,7 +1011,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
                 return 50;
             }
         };
-        configParams.setHeartBeatInterval(new FiniteDuration(9, TimeUnit.SECONDS));
+        configParams.setHeartBeatInterval(Duration.ofSeconds(9));
         configParams.setIsolatedLeaderCheckInterval(new FiniteDuration(10, TimeUnit.SECONDS));
 
         actorContext.setConfigParams(configParams);
@@ -1256,16 +1258,16 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         return createActorContext(LEADER_ID, actorRef, payloadVersion);
     }
 
-    private MockRaftActorContext createActorContext(final String id, final ActorRef actorRef) {
+    private static @NonNull MockRaftActorContext createActorContext(final String id, final ActorRef actorRef) {
         return createActorContext(id, actorRef, 0);
     }
 
-    private MockRaftActorContext createActorContext(final String id, final ActorRef actorRef,
+    private static @NonNull MockRaftActorContext createActorContext(final String id, final ActorRef actorRef,
             final int payloadVersion) {
-        DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
-        configParams.setHeartBeatInterval(new FiniteDuration(50, TimeUnit.MILLISECONDS));
+        final var configParams = new DefaultConfigParamsImpl();
+        configParams.setHeartBeatInterval(Duration.ofMillis(50));
         configParams.setElectionTimeoutFactor(100000);
-        MockRaftActorContext context = new MockRaftActorContext(id, getSystem(), actorRef, payloadVersion);
+        final var context = new MockRaftActorContext(id, getSystem(), actorRef, payloadVersion);
         context.setConfigParams(configParams);
         return context;
     }
@@ -1420,8 +1422,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         logStart("testHandleAppendEntriesReplyFailureWithFollowersLogBehindTheLeader");
 
         MockRaftActorContext leaderActorContext = createActorContextWithFollower();
-        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setHeartBeatInterval(
-                new FiniteDuration(1000, TimeUnit.SECONDS));
+        ((DefaultConfigParamsImpl) leaderActorContext.getConfigParams()).setHeartBeatInterval(Duration.ofSeconds(1000));
 
         leaderActorContext.setReplicatedLog(
                 new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 3, 1).build());
@@ -1429,8 +1430,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leaderActorContext.setCommitIndex(leaderCommitIndex);
         leaderActorContext.setLastApplied(leaderCommitIndex);
 
-        final ReplicatedLogEntry leadersSecondLogEntry = leaderActorContext.getReplicatedLog().get(1);
-        final ReplicatedLogEntry leadersThirdLogEntry = leaderActorContext.getReplicatedLog().get(2);
+        final var leadersSecondLogEntry = leaderActorContext.getReplicatedLog().get(1);
+        final var leadersThirdLogEntry = leaderActorContext.getReplicatedLog().get(2);
 
         MockRaftActorContext followerActorContext = createFollowerActorContextWithLeader();
 
@@ -1445,8 +1446,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leader = new Leader(leaderActorContext);
 
         AppendEntries appendEntries = MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
-        final AppendEntriesReply appendEntriesReply = MessageCollectorActor.expectFirstMatching(leaderActor,
-                AppendEntriesReply.class);
+        final var appendEntriesReply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
 
         MessageCollectorActor.clearMessages(followerActor);
         MessageCollectorActor.clearMessages(leaderActor);
@@ -1500,8 +1500,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         logStart("testHandleAppendEntriesReplyFailureWithFollowersLogEmpty");
 
         MockRaftActorContext leaderActorContext = createActorContextWithFollower();
-        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setHeartBeatInterval(
-                new FiniteDuration(1000, TimeUnit.SECONDS));
+        ((DefaultConfigParamsImpl )leaderActorContext.getConfigParams()).setHeartBeatInterval(Duration.ofSeconds(1000));
 
         leaderActorContext.setReplicatedLog(
                 new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 2, 1).build());
@@ -1581,8 +1580,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         logStart("testHandleAppendEntriesReplyFailureWithFollowersLogTermDifferent");
 
         MockRaftActorContext leaderActorContext = createActorContextWithFollower();
-        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setHeartBeatInterval(
-                new FiniteDuration(1000, TimeUnit.SECONDS));
+        ((DefaultConfigParamsImpl) leaderActorContext.getConfigParams()).setHeartBeatInterval(Duration.ofSeconds(1000));
 
         leaderActorContext.setReplicatedLog(
                 new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 2, 2).build());
@@ -1666,8 +1664,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         logStart("testHandleAppendEntriesReplyWithNewerTerm");
 
         MockRaftActorContext leaderActorContext = createActorContext();
-        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setHeartBeatInterval(
-                new FiniteDuration(10000, TimeUnit.SECONDS));
+        ((DefaultConfigParamsImpl) leaderActorContext.getConfigParams()).setHeartBeatInterval(Duration.ofSeconds(1000));
 
         leaderActorContext.setReplicatedLog(
                 new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 2, 2).build());
@@ -1690,8 +1687,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         logStart("testHandleAppendEntriesReplyWithNewerTermWhenElectionsAreDisabled");
 
         MockRaftActorContext leaderActorContext = createActorContext();
-        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setHeartBeatInterval(
-                new FiniteDuration(10000, TimeUnit.SECONDS));
+        ((DefaultConfigParamsImpl) leaderActorContext.getConfigParams()).setHeartBeatInterval(Duration.ofSeconds(1000));
 
         leaderActorContext.setReplicatedLog(
                 new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 2, 2).build());
@@ -1745,8 +1741,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         assertEquals(2, applyJournalEntries.getToIndex());
 
-        List<ApplyState> applyStateList = MessageCollectorActor.getAllMatching(leaderActor,
-                ApplyState.class);
+        final var applyStateList = MessageCollectorActor.getAllMatching(leaderActor, ApplyState.class);
 
         assertEquals(1,applyStateList.size());
 
@@ -1780,10 +1775,9 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         logStart("testFollowerCatchUpWithAppendEntriesMaxDataSizeExceeded");
 
         MockRaftActorContext leaderActorContext = createActorContextWithFollower();
-        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setHeartBeatInterval(
-                new FiniteDuration(1000, TimeUnit.SECONDS));
+        ((DefaultConfigParamsImpl) leaderActorContext.getConfigParams()).setHeartBeatInterval(Duration.ofSeconds(1000));
         // Note: the size here depends on estimate
-        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setMaximumMessageSliceSize(246);
+        ((DefaultConfigParamsImpl) leaderActorContext.getConfigParams()).setMaximumMessageSliceSize(246);
 
         leaderActorContext.setReplicatedLog(
                 new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 4, 1).build());
@@ -1901,8 +1895,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         followerActor.underlyingActor().setBehavior(follower);
 
         MockRaftActorContext leaderActorContext = createActorContextWithFollower();
-        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setHeartBeatInterval(
-                new FiniteDuration(1000, TimeUnit.SECONDS));
+        ((DefaultConfigParamsImpl) leaderActorContext.getConfigParams()).setHeartBeatInterval(Duration.ofSeconds(1000));
         leaderActorContext.getPeerInfo(FOLLOWER_ID).setVotingState(VotingState.NON_VOTING);
 
         leader = new Leader(leaderActorContext);
@@ -1990,7 +1983,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
                 new MockRaftActorContext(leaderActorId, getSystem(), leaderActor);
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
-        configParams.setHeartBeatInterval(new FiniteDuration(200, TimeUnit.MILLISECONDS));
+        configParams.setHeartBeatInterval(Duration.ofMillis(200));
         configParams.setIsolatedLeaderCheckInterval(new FiniteDuration(10, TimeUnit.SECONDS));
 
         leaderActorContext.setConfigParams(configParams);
@@ -2037,8 +2030,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         logStart("testReplicationConsensusWithNonVotingFollower");
 
         MockRaftActorContext leaderActorContext = createActorContextWithFollower();
-        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setHeartBeatInterval(
-                new FiniteDuration(1000, TimeUnit.SECONDS));
+        ((DefaultConfigParamsImpl) leaderActorContext.getConfigParams()).setHeartBeatInterval(Duration.ofSeconds(1000));
 
         leaderActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().build());
         leaderActorContext.setCommitIndex(-1);
@@ -2105,8 +2097,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         MockRaftActorContext leaderActorContext = createActorContextWithFollower();
         leaderActorContext.setLastApplied(-1);
-        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setHeartBeatInterval(
-                new FiniteDuration(1000, TimeUnit.SECONDS));
+        ((DefaultConfigParamsImpl) leaderActorContext.getConfigParams()).setHeartBeatInterval(Duration.ofSeconds(1000));
         leaderActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().build());
 
         leader = new Leader(leaderActorContext);
@@ -2146,8 +2137,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         logStart("testTransferLeadershipWithEmptyLog");
 
         MockRaftActorContext leaderActorContext = createActorContextWithFollower();
-        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setHeartBeatInterval(
-                new FiniteDuration(1000, TimeUnit.SECONDS));
+        ((DefaultConfigParamsImpl) leaderActorContext.getConfigParams()).setHeartBeatInterval(Duration.ofSeconds(1000));
         leaderActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().build());
 
         leader = new Leader(leaderActorContext);
@@ -2180,8 +2170,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         logStart("testTransferLeadershipWithFollowerInitiallyOutOfSync");
 
         MockRaftActorContext leaderActorContext = createActorContextWithFollower();
-        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setHeartBeatInterval(
-                new FiniteDuration(200, TimeUnit.MILLISECONDS));
+        ((DefaultConfigParamsImpl) leaderActorContext.getConfigParams()).setHeartBeatInterval(Duration.ofMillis(200));
 
         leader = new Leader(leaderActorContext);
         leaderActorContext.setCurrentBehavior(leader);
@@ -2218,9 +2207,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         logStart("testTransferLeadershipWithFollowerSyncTimeout");
 
         MockRaftActorContext leaderActorContext = createActorContextWithFollower();
-        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setHeartBeatInterval(
-                new FiniteDuration(200, TimeUnit.MILLISECONDS));
-        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setElectionTimeoutFactor(2);
+        ((DefaultConfigParamsImpl) leaderActorContext.getConfigParams()).setHeartBeatInterval(Duration.ofMillis(200));
+        ((DefaultConfigParamsImpl) leaderActorContext.getConfigParams()).setElectionTimeoutFactor(2);
         leaderActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().build());
 
         leader = new Leader(leaderActorContext);
@@ -2264,8 +2252,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
                 new MockRaftActorContext.MockPayload("large", serializedSize);
 
         MockRaftActorContext leaderActorContext = createActorContextWithFollower();
-        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setHeartBeatInterval(
-                new FiniteDuration(300, TimeUnit.MILLISECONDS));
+        ((DefaultConfigParamsImpl) leaderActorContext.getConfigParams()).setHeartBeatInterval(Duration.ofMillis(300));
         ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setMaximumMessageSliceSize(serializedSize - 50);
         leaderActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().build());
         leaderActorContext.setCommitIndex(-1);
@@ -2347,10 +2334,9 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         logStart("testLargePayloadSlicingExpiration");
 
         MockRaftActorContext leaderActorContext = createActorContextWithFollower();
-        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setHeartBeatInterval(
-                new FiniteDuration(100, TimeUnit.MILLISECONDS));
-        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setElectionTimeoutFactor(1);
-        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setMaximumMessageSliceSize(10);
+        ((DefaultConfigParamsImpl) leaderActorContext.getConfigParams()).setHeartBeatInterval(Duration.ofMillis(100));
+        ((DefaultConfigParamsImpl) leaderActorContext.getConfigParams()).setElectionTimeoutFactor(1);
+        ((DefaultConfigParamsImpl) leaderActorContext.getConfigParams()).setMaximumMessageSliceSize(10);
         leaderActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().build());
         leaderActorContext.setCommitIndex(-1);
         leaderActorContext.setLastApplied(-1);
@@ -2397,8 +2383,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         logStart("testLeaderAddressInAppendEntries");
 
         MockRaftActorContext leaderActorContext = createActorContextWithFollower();
-        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setHeartBeatInterval(
-                FiniteDuration.create(50, TimeUnit.MILLISECONDS));
+        ((DefaultConfigParamsImpl) leaderActorContext.getConfigParams()).setHeartBeatInterval(Duration.ofMillis(50));
         leaderActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().build());
         leaderActorContext.setCommitIndex(-1);
         leaderActorContext.setLastApplied(-1);
@@ -2462,8 +2447,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         }
 
         @Override
-        public FiniteDuration getElectionTimeOutInterval() {
-            return new FiniteDuration(electionTimeOutIntervalMillis, TimeUnit.MILLISECONDS);
+        public Duration getElectionTimeOutInterval() {
+            return Duration.ofMillis(electionTimeOutIntervalMillis);
         }
 
         @Override

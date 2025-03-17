@@ -10,8 +10,8 @@ package org.opendaylight.controller.cluster.raft;
 import static java.util.Objects.requireNonNull;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.time.Duration;
 import org.apache.pekko.actor.Cancellable;
-import scala.concurrent.duration.FiniteDuration;
 
 /**
  * An abstract class that implements a Runnable operation with a timer such that if the run method is not invoked within
@@ -29,7 +29,7 @@ abstract class TimedRunnable implements Runnable {
 
     @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR",
         justification = "https://github.com/spotbugs/spotbugs/issues/1867")
-    TimedRunnable(final FiniteDuration timeout, final RaftActor actor) {
+    TimedRunnable(final Duration timeout, final RaftActor actor) {
         cancelTimer = requireNonNull(actor).getContext().system().scheduler()
             .scheduleOnce(requireNonNull(timeout), actor.self(), (Runnable) this::cancel,
                 actor.getContext().system().dispatcher(), actor.self());

@@ -11,10 +11,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import org.apache.pekko.actor.ActorRef;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
@@ -30,7 +30,6 @@ import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
-import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Integration test for various scenarios involving non-voting followers.
@@ -364,9 +363,8 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
 
         setupLeaderAndNonVotingFollower();
 
-        ((DefaultConfigParamsImpl)follower1Context.getConfigParams()).setElectionTimeoutFactor(2);
-        ((DefaultConfigParamsImpl)follower1Context.getConfigParams())
-                .setHeartBeatInterval(FiniteDuration.apply(100, TimeUnit.MILLISECONDS));
+        ((DefaultConfigParamsImpl) follower1Context.getConfigParams()).setElectionTimeoutFactor(2);
+        ((DefaultConfigParamsImpl) follower1Context.getConfigParams()).setHeartBeatInterval(Duration.ofMillis(100));
 
         MessageCollectorActor.clearMessages(roleChangeNotifier);
         follower1Actor.tell(ElectionTimeout.INSTANCE, ActorRef.noSender());

@@ -14,6 +14,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -24,6 +25,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.OutputStream;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -72,7 +74,6 @@ import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
-import scala.concurrent.duration.FiniteDuration;
 
 public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     private final short ourPayloadVersion = 5;
@@ -123,7 +124,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         follower = new Follower(actorContext);
 
         MessageCollectorActor.expectFirstMatching(followerActor, TimeoutNow.class,
-                actorContext.getConfigParams().getElectionTimeOutInterval().$times(6).toMillis());
+                actorContext.getConfigParams().getElectionTimeOutInterval().multipliedBy(6).toMillis());
     }
 
     @Test
@@ -145,8 +146,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         logStart("testHandleElectionTimeoutWhenLeaderMessageReceived");
 
         MockRaftActorContext context = createActorContext();
-        ((DefaultConfigParamsImpl) context.getConfigParams())
-                .setHeartBeatInterval(new FiniteDuration(100, TimeUnit.MILLISECONDS));
+        ((DefaultConfigParamsImpl) context.getConfigParams()).setHeartBeatInterval(Duration.ofMillis(100));
         ((DefaultConfigParamsImpl) context.getConfigParams()).setElectionTimeoutFactor(4);
 
         follower = new Follower(context);
@@ -167,8 +167,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
                 -1, -1, (short) 1));
 
         Uninterruptibles.sleepUninterruptibly(200, TimeUnit.MILLISECONDS);
-        raftBehavior = follower.handleMessage(leaderActor, ElectionTimeout.INSTANCE);
-        assertTrue(raftBehavior instanceof Follower);
+        assertInstanceOf(Follower.class, follower.handleMessage(leaderActor, ElectionTimeout.INSTANCE));
     }
 
     @Test
@@ -187,7 +186,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         assertTrue("isVoteGranted", reply.isVoteGranted());
         assertEquals("getTerm", term, reply.getTerm());
-        verify(follower).scheduleElection(any(FiniteDuration.class));
+        verify(follower).scheduleElection(any());
     }
 
     @Test
@@ -205,7 +204,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, RequestVoteReply.class);
 
         assertFalse("isVoteGranted", reply.isVoteGranted());
-        verify(follower, never()).scheduleElection(any(FiniteDuration.class));
+        verify(follower, never()).scheduleElection(any());
     }
 
 
@@ -1036,8 +1035,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         MockRaftActorContext context = createActorContext();
         context.setConfigParams(new DefaultConfigParamsImpl() {
             @Override
-            public FiniteDuration getElectionTimeOutInterval() {
-                return FiniteDuration.apply(100, TimeUnit.MILLISECONDS);
+            public Duration getElectionTimeOutInterval() {
+                return Duration.ofMillis(100);
             }
         });
 
@@ -1054,9 +1053,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     public void testFollowerSchedulesElectionIfNonVoting() {
         MockRaftActorContext context = createActorContext();
         context.updatePeerIds(new ClusterConfig(new ServerInfo(context.getId(), false)));
-        ((DefaultConfigParamsImpl)context.getConfigParams()).setHeartBeatInterval(
-                FiniteDuration.apply(100, TimeUnit.MILLISECONDS));
-        ((DefaultConfigParamsImpl)context.getConfigParams()).setElectionTimeoutFactor(1);
+        ((DefaultConfigParamsImpl) context.getConfigParams()).setHeartBeatInterval(Duration.ofMillis(100));
+        ((DefaultConfigParamsImpl) context.getConfigParams()).setElectionTimeoutFactor(1);
 
         follower = new Follower(context, "leader", (short)1);
 
@@ -1073,7 +1071,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         MockRaftActorContext context = createActorContext();
         follower = createBehavior(context);
         follower.handleMessage(leaderActor, new RequestVoteReply(100, false));
-        verify(follower).scheduleElection(any(FiniteDuration.class));
+        verify(follower).scheduleElection(any());
     }
 
     @Test
@@ -1081,7 +1079,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         MockRaftActorContext context = createActorContext();
         follower = createBehavior(context);
         follower.handleMessage(leaderActor, "non-raft-rpc");
-        verify(follower, never()).scheduleElection(any(FiniteDuration.class));
+        verify(follower, never()).scheduleElection(any());
     }
 
     @Test

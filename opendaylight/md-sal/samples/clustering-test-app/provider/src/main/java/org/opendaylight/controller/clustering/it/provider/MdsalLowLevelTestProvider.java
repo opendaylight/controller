@@ -581,7 +581,7 @@ public final class MdsalLowLevelTestProvider {
         final ActorUtils context = configDataStore.getActorUtils();
 
         long timeoutInMS = Math.max(context.getDatastoreContext().getShardRaftConfig()
-                .getElectionTimeOutInterval().$times(3).toMillis(), 10000);
+                .getElectionTimeOutInterval().multipliedBy(3).toMillis(), 10000);
         final FiniteDuration duration = FiniteDuration.apply(timeoutInMS, TimeUnit.MILLISECONDS);
         final scala.concurrent.Promise<Boolean> shutdownShardAsk = Futures.promise();
 
@@ -600,7 +600,7 @@ public final class MdsalLowLevelTestProvider {
             @Override
             public void onComplete(final Throwable throwable, final Boolean gracefulStopResult) {
                 if (throwable != null) {
-                    final RpcResult<T> failedResult = RpcResultBuilder.<T>failed()
+                    final var failedResult = RpcResultBuilder.<T>failed()
                             .withError(ErrorType.APPLICATION, "Failed to gracefully shutdown shard", throwable).build();
                     rpcResult.set(failedResult);
                 } else {

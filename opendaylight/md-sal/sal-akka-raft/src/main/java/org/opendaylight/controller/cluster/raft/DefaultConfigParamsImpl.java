@@ -12,7 +12,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.Strings;
 import com.google.common.base.Suppliers;
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 import java.util.function.Supplier;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.policy.DefaultRaftPolicy;
@@ -49,17 +49,16 @@ public class DefaultConfigParamsImpl implements ConfigParams {
      *
      * <p>Since this is set to 100 milliseconds the Election timeout should be at least 200 milliseconds.
      */
-    public static final FiniteDuration HEART_BEAT_INTERVAL =
-        new FiniteDuration(100, TimeUnit.MILLISECONDS);
+    public static final Duration HEART_BEAT_INTERVAL = Duration.ofMillis(100);
 
     private final Supplier<RaftPolicy> policySupplier = Suppliers.memoize(this::getPolicy);
 
-    private FiniteDuration heartBeatInterval = HEART_BEAT_INTERVAL;
+    private Duration heartBeatInterval = HEART_BEAT_INTERVAL;
     private long snapshotBatchCount = SNAPSHOT_BATCH_COUNT;
     private int journalRecoveryLogBatchSize = JOURNAL_RECOVERY_LOG_BATCH_SIZE;
     private int recoverySnapshotIntervalSeconds = RECOVERY_SNAPSHOT_INTERVAL_SECONDS;
-    private long isolatedLeaderCheckInterval = HEART_BEAT_INTERVAL.$times(1000).toMillis();
-    private FiniteDuration electionTimeOutInterval;
+    private long isolatedLeaderCheckInterval = HEART_BEAT_INTERVAL.multipliedBy(1000).toMillis();
+    private Duration electionTimeOutInterval;
 
     // 12 is just an arbitrary percentage. This is the amount of the total memory that a raft actor's
     // in-memory journal can use before it needs to snapshot
@@ -83,8 +82,8 @@ public class DefaultConfigParamsImpl implements ConfigParams {
 
     private long syncIndexThreshold = 10;
 
-    public void setHeartBeatInterval(final FiniteDuration heartBeatInterval) {
-        this.heartBeatInterval = heartBeatInterval;
+    public void setHeartBeatInterval(final Duration heartBeatInterval) {
+        this.heartBeatInterval = requireNonNull(heartBeatInterval);
         electionTimeOutInterval = null;
     }
 
@@ -164,16 +163,15 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     }
 
     @Override
-    public FiniteDuration getHeartBeatInterval() {
+    public Duration getHeartBeatInterval() {
         return heartBeatInterval;
     }
 
     @Override
-    public FiniteDuration getElectionTimeOutInterval() {
+    public Duration getElectionTimeOutInterval() {
         if (electionTimeOutInterval == null) {
-            electionTimeOutInterval = getHeartBeatInterval().$times(electionTimeoutFactor);
+            electionTimeOutInterval = getHeartBeatInterval().multipliedBy(electionTimeoutFactor);
         }
-
         return electionTimeOutInterval;
     }
 

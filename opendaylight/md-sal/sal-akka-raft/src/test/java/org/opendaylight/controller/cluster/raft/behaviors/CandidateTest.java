@@ -76,7 +76,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
         candidate = new Candidate(actorContext);
 
         MessageCollectorActor.expectFirstMatching(candidateActor, ElectionTimeout.class,
-                actorContext.getConfigParams().getElectionTimeOutInterval().$times(6).toMillis());
+                actorContext.getConfigParams().getElectionTimeOutInterval().multipliedBy(6).toMillis());
     }
 
     @Test

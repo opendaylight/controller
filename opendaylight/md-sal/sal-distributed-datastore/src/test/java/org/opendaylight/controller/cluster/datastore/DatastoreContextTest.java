@@ -48,7 +48,7 @@ public class DatastoreContextTest {
                 context.getShardRaftConfig().getJournalRecoveryLogBatchSize());
         assertEquals(DEFAULT_SNAPSHOT_BATCH_COUNT, context.getShardRaftConfig().getSnapshotBatchCount());
         assertEquals(DEFAULT_HEARTBEAT_INTERVAL_IN_MILLIS,
-                context.getShardRaftConfig().getHeartBeatInterval().length());
+                context.getShardRaftConfig().getHeartBeatInterval().toMillis());
         assertEquals(DEFAULT_SHARD_TX_COMMIT_QUEUE_CAPACITY, context.getShardTransactionCommitQueueCapacity());
         assertEquals(DEFAULT_SHARD_INITIALIZATION_TIMEOUT.duration().toMillis(),
                 context.getShardInitializationTimeout().duration().toMillis());
@@ -128,7 +128,7 @@ public class DatastoreContextTest {
         assertEquals(DEFAULT_RECOVERY_SNAPSHOT_INTERVAL_SECONDS + 1,
                 context.getShardRaftConfig().getRecoverySnapshotIntervalSeconds());
         assertEquals(DEFAULT_HEARTBEAT_INTERVAL_IN_MILLIS + 1,
-                context.getShardRaftConfig().getHeartBeatInterval().length());
+                context.getShardRaftConfig().getHeartBeatInterval().toMillis());
         assertEquals(DEFAULT_SHARD_TX_COMMIT_QUEUE_CAPACITY + 1, context.getShardTransactionCommitQueueCapacity());
         assertEquals(DEFAULT_SHARD_INITIALIZATION_TIMEOUT.duration().toMillis() + 1,
                 context.getShardInitializationTimeout().duration().toMillis());

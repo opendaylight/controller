@@ -77,7 +77,6 @@ import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Unit tests for RaftActorServerConfigurationSupport.
@@ -132,7 +131,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
     private static DefaultConfigParamsImpl newFollowerConfigParams() {
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
-        configParams.setHeartBeatInterval(new FiniteDuration(100, TimeUnit.MILLISECONDS));
+        configParams.setHeartBeatInterval(Duration.ofMillis(100));
         configParams.setElectionTimeoutFactor(100000);
         configParams.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
         return configParams;
@@ -634,7 +633,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         setupNewFollower();
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
-        configParams.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+        configParams.setHeartBeatInterval(Duration.ofDays(1));
 
         TestActorRef<MockRaftActor> noLeaderActor = actorFactory.createTestActor(
                 MockRaftActor.builder().id(LEADER_ID).peerAddresses(Map.of(FOLLOWER_ID,
@@ -737,7 +736,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         setupNewFollower();
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
-        configParams.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+        configParams.setHeartBeatInterval(Duration.ofDays(1));
 
         ActorRef leaderActor = actorFactory.createActor(
                 MessageCollectorActor.props(), actorFactory.generateActorId(LEADER_ID));
@@ -763,7 +762,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         LOG.info("testOnApplyState starting");
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
-        configParams.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+        configParams.setHeartBeatInterval(Duration.ofDays(1));
         TestActorRef<MockRaftActor> noLeaderActor = actorFactory.createTestActor(
                 MockRaftActor.builder().id(LEADER_ID).peerAddresses(Map.of(FOLLOWER_ID,
                         followerActor.path().toString())).config(configParams).persistent(Optional.of(Boolean.FALSE))
@@ -790,7 +789,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         LOG.info("testRemoveServerWithNoLeader starting");
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
-        configParams.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+        configParams.setHeartBeatInterval(Duration.ofDays(1));
 
         TestActorRef<MockRaftActor> leaderActor = actorFactory.createTestActor(
                 MockRaftActor.builder().id(LEADER_ID).peerAddresses(Map.of(FOLLOWER_ID,
@@ -829,7 +828,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         LOG.info("testRemoveServerForwardToLeader starting");
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
-        configParams.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+        configParams.setHeartBeatInterval(Duration.ofDays(1));
 
         ActorRef leaderActor = actorFactory.createTestActor(
                 MessageCollectorActor.props(), actorFactory.generateActorId(LEADER_ID));
@@ -854,7 +853,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         LOG.info("testRemoveServer starting");
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
-        configParams.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+        configParams.setHeartBeatInterval(Duration.ofDays(1));
         configParams.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
 
         final String follower1ActorId = actorFactory.generateActorId(FOLLOWER_ID);
@@ -918,7 +917,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         LOG.info("testRemoveServerLeader starting");
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
-        configParams.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+        configParams.setHeartBeatInterval(Duration.ofDays(1));
         configParams.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
 
         final String followerActorId = actorFactory.generateActorId(FOLLOWER_ID);
@@ -975,7 +974,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         LOG.info("testChangeServersVotingStatus starting");
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
-        configParams.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+        configParams.setHeartBeatInterval(Duration.ofDays(1));
         configParams.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
 
         final String follower1ActorId = actorFactory.generateActorId(FOLLOWER_ID);
@@ -1055,7 +1054,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         LOG.info("testChangeLeaderToNonVoting starting");
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
-        configParams.setHeartBeatInterval(new FiniteDuration(500, TimeUnit.MILLISECONDS));
+        configParams.setHeartBeatInterval(Duration.ofMillis(500));
 
         final String follower1ActorId = actorFactory.generateActorId(FOLLOWER_ID);
         final String follower1ActorPath = actorFactory.createTestActorPath(follower1ActorId);
@@ -1128,7 +1127,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         LOG.info("testChangeToVotingWithNoLeader starting");
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
-        configParams.setHeartBeatInterval(new FiniteDuration(100, TimeUnit.MILLISECONDS));
+        configParams.setHeartBeatInterval(Duration.ofMillis(100));
         configParams.setElectionTimeoutFactor(5);
 
         final String node1ID = "node1";
@@ -1255,7 +1254,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         InMemoryJournal.addEntry(node2ID, 2, persistedServerConfigEntry);
 
         DefaultConfigParamsImpl configParams1 = new DefaultConfigParamsImpl();
-        configParams1.setHeartBeatInterval(new FiniteDuration(100, TimeUnit.MILLISECONDS));
+        configParams1.setHeartBeatInterval(Duration.ofMillis(100));
         configParams1.setElectionTimeoutFactor(1);
         configParams1.setPeerAddressResolver(peerAddressResolver);
         ActorRef node1Collector = actorFactory.createActor(
@@ -1307,7 +1306,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
                         ? actorFactory.createTestActorPath(node2ID) : null;
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
-        configParams.setHeartBeatInterval(new FiniteDuration(100, TimeUnit.MILLISECONDS));
+        configParams.setHeartBeatInterval(Duration.ofMillis(100));
         configParams.setElectionTimeoutFactor(3);
         configParams.setPeerAddressResolver(peerAddressResolver);
 
@@ -1367,7 +1366,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         LOG.info("testChangeToVotingWithNoLeaderAndOtherLeaderElected starting");
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
-        configParams.setHeartBeatInterval(new FiniteDuration(100, TimeUnit.MILLISECONDS));
+        configParams.setHeartBeatInterval(Duration.ofMillis(100));
         configParams.setElectionTimeoutFactor(100000);
 
         final String node1ID = "node1";
@@ -1431,6 +1430,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         LOG.info("testChangeToVotingWithNoLeaderAndOtherLeaderElected ending");
     }
 
+    // FIXME: use awaitility here
     private static void verifyRaftState(final RaftState expState, final RaftActor... raftActors) {
         Stopwatch sw = Stopwatch.createStarted();
         while (sw.elapsed(TimeUnit.SECONDS) <= 5) {
@@ -1472,7 +1472,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
     private static RaftActorContextImpl newFollowerContext(final String id,
             final TestActorRef<? extends AbstractActor> actor) {
         final var configParams = new DefaultConfigParamsImpl();
-        configParams.setHeartBeatInterval(new FiniteDuration(100, TimeUnit.MILLISECONDS));
+        configParams.setHeartBeatInterval(Duration.ofMillis(100));
         configParams.setElectionTimeoutFactor(100000);
 
         return new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
@@ -1582,7 +1582,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         static Props props(final Path stateDir, final Map<String, String> peerAddresses,
                 final RaftActorContext fromContext) {
             final var configParams = new DefaultConfigParamsImpl();
-            configParams.setHeartBeatInterval(new FiniteDuration(100, TimeUnit.MILLISECONDS));
+            configParams.setHeartBeatInterval(Duration.ofMillis(100));
             configParams.setElectionTimeoutFactor(10);
             return Props.create(MockLeaderRaftActor.class, stateDir, peerAddresses, configParams, fromContext);
         }

@@ -14,6 +14,7 @@ import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.UncheckedIOException;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -56,7 +57,6 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.concurrent.duration.FiniteDuration;
 
 /**
  * The behavior of a RaftActor when it is in the Leader state.
@@ -698,8 +698,8 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
                 // if install snapshot is in process , then sent next chunk if possible
                 if (isFollowerActive) {
                     // 30 seconds with default settings, can be modified via heartbeat or election timeout factor
-                    FiniteDuration snapshotReplyTimeout = context.getConfigParams().getHeartBeatInterval()
-                            .$times(context.getConfigParams().getElectionTimeoutFactor() * 3);
+                    final var snapshotReplyTimeout = context.getConfigParams().getHeartBeatInterval()
+                        .multipliedBy(context.getConfigParams().getElectionTimeoutFactor() * 3);
 
                     if (installSnapshotState.isChunkTimedOut(snapshotReplyTimeout)) {
                         sendAppendEntries = !resendSnapshotChunk(followerActor, followerLogInformation);
@@ -1029,7 +1029,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         }
     }
 
-    private void scheduleHeartBeat(final FiniteDuration interval) {
+    private void scheduleHeartBeat(final Duration interval) {
         if (followerToLog.isEmpty()) {
             // Optimization - do not bother scheduling a heartbeat as there are
             // no followers
@@ -1043,9 +1043,11 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         // Scheduling the heartbeat only once here because heartbeats do not
         // need to be sent if there are other messages being sent to the remote
         // actor.
-        heartbeatSchedule = context.getActorSystem().scheduler().scheduleOnce(
-            interval, context.getActor(), SendHeartBeat.INSTANCE,
-            context.getActorSystem().dispatcher(), context.getActor());
+        final var actor = context.getActor();
+        final var actorSystem = context.getActorSystem();
+
+        heartbeatSchedule = actorSystem.scheduler()
+            .scheduleOnce(interval, actor, SendHeartBeat.INSTANCE, actorSystem.dispatcher(), actor);
     }
 
     @Override

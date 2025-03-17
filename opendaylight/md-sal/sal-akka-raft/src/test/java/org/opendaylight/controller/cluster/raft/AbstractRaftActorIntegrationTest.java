@@ -258,7 +258,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
 
     protected DefaultConfigParamsImpl newLeaderConfigParams() {
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
-        configParams.setHeartBeatInterval(new FiniteDuration(100, TimeUnit.MILLISECONDS));
+        configParams.setHeartBeatInterval(Duration.ofMillis(100));
         configParams.setElectionTimeoutFactor(4);
         configParams.setSnapshotBatchCount(snapshotBatchCount);
         configParams.setSnapshotDataThresholdPercentage(70);
@@ -269,7 +269,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
 
     protected DefaultConfigParamsImpl newFollowerConfigParams() {
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
-        configParams.setHeartBeatInterval(new FiniteDuration(500, TimeUnit.MILLISECONDS));
+        configParams.setHeartBeatInterval(Duration.ofMillis(500));
         configParams.setElectionTimeoutFactor(1000);
         return configParams;
     }

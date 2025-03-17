@@ -396,7 +396,8 @@ public class ActorUtils {
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     public void shutdown() {
-        final var duration = datastoreContext.getShardRaftConfig().getElectionTimeOutInterval().$times(3);
+        final var duration = FiniteDuration.fromNanos(
+            datastoreContext.getShardRaftConfig().getElectionTimeOutInterval().toNanos()).$times(3);
         try {
             Await.ready(Patterns.gracefulStop(shardManager, duration, Shutdown.INSTANCE), duration);
         } catch (Exception e) {

@@ -7,9 +7,9 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import java.time.Duration;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
-import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Configuration Parameter interface for configuring the Raft consensus system. Any component using this implementation
@@ -55,16 +55,16 @@ public interface ConfigParams {
     /**
      * Returns the interval at which a heart beat message should be sent to remote followers.
      *
-     * @return the interval as a FiniteDuration.
+     * @return the interval as a {@link Duration}.
      */
-    FiniteDuration getHeartBeatInterval();
+    Duration getHeartBeatInterval();
 
     /**
      * Returns the interval after which a new election should be triggered if no leader is available.
      *
-     * @return the interval as a FiniteDuration.
+     * @return the interval as a {@link Duration}.
      */
-    FiniteDuration getElectionTimeOutInterval();
+    Duration getElectionTimeOutInterval();
 
     /**
      * Returns the number by which a candidate should divide the election timeout it has calculated. This serves

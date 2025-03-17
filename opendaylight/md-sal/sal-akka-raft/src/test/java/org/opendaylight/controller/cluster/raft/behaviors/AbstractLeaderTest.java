@@ -11,6 +11,7 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 import static org.junit.Assert.assertTrue;
 
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +50,7 @@ public abstract class AbstractLeaderTest<T extends AbstractLeader> extends Abstr
                 new MockRaftActorContext(leaderActorId, getSystem(), leaderActor);
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
-        configParams.setHeartBeatInterval(new FiniteDuration(200, TimeUnit.MILLISECONDS));
+        configParams.setHeartBeatInterval(Duration.ofMillis(200));
         configParams.setIsolatedLeaderCheckInterval(new FiniteDuration(10, TimeUnit.SECONDS));
 
         leaderActorContext.setConfigParams(configParams);

@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableList;
+import java.time.Duration;
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.HashSet;
@@ -40,7 +41,6 @@ import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.util.AbstractUUIDIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Handles server configuration related messages for a RaftActor.
@@ -280,13 +280,14 @@ class RaftActorServerConfigurationSupport {
         }
 
         Cancellable newTimer(final Object message) {
-            return newTimer(raftContext.getConfigParams().getElectionTimeOutInterval().$times(2), message);
+            return newTimer(raftContext.getConfigParams().getElectionTimeOutInterval().multipliedBy(2), message);
         }
 
-        Cancellable newTimer(final FiniteDuration timeout, final Object message) {
-            return raftContext.getActorSystem().scheduler().scheduleOnce(
-                    timeout, raftContext.getActor(), message,
-                            raftContext.getActorSystem().dispatcher(), raftContext.getActor());
+        Cancellable newTimer(final Duration timeout, final Object message) {
+            final var actorSystem = raftContext.getActorSystem();
+            final var actor = raftContext.getActor();
+
+            return actorSystem.scheduler().scheduleOnce(timeout, actor, message, actorSystem.dispatcher(), actor);
         }
 
         @Override

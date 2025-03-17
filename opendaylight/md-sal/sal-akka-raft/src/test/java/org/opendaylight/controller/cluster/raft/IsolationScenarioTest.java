@@ -17,6 +17,7 @@ import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorAct
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.apache.pekko.actor.ActorRef;
@@ -425,7 +426,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
                 factory.generateActorId(follower1Id + "-notifier"));
 
         DefaultConfigParamsImpl followerConfigParams = new DefaultConfigParamsImpl();
-        followerConfigParams.setHeartBeatInterval(new FiniteDuration(100, TimeUnit.MILLISECONDS));
+        followerConfigParams.setHeartBeatInterval(Duration.ofMillis(100));
         followerConfigParams.setElectionTimeoutFactor(1000);
         follower1Actor = newTestRaftActor(follower1Id, TestRaftActor.newBuilder()
             .peerAddresses(ImmutableMap.of(leaderId, testActorPath(leaderId), follower2Id, testActorPath(follower2Id)))

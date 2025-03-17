@@ -14,6 +14,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -233,7 +234,7 @@ public class AbstractLeaderElectionScenarioTest {
 
     DefaultConfigParamsImpl newConfigParams() {
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
-        configParams.setHeartBeatInterval(new FiniteDuration(HEARTBEAT_INTERVAL, TimeUnit.MILLISECONDS));
+        configParams.setHeartBeatInterval(Duration.ofMillis(HEARTBEAT_INTERVAL));
         configParams.setElectionTimeoutFactor(100000);
         configParams.setIsolatedLeaderCheckInterval(new FiniteDuration(1, TimeUnit.DAYS));
         return configParams;
