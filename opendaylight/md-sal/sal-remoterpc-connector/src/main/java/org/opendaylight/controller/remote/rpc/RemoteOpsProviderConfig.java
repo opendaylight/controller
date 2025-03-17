@@ -8,7 +8,6 @@
 package org.opendaylight.controller.remote.rpc;
 
 import com.typesafe.config.Config;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.concurrent.TimeUnit;
 import org.apache.pekko.util.Timeout;
 import org.opendaylight.controller.cluster.common.actor.CommonConfig;
@@ -105,21 +104,7 @@ public class RemoteOpsProviderConfig extends CommonConfig {
         return cachedGossipTickInterval;
     }
 
-    /**
-     * This is called via blueprint xml as the builder pattern can't be used.
-     */
-    @SuppressFBWarnings(value = "BC_UNCONFIRMED_CAST_OF_RETURN_VALUE",
-            justification = "Findbugs flags this as an unconfirmed cast of return value but the build method clearly "
-                + "returns RemoteOpsProviderConfig. Perhaps it's confused b/c the build method is overloaded and "
-                + "and differs in return type from the base class.")
-    public static RemoteOpsProviderConfig newInstance(final String actorSystemName, final boolean metricCaptureEnabled,
-                                                      final int mailboxCapacity) {
-        return new Builder(actorSystemName).metricCaptureEnabled(metricCaptureEnabled)
-                .mailboxCapacity(mailboxCapacity).build();
-    }
-
     public static class Builder extends CommonConfig.Builder<Builder> {
-
         public Builder(final String actorSystemName) {
             super(actorSystemName);
 

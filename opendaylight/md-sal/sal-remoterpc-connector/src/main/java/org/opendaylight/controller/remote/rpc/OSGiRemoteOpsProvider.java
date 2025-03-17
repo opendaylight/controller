@@ -8,7 +8,6 @@
 package org.opendaylight.controller.remote.rpc;
 
 import org.apache.pekko.actor.ActorRef;
-import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.actor.PoisonPill;
 import org.opendaylight.controller.cluster.ActorSystemProvider;
 import org.opendaylight.mdsal.dom.api.DOMActionProviderService;
@@ -46,9 +45,11 @@ public final class OSGiRemoteOpsProvider {
             @Reference final DOMActionProviderService actionProviderService,
             @Reference final DOMActionService actionService, final Config config) {
         LOG.info("Remote Operations service starting");
-        final ActorSystem actorSystem = actorSystemProvider.getActorSystem();
-        final RemoteOpsProviderConfig opsConfig = RemoteOpsProviderConfig.newInstance(actorSystem.name(),
-            config.metricCapture(), config.boundedMailboxCapacity());
+        final var actorSystem = actorSystemProvider.getActorSystem();
+        final var opsConfig = new RemoteOpsProviderConfig.Builder(actorSystem.name())
+                .metricCaptureEnabled(config.metricCapture())
+                .mailboxCapacity(config.boundedMailboxCapacity())
+                .build();
 
         opsManager = actorSystem.actorOf(OpsManager.props(rpcProviderService, rpcService, opsConfig,
                 actionProviderService, actionService), opsConfig.getRpcManagerName());
