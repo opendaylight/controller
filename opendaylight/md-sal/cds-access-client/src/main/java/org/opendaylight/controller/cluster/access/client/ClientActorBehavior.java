@@ -11,11 +11,11 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Verify;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.checkerframework.checker.lock.qual.Holding;
 import org.eclipse.jdt.annotation.NonNull;
@@ -40,7 +40,6 @@ import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.concurrent.duration.FiniteDuration;
 
 /**
  * A behavior, which handles messages sent to a {@link AbstractClientActor}.
@@ -62,7 +61,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(ClientActorBehavior.class);
-    private static final FiniteDuration RESOLVE_RETRY_DURATION = FiniteDuration.apply(1, TimeUnit.SECONDS);
+    private static final Duration RESOLVE_RETRY_DURATION = Duration.ofSeconds(1);
 
     /**
      * Map of connections to the backend. This map is concurrent to allow lookups, but given complex operations

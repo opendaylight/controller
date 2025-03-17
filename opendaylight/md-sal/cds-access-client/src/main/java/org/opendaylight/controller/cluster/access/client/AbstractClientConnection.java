@@ -13,6 +13,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -33,7 +34,6 @@ import org.opendaylight.controller.cluster.access.concepts.ResponseEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Base class for a connection to the backend. Responsible to queueing and dispatch of requests toward the backend.
@@ -301,7 +301,7 @@ public abstract sealed class AbstractClientConnection<T extends BackendInfo>
         // for that condition and take appropriate action, but this is more convenient and less error-prone.
         final long normalized =  delay <= 0 ? 0 : Math.min(delay, context.config().getBackendAlivenessTimerInterval());
 
-        final FiniteDuration dur = FiniteDuration.fromNanos(normalized);
+        final var dur = Duration.ofNanos(normalized);
         LOG.debug("{}: connection {} scheduling timeout in {}", context.persistenceId(), this, dur);
         context.executeInActor(this::runTimer, dur);
         haveTimer = true;

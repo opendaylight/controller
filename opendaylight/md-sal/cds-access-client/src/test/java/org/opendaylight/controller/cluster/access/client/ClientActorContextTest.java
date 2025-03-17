@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.access.client;
 import static org.junit.Assert.assertSame;
 
 import com.google.common.base.Ticker;
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.testkit.TestProbe;
 import org.apache.pekko.testkit.javadsl.TestKit;
@@ -24,7 +24,6 @@ import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
-import scala.concurrent.duration.FiniteDuration;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClientActorContextTest {
@@ -69,7 +68,7 @@ public class ClientActorContextTest {
 
     @Test
     public void testExecuteInActorScheduled() {
-        ctx.executeInActor(command, FiniteDuration.create(1, TimeUnit.SECONDS));
+        ctx.executeInActor(command, Duration.ofSeconds(1));
         probe.expectMsg(command);
     }
 

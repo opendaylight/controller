@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.access.client;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.Ticker;
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
@@ -22,7 +23,6 @@ import org.opendaylight.controller.cluster.io.FileBackedOutputStreamFactory;
 import org.opendaylight.controller.cluster.messaging.MessageSlicer;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import scala.concurrent.ExecutionContext;
-import scala.concurrent.duration.FiniteDuration;
 
 /**
  * An actor context associated with this {@link AbstractClientActor}.
@@ -94,7 +94,7 @@ public class ClientActorContext extends AbstractClientActorContext implements Id
     }
 
     public <T extends BackendInfo> Cancellable executeInActor(final @NonNull InternalCommand<T> command,
-            final FiniteDuration delay) {
+            final Duration delay) {
         return scheduler.scheduleOnce(requireNonNull(delay), self(), requireNonNull(command),
             executionContext, ActorRef.noSender());
     }
