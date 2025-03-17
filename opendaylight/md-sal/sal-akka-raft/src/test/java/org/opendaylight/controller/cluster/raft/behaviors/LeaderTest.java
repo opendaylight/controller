@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.pekko.actor.ActorRef;
@@ -79,7 +78,6 @@ import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.utils.ForwardMessageToBehaviorActor;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.yangtools.concepts.Identifier;
-import scala.concurrent.duration.FiniteDuration;
 
 public class LeaderTest extends AbstractLeaderTest<Leader> {
 
@@ -145,8 +143,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         followerActor.underlyingActor().clear();
 
         // Sleep for the heartbeat interval so AppendEntries is sent.
-        Uninterruptibles.sleepUninterruptibly(actorContext.getConfigParams()
-                .getHeartBeatInterval().toMillis(), TimeUnit.MILLISECONDS);
+        Uninterruptibles.sleepUninterruptibly(actorContext.getConfigParams().getHeartBeatInterval());
 
         leader.handleMessage(leaderActor, SendHeartBeat.INSTANCE);
 
@@ -447,7 +444,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         sendReplicate(actorContext, lastIndex + 1);
 
         // Wait slightly longer than heartbeat duration
-        Uninterruptibles.sleepUninterruptibly(750, TimeUnit.MILLISECONDS);
+        Uninterruptibles.sleepUninterruptibly(Duration.ofMillis(750));
 
         leader.handleMessage(leaderActor, SendHeartBeat.INSTANCE);
 
@@ -491,11 +488,11 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         followerActor.underlyingActor().clear();
 
         for (int i = 0; i < 3; i++) {
-            Uninterruptibles.sleepUninterruptibly(150, TimeUnit.MILLISECONDS);
+            Uninterruptibles.sleepUninterruptibly(Duration.ofMillis(150));
             leader.handleMessage(leaderActor, SendHeartBeat.INSTANCE);
         }
 
-        List<AppendEntries> allMessages = MessageCollectorActor.getAllMatching(followerActor, AppendEntries.class);
+        final var allMessages = MessageCollectorActor.getAllMatching(followerActor, AppendEntries.class);
         assertEquals("The number of append entries collected should be 3", 3, allMessages.size());
     }
 
@@ -527,7 +524,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         followerActor.underlyingActor().clear();
 
-        Uninterruptibles.sleepUninterruptibly(150, TimeUnit.MILLISECONDS);
+        Uninterruptibles.sleepUninterruptibly(Duration.ofMillis(150));
         leader.handleMessage(leaderActor, SendHeartBeat.INSTANCE);
         sendReplicate(actorContext, lastIndex + 1);
 
@@ -620,8 +617,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         fts.getNextChunk();
         fts.incrementChunkIndex();
 
-        Uninterruptibles.sleepUninterruptibly(actorContext.getConfigParams().getHeartBeatInterval().toMillis(),
-                TimeUnit.MILLISECONDS);
+        Uninterruptibles.sleepUninterruptibly(actorContext.getConfigParams().getHeartBeatInterval());
 
         leader.handleMessage(leaderActor, SendHeartBeat.INSTANCE);
 
@@ -1012,7 +1008,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
             }
         };
         configParams.setHeartBeatInterval(Duration.ofSeconds(9));
-        configParams.setIsolatedLeaderCheckInterval(new FiniteDuration(10, TimeUnit.SECONDS));
+        configParams.setIsolatedLeaderCheckInterval(Duration.ofSeconds(10));
 
         actorContext.setConfigParams(configParams);
         actorContext.setCommitIndex(commitIndex);
@@ -1110,7 +1106,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         Snapshot snapshot = Snapshot.create(ByteState.of(bs.toByteArray()), List.of(), commitIndex, snapshotTerm,
                 commitIndex, snapshotTerm, new TermInfo(-1), null);
 
-        Uninterruptibles.sleepUninterruptibly(1, TimeUnit.SECONDS);
+        Uninterruptibles.sleepUninterruptibly(Duration.ofSeconds(1));
         leader.handleMessage(leaderActor, new SendInstallSnapshot(snapshot, ByteSource.wrap(bs.toByteArray())));
 
         InstallSnapshot installSnapshot = MessageCollectorActor.expectFirstMatching(followerActor,
@@ -1124,8 +1120,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leader.handleMessage(followerActor,
             new InstallSnapshotReply(actorContext.currentTerm(), FOLLOWER_ID, -1, false));
 
-        Uninterruptibles.sleepUninterruptibly(actorContext.getConfigParams().getHeartBeatInterval().toMillis(),
-                TimeUnit.MILLISECONDS);
+        Uninterruptibles.sleepUninterruptibly(actorContext.getConfigParams().getHeartBeatInterval());
 
         leader.handleMessage(leaderActor, SendHeartBeat.INSTANCE);
 
@@ -1396,8 +1391,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leaderActor.underlyingActor().clear();
         followerActor.underlyingActor().clear();
 
-        Uninterruptibles.sleepUninterruptibly(leaderActorContext.getConfigParams().getHeartBeatInterval().toMillis(),
-                TimeUnit.MILLISECONDS);
+        Uninterruptibles.sleepUninterruptibly(leaderActorContext.getConfigParams().getHeartBeatInterval());
 
         leader.handleMessage(leaderActor, SendHeartBeat.INSTANCE);
 
@@ -1984,7 +1978,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         configParams.setHeartBeatInterval(Duration.ofMillis(200));
-        configParams.setIsolatedLeaderCheckInterval(new FiniteDuration(10, TimeUnit.SECONDS));
+        configParams.setIsolatedLeaderCheckInterval(Duration.ofSeconds(10));
 
         leaderActorContext.setConfigParams(configParams);
 
@@ -2009,17 +2003,17 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
             RaftActorBehavior newBehavior = leader.handleMessage(follower1Actor,
                     new AppendEntriesReply(follower1ActorId, 1, true, i, 1, (short)0));
             assertTrue(newBehavior == leader);
-            Uninterruptibles.sleepUninterruptibly(200, TimeUnit.MILLISECONDS);
+            Uninterruptibles.sleepUninterruptibly(Duration.ofMillis(200));
         }
 
         // Check if the leader has been receiving SendHeartbeat messages despite getting AppendEntriesReply
-        List<SendHeartBeat> heartbeats = MessageCollectorActor.getAllMatching(leaderActor, SendHeartBeat.class);
+        final var heartbeats = MessageCollectorActor.getAllMatching(leaderActor, SendHeartBeat.class);
 
         assertTrue(String.format("%s heartbeat(s) is less than expected", heartbeats.size()),
                 heartbeats.size() > 1);
 
         // Check if follower-2 got AppendEntries during this time and was not starved
-        List<AppendEntries> appendEntries = MessageCollectorActor.getAllMatching(follower2Actor, AppendEntries.class);
+        final var appendEntries = MessageCollectorActor.getAllMatching(follower2Actor, AppendEntries.class);
 
         assertTrue(String.format("%s append entries is less than expected", appendEntries.size()),
                 appendEntries.size() > 1);
@@ -2190,8 +2184,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leader.handleMessage(leaderActor, new AppendEntriesReply(FOLLOWER_ID, 1, true, -1, -1, (short)0));
         MessageCollectorActor.clearMessages(followerActor);
 
-        Uninterruptibles.sleepUninterruptibly(leaderActorContext.getConfigParams()
-                .getHeartBeatInterval().toMillis() + 1, TimeUnit.MILLISECONDS);
+        Uninterruptibles.sleepUninterruptibly(
+            leaderActorContext.getConfigParams().getHeartBeatInterval().plusMillis(1));
         leader.handleMessage(leaderActor, SendHeartBeat.INSTANCE);
         MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
         leader.handleMessage(leaderActor, new AppendEntriesReply(FOLLOWER_ID, 1, true, 1, 1, (short)0));
@@ -2231,8 +2225,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         // Send heartbeats to time out the transfer.
         for (int i = 0; i < leaderActorContext.getConfigParams().getElectionTimeoutFactor(); i++) {
-            Uninterruptibles.sleepUninterruptibly(leaderActorContext.getConfigParams()
-                    .getHeartBeatInterval().toMillis() + 1, TimeUnit.MILLISECONDS);
+            Uninterruptibles.sleepUninterruptibly(
+                leaderActorContext.getConfigParams().getHeartBeatInterval().plusMillis(1));
             leader.handleMessage(leaderActor, SendHeartBeat.INSTANCE);
         }
 
@@ -2297,8 +2291,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         // Initiate a heartbeat - it should send an empty AppendEntries since slicing is in progress.
 
         // Sleep for the heartbeat interval so AppendEntries is sent.
-        Uninterruptibles.sleepUninterruptibly(leaderActorContext.getConfigParams()
-                .getHeartBeatInterval().toMillis(), TimeUnit.MILLISECONDS);
+        Uninterruptibles.sleepUninterruptibly(leaderActorContext.getConfigParams().getHeartBeatInterval());
 
         leader.handleMessage(leaderActor, SendHeartBeat.INSTANCE);
 
@@ -2355,8 +2348,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         MessageCollectorActor.expectFirstMatching(followerActor, MessageSlice.class);
 
         // Sleep for at least 3 * election timeout so the slicing state expires.
-        Uninterruptibles.sleepUninterruptibly(leaderActorContext.getConfigParams()
-                .getElectionTimeOutInterval().toMillis() * 3  + 50, TimeUnit.MILLISECONDS);
+        Uninterruptibles.sleepUninterruptibly(
+            leaderActorContext.getConfigParams().getElectionTimeOutInterval().multipliedBy(3).plusMillis(50));
         MessageCollectorActor.clearMessages(followerActor);
 
         leader.handleMessage(leaderActor, SendHeartBeat.INSTANCE);
@@ -2370,8 +2363,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         // Send an AppendEntriesReply - this should restart the slicing.
 
-        Uninterruptibles.sleepUninterruptibly(leaderActorContext.getConfigParams()
-                .getHeartBeatInterval().toMillis() + 50, TimeUnit.MILLISECONDS);
+        Uninterruptibles.sleepUninterruptibly(
+            leaderActorContext.getConfigParams().getHeartBeatInterval().plusMillis(50));
 
         leader.handleMessage(followerActor, new AppendEntriesReply(FOLLOWER_ID, term, true, -1, term, (short)0));
 
@@ -2406,8 +2399,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
                 RaftVersions.CURRENT_VERSION));
 
         // Sleep for the heartbeat interval so AppendEntries is sent.
-        Uninterruptibles.sleepUninterruptibly(leaderActorContext.getConfigParams()
-                .getHeartBeatInterval().toMillis(), TimeUnit.MILLISECONDS);
+        Uninterruptibles.sleepUninterruptibly(leaderActorContext.getConfigParams().getHeartBeatInterval());
 
         leader.handleMessage(leaderActor, SendHeartBeat.INSTANCE);
 
@@ -2420,8 +2412,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leader.handleMessage(leaderActor, new AppendEntriesReply(FOLLOWER_ID, 1, true, -1, -1, (short)0, false, false,
                 RaftVersions.CURRENT_VERSION));
 
-        Uninterruptibles.sleepUninterruptibly(leaderActorContext.getConfigParams()
-                .getHeartBeatInterval().toMillis(), TimeUnit.MILLISECONDS);
+        Uninterruptibles.sleepUninterruptibly(leaderActorContext.getConfigParams().getHeartBeatInterval());
 
         leader.handleMessage(leaderActor, SendHeartBeat.INSTANCE);
 
