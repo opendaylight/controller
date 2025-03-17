@@ -9,10 +9,12 @@ package org.opendaylight.controller.cluster.raft;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.pekko.japi.Procedure;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SnapshotProtocol;
 import org.apache.pekko.persistence.SnapshotSelectionCriteria;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
@@ -24,20 +26,40 @@ import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
  * @author Thomas Pantelis
  */
 final class RaftActorDataPersistenceProvider implements DataPersistenceProvider {
-    private final PersistentDataProvider persistentProvider;
+    private final @NonNull PersistentDataProvider persistentProvider;
+    private final @NonNull NonPersistentDataProvider transientProvider;
 
-    private DataPersistenceProvider delegate;
+    private @NonNull DataPersistenceProvider delegate;
 
-    RaftActorDataPersistenceProvider(final DataPersistenceProvider delegate,
-            final PersistentDataProvider persistentProvider) {
-        this.delegate = delegate;
+    @VisibleForTesting
+    RaftActorDataPersistenceProvider(final PersistentDataProvider persistentProvider,
+            final NonPersistentDataProvider transientProvider) {
         this.persistentProvider = requireNonNull(persistentProvider);
+        this.transientProvider = requireNonNull(transientProvider);
+        delegate = transientProvider;
     }
 
-    DataPersistenceProvider getDelegate() {
+    RaftActorDataPersistenceProvider(final RaftActor raftActor) {
+        this(new PersistentDataProvider(raftActor), new TransientDataProvider(raftActor));
+    }
+
+    @NonNull DataPersistenceProvider delegate() {
         return delegate;
     }
 
+    boolean becomePersistent() {
+        if (delegate.isRecoveryApplicable()) {
+            return false;
+        }
+        delegate = persistentProvider;
+        return true;
+    }
+
+    void becomeTransient() {
+        delegate = transientProvider;
+    }
+
+    @Deprecated
     void setDelegate(final DataPersistenceProvider delegate) {
         this.delegate = requireNonNull(delegate);
     }

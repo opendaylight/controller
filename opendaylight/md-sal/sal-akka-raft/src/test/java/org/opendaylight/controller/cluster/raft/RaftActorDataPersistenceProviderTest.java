@@ -22,7 +22,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
-import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 
 /**
  * Unit tests for RaftActorDelegatingPersistentDataProvider.
@@ -42,7 +41,7 @@ public class RaftActorDataPersistenceProviderTest {
     @Mock
     private ReplicatedLogEntry mockNonPersistentLogEntry;
     @Mock
-    private DataPersistenceProvider mockDelegateProvider;
+    private NonPersistentDataProvider mockTransientProvider;
     @Mock
     private PersistentDataProvider mockPersistentProvider;
     @Mock
@@ -56,39 +55,39 @@ public class RaftActorDataPersistenceProviderTest {
     public void setup() {
         doReturn(PERSISTENT_PAYLOAD).when(mockPersistentLogEntry).getData();
         doReturn(NON_PERSISTENT_PAYLOAD).when(mockNonPersistentLogEntry).getData();
-        provider = new RaftActorDataPersistenceProvider(mockDelegateProvider, mockPersistentProvider);
+        provider = new RaftActorDataPersistenceProvider(mockPersistentProvider, mockTransientProvider);
     }
 
     @Test
     public void testPersistWithPersistenceEnabled() {
-        doReturn(true).when(mockDelegateProvider).isRecoveryApplicable();
+        doReturn(true).when(mockTransientProvider).isRecoveryApplicable();
 
         provider.persist(mockPersistentLogEntry, mockProcedure);
-        verify(mockDelegateProvider).persist(mockPersistentLogEntry, mockProcedure);
+        verify(mockTransientProvider).persist(mockPersistentLogEntry, mockProcedure);
 
         provider.persist(mockNonPersistentLogEntry, mockProcedure);
-        verify(mockDelegateProvider).persist(mockNonPersistentLogEntry, mockProcedure);
+        verify(mockTransientProvider).persist(mockNonPersistentLogEntry, mockProcedure);
 
         provider.persist(OTHER_DATA_OBJECT, mockProcedure);
-        verify(mockDelegateProvider).persist(OTHER_DATA_OBJECT, mockProcedure);
+        verify(mockTransientProvider).persist(OTHER_DATA_OBJECT, mockProcedure);
     }
 
     @Test
     public void testPersistWithPersistenceDisabled() throws Exception {
-        doReturn(false).when(mockDelegateProvider).isRecoveryApplicable();
+        doReturn(false).when(mockTransientProvider).isRecoveryApplicable();
 
         provider.persist(mockPersistentLogEntry, mockProcedure);
 
         verify(mockPersistentProvider).persist(eq(PERSISTENT_PAYLOAD), procedureCaptor.capture());
-        verify(mockDelegateProvider, never()).persist(mockNonPersistentLogEntry, mockProcedure);
+        verify(mockTransientProvider, never()).persist(mockNonPersistentLogEntry, mockProcedure);
         procedureCaptor.getValue().apply(PERSISTENT_PAYLOAD);
         verify(mockProcedure).apply(mockPersistentLogEntry);
 
         provider.persist(mockNonPersistentLogEntry, mockProcedure);
-        verify(mockDelegateProvider).persist(mockNonPersistentLogEntry, mockProcedure);
+        verify(mockTransientProvider).persist(mockNonPersistentLogEntry, mockProcedure);
 
         provider.persist(OTHER_DATA_OBJECT, mockProcedure);
-        verify(mockDelegateProvider).persist(OTHER_DATA_OBJECT, mockProcedure);
+        verify(mockTransientProvider).persist(OTHER_DATA_OBJECT, mockProcedure);
     }
 
     static class TestNonPersistentPayload extends Payload {

@@ -30,7 +30,7 @@ class PersistentDataProvider implements DataPersistenceProvider {
     }
 
     @Override
-    public boolean isRecoveryApplicable() {
+    public final boolean isRecoveryApplicable() {
         return true;
     }
 
