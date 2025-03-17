@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
 import com.google.common.io.ByteSource;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.HashSet;
@@ -68,8 +67,6 @@ public class Follower extends RaftActorBehavior {
         this(context, null, (short)-1);
     }
 
-    @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR",
-        justification = "electionDuration() is not final for Candidate override")
     public Follower(final RaftActorContext context, final String initialLeaderId,
             final short initialLeaderPayloadVersion) {
         super(context, RaftState.Follower);
@@ -88,7 +85,8 @@ public class Follower extends RaftActorBehavior {
         if (context.getPeerIds().isEmpty() && getLeaderId() == null) {
             actor().tell(TimeoutNow.INSTANCE, actor());
         } else {
-            scheduleElection(electionDuration());
+            // Note: call to 'super' instead of 'this' to side-step MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR
+            scheduleElection(super.electionDuration());
         }
     }
 
