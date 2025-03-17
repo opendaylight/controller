@@ -122,7 +122,6 @@ public class ActorUtils {
     private DatastoreContext datastoreContext;
     private FiniteDuration operationDuration;
     private Timeout operationTimeout;
-    private Timeout transactionCommitOperationTimeout;
     private Timeout shardInitializationTimeout;
 
     private volatile EffectiveModelContext schemaContext;
@@ -165,10 +164,6 @@ public class ActorUtils {
         operationDuration = FiniteDuration.create(datastoreContext.getOperationTimeoutInMillis(),
             TimeUnit.MILLISECONDS);
         operationTimeout = new Timeout(operationDuration);
-
-        transactionCommitOperationTimeout = new Timeout(FiniteDuration.create(
-                datastoreContext.getShardTransactionCommitTimeoutInSeconds(), TimeUnit.SECONDS));
-
         shardInitializationTimeout = new Timeout(datastoreContext.getShardInitializationTimeout().duration().$times(2));
     }
 
@@ -480,15 +475,6 @@ public class ActorUtils {
 
     public void resetAskTimeoutExceptionCount() {
         askTimeoutCounter.reset();
-    }
-
-    /**
-     * Returns the operation timeout to be used when committing transactions.
-     *
-     * @return the operation timeout
-     */
-    public Timeout getTransactionCommitOperationTimeout() {
-        return transactionCommitOperationTimeout;
     }
 
     /**

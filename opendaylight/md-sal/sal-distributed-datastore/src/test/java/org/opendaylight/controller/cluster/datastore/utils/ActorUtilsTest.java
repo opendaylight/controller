@@ -64,10 +64,6 @@ import scala.concurrent.duration.FiniteDuration;
 public class ActorUtilsTest extends AbstractActorTest {
     static final Logger LOG = LoggerFactory.getLogger(ActorUtilsTest.class);
 
-    private static final class TestMessage {
-
-    }
-
     private static final class MockShardManager extends UntypedAbstractActor {
         private final Map<String,Object> findPrimaryResponses = new HashMap<>();
         private final boolean found;
@@ -293,8 +289,6 @@ public class ActorUtilsTest extends AbstractActorTest {
             new PrimaryShardInfoFutureCache());
 
         assertEquals("getOperationDuration", 5, actorUtils.getOperationDuration().toSeconds());
-        assertEquals("getTransactionCommitOperationTimeout", 7,
-            actorUtils.getTransactionCommitOperationTimeout().duration().toSeconds());
 
         DatastoreContext newContext = DatastoreContext.newBuilder().operationTimeoutInSeconds(6)
                 .shardTransactionCommitTimeoutInSeconds(8).build();
@@ -309,8 +303,6 @@ public class ActorUtilsTest extends AbstractActorTest {
         Assert.assertSame("getDatastoreContext", newContext, actorUtils.getDatastoreContext());
 
         assertEquals("getOperationDuration", 6, actorUtils.getOperationDuration().toSeconds());
-        assertEquals("getTransactionCommitOperationTimeout", 8,
-            actorUtils.getTransactionCommitOperationTimeout().duration().toSeconds());
     }
 
     @Test
