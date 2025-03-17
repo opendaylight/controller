@@ -1267,7 +1267,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         ReplicatedLogEntry logEntry = leaderActor.getReplicatedLog().get(0);
         assertNotNull("ReplicatedLogEntry not found", logEntry);
-        assertEquals("isPersistencePending", true, logEntry.isPersistencePending());
+        assertTrue("isPersistencePending", logEntry.isPersistencePending());
         assertEquals("getCommitIndex", -1, leaderActor.getRaftActorContext().getCommitIndex());
 
         leaderActor.handleCommand(new AppendEntriesReply(followerId, 1, true, 0, 1, (short)0));
