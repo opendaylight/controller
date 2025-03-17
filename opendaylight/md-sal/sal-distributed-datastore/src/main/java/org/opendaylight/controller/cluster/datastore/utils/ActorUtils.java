@@ -56,6 +56,7 @@ import scala.concurrent.Await;
 import scala.concurrent.ExecutionContextExecutor;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
+import scala.jdk.javaapi.DurationConverters;
 
 /**
  * The ActorUtils class contains utility methods which could be used by non-actors (like DistributedDataStore) to work
@@ -391,8 +392,8 @@ public class ActorUtils {
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     public void shutdown() {
-        final var duration = FiniteDuration.fromNanos(
-            datastoreContext.getShardRaftConfig().getElectionTimeOutInterval().toNanos()).$times(3);
+        final var duration = DurationConverters.toScala(
+            datastoreContext.getShardRaftConfig().getElectionTimeOutInterval().multipliedBy(3));
         try {
             Await.ready(Patterns.gracefulStop(shardManager, duration, Shutdown.INSTANCE), duration);
         } catch (Exception e) {

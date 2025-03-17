@@ -19,7 +19,6 @@ import org.opendaylight.controller.cluster.raft.policy.DefaultRaftPolicy;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Default implementation of the ConfigParams.
@@ -112,7 +111,7 @@ public class DefaultConfigParamsImpl implements ConfigParams {
         this.journalRecoveryLogBatchSize = journalRecoveryLogBatchSize;
     }
 
-    public void setIsolatedLeaderCheckInterval(final FiniteDuration isolatedLeaderCheckInterval) {
+    public void setIsolatedLeaderCheckInterval(final Duration isolatedLeaderCheckInterval) {
         this.isolatedLeaderCheckInterval = isolatedLeaderCheckInterval.toMillis();
     }
 
@@ -240,7 +239,6 @@ public class DefaultConfigParamsImpl implements ConfigParams {
         this.syncIndexThreshold = syncIndexThreshold;
     }
 
-    @SuppressWarnings("checkstyle:IllegalCatch")
     private RaftPolicy getPolicy() {
         if (Strings.isNullOrEmpty(DefaultConfigParamsImpl.this.customRaftPolicyImplementationClass)) {
             LOG.debug("No custom RaftPolicy specified. Using DefaultRaftPolicy");

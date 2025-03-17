@@ -271,8 +271,7 @@ public class DatastoreContext implements ClientActorConfig {
 
 
     private void setIsolatedLeaderCheckInterval(final long shardIsolatedLeaderCheckIntervalInMillis) {
-        raftConfig.setIsolatedLeaderCheckInterval(
-                new FiniteDuration(shardIsolatedLeaderCheckIntervalInMillis, TimeUnit.MILLISECONDS));
+        raftConfig.setIsolatedLeaderCheckInterval(Duration.ofMillis(shardIsolatedLeaderCheckIntervalInMillis));
     }
 
     private void setElectionTimeoutFactor(final long shardElectionTimeoutFactor) {
