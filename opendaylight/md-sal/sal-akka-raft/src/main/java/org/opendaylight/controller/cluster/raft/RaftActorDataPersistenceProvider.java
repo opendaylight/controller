@@ -10,11 +10,11 @@ package org.opendaylight.controller.cluster.raft;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
-import org.apache.pekko.japi.Procedure;
+import java.util.function.Consumer;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SnapshotProtocol;
 import org.apache.pekko.persistence.SnapshotSelectionCriteria;
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
@@ -25,11 +25,12 @@ import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
  *
  * @author Thomas Pantelis
  */
+@NonNullByDefault
 final class RaftActorDataPersistenceProvider implements DataPersistenceProvider {
-    private final @NonNull PersistentDataProvider persistentProvider;
-    private final @NonNull NonPersistentDataProvider transientProvider;
+    private final PersistentDataProvider persistentProvider;
+    private final NonPersistentDataProvider transientProvider;
 
-    private @NonNull DataPersistenceProvider delegate;
+    private DataPersistenceProvider delegate;
 
     @VisibleForTesting
     RaftActorDataPersistenceProvider(final PersistentDataProvider persistentProvider,
@@ -43,7 +44,7 @@ final class RaftActorDataPersistenceProvider implements DataPersistenceProvider 
         this(new PersistentDataProvider(raftActor), new TransientDataProvider(raftActor));
     }
 
-    @NonNull DataPersistenceProvider delegate() {
+    DataPersistenceProvider delegate() {
         return delegate;
     }
 
@@ -70,16 +71,16 @@ final class RaftActorDataPersistenceProvider implements DataPersistenceProvider 
     }
 
     @Override
-    public <T> void persist(final T entry, final Procedure<T> procedure) {
-        doPersist(entry, procedure, false);
+    public <T> void persist(final T entry, final Consumer<T> callback) {
+        doPersist(entry, callback, false);
     }
 
     @Override
-    public <T> void persistAsync(final T entry, final Procedure<T> procedure) {
-        doPersist(entry, procedure, true);
+    public <T> void persistAsync(final T entry, final Consumer<T> callback) {
+        doPersist(entry, callback, true);
     }
 
-    private <T> void doPersist(final T entry, final Procedure<T> procedure, final boolean async) {
+    private <T> void doPersist(final T entry, final Consumer<T> callback, final boolean async) {
         if (!delegate.isRecoveryApplicable() && entry instanceof ReplicatedLogEntry replicatedLogEntry
             && replicatedLogEntry.getData() instanceof ClusterConfig serverConfig) {
             // TODO: revisit this statement with EntryStore
@@ -87,17 +88,17 @@ final class RaftActorDataPersistenceProvider implements DataPersistenceProvider 
             //   We persist the ClusterConfig but not the ReplicatedLogEntry to avoid gaps in the journal indexes
             //   on recovery if data persistence is later enabled.
             if (async) {
-                persistentProvider.persistAsync(serverConfig, p -> procedure.apply(entry));
+                persistentProvider.persistAsync(serverConfig, p -> callback.accept(entry));
             } else {
-                persistentProvider.persist(serverConfig, p -> procedure.apply(entry));
+                persistentProvider.persist(serverConfig, p -> callback.accept(entry));
             }
             return;
         }
 
         if (async) {
-            delegate.persistAsync(entry, procedure);
+            delegate.persistAsync(entry, callback);
         } else {
-            delegate.persist(entry, procedure);
+            delegate.persist(entry, callback);
         }
     }
 

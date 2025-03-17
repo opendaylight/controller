@@ -9,7 +9,7 @@ package org.opendaylight.controller.cluster.raft;
 
 import static java.util.Objects.requireNonNull;
 
-import org.apache.pekko.japi.Procedure;
+import java.util.function.Consumer;
 import org.apache.pekko.persistence.DeleteMessagesSuccess;
 import org.apache.pekko.persistence.DeleteSnapshotsSuccess;
 import org.apache.pekko.persistence.JournalProtocol;
@@ -35,13 +35,13 @@ class PersistentDataProvider implements DataPersistenceProvider {
     }
 
     @Override
-    public <T> void persist(final T entry, final Procedure<T> procedure) {
-        persistentActor.persist(entry, procedure);
+    public <T> void persist(final T entry, final Consumer<T> callback) {
+        persistentActor.persist(entry, callback::accept);
     }
 
     @Override
-    public <T> void persistAsync(final T entry, final Procedure<T> procedure) {
-        persistentActor.persistAsync(entry, procedure);
+    public <T> void persistAsync(final T entry, final Consumer<T> callback) {
+        persistentActor.persistAsync(entry, callback::accept);
     }
 
     @Override

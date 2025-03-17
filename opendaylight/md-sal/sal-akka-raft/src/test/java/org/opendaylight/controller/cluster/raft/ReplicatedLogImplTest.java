@@ -18,7 +18,6 @@ import com.google.common.util.concurrent.MoreExecutors;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.function.Consumer;
-import org.apache.pekko.japi.Procedure;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,7 +48,7 @@ class ReplicatedLogImplTest {
     @Mock
     private Consumer<ReplicatedLogEntry> mockCallback;
     @Captor
-    private ArgumentCaptor<Procedure<Object>> procedureCaptor;
+    private ArgumentCaptor<Consumer<Object>> procedureCaptor;
     @TempDir
     private Path stateDir;
 
@@ -73,8 +72,7 @@ class ReplicatedLogImplTest {
         } else {
             verify(mockPersistence).persist(argThat(matcher), procedureCaptor.capture());
         }
-
-        procedureCaptor.getValue().apply(message);
+        procedureCaptor.getValue().accept(message);
     }
 
     @Test

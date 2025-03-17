@@ -12,7 +12,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
-import org.apache.pekko.japi.Procedure;
+import java.util.function.Consumer;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,9 +45,9 @@ public class RaftActorDataPersistenceProviderTest {
     @Mock
     private PersistentDataProvider mockPersistentProvider;
     @Mock
-    private Procedure<Object> mockProcedure;
+    private Consumer<Object> mockCallback;
     @Captor
-    private ArgumentCaptor<Procedure<Object>> procedureCaptor;
+    private ArgumentCaptor<Consumer<Object>> callbackCaptor;
 
     private RaftActorDataPersistenceProvider provider;
 
@@ -62,32 +62,32 @@ public class RaftActorDataPersistenceProviderTest {
     public void testPersistWithPersistenceEnabled() {
         doReturn(true).when(mockTransientProvider).isRecoveryApplicable();
 
-        provider.persist(mockPersistentLogEntry, mockProcedure);
-        verify(mockTransientProvider).persist(mockPersistentLogEntry, mockProcedure);
+        provider.persist(mockPersistentLogEntry, mockCallback);
+        verify(mockTransientProvider).persist(mockPersistentLogEntry, mockCallback);
 
-        provider.persist(mockNonPersistentLogEntry, mockProcedure);
-        verify(mockTransientProvider).persist(mockNonPersistentLogEntry, mockProcedure);
+        provider.persist(mockNonPersistentLogEntry, mockCallback);
+        verify(mockTransientProvider).persist(mockNonPersistentLogEntry, mockCallback);
 
-        provider.persist(OTHER_DATA_OBJECT, mockProcedure);
-        verify(mockTransientProvider).persist(OTHER_DATA_OBJECT, mockProcedure);
+        provider.persist(OTHER_DATA_OBJECT, mockCallback);
+        verify(mockTransientProvider).persist(OTHER_DATA_OBJECT, mockCallback);
     }
 
     @Test
     public void testPersistWithPersistenceDisabled() throws Exception {
         doReturn(false).when(mockTransientProvider).isRecoveryApplicable();
 
-        provider.persist(mockPersistentLogEntry, mockProcedure);
+        provider.persist(mockPersistentLogEntry, mockCallback);
 
-        verify(mockPersistentProvider).persist(eq(PERSISTENT_PAYLOAD), procedureCaptor.capture());
-        verify(mockTransientProvider, never()).persist(mockNonPersistentLogEntry, mockProcedure);
-        procedureCaptor.getValue().apply(PERSISTENT_PAYLOAD);
-        verify(mockProcedure).apply(mockPersistentLogEntry);
+        verify(mockPersistentProvider).persist(eq(PERSISTENT_PAYLOAD), callbackCaptor.capture());
+        verify(mockTransientProvider, never()).persist(mockNonPersistentLogEntry, mockCallback);
+        callbackCaptor.getValue().accept(PERSISTENT_PAYLOAD);
+        verify(mockCallback).accept(mockPersistentLogEntry);
 
-        provider.persist(mockNonPersistentLogEntry, mockProcedure);
-        verify(mockTransientProvider).persist(mockNonPersistentLogEntry, mockProcedure);
+        provider.persist(mockNonPersistentLogEntry, mockCallback);
+        verify(mockTransientProvider).persist(mockNonPersistentLogEntry, mockCallback);
 
-        provider.persist(OTHER_DATA_OBJECT, mockProcedure);
-        verify(mockTransientProvider).persist(OTHER_DATA_OBJECT, mockProcedure);
+        provider.persist(OTHER_DATA_OBJECT, mockCallback);
+        verify(mockTransientProvider).persist(OTHER_DATA_OBJECT, mockCallback);
     }
 
     static class TestNonPersistentPayload extends Payload {

@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft.spi;
 
-import org.apache.pekko.japi.Procedure;
+import java.util.function.Consumer;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SnapshotProtocol;
 import org.apache.pekko.persistence.SnapshotSelectionCriteria;
@@ -32,18 +32,18 @@ public interface DataPersistenceProvider {
      *
      * @param <T> the type of the journal entry
      * @param entry the journal entry to persist
-     * @param procedure the callback when persistence is complete
+     * @param callback the callback when persistence is complete
      */
-    <T> void persist(T entry, Procedure<T> procedure);
+    <T> void persist(T entry, Consumer<T> callback);
 
     /**
      * Persists an entry to the applicable journal asynchronously.
      *
      * @param <T> the type of the journal entry
      * @param entry the journal entry to persist
-     * @param procedure the callback when persistence is complete
+     * @param callback the callback when persistence is complete
      */
-    <T> void persistAsync(T entry, Procedure<T> procedure);
+    <T> void persistAsync(T entry, Consumer<T> callback);
 
     /**
      * Saves a snapshot.
