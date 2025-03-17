@@ -10,18 +10,15 @@ package org.opendaylight.controller.cluster.common.actor;
 import static java.util.Objects.requireNonNull;
 
 import org.apache.pekko.dispatch.ControlMessage;
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  * Message internal to {@link ExecuteInSelfActor} implementations in this package.
- *
- * @author Robert Varga
  */
-final class ExecuteInSelfMessage implements ControlMessage {
-    private final Runnable runnable;
-
-    ExecuteInSelfMessage(final @NonNull Runnable runnable) {
-        this.runnable = requireNonNull(runnable);
+@NonNullByDefault
+record ExecuteInSelfMessage(Runnable runnable) implements ControlMessage {
+    ExecuteInSelfMessage {
+        requireNonNull(runnable);
     }
 
     void run() {

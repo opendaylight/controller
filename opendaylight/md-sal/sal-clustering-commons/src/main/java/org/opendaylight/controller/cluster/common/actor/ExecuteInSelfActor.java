@@ -8,20 +8,19 @@
 package org.opendaylight.controller.cluster.common.actor;
 
 import com.google.common.annotations.Beta;
-import org.apache.pekko.japi.Procedure;
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * Interface implemented by Actors, who can schedule invocation of a {@link Procedure} in their context.
- *
- * @author Robert Varga
+ * Interface implemented by Actors, who can schedule invocation of a {@link Runnable} in their context.
  */
 @Beta
+@NonNullByDefault
+@FunctionalInterface
 public interface ExecuteInSelfActor {
     /**
      * Run a Runnable in the context of this actor.
      *
      * @param runnable Runnable to run
      */
-    void executeInSelf(@NonNull Runnable runnable);
+    void executeInSelf(Runnable runnable);
 }
