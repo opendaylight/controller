@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft.behaviors;
 
 import static org.junit.Assert.assertTrue;
@@ -24,10 +23,8 @@ import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.utils.ForwardMessageToBehaviorActor;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
-import scala.concurrent.duration.FiniteDuration;
 
 public abstract class AbstractLeaderTest<T extends AbstractLeader> extends AbstractRaftActorBehaviorTest<T> {
-
     /**
      * When we removed scheduling of heartbeat in the AbstractLeader constructor we ended up with a situation where
      * if no follower responded to an initial AppendEntries heartbeats would not be sent to it. This test verifies
@@ -51,7 +48,7 @@ public abstract class AbstractLeaderTest<T extends AbstractLeader> extends Abstr
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         configParams.setHeartBeatInterval(Duration.ofMillis(200));
-        configParams.setIsolatedLeaderCheckInterval(new FiniteDuration(10, TimeUnit.SECONDS));
+        configParams.setIsolatedLeaderCheckInterval(Duration.ofSeconds(10));
 
         leaderActorContext.setConfigParams(configParams);
 

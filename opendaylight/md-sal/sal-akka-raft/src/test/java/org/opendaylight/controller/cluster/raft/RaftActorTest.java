@@ -97,8 +97,8 @@ import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.FiniteDuration;
 
 public class RaftActorTest extends AbstractActorTest {
-
-    static final Logger TEST_LOG = LoggerFactory.getLogger(RaftActorTest.class);
+    private static final Logger TEST_LOG = LoggerFactory.getLogger(RaftActorTest.class);
+    private static final Duration ONE_DAY = Duration.ofDays(1);
 
     private TestActorFactory factory;
 
@@ -138,7 +138,7 @@ public class RaftActorTest extends AbstractActorTest {
         // Set the heartbeat interval high to essentially disable election otherwise the test
         // may fail if the actor is switched to Leader and the commitIndex is set to the last
         // log entry.
-        config.setHeartBeatInterval(Duration.ofDays(1));
+        config.setHeartBeatInterval(ONE_DAY);
 
         Map<String, String> peerAddresses = Map.of("member1", "address");
         ActorRef followerActor = factory.createActor(MockRaftActor.props(persistenceId, stateDir(),
@@ -213,7 +213,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
 
-        config.setHeartBeatInterval(Duration.ofDays(1));
+        config.setHeartBeatInterval(ONE_DAY);
 
         TestActorRef<MockRaftActor> ref = factory.createTestActor(MockRaftActor.props(persistenceId, stateDir(),
                 Map.of("member1", "address"), config, TestDataProvider.INSTANCE), persistenceId);
@@ -247,7 +247,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         factory.killActor(ref, kit);
 
-        config.setHeartBeatInterval(Duration.ofDays(1));
+        config.setHeartBeatInterval(ONE_DAY);
         ref = factory.createTestActor(MockRaftActor.props(persistenceId, stateDir(), Map.of("member1", "address"),
                 config, TestDataProvider.INSTANCE).withDispatcher(Dispatchers.DefaultDispatcherId()),
                 factory.generateActorId("follower-"));
@@ -268,7 +268,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
 
-        config.setHeartBeatInterval(Duration.ofDays(1));
+        config.setHeartBeatInterval(ONE_DAY);
 
         TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(MockRaftActor.props(persistenceId,
             stateDir(), Map.of(), config), persistenceId);
@@ -310,7 +310,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
 
-        config.setHeartBeatInterval(Duration.ofDays(1));
+        config.setHeartBeatInterval(ONE_DAY);
 
         RaftActorSnapshotMessageSupport mockSupport = mock(RaftActorSnapshotMessageSupport.class);
 
@@ -364,7 +364,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
 
-        config.setHeartBeatInterval(Duration.ofDays(1));
+        config.setHeartBeatInterval(ONE_DAY);
 
         DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
 
@@ -388,7 +388,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
 
-        config.setHeartBeatInterval(Duration.ofDays(1));
+        config.setHeartBeatInterval(ONE_DAY);
 
         DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
 
@@ -542,8 +542,8 @@ public class RaftActorTest extends AbstractActorTest {
         ActorRef followerActor1 = factory.createActor(MessageCollectorActor.props());
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
-        config.setHeartBeatInterval(Duration.ofDays(1));
-        config.setIsolatedLeaderCheckInterval(new FiniteDuration(1, TimeUnit.DAYS));
+        config.setHeartBeatInterval(ONE_DAY);
+        config.setIsolatedLeaderCheckInterval(ONE_DAY);
 
         DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
 
@@ -631,8 +631,8 @@ public class RaftActorTest extends AbstractActorTest {
         ActorRef leaderActor1 = factory.createActor(MessageCollectorActor.props());
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
-        config.setHeartBeatInterval(Duration.ofDays(1));
-        config.setIsolatedLeaderCheckInterval(new FiniteDuration(1, TimeUnit.DAYS));
+        config.setHeartBeatInterval(ONE_DAY);
+        config.setIsolatedLeaderCheckInterval(ONE_DAY);
 
         DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
 
@@ -720,8 +720,8 @@ public class RaftActorTest extends AbstractActorTest {
         final ActorRef followerActor2 = factory.createActor(MessageCollectorActor.props(), follower2Id);
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
-        config.setHeartBeatInterval(Duration.ofDays(1));
-        config.setIsolatedLeaderCheckInterval(new FiniteDuration(1, TimeUnit.DAYS));
+        config.setHeartBeatInterval(ONE_DAY);
+        config.setIsolatedLeaderCheckInterval(ONE_DAY);
 
         DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
 
@@ -798,8 +798,8 @@ public class RaftActorTest extends AbstractActorTest {
     public void testRealSnapshotWhenReplicatedToAllIndexMinusOne() throws Exception {
         String persistenceId = factory.generateActorId("leader-");
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
-        config.setHeartBeatInterval(Duration.ofDays(1));
-        config.setIsolatedLeaderCheckInterval(new FiniteDuration(1, TimeUnit.DAYS));
+        config.setHeartBeatInterval(ONE_DAY);
+        config.setIsolatedLeaderCheckInterval(ONE_DAY);
         config.setSnapshotBatchCount(5);
 
         final var peerAddresses = Map.of("member1", "address");
@@ -840,8 +840,8 @@ public class RaftActorTest extends AbstractActorTest {
     public void testRealSnapshotWhenReplicatedToAllIndexNotInReplicatedLog() throws Exception {
         String persistenceId = factory.generateActorId("leader-");
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
-        config.setHeartBeatInterval(Duration.ofDays(1));
-        config.setIsolatedLeaderCheckInterval(new FiniteDuration(1, TimeUnit.DAYS));
+        config.setHeartBeatInterval(ONE_DAY);
+        config.setIsolatedLeaderCheckInterval(ONE_DAY);
         config.setSnapshotBatchCount(5);
 
         final var peerAddresses = Map.of("member1", "address");
@@ -880,8 +880,8 @@ public class RaftActorTest extends AbstractActorTest {
         String persistenceId = factory.generateActorId("leader-");
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
         config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
-        config.setHeartBeatInterval(Duration.ofDays(1));
-        config.setIsolatedLeaderCheckInterval(new FiniteDuration(1, TimeUnit.DAYS));
+        config.setHeartBeatInterval(ONE_DAY);
+        config.setIsolatedLeaderCheckInterval(ONE_DAY);
         config.setSnapshotBatchCount(5);
 
         TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(
@@ -1132,7 +1132,7 @@ public class RaftActorTest extends AbstractActorTest {
         mockRaftActor = raftActorRef.underlyingActor();
 
         mockRaftActor.waitForRecoveryComplete();
-        assertEquals("snapshot committed", true,
+        assertTrue("snapshot committed",
                 Uninterruptibles.awaitUninterruptibly(mockRaftActor.snapshotCommitted, 5, TimeUnit.SECONDS));
 
         context = mockRaftActor.getRaftActorContext();
@@ -1245,8 +1245,8 @@ public class RaftActorTest extends AbstractActorTest {
         final ActorRef followerActor = factory.createActor(MessageCollectorActor.props());
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
-        config.setHeartBeatInterval(Duration.ofDays(1));
-        config.setIsolatedLeaderCheckInterval(new FiniteDuration(1, TimeUnit.DAYS));
+        config.setHeartBeatInterval(ONE_DAY);
+        config.setIsolatedLeaderCheckInterval(ONE_DAY);
 
         DataPersistenceProvider mockPersistenceProvider = mock(DataPersistenceProvider.class);
         doReturn(true).when(mockPersistenceProvider).isRecoveryApplicable();
@@ -1290,8 +1290,8 @@ public class RaftActorTest extends AbstractActorTest {
         final ActorRef followerActor = factory.createActor(MessageCollectorActor.props());
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
-        config.setHeartBeatInterval(Duration.ofDays(1));
-        config.setIsolatedLeaderCheckInterval(new FiniteDuration(1, TimeUnit.DAYS));
+        config.setHeartBeatInterval(ONE_DAY);
+        config.setIsolatedLeaderCheckInterval(ONE_DAY);
 
         TestActorRef<MockRaftActor> leaderActorRef = factory.createTestActor(
                 MockRaftActor.props(leaderId, stateDir(), Map.of(followerId, followerActor.path().toString()), config),
@@ -1327,7 +1327,7 @@ public class RaftActorTest extends AbstractActorTest {
         final String followerId = factory.generateActorId("follower-");
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
-        config.setIsolatedLeaderCheckInterval(new FiniteDuration(1, TimeUnit.DAYS));
+        config.setIsolatedLeaderCheckInterval(ONE_DAY);
         config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
 
         ActorRef mockFollowerActorRef = factory.createActor(MessageCollectorActor.props());

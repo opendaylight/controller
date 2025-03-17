@@ -54,7 +54,6 @@ import org.opendaylight.yangtools.util.AbstractStringIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
-import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Abstract base for an integration test that tests end-to-end RaftActor and behavior functionality.
@@ -262,7 +261,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         configParams.setElectionTimeoutFactor(4);
         configParams.setSnapshotBatchCount(snapshotBatchCount);
         configParams.setSnapshotDataThresholdPercentage(70);
-        configParams.setIsolatedLeaderCheckInterval(new FiniteDuration(1, TimeUnit.DAYS));
+        configParams.setIsolatedLeaderCheckInterval(Duration.ofDays(1));
         configParams.setMaximumMessageSliceSize(maximumMessageSliceSize);
         return configParams;
     }

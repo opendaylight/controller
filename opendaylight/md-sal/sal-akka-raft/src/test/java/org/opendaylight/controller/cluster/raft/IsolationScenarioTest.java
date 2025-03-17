@@ -19,7 +19,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import java.time.Duration;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import org.apache.pekko.actor.ActorRef;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.notifications.RoleChanged;
@@ -31,7 +30,6 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
-import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Tests isolation of nodes end-to-end.
@@ -440,7 +438,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
                 .put(follower2Id, follower2Actor.path().toString()).build();
 
         leaderConfigParams = newLeaderConfigParams();
-        leaderConfigParams.setIsolatedLeaderCheckInterval(new FiniteDuration(500, TimeUnit.MILLISECONDS));
+        leaderConfigParams.setIsolatedLeaderCheckInterval(Duration.ofMillis(500));
 
         leaderNotifierActor = factory.createActor(MessageCollectorActor.props(),
                 factory.generateActorId(leaderId + "-notifier"));

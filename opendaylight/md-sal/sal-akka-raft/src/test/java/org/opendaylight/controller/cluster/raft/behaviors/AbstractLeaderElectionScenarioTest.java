@@ -236,7 +236,7 @@ public class AbstractLeaderElectionScenarioTest {
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         configParams.setHeartBeatInterval(Duration.ofMillis(HEARTBEAT_INTERVAL));
         configParams.setElectionTimeoutFactor(100000);
-        configParams.setIsolatedLeaderCheckInterval(new FiniteDuration(1, TimeUnit.DAYS));
+        configParams.setIsolatedLeaderCheckInterval(Duration.ofDays(1));
         return configParams;
     }
 
