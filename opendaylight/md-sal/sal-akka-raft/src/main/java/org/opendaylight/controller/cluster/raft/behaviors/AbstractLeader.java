@@ -348,33 +348,36 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         //   If there exists an index N such that N > commitIndex, a majority of matchIndex[i] ≥ N,
         //     and log[N].term == currentTerm:
         //   set commitIndex = N (§5.3, §5.4).
+        final var replLog = context.getReplicatedLog();
         for (long index = context.getCommitIndex() + 1; ; index++) {
-            final var replicatedLogEntry = context.getReplicatedLog().get(index);
-            if (replicatedLogEntry == null) {
-                final var replLog = context.getReplicatedLog();
+            final var logEntry = replLog.get(index);
+            if (logEntry == null) {
                 LOG.trace("{}: ReplicatedLogEntry not found for index {} - snapshotIndex: {}, journal size: {}",
                         logName, index, replLog.getSnapshotIndex(), replLog.size());
                 break;
             }
 
-            // Count our entry if it has been persisted.
-            int replicatedCount = replicatedLogEntry.isPersistencePending() ? 0 : 1;
-
-            if (replicatedCount == 0) {
-                // We don't commit and apply a log entry until we've gotten the ack from our local persistence,
-                // even though there *shouldn't* be any issue with updating the commit index if we get a consensus
+            // TODO: revisit this piece of code once we have simplified ReplicatedLog/persistence/snapshotting
+            //       interactions to see if we can get to pre-CONTROLLER-1568 world, i.e. just not count ourselves as
+            //       as a replica.
+            if (logEntry.isPersistencePending()) {
+                // We don't commit and apply a log entry until we have gotten the ack from our local persistence,
+                // even though there *should not* be any issue with updating the commit index if we get a consensus
                 // amongst the followers w/o the local persistence ack.
+                LOG.trace("{}: log entry at index {} has not finished persisting", logName, index);
                 break;
             }
 
+            int replicatedCount = 1;
+
             LOG.trace("{}: checking Nth index {}", logName, index);
-            for (FollowerLogInformation info : followerToLog.values()) {
-                final PeerInfo peerInfo = context.getPeerInfo(info.getId());
-                if (info.getMatchIndex() >= index && peerInfo != null && peerInfo.isVoting()) {
+            for (var logInfo : followerToLog.values()) {
+                final var peerInfo = context.getPeerInfo(logInfo.getId());
+                if (logInfo.getMatchIndex() >= index && peerInfo != null && peerInfo.isVoting()) {
                     replicatedCount++;
                 } else if (LOG.isTraceEnabled()) {
-                    LOG.trace("{}: Not counting follower {} - matchIndex: {}, {}", logName, info.getId(),
-                            info.getMatchIndex(), peerInfo);
+                    LOG.trace("{}: Not counting follower {} - matchIndex: {}, {}", logName, logInfo.getId(),
+                            logInfo.getMatchIndex(), peerInfo);
                 }
             }
 
@@ -382,24 +385,22 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
                 LOG.trace("{}: replicatedCount {}, minReplicationCount: {}", logName, replicatedCount,
                         minReplicationCount);
             }
-
-            if (replicatedCount >= minReplicationCount) {
-                // Don't update the commit index if the log entry is from a previous term, as per §5.4.1:
-                // "Raft never commits log entries from previous terms by counting replicas".
-                // However we keep looping so we can make progress when new entries in the current term
-                // reach consensus, as per §5.4.1: "once an entry from the current term is committed by
-                // counting replicas, then all prior entries are committed indirectly".
-                if (replicatedLogEntry.term() == currentTerm()) {
-                    LOG.trace("{}: Setting commit index to {}", logName, index);
-                    context.setCommitIndex(index);
-                } else {
-                    LOG.debug("{}: Not updating commit index to {} - retrieved log entry with index {}, "
-                            + "term {} does not match the current term {}", logName, index,
-                            replicatedLogEntry.index(), replicatedLogEntry.term(), currentTerm());
-                }
-            } else {
+            if (replicatedCount < minReplicationCount) {
                 LOG.trace("{}: minReplicationCount not reached, actual {} - breaking", logName, replicatedCount);
                 break;
+            }
+
+            // Don't update the commit index if the log entry is from a previous term, as per §5.4.1:
+            // "Raft never commits log entries from previous terms by counting replicas".
+            // However we keep looping so we can make progress when new entries in the current term
+            // reach consensus, as per §5.4.1: "once an entry from the current term is committed by
+            // counting replicas, then all prior entries are committed indirectly".
+            if (logEntry.term() == currentTerm()) {
+                LOG.trace("{}: Setting commit index to {}", logName, index);
+                context.setCommitIndex(index);
+            } else {
+                LOG.debug("{}: Not updating commit index to {} - retrieved log entry with index {}, term {} does not "
+                    + "match the current term {}", logName, index, logEntry.index(), logEntry.term(), currentTerm());
             }
         }
 
