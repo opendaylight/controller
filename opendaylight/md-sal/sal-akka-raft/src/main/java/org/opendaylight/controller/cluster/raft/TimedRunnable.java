@@ -28,7 +28,7 @@ abstract class TimedRunnable implements Runnable {
     private boolean canRun = true;
 
     @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR",
-        justification = "https://github.com/spotbugs/spotbugs/issues/1867")
+        justification = "https://github.com/spotbugs/spotbugs/issues/2837")
     TimedRunnable(final Duration timeout, final RaftActor actor) {
         cancelTimer = requireNonNull(actor).getContext().system().scheduler()
             .scheduleOnce(requireNonNull(timeout), actor.self(), (Runnable) this::cancel,
