@@ -18,11 +18,13 @@ final class TransientDataProvider extends NonPersistentDataProvider {
         this.raftActor = raftActor.self();
     }
 
-    /*
-     * The way snapshotting works is,
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The way snapshotting works is:
      * <ol>
-     *   <li>RaftActor calls createSnapshot on the Shard
-     *   <li>Shard sends a CaptureSnapshotReply and RaftActor then calls saveSnapshot
+     *   <li>RaftActor calls {@link RaftActorSnapshotCohort#createSnapshot(ActorRef, java.io.OutputStream)}
+     *   <li>the cohort sends a CaptureSnapshotReply and RaftActor then calls this method
      *   <li>When saveSnapshot is invoked on the akka-persistence API it uses the SnapshotStore to save
      *       the snapshot. The SnapshotStore sends SaveSnapshotSuccess or SaveSnapshotFailure. When the
      *       RaftActor gets SaveSnapshot success it commits the snapshot to the in-memory journal. This
