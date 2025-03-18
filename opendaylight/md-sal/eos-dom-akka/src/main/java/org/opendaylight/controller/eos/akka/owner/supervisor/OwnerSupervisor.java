@@ -13,7 +13,6 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -25,13 +24,13 @@ import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-import org.apache.pekko.actor.typed.ActorRef;
 import org.apache.pekko.actor.typed.Behavior;
 import org.apache.pekko.actor.typed.javadsl.ActorContext;
 import org.apache.pekko.actor.typed.javadsl.Behaviors;
 import org.apache.pekko.actor.typed.javadsl.Receive;
 import org.apache.pekko.cluster.ClusterEvent;
-import org.apache.pekko.cluster.ClusterEvent.CurrentClusterState;
+import org.apache.pekko.cluster.ClusterEvent.MemberEvent;
+import org.apache.pekko.cluster.ClusterEvent.ReachabilityEvent;
 import org.apache.pekko.cluster.Member;
 import org.apache.pekko.cluster.ddata.LWWRegister;
 import org.apache.pekko.cluster.ddata.LWWRegisterKey;
@@ -67,7 +66,7 @@ import org.opendaylight.mdsal.eos.dom.api.DOMEntity;
 import org.opendaylight.yangtools.binding.data.codec.api.BindingInstanceIdentifierCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.collection.JavaConverters;
+import scala.jdk.javaapi.CollectionConverters;
 
 /**
  * Responsible for tracking candidates and assigning ownership of entities. This behavior is subscribed to the candidate
@@ -97,7 +96,7 @@ public final class OwnerSupervisor extends AbstractSupervisor {
     // current owners
     private final Map<DOMEntity, String> currentOwners;
     // reverse lookup of owner to entity
-    private final Multimap<String, DOMEntity> ownerToEntity = HashMultimap.create();
+    private final HashMultimap<String, DOMEntity> ownerToEntity = HashMultimap.create();
 
     // only reassign owner for those entities that lost this candidate or is not reachable
     private final BiPredicate<DOMEntity, String> reassignPredicate = (entity, candidate) ->
@@ -112,8 +111,8 @@ public final class OwnerSupervisor extends AbstractSupervisor {
         super(context);
         this.iidCodec = requireNonNull(iidCodec);
 
-        final DistributedData distributedData = DistributedData.get(context.getSystem());
-        final ActorRef<Replicator.Command> replicator = distributedData.replicator();
+        final var distributedData = DistributedData.get(context.getSystem());
+        final var replicator = distributedData.replicator();
 
         cluster = Cluster.get(context.getSystem());
         ownerReplicator = new ReplicatorMessageAdapter<>(context, replicator, Duration.ofSeconds(5));
@@ -125,7 +124,7 @@ public final class OwnerSupervisor extends AbstractSupervisor {
         this.currentCandidates = currentCandidates;
         this.currentOwners = currentOwners;
 
-        for (final Map.Entry<DOMEntity, String> entry : currentOwners.entrySet()) {
+        for (var entry : currentOwners.entrySet()) {
             ownerToEntity.put(entry.getValue(), entry.getKey());
         }
 
@@ -133,25 +132,21 @@ public final class OwnerSupervisor extends AbstractSupervisor {
         reassignUnreachableOwners();
         assignMissingOwners();
 
-        final ActorRef<ClusterEvent.MemberEvent> memberEventAdapter =
-                context.messageAdapter(ClusterEvent.MemberEvent.class, event -> {
-                    if (event instanceof ClusterEvent.MemberUp) {
-                        return new MemberUpEvent(event.member().address(), event.member().getRoles());
-                    } else {
-                        return new MemberDownEvent(event.member().address(), event.member().getRoles());
-                    }
-                });
-        cluster.subscriptions().tell(Subscribe.create(memberEventAdapter, ClusterEvent.MemberEvent.class));
+        cluster.subscriptions().tell(Subscribe.create(context.messageAdapter(MemberEvent.class, event -> {
+            if (event instanceof ClusterEvent.MemberUp) {
+                return new MemberUpEvent(event.member().address(), event.member().getRoles());
+            } else {
+                return new MemberDownEvent(event.member().address(), event.member().getRoles());
+            }
+        }), MemberEvent.class));
 
-        final ActorRef<ClusterEvent.ReachabilityEvent> reachabilityEventAdapter =
-                context.messageAdapter(ClusterEvent.ReachabilityEvent.class, event -> {
-                    if (event instanceof ClusterEvent.ReachableMember) {
-                        return new MemberReachableEvent(event.member().address(), event.member().getRoles());
-                    } else {
-                        return new MemberUnreachableEvent(event.member().address(), event.member().getRoles());
-                    }
-                });
-        cluster.subscriptions().tell(Subscribe.create(reachabilityEventAdapter, ClusterEvent.ReachabilityEvent.class));
+        cluster.subscriptions().tell(Subscribe.create(context.messageAdapter(ReachabilityEvent.class, event -> {
+            if (event instanceof ClusterEvent.ReachableMember) {
+                return new MemberReachableEvent(event.member().address(), event.member().getRoles());
+            } else {
+                return new MemberUnreachableEvent(event.member().address(), event.member().getRoles());
+            }
+        }), ReachabilityEvent.class));
 
         candidateReplicator.subscribe(CandidateRegistry.KEY, CandidatesChanged::new);
 
@@ -193,39 +188,36 @@ public final class OwnerSupervisor extends AbstractSupervisor {
     }
 
     private void reassignUnreachableOwners() {
-        final Set<String> ownersToReassign = new HashSet<>();
-        for (final String owner : ownerToEntity.keys()) {
+        final var ownersToReassign = new HashSet<String>();
+        for (var owner : ownerToEntity.keys()) {
             if (!isActiveCandidate(owner)) {
                 ownersToReassign.add(owner);
             }
         }
 
-        for (final String owner : ownersToReassign) {
+        for (var owner : ownersToReassign) {
             reassignCandidatesFor(owner, ImmutableList.copyOf(ownerToEntity.get(owner)), reassignPredicate);
         }
     }
 
     private void assignMissingOwners() {
-        for (final Map.Entry<DOMEntity, Set<String>> entry : currentCandidates.entrySet()) {
-            if (!currentOwners.containsKey(entry.getKey())) {
-                assignOwnerFor(entry.getKey());
+        for (var entity : currentCandidates.keySet()) {
+            if (!currentOwners.containsKey(entity)) {
+                assignOwnerFor(entity);
             }
         }
     }
 
     private Behavior<OwnerSupervisorCommand> onCandidatesChanged(final CandidatesChanged message) {
         LOG.debug("onCandidatesChanged {}", message.getResponse());
-        if (message.getResponse() instanceof Replicator.Changed) {
-            final Replicator.Changed<ORMap<DOMEntity, ORSet<String>>> changed =
-                    (Replicator.Changed<ORMap<DOMEntity, ORSet<String>>>) message.getResponse();
+        if (message.getResponse() instanceof Replicator.Changed<ORMap<DOMEntity, ORSet<String>>> changed) {
             processCandidateChanges(changed.get(CandidateRegistry.KEY));
         }
         return this;
     }
 
     private void processCandidateChanges(final ORMap<DOMEntity, ORSet<String>> candidates) {
-        final Map<DOMEntity, ORSet<String>> entries = candidates.getEntries();
-        for (final Map.Entry<DOMEntity, ORSet<String>> entry : entries.entrySet()) {
+        for (var entry : candidates.getEntries().entrySet()) {
             processCandidatesFor(entry.getKey(), entry.getValue());
         }
     }
@@ -233,7 +225,7 @@ public final class OwnerSupervisor extends AbstractSupervisor {
     private void processCandidatesFor(final DOMEntity entity, final ORSet<String> receivedCandidates) {
         LOG.debug("Processing candidates for : {}, new value: {}", entity, receivedCandidates.elements());
 
-        final Set<String> candidates = JavaConverters.asJava(receivedCandidates.elements());
+        final var candidates = CollectionConverters.asJava(receivedCandidates.elements());
         // only insert candidates if there are any to insert, otherwise we would generate unnecessary notification with
         // no owner
         if (!currentCandidates.containsKey(entity) && !candidates.isEmpty()) {
@@ -246,8 +238,8 @@ public final class OwnerSupervisor extends AbstractSupervisor {
             return;
         }
 
-        final Set<String> currentlyPresent = currentCandidates.getOrDefault(entity, Set.of());
-        final Set<String> difference = ImmutableSet.copyOf(Sets.symmetricDifference(currentlyPresent, candidates));
+        final var currentlyPresent = currentCandidates.getOrDefault(entity, Set.of());
+        final var difference = ImmutableSet.copyOf(Sets.symmetricDifference(currentlyPresent, candidates));
 
         LOG.debug("currently present candidates: {}", currentlyPresent);
         LOG.debug("difference: {}", difference);
@@ -255,14 +247,13 @@ public final class OwnerSupervisor extends AbstractSupervisor {
         final List<String> ownersToReassign = new ArrayList<>();
 
         // first add/remove candidates from entities
-        for (final String toCheck : difference) {
+        for (var toCheck : difference) {
             if (!currentlyPresent.contains(toCheck)) {
                 // add new candidate
                 LOG.debug("Adding new candidate for entity: {} : {}", entity, toCheck);
                 currentCandidates.get(entity).add(toCheck);
 
-                final String currentOwner = currentOwners.get(entity);
-
+                final var currentOwner = currentOwners.get(entity);
                 if (currentOwner == null || !activeMembers.contains(currentOwner)) {
                     // might as well assign right away when we don't have an owner or its unreachable
                     assignOwnerFor(entity);
@@ -283,9 +274,8 @@ public final class OwnerSupervisor extends AbstractSupervisor {
         }
 
         // then reassign those that need new owners
-        for (final String toReassign : ownersToReassign) {
-            reassignCandidatesFor(toReassign, ImmutableList.copyOf(ownerToEntity.get(toReassign)),
-                    reassignPredicate);
+        for (var toReassign : ownersToReassign) {
+            reassignCandidatesFor(toReassign, ImmutableList.copyOf(ownerToEntity.get(toReassign)), reassignPredicate);
         }
 
         if (currentCandidates.get(entity) == null) {
@@ -298,9 +288,8 @@ public final class OwnerSupervisor extends AbstractSupervisor {
     private void reassignCandidatesFor(final String oldOwner, final Collection<DOMEntity> entities,
                                        final BiPredicate<DOMEntity, String> predicate) {
         LOG.debug("Reassigning owners for {}", entities);
-        for (final DOMEntity entity : entities) {
+        for (var entity : entities) {
             if (predicate.test(entity, oldOwner)) {
-
                 if (!isActiveCandidate(oldOwner) && isCandidateFor(entity, oldOwner) && hasSingleCandidate(entity)) {
                     // only skip new owner assignment, only if unreachable, still is a candidate and is the ONLY
                     // candidate
@@ -326,7 +315,7 @@ public final class OwnerSupervisor extends AbstractSupervisor {
     }
 
     private void assignOwnerFor(final DOMEntity entity) {
-        final Set<String> candidatesForEntity = currentCandidates.get(entity);
+        final var candidatesForEntity = currentCandidates.get(entity);
         if (candidatesForEntity.isEmpty()) {
             LOG.debug("No candidates present for entity: {}", entity);
             removeOwner(entity);
@@ -334,7 +323,7 @@ public final class OwnerSupervisor extends AbstractSupervisor {
         }
 
         String pickedCandidate = null;
-        for (final String candidate : candidatesForEntity) {
+        for (var candidate : candidatesForEntity) {
             if (activeMembers.contains(candidate)) {
                 pickedCandidate = candidate;
                 break;
@@ -395,7 +384,7 @@ public final class OwnerSupervisor extends AbstractSupervisor {
     }
 
     private Behavior<OwnerSupervisorCommand> onGetEntity(final GetEntityBackendRequest request) {
-        final DOMEntity entity = extractEntity(request);
+        final var entity = extractEntity(request);
         request.getReplyTo().tell(StatusReply.success(
                 new GetEntityBackendReply(currentOwners.get(entity), currentCandidates.get(entity))));
         return this;
@@ -440,8 +429,8 @@ public final class OwnerSupervisor extends AbstractSupervisor {
     }
 
     private Set<String> getActiveMembers() {
-        final CurrentClusterState clusterState = cluster.state();
-        final Set<String> unreachableRoles = clusterState.getUnreachable().stream()
+        final var clusterState = cluster.state();
+        final var unreachableRoles = clusterState.getUnreachable().stream()
             .map(OwnerSupervisor::extractRole)
             .collect(Collectors.toSet());
 
