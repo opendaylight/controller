@@ -1,6 +1,7 @@
 {
   "comments": [
     {
+      "unresolved": true,
       "key": {
         "uuid": "fd5d5a14_4bf04e1d",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/ShardSnapshotActor.java",
@@ -20,8 +21,31 @@
         "endChar": 28
       },
       "revId": "09fb54ef0b06a020dfae01c43c1dd027a4f3f62d",
-      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
-      "unresolved": true
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "970082d7_1f51e1d3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/actors/ShardSnapshotActor.java",
+        "patchSetId": 23
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2025-03-18T12:12:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fd5d5a14_4bf04e1d",
+      "range": {
+        "startLine": 63,
+        "startChar": 4,
+        "endLine": 65,
+        "endChar": 28
+      },
+      "revId": "09fb54ef0b06a020dfae01c43c1dd027a4f3f62d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
