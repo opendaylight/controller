@@ -1,6 +1,7 @@
 {
   "comments": [
     {
+      "unresolved": true,
       "key": {
         "uuid": "e02d3dd6_1b0ead40",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/persistence/LocalSnapshotStore.java",
@@ -20,10 +21,10 @@
         "endChar": 28
       },
       "revId": "343726410dba8fcdc33befbbd6dcc1a09a203be7",
-      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
-      "unresolved": true
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
       "key": {
         "uuid": "128db68b_11b75a14",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/persistence/LocalSnapshotStore.java",
@@ -44,10 +45,10 @@
         "endChar": 28
       },
       "revId": "343726410dba8fcdc33befbbd6dcc1a09a203be7",
-      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
-      "unresolved": false
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "647f0c30_04c123bc",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/persistence/LocalSnapshotStore.java",
@@ -67,10 +68,10 @@
         "endChar": 44
       },
       "revId": "343726410dba8fcdc33befbbd6dcc1a09a203be7",
-      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
-      "unresolved": true
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
       "key": {
         "uuid": "087c6bed_d320bad1",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/persistence/LocalSnapshotStore.java",
@@ -91,10 +92,10 @@
         "endChar": 44
       },
       "revId": "343726410dba8fcdc33befbbd6dcc1a09a203be7",
-      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
-      "unresolved": false
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "1e07af5c_b7a85175",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/persistence/LocalSnapshotStore.java",
@@ -114,10 +115,10 @@
         "endChar": 114
       },
       "revId": "343726410dba8fcdc33befbbd6dcc1a09a203be7",
-      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
-      "unresolved": true
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "5904b1cf_5f97fead",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/persistence/LocalSnapshotStore.java",
@@ -138,10 +139,34 @@
         "endChar": 114
       },
       "revId": "343726410dba8fcdc33befbbd6dcc1a09a203be7",
-      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
-      "unresolved": true
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "3eaa2ed8_b206c38e",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/persistence/LocalSnapshotStore.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2025-03-18T12:12:24Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "5904b1cf_5f97fead",
+      "range": {
+        "startLine": 185,
+        "startChar": 11,
+        "endLine": 185,
+        "endChar": 114
+      },
+      "revId": "343726410dba8fcdc33befbbd6dcc1a09a203be7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
       "key": {
         "uuid": "3578689a_d3a8597d",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/persistence/LocalSnapshotStore.java",
@@ -161,10 +186,10 @@
         "endChar": 61
       },
       "revId": "343726410dba8fcdc33befbbd6dcc1a09a203be7",
-      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
-      "unresolved": true
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
       "key": {
         "uuid": "299f9587_6e6b6d5b",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/persistence/LocalSnapshotStore.java",
@@ -185,8 +210,7 @@
         "endChar": 61
       },
       "revId": "343726410dba8fcdc33befbbd6dcc1a09a203be7",
-      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
-      "unresolved": false
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
