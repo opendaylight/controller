@@ -109,6 +109,7 @@ import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
@@ -1609,13 +1610,21 @@ public class ShardTest extends AbstractShardTest {
     public void testRecoveryApplicable() {
 
         final DatastoreContext persistentContext = DatastoreContext.newBuilder()
-                .shardJournalRecoveryLogBatchSize(3).shardSnapshotBatchCount(5000).persistent(true).build();
+                .shardJournalRecoveryLogBatchSize(3)
+                .shardSnapshotBatchCount(5000)
+                .persistent(true)
+                .logicalStoreType(LogicalDatastoreType.OPERATIONAL)
+                .build();
 
         final Props persistentProps = Shard.builder().id(shardID).datastoreContext(persistentContext)
                 .schemaContextProvider(() -> SCHEMA_CONTEXT).props(stateDir());
 
         final DatastoreContext nonPersistentContext = DatastoreContext.newBuilder()
-                .shardJournalRecoveryLogBatchSize(3).shardSnapshotBatchCount(5000).persistent(false).build();
+                .shardJournalRecoveryLogBatchSize(3)
+                .shardSnapshotBatchCount(5000)
+                .persistent(false)
+                .logicalStoreType(LogicalDatastoreType.OPERATIONAL)
+                .build();
 
         final Props nonPersistentProps = Shard.builder().id(shardID).datastoreContext(nonPersistentContext)
                 .schemaContextProvider(() -> SCHEMA_CONTEXT).props(stateDir());
