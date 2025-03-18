@@ -52,6 +52,7 @@ import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
@@ -82,8 +83,10 @@ public abstract class AbstractShardTest extends AbstractActorTest {
     protected static final int HEARTBEAT_MILLIS = 100;
 
     protected final Builder dataStoreContextBuilder = DatastoreContext.newBuilder()
-            .shardJournalRecoveryLogBatchSize(3).shardSnapshotBatchCount(5000)
-            .shardHeartbeatIntervalInMillis(HEARTBEAT_MILLIS);
+        .shardJournalRecoveryLogBatchSize(3)
+        .shardSnapshotBatchCount(5000)
+        .shardHeartbeatIntervalInMillis(HEARTBEAT_MILLIS)
+        .logicalStoreType(LogicalDatastoreType.CONFIGURATION);
 
     protected final TestActorFactory actorFactory = new TestActorFactory(getSystem());
     protected final int nextShardNum = SHARD_NUM.getAndIncrement();
