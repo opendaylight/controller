@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.md.sal.common.util.jmx;
 
+import static java.util.Objects.requireNonNull;
+
 import java.lang.management.ManagementFactory;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
@@ -45,30 +47,26 @@ public abstract class AbstractMXBean {
      * @param beanType Used as the <code>type</code> property in the bean's ObjectName.
      * @param beanCategory Used as the <code>Category</code> property in the bean's ObjectName.
      */
-    protected AbstractMXBean(@NonNull String beanName, @NonNull String beanType,
-            @Nullable String beanCategory) {
-        this.beanName = beanName;
-        this.beanType = beanType;
+    protected AbstractMXBean(final @NonNull String beanName, final @NonNull String beanType,
+            final @Nullable String beanCategory) {
+        this.beanName = requireNonNull(beanName);
+        this.beanType = requireNonNull(beanType);
         this.beanCategory = beanCategory;
     }
 
     private ObjectName getMBeanObjectName() throws MalformedObjectNameException {
-        StringBuilder builder = new StringBuilder(BASE_JMX_PREFIX)
-                .append("type=").append(getMBeanType());
-
-        if (getMBeanCategory() != null) {
-            builder.append(",Category=").append(getMBeanCategory());
+        final var sb = new StringBuilder(BASE_JMX_PREFIX).append("type=").append(beanType);
+        if (beanCategory != null) {
+            sb.append(",Category=").append(beanCategory);
         }
-
-        builder.append(",name=").append(getMBeanName());
-        return new ObjectName(builder.toString());
+        return new ObjectName(sb.append(",name=").append(beanName).toString());
     }
 
     /**
      * This method is a wrapper for registerMBean with void return type so it can be invoked by dependency
      * injection frameworks such as Spring and Blueprint.
      */
-    public void register() {
+    public final void register() {
         registerMBean();
     }
 
@@ -78,7 +76,7 @@ public abstract class AbstractMXBean {
      *
      * @return true is successfully registered, false otherwise.
      */
-    public boolean registerMBean() {
+    public final boolean registerMBean() {
         boolean registered = false;
         try {
             // Object to identify MBean
@@ -112,7 +110,7 @@ public abstract class AbstractMXBean {
      * This method is a wrapper for unregisterMBean with void return type so it can be invoked by dependency
      * injection frameworks such as Spring and Blueprint.
      */
-    public void unregister() {
+    public final void unregister() {
         unregisterMBean();
     }
 
@@ -121,7 +119,7 @@ public abstract class AbstractMXBean {
      *
      * @return true is successfully unregistered, false otherwise.
      */
-    public boolean unregisterMBean() {
+    public final boolean unregisterMBean() {
         try {
             unregisterMBean(getMBeanObjectName());
             return true;
@@ -131,7 +129,7 @@ public abstract class AbstractMXBean {
         }
     }
 
-    private void unregisterMBean(ObjectName mbeanName) throws MBeanRegistrationException,
+    private void unregisterMBean(final ObjectName mbeanName) throws MBeanRegistrationException,
             InstanceNotFoundException {
         server.unregisterMBean(mbeanName);
     }
@@ -139,21 +137,21 @@ public abstract class AbstractMXBean {
     /**
      * Returns the <code>name</code> property of the bean's ObjectName.
      */
-    public String getMBeanName() {
+    public final String getMBeanName() {
         return beanName;
     }
 
     /**
      * Returns the <code>type</code> property of the bean's ObjectName.
      */
-    public String getMBeanType() {
+    public final String getMBeanType() {
         return beanType;
     }
 
     /**
      * Returns the <code>Category</code> property of the bean's ObjectName.
      */
-    public String getMBeanCategory() {
+    public final String getMBeanCategory() {
         return beanCategory;
     }
 }
