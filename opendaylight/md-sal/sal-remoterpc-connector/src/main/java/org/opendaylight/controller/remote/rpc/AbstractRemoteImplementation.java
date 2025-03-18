@@ -9,11 +9,11 @@ package org.opendaylight.controller.remote.rpc;
 
 import static java.util.Objects.requireNonNull;
 
+import java.time.Duration;
+import java.util.concurrent.CompletionStage;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.pattern.Patterns;
-import org.apache.pekko.util.Timeout;
 import org.opendaylight.controller.remote.rpc.messages.AbstractExecute;
-import scala.concurrent.Future;
 
 /**
  * An abstract base class for remote RPC/action implementations.
@@ -23,14 +23,14 @@ abstract class AbstractRemoteImplementation<T extends AbstractExecute<?, ?>> {
     static final long COST = 2;
 
     private final ActorRef remoteInvoker;
-    private final Timeout askDuration;
+    private final Duration askDuration;
 
     AbstractRemoteImplementation(final ActorRef remoteInvoker, final RemoteOpsProviderConfig config) {
         this.remoteInvoker = requireNonNull(remoteInvoker);
-        this.askDuration = config.getAskDuration();
+        askDuration = config.getAskDuration();
     }
 
-    final Future<Object> ask(final T message) {
+    final CompletionStage<Object> ask(final T message) {
         return Patterns.ask(remoteInvoker, requireNonNull(message), askDuration);
     }
 }

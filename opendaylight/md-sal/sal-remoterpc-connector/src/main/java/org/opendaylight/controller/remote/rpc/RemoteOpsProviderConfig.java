@@ -8,10 +8,8 @@
 package org.opendaylight.controller.remote.rpc;
 
 import com.typesafe.config.Config;
-import java.util.concurrent.TimeUnit;
-import org.apache.pekko.util.Timeout;
+import java.time.Duration;
 import org.opendaylight.controller.cluster.common.actor.CommonConfig;
-import scala.concurrent.duration.FiniteDuration;
 
 public class RemoteOpsProviderConfig extends CommonConfig {
 
@@ -31,8 +29,8 @@ public class RemoteOpsProviderConfig extends CommonConfig {
     private static final String TAG_ACTION_REGISTRY_PERSISTENCE_ID = "action-registry-persistence-id";
 
     //locally cached values
-    private Timeout cachedAskDuration;
-    private FiniteDuration cachedGossipTickInterval;
+    private Duration cachedAskDuration;
+    private Duration cachedGossipTickInterval;
 
     public RemoteOpsProviderConfig(final Config config) {
         super(config);
@@ -82,25 +80,17 @@ public class RemoteOpsProviderConfig extends CommonConfig {
         return get().getString(TAG_RPC_MGR_PATH);
     }
 
-    public Timeout getAskDuration() {
-        if (cachedAskDuration != null) {
-            return cachedAskDuration;
+    public Duration getAskDuration() {
+        if (cachedAskDuration == null) {
+            cachedAskDuration = get().getDuration(TAG_ASK_DURATION);
         }
-
-        cachedAskDuration = new Timeout(new FiniteDuration(
-                get().getDuration(TAG_ASK_DURATION, TimeUnit.NANOSECONDS), TimeUnit.NANOSECONDS));
-
         return cachedAskDuration;
     }
 
-    public FiniteDuration getGossipTickInterval() {
-        if (cachedGossipTickInterval != null) {
-            return cachedGossipTickInterval;
+    public Duration getGossipTickInterval() {
+        if (cachedGossipTickInterval == null) {
+            cachedGossipTickInterval = get().getDuration(TAG_GOSSIP_TICK_INTERVAL);
         }
-
-        cachedGossipTickInterval = new FiniteDuration(
-                get().getDuration(TAG_GOSSIP_TICK_INTERVAL, TimeUnit.NANOSECONDS), TimeUnit.NANOSECONDS);
-
         return cachedGossipTickInterval;
     }
 

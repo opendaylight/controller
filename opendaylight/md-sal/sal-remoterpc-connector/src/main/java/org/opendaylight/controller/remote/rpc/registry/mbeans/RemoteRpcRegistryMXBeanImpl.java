@@ -7,13 +7,13 @@
  */
 package org.opendaylight.controller.remote.rpc.registry.mbeans;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import org.apache.pekko.actor.Address;
-import org.apache.pekko.util.Timeout;
 import org.opendaylight.controller.remote.rpc.registry.RoutingTable;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Bucket;
 import org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreAccess;
@@ -21,7 +21,7 @@ import org.opendaylight.mdsal.dom.api.DOMRpcIdentifier;
 
 public class RemoteRpcRegistryMXBeanImpl extends AbstractRegistryMXBean<RoutingTable, DOMRpcIdentifier>
         implements RemoteRpcRegistryMXBean {
-    public RemoteRpcRegistryMXBeanImpl(final BucketStoreAccess rpcRegistryAccess, final Timeout timeout) {
+    public RemoteRpcRegistryMXBeanImpl(final BucketStoreAccess rpcRegistryAccess, final Duration timeout) {
         super("RemoteRpcRegistry", "RemoteRpcBroker", rpcRegistryAccess, timeout);
     }
 

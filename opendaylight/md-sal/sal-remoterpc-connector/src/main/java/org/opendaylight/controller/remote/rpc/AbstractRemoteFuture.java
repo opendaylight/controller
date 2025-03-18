@@ -10,25 +10,36 @@ package org.opendaylight.controller.remote.rpc;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.util.concurrent.AbstractFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import org.apache.pekko.dispatch.OnComplete;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.concurrent.ExecutionContext;
-import scala.concurrent.Future;
 
 abstract class AbstractRemoteFuture<T, O, E extends Exception> extends AbstractFuture<O> {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractRemoteFuture.class);
 
     private final @NonNull T type;
 
-    AbstractRemoteFuture(final @NonNull T type, final Future<Object> requestFuture) {
+    AbstractRemoteFuture(final @NonNull T type, final CompletionStage<Object> requestFuture) {
         this.type = requireNonNull(type);
-        requestFuture.onComplete(new FutureUpdater(), ExecutionContext.Implicits$.MODULE$.global());
+        requestFuture.whenComplete((reply, error) -> {
+            if (error != null) {
+                failNow(error);
+                return;
+            }
+
+            final var result = processReply(reply);
+            if (result != null) {
+                LOG.debug("Received response for operation {}: result is {}", type, result);
+                set(result);
+            } else {
+                failNow(new IllegalStateException("Incorrect reply type " + reply + " from Akka"));
+            }
+        });
     }
 
     @Override
@@ -73,22 +84,5 @@ abstract class AbstractRemoteFuture<T, O, E extends Exception> extends AbstractF
     private ExecutionException mapException(final ExecutionException ex) {
         final Throwable cause = ex.getCause();
         return exceptionClass().isInstance(cause) ? ex : new ExecutionException(ex.getMessage(), wrapCause(cause));
-    }
-
-    private final class FutureUpdater extends OnComplete<Object> {
-        @Override
-        public void onComplete(final Throwable error, final Object reply) {
-            if (error == null) {
-                final O result = processReply(reply);
-                if (result != null) {
-                    LOG.debug("Received response for operation {}: result is {}", type, result);
-                    set(result);
-                } else {
-                    failNow(new IllegalStateException("Incorrect reply type " + reply + " from Akka"));
-                }
-            } else {
-                failNow(error);
-            }
-        }
     }
 }

@@ -12,6 +12,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,7 +21,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorRefProvider;
 import org.apache.pekko.actor.ActorSelection;
@@ -33,7 +33,6 @@ import org.apache.pekko.cluster.ClusterEvent;
 import org.apache.pekko.cluster.Member;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActorWithMetering;
 import org.opendaylight.controller.remote.rpc.RemoteOpsProviderConfig;
-import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Gossiper that syncs bucket store across nodes in the cluster.
@@ -124,7 +123,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
         if (autoStartGossipTicks) {
             gossipTask = getContext().system().scheduler().scheduleAtFixedRate(
                 // initial delay
-                new FiniteDuration(1, TimeUnit.SECONDS),
+                Duration.ofSeconds(1),
                 // interval
                 config.getGossipTickInterval(),
                 // target

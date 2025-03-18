@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.remote.rpc;
 
+import java.util.concurrent.CompletionStage;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.remote.rpc.messages.ActionResponse;
 import org.opendaylight.mdsal.dom.api.DOMActionException;
@@ -14,10 +15,9 @@ import org.opendaylight.mdsal.dom.api.DOMRpcResult;
 import org.opendaylight.mdsal.dom.spi.DefaultDOMRpcResult;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.model.api.stmt.SchemaNodeIdentifier.Absolute;
-import scala.concurrent.Future;
 
 final class RemoteDOMActionFuture extends AbstractRemoteFuture<Absolute, DOMRpcResult, DOMActionException> {
-    RemoteDOMActionFuture(final @NonNull Absolute type, final @NonNull Future<Object> requestFuture) {
+    RemoteDOMActionFuture(final @NonNull Absolute type, final @NonNull CompletionStage<Object> requestFuture) {
         super(type, requestFuture);
     }
 

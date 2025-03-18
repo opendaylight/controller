@@ -7,16 +7,16 @@
  */
 package org.opendaylight.controller.remote.rpc;
 
+import java.util.concurrent.CompletionStage;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.remote.rpc.messages.RpcResponse;
 import org.opendaylight.mdsal.dom.api.DOMRpcException;
 import org.opendaylight.mdsal.dom.api.DOMRpcResult;
 import org.opendaylight.mdsal.dom.spi.DefaultDOMRpcResult;
 import org.opendaylight.yangtools.yang.common.QName;
-import scala.concurrent.Future;
 
 final class RemoteDOMRpcFuture extends AbstractRemoteFuture<QName, DOMRpcResult, DOMRpcException> {
-    RemoteDOMRpcFuture(final @NonNull QName type, final @NonNull Future<Object> requestFuture) {
+    RemoteDOMRpcFuture(final @NonNull QName type, final @NonNull CompletionStage<Object> requestFuture) {
         super(type, requestFuture);
     }
 

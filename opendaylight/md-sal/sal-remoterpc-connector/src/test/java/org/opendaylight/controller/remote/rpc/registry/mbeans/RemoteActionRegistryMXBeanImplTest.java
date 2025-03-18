@@ -8,18 +8,17 @@
 package org.opendaylight.controller.remote.rpc.registry.mbeans;
 
 import com.typesafe.config.ConfigFactory;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.actor.Props;
 import org.apache.pekko.dispatch.Dispatchers;
 import org.apache.pekko.testkit.TestActorRef;
 import org.apache.pekko.testkit.javadsl.TestKit;
-import org.apache.pekko.util.Timeout;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -64,7 +63,7 @@ public class RemoteActionRegistryMXBeanImplTest {
                 .withDispatcher(Dispatchers.DefaultDispatcherId());
         testActor = new TestActorRef<>(system, props, supervisor.getRef(), "testActor");
 
-        final Timeout timeout = Timeout.apply(10, TimeUnit.SECONDS);
+        final var timeout = Duration.ofSeconds(10);
         mxBean = new RemoteActionRegistryMXBeanImpl(new BucketStoreAccess(testActor, system.dispatcher(), timeout),
                 timeout);
     }

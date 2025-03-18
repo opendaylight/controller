@@ -10,10 +10,10 @@ package org.opendaylight.controller.remote.rpc.registry.mbeans;
 import static java.util.Objects.requireNonNull;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 import org.apache.pekko.actor.Address;
-import org.apache.pekko.util.Timeout;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 import org.opendaylight.controller.remote.rpc.registry.AbstractRoutingTable;
@@ -22,8 +22,9 @@ import org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreAccess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
-import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
+import scala.jdk.javaapi.DurationConverters;
+import scala.jdk.javaapi.FutureConverters;
 
 abstract class AbstractRegistryMXBean<T extends AbstractRoutingTable<T, I>, I> extends AbstractMXBean {
     static final String LOCAL_CONSTANT = "local";
@@ -39,35 +40,32 @@ abstract class AbstractRegistryMXBean<T extends AbstractRoutingTable<T, I>, I> e
     @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR",
         justification = "registerMBean() is expected to be stateless")
     AbstractRegistryMXBean(final @NonNull String beanName, final @NonNull String beanType,
-            final @NonNull BucketStoreAccess bucketAccess, final @NonNull Timeout timeout) {
+            final @NonNull BucketStoreAccess bucketAccess, final @NonNull Duration timeout) {
         super(beanName, beanType, null);
         this.bucketAccess = requireNonNull(bucketAccess);
-        this.timeout = timeout.duration();
+        this.timeout = DurationConverters.toScala(timeout);
         registerMBean();
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     final T localData() {
         try {
-            return (T) Await.result((Future) bucketAccess.getLocalData(), timeout);
+            return Await.result(FutureConverters.asScala(bucketAccess.<T>getLocalData()), timeout);
         } catch (InterruptedException | TimeoutException e) {
             throw new IllegalStateException("getLocalData failed", e);
         }
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     final Map<Address, Bucket<T>> remoteBuckets() {
         try {
-            return (Map<Address, Bucket<T>>) Await.result((Future)bucketAccess.getRemoteBuckets(), timeout);
+            return Await.result(FutureConverters.asScala(bucketAccess.getRemoteBuckets()), timeout);
         } catch (InterruptedException | TimeoutException e) {
             throw new IllegalStateException("getRemoteBuckets failed", e);
         }
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     final String bucketVersions() {
         try {
-            return Await.result((Future)bucketAccess.getBucketVersions(), timeout).toString();
+            return Await.result(FutureConverters.asScala(bucketAccess.getBucketVersions()), timeout).toString();
         } catch (InterruptedException | TimeoutException e) {
             throw new IllegalStateException("getVersions failed", e);
         }

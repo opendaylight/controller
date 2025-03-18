@@ -55,19 +55,18 @@ public class RemoteOpsProviderConfigTest {
         AkkaConfigurationReader reader = new TestConfigReader();
 
         final int expectedCapacity = 100;
-        String timeOutVal = "10ms";
-        FiniteDuration expectedTimeout = FiniteDuration.create(10, TimeUnit.MILLISECONDS);
+        final var expectedTimeout = new FiniteDuration(10, TimeUnit.MILLISECONDS);
 
         RemoteOpsProviderConfig config = new RemoteOpsProviderConfig.Builder("unit-test")
                 .metricCaptureEnabled(true)//enable metric capture
                 .mailboxCapacity(expectedCapacity)
-                .mailboxPushTimeout(timeOutVal)
+                .mailboxPushTimeout("10ms")
                 .withConfigReader(reader)
                 .build();
 
         assertTrue(config.isMetricCaptureEnabled());
         assertEquals(expectedCapacity, config.getMailBoxCapacity().intValue());
-        assertEquals(expectedTimeout.toMillis(), config.getMailBoxPushTimeout().toMillis());
+        assertEquals(expectedTimeout, config.getMailBoxPushTimeout());
 
         //Now check this config inside an actor
         ActorSystem system = ActorSystem.create("unit-test", config.get());
@@ -81,7 +80,7 @@ public class RemoteOpsProviderConfigTest {
 
         assertTrue(config.isMetricCaptureEnabled());
         assertEquals(expectedCapacity, config.getMailBoxCapacity().intValue());
-        assertEquals(expectedTimeout.toMillis(), config.getMailBoxPushTimeout().toMillis());
+        assertEquals(expectedTimeout, config.getMailBoxPushTimeout());
     }
 
     public static class ConfigTestActor extends UntypedAbstractActor {
@@ -89,7 +88,7 @@ public class RemoteOpsProviderConfigTest {
         private final Config actorSystemConfig;
 
         public ConfigTestActor() {
-            this.actorSystemConfig = getContext().system().settings().config();
+            actorSystemConfig = getContext().system().settings().config();
         }
 
         @Override
