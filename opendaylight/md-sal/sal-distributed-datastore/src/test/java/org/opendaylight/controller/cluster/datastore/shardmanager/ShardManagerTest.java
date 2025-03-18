@@ -133,6 +133,7 @@ import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.common.XMLNamespace;
@@ -1287,8 +1288,11 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         EffectiveModelContext schemaContext = TEST_SCHEMA_CONTEXT;
         shardManager.tell(new UpdateSchemaContext(schemaContext), ActorRef.noSender());
 
-        DatastoreContext datastoreContext = DatastoreContext.newBuilder().shardElectionTimeoutFactor(100)
-                .persistent(false).build();
+        DatastoreContext datastoreContext = DatastoreContext.newBuilder()
+            .shardElectionTimeoutFactor(100)
+            .persistent(false)
+            .logicalStoreType(LogicalDatastoreType.OPERATIONAL)
+            .build();
         Shard.Builder shardBuilder = Shard.builder();
 
         ModuleShardConfiguration config = new ModuleShardConfiguration(XMLNamespace.of("foo-ns"), "foo-module",

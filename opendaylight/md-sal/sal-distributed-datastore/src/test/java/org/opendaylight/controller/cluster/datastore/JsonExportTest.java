@@ -24,15 +24,14 @@ import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
+import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev250130.DataStoreProperties.ExportOnRecovery;
 
 public class JsonExportTest extends AbstractShardTest {
     private static final String DUMMY_DATA = "Dummy data as snapshot sequence number is set to 0 in "
             + "InMemorySnapshotStore and journal recovery seq number will start from 1";
-    private static final String EXPECTED_JOURNAL_FILE = "expectedJournalExport.json";
-    private static final String EXPECTED_SNAPSHOT_FILE = "expectedSnapshotExport.json";
-    private static String actualJournalFilePath;
-    private static String actualSnapshotFilePath;
+    private String actualJournalFilePath;
+    private String actualSnapshotFilePath;
     private DatastoreContext datastoreContext;
 
     @Rule
@@ -47,9 +46,13 @@ public class JsonExportTest extends AbstractShardTest {
             + "member-1-shard-inventory-config" + nextShardNum + "-journal.json";
         actualSnapshotFilePath = exportTmpFolder.getAbsolutePath() + "/snapshots/"
             + "member-1-shard-inventory-config" + nextShardNum + "-snapshot.json";
-        datastoreContext = DatastoreContext.newBuilder().shardJournalRecoveryLogBatchSize(1)
-            .shardSnapshotBatchCount(5000).shardHeartbeatIntervalInMillis(HEARTBEAT_MILLIS).persistent(true)
+        datastoreContext = DatastoreContext.newBuilder()
+            .shardJournalRecoveryLogBatchSize(1)
+            .shardSnapshotBatchCount(5000)
+            .shardHeartbeatIntervalInMillis(HEARTBEAT_MILLIS)
+            .persistent(true)
             .exportOnRecovery(ExportOnRecovery.Json)
+            .logicalStoreType(LogicalDatastoreType.OPERATIONAL)
             .recoveryExportBaseDir(exportTmpFolder.getAbsolutePath()).build();
     }
 
@@ -96,14 +99,14 @@ public class JsonExportTest extends AbstractShardTest {
         verifySnapshotExport();
     }
 
-    private static void verifyJournalExport() throws IOException {
-        final String expectedJournalData = readExpectedFile(EXPECTED_JOURNAL_FILE);
+    private void verifyJournalExport() throws IOException {
+        final String expectedJournalData = readExpectedFile("expectedJournalExport.json");
         final String actualJournalData = readActualFile(actualJournalFilePath);
         assertEquals("Exported journal is not expected ", expectedJournalData, actualJournalData);
     }
 
-    private static void verifySnapshotExport() throws IOException {
-        final String expectedSnapshotData = readExpectedFile(EXPECTED_SNAPSHOT_FILE);
+    private void verifySnapshotExport() throws IOException {
+        final String expectedSnapshotData = readExpectedFile("expectedSnapshotExport.json");
         final String actualSnapshotData = readActualFile(actualSnapshotFilePath);
         assertEquals("Exported snapshot is not expected ", expectedSnapshotData, actualSnapshotData);
     }

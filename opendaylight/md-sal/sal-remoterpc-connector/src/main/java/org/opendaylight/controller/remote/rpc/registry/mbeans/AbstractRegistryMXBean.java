@@ -37,8 +37,6 @@ abstract class AbstractRegistryMXBean<T extends AbstractRoutingTable<T, I>, I> e
     private final BucketStoreAccess bucketAccess;
     private final FiniteDuration timeout;
 
-    @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR",
-        justification = "registerMBean() is expected to be stateless")
     AbstractRegistryMXBean(final @NonNull String beanName, final @NonNull String beanType,
             final @NonNull BucketStoreAccess bucketAccess, final @NonNull Duration timeout) {
         super(beanName, beanType, null);
