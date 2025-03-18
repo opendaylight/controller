@@ -9,8 +9,7 @@ package org.opendaylight.controller.cluster.raft.client.messages;
 
 import static java.util.Objects.requireNonNull;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 
 /**
@@ -18,28 +17,10 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
  *
  * @author Thomas Pantelis
  */
-public class GetSnapshotReply {
-    private final String id;
-    private final Snapshot snapshot;
-
-    public GetSnapshotReply(@NonNull String id, @NonNull Snapshot snapshot) {
-        this.id = requireNonNull(id);
-        this.snapshot = requireNonNull(snapshot);
-    }
-
-    public @NonNull String getId() {
-        return id;
-    }
-
-    @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "Exposes a mutable object stored in a field but "
-            + "this is OK since this class is merely a DTO and does not process the byte[] internally. "
-            + "Also it would be inefficient to create a return copy as the byte[] could be large.")
-    public @NonNull Snapshot getSnapshot() {
-        return snapshot;
-    }
-
-    @Override
-    public String toString() {
-        return "GetSnapshotReply [id=" + id + ", snapshot=" + snapshot + "]";
+@NonNullByDefault
+public record GetSnapshotReply(String id, Snapshot snapshot) {
+    public GetSnapshotReply {
+        requireNonNull(id);
+        requireNonNull(snapshot);
     }
 }

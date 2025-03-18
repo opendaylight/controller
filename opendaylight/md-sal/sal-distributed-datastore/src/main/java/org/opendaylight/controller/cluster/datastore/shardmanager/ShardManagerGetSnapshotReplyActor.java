@@ -74,15 +74,15 @@ final class ShardManagerGetSnapshotReplyActor extends UntypedAbstractActor {
     private void onGetSnapshotReply(final GetSnapshotReply getSnapshotReply) {
         LOG.debug("{}: Received {}", params.id, getSnapshotReply);
 
-        ShardIdentifier shardId = ShardIdentifier.fromShardIdString(getSnapshotReply.getId());
-        shardSnapshots.add(new ShardSnapshot(shardId.getShardName(), getSnapshotReply.getSnapshot()));
+        final var shardName = ShardIdentifier.fromShardIdString(getSnapshotReply.id()).getShardName();
+        shardSnapshots.add(new ShardSnapshot(shardName, getSnapshotReply.snapshot()));
 
-        remainingShardNames.remove(shardId.getShardName());
+        remainingShardNames.remove(shardName);
         if (remainingShardNames.isEmpty()) {
             LOG.debug("{}: All shard snapshots received", params.id);
 
-            DatastoreSnapshot datastoreSnapshot = new DatastoreSnapshot(params.datastoreType,
-                    params.shardManagerSnapshot, shardSnapshots);
+            final var datastoreSnapshot = new DatastoreSnapshot(params.datastoreType, params.shardManagerSnapshot,
+                shardSnapshots);
             params.replyToActor.tell(datastoreSnapshot, self());
             self().tell(PoisonPill.getInstance(), self());
         }

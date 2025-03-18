@@ -1021,8 +1021,8 @@ public class RaftActorTest extends AbstractActorTest {
 
         GetSnapshotReply reply = kit.expectMsgClass(GetSnapshotReply.class);
 
-        assertEquals("getId", persistenceId, reply.getId());
-        Snapshot replySnapshot = reply.getSnapshot();
+        assertEquals("getId", persistenceId, reply.id());
+        var replySnapshot = reply.snapshot();
         assertEquals("getElectionTerm", new TermInfo(term, "member-1"), replySnapshot.termInfo());
         assertEquals("getLastAppliedIndex", 1L, replySnapshot.getLastAppliedIndex());
         assertEquals("getLastAppliedTerm", term, replySnapshot.getLastAppliedTerm());
@@ -1054,8 +1054,8 @@ public class RaftActorTest extends AbstractActorTest {
         reply = kit.expectMsgClass(GetSnapshotReply.class);
         verify(mockRaftActor.snapshotCohortDelegate, never()).createSnapshot(any(), any());
 
-        assertEquals("getId", persistenceId, reply.getId());
-        replySnapshot = reply.getSnapshot();
+        assertEquals("getId", persistenceId, reply.id());
+        replySnapshot = reply.snapshot();
         assertEquals("getElectionTerm", new TermInfo(term, "member-1"), replySnapshot.termInfo());
         assertEquals("getLastAppliedIndex", -1L, replySnapshot.getLastAppliedIndex());
         assertEquals("getLastAppliedTerm", -1L, replySnapshot.getLastAppliedTerm());
