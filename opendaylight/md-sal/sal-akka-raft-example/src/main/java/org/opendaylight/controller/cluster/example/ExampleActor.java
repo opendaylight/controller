@@ -188,11 +188,10 @@ public final class ExampleActor extends RaftActor implements RaftActorRecoveryCo
         return null;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Snapshot.State deserializeSnapshot(final ByteSource snapshotBytes) {
         try {
-            return new MapState((Map<String, String>) SerializationUtils.deserialize(snapshotBytes.read()));
+            return new MapState(SerializationUtils.<Map<String, String>>deserialize(snapshotBytes.read()));
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }

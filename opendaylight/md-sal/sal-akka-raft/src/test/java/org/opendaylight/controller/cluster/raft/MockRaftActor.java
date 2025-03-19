@@ -8,6 +8,7 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static com.google.common.base.Verify.verifyNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
@@ -196,7 +197,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     @Override
     public Snapshot.State deserializeSnapshot(final ByteSource snapshotBytes) {
         try {
-            return (Snapshot.State) SerializationUtils.deserialize(snapshotBytes.read());
+            return verifyNotNull(SerializationUtils.<Snapshot.State>deserialize(snapshotBytes.read()));
         } catch (IOException e) {
             throw new RuntimeException("Error deserializing state", e);
         }
@@ -217,6 +218,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     @Override
+    @Deprecated
     protected void handleCommand(final Object message) {
         if (message instanceof RaftActorBehavior msg) {
             super.changeCurrentBehavior(msg);
