@@ -9,19 +9,13 @@ package org.opendaylight.controller.cluster.raft;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.List;
 import java.util.Optional;
-import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.persistence.SaveSnapshotFailure;
 import org.apache.pekko.persistence.SaveSnapshotSuccess;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.ApplyLeaderSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.base.messages.SnapshotComplete;
-import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshot;
-import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshotReply;
-import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,22 +42,18 @@ class RaftActorSnapshotMessageSupport {
     private static final Logger LOG = LoggerFactory.getLogger(RaftActorSnapshotMessageSupport.class);
 
     private final RaftActorContext context;
-    private final RaftActorSnapshotCohort cohort;
 
-    RaftActorSnapshotMessageSupport(final RaftActorContext context, final RaftActorSnapshotCohort cohort) {
+    RaftActorSnapshotMessageSupport(final RaftActorContext context) {
         this.context = requireNonNull(context);
-        this.cohort = requireNonNull(cohort);
-        context.getSnapshotManager().setSnapshotCohort(cohort);
     }
 
-    boolean handleSnapshotMessage(final Object message, final ActorRef sender) {
+    boolean handleSnapshotMessage(final Object message) {
         switch (message) {
             case ApplyLeaderSnapshot msg -> context.getSnapshotManager().applyFromLeader(msg);
             case SaveSnapshotSuccess msg -> onSaveSnapshotSuccess(msg);
             case SaveSnapshotFailure msg -> onSaveSnapshotFailure(msg);
             case CaptureSnapshotReply msg -> onCaptureSnapshotReply(msg);
             case CommitSnapshot msg -> context.getSnapshotManager().commit(-1, -1);
-            case GetSnapshot msg -> onGetSnapshot(sender, msg);
             case SnapshotComplete msg -> LOG.debug("{}: SnapshotComplete received", context.getId());
             default -> {
                 return false;
@@ -91,25 +81,5 @@ class RaftActorSnapshotMessageSupport {
         LOG.info("{}: SaveSnapshotSuccess received for snapshot, sequenceNr: {}", context.getId(), sequenceNumber);
 
         context.getSnapshotManager().commit(sequenceNumber, success.metadata().timestamp());
-    }
-
-    private void onGetSnapshot(final ActorRef sender, final GetSnapshot getSnapshot) {
-        LOG.debug("{}: onGetSnapshot", context.getId());
-
-        if (context.getPersistenceProvider().isRecoveryApplicable()) {
-            final var captureSnapshot = context.getSnapshotManager().newCaptureSnapshot(
-                    context.getReplicatedLog().lastMeta(), -1, true);
-
-            final var snapshotReplyActor = context.actorOf(GetSnapshotReplyActor.props(captureSnapshot,
-                    context.termInfo(), sender, getSnapshot.timeout(), context.getId(),
-                    context.getPeerServerInfo(true)));
-
-            cohort.createSnapshot(snapshotReplyActor, null);
-        } else {
-            final var snapshot = Snapshot.create(EmptyState.INSTANCE, List.of(),
-                    -1, -1, -1, -1, context.termInfo(), context.getPeerServerInfo(true));
-
-            sender.tell(new GetSnapshotReply(context.getId(), snapshot), context.getActor());
-        }
     }
 }

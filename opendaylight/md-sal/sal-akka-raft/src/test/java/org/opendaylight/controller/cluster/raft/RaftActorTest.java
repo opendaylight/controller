@@ -324,38 +324,37 @@ public class RaftActorTest extends AbstractActorTest {
         final var applySnapshot = new ApplyLeaderSnapshot(persistenceId, 0, ImmutableRaftEntryMeta.of(0, 0),
             ByteSource.wrap(new byte[1]), null, mock(ApplyLeaderSnapshot.Callback.class));
 
-        when(mockSupport.handleSnapshotMessage(same(applySnapshot), any(ActorRef.class))).thenReturn(true);
+        when(mockSupport.handleSnapshotMessage(same(applySnapshot))).thenReturn(true);
         mockRaftActor.handleCommand(applySnapshot);
 
         CaptureSnapshotReply captureSnapshotReply = new CaptureSnapshotReply(ByteState.empty(), null);
-        when(mockSupport.handleSnapshotMessage(same(captureSnapshotReply), any(ActorRef.class))).thenReturn(true);
+        when(mockSupport.handleSnapshotMessage(same(captureSnapshotReply))).thenReturn(true);
         mockRaftActor.handleCommand(captureSnapshotReply);
 
         SaveSnapshotSuccess saveSnapshotSuccess = new SaveSnapshotSuccess(new SnapshotMetadata("", 0L, 0L));
-        when(mockSupport.handleSnapshotMessage(same(saveSnapshotSuccess), any(ActorRef.class))).thenReturn(true);
+        when(mockSupport.handleSnapshotMessage(same(saveSnapshotSuccess))).thenReturn(true);
         mockRaftActor.handleCommand(saveSnapshotSuccess);
 
         SaveSnapshotFailure saveSnapshotFailure = new SaveSnapshotFailure(new SnapshotMetadata("", 0L, 0L),
                 new Throwable());
-        when(mockSupport.handleSnapshotMessage(same(saveSnapshotFailure), any(ActorRef.class))).thenReturn(true);
+        when(mockSupport.handleSnapshotMessage(same(saveSnapshotFailure))).thenReturn(true);
         mockRaftActor.handleCommand(saveSnapshotFailure);
 
-        when(mockSupport.handleSnapshotMessage(same(RaftActorSnapshotMessageSupport.CommitSnapshot.INSTANCE),
-            any(ActorRef.class))).thenReturn(true);
+        when(mockSupport.handleSnapshotMessage(same(RaftActorSnapshotMessageSupport.CommitSnapshot.INSTANCE)))
+            .thenReturn(true);
         mockRaftActor.handleCommand(RaftActorSnapshotMessageSupport.CommitSnapshot.INSTANCE);
 
         final var getSnapshot = new GetSnapshot(Duration.ofSeconds(30));
 
-        when(mockSupport.handleSnapshotMessage(same(getSnapshot), any(ActorRef.class))).thenReturn(true);
+        when(mockSupport.handleSnapshotMessage(same(getSnapshot))).thenReturn(true);
         mockRaftActor.handleCommand(getSnapshot);
 
-        verify(mockSupport).handleSnapshotMessage(same(applySnapshot), any(ActorRef.class));
-        verify(mockSupport).handleSnapshotMessage(same(captureSnapshotReply), any(ActorRef.class));
-        verify(mockSupport).handleSnapshotMessage(same(saveSnapshotSuccess), any(ActorRef.class));
-        verify(mockSupport).handleSnapshotMessage(same(saveSnapshotFailure), any(ActorRef.class));
-        verify(mockSupport).handleSnapshotMessage(same(RaftActorSnapshotMessageSupport.CommitSnapshot.INSTANCE),
-                any(ActorRef.class));
-        verify(mockSupport).handleSnapshotMessage(same(getSnapshot), any(ActorRef.class));
+        verify(mockSupport).handleSnapshotMessage(same(applySnapshot));
+        verify(mockSupport).handleSnapshotMessage(same(captureSnapshotReply));
+        verify(mockSupport).handleSnapshotMessage(same(saveSnapshotSuccess));
+        verify(mockSupport).handleSnapshotMessage(same(saveSnapshotFailure));
+        verify(mockSupport).handleSnapshotMessage(same(RaftActorSnapshotMessageSupport.CommitSnapshot.INSTANCE));
+        verify(mockSupport).handleSnapshotMessage(same(getSnapshot));
     }
 
     @Test

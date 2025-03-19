@@ -15,6 +15,7 @@ import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import org.apache.pekko.actor.ActorContext;
 import org.apache.pekko.actor.ActorRef;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
@@ -52,7 +53,7 @@ final class ShardSnapshotCohort implements RaftActorSnapshotCohort {
         this.memberName = requireNonNull(memberName);
     }
 
-    static ShardSnapshotCohort create(final ActorContext actorContext, final MemberName memberName,
+    static @NonNull ShardSnapshotCohort create(final ActorContext actorContext, final MemberName memberName,
             final ShardDataTree store, final String logId, final DatastoreContext context) {
         final var applyHistoryId = new LocalHistoryIdentifier(ClientIdentifier.create(
             FrontendIdentifier.create(memberName, SNAPSHOT_APPLY), 0), 0);
