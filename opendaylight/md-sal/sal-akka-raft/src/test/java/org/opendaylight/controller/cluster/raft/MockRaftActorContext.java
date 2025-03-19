@@ -113,7 +113,6 @@ public class MockRaftActorContext extends RaftActorContextImpl {
     @Override
     public SnapshotManager getSnapshotManager() {
         SnapshotManager snapshotManager = super.getSnapshotManager();
-        snapshotManager.setCreateSnapshotConsumer(createSnapshotProcedure);
 
         snapshotManager.setSnapshotCohort(new RaftActorSnapshotCohort() {
             @Override
@@ -123,10 +122,12 @@ public class MockRaftActorContext extends RaftActorContextImpl {
 
             @Override
             public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
+                createSnapshotProcedure.accept(Optional.ofNullable(installSnapshotStream));
             }
 
             @Override
             public void applySnapshot(final State snapshotState) {
+                // No-op
             }
         });
 
