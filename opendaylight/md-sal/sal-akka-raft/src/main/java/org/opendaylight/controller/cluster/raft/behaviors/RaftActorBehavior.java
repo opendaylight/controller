@@ -149,7 +149,7 @@ public abstract class RaftActorBehavior implements AutoCloseable {
         final var current = currentTerm();
         if (term < current) {
             LOG.info("{}: Cannot append entries because sender's term {} is less than {}", logName, term, current);
-            sender.tell(new AppendEntriesReply(context.getId(), current, false, lastIndex(), lastTerm(),
+            sender.tell(new AppendEntriesReply(getId(), current, false, lastIndex(), lastTerm(),
                     context.getPayloadVersion(), false, false, appendEntries.getLeaderRaftVersion()), actor());
             return this;
         }
