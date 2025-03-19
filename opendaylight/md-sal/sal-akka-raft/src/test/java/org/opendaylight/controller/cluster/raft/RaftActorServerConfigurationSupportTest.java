@@ -22,7 +22,6 @@ import com.google.common.base.Stopwatch;
 import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.io.ObjectInputStream;
-import java.io.OutputStream;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
@@ -30,7 +29,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.lang3.SerializationUtils;
 import org.apache.pekko.actor.AbstractActor;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Props;
@@ -67,6 +65,7 @@ import org.opendaylight.controller.cluster.raft.persisted.ByteState;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.FailingTermInfoStore;
@@ -1519,18 +1518,17 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
             super(stateDir, id, peerAddresses, config, persistent, collectorActor);
             snapshotCohortDelegate = new RaftActorSnapshotCohort() {
                 @Override
-                public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
-                    actorRef.tell(new CaptureSnapshotReply(ByteState.empty(), installSnapshotStream), actorRef);
+                public ByteState createSnapshot() {
+                    return ByteState.empty();
                 }
 
                 @Override
-                public void applySnapshot(
-                        final org.opendaylight.controller.cluster.raft.persisted.Snapshot.State snapshotState) {
+                public void applySnapshot(final Snapshot.State snapshotState) {
+                    // No-op
                 }
 
                 @Override
-                public org.opendaylight.controller.cluster.raft.persisted.Snapshot.State deserializeSnapshot(
-                        final ByteSource snapshotBytes) {
+                public Snapshot.State deserializeSnapshot(final ByteSource snapshotBytes) {
                     throw new UnsupportedOperationException();
                 }
             };
@@ -1569,14 +1567,8 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         }
 
         @Override
-        @SuppressWarnings("checkstyle:IllegalCatch")
-        public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
-            MockSnapshotState snapshotState = new MockSnapshotState(List.copyOf(getState()));
-            if (installSnapshotStream != null) {
-                SerializationUtils.serialize(snapshotState, installSnapshotStream);
-            }
-
-            actorRef.tell(new CaptureSnapshotReply(snapshotState, installSnapshotStream), actorRef);
+        public Snapshot.State createSnapshot() {
+            return new MockSnapshotState(List.copyOf(getState()));
         }
 
         static Props props(final Path stateDir, final Map<String, String> peerAddresses,

@@ -8,8 +8,8 @@
 package org.opendaylight.controller.cluster.raft;
 
 import com.google.common.io.ByteSource;
-import java.io.OutputStream;
-import org.apache.pekko.actor.ActorRef;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
@@ -27,8 +27,8 @@ public final class NoopRaftActorSnapshotCohort implements RaftActorSnapshotCohor
     }
 
     @Override
-    public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
-        // No-op
+    public State createSnapshot() {
+        return EmptyState.INSTANCE;
     }
 
     @Override
@@ -37,7 +37,11 @@ public final class NoopRaftActorSnapshotCohort implements RaftActorSnapshotCohor
     }
 
     @Override
-    public State deserializeSnapshot(final ByteSource snapshotBytes) {
-        return EmptyState.INSTANCE;
+    public State deserializeSnapshot(final ByteSource snapshotBytes) throws IOException {
+        try (var ois = new ObjectInputStream(snapshotBytes.openStream())) {
+            return (State) ois.readObject();
+        } catch (ClassNotFoundException e) {
+            throw new IOException("Failed to read state", e);
+        }
     }
 }
