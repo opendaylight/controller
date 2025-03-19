@@ -571,8 +571,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         assertEquals(8, leaderActor.getReplicatedLog().size());
 
-        leaderActor.getRaftActorContext().getSnapshotManager().capture(
-                new SimpleReplicatedLogEntry(6, 1, new MockRaftActorContext.MockPayload("x")), 4);
+        leaderActor.getRaftActorContext().getSnapshotManager().capture(ImmutableRaftEntryMeta.of(6, 1), 4);
 
         verify(leaderActor.snapshotCohortDelegate).createSnapshot(any(), any());
 
@@ -660,8 +659,7 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals(6, followerActor.getReplicatedLog().size());
 
         //snapshot on 4
-        followerActor.getRaftActorContext().getSnapshotManager().capture(
-                new SimpleReplicatedLogEntry(5, 1, new MockRaftActorContext.MockPayload("D")), 4);
+        followerActor.getRaftActorContext().getSnapshotManager().capture(ImmutableRaftEntryMeta.of(5, 1), 4);
 
         verify(followerActor.snapshotCohortDelegate).createSnapshot(any(), any());
 

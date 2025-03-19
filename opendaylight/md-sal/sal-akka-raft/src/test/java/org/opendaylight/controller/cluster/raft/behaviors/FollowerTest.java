@@ -401,8 +401,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         MessageCollectorActor.clearMessages(followerActor);
 
         context.setLastApplied(100);
-        setLastLogEntry(context, 1, 100,
-                new MockRaftActorContext.MockPayload(""));
+        setLastLogEntry(context, 1, 100, new MockRaftActorContext.MockPayload(""));
 
         entries = List.of(newReplicatedLogEntry(2, 101, "foo"));
 
@@ -440,8 +439,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         context.setLastApplied(101);
         context.setCommitIndex(101);
-        setLastLogEntry(context, 1, 101,
-                new MockRaftActorContext.MockPayload(""));
+        setLastLogEntry(context, 1, 101, new MockRaftActorContext.MockPayload(""));
 
         entries = List.of(newReplicatedLogEntry(2, 101, "foo"));
 
@@ -1367,8 +1365,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
 
     private static ReplicatedLogEntry newReplicatedLogEntry(final long term, final long index, final String data) {
-        return new SimpleReplicatedLogEntry(index, term,
-                new MockRaftActorContext.MockPayload(data));
+        return new SimpleReplicatedLogEntry(index, term, new MockRaftActorContext.MockPayload(data));
     }
 
     private ByteString createSnapshot() {

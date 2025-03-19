@@ -89,7 +89,6 @@ import org.opendaylight.controller.cluster.datastore.utils.MockDataTreeChangeLis
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListener;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListenerReply;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
-import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.CommitSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
@@ -105,6 +104,7 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
+import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
@@ -1556,10 +1556,10 @@ public class ShardTest extends AbstractShardTest {
 
         // Trigger creation of a snapshot by ensuring
         final RaftActorContext raftActorContext = shard.underlyingActor().getRaftActorContext();
-        raftActorContext.getSnapshotManager().capture(mock(ReplicatedLogEntry.class), -1);
+        raftActorContext.getSnapshotManager().capture(mock(RaftEntryMeta.class), -1);
         awaitAndValidateSnapshot(latch, savedSnapshot, expectedRoot);
 
-        raftActorContext.getSnapshotManager().capture(mock(ReplicatedLogEntry.class), -1);
+        raftActorContext.getSnapshotManager().capture(mock(RaftEntryMeta.class), -1);
         awaitAndValidateSnapshot(latch, savedSnapshot, expectedRoot);
     }
 
