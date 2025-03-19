@@ -340,9 +340,9 @@ public class RaftActorTest extends AbstractActorTest {
         when(mockSupport.handleSnapshotMessage(same(saveSnapshotFailure))).thenReturn(true);
         mockRaftActor.handleCommand(saveSnapshotFailure);
 
-        when(mockSupport.handleSnapshotMessage(same(RaftActorSnapshotMessageSupport.CommitSnapshot.INSTANCE)))
+        when(mockSupport.handleSnapshotMessage(same(SnapshotManager.CommitSnapshot.INSTANCE)))
             .thenReturn(true);
-        mockRaftActor.handleCommand(RaftActorSnapshotMessageSupport.CommitSnapshot.INSTANCE);
+        mockRaftActor.handleCommand(SnapshotManager.CommitSnapshot.INSTANCE);
 
         final var getSnapshot = new GetSnapshot(Duration.ofSeconds(30));
 
@@ -353,7 +353,7 @@ public class RaftActorTest extends AbstractActorTest {
         verify(mockSupport).handleSnapshotMessage(same(captureSnapshotReply));
         verify(mockSupport).handleSnapshotMessage(same(saveSnapshotSuccess));
         verify(mockSupport).handleSnapshotMessage(same(saveSnapshotFailure));
-        verify(mockSupport).handleSnapshotMessage(same(RaftActorSnapshotMessageSupport.CommitSnapshot.INSTANCE));
+        verify(mockSupport).handleSnapshotMessage(same(SnapshotManager.CommitSnapshot.INSTANCE));
         verify(mockSupport).handleSnapshotMessage(same(getSnapshot));
     }
 

@@ -91,7 +91,7 @@ class RaftActorSnapshotMessageSupportTest {
 
     @Test
     void testOnCommitSnapshot() {
-        sendMessageToSupport(RaftActorSnapshotMessageSupport.CommitSnapshot.INSTANCE);
+        sendMessageToSupport(SnapshotManager.CommitSnapshot.INSTANCE);
 
         verify(mockSnapshotManager).commit(eq(-1L), eq(-1L));
     }

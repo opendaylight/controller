@@ -66,6 +66,21 @@ public final class SnapshotManager {
         }
     }
 
+    @VisibleForTesting
+    @NonNullByDefault
+    public static final class CommitSnapshot {
+        static final CommitSnapshot INSTANCE = new CommitSnapshot();
+
+        private CommitSnapshot() {
+            // Hidden on purpose
+        }
+
+        @Override
+        public String toString() {
+            return "commit_snapshot";
+        }
+    }
+
     /**
      * The task being executed by this instance.
      */
