@@ -12,16 +12,13 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.OutputStream;
 import org.apache.pekko.actor.ActorContext;
-import org.apache.pekko.actor.ActorRef;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
-import org.opendaylight.controller.cluster.datastore.actors.ShardSnapshotActor;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
 import org.opendaylight.controller.cluster.io.InputOutputStreamFactory;
@@ -41,14 +38,12 @@ final class ShardSnapshotCohort implements RaftActorSnapshotCohort {
     private static final FrontendType SNAPSHOT_APPLY = FrontendType.forName("snapshot-apply");
 
     private final InputOutputStreamFactory streamFactory;
-    private final ActorRef snapshotActor;
     private final ShardDataTree store;
     private final String memberName;
 
     ShardSnapshotCohort(final InputOutputStreamFactory streamFactory, final LocalHistoryIdentifier applyHistoryId,
-            final ActorRef snapshotActor, final ShardDataTree store, final String memberName) {
+            final ShardDataTree store, final String memberName) {
         this.streamFactory = requireNonNull(streamFactory);
-        this.snapshotActor = requireNonNull(snapshotActor);
         this.store = requireNonNull(store);
         this.memberName = requireNonNull(memberName);
     }
@@ -59,18 +54,12 @@ final class ShardSnapshotCohort implements RaftActorSnapshotCohort {
             FrontendIdentifier.create(memberName, SNAPSHOT_APPLY), 0), 0);
         final var streamFactory = context.isUseLz4Compression()
                 ? InputOutputStreamFactory.lz4("256KB") : InputOutputStreamFactory.simple();
-        // Create a snapshot actor. This actor will act as a worker to offload snapshot serialization for all requests.
-        final var snapshotActor = actorContext.actorOf(ShardSnapshotActor.props(streamFactory),
-            "shard-" + memberName.getName() + ':' + "snapshot-read");
-        return new ShardSnapshotCohort(streamFactory, applyHistoryId, snapshotActor, store, logId);
+        return new ShardSnapshotCohort(streamFactory, applyHistoryId, store, logId);
     }
 
     @Override
-    public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
-        // Forward the request to the snapshot actor
-        final var snapshot = store.takeStateSnapshot();
-        LOG.debug("{}: requesting serialization of snapshot {}", memberName, snapshot);
-        ShardSnapshotActor.requestSnapshot(snapshotActor, snapshot, installSnapshotStream, actorRef);
+    public ShardSnapshotState createSnapshot() {
+        return new ShardSnapshotState(store.takeStateSnapshot());
     }
 
     @Override

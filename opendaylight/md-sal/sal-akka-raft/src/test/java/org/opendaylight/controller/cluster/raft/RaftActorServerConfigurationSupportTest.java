@@ -67,6 +67,7 @@ import org.opendaylight.controller.cluster.raft.persisted.ByteState;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.FailingTermInfoStore;
@@ -1519,18 +1520,17 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
             super(stateDir, id, peerAddresses, config, persistent, collectorActor);
             snapshotCohortDelegate = new RaftActorSnapshotCohort() {
                 @Override
-                public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
-                    actorRef.tell(new CaptureSnapshotReply(ByteState.empty(), installSnapshotStream), actorRef);
+                public ByteState createSnapshot() {
+                    return ByteState.empty();
                 }
 
                 @Override
-                public void applySnapshot(
-                        final org.opendaylight.controller.cluster.raft.persisted.Snapshot.State snapshotState) {
+                public void applySnapshot(final Snapshot.State snapshotState) {
+                    // No-op
                 }
 
                 @Override
-                public org.opendaylight.controller.cluster.raft.persisted.Snapshot.State deserializeSnapshot(
-                        final ByteSource snapshotBytes) {
+                public Snapshot.State deserializeSnapshot(final ByteSource snapshotBytes) {
                     throw new UnsupportedOperationException();
                 }
             };
