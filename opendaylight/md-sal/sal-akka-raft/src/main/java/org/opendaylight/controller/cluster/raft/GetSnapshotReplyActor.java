@@ -14,6 +14,7 @@ import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.PoisonPill;
 import org.apache.pekko.actor.Props;
 import org.apache.pekko.actor.ReceiveTimeout;
+import org.apache.pekko.actor.Status.Failure;
 import org.apache.pekko.actor.UntypedAbstractActor;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
@@ -55,12 +56,13 @@ final class GetSnapshotReplyActor extends UntypedAbstractActor {
             params.replyToActor.tell(new GetSnapshotReply(params.id, snapshot), self());
             self().tell(PoisonPill.getInstance(), self());
         } else if (message instanceof ReceiveTimeout) {
-            LOG.warn("{}: Got ReceiveTimeout for inactivity - did not receive CaptureSnapshotReply within {} ms",
-                    params.id, params.receiveTimeout.toMillis());
+            final var millis = params.receiveTimeout.toMillis();
 
-            params.replyToActor.tell(new org.apache.pekko.actor.Status.Failure(new TimeoutException(String.format(
-                    "Timed out after %d ms while waiting for CaptureSnapshotReply",
-                        params.receiveTimeout.toMillis()))), self());
+            LOG.warn("{}: Got ReceiveTimeout for inactivity - did not receive CaptureSnapshotReply within {} ms",
+                    params.id, millis);
+
+            params.replyToActor.tell(new Failure(new TimeoutException(String.format(
+                    "Timed out after %d ms while waiting for CaptureSnapshotReply", millis))), self());
             self().tell(PoisonPill.getInstance(), self());
         }
     }

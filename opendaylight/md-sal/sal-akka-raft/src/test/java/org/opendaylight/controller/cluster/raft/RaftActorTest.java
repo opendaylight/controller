@@ -1039,7 +1039,7 @@ public class RaftActorTest extends AbstractActorTest {
         reset(mockRaftActor.snapshotCohortDelegate);
 
         raftActorRef.tell(GetSnapshot.INSTANCE, kit.getRef());
-        Failure failure = kit.expectMsgClass(org.apache.pekko.actor.Status.Failure.class);
+        Failure failure = kit.expectMsgClass(Failure.class);
         assertEquals("Failure cause type", TimeoutException.class, failure.cause().getClass());
 
         mockRaftActor.getSnapshotMessageSupport().setSnapshotReplyActorTimeout(
