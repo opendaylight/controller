@@ -24,7 +24,6 @@ import static org.mockito.Mockito.verify;
 import com.google.common.base.Stopwatch;
 import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.Uninterruptibles;
-import java.io.OutputStream;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
@@ -51,7 +50,6 @@ import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.ApplyLeaderSnapshot;
 import org.opendaylight.controller.cluster.raft.VotingState;
-import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
 import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
@@ -1298,20 +1296,12 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         verify(mockResolver).setResolved("leader", leaderActor.path().toString());
     }
 
-    @SuppressWarnings("checkstyle:IllegalCatch")
     private static RaftActorSnapshotCohort newRaftActorSnapshotCohort(
             final AtomicReference<MockRaftActor> followerRaftActor) {
-        RaftActorSnapshotCohort snapshotCohort = new RaftActorSnapshotCohort() {
+        return new RaftActorSnapshotCohort() {
             @Override
-            public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
-                try {
-                    actorRef.tell(new CaptureSnapshotReply(new MockSnapshotState(followerRaftActor.get().getState()),
-                            installSnapshotStream), actorRef);
-                } catch (RuntimeException e) {
-                    throw e;
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+            public State createSnapshot() {
+                return new MockSnapshotState(followerRaftActor.get().getState());
             }
 
             @Override
@@ -1323,7 +1313,6 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
                 throw new UnsupportedOperationException();
             }
         };
-        return snapshotCohort;
     }
 
     public byte[] getNextChunk(final ByteString bs, final int offset, final int chunkSize) {

@@ -919,19 +919,18 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         final var termInfo = context.termInfo();
         final var clusterConfig = context.getPeerServerInfo(true);
+        final Snapshot snapshot;
         if (context.getPersistenceProvider().isRecoveryApplicable()) {
             final var captureSnapshot = context.getSnapshotManager().newCaptureSnapshot(
                     context.getReplicatedLog().lastMeta(), -1, true);
-            final var snapshotReplyActor = getContext().actorOf(GetSnapshotReplyActor.props(captureSnapshot,
-                    termInfo, sender, timeout, memberId(), clusterConfig));
-
-            getRaftActorSnapshotCohort().createSnapshot(snapshotReplyActor, null);
+            snapshot = Snapshot.create(getRaftActorSnapshotCohort().createSnapshot(),
+                captureSnapshot.getUnAppliedEntries(), captureSnapshot.getLastIndex(), captureSnapshot.getLastTerm(),
+                captureSnapshot.getLastAppliedIndex(), captureSnapshot.getLastAppliedTerm(), termInfo, clusterConfig);
         } else {
-            final var snapshot = Snapshot.create(EmptyState.INSTANCE, List.of(), -1, -1, -1, -1, termInfo,
-                clusterConfig);
-
-            sender.tell(new GetSnapshotReply(memberId(), snapshot), ActorRef.noSender());
+            snapshot = Snapshot.create(EmptyState.INSTANCE, List.of(), -1, -1, -1, -1, termInfo, clusterConfig);
         }
+
+        sender.tell(new GetSnapshotReply(memberId(), snapshot), ActorRef.noSender());
     }
 
     /**

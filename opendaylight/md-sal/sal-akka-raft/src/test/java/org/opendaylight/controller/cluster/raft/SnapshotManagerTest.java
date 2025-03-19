@@ -198,7 +198,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
     @Test
     public void testCaptureWithCreateProcedureError() {
-        doThrow(new RuntimeException("mock")).when(mockCohort).createSnapshot(any(), any());
+        doThrow(new RuntimeException("mock")).when(mockCohort).createSnapshot();
 
         boolean capture = snapshotManager.capture(ImmutableRaftEntryMeta.of(9, 1), 9);
 
