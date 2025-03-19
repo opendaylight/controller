@@ -228,7 +228,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         }
 
         super.handleCommand(message);
-        if (message instanceof RaftActorSnapshotMessageSupport.CommitSnapshot) {
+        if (message instanceof SnapshotManager.CommitSnapshot) {
             snapshotCommitted.countDown();
         }
     }

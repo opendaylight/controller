@@ -90,6 +90,7 @@ import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListe
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListenerReply;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.SnapshotManager.CommitSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
 import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
@@ -1537,8 +1538,7 @@ public class ShardTest extends AbstractShardTest {
             public void handleCommand(final Object message) {
                 super.handleCommand(message);
 
-                // XXX:  commit_snapshot equality check references RaftActorSnapshotMessageSupport.COMMIT_SNAPSHOT
-                if (message instanceof SaveSnapshotSuccess || "commit_snapshot".equals(message.toString())) {
+                if (message instanceof SaveSnapshotSuccess || message instanceof CommitSnapshot) {
                     latch.get().countDown();
                 }
             }

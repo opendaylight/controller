@@ -36,6 +36,6 @@ final class TransientDataProvider extends NonPersistentDataProvider {
         // Make saving Snapshot successful
         // Committing the snapshot here would end up calling commit in the creating state which would
         // be a state violation. That's why now we send a message to commit the snapshot.
-        raftActor.tell(RaftActorSnapshotMessageSupport.CommitSnapshot.INSTANCE, raftActor);
+        raftActor.tell(SnapshotManager.CommitSnapshot.INSTANCE, raftActor);
     }
 }
