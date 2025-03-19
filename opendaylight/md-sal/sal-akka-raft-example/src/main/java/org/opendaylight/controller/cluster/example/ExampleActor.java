@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.cluster.example;
 
+import com.google.common.base.VerifyException;
 import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.Serializable;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
@@ -52,7 +52,7 @@ public final class ExampleActor extends RaftActor implements RaftActorRecoveryCo
 
     private static final Logger LOG = LoggerFactory.getLogger(ExampleActor.class);
 
-    private final Map<String, String> state = new HashMap<>();
+    private final HashMap<String, String> state = new HashMap<>();
     private final ActorRef roleChangeNotifier;
 
     private long persistIdentifier = 1;
@@ -129,7 +129,7 @@ public final class ExampleActor extends RaftActor implements RaftActorRecoveryCo
     public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
         if (installSnapshotStream != null) {
             try {
-                SerializationUtils.serialize((Serializable) state, installSnapshotStream);
+                SerializationUtils.serialize(state, installSnapshotStream);
             } catch (RuntimeException e) {
                 LOG.error("Exception in creating snapshot", e);
             }
@@ -140,8 +140,12 @@ public final class ExampleActor extends RaftActor implements RaftActorRecoveryCo
 
     @Override
     public void applySnapshot(final Snapshot.State snapshotState) {
+        if (!(snapshotState instanceof MapState mapState)) {
+            throw new VerifyException("Unhandled state " + snapshotState);
+        }
+
         state.clear();
-        state.putAll(((MapState)snapshotState).state);
+        state.putAll(mapState.state);
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("Snapshot applied to state : {}", state.size());
