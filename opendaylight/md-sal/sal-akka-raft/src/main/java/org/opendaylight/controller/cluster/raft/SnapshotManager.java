@@ -141,7 +141,7 @@ public final class SnapshotManager {
         this.context = requireNonNull(context);
     }
 
-    private String memberId() {
+    String memberId() {
         return context.getId();
     }
 
@@ -300,11 +300,9 @@ public final class SnapshotManager {
      * @param snapshotState the snapshot State
      * @param installSnapshotStream Optional OutputStream that is present if the snapshot is to also be installed
      *        on a follower.
-     * @param totalMemory the total memory threshold
      */
     @VisibleForTesting
-    public void persist(final Snapshot.State snapshotState, final Optional<OutputStream> installSnapshotStream,
-            final long totalMemory) {
+    public void persist(final Snapshot.State snapshotState, final Optional<OutputStream> installSnapshotStream) {
         if (!(task instanceof Capture(final var lastSeq, final var request))) {
             LOG.debug("{}: persist should not be called in state {}", memberId(), task);
             return;
@@ -324,7 +322,7 @@ public final class SnapshotManager {
         final var config = context.getConfigParams();
         final long absoluteThreshold = config.getSnapshotDataThreshold();
         final long dataThreshold = absoluteThreshold != 0 ? absoluteThreshold * ConfigParams.MEGABYTE
-                : totalMemory * config.getSnapshotDataThresholdPercentage() / 100;
+                : context.getTotalMemory() * config.getSnapshotDataThresholdPercentage() / 100;
 
         final var replLog = context.getReplicatedLog();
         final boolean dataSizeThresholdExceeded = replLog.dataSize() > dataThreshold;

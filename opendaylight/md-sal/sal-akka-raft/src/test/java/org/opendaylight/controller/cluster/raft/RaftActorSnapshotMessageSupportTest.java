@@ -8,32 +8,24 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import com.google.common.io.ByteSource;
-import com.google.common.util.concurrent.MoreExecutors;
 import java.io.OutputStream;
-import java.nio.file.Path;
-import java.util.Map;
 import java.util.Optional;
-import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.persistence.SaveSnapshotFailure;
 import org.apache.pekko.persistence.SaveSnapshotSuccess;
 import org.apache.pekko.persistence.SnapshotMetadata;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.ApplyLeaderSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
-import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.ByteState;
-import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.ImmutableRaftEntryMeta;
 
 /**
@@ -44,34 +36,15 @@ import org.opendaylight.controller.cluster.raft.spi.ImmutableRaftEntryMeta;
 @ExtendWith(MockitoExtension.class)
 class RaftActorSnapshotMessageSupportTest {
     @Mock
-    private DataPersistenceProvider mockPersistence;
-    @Mock
-    private RaftActorBehavior mockBehavior;
-    @Mock
     private SnapshotManager mockSnapshotManager;
     @Mock
-    private ActorRef mockRaftActorRef;
-    @Mock
     private ApplyLeaderSnapshot.Callback mockCallback;
-    @TempDir
-    private Path stateDir;
 
     private RaftActorSnapshotMessageSupport support;
 
-    private RaftActorContext context;
-    private final DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
-
     @BeforeEach
     void beforeEach() throws Exception {
-        context = new RaftActorContextImpl(mockRaftActorRef, null, new LocalAccess("test", stateDir), -1, -1, Map.of(),
-            configParams, (short) 0, mockPersistence, applyState -> { }, MoreExecutors.directExecutor()) {
-                @Override
-                public SnapshotManager getSnapshotManager() {
-                    return mockSnapshotManager;
-                }
-        };
-        context.setReplicatedLog(ReplicatedLogImpl.newInstance(context));
-        support = new RaftActorSnapshotMessageSupport(context);
+        support = new RaftActorSnapshotMessageSupport(mockSnapshotManager);
     }
 
     private void sendMessageToSupport(final Object message) {
@@ -97,7 +70,7 @@ class RaftActorSnapshotMessageSupportTest {
         final var stream = mock(OutputStream.class);
         sendMessageToSupport(new CaptureSnapshotReply(state, stream));
 
-        verify(mockSnapshotManager).persist(eq(state), eq(Optional.of(stream)), anyLong());
+        verify(mockSnapshotManager).persist(eq(state), eq(Optional.of(stream)));
     }
 
     @Test
