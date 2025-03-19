@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.VisibleForTesting;
 import java.util.List;
 import java.util.Optional;
@@ -56,11 +58,8 @@ class RaftActorSnapshotMessageSupport {
     private FiniteDuration snapshotReplyActorTimeout = FiniteDuration.create(30, TimeUnit.SECONDS);
 
     RaftActorSnapshotMessageSupport(final RaftActorContext context, final RaftActorSnapshotCohort cohort) {
-        this.context = context;
-        this.cohort = cohort;
-
-        context.getSnapshotManager().setCreateSnapshotConsumer(
-            outputStream -> cohort.createSnapshot(context.getActor(), outputStream.orElse(null)));
+        this.context = requireNonNull(context);
+        this.cohort = requireNonNull(cohort);
         context.getSnapshotManager().setSnapshotCohort(cohort);
     }
 

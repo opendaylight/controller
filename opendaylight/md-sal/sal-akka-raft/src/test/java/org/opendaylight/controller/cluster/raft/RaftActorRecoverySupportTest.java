@@ -19,19 +19,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import com.google.common.util.concurrent.MoreExecutors;
-import java.io.OutputStream;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.actor.Props;
@@ -40,7 +35,6 @@ import org.apache.pekko.persistence.RecoveryCompleted;
 import org.apache.pekko.persistence.SnapshotMetadata;
 import org.apache.pekko.persistence.SnapshotOffer;
 import org.apache.pekko.testkit.javadsl.TestKit;
-import org.junit.Assert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -86,7 +80,7 @@ class RaftActorRecoverySupportTest {
     @Mock
     private AbstractPersistentActor mockActor;
     @Mock
-    private Consumer<Optional<OutputStream>> mockSnapshotConsumer;
+    private RaftActorSnapshotCohort mockSnapshotCohort;
     @TempDir
     private Path stateDir;
 
@@ -187,13 +181,13 @@ class RaftActorRecoverySupportTest {
     }
 
     @Test
-    public void testIncrementalRecovery() {
+    public void testIncrementalRecovery() throws Exception {
         doReturn(true).when(mockPersistence).isRecoveryApplicable();
 
         int recoverySnapshotInterval = 3;
         int numberOfEntries = 5;
         configParams.setRecoverySnapshotIntervalSeconds(recoverySnapshotInterval);
-        context.getSnapshotManager().setCreateSnapshotConsumer(mockSnapshotConsumer);
+        context.getSnapshotManager().setSnapshotCohort(mockSnapshotCohort);
 
         ScheduledExecutorService applyEntriesExecutor = Executors.newSingleThreadScheduledExecutor();
         ReplicatedLog replicatedLog = context.getReplicatedLog();
@@ -203,22 +197,17 @@ class RaftActorRecoverySupportTest {
                 new MockRaftActorContext.MockPayload(String.valueOf(i))));
         }
 
-        AtomicInteger entryCount = new AtomicInteger();
-        ScheduledFuture<?> applyEntriesFuture = applyEntriesExecutor.scheduleAtFixedRate(() -> {
+        final var entryCount = new AtomicInteger();
+        final var applyEntriesFuture = applyEntriesExecutor.scheduleAtFixedRate(() -> {
             int run = entryCount.getAndIncrement();
             LOG.info("Sending entry number {}", run);
             sendMessageToSupport(new ApplyJournalEntries(run));
         }, 0, 1, TimeUnit.SECONDS);
 
-        ScheduledFuture<Boolean> canceller = applyEntriesExecutor.schedule(() -> applyEntriesFuture.cancel(false),
-            numberOfEntries, TimeUnit.SECONDS);
-        try {
-            canceller.get();
-            verify(mockSnapshotConsumer, times(1)).accept(any());
-            applyEntriesExecutor.shutdown();
-        } catch (InterruptedException | ExecutionException e) {
-            Assert.fail();
-        }
+        applyEntriesExecutor.schedule(() -> applyEntriesFuture.cancel(false), numberOfEntries, TimeUnit.SECONDS).get();
+
+        verify(mockSnapshotCohort, times(1)).createSnapshot(any(), any());
+        applyEntriesExecutor.shutdown();
     }
 
     @Test

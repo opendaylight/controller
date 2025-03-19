@@ -14,7 +14,6 @@ import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Optional;
-import java.util.function.Consumer;
 import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -130,8 +129,7 @@ public final class SnapshotManager {
 
     private final @NonNull RaftActorContext context;
 
-    private RaftActorSnapshotCohort snapshotCohort = NoopRaftActorSnapshotCohort.INSTANCE;
-    private Consumer<Optional<OutputStream>> createSnapshotProcedure = null;
+    private @NonNull RaftActorSnapshotCohort snapshotCohort = NoopRaftActorSnapshotCohort.INSTANCE;
     private @NonNull Task task = Idle.INSTANCE;
 
     /**
@@ -199,7 +197,7 @@ public final class SnapshotManager {
     @SuppressWarnings("checkstyle:IllegalCatch")
     private boolean capture(final @Nullable OutputStream installSnapshotStream) {
         try {
-            createSnapshotProcedure.accept(Optional.ofNullable(installSnapshotStream));
+            snapshotCohort.createSnapshot(context.getActor(), installSnapshotStream);
         } catch (Exception e) {
             task = Idle.INSTANCE;
             LOG.error("{}: Error creating snapshot", memberId(), e);
@@ -534,13 +532,9 @@ public final class SnapshotManager {
         return -1;
     }
 
-    @SuppressWarnings("checkstyle:hiddenField")
-    void setCreateSnapshotConsumer(final Consumer<Optional<OutputStream>> createSnapshotProcedure) {
-        this.createSnapshotProcedure = createSnapshotProcedure;
-    }
-
-    void setSnapshotCohort(final RaftActorSnapshotCohort snapshotCohort) {
-        this.snapshotCohort = snapshotCohort;
+    @VisibleForTesting
+    public void setSnapshotCohort(final RaftActorSnapshotCohort snapshotCohort) {
+        this.snapshotCohort = requireNonNull(snapshotCohort);
     }
 
     Snapshot.@NonNull State convertSnapshot(final ByteSource snapshotBytes) throws IOException {
