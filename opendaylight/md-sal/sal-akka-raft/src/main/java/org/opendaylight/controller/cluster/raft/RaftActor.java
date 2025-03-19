@@ -18,6 +18,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -46,14 +47,18 @@ import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
 import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
+import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshot;
+import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshotReply;
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.client.messages.Shutdown;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.messages.RequestLeadership;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
+import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
 import org.opendaylight.controller.cluster.raft.persisted.NoopPayload;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.yangtools.concepts.Identifier;
@@ -148,6 +153,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         snapshotSupport = newRaftActorSnapshotMessageSupport();
         serverConfigurationSupport = new RaftActorServerConfigurationSupport(this);
+        context.getSnapshotManager().setSnapshotCohort(getRaftActorSnapshotCohort());
     }
 
     @Override
@@ -223,7 +229,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         if (serverConfigurationSupport.handleMessage(message, getSender())) {
             return;
         }
-        if (snapshotSupport.handleSnapshotMessage(message, getSender())) {
+        if (snapshotSupport.handleSnapshotMessage(message)) {
             return;
         }
         if (message instanceof ApplyState applyState) {
@@ -245,6 +251,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             getSender().tell(new FindLeaderReply(getLeaderAddress()), self());
         } else if (message instanceof GetOnDemandRaftState) {
             getSender().tell(getOnDemandRaftState(), self());
+        } else if (message instanceof GetSnapshot(var timeout)) {
+            getSnapshot(getSender(), timeout);
         } else if (message instanceof InitiateCaptureSnapshot) {
             captureSnapshot();
         } else if (message instanceof SwitchBehavior(var newState, var newTerm)) {
@@ -445,7 +453,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     @VisibleForTesting
     RaftActorSnapshotMessageSupport newRaftActorSnapshotMessageSupport() {
-        return new RaftActorSnapshotMessageSupport(context, getRaftActorSnapshotCohort());
+        return new RaftActorSnapshotMessageSupport(context);
     }
 
     private OnDemandRaftState getOnDemandRaftState() {
@@ -886,7 +894,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     private void captureSnapshot() {
-        SnapshotManager snapshotManager = context.getSnapshotManager();
+        final var snapshotManager = context.getSnapshotManager();
 
         if (!snapshotManager.isCapturing()) {
             final long idx = getCurrentBehavior().getReplicatedToAllIndex();
@@ -895,6 +903,24 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 memberId(), last, idx);
 
             snapshotManager.captureWithForcedTrim(last, idx);
+        }
+    }
+
+    private void getSnapshot(final ActorRef sender, final Duration timeout) {
+        LOG.debug("{}: onGetSnapshot", context.getId());
+
+        if (context.getPersistenceProvider().isRecoveryApplicable()) {
+            final var captureSnapshot = context.getSnapshotManager().newCaptureSnapshot(
+                    context.getReplicatedLog().lastMeta(), -1, true);
+            final var snapshotReplyActor = context.actorOf(GetSnapshotReplyActor.props(captureSnapshot,
+                    context.termInfo(), sender, timeout, context.getId(), context.getPeerServerInfo(true)));
+
+            getRaftActorSnapshotCohort().createSnapshot(snapshotReplyActor, null);
+        } else {
+            final var snapshot = Snapshot.create(EmptyState.INSTANCE, List.of(),
+                    -1, -1, -1, -1, context.termInfo(), context.getPeerServerInfo(true));
+
+            sender.tell(new GetSnapshotReply(context.getId(), snapshot), context.getActor());
         }
     }
 
