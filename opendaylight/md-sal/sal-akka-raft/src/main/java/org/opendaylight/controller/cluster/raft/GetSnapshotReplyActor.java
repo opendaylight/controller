@@ -16,6 +16,9 @@ import org.apache.pekko.actor.Props;
 import org.apache.pekko.actor.ReceiveTimeout;
 import org.apache.pekko.actor.Status.Failure;
 import org.apache.pekko.actor.UntypedAbstractActor;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshotReply;
@@ -34,59 +37,53 @@ import scala.concurrent.duration.FiniteDuration;
 final class GetSnapshotReplyActor extends UntypedAbstractActor {
     private static final Logger LOG = LoggerFactory.getLogger(GetSnapshotReplyActor.class);
 
-    private final Params params;
+    private final @NonNull CaptureSnapshot captureSnapshot;
+    private final @NonNull TermInfo termInfo;
+    private final @NonNull ActorRef replyToActor;
+    private final @NonNull FiniteDuration receiveTimeout;
+    private final @NonNull String memberId;
+    private final @Nullable ClusterConfig serverConfig;
 
-    GetSnapshotReplyActor(final Params params) {
-        this.params = params;
+    private GetSnapshotReplyActor(final CaptureSnapshot captureSnapshot, final TermInfo termInfo,
+            final ActorRef replyToActor, final FiniteDuration receiveTimeout, final String memberId,
+            final ClusterConfig serverConfig) {
+        this.captureSnapshot = requireNonNull(captureSnapshot);
+        this.termInfo = requireNonNull(termInfo);
+        this.replyToActor = requireNonNull(replyToActor);
+        this.receiveTimeout = requireNonNull(receiveTimeout);
+        this.memberId = requireNonNull(memberId);
+        this.serverConfig = serverConfig;
 
-        getContext().setReceiveTimeout(params.receiveTimeout);
+        getContext().setReceiveTimeout(receiveTimeout);
+    }
+
+    @NonNullByDefault
+    static Props props(final CaptureSnapshot captureSnapshot, final TermInfo termInfo, final ActorRef replyToActor,
+            final FiniteDuration receiveTimeout, final String id, final @Nullable ClusterConfig serverConfig) {
+        return Props.create(GetSnapshotReplyActor.class, requireNonNull(captureSnapshot), requireNonNull(termInfo),
+            requireNonNull(replyToActor), requireNonNull(receiveTimeout), requireNonNull(id), serverConfig);
     }
 
     @Override
     public void onReceive(final Object message) {
         if (message instanceof CaptureSnapshotReply msg) {
-            Snapshot snapshot = Snapshot.create(msg.snapshotState(),
-                params.captureSnapshot.getUnAppliedEntries(),
-                params.captureSnapshot.getLastIndex(), params.captureSnapshot.getLastTerm(),
-                params.captureSnapshot.getLastAppliedIndex(), params.captureSnapshot.getLastAppliedTerm(),
-                params.termInfo, params.serverConfig);
+            Snapshot snapshot = Snapshot.create(msg.snapshotState(), captureSnapshot.getUnAppliedEntries(),
+                captureSnapshot.getLastIndex(), captureSnapshot.getLastTerm(), captureSnapshot.getLastAppliedIndex(),
+                captureSnapshot.getLastAppliedTerm(), termInfo, serverConfig);
 
-            LOG.debug("{}: Received CaptureSnapshotReply, sending {}", params.id, snapshot);
+            LOG.debug("{}: Received CaptureSnapshotReply, sending {}", memberId, snapshot);
 
-            params.replyToActor.tell(new GetSnapshotReply(params.id, snapshot), self());
+            replyToActor.tell(new GetSnapshotReply(memberId, snapshot), self());
             self().tell(PoisonPill.getInstance(), self());
         } else if (message instanceof ReceiveTimeout) {
-            final var millis = params.receiveTimeout.toMillis();
+            final var millis = receiveTimeout.toMillis();
 
             LOG.warn("{}: Got ReceiveTimeout for inactivity - did not receive CaptureSnapshotReply within {} ms",
-                    params.id, millis);
+                    memberId, millis);
 
-            params.replyToActor.tell(new Failure(new TimeoutException(String.format(
+            replyToActor.tell(new Failure(new TimeoutException(String.format(
                     "Timed out after %d ms while waiting for CaptureSnapshotReply", millis))), self());
             self().tell(PoisonPill.getInstance(), self());
-        }
-    }
-
-    public static Props props(final CaptureSnapshot captureSnapshot, final TermInfo termInfo,
-            final ActorRef replyToActor, final FiniteDuration receiveTimeout, final String id,
-            final ClusterConfig updatedPeerInfo) {
-        return Props.create(GetSnapshotReplyActor.class, new Params(captureSnapshot, termInfo, replyToActor,
-                receiveTimeout, id, updatedPeerInfo));
-    }
-
-    private record Params(
-            CaptureSnapshot captureSnapshot,
-            TermInfo termInfo,
-            ActorRef replyToActor,
-            FiniteDuration receiveTimeout,
-            String id,
-            ClusterConfig serverConfig) {
-        Params {
-            requireNonNull(captureSnapshot);
-            requireNonNull(termInfo);
-            requireNonNull(replyToActor);
-            requireNonNull(receiveTimeout);
-            requireNonNull(id);
         }
     }
 }
