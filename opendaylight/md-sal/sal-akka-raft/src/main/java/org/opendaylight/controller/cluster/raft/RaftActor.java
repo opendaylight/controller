@@ -151,9 +151,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         super.preStart();
 
+        context.getSnapshotManager().setSnapshotCohort(getRaftActorSnapshotCohort());
         snapshotSupport = newRaftActorSnapshotMessageSupport();
         serverConfigurationSupport = new RaftActorServerConfigurationSupport(this);
-        context.getSnapshotManager().setSnapshotCohort(getRaftActorSnapshotCohort());
     }
 
     @Override
@@ -453,7 +453,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     @VisibleForTesting
     RaftActorSnapshotMessageSupport newRaftActorSnapshotMessageSupport() {
-        return new RaftActorSnapshotMessageSupport(context);
+        return new RaftActorSnapshotMessageSupport(context.getSnapshotManager());
     }
 
     private OnDemandRaftState getOnDemandRaftState() {

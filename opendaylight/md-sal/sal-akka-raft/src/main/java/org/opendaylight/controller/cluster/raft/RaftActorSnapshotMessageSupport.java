@@ -41,20 +41,20 @@ class RaftActorSnapshotMessageSupport {
 
     private static final Logger LOG = LoggerFactory.getLogger(RaftActorSnapshotMessageSupport.class);
 
-    private final RaftActorContext context;
+    private final SnapshotManager snapshotManager;
 
-    RaftActorSnapshotMessageSupport(final RaftActorContext context) {
-        this.context = requireNonNull(context);
+    RaftActorSnapshotMessageSupport(final SnapshotManager snapshotManager) {
+        this.snapshotManager = requireNonNull(snapshotManager);
     }
 
     boolean handleSnapshotMessage(final Object message) {
         switch (message) {
-            case ApplyLeaderSnapshot msg -> context.getSnapshotManager().applyFromLeader(msg);
+            case ApplyLeaderSnapshot msg -> snapshotManager.applyFromLeader(msg);
             case SaveSnapshotSuccess msg -> onSaveSnapshotSuccess(msg);
             case SaveSnapshotFailure msg -> onSaveSnapshotFailure(msg);
             case CaptureSnapshotReply msg -> onCaptureSnapshotReply(msg);
-            case CommitSnapshot msg -> context.getSnapshotManager().commit(-1, -1);
-            case SnapshotComplete msg -> LOG.debug("{}: SnapshotComplete received", context.getId());
+            case CommitSnapshot msg -> snapshotManager.commit(-1, -1);
+            case SnapshotComplete msg -> LOG.debug("{}: SnapshotComplete received", snapshotManager.memberId());
             default -> {
                 return false;
             }
@@ -63,23 +63,19 @@ class RaftActorSnapshotMessageSupport {
     }
 
     private void onCaptureSnapshotReply(final CaptureSnapshotReply reply) {
-        LOG.debug("{}: CaptureSnapshotReply received by actor", context.getId());
-
-        context.getSnapshotManager().persist(reply.snapshotState(), Optional.ofNullable(reply.installSnapshotStream()),
-                context.getTotalMemory());
+        LOG.debug("{}: CaptureSnapshotReply received by actor", snapshotManager.memberId());
+        snapshotManager.persist(reply.snapshotState(), Optional.ofNullable(reply.installSnapshotStream()));
     }
 
-    private void onSaveSnapshotFailure(final SaveSnapshotFailure saveSnapshotFailure) {
-        LOG.error("{}: SaveSnapshotFailure received for snapshot Cause:", context.getId(), saveSnapshotFailure.cause());
-
-        context.getSnapshotManager().rollback();
+    private void onSaveSnapshotFailure(final SaveSnapshotFailure failure) {
+        LOG.error("{}: SaveSnapshotFailure received for snapshot Cause:", snapshotManager.memberId(), failure.cause());
+        snapshotManager.rollback();
     }
 
     private void onSaveSnapshotSuccess(final SaveSnapshotSuccess success) {
         final var sequenceNumber = success.metadata().sequenceNr();
-
-        LOG.info("{}: SaveSnapshotSuccess received for snapshot, sequenceNr: {}", context.getId(), sequenceNumber);
-
-        context.getSnapshotManager().commit(sequenceNumber, success.metadata().timestamp());
+        LOG.info("{}: SaveSnapshotSuccess received for snapshot, sequenceNr: {}", snapshotManager.memberId(),
+            sequenceNumber);
+        snapshotManager.commit(sequenceNumber, success.metadata().timestamp());
     }
 }
