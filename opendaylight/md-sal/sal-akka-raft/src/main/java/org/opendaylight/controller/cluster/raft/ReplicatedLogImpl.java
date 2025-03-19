@@ -102,7 +102,7 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog {
     @Override
     public <T extends ReplicatedLogEntry> boolean appendAndPersist(final T replicatedLogEntry,
             final Consumer<T> callback, final boolean doAsync)  {
-        LOG.debug("{}: Append log entry and persist {} ", context.getId(), replicatedLogEntry);
+        LOG.debug("{}: Append log entry and persist {} ", memberId, replicatedLogEntry);
 
         if (!append(replicatedLogEntry)) {
             return false;
@@ -124,7 +124,7 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog {
 
     private <T extends ReplicatedLogEntry> void syncPersistCallback(final @NonNull T persistedLogEntry,
             final @Nullable Consumer<T> callback) {
-        LOG.debug("{}: persist complete {}", context.getId(), persistedLogEntry);
+        LOG.debug("{}: persist complete {}", memberId, persistedLogEntry);
 
         dataSizeSinceLastSnapshot += persistedLogEntry.size();
 
