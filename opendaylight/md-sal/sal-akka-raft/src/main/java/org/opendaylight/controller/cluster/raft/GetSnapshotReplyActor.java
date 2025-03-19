@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft;
 
 import static java.util.Objects.requireNonNull;
 
+import java.time.Duration;
 import java.util.concurrent.TimeoutException;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.PoisonPill;
@@ -27,7 +28,6 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Temporary actor used to receive a CaptureSnapshotReply message and return a GetSnapshotReply instance.
@@ -40,12 +40,12 @@ final class GetSnapshotReplyActor extends UntypedAbstractActor {
     private final @NonNull CaptureSnapshot captureSnapshot;
     private final @NonNull TermInfo termInfo;
     private final @NonNull ActorRef replyToActor;
-    private final @NonNull FiniteDuration receiveTimeout;
+    private final @NonNull Duration receiveTimeout;
     private final @NonNull String memberId;
     private final @Nullable ClusterConfig serverConfig;
 
     private GetSnapshotReplyActor(final CaptureSnapshot captureSnapshot, final TermInfo termInfo,
-            final ActorRef replyToActor, final FiniteDuration receiveTimeout, final String memberId,
+            final ActorRef replyToActor, final Duration receiveTimeout, final String memberId,
             final ClusterConfig serverConfig) {
         this.captureSnapshot = requireNonNull(captureSnapshot);
         this.termInfo = requireNonNull(termInfo);
@@ -59,7 +59,7 @@ final class GetSnapshotReplyActor extends UntypedAbstractActor {
 
     @NonNullByDefault
     static Props props(final CaptureSnapshot captureSnapshot, final TermInfo termInfo, final ActorRef replyToActor,
-            final FiniteDuration receiveTimeout, final String id, final @Nullable ClusterConfig serverConfig) {
+            final Duration receiveTimeout, final String id, final @Nullable ClusterConfig serverConfig) {
         return Props.create(GetSnapshotReplyActor.class, requireNonNull(captureSnapshot), requireNonNull(termInfo),
             requireNonNull(replyToActor), requireNonNull(receiveTimeout), requireNonNull(id), serverConfig);
     }
@@ -67,7 +67,7 @@ final class GetSnapshotReplyActor extends UntypedAbstractActor {
     @Override
     public void onReceive(final Object message) {
         if (message instanceof CaptureSnapshotReply msg) {
-            Snapshot snapshot = Snapshot.create(msg.snapshotState(), captureSnapshot.getUnAppliedEntries(),
+            final var snapshot = Snapshot.create(msg.snapshotState(), captureSnapshot.getUnAppliedEntries(),
                 captureSnapshot.getLastIndex(), captureSnapshot.getLastTerm(), captureSnapshot.getLastAppliedIndex(),
                 captureSnapshot.getLastAppliedTerm(), termInfo, serverConfig);
 
