@@ -157,8 +157,16 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     @Override
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public void postStop() throws Exception {
-        context.close();
+        final var behavior = context.getCurrentBehavior();
+        if (behavior != null) {
+            try {
+                behavior.close();
+            } catch (Exception e) {
+                LOG.warn("{}: Error closing behavior {}", memberId(), behavior.state(), e);
+            }
+        }
         super.postStop();
     }
 

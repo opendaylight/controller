@@ -421,17 +421,6 @@ public class RaftActorContextImpl implements RaftActorContext {
         return fileBackedOutputStreamFactory;
     }
 
-    @SuppressWarnings("checkstyle:IllegalCatch")
-    void close() {
-        if (currentBehavior != null) {
-            try {
-                currentBehavior.close();
-            } catch (Exception e) {
-                LOG.debug("{}: Error closing behavior {}", id, currentBehavior.state(), e);
-            }
-        }
-    }
-
     @Override
     public RaftActorLeadershipTransferCohort getRaftActorLeadershipTransferCohort() {
         return leadershipTransferCohort;
