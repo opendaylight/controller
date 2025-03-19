@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -140,9 +141,9 @@ import scala.concurrent.Future;
  * @author Thomas Pantelis
  */
 public final class ClusterAdminRpcService {
-    private static final Timeout SHARD_MGR_TIMEOUT = new Timeout(1, TimeUnit.MINUTES);
-
     private static final Logger LOG = LoggerFactory.getLogger(ClusterAdminRpcService.class);
+    private static final @NonNull Timeout SHARD_MGR_TIMEOUT = new Timeout(1, TimeUnit.MINUTES);
+    private static final @NonNull Duration GET_SNAPSHOT_TIMEOUT = Duration.ofMinutes(1);
     private static final @NonNull RpcResult<LocateShardOutput> LOCAL_SHARD_RESULT =
             RpcResultBuilder.success(new LocateShardOutputBuilder()
                 .setMemberNode(new LocalCaseBuilder().setLocal(new LocalBuilder().build()).build())
@@ -494,9 +495,7 @@ public final class ClusterAdminRpcService {
         }
 
         final var timeout = input.getTimeout();
-        final var opTimeout = timeout != null ? Timeout.apply(timeout.longValue(), TimeUnit.SECONDS)
-                : SHARD_MGR_TIMEOUT;
-
+        final var opTimeout = timeout != null ? Duration.ofSeconds(timeout.longValue()) : GET_SNAPSHOT_TIMEOUT;
         final var message = new GetSnapshot(opTimeout);
 
         final var ret = SettableFuture.<RpcResult<BackupDatastoreOutput>>create();

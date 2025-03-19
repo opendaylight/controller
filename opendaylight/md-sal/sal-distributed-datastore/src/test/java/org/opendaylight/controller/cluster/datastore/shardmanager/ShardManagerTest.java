@@ -1372,14 +1372,14 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
 
         kit.expectMsgClass(Duration.ofSeconds(5), Success.class);
 
-        EffectiveModelContext schemaContext = TEST_SCHEMA_CONTEXT;
-        shardManager.tell(new UpdateSchemaContext(schemaContext), ActorRef.noSender());
+        final var modelContext = TEST_SCHEMA_CONTEXT;
+        shardManager.tell(new UpdateSchemaContext(modelContext), ActorRef.noSender());
 
         shardManager.tell(new FindLocalShard("foo", true), kit.getRef());
 
         kit.expectMsgClass(Duration.ofSeconds(5), LocalShardFound.class);
 
-        assertSame("schemaContext", schemaContext, shardBuilder.getSchemaContext());
+        assertSame("schemaContext", modelContext, shardBuilder.getSchemaContext());
         assertNotNull("schemaContext is null", shardBuilder.getDatastoreContext());
 
         LOG.info("testOnCreateShardWithNoInitialSchemaContext ending");
@@ -1397,7 +1397,9 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         TestActorRef<TestShardManager> shardManager = actorFactory.createTestActor(newShardMgrProps(mockConfig)
                 .withDispatcher(Dispatchers.DefaultDispatcherId()));
 
-        shardManager.tell(GetSnapshot.INSTANCE, kit.getRef());
+        final var getSnapshot = new GetSnapshot(Duration.ofSeconds(30));
+
+        shardManager.tell(getSnapshot, kit.getRef());
         Failure failure = kit.expectMsgClass(Failure.class);
         assertEquals("Failure cause type", IllegalStateException.class, failure.cause().getClass());
 
@@ -1406,7 +1408,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         waitForShardInitialized(shardManager, "shard1", kit);
         waitForShardInitialized(shardManager, "shard2", kit);
 
-        shardManager.tell(GetSnapshot.INSTANCE, kit.getRef());
+        shardManager.tell(getSnapshot, kit.getRef());
 
         DatastoreSnapshot datastoreSnapshot = expectMsgClassOrFailure(DatastoreSnapshot.class, kit, "GetSnapshot");
 
@@ -1431,7 +1433,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
 
         // Send another GetSnapshot and verify
 
-        shardManager.tell(GetSnapshot.INSTANCE, kit.getRef());
+        shardManager.tell(getSnapshot, kit.getRef());
         datastoreSnapshot = expectMsgClassOrFailure(DatastoreSnapshot.class, kit, "GetSnapshot");
 
         assertEquals("Shard names", Sets.newHashSet("shard1", "shard2", "astronauts"), Sets.newHashSet(
@@ -1453,14 +1455,12 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
 
         TestKit kit = new TestKit(getSystem());
 
-        MockConfiguration mockConfig = new MockConfiguration(ImmutableMap.<String, List<String>>builder()
-                .put("shard1", Collections.<String>emptyList()).put("shard2", Collections.<String>emptyList())
-                .put("astronauts", Collections.<String>emptyList()).build());
+        MockConfiguration mockConfig = new MockConfiguration(ImmutableMap.<String, List<String>>of(
+            "shard1", List.of(), "shard2", List.of(), "astronauts", List.of()));
 
         ShardManagerSnapshot snapshot =
                 new ShardManagerSnapshot(Arrays.asList("shard1", "shard2", "astronauts"));
-        DatastoreSnapshot restoreFromSnapshot = new DatastoreSnapshot(shardMrgIDSuffix, snapshot,
-                Collections.<ShardSnapshot>emptyList());
+        DatastoreSnapshot restoreFromSnapshot = new DatastoreSnapshot(shardMrgIDSuffix, snapshot, List.of());
         TestActorRef<TestShardManager> shardManager = actorFactory.createTestActor(newTestShardMgrBuilder(mockConfig)
                 .restoreFromSnapshot(restoreFromSnapshot).props(stateDir())
                 .withDispatcher(Dispatchers.DefaultDispatcherId()));
@@ -1473,7 +1473,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         waitForShardInitialized(shardManager, "shard2", kit);
         waitForShardInitialized(shardManager, "astronauts", kit);
 
-        shardManager.tell(GetSnapshot.INSTANCE, kit.getRef());
+        shardManager.tell(new GetSnapshot(Duration.ofSeconds(30)), kit.getRef());
 
         DatastoreSnapshot datastoreSnapshot = expectMsgClassOrFailure(DatastoreSnapshot.class, kit, "GetSnapshot");
 

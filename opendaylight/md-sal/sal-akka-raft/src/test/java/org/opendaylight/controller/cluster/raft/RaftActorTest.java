@@ -94,7 +94,6 @@ import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.concurrent.duration.FiniteDuration;
 
 public class RaftActorTest extends AbstractActorTest {
     private static final Logger TEST_LOG = LoggerFactory.getLogger(RaftActorTest.class);
@@ -345,8 +344,10 @@ public class RaftActorTest extends AbstractActorTest {
             any(ActorRef.class))).thenReturn(true);
         mockRaftActor.handleCommand(RaftActorSnapshotMessageSupport.CommitSnapshot.INSTANCE);
 
-        when(mockSupport.handleSnapshotMessage(same(GetSnapshot.INSTANCE), any(ActorRef.class))).thenReturn(true);
-        mockRaftActor.handleCommand(GetSnapshot.INSTANCE);
+        final var getSnapshot = new GetSnapshot(Duration.ofSeconds(30));
+
+        when(mockSupport.handleSnapshotMessage(same(getSnapshot), any(ActorRef.class))).thenReturn(true);
+        mockRaftActor.handleCommand(getSnapshot);
 
         verify(mockSupport).handleSnapshotMessage(same(applySnapshot), any(ActorRef.class));
         verify(mockSupport).handleSnapshotMessage(same(captureSnapshotReply), any(ActorRef.class));
@@ -354,10 +355,9 @@ public class RaftActorTest extends AbstractActorTest {
         verify(mockSupport).handleSnapshotMessage(same(saveSnapshotFailure), any(ActorRef.class));
         verify(mockSupport).handleSnapshotMessage(same(RaftActorSnapshotMessageSupport.CommitSnapshot.INSTANCE),
                 any(ActorRef.class));
-        verify(mockSupport).handleSnapshotMessage(same(GetSnapshot.INSTANCE), any(ActorRef.class));
+        verify(mockSupport).handleSnapshotMessage(same(getSnapshot), any(ActorRef.class));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testApplyJournalEntriesCallsDataPersistence() throws Exception {
         String persistenceId = factory.generateActorId("leader-");
@@ -1011,7 +1011,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         mockRaftActor.snapshotCohortDelegate = mock(RaftActorSnapshotCohort.class);
 
-        raftActorRef.tell(GetSnapshot.INSTANCE, kit.getRef());
+        raftActorRef.tell(new GetSnapshot(Duration.ofSeconds(30)), kit.getRef());
 
         ArgumentCaptor<ActorRef> replyActor = ArgumentCaptor.forClass(ActorRef.class);
         verify(mockRaftActor.snapshotCohortDelegate, timeout(5000)).createSnapshot(replyActor.capture(), isNull());
@@ -1033,24 +1033,17 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals("UnApplied entry index ", 2L, replySnapshot.getUnAppliedEntries().get(0).index());
 
         // Test with timeout
-
-        mockRaftActor.getSnapshotMessageSupport().setSnapshotReplyActorTimeout(
-            FiniteDuration.create(200, TimeUnit.MILLISECONDS));
         reset(mockRaftActor.snapshotCohortDelegate);
 
-        raftActorRef.tell(GetSnapshot.INSTANCE, kit.getRef());
+        raftActorRef.tell(new GetSnapshot(Duration.ofMillis(200)), kit.getRef());
         Failure failure = kit.expectMsgClass(Failure.class);
         assertEquals("Failure cause type", TimeoutException.class, failure.cause().getClass());
 
-        mockRaftActor.getSnapshotMessageSupport().setSnapshotReplyActorTimeout(
-            FiniteDuration.create(30, TimeUnit.SECONDS));
-
         // Test with persistence disabled.
-
         mockRaftActor.setPersistence(false);
         reset(mockRaftActor.snapshotCohortDelegate);
 
-        raftActorRef.tell(GetSnapshot.INSTANCE, kit.getRef());
+        raftActorRef.tell(new GetSnapshot(Duration.ofSeconds(30)), kit.getRef());
         reply = kit.expectMsgClass(GetSnapshotReply.class);
         verify(mockRaftActor.snapshotCohortDelegate, never()).createSnapshot(any(), any());
 
