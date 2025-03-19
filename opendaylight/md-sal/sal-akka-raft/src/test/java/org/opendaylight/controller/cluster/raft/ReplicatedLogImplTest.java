@@ -76,7 +76,7 @@ class ReplicatedLogImplTest {
     }
 
     @Test
-    public void testAppendAndPersistExpectingNoCapture() throws Exception {
+    void testAppendAndPersistExpectingNoCapture() throws Exception {
         final var log = ReplicatedLogImpl.newInstance(context);
 
         final var logEntry1 = new SimpleReplicatedLogEntry(1, 1, new MockPayload("1"));
@@ -141,7 +141,7 @@ class ReplicatedLogImplTest {
     }
 
     @Test
-    public void testAppendAndPersistExpectingCaptureDueToDataSize() throws Exception {
+    void testAppendAndPersistExpectingCaptureDueToDataSize() throws Exception {
         context.setTotalMemoryRetriever(() -> 100);
 
         final var log = ReplicatedLogImpl.newInstance(context);
@@ -163,7 +163,7 @@ class ReplicatedLogImplTest {
     }
 
     @Test
-    public void testRemoveFromAndPersist() throws Exception {
+    void testRemoveFromAndPersist() throws Exception {
 
         final var log = ReplicatedLogImpl.newInstance(context);
 
@@ -186,7 +186,7 @@ class ReplicatedLogImplTest {
     }
 
     @Test
-    public void testCommitFakeSnapshot() {
+    void testCommitFakeSnapshot() {
         final var log = ReplicatedLogImpl.newInstance(context);
 
         log.append(new SimpleReplicatedLogEntry(0, 1, new MockPayload("0")));
