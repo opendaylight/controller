@@ -15,7 +15,6 @@ import static org.mockito.Mockito.mock;
 import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -184,9 +183,9 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     @Override
-    public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
+    public Snapshot.State createSnapshot() {
         LOG.info("{}: createSnapshot called", memberId());
-        snapshotCohortDelegate.createSnapshot(actorRef, installSnapshotStream);
+        return snapshotCohortDelegate.createSnapshot();
     }
 
     @Override

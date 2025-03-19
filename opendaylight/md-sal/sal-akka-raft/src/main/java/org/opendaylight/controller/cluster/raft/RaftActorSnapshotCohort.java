@@ -9,10 +9,7 @@ package org.opendaylight.controller.cluster.raft;
 
 import com.google.common.io.ByteSource;
 import java.io.IOException;
-import java.io.OutputStream;
-import org.apache.pekko.actor.ActorRef;
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 
 /**
@@ -22,19 +19,11 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
  */
 public interface RaftActorSnapshotCohort {
     /**
-     * This method is called by the RaftActor when a snapshot needs to be
-     * created. The implementation should send a CaptureSnapshotReply to the given actor.
+     * This method is called by the RaftActor when a snapshot needs to be created.
      *
-     * @param actorRef the actor to which to respond
-     * @param installSnapshotStream Optional OutputStream that is present if the snapshot is to also be installed
-     *        on a follower. The implementation must serialize its state to the OutputStream and return the
-     *        installSnapshotStream instance in the CaptureSnapshotReply along with the snapshot State instance.
-     *        The snapshot State is serialized directly to the snapshot store while the OutputStream is used to send
-     *        the state data to follower(s) in chunks. The {@link #deserializeSnapshot} method is used to convert the
-     *        serialized data back to a State instance on the follower end. The serialization for snapshot install is
-     *        passed off so the cost of serialization is not charged to the raft actor's thread.
+     * @return a {@link State}
      */
-    void createSnapshot(@NonNull ActorRef actorRef, @Nullable OutputStream installSnapshotStream);
+    State createSnapshot();
 
     /**
      * This method is called to apply a snapshot installed by the leader.
