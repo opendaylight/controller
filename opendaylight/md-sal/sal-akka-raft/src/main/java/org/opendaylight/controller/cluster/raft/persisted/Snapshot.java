@@ -65,17 +65,17 @@ public final class Snapshot implements Serializable {
         this.serverConfig = serverConfig;
     }
 
-    public static Snapshot create(final State state, final List<ReplicatedLogEntry> entries, final long lastIndex,
-            final long lastTerm, final long lastAppliedIndex, final long lastAppliedTerm, final TermInfo termInfo,
-            final ClusterConfig serverConfig) {
+    public static @NonNull Snapshot create(final State state, final List<ReplicatedLogEntry> entries,
+            final long lastIndex, final long lastTerm, final long lastAppliedIndex, final long lastAppliedTerm,
+            final TermInfo termInfo, final ClusterConfig serverConfig) {
         return new Snapshot(state, entries, lastIndex, lastTerm, lastAppliedIndex, lastAppliedTerm, termInfo,
             serverConfig);
     }
 
-    public static Snapshot ofTermLeader(final State state, final RaftEntryMeta lastIncluded, final TermInfo termInfo,
-            final ClusterConfig serverConfig) {
-        return new Snapshot(state, List.of(), lastIncluded.index(), lastIncluded.term(),
-            lastIncluded.index(), lastIncluded.term(), termInfo, serverConfig);
+    public static @NonNull Snapshot ofTermLeader(final State state, final RaftEntryMeta lastIncluded,
+            final TermInfo termInfo, final ClusterConfig serverConfig) {
+        return new Snapshot(state, List.of(), lastIncluded.index(), lastIncluded.term(), lastIncluded.index(),
+            lastIncluded.term(), termInfo, serverConfig);
     }
 
     public State getState() {

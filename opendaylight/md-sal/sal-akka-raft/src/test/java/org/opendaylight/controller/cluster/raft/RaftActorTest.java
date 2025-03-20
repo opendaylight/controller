@@ -16,7 +16,6 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -37,11 +36,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.PoisonPill;
-import org.apache.pekko.actor.Status.Failure;
 import org.apache.pekko.actor.Terminated;
 import org.apache.pekko.dispatch.Dispatchers;
 import org.apache.pekko.persistence.AbstractPersistentActor;
@@ -122,7 +119,6 @@ public class RaftActorTest extends AbstractActorTest {
         final var kit = new RaftActorTestKit(stateDir(), getSystem(), "testFindLeader");
         kit.waitUntilLeader();
     }
-
 
     @Test
     public void testRaftActorRecoveryWithPersistenceEnabled() {
@@ -1004,15 +1000,13 @@ public class RaftActorTest extends AbstractActorTest {
 
         mockRaftActor.waitForRecoveryComplete();
 
+        final var stateSnapshot = new MockSnapshotState(List.of(new byte[] { 1, 2, 3 }));
         mockRaftActor.snapshotCohortDelegate = mock(MockRaftActorSnapshotCohort.class);
+        doReturn(stateSnapshot).when(mockRaftActor.snapshotCohortDelegate).takeSnapshot();
 
         raftActorRef.tell(new GetSnapshot(Duration.ofSeconds(30)), kit.getRef());
 
-        ArgumentCaptor<ActorRef> replyActor = ArgumentCaptor.forClass(ActorRef.class);
-        verify(mockRaftActor.snapshotCohortDelegate, timeout(5000)).createSnapshot(replyActor.capture(), isNull());
-
-        byte[] stateSnapshot = new byte[]{1,2,3};
-        replyActor.getValue().tell(new CaptureSnapshotReply(ByteState.of(stateSnapshot), null), ActorRef.noSender());
+        verify(mockRaftActor.snapshotCohortDelegate, timeout(5000)).takeSnapshot();
 
         GetSnapshotReply reply = kit.expectMsgClass(GetSnapshotReply.class);
 
@@ -1023,16 +1017,9 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals("getLastAppliedTerm", term, replySnapshot.getLastAppliedTerm());
         assertEquals("getLastIndex", 2L, replySnapshot.getLastIndex());
         assertEquals("getLastTerm", term, replySnapshot.getLastTerm());
-        assertEquals("getState", ByteState.of(stateSnapshot), replySnapshot.getState());
+        assertSame("getState", stateSnapshot, replySnapshot.getState());
         assertEquals("getUnAppliedEntries size", 1, replySnapshot.getUnAppliedEntries().size());
         assertEquals("UnApplied entry index ", 2L, replySnapshot.getUnAppliedEntries().get(0).index());
-
-        // Test with timeout
-        reset(mockRaftActor.snapshotCohortDelegate);
-
-        raftActorRef.tell(new GetSnapshot(Duration.ofMillis(200)), kit.getRef());
-        Failure failure = kit.expectMsgClass(Failure.class);
-        assertEquals("Failure cause type", TimeoutException.class, failure.cause().getClass());
 
         // Test with persistence disabled.
         mockRaftActor.setPersistence(false);
