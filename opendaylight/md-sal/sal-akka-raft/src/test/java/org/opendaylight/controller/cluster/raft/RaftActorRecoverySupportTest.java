@@ -78,7 +78,7 @@ class RaftActorRecoverySupportTest {
     @Mock
     private AbstractPersistentActor mockActor;
     @Mock
-    private RaftActorSnapshotCohort mockSnapshotCohort;
+    private RaftActorSnapshotCohort<?> mockSnapshotCohort;
     @TempDir
     private Path stateDir;
 

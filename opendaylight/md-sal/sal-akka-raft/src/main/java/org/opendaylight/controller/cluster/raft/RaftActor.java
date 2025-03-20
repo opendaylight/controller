@@ -832,7 +832,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     /**
      * Returns the RaftActorSnapshotCohort to participate in snapshot captures.
      */
-    protected abstract @NonNull RaftActorSnapshotCohort getRaftActorSnapshotCohort();
+    protected abstract @NonNull RaftActorSnapshotCohort<?> getRaftActorSnapshotCohort();
 
     /**
      * This method will be called by the RaftActor when the state of the

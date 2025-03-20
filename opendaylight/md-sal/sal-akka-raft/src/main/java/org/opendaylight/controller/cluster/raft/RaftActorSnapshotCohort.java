@@ -18,9 +18,17 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 /**
  * Interface for a class that participates in raft actor snapshotting.
  *
+ * @param <T> type of state
  * @author Thomas Pantelis
  */
-public interface RaftActorSnapshotCohort {
+public interface RaftActorSnapshotCohort<T extends State> {
+    /**
+     * Return the type of state supported by this cohort.
+     *
+     * @return the state class
+     */
+    @NonNull Class<T> stateClass();
+
     /**
      * This method is called by the RaftActor when a snapshot needs to be
      * created. The implementation should send a CaptureSnapshotReply to the given actor.
@@ -41,7 +49,7 @@ public interface RaftActorSnapshotCohort {
      *
      * @param snapshotState a snapshot of the state of the actor
      */
-    void applySnapshot(@NonNull State snapshotState);
+    void applySnapshot(@NonNull T snapshotState);
 
     /**
      * This method is called to de-serialize snapshot data that was previously serialized via {@link #createSnapshot}
@@ -51,5 +59,5 @@ public interface RaftActorSnapshotCohort {
      * @return the converted snapshot State
      * @throws IOException if an error occurs accessing the ByteSource or de-serializing
      */
-    @NonNull State deserializeSnapshot(@NonNull ByteSource snapshotBytes) throws IOException;
+    @NonNull T deserializeSnapshot(@NonNull ByteSource snapshotBytes) throws IOException;
 }

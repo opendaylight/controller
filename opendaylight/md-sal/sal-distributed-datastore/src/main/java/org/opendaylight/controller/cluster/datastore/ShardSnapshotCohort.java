@@ -26,8 +26,6 @@ import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnap
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
 import org.opendaylight.controller.cluster.io.InputOutputStreamFactory;
 import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +34,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Pantelis
  */
-final class ShardSnapshotCohort implements RaftActorSnapshotCohort {
+final class ShardSnapshotCohort implements RaftActorSnapshotCohort<ShardSnapshotState> {
     private static final Logger LOG = LoggerFactory.getLogger(ShardSnapshotCohort.class);
     private static final FrontendType SNAPSHOT_APPLY = FrontendType.forName("snapshot-apply");
 
@@ -66,6 +64,11 @@ final class ShardSnapshotCohort implements RaftActorSnapshotCohort {
     }
 
     @Override
+    public Class<ShardSnapshotState> stateClass() {
+        return ShardSnapshotState.class;
+    }
+
+    @Override
     public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
         // Forward the request to the snapshot actor
         final var snapshot = store.takeStateSnapshot();
@@ -75,13 +78,8 @@ final class ShardSnapshotCohort implements RaftActorSnapshotCohort {
 
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public void applySnapshot(final Snapshot.State snapshotState) {
-        if (!(snapshotState instanceof ShardSnapshotState shardSnapshotState)) {
-            LOG.debug("{}: applySnapshot ignoring snapshot: {}", memberName, snapshotState);
-            return;
-        }
-
-        final var snapshot = shardSnapshotState.getSnapshot();
+    public void applySnapshot(final ShardSnapshotState snapshotState) {
+        final var snapshot = snapshotState.getSnapshot();
 
         // Since this will be done only on Recovery or when this actor is a Follower
         // we can safely commit everything in here. We not need to worry about event notifications
@@ -98,7 +96,7 @@ final class ShardSnapshotCohort implements RaftActorSnapshotCohort {
     }
 
     @Override
-    public State deserializeSnapshot(final ByteSource snapshotBytes) throws IOException {
+    public ShardSnapshotState deserializeSnapshot(final ByteSource snapshotBytes) throws IOException {
         try (var in = new ObjectInputStream(streamFactory.createInputStream(snapshotBytes))) {
             return ShardDataTreeSnapshot.deserialize(in);
         }

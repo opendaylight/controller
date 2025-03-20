@@ -144,7 +144,7 @@ public final class SnapshotManager {
 
     private final @NonNull RaftActorContext context;
 
-    private @NonNull RaftActorSnapshotCohort snapshotCohort = NoopRaftActorSnapshotCohort.INSTANCE;
+    private @NonNull RaftActorSnapshotCohort<?> snapshotCohort = NoopRaftActorSnapshotCohort.INSTANCE;
     private @NonNull Task task = Idle.INSTANCE;
 
     /**
@@ -447,7 +447,7 @@ public final class SnapshotManager {
 
                     final var state = snapshot.getState();
                     if (state != null && !(state instanceof EmptyState)) {
-                        snapshotCohort.applySnapshot(state);
+                        applySnapshotState(snapshotCohort, state);
                     }
 
                     if (callback != null) {
@@ -463,6 +463,18 @@ public final class SnapshotManager {
                 yield lastSeq;
             }
         };
+    }
+
+    private <T extends Snapshot.State> void applySnapshotState(final @NonNull RaftActorSnapshotCohort<T> cohort,
+            final Snapshot.@NonNull State state) {
+        final T casted;
+        try {
+            casted = cohort.stateClass().cast(state);
+        } catch (ClassCastException e) {
+            LOG.warn("{}: not applyling state {}", memberId(), state, e);
+            return;
+        }
+        cohort.applySnapshot(casted);
     }
 
     /**
@@ -542,7 +554,7 @@ public final class SnapshotManager {
     }
 
     @VisibleForTesting
-    public void setSnapshotCohort(final RaftActorSnapshotCohort snapshotCohort) {
+    public void setSnapshotCohort(final RaftActorSnapshotCohort<?> snapshotCohort) {
         this.snapshotCohort = requireNonNull(snapshotCohort);
     }
 

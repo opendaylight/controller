@@ -26,8 +26,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.ByteState;
+import org.opendaylight.controller.cluster.raft.persisted.ByteStateSnapshotCohort;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.spi.TestTermInfoStore;
@@ -106,11 +106,11 @@ public class MockRaftActorContext extends RaftActorContextImpl {
 
     @Override
     public SnapshotManager getSnapshotManager() {
-        SnapshotManager snapshotManager = super.getSnapshotManager();
+        final var snapshotManager = super.getSnapshotManager();
 
-        snapshotManager.setSnapshotCohort(new RaftActorSnapshotCohort() {
+        snapshotManager.setSnapshotCohort(new ByteStateSnapshotCohort() {
             @Override
-            public State deserializeSnapshot(final ByteSource snapshotBytes) throws IOException {
+            public ByteState deserializeSnapshot(final ByteSource snapshotBytes) throws IOException {
                 return ByteState.of(snapshotBytes.read());
             }
 
@@ -120,7 +120,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
             }
 
             @Override
-            public void applySnapshot(final State snapshotState) {
+            public void applySnapshot(final ByteState snapshotState) {
                 // No-op
             }
         });
