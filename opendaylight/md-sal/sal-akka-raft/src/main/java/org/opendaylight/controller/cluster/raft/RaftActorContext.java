@@ -17,7 +17,6 @@ import java.util.function.LongSupplier;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.ActorSystem;
-import org.apache.pekko.actor.Props;
 import org.apache.pekko.cluster.Cluster;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -36,14 +35,6 @@ import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
  * used in any actor context outside the RaftActor that constructed it.
  */
 public interface RaftActorContext {
-    /**
-     * Creates a new local actor.
-     *
-     * @param props the Props used to create the actor.
-     * @return a reference to the newly created actor.
-     */
-    ActorRef actorOf(Props props);
-
     /**
      * Creates an actor selection.
      *

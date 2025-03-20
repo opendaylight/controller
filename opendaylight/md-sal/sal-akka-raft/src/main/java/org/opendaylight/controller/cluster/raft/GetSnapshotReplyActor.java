@@ -73,8 +73,8 @@ final class GetSnapshotReplyActor extends UntypedAbstractActor {
 
             LOG.debug("{}: Received CaptureSnapshotReply, sending {}", memberId, snapshot);
 
-            replyToActor.tell(new GetSnapshotReply(memberId, snapshot), self());
-            self().tell(PoisonPill.getInstance(), self());
+            replyToActor.tell(new GetSnapshotReply(memberId, snapshot), ActorRef.noSender());
+            self().tell(PoisonPill.getInstance(), ActorRef.noSender());
         } else if (message instanceof ReceiveTimeout) {
             final var millis = receiveTimeout.toMillis();
 
@@ -82,8 +82,8 @@ final class GetSnapshotReplyActor extends UntypedAbstractActor {
                     memberId, millis);
 
             replyToActor.tell(new Failure(new TimeoutException(String.format(
-                    "Timed out after %d ms while waiting for CaptureSnapshotReply", millis))), self());
-            self().tell(PoisonPill.getInstance(), self());
+                    "Timed out after %d ms while waiting for CaptureSnapshotReply", millis))), ActorRef.noSender());
+            self().tell(PoisonPill.getInstance(), ActorRef.noSender());
         }
     }
 }
