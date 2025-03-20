@@ -191,7 +191,24 @@ public final class SnapshotManager {
 
         final var request = newCaptureSnapshot(lastLogEntry, replicatedToAllIndex, false);
         LOG.info("{}: Initiating snapshot capture {} to install on {}", memberId(), request, targetFollower);
-        return capture(request, context.getFileBackedOutputStreamFactory().newInstance());
+
+        final var lastSeq = context.getPersistenceProvider().getLastSequenceNumber();
+        LOG.debug("{}: lastSequenceNumber prior to capture: {}", memberId(), lastSeq);
+
+        task = new Capture(lastSeq, request);
+        return captureToInstall(context.getFileBackedOutputStreamFactory().newInstance());
+    }
+
+    @SuppressWarnings("checkstyle:IllegalCatch")
+    private boolean captureToInstall(final @NonNull OutputStream outputStream) {
+        try {
+            snapshotCohort.createSnapshot(context.getActor(), outputStream);
+        } catch (Exception e) {
+            task = Idle.INSTANCE;
+            LOG.error("{}: Error creating snapshot", memberId(), e);
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -226,26 +243,10 @@ public final class SnapshotManager {
 
     private boolean capture(final @NonNull CaptureSnapshot request) {
         LOG.info("{}: Initiating snapshot capture {}", memberId(), request);
-        return capture(request, null);
-    }
-
-    private boolean capture(final @NonNull CaptureSnapshot request, final @Nullable OutputStream outputStream) {
         final var lastSeq = context.getPersistenceProvider().getLastSequenceNumber();
-        LOG.debug("{}: lastSequenceNumber prior to capture: {}", memberId(), lastSeq);
-
-        task = new Capture(lastSeq, request);
-        return capture(outputStream);
-    }
-
-    @SuppressWarnings("checkstyle:IllegalCatch")
-    private boolean capture(final @Nullable OutputStream outputStream) {
-        try {
-            snapshotCohort.createSnapshot(context.getActor(), outputStream);
-        } catch (Exception e) {
-            task = Idle.INSTANCE;
-            LOG.error("{}: Error creating snapshot", memberId(), e);
-            return false;
-        }
+        final var snapshotState = snapshotCohort.takeSnapshot();
+        LOG.debug("{}: captured snapshot at lastSequenceNumber: {}", memberId(), lastSeq);
+        persist(lastSeq, request, snapshotState, null);
         return true;
     }
 
@@ -314,11 +315,15 @@ public final class SnapshotManager {
      */
     @VisibleForTesting
     public void persist(final Snapshot.State snapshotState, final @Nullable OutputStream installSnapshotStream) {
-        if (!(task instanceof Capture(final var lastSeq, final var request))) {
+        if (task instanceof Capture(var lastSeq, var request)) {
+            persist(lastSeq, request, snapshotState, installSnapshotStream);
+        } else {
             LOG.debug("{}: persist should not be called in state {}", memberId(), task);
-            return;
         }
+    }
 
+    private void persist(final long lastSeq, final CaptureSnapshot request, final Snapshot.State snapshotState,
+            final @Nullable OutputStream installSnapshotStream) {
         // create a snapshot object from the state provided and save it when snapshot is saved async,
         // SaveSnapshotSuccess is raised.
         final var snapshot = Snapshot.create(snapshotState, request.getUnAppliedEntries(),
