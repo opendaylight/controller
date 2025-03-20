@@ -7,9 +7,6 @@
  */
 package org.opendaylight.controller.cluster.raft.client.messages;
 
-import static java.util.Objects.requireNonNull;
-
-import java.time.Duration;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -19,9 +16,10 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Thomas Pantelis
  */
 @NonNullByDefault
-public record GetSnapshot(Duration timeout) {
+public final class GetSnapshot {
+    public static final GetSnapshot INSTANCE = new GetSnapshot();
 
-    public GetSnapshot {
-        requireNonNull(timeout);
+    private GetSnapshot() {
+        // Hidden on purpose
     }
 }

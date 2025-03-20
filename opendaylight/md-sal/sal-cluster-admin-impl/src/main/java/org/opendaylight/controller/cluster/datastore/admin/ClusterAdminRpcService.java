@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -143,7 +142,6 @@ import scala.concurrent.Future;
 public final class ClusterAdminRpcService {
     private static final Logger LOG = LoggerFactory.getLogger(ClusterAdminRpcService.class);
     private static final @NonNull Timeout SHARD_MGR_TIMEOUT = new Timeout(1, TimeUnit.MINUTES);
-    private static final @NonNull Duration GET_SNAPSHOT_TIMEOUT = Duration.ofMinutes(1);
     private static final @NonNull RpcResult<LocateShardOutput> LOCAL_SHARD_RESULT =
             RpcResultBuilder.success(new LocateShardOutputBuilder()
                 .setMemberNode(new LocalCaseBuilder().setLocal(new LocalBuilder().build()).build())
@@ -495,13 +493,12 @@ public final class ClusterAdminRpcService {
         }
 
         final var timeout = input.getTimeout();
-        final var opTimeout = timeout != null ? Duration.ofSeconds(timeout.longValue()) : GET_SNAPSHOT_TIMEOUT;
-        final var message = new GetSnapshot(opTimeout);
+        final var opTimeout = timeout != null ? new Timeout(timeout.longValue(), TimeUnit.SECONDS) : SHARD_MGR_TIMEOUT;
 
         final var ret = SettableFuture.<RpcResult<BackupDatastoreOutput>>create();
         Futures.addCallback(Futures.<DatastoreSnapshot>allAsList(
-            sendMessageToShardManager(DataStoreType.Config, message),
-            sendMessageToShardManager(DataStoreType.Operational, message)),
+            sendMessageToShardManager(DataStoreType.Config, GetSnapshot.INSTANCE, opTimeout),
+            sendMessageToShardManager(DataStoreType.Operational, GetSnapshot.INSTANCE, opTimeout)),
             new FutureCallback<>() {
                 @Override
                 public void onSuccess(final List<DatastoreSnapshot> snapshots) {
@@ -717,7 +714,12 @@ public final class ClusterAdminRpcService {
     }
 
     private <T> ListenableFuture<T> sendMessageToShardManager(final DataStoreType dataStoreType, final Object message) {
-        return ask(actorUtils(dataStoreType).getShardManager(), message, SHARD_MGR_TIMEOUT);
+        return sendMessageToShardManager(dataStoreType, message, SHARD_MGR_TIMEOUT);
+    }
+
+    private <T> ListenableFuture<T> sendMessageToShardManager(final DataStoreType dataStoreType, final Object message,
+            final Timeout timeout) {
+        return ask(actorUtils(dataStoreType).getShardManager(), message, timeout);
     }
 
     private static void saveSnapshotsToFile(final DatastoreSnapshotList snapshots, final String fileName,

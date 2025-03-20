@@ -339,17 +339,15 @@ public class RaftActorTest extends AbstractActorTest {
             .thenReturn(true);
         mockRaftActor.handleCommand(SnapshotManager.CommitSnapshot.INSTANCE);
 
-        final var getSnapshot = new GetSnapshot(Duration.ofSeconds(30));
-
-        when(mockSupport.handleSnapshotMessage(same(getSnapshot))).thenReturn(true);
-        mockRaftActor.handleCommand(getSnapshot);
+        when(mockSupport.handleSnapshotMessage(same(GetSnapshot.INSTANCE))).thenReturn(true);
+        mockRaftActor.handleCommand(GetSnapshot.INSTANCE);
 
         verify(mockSupport).handleSnapshotMessage(same(applySnapshot));
         verify(mockSupport).handleSnapshotMessage(same(captureSnapshotReply));
         verify(mockSupport).handleSnapshotMessage(same(saveSnapshotSuccess));
         verify(mockSupport).handleSnapshotMessage(same(saveSnapshotFailure));
         verify(mockSupport).handleSnapshotMessage(same(SnapshotManager.CommitSnapshot.INSTANCE));
-        verify(mockSupport).handleSnapshotMessage(same(getSnapshot));
+        verify(mockSupport).handleSnapshotMessage(same(GetSnapshot.INSTANCE));
     }
 
     @Test
@@ -1004,7 +1002,7 @@ public class RaftActorTest extends AbstractActorTest {
         mockRaftActor.snapshotCohortDelegate = mock(MockRaftActorSnapshotCohort.class);
         doReturn(stateSnapshot).when(mockRaftActor.snapshotCohortDelegate).takeSnapshot();
 
-        raftActorRef.tell(new GetSnapshot(Duration.ofSeconds(30)), kit.getRef());
+        raftActorRef.tell(GetSnapshot.INSTANCE, kit.getRef());
 
         verify(mockRaftActor.snapshotCohortDelegate, timeout(5000)).takeSnapshot();
 
@@ -1025,7 +1023,7 @@ public class RaftActorTest extends AbstractActorTest {
         mockRaftActor.setPersistence(false);
         reset(mockRaftActor.snapshotCohortDelegate);
 
-        raftActorRef.tell(new GetSnapshot(Duration.ofSeconds(30)), kit.getRef());
+        raftActorRef.tell(GetSnapshot.INSTANCE, kit.getRef());
         reply = kit.expectMsgClass(GetSnapshotReply.class);
         verify(mockRaftActor.snapshotCohortDelegate, never()).createSnapshot(any(), any());
 

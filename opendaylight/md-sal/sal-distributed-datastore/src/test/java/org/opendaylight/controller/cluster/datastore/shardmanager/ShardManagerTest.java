@@ -1397,9 +1397,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         TestActorRef<TestShardManager> shardManager = actorFactory.createTestActor(newShardMgrProps(mockConfig)
                 .withDispatcher(Dispatchers.DefaultDispatcherId()));
 
-        final var getSnapshot = new GetSnapshot(Duration.ofSeconds(30));
-
-        shardManager.tell(getSnapshot, kit.getRef());
+        shardManager.tell(GetSnapshot.INSTANCE, kit.getRef());
         Failure failure = kit.expectMsgClass(Failure.class);
         assertEquals("Failure cause type", IllegalStateException.class, failure.cause().getClass());
 
@@ -1408,7 +1406,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         waitForShardInitialized(shardManager, "shard1", kit);
         waitForShardInitialized(shardManager, "shard2", kit);
 
-        shardManager.tell(getSnapshot, kit.getRef());
+        shardManager.tell(GetSnapshot.INSTANCE, kit.getRef());
 
         DatastoreSnapshot datastoreSnapshot = expectMsgClassOrFailure(DatastoreSnapshot.class, kit, "GetSnapshot");
 
@@ -1433,7 +1431,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
 
         // Send another GetSnapshot and verify
 
-        shardManager.tell(getSnapshot, kit.getRef());
+        shardManager.tell(GetSnapshot.INSTANCE, kit.getRef());
         datastoreSnapshot = expectMsgClassOrFailure(DatastoreSnapshot.class, kit, "GetSnapshot");
 
         assertEquals("Shard names", Sets.newHashSet("shard1", "shard2", "astronauts"), Sets.newHashSet(
@@ -1473,7 +1471,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         waitForShardInitialized(shardManager, "shard2", kit);
         waitForShardInitialized(shardManager, "astronauts", kit);
 
-        shardManager.tell(new GetSnapshot(Duration.ofSeconds(30)), kit.getRef());
+        shardManager.tell(GetSnapshot.INSTANCE, kit.getRef());
 
         DatastoreSnapshot datastoreSnapshot = expectMsgClassOrFailure(DatastoreSnapshot.class, kit, "GetSnapshot");
 
