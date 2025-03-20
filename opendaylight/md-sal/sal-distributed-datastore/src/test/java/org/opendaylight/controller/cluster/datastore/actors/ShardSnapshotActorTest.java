@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.datastore.actors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 
 import com.google.common.io.ByteSource;
 import java.io.ByteArrayOutputStream;
@@ -25,44 +26,34 @@ import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotStat
 import org.opendaylight.controller.cluster.io.InputOutputStreamFactory;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 public class ShardSnapshotActorTest extends AbstractActorTest {
     private static final InputOutputStreamFactory STREAM_FACTORY = InputOutputStreamFactory.simple();
 
-    private static void testSerializeSnapshot(final String testName, final ShardDataTreeSnapshot snapshot,
-            final boolean withInstallSnapshot) throws Exception {
+    @Test
+    public void testSerializeSnapshot() throws Exception {
         final TestKit kit = new TestKit(getSystem());
-        final ActorRef snapshotActor = getSystem().actorOf(ShardSnapshotActor.props(STREAM_FACTORY), testName);
+        final ActorRef snapshotActor = getSystem().actorOf(ShardSnapshotActor.props(STREAM_FACTORY),
+            "testSerializeBoronSnapshotWithInstallSnapshot");
         kit.watch(snapshotActor);
 
-        final NormalizedNode expectedRoot = snapshot.getRootNode().orElseThrow();
+        final var snapshot =  new MetadataShardDataTreeSnapshot(TestModel.EMPTY_TEST);
 
-        ByteArrayOutputStream installSnapshotStream = withInstallSnapshot ? new ByteArrayOutputStream() : null;
+        final var installSnapshotStream = new ByteArrayOutputStream();
         ShardSnapshotActor.requestSnapshot(snapshotActor, snapshot, installSnapshotStream, kit.getRef());
 
-        final CaptureSnapshotReply reply = kit.expectMsgClass(Duration.ofSeconds(3), CaptureSnapshotReply.class);
+        final var reply = kit.expectMsgClass(Duration.ofSeconds(3), CaptureSnapshotReply.class);
         assertNotNull("getSnapshotState is null", reply.snapshotState());
         assertEquals("SnapshotState type", ShardSnapshotState.class, reply.snapshotState().getClass());
-        assertEquals("Snapshot", snapshot, ((ShardSnapshotState)reply.snapshotState()).getSnapshot());
+        assertSame("Snapshot", snapshot, ((ShardSnapshotState) reply.snapshotState()).getSnapshot());
 
-        if (installSnapshotStream != null) {
-            final ShardDataTreeSnapshot deserialized;
-            try (ObjectInputStream in = new ObjectInputStream(STREAM_FACTORY.createInputStream(
-                    ByteSource.wrap(installSnapshotStream.toByteArray())))) {
-                deserialized = ShardDataTreeSnapshot.deserialize(in).getSnapshot();
-            }
-
-            assertEquals("Deserialized snapshot type", snapshot.getClass(), deserialized.getClass());
-            assertEquals("Root node", Optional.of(expectedRoot), deserialized.getRootNode());
+        final ShardDataTreeSnapshot deserialized;
+        try (var in = new ObjectInputStream(STREAM_FACTORY.createInputStream(
+            ByteSource.wrap(installSnapshotStream.toByteArray())))) {
+            deserialized = ShardDataTreeSnapshot.deserialize(in).getSnapshot();
         }
-    }
 
-    @Test
-    public void testSerializeBoronSnapshot() throws Exception {
-        testSerializeSnapshot("testSerializeBoronSnapshotWithInstallSnapshot",
-                new MetadataShardDataTreeSnapshot(TestModel.EMPTY_TEST), true);
-        testSerializeSnapshot("testSerializeBoronSnapshotWithoutInstallSnapshot",
-                new MetadataShardDataTreeSnapshot(TestModel.EMPTY_TEST), false);
+        assertEquals("Deserialized snapshot type", snapshot.getClass(), deserialized.getClass());
+        assertEquals("Root node", Optional.of(TestModel.EMPTY_TEST), deserialized.getRootNode());
     }
 }

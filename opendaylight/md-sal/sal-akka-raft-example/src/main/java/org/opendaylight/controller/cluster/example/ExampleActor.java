@@ -139,14 +139,11 @@ public final class ExampleActor extends RaftActor
     @SuppressWarnings("checkstyle:IllegalCatch")
     public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
         final var snapshot = takeSnapshot();
-        if (installSnapshotStream != null) {
-            try {
-                SerializationUtils.serialize(snapshot.state, installSnapshotStream);
-            } catch (RuntimeException e) {
-                LOG.error("Exception in creating snapshot", e);
-            }
+        try {
+            SerializationUtils.serialize(snapshot.state, installSnapshotStream);
+        } catch (RuntimeException e) {
+            LOG.error("Exception in creating snapshot", e);
         }
-
         self().tell(new CaptureSnapshotReply(snapshot, installSnapshotStream), null);
     }
 

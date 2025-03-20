@@ -100,7 +100,7 @@ public final class ShardSnapshotActor extends AbstractUntypedActorWithMetering {
      * @param replyTo the actor to which to send the CaptureSnapshotReply
      */
     public static void requestSnapshot(final ActorRef snapshotActor, final ShardDataTreeSnapshot snapshot,
-            final @Nullable OutputStream installSnapshotStream, final ActorRef replyTo) {
+            final OutputStream installSnapshotStream, final ActorRef replyTo) {
         snapshotActor.tell(new SerializeSnapshot(snapshot, installSnapshotStream, replyTo), ActorRef.noSender());
     }
 
