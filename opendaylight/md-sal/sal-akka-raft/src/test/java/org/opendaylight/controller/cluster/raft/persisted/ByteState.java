@@ -19,6 +19,7 @@ import org.eclipse.jdt.annotation.NonNull;
  * @author Thomas Pantelis
  */
 public final class ByteState implements Snapshot.State {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private final byte @NonNull[] bytes;
@@ -35,7 +36,7 @@ public final class ByteState implements Snapshot.State {
         return new ByteState(new byte[0]);
     }
 
-    public byte @NonNull[] getBytes() {
+    public byte @NonNull[] bytes() {
         return bytes;
     }
 

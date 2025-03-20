@@ -1004,7 +1004,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         mockRaftActor.waitForRecoveryComplete();
 
-        mockRaftActor.snapshotCohortDelegate = mock(RaftActorSnapshotCohort.class);
+        mockRaftActor.snapshotCohortDelegate = mock(MockRaftActorSnapshotCohort.class);
 
         raftActorRef.tell(new GetSnapshot(Duration.ofSeconds(30)), kit.getRef());
 
@@ -1096,7 +1096,7 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals("getState", snapshot.getState(), savedSnapshot.getState());
         assertEquals("getUnAppliedEntries", snapshot.getUnAppliedEntries(), savedSnapshot.getUnAppliedEntries());
 
-        verify(mockRaftActor.snapshotCohortDelegate, timeout(5000)).applySnapshot(any(Snapshot.State.class));
+        verify(mockRaftActor.snapshotCohortDelegate, timeout(5000)).applySnapshot(any());
 
         RaftActorContext context = mockRaftActor.getRaftActorContext();
         assertEquals("Journal log size", 1, context.getReplicatedLog().size());
@@ -1136,7 +1136,7 @@ public class RaftActorTest extends AbstractActorTest {
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
         config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
 
-        List<MockPayload> state = List.of(new MockRaftActorContext.MockPayload("A"));
+        final var state = List.of(new MockRaftActorContext.MockPayload("A"));
         Snapshot snapshot = Snapshot.create(ByteState.of(fromObject(state).toByteArray()),
                 List.of(), 5, 2, 5, 2, new TermInfo(2, "member-1"), null);
 
@@ -1151,7 +1151,7 @@ public class RaftActorTest extends AbstractActorTest {
         mockRaftActor.waitForRecoveryComplete();
 
         Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
-        verify(mockRaftActor.snapshotCohortDelegate, never()).applySnapshot(any(Snapshot.State.class));
+        verify(mockRaftActor.snapshotCohortDelegate, never()).applySnapshot(any());
 
         RaftActorContext context = mockRaftActor.getRaftActorContext();
         assertEquals("Journal log size", 1, context.getReplicatedLog().size());

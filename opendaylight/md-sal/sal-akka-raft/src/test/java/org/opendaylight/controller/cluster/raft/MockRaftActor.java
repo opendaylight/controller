@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static com.google.common.base.Verify.verifyNotNull;
+import static java.util.Objects.requireNonNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
@@ -36,14 +37,14 @@ import org.opendaylight.yangtools.concepts.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort, RaftActorSnapshotCohort {
+public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort, MockRaftActorSnapshotCohort {
     private static final Logger LOG = LoggerFactory.getLogger(MockRaftActor.class);
 
     public static final short PAYLOAD_VERSION = 5;
 
     final RaftActor actorDelegate;
     final RaftActorRecoveryCohort recoveryCohortDelegate;
-    volatile RaftActorSnapshotCohort snapshotCohortDelegate;
+    volatile MockRaftActorSnapshotCohort snapshotCohortDelegate;
     private final CountDownLatch recoveryComplete = new CountDownLatch(1);
     private final List<Object> state = Collections.synchronizedList(new ArrayList<>());
     private final ActorRef roleChangeNotifier;
@@ -61,7 +62,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         recoveryCohortDelegate = mock(RaftActorRecoveryCohort.class);
 
         snapshotCohortDelegate = builder.snapshotCohort != null ? builder.snapshotCohort :
-            mock(RaftActorSnapshotCohort.class);
+            mock(MockRaftActorSnapshotCohort.class);
 
         if (builder.dataPersistenceProvider == null) {
             setPersistence(builder.persistent.isPresent() ? builder.persistent.orElseThrow() : true);
@@ -189,16 +190,16 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     @Override
-    public void applySnapshot(final Snapshot.State newState) {
+    public void applySnapshot(final MockSnapshotState newState) {
         LOG.info("{}: applySnapshot called", memberId());
         applySnapshotState(newState);
         snapshotCohortDelegate.applySnapshot(newState);
     }
 
     @Override
-    public Snapshot.State deserializeSnapshot(final ByteSource snapshotBytes) {
+    public MockSnapshotState deserializeSnapshot(final ByteSource snapshotBytes) {
         try {
-            return verifyNotNull(SerializationUtils.<Snapshot.State>deserialize(snapshotBytes.read()));
+            return verifyNotNull(SerializationUtils.<MockSnapshotState>deserialize(snapshotBytes.read()));
         } catch (IOException e) {
             throw new RuntimeException("Error deserializing state", e);
         }
@@ -284,7 +285,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         private Snapshot restoreFromSnapshot;
         private Optional<Boolean> persistent = Optional.empty();
         private Function<Runnable, Void> pauseLeaderFunction;
-        private RaftActorSnapshotCohort snapshotCohort;
+        private MockRaftActorSnapshotCohort snapshotCohort;
 
         protected AbstractBuilder(final Class<A> actorClass) {
             this.actorClass = actorClass;
@@ -340,8 +341,8 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
             return self();
         }
 
-        public T snapshotCohort(final RaftActorSnapshotCohort newSnapshotCohort) {
-            snapshotCohort = newSnapshotCohort;
+        public T snapshotCohort(final MockRaftActorSnapshotCohort newSnapshotCohort) {
+            snapshotCohort = requireNonNull(newSnapshotCohort);
             return self();
         }
 

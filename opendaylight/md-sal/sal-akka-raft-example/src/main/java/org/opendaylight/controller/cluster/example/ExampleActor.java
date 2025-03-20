@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.example;
 
-import com.google.common.base.VerifyException;
 import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -40,7 +39,8 @@ import org.slf4j.LoggerFactory;
 /**
  * A sample actor showing how the RaftActor is to be extended.
  */
-public final class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, RaftActorSnapshotCohort {
+public final class ExampleActor extends RaftActor
+        implements RaftActorRecoveryCohort, RaftActorSnapshotCohort<ExampleActor.MapState> {
     private static final class PayloadIdentifier extends AbstractStringIdentifier<PayloadIdentifier> {
         @java.io.Serial
         private static final long serialVersionUID = 1L;
@@ -115,6 +115,11 @@ public final class ExampleActor extends RaftActor implements RaftActorRecoveryCo
     }
 
     @Override
+    public Class<MapState> stateClass() {
+        return MapState.class;
+    }
+
+    @Override
     protected void applyState(final ActorRef clientActor, final Identifier identifier, final Object data) {
         if (data instanceof KeyValue kv) {
             state.put(kv.getKey(), kv.getValue());
@@ -139,13 +144,9 @@ public final class ExampleActor extends RaftActor implements RaftActorRecoveryCo
     }
 
     @Override
-    public void applySnapshot(final Snapshot.State snapshotState) {
-        if (!(snapshotState instanceof MapState mapState)) {
-            throw new VerifyException("Unhandled state " + snapshotState);
-        }
-
+    public void applySnapshot(final MapState snapshotState) {
         state.clear();
-        state.putAll(mapState.state);
+        state.putAll(snapshotState.state);
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("Snapshot applied to state : {}", state.size());
@@ -183,7 +184,7 @@ public final class ExampleActor extends RaftActor implements RaftActorRecoveryCo
     }
 
     @Override
-    protected RaftActorSnapshotCohort getRaftActorSnapshotCohort() {
+    protected RaftActorSnapshotCohort<MapState> getRaftActorSnapshotCohort() {
         return this;
     }
 
@@ -193,7 +194,7 @@ public final class ExampleActor extends RaftActor implements RaftActorRecoveryCo
     }
 
     @Override
-    public Snapshot.State deserializeSnapshot(final ByteSource snapshotBytes) {
+    public MapState deserializeSnapshot(final ByteSource snapshotBytes) {
         try {
             return new MapState(SerializationUtils.<Map<String, String>>deserialize(snapshotBytes.read()));
         } catch (IOException e) {
@@ -201,7 +202,7 @@ public final class ExampleActor extends RaftActor implements RaftActorRecoveryCo
         }
     }
 
-    private static class MapState implements Snapshot.State {
+    static class MapState implements Snapshot.State {
         private static final long serialVersionUID = 1L;
 
         Map<String, String> state;
