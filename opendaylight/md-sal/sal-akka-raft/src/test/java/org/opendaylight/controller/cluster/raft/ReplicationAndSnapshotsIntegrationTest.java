@@ -15,7 +15,6 @@ import org.apache.pekko.persistence.SaveSnapshotSuccess;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
-import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
@@ -315,14 +314,14 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         expSnapshotState.add(payload6);
 
         // Delay the CaptureSnapshot message to the leader actor.
-        leaderActor.underlyingActor().startDropMessages(CaptureSnapshotReply.class);
+        leaderActor.underlyingActor().startDropMessages(SaveSnapshotSuccess.class);
 
         // Send the payload.
         payload7 = sendPayloadData(leaderActor, "seven");
 
-        // Capture the CaptureSnapshotReply message so we can send it later.
-        final CaptureSnapshotReply captureSnapshotReply = MessageCollectorActor.expectFirstMatching(
-                leaderCollectorActor, CaptureSnapshotReply.class);
+        // Capture the SaveSnapshotSuccess message so we can send it later.
+        final var saveSuccess = MessageCollectorActor.expectFirstMatching(
+                leaderCollectorActor, SaveSnapshotSuccess.class);
 
         // Wait for the state to be applied in the leader.
         ApplyState applyState = MessageCollectorActor.expectFirstMatching(leaderCollectorActor, ApplyState.class);
@@ -343,8 +342,8 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         assertEquals("Leader replicatedToAllIndex", 5, leader.getReplicatedToAllIndex());
 
         // Now deliver the CaptureSnapshotReply.
-        leaderActor.underlyingActor().stopDropMessages(CaptureSnapshotReply.class);
-        leaderActor.tell(captureSnapshotReply, leaderActor);
+        leaderActor.underlyingActor().stopDropMessages(SaveSnapshotSuccess.class);
+        leaderActor.tell(saveSuccess, leaderActor);
 
         // Wait for snapshot complete.
         MessageCollectorActor.expectFirstMatching(leaderCollectorActor, SaveSnapshotSuccess.class);
