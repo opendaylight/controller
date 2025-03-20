@@ -55,7 +55,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         // Send an initial payloads and verify replication.
 
         final MockPayload payload0 = sendPayloadData(leaderActor, "zero");
-        final  MockPayload payload1 = sendPayloadData(leaderActor, "one");
+        final MockPayload payload1 = sendPayloadData(leaderActor, "one");
         verifyApplyJournalEntries(leaderCollectorActor, 1);
         verifyApplyJournalEntries(follower1CollectorActor, 1);
         verifyApplyJournalEntries(follower2CollectorActor, 1);
@@ -454,7 +454,6 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         waitUntilLeader(leaderActor);
 
         expectMatching(leaderCollectorActor, AppendEntriesReply.class, 2);
-
 
         clearMessages(leaderCollectorActor);
         clearMessages(follower1CollectorActor);
