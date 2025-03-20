@@ -55,8 +55,8 @@ public final class Snapshot implements Serializable {
     private Snapshot(final State state, final List<ReplicatedLogEntry> unAppliedEntries, final long lastIndex,
             final long lastTerm, final long lastAppliedIndex, final long lastAppliedTerm, final TermInfo termInfo,
             final ClusterConfig serverConfig) {
-        this.state = state;
-        this.unAppliedEntries = unAppliedEntries;
+        this.state = requireNonNull(state);
+        this.unAppliedEntries = requireNonNull(unAppliedEntries);
         this.lastIndex = lastIndex;
         this.lastTerm = lastTerm;
         this.lastAppliedIndex = lastAppliedIndex;
