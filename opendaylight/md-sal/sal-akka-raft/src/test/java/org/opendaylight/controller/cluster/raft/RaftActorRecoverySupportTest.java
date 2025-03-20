@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.pekko.actor.ActorRef;
@@ -189,25 +188,25 @@ class RaftActorRecoverySupportTest {
         configParams.setRecoverySnapshotIntervalSeconds(recoverySnapshotInterval);
         context.getSnapshotManager().setSnapshotCohort(mockSnapshotCohort);
 
-        ScheduledExecutorService applyEntriesExecutor = Executors.newSingleThreadScheduledExecutor();
-        ReplicatedLog replicatedLog = context.getReplicatedLog();
+        try (var executor = Executors.newSingleThreadScheduledExecutor()) {
+            final var replicatedLog = context.getReplicatedLog();
 
-        for (int i = 0; i <= numberOfEntries; i++) {
-            replicatedLog.append(new SimpleReplicatedLogEntry(i, 1,
-                new MockRaftActorContext.MockPayload(String.valueOf(i))));
+            for (int i = 0; i <= numberOfEntries; i++) {
+                replicatedLog.append(new SimpleReplicatedLogEntry(i, 1,
+                    new MockRaftActorContext.MockPayload(String.valueOf(i))));
+            }
+
+            final var entryCount = new AtomicInteger();
+            final var applyEntriesFuture = executor.scheduleAtFixedRate(() -> {
+                int run = entryCount.getAndIncrement();
+                LOG.info("Sending entry number {}", run);
+                sendMessageToSupport(new ApplyJournalEntries(run));
+            }, 0, 1, TimeUnit.SECONDS);
+
+            executor.schedule(() -> applyEntriesFuture.cancel(false), numberOfEntries, TimeUnit.SECONDS).get();
+
+            verify(mockSnapshotCohort, times(1)).createSnapshot(any(), any());
         }
-
-        final var entryCount = new AtomicInteger();
-        final var applyEntriesFuture = applyEntriesExecutor.scheduleAtFixedRate(() -> {
-            int run = entryCount.getAndIncrement();
-            LOG.info("Sending entry number {}", run);
-            sendMessageToSupport(new ApplyJournalEntries(run));
-        }, 0, 1, TimeUnit.SECONDS);
-
-        applyEntriesExecutor.schedule(() -> applyEntriesFuture.cancel(false), numberOfEntries, TimeUnit.SECONDS).get();
-
-        verify(mockSnapshotCohort, times(1)).createSnapshot(any(), any());
-        applyEntriesExecutor.shutdown();
     }
 
     @Test
