@@ -22,7 +22,6 @@ import java.util.function.Consumer;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.ActorSystem;
-import org.apache.pekko.actor.Props;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
@@ -74,11 +73,6 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         setReplicatedLog(replicatedLog);
         setCommitIndex(replicatedLog.lastIndex());
         setLastApplied(replicatedLog.lastIndex());
-    }
-
-    @Override
-    public ActorRef actorOf(final Props props) {
-        return system.actorOf(props);
     }
 
     @Override

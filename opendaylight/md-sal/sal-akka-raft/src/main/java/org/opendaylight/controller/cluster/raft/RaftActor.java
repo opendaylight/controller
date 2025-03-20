@@ -915,20 +915,22 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     private void getSnapshot(final ActorRef sender, final Duration timeout) {
-        LOG.debug("{}: onGetSnapshot", context.getId());
+        LOG.debug("{}: onGetSnapshot", memberId());
 
+        final var termInfo = context.termInfo();
+        final var clusterConfig = context.getPeerServerInfo(true);
         if (context.getPersistenceProvider().isRecoveryApplicable()) {
             final var captureSnapshot = context.getSnapshotManager().newCaptureSnapshot(
                     context.getReplicatedLog().lastMeta(), -1, true);
-            final var snapshotReplyActor = context.actorOf(GetSnapshotReplyActor.props(captureSnapshot,
-                    context.termInfo(), sender, timeout, context.getId(), context.getPeerServerInfo(true)));
+            final var snapshotReplyActor = getContext().actorOf(GetSnapshotReplyActor.props(captureSnapshot,
+                    termInfo, sender, timeout, memberId(), clusterConfig));
 
             getRaftActorSnapshotCohort().createSnapshot(snapshotReplyActor, null);
         } else {
-            final var snapshot = Snapshot.create(EmptyState.INSTANCE, List.of(),
-                    -1, -1, -1, -1, context.termInfo(), context.getPeerServerInfo(true));
+            final var snapshot = Snapshot.create(EmptyState.INSTANCE, List.of(), -1, -1, -1, -1, termInfo,
+                clusterConfig);
 
-            sender.tell(new GetSnapshotReply(context.getId(), snapshot), context.getActor());
+            sender.tell(new GetSnapshotReply(memberId(), snapshot), ActorRef.noSender());
         }
     }
 

@@ -24,7 +24,6 @@ import org.apache.pekko.actor.ActorContext;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.ActorSystem;
-import org.apache.pekko.actor.Props;
 import org.apache.pekko.cluster.Cluster;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStreamFactory;
@@ -128,11 +127,6 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     public void setConfigParams(final ConfigParams configParams) {
         this.configParams = configParams;
-    }
-
-    @Override
-    public ActorRef actorOf(final Props props) {
-        return context.actorOf(props);
     }
 
     @Override
