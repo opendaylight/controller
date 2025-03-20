@@ -181,11 +181,11 @@ public final class SnapshotManager {
      * @return true if capture was started
      */
     public boolean capture(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex) {
-        if (task instanceof Idle) {
-            return capture(lastLogEntry, replicatedToAllIndex, null, false);
+        if (!(task instanceof Idle)) {
+            LOG.debug("{}: Capture should not be called in state {}", memberId(), task);
+            return false;
         }
-        LOG.debug("{}: Capture should not be called in state {}", memberId(), task);
-        return false;
+        return capture(lastLogEntry, replicatedToAllIndex, null, false);
     }
 
     private boolean capture(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex,
@@ -231,11 +231,12 @@ public final class SnapshotManager {
      */
     public boolean captureToInstall(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex,
             final String targetFollower) {
-        if (task instanceof Idle) {
-            return capture(lastLogEntry, replicatedToAllIndex, targetFollower, false);
+        requireNonNull(targetFollower);
+        if (!(task instanceof Idle)) {
+            LOG.debug("{}: captureToInstall should not be called in state {}", memberId(), task);
+            return false;
         }
-        LOG.debug("{}: captureToInstall should not be called in state {}", memberId(), task);
-        return false;
+        return capture(lastLogEntry, replicatedToAllIndex, targetFollower, false);
     }
 
     /**
@@ -246,11 +247,11 @@ public final class SnapshotManager {
      * @return true if capture was started
      */
     boolean captureWithForcedTrim(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex) {
-        if (task instanceof Idle) {
-            return capture(lastLogEntry, replicatedToAllIndex, null, true);
+        if (!(task instanceof Idle)) {
+            LOG.debug("{}: captureWithForcedTrim should not be called in state {}", memberId(), task);
+            return false;
         }
-        LOG.debug("{}: captureWithForcedTrim should not be called in state {}", memberId(), task);
-        return false;
+        return capture(lastLogEntry, replicatedToAllIndex, null, true);
     }
 
     /**
