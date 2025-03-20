@@ -60,7 +60,6 @@ import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RoleChanged;
 import org.opendaylight.controller.cluster.raft.AbstractRaftActorIntegrationTest.TestPersist;
 import org.opendaylight.controller.cluster.raft.AbstractRaftActorIntegrationTest.TestRaftActor;
-import org.opendaylight.controller.cluster.raft.MockRaftActor.MockSnapshotState;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.ApplyLeaderSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
@@ -1104,7 +1103,7 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals("Last index", snapshotLastIndex, context.getReplicatedLog().lastIndex());
         assertEquals("Last applied", snapshotLastApplied, context.getLastApplied());
         assertEquals("Commit index", snapshotLastApplied, context.getCommitIndex());
-        assertEquals("Recovered state", snapshotState.getState(), mockRaftActor.getState());
+        assertEquals("Recovered state", snapshotState.state(), mockRaftActor.getState());
         assertEquals("Current term", new TermInfo(1, "member-1"), context.termInfo());
 
         // Test with data persistence disabled
