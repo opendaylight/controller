@@ -174,54 +174,6 @@ public final class SnapshotManager {
     }
 
     /**
-     * Initiates a capture snapshot.
-     *
-     * @param lastLogEntry the last entry in the replicated log
-     * @param replicatedToAllIndex the current replicatedToAllIndex
-     * @return true if capture was started
-     */
-    public boolean capture(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex) {
-        if (!(task instanceof Idle)) {
-            LOG.debug("{}: Capture should not be called in state {}", memberId(), task);
-            return false;
-        }
-        return capture(lastLogEntry, replicatedToAllIndex, null, false);
-    }
-
-    private boolean capture(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex,
-            final String targetFollower, final boolean mandatoryTrim) {
-        final var request = newCaptureSnapshot(lastLogEntry, replicatedToAllIndex, mandatoryTrim);
-
-        final OutputStream installSnapshotStream;
-        if (targetFollower != null) {
-            installSnapshotStream = context.getFileBackedOutputStreamFactory().newInstance();
-            LOG.info("{}: Initiating snapshot capture {} to install on {}", memberId(), request, targetFollower);
-        } else {
-            installSnapshotStream = null;
-            LOG.info("{}: Initiating snapshot capture {}", memberId(), request);
-        }
-
-        final var lastSeq = context.getPersistenceProvider().getLastSequenceNumber();
-
-        LOG.debug("{}: lastSequenceNumber prior to capture: {}", memberId(), lastSeq);
-
-        task = new Capture(lastSeq, request);
-        return capture(installSnapshotStream);
-    }
-
-    @SuppressWarnings("checkstyle:IllegalCatch")
-    private boolean capture(final @Nullable OutputStream installSnapshotStream) {
-        try {
-            snapshotCohort.createSnapshot(context.getActor(), installSnapshotStream);
-        } catch (Exception e) {
-            task = Idle.INSTANCE;
-            LOG.error("{}: Error creating snapshot", memberId(), e);
-            return false;
-        }
-        return true;
-    }
-
-    /**
      * Initiates a capture snapshot for the purposing of installing the snapshot on a follower.
      *
      * @param lastLogEntry the last entry in the replicated log
@@ -236,7 +188,10 @@ public final class SnapshotManager {
             LOG.debug("{}: captureToInstall should not be called in state {}", memberId(), task);
             return false;
         }
-        return capture(lastLogEntry, replicatedToAllIndex, targetFollower, false);
+
+        final var request = newCaptureSnapshot(lastLogEntry, replicatedToAllIndex, false);
+        LOG.info("{}: Initiating snapshot capture {} to install on {}", memberId(), request, targetFollower);
+        return capture(request, context.getFileBackedOutputStreamFactory().newInstance());
     }
 
     /**
@@ -251,7 +206,47 @@ public final class SnapshotManager {
             LOG.debug("{}: captureWithForcedTrim should not be called in state {}", memberId(), task);
             return false;
         }
-        return capture(lastLogEntry, replicatedToAllIndex, null, true);
+        return capture(newCaptureSnapshot(lastLogEntry, replicatedToAllIndex, true));
+    }
+
+    /**
+     * Initiates a capture snapshot.
+     *
+     * @param lastLogEntry the last entry in the replicated log
+     * @param replicatedToAllIndex the current replicatedToAllIndex
+     * @return true if capture was started
+     */
+    public boolean capture(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex) {
+        if (!(task instanceof Idle)) {
+            LOG.debug("{}: capture should not be called in state {}", memberId(), task);
+            return false;
+        }
+        return capture(newCaptureSnapshot(lastLogEntry, replicatedToAllIndex, false));
+    }
+
+    private boolean capture(final @NonNull CaptureSnapshot request) {
+        LOG.info("{}: Initiating snapshot capture {}", memberId(), request);
+        return capture(request, null);
+    }
+
+    private boolean capture(final @NonNull CaptureSnapshot request, final @Nullable OutputStream outputStream) {
+        final var lastSeq = context.getPersistenceProvider().getLastSequenceNumber();
+        LOG.debug("{}: lastSequenceNumber prior to capture: {}", memberId(), lastSeq);
+
+        task = new Capture(lastSeq, request);
+        return capture(outputStream);
+    }
+
+    @SuppressWarnings("checkstyle:IllegalCatch")
+    private boolean capture(final @Nullable OutputStream outputStream) {
+        try {
+            snapshotCohort.createSnapshot(context.getActor(), outputStream);
+        } catch (Exception e) {
+            task = Idle.INSTANCE;
+            LOG.error("{}: Error creating snapshot", memberId(), e);
+            return false;
+        }
+        return true;
     }
 
     /**
