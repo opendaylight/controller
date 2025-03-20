@@ -17,7 +17,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Consumer;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
@@ -35,7 +34,7 @@ import org.opendaylight.controller.cluster.raft.spi.TestTermInfoStore;
 public class MockRaftActorContext extends RaftActorContextImpl {
     private ActorSystem system;
     private RaftPolicy raftPolicy;
-    private Consumer<Optional<OutputStream>> createSnapshotProcedure = out -> { };
+    private Consumer<OutputStream> createSnapshotProcedure = out -> { };
 
     @NonNullByDefault
     private static LocalAccess newLocalAccess(final String id) {
@@ -116,7 +115,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
 
             @Override
             public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
-                createSnapshotProcedure.accept(Optional.ofNullable(installSnapshotStream));
+                createSnapshotProcedure.accept(installSnapshotStream);
             }
 
             @Override
@@ -128,8 +127,8 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         return snapshotManager;
     }
 
-    public void setCreateSnapshotProcedure(final Consumer<Optional<OutputStream>> createSnapshotProcedure) {
-        this.createSnapshotProcedure = createSnapshotProcedure;
+    public void setCreateSnapshotProcedure(final Consumer<OutputStream> createSnapshotProcedure) {
+        this.createSnapshotProcedure = requireNonNull(createSnapshotProcedure);
     }
 
     @Override

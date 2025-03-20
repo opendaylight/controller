@@ -26,7 +26,6 @@ import static org.mockito.Mockito.verify;
 
 import java.io.OutputStream;
 import java.util.List;
-import java.util.Optional;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.junit.After;
@@ -239,7 +238,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         snapshotManager.capture(lastLogEntry, -1);
 
         ByteState snapshotState = ByteState.of(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
-        snapshotManager.persist(snapshotState, Optional.empty());
+        snapshotManager.persist(snapshotState, null);
 
         verify(mockDataPersistenceProvider).saveSnapshot(snapshotCaptor.capture());
 
@@ -267,8 +266,8 @@ public class SnapshotManagerTest extends AbstractActorTest {
         // when replicatedToAllIndex != -1
         snapshotManager.capture(ImmutableRaftEntryMeta.of(9, 6), 9);
 
-        ByteState snapshotState = ByteState.of(new byte[] {1,2,3,4,5,6,7,8,9,10});
-        snapshotManager.persist(snapshotState, Optional.empty());
+        ByteState snapshotState = ByteState.of(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
+        snapshotManager.persist(snapshotState, null);
 
         verify(mockDataPersistenceProvider).saveSnapshot(snapshotCaptor.capture());
 
@@ -293,7 +292,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         // when replicatedToAllIndex = -1
         snapshotManager.capture(ImmutableRaftEntryMeta.of(9, 6), -1);
 
-        snapshotManager.persist(ByteState.empty(), Optional.empty());
+        snapshotManager.persist(ByteState.empty(), null);
 
         verify(mockDataPersistenceProvider).saveSnapshot(any(Snapshot.class));
 
@@ -317,7 +316,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         snapshotManager.capture(ImmutableRaftEntryMeta.of(9, 6), replicatedToAllIndex);
 
-        snapshotManager.persist(ByteState.empty(), Optional.empty());
+        snapshotManager.persist(ByteState.empty(), null);
 
         verify(mockDataPersistenceProvider).saveSnapshot(any(Snapshot.class));
 
@@ -345,7 +344,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         installSnapshotStream.write(snapshotState.bytes());
 
-        snapshotManager.persist(snapshotState, Optional.of(installSnapshotStream));
+        snapshotManager.persist(snapshotState, installSnapshotStream);
 
         assertTrue(snapshotManager.isCapturing());
 
@@ -365,7 +364,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
     @Test
     public void testCallingPersistWithoutCaptureWillDoNothing() {
-        snapshotManager.persist(ByteState.empty(), Optional.empty());
+        snapshotManager.persist(ByteState.empty(), null);
 
         verify(mockDataPersistenceProvider, never()).saveSnapshot(any(Snapshot.class));
 
@@ -381,9 +380,9 @@ public class SnapshotManagerTest extends AbstractActorTest {
         // when replicatedToAllIndex = -1
         snapshotManager.capture(ImmutableRaftEntryMeta.of(9, 6), -1);
 
-        snapshotManager.persist(ByteState.empty(), Optional.empty());
+        snapshotManager.persist(ByteState.empty(), null);
 
-        snapshotManager.persist(ByteState.empty(), Optional.empty());
+        snapshotManager.persist(ByteState.empty(), null);
 
         verify(mockDataPersistenceProvider).saveSnapshot(any(Snapshot.class));
 
@@ -397,7 +396,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         // when replicatedToAllIndex = -1
         snapshotManager.capture(ImmutableRaftEntryMeta.of(9, 6), -1);
 
-        snapshotManager.persist(ByteState.empty(), Optional.empty());
+        snapshotManager.persist(ByteState.empty(), null);
 
         assertTrue(snapshotManager.isCapturing());
 
@@ -452,7 +451,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         // when replicatedToAllIndex = -1
         snapshotManager.capture(ImmutableRaftEntryMeta.of(9, 6), -1);
 
-        snapshotManager.persist(ByteState.empty(), Optional.empty());
+        snapshotManager.persist(ByteState.empty(), null);
 
         snapshotManager.commit(100L, 0);
 
@@ -470,7 +469,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         // when replicatedToAllIndex = -1
         snapshotManager.capture(ImmutableRaftEntryMeta.of(9, 6), -1);
 
-        snapshotManager.persist(ByteState.empty(), Optional.empty());
+        snapshotManager.persist(ByteState.empty(), null);
 
         snapshotManager.rollback();
 
@@ -502,7 +501,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         // when replicatedToAllIndex = -1
         snapshotManager.capture(ImmutableRaftEntryMeta.of(9, 6), -1);
 
-        snapshotManager.persist(ByteState.empty(), Optional.empty());
+        snapshotManager.persist(ByteState.empty(), null);
 
         snapshotManager.rollback();
 
