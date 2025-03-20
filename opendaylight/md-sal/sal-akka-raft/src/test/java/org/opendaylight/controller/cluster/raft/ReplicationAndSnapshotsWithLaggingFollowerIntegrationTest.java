@@ -25,7 +25,6 @@ import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.persistence.SaveSnapshotSuccess;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.raft.MockRaftActor.MockSnapshotState;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.ApplyLeaderSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;

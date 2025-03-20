@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -179,7 +178,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     private void applySnapshotState(final Snapshot.State newState) {
         if (newState instanceof MockSnapshotState mockState) {
             state.clear();
-            state.addAll(mockState.getState());
+            state.addAll(mockState.state());
         }
     }
 
@@ -244,7 +243,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
 
     public static List<Object> fromState(final Snapshot.State from) {
         if (from instanceof MockSnapshotState mockState) {
-            return mockState.getState();
+            return mockState.state();
         }
 
         throw new IllegalStateException("Unexpected snapshot State: " + from);
@@ -355,48 +354,6 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     public static class Builder extends AbstractBuilder<Builder, MockRaftActor> {
         Builder() {
             super(MockRaftActor.class);
-        }
-    }
-
-    public static class MockSnapshotState implements Snapshot.State {
-        private static final long serialVersionUID = 1L;
-
-        private final List<Object> state;
-
-        public MockSnapshotState(final List<Object> state) {
-            this.state = state;
-        }
-
-        public List<Object> getState() {
-            return state;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(state);
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            MockSnapshotState other = (MockSnapshotState) obj;
-            if (!Objects.equals(state, other.state)) {
-                return false;
-            }
-            return true;
-        }
-
-        @Override
-        public String toString() {
-            return "MockSnapshotState [state=" + state + "]";
         }
     }
 }
