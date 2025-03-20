@@ -144,7 +144,7 @@ public final class SnapshotManager {
 
     private final @NonNull RaftActorContext context;
 
-    private @NonNull RaftActorSnapshotCohort snapshotCohort = NoopRaftActorSnapshotCohort.INSTANCE;
+    private @NonNull RaftActorSnapshotCohort<?> snapshotCohort = NoopRaftActorSnapshotCohort.INSTANCE;
     private @NonNull Task task = Idle.INSTANCE;
 
     /**
@@ -542,7 +542,7 @@ public final class SnapshotManager {
     }
 
     @VisibleForTesting
-    public void setSnapshotCohort(final RaftActorSnapshotCohort snapshotCohort) {
+    public void setSnapshotCohort(final RaftActorSnapshotCohort<?> snapshotCohort) {
         this.snapshotCohort = requireNonNull(snapshotCohort);
     }
 

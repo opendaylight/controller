@@ -1512,24 +1512,22 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
     }
 
     public static class CollectingMockRaftActor extends AbstractMockRaftActor {
-
         CollectingMockRaftActor(final Path stateDir, final String id, final Map<String, String> peerAddresses,
                 final Optional<ConfigParams> config, final boolean persistent, final ActorRef collectorActor) {
             super(stateDir, id, peerAddresses, config, persistent, collectorActor);
-            snapshotCohortDelegate = new RaftActorSnapshotCohort() {
+            snapshotCohortDelegate = new MockRaftActorSnapshotCohort() {
                 @Override
                 public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
                     actorRef.tell(new CaptureSnapshotReply(ByteState.empty(), installSnapshotStream), actorRef);
                 }
 
                 @Override
-                public void applySnapshot(
-                        final org.opendaylight.controller.cluster.raft.persisted.Snapshot.State snapshotState) {
+                public void applySnapshot(final MockSnapshotState snapshotState) {
+                    // No-op
                 }
 
                 @Override
-                public org.opendaylight.controller.cluster.raft.persisted.Snapshot.State deserializeSnapshot(
-                        final ByteSource snapshotBytes) {
+                public MockSnapshotState deserializeSnapshot(final ByteSource snapshotBytes) {
                     throw new UnsupportedOperationException();
                 }
             };
@@ -1540,7 +1538,6 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
             return Props.create(CollectingMockRaftActor.class, stateDir, id, peerAddresses, Optional.of(config),
                     persistent, collectorActor);
         }
-
     }
 
     public static class MockLeaderRaftActor extends AbstractMockRaftActor {
