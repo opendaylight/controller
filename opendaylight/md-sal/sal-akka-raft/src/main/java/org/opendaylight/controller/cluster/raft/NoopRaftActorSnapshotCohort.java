@@ -12,18 +12,22 @@ import java.io.OutputStream;
 import org.apache.pekko.actor.ActorRef;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 
 /**
  * RaftActorSnapshotCohort implementation that does nothing.
  *
  * @author Thomas Pantelis
  */
-public final class NoopRaftActorSnapshotCohort implements RaftActorSnapshotCohort {
+public final class NoopRaftActorSnapshotCohort implements RaftActorSnapshotCohort<EmptyState> {
     public static final @NonNull NoopRaftActorSnapshotCohort INSTANCE = new NoopRaftActorSnapshotCohort();
 
     private NoopRaftActorSnapshotCohort() {
         // Hidden on purpose
+    }
+
+    @Override
+    public Class<EmptyState> stateClass() {
+        return EmptyState.class;
     }
 
     @Override
@@ -32,12 +36,12 @@ public final class NoopRaftActorSnapshotCohort implements RaftActorSnapshotCohor
     }
 
     @Override
-    public void applySnapshot(final State snapshotState) {
+    public void applySnapshot(final EmptyState snapshotState) {
         // No-op
     }
 
     @Override
-    public State deserializeSnapshot(final ByteSource snapshotBytes) {
+    public EmptyState deserializeSnapshot(final ByteSource snapshotBytes) {
         return EmptyState.INSTANCE;
     }
 }

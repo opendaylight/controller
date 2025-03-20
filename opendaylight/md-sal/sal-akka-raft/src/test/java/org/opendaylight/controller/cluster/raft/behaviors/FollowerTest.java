@@ -42,11 +42,11 @@ import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.MockRaftActor;
 import org.opendaylight.controller.cluster.raft.MockRaftActor.Builder;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
+import org.opendaylight.controller.cluster.raft.MockRaftActorSnapshotCohort;
 import org.opendaylight.controller.cluster.raft.MockSnapshotState;
 import org.opendaylight.controller.cluster.raft.NoopPeerAddressResolver;
 import org.opendaylight.controller.cluster.raft.PeerAddressResolver;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
-import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.ApplyLeaderSnapshot;
@@ -67,7 +67,6 @@ import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
@@ -1091,8 +1090,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         config.setSnapshotBatchCount(2);
         config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
 
-        final AtomicReference<MockRaftActor> followerRaftActor = new AtomicReference<>();
-        RaftActorSnapshotCohort snapshotCohort = newRaftActorSnapshotCohort(followerRaftActor);
+        final var followerRaftActor = new AtomicReference<MockRaftActor>();
+        final var snapshotCohort = newRaftActorSnapshotCohort(followerRaftActor);
         Builder builder = MockRaftActor.builder().persistent(Optional.of(Boolean.TRUE)).id(id)
                 .peerAddresses(Map.of("leader", "")).config(config).snapshotCohort(snapshotCohort);
         TestActorRef<MockRaftActor> followerActorRef = actorFactory.createTestActor(builder.props(stateDir())
@@ -1146,8 +1145,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         config.setSnapshotBatchCount(2);
         config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
 
-        final AtomicReference<MockRaftActor> followerRaftActor = new AtomicReference<>();
-        RaftActorSnapshotCohort snapshotCohort = newRaftActorSnapshotCohort(followerRaftActor);
+        final var followerRaftActor = new AtomicReference<MockRaftActor>();
+        final var snapshotCohort = newRaftActorSnapshotCohort(followerRaftActor);
         Builder builder = MockRaftActor.builder().persistent(Optional.of(Boolean.TRUE)).id(id)
                 .peerAddresses(Map.of("leader", "")).config(config).snapshotCohort(snapshotCohort);
         TestActorRef<MockRaftActor> followerActorRef = actorFactory.createTestActor(builder.props(stateDir())
@@ -1221,8 +1220,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         config.setSnapshotBatchCount(1);
         config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
 
-        final AtomicReference<MockRaftActor> followerRaftActor = new AtomicReference<>();
-        RaftActorSnapshotCohort snapshotCohort = newRaftActorSnapshotCohort(followerRaftActor);
+        final var followerRaftActor = new AtomicReference<MockRaftActor>();
+        final var snapshotCohort = newRaftActorSnapshotCohort(followerRaftActor);
         Builder builder = MockRaftActor.builder().persistent(Optional.of(Boolean.TRUE)).id(id)
                 .peerAddresses(Map.of("leader", "")).config(config).snapshotCohort(snapshotCohort);
         TestActorRef<MockRaftActor> followerActorRef = actorFactory.createTestActor(builder.props(stateDir())
@@ -1252,7 +1251,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         // We expect the ApplyJournalEntries for index 0 to remain in the persisted log b/c it's still queued for
         // persistence by the time we initiate capture so the last persisted journal sequence number doesn't include it.
         // This is OK - on recovery it will be a no-op since index 0 has already been applied.
-        List<Object> journalEntries = InMemoryJournal.get(id, Object.class);
+        final var journalEntries = InMemoryJournal.get(id, Object.class);
         assertEquals("Persisted journal entries size: " + journalEntries, 1, journalEntries.size());
         assertEquals("Persisted journal entry type", ApplyJournalEntries.class, journalEntries.get(0).getClass());
         assertEquals("ApplyJournalEntries index", 0, ((ApplyJournalEntries)journalEntries.get(0)).getToIndex());
@@ -1298,11 +1297,11 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         verify(mockResolver).setResolved("leader", leaderActor.path().toString());
     }
 
-    @SuppressWarnings("checkstyle:IllegalCatch")
-    private static RaftActorSnapshotCohort newRaftActorSnapshotCohort(
+    private static MockRaftActorSnapshotCohort newRaftActorSnapshotCohort(
             final AtomicReference<MockRaftActor> followerRaftActor) {
-        RaftActorSnapshotCohort snapshotCohort = new RaftActorSnapshotCohort() {
+        final var snapshotCohort = new MockRaftActorSnapshotCohort() {
             @Override
+            @SuppressWarnings("checkstyle:IllegalCatch")
             public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
                 try {
                     actorRef.tell(new CaptureSnapshotReply(new MockSnapshotState(followerRaftActor.get().getState()),
@@ -1315,11 +1314,12 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
             }
 
             @Override
-            public void applySnapshot(final State snapshotState) {
+            public void applySnapshot(final MockSnapshotState snapshotState) {
+                // No-op
             }
 
             @Override
-            public State deserializeSnapshot(final ByteSource snapshotBytes) {
+            public MockSnapshotState deserializeSnapshot(final ByteSource snapshotBytes) {
                 throw new UnsupportedOperationException();
             }
         };
