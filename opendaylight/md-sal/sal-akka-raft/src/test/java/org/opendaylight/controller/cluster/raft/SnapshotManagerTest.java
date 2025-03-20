@@ -343,7 +343,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         final var installSnapshotStream = outputStreamCaptor.getValue();
         assertNotNull(installSnapshotStream);
 
-        installSnapshotStream.write(snapshotState.getBytes());
+        installSnapshotStream.write(snapshotState.bytes());
 
         snapshotManager.persist(snapshotState, Optional.of(installSnapshotStream));
 
@@ -360,7 +360,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         SendInstallSnapshot sendInstallSnapshot = sendInstallSnapshotArgumentCaptor.getValue();
 
         assertEquals("state", snapshotState, sendInstallSnapshot.getSnapshot().getState());
-        assertArrayEquals("state", snapshotState.getBytes(), sendInstallSnapshot.getSnapshotBytes().read());
+        assertArrayEquals("state", snapshotState.bytes(), sendInstallSnapshot.getSnapshotBytes().read());
     }
 
     @Test
