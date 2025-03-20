@@ -18,7 +18,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.ApplyLeaderSnapshot;
-import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
@@ -55,7 +54,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         send2InitialPayloads();
 
         // Block these messages initially so we can control the sequence.
-        leaderActor.underlyingActor().startDropMessages(CaptureSnapshotReply.class);
+        leaderActor.underlyingActor().startDropMessages(SaveSnapshotSuccess.class);
         follower1Actor.underlyingActor().startDropMessages(AppendEntries.class);
 
         final MockPayload payload2 = sendPayloadData(leaderActor, "two");
@@ -73,11 +72,11 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
 
         MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyJournalEntries.class, 1);
 
-        // Now deliver the CaptureSnapshotReply to the leader.
-        final CaptureSnapshotReply captureSnapshotReply = MessageCollectorActor.expectFirstMatching(
-                leaderCollectorActor, CaptureSnapshotReply.class);
-        leaderActor.underlyingActor().stopDropMessages(CaptureSnapshotReply.class);
-        leaderActor.tell(captureSnapshotReply, leaderActor);
+        // Now deliver the SaveSnapshotSuccess to the leader.
+        final var saveSuccess = MessageCollectorActor.expectFirstMatching(
+                leaderCollectorActor, SaveSnapshotSuccess.class);
+        leaderActor.underlyingActor().stopDropMessages(SaveSnapshotSuccess.class);
+        leaderActor.tell(saveSuccess, leaderActor);
 
         // Wait for snapshot complete.
         MessageCollectorActor.expectFirstMatching(leaderCollectorActor, SaveSnapshotSuccess.class);

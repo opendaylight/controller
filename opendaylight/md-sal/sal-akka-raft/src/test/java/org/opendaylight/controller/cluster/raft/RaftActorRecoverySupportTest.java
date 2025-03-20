@@ -186,6 +186,7 @@ class RaftActorRecoverySupportTest {
         int numberOfEntries = 5;
         configParams.setRecoverySnapshotIntervalSeconds(recoverySnapshotInterval);
         context.getSnapshotManager().setSnapshotCohort(mockSnapshotCohort);
+        doReturn(new MockSnapshotState(List.of())).when(mockSnapshotCohort).takeSnapshot();
 
         try (var executor = Executors.newSingleThreadScheduledExecutor()) {
             final var replicatedLog = context.getReplicatedLog();
@@ -204,7 +205,7 @@ class RaftActorRecoverySupportTest {
 
             executor.schedule(() -> applyEntriesFuture.cancel(false), numberOfEntries, TimeUnit.SECONDS).get();
 
-            verify(mockSnapshotCohort, times(1)).createSnapshot(any(), any());
+            verify(mockSnapshotCohort, times(1)).takeSnapshot();
         }
     }
 
