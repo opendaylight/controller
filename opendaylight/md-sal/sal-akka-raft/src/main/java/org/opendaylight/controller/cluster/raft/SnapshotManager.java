@@ -391,7 +391,7 @@ public final class SnapshotManager {
                 throw new VerifyException("Unexpected stream " + installSnapshotStream);
             }
 
-            if (context.getId().equals(currentBehavior.getLeaderId())) {
+            if (memberId().equals(currentBehavior.getLeaderId())) {
                 try {
                     final var snapshotBytes = snapshotStream.asByteSource();
                     currentBehavior.handleMessage(context.getActor(), new SendInstallSnapshot(snapshot, snapshotBytes));

@@ -681,7 +681,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
      * @return true it this RaftActor is a Leader false otherwise
      */
     protected boolean isLeader() {
-        return context.getId().equals(getCurrentBehavior().getLeaderId());
+        return memberId().equals(getCurrentBehavior().getLeaderId());
     }
 
     protected final boolean isLeaderActive() {
