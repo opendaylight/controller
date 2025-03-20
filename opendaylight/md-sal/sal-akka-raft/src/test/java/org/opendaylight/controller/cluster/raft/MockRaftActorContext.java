@@ -109,8 +109,8 @@ public class MockRaftActorContext extends RaftActorContextImpl {
 
         snapshotManager.setSnapshotCohort(new ByteStateSnapshotCohort() {
             @Override
-            public ByteState deserializeSnapshot(final ByteSource snapshotBytes) throws IOException {
-                return ByteState.of(snapshotBytes.read());
+            public ByteState takeSnapshot() {
+                throw new UnsupportedOperationException();
             }
 
             @Override
@@ -121,6 +121,11 @@ public class MockRaftActorContext extends RaftActorContextImpl {
             @Override
             public void applySnapshot(final ByteState snapshotState) {
                 // No-op
+            }
+
+            @Override
+            public ByteState deserializeSnapshot(final ByteSource snapshotBytes) throws IOException {
+                return ByteState.of(snapshotBytes.read());
             }
         });
 

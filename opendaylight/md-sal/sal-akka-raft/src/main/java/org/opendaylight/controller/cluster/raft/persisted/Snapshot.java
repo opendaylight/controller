@@ -15,6 +15,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
+import org.opendaylight.yangtools.concepts.Immutable;
 
 /**
  * Represents a snapshot of the raft data.
@@ -27,7 +28,7 @@ public final class Snapshot implements Serializable {
      *
      * @author Thomas Pantelis
      */
-    public interface State extends Serializable {
+    public interface State extends Immutable, Serializable {
         /**
          * Indicate whether the snapshot requires migration, i.e. a new snapshot should be created after recovery.
          * Default implementation returns false, i.e. do not re-snapshot.

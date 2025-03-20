@@ -62,7 +62,6 @@ import org.opendaylight.controller.cluster.raft.messages.ServerChangeStatus;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.controller.cluster.raft.messages.UnInitializedFollowerSnapshotReply;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
-import org.opendaylight.controller.cluster.raft.persisted.ByteState;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
@@ -1517,8 +1516,13 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
             super(stateDir, id, peerAddresses, config, persistent, collectorActor);
             snapshotCohortDelegate = new MockRaftActorSnapshotCohort() {
                 @Override
+                public MockSnapshotState takeSnapshot() {
+                    return new MockSnapshotState(List.of());
+                }
+
+                @Override
                 public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
-                    actorRef.tell(new CaptureSnapshotReply(ByteState.empty(), installSnapshotStream), actorRef);
+                    actorRef.tell(new CaptureSnapshotReply(takeSnapshot(), installSnapshotStream), actorRef);
                 }
 
                 @Override

@@ -31,6 +31,11 @@ public final class NoopRaftActorSnapshotCohort implements RaftActorSnapshotCohor
     }
 
     @Override
+    public EmptyState takeSnapshot() {
+        return EmptyState.INSTANCE;
+    }
+
+    @Override
     public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
         // No-op
     }
@@ -42,6 +47,7 @@ public final class NoopRaftActorSnapshotCohort implements RaftActorSnapshotCohor
 
     @Override
     public EmptyState deserializeSnapshot(final ByteSource snapshotBytes) {
-        return EmptyState.INSTANCE;
+        // XXX: we really should be reading the bytes
+        return takeSnapshot();
     }
 }

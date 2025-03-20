@@ -69,9 +69,14 @@ final class ShardSnapshotCohort implements RaftActorSnapshotCohort<ShardSnapshot
     }
 
     @Override
+    public ShardSnapshotState takeSnapshot() {
+        return new ShardSnapshotState(store.takeStateSnapshot());
+    }
+
+    @Override
     public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
         // Forward the request to the snapshot actor
-        final var snapshot = store.takeStateSnapshot();
+        final var snapshot = takeSnapshot().getSnapshot();
         LOG.debug("{}: requesting serialization of snapshot {}", memberName, snapshot);
         ShardSnapshotActor.requestSnapshot(snapshotActor, snapshot, installSnapshotStream, actorRef);
     }

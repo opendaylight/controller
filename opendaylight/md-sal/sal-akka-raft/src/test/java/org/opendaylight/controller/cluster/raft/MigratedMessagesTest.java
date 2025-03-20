@@ -13,18 +13,19 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.OutputStream;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.dispatch.Dispatchers;
 import org.apache.pekko.testkit.TestActorRef;
+import org.eclipse.jdt.annotation.NonNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
-import org.opendaylight.controller.cluster.raft.persisted.ByteState;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
@@ -70,8 +71,13 @@ public class MigratedMessagesTest extends AbstractActorTest {
 
         final var snapshotCohort = new MockRaftActorSnapshotCohort() {
             @Override
+            public MockSnapshotState takeSnapshot() {
+                return new MockSnapshotState(List.of());
+            }
+
+            @Override
             public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
-                actorRef.tell(new CaptureSnapshotReply(ByteState.empty(), installSnapshotStream), actorRef);
+                actorRef.tell(new CaptureSnapshotReply(takeSnapshot(), installSnapshotStream), actorRef);
             }
 
             @Override
@@ -101,16 +107,20 @@ public class MigratedMessagesTest extends AbstractActorTest {
         TEST_LOG.info("testNoSnapshotAfterStartupWithNoMigratedMessages ending");
     }
 
-    @SuppressWarnings("checkstyle:IllegalCatch")
     private TestActorRef<MockRaftActor> doTestSnapshotAfterStartupWithMigratedMessage(final String id,
             final boolean persistent, final Consumer<Snapshot> snapshotVerifier,
-            final MockSnapshotState snapshotState) {
+            final @NonNull MockSnapshotState snapshotState) {
         InMemorySnapshotStore.addSnapshotSavedLatch(id);
         InMemoryJournal.addDeleteMessagesCompleteLatch(id);
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
         config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
 
         final var snapshotCohort = new MockRaftActorSnapshotCohort() {
+            @Override
+            public MockSnapshotState takeSnapshot() {
+                return snapshotState;
+            }
+
             @Override
             public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
                 actorRef.tell(new CaptureSnapshotReply(snapshotState, installSnapshotStream), actorRef);

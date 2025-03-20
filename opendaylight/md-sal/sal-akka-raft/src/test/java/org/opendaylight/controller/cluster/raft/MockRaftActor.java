@@ -113,7 +113,6 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         }
     }
 
-
     public void waitUntilLeader() {
         for (int i = 0; i < 10; i++) {
             if (isLeader()) {
@@ -181,6 +180,11 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
             state.clear();
             state.addAll(mockState.state());
         }
+    }
+
+    @Override
+    public MockSnapshotState takeSnapshot() {
+        return snapshotCohortDelegate.takeSnapshot();
     }
 
     @Override

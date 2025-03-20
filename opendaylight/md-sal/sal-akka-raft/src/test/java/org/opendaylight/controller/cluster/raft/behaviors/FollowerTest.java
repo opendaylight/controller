@@ -1301,16 +1301,13 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
             final AtomicReference<MockRaftActor> followerRaftActor) {
         final var snapshotCohort = new MockRaftActorSnapshotCohort() {
             @Override
-            @SuppressWarnings("checkstyle:IllegalCatch")
+            public MockSnapshotState takeSnapshot() {
+                return new MockSnapshotState(followerRaftActor.get().getState());
+            }
+
+            @Override
             public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
-                try {
-                    actorRef.tell(new CaptureSnapshotReply(new MockSnapshotState(followerRaftActor.get().getState()),
-                            installSnapshotStream), actorRef);
-                } catch (RuntimeException e) {
-                    throw e;
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+                actorRef.tell(new CaptureSnapshotReply(takeSnapshot(), installSnapshotStream), actorRef);
             }
 
             @Override

@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.example;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -130,17 +131,23 @@ public final class ExampleActor extends RaftActor
     }
 
     @Override
+    public MapState takeSnapshot() {
+        return new MapState(state);
+    }
+
+    @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
     public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
+        final var snapshot = takeSnapshot();
         if (installSnapshotStream != null) {
             try {
-                SerializationUtils.serialize(state, installSnapshotStream);
+                SerializationUtils.serialize(snapshot.state, installSnapshotStream);
             } catch (RuntimeException e) {
                 LOG.error("Exception in creating snapshot", e);
             }
         }
 
-        self().tell(new CaptureSnapshotReply(new MapState(state), installSnapshotStream), null);
+        self().tell(new CaptureSnapshotReply(snapshot, installSnapshotStream), null);
     }
 
     @Override
@@ -203,12 +210,13 @@ public final class ExampleActor extends RaftActor
     }
 
     static class MapState implements Snapshot.State {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
-        Map<String, String> state;
+        final ImmutableMap<String, String> state;
 
         MapState(final Map<String, String> state) {
-            this.state = state;
+            this.state = ImmutableMap.copyOf(state);
         }
     }
 }

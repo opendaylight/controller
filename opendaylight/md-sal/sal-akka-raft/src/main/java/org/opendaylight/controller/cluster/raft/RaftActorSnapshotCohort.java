@@ -30,6 +30,13 @@ public interface RaftActorSnapshotCohort<T extends State> {
     @NonNull Class<T> stateClass();
 
     /**
+     * Take a snapshot of current state.
+     *
+     * @return current snapshot state
+     */
+    @NonNull T takeSnapshot();
+
+    /**
      * This method is called by the RaftActor when a snapshot needs to be
      * created. The implementation should send a CaptureSnapshotReply to the given actor.
      *
