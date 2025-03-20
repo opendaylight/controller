@@ -564,8 +564,8 @@ public class RaftActorTest extends AbstractActorTest {
 
         assertEquals(8, leaderActor.getReplicatedLog().size());
 
-        leaderActor.getRaftActorContext().getSnapshotManager().capture(ImmutableRaftEntryMeta.of(6, 1), 4);
-
+        leaderActor.getRaftActorContext().getSnapshotManager().captureToInstall(ImmutableRaftEntryMeta.of(6, 1), 4,
+            "xyzzy");
         verify(leaderActor.snapshotCohortDelegate).createSnapshot(any(), any());
 
         assertEquals(8, leaderActor.getReplicatedLog().size());
@@ -652,8 +652,8 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals(6, followerActor.getReplicatedLog().size());
 
         //snapshot on 4
-        followerActor.getRaftActorContext().getSnapshotManager().capture(ImmutableRaftEntryMeta.of(5, 1), 4);
-
+        followerActor.getRaftActorContext().getSnapshotManager().captureToInstall(ImmutableRaftEntryMeta.of(5, 1), 4,
+            "xyzzy");
         verify(followerActor.snapshotCohortDelegate).createSnapshot(any(), any());
 
         assertEquals(6, followerActor.getReplicatedLog().size());
@@ -851,12 +851,11 @@ public class RaftActorTest extends AbstractActorTest {
         leader.setReplicatedToAllIndex(3);
         assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
 
-        // Persist another entry (this will cause a CaptureSnapshot to be triggered
+        // Persist another entry, this will cause a CaptureSnapshot to be triggered
+        doReturn(new MockSnapshotState(List.of())).when(leaderActor.snapshotCohortDelegate).takeSnapshot();
         leaderActor.persistData(mockActorRef, new MockIdentifier("x"),
                 new MockRaftActorContext.MockPayload("duh"), false);
-
-        // Now send a CaptureSnapshotReply
-        mockActorRef.tell(new CaptureSnapshotReply(ByteState.of(fromObject("foo").toByteArray()), null), mockActorRef);
+        verify(leaderActor.snapshotCohortDelegate).takeSnapshot();
 
         // Trimming log in this scenario is a no-op
         assertEquals(3, leaderActor.getReplicatedLog().getSnapshotIndex());
