@@ -754,8 +754,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         actorContext.getReplicatedLog().removeFrom(0);
 
-        AtomicReference<Optional<OutputStream>> installSnapshotStream = new AtomicReference<>();
-        actorContext.setCreateSnapshotProcedure(installSnapshotStream::set);
+        final var installSnapshotStream = new AtomicReference<Optional<OutputStream>>();
+        actorContext.setCreateSnapshotProcedure(stream -> installSnapshotStream.set(Optional.ofNullable(stream)));
 
         leader = new Leader(actorContext);
         actorContext.setCurrentBehavior(leader);
@@ -785,14 +785,15 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         assertTrue("isCapturing", actorContext.getSnapshotManager().isCapturing());
 
-        CaptureSnapshot cs = actorContext.getSnapshotManager().getCaptureSnapshot();
+        final var cs = actorContext.getSnapshotManager().getCaptureSnapshot();
         assertEquals(3, cs.getLastAppliedIndex());
         assertEquals(1, cs.getLastAppliedTerm());
         assertEquals(4, cs.getLastIndex());
         assertEquals(2, cs.getLastTerm());
 
-        assertNotNull("Create snapshot procedure not invoked", installSnapshotStream.get());
-        assertTrue("Install snapshot stream present", installSnapshotStream.get().isPresent());
+        final var optStream = installSnapshotStream.get();
+        assertNotNull("Create snapshot procedure not invoked", optStream);
+        final var stream = optStream.orElseThrow(() -> new AssertionError("Install snapshot stream present"));
 
         MessageCollectorActor.clearMessages(followerActor);
 
@@ -806,9 +807,9 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         assertSame("CaptureSnapshot instance", cs, actorContext.getSnapshotManager().getCaptureSnapshot());
 
         // Now simulate the CaptureSnapshotReply to initiate snapshot install - the first chunk should be sent.
-        final byte[] bytes = new byte[]{1, 2, 3};
-        installSnapshotStream.get().orElseThrow().write(bytes);
-        actorContext.getSnapshotManager().persist(ByteState.of(bytes), installSnapshotStream.get());
+        final byte[] bytes = new byte[] { 1, 2, 3 };
+        stream.write(bytes);
+        actorContext.getSnapshotManager().persist(ByteState.of(bytes), stream);
         MessageCollectorActor.expectFirstMatching(followerActor, InstallSnapshot.class);
 
         // Sending another AppendEntriesReply to force a snapshot should be a no-op and not try to re-send the chunk.
@@ -823,9 +824,9 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
     public void testInstallSnapshot() {
         logStart("testInstallSnapshot");
 
-        final MockRaftActorContext actorContext = createActorContextWithFollower();
+        final var actorContext = createActorContextWithFollower();
 
-        Map<String, String> leadersSnapshot = new HashMap<>();
+        final var leadersSnapshot = new HashMap<String, String>();
         leadersSnapshot.put("1", "A");
         leadersSnapshot.put("2", "B");
         leadersSnapshot.put("3", "C");

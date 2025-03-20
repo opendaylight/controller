@@ -598,7 +598,7 @@ public class RaftActorTest extends AbstractActorTest {
                 new MockRaftActorContext.MockPayload("foo-3"),
                 new MockRaftActorContext.MockPayload("foo-4")));
 
-        leaderActor.getRaftActorContext().getSnapshotManager().persist(snapshotState, Optional.empty());
+        leaderActor.getRaftActorContext().getSnapshotManager().persist(snapshotState, null);
 
         assertTrue(leaderActor.getRaftActorContext().getSnapshotManager().isCapturing());
 

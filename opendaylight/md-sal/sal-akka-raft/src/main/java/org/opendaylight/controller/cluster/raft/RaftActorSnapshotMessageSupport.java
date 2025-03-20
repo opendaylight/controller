@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.raft;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.Optional;
 import org.apache.pekko.persistence.SaveSnapshotFailure;
 import org.apache.pekko.persistence.SaveSnapshotSuccess;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.ApplyLeaderSnapshot;
@@ -49,7 +48,7 @@ class RaftActorSnapshotMessageSupport {
             }
             case CaptureSnapshotReply msg -> {
                 LOG.debug("{}: CaptureSnapshotReply received by actor", snapshotManager.memberId());
-                snapshotManager.persist(msg.snapshotState(), Optional.ofNullable(msg.installSnapshotStream()));
+                snapshotManager.persist(msg.snapshotState(), msg.installSnapshotStream());
             }
             case SnapshotComplete msg -> LOG.debug("{}: SnapshotComplete received", snapshotManager.memberId());
             default -> {

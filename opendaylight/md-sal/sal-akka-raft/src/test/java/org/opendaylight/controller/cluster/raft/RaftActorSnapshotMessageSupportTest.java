@@ -14,7 +14,6 @@ import static org.mockito.Mockito.verify;
 
 import com.google.common.io.ByteSource;
 import java.io.OutputStream;
-import java.util.Optional;
 import org.apache.pekko.persistence.SaveSnapshotFailure;
 import org.apache.pekko.persistence.SaveSnapshotSuccess;
 import org.apache.pekko.persistence.SnapshotMetadata;
@@ -70,7 +69,7 @@ class RaftActorSnapshotMessageSupportTest {
         final var stream = mock(OutputStream.class);
         sendMessageToSupport(new CaptureSnapshotReply(state, stream));
 
-        verify(mockSnapshotManager).persist(eq(state), eq(Optional.of(stream)));
+        verify(mockSnapshotManager).persist(eq(state), eq(stream));
     }
 
     @Test

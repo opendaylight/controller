@@ -13,7 +13,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Optional;
 import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -313,7 +312,7 @@ public final class SnapshotManager {
      *        on a follower.
      */
     @VisibleForTesting
-    public void persist(final Snapshot.State snapshotState, final Optional<OutputStream> installSnapshotStream) {
+    public void persist(final Snapshot.State snapshotState, final @Nullable OutputStream installSnapshotStream) {
         if (!(task instanceof Capture(final var lastSeq, final var request))) {
             LOG.debug("{}: persist should not be called in state {}", memberId(), task);
             return;
@@ -385,9 +384,9 @@ public final class SnapshotManager {
         LOG.info("{}: Removed in-memory snapshotted entries, adjusted snaphsotIndex: {} and term: {}", memberId(),
             replLog.getSnapshotIndex(), replLog.getSnapshotTerm());
 
-        if (installSnapshotStream.isPresent()) {
+        if (installSnapshotStream != null) {
             // FIXME: ugly cast
-            final var snapshotStream = (FileBackedOutputStream) installSnapshotStream.orElseThrow();
+            final var snapshotStream = (FileBackedOutputStream) installSnapshotStream;
 
             if (context.getId().equals(currentBehavior.getLeaderId())) {
                 try {
