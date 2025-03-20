@@ -21,21 +21,15 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Recovery Integration Test for single node.
  */
 public class RecoveryIntegrationSingleNodeTest extends AbstractRaftActorIntegrationTest {
-
-    static final Logger LOG = LoggerFactory.getLogger(RecoveryIntegrationSingleNodeTest.class);
-
     @Before
     public void setup() {
         leaderConfigParams = newLeaderConfigParams();
     }
-
 
     @Test
     public void testJournalReplayAfterSnapshotWithSingleNode() {
