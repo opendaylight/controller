@@ -269,7 +269,7 @@ public final class SnapshotManager {
 
         final Snapshot.State snapshotState;
         try {
-            snapshotState = convertSnapshot(snapshotBytes);
+            snapshotState = snapshotCohort.deserializeSnapshot(snapshotBytes);
         } catch (IOException e) {
             LOG.debug("{}: failed to convert InstallSnapshot to state", memberId(), e);
             snapshot.callback().onFailure();
@@ -565,10 +565,6 @@ public final class SnapshotManager {
     @VisibleForTesting
     public void setSnapshotCohort(final RaftActorSnapshotCohort<?> snapshotCohort) {
         this.snapshotCohort = requireNonNull(snapshotCohort);
-    }
-
-    Snapshot.@NonNull State convertSnapshot(final ByteSource snapshotBytes) throws IOException {
-        return snapshotCohort.deserializeSnapshot(snapshotBytes);
     }
 
     long getLastSequenceNumber() {
