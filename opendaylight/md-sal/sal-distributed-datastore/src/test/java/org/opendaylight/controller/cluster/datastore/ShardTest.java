@@ -88,7 +88,6 @@ import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotStat
 import org.opendaylight.controller.cluster.datastore.utils.MockDataTreeChangeListener;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListener;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListenerReply;
-import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.CommitSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
@@ -1552,14 +1551,16 @@ public class ShardTest extends AbstractShardTest {
         ShardTestKit.waitUntilLeader(shard);
         writeToStore(shard, TestModel.TEST_PATH, TestModel.EMPTY_TEST);
 
-        final NormalizedNode expectedRoot = readStore(shard, YangInstanceIdentifier.of());
+        final var expectedRoot = readStore(shard, YangInstanceIdentifier.of());
 
         // Trigger creation of a snapshot by ensuring
-        final RaftActorContext raftActorContext = shard.underlyingActor().getRaftActorContext();
-        raftActorContext.getSnapshotManager().capture(mock(RaftEntryMeta.class), -1);
+        final var shardActor = shard.underlyingActor();
+        final var snapshotManager = shardActor.getRaftActorContext().getSnapshotManager();
+
+        shardActor.executeInSelf(() -> snapshotManager.capture(mock(RaftEntryMeta.class), -1));
         awaitAndValidateSnapshot(latch, savedSnapshot, expectedRoot);
 
-        raftActorContext.getSnapshotManager().capture(mock(RaftEntryMeta.class), -1);
+        shardActor.executeInSelf(() -> snapshotManager.capture(mock(RaftEntryMeta.class), -1));
         awaitAndValidateSnapshot(latch, savedSnapshot, expectedRoot);
     }
 
