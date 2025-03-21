@@ -47,8 +47,7 @@ class SnapshotTest {
 
         assertEquals(expected.getLastIndex(), cloned.getLastIndex());
         assertEquals(expected.getLastTerm(), cloned.getLastTerm());
-        assertEquals(expected.getLastAppliedIndex(), cloned.getLastAppliedIndex());
-        assertEquals(expected.getLastAppliedTerm(), cloned.getLastAppliedTerm());
+        assertEquals(expected.lastApplied(), cloned.lastApplied());
         assertEquals(expected.getUnAppliedEntries(), cloned.getUnAppliedEntries());
         assertEquals(expected.termInfo(), cloned.termInfo());
         assertEquals(expected.getState(), cloned.getState());

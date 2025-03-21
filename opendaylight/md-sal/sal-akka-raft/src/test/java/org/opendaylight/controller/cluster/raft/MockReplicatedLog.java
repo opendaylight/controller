@@ -13,7 +13,7 @@ import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
 
 final class MockReplicatedLog extends AbstractReplicatedLog {
     MockReplicatedLog() {
-        super("", -1L, -1L, List.of());
+        super("", null, List.of());
     }
 
     @Override
