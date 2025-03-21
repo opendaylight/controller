@@ -590,7 +590,8 @@ public final class SnapshotManager {
     @NonNull CaptureSnapshot newCaptureSnapshot(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex,
             final boolean mandatoryTrim) {
         final var replLog = context.getReplicatedLog();
-        final var lastAppliedEntry = computeLastAppliedEntry(lastLogEntry);
+        final var lastAppliedEntry = AbstractReplicatedLog.computeLastAppliedEntry(replLog, context.getLastApplied(),
+            lastLogEntry, context.hasFollowers());
 
         final var entry = replLog.get(replicatedToAllIndex);
         final var replicatedToAllEntry = entry != null ? entry : ImmutableRaftEntryMeta.of(-1, -1);
@@ -617,11 +618,5 @@ public final class SnapshotManager {
 
         return new CaptureSnapshot(lastLogEntryIndex, lastLogEntryTerm, lastAppliedIndex, lastAppliedTerm,
             replicatedToAllEntry.index(), replicatedToAllEntry.term(), unAppliedEntries, mandatoryTrim);
-    }
-
-    @NonNullByDefault
-    private RaftEntryMeta computeLastAppliedEntry(final @Nullable RaftEntryMeta lastLogEntry) {
-        return AbstractReplicatedLog.computeLastAppliedEntry(context.getReplicatedLog(), context.getLastApplied(),
-            lastLogEntry, context.hasFollowers());
     }
 }
