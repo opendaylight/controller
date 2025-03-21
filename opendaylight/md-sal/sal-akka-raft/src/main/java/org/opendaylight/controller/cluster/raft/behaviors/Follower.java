@@ -74,8 +74,8 @@ public class Follower extends RaftActorBehavior {
         leaderId = initialLeaderId;
         leaderPayloadVersion = initialLeaderPayloadVersion;
 
-        initialSyncStatusTracker = new SyncStatusTracker(context.getActor(), getId(), context.getConfigParams()
-            .getSyncIndexThreshold());
+        initialSyncStatusTracker = new SyncStatusTracker(context.getActor(), getId(),
+            context.getConfigParams().getSyncIndexThreshold());
 
         appendEntriesMessageAssembler = MessageAssembler.builder()
             .logContext(logName)
