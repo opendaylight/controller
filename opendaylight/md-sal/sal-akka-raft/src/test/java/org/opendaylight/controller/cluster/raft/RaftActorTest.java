@@ -156,7 +156,7 @@ public class RaftActorTest extends AbstractActorTest {
                 new MockRaftActorContext.MockPayload("D")));
 
         Snapshot snapshot = Snapshot.create(snapshotState, snapshotUnappliedEntries, lastIndexDuringSnapshotCapture, 1,
-                lastAppliedDuringSnapshotCapture, 1, new TermInfo(-1), null);
+            ImmutableRaftEntryMeta.of(lastAppliedDuringSnapshotCapture, 1), new TermInfo(-1), null);
         InMemorySnapshotStore.addSnapshot(persistenceId, snapshot);
 
         // add more entries after snapshot is taken
@@ -277,7 +277,8 @@ public class RaftActorTest extends AbstractActorTest {
         RaftActorRecoverySupport mockSupport = mock(RaftActorRecoverySupport.class);
         mockRaftActor.setRaftActorRecoverySupport(mockSupport);
 
-        Snapshot snapshot = Snapshot.create(ByteState.of(new byte[]{1}), List.of(), 3, 1, 3, 1, new TermInfo(-1), null);
+        Snapshot snapshot = Snapshot.create(ByteState.of(new byte[]{1}), List.of(), 3, 1,
+            ImmutableRaftEntryMeta.of(3, 1), new TermInfo(-1), null);
         SnapshotOffer snapshotOffer = new SnapshotOffer(new SnapshotMetadata("test", 6, 12345), snapshot);
         mockRaftActor.handleRecover(snapshotOffer);
 
@@ -989,16 +990,15 @@ public class RaftActorTest extends AbstractActorTest {
 
         GetSnapshotReply reply = kit.expectMsgClass(GetSnapshotReply.class);
 
-        assertEquals("getId", persistenceId, reply.id());
+        assertEquals(persistenceId, reply.id());
         var replySnapshot = reply.snapshot();
-        assertEquals("getElectionTerm", new TermInfo(term, "member-1"), replySnapshot.termInfo());
-        assertEquals("getLastAppliedIndex", 1L, replySnapshot.getLastAppliedIndex());
-        assertEquals("getLastAppliedTerm", term, replySnapshot.getLastAppliedTerm());
-        assertEquals("getLastIndex", 2L, replySnapshot.getLastIndex());
-        assertEquals("getLastTerm", term, replySnapshot.getLastTerm());
-        assertSame("getState", stateSnapshot, replySnapshot.getState());
-        assertEquals("getUnAppliedEntries size", 1, replySnapshot.getUnAppliedEntries().size());
-        assertEquals("UnApplied entry index ", 2L, replySnapshot.getUnAppliedEntries().get(0).index());
+        assertEquals(new TermInfo(term, "member-1"), replySnapshot.termInfo());
+        assertEquals(ImmutableRaftEntryMeta.of(1, term), replySnapshot.lastApplied());
+        assertEquals(2L, replySnapshot.getLastIndex());
+        assertEquals(term, replySnapshot.getLastTerm());
+        assertSame(stateSnapshot, replySnapshot.getState());
+        assertEquals(1, replySnapshot.getUnAppliedEntries().size());
+        assertEquals(2L, replySnapshot.getUnAppliedEntries().get(0).index());
 
         // Test with persistence disabled.
         mockRaftActor.setPersistence(false);
@@ -1008,15 +1008,14 @@ public class RaftActorTest extends AbstractActorTest {
         reply = kit.expectMsgClass(GetSnapshotReply.class);
         verify(mockRaftActor.snapshotCohortDelegate, never()).createSnapshot(any(), any());
 
-        assertEquals("getId", persistenceId, reply.id());
+        assertEquals(persistenceId, reply.id());
         replySnapshot = reply.snapshot();
-        assertEquals("getElectionTerm", new TermInfo(term, "member-1"), replySnapshot.termInfo());
-        assertEquals("getLastAppliedIndex", -1L, replySnapshot.getLastAppliedIndex());
-        assertEquals("getLastAppliedTerm", -1L, replySnapshot.getLastAppliedTerm());
-        assertEquals("getLastIndex", -1L, replySnapshot.getLastIndex());
-        assertEquals("getLastTerm", -1L, replySnapshot.getLastTerm());
-        assertEquals("getState type", EmptyState.INSTANCE, replySnapshot.getState());
-        assertEquals("getUnAppliedEntries size", 0, replySnapshot.getUnAppliedEntries().size());
+        assertEquals(new TermInfo(term, "member-1"), replySnapshot.termInfo());
+        assertNull(replySnapshot.lastApplied());
+        assertEquals(-1L, replySnapshot.getLastIndex());
+        assertEquals(-1L, replySnapshot.getLastTerm());
+        assertEquals(EmptyState.INSTANCE, replySnapshot.getState());
+        assertEquals(0, replySnapshot.getUnAppliedEntries().size());
 
         TEST_LOG.info("testGetSnapshot ending");
     }
@@ -1041,8 +1040,8 @@ public class RaftActorTest extends AbstractActorTest {
                 new MockRaftActorContext.MockPayload("C"),
                 new MockRaftActorContext.MockPayload("D")));
 
-        Snapshot snapshot = Snapshot.create(snapshotState, snapshotUnappliedEntries,
-                snapshotLastIndex, 1, snapshotLastApplied, 1, new TermInfo(1, "member-1"), null);
+        Snapshot snapshot = Snapshot.create(snapshotState, snapshotUnappliedEntries, snapshotLastIndex, 1,
+            ImmutableRaftEntryMeta.of(snapshotLastApplied, 1), new TermInfo(1, "member-1"), null);
 
         InMemorySnapshotStore.addSnapshotSavedLatch(persistenceId);
 
@@ -1054,27 +1053,26 @@ public class RaftActorTest extends AbstractActorTest {
         mockRaftActor.waitForRecoveryComplete();
 
         Snapshot savedSnapshot = InMemorySnapshotStore.waitForSavedSnapshot(persistenceId, Snapshot.class);
-        assertEquals("getElectionTerm", snapshot.termInfo(), savedSnapshot.termInfo());
-        assertEquals("getLastAppliedIndex", snapshot.getLastAppliedIndex(), savedSnapshot.getLastAppliedIndex());
-        assertEquals("getLastAppliedTerm", snapshot.getLastAppliedTerm(), savedSnapshot.getLastAppliedTerm());
-        assertEquals("getLastIndex", snapshot.getLastIndex(), savedSnapshot.getLastIndex());
-        assertEquals("getLastTerm", snapshot.getLastTerm(), savedSnapshot.getLastTerm());
-        assertEquals("getState", snapshot.getState(), savedSnapshot.getState());
-        assertEquals("getUnAppliedEntries", snapshot.getUnAppliedEntries(), savedSnapshot.getUnAppliedEntries());
+        assertEquals(snapshot.termInfo(), savedSnapshot.termInfo());
+        assertEquals(snapshot.lastApplied(), savedSnapshot.lastApplied());
+        assertEquals(snapshot.getLastIndex(), savedSnapshot.getLastIndex());
+        assertEquals(snapshot.getLastTerm(), savedSnapshot.getLastTerm());
+        assertEquals(snapshot.getState(), savedSnapshot.getState());
+        assertEquals(snapshot.getUnAppliedEntries(), savedSnapshot.getUnAppliedEntries());
 
         verify(mockRaftActor.snapshotCohortDelegate, timeout(5000)).applySnapshot(any());
 
         RaftActorContext context = mockRaftActor.getRaftActorContext();
-        assertEquals("Journal log size", 1, context.getReplicatedLog().size());
-        assertEquals("Last index", snapshotLastIndex, context.getReplicatedLog().lastIndex());
-        assertEquals("Last applied", snapshotLastApplied, context.getLastApplied());
-        assertEquals("Commit index", snapshotLastApplied, context.getCommitIndex());
-        assertEquals("Recovered state", snapshotState.state(), mockRaftActor.getState());
-        assertEquals("Current term", new TermInfo(1, "member-1"), context.termInfo());
+        assertEquals(1, context.getReplicatedLog().size());
+        assertEquals(snapshotLastIndex, context.getReplicatedLog().lastIndex());
+        assertEquals(snapshotLastApplied, context.getLastApplied());
+        assertEquals(snapshotLastApplied, context.getCommitIndex());
+        assertEquals(snapshotState.state(), mockRaftActor.getState());
+        assertEquals(new TermInfo(1, "member-1"), context.termInfo());
 
         // Test with data persistence disabled
 
-        snapshot = Snapshot.create(EmptyState.INSTANCE, List.of(), -1, -1, -1, -1, new TermInfo(5, "member-1"), null);
+        snapshot = Snapshot.create(EmptyState.INSTANCE, List.of(), -1, -1, null, new TermInfo(5, "member-1"), null);
 
         persistenceId = factory.generateActorId("test-actor-");
 
@@ -1104,7 +1102,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         final var state = List.of(new MockRaftActorContext.MockPayload("A"));
         Snapshot snapshot = Snapshot.create(ByteState.of(fromObject(state).toByteArray()),
-                List.of(), 5, 2, 5, 2, new TermInfo(2, "member-1"), null);
+                List.of(), 5, 2, ImmutableRaftEntryMeta.of(5, 2), new TermInfo(2, "member-1"), null);
 
         InMemoryJournal.addEntry(persistenceId, 1, new SimpleReplicatedLogEntry(0, 1,
                 new MockRaftActorContext.MockPayload("B")));

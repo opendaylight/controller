@@ -63,6 +63,7 @@ import org.opendaylight.controller.cluster.raft.persisted.NoopPayload;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
+import org.opendaylight.controller.cluster.raft.spi.ImmutableRaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.concepts.Immutable;
@@ -924,10 +925,11 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
             return Snapshot.create(getRaftActorSnapshotCohort().takeSnapshot(), captureSnapshot.getUnAppliedEntries(),
                 captureSnapshot.getLastIndex(), captureSnapshot.getLastTerm(),
-                captureSnapshot.getLastAppliedIndex(), captureSnapshot.getLastAppliedTerm(), termInfo, clusterConfig);
+                ImmutableRaftEntryMeta.of(captureSnapshot.getLastAppliedIndex(), captureSnapshot.getLastAppliedTerm()),
+                termInfo, clusterConfig);
         }
 
-        return Snapshot.create(EmptyState.INSTANCE, List.of(), -1, -1, -1, -1, termInfo, clusterConfig);
+        return Snapshot.create(EmptyState.INSTANCE, List.of(), -1, -1, null, termInfo, clusterConfig);
     }
 
     /**

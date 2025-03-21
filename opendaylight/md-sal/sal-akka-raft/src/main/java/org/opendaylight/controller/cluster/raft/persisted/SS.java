@@ -18,6 +18,7 @@ import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
+import org.opendaylight.controller.cluster.raft.spi.ImmutableRaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.yangtools.concepts.WritableObjects;
 
@@ -42,7 +43,12 @@ final class SS implements Externalizable {
     @Override
     public void writeExternal(final ObjectOutput out) throws IOException {
         WritableObjects.writeLongs(out, snapshot.getLastIndex(), snapshot.getLastTerm());
-        WritableObjects.writeLongs(out, snapshot.getLastAppliedIndex(), snapshot.getLastAppliedTerm());
+        final var lastApplied = snapshot.lastApplied();
+        if (lastApplied != null) {
+            WritableObjects.writeLongs(out, lastApplied.index(), lastApplied.term());
+        } else {
+            WritableObjects.writeLongs(out, -1, -1);
+        }
 
         final var termInfo = snapshot.termInfo();
         WritableObjects.writeLong(out, termInfo.term());
@@ -84,8 +90,9 @@ final class SS implements Externalizable {
 
         State state = (State) in.readObject();
 
-        snapshot = Snapshot.create(state, unAppliedEntries.build(), lastIndex, lastTerm, lastAppliedIndex,
-            lastAppliedTerm, new TermInfo(electionTerm, electionVotedFor), serverConfig);
+        snapshot = Snapshot.create(state, unAppliedEntries.build(), lastIndex, lastTerm,
+            ImmutableRaftEntryMeta.of(lastAppliedIndex, lastAppliedTerm), new TermInfo(electionTerm, electionVotedFor),
+            serverConfig);
     }
 
     @java.io.Serial

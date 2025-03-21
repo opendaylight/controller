@@ -74,6 +74,7 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.policy.DefaultRaftPolicy;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
+import org.opendaylight.controller.cluster.raft.spi.ImmutableRaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.utils.ForwardMessageToBehaviorActor;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
@@ -586,12 +587,10 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         actorContext.getReplicatedLog().removeFrom(0);
 
         final int commitIndex = 3;
-        final int snapshotIndex = 2;
-        final int snapshotTerm = 1;
+        final var snapshotMeta = ImmutableRaftEntryMeta.of(2, 1);
 
         // set the snapshot variables in replicatedlog
-        actorContext.getReplicatedLog().setSnapshotIndex(snapshotIndex);
-        actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
+        actorContext.getReplicatedLog().setSnapshotMeta(snapshotMeta);
         actorContext.setCommitIndex(commitIndex);
         //set follower timeout to 2 mins, helps during debugging
         actorContext.setConfigParams(new MockConfigParamsImpl(120000L, 10));
@@ -605,9 +604,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leader.markFollowerActive(FOLLOWER_ID);
 
         ByteString bs = toByteString(Map.of("1", "A", "2", "B", "3", "C"));
-        leader.setSnapshotHolder(new SnapshotHolder(Snapshot.create(ByteState.of(bs.toByteArray()),
-                List.of(), commitIndex, snapshotTerm, commitIndex, snapshotTerm, new TermInfo(-1), null),
-                ByteSource.wrap(bs.toByteArray())));
+        leader.setSnapshotHolder(new SnapshotHolder(snapshotMeta, ByteSource.wrap(bs.toByteArray())));
         LeaderInstallSnapshotState fts = new LeaderInstallSnapshotState(
                 actorContext.getConfigParams().getMaximumMessageSliceSize(), leader.logName);
         fts.setSnapshotBytes(ByteSource.wrap(bs.toByteArray()));
@@ -641,7 +638,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         final MockRaftActorContext actorContext = createActorContextWithFollower();
 
-        Map<String, String> leadersSnapshot = new HashMap<>();
+        final var leadersSnapshot = new HashMap<String, String>();
         leadersSnapshot.put("1", "A");
         leadersSnapshot.put("2", "B");
         leadersSnapshot.put("3", "C");
@@ -650,14 +647,11 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         actorContext.getReplicatedLog().removeFrom(0);
 
         final int followersLastIndex = 2;
-        final int snapshotIndex = 3;
         final int newEntryIndex = 4;
-        final int snapshotTerm = 1;
         final int currentTerm = 2;
 
         // set the snapshot variables in replicatedlog
-        actorContext.getReplicatedLog().setSnapshotIndex(snapshotIndex);
-        actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
+        actorContext.getReplicatedLog().setSnapshotMeta(ImmutableRaftEntryMeta.of(3, 1));
         actorContext.setCommitIndex(followersLastIndex);
 
         leader = new Leader(actorContext);
@@ -691,14 +685,12 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         actorContext.getReplicatedLog().removeFrom(0);
 
         final int followersLastIndex = 2;
-        final int snapshotIndex = 3;
+        final var snapshotMeta = ImmutableRaftEntryMeta.of(3,  1);
         final int newEntryIndex = 4;
-        final int snapshotTerm = 1;
         final int currentTerm = 2;
 
         // set the snapshot variables in replicatedlog
-        actorContext.getReplicatedLog().setSnapshotIndex(snapshotIndex);
-        actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
+        actorContext.getReplicatedLog().setSnapshotMeta(snapshotMeta);
         actorContext.setLastApplied(3);
         actorContext.setCommitIndex(followersLastIndex);
 
@@ -741,14 +733,11 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         MockRaftActorContext actorContext = createActorContextWithFollower();
 
         final int followersLastIndex = 2;
-        final int snapshotIndex = -1;
         final int newEntryIndex = 4;
-        final int snapshotTerm = -1;
         final int currentTerm = 2;
 
         // set the snapshot variables in replicatedlog
-        actorContext.getReplicatedLog().setSnapshotIndex(snapshotIndex);
-        actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
+        actorContext.getReplicatedLog().setSnapshotMeta(null);
         actorContext.setLastApplied(3);
         actorContext.setCommitIndex(followersLastIndex);
 
@@ -835,13 +824,10 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         actorContext.getReplicatedLog().removeFrom(0);
 
         final int lastAppliedIndex = 3;
-        final int snapshotIndex = 2;
-        final int snapshotTerm = 1;
         final int currentTerm = 2;
 
         // set the snapshot variables in replicatedlog
-        actorContext.getReplicatedLog().setSnapshotIndex(snapshotIndex);
-        actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
+        actorContext.getReplicatedLog().setSnapshotMeta(ImmutableRaftEntryMeta.of(2, 1));
         actorContext.setTermInfo(new TermInfo(currentTerm, leaderActor.path().toString()));
         actorContext.setCommitIndex(lastAppliedIndex);
         actorContext.setLastApplied(lastAppliedIndex);
@@ -855,8 +841,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leader.getFollower(FOLLOWER_ID).setNextIndex(0);
 
         byte[] bytes = toByteString(leadersSnapshot).toByteArray();
-        Snapshot snapshot = Snapshot.create(ByteState.of(bytes), List.of(), lastAppliedIndex, snapshotTerm,
-                lastAppliedIndex, snapshotTerm, new TermInfo(-1), null);
+        Snapshot snapshot = Snapshot.create(ByteState.of(bytes), List.of(), lastAppliedIndex, 1,
+            ImmutableRaftEntryMeta.of(lastAppliedIndex, 2), new TermInfo(-1), null);
 
         RaftActorBehavior raftBehavior = leader.handleMessage(leaderActor,
                 new SendInstallSnapshot(snapshot, ByteSource.wrap(bytes)));
@@ -870,7 +856,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         assertNotNull(installSnapshot.getData());
         assertEquals(lastAppliedIndex, installSnapshot.getLastIncludedIndex());
-        assertEquals(snapshotTerm, installSnapshot.getLastIncludedTerm());
+        assertEquals(1, installSnapshot.getLastIncludedTerm());
 
         assertEquals(currentTerm, installSnapshot.getTerm());
     }
@@ -887,13 +873,10 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leadersSnapshot.put("3", "C");
 
         final int lastAppliedIndex = 3;
-        final int snapshotIndex = -1;
-        final int snapshotTerm = -1;
         final int currentTerm = 2;
 
         // set the snapshot variables in replicatedlog
-        actorContext.getReplicatedLog().setSnapshotIndex(snapshotIndex);
-        actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
+        actorContext.getReplicatedLog().setSnapshotMeta(null);
         actorContext.setTermInfo(new TermInfo(currentTerm, leaderActor.path().toString()));
         actorContext.setCommitIndex(lastAppliedIndex);
         actorContext.setLastApplied(lastAppliedIndex);
@@ -908,7 +891,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         byte[] bytes = toByteString(leadersSnapshot).toByteArray();
         Snapshot snapshot = Snapshot.create(ByteState.of(bytes), List.of(),
-                lastAppliedIndex, snapshotTerm, lastAppliedIndex, snapshotTerm, new TermInfo(-1), null);
+                lastAppliedIndex, -1, ImmutableRaftEntryMeta.of(lastAppliedIndex, -1), new TermInfo(-1), null);
 
         RaftActorBehavior raftBehavior = leader.handleMessage(leaderActor,
                 new SendInstallSnapshot(snapshot, ByteSource.wrap(bytes)));
@@ -922,7 +905,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         assertNotNull(installSnapshot.getData());
         assertEquals(lastAppliedIndex, installSnapshot.getLastIncludedIndex());
-        assertEquals(snapshotTerm, installSnapshot.getLastIncludedTerm());
+        assertEquals(-1, installSnapshot.getLastIncludedTerm());
 
         assertEquals(currentTerm, installSnapshot.getTerm());
     }
@@ -934,8 +917,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         MockRaftActorContext actorContext = createActorContextWithFollower();
 
         final int commitIndex = 3;
-        final int snapshotIndex = 2;
-        final int snapshotTerm = 1;
+        final var snapshotEntry = ImmutableRaftEntryMeta.of(2, 1);
         final int currentTerm = 2;
 
         actorContext.setCommitIndex(commitIndex);
@@ -956,14 +938,11 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         // set the snapshot variables in replicatedlog
 
-        actorContext.getReplicatedLog().setSnapshotIndex(snapshotIndex);
-        actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
+        actorContext.getReplicatedLog().setSnapshotMeta(snapshotEntry);
         actorContext.setTermInfo(new TermInfo(currentTerm, leaderActor.path().toString()));
 
         ByteString bs = toByteString(leadersSnapshot);
-        leader.setSnapshotHolder(new SnapshotHolder(Snapshot.create(ByteState.of(bs.toByteArray()), List.of(),
-                commitIndex, snapshotTerm, commitIndex, snapshotTerm, new TermInfo(-1), null),
-                ByteSource.wrap(bs.toByteArray())));
+        leader.setSnapshotHolder(new SnapshotHolder(snapshotEntry, ByteSource.wrap(bs.toByteArray())));
         LeaderInstallSnapshotState fts = new LeaderInstallSnapshotState(
                 actorContext.getConfigParams().getMaximumMessageSliceSize(), leader.logName);
         fts.setSnapshotBytes(ByteSource.wrap(bs.toByteArray()));
@@ -997,8 +976,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         MockRaftActorContext actorContext = createActorContextWithFollower();
 
         final int commitIndex = 3;
-        final int snapshotIndex = 2;
-        final int snapshotTerm = 1;
+        final var snapshotMeta = ImmutableRaftEntryMeta.of(2, 1);
         final int currentTerm = 2;
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl() {
@@ -1025,13 +1003,12 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leadersSnapshot.put("3", "C");
 
         // set the snapshot variables in replicatedlog
-        actorContext.getReplicatedLog().setSnapshotIndex(snapshotIndex);
-        actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
+        actorContext.getReplicatedLog().setSnapshotMeta(snapshotMeta);
         actorContext.setTermInfo(new TermInfo(currentTerm, leaderActor.path().toString()));
 
         ByteString bs = toByteString(leadersSnapshot);
-        Snapshot snapshot = Snapshot.create(ByteState.of(bs.toByteArray()), List.of(), commitIndex, snapshotTerm,
-                commitIndex, snapshotTerm, new TermInfo(-1), null);
+        Snapshot snapshot = Snapshot.create(ByteState.of(bs.toByteArray()), List.of(), commitIndex, 2,
+            ImmutableRaftEntryMeta.of(commitIndex, 2), new TermInfo(-1), null);
 
         leader.handleMessage(leaderActor, new SendInstallSnapshot(snapshot, ByteSource.wrap(bs.toByteArray())));
 
@@ -1074,8 +1051,6 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         MockRaftActorContext actorContext = createActorContextWithFollower();
 
         final int commitIndex = 3;
-        final int snapshotIndex = 2;
-        final int snapshotTerm = 1;
         final int currentTerm = 2;
 
         actorContext.setConfigParams(new DefaultConfigParamsImpl() {
@@ -1098,13 +1073,12 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leadersSnapshot.put("3", "C");
 
         // set the snapshot variables in replicatedlog
-        actorContext.getReplicatedLog().setSnapshotIndex(snapshotIndex);
-        actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
+        actorContext.getReplicatedLog().setSnapshotMeta(ImmutableRaftEntryMeta.of(2, 1));
         actorContext.setTermInfo(new TermInfo(currentTerm, leaderActor.path().toString()));
 
         ByteString bs = toByteString(leadersSnapshot);
-        Snapshot snapshot = Snapshot.create(ByteState.of(bs.toByteArray()), List.of(), commitIndex, snapshotTerm,
-                commitIndex, snapshotTerm, new TermInfo(-1), null);
+        Snapshot snapshot = Snapshot.create(ByteState.of(bs.toByteArray()), List.of(), commitIndex, 1,
+            ImmutableRaftEntryMeta.of(commitIndex, 2), new TermInfo(-1), null);
 
         Uninterruptibles.sleepUninterruptibly(Duration.ofSeconds(1));
         leader.handleMessage(leaderActor, new SendInstallSnapshot(snapshot, ByteSource.wrap(bs.toByteArray())));
@@ -1137,8 +1111,6 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         MockRaftActorContext actorContext = createActorContextWithFollower();
 
         final int commitIndex = 3;
-        final int snapshotIndex = 2;
-        final int snapshotTerm = 1;
         final int currentTerm = 2;
 
         actorContext.setConfigParams(new DefaultConfigParamsImpl() {
@@ -1161,13 +1133,12 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leadersSnapshot.put("3", "C");
 
         // set the snapshot variables in replicatedlog
-        actorContext.getReplicatedLog().setSnapshotIndex(snapshotIndex);
-        actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
+        actorContext.getReplicatedLog().setSnapshotMeta(ImmutableRaftEntryMeta.of(1, 2));
         actorContext.setTermInfo(new TermInfo(currentTerm, leaderActor.path().toString()));
 
         ByteString bs = toByteString(leadersSnapshot);
-        Snapshot snapshot = Snapshot.create(ByteState.of(bs.toByteArray()), List.of(), commitIndex, snapshotTerm,
-                commitIndex, snapshotTerm, new TermInfo(-1), null);
+        Snapshot snapshot = Snapshot.create(ByteState.of(bs.toByteArray()), List.of(), commitIndex, 2,
+            ImmutableRaftEntryMeta.of(commitIndex, 2), new TermInfo(-1), null);
 
         leader.handleMessage(leaderActor, new SendInstallSnapshot(snapshot, ByteSource.wrap(bs.toByteArray())));
 

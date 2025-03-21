@@ -140,8 +140,8 @@ class RaftActorRecoverySupport {
             // We may have just transitioned to disabled and have a snapshot containing state data and/or log
             // entries - we don't want to preserve these, only the server config and election term info.
 
-            snapshot = Snapshot.create(EmptyState.INSTANCE, List.of(), -1, -1, -1, -1,
-                snapshot.termInfo(), snapshot.getServerConfiguration());
+            snapshot = Snapshot.create(EmptyState.INSTANCE, List.of(), -1, -1, null, snapshot.termInfo(),
+                snapshot.getServerConfiguration());
         }
 
         // Create a replicated log with the snapshot information
@@ -344,8 +344,8 @@ class RaftActorRecoverySupport {
             // messages. Either way, we persist a snapshot and delete all the messages from the akka journal
             // to clean out unwanted messages.
 
-            Snapshot snapshot = Snapshot.create(EmptyState.INSTANCE, List.of(), -1, -1, -1, -1,
-                context.termInfo(), context.getPeerServerInfo(true));
+            Snapshot snapshot = Snapshot.create(EmptyState.INSTANCE, List.of(), -1, -1, null, context.termInfo(),
+                context.getPeerServerInfo(true));
 
             raftActor.saveSnapshot(snapshot);
             raftActor.deleteMessages(raftActor.lastSequenceNr());
