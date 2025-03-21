@@ -69,6 +69,7 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
+import org.opendaylight.controller.cluster.raft.spi.ImmutableRaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
@@ -482,8 +483,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         MockRaftActorContext context = createActorContext();
 
         context.setLastApplied(100);
-        setLastLogEntry(context, 1, 100,
-                new MockRaftActorContext.MockPayload(""));
+        setLastLogEntry(context, 1, 100, new MockRaftActorContext.MockPayload(""));
         context.getReplicatedLog().setSnapshotIndex(99);
 
         List<ReplicatedLogEntry> entries = List.of(newReplicatedLogEntry(2, 101, "foo"));
@@ -528,8 +528,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         MockRaftActorContext context = createActorContext();
         context.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(5, 8, 3).build());
-        context.getReplicatedLog().setSnapshotIndex(4);
-        context.getReplicatedLog().setSnapshotTerm(3);
+        context.getReplicatedLog().setSnapshotMeta(ImmutableRaftEntryMeta.of(4, 3));
 
         AppendEntries appendEntries = new AppendEntries(3, "leader", 1, 3, List.of(), 8, -1, (short)0);
 
@@ -767,8 +766,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         MockRaftActorContext.SimpleReplicatedLog log = new MockRaftActorContext.SimpleReplicatedLog();
 
         // Set up a log as if it has been snapshotted
-        log.setSnapshotIndex(3);
-        log.setSnapshotTerm(1);
+        log.setSnapshotMeta(ImmutableRaftEntryMeta.of(3, 1));
 
         context.setReplicatedLog(log);
 
@@ -1126,8 +1124,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertEquals("ApplyJournalEntries index", 1, ((ApplyJournalEntries)journalEntries.get(0)).getToIndex());
 
         assertEquals("Snapshot unapplied size", 0, snapshot.getUnAppliedEntries().size());
-        assertEquals("Snapshot getLastAppliedTerm", 1, snapshot.getLastAppliedTerm());
-        assertEquals("Snapshot getLastAppliedIndex", 1, snapshot.getLastAppliedIndex());
+        assertEquals(ImmutableRaftEntryMeta.of(1, 1), snapshot.lastApplied());
         assertEquals("Snapshot getLastTerm", 1, snapshot.getLastTerm());
         assertEquals("Snapshot getLastIndex", 1, snapshot.getLastIndex());
         assertEquals("Snapshot state", List.of(entries.get(0).getData(), entries.get(1).getData()),
@@ -1177,13 +1174,12 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         // persistence by the time we initiate capture so the last persisted journal sequence number doesn't include it.
         // This is OK - on recovery it will be a no-op since index 2 has already been applied.
         final var journalEntries = InMemoryJournal.get(id, Object.class);
-        assertEquals("Persisted journal entries size: " + journalEntries, 1, journalEntries.size());
-        assertEquals("Persisted journal entry type", ApplyJournalEntries.class, journalEntries.get(0).getClass());
-        assertEquals("ApplyJournalEntries index", 2, ((ApplyJournalEntries)journalEntries.get(0)).getToIndex());
+        assertEquals(1, journalEntries.size());
+        assertEquals(ApplyJournalEntries.class, journalEntries.get(0).getClass());
+        assertEquals(2, ((ApplyJournalEntries)journalEntries.get(0)).getToIndex());
 
-        assertEquals("Snapshot unapplied size", 0, snapshot.getUnAppliedEntries().size());
-        assertEquals("Snapshot getLastAppliedTerm", 1, snapshot.getLastAppliedTerm());
-        assertEquals("Snapshot getLastAppliedIndex", 2, snapshot.getLastAppliedIndex());
+        assertEquals(0, snapshot.getUnAppliedEntries().size());
+        assertEquals(ImmutableRaftEntryMeta.of(2, 1), snapshot.lastApplied());
         assertEquals("Snapshot getLastTerm", 1, snapshot.getLastTerm());
         assertEquals("Snapshot getLastIndex", 2, snapshot.getLastIndex());
         assertEquals("Snapshot state", List.of(entries.get(0).getData(), entries.get(1).getData(),
@@ -1252,19 +1248,16 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         // persistence by the time we initiate capture so the last persisted journal sequence number doesn't include it.
         // This is OK - on recovery it will be a no-op since index 0 has already been applied.
         final var journalEntries = InMemoryJournal.get(id, Object.class);
-        assertEquals("Persisted journal entries size: " + journalEntries, 1, journalEntries.size());
-        assertEquals("Persisted journal entry type", ApplyJournalEntries.class, journalEntries.get(0).getClass());
-        assertEquals("ApplyJournalEntries index", 0, ((ApplyJournalEntries)journalEntries.get(0)).getToIndex());
-
-        assertEquals("Snapshot unapplied size", 2, snapshot.getUnAppliedEntries().size());
-        assertEquals("Snapshot unapplied entry index", 1, snapshot.getUnAppliedEntries().get(0).index());
-        assertEquals("Snapshot unapplied entry index", 2, snapshot.getUnAppliedEntries().get(1).index());
-        assertEquals("Snapshot getLastAppliedTerm", 1, snapshot.getLastAppliedTerm());
-        assertEquals("Snapshot getLastAppliedIndex", 0, snapshot.getLastAppliedIndex());
-        assertEquals("Snapshot getLastTerm", 1, snapshot.getLastTerm());
-        assertEquals("Snapshot getLastIndex", 2, snapshot.getLastIndex());
-        assertEquals("Snapshot state", List.of(entries.get(0).getData()),
-                MockRaftActor.fromState(snapshot.getState()));
+        assertEquals(1, journalEntries.size());
+        final var entryZero = assertInstanceOf(ApplyJournalEntries.class, journalEntries.get(0));
+        assertEquals(0, entryZero.getToIndex());
+        assertEquals(2, snapshot.getUnAppliedEntries().size());
+        assertEquals(1, snapshot.getUnAppliedEntries().get(0).index());
+        assertEquals(2, snapshot.getUnAppliedEntries().get(1).index());
+        assertEquals(ImmutableRaftEntryMeta.of(0, 1), snapshot.lastApplied());
+        assertEquals(1, snapshot.getLastTerm());
+        assertEquals(2, snapshot.getLastIndex());
+        assertEquals(List.of(entries.get(0).getData()), MockRaftActor.fromState(snapshot.getState()));
     }
 
     @Test
@@ -1274,7 +1267,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         MockRaftActorContext context = createActorContext();
         context.setReplicatedLog(new MockRaftActorContext.SimpleReplicatedLog());
         context.addToPeers("leader", null, VotingState.VOTING);
-        ((DefaultConfigParamsImpl)context.getConfigParams()).setPeerAddressResolver(NoopPeerAddressResolver.INSTANCE);
+        ((DefaultConfigParamsImpl) context.getConfigParams()).setPeerAddressResolver(NoopPeerAddressResolver.INSTANCE);
 
         follower = createBehavior(context);
 

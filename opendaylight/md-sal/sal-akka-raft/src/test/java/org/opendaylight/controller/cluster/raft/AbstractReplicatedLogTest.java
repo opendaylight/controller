@@ -21,6 +21,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.spi.ImmutableRaftEntryMeta;
 
 class AbstractReplicatedLogTest {
     private MockReplicatedLog replicatedLogImpl;
@@ -54,8 +55,7 @@ class AbstractReplicatedLogTest {
 
         assertEquals(-1, replicatedLogImpl.removeFrom(1));
 
-        replicatedLogImpl.setSnapshotIndex(2);
-        replicatedLogImpl.setSnapshotTerm(1);
+        replicatedLogImpl.setSnapshotMeta(ImmutableRaftEntryMeta.of(2, 1));
 
         assertEquals(2, replicatedLogImpl.getSnapshotIndex());
         assertEquals(1, replicatedLogImpl.getSnapshotTerm());
