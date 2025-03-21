@@ -8,25 +8,25 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 
-public class AbstractReplicatedLogTest {
+class AbstractReplicatedLogTest {
     private MockReplicatedLog replicatedLogImpl;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void beforeEach() {
         replicatedLogImpl = new MockReplicatedLog();
         // create a set of initial entries in the in-memory log
         replicatedLogImpl.append(new SimpleReplicatedLogEntry(0, 1, new MockPayload("A")));
@@ -36,37 +36,35 @@ public class AbstractReplicatedLogTest {
     }
 
     @Test
-    public void testEmptyLog() {
+    void testEmptyLog() {
         replicatedLogImpl = new MockReplicatedLog();
 
-        assertEquals("size", 0, replicatedLogImpl.size());
-        assertEquals("dataSize", 0, replicatedLogImpl.dataSize());
-        assertEquals("getSnapshotIndex", -1, replicatedLogImpl.getSnapshotIndex());
-        assertEquals("getSnapshotTerm", -1, replicatedLogImpl.getSnapshotTerm());
-        assertEquals("lastIndex", -1, replicatedLogImpl.lastIndex());
-        assertEquals("lastTerm", -1, replicatedLogImpl.lastTerm());
-        assertFalse("isPresent", replicatedLogImpl.isPresent(0));
-        assertFalse("isInSnapshot", replicatedLogImpl.isInSnapshot(0));
-        assertNull("get(0)", replicatedLogImpl.get(0));
-        assertNull("last", replicatedLogImpl.last());
+        assertEquals(0, replicatedLogImpl.size());
+        assertEquals(0, replicatedLogImpl.dataSize());
+        assertEquals(-1, replicatedLogImpl.getSnapshotIndex());
+        assertEquals(-1, replicatedLogImpl.getSnapshotTerm());
+        assertEquals(-1, replicatedLogImpl.lastIndex());
+        assertEquals(-1, replicatedLogImpl.lastTerm());
+        assertFalse(replicatedLogImpl.isPresent(0));
+        assertFalse(replicatedLogImpl.isInSnapshot(0));
+        assertNull(replicatedLogImpl.get(0));
+        assertNull(replicatedLogImpl.last());
 
-        List<ReplicatedLogEntry> list = replicatedLogImpl.getFrom(0, 1, ReplicatedLog.NO_MAX_SIZE);
-        assertEquals("getFrom size", 0, list.size());
+        assertEquals(List.of(), replicatedLogImpl.getFrom(0, 1, ReplicatedLog.NO_MAX_SIZE));
 
-        assertEquals("removeFrom", -1, replicatedLogImpl.removeFrom(1));
+        assertEquals(-1, replicatedLogImpl.removeFrom(1));
 
         replicatedLogImpl.setSnapshotIndex(2);
         replicatedLogImpl.setSnapshotTerm(1);
 
-        assertEquals("getSnapshotIndex", 2, replicatedLogImpl.getSnapshotIndex());
-        assertEquals("getSnapshotTerm", 1, replicatedLogImpl.getSnapshotTerm());
-        assertEquals("lastIndex", 2, replicatedLogImpl.lastIndex());
-        assertEquals("lastTerm", 1, replicatedLogImpl.lastTerm());
+        assertEquals(2, replicatedLogImpl.getSnapshotIndex());
+        assertEquals(1, replicatedLogImpl.getSnapshotTerm());
+        assertEquals(2, replicatedLogImpl.lastIndex());
+        assertEquals(1, replicatedLogImpl.lastTerm());
     }
 
     @Test
-    public void testIndexOperations() {
-
+    void testIndexOperations() {
         // check if the values returned are correct, with snapshotIndex = -1
         assertEquals("B", replicatedLogImpl.get(1).getData().toString());
         assertEquals("D", replicatedLogImpl.last().getData().toString());
@@ -127,12 +125,11 @@ public class AbstractReplicatedLogTest {
         assertTrue(replicatedLogImpl.isInSnapshot(7));
         assertEquals(0, replicatedLogImpl.getFrom(7).size());
         assertEquals(0, replicatedLogImpl.getFrom(6).size());
-
     }
 
     @Test
-    public void testGetFromWithMax() {
-        List<ReplicatedLogEntry> from = replicatedLogImpl.getFrom(0, 1, ReplicatedLog.NO_MAX_SIZE);
+    void testGetFromWithMax() {
+        var from = replicatedLogImpl.getFrom(0, 1, ReplicatedLog.NO_MAX_SIZE);
         assertEquals(1, from.size());
         assertEquals("A", from.get(0).getData().toString());
 
@@ -176,7 +173,7 @@ public class AbstractReplicatedLogTest {
     }
 
     @Test
-    public void testSnapshotPreCommit() {
+    void testSnapshotPreCommit() {
         //add 4 more entries
         replicatedLogImpl.append(new SimpleReplicatedLogEntry(4, 2, new MockPayload("E")));
         replicatedLogImpl.append(new SimpleReplicatedLogEntry(5, 2, new MockPayload("F")));
@@ -212,46 +209,43 @@ public class AbstractReplicatedLogTest {
     }
 
     @Test
-    public void testSnapshotCommit() {
-
+    void testSnapshotCommit() {
         replicatedLogImpl.snapshotPreCommit(1, 1);
-
         replicatedLogImpl.snapshotCommit();
 
-        assertEquals("size", 2, replicatedLogImpl.size());
-        assertEquals("dataSize", 2, replicatedLogImpl.dataSize());
-        assertEquals("getSnapshotIndex", 1, replicatedLogImpl.getSnapshotIndex());
-        assertEquals("getSnapshotTerm", 1, replicatedLogImpl.getSnapshotTerm());
-        assertEquals("lastIndex", 3, replicatedLogImpl.lastIndex());
-        assertEquals("lastTerm", 2, replicatedLogImpl.lastTerm());
+        assertEquals(2, replicatedLogImpl.size());
+        assertEquals(2, replicatedLogImpl.dataSize());
+        assertEquals(1, replicatedLogImpl.getSnapshotIndex());
+        assertEquals(1, replicatedLogImpl.getSnapshotTerm());
+        assertEquals(3, replicatedLogImpl.lastIndex());
+        assertEquals(2, replicatedLogImpl.lastTerm());
 
-        assertNull("get(0)", replicatedLogImpl.get(0));
-        assertNull("get(1)", replicatedLogImpl.get(1));
-        assertNotNull("get(2)", replicatedLogImpl.get(2));
-        assertNotNull("get(3)", replicatedLogImpl.get(3));
+        assertNull(replicatedLogImpl.get(0));
+        assertNull(replicatedLogImpl.get(1));
+        assertNotNull(replicatedLogImpl.get(2));
+        assertNotNull(replicatedLogImpl.get(3));
     }
 
     @Test
-    public void testSnapshotRollback() {
-
+    void testSnapshotRollback() {
         replicatedLogImpl.snapshotPreCommit(1, 1);
 
-        assertEquals("size", 2, replicatedLogImpl.size());
-        assertEquals("getSnapshotIndex", 1, replicatedLogImpl.getSnapshotIndex());
-        assertEquals("getSnapshotTerm", 1, replicatedLogImpl.getSnapshotTerm());
+        assertEquals(2, replicatedLogImpl.size());
+        assertEquals(1, replicatedLogImpl.getSnapshotIndex());
+        assertEquals(1, replicatedLogImpl.getSnapshotTerm());
 
         replicatedLogImpl.snapshotRollback();
 
-        assertEquals("size", 4, replicatedLogImpl.size());
-        assertEquals("dataSize", 4, replicatedLogImpl.dataSize());
-        assertEquals("getSnapshotIndex", -1, replicatedLogImpl.getSnapshotIndex());
-        assertEquals("getSnapshotTerm", -1, replicatedLogImpl.getSnapshotTerm());
-        assertNotNull("get(0)", replicatedLogImpl.get(0));
-        assertNotNull("get(3)", replicatedLogImpl.get(3));
+        assertEquals(4, replicatedLogImpl.size());
+        assertEquals(4, replicatedLogImpl.dataSize());
+        assertEquals(-1, replicatedLogImpl.getSnapshotIndex());
+        assertEquals(-1, replicatedLogImpl.getSnapshotTerm());
+        assertNotNull(replicatedLogImpl.get(0));
+        assertNotNull(replicatedLogImpl.get(3));
     }
 
     @Test
-    public void testIsPresent() {
+    void testIsPresent() {
         assertTrue(replicatedLogImpl.isPresent(0));
         assertTrue(replicatedLogImpl.isPresent(1));
         assertTrue(replicatedLogImpl.isPresent(2));
@@ -276,31 +270,30 @@ public class AbstractReplicatedLogTest {
     }
 
     @Test
-    public void testRemoveFrom() {
-
+    void testRemoveFrom() {
         replicatedLogImpl.append(new SimpleReplicatedLogEntry(4, 2, new MockPayload("E", 2)));
         replicatedLogImpl.append(new SimpleReplicatedLogEntry(5, 2, new MockPayload("F", 3)));
 
-        assertEquals("dataSize", 9, replicatedLogImpl.dataSize());
+        assertEquals(9, replicatedLogImpl.dataSize());
 
         long adjusted = replicatedLogImpl.removeFrom(4);
-        assertEquals("removeFrom - adjusted", 4, adjusted);
-        assertEquals("size", 4, replicatedLogImpl.size());
-        assertEquals("dataSize", 4, replicatedLogImpl.dataSize());
+        assertEquals(4, adjusted);
+        assertEquals(4, replicatedLogImpl.size());
+        assertEquals(4, replicatedLogImpl.dataSize());
 
         takeSnapshot(1);
 
         adjusted = replicatedLogImpl.removeFrom(2);
-        assertEquals("removeFrom - adjusted", 1, adjusted);
-        assertEquals("size", 1, replicatedLogImpl.size());
-        assertEquals("dataSize", 1, replicatedLogImpl.dataSize());
+        assertEquals(1, adjusted);
+        assertEquals(1, replicatedLogImpl.size());
+        assertEquals(1, replicatedLogImpl.dataSize());
 
-        assertEquals("removeFrom - adjusted", -1, replicatedLogImpl.removeFrom(0));
-        assertEquals("removeFrom - adjusted", -1, replicatedLogImpl.removeFrom(100));
+        assertEquals(-1, replicatedLogImpl.removeFrom(0));
+        assertEquals(-1, replicatedLogImpl.removeFrom(100));
     }
 
     // create a snapshot for test
-    public Map<Long, String> takeSnapshot(final int numEntries) {
+    private Map<Long, String> takeSnapshot(final int numEntries) {
         final var map = new HashMap<Long, String>(numEntries);
 
         long lastIndex = 0;
