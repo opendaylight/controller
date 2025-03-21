@@ -91,7 +91,7 @@ public class Follower extends RaftActorBehavior {
         }
     }
 
-    public @NonNull Follower copy() {
+    public final @NonNull Follower copy() {
         return new Follower(context, leaderId, leaderPayloadVersion);
     }
 
@@ -106,7 +106,7 @@ public class Follower extends RaftActorBehavior {
     }
 
     @Override
-    public short getLeaderPayloadVersion() {
+    public final short getLeaderPayloadVersion() {
         return leaderPayloadVersion;
     }
 
@@ -133,7 +133,7 @@ public class Follower extends RaftActorBehavior {
     }
 
     @Override
-    RaftActorBehavior handleAppendEntries(final ActorRef sender, final AppendEntries appendEntries) {
+    final RaftActorBehavior handleAppendEntries(final ActorRef sender, final AppendEntries appendEntries) {
         int numLogEntries = appendEntries.getEntries().size();
         if (LOG.isTraceEnabled()) {
             LOG.trace("{}: handleAppendEntries: {}", logName, appendEntries);
@@ -418,12 +418,13 @@ public class Follower extends RaftActorBehavior {
     }
 
     @Override
-    RaftActorBehavior handleAppendEntriesReply(final ActorRef sender, final AppendEntriesReply appendEntriesReply) {
+    final RaftActorBehavior handleAppendEntriesReply(final ActorRef sender,
+            final AppendEntriesReply appendEntriesReply) {
         return this;
     }
 
     @Override
-    RaftActorBehavior handleRequestVoteReply(final ActorRef sender, final RequestVoteReply requestVoteReply) {
+    final RaftActorBehavior handleRequestVoteReply(final ActorRef sender, final RequestVoteReply requestVoteReply) {
         return this;
     }
 
@@ -675,14 +676,14 @@ public class Follower extends RaftActorBehavior {
     }
 
     @Override
-    public void close() {
+    public final void close() {
         closeSnapshotTracker();
         stopElection();
         appendEntriesMessageAssembler.close();
     }
 
     @VisibleForTesting
-    SnapshotTracker getSnapshotTracker() {
+    final SnapshotTracker getSnapshotTracker() {
         return snapshotTracker;
     }
 }
