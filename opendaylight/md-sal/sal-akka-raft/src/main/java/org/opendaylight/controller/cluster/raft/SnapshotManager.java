@@ -621,30 +621,7 @@ public final class SnapshotManager {
 
     @NonNullByDefault
     private RaftEntryMeta computeLastAppliedEntry(final @Nullable RaftEntryMeta lastLogEntry) {
-        return computeLastAppliedEntry(context.getReplicatedLog(), context.getLastApplied(), lastLogEntry,
-            context.hasFollowers());
-    }
-
-    @VisibleForTesting
-    @NonNullByDefault
-    static RaftEntryMeta computeLastAppliedEntry(final ReplicatedLog log, final long originalIndex,
-            final @Nullable RaftEntryMeta lastLogEntry, final boolean hasFollowers) {
-        if (hasFollowers) {
-            final var entry = log.lookupMeta(originalIndex);
-            if (entry != null) {
-                return entry;
-            }
-
-            final var snapshotIndex = log.getSnapshotIndex();
-            if (snapshotIndex > -1) {
-                return ImmutableRaftEntryMeta.of(snapshotIndex, log.getSnapshotTerm());
-            }
-        } else if (lastLogEntry != null) {
-            // since we have persisted the last-log-entry to persistent journal before the capture, we would want
-            // to snapshot from this entry.
-            return lastLogEntry;
-        }
-
-        return ImmutableRaftEntryMeta.of(-1, -1);
+        return AbstractReplicatedLog.computeLastAppliedEntry(context.getReplicatedLog(), context.getLastApplied(),
+            lastLogEntry, context.hasFollowers());
     }
 }
