@@ -7,14 +7,25 @@
  */
 package org.opendaylight.controller.cluster.raft.base.messages;
 
-import static java.util.Objects.requireNonNull;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.opendaylight.controller.cluster.raft.RaftState;
+import org.opendaylight.controller.cluster.raft.RaftActor;
 
 @NonNullByDefault
-public record SwitchBehavior(RaftState newState, long newTerm) {
-    public SwitchBehavior {
-        requireNonNull(newState);
+public sealed interface SwitchBehavior {
+
+    long newTerm();
+
+    /**
+     * Request a {@link RaftActor} to become a follower in specified term.
+     */
+    record BecomeFollower(long newTerm) implements SwitchBehavior {
+        // Nothing else
+    }
+
+    /**
+     * Request a {@link RaftActor} to become a leader in specified term.
+     */
+    record BecomeLeader(long newTerm) implements SwitchBehavior {
+        // Nothing else
     }
 }

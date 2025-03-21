@@ -117,7 +117,7 @@ import org.opendaylight.controller.cluster.notifications.RoleChangeNotification;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.TestActorFactory;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
-import org.opendaylight.controller.cluster.raft.base.messages.SwitchBehavior;
+import org.opendaylight.controller.cluster.raft.base.messages.SwitchBehavior.BecomeLeader;
 import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshot;
 import org.opendaylight.controller.cluster.raft.client.messages.Shutdown;
 import org.opendaylight.controller.cluster.raft.messages.AddServer;
@@ -1262,13 +1262,10 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         shardManager.tell(new UpdateSchemaContext(TEST_SCHEMA_CONTEXT), kit.getRef());
         shardManager.tell(new ActorInitialized(mockShardActor), ActorRef.noSender());
 
-        shardManager.tell(new SwitchShardBehavior(mockShardName, RaftState.Leader, 1000), kit.getRef());
+        final var becomeLeader = new BecomeLeader(1000);
+        shardManager.tell(new SwitchShardBehavior(mockShardName, becomeLeader), kit.getRef());
 
-        SwitchBehavior switchBehavior = MessageCollectorActor.expectFirstMatching(mockShardActor,
-            SwitchBehavior.class);
-
-        assertEquals(RaftState.Leader, switchBehavior.newState());
-        assertEquals(1000, switchBehavior.newTerm());
+        assertSame(becomeLeader, MessageCollectorActor.expectFirstMatching(mockShardActor, BecomeLeader.class));
     }
 
     private static List<MemberName> members(final String... names) {

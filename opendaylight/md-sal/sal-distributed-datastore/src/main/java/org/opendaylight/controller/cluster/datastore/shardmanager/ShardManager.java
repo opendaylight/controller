@@ -47,6 +47,7 @@ import org.apache.pekko.persistence.SnapshotOffer;
 import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.apache.pekko.util.Timeout;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActorWithMetering;
 import org.opendaylight.controller.cluster.common.actor.Dispatchers;
@@ -229,7 +230,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             case FollowerInitialSyncUpStatus msg -> onFollowerInitialSyncStatus(msg);
             case ShardNotInitializedTimeout msg -> onShardNotInitializedTimeout(msg);
             case ShardLeaderStateChanged msg -> onLeaderStateChanged(msg);
-            case SwitchShardBehavior msg -> onSwitchShardBehavior(msg);
+            case SwitchShardBehavior(var shardId, var switchBehavior) -> onSwitchShardBehavior(shardId, switchBehavior);
             case CreateShard msg -> onCreateShard(msg);
             case AddShardReplica msg -> onAddShardReplica(msg);
             case ForwardedAddServerReply msg -> onAddServerReply(msg.shardInfo, msg.addServerReply, getSender(),
@@ -898,35 +899,33 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         getSender().tell(new Status.Success(response), self());
     }
 
-    private void onSwitchShardBehavior(final SwitchShardBehavior message) {
-        final var shardId = message.shardId();
-        final var switchBehavior = new SwitchBehavior(message.newState(), message.term());
+    private void onSwitchShardBehavior(final @Nullable ShardIdentifier shardId, final SwitchBehavior switchBehavior) {
+        final var status = shardId != null ? switchOneShard(shardId, switchBehavior) : switchAllShards(switchBehavior);
+        getSender().tell(status, self());
+    }
 
-        if (shardId != null) {
-            final var info = localShards.get(shardId.getShardName());
-            if (info == null) {
-                getSender().tell(new Status.Failure(new IllegalArgumentException("Shard " + shardId + " is not local")),
-                    self());
-                return;
-            }
-
+    private Status.Success switchAllShards(final SwitchBehavior switchBehavior) {
+        for (var info : localShards.values()) {
             switchShardBehavior(info, switchBehavior);
-        } else {
-            for (var info : localShards.values()) {
-                switchShardBehavior(info, switchBehavior);
-            }
         }
+        return new Status.Success(null);
+    }
 
-        getSender().tell(new Status.Success(null), self());
+    private Status.Status switchOneShard(final ShardIdentifier shardId, final SwitchBehavior switchBehavior) {
+        final var info = localShards.get(shardId.getShardName());
+        if (info == null) {
+            return new Status.Failure(new IllegalArgumentException("Shard " + shardId + " is not local"));
+        }
+        switchShardBehavior(info, switchBehavior);
+        return new Status.Success(null);
     }
 
     private void switchShardBehavior(final ShardInformation info, final SwitchBehavior switchBehavior) {
-        final ActorRef actor = info.getActor();
+        final var actor = info.getActor();
         if (actor != null) {
             actor.tell(switchBehavior, self());
         } else {
-            LOG.warn("Could not switch the behavior of shard {} to {} - shard is not yet available",
-                info.getShardName(), switchBehavior.newState());
+            LOG.warn("Could not switch the behavior of shard {} - shard is not yet available", info.getShardName());
         }
     }
 

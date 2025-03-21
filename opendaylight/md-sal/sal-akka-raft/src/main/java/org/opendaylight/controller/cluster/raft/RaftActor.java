@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.PoisonPill;
@@ -40,9 +41,11 @@ import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.InitiateCaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.LeaderTransitioning;
 import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
-import org.opendaylight.controller.cluster.raft.base.messages.SwitchBehavior;
+import org.opendaylight.controller.cluster.raft.base.messages.SwitchBehavior.BecomeFollower;
+import org.opendaylight.controller.cluster.raft.base.messages.SwitchBehavior.BecomeLeader;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
 import org.opendaylight.controller.cluster.raft.behaviors.Follower;
+import org.opendaylight.controller.cluster.raft.behaviors.Leader;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
@@ -109,7 +112,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     private final @NonNull BehaviorStateTracker behaviorStateTracker = new BehaviorStateTracker();
 
     // FIXME: should be valid only after recovery
-    private final RaftActorContextImpl context;
+    private final @NonNull RaftActorContextImpl context;
 
     private RaftActorRecoverySupport raftRecovery;
     private RaftActorSnapshotMessageSupport snapshotSupport;
@@ -263,8 +266,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             getSender().tell(new GetSnapshotReply(memberId(), getSnapshot()), ActorRef.noSender());
         } else if (message instanceof InitiateCaptureSnapshot) {
             captureSnapshot();
-        } else if (message instanceof SwitchBehavior(var newState, var newTerm)) {
-            switchBehavior(newState, newTerm);
+        } else if (message instanceof BecomeFollower(var newTerm)) {
+            switchBehavior(Follower::new, newTerm);
+        } else if (message instanceof BecomeLeader(var newTerm)) {
+            switchBehavior(Leader::new, newTerm);
         } else if (message instanceof LeaderTransitioning leaderTransitioning) {
             onLeaderTransitioning(leaderTransitioning);
         } else if (message instanceof Shutdown) {
@@ -436,22 +441,20 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     @NonNullByDefault
-    private void switchBehavior(final RaftState newState, final long newTerm) {
-        if (!context.getRaftPolicy().automaticElectionsEnabled()) {
-            switch (newState) {
-                case Follower, Leader -> {
-                    try {
-                        context.persistTermInfo(new TermInfo(newTerm, ""));
-                    } catch (IOException e) {
-                        // FIXME: do not mask IOException
-                        throw new UncheckedIOException(e);
-                    }
-                    switchBehavior(behaviorStateTracker.capture(getCurrentBehavior()),
-                        RaftActorBehavior.createBehavior(context, newState));
-                }
-                default -> LOG.warn("{}: Switching to behavior : {} - not supported", memberId(), newState);
-            }
+    private void switchBehavior(final Function<RaftActorContext, RaftActorBehavior> ctor, final long newTerm) {
+        if (context.getRaftPolicy().automaticElectionsEnabled()) {
+            LOG.warn("{}: Ignoring request to switch behavior when automatic elections are disabled", memberId());
+            return;
         }
+
+        try {
+            context.persistTermInfo(new TermInfo(newTerm, ""));
+        } catch (IOException e) {
+            // FIXME: do not mask IOException
+            throw new UncheckedIOException(e);
+        }
+
+        switchBehavior(behaviorStateTracker.capture(getCurrentBehavior()), ctor.apply(context));
     }
 
     private void switchBehavior(final BehaviorState oldBehaviorState, final RaftActorBehavior nextBehavior) {
