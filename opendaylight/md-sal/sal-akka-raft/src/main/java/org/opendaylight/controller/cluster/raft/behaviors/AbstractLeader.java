@@ -526,7 +526,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
                 requestVote(sender, requestVote);
             }
 
-            return internalSwitchBehavior(RaftState.Follower);
+            return switchBehavior(new Follower(context));
         }
 
         if (message instanceof SendHeartBeat) {
