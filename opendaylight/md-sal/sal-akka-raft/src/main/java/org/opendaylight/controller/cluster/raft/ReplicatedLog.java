@@ -163,32 +163,38 @@ public interface ReplicatedLog {
     boolean isInSnapshot(long index);
 
     /**
+     * Returns the last entry in the snapshot.
+     *
+     * @return the last entry in the snapshot
+     */
+    @Nullable RaftEntryMeta snapshotEntry();
+
+    /**
+     * Sets the last entry in the snapshot.
+     *
+     * @param newSnapshotMeta the entry to set
+     */
+    void setSnapshotMeta(@Nullable RaftEntryMeta newSnapshotMeta);
+
+    /**
      * Returns the index of the snapshot.
      *
      * @return the index from which the snapshot was created. -1 otherwise.
      */
-    long getSnapshotIndex();
+    default long getSnapshotIndex() {
+        final var meta = snapshotEntry();
+        return meta != null ? meta.index() : -1;
+    }
 
     /**
      * Returns the term of the snapshot.
      *
      * @return the term of the index from which the snapshot was created. -1 otherwise
      */
-    long getSnapshotTerm();
-
-    /**
-     * Sets the snapshot index in the replicated log.
-     *
-     * @param snapshotIndex the index to set
-     */
-    void setSnapshotIndex(long snapshotIndex);
-
-    /**
-     * Sets snapshot term.
-     *
-     * @param snapshotTerm the term to set
-     */
-    void setSnapshotTerm(long snapshotTerm);
+    default long getSnapshotTerm() {
+        final var meta = snapshotEntry();
+        return meta != null ? meta.term() : -1;
+    }
 
     /**
      * Clears the journal entries with startIndex (inclusive) and endIndex (exclusive).

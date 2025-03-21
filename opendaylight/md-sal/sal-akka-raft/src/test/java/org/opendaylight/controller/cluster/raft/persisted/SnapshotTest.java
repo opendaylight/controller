@@ -14,6 +14,7 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.spi.ImmutableRaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 
 /**
@@ -33,22 +34,19 @@ class SnapshotTest {
             final int expectedSize) {
         long lastIndex = 6;
         long lastTerm = 2;
-        long lastAppliedIndex = 5;
-        long lastAppliedTerm = 1;
         long electionTerm = 3;
         String electionVotedFor = "member-1";
         final var serverConfig = new ClusterConfig(new ServerInfo("1", true), new ServerInfo("2", false));
 
-        final var expected = Snapshot.create(ByteState.of(state), unapplied, lastIndex, lastTerm, lastAppliedIndex,
-                lastAppliedTerm, new TermInfo(electionTerm, electionVotedFor), serverConfig);
+        final var expected = Snapshot.create(ByteState.of(state), unapplied, lastIndex, lastTerm,
+            ImmutableRaftEntryMeta.of(5, 1), new TermInfo(electionTerm, electionVotedFor), serverConfig);
         final var bytes = SerializationUtils.serialize(expected);
         assertEquals(expectedSize, bytes.length);
         final var cloned = (Snapshot) SerializationUtils.deserialize(bytes);
 
         assertEquals(expected.getLastIndex(), cloned.getLastIndex());
         assertEquals(expected.getLastTerm(), cloned.getLastTerm());
-        assertEquals(expected.getLastAppliedIndex(), cloned.getLastAppliedIndex());
-        assertEquals(expected.getLastAppliedTerm(), cloned.getLastAppliedTerm());
+        assertEquals(expected.lastApplied(), cloned.lastApplied());
         assertEquals(expected.getUnAppliedEntries(), cloned.getUnAppliedEntries());
         assertEquals(expected.termInfo(), cloned.termInfo());
         assertEquals(expected.getState(), cloned.getState());

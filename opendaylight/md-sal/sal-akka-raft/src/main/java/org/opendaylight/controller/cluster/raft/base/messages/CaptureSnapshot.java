@@ -9,11 +9,13 @@ package org.opendaylight.controller.cluster.raft.base.messages;
 
 import java.util.List;
 import org.apache.pekko.dispatch.ControlMessage;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.spi.ImmutableRaftEntryMeta;
+import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
 
 public final class CaptureSnapshot implements ControlMessage {
-    private final long lastAppliedIndex;
-    private final long lastAppliedTerm;
+    private final ImmutableRaftEntryMeta lastApplied;
     private final long lastIndex;
     private final long lastTerm;
     private final long replicatedToAllIndex;
@@ -21,25 +23,20 @@ public final class CaptureSnapshot implements ControlMessage {
     private final List<ReplicatedLogEntry> unAppliedEntries;
     private final boolean mandatoryTrim;
 
-    public CaptureSnapshot(final long lastIndex, final long lastTerm, final long lastAppliedIndex,
-            final long lastAppliedTerm, final long replicatedToAllIndex, final long replicatedToAllTerm,
+    public CaptureSnapshot(final long lastIndex, final long lastTerm, final @Nullable RaftEntryMeta lastApplied,
+            final long replicatedToAllIndex, final long replicatedToAllTerm,
             final List<ReplicatedLogEntry> unAppliedEntries, final boolean mandatoryTrim) {
         this.lastIndex = lastIndex;
         this.lastTerm = lastTerm;
-        this.lastAppliedIndex = lastAppliedIndex;
-        this.lastAppliedTerm = lastAppliedTerm;
+        this.lastApplied = ImmutableRaftEntryMeta.ofNullable(lastApplied);
         this.replicatedToAllIndex = replicatedToAllIndex;
         this.replicatedToAllTerm = replicatedToAllTerm;
         this.unAppliedEntries = unAppliedEntries != null ? unAppliedEntries : List.of();
         this.mandatoryTrim = mandatoryTrim;
     }
 
-    public long getLastAppliedIndex() {
-        return lastAppliedIndex;
-    }
-
-    public long getLastAppliedTerm() {
-        return lastAppliedTerm;
+    public @Nullable ImmutableRaftEntryMeta lastApplied() {
+        return lastApplied;
     }
 
     public long getLastIndex() {
@@ -68,6 +65,16 @@ public final class CaptureSnapshot implements ControlMessage {
 
     @Override
     public String toString() {
+        final long lastAppliedIndex;
+        final long lastAppliedTerm;
+        final var local = lastApplied;
+        if (local != null) {
+            lastAppliedIndex = local.index();
+            lastAppliedTerm = local.term();
+        } else {
+            lastAppliedIndex = lastAppliedTerm = -1;
+        }
+
         return "CaptureSnapshot [lastAppliedIndex=" + lastAppliedIndex
                 + ", lastAppliedTerm=" + lastAppliedTerm
                 + ", lastIndex=" + lastIndex

@@ -923,11 +923,11 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                     context.getReplicatedLog().lastMeta(), -1, true);
 
             return Snapshot.create(getRaftActorSnapshotCohort().takeSnapshot(), captureSnapshot.getUnAppliedEntries(),
-                captureSnapshot.getLastIndex(), captureSnapshot.getLastTerm(),
-                captureSnapshot.getLastAppliedIndex(), captureSnapshot.getLastAppliedTerm(), termInfo, clusterConfig);
+                captureSnapshot.getLastIndex(), captureSnapshot.getLastTerm(), captureSnapshot.lastApplied(), termInfo,
+                clusterConfig);
         }
 
-        return Snapshot.create(EmptyState.INSTANCE, List.of(), -1, -1, -1, -1, termInfo, clusterConfig);
+        return Snapshot.create(EmptyState.INSTANCE, List.of(), -1, -1, null, termInfo, clusterConfig);
     }
 
     /**

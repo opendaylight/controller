@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft.spi;
 
 import com.google.common.annotations.Beta;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.yangtools.concepts.Immutable;
 
 /**
@@ -52,5 +53,9 @@ public record ImmutableRaftEntryMeta(long index, long term) implements RaftEntry
      */
     public static ImmutableRaftEntryMeta of(final long index, final long term) {
         return new ImmutableRaftEntryMeta(index, term);
+    }
+
+    public static @Nullable ImmutableRaftEntryMeta ofNullable(final @Nullable RaftEntryMeta entryMeta) {
+        return entryMeta == null ? null : copyOf(entryMeta);
     }
 }

@@ -54,6 +54,7 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
+import org.opendaylight.controller.cluster.raft.spi.ImmutableRaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
 import org.slf4j.Logger;
@@ -227,9 +228,9 @@ class RaftActorRecoverySupportTest {
         final var electionVotedFor = "member-2";
 
         final var snapshotState = new MockSnapshotState(List.of(new MockPayload("1")));
-        final var snapshot = Snapshot.create(snapshotState,
-                List.of(unAppliedEntry1, unAppliedEntry2), lastIndexDuringSnapshotCapture, 1,
-                lastAppliedDuringSnapshotCapture, 1, new TermInfo(electionTerm, electionVotedFor), null);
+        final var snapshot = Snapshot.create(snapshotState, List.of(unAppliedEntry1, unAppliedEntry2),
+            lastIndexDuringSnapshotCapture, 1, ImmutableRaftEntryMeta.of(lastAppliedDuringSnapshotCapture, 1),
+            new TermInfo(electionTerm, electionVotedFor), null);
 
         final var metadata = new SnapshotMetadata("test", 6, 12345);
         final var snapshotOffer = new SnapshotOffer(metadata, snapshot);
@@ -311,8 +312,8 @@ class RaftActorRecoverySupportTest {
         doReturn(false).when(mockPersistence).isRecoveryApplicable();
         doReturn(10L).when(mockActor).lastSequenceNr();
 
-        Snapshot snapshot = Snapshot.create(new MockSnapshotState(List.of(new MockPayload("1"))),
-                List.of(), 3, 1, 3, 1, new TermInfo(-1), null);
+        Snapshot snapshot = Snapshot.create(new MockSnapshotState(List.of(new MockPayload("1"))), List.of(), 3, 1,
+            ImmutableRaftEntryMeta.of(3, 1), new TermInfo(-1), null);
         SnapshotOffer snapshotOffer = new SnapshotOffer(new SnapshotMetadata("test", 6, 12345), snapshot);
 
         sendMessageToSupport(snapshotOffer);
@@ -429,8 +430,8 @@ class RaftActorRecoverySupportTest {
                 new ServerInfo("follower2", true));
 
         MockSnapshotState snapshotState = new MockSnapshotState(List.of(new MockPayload("1")));
-        Snapshot snapshot = Snapshot.create(snapshotState, List.of(),
-                -1, -1, -1, -1, new TermInfo(electionTerm, electionVotedFor), serverPayload);
+        Snapshot snapshot = Snapshot.create(snapshotState, List.of(), -1, -1, null,
+            new TermInfo(electionTerm, electionVotedFor), serverPayload);
 
         SnapshotMetadata metadata = new SnapshotMetadata("test", 6, 12345);
         SnapshotOffer snapshotOffer = new SnapshotOffer(metadata, snapshot);

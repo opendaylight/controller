@@ -9,10 +9,13 @@ package org.opendaylight.controller.cluster.raft.persisted;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.base.MoreObjects;
 import java.io.Serializable;
 import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.spi.ImmutableRaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.yangtools.concepts.Immutable;
@@ -47,35 +50,32 @@ public final class Snapshot implements Serializable {
     private final List<ReplicatedLogEntry> unAppliedEntries;
     private final long lastIndex;
     private final long lastTerm;
-    private final long lastAppliedIndex;
-    private final long lastAppliedTerm;
+    private final @Nullable ImmutableRaftEntryMeta lastApplied;
     private final @NonNull TermInfo termInfo;
     private final ClusterConfig serverConfig;
 
     private Snapshot(final State state, final List<ReplicatedLogEntry> unAppliedEntries, final long lastIndex,
-            final long lastTerm, final long lastAppliedIndex, final long lastAppliedTerm, final TermInfo termInfo,
+            final long lastTerm, final @Nullable RaftEntryMeta lastApplied, final TermInfo termInfo,
             final ClusterConfig serverConfig) {
         this.state = requireNonNull(state);
         this.unAppliedEntries = requireNonNull(unAppliedEntries);
         this.lastIndex = lastIndex;
         this.lastTerm = lastTerm;
-        this.lastAppliedIndex = lastAppliedIndex;
-        this.lastAppliedTerm = lastAppliedTerm;
+        this.lastApplied = ImmutableRaftEntryMeta.ofNullable(lastApplied);
         this.termInfo = requireNonNull(termInfo);
         this.serverConfig = serverConfig;
     }
 
     public static @NonNull Snapshot create(final State state, final List<ReplicatedLogEntry> entries,
-            final long lastIndex, final long lastTerm, final long lastAppliedIndex, final long lastAppliedTerm,
+            final long lastIndex, final long lastTerm, final @Nullable RaftEntryMeta lastApplied,
             final TermInfo termInfo, final ClusterConfig serverConfig) {
-        return new Snapshot(state, entries, lastIndex, lastTerm, lastAppliedIndex, lastAppliedTerm, termInfo,
-            serverConfig);
+        return new Snapshot(state, entries, lastIndex, lastTerm, lastApplied, termInfo, serverConfig);
     }
 
     public static @NonNull Snapshot ofTermLeader(final State state, final RaftEntryMeta lastIncluded,
             final TermInfo termInfo, final ClusterConfig serverConfig) {
-        return new Snapshot(state, List.of(), lastIncluded.index(), lastIncluded.term(), lastIncluded.index(),
-            lastIncluded.term(), termInfo, serverConfig);
+        return new Snapshot(state, List.of(), lastIncluded.index(), lastIncluded.term(), lastIncluded, termInfo,
+            serverConfig);
     }
 
     public State getState() {
@@ -86,21 +86,18 @@ public final class Snapshot implements Serializable {
         return unAppliedEntries;
     }
 
-    public long getLastTerm() {
-        return lastTerm;
-    }
-
-    public long getLastAppliedIndex() {
-        return lastAppliedIndex;
-    }
-
-    public long getLastAppliedTerm() {
-        return lastAppliedTerm;
+    public @Nullable ImmutableRaftEntryMeta lastApplied() {
+        return lastApplied;
     }
 
     public long getLastIndex() {
         return lastIndex;
     }
+
+    public long getLastTerm() {
+        return lastTerm;
+    }
+
 
     public @NonNull TermInfo termInfo() {
         return termInfo;
@@ -122,10 +119,16 @@ public final class Snapshot implements Serializable {
 
     @Override
     public String toString() {
-        return "Snapshot [lastIndex=" + lastIndex + ", lastTerm=" + lastTerm + ", lastAppliedIndex=" + lastAppliedIndex
-                + ", lastAppliedTerm=" + lastAppliedTerm + ", unAppliedEntries size=" + unAppliedEntries.size()
-                + ", state=" + state + ", electionTerm=" + termInfo.term() + ", electionVotedFor="
-                + termInfo.votedFor() + ", ServerConfigPayload="  + serverConfig + "]";
+        return MoreObjects.toStringHelper(this).omitNullValues()
+            .add("lastIndex", lastIndex)
+            .add("lastTerm", lastTerm)
+            .add("lastApplied", lastApplied)
+            .add("unAppliedEntries size", unAppliedEntries.size())
+            .add("state", state)
+            .add("electionTerm", termInfo.term())
+            .add("electionVotedFor", termInfo.votedFor())
+            .add("serverConfig", serverConfig)
+            .toString();
     }
 
     @java.io.Serial

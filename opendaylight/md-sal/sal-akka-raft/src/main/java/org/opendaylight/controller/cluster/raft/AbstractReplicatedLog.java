@@ -32,21 +32,17 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
 
     // We define this as ArrayList so we can use ensureCapacity.
     private ArrayList<ReplicatedLogEntry> journal;
-
-    private long snapshotIndex = -1;
-    private long snapshotTerm = -1;
+    private ImmutableRaftEntryMeta snapshotEntry;
 
     // to be used for rollback during save snapshot failure
     private ArrayList<ReplicatedLogEntry> snapshottedJournal;
-    private long previousSnapshotIndex = -1;
-    private long previousSnapshotTerm = -1;
+    private ImmutableRaftEntryMeta previousSnapshotEntry;
     private int dataSize = 0;
 
-    protected AbstractReplicatedLog(final @NonNull String memberId, final long snapshotIndex, final long snapshotTerm,
+    protected AbstractReplicatedLog(final @NonNull String memberId, final @Nullable RaftEntryMeta snapshotEntry,
             final List<ReplicatedLogEntry> unAppliedEntries) {
         this.memberId = requireNonNull(memberId);
-        this.snapshotIndex = snapshotIndex;
-        this.snapshotTerm = snapshotTerm;
+        this.snapshotEntry = ImmutableRaftEntryMeta.ofNullable(snapshotEntry);
 
         journal = new ArrayList<>(unAppliedEntries.size());
         for (var entry : unAppliedEntries) {
@@ -54,15 +50,13 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
         }
     }
 
-    protected int adjustedIndex(final long logEntryIndex) {
-        if (snapshotIndex < 0) {
-            return (int) logEntryIndex;
-        }
-        return (int) (logEntryIndex - (snapshotIndex + 1));
+    protected final int adjustedIndex(final long logEntryIndex) {
+        final var local = snapshotEntry;
+        return (int) (local == null ? logEntryIndex : logEntryIndex - local.index() - 1);
     }
 
     @Override
-    public ReplicatedLogEntry get(final long logEntryIndex) {
+    public final ReplicatedLogEntry get(final long logEntryIndex) {
         int adjustedIndex = adjustedIndex(logEntryIndex);
 
         if (adjustedIndex < 0 || adjustedIndex >= journal.size()) {
@@ -74,7 +68,7 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
     }
 
     @Override
-    public ReplicatedLogEntry last() {
+    public final ReplicatedLogEntry last() {
         if (journal.isEmpty()) {
             return null;
         }
@@ -83,24 +77,24 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
     }
 
     @Override
-    public RaftEntryMeta lastMeta() {
+    public final RaftEntryMeta lastMeta() {
         return last();
     }
 
     @Override
-    public long lastIndex() {
+    public final long lastIndex() {
         final var last = last();
         // it can happen that after snapshot, all the entries of the journal are trimmed till lastApplied,
         // so lastIndex = snapshotIndex
-        return last != null ? last.index() : snapshotIndex;
+        return last != null ? last.index() : getSnapshotIndex();
     }
 
     @Override
-    public long lastTerm() {
+    public final long lastTerm() {
         final var last = last();
         // it can happen that after snapshot, all the entries of the journal are trimmed till lastApplied,
         // so lastTerm = snapshotTerm
-        return last != null ? last.term() : snapshotTerm;
+        return last != null ? last.term() : getSnapshotTerm();
     }
 
     @Override
@@ -190,7 +184,7 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
     }
 
     @Override
-    public long size() {
+    public final long size() {
         return journal.size();
     }
 
@@ -200,7 +194,7 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
     }
 
     @Override
-    public boolean isPresent(final long logEntryIndex) {
+    public final boolean isPresent(final long logEntryIndex) {
         if (logEntryIndex > lastIndex()) {
             // if the request logical index is less than the last present in the list
             return false;
@@ -210,28 +204,22 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
     }
 
     @Override
-    public boolean isInSnapshot(final long logEntryIndex) {
-        return logEntryIndex >= 0 && logEntryIndex <= snapshotIndex && snapshotIndex != -1;
+    public final boolean isInSnapshot(final long logEntryIndex) {
+        if (logEntryIndex < 0) {
+            return false;
+        }
+        final var local = snapshotEntry;
+        return snapshotEntry != null && logEntryIndex <= local.index();
     }
 
     @Override
-    public long getSnapshotIndex() {
-        return snapshotIndex;
+    public final @Nullable RaftEntryMeta snapshotEntry() {
+        return snapshotEntry;
     }
 
     @Override
-    public long getSnapshotTerm() {
-        return snapshotTerm;
-    }
-
-    @Override
-    public void setSnapshotIndex(final long snapshotIndex) {
-        this.snapshotIndex = snapshotIndex;
-    }
-
-    @Override
-    public void setSnapshotTerm(final long snapshotTerm) {
-        this.snapshotTerm = snapshotTerm;
+    public final void setSnapshotMeta(final RaftEntryMeta newSnapshotMeta) {
+        snapshotEntry = ImmutableRaftEntryMeta.ofNullable(newSnapshotMeta);
     }
 
     @Override
@@ -251,18 +239,14 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
         snapshottedJournal.addAll(snapshotJournalEntries);
         snapshotJournalEntries.clear();
 
-        previousSnapshotIndex = snapshotIndex;
-        setSnapshotIndex(snapshotCapturedIndex);
-
-        previousSnapshotTerm = snapshotTerm;
-        setSnapshotTerm(snapshotCapturedTerm);
+        previousSnapshotEntry = snapshotEntry;
+        snapshotEntry = ImmutableRaftEntryMeta.of(snapshotCapturedIndex, snapshotCapturedTerm);
     }
 
     @Override
     public void snapshotCommit(final boolean updateDataSize) {
         snapshottedJournal = null;
-        previousSnapshotIndex = -1;
-        previousSnapshotTerm = -1;
+        previousSnapshotEntry = null;
 
         if (updateDataSize) {
             // need to recalc the datasize based on the entries left after precommit.
@@ -280,12 +264,8 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
         snapshottedJournal.addAll(journal);
         journal = snapshottedJournal;
         snapshottedJournal = null;
-
-        snapshotIndex = previousSnapshotIndex;
-        previousSnapshotIndex = -1;
-
-        snapshotTerm = previousSnapshotTerm;
-        previousSnapshotTerm = -1;
+        snapshotEntry = previousSnapshotEntry;
+        previousSnapshotEntry = null;
     }
 
     @VisibleForTesting

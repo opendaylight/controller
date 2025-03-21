@@ -329,9 +329,8 @@ public final class SnapshotManager {
         // create a snapshot object from the state provided and save it when snapshot is saved async,
         // SaveSnapshotSuccess is raised.
         final var snapshot = Snapshot.create(snapshotState, request.getUnAppliedEntries(),
-                request.getLastIndex(), request.getLastTerm(),
-                request.getLastAppliedIndex(), request.getLastAppliedTerm(),
-                context.termInfo(), context.getPeerServerInfo(true));
+                request.getLastIndex(), request.getLastTerm(), request.lastApplied(), context.termInfo(),
+                context.getPeerServerInfo(true));
 
         context.getPersistenceProvider().saveSnapshot(snapshot);
 

@@ -147,7 +147,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
 
     public static class SimpleReplicatedLog extends AbstractReplicatedLog {
         public SimpleReplicatedLog() {
-            super("", -1L, -1L, List.of());
+            super("", null, List.of());
         }
 
         @Override

@@ -143,8 +143,8 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
     private void createRaftActors() {
         testLog.info("createRaftActors starting");
 
-        final Snapshot snapshot = Snapshot.create(EmptyState.INSTANCE, List.of(), -1, -1, -1, -1,
-            new TermInfo(1), new ClusterConfig(
+        final Snapshot snapshot = Snapshot.create(EmptyState.INSTANCE, List.of(), -1, -1, null, new TermInfo(1),
+            new ClusterConfig(
                 new ServerInfo(leaderId, true), new ServerInfo(follower1Id, true),
                 new ServerInfo(follower2Id, true), new ServerInfo(follower3Id, false)));
 
