@@ -14,6 +14,7 @@ import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.spi.ImmutableRaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
@@ -292,25 +293,33 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
         return journal.get(index);
     }
 
-    @VisibleForTesting
-    static final RaftEntryMeta computeLastAppliedEntry(final @NonNull ReplicatedLog log, final long originalIndex,
+    @NonNullByDefault
+    static final RaftEntryMeta computeLastAppliedEntry(final ReplicatedLog log, final long originalIndex,
             final @Nullable RaftEntryMeta lastLogEntry, final boolean hasFollowers) {
-        if (hasFollowers) {
-            final var entry = log.lookupMeta(originalIndex);
-            if (entry != null) {
-                return entry;
-            }
+        return hasFollowers ? compulateLastAppliedEntry(log, originalIndex)
+            : compulateLastAppliedEntry(log, lastLogEntry);
+    }
 
-            final var snapshotIndex = log.getSnapshotIndex();
-            if (snapshotIndex > -1) {
-                return ImmutableRaftEntryMeta.of(snapshotIndex, log.getSnapshotTerm());
-            }
-        } else if (lastLogEntry != null) {
+    @NonNullByDefault
+    static final RaftEntryMeta compulateLastAppliedEntry(final ReplicatedLog log, final long originalIndex) {
+        final var entry = log.lookupMeta(originalIndex);
+        if (entry != null) {
+            return entry;
+        }
+
+        final var snapshotIndex = log.getSnapshotIndex();
+        return snapshotIndex > -1 ? ImmutableRaftEntryMeta.of(snapshotIndex, log.getSnapshotTerm())
+            : ImmutableRaftEntryMeta.of(-1, -1);
+    }
+
+    @NonNullByDefault
+    static final RaftEntryMeta compulateLastAppliedEntry(final ReplicatedLog log,
+            final @Nullable RaftEntryMeta lastLogEntry) {
+        if (lastLogEntry != null) {
             // since we have persisted the last-log-entry to persistent journal before the capture, we would want
             // to snapshot from this entry.
             return lastLogEntry;
         }
-
         return ImmutableRaftEntryMeta.of(-1, -1);
     }
 }
