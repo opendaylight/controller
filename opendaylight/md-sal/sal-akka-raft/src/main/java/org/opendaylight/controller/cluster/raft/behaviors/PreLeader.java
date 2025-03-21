@@ -11,6 +11,7 @@ import org.apache.pekko.actor.ActorRef;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
+import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.persisted.NoopPayload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,5 +52,11 @@ public final class PreLeader extends AbstractLeader {
         } else {
             return super.handleMessage(sender, message);
         }
+    }
+
+    @Override
+    PreLeader handleAppendEntriesReply(final ActorRef sender, final AppendEntriesReply appendEntriesReply) {
+        processAppendEntriesReply(sender, appendEntriesReply);
+        return this;
     }
 }

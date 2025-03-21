@@ -42,14 +42,15 @@ public final class IsolatedLeader extends AbstractLeader {
     // we received an Append Entries reply, we should switch the Behavior to Leader
     @Override
     RaftActorBehavior handleAppendEntriesReply(final ActorRef sender, final AppendEntriesReply appendEntriesReply) {
-        final var ret = super.handleAppendEntriesReply(sender, appendEntriesReply);
+        processAppendEntriesReply(sender, appendEntriesReply);
 
-        // it can happen that this isolated leader interacts with a new leader in the cluster and
-        // changes its state to Follower, hence we only need to switch to Leader if the state is still Isolated
-        if (ret.state() == RaftState.IsolatedLeader && !isLeaderIsolated()) {
-            LOG.info("{}: IsolatedLeader {} switching from IsolatedLeader to Leader", getId(), getLeaderId());
-            return switchBehavior(new Leader(context, this));
+        // it can happen that this isolated leader interacts with a new leader in the cluster and changes its state to
+        // Follower, hence we only need to switch to Leader if the state is still Isolated
+        if (isLeaderIsolated()) {
+            return this;
         }
-        return ret;
+
+        LOG.info("{}: IsolatedLeader {} switching from IsolatedLeader to Leader", getId(), getLeaderId());
+        return switchBehavior(new Leader(context, this));
     }
 }

@@ -205,8 +205,8 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         return this;
     }
 
-    @Override
-    RaftActorBehavior handleAppendEntriesReply(final ActorRef sender, final AppendEntriesReply appendEntriesReply) {
+    // handleAppendEntriesReply() without switching behaviors
+    final void processAppendEntriesReply(final ActorRef sender, final AppendEntriesReply appendEntriesReply) {
         LOG.trace("{}: handleAppendEntriesReply: {}", logName, appendEntriesReply);
 
         // Update the FollowerLogInformation
@@ -215,14 +215,14 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
 
         if (followerLogInformation == null) {
             LOG.error("{}: handleAppendEntriesReply - unknown follower {}", logName, followerId);
-            return this;
+            return;
         }
 
         final var followerRaftVersion = appendEntriesReply.getRaftVersion();
         if (followerRaftVersion < RaftVersions.FLUORINE_VERSION) {
             LOG.warn("{}: handleAppendEntriesReply - ignoring reply from follower {} raft version {}", logName,
                 followerId, followerRaftVersion);
-            return this;
+            return;
         }
 
         final long lastActivityNanos = followerLogInformation.nanosSinceLastActivity();
@@ -334,8 +334,6 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
 
         //Send the next log entry immediately, if possible, no need to wait for heartbeat to trigger that event
         sendUpdatesToFollower(followerId, followerLogInformation, false, !updated);
-
-        return this;
     }
 
     // Invoked after persistence is complete to check if replication consensus has been reached.
