@@ -63,7 +63,8 @@ import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.base.messages.LeaderTransitioning;
 import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
-import org.opendaylight.controller.cluster.raft.base.messages.SwitchBehavior;
+import org.opendaylight.controller.cluster.raft.base.messages.SwitchBehavior.BecomeFollower;
+import org.opendaylight.controller.cluster.raft.base.messages.SwitchBehavior.BecomeLeader;
 import org.opendaylight.controller.cluster.raft.behaviors.Follower;
 import org.opendaylight.controller.cluster.raft.behaviors.Leader;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
@@ -880,22 +881,12 @@ public class RaftActorTest extends AbstractActorTest {
 
         leaderActor.waitForRecoveryComplete();
 
-        leaderActor.handleCommand(new SwitchBehavior(RaftState.Follower, 100));
+        leaderActor.handleCommand(new BecomeFollower(100));
 
         assertEquals(100, leaderActor.getRaftActorContext().currentTerm());
         assertEquals(RaftState.Follower, leaderActor.getCurrentBehavior().state());
 
-        leaderActor.handleCommand(new SwitchBehavior(RaftState.Leader, 110));
-
-        assertEquals(110, leaderActor.getRaftActorContext().currentTerm());
-        assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
-
-        leaderActor.handleCommand(new SwitchBehavior(RaftState.Candidate, 125));
-
-        assertEquals(110, leaderActor.getRaftActorContext().currentTerm());
-        assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
-
-        leaderActor.handleCommand(new SwitchBehavior(RaftState.IsolatedLeader, 125));
+        leaderActor.handleCommand(new BecomeLeader(110));
 
         assertEquals(110, leaderActor.getRaftActorContext().currentTerm());
         assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());

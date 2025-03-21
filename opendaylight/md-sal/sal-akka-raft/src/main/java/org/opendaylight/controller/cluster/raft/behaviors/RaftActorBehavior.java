@@ -69,16 +69,6 @@ public abstract class RaftActorBehavior implements AutoCloseable {
         logName = context.getId() + " (" + state + ")";
     }
 
-    public static RaftActorBehavior createBehavior(final RaftActorContext context, final RaftState state) {
-        return switch (state) {
-            case Candidate -> new Candidate(context);
-            case Follower -> new Follower(context);
-            case IsolatedLeader -> new IsolatedLeader(context);
-            case Leader -> new Leader(context);
-            case PreLeader -> new PreLeader(context);
-        };
-    }
-
     /**
      * Returns the state associated with this behavior.
      *

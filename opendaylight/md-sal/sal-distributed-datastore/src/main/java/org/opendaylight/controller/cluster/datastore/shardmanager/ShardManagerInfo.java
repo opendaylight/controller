@@ -16,6 +16,8 @@ import org.apache.pekko.pattern.Patterns;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.raft.RaftState;
+import org.opendaylight.controller.cluster.raft.base.messages.SwitchBehavior.BecomeFollower;
+import org.opendaylight.controller.cluster.raft.base.messages.SwitchBehavior.BecomeLeader;
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,24 +73,21 @@ final class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfoM
     @SuppressWarnings("checkstyle:IllegalCatch")
     private void requestSwitchShardState(final ShardIdentifier shardId, final String newState, final long term) {
         // Validates strings argument
-        final RaftState state = RaftState.valueOf(newState);
+        final var state = RaftState.valueOf(newState);
 
         // Leader and Follower are the only states to which we can switch externally
-        switch (state) {
-            case Follower:
-            case Leader:
-                try {
-                    Await.result(Patterns.ask(shardManager, new SwitchShardBehavior(shardId, state, term),
-                        ASK_TIMEOUT_MILLIS), Duration.Inf());
-                } catch (Exception e) {
-                    Throwables.throwIfUnchecked(e);
-                    throw new IllegalStateException(e);
-                }
-                break;
-            case Candidate:
-            case IsolatedLeader:
-            default:
-                throw new IllegalArgumentException("Illegal target state " + state);
+        final var behavior = switch (state) {
+            case Follower -> new BecomeFollower(term);
+            case Leader -> new BecomeLeader(term);
+            default -> throw new IllegalArgumentException("Illegal target state " + state);
+        };
+
+        final var future = Patterns.ask(shardManager, new SwitchShardBehavior(shardId, behavior), ASK_TIMEOUT_MILLIS);
+        try {
+            Await.result(future, Duration.Inf());
+        } catch (Exception e) {
+            Throwables.throwIfUnchecked(e);
+            throw new IllegalStateException(e);
         }
     }
 

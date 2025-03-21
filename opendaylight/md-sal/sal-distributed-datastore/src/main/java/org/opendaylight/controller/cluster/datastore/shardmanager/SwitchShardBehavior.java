@@ -12,11 +12,11 @@ import static java.util.Objects.requireNonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
-import org.opendaylight.controller.cluster.raft.RaftState;
+import org.opendaylight.controller.cluster.raft.base.messages.SwitchBehavior;
 
 @NonNullByDefault
-record SwitchShardBehavior(@Nullable ShardIdentifier shardId, RaftState newState, long term) {
+record SwitchShardBehavior(@Nullable ShardIdentifier shardId, SwitchBehavior switchBehavior) {
     SwitchShardBehavior {
-        requireNonNull(newState);
+        requireNonNull(switchBehavior);
     }
 }
