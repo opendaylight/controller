@@ -230,7 +230,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
                 FollowerInitialSyncUpStatus.class);
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
 
-        assertFalse(syncStatus.isInitialSyncDone());
+        assertFalse(syncStatus.initialSyncDone());
         assertTrue("append entries reply should be true", reply.isSuccess());
     }
 
@@ -252,7 +252,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
                 FollowerInitialSyncUpStatus.class);
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
 
-        assertFalse(syncStatus.isInitialSyncDone());
+        assertFalse(syncStatus.initialSyncDone());
         assertFalse("append entries reply should be false", reply.isSuccess());
     }
 
@@ -277,7 +277,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
                 FollowerInitialSyncUpStatus.class);
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
 
-        assertFalse(syncStatus.isInitialSyncDone());
+        assertFalse(syncStatus.initialSyncDone());
         assertTrue("append entries reply should be true", reply.isSuccess());
     }
 
@@ -301,7 +301,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
                 FollowerInitialSyncUpStatus.class);
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
 
-        assertFalse(syncStatus.isInitialSyncDone());
+        assertFalse(syncStatus.initialSyncDone());
         assertTrue("append entries reply should be true", reply.isSuccess());
     }
 
@@ -326,7 +326,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
                 FollowerInitialSyncUpStatus.class);
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
 
-        assertFalse(syncStatus.isInitialSyncDone());
+        assertFalse(syncStatus.initialSyncDone());
         assertFalse("append entries reply should be false", reply.isSuccess());
     }
 
@@ -347,7 +347,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         FollowerInitialSyncUpStatus syncStatus = MessageCollectorActor.expectFirstMatching(followerActor,
                 FollowerInitialSyncUpStatus.class);
 
-        assertFalse(syncStatus.isInitialSyncDone());
+        assertFalse(syncStatus.initialSyncDone());
 
         // Clear all the messages
         MessageCollectorActor.clearMessages(followerActor);
@@ -364,7 +364,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         syncStatus = MessageCollectorActor.expectFirstMatching(followerActor, FollowerInitialSyncUpStatus.class);
 
-        assertTrue(syncStatus.isInitialSyncDone());
+        assertTrue(syncStatus.initialSyncDone());
 
         MessageCollectorActor.clearMessages(followerActor);
 
@@ -394,7 +394,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         FollowerInitialSyncUpStatus syncStatus = MessageCollectorActor.expectFirstMatching(followerActor,
                 FollowerInitialSyncUpStatus.class);
 
-        assertFalse(syncStatus.isInitialSyncDone());
+        assertFalse(syncStatus.initialSyncDone());
 
         // Clear all the messages
         MessageCollectorActor.clearMessages(followerActor);
@@ -411,7 +411,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         syncStatus = MessageCollectorActor.expectFirstMatching(followerActor, FollowerInitialSyncUpStatus.class);
 
         // We get a new message saying initial status is not done
-        assertFalse(syncStatus.isInitialSyncDone());
+        assertFalse(syncStatus.initialSyncDone());
     }
 
     @Test
@@ -431,7 +431,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         FollowerInitialSyncUpStatus syncStatus = MessageCollectorActor.expectFirstMatching(followerActor,
                 FollowerInitialSyncUpStatus.class);
 
-        assertFalse(syncStatus.isInitialSyncDone());
+        assertFalse(syncStatus.initialSyncDone());
 
         // Clear all the messages
         MessageCollectorActor.clearMessages(followerActor);
@@ -448,7 +448,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         syncStatus = MessageCollectorActor.expectFirstMatching(followerActor, FollowerInitialSyncUpStatus.class);
 
-        assertTrue(syncStatus.isInitialSyncDone());
+        assertTrue(syncStatus.initialSyncDone());
 
         // Clear all the messages
         MessageCollectorActor.clearMessages(followerActor);
@@ -466,7 +466,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         syncStatus = MessageCollectorActor.expectFirstMatching(followerActor, FollowerInitialSyncUpStatus.class);
 
         // We get a new message saying initial status is not done
-        assertFalse(syncStatus.isInitialSyncDone());
+        assertFalse(syncStatus.initialSyncDone());
     }
 
     /**
@@ -963,7 +963,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         FollowerInitialSyncUpStatus syncStatus =
                 MessageCollectorActor.expectFirstMatching(followerActor, FollowerInitialSyncUpStatus.class);
 
-        assertFalse(syncStatus.isInitialSyncDone());
+        assertFalse(syncStatus.initialSyncDone());
 
         // Clear all the messages
         MessageCollectorActor.clearMessages(followerActor);
@@ -981,7 +981,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         syncStatus = MessageCollectorActor.expectFirstMatching(followerActor, FollowerInitialSyncUpStatus.class);
 
-        assertTrue(syncStatus.isInitialSyncDone());
+        assertTrue(syncStatus.initialSyncDone());
     }
 
     @Test

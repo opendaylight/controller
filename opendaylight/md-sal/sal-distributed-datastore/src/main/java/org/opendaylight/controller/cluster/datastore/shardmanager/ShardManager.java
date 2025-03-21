@@ -622,17 +622,14 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     }
 
     private void onFollowerInitialSyncStatus(final FollowerInitialSyncUpStatus status) {
-        LOG.info("{} Received follower initial sync status for {} status sync done {}", logName(),
-                status.getName(), status.isInitialSyncDone());
+        LOG.info("{} Received follower initial sync status for {} status sync done {}", logName(), status.memberId(),
+            status.initialSyncDone());
 
-        ShardInformation shardInformation = findShardInformation(status.getName());
-
+        final var shardInformation = findShardInformation(status.memberId());
         if (shardInformation != null) {
-            shardInformation.setFollowerSyncStatus(status.isInitialSyncDone());
-
+            shardInformation.setFollowerSyncStatus(status.initialSyncDone());
             shardManagerMBean.setSyncStatus(isInSync());
         }
-
     }
 
     private void onRoleChangeNotification(final RoleChangeNotification roleChanged) {

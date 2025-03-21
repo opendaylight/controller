@@ -5,16 +5,14 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
-
 package org.opendaylight.controller.cluster.raft.behaviors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import org.apache.pekko.actor.ActorRef;
 import org.junit.After;
@@ -45,7 +43,7 @@ public class SyncStatusTrackerTest extends AbstractActorTest {
         FollowerInitialSyncUpStatus status =
                 MessageCollectorActor.getFirstMatching(listener, FollowerInitialSyncUpStatus.class);
 
-        assertFalse(status.isInitialSyncDone());
+        assertFalse(status.initialSyncDone());
         MessageCollectorActor.clearMessages(listener);
 
         // At a minimum the follower should have the commit index that the new leader sent it in the first message
@@ -55,7 +53,7 @@ public class SyncStatusTrackerTest extends AbstractActorTest {
 
         status = MessageCollectorActor.getFirstMatching(listener, FollowerInitialSyncUpStatus.class);
 
-        assertEquals(true, status.isInitialSyncDone());
+        assertTrue(status.initialSyncDone());
         MessageCollectorActor.clearMessages(listener);
 
         // If a subsequent message is received and if the difference between the followers commit index and
@@ -74,7 +72,7 @@ public class SyncStatusTrackerTest extends AbstractActorTest {
 
         assertNotNull("No sync status message was received", status);
 
-        assertFalse(status.isInitialSyncDone());
+        assertFalse(status.initialSyncDone());
         MessageCollectorActor.clearMessages(listener);
 
         // If the follower is not caught up yet it should not receive any further notification
@@ -89,7 +87,7 @@ public class SyncStatusTrackerTest extends AbstractActorTest {
 
         status = MessageCollectorActor.getFirstMatching(listener, FollowerInitialSyncUpStatus.class);
 
-        assertTrue(status.isInitialSyncDone());
+        assertTrue(status.initialSyncDone());
         MessageCollectorActor.clearMessages(listener);
 
         // When a new leader starts sending update messages a new syncStatus notification should be immediately
@@ -98,7 +96,7 @@ public class SyncStatusTrackerTest extends AbstractActorTest {
 
         status = MessageCollectorActor.getFirstMatching(listener, FollowerInitialSyncUpStatus.class);
 
-        assertFalse(status.isInitialSyncDone());
+        assertFalse(status.initialSyncDone());
         MessageCollectorActor.clearMessages(listener);
 
         // If an update is received from a new leader which is still below the minimum expected index then
@@ -108,36 +106,24 @@ public class SyncStatusTrackerTest extends AbstractActorTest {
         status = MessageCollectorActor.getFirstMatching(listener, FollowerInitialSyncUpStatus.class);
 
         assertNull("No status message should be received", status);
-
     }
 
     @Test
     public void testConstructorActorShouldNotBeNull() {
-        try {
-            new SyncStatusTracker(null, "commit-tracker", 10);
-            fail("A NullPointerException was expected");
-        } catch (NullPointerException e) {
-            assertTrue("Invalid error message :" + e.getMessage(), e.getMessage().contains("actor "));
-        }
+        final var ex = assertThrows(NullPointerException.class, () -> new SyncStatusTracker(null, "commit-tracker", 1));
+        assertEquals("actor should not be null", ex.getMessage());
     }
 
     @Test
     public void testConstructorIdShouldNotBeNull() {
-        try {
-            new SyncStatusTracker(listener, null, 10);
-            fail("A NullPointerException was expected");
-        } catch (NullPointerException e) {
-            assertTrue("Invalid error message :" + e.getMessage(), e.getMessage().contains("id "));
-        }
+        final var ex = assertThrows(NullPointerException.class, () -> new SyncStatusTracker(listener, null, 1));
+        assertEquals("memberId should not be null", ex.getMessage());
     }
 
     @Test
     public void testConstructorSyncThresholdShouldNotBeNegative() {
-        try {
-            new SyncStatusTracker(listener, "commit-tracker", -1);
-            fail("An IllegalArgumentException was expected");
-        } catch (IllegalArgumentException e) {
-            assertTrue("Invalid error message :" + e.getMessage(), e.getMessage().contains("syncThreshold "));
-        }
+        final var ex = assertThrows(IllegalArgumentException.class,
+            () -> new SyncStatusTracker(listener, "commit-tracker", -1));
+        assertEquals("syncThreshold should be greater than or equal to 0", ex.getMessage());
     }
 }

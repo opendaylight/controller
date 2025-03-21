@@ -1695,13 +1695,13 @@ public class ShardTest extends AbstractShardTest {
                 newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()),
                 "testFollowerInitialSyncStatus");
 
-        shard.underlyingActor().handleNonRaftCommand(new FollowerInitialSyncUpStatus(false,
-                "member-1-shard-inventory-operational"));
+        shard.underlyingActor().handleNonRaftCommand(
+            new FollowerInitialSyncUpStatus("member-1-shard-inventory-operational", false));
 
         assertFalse(shard.underlyingActor().getShardMBean().getFollowerInitialSyncStatus());
 
-        shard.underlyingActor().handleNonRaftCommand(new FollowerInitialSyncUpStatus(true,
-                "member-1-shard-inventory-operational"));
+        shard.underlyingActor().handleNonRaftCommand(
+            new FollowerInitialSyncUpStatus("member-1-shard-inventory-operational", true));
 
         assertTrue(shard.underlyingActor().getShardMBean().getFollowerInitialSyncStatus());
     }
