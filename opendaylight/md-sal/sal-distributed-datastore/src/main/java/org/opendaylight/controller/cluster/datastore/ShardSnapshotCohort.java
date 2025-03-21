@@ -38,10 +38,10 @@ final class ShardSnapshotCohort implements RaftActorSnapshotCohort<ShardSnapshot
     private static final Logger LOG = LoggerFactory.getLogger(ShardSnapshotCohort.class);
     private static final FrontendType SNAPSHOT_APPLY = FrontendType.forName("snapshot-apply");
 
-    private final InputOutputStreamFactory streamFactory;
-    private final ActorRef snapshotActor;
-    private final ShardDataTree store;
-    private final String memberName;
+    private final @NonNull InputOutputStreamFactory streamFactory;
+    private final @NonNull ActorRef snapshotActor;
+    private final @NonNull ShardDataTree store;
+    private final @NonNull String memberName;
 
     ShardSnapshotCohort(final InputOutputStreamFactory streamFactory, final LocalHistoryIdentifier applyHistoryId,
             final ActorRef snapshotActor, final ShardDataTree store, final String memberName) {
@@ -76,8 +76,8 @@ final class ShardSnapshotCohort implements RaftActorSnapshotCohort<ShardSnapshot
     @Override
     public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
         // Forward the request to the snapshot actor
-        final var snapshot = takeSnapshot().getSnapshot();
-        LOG.debug("{}: requesting serialization of snapshot {}", memberName, snapshot);
+        final var snapshot = takeSnapshot();
+        LOG.debug("{}: requesting serialization of snapshot {}", memberName, snapshot.getSnapshot());
         ShardSnapshotActor.requestSnapshot(snapshotActor, snapshot, installSnapshotStream, actorRef);
     }
 

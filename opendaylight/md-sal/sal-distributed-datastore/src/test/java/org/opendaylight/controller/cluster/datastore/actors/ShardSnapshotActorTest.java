@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.datastore.actors;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 
 import com.google.common.io.ByteSource;
@@ -37,15 +36,13 @@ public class ShardSnapshotActorTest extends AbstractActorTest {
             "testSerializeBoronSnapshotWithInstallSnapshot");
         kit.watch(snapshotActor);
 
-        final var snapshot =  new MetadataShardDataTreeSnapshot(TestModel.EMPTY_TEST);
+        final var snapshot = new ShardSnapshotState(new MetadataShardDataTreeSnapshot(TestModel.EMPTY_TEST));
 
         final var installSnapshotStream = new ByteArrayOutputStream();
         ShardSnapshotActor.requestSnapshot(snapshotActor, snapshot, installSnapshotStream, kit.getRef());
 
         final var reply = kit.expectMsgClass(Duration.ofSeconds(3), CaptureSnapshotReply.class);
-        assertNotNull("getSnapshotState is null", reply.snapshotState());
-        assertEquals("SnapshotState type", ShardSnapshotState.class, reply.snapshotState().getClass());
-        assertSame("Snapshot", snapshot, ((ShardSnapshotState) reply.snapshotState()).getSnapshot());
+        assertSame(snapshot, reply.snapshotState());
 
         final ShardDataTreeSnapshot deserialized;
         try (var in = new ObjectInputStream(STREAM_FACTORY.createInputStream(
@@ -53,7 +50,6 @@ public class ShardSnapshotActorTest extends AbstractActorTest {
             deserialized = ShardDataTreeSnapshot.deserialize(in).getSnapshot();
         }
 
-        assertEquals("Deserialized snapshot type", snapshot.getClass(), deserialized.getClass());
         assertEquals("Root node", Optional.of(TestModel.EMPTY_TEST), deserialized.getRootNode());
     }
 }
