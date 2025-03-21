@@ -437,11 +437,11 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     @NonNullByDefault
     private void switchBehavior(final RaftState newState, final long newTerm) {
-        if (!getRaftActorContext().getRaftPolicy().automaticElectionsEnabled()) {
+        if (!context.getRaftPolicy().automaticElectionsEnabled()) {
             switch (newState) {
                 case Follower, Leader -> {
                     try {
-                        getRaftActorContext().persistTermInfo(new TermInfo(newTerm, ""));
+                        context.persistTermInfo(new TermInfo(newTerm, ""));
                     } catch (IOException e) {
                         // FIXME: do not mask IOException
                         throw new UncheckedIOException(e);
@@ -894,7 +894,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     protected boolean hasFollowers() {
-        return getRaftActorContext().hasFollowers();
+        return context.hasFollowers();
     }
 
     private void captureSnapshot() {
