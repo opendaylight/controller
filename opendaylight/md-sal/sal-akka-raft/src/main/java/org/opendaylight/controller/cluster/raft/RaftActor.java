@@ -746,14 +746,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             // The RaftPolicy was modified. If the current behavior is Follower then re-initialize to Follower
             // but transfer the previous leaderId so it doesn't immediately try to schedule an election. This
             // avoids potential disruption. Otherwise, switch to Follower normally.
-            RaftActorBehavior behavior = getCurrentBehavior();
-            if (behavior != null && behavior.state() == RaftState.Follower) {
-                String previousLeaderId = behavior.getLeaderId();
-                short previousLeaderPayloadVersion = behavior.getLeaderPayloadVersion();
-
-                LOG.debug("{}: Re-initializing to Follower with previous leaderId {}", memberId(), previousLeaderId);
-
-                changeCurrentBehavior(new Follower(context, previousLeaderId, previousLeaderPayloadVersion));
+            if (getCurrentBehavior() instanceof Follower follower) {
+                LOG.debug("{}: Re-initializing to Follower with previous leaderId {}", memberId(),
+                    follower.getLeaderId());
+                changeCurrentBehavior(follower.copy());
             } else {
                 initializeBehavior();
             }
