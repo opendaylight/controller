@@ -7,30 +7,26 @@
  */
 package org.opendaylight.controller.cluster.raft.behaviors;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import org.apache.pekko.actor.ActorRef;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The SyncStatusTracker tracks if a Follower is in sync with any given Leader or not
- * When an update is received from the Leader and the update happens to be the first update
- * from that Leader then the SyncStatusTracker will not mark the Follower as not in-sync till the
- * Followers commitIndex matches the commitIndex that the Leader sent in it's very first update.
- * Subsequently when an update is received the tracker will consider the Follower to be out of
- * sync if it is behind by 'syncThreshold' commits.
+ * The SyncStatusTracker tracks if a Follower is in sync with any given Leader or not. When an update is received from
+ * the Leader and the update happens to be the first update from that Leader, then the SyncStatusTracker will not mark
+ * the Follower as not in-sync until the Follower's commitIndex matches the commitIndex that the Leader sent in its very
+ * first update. Subsequently when an update is received the tracker will consider the Follower to be out of sync if it
+ * is behind by {@code syncThreshold} commits.
  */
-public class SyncStatusTracker {
-    private static final class LeaderInfo {
-        final long minimumCommitIndex;
-        final String leaderId;
-
-        LeaderInfo(final String leaderId, final long minimumCommitIndex) {
-            this.leaderId = requireNonNull(leaderId);
-            this.minimumCommitIndex = minimumCommitIndex;
+final class SyncStatusTracker {
+    @NonNullByDefault
+    private record LeaderInfo(String leaderId, long minimumCommitIndex) {
+        LeaderInfo {
+            requireNonNull(leaderId);
         }
     }
 
@@ -46,14 +42,16 @@ public class SyncStatusTracker {
     private LeaderInfo syncTarget;
     private boolean syncStatus;
 
-    public SyncStatusTracker(final ActorRef actor, final String id, final long syncThreshold) {
+    SyncStatusTracker(final ActorRef actor, final String id, final long syncThreshold) {
         this.actor = requireNonNull(actor, "actor should not be null");
         this.id = requireNonNull(id, "id should not be null");
-        checkArgument(syncThreshold >= 0, "syncThreshold should be greater than or equal to 0");
+        if (syncThreshold < 0) {
+            throw new IllegalArgumentException("syncThreshold should be greater than or equal to 0");
+        }
         this.syncThreshold = syncThreshold;
     }
 
-    public void update(final String leaderId, final long leaderCommit, final long commitIndex) {
+    void update(final String leaderId, final long leaderCommit, final long commitIndex) {
         requireNonNull(leaderId, "leaderId should not be null");
 
         if (syncTarget == null || !leaderId.equals(syncTarget.leaderId)) {
