@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 import static java.util.Objects.requireNonNull;
 
 import org.apache.pekko.actor.ActorRef;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
 import org.slf4j.Logger;
@@ -32,19 +33,16 @@ final class SyncStatusTracker {
 
     private static final Logger LOG = LoggerFactory.getLogger(SyncStatusTracker.class);
 
-    private static final boolean IN_SYNC = true;
-    private static final boolean NOT_IN_SYNC = false;
-
+    private final @NonNull ActorRef actor;
+    private final @NonNull String memberId;
     private final long syncThreshold;
-    private final ActorRef actor;
-    private final String id;
 
     private LeaderInfo syncTarget;
-    private boolean syncStatus;
+    private boolean inSync;
 
-    SyncStatusTracker(final ActorRef actor, final String id, final long syncThreshold) {
+    SyncStatusTracker(final ActorRef actor, final String memberId, final long syncThreshold) {
         this.actor = requireNonNull(actor, "actor should not be null");
-        this.id = requireNonNull(id, "id should not be null");
+        this.memberId = requireNonNull(memberId, "memberId should not be null");
         if (syncThreshold < 0) {
             throw new IllegalArgumentException("syncThreshold should be greater than or equal to 0");
         }
@@ -55,30 +53,34 @@ final class SyncStatusTracker {
         requireNonNull(leaderId, "leaderId should not be null");
 
         if (syncTarget == null || !leaderId.equals(syncTarget.leaderId)) {
-            LOG.debug("{}: Last sync leader does not match current leader {}, need to catch up to {}", id,
+            LOG.debug("{}: Last sync leader does not match current leader {}, need to catch up to {}", memberId,
                 leaderId, leaderCommit);
-            changeSyncStatus(NOT_IN_SYNC, true);
+            setInSync(false);
             syncTarget = new LeaderInfo(leaderId, leaderCommit);
             return;
         }
 
         final long lag = leaderCommit - commitIndex;
         if (lag > syncThreshold) {
-            LOG.debug("{}: Lagging {} entries behind leader {}", id, lag, leaderId);
-            changeSyncStatus(NOT_IN_SYNC, false);
+            LOG.debug("{}: Lagging {} entries behind leader {}", memberId, lag, leaderId);
+            changeInSync(false);
         } else if (commitIndex >= syncTarget.minimumCommitIndex) {
-            LOG.debug("{}: Lagging {} entries behind leader {} and reached {} (of expected {})", id, lag, leaderId,
-                commitIndex, syncTarget.minimumCommitIndex);
-            changeSyncStatus(IN_SYNC, false);
+            LOG.debug("{}: Lagging {} entries behind leader {} and reached {} (of expected {})", memberId, lag,
+                leaderId, commitIndex, syncTarget.minimumCommitIndex);
+            changeInSync(true);
         }
     }
 
-    private void changeSyncStatus(final boolean newSyncStatus, final boolean forceStatusChange) {
-        if (forceStatusChange || newSyncStatus != syncStatus) {
-            actor.tell(new FollowerInitialSyncUpStatus(newSyncStatus, id), ActorRef.noSender());
-            syncStatus = newSyncStatus;
+    private void changeInSync(final boolean newInSync) {
+        if (inSync == newInSync) {
+            LOG.trace("{}: No change in sync status of, dampening message", memberId);
         } else {
-            LOG.trace("{}: No change in sync status of, dampening message", id);
+            setInSync(newInSync);
         }
+    }
+
+    private void setInSync(final boolean newInSync) {
+        inSync = newInSync;
+        actor.tell(new FollowerInitialSyncUpStatus(memberId, newInSync), ActorRef.noSender());
     }
 }

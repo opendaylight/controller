@@ -345,7 +345,7 @@ public class Shard extends RaftActor {
             } else if (message instanceof RegisterRoleChangeListener) {
                 roleChangeNotifier.forward(message, context());
             } else if (message instanceof FollowerInitialSyncUpStatus request) {
-                shardMBean.setFollowerInitialSyncStatus(request.isInitialSyncDone());
+                shardMBean.setFollowerInitialSyncStatus(request.initialSyncDone());
                 context().parent().tell(message, self());
             } else if (GET_SHARD_MBEAN_MESSAGE.equals(message)) {
                 getSender().tell(getShardMBean(), self());

@@ -1181,8 +1181,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         assertFalse(shardManager.getMBean().getSyncStatus());
 
         // Send a FollowerInitialSyncStatus with status = true for the replica whose current state is candidate
-        shardManager.handleCommand(new FollowerInitialSyncUpStatus(
-                true, shardId));
+        shardManager.handleCommand(new FollowerInitialSyncUpStatus(shardId, true));
 
         assertFalse(shardManager.getMBean().getSyncStatus());
     }
@@ -1199,12 +1198,12 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         assertFalse(shardManager.getMBean().getSyncStatus());
 
         // Send status true will make sync status true
-        shardManager.handleCommand(new FollowerInitialSyncUpStatus(true, shardId));
+        shardManager.handleCommand(new FollowerInitialSyncUpStatus(shardId, true));
 
         assertTrue(shardManager.getMBean().getSyncStatus());
 
         // Send status false will make sync status false
-        shardManager.handleCommand(new FollowerInitialSyncUpStatus(false, shardId));
+        shardManager.handleCommand(new FollowerInitialSyncUpStatus(shardId, false));
 
         assertFalse(shardManager.getMBean().getSyncStatus());
     }
@@ -1246,7 +1245,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         assertFalse(shardManager.getMBean().getSyncStatus());
 
         // Make the astronauts follower sync status true
-        shardManager.handleCommand(new FollowerInitialSyncUpStatus(true, astronautsShardId));
+        shardManager.handleCommand(new FollowerInitialSyncUpStatus(astronautsShardId, true));
 
         // Sync status is now true
         assertTrue(shardManager.getMBean().getSyncStatus());
