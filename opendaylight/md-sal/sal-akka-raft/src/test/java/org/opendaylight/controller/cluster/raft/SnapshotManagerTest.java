@@ -585,6 +585,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         verify(mockReplicatedLog, never()).snapshotCommit();
     }
 
+    // FIXME: move to AbstractReplicatedLogTest
     @Test
     public void testLastAppliedTermInformationReader() {
         doReturn(4L).when(mockReplicatedLog).getSnapshotTerm();
@@ -593,30 +594,30 @@ public class SnapshotManagerTest extends AbstractActorTest {
         final var lastLogEntry = ImmutableRaftEntryMeta.of(9, 6);
 
         // No followers and valid lastLogEntry
-        var reader = SnapshotManager.computeLastAppliedEntry(mockReplicatedLog, 1L, lastLogEntry, false);
+        var reader = AbstractReplicatedLog.computeLastAppliedEntry(mockReplicatedLog, 1L, lastLogEntry, false);
         assertEquals("getTerm", 6L, reader.term());
         assertEquals("getIndex", 9L, reader.index());
 
         // No followers and null lastLogEntry
-        reader = SnapshotManager.computeLastAppliedEntry(mockReplicatedLog, 1L, null, false);
+        reader = AbstractReplicatedLog.computeLastAppliedEntry(mockReplicatedLog, 1L, null, false);
         assertEquals("getTerm", -1L, reader.term());
         assertEquals("getIndex", -1L, reader.index());
 
         // Followers and valid originalIndex entry
         doReturn(new SimpleReplicatedLogEntry(8L, 5L, new MockRaftActorContext.MockPayload()))
             .when(mockReplicatedLog).get(8L);
-        reader = SnapshotManager.computeLastAppliedEntry(mockReplicatedLog, 8L, lastLogEntry, true);
+        reader = AbstractReplicatedLog.computeLastAppliedEntry(mockReplicatedLog, 8L, lastLogEntry, true);
         assertEquals("getTerm", 5L, reader.term());
         assertEquals("getIndex", 8L, reader.index());
 
         // Followers and null originalIndex entry and valid snapshot index
-        reader = SnapshotManager.computeLastAppliedEntry(mockReplicatedLog, 7L, lastLogEntry, true);
+        reader = AbstractReplicatedLog.computeLastAppliedEntry(mockReplicatedLog, 7L, lastLogEntry, true);
         assertEquals("getTerm", 4L, reader.term());
         assertEquals("getIndex", 7L, reader.index());
 
         // Followers and null originalIndex entry and invalid snapshot index
         doReturn(-1L).when(mockReplicatedLog).getSnapshotIndex();
-        reader = SnapshotManager.computeLastAppliedEntry(mockReplicatedLog, 7L, lastLogEntry, true);
+        reader = AbstractReplicatedLog.computeLastAppliedEntry(mockReplicatedLog, 7L, lastLogEntry, true);
         assertEquals("getTerm", -1L, reader.term());
         assertEquals("getIndex", -1L, reader.index());
     }
