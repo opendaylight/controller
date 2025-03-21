@@ -91,7 +91,7 @@ public non-sealed class Leader extends AbstractLeader {
     }
 
     @Override
-    protected void beforeSendHeartbeat() {
+    protected final void beforeSendHeartbeat() {
         if (isolatedLeaderCheck.elapsed(TimeUnit.MILLISECONDS)
                 > context.getConfigParams().getIsolatedCheckIntervalInMillis()) {
             context.getActor().tell(ISOLATED_LEADER_CHECK, context.getActor());
@@ -106,10 +106,10 @@ public non-sealed class Leader extends AbstractLeader {
     }
 
     @Override
-    RaftActorBehavior handleAppendEntriesReply(final ActorRef sender, final AppendEntriesReply appendEntriesReply) {
-        RaftActorBehavior returnBehavior = super.handleAppendEntriesReply(sender, appendEntriesReply);
+    final Leader handleAppendEntriesReply(final ActorRef sender, final AppendEntriesReply appendEntriesReply) {
+        processAppendEntriesReply(sender, appendEntriesReply);
         tryToCompleteLeadershipTransfer(appendEntriesReply.getFollowerId());
-        return returnBehavior;
+        return this;
     }
 
     /**
@@ -181,7 +181,7 @@ public non-sealed class Leader extends AbstractLeader {
     }
 
     @Override
-    public void close() {
+    public final void close() {
         if (leadershipTransferContext != null) {
             LeadershipTransferContext localLeadershipTransferContext = leadershipTransferContext;
             leadershipTransferContext = null;
@@ -192,12 +192,12 @@ public non-sealed class Leader extends AbstractLeader {
     }
 
     @VisibleForTesting
-    void markFollowerActive(final String followerId) {
+    final void markFollowerActive(final String followerId) {
         getFollower(followerId).markFollowerActive();
     }
 
     @VisibleForTesting
-    void markFollowerInActive(final String followerId) {
+    final void markFollowerInActive(final String followerId) {
         getFollower(followerId).markFollowerInActive();
     }
 
