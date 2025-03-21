@@ -1667,11 +1667,10 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leaderActor.underlyingActor().setBehavior(leader);
         leaderActor.tell(new AppendEntriesReply("foo", 20, false, 1000, 10, (short) 1), ActorRef.noSender());
 
-        AppendEntriesReply appendEntriesReply = MessageCollectorActor.expectFirstMatching(leaderActor,
-                AppendEntriesReply.class);
+        final var appendEntriesReply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
 
         assertFalse(appendEntriesReply.isSuccess());
-        assertEquals(RaftState.Follower, leaderActor.underlyingActor().getFirstBehaviorChange().state());
+        assertInstanceOf(Follower.class, leaderActor.underlyingActor().getFirstBehaviorChange());
 
         MessageCollectorActor.clearMessages(leaderActor);
     }
@@ -1854,19 +1853,13 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
     public void testHandleRequestVoteReply() {
         logStart("testHandleRequestVoteReply");
 
-        MockRaftActorContext leaderActorContext = createActorContext();
+        final var leaderActorContext = createActorContext();
 
         leader = new Leader(leaderActorContext);
 
         // Should be a no-op.
-        RaftActorBehavior raftActorBehavior = leader.handleRequestVoteReply(followerActor,
-                new RequestVoteReply(1, true));
-
-        assertEquals(RaftState.Leader, raftActorBehavior.state());
-
-        raftActorBehavior = leader.handleRequestVoteReply(followerActor, new RequestVoteReply(1, false));
-
-        assertEquals(RaftState.Leader, raftActorBehavior.state());
+        assertSame(leader, leader.handleRequestVoteReply(followerActor, new RequestVoteReply(1, true)));
+        assertSame(leader, leader.handleRequestVoteReply(followerActor, new RequestVoteReply(1, false)));
     }
 
     @Test

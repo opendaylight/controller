@@ -14,6 +14,7 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.same;
@@ -809,9 +810,9 @@ public class RaftActorTest extends AbstractActorTest {
                     new MockRaftActorContext.MockPayload("A")));
         }
 
-        Leader leader = new Leader(leaderActor.getRaftActorContext());
+        final var leader = new Leader(leaderActor.getRaftActorContext());
         leaderActor.setCurrentBehavior(leader);
-        assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
+        assertSame(leader, leaderActor.getCurrentBehavior());
 
         // Simulate an install snaphost to a follower.
         leaderActor.getRaftActorContext().getSnapshotManager().captureToInstall(
@@ -850,7 +851,7 @@ public class RaftActorTest extends AbstractActorTest {
         Leader leader = new Leader(leaderActor.getRaftActorContext());
         leaderActor.setCurrentBehavior(leader);
         leader.setReplicatedToAllIndex(3);
-        assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
+        assertInstanceOf(Leader.class, leaderActor.getCurrentBehavior());
 
         // Persist another entry, this will cause a CaptureSnapshot to be triggered
         doReturn(new MockSnapshotState(List.of())).when(leaderActor.snapshotCohortDelegate).takeSnapshot();
@@ -884,12 +885,12 @@ public class RaftActorTest extends AbstractActorTest {
         leaderActor.handleCommand(new BecomeFollower(100));
 
         assertEquals(100, leaderActor.getRaftActorContext().currentTerm());
-        assertEquals(RaftState.Follower, leaderActor.getCurrentBehavior().state());
+        assertInstanceOf(Follower.class, leaderActor.getCurrentBehavior());
 
         leaderActor.handleCommand(new BecomeLeader(110));
 
         assertEquals(110, leaderActor.getRaftActorContext().currentTerm());
-        assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
+        assertInstanceOf(Leader.class, leaderActor.getCurrentBehavior());
     }
 
     public static ByteString fromObject(final Object snapshot) throws Exception {
@@ -914,10 +915,10 @@ public class RaftActorTest extends AbstractActorTest {
 
     @Test
     public void testUpdateConfigParam() {
-        DefaultConfigParamsImpl emptyConfig = new DefaultConfigParamsImpl();
-        String persistenceId = factory.generateActorId("follower-");
-        Map<String, String> peerAddresses = Map.of("member1", "address");
-        DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
+        final var emptyConfig = new DefaultConfigParamsImpl();
+        final var persistenceId = factory.generateActorId("follower-");
+        final var peerAddresses = Map.of("member1", "address");
+        final var dataPersistenceProvider = mock(DataPersistenceProvider.class);
 
         TestActorRef<MockRaftActor> actorRef = factory.createTestActor(
                 MockRaftActor.props(persistenceId, stateDir(), peerAddresses, emptyConfig, dataPersistenceProvider),
@@ -925,39 +926,29 @@ public class RaftActorTest extends AbstractActorTest {
         MockRaftActor mockRaftActor = actorRef.underlyingActor();
         mockRaftActor.waitForInitializeBehaviorComplete();
 
-        RaftActorBehavior behavior = mockRaftActor.getCurrentBehavior();
+        var behavior = assertInstanceOf(Follower.class, mockRaftActor.getCurrentBehavior());
         mockRaftActor.updateConfigParams(emptyConfig);
         assertSame("Same Behavior", behavior, mockRaftActor.getCurrentBehavior());
-        assertEquals("Behavior State", RaftState.Follower,
-            mockRaftActor.getCurrentBehavior().state());
 
-        DefaultConfigParamsImpl disableConfig = new DefaultConfigParamsImpl();
+        final var disableConfig = new DefaultConfigParamsImpl();
         disableConfig.setCustomRaftPolicyImplementationClass(
             "org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy");
         mockRaftActor.updateConfigParams(disableConfig);
         assertNotSame("Different Behavior", behavior, mockRaftActor.getCurrentBehavior());
-        assertEquals("Behavior State", RaftState.Follower,
-            mockRaftActor.getCurrentBehavior().state());
+        behavior = assertInstanceOf(Follower.class, mockRaftActor.getCurrentBehavior());
 
-        behavior = mockRaftActor.getCurrentBehavior();
         mockRaftActor.updateConfigParams(disableConfig);
         assertSame("Same Behavior", behavior, mockRaftActor.getCurrentBehavior());
-        assertEquals("Behavior State", RaftState.Follower,
-            mockRaftActor.getCurrentBehavior().state());
 
-        DefaultConfigParamsImpl defaultConfig = new DefaultConfigParamsImpl();
+        final var defaultConfig = new DefaultConfigParamsImpl();
         defaultConfig.setCustomRaftPolicyImplementationClass(
             "org.opendaylight.controller.cluster.raft.policy.DefaultRaftPolicy");
         mockRaftActor.updateConfigParams(defaultConfig);
         assertNotSame("Different Behavior", behavior, mockRaftActor.getCurrentBehavior());
-        assertEquals("Behavior State", RaftState.Follower,
-            mockRaftActor.getCurrentBehavior().state());
+        behavior = assertInstanceOf(Follower.class, mockRaftActor.getCurrentBehavior());
 
-        behavior = mockRaftActor.getCurrentBehavior();
         mockRaftActor.updateConfigParams(defaultConfig);
         assertSame("Same Behavior", behavior, mockRaftActor.getCurrentBehavior());
-        assertEquals("Behavior State", RaftState.Follower,
-            mockRaftActor.getCurrentBehavior().state());
     }
 
     @Test

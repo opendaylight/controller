@@ -9,7 +9,9 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 import com.google.common.base.Stopwatch;
 import java.util.ArrayList;
@@ -147,18 +149,12 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
         MessageCollectorActor.expectFirstMatching(peerActors[2], RequestVote.class);
         MessageCollectorActor.expectFirstMatching(peerActors[3], RequestVote.class);
 
-        // First peers denies the vote.
-        candidate = candidate.handleMessage(peerActors[0], new RequestVoteReply(1, false));
+        // First peer denies the vote, hence two first two messages do not result in quorum
+        assertSame(candidate, candidate.handleMessage(peerActors[0], new RequestVoteReply(1, false)));
+        assertSame(candidate, candidate.handleMessage(peerActors[1], new RequestVoteReply(1, true)));
 
-        assertEquals("Behavior", RaftState.Candidate, candidate.state());
-
-        candidate = candidate.handleMessage(peerActors[1], new RequestVoteReply(1, true));
-
-        assertEquals("Behavior", RaftState.Candidate, candidate.state());
-
-        candidate = candidate.handleMessage(peerActors[2], new RequestVoteReply(1, true));
-
-        assertEquals("Behavior", RaftState.Leader, candidate.state());
+        // The third response results in quorum, becoming a leader
+        assertInstanceOf(Leader.class, candidate.handleMessage(peerActors[2], new RequestVoteReply(1, true)));
     }
 
     @Test
