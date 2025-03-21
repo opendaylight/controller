@@ -19,6 +19,7 @@ import java.util.function.Consumer;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.cluster.Member;
 import org.apache.pekko.cluster.MemberStatus;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.messaging.MessageAssembler;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
@@ -67,8 +68,8 @@ public class Follower extends RaftActorBehavior {
         this(context, null, (short)-1);
     }
 
-    public Follower(final RaftActorContext context, final String initialLeaderId,
-            final short initialLeaderPayloadVersion) {
+    @VisibleForTesting
+    Follower(final RaftActorContext context, final String initialLeaderId, final short initialLeaderPayloadVersion) {
         super(context, RaftState.Follower);
         leaderId = initialLeaderId;
         leaderPayloadVersion = initialLeaderPayloadVersion;
@@ -88,6 +89,10 @@ public class Follower extends RaftActorBehavior {
             // Note: call to 'super' instead of 'this' to side-step MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR
             scheduleElection(super.electionDuration());
         }
+    }
+
+    public @NonNull Follower copy() {
+        return new Follower(context, leaderId, leaderPayloadVersion);
     }
 
     @Override
