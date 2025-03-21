@@ -30,10 +30,10 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Pantelis
  */
-public non-sealed class PreLeader extends AbstractLeader {
+public final class PreLeader extends AbstractLeader {
     private static final Logger LOG = LoggerFactory.getLogger(PreLeader.class);
 
-    public PreLeader(final RaftActorContext context) {
+    PreLeader(final RaftActorContext context) {
         super(context, RaftState.PreLeader);
 
         context.getActor().tell(NoopPayload.INSTANCE, context.getActor());

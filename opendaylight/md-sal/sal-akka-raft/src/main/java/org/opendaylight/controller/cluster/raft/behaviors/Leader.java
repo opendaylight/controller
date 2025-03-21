@@ -46,6 +46,7 @@ import org.slf4j.LoggerFactory;
  * set commitIndex = N (§5.3, §5.4).
  * </ul>
  */
+// Non-final for testing
 public non-sealed class Leader extends AbstractLeader {
     private static final Logger LOG = LoggerFactory.getLogger(Leader.class);
 
@@ -59,12 +60,17 @@ public non-sealed class Leader extends AbstractLeader {
     private final Stopwatch isolatedLeaderCheck = Stopwatch.createStarted();
     private @Nullable LeadershipTransferContext leadershipTransferContext;
 
-    Leader(final RaftActorContext context, final @Nullable AbstractLeader initializeFromLeader) {
-        super(context, RaftState.Leader, initializeFromLeader);
+    Leader(final RaftActorContext context, final IsolatedLeader initializeFromLeader) {
+        super(context, RaftState.Leader, requireNonNull(initializeFromLeader));
     }
 
+    Leader(final RaftActorContext context, final PreLeader initializeFromLeader) {
+        super(context, RaftState.Leader, requireNonNull(initializeFromLeader));
+    }
+
+    @VisibleForTesting
     public Leader(final RaftActorContext context) {
-        this(context, null);
+        super(context, RaftState.Leader);
     }
 
     @Override
