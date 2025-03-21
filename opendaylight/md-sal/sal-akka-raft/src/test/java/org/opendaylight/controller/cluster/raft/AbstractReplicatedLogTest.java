@@ -17,19 +17,17 @@ import static org.junit.Assert.assertTrue;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
 
 public class AbstractReplicatedLogTest {
-    private MockAbstractReplicatedLog replicatedLogImpl;
+    private MockReplicatedLog replicatedLogImpl;
 
     @Before
     public void setUp() {
-        replicatedLogImpl = new MockAbstractReplicatedLog();
+        replicatedLogImpl = new MockReplicatedLog();
         // create a set of initial entries in the in-memory log
         replicatedLogImpl.append(new SimpleReplicatedLogEntry(0, 1, new MockPayload("A")));
         replicatedLogImpl.append(new SimpleReplicatedLogEntry(1, 1, new MockPayload("B")));
@@ -39,7 +37,7 @@ public class AbstractReplicatedLogTest {
 
     @Test
     public void testEmptyLog() {
-        replicatedLogImpl = new MockAbstractReplicatedLog();
+        replicatedLogImpl = new MockReplicatedLog();
 
         assertEquals("size", 0, replicatedLogImpl.size());
         assertEquals("dataSize", 0, replicatedLogImpl.dataSize());
@@ -318,36 +316,5 @@ public class AbstractReplicatedLogTest {
         replicatedLogImpl.snapshotCommit();
 
         return map;
-
-    }
-
-    static class MockAbstractReplicatedLog extends AbstractReplicatedLog {
-        MockAbstractReplicatedLog() {
-            super("", -1L, -1L, List.of());
-        }
-
-        @Override
-        public boolean removeFromAndPersist(final long index) {
-            return true;
-        }
-
-        @Override
-        public <T extends ReplicatedLogEntry> boolean appendAndPersist(final T replicatedLogEntry,
-                final Consumer<T> callback, final boolean doAsync) {
-            if (callback != null) {
-                callback.accept(replicatedLogEntry);
-            }
-            return true;
-        }
-
-        @Override
-        public void captureSnapshotIfReady(final RaftEntryMeta replicatedLogEntry) {
-            // No-op
-        }
-
-        @Override
-        public boolean shouldCaptureSnapshot(final long logIndex) {
-            return false;
-        }
     }
 }
