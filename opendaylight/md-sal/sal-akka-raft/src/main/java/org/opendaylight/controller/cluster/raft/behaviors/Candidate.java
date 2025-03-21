@@ -52,7 +52,7 @@ public final class Candidate extends RaftActorBehavior {
 
     private int voteCount;
 
-    public Candidate(final RaftActorContext context) {
+    Candidate(final RaftActorContext context) {
         super(context, RaftState.Candidate);
 
         votingPeers = context.getPeers().stream()

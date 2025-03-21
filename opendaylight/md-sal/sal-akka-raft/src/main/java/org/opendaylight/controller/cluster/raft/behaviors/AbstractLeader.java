@@ -104,7 +104,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
     private Optional<SnapshotHolder> snapshotHolder = Optional.empty();
     private int minReplicationCount;
 
-    protected AbstractLeader(final RaftActorContext context, final RaftState state,
+    AbstractLeader(final RaftActorContext context, final RaftState state,
             final @Nullable AbstractLeader initializeFromLeader) {
         super(context, state);
 
@@ -140,7 +140,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         scheduleHeartBeat(context.getConfigParams().getHeartBeatInterval());
     }
 
-    protected AbstractLeader(final RaftActorContext context, final RaftState state) {
+    AbstractLeader(final RaftActorContext context, final RaftState state) {
         this(context, state, null);
     }
 

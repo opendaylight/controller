@@ -7,8 +7,9 @@
  */
 package org.opendaylight.controller.cluster.raft.behaviors;
 
+import static java.util.Objects.requireNonNull;
+
 import org.apache.pekko.actor.ActorRef;
-import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
@@ -27,15 +28,15 @@ import org.slf4j.LoggerFactory;
  * <p>In the Isolated Leader , on every AppendEntriesReply, we aggressively check if the leader is isolated.
  * If no, then the state is switched back to Leader.
  */
-public non-sealed class IsolatedLeader extends AbstractLeader {
+public final class IsolatedLeader extends AbstractLeader {
     private static final Logger LOG = LoggerFactory.getLogger(IsolatedLeader.class);
 
-    IsolatedLeader(final RaftActorContext context, final @Nullable AbstractLeader initializeFromLeader) {
-        super(context, RaftState.IsolatedLeader, initializeFromLeader);
+    IsolatedLeader(final RaftActorContext context, final Leader initializeFromLeader) {
+        super(context, RaftState.IsolatedLeader, requireNonNull(initializeFromLeader));
     }
 
-    public IsolatedLeader(final RaftActorContext context) {
-        this(context, null);
+    IsolatedLeader(final RaftActorContext context) {
+        super(context, RaftState.IsolatedLeader);
     }
 
     // we received an Append Entries reply, we should switch the Behavior to Leader
