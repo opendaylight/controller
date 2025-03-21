@@ -118,12 +118,12 @@ public final class Candidate extends RaftActorBehavior {
         final var lastApplied = context.getLastApplied();
         final var lastIndex = context.getReplicatedLog().lastIndex();
         if (lastApplied >= lastIndex) {
-            return internalSwitchBehavior(RaftState.Leader);
+            return switchBehavior(new Leader(context));
         }
 
         LOG.info("{}: LastApplied index {} is behind last index {} - switching to PreLeader", logName, lastApplied,
             lastIndex);
-        return internalSwitchBehavior(RaftState.PreLeader);
+        return switchBehavior(new PreLeader(context));
     }
 
     @Override
@@ -149,7 +149,7 @@ public final class Candidate extends RaftActorBehavior {
                 // who we do not know about (as a peer)
                 // to send a message to the candidate
 
-                return internalSwitchBehavior(RaftState.Leader);
+                return switchBehavior(new Leader(context));
             }
 
             startNewTerm();
@@ -182,7 +182,7 @@ public final class Candidate extends RaftActorBehavior {
                     super.handleMessage(sender, message);
                 }
 
-                return internalSwitchBehavior(RaftState.Follower);
+                return switchBehavior(new Follower(context));
             }
         }
 

@@ -47,7 +47,7 @@ public final class PreLeader extends AbstractLeader {
             LOG.debug("{}: Received {} - lastApplied: {}, lastIndex: {}", logName, message, lastApplied, lastIndex);
             return lastApplied < lastIndex ? this
                 // We've applied all entries - we can switch to Leader.
-                : internalSwitchBehavior(new Leader(context, this));
+                : switchBehavior(new Leader(context, this));
         } else {
             return super.handleMessage(sender, message);
         }

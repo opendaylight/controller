@@ -492,7 +492,7 @@ public class Follower extends RaftActorBehavior {
         if (canStartElection()) {
             if (message instanceof TimeoutNow) {
                 LOG.debug("{}: Received TimeoutNow - switching to Candidate", logName);
-                return internalSwitchBehavior(RaftState.Candidate);
+                return switchBehavior(new Candidate(context));
             } else if (noLeaderMessageReceived) {
                 // Check the cluster state to see if the leader is known to be up before we go to Candidate.
                 // However if we haven't heard from the leader in a long time even though the cluster state
@@ -508,7 +508,7 @@ public class Follower extends RaftActorBehavior {
                     scheduleElection(electionDuration());
                 } else {
                     LOG.debug("{}: Received ElectionTimeout - switching to Candidate", logName);
-                    return internalSwitchBehavior(RaftState.Candidate);
+                    return switchBehavior(new Candidate(context));
                 }
             } else {
                 LOG.debug("{}: Received ElectionTimeout but lastLeaderMessageInterval {} < election timeout {}",
