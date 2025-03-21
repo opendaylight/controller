@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.Cancellable;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.io.SharedFileBackedOutputStream;
 import org.opendaylight.controller.cluster.messaging.MessageSlicer;
@@ -53,7 +54,7 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.messages.UnInitializedFollowerSnapshotReply;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.spi.ImmutableRaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,6 +81,13 @@ import org.slf4j.LoggerFactory;
  * </ul>
  */
 public abstract sealed class AbstractLeader extends RaftActorBehavior permits IsolatedLeader, Leader, PreLeader {
+    @NonNullByDefault
+    record SnapshotHolder(@Nullable ImmutableRaftEntryMeta lastIncluded, ByteSource snapshotBytes) {
+        SnapshotHolder {
+            requireNonNull(snapshotBytes);
+        }
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(AbstractLeader.class);
 
     private final Map<String, FollowerLogInformation> followerToLog = new HashMap<>();
@@ -532,7 +540,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
             sendHeartBeat();
             scheduleHeartBeat(context.getConfigParams().getHeartBeatInterval());
         } else if (message instanceof SendInstallSnapshot sendInstallSnapshot) {
-            setSnapshotHolder(new SnapshotHolder(sendInstallSnapshot.getSnapshot(),
+            setSnapshotHolder(new SnapshotHolder(sendInstallSnapshot.getSnapshot().lastApplied(),
                 sendInstallSnapshot.getSnapshotBytes()));
             sendInstallSnapshot();
         } else if (message instanceof Replicate replicate) {
@@ -953,7 +961,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         final byte[] data;
         try {
             // Ensure the snapshot bytes are set - this is a no-op.
-            installSnapshotState.setSnapshotBytes(snapshot.getSnapshotBytes());
+            installSnapshotState.setSnapshotBytes(snapshot.snapshotBytes());
 
             if (installSnapshotState.canSendNextChunk()) {
                 data = installSnapshotState.getNextChunk();
@@ -1098,29 +1106,5 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
     @VisibleForTesting
     public int followerLogSize() {
         return followerToLog.size();
-    }
-
-    static class SnapshotHolder {
-        private final long lastIncludedTerm;
-        private final long lastIncludedIndex;
-        private final ByteSource snapshotBytes;
-
-        SnapshotHolder(final Snapshot snapshot, final ByteSource snapshotBytes) {
-            lastIncludedTerm = snapshot.getLastAppliedTerm();
-            lastIncludedIndex = snapshot.getLastAppliedIndex();
-            this.snapshotBytes = snapshotBytes;
-        }
-
-        long getLastIncludedTerm() {
-            return lastIncludedTerm;
-        }
-
-        long getLastIncludedIndex() {
-            return lastIncludedIndex;
-        }
-
-        ByteSource getSnapshotBytes() {
-            return snapshotBytes;
-        }
     }
 }

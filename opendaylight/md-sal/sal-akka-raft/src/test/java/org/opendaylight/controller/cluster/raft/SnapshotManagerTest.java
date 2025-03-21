@@ -239,10 +239,9 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         final var snapshot = snapshotCaptor.getValue();
 
-        assertEquals("getLastTerm", 3L, snapshot.getLastTerm());
-        assertEquals("getLastIndex", 9L, snapshot.getLastIndex());
-        assertEquals("getLastAppliedTerm", 2L, snapshot.getLastAppliedTerm());
-        assertEquals("getLastAppliedIndex", 8L, snapshot.getLastAppliedIndex());
+        assertEquals(3, snapshot.getLastTerm());
+        assertEquals(9, snapshot.getLastIndex());
+        assertEquals(ImmutableRaftEntryMeta.of(8, 2), snapshot.lastApplied());
         assertEquals("getState", snapshotState, snapshot.getState());
         assertEquals("getUnAppliedEntries", List.of(lastLogEntry), snapshot.getUnAppliedEntries());
         assertEquals(mockTermInfo, snapshot.termInfo());
@@ -268,12 +267,11 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         final var snapshot = snapshotCaptor.getValue();
 
-        assertEquals("getLastTerm", 6L, snapshot.getLastTerm());
-        assertEquals("getLastIndex", 9L, snapshot.getLastIndex());
-        assertEquals("getLastAppliedTerm", 6L, snapshot.getLastAppliedTerm());
-        assertEquals("getLastAppliedIndex", 9L, snapshot.getLastAppliedIndex());
-        assertEquals("getState", snapshotState, snapshot.getState());
-        assertEquals("getUnAppliedEntries size", 0, snapshot.getUnAppliedEntries().size());
+        assertEquals(6, snapshot.getLastTerm());
+        assertEquals(9, snapshot.getLastIndex());
+        assertEquals(ImmutableRaftEntryMeta.of(9, 6), snapshot.lastApplied());
+        assertEquals(snapshotState, snapshot.getState());
+        assertEquals(0, snapshot.getUnAppliedEntries().size());
 
         verify(mockReplicatedLog).snapshotPreCommit(9L, 6L);
 
