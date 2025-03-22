@@ -549,9 +549,11 @@ public class RaftActorTest extends AbstractActorTest {
 
         MockRaftActor leaderActor = mockActorRef.underlyingActor();
 
-        leaderActor.getRaftActorContext().setCommitIndex(4);
-        leaderActor.getRaftActorContext().setLastApplied(4);
-        leaderActor.getRaftActorContext().setTermInfo(new TermInfo(1, persistenceId));
+        final var leaderContext = leaderActor.getRaftActorContext();
+        final var leaderLog = leaderContext.getReplicatedLog();
+        leaderLog.setCommitIndex(4);
+        leaderLog.setLastApplied(4);
+        leaderContext.setTermInfo(new TermInfo(1, persistenceId));
 
         leaderActor.waitForInitializeBehaviorComplete();
 
@@ -634,13 +636,14 @@ public class RaftActorTest extends AbstractActorTest {
             MockRaftActor.props(persistenceId, stateDir(), peerAddresses, config, dataPersistenceProvider),
             persistenceId);
 
-        MockRaftActor followerActor = mockActorRef.underlyingActor();
-        followerActor.getRaftActorContext().setCommitIndex(4);
-        followerActor.getRaftActorContext().setLastApplied(4);
-        followerActor.getRaftActorContext().setTermInfo(new TermInfo(1, persistenceId));
+        final var followerActor = mockActorRef.underlyingActor();
+        final var followerContext = followerActor.getRaftActorContext();
+        final var followerLog = followerContext.getReplicatedLog();
+        followerLog.setCommitIndex(4);
+        followerLog.setLastApplied(4);
+        followerContext.setTermInfo(new TermInfo(1, persistenceId));
 
         followerActor.waitForInitializeBehaviorComplete();
-
 
         Follower follower = new Follower(followerActor.getRaftActorContext());
         followerActor.setCurrentBehavior(follower);
@@ -724,10 +727,12 @@ public class RaftActorTest extends AbstractActorTest {
                 MockRaftActor.props(persistenceId, stateDir(), peerAddresses, config, dataPersistenceProvider),
                 persistenceId);
 
-        MockRaftActor leaderActor = mockActorRef.underlyingActor();
-        leaderActor.getRaftActorContext().setCommitIndex(9);
-        leaderActor.getRaftActorContext().setLastApplied(9);
-        leaderActor.getRaftActorContext().setTermInfo(new TermInfo(1, persistenceId));
+        final var leaderActor = mockActorRef.underlyingActor();
+        final var leaderContext = leaderActor.getRaftActorContext();
+        final var leaderLog = leaderContext.getReplicatedLog();
+        leaderLog.setCommitIndex(9);
+        leaderLog.setLastApplied(9);
+        leaderContext.setTermInfo(new TermInfo(1, persistenceId));
 
         leaderActor.waitForInitializeBehaviorComplete();
 

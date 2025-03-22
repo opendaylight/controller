@@ -69,7 +69,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         replicatedLog.append(new SimpleReplicatedLogEntry(0, term, new MockPayload("1")));
         replicatedLog.append(new SimpleReplicatedLogEntry(1, term, new MockPayload("2")));
         setReplicatedLog(replicatedLog);
-        setCommitIndex(replicatedLog.lastIndex());
+        replicatedLog.setCommitIndex(replicatedLog.lastIndex());
         replicatedLog.setLastApplied(replicatedLog.lastIndex());
     }
 

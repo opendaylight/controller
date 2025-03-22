@@ -326,12 +326,13 @@ class RaftActorRecoverySupportTest {
 
         sendMessageToSupport(new DeleteEntries(5));
 
-        assertEquals("Journal log size", 0, context.getReplicatedLog().size());
-        assertEquals("Last index", -1, context.getReplicatedLog().lastIndex());
-        assertEquals("Last applied", -1, context.getLastApplied());
-        assertEquals("Commit index", -1, context.getCommitIndex());
-        assertEquals("Snapshot term", -1, context.getReplicatedLog().getSnapshotTerm());
-        assertEquals("Snapshot index", -1, context.getReplicatedLog().getSnapshotIndex());
+        final var log = context.getReplicatedLog();
+        assertEquals("Journal log size", 0, log.size());
+        assertEquals("Last index", -1, log.lastIndex());
+        assertEquals("Last applied", -1, log.getLastApplied());
+        assertEquals("Commit index", -1, log.getCommitIndex());
+        assertEquals("Snapshot term", -1, log.getSnapshotTerm());
+        assertEquals("Snapshot index", -1, log.getSnapshotIndex());
 
         assertEquals("Current term", new TermInfo(5, "member2"), context.termInfo());
 

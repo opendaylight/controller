@@ -156,7 +156,7 @@ public non-sealed class Leader extends AbstractLeader {
             return;
         }
 
-        long lastIndex = context.getReplicatedLog().lastIndex();
+        long lastIndex = replicatedLog().lastIndex();
         boolean isVoting = context.getPeerInfo(followerId).isVoting();
 
         LOG.debug("{}: tryToCompleteLeadershipTransfer: followerId: {}, matchIndex: {}, lastIndex: {}, isVoting: {}",

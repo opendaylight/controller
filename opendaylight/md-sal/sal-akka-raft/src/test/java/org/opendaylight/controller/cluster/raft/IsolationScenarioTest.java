@@ -222,9 +222,10 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         verifyApplyJournalEntries(leaderCollectorActor, 3);
 
         verifyRaftState(leaderActor, raftState -> {
-            assertEquals("Prior leader journal last term", currentTerm, leaderContext.getReplicatedLog().lastTerm());
-            assertEquals("Prior leader journal last index", 3, leaderContext.getReplicatedLog().lastIndex());
-            assertEquals("Prior leader commit index", 3, leaderContext.getCommitIndex());
+            final var leaderLog = leaderContext.getReplicatedLog();
+            assertEquals("Prior leader journal last term", currentTerm, leaderLog.lastTerm());
+            assertEquals("Prior leader journal last index", 3, leaderLog.lastIndex());
+            assertEquals("Prior leader commit index", 3, leaderLog.getCommitIndex());
         });
 
         assertEquals("Prior leader state", Lists.newArrayList(payload0, payload1, newLeaderPayload2),
@@ -350,9 +351,10 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         verifyApplyJournalEntries(leaderCollectorActor, 5);
 
         verifyRaftState(leaderActor, raftState -> {
-            assertEquals("Prior leader journal last term", currentTerm, leaderContext.getReplicatedLog().lastTerm());
-            assertEquals("Prior leader journal last index", 5, leaderContext.getReplicatedLog().lastIndex());
-            assertEquals("Prior leader commit index", 5, leaderContext.getCommitIndex());
+            final var leaderLog = leaderContext.getReplicatedLog();
+            assertEquals("Prior leader journal last term", currentTerm, leaderLog.lastTerm());
+            assertEquals("Prior leader journal last index", 5, leaderLog.lastIndex());
+            assertEquals("Prior leader commit index", 5, leaderLog.getCommitIndex());
         });
 
         assertEquals("Prior leader state", Lists.newArrayList(payload0, payload1, newLeaderPayload2, newLeaderPayload3,
