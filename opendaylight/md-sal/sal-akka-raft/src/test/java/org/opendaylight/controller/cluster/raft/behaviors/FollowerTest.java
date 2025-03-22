@@ -479,14 +479,13 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     public void testHandleAppendEntriesWithNewerCommitIndex() {
         logStart("testHandleAppendEntriesWithNewerCommitIndex");
 
-        MockRaftActorContext context = createActorContext();
+        final var context = createActorContext();
 
-        context.setLastApplied(100);
-        setLastLogEntry(context, 1, 100,
-                new MockRaftActorContext.MockPayload(""));
+        setLastLogEntry(context, 1, 100, new MockRaftActorContext.MockPayload(""));
+        context.getReplicatedLog().setLastApplied(100);
         context.getReplicatedLog().setSnapshotIndex(99);
 
-        List<ReplicatedLogEntry> entries = List.of(newReplicatedLogEntry(2, 101, "foo"));
+        final var entries = List.of(newReplicatedLogEntry(2, 101, "foo"));
 
         // The new commitIndex is 101
         AppendEntries appendEntries = new AppendEntries(2, "leader-1", 100, 1, entries, 101, 100, (short)0);

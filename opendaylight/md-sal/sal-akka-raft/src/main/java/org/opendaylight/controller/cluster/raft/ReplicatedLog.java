@@ -70,6 +70,20 @@ public interface ReplicatedLog {
     long lastTerm();
 
     /**
+     * Returns index of highest log entry applied to state machine.
+     *
+     * @return index of highest log entry applied to state machine.
+     */
+    long getLastApplied();
+
+    /**
+     * Sets index of highest log entry applied to state machine.
+     *
+     * @param lastApplied the new applied index.
+     */
+    void setLastApplied(long lastApplied);
+
+    /**
      * Removes entries from the in-memory log starting at the given index.
      *
      * @param index the index of the first log entry to remove

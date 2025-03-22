@@ -35,6 +35,7 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
 
     private long snapshotIndex = -1;
     private long snapshotTerm = -1;
+    private long lastApplied = -1;
 
     // to be used for rollback during save snapshot failure
     private ArrayList<ReplicatedLogEntry> snapshottedJournal;
@@ -80,7 +81,7 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
     }
 
     @Override
-    public long lastIndex() {
+    public final long lastIndex() {
         final var last = last();
         // it can happen that after snapshot, all the entries of the journal are trimmed till lastApplied,
         // so lastIndex = snapshotIndex
@@ -88,11 +89,23 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
     }
 
     @Override
-    public long lastTerm() {
+    public final long lastTerm() {
         final var last = last();
         // it can happen that after snapshot, all the entries of the journal are trimmed till lastApplied,
         // so lastTerm = snapshotTerm
         return last != null ? last.term() : snapshotTerm;
+    }
+
+    @Override
+    public final long getLastApplied() {
+        return lastApplied;
+    }
+
+    @Override
+    public final void setLastApplied(final long lastApplied) {
+        LOG.debug("{}: Moving last applied index from {} to {}", memberId, this.lastApplied, lastApplied,
+            LOG.isTraceEnabled() ? new Throwable() : null);
+        this.lastApplied = lastApplied;
     }
 
     @Override

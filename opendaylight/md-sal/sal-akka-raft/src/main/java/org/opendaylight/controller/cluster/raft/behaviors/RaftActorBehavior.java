@@ -355,9 +355,11 @@ public abstract class RaftActorBehavior implements AutoCloseable {
      */
     final void applyLogToStateMachine(final long index) {
         // Now maybe we apply to the state machine
-        for (long i = context.getLastApplied() + 1; i < index + 1; i++) {
+        final var replLog = context.getReplicatedLog();
 
-            final var replicatedLogEntry = context.getReplicatedLog().get(i);
+        for (long i = replLog.getLastApplied() + 1; i < index + 1; i++) {
+
+            final var replicatedLogEntry = replLog.get(i);
             if (replicatedLogEntry != null) {
                 // Send a local message to the local RaftActor (it's derived class to be
                 // specific to apply the log to it's index)
@@ -366,7 +368,7 @@ public abstract class RaftActorBehavior implements AutoCloseable {
 
                 LOG.debug("{}: Setting last applied to {}", logName, i);
 
-                context.setLastApplied(i);
+                replLog.setLastApplied(i);
                 context.getApplyStateConsumer().accept(applyState);
             } else {
                 //if one index is not present in the log, no point in looping
@@ -380,7 +382,7 @@ public abstract class RaftActorBehavior implements AutoCloseable {
         // will be used during recovery
         //in case if the above code throws an error and this message is not sent, it would be fine
         // as the  append entries received later would initiate add this message to the journal
-        actor().tell(new ApplyJournalEntries(context.getLastApplied()), actor());
+        actor().tell(new ApplyJournalEntries(replLog.getLastApplied()), actor());
     }
 
     /**

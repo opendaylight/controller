@@ -46,6 +46,8 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog {
                 append(entry);
             }
         }
+
+        setLastApplied(snapshot.getLastAppliedIndex());
     }
 
     @Override
