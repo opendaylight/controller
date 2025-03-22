@@ -162,7 +162,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
     public void postStop() throws Exception {
-        final var behavior = context.getCurrentBehavior();
+        final var behavior = getCurrentBehavior();
         if (behavior != null) {
             try {
                 behavior.close();
@@ -389,8 +389,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         shuttingDown = true;
 
-        final RaftActorBehavior currentBehavior = context.getCurrentBehavior();
-        switch (currentBehavior.state()) {
+        switch (getCurrentBehavior().state()) {
             case Leader:
             case PreLeader:
                 // Fall-through to more work
@@ -477,7 +476,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             peerAddresses.put(info.getId(), info.getAddress() != null ? info.getAddress() : "");
         }
 
-        final var currentBehavior = context.getCurrentBehavior();
+        final var currentBehavior = getCurrentBehavior();
         final var termInfo = context.termInfo();
         final var builder = newOnDemandRaftStateBuilder()
                 .commitIndex(context.getCommitIndex())
@@ -673,7 +672,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         context.setCurrentBehavior(behavior);
     }
 
-    protected RaftActorBehavior getCurrentBehavior() {
+    protected final RaftActorBehavior getCurrentBehavior() {
         return context.getCurrentBehavior();
     }
 
