@@ -60,7 +60,6 @@ import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
 import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader.SendInstallSnapshot;
-import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader.SnapshotHolder;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
@@ -605,9 +604,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leader.markFollowerActive(FOLLOWER_ID);
 
         ByteString bs = toByteString(Map.of("1", "A", "2", "B", "3", "C"));
-        leader.setSnapshotHolder(new SnapshotHolder(Snapshot.create(ByteState.of(bs.toByteArray()),
-                List.of(), commitIndex, snapshotTerm, commitIndex, snapshotTerm, new TermInfo(-1), null),
-                ByteSource.wrap(bs.toByteArray())));
+        leader.setSnapshot(commitIndex, snapshotTerm, ByteSource.wrap(bs.toByteArray()));
         LeaderInstallSnapshotState fts = new LeaderInstallSnapshotState(
                 actorContext.getConfigParams().getMaximumMessageSliceSize(), leader.logName);
         fts.setSnapshotBytes(ByteSource.wrap(bs.toByteArray()));
@@ -708,7 +705,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
 
         // set the snapshot as absent and check if capture-snapshot is invoked.
-        leader.setSnapshotHolder(null);
+        leader.clearSnapshot();
 
         // new entry
         actorContext.getReplicatedLog().append(
@@ -764,7 +761,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
 
         // set the snapshot as absent and check if capture-snapshot is invoked.
-        leader.setSnapshotHolder(null);
+        leader.clearSnapshot();
 
         for (int i = 0; i < 4; i++) {
             actorContext.getReplicatedLog().append(new SimpleReplicatedLogEntry(i, 1,
@@ -961,9 +958,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         actorContext.setTermInfo(new TermInfo(currentTerm, leaderActor.path().toString()));
 
         ByteString bs = toByteString(leadersSnapshot);
-        leader.setSnapshotHolder(new SnapshotHolder(Snapshot.create(ByteState.of(bs.toByteArray()), List.of(),
-                commitIndex, snapshotTerm, commitIndex, snapshotTerm, new TermInfo(-1), null),
-                ByteSource.wrap(bs.toByteArray())));
+        leader.setSnapshot(commitIndex, snapshotTerm, ByteSource.wrap(bs.toByteArray()));
         LeaderInstallSnapshotState fts = new LeaderInstallSnapshotState(
                 actorContext.getConfigParams().getMaximumMessageSliceSize(), leader.logName);
         fts.setSnapshotBytes(ByteSource.wrap(bs.toByteArray()));
