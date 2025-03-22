@@ -66,7 +66,11 @@ public abstract class RaftActorBehavior implements AutoCloseable {
     RaftActorBehavior(final RaftActorContext context, final RaftState state) {
         this.context = requireNonNull(context);
         this.state = requireNonNull(state);
-        logName = context.getId() + " (" + state + ")";
+        logName = memberId() + " (" + state + ")";
+    }
+
+    final @NonNull String memberId() {
+        return context.getId();
     }
 
     /**
@@ -110,10 +114,6 @@ public abstract class RaftActorBehavior implements AutoCloseable {
         return replicatedToAllIndex;
     }
 
-    final String getId() {
-        return context.getId();
-    }
-
     /**
      * Derived classes should not directly handle AppendEntries messages it should let the base class handle it first.
      * Once the base class handles the AppendEntries message and does the common actions that are applicable in all
@@ -139,7 +139,7 @@ public abstract class RaftActorBehavior implements AutoCloseable {
         final var current = currentTerm();
         if (term < current) {
             LOG.info("{}: Cannot append entries because sender's term {} is less than {}", logName, term, current);
-            sender.tell(new AppendEntriesReply(getId(), current, false, lastIndex(), lastTerm(),
+            sender.tell(new AppendEntriesReply(memberId(), current, false, lastIndex(), lastTerm(),
                     context.getPayloadVersion(), false, false, appendEntries.getLeaderRaftVersion()), actor());
             return this;
         }

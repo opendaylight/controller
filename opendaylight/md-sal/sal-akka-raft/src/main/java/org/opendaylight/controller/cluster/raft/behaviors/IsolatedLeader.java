@@ -50,7 +50,7 @@ public final class IsolatedLeader extends AbstractLeader {
             return this;
         }
 
-        LOG.info("{}: IsolatedLeader {} switching from IsolatedLeader to Leader", getId(), getLeaderId());
+        LOG.info("{}: IsolatedLeader {} switching from IsolatedLeader to Leader", memberId(), getLeaderId());
         return switchBehavior(new Leader(context, this));
     }
 }
