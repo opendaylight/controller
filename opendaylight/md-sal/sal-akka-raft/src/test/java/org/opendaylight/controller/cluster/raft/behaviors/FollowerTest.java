@@ -592,7 +592,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertEquals("getLeaderPayloadVersion", leaderPayloadVersion, newBehavior.getLeaderPayloadVersion());
         assertEquals("getLeaderId", leaderId, newBehavior.getLeaderId());
 
-        expectAndVerifyAppendEntriesReply(1, true, context.getId(), 1, 4);
+        expectAndVerifyAppendEntriesReply(1, true, "follower", 1, 4);
     }
 
     /**
@@ -648,7 +648,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         assertEquals("Entry 3", entries.get(1), log.get(3));
 
-        expectAndVerifyAppendEntriesReply(2, true, context.getId(), 2, 3);
+        expectAndVerifyAppendEntriesReply(2, true, "follower", 2, 3);
     }
 
     @Test
@@ -685,7 +685,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         assertSame(follower, newBehavior);
 
-        expectAndVerifyAppendEntriesReply(2, false, context.getId(), 1, 2, true);
+        expectAndVerifyAppendEntriesReply(2, false, "follower", 1, 2, true);
     }
 
     @Test
@@ -713,7 +713,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         assertSame(follower, newBehavior);
 
-        expectAndVerifyAppendEntriesReply(1, false, context.getId(), 1, 2);
+        expectAndVerifyAppendEntriesReply(1, false, "follower", 1, 2);
     }
 
     @Test
@@ -741,7 +741,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertEquals("Next index", 2, log.last().index() + 1);
         assertEquals("Entry 1", entries.get(0), log.get(1));
 
-        expectAndVerifyAppendEntriesReply(1, true, context.getId(), 1, 1);
+        expectAndVerifyAppendEntriesReply(1, true, "follower", 1, 1);
 
         // Send the last entry again and also a new one.
 
@@ -754,7 +754,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertEquals("Entry 1", entries.get(0), log.get(1));
         assertEquals("Entry 2", entries.get(1), log.get(2));
 
-        expectAndVerifyAppendEntriesReply(1, true, context.getId(), 1, 2);
+        expectAndVerifyAppendEntriesReply(1, true, "follower", 1, 2);
     }
 
     @Test
@@ -783,7 +783,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         assertSame(follower, newBehavior);
 
-        expectAndVerifyAppendEntriesReply(1, true, context.getId(), 1, 4);
+        expectAndVerifyAppendEntriesReply(1, true, "follower", 1, 4);
     }
 
     /**
@@ -836,7 +836,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
             assertEquals("getChunkIndex", chunkIndex++, reply.getChunkIndex());
             assertEquals("getTerm", 1, reply.getTerm());
             assertTrue("isSuccess", reply.isSuccess());
-            assertEquals("getFollowerId", context.getId(), reply.getFollowerId());
+            assertEquals("getFollowerId", "follower", reply.getFollowerId());
         }
 
         assertNull("Expected null SnapshotTracker", follower.getSnapshotTracker());
@@ -1004,7 +1004,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertFalse("isSuccess", reply.isSuccess());
         assertEquals("getChunkIndex", -1, reply.getChunkIndex());
         assertEquals("getTerm", 1, reply.getTerm());
-        assertEquals("getFollowerId", context.getId(), reply.getFollowerId());
+        assertEquals("getFollowerId", "follower", reply.getFollowerId());
 
         assertNull("Expected null SnapshotTracker", follower.getSnapshotTracker());
     }
@@ -1049,7 +1049,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     @Test
     public void testFollowerSchedulesElectionIfNonVoting() {
         MockRaftActorContext context = createActorContext();
-        context.updatePeerIds(new ClusterConfig(new ServerInfo(context.getId(), false)));
+        context.updatePeerIds(new ClusterConfig(new ServerInfo("follower", false)));
         ((DefaultConfigParamsImpl) context.getConfigParams()).setHeartBeatInterval(Duration.ofMillis(100));
         ((DefaultConfigParamsImpl) context.getConfigParams()).setElectionTimeoutFactor(1);
 
