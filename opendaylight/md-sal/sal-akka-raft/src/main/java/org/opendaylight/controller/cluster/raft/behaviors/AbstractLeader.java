@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.Cancellable;
+import org.apache.pekko.dispatch.ControlMessage;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.io.SharedFileBackedOutputStream;
@@ -41,7 +42,6 @@ import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.VotingState;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
-import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.IdentifiablePayload;
@@ -74,6 +74,19 @@ import org.slf4j.LoggerFactory;
  * </ul>
  */
 public abstract sealed class AbstractLeader extends RaftActorBehavior permits IsolatedLeader, Leader, PreLeader {
+    /**
+     * This messages is sent via a schedule to the Leader to prompt it to send a heart beat to its followers.
+     */
+    @NonNullByDefault
+    @VisibleForTesting
+    public static final class SendHeartBeat implements ControlMessage {
+        public static final SendHeartBeat INSTANCE = new SendHeartBeat();
+
+        private SendHeartBeat() {
+            // Hidden on purpose
+        }
+    }
+
     @NonNullByDefault
     private record SnapshotHolder(long index, long term, ByteSource bytes) {
         public SnapshotHolder {
@@ -473,10 +486,6 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         return this;
     }
 
-    protected void beforeSendHeartbeat() {
-        // No-op
-    }
-
     @Override
     public RaftActorBehavior handleMessage(final ActorRef sender, final Object message) {
         requireNonNull(sender, "sender should not be null");
@@ -515,18 +524,14 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
             return switchBehavior(new Follower(context));
         }
 
-        if (message instanceof SendHeartBeat) {
-            beforeSendHeartbeat();
-            sendHeartBeat();
-            scheduleHeartBeat(context.getConfigParams().getHeartBeatInterval());
-        } else if (message instanceof Replicate replicate) {
-            replicate(replicate);
-        } else if (message instanceof InstallSnapshotReply installSnapshotReply) {
-            handleInstallSnapshotReply(installSnapshotReply);
-        } else {
-            return super.handleMessage(sender, message);
+        switch (message) {
+            case SendHeartBeat msg -> sendHeartBeat();
+            case Replicate msg -> replicate(msg);
+            case InstallSnapshotReply msg -> handleInstallSnapshotReply(msg);
+            default -> {
+                return super.handleMessage(sender, message);
+            }
         }
-
         return this;
     }
 
@@ -998,13 +1003,21 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         return true;
     }
 
+    void beforeSendHeartbeat() {
+        // No-op, overridden in Leader
+    }
+
     private void sendHeartBeat() {
+        beforeSendHeartbeat();
+
         if (!followerToLog.isEmpty()) {
             LOG.trace("{}: Sending heartbeat", logName);
             sendAppendEntries(context.getConfigParams().getHeartBeatInterval().toNanos(), true);
 
             appendEntriesMessageSlicer.checkExpiredSlicedMessageState();
         }
+
+        scheduleHeartBeat(context.getConfigParams().getHeartBeatInterval());
     }
 
     private void stopHeartBeat() {

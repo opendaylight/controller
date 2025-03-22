@@ -91,7 +91,7 @@ public non-sealed class Leader extends AbstractLeader {
     }
 
     @Override
-    protected final void beforeSendHeartbeat() {
+    final void beforeSendHeartbeat() {
         if (isolatedLeaderCheck.elapsed(TimeUnit.MILLISECONDS)
                 > context.getConfigParams().getIsolatedCheckIntervalInMillis()) {
             context.getActor().tell(ISOLATED_LEADER_CHECK, context.getActor());
