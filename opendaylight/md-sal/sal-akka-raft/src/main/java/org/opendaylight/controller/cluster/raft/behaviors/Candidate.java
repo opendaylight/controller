@@ -198,7 +198,7 @@ public final class Candidate extends RaftActorBehavior {
         final long newTerm = currentTerm + 1;
         try {
             // note: also updates current
-            context.persistTermInfo(new TermInfo(newTerm, context.getId()));
+            context.persistTermInfo(new TermInfo(newTerm, memberId()));
         } catch (IOException e) {
             // FIXME: do not mask IOException
             throw new UncheckedIOException(e);
@@ -212,10 +212,8 @@ public final class Candidate extends RaftActorBehavior {
         for (var peerId : votingPeers) {
             final var peerActor = context.getPeerActorSelection(peerId);
             if (peerActor != null) {
-                final var requestVote = new RequestVote(newTerm,
-                        context.getId(),
-                        context.getReplicatedLog().lastIndex(),
-                        context.getReplicatedLog().lastTerm());
+                final var replLog = context.getReplicatedLog();
+                final var requestVote = new RequestVote(newTerm, memberId(), replLog.lastIndex(), replLog.lastTerm());
 
                 LOG.debug("{}: Sending {} to peer {}", logName, requestVote, peerId);
 

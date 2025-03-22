@@ -793,7 +793,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         if (fileBackedStream == null) {
             fileBackedStream = context.getFileBackedOutputStreamFactory().newSharedInstance();
 
-            final var appendEntries = new AppendEntries(currentTerm(), context.getId(),
+            final var appendEntries = new AppendEntries(currentTerm(), memberId(),
                     getLogEntryIndex(followerNextIndex - 1), getLogEntryTerm(followerNextIndex - 1), entries,
                     context.getCommitIndex(), getReplicatedToAllIndex(), context.getPayloadVersion());
 
@@ -852,11 +852,10 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
                 || !followerLogInformation.isFollowerActive() ? -1 : context.getCommitIndex();
 
         long followerNextIndex = followerLogInformation.getNextIndex();
-        AppendEntries appendEntries = new AppendEntries(currentTerm(), context.getId(),
-            getLogEntryIndex(followerNextIndex - 1),
-            getLogEntryTerm(followerNextIndex - 1), entries,
-            leaderCommitIndex, super.getReplicatedToAllIndex(), context.getPayloadVersion(),
-            followerLogInformation.getRaftVersion(), followerLogInformation.needsLeaderAddress(getId()));
+        final var appendEntries = new AppendEntries(currentTerm(), memberId(),
+            getLogEntryIndex(followerNextIndex - 1), getLogEntryTerm(followerNextIndex - 1), entries, leaderCommitIndex,
+            super.getReplicatedToAllIndex(), context.getPayloadVersion(), followerLogInformation.getRaftVersion(),
+            followerLogInformation.needsLeaderAddress(memberId()));
 
         if (!entries.isEmpty() || LOG.isTraceEnabled()) {
             LOG.debug("{}: Sending AppendEntries to follower {}: {}", logName, followerLogInformation.getId(),
@@ -978,7 +977,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
 
         installSnapshotState.startChunkTimer();
         followerActor.tell(
-            new InstallSnapshot(currentTerm(), context.getId(),
+            new InstallSnapshot(currentTerm(), memberId(),
                 // snapshot term/index inforation
                 snapshot.getLastIncludedIndex(), snapshot.getLastIncludedTerm(),
                 // this chunk and its indexing info and previous hash code
@@ -1056,7 +1055,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
 
     @Override
     public final String getLeaderId() {
-        return context.getId();
+        return memberId();
     }
 
     @Override

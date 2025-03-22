@@ -74,7 +74,7 @@ public class Follower extends RaftActorBehavior {
         leaderId = initialLeaderId;
         leaderPayloadVersion = initialLeaderPayloadVersion;
 
-        initialSyncStatusTracker = new SyncStatusTracker(context.getActor(), getId(),
+        initialSyncStatusTracker = new SyncStatusTracker(context.getActor(), memberId(),
             context.getConfigParams().getSyncIndexThreshold());
 
         appendEntriesMessageAssembler = MessageAssembler.builder()
@@ -149,7 +149,7 @@ public class Follower extends RaftActorBehavior {
 
         if (snapshotTracker != null || context.getSnapshotManager().isApplying()) {
             // if snapshot install is in progress, follower should just acknowledge append entries with a reply.
-            final var reply = new AppendEntriesReply(context.getId(), currentTerm(), true, lastIndex(), lastTerm(),
+            final var reply = new AppendEntriesReply(memberId(), currentTerm(), true, lastIndex(), lastTerm(),
                 context.getPayloadVersion(), false, needsLeaderAddress(), appendEntries.getLeaderRaftVersion());
 
             LOG.debug("{}: snapshot install is in progress, replying immediately with {}", logName, reply);
@@ -191,9 +191,8 @@ public class Follower extends RaftActorBehavior {
             LOG.debug("{}: Commit index set to {}", logName, context.getCommitIndex());
         }
 
-        final var reply = new AppendEntriesReply(context.getId(), currentTerm(), true,
-                lastIndex, lastTerm(), context.getPayloadVersion(), false, needsLeaderAddress(),
-                appendEntries.getLeaderRaftVersion());
+        final var reply = new AppendEntriesReply(memberId(), currentTerm(), true, lastIndex, lastTerm(),
+            context.getPayloadVersion(), false, needsLeaderAddress(), appendEntries.getLeaderRaftVersion());
 
         if (LOG.isTraceEnabled()) {
             LOG.trace("{}: handleAppendEntries returning : {}", logName, reply);
@@ -277,17 +276,17 @@ public class Follower extends RaftActorBehavior {
                         // follower's log and state.
 
                         LOG.info("{}: Could not remove entries - sending reply to force snapshot", logName);
-                        sender.tell(new AppendEntriesReply(context.getId(), currentTerm(), false, lastIndex,
-                                lastTerm(), context.getPayloadVersion(), true, needsLeaderAddress(),
-                                appendEntries.getLeaderRaftVersion()), actor());
+                        sender.tell(new AppendEntriesReply(memberId(), currentTerm(), false, lastIndex, lastTerm(),
+                            context.getPayloadVersion(), true, needsLeaderAddress(),
+                            appendEntries.getLeaderRaftVersion()), actor());
                         return false;
                     }
 
                     break;
                 } else {
-                    sender.tell(new AppendEntriesReply(context.getId(), currentTerm(), false, lastIndex,
-                            lastTerm(), context.getPayloadVersion(), true, needsLeaderAddress(),
-                            appendEntries.getLeaderRaftVersion()), actor());
+                    sender.tell(new AppendEntriesReply(memberId(), currentTerm(), false, lastIndex, lastTerm(),
+                        context.getPayloadVersion(), true, needsLeaderAddress(), appendEntries.getLeaderRaftVersion()),
+                        actor());
                     return false;
                 }
             }
@@ -406,7 +405,7 @@ public class Follower extends RaftActorBehavior {
     private void sendOutOfSyncAppendEntriesReply(final ActorRef sender, final boolean forceInstallSnapshot,
             final short leaderRaftVersion) {
         // We found that the log was out of sync so just send a negative reply.
-        final var reply = new AppendEntriesReply(context.getId(), currentTerm(), false, lastIndex(), lastTerm(),
+        final var reply = new AppendEntriesReply(memberId(), currentTerm(), false, lastIndex(), lastTerm(),
             context.getPayloadVersion(), forceInstallSnapshot, needsLeaderAddress(), leaderRaftVersion);
 
         LOG.info("{}: Follower is out-of-sync so sending negative reply: {}", logName, reply);
@@ -623,12 +622,12 @@ public class Follower extends RaftActorBehavior {
         } catch (IOException e) {
             LOG.debug("{}: failed to add InstallSnapshot chunk", logName, e);
             closeSnapshotTracker();
-            sender.tell(new InstallSnapshotReply(currentTerm(), context.getId(), -1, false), actor());
+            sender.tell(new InstallSnapshotReply(currentTerm(), memberId(), -1, false), actor());
             return;
         }
 
-        final var successReply = new InstallSnapshotReply(currentTerm(), context.getId(),
-            installSnapshot.getChunkIndex(), true);
+        final var successReply = new InstallSnapshotReply(currentTerm(), memberId(), installSnapshot.getChunkIndex(),
+            true);
         if (!isLastChunk) {
             LOG.debug("{}: handleInstallSnapshot returning: {}", logName, successReply);
             sender.tell(successReply, actor());
@@ -646,7 +645,7 @@ public class Follower extends RaftActorBehavior {
         } catch (IOException e) {
             LOG.debug("{}: failed to reconstract InstallSnapshot state", logName, e);
             tracker.close();
-            sender.tell(new InstallSnapshotReply(currentTerm(), context.getId(), -1, false), actor());
+            sender.tell(new InstallSnapshotReply(currentTerm(), memberId(), -1, false), actor());
             return;
         }
 
