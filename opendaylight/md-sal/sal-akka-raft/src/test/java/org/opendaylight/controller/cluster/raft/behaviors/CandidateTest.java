@@ -68,8 +68,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
 
         candidate = new Candidate(raftActorContext);
 
-        assertEquals("getCurrentTerm", new TermInfo(expectedTerm + 1, raftActorContext.getId()),
-            raftActorContext.termInfo());
+        assertEquals("getCurrentTerm", new TermInfo(expectedTerm + 1, "candidate"), raftActorContext.termInfo());
     }
 
     @Test
@@ -141,7 +140,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
 
         RequestVote requestVote = MessageCollectorActor.expectFirstMatching(peerActors[0], RequestVote.class);
         assertEquals("getTerm", 3L, requestVote.getTerm());
-        assertEquals("getCandidateId", raftActorContext.getId(), requestVote.getCandidateId());
+        assertEquals("getCandidateId", "candidate", requestVote.getCandidateId());
         assertEquals("getLastLogTerm", 1L, requestVote.getLastLogTerm());
         assertEquals("getLastLogIndex", 4L, requestVote.getLastLogIndex());
 
@@ -241,7 +240,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
         candidate = new Candidate(context);
 
         setupPeers(1);
-        candidate.handleMessage(peerActors[0], new RequestVote(1001, context.getId(), 10000, 999));
+        candidate.handleMessage(peerActors[0], new RequestVote(1001, "candidate", 10000, 999));
 
         RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(peerActors[0], RequestVoteReply.class);
         assertTrue("isVoteGranted", reply.isVoteGranted());
