@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.apache.pekko.actor.ActorContext;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.actor.Props;
@@ -68,6 +69,7 @@ import org.slf4j.LoggerFactory;
 class RaftActorRecoverySupportTest {
     private static final Logger LOG = LoggerFactory.getLogger(RaftActorRecoverySupportTest.class);
 
+
     private final DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
     private final String localId = "leader";
 
@@ -79,28 +81,29 @@ class RaftActorRecoverySupportTest {
     private AbstractPersistentActor mockActor;
     @Mock
     private RaftActorSnapshotCohort<?> mockSnapshotCohort;
+    @Mock
+    private ActorContext mockActorContext;
     @TempDir
     private Path stateDir;
 
-    private ActorRef mockActorRef;
     private ActorSystem mockActorSystem;
+    private ActorRef mockActorRef;
     private RaftActorRecoverySupport support;
-
     private RaftActorContext context;
 
     @BeforeEach
-    void setup() {
+    void beforeEach() {
         mockActorSystem = ActorSystem.create();
         mockActorRef = mockActorSystem.actorOf(Props.create(DoNothingActor.class));
         final var localAccess = new LocalAccess(localId, stateDir);
-        context = new RaftActorContextImpl(mockActorRef, null, localAccess, Map.of(), configParams, (short) 0,
-            mockPersistence, applyState -> { }, MoreExecutors.directExecutor());
+        context = new RaftActorContextImpl(mockActorRef, mockActorContext, localAccess, Map.of(), configParams,
+            (short) 0, mockPersistence, applyState -> { }, MoreExecutors.directExecutor());
 
         support = new RaftActorRecoverySupport(localAccess, context, mockCohort);
     }
 
     @AfterEach
-    void tearDown() {
+    void afterEach() {
         TestKit.shutdownActorSystem(mockActorSystem);
     }
 

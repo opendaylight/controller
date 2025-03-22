@@ -18,6 +18,8 @@ import com.google.common.util.concurrent.MoreExecutors;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.function.Consumer;
+import org.apache.pekko.actor.ActorContext;
+import org.apache.pekko.actor.ActorRef;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,6 +51,11 @@ class ReplicatedLogImplTest {
     private Consumer<ReplicatedLogEntry> mockCallback;
     @Captor
     private ArgumentCaptor<Consumer<Object>> procedureCaptor;
+    @Mock
+    private ActorRef actor;
+    @Mock
+    private ActorContext actorContext;
+
     @TempDir
     private Path stateDir;
 
@@ -57,8 +64,8 @@ class ReplicatedLogImplTest {
 
     @BeforeEach
     public void setup() {
-        context = new RaftActorContextImpl(null, null, new LocalAccess("test", stateDir), Map.of(), configParams,
-            (short) 0, mockPersistence, applyState -> { }, MoreExecutors.directExecutor());
+        context = new RaftActorContextImpl(actor, actorContext, new LocalAccess("test", stateDir), Map.of(),
+            configParams, (short) 0, mockPersistence, applyState -> { }, MoreExecutors.directExecutor());
     }
 
     private void verifyPersist(final Object message) throws Exception {

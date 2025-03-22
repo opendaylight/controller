@@ -30,27 +30,27 @@ import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.spi.TestTermInfoStore;
 
-public class MockRaftActorContext extends RaftActorContextImpl {
-    private ActorSystem system;
-    private RaftPolicy raftPolicy;
-    private Consumer<OutputStream> createSnapshotProcedure = out -> { };
+public final class MockRaftActorContext extends AbstractRaftActorContext {
+    private final ActorSystem system;
+    private final ActorRef actor;
 
-    @NonNullByDefault
-    private static LocalAccess newLocalAccess(final String id) {
-        return new LocalAccess(id, new TestTermInfoStore(1, ""));
-    }
+    private Consumer<OutputStream> createSnapshotProcedure = out -> { };
+    private RaftPolicy raftPolicy;
 
     public MockRaftActorContext(final int payloadVersion) {
-        super(null, null, newLocalAccess("test"), new HashMap<>(), new DefaultConfigParamsImpl(),
-            (short) payloadVersion, TestDataProvider.INSTANCE, applyState -> { }, MoreExecutors.directExecutor());
+        super(newLocalAccess("test"), new HashMap<>(), new DefaultConfigParamsImpl(), (short) payloadVersion,
+            TestDataProvider.INSTANCE, applyState -> { }, MoreExecutors.directExecutor());
+        actor = null;
+        system = null;
         setReplicatedLog(new MockReplicatedLogBuilder().build());
     }
 
     public MockRaftActorContext(final String id, final ActorSystem system, final ActorRef actor,
             final int payloadVersion) {
-        super(actor, null, newLocalAccess(id), new HashMap<>(), new DefaultConfigParamsImpl(),
+        super(newLocalAccess(id), new HashMap<>(), new DefaultConfigParamsImpl(),
             (short) payloadVersion, TestDataProvider.INSTANCE, applyState -> actor.tell(applyState, actor),
             MoreExecutors.directExecutor());
+        this.actor = actor;
         this.system = system;
         initReplicatedLog();
     }
@@ -73,13 +73,19 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         replicatedLog.setLastApplied(replicatedLog.lastIndex());
     }
 
+
     @Override
-    final ActorSelection actorSelection(final String path) {
+    public ActorRef getActor() {
+        // TODO Auto-generated method stub
+        return actor;
+    }
+
+    @Override ActorSelection actorSelection(final String path) {
         return system.actorSelection(path);
     }
 
     @Override
-    public final ActorSystem getActorSystem() {
+    public ActorSystem getActorSystem() {
         return system;
     }
 
@@ -133,6 +139,16 @@ public class MockRaftActorContext extends RaftActorContextImpl {
 
     public void setRaftPolicy(final RaftPolicy raftPolicy) {
         this.raftPolicy = raftPolicy;
+    }
+
+    @Override
+    public void setCurrentBehavior(final RaftActorBehavior behavior) {
+        super.setCurrentBehavior(behavior);
+    }
+
+    @NonNullByDefault
+    private static LocalAccess newLocalAccess(final String id) {
+        return new LocalAccess(id, new TestTermInfoStore(1, ""));
     }
 
     public static class SimpleReplicatedLog extends AbstractReplicatedLog {
@@ -259,10 +275,5 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         public ReplicatedLog build() {
             return mockLog;
         }
-    }
-
-    @Override
-    public void setCurrentBehavior(final RaftActorBehavior behavior) {
-        super.setCurrentBehavior(behavior);
     }
 }
