@@ -531,8 +531,8 @@ public class Follower extends RaftActorBehavior {
             return false;
         }
 
-        final var cluster = context.getCluster();
-        if (cluster.isEmpty()) {
+        final var cluster = context.cluster();
+        if (cluster == null) {
             return false;
         }
 
@@ -543,7 +543,7 @@ public class Follower extends RaftActorBehavior {
 
         final var leaderAddress = leaderActor.anchorPath().address();
 
-        final var state = cluster.orElseThrow().state();
+        final var state = cluster.state();
         final var unreachable = state.getUnreachable();
 
         LOG.debug("{}: Checking for leader {} in the cluster unreachable set {}", logName, leaderAddress,
@@ -575,14 +575,12 @@ public class Follower extends RaftActorBehavior {
     }
 
     private boolean isThisFollowerIsolated() {
-        final var maybeCluster = context.getCluster();
-        if (maybeCluster.isEmpty()) {
+        final var cluster = context.cluster();
+        if (cluster == null) {
             return false;
         }
 
-        final var cluster = maybeCluster.orElseThrow();
         final var selfMember = cluster.selfMember();
-
         final var state = cluster.state();
         final var unreachable = state.getUnreachable();
         final var members = state.getMembers();

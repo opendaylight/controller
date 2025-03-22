@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.raft;
 import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.LongSupplier;
@@ -58,11 +57,11 @@ public interface RaftActorContext {
     @NonNull Executor getExecutor();
 
     /**
-     * The akka Cluster singleton for the actor system if one is configured.
+     * The Pekko {@link Cluster} singleton for the actor system if one is configured.
      *
-     * @return an Optional containing the Cluster instance is present.
+     * @return the Cluster instance, or {@code null}
      */
-    Optional<Cluster> getCluster();
+    @Nullable Cluster cluster();
 
     /**
      * Return current term. This method is equivalent to {@code termInfo().term()}.

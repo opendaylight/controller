@@ -480,12 +480,10 @@ public abstract class RaftActorBehavior implements AutoCloseable {
         }
 
         LOG.debug("{}: Found higher term in RequestVote rpc, verifying whether it's safe to update term.", logName);
-        final var maybeCluster = context.getCluster();
-        if (maybeCluster.isEmpty()) {
+        final var cluster = context.cluster();
+        if (cluster == null) {
             return true;
         }
-
-        final var cluster = maybeCluster.orElseThrow();
 
         final var unreachable = cluster.state().getUnreachable();
         LOG.debug("{}: Cluster state: {}", logName, unreachable);

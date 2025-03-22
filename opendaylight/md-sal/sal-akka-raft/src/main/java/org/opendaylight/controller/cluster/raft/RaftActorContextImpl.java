@@ -150,18 +150,19 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public Optional<Cluster> getCluster() {
-        if (cluster == null) {
+    public final Cluster cluster() {
+        var local = cluster;
+        if (local == null) {
             try {
-                cluster = Optional.of(Cluster.get(getActorSystem()));
+                local = Optional.of(Cluster.get(getActorSystem()));
             } catch (Exception e) {
                 // An exception means there's no cluster configured. This will only happen in unit tests.
                 LOG.debug("{}: Could not obtain Cluster", id, e);
-                cluster = Optional.empty();
+                local = Optional.empty();
             }
+            cluster = local;
         }
-
-        return cluster;
+        return local.orElse(null);
     }
 
     @Override
