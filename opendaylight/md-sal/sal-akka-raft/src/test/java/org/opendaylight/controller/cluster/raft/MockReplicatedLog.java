@@ -39,4 +39,9 @@ final class MockReplicatedLog extends AbstractReplicatedLog {
     public boolean shouldCaptureSnapshot(final long logIndex) {
         return false;
     }
+
+    @Override
+    protected SnapshotManager snapshotManager() {
+        throw new UnsupportedOperationException();
+    }
 }

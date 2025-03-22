@@ -145,7 +145,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         this.raftPolicy = raftPolicy;
     }
 
-    public static class SimpleReplicatedLog extends AbstractReplicatedLog {
+    public static final class SimpleReplicatedLog extends AbstractReplicatedLog {
         public SimpleReplicatedLog() {
             super("", -1L, -1L, List.of());
         }
@@ -179,6 +179,11 @@ public class MockRaftActorContext extends RaftActorContextImpl {
                 callback.accept(replicatedLogEntry);
             }
             return true;
+        }
+
+        @Override
+        protected SnapshotManager snapshotManager() {
+            throw new UnsupportedOperationException();
         }
     }
 

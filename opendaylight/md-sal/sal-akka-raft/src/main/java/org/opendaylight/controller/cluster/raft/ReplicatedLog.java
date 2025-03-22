@@ -7,10 +7,12 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import com.google.common.annotations.Beta;
 import java.util.List;
 import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
 
 /**
@@ -248,4 +250,7 @@ public interface ReplicatedLog {
      * @return true if a snapshot should be captured, false otherwise
      */
     boolean shouldCaptureSnapshot(long logIndex);
+
+    @Beta
+    @NonNull CaptureSnapshot newCaptureSnapshot(final long replicatedToAllIndex, boolean mandatoryTrim);
 }

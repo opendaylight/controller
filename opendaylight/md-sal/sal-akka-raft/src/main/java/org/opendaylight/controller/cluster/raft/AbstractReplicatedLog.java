@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.ImmutableRaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
 import org.slf4j.Logger;
@@ -287,6 +289,14 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
         snapshotTerm = previousSnapshotTerm;
         previousSnapshotTerm = -1;
     }
+
+    @Override
+    public final CaptureSnapshot newCaptureSnapshot(final long replicatedToAllIndex, final boolean mandatoryTrim) {
+        return snapshotManager().newCaptureSnapshot(lastMeta(), replicatedToAllIndex, mandatoryTrim);
+    }
+
+    @Beta
+    protected abstract @NonNull SnapshotManager snapshotManager();
 
     @VisibleForTesting
     ReplicatedLogEntry getAtPhysicalIndex(final int index) {

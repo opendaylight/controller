@@ -117,6 +117,11 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog {
         return true;
     }
 
+    @Override
+    protected SnapshotManager snapshotManager() {
+        return context.getSnapshotManager();
+    }
+
     private <T extends ReplicatedLogEntry> void persistCallback(final @NonNull T persistedLogEntry,
             final @Nullable Consumer<T> callback) {
         context.getExecutor().execute(() -> syncPersistCallback(persistedLogEntry, callback));
