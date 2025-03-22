@@ -5,15 +5,13 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft.base.messages;
 
-import java.util.Collections;
 import java.util.List;
 import org.apache.pekko.dispatch.ControlMessage;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 
-public class CaptureSnapshot implements ControlMessage {
+public final class CaptureSnapshot implements ControlMessage {
     private final long lastAppliedIndex;
     private final long lastAppliedTerm;
     private final long lastIndex;
@@ -23,17 +21,16 @@ public class CaptureSnapshot implements ControlMessage {
     private final List<ReplicatedLogEntry> unAppliedEntries;
     private final boolean mandatoryTrim;
 
-    public CaptureSnapshot(long lastIndex, long lastTerm, long lastAppliedIndex,
-            long lastAppliedTerm, long replicatedToAllIndex, long replicatedToAllTerm,
-            List<ReplicatedLogEntry> unAppliedEntries, boolean mandatoryTrim) {
+    public CaptureSnapshot(final long lastIndex, final long lastTerm, final long lastAppliedIndex,
+            final long lastAppliedTerm, final long replicatedToAllIndex, final long replicatedToAllTerm,
+            final List<ReplicatedLogEntry> unAppliedEntries, final boolean mandatoryTrim) {
         this.lastIndex = lastIndex;
         this.lastTerm = lastTerm;
         this.lastAppliedIndex = lastAppliedIndex;
         this.lastAppliedTerm = lastAppliedTerm;
         this.replicatedToAllIndex = replicatedToAllIndex;
         this.replicatedToAllTerm = replicatedToAllTerm;
-        this.unAppliedEntries = unAppliedEntries != null ? unAppliedEntries :
-            Collections.<ReplicatedLogEntry>emptyList();
+        this.unAppliedEntries = unAppliedEntries != null ? unAppliedEntries : List.of();
         this.mandatoryTrim = mandatoryTrim;
     }
 
@@ -81,6 +78,4 @@ public class CaptureSnapshot implements ControlMessage {
                 + ", unAppliedEntries size=" + unAppliedEntries.size()
                 + ", mandatoryTrim=" + mandatoryTrim + "]";
     }
-
-
 }
