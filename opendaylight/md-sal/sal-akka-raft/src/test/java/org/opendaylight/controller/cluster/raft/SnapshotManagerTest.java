@@ -38,8 +38,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStreamFactory;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
-import org.opendaylight.controller.cluster.raft.base.messages.SendInstallSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.SnapshotComplete;
+import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader.SendInstallSnapshot;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.ByteState;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
@@ -351,8 +351,8 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         SendInstallSnapshot sendInstallSnapshot = sendInstallSnapshotArgumentCaptor.getValue();
 
-        assertEquals("state", snapshotState, sendInstallSnapshot.getSnapshot().getState());
-        assertArrayEquals("state", snapshotState.bytes(), sendInstallSnapshot.getSnapshotBytes().read());
+        assertEquals("state", snapshotState, sendInstallSnapshot.snapshot().getState());
+        assertArrayEquals("state", snapshotState.bytes(), sendInstallSnapshot.bytes().read());
     }
 
     @Test

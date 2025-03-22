@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.Cancellable;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.io.SharedFileBackedOutputStream;
 import org.opendaylight.controller.cluster.messaging.MessageSlicer;
@@ -42,7 +43,6 @@ import org.opendaylight.controller.cluster.raft.VotingState;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
 import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
-import org.opendaylight.controller.cluster.raft.base.messages.SendInstallSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.IdentifiablePayload;
@@ -63,23 +63,31 @@ import org.slf4j.LoggerFactory;
  *
  * <p>Leaders:
  * <ul>
- * <li> Upon election: send initial empty AppendEntries RPCs
- * (heartbeat) to each server; repeat during idle periods to
- * prevent election timeouts (§5.2)
- * <li> If command received from client: append entry to local log,
- * respond after entry applied to state machine (§5.3)
- * <li> If last log index ≥ nextIndex for a follower: send
- * AppendEntries RPC with log entries starting at nextIndex
- * <li> If successful: update nextIndex and matchIndex for
- * follower (§5.3)
- * <li> If AppendEntries fails because of log inconsistency:
- * decrement nextIndex and retry (§5.3)
- * <li> If there exists an N such that N &gt; commitIndex, a majority
- * of matchIndex[i] ≥ N, and log[N].term == currentTerm:
- * set commitIndex = N (§5.3, §5.4).
+ *   <li>Upon election: send initial empty {@linkplain AppendEntries} RPCs (heartbeat) to each server; repeat during
+ *       idle periods to prevent election timeouts (§5.2)</li>
+ *   <li>If command received from client: append entry to local log, respond after entry applied to state machine (§5.3)
+ *   </li>
+ *   <li>If last log index ≥ nextIndex for a follower: send {@linkplain AppendEntries} RPC with log entries starting at
+ *       nextIndex</li>
+ *   <li>If successful: update nextIndex and matchIndex for follower (§5.3)</li>
+ *   <li>If {@linkplain AppendEntries} fails because of log inconsistency: decrement nextIndex and retry (§5.3)</li>
+ *   <li>If there exists an N such that {@code N > commitIndex}, a majority of {@code matchIndex[i] ≥ N}, and
+ *       {@code log[N].term == currentTerm}: set {@code commitIndex = N} (§5.3, §5.4)</li>
  * </ul>
  */
 public abstract sealed class AbstractLeader extends RaftActorBehavior permits IsolatedLeader, Leader, PreLeader {
+    /**
+     * Internal message sent from the SnapshotManager to its associated leader when a snapshot capture is complete to
+     * prompt the leader to install the snapshot on its followers as needed.
+     */
+    @NonNullByDefault
+    public record SendInstallSnapshot(Snapshot snapshot, ByteSource bytes) {
+        public SendInstallSnapshot {
+            requireNonNull(snapshot);
+            requireNonNull(bytes);
+        }
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(AbstractLeader.class);
 
     private final Map<String, FollowerLogInformation> followerToLog = new HashMap<>();
@@ -154,10 +162,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
     }
 
     public void addFollower(final String followerId) {
-        FollowerLogInformation followerLogInformation = new FollowerLogInformation(context.getPeerInfo(followerId),
-            context);
-        followerToLog.put(followerId, followerLogInformation);
-
+        followerToLog.put(followerId, new FollowerLogInformation(context.getPeerInfo(followerId), context));
         if (heartbeatSchedule == null) {
             scheduleHeartBeat(context.getConfigParams().getHeartBeatInterval());
         }
@@ -531,10 +536,8 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
             beforeSendHeartbeat();
             sendHeartBeat();
             scheduleHeartBeat(context.getConfigParams().getHeartBeatInterval());
-        } else if (message instanceof SendInstallSnapshot sendInstallSnapshot) {
-            setSnapshotHolder(new SnapshotHolder(sendInstallSnapshot.getSnapshot(),
-                sendInstallSnapshot.getSnapshotBytes()));
-            sendInstallSnapshot();
+        } else if (message instanceof SendInstallSnapshot(var snapshot, var bytes)) {
+            sendInstallSnapshot(snapshot, bytes);
         } else if (message instanceof Replicate replicate) {
             replicate(replicate);
         } else if (message instanceof InstallSnapshotReply installSnapshotReply) {
@@ -913,7 +916,9 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         return nextIndex == -1 || !replLog.isPresent(nextIndex) && replLog.isInSnapshot(nextIndex);
     }
 
-    private void sendInstallSnapshot() {
+    private void sendInstallSnapshot(final Snapshot snapshot, final ByteSource bytes) {
+        snapshotHolder = Optional.of(new SnapshotHolder(snapshot, bytes));
+
         LOG.debug("{}: sendInstallSnapshot", logName);
         for (var entry : followerToLog.entrySet()) {
             final var followerId = entry.getKey();
