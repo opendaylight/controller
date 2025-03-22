@@ -77,7 +77,7 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
 
     @Override
     public final long lastIndex() {
-        final var last = last();
+        final var last = lastMeta();
         // it can happen that after snapshot, all the entries of the journal are trimmed till lastApplied,
         // so lastIndex = snapshotIndex
         return last != null ? last.index() : snapshotIndex;
@@ -85,7 +85,7 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
 
     @Override
     public final long lastTerm() {
-        final var last = last();
+        final var last = lastMeta();
         // it can happen that after snapshot, all the entries of the journal are trimmed till lastApplied,
         // so lastTerm = snapshotTerm
         return last != null ? last.term() : snapshotTerm;
@@ -131,7 +131,7 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
     }
 
     @Override
-    public boolean append(final ReplicatedLogEntry replicatedLogEntry) {
+    public final boolean append(final ReplicatedLogEntry replicatedLogEntry) {
         final var entryIndex = replicatedLogEntry.index();
         final var lastIndex = lastIndex();
         if (entryIndex > lastIndex) {

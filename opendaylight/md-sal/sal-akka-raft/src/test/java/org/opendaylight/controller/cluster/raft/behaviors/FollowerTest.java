@@ -583,7 +583,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         assertSame(follower, newBehavior);
 
-        assertEquals("Next index", 5, log.last().index() + 1);
+        assertEquals("Next index", 4, log.lastIndex());
         assertEquals("Entry 3", entries.get(0), log.get(3));
         assertEquals("Entry 4", entries.get(1), log.get(4));
 
@@ -632,11 +632,10 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         assertSame(follower, newBehavior);
 
-        // The entry at index 2 will be found out-of-sync with the leader
-        // and will be removed
+        // The entry at index 2 will be found out-of-sync with the leader and will be removed
         // Then the two new entries will be added to the log
         // Thus making the log to have 4 entries
-        assertEquals("Next index", 4, log.last().index() + 1);
+        assertEquals("Next index", 3, log.lastIndex());
         //assertEquals("Entry 2", entries.get(0), log.get(2));
 
         assertEquals("Entry 1 data", "one", log.get(1).getData().toString());
@@ -736,7 +735,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         follower.handleMessage(leaderActor, new AppendEntries(1, "leader", 0, 1, entries, 1, -1, (short)0));
 
-        assertEquals("Next index", 2, log.last().index() + 1);
+        assertEquals("Next index", 1, log.lastIndex());
         assertEquals("Entry 1", entries.get(0), log.get(1));
 
         expectAndVerifyAppendEntriesReply(1, true, "follower", 1, 1);
