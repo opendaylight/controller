@@ -605,9 +605,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leader.markFollowerActive(FOLLOWER_ID);
 
         ByteString bs = toByteString(Map.of("1", "A", "2", "B", "3", "C"));
-        leader.setSnapshotHolder(new SnapshotHolder(Snapshot.create(ByteState.of(bs.toByteArray()),
-                List.of(), commitIndex, snapshotTerm, commitIndex, snapshotTerm, new TermInfo(-1), null),
-                ByteSource.wrap(bs.toByteArray())));
+        leader.setSnapshotHolder(new SnapshotHolder(snapshotTerm, commitIndex, ByteSource.wrap(bs.toByteArray())));
         LeaderInstallSnapshotState fts = new LeaderInstallSnapshotState(
                 actorContext.getConfigParams().getMaximumMessageSliceSize(), leader.logName);
         fts.setSnapshotBytes(ByteSource.wrap(bs.toByteArray()));
@@ -961,9 +959,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         actorContext.setTermInfo(new TermInfo(currentTerm, leaderActor.path().toString()));
 
         ByteString bs = toByteString(leadersSnapshot);
-        leader.setSnapshotHolder(new SnapshotHolder(Snapshot.create(ByteState.of(bs.toByteArray()), List.of(),
-                commitIndex, snapshotTerm, commitIndex, snapshotTerm, new TermInfo(-1), null),
-                ByteSource.wrap(bs.toByteArray())));
+        leader.setSnapshotHolder(new SnapshotHolder(snapshotTerm, commitIndex, ByteSource.wrap(bs.toByteArray())));
         LeaderInstallSnapshotState fts = new LeaderInstallSnapshotState(
                 actorContext.getConfigParams().getMaximumMessageSliceSize(), leader.logName);
         fts.setSnapshotBytes(ByteSource.wrap(bs.toByteArray()));

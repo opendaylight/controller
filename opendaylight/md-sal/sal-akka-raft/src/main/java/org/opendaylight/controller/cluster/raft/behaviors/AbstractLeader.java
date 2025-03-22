@@ -88,6 +88,14 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         }
     }
 
+    @VisibleForTesting
+    @NonNullByDefault
+    record SnapshotHolder(long lastIncludedTerm, long lastIncludedIndex, ByteSource snapshotBytes) {
+        SnapshotHolder {
+            requireNonNull(snapshotBytes);
+        }
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(AbstractLeader.class);
 
     private final Map<String, FollowerLogInformation> followerToLog = new HashMap<>();
@@ -198,12 +206,12 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
     }
 
     @VisibleForTesting
-    void setSnapshotHolder(final @Nullable SnapshotHolder snapshotHolder) {
+    final void setSnapshotHolder(final @Nullable SnapshotHolder snapshotHolder) {
         this.snapshotHolder = Optional.ofNullable(snapshotHolder);
     }
 
     @VisibleForTesting
-    boolean hasSnapshot() {
+    final boolean hasSnapshot() {
         return snapshotHolder.isPresent();
     }
 
@@ -603,7 +611,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         }
 
         // this was the last chunk reply
-        final long followerMatchIndex = snapshotHolder.orElseThrow().getLastIncludedIndex();
+        final long followerMatchIndex = snapshotHolder.orElseThrow().lastIncludedIndex;
         followerLogInfo.setMatchIndex(followerMatchIndex);
         followerLogInfo.setNextIndex(followerMatchIndex + 1);
         followerLogInfo.clearLeaderInstallSnapshotState();
@@ -614,7 +622,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
 
         if (!anyFollowersInstallingSnapshot()) {
             // once there are no pending followers receiving snapshots we can remove snapshot from the memory
-            setSnapshotHolder(null);
+            snapshotHolder = Optional.empty();
         }
 
         if (context.getPeerInfo(followerId).getVotingState() == VotingState.VOTING_NOT_INITIALIZED) {
@@ -920,7 +928,8 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
     }
 
     private void sendInstallSnapshot(final Snapshot snapshot, final ByteSource bytes) {
-        snapshotHolder = Optional.of(new SnapshotHolder(snapshot, bytes));
+        snapshotHolder = Optional.of(new SnapshotHolder(snapshot.getLastAppliedTerm(), snapshot.getLastAppliedIndex(),
+            bytes));
 
         LOG.debug("{}: sendInstallSnapshot", logName);
         for (var entry : followerToLog.entrySet()) {
@@ -960,7 +969,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         final byte[] data;
         try {
             // Ensure the snapshot bytes are set - this is a no-op.
-            installSnapshotState.setSnapshotBytes(snapshot.getSnapshotBytes());
+            installSnapshotState.setSnapshotBytes(snapshot.snapshotBytes);
 
             if (installSnapshotState.canSendNextChunk()) {
                 data = installSnapshotState.getNextChunk();
@@ -987,7 +996,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         followerActor.tell(
             new InstallSnapshot(currentTerm(), memberId(),
                 // snapshot term/index inforation
-                snapshot.getLastIncludedIndex(), snapshot.getLastIncludedTerm(),
+                snapshot.lastIncludedIndex, snapshot.lastIncludedTerm,
                 // this chunk and its indexing info and previous hash code
                 data, chunkIndex, totalChunks, OptionalInt.of(installSnapshotState.getLastChunkHashCode()),
                 // server configuration, if present
@@ -1105,29 +1114,5 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
     @VisibleForTesting
     public int followerLogSize() {
         return followerToLog.size();
-    }
-
-    static class SnapshotHolder {
-        private final long lastIncludedTerm;
-        private final long lastIncludedIndex;
-        private final ByteSource snapshotBytes;
-
-        SnapshotHolder(final Snapshot snapshot, final ByteSource snapshotBytes) {
-            lastIncludedTerm = snapshot.getLastAppliedTerm();
-            lastIncludedIndex = snapshot.getLastAppliedIndex();
-            this.snapshotBytes = snapshotBytes;
-        }
-
-        long getLastIncludedTerm() {
-            return lastIncludedTerm;
-        }
-
-        long getLastIncludedIndex() {
-            return lastIncludedIndex;
-        }
-
-        ByteSource getSnapshotBytes() {
-            return snapshotBytes;
-        }
     }
 }
