@@ -226,12 +226,13 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
             return;
         }
 
+        final var replLog = context.getReplicatedLog();
         final long lastActivityNanos = followerLogInformation.nanosSinceLastActivity();
         if (lastActivityNanos > context.getConfigParams().getElectionTimeOutInterval().toNanos()) {
             LOG.warn("{} : handleAppendEntriesReply delayed beyond election timeout, "
                     + "appendEntriesReply : {}, timeSinceLastActivity : {}, lastApplied : {}, commitIndex : {}",
                     logName, appendEntriesReply, TimeUnit.NANOSECONDS.toMillis(lastActivityNanos),
-                    context.getLastApplied(), context.getCommitIndex());
+                    replLog.getLastApplied(), replLog.getCommitIndex());
         }
 
         followerLogInformation.markFollowerActive();
@@ -241,7 +242,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
 
         long followerLastLogIndex = appendEntriesReply.getLogLastIndex();
         boolean updated = false;
-        if (appendEntriesReply.getLogLastIndex() > context.getReplicatedLog().lastIndex()) {
+        if (appendEntriesReply.getLogLastIndex() > replLog.lastIndex()) {
             // The follower's log is actually ahead of the leader's log. Normally this doesn't happen
             // in raft as a node cannot become leader if it's log is behind another's. However, the
             // non-voting semantics deviate a bit from raft. Only voting members participate in
@@ -255,7 +256,6 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
             // snapshot. It's also possible that the follower's last log index is behind the leader's.
             // However in this case the log terms won't match and the logs will conflict - this is handled
             // elsewhere.
-            final var replLog = context.getReplicatedLog();
             LOG.info("{}: handleAppendEntriesReply: follower {} lastIndex {} is ahead of our lastIndex {} "
                     + "(snapshotIndex {}, snapshotTerm {}) - forcing install snaphot", logName,
                     followerLogInformation.getId(), appendEntriesReply.getLogLastIndex(),
@@ -292,8 +292,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         } else {
             LOG.info("{}: handleAppendEntriesReply - received unsuccessful reply: {}, leader snapshotIndex: {}, "
                     + "snapshotTerm: {}, replicatedToAllIndex: {}", logName, appendEntriesReply,
-                    context.getReplicatedLog().getSnapshotIndex(), context.getReplicatedLog().getSnapshotTerm(),
-                    getReplicatedToAllIndex());
+                    replLog.getSnapshotIndex(), replLog.getSnapshotTerm(), getReplicatedToAllIndex());
 
             long followersLastLogTermInLeadersLogOrSnapshot = getLogEntryOrSnapshotTerm(followerLastLogIndex);
             if (appendEntriesReply.isForceInstallSnapshot()) {
@@ -328,7 +327,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
 
         if (LOG.isTraceEnabled()) {
             LOG.trace("{}: handleAppendEntriesReply from {}: commitIndex: {}, lastAppliedIndex: {}, currentTerm: {}",
-                    logName, followerId, context.getCommitIndex(), context.getLastApplied(), currentTerm());
+                    logName, followerId, replLog.getCommitIndex(), replLog.getLastApplied(), currentTerm());
         }
 
         possiblyUpdateCommitIndex();
@@ -435,7 +434,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         // lastApplied if there are no followers, so that we keep clearing the log for single-node
         // we would delete the in-mem log from that index on, in-order to minimize mem usage
         // we would also share this info thru AE with the followers so that they can delete their log entries as well.
-        long minReplicatedToAllIndex = followerToLog.isEmpty() ? context.getLastApplied() : Long.MAX_VALUE;
+        long minReplicatedToAllIndex = followerToLog.isEmpty() ? replicatedLog().getLastApplied() : Long.MAX_VALUE;
         for (var info : followerToLog.values()) {
             minReplicatedToAllIndex = Math.min(minReplicatedToAllIndex, info.getMatchIndex());
         }
@@ -644,7 +643,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
                 || context.getRaftPolicy().applyModificationToStateBeforeConsensus();
 
         if (applyModificationToState) {
-            context.setCommitIndex(logIndex);
+            context.getReplicatedLog().setCommitIndex(logIndex);
             applyLogToStateMachine(logIndex);
         }
 
@@ -693,15 +692,17 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
                     } else if (installSnapshotState.canSendNextChunk()) {
                         sendSnapshotChunk(followerActor, followerLogInformation);
                     }
-                } else if (sendHeartbeat || followerLogInformation.hasStaleCommitIndex(context.getCommitIndex())) {
+                } else if (sendHeartbeat
+                    || followerLogInformation.hasStaleCommitIndex(replicatedLog().getCommitIndex())) {
                     // we send a heartbeat even if we have not received a reply for the last chunk
                     sendAppendEntries = true;
                 }
             } else if (followerLogInformation.isLogEntrySlicingInProgress()) {
                 sendAppendEntries = sendHeartbeat;
             } else {
-                long leaderLastIndex = context.getReplicatedLog().lastIndex();
-                long leaderSnapShotIndex = context.getReplicatedLog().getSnapshotIndex();
+                final var replLog = replicatedLog();
+                long leaderLastIndex = replLog.lastIndex();
+                long leaderSnapShotIndex = replLog.getSnapshotIndex();
 
                 if (!isHeartbeat && LOG.isDebugEnabled() || LOG.isTraceEnabled()) {
                     LOG.debug("{}: Checking sendAppendEntries for follower {}: active: {}, followerNextIndex: {}, "
@@ -709,11 +710,11 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
                             followerNextIndex, leaderLastIndex, leaderSnapShotIndex);
                 }
 
-                if (isFollowerActive && context.getReplicatedLog().isPresent(followerNextIndex)) {
+                if (isFollowerActive && replLog.isPresent(followerNextIndex)) {
                     LOG.debug("{}: sendAppendEntries: {} is present for follower {}", logName, followerNextIndex,
                         followerId);
 
-                    if (followerLogInformation.okToReplicate(context.getCommitIndex())) {
+                    if (followerLogInformation.okToReplicate(replLog.getCommitIndex())) {
                         entries = getEntriesToSend(followerLogInformation, followerActor);
                         sendAppendEntries = true;
                     }
@@ -726,7 +727,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
                     // Send heartbeat to follower whenever install snapshot is initiated.
                     sendAppendEntries = true;
 
-                    final var replLogSize = context.getReplicatedLog().size();
+                    final var replLogSize = replLog.size();
                     if (canInstallSnapshot(followerNextIndex)) {
                         LOG.info("{}: Initiating install snapshot to follower {}: follower nextIndex: {}, leader "
                                 + "snapshotIndex: {}, leader lastIndex: {}, leader log size: {}", logName, followerId,
@@ -741,7 +742,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
                                 followerId, followerNextIndex, leaderSnapShotIndex, leaderLastIndex, replLogSize);
                     }
 
-                } else if (sendHeartbeat || followerLogInformation.hasStaleCommitIndex(context.getCommitIndex())) {
+                } else if (sendHeartbeat || followerLogInformation.hasStaleCommitIndex(replLog.getCommitIndex())) {
                     // we send an AppendEntries, even if the follower is inactive
                     // in-order to update the followers timestamp, in case it becomes active again
                     sendAppendEntries = true;
@@ -759,19 +760,21 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
             final ActorSelection followerActor) {
         // Try to get all the entries in the journal but not exceeding the max data size for a single AppendEntries
         // message.
-        int maxEntries = (int) context.getReplicatedLog().size();
+        final var replLog = replicatedLog();
+
+        int maxEntries = (int) replLog.size();
         final int maxDataSize = context.getConfigParams().getMaximumMessageSliceSize();
         final long followerNextIndex = followerLogInfo.getNextIndex();
-        final var entries = context.getReplicatedLog().getFrom(followerNextIndex, maxEntries, maxDataSize);
+        final var entries = replLog.getFrom(followerNextIndex, maxEntries, maxDataSize);
 
         // If the first entry's size exceeds the max data size threshold, it will be returned from the call above. If
         // that is the case, then we need to slice it into smaller chunks.
-        if (entries.size() != 1 || entries.get(0).getData().serializedSize() <= maxDataSize) {
+        if (entries.size() != 1 || entries.getFirst().getData().serializedSize() <= maxDataSize) {
             // Don't need to slice.
             return entries;
         }
 
-        final var firstEntry = entries.get(0);
+        final var firstEntry = entries.getFirst();
         LOG.debug("{}: Log entry size {} exceeds max payload size {}", logName, firstEntry.getData().size(),
                 maxDataSize);
 
@@ -784,7 +787,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
 
             final var appendEntries = new AppendEntries(currentTerm(), memberId(),
                     getLogEntryIndex(followerNextIndex - 1), getLogEntryTerm(followerNextIndex - 1), entries,
-                    context.getCommitIndex(), getReplicatedToAllIndex(), context.getPayloadVersion());
+                    replLog.getCommitIndex(), getReplicatedToAllIndex(), context.getPayloadVersion());
 
             LOG.debug("{}: Serializing {} for slicing for follower {}", logName, appendEntries,
                     followerLogInfo.getId());
@@ -838,7 +841,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         //       need to send an empty AppendEntries to prevent election.
         boolean isInstallingSnaphot = followerLogInformation.getInstallSnapshotState() != null;
         long leaderCommitIndex = isInstallingSnaphot || followerLogInformation.isLogEntrySlicingInProgress()
-                || !followerLogInformation.isFollowerActive() ? -1 : context.getCommitIndex();
+                || !followerLogInformation.isFollowerActive() ? -1 : replicatedLog().getCommitIndex();
 
         long followerNextIndex = followerLogInformation.getNextIndex();
         final var appendEntries = new AppendEntries(currentTerm(), memberId(),
@@ -886,7 +889,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         }
 
         final var captureInitiated = context.getSnapshotManager()
-            .captureToInstall(context.getReplicatedLog().lastMeta(), getReplicatedToAllIndex(), followerId);
+            .captureToInstall(replicatedLog().lastMeta(), getReplicatedToAllIndex(), followerId);
         if (captureInitiated) {
             followerLogInfo.setLeaderInstallSnapshotState(new LeaderInstallSnapshotState(
                 context.getConfigParams().getMaximumMessageSliceSize(), logName));
@@ -898,7 +901,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         // If the follower's nextIndex is -1 then we might as well send it a snapshot
         // Otherwise send it a snapshot only if the nextIndex is not present in the log but is present
         // in the snapshot
-        final var replLog = context.getReplicatedLog();
+        final var replLog = replicatedLog();
         return nextIndex == -1 || !replLog.isPresent(nextIndex) && replLog.isInSnapshot(nextIndex);
     }
 

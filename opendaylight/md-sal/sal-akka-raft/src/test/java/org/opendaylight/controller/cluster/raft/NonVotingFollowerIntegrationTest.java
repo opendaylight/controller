@@ -61,10 +61,13 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyState.class, 3);
         MessageCollectorActor.expectMatching(follower1CollectorActor, ApplyState.class, 3);
 
-        assertEquals("Leader journal lastIndex", 2, leaderContext.getReplicatedLog().lastIndex());
-        assertEquals("Leader commit index", 2, leaderContext.getCommitIndex());
-        assertEquals("Follower journal lastIndex", 2, follower1Context.getReplicatedLog().lastIndex());
-        assertEquals("Follower commit index", 2, follower1Context.getCommitIndex());
+        final var leaderLog = leaderContext.getReplicatedLog();
+        assertEquals("Leader journal lastIndex", 2, leaderLog.lastIndex());
+        assertEquals("Leader commit index", 2, leaderLog.getCommitIndex());
+
+        final var follower1log = follower1Context.getReplicatedLog();
+        assertEquals("Follower journal lastIndex", 2, follower1log.lastIndex());
+        assertEquals("Follower commit index", 2, follower1log.getCommitIndex());
         assertEquals("Follower applied state", expSnapshotState, followerInstance.getState());
 
         // Persisted journal should only contain the ServerConfigurationPayload and the original UpdateElectionTerm
@@ -72,7 +75,7 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
 
         // Restart the leader
 
-        killActor(leaderActor);
+        killActor(leaderActor);follower1Context
         MessageCollectorActor.clearMessages(follower1CollectorActor);
 
         createNewLeaderActor();

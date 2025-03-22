@@ -144,11 +144,11 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
     public void testAddServerWithExistingFollower() {
         LOG.info("testAddServerWithExistingFollower starting");
         setupNewFollower();
-        RaftActorContextImpl followerActorContext = newFollowerContext(FOLLOWER_ID, followerActor);
-        followerActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 3, 1)
-            .build());
-        followerActorContext.setCommitIndex(2);
-        followerActorContext.setLastApplied(2);
+        final var followerActorContext = newFollowerContext(FOLLOWER_ID, followerActor);
+        var followerLog = new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 3, 1).build();
+        followerLog.setCommitIndex(2);
+        followerLog.setLastApplied(2);
+        followerActorContext.setReplicatedLog(followerLog);
 
         Follower follower = new Follower(followerActorContext);
         followerActor.underlyingActor().setBehavior(follower);
@@ -183,10 +183,11 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         // Verify ServerConfigurationPayload entry in leader's log
 
         expectFirstMatching(leaderCollectorActor, ApplyState.class);
-        RaftActorContext leaderActorContext = leaderRaftActor.getRaftActorContext();
-        assertEquals("Leader journal last index", 3, leaderActorContext.getReplicatedLog().lastIndex());
-        assertEquals("Leader commit index", 3, leaderActorContext.getCommitIndex());
-        assertEquals("Leader last applied index", 3, leaderActorContext.getLastApplied());
+        final var leaderActorContext = leaderRaftActor.getRaftActorContext();
+        final var leaderLog = leaderActorContext.getReplicatedLog();
+        assertEquals("Leader journal last index", 3, leaderLog.lastIndex());
+        assertEquals("Leader commit index", 3, leaderLog.getCommitIndex());
+        assertEquals("Leader last applied index", 3, leaderLog.getLastApplied());
         verifyServerConfigurationPayloadEntry(leaderActorContext.getReplicatedLog(), votingServer(LEADER_ID),
                 votingServer(FOLLOWER_ID), votingServer(NEW_SERVER_ID));
 
@@ -208,10 +209,13 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         assertEquals("New follower peers", Set.of(LEADER_ID, FOLLOWER_ID), newFollowerActorContext.getPeerIds());
 
-        assertEquals("Follower commit index", 3, followerActorContext.getCommitIndex());
-        assertEquals("Follower last applied index", 3, followerActorContext.getLastApplied());
-        assertEquals("New follower commit index", 3, newFollowerActorContext.getCommitIndex());
-        assertEquals("New follower last applied index", 3, newFollowerActorContext.getLastApplied());
+        followerLog = followerActorContext.getReplicatedLog();
+        assertEquals("Follower commit index", 3, followerLog.getCommitIndex());
+        assertEquals("Follower last applied index", 3, followerLog.getLastApplied());
+
+        final var newFollowerLog = newFollowerActorContext.getReplicatedLog();
+        assertEquals("New follower commit index", 3, newFollowerLog.getCommitIndex());
+        assertEquals("New follower last applied index", 3, newFollowerLog.getLastApplied());
 
         assertEquals("Leader persisted ReplicatedLogImplEntry entries", 0,
                 InMemoryJournal.get(LEADER_ID, SimpleReplicatedLogEntry.class).size());
@@ -232,10 +236,10 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         setupNewFollower();
         RaftActorContext initialActorContext = new MockRaftActorContext();
-        initialActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder()
-            .createEntries(0, 2, 1).build());
-        initialActorContext.setCommitIndex(1);
-        initialActorContext.setLastApplied(1);
+        final var initialLog = new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 2, 1).build();
+        initialLog.setCommitIndex(1);
+        initialLog.setLastApplied(1);
+        initialActorContext.setReplicatedLog(initialLog);
 
         TestActorRef<MockLeaderRaftActor> leaderActor = actorFactory.createTestActor(
                 MockLeaderRaftActor.props(stateDir(), Map.of(), initialActorContext)
@@ -267,11 +271,11 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         // Verify ServerConfigurationPayload entry in leader's log
 
         expectFirstMatching(leaderCollectorActor, ApplyState.class);
-        assertEquals("Leader journal last index", 2, leaderActorContext.getReplicatedLog().lastIndex());
-        assertEquals("Leader commit index", 2, leaderActorContext.getCommitIndex());
-        assertEquals("Leader last applied index", 2, leaderActorContext.getLastApplied());
-        verifyServerConfigurationPayloadEntry(leaderActorContext.getReplicatedLog(), votingServer(LEADER_ID),
-                votingServer(NEW_SERVER_ID));
+        final var leaderLog = leaderActorContext.getReplicatedLog();
+        assertEquals("Leader journal last index", 2, leaderLog.lastIndex());
+        assertEquals("Leader commit index", 2, leaderLog.getCommitIndex());
+        assertEquals("Leader last applied index", 2, leaderLog.getLastApplied());
+        verifyServerConfigurationPayloadEntry(leaderLog, votingServer(LEADER_ID), votingServer(NEW_SERVER_ID));
 
         // Verify ServerConfigurationPayload entry in the new follower
 
@@ -300,7 +304,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
                 actorFactory.generateActorId(LEADER_ID));
 
         MockLeaderRaftActor leaderRaftActor = leaderActor.underlyingActor();
-        final RaftActorContext leaderActorContext = leaderRaftActor.getRaftActorContext();
+        final var leaderActorContext = leaderRaftActor.getRaftActorContext();
 
         final ActorRef leaderCollectorActor = newLeaderCollectorActor(leaderRaftActor);
 
@@ -314,11 +318,11 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         expectFirstMatching(leaderCollectorActor, ApplyState.class);
 
-        assertEquals("Leader journal last index", 0, leaderActorContext.getReplicatedLog().lastIndex());
-        assertEquals("Leader commit index", 0, leaderActorContext.getCommitIndex());
-        assertEquals("Leader last applied index", 0, leaderActorContext.getLastApplied());
-        verifyServerConfigurationPayloadEntry(leaderActorContext.getReplicatedLog(), votingServer(LEADER_ID),
-                nonVotingServer(NEW_SERVER_ID));
+        var leaderLog = leaderActorContext.getReplicatedLog();
+        assertEquals("Leader journal last index", 0, leaderLog.lastIndex());
+        assertEquals("Leader commit index", 0, leaderLog.getCommitIndex());
+        assertEquals("Leader last applied index", 0, leaderLog.getLastApplied());
+        verifyServerConfigurationPayloadEntry(leaderLog, votingServer(LEADER_ID), nonVotingServer(NEW_SERVER_ID));
 
         // Verify ServerConfigurationPayload entry in the new follower
 
@@ -348,10 +352,11 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         assertEquals("getLeaderHint", Optional.of(LEADER_ID), addServerReply.getLeaderHint());
 
         expectFirstMatching(leaderCollectorActor, ApplyState.class);
-        assertEquals("Leader journal last index", 1, leaderActorContext.getReplicatedLog().lastIndex());
-        assertEquals("Leader commit index", 1, leaderActorContext.getCommitIndex());
-        assertEquals("Leader last applied index", 1, leaderActorContext.getLastApplied());
-        verifyServerConfigurationPayloadEntry(leaderActorContext.getReplicatedLog(),
+        leaderLog = leaderActorContext.getReplicatedLog();
+        assertEquals("Leader journal last index", 1, leaderLog.lastIndex());
+        assertEquals("Leader commit index", 1, leaderLog.getCommitIndex());
+        assertEquals("Leader last applied index", 1, leaderLog.getLastApplied());
+        verifyServerConfigurationPayloadEntry(leaderLog,
                 votingServer(LEADER_ID), nonVotingServer(NEW_SERVER_ID), nonVotingServer(NEW_SERVER_ID2));
 
         LOG.info("testAddServersAsNonVoting ending");
@@ -405,10 +410,11 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         // Verify ServerConfigurationPayload entries in leader's log
 
         expectMatching(leaderCollectorActor, ApplyState.class, 2);
-        assertEquals("Leader journal last index", 1, leaderActorContext.getReplicatedLog().lastIndex());
-        assertEquals("Leader commit index", 1, leaderActorContext.getCommitIndex());
-        assertEquals("Leader last applied index", 1, leaderActorContext.getLastApplied());
-        verifyServerConfigurationPayloadEntry(leaderActorContext.getReplicatedLog(),
+        final var leaderLog = leaderActorContext.getReplicatedLog();
+        assertEquals("Leader journal last index", 1, leaderLog.lastIndex());
+        assertEquals("Leader commit index", 1, leaderLog.getCommitIndex());
+        assertEquals("Leader last applied index", 1, leaderLog.getLastApplied());
+        verifyServerConfigurationPayloadEntry(leaderLog,
                 votingServer(LEADER_ID), votingServer(NEW_SERVER_ID), nonVotingServer(NEW_SERVER_ID2));
 
         // Verify ServerConfigurationPayload entry in the new follower
@@ -457,11 +463,11 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         // Verify ServerConfigurationPayload entry in leader's log
 
         expectFirstMatching(leaderCollectorActor, ApplyState.class);
-        assertEquals("Leader journal last index", 0, leaderActorContext.getReplicatedLog().lastIndex());
-        assertEquals("Leader commit index", 0, leaderActorContext.getCommitIndex());
-        assertEquals("Leader last applied index", 0, leaderActorContext.getLastApplied());
-        verifyServerConfigurationPayloadEntry(leaderActorContext.getReplicatedLog(), votingServer(LEADER_ID),
-                votingServer(NEW_SERVER_ID));
+        final var leaderLog = leaderActorContext.getReplicatedLog();
+        assertEquals("Leader journal last index", 0, leaderLog.lastIndex());
+        assertEquals("Leader commit index", 0, leaderLog.getCommitIndex());
+        assertEquals("Leader last applied index", 0, leaderLog.getLastApplied());
+        verifyServerConfigurationPayloadEntry(leaderLog, votingServer(LEADER_ID), votingServer(NEW_SERVER_ID));
 
         LOG.info("testAddServerWithPriorSnapshotInProgress ending");
     }
@@ -1559,7 +1565,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
                 toLog.append(entry);
             }
 
-            context.setCommitIndex(fromContext.getCommitIndex());
+            toLog.setCommitIndex(fromLog.getCommitIndex());
             toLog.setLastApplied(fromLog.getLastApplied());
             context.setTermInfo(fromContext.termInfo());
         }

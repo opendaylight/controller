@@ -124,12 +124,12 @@ public class Follower extends RaftActorBehavior {
     }
 
     private boolean isLogEntryPresent(final long index) {
-        final var log = context.getReplicatedLog();
-        return log.isInSnapshot(index) || log.get(index) != null;
+        final var replLog = replicatedLog();
+        return replLog.isInSnapshot(index) || replLog.get(index) != null;
     }
 
     private void updateInitialSyncStatus(final long currentLeaderCommit, final String newLeaderId) {
-        initialSyncStatusTracker.update(newLeaderId, currentLeaderCommit, context.getCommitIndex());
+        initialSyncStatusTracker.update(newLeaderId, currentLeaderCommit, replicatedLog().getCommitIndex());
     }
 
     @Override
@@ -179,19 +179,20 @@ public class Follower extends RaftActorBehavior {
             return this;
         }
 
-        long lastIndex = lastIndex();
-        long prevCommitIndex = context.getCommitIndex();
+        final var replLog = replicatedLog();
+        final var lastIndex = replLog.lastIndex();
+        final var prevCommitIndex = replLog.getCommitIndex();
 
         // If leaderCommit > commitIndex, set commitIndex = min(leaderCommit, index of last new entry)
         if (appendEntries.getLeaderCommit() > prevCommitIndex) {
-            context.setCommitIndex(Math.min(appendEntries.getLeaderCommit(), lastIndex));
+            replLog.setCommitIndex(Math.min(appendEntries.getLeaderCommit(), lastIndex));
         }
 
-        if (prevCommitIndex != context.getCommitIndex()) {
-            LOG.debug("{}: Commit index set to {}", logName, context.getCommitIndex());
+        if (prevCommitIndex != replLog.getCommitIndex()) {
+            LOG.debug("{}: Commit index set to {}", logName, replLog.getCommitIndex());
         }
 
-        final var reply = new AppendEntriesReply(memberId(), currentTerm(), true, lastIndex, lastTerm(),
+        final var reply = new AppendEntriesReply(memberId(), currentTerm(), true, lastIndex, replLog.lastTerm(),
             context.getPayloadVersion(), false, needsLeaderAddress(), appendEntries.getLeaderRaftVersion());
 
         if (LOG.isTraceEnabled()) {
@@ -207,11 +208,11 @@ public class Follower extends RaftActorBehavior {
 
         // If leaderCommit > lastApplied, increment lastApplied and apply log[lastApplied] to state machine (§5.3).
         // lastApplied can be equal to lastIndex.
-        if (appendEntries.getLeaderCommit() > context.getLastApplied() && context.getLastApplied() < lastIndex) {
+        if (appendEntries.getLeaderCommit() > replLog.getLastApplied() && replLog.getLastApplied() < lastIndex) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("{}: applyLogToStateMachine, appendEntries.getLeaderCommit(): {}, "
                         + "context.getLastApplied(): {}, lastIndex(): {}", logName,
-                    appendEntries.getLeaderCommit(), context.getLastApplied(), lastIndex);
+                    appendEntries.getLeaderCommit(), replLog.getLastApplied(), lastIndex);
             }
 
             applyLogToStateMachine(appendEntries.getLeaderCommit());
@@ -235,12 +236,12 @@ public class Follower extends RaftActorBehavior {
 
         LOG.debug("{}: Number of entries to be appended = {}", logName, numLogEntries);
 
-        long lastIndex = lastIndex();
+        final var replLog = replicatedLog();
+        long lastIndex = replLog.lastIndex();
         int addEntriesFrom = 0;
 
         // First check for conflicting entries. If an existing entry conflicts with a new one (same index but different
         // term), delete the existing entry and all that follow it (§5.3)
-        final var replLog = context.getReplicatedLog();
         if (replLog.size() > 0) {
             // Find the entry up until the one that is not in the follower's log
             for (int i = 0; i < numLogEntries; i++, addEntriesFrom++) {
@@ -264,11 +265,11 @@ public class Follower extends RaftActorBehavior {
 
                 if (!context.getRaftPolicy().applyModificationToStateBeforeConsensus()) {
                     LOG.info("{}: Removing entries from log starting at {}, commitIndex: {}, lastApplied: {}",
-                            logName, matchEntry.index(), context.getCommitIndex(), context.getLastApplied());
+                            logName, matchEntry.index(), replLog.getCommitIndex(), replLog.getLastApplied());
 
                     // Entries do not match so remove all subsequent entries but only if the existing entries haven't
                     // been applied to the state yet.
-                    if (matchEntry.index() <= context.getLastApplied()
+                    if (matchEntry.index() <= replLog.getLastApplied()
                             || !replLog.removeFromAndPersist(matchEntry.index())) {
                         // Could not remove the entries - this means the matchEntry index must be in the
                         // snapshot and not the log. In this case the prior entries are part of the state
@@ -292,7 +293,7 @@ public class Follower extends RaftActorBehavior {
             }
         }
 
-        lastIndex = lastIndex();
+        lastIndex = replLog.lastIndex();
         LOG.debug("{}: After cleanup, lastIndex: {}, entries to be added from: {}", logName, lastIndex, addEntriesFrom);
 
         // When persistence successfully completes for each new log entry appended, we need to determine if we
