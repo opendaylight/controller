@@ -106,16 +106,6 @@ public final class Snapshot implements Serializable {
         return termInfo;
     }
 
-    @Deprecated
-    public long getElectionTerm() {
-        return termInfo.term();
-    }
-
-    @Deprecated
-    public String getElectionVotedFor() {
-        return termInfo.votedFor();
-    }
-
     public ClusterConfig getServerConfiguration() {
         return serverConfig;
     }
