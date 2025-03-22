@@ -204,7 +204,8 @@ class RaftActorRecoverySupport {
             return;
         }
 
-        long lastUnappliedIndex = context.getLastApplied() + 1;
+        final var replLog = replicatedLog();
+        long lastUnappliedIndex = replLog.getLastApplied() + 1;
 
         if (LOG.isDebugEnabled()) {
             // it can happen that lastUnappliedIndex > toIndex, if the AJE is in the persistent journal
@@ -223,8 +224,8 @@ class RaftActorRecoverySupport {
                     if (currentRecoveryBatchCount > 0) {
                         endCurrentLogRecoveryBatch();
                     }
-                    context.setLastApplied(lastApplied);
-                    context.setCommitIndex(lastApplied);
+                    replLog.setLastApplied(lastApplied);
+                    replLog.setCommitIndex(lastApplied);
                     takeRecoverySnapshot(logEntry);
                 }
             } else {
@@ -234,8 +235,8 @@ class RaftActorRecoverySupport {
             }
         }
 
-        context.setLastApplied(lastApplied);
-        context.setCommitIndex(lastApplied);
+        replLog.setLastApplied(lastApplied);
+        replLog.setCommitIndex(lastApplied);
     }
 
     private void onDeleteEntries(final DeleteEntries deleteEntries) {

@@ -115,8 +115,9 @@ public final class Candidate extends RaftActorBehavior {
             return this;
         }
 
-        final var lastApplied = context.getLastApplied();
-        final var lastIndex = context.getReplicatedLog().lastIndex();
+        final var replLog = replicatedLog();
+        final var lastApplied = replLog.getLastApplied();
+        final var lastIndex = replLog.lastIndex();
         if (lastApplied >= lastIndex) {
             return switchBehavior(new Leader(context));
         }
@@ -212,7 +213,7 @@ public final class Candidate extends RaftActorBehavior {
         for (var peerId : votingPeers) {
             final var peerActor = context.getPeerActorSelection(peerId);
             if (peerActor != null) {
-                final var replLog = context.getReplicatedLog();
+                final var replLog = replicatedLog();
                 final var requestVote = new RequestVote(newTerm, memberId(), replLog.lastIndex(), replLog.lastTerm());
 
                 LOG.debug("{}: Sending {} to peer {}", logName, requestVote, peerId);

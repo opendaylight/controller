@@ -43,8 +43,9 @@ public final class PreLeader extends AbstractLeader {
     @Override
     public RaftActorBehavior handleMessage(final ActorRef sender, final Object message) {
         if (message instanceof ApplyState) {
-            final var lastApplied = context.getLastApplied();
-            final var lastIndex = context.getReplicatedLog().lastIndex();
+            final var replLog = replicatedLog();
+            final var lastApplied = replLog.getLastApplied();
+            final var lastIndex = replLog.lastIndex();
             LOG.debug("{}: Received {} - lastApplied: {}, lastIndex: {}", logName, message, lastApplied, lastIndex);
             return lastApplied < lastIndex ? this
                 // We've applied all entries - we can switch to Leader.

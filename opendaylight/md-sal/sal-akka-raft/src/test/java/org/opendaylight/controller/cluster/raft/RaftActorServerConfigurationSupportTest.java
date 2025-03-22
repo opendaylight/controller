@@ -144,11 +144,11 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
     public void testAddServerWithExistingFollower() {
         LOG.info("testAddServerWithExistingFollower starting");
         setupNewFollower();
-        RaftActorContextImpl followerActorContext = newFollowerContext(FOLLOWER_ID, followerActor);
-        followerActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 3, 1)
-            .build());
-        followerActorContext.setCommitIndex(2);
-        followerActorContext.setLastApplied(2);
+        final var followerActorContext = newFollowerContext(FOLLOWER_ID, followerActor);
+        final var followerLog = new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 3, 1).build();
+        followerLog.setCommitIndex(2);
+        followerLog.setLastApplied(2);
+        followerActorContext.setReplicatedLog(followerLog);
 
         Follower follower = new Follower(followerActorContext);
         followerActor.underlyingActor().setBehavior(follower);
@@ -232,10 +232,10 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         setupNewFollower();
         RaftActorContext initialActorContext = new MockRaftActorContext();
-        initialActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder()
-            .createEntries(0, 2, 1).build());
-        initialActorContext.setCommitIndex(1);
-        initialActorContext.setLastApplied(1);
+        final var initialLog = new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 2, 1).build();
+        initialLog.setCommitIndex(1);
+        initialLog.setLastApplied(1);
+        initialActorContext.setReplicatedLog(initialLog);
 
         TestActorRef<MockLeaderRaftActor> leaderActor = actorFactory.createTestActor(
                 MockLeaderRaftActor.props(stateDir(), Map.of(), initialActorContext)
@@ -1559,7 +1559,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
                 toLog.append(entry);
             }
 
-            context.setCommitIndex(fromContext.getCommitIndex());
+            toLog.setCommitIndex(fromLog.getCommitIndex());
             toLog.setLastApplied(fromLog.getLastApplied());
             context.setTermInfo(fromContext.termInfo());
         }

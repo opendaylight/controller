@@ -131,10 +131,10 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     public void testBecomeLeaderOnReceivingMajorityVotesInFiveNodeCluster() {
         MockRaftActorContext raftActorContext = createActorContext();
         raftActorContext.setTermInfo(new TermInfo(2L, "other"));
-        raftActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder()
-                .createEntries(0, 5, 1).build());
-        raftActorContext.setCommitIndex(raftActorContext.getReplicatedLog().lastIndex());
-        raftActorContext.setLastApplied(raftActorContext.getReplicatedLog().lastIndex());
+        final var log = new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 5, 1).build();
+        log.setCommitIndex(log.lastIndex());
+        log.setLastApplied(log.lastIndex());
+        raftActorContext.setReplicatedLog(log);
         raftActorContext.setPeerAddresses(setupPeers(4));
         candidate = new Candidate(raftActorContext);
 
