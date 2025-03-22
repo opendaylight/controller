@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
 
 /**
@@ -276,4 +277,11 @@ public interface ReplicatedLog {
      * @return true if a snapshot should be captured, false otherwise
      */
     boolean shouldCaptureSnapshot(long logIndex);
+
+    /**
+     * Reset internal state to specified {@link Snapshot}.
+     *
+     * @param snapshot snapshot to reset to
+     */
+    void resetToSnapshot(@NonNull Snapshot snapshot);
 }

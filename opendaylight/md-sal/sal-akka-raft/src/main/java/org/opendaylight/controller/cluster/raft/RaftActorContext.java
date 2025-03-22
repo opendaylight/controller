@@ -146,6 +146,8 @@ public interface RaftActorContext {
      *
      * @param replicatedLog the ReplicatedLog instance.
      */
+    @VisibleForTesting
+    @Deprecated(forRemoval = true)
     void setReplicatedLog(@NonNull ReplicatedLog replicatedLog);
 
     /**

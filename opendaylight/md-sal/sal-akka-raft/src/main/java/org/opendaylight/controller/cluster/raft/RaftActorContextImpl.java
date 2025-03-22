@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
  * @author Moiz Raja
  * @author Thomas Pantelis
  */
+// Non-final for testing
 public class RaftActorContextImpl implements RaftActorContext {
     private static final Logger LOG = LoggerFactory.getLogger(RaftActorContextImpl.class);
     private static final LongSupplier JVM_MEMORY_RETRIEVER = () -> Runtime.getRuntime().maxMemory();
@@ -111,6 +112,8 @@ public class RaftActorContextImpl implements RaftActorContext {
         for (Map.Entry<String, String> e : requireNonNull(peerAddresses).entrySet()) {
             peerInfoMap.put(e.getKey(), new PeerInfo(e.getKey(), e.getValue(), VotingState.VOTING));
         }
+
+        replicatedLog = new ReplicatedLogImpl(this);
     }
 
     @Override
@@ -174,6 +177,7 @@ public class RaftActorContextImpl implements RaftActorContext {
     }
 
     @Override
+    @Deprecated(forRemoval = true)
     public void setReplicatedLog(final ReplicatedLog replicatedLog) {
         this.replicatedLog = replicatedLog;
     }

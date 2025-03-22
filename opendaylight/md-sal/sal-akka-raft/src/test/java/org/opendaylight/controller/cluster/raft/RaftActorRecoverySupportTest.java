@@ -97,8 +97,6 @@ class RaftActorRecoverySupportTest {
             mockPersistence, applyState -> { }, MoreExecutors.directExecutor());
 
         support = new RaftActorRecoverySupport(localAccess, context, mockCohort);
-
-        context.setReplicatedLog(new ReplicatedLogImpl(context));
     }
 
     @AfterEach
