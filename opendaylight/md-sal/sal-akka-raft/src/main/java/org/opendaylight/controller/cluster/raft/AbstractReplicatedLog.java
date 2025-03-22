@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.raft;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
@@ -68,17 +67,12 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
     }
 
     @Override
-    public ReplicatedLogEntry last() {
+    public final ReplicatedLogEntry last() {
         if (journal.isEmpty()) {
             return null;
         }
         // get the last entry directly from the physical index
         return journal.get(journal.size() - 1);
-    }
-
-    @Override
-    public RaftEntryMeta lastMeta() {
-        return last();
     }
 
     @Override
@@ -120,7 +114,7 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
     }
 
     @Override
-    public long removeFrom(final long logEntryIndex) {
+    public final long removeFrom(final long logEntryIndex) {
         int adjustedIndex = adjustedIndex(logEntryIndex);
         if (adjustedIndex < 0 || adjustedIndex >= journal.size()) {
             // physical index should be less than list size and >= 0
@@ -152,34 +146,32 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
     }
 
     @Override
-    public void increaseJournalLogCapacity(final int amount) {
+    public final void increaseJournalLogCapacity(final int amount) {
         journal.ensureCapacity(journal.size() + amount);
     }
 
     @Override
-    public List<ReplicatedLogEntry> getFrom(final long logEntryIndex) {
+    public final List<ReplicatedLogEntry> getFrom(final long logEntryIndex) {
         return getFrom(logEntryIndex, journal.size(), NO_MAX_SIZE);
     }
 
     @Override
-    public List<ReplicatedLogEntry> getFrom(final long logEntryIndex, final int maxEntries, final long maxDataSize) {
+    public final List<ReplicatedLogEntry> getFrom(final long logEntryIndex, final int maxEntries,
+            final long maxDataSize) {
         int adjustedIndex = adjustedIndex(logEntryIndex);
         int size = journal.size();
-        if (adjustedIndex >= 0 && adjustedIndex < size) {
-            // physical index should be less than list size and >= 0
-            int maxIndex = adjustedIndex + maxEntries;
-            if (maxIndex > size) {
-                maxIndex = size;
-            }
-
-            if (maxDataSize == NO_MAX_SIZE) {
-                return new ArrayList<>(journal.subList(adjustedIndex, maxIndex));
-            } else {
-                return copyJournalEntries(adjustedIndex, maxIndex, maxDataSize);
-            }
-        } else {
+        if (adjustedIndex < 0 || adjustedIndex >= size) {
             return List.of();
         }
+
+        // physical index should be less than list size and >= 0
+        int maxIndex = adjustedIndex + maxEntries;
+        if (maxIndex > size) {
+            maxIndex = size;
+        }
+
+        return maxDataSize == NO_MAX_SIZE ? new ArrayList<>(journal.subList(adjustedIndex, maxIndex))
+            : copyJournalEntries(adjustedIndex, maxIndex, maxDataSize);
     }
 
     private @NonNull List<ReplicatedLogEntry> copyJournalEntries(final int fromIndex, final int toIndex,
@@ -189,34 +181,34 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
         for (int i = fromIndex; i < toIndex; i++) {
             final var entry = journal.get(i);
             totalSize += entry.serializedSize();
-            if (totalSize <= maxDataSize) {
-                retList.add(entry);
-            } else {
+            if (totalSize > maxDataSize) {
                 if (retList.isEmpty()) {
                     // Edge case - the first entry's size exceeds the threshold. We need to return
                     // at least the first entry so add it here.
                     retList.add(entry);
                 }
-
                 break;
             }
+
+            retList.add(entry);
         }
 
         return retList;
     }
 
     @Override
-    public long size() {
+    public final long size() {
         return journal.size();
     }
 
+    // Non-final for testing
     @Override
     public int dataSize() {
         return dataSize;
     }
 
     @Override
-    public boolean isPresent(final long logEntryIndex) {
+    public final boolean isPresent(final long logEntryIndex) {
         if (logEntryIndex > lastIndex()) {
             // if the request logical index is less than the last present in the list
             return false;
@@ -226,39 +218,40 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
     }
 
     @Override
-    public boolean isInSnapshot(final long logEntryIndex) {
+    public final boolean isInSnapshot(final long logEntryIndex) {
         return logEntryIndex >= 0 && logEntryIndex <= snapshotIndex && snapshotIndex != -1;
     }
 
     @Override
-    public long getSnapshotIndex() {
+    public final long getSnapshotIndex() {
         return snapshotIndex;
     }
 
     @Override
-    public long getSnapshotTerm() {
+    public final long getSnapshotTerm() {
         return snapshotTerm;
     }
 
     @Override
-    public void setSnapshotIndex(final long snapshotIndex) {
+    public final void setSnapshotIndex(final long snapshotIndex) {
         this.snapshotIndex = snapshotIndex;
     }
 
     @Override
-    public void setSnapshotTerm(final long snapshotTerm) {
+    public final void setSnapshotTerm(final long snapshotTerm) {
         this.snapshotTerm = snapshotTerm;
     }
 
     @Override
-    public void clear(final int startIndex, final int endIndex) {
+    public final void clear(final int startIndex, final int endIndex) {
         journal.subList(startIndex, endIndex).clear();
     }
 
     @Override
-    public void snapshotPreCommit(final long snapshotCapturedIndex, final long snapshotCapturedTerm) {
-        Preconditions.checkArgument(snapshotCapturedIndex >= snapshotIndex,
-                "snapshotCapturedIndex must be greater than or equal to snapshotIndex");
+    public final void snapshotPreCommit(final long snapshotCapturedIndex, final long snapshotCapturedTerm) {
+        if (snapshotCapturedIndex < snapshotIndex) {
+            throw new IllegalArgumentException("snapshotCapturedIndex must be greater than or equal to snapshotIndex");
+        }
 
         snapshottedJournal = new ArrayList<>(journal.size());
 
@@ -275,7 +268,7 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
     }
 
     @Override
-    public void snapshotCommit(final boolean updateDataSize) {
+    public final void snapshotCommit(final boolean updateDataSize) {
         snapshottedJournal = null;
         previousSnapshotIndex = -1;
         previousSnapshotTerm = -1;
@@ -292,7 +285,7 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
     }
 
     @Override
-    public void snapshotRollback() {
+    public final void snapshotRollback() {
         snapshottedJournal.addAll(journal);
         journal = snapshottedJournal;
         snapshottedJournal = null;
@@ -305,7 +298,7 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
     }
 
     @VisibleForTesting
-    ReplicatedLogEntry getAtPhysicalIndex(final int index) {
+    final ReplicatedLogEntry getAtPhysicalIndex(final int index) {
         return journal.get(index);
     }
 
