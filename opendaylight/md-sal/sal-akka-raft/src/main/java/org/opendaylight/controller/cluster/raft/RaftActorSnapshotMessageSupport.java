@@ -13,8 +13,8 @@ import org.apache.pekko.persistence.SaveSnapshotFailure;
 import org.apache.pekko.persistence.SaveSnapshotSuccess;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.ApplyLeaderSnapshot;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.CommitSnapshot;
+import org.opendaylight.controller.cluster.raft.SnapshotManager.SnapshotComplete;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
-import org.opendaylight.controller.cluster.raft.base.messages.SnapshotComplete;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
