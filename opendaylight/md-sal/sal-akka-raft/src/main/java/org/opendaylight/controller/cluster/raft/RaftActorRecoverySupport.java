@@ -151,8 +151,7 @@ class RaftActorRecoverySupport {
         // Create a replicated log with the snapshot information
         // The replicated log can be used later on to retrieve this snapshot
         // when we need to install it on a peer
-
-        context.setReplicatedLog(new ReplicatedLogImpl(context, snapshot));
+        context.getReplicatedLog().resetToSnapshot(snapshot);
         context.setTermInfo(snapshot.termInfo());
 
         final var timer = Stopwatch.createStarted();

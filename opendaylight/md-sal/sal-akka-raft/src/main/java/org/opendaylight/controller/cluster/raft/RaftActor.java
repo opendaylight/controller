@@ -129,7 +129,6 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         context = new RaftActorContextImpl(self(), getContext(), localAccess, peerAddresses,
             configParams.orElseGet(DefaultConfigParamsImpl::new), payloadVersion, dataPersistenceProvider,
             this::handleApplyState, this::executeInSelf);
-        context.setReplicatedLog(new ReplicatedLogImpl(context));
     }
 
     /**

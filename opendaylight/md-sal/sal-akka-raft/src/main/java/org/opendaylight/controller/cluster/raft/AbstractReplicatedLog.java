@@ -15,6 +15,7 @@ import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.ImmutableRaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
 import org.slf4j.Logger;
@@ -52,6 +53,33 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
             return (int) logEntryIndex;
         }
         return (int) (logEntryIndex - (snapshotIndex + 1));
+    }
+
+    @Override
+    public final void resetToSnapshot(final Snapshot snapshot) {
+        commitIndex = -1;
+        lastApplied = -1;
+        dataSize = 0;
+        previousSnapshotIndex = -1;
+        previousSnapshotTerm = -1;
+        snapshottedJournal = null;
+
+        snapshotIndex = snapshot.getLastAppliedIndex();
+        snapshotTerm = snapshot.getLastAppliedTerm();
+
+        final var unapplied = snapshot.getUnAppliedEntries();
+        final var size = unapplied.size();
+        if (size > 0) {
+            journal = new ArrayList<>(size);
+            for (var entry : unapplied) {
+                append(entry);
+            }
+        } else {
+            journal = new ArrayList<>();
+        }
+
+        lastApplied = snapshotIndex;
+        commitIndex = snapshotTerm;
     }
 
     @Override
