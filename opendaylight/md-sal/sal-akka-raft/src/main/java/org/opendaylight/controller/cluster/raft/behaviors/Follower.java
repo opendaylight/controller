@@ -437,24 +437,22 @@ public class Follower extends RaftActorBehavior {
         if (message instanceof ElectionTimeout || message instanceof TimeoutNow) {
             return handleElectionTimeout(message);
         }
-
         if (appendEntriesMessageAssembler.handleMessage(message, actor())) {
             return this;
         }
+        return message instanceof RaftRPC rpc ? handleRaftRpc(sender, rpc) : null;
+    }
 
-        if (!(message instanceof RaftRPC rpc)) {
-            // The rest of the processing requires the message to be a RaftRPC
-            return null;
-        }
-
+    @Override
+    RaftActorBehavior handleRaftRpc(final ActorRef sender, final RaftRPC rpc) {
         // If RPC request or response contains term T > currentTerm:
         // set currentTerm = T, convert to follower (§5.1)
         // This applies to all RPC messages and responses
         final var currentTerm = context.currentTerm();
         final var rpcTerm = rpc.getTerm();
         if (rpcTerm > currentTerm && shouldUpdateTerm(rpc)) {
-            LOG.info("{}: Term {} in \"{}\" message is greater than follower's term {} - updating term",
-                logName, rpcTerm, rpc, currentTerm);
+            LOG.info("{}: Term {} in \"{}\" message is greater than follower's term {} - updating term", logName,
+                rpcTerm, rpc, currentTerm);
             try {
                 context.persistTermInfo(new TermInfo(rpcTerm));
             } catch (IOException e) {
@@ -475,7 +473,7 @@ public class Follower extends RaftActorBehavior {
             scheduleElection(electionDuration());
         }
 
-        return super.handleMessage(sender, rpc);
+        return super.handleRaftRpc(sender, rpc);
     }
 
     private RaftActorBehavior handleElectionTimeout(final Object message) {
@@ -493,7 +491,8 @@ public class Follower extends RaftActorBehavior {
             if (message instanceof TimeoutNow) {
                 LOG.debug("{}: Received TimeoutNow - switching to Candidate", logName);
                 return switchBehavior(new Candidate(context));
-            } else if (noLeaderMessageReceived) {
+            }
+            if (noLeaderMessageReceived) {
                 // Check the cluster state to see if the leader is known to be up before we go to Candidate.
                 // However if we haven't heard from the leader in a long time even though the cluster state
                 // indicates it's up then something is wrong - leader might be stuck indefinitely - so switch

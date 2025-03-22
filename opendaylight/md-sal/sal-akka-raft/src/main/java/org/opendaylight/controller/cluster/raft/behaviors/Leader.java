@@ -74,20 +74,19 @@ public non-sealed class Leader extends AbstractLeader {
     }
 
     @Override
-    public RaftActorBehavior handleMessage(final ActorRef sender, final Object originalMessage) {
+    public RaftActorBehavior handleMessage(final ActorRef sender, final Object message) {
         requireNonNull(sender, "sender should not be null");
+        return ISOLATED_LEADER_CHECK.equals(message) ? checkIsolatedLeader() : super.handleMessage(sender, message);
+    }
 
-        if (ISOLATED_LEADER_CHECK.equals(originalMessage)) {
-            if (isLeaderIsolated()) {
-                LOG.warn("{}: At least {} followers need to be active, Switching {} from Leader to IsolatedLeader",
-                    logName, getMinIsolatedLeaderPeerCount(), getLeaderId());
-                return switchBehavior(new IsolatedLeader(context, this));
-            } else {
-                return this;
-            }
-        } else {
-            return super.handleMessage(sender, originalMessage);
+    private @NonNull RaftActorBehavior checkIsolatedLeader() {
+        if (!isLeaderIsolated()) {
+            return this;
         }
+
+        LOG.warn("{}: At least {} followers need to be active, Switching {} from Leader to IsolatedLeader", logName,
+            getMinIsolatedLeaderPeerCount(), getLeaderId());
+        return switchBehavior(new IsolatedLeader(context, this));
     }
 
     @Override

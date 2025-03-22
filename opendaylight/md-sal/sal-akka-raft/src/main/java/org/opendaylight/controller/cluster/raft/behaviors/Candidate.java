@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.time.Duration;
 import org.apache.pekko.actor.ActorRef;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.PeerInfo;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
@@ -139,54 +140,60 @@ public final class Candidate extends RaftActorBehavior {
 
     @Override
     public RaftActorBehavior handleMessage(final ActorRef sender, final Object message) {
-        if (message instanceof ElectionTimeout) {
-            LOG.debug("{}: Received ElectionTimeout", logName);
+        return switch (message) {
+            case RaftRPC rpc -> handleRaftRpc(sender, rpc);
+            case ElectionTimeout msg -> handleElectionTimeout();
+            default -> null;
+        };
+    }
 
-            if (votesRequired == 0) {
-                // If there are no peers then we should be a Leader
-                // We wait for the election timeout to occur before declare
-                // ourselves the leader. This gives enough time for a leader
-                // who we do not know about (as a peer)
-                // to send a message to the candidate
+    private @NonNull RaftActorBehavior handleElectionTimeout() {
+        LOG.debug("{}: Received ElectionTimeout", logName);
 
-                return switchBehavior(new Leader(context));
-            }
-
-            startNewTerm();
-            scheduleElection(electionDuration());
-            return this;
+        if (votesRequired == 0) {
+            // If there are no peers then we should be a Leader
+            // We wait for the election timeout to occur before declare
+            // ourselves the leader. This gives enough time for a leader
+            // who we do not know about (as a peer)
+            // to send a message to the candidate
+            return switchBehavior(new Leader(context));
         }
 
-        if (message instanceof RaftRPC rpc) {
-            final var currentTerm = context.currentTerm();
-            LOG.debug("{}: RaftRPC message received {}, my term is {}", logName, rpc, currentTerm);
+        startNewTerm();
+        scheduleElection(electionDuration());
+        return this;
+    }
 
-            // If RPC request or response contains term T > currentTerm:
-            // set currentTerm = T, convert to follower (§5.1)
-            // This applies to all RPC messages and responses
-            final var rpcTerm = rpc.getTerm();
-            if (rpcTerm > currentTerm) {
-                LOG.info("{}: Term {} in \"{}\" message is greater than Candidate's term {} - switching to Follower",
-                        logName, rpcTerm, rpc, currentTerm);
+    @Override
+    RaftActorBehavior handleRaftRpc(final ActorRef sender, final RaftRPC rpc) {
+        final var currentTerm = context.currentTerm();
+        LOG.debug("{}: RaftRPC message received {}, my term is {}", logName, rpc, currentTerm);
 
-                try {
-                    context.persistTermInfo(new TermInfo(rpcTerm, null));
-                } catch (IOException e) {
-                    // FIXME: do not mask IOException
-                    throw new UncheckedIOException(e);
-                }
+        // If RPC request or response contains term T > currentTerm:
+        // set currentTerm = T, convert to follower (§5.1)
+        // This applies to all RPC messages and responses
+        final var rpcTerm = rpc.getTerm();
+        return rpcTerm > currentTerm ? switchToFollower(sender, rpc) : handleRaftRpc(sender, rpc);
+    }
 
-                // The raft paper does not say whether or not a Candidate can/should process a RequestVote in
-                // this case but doing so gains quicker convergence when the sender's log is more up-to-date.
-                if (message instanceof RequestVote) {
-                    super.handleMessage(sender, message);
-                }
+    private @NonNull RaftActorBehavior switchToFollower(final ActorRef sender, final RaftRPC rpc) {
+        final var rpcTerm = rpc.getTerm();
+        LOG.info("{}: Term {} in \"{}\" message is greater than Candidate's term {} - switching to Follower",
+            logName, rpcTerm, rpc, context.currentTerm());
 
-                return switchBehavior(new Follower(context));
-            }
+        try {
+            context.persistTermInfo(new TermInfo(rpcTerm));
+        } catch (IOException e) {
+            // FIXME: do not mask IOException
+            throw new UncheckedIOException(e);
         }
 
-        return super.handleMessage(sender, message);
+        // The raft paper does not say whether or not a Candidate can/should process a RequestVote in this case
+        // but doing so gains quicker convergence when the sender's log is more up-to-date.
+        if (rpc instanceof RequestVote requestVote) {
+            requestVote(sender, requestVote);
+        }
+        return switchBehavior(new Follower(context));
     }
 
     private void startNewTerm() {

@@ -166,7 +166,7 @@ public abstract class RaftActorBehavior implements AutoCloseable {
      * @param requestVote the message
      * @return a new behavior if it was changed or the current behavior
      */
-    final RaftActorBehavior requestVote(final ActorRef sender, final RequestVote requestVote) {
+    final @NonNull RaftActorBehavior requestVote(final ActorRef sender, final RequestVote requestVote) {
         LOG.debug("{}: In requestVote: {} - currentTerm: {}, votedFor: {}, lastIndex: {}, lastTerm: {}", logName,
                 requestVote, currentTerm(), votedFor(), lastIndex(), lastTerm());
 
@@ -401,12 +401,14 @@ public abstract class RaftActorBehavior implements AutoCloseable {
      *
      * @return The new behavior or current behavior, or null if the message was not handled.
      */
-    public @Nullable RaftActorBehavior handleMessage(final ActorRef sender, final Object message) {
-        return switch (message) {
-            case AppendEntries appendEntries -> appendEntries(sender, appendEntries);
-            case AppendEntriesReply appendEntriesReply -> handleAppendEntriesReply(sender, appendEntriesReply);
-            case RequestVote requestVote -> requestVote(sender, requestVote);
-            case RequestVoteReply requestVoteReply -> handleRequestVoteReply(sender, requestVoteReply);
+    public abstract @Nullable RaftActorBehavior handleMessage(ActorRef sender, Object message);
+
+    @Nullable RaftActorBehavior handleRaftRpc(final ActorRef sender, final RaftRPC rpc) {
+        return switch (rpc) {
+            case AppendEntries msg -> appendEntries(sender, msg);
+            case AppendEntriesReply msg -> handleAppendEntriesReply(sender, msg);
+            case RequestVote msg -> requestVote(sender, msg);
+            case RequestVoteReply msg -> handleRequestVoteReply(sender, msg);
             default -> null;
         };
     }
@@ -421,7 +423,7 @@ public abstract class RaftActorBehavior implements AutoCloseable {
      * @return the new behavior
      */
     @SuppressWarnings("checkstyle:IllegalCatch")
-    final RaftActorBehavior switchBehavior(final RaftActorBehavior newBehavior) {
+    final @NonNull RaftActorBehavior switchBehavior(final RaftActorBehavior newBehavior) {
         if (!context.getRaftPolicy().automaticElectionsEnabled()) {
             return this;
         }

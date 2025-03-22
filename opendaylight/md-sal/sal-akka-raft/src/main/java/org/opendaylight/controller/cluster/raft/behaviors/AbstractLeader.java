@@ -27,6 +27,7 @@ import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.Cancellable;
 import org.apache.pekko.dispatch.ControlMessage;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.io.SharedFileBackedOutputStream;
@@ -494,45 +495,62 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
             return this;
         }
 
+        return switch (message) {
+            case RaftRPC rpc -> handleRaftRpc(sender, rpc);
+            case Replicate msg -> {
+                replicate(msg);
+                yield this;
+            }
+            case SendHeartBeat msg -> {
+                sendHeartBeat();
+                yield this;
+            }
+            default ->  null;
+        };
+    }
+
+    @Override
+    final RaftActorBehavior handleRaftRpc(final ActorRef sender, final RaftRPC rpc) {
         // If RPC request or response contains term T > currentTerm:
         // set currentTerm = T, convert to follower (§5.1)
         // This applies to all RPC messages and responses
-        if (message instanceof RaftRPC rpc && rpc.getTerm() > context.currentTerm() && shouldUpdateTerm(rpc)) {
-            LOG.info("{}: Term {} in \"{}\" message is greater than leader's term {} - switching to Follower",
-                logName, rpc.getTerm(), rpc, context.currentTerm());
-
-            try {
-                context.persistTermInfo(new TermInfo(rpc.getTerm()));
-            } catch (IOException e) {
-                // FIXME: do not mask IOException
-                throw new UncheckedIOException(e);
-            }
-
-            // This is a special case. Normally when stepping down as leader we don't process and reply to the
-            // RaftRPC as per raft. But if we're in the process of transferring leadership and we get a
-            // RequestVote, process the RequestVote before switching to Follower. This enables the requesting
-            // candidate node to be elected the leader faster and avoids us possibly timing out in the Follower
-            // state and starting a new election and grabbing leadership back before the other candidate node can
-            // start a new election due to lack of responses. This case would only occur if there isn't a majority
-            // of other nodes available that can elect the requesting candidate. Since we're transferring
-            // leadership, we should make every effort to get the requesting node elected.
-            if (rpc instanceof RequestVote requestVote && context.getRaftActorLeadershipTransferCohort() != null) {
-                LOG.debug("{}: Leadership transfer in progress - processing RequestVote", logName);
-                requestVote(sender, requestVote);
-            }
-
-            return switchBehavior(new Follower(context));
+        if (rpc.getTerm() > context.currentTerm() && shouldUpdateTerm(rpc)) {
+            return switchToFollower(sender, rpc);
         }
 
-        switch (message) {
-            case InstallSnapshotReply msg -> handleInstallSnapshotReply(msg);
-            case Replicate msg -> replicate(msg);
-            case SendHeartBeat msg -> sendHeartBeat();
-            default -> {
-                return super.handleMessage(sender, message);
-            }
+        if (rpc instanceof InstallSnapshotReply msg) {
+            handleInstallSnapshotReply(msg);
+            return this;
         }
-        return this;
+        return super.handleRaftRpc(sender, rpc);
+    }
+
+    private @NonNull RaftActorBehavior switchToFollower(final ActorRef sender, final RaftRPC rpc) {
+        final var rpcTerm = rpc.getTerm();
+        LOG.info("{}: Term {} in \"{}\" message is greater than leader's term {} - switching to Follower", logName,
+            rpcTerm, rpc, context.currentTerm());
+
+        try {
+            context.persistTermInfo(new TermInfo(rpcTerm));
+        } catch (IOException e) {
+            // FIXME: do not mask IOException
+            throw new UncheckedIOException(e);
+        }
+
+        // This is a special case. Normally when stepping down as leader we don't process and reply to the
+        // RaftRPC as per raft. But if we're in the process of transferring leadership and we get a
+        // RequestVote, process the RequestVote before switching to Follower. This enables the requesting
+        // candidate node to be elected the leader faster and avoids us possibly timing out in the Follower
+        // state and starting a new election and grabbing leadership back before the other candidate node can
+        // start a new election due to lack of responses. This case would only occur if there isn't a majority
+        // of other nodes available that can elect the requesting candidate. Since we're transferring
+        // leadership, we should make every effort to get the requesting node elected.
+        if (rpc instanceof RequestVote requestVote && context.getRaftActorLeadershipTransferCohort() != null) {
+            LOG.debug("{}: Leadership transfer in progress - processing RequestVote", logName);
+            requestVote(sender, requestVote);
+        }
+
+        return switchBehavior(new Follower(context));
     }
 
     private void handleInstallSnapshotReply(final InstallSnapshotReply reply) {
