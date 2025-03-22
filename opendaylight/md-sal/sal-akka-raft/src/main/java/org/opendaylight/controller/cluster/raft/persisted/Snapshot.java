@@ -61,7 +61,7 @@ public final class Snapshot implements Serializable {
         this.unAppliedEntries = requireNonNull(unAppliedEntries);
         this.lastIndex = lastIndex;
         this.lastTerm = lastTerm;
-        this.lastApplied = lastApplied != null ? ImmutableRaftEntryMeta.copyOf(lastApplied) : null;
+        this.lastApplied = ImmutableRaftEntryMeta.ofNullable(lastApplied);
         this.termInfo = requireNonNull(termInfo);
         this.serverConfig = serverConfig;
     }

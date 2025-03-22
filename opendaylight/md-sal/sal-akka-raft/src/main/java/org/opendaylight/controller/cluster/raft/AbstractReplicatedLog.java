@@ -42,7 +42,7 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
     protected AbstractReplicatedLog(final @NonNull String memberId, final @Nullable RaftEntryMeta snapshotEntry,
             final List<ReplicatedLogEntry> unAppliedEntries) {
         this.memberId = requireNonNull(memberId);
-        this.snapshotEntry = snapshotEntry != null ? ImmutableRaftEntryMeta.copyOf(snapshotEntry) : null;
+        this.snapshotEntry = ImmutableRaftEntryMeta.ofNullable(snapshotEntry);
 
         journal = new ArrayList<>(unAppliedEntries.size());
         for (var entry : unAppliedEntries) {
@@ -219,7 +219,7 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
 
     @Override
     public final void setSnapshotMeta(final RaftEntryMeta newSnapshotMeta) {
-        snapshotEntry = newSnapshotMeta != null ? ImmutableRaftEntryMeta.copyOf(newSnapshotMeta) : null;
+        snapshotEntry = ImmutableRaftEntryMeta.ofNullable(newSnapshotMeta);
     }
 
     @Override
