@@ -88,6 +88,13 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         }
     }
 
+    @NonNullByDefault
+    private record SnapshotHolder(long index, long term, ByteSource bytes) {
+        SnapshotHolder {
+            requireNonNull(bytes);
+        }
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(AbstractLeader.class);
 
     private final Map<String, FollowerLogInformation> followerToLog = new HashMap<>();
@@ -192,16 +199,6 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         //4 peers = 3 votesRequired, minIsolatedLeaderPeerCount = 2
 
         return minReplicationCount > 0 ? minReplicationCount - 1 : 0;
-    }
-
-    @VisibleForTesting
-    void setSnapshotHolder(final @Nullable SnapshotHolder snapshotHolder) {
-        this.snapshotHolder = Optional.ofNullable(snapshotHolder);
-    }
-
-    @VisibleForTesting
-    boolean hasSnapshot() {
-        return snapshotHolder.isPresent();
     }
 
     @Override
@@ -537,7 +534,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
             sendHeartBeat();
             scheduleHeartBeat(context.getConfigParams().getHeartBeatInterval());
         } else if (message instanceof SendInstallSnapshot(var snapshot, var bytes)) {
-            sendInstallSnapshot(snapshot, bytes);
+            sendInstallSnapshot(snapshot.getLastAppliedIndex(), snapshot.getLastAppliedTerm(), bytes);
         } else if (message instanceof Replicate replicate) {
             replicate(replicate);
         } else if (message instanceof InstallSnapshotReply installSnapshotReply) {
@@ -600,7 +597,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         }
 
         // this was the last chunk reply
-        final long followerMatchIndex = snapshotHolder.orElseThrow().getLastIncludedIndex();
+        final long followerMatchIndex = snapshotHolder.orElseThrow().index;
         followerLogInfo.setMatchIndex(followerMatchIndex);
         followerLogInfo.setNextIndex(followerMatchIndex + 1);
         followerLogInfo.clearLeaderInstallSnapshotState();
@@ -611,7 +608,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
 
         if (!anyFollowersInstallingSnapshot()) {
             // once there are no pending followers receiving snapshots we can remove snapshot from the memory
-            setSnapshotHolder(null);
+            clearSnapshot();
         }
 
         if (context.getPeerInfo(followerId).getVotingState() == VotingState.VOTING_NOT_INITIALIZED) {
@@ -916,8 +913,9 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         return nextIndex == -1 || !replLog.isPresent(nextIndex) && replLog.isInSnapshot(nextIndex);
     }
 
-    private void sendInstallSnapshot(final Snapshot snapshot, final ByteSource bytes) {
-        snapshotHolder = Optional.of(new SnapshotHolder(snapshot, bytes));
+    @NonNullByDefault
+    private void sendInstallSnapshot(final long index, final long term, final ByteSource bytes) {
+        setSnapshot(index, term, bytes);
 
         LOG.debug("{}: sendInstallSnapshot", logName);
         for (var entry : followerToLog.entrySet()) {
@@ -957,7 +955,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         final byte[] data;
         try {
             // Ensure the snapshot bytes are set - this is a no-op.
-            installSnapshotState.setSnapshotBytes(snapshot.getSnapshotBytes());
+            installSnapshotState.setSnapshotBytes(snapshot.bytes);
 
             if (installSnapshotState.canSendNextChunk()) {
                 data = installSnapshotState.getNextChunk();
@@ -984,7 +982,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         followerActor.tell(
             new InstallSnapshot(currentTerm(), memberId(),
                 // snapshot term/index inforation
-                snapshot.getLastIncludedIndex(), snapshot.getLastIncludedTerm(),
+                snapshot.index, snapshot.term,
                 // this chunk and its indexing info and previous hash code
                 data, chunkIndex, totalChunks, OptionalInt.of(installSnapshotState.getLastChunkHashCode()),
                 // server configuration, if present
@@ -1104,27 +1102,19 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         return followerToLog.size();
     }
 
-    static class SnapshotHolder {
-        private final long lastIncludedTerm;
-        private final long lastIncludedIndex;
-        private final ByteSource snapshotBytes;
+    @NonNullByDefault
+    @VisibleForTesting
+    final void setSnapshot(final long index, final long term, final ByteSource bytes) {
+        snapshotHolder = Optional.of(new SnapshotHolder(index, term, bytes));
+    }
 
-        SnapshotHolder(final Snapshot snapshot, final ByteSource snapshotBytes) {
-            lastIncludedTerm = snapshot.getLastAppliedTerm();
-            lastIncludedIndex = snapshot.getLastAppliedIndex();
-            this.snapshotBytes = snapshotBytes;
-        }
+    @VisibleForTesting
+    final boolean hasSnapshot() {
+        return snapshotHolder.isPresent();
+    }
 
-        long getLastIncludedTerm() {
-            return lastIncludedTerm;
-        }
-
-        long getLastIncludedIndex() {
-            return lastIncludedIndex;
-        }
-
-        ByteSource getSnapshotBytes() {
-            return snapshotBytes;
-        }
+    @VisibleForTesting
+    final void clearSnapshot() {
+        snapshotHolder = Optional.empty();
     }
 }
