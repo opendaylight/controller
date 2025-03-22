@@ -152,7 +152,7 @@ class RaftActorRecoverySupport {
         // The replicated log can be used later on to retrieve this snapshot
         // when we need to install it on a peer
 
-        context.setReplicatedLog(ReplicatedLogImpl.newInstance(snapshot, context));
+        context.setReplicatedLog(new ReplicatedLogImpl(context, snapshot));
         context.setLastApplied(snapshot.getLastAppliedIndex());
         context.setCommitIndex(snapshot.getLastAppliedIndex());
         context.setTermInfo(snapshot.termInfo());

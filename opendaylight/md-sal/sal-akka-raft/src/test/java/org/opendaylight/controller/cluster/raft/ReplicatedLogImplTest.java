@@ -77,7 +77,7 @@ class ReplicatedLogImplTest {
 
     @Test
     void testAppendAndPersistExpectingNoCapture() throws Exception {
-        final var log = ReplicatedLogImpl.newInstance(context);
+        final var log = new ReplicatedLogImpl(context);
 
         final var logEntry1 = new SimpleReplicatedLogEntry(1, 1, new MockPayload("1"));
 
@@ -101,7 +101,7 @@ class ReplicatedLogImplTest {
 
     @Test
     void testAppendAndPersisWithDuplicateEntry() throws Exception {
-        final var log = ReplicatedLogImpl.newInstance(context);
+        final var log = new ReplicatedLogImpl(context);
 
         final var logEntry = new SimpleReplicatedLogEntry(1, 1, new MockPayload("1"));
 
@@ -124,7 +124,7 @@ class ReplicatedLogImplTest {
     void testAppendAndPersistExpectingCaptureDueToJournalCount() throws Exception {
         configParams.setSnapshotBatchCount(2);
 
-        final var log = ReplicatedLogImpl.newInstance(context);
+        final var log = new ReplicatedLogImpl(context);
 
         final var logEntry1 = new SimpleReplicatedLogEntry(2, 1, new MockPayload("2"));
         final var logEntry2 = new SimpleReplicatedLogEntry(3, 1, new MockPayload("3"));
@@ -144,7 +144,7 @@ class ReplicatedLogImplTest {
     void testAppendAndPersistExpectingCaptureDueToDataSize() throws Exception {
         context.setTotalMemoryRetriever(() -> 100);
 
-        final var log = ReplicatedLogImpl.newInstance(context);
+        final var log = new ReplicatedLogImpl(context);
 
         int dataSize = 600;
         var logEntry = new SimpleReplicatedLogEntry(2, 1, new MockPayload("2", dataSize));
@@ -164,8 +164,7 @@ class ReplicatedLogImplTest {
 
     @Test
     void testRemoveFromAndPersist() throws Exception {
-
-        final var log = ReplicatedLogImpl.newInstance(context);
+        final var log = new ReplicatedLogImpl(context);
 
         log.append(new SimpleReplicatedLogEntry(0, 1, new MockPayload("0")));
         log.append(new SimpleReplicatedLogEntry(1, 1, new MockPayload("1")));
@@ -187,7 +186,7 @@ class ReplicatedLogImplTest {
 
     @Test
     void testCommitFakeSnapshot() {
-        final var log = ReplicatedLogImpl.newInstance(context);
+        final var log = new ReplicatedLogImpl(context);
 
         log.append(new SimpleReplicatedLogEntry(0, 1, new MockPayload("0")));
         final int dataSizeAfterFirstPayload = log.dataSize();

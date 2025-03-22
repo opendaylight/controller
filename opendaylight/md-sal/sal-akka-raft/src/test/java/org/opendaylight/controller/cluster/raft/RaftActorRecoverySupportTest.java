@@ -98,7 +98,7 @@ class RaftActorRecoverySupportTest {
 
         support = new RaftActorRecoverySupport(localAccess, context, mockCohort);
 
-        context.setReplicatedLog(ReplicatedLogImpl.newInstance(context));
+        context.setReplicatedLog(new ReplicatedLogImpl(context));
     }
 
     @AfterEach

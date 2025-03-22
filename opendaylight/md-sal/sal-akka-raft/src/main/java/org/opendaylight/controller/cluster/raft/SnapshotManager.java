@@ -441,7 +441,7 @@ public final class SnapshotManager {
             case PersistApply(var lastSeq, var snapshot, var callback) -> {
                 try {
                     // clears the followers log, sets the snapshot index to ensure adjusted-index works
-                    context.setReplicatedLog(ReplicatedLogImpl.newInstance(snapshot, context));
+                    context.setReplicatedLog(new ReplicatedLogImpl(context, snapshot));
                     context.setLastApplied(snapshot.getLastAppliedIndex());
                     context.setCommitIndex(snapshot.getLastAppliedIndex());
                     // FIXME: This may be coming from the leader: we do not want to pollute our TermInfo if it is for
