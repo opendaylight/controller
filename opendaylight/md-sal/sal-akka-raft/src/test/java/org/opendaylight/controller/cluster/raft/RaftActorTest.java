@@ -63,9 +63,9 @@ import org.opendaylight.controller.cluster.raft.SnapshotManager.ApplyLeaderSnaps
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.base.messages.LeaderTransitioning;
-import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.base.messages.SwitchBehavior.BecomeFollower;
 import org.opendaylight.controller.cluster.raft.base.messages.SwitchBehavior.BecomeLeader;
+import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.behaviors.Follower;
 import org.opendaylight.controller.cluster.raft.behaviors.Leader;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
