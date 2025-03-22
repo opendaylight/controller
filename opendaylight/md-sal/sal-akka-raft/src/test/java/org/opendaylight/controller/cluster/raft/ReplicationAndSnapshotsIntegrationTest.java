@@ -137,12 +137,13 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
 
         // The leader should have performed fake snapshots due to the follower's AppendEntriesReplies and
         // trimmed the in-memory log so that only the last entry remains.
-        assertEquals("Leader snapshot term", initialTerm, leaderContext.getReplicatedLog().getSnapshotTerm());
-        assertEquals("Leader snapshot index", 1, leaderContext.getReplicatedLog().getSnapshotIndex());
-        assertEquals("Leader journal log size", 1, leaderContext.getReplicatedLog().size());
-        assertEquals("Leader journal last index", 2, leaderContext.getReplicatedLog().lastIndex());
-        assertEquals("Leader commit index", 2, leaderContext.getCommitIndex());
-        assertEquals("Leader last applied", 2, leaderContext.getLastApplied());
+        final var leaderLog = leaderContext.getReplicatedLog();
+        assertEquals("Leader snapshot term", initialTerm, leaderLog.getSnapshotTerm());
+        assertEquals("Leader snapshot index", 1, leaderLog.getSnapshotIndex());
+        assertEquals("Leader journal log size", 1, leaderLog.size());
+        assertEquals("Leader journal last index", 2, leaderLog.lastIndex());
+        assertEquals("Leader commit index", 2, leaderLog.getCommitIndex());
+        assertEquals("Leader last applied", 2, leaderLog.getLastApplied());
         assertEquals("Leader replicatedToAllIndex", 1, leader.getReplicatedToAllIndex());
 
         // Verify the follower's persisted journal log.
@@ -211,7 +212,8 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
 
         verifyApplyJournalEntries(leaderCollectorActor, 3);
 
-        assertEquals("Leader commit index", 3, leaderContext.getCommitIndex());
+        final var leaderLog = leaderContext.getReplicatedLog();
+        assertEquals("Leader commit index", 3, leaderLog.getCommitIndex());
 
         applyState = MessageCollectorActor.expectFirstMatching(follower1CollectorActor, ApplyState.class);
         verifyApplyState(applyState, null, null, currentTerm, 3, payload3);
@@ -223,11 +225,11 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
 
         verifyApplyJournalEntries(follower2CollectorActor, 3);
 
-        assertEquals("Leader snapshot term", initialTerm, leaderContext.getReplicatedLog().getSnapshotTerm());
-        assertEquals("Leader snapshot index", 2, leaderContext.getReplicatedLog().getSnapshotIndex());
-        assertEquals("Leader journal log size", 1, leaderContext.getReplicatedLog().size());
-        assertEquals("Leader commit index", 3, leaderContext.getCommitIndex());
-        assertEquals("Leader last applied", 3, leaderContext.getLastApplied());
+        assertEquals("Leader snapshot term", initialTerm, leaderLog.getSnapshotTerm());
+        assertEquals("Leader snapshot index", 2, leaderLog.getSnapshotIndex());
+        assertEquals("Leader journal log size", 1, leaderLog.size());
+        assertEquals("Leader commit index", 3, leaderLog.getCommitIndex());
+        assertEquals("Leader last applied", 3, leaderLog.getLastApplied());
         assertEquals("Leader replicatedToAllIndex", 2, leader.getReplicatedToAllIndex());
 
         // The followers should also snapshot so verify.
@@ -333,12 +335,13 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         MessageCollectorActor.clearMessages(leaderCollectorActor);
         MessageCollectorActor.expectFirstMatching(leaderCollectorActor, AppendEntriesReply.class);
 
-        assertEquals("Leader snapshot term", currentTerm, leaderContext.getReplicatedLog().getSnapshotTerm());
-        assertEquals("Leader snapshot index", 5, leaderContext.getReplicatedLog().getSnapshotIndex());
-        assertEquals("Leader journal log size", 2, leaderContext.getReplicatedLog().size());
-        assertEquals("Leader journal last index", 7, leaderContext.getReplicatedLog().lastIndex());
-        assertEquals("Leader commit index", 7, leaderContext.getCommitIndex());
-        assertEquals("Leader last applied", 7, leaderContext.getLastApplied());
+        final var leaderLog = leaderContext.getReplicatedLog();
+        assertEquals("Leader snapshot term", currentTerm, leaderLog.getSnapshotTerm());
+        assertEquals("Leader snapshot index", 5, leaderLog.getSnapshotIndex());
+        assertEquals("Leader journal log size", 2, leaderLog.size());
+        assertEquals("Leader journal last index", 7, leaderLog.lastIndex());
+        assertEquals("Leader commit index", 7, leaderLog.getCommitIndex());
+        assertEquals("Leader last applied", 7, leaderLog.getLastApplied());
         assertEquals("Leader replicatedToAllIndex", 5, leader.getReplicatedToAllIndex());
 
         // Now deliver the CaptureSnapshotReply.
@@ -427,12 +430,13 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
 
         leaderContext = leaderActor.underlyingActor().getRaftActorContext();
 
-        assertEquals("Leader snapshot term", currentTerm, leaderContext.getReplicatedLog().getSnapshotTerm());
-        assertEquals("Leader snapshot index", 6, leaderContext.getReplicatedLog().getSnapshotIndex());
-        assertEquals("Leader journal log size", 1, leaderContext.getReplicatedLog().size());
-        assertEquals("Leader journal last index", 7, leaderContext.getReplicatedLog().lastIndex());
-        assertEquals("Leader commit index", 7, leaderContext.getCommitIndex());
-        assertEquals("Leader last applied", 7, leaderContext.getLastApplied());
+        final var leaderLog = leaderContext.getReplicatedLog();
+        assertEquals("Leader snapshot term", currentTerm, leaderLog.getSnapshotTerm());
+        assertEquals("Leader snapshot index", 6, leaderLog.getSnapshotIndex());
+        assertEquals("Leader journal log size", 1, leaderLog.size());
+        assertEquals("Leader journal last index", 7, leaderLog.lastIndex());
+        assertEquals("Leader commit index", 7, leaderLog.getCommitIndex());
+        assertEquals("Leader last applied", 7, leaderLog.getLastApplied());
         verifyReplicatedLogEntry(leaderContext.getReplicatedLog().last(), currentTerm, 7, payload7);
 
         testLog.info("testLeaderReinstatement ending");

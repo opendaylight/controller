@@ -496,7 +496,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
     @Test
     public void testTrimLogWhenTrimIndexLessThanLastApplied() {
-        doReturn(20L).when(mockRaftActorContext).getLastApplied();
+        doReturn(20L).when(mockReplicatedLog).getLastApplied();
 
         doReturn(true).when(mockReplicatedLog).isPresent(10);
         doReturn(replicatedLogEntry).when(mockReplicatedLog).get(10);
@@ -513,7 +513,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
     @Test
     public void testTrimLogWhenLastAppliedNotSet() {
-        doReturn(-1L).when(mockRaftActorContext).getLastApplied();
+        doReturn(-1L).when(mockReplicatedLog).getLastApplied();
 
         long retIndex = snapshotManager.trimLog(10);
         assertEquals("return index", -1L, retIndex);
@@ -526,7 +526,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
     @Test
     public void testTrimLogWhenLastAppliedZero() {
-        doReturn(0L).when(mockRaftActorContext).getLastApplied();
+        doReturn(0L).when(mockReplicatedLog).getLastApplied();
 
         long retIndex = snapshotManager.trimLog(10);
         assertEquals("return index", -1L, retIndex);
@@ -539,7 +539,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
     @Test
     public void testTrimLogWhenTrimIndexNotPresent() {
-        doReturn(20L).when(mockRaftActorContext).getLastApplied();
+        doReturn(20L).when(mockReplicatedLog).getLastApplied();
 
         doReturn(false).when(mockReplicatedLog).isPresent(10);
 

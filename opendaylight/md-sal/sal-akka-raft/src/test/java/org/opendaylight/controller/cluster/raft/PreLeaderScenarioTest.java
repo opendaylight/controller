@@ -58,10 +58,11 @@ public class PreLeaderScenarioTest extends AbstractRaftActorIntegrationTest {
 
         // At this point, the payload entry is in follower1's log but is uncommitted. follower2 has not
         // received the payload entry yet.
-        assertEquals("Follower 1 journal log size", 1, follower1Context.getReplicatedLog().size());
-        assertEquals("Follower 1 journal last index", 0, follower1Context.getReplicatedLog().lastIndex());
-        assertEquals("Follower 1 commit index", -1, follower1Context.getCommitIndex());
-        assertEquals("Follower 1 last applied index", -1, follower1Context.getLastApplied());
+        final var follower1Log = follower1Context.getReplicatedLog();
+        assertEquals("Follower 1 journal log size", 1, follower1Log.size());
+        assertEquals("Follower 1 journal last index", 0, follower1Log.lastIndex());
+        assertEquals("Follower 1 commit index", -1, follower1Log.getCommitIndex());
+        assertEquals("Follower 1 last applied index", -1, follower1Log.getLastApplied());
 
         assertEquals("Follower 2 journal log size", 0, follower2Context.getReplicatedLog().size());
 

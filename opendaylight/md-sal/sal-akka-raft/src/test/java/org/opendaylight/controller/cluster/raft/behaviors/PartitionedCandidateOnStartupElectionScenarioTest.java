@@ -168,9 +168,9 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         SimpleReplicatedLog candidateReplicatedLog = new SimpleReplicatedLog();
         candidateReplicatedLog.append(new SimpleReplicatedLogEntry(0, 2, new MockPayload("")));
 
+        candidateReplicatedLog.setCommitIndex(candidateReplicatedLog.lastIndex());
+        candidateReplicatedLog.setLastApplied(candidateReplicatedLog.lastIndex());
         member3Context.setReplicatedLog(candidateReplicatedLog);
-        member3Context.setCommitIndex(candidateReplicatedLog.lastIndex());
-        member3Context.setLastApplied(candidateReplicatedLog.lastIndex());
         member3Context.setTermInfo(new TermInfo(2, member1Context.getId()));
 
         // The member 3 Candidate will start a new term and send RequestVotes. However it will be
@@ -227,9 +227,9 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         DefaultConfigParamsImpl member2ConfigParams = newConfigParams();
         member2Context.setConfigParams(member2ConfigParams);
 
+        replicatedLog.setCommitIndex(replicatedLog.lastIndex());
+        replicatedLog.setLastApplied(replicatedLog.lastIndex());
         member2Context.setReplicatedLog(replicatedLog);
-        member2Context.setCommitIndex(replicatedLog.lastIndex());
-        member2Context.setLastApplied(replicatedLog.lastIndex());
         member2Context.setTermInfo(new TermInfo(3, "member1"));
 
         member2Actor.self().tell(new SetBehavior(new Follower(member2Context), member2Context),
@@ -245,9 +245,9 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         DefaultConfigParamsImpl member1ConfigParams = newConfigParams();
         member1Context.setConfigParams(member1ConfigParams);
 
+        replicatedLog.setCommitIndex(replicatedLog.lastIndex());
+        replicatedLog.setLastApplied(replicatedLog.lastIndex());
         member1Context.setReplicatedLog(replicatedLog);
-        member1Context.setCommitIndex(replicatedLog.lastIndex());
-        member1Context.setLastApplied(replicatedLog.lastIndex());
         member1Context.setTermInfo(new TermInfo(3, "member1"));
 
         initializeLeaderBehavior(member1Actor, member1Context, 1);

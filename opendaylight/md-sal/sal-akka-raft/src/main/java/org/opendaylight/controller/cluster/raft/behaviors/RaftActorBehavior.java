@@ -19,6 +19,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
+import org.opendaylight.controller.cluster.raft.ReplicatedLog;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
@@ -71,6 +72,10 @@ public abstract class RaftActorBehavior implements AutoCloseable {
 
     final @NonNull String memberId() {
         return context.getId();
+    }
+
+    final @NonNull ReplicatedLog replicatedLog() {
+        return context.getReplicatedLog();
     }
 
     /**
@@ -295,7 +300,7 @@ public abstract class RaftActorBehavior implements AutoCloseable {
      * @return the term
      */
     final long lastTerm() {
-        return context.getReplicatedLog().lastTerm();
+        return replicatedLog().lastTerm();
     }
 
     /**
@@ -304,7 +309,7 @@ public abstract class RaftActorBehavior implements AutoCloseable {
      * @return the index
      */
     final long lastIndex() {
-        return context.getReplicatedLog().lastIndex();
+        return replicatedLog().lastIndex();
     }
 
     /**
@@ -313,7 +318,7 @@ public abstract class RaftActorBehavior implements AutoCloseable {
      * @return the log entry index or -1 if not found
      */
     final long getLogEntryIndex(final long index) {
-        final var replLog = context.getReplicatedLog();
+        final var replLog = replicatedLog();
         if (index == replLog.getSnapshotIndex()) {
             return index;
         }
@@ -328,7 +333,7 @@ public abstract class RaftActorBehavior implements AutoCloseable {
      * @return the log entry term or -1 if not found
      */
     final long getLogEntryTerm(final long index) {
-        final var replLog = context.getReplicatedLog();
+        final var replLog = replicatedLog();
         if (index == replLog.getSnapshotIndex()) {
             return replLog.getSnapshotTerm();
         }
@@ -344,7 +349,7 @@ public abstract class RaftActorBehavior implements AutoCloseable {
      * @return the term or -1 otherwise
      */
     final long getLogEntryOrSnapshotTerm(final long index) {
-        final var replLog = context.getReplicatedLog();
+        final var replLog = replicatedLog();
         return replLog.isInSnapshot(index) ? replLog.getSnapshotTerm() : getLogEntryTerm(index);
     }
 
@@ -355,7 +360,7 @@ public abstract class RaftActorBehavior implements AutoCloseable {
      */
     final void applyLogToStateMachine(final long index) {
         // Now maybe we apply to the state machine
-        final var replLog = context.getReplicatedLog();
+        final var replLog = replicatedLog();
 
         for (long i = replLog.getLastApplied() + 1; i < index + 1; i++) {
 

@@ -1198,12 +1198,13 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         followerRaftActor.set(followerActorRef.underlyingActor());
         followerRaftActor.get().waitForInitializeBehaviorComplete();
 
-        assertEquals("Journal size", 0, followerRaftActor.get().getReplicatedLog().size());
-        assertEquals("Last index", 2, followerRaftActor.get().getReplicatedLog().lastIndex());
-        assertEquals("Last applied index", 2, followerRaftActor.get().getRaftActorContext().getLastApplied());
-        assertEquals("Commit index", 2, followerRaftActor.get().getRaftActorContext().getCommitIndex());
-        assertEquals("State", List.of(entries.get(0).getData(), entries.get(1).getData(),
-                entries.get(2).getData()), followerRaftActor.get().getState());
+        final var followerLog = followerRaftActor.get().getReplicatedLog();
+        assertEquals("Journal size", 0, followerLog.size());
+        assertEquals("Last index", 2, followerLog.lastIndex());
+        assertEquals("Last applied index", 2, followerLog.getLastApplied());
+        assertEquals("Commit index", 2, followerLog.getCommitIndex());
+        assertEquals("State", List.of(entries.get(0).getData(), entries.get(1).getData(), entries.get(2).getData()),
+            followerRaftActor.get().getState());
     }
 
     @Test

@@ -84,11 +84,12 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         reinstateLeaderActor();
 
         assertEquals("Leader snapshot term", currentTerm, leaderContext.getReplicatedLog().getSnapshotTerm());
-        assertEquals("Leader snapshot index", 1, leaderContext.getReplicatedLog().getSnapshotIndex());
-        assertEquals("Leader journal log size", 3, leaderContext.getReplicatedLog().size());
-        assertEquals("Leader journal last index", 4, leaderContext.getReplicatedLog().lastIndex());
-        assertEquals("Leader commit index", 4, leaderContext.getCommitIndex());
-        assertEquals("Leader last applied", 4, leaderContext.getLastApplied());
+        final var leaderLog = leaderContext.getReplicatedLog();
+        assertEquals("Leader snapshot index", 1, leaderLog.getSnapshotIndex());
+        assertEquals("Leader journal log size", 3, leaderLog.size());
+        assertEquals("Leader journal last index", 4, leaderLog.lastIndex());
+        assertEquals("Leader commit index", 4, leaderLog.getCommitIndex());
+        assertEquals("Leader last applied", 4, leaderLog.getLastApplied());
 
         assertEquals("Leader state", List.of(payload0, payload1, payload2, payload3, payload4),
                 leaderActor.underlyingActor().getState());
@@ -122,12 +123,13 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
 
         reinstateLeaderActor();
 
-        assertEquals("Leader snapshot term", currentTerm, leaderContext.getReplicatedLog().getSnapshotTerm());
-        assertEquals("Leader snapshot index", 1, leaderContext.getReplicatedLog().getSnapshotIndex());
-        assertEquals("Leader journal log size", 3, leaderContext.getReplicatedLog().size());
-        assertEquals("Leader journal last index", 4, leaderContext.getReplicatedLog().lastIndex());
-        assertEquals("Leader commit index", 4, leaderContext.getCommitIndex());
-        assertEquals("Leader last applied", 4, leaderContext.getLastApplied());
+        final var leaderLog = leaderContext.getReplicatedLog();
+        assertEquals("Leader snapshot term", currentTerm, leaderLog.getSnapshotTerm());
+        assertEquals("Leader snapshot index", 1, leaderLog.getSnapshotIndex());
+        assertEquals("Leader journal log size", 3, leaderLog.size());
+        assertEquals("Leader journal last index", 4, leaderLog.lastIndex());
+        assertEquals("Leader commit index", 4, leaderLog.getCommitIndex());
+        assertEquals("Leader last applied", 4, leaderLog.getLastApplied());
 
         assertEquals("Leader state", List.of(payload0, payload1, payload2, payload3, payload4),
                 leaderActor.underlyingActor().getState());
@@ -153,9 +155,10 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
 
         MessageCollectorActor.expectMatching(follower2CollectorActor, ApplyJournalEntries.class, 1);
 
-        assertEquals("Leader commit index", 2, leaderContext.getCommitIndex());
-        assertEquals("Leader last applied", 2, leaderContext.getLastApplied());
-        assertEquals("Leader snapshot index", 1, leaderContext.getReplicatedLog().getSnapshotIndex());
+        final var leaderLog = leaderContext.getReplicatedLog();
+        assertEquals("Leader commit index", 2, leaderLog.getCommitIndex());
+        assertEquals("Leader last applied", 2, leaderLog.getLastApplied());
+        assertEquals("Leader snapshot index", 1, leaderLog.getSnapshotIndex());
         assertEquals("Leader replicatedToAllIndex", 1, leader.getReplicatedToAllIndex());
 
         killActor(follower2Actor);
@@ -178,9 +181,10 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
 
         final List<MockPayload> expFollowerState = List.of(payload0, payload1, payload2);
 
-        assertEquals("Follower commit index", 2, follower2Context.getCommitIndex());
-        assertEquals("Follower last applied", 2, follower2Context.getLastApplied());
-        assertEquals("Follower snapshot index", 2, follower2Context.getReplicatedLog().getSnapshotIndex());
+        var follower2log = follower2Context.getReplicatedLog();
+        assertEquals("Follower commit index", 2, follower2log.getCommitIndex());
+        assertEquals("Follower last applied", 2, follower2log.getLastApplied());
+        assertEquals("Follower snapshot index", 2, follower2log.getSnapshotIndex());
         assertEquals("Follower state", expFollowerState, follower2Underlying.getState());
 
         killActor(follower2Actor);
@@ -192,9 +196,10 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         follower2Underlying.waitForRecoveryComplete();
         follower2Context = follower2Underlying.getRaftActorContext();
 
-        assertEquals("Follower commit index", 2, follower2Context.getCommitIndex());
-        assertEquals("Follower last applied", 2, follower2Context.getLastApplied());
-        assertEquals("Follower snapshot index", 2, follower2Context.getReplicatedLog().getSnapshotIndex());
+        follower2log = follower2Context.getReplicatedLog();
+        assertEquals("Follower commit index", 2, follower2log.getCommitIndex());
+        assertEquals("Follower last applied", 2, follower2log.getLastApplied());
+        assertEquals("Follower snapshot index", 2, follower2log.getSnapshotIndex());
         assertEquals("Follower state", expFollowerState, follower2Underlying.getState());
     }
 
@@ -271,7 +276,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         // Verify the leader applies the states.
         MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyJournalEntries.class, 2);
 
-        assertEquals("Leader last applied", 1, leaderContext.getLastApplied());
+        assertEquals("Leader last applied", 1, leaderContext.getReplicatedLog().getLastApplied());
 
         MessageCollectorActor.clearMessages(leaderCollectorActor);
         MessageCollectorActor.clearMessages(follower1CollectorActor);

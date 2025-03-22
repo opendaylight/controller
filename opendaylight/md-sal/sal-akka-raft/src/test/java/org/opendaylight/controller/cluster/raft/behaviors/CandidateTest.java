@@ -105,7 +105,8 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     @Test
     public void testBecomeLeaderOnReceivingMajorityVotesInThreeNodeCluster() {
         MockRaftActorContext raftActorContext = createActorContext();
-        raftActorContext.setLastApplied(raftActorContext.getReplicatedLog().lastIndex());
+        final var log = raftActorContext.getReplicatedLog();
+        log.setLastApplied(log.lastIndex());
         raftActorContext.setPeerAddresses(setupPeers(2));
         candidate = new Candidate(raftActorContext);
 
@@ -117,7 +118,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     @Test
     public void testBecomePreLeaderOnReceivingMajorityVotesInThreeNodeCluster() {
         MockRaftActorContext raftActorContext = createActorContext();
-        raftActorContext.setLastApplied(-1);
+        raftActorContext.getReplicatedLog().setLastApplied(-1);
         raftActorContext.setPeerAddresses(setupPeers(2));
         candidate = new Candidate(raftActorContext);
 
@@ -131,10 +132,10 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     public void testBecomeLeaderOnReceivingMajorityVotesInFiveNodeCluster() {
         MockRaftActorContext raftActorContext = createActorContext();
         raftActorContext.setTermInfo(new TermInfo(2L, "other"));
-        raftActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder()
-                .createEntries(0, 5, 1).build());
-        raftActorContext.setCommitIndex(raftActorContext.getReplicatedLog().lastIndex());
-        raftActorContext.setLastApplied(raftActorContext.getReplicatedLog().lastIndex());
+        final var log = new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 5, 1).build();
+        log.setCommitIndex(log.lastIndex());
+        log.setLastApplied(log.lastIndex());
+        raftActorContext.setReplicatedLog(log);
         raftActorContext.setPeerAddresses(setupPeers(4));
         candidate = new Candidate(raftActorContext);
 
