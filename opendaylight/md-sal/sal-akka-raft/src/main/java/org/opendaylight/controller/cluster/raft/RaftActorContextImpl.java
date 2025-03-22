@@ -129,8 +129,7 @@ public class RaftActorContextImpl implements RaftActorContext {
         this.configParams = configParams;
     }
 
-    @Override
-    public ActorSelection actorSelection(final String path) {
+    ActorSelection actorSelection(final String path) {
         return context.actorSelection(path);
     }
 
@@ -299,12 +298,9 @@ public class RaftActorContextImpl implements RaftActorContext {
     }
 
     @Override
-    public ActorSelection getPeerActorSelection(final String peerId) {
-        String peerAddress = getPeerAddress(peerId);
-        if (peerAddress != null) {
-            return actorSelection(peerAddress);
-        }
-        return null;
+    public final ActorSelection getPeerActorSelection(final String peerId) {
+        final var peerAddress = getPeerAddress(peerId);
+        return peerAddress != null ? actorSelection(peerAddress) : null;
     }
 
     @Override

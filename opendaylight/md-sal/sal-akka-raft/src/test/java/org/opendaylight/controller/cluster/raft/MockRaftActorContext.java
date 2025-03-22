@@ -75,22 +75,13 @@ public class MockRaftActorContext extends RaftActorContextImpl {
     }
 
     @Override
-    public ActorSelection actorSelection(final String path) {
+    final ActorSelection actorSelection(final String path) {
         return system.actorSelection(path);
     }
 
     @Override
-    public ActorSystem getActorSystem() {
+    public final ActorSystem getActorSystem() {
         return system;
-    }
-
-    @Override
-    public ActorSelection getPeerActorSelection(final String peerId) {
-        String peerAddress = getPeerAddress(peerId);
-        if (peerAddress != null) {
-            return actorSelection(peerAddress);
-        }
-        return null;
     }
 
     public void setPeerAddresses(final Map<String, String> peerAddresses) {

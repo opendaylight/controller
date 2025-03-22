@@ -698,20 +698,14 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     /**
-     * Derived actor can call getLeader if they need a reference to the Leader.
-     * This would be useful for example in forwarding a request to an actor
-     * which is the leader
+     * Derived actor can call getLeader if they need a reference to the Leader. This would be useful for example in
+     * forwarding a request to an actor which is the leader.
      *
-     * @return A reference to the leader if known, null otherwise
+     * @return A reference to the leader if known, {@code null} otherwise
      */
-    public ActorSelection getLeader() {
-        String leaderAddress = getLeaderAddress();
-
-        if (leaderAddress == null) {
-            return null;
-        }
-
-        return context.actorSelection(leaderAddress);
+    protected final @Nullable ActorSelection getLeader() {
+        final var leaderAddress = getLeaderAddress();
+        return leaderAddress != null ? getContext().actorSelection(leaderAddress) : null;
     }
 
     /**

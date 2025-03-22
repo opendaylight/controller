@@ -36,14 +36,6 @@ import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
  */
 public interface RaftActorContext {
     /**
-     * Creates an actor selection.
-     *
-     * @param path the path.
-     * @return an actor selection for the given actor path.
-     */
-    ActorSelection actorSelection(String path);
-
-    /**
      * Returns the identifier for the RaftActor. This identifier represents the
      * name of the actor whose common state is being shared.
      *
