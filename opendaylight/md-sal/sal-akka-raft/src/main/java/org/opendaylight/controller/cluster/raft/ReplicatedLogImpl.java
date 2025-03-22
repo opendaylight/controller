@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import java.util.List;
 import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -26,20 +25,27 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog {
     private static final int DATA_SIZE_DIVIDER = 5;
 
     private final RaftActorContext context;
+
     private long dataSizeSinceLastSnapshot = 0L;
 
-    private ReplicatedLogImpl(final RaftActorContext context, final long snapshotIndex, final long snapshotTerm,
-            final List<ReplicatedLogEntry> unAppliedEntries) {
-        super(context.getId(), snapshotIndex, snapshotTerm, unAppliedEntries);
+    ReplicatedLogImpl(final RaftActorContext context) {
+        super(context.getId());
         this.context = context;
     }
 
-    ReplicatedLogImpl(final RaftActorContext context) {
-        this(context, -1, -1, List.of());
-    }
-
     ReplicatedLogImpl(final RaftActorContext context, final Snapshot snapshot) {
-        this(context, snapshot.getLastAppliedIndex(), snapshot.getLastAppliedTerm(), snapshot.getUnAppliedEntries());
+        this(context);
+        setSnapshotIndex(snapshot.getLastAppliedIndex());
+        setSnapshotTerm(snapshot.getLastAppliedTerm());
+
+        final var unapplied = snapshot.getUnAppliedEntries();
+        final var size = unapplied.size();
+        if (size > 0) {
+            increaseJournalLogCapacity(size);
+            for (var entry : unapplied) {
+                append(entry);
+            }
+        }
     }
 
     @Override

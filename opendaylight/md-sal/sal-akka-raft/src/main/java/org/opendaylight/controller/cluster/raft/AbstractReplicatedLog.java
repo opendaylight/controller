@@ -31,7 +31,7 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
     final @NonNull String memberId;
 
     // We define this as ArrayList so we can use ensureCapacity.
-    private ArrayList<ReplicatedLogEntry> journal;
+    private ArrayList<ReplicatedLogEntry> journal = new ArrayList<>();
 
     private long snapshotIndex = -1;
     private long snapshotTerm = -1;
@@ -42,19 +42,11 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
     private long previousSnapshotTerm = -1;
     private int dataSize = 0;
 
-    protected AbstractReplicatedLog(final @NonNull String memberId, final long snapshotIndex, final long snapshotTerm,
-            final List<ReplicatedLogEntry> unAppliedEntries) {
+    protected AbstractReplicatedLog(final @NonNull String memberId) {
         this.memberId = requireNonNull(memberId);
-        this.snapshotIndex = snapshotIndex;
-        this.snapshotTerm = snapshotTerm;
-
-        journal = new ArrayList<>(unAppliedEntries.size());
-        for (var entry : unAppliedEntries) {
-            append(entry);
-        }
     }
 
-    protected int adjustedIndex(final long logEntryIndex) {
+    protected final int adjustedIndex(final long logEntryIndex) {
         if (snapshotIndex < 0) {
             return (int) logEntryIndex;
         }
@@ -62,7 +54,7 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
     }
 
     @Override
-    public ReplicatedLogEntry get(final long logEntryIndex) {
+    public final ReplicatedLogEntry get(final long logEntryIndex) {
         int adjustedIndex = adjustedIndex(logEntryIndex);
 
         if (adjustedIndex < 0 || adjustedIndex >= journal.size()) {

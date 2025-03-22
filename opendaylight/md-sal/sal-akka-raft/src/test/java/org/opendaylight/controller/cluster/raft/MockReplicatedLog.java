@@ -7,13 +7,12 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import java.util.List;
 import java.util.function.Consumer;
 import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
 
 final class MockReplicatedLog extends AbstractReplicatedLog {
     MockReplicatedLog() {
-        super("", -1L, -1L, List.of());
+        super("");
     }
 
     @Override

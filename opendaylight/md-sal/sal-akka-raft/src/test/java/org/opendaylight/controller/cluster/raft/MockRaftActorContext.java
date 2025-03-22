@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import org.apache.pekko.actor.ActorRef;
@@ -138,7 +137,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
 
     public static class SimpleReplicatedLog extends AbstractReplicatedLog {
         public SimpleReplicatedLog() {
-            super("", -1L, -1L, List.of());
+            super("");
         }
 
         @Override
