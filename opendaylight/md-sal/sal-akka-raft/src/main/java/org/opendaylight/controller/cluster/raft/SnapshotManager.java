@@ -21,6 +21,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStream;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.SnapshotComplete;
+import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader.SnapshotBytes;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
@@ -330,8 +331,7 @@ public final class SnapshotManager {
                 throw new VerifyException("Unexpected stream " + installSnapshotStream);
             }
 
-            final var currentBehavior = context.getCurrentBehavior();
-            if (!memberId().equals(currentBehavior.getLeaderId())) {
+            if (!(context.getCurrentBehavior() instanceof AbstractLeader leader)) {
                 snapshotStream.cleanup();
                 return;
             }
@@ -344,7 +344,7 @@ public final class SnapshotManager {
                 return;
             }
 
-            currentBehavior.handleMessage(context.getActor(),
+            leader.handleMessage(context.getActor(),
                 new SnapshotBytes(request.getLastAppliedIndex(), request.getLastAppliedTerm(), bytes));
         }
     }

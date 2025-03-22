@@ -40,7 +40,7 @@ import org.opendaylight.controller.cluster.io.FileBackedOutputStreamFactory;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.SnapshotComplete;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader.SnapshotBytes;
-import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
+import org.opendaylight.controller.cluster.raft.behaviors.Leader;
 import org.opendaylight.controller.cluster.raft.persisted.ByteState;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
@@ -60,7 +60,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     @Mock
     private DataPersistenceProvider mockDataPersistenceProvider;
     @Mock
-    private RaftActorBehavior mockRaftActorBehavior;
+    private Leader mockRaftActorBehavior;
     @Mock
     private RaftActorSnapshotCohort<?> mockCohort;
     @Mock
@@ -87,8 +87,6 @@ public class SnapshotManagerTest extends AbstractActorTest {
         doCallRealMethod().when(mockReplicatedLog).lookupMeta(anyLong());
         doReturn(mockDataPersistenceProvider).when(mockRaftActorContext).getPersistenceProvider();
         doReturn(mockRaftActorBehavior).when(mockRaftActorContext).getCurrentBehavior();
-        doReturn("123").when(mockRaftActorBehavior).getLeaderId();
-
         doReturn(mockTermInfo).when(mockRaftActorContext).termInfo();
 
         doReturn(new FileBackedOutputStreamFactory(10000000, "target"))
@@ -320,6 +318,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
     @Test
     public void testPersistSendInstallSnapshot() throws Exception {
+
         doReturn(Integer.MAX_VALUE).when(mockReplicatedLog).dataSize();
         doNothing().when(mockCohort).createSnapshot(any(), any());
 
