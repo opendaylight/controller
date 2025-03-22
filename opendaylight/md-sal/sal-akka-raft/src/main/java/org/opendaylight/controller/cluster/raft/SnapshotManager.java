@@ -459,7 +459,7 @@ public final class SnapshotManager {
             case PersistApply(var lastSeq, var snapshot, var callback) -> {
                 try {
                     // clears the followers log, sets the snapshot index to ensure adjusted-index works
-                    context.setReplicatedLog(new ReplicatedLogImpl(context, snapshot));
+                    context.getReplicatedLog().resetToSnapshot(snapshot);
                     // FIXME: This may be coming from the leader: we do not want to pollute our TermInfo if it is for
                     //        this term: we may need to know who we voted for in the next elections.
                     //        This behavior means we report as if we voted for the leader.
