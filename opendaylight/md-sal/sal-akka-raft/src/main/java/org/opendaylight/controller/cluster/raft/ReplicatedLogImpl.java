@@ -11,7 +11,6 @@ import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,24 +30,6 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog {
     ReplicatedLogImpl(final RaftActorContext context) {
         super(context.getId());
         this.context = context;
-    }
-
-    ReplicatedLogImpl(final RaftActorContext context, final Snapshot snapshot) {
-        this(context);
-        setSnapshotIndex(snapshot.getLastAppliedIndex());
-        setSnapshotTerm(snapshot.getLastAppliedTerm());
-
-        final var unapplied = snapshot.getUnAppliedEntries();
-        final var size = unapplied.size();
-        if (size > 0) {
-            increaseJournalLogCapacity(size);
-            for (var entry : unapplied) {
-                append(entry);
-            }
-        }
-
-        setLastApplied(snapshot.getLastAppliedIndex());
-        setCommitIndex(snapshot.getLastAppliedIndex());
     }
 
     @Override
