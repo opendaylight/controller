@@ -352,9 +352,9 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         // Clear all the messages
         MessageCollectorActor.clearMessages(followerActor);
 
+        setLastLogEntry(context, 1, 101, new MockRaftActorContext.MockPayload(""));
         context.setLastApplied(101);
         context.setCommitIndex(101);
-        setLastLogEntry(context, 1, 101, new MockRaftActorContext.MockPayload(""));
 
         entries = List.of(newReplicatedLogEntry(2, 101, "foo"));
 
@@ -436,9 +436,9 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         // Clear all the messages
         MessageCollectorActor.clearMessages(followerActor);
 
+        setLastLogEntry(context, 1, 101, new MockRaftActorContext.MockPayload(""));
         context.setLastApplied(101);
         context.setCommitIndex(101);
-        setLastLogEntry(context, 1, 101, new MockRaftActorContext.MockPayload(""));
 
         entries = List.of(newReplicatedLogEntry(2, 101, "foo"));
 
@@ -453,9 +453,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         // Clear all the messages
         MessageCollectorActor.clearMessages(followerActor);
 
+        setLastLogEntry(context, 1, 100, new MockRaftActorContext.MockPayload(""));
         context.setLastApplied(100);
-        setLastLogEntry(context, 1, 100,
-                new MockRaftActorContext.MockPayload(""));
 
         entries = List.of(newReplicatedLogEntry(2, 101, "foo"));
 
@@ -479,14 +478,13 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     public void testHandleAppendEntriesWithNewerCommitIndex() {
         logStart("testHandleAppendEntriesWithNewerCommitIndex");
 
-        MockRaftActorContext context = createActorContext();
+        final var context = createActorContext();
 
-        context.setLastApplied(100);
-        setLastLogEntry(context, 1, 100,
-                new MockRaftActorContext.MockPayload(""));
+        setLastLogEntry(context, 1, 100, new MockRaftActorContext.MockPayload(""));
+        context.getReplicatedLog().setLastApplied(100);
         context.getReplicatedLog().setSnapshotIndex(99);
 
-        List<ReplicatedLogEntry> entries = List.of(newReplicatedLogEntry(2, 101, "foo"));
+        final var entries = List.of(newReplicatedLogEntry(2, 101, "foo"));
 
         // The new commitIndex is 101
         AppendEntries appendEntries = new AppendEntries(2, "leader-1", 100, 1, entries, 101, 100, (short)0);
@@ -968,10 +966,9 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         // Clear all the messages
         MessageCollectorActor.clearMessages(followerActor);
 
+        setLastLogEntry(context, 1, 101, new MockRaftActorContext.MockPayload(""));
         context.setLastApplied(101);
         context.setCommitIndex(101);
-        setLastLogEntry(context, 1, 101,
-                new MockRaftActorContext.MockPayload(""));
 
         List<ReplicatedLogEntry> entries = List.of(newReplicatedLogEntry(2, 101, "foo"));
 

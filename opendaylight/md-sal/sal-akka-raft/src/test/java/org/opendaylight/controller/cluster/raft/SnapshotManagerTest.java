@@ -221,7 +221,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         doReturn(true).when(mockRaftActorContext).hasFollowers();
 
-        doReturn(8L).when(mockRaftActorContext).getLastApplied();
+        doReturn(8L).when(mockReplicatedLog).getLastApplied();
 
         final var lastLogEntry = new SimpleReplicatedLogEntry(9L, 3L, new MockRaftActorContext.MockPayload());
         final var lastAppliedEntry = new SimpleReplicatedLogEntry(8L, 2L, new MockRaftActorContext.MockPayload());

@@ -57,8 +57,8 @@ class ReplicatedLogImplTest {
 
     @BeforeEach
     public void setup() {
-        context = new RaftActorContextImpl(null, null, new LocalAccess("test", stateDir), -1, -1, Map.of(),
-            configParams, (short) 0, mockPersistence, applyState -> { }, MoreExecutors.directExecutor());
+        context = new RaftActorContextImpl(null, null, new LocalAccess("test", stateDir), Map.of(), configParams,
+            (short) 0, mockPersistence, applyState -> { }, MoreExecutors.directExecutor());
     }
 
     private void verifyPersist(final Object message) throws Exception {

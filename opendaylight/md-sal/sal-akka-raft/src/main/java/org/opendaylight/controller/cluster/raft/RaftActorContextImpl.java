@@ -58,10 +58,6 @@ public class RaftActorContextImpl implements RaftActorContext {
     private final @NonNull String id;
     private final @NonNull TermInfoStore termInformation;
 
-    private long commitIndex;
-
-    private long lastApplied;
-
     private ReplicatedLog replicatedLog;
 
     private final Map<String, PeerInfo> peerInfoMap = new HashMap<>();
@@ -96,17 +92,14 @@ public class RaftActorContextImpl implements RaftActorContext {
     private RaftActorLeadershipTransferCohort leadershipTransferCohort;
 
     public RaftActorContextImpl(final ActorRef actor, final ActorContext context, final @NonNull LocalAccess localStore,
-            final long commitIndex, final long lastApplied, final @NonNull Map<String, String> peerAddresses,
-            final @NonNull ConfigParams configParams, final short payloadVersion,
-            final @NonNull DataPersistenceProvider persistenceProvider,
+            final @NonNull Map<String, String> peerAddresses, final @NonNull ConfigParams configParams,
+            final short payloadVersion, final @NonNull DataPersistenceProvider persistenceProvider,
             final @NonNull Consumer<ApplyState> applyStateConsumer, final @NonNull Executor executor) {
         this.actor = actor;
         this.context = context;
         id = localStore.memberId();
         termInformation = localStore.termInfoStore();
         this.executor = requireNonNull(executor);
-        this.commitIndex = commitIndex;
-        this.lastApplied = lastApplied;
         this.configParams = requireNonNull(configParams);
         this.payloadVersion = payloadVersion;
         this.persistenceProvider = requireNonNull(persistenceProvider);
@@ -178,28 +171,6 @@ public class RaftActorContextImpl implements RaftActorContext {
     @Override
     public void persistTermInfo(final TermInfo newElectionInfo) throws IOException {
         termInformation.storeAndSetTerm(newElectionInfo);
-    }
-
-    @Override
-    public long getCommitIndex() {
-        return commitIndex;
-    }
-
-    @Override
-    public void setCommitIndex(final long commitIndex) {
-        this.commitIndex = commitIndex;
-    }
-
-    @Override
-    public long getLastApplied() {
-        return lastApplied;
-    }
-
-    @Override
-    public void setLastApplied(final long lastApplied) {
-        LOG.debug("{}: Moving last applied index from {} to {}", id, this.lastApplied, lastApplied,
-            LOG.isTraceEnabled() ? new Throwable() : null);
-        this.lastApplied = lastApplied;
     }
 
     @Override

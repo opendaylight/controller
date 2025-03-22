@@ -348,7 +348,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         //     and log[N].term == currentTerm:
         //   set commitIndex = N (§5.3, §5.4).
         final var replLog = context.getReplicatedLog();
-        for (long index = context.getCommitIndex() + 1; ; index++) {
+        for (long index = replLog.getCommitIndex() + 1; ; index++) {
             final var logEntry = replLog.get(index);
             if (logEntry == null) {
                 LOG.trace("{}: ReplicatedLogEntry not found for index {} - snapshotIndex: {}, journal size: {}",
@@ -396,7 +396,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
             // counting replicas, then all prior entries are committed indirectly".
             if (logEntry.term() == currentTerm()) {
                 LOG.trace("{}: Setting commit index to {}", logName, index);
-                context.setCommitIndex(index);
+                replLog.setCommitIndex(index);
             } else {
                 LOG.debug("{}: Not updating commit index to {} - retrieved log entry with index {}, term {} does not "
                     + "match the current term {}", logName, index, logEntry.index(), logEntry.term(), currentTerm());
@@ -404,11 +404,11 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         }
 
         // Apply the change to the state machine
-        if (context.getCommitIndex() > context.getLastApplied()) {
+        if (replLog.getCommitIndex() > replLog.getLastApplied()) {
             LOG.debug("{}: Applying to log - commitIndex: {}, lastAppliedIndex: {}", logName,
-                    context.getCommitIndex(), context.getLastApplied());
+                replLog.getCommitIndex(), replLog.getLastApplied());
 
-            applyLogToStateMachine(context.getCommitIndex());
+            applyLogToStateMachine(replLog.getCommitIndex());
         }
 
         if (!context.getSnapshotManager().isCapturing()) {

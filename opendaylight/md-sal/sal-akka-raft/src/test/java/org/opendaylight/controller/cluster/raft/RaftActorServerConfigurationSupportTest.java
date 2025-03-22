@@ -232,10 +232,10 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         setupNewFollower();
         RaftActorContext initialActorContext = new MockRaftActorContext();
+        initialActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder()
+            .createEntries(0, 2, 1).build());
         initialActorContext.setCommitIndex(1);
         initialActorContext.setLastApplied(1);
-        initialActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(
-                0, 2, 1).build());
 
         TestActorRef<MockLeaderRaftActor> leaderActor = actorFactory.createTestActor(
                 MockLeaderRaftActor.props(stateDir(), Map.of(), initialActorContext)
@@ -1474,9 +1474,8 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         configParams.setElectionTimeoutFactor(100000);
 
         return new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
-            new LocalAccess(id, new FailingTermInfoStore(1, LEADER_ID)),
-            -1, -1, Map.of(LEADER_ID, ""), configParams, (short) 0,  TestDataProvider.INSTANCE,
-            applyState -> actor.tell(applyState, actor), MoreExecutors.directExecutor());
+            new LocalAccess(id, new FailingTermInfoStore(1, LEADER_ID)), Map.of(LEADER_ID, ""), configParams, (short) 0,
+            TestDataProvider.INSTANCE, applyState -> actor.tell(applyState, actor), MoreExecutors.directExecutor());
     }
 
     abstract static class AbstractMockRaftActor extends MockRaftActor {
@@ -1551,14 +1550,17 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
             setPersistence(false);
 
             final var context = getRaftActorContext();
-            for (int i = 0; i < fromContext.getReplicatedLog().size(); i++) {
-                final var entry = fromContext.getReplicatedLog().get(i);
+            final var fromLog = fromContext.getReplicatedLog();
+            final var toLog = context.getReplicatedLog();
+
+            for (int i = 0; i < fromLog.size(); i++) {
+                final var entry = fromLog.get(i);
                 getState().add(entry.getData());
-                context.getReplicatedLog().append(entry);
+                toLog.append(entry);
             }
 
             context.setCommitIndex(fromContext.getCommitIndex());
-            context.setLastApplied(fromContext.getLastApplied());
+            toLog.setLastApplied(fromLog.getLastApplied());
             context.setTermInfo(fromContext.termInfo());
         }
 

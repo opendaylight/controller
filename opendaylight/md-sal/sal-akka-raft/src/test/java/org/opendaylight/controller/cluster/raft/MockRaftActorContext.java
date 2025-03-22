@@ -41,14 +41,14 @@ public class MockRaftActorContext extends RaftActorContextImpl {
     }
 
     public MockRaftActorContext(final int payloadVersion) {
-        super(null, null, newLocalAccess("test"), -1, -1, new HashMap<>(), new DefaultConfigParamsImpl(),
+        super(null, null, newLocalAccess("test"), new HashMap<>(), new DefaultConfigParamsImpl(),
             (short) payloadVersion, TestDataProvider.INSTANCE, applyState -> { }, MoreExecutors.directExecutor());
         setReplicatedLog(new MockReplicatedLogBuilder().build());
     }
 
     public MockRaftActorContext(final String id, final ActorSystem system, final ActorRef actor,
             final int payloadVersion) {
-        super(actor, null, newLocalAccess(id), -1, -1, new HashMap<>(), new DefaultConfigParamsImpl(),
+        super(actor, null, newLocalAccess(id), new HashMap<>(), new DefaultConfigParamsImpl(),
             (short) payloadVersion, TestDataProvider.INSTANCE, applyState -> actor.tell(applyState, actor),
             MoreExecutors.directExecutor());
         this.system = system;
@@ -70,7 +70,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         replicatedLog.append(new SimpleReplicatedLogEntry(1, term, new MockPayload("2")));
         setReplicatedLog(replicatedLog);
         setCommitIndex(replicatedLog.lastIndex());
-        setLastApplied(replicatedLog.lastIndex());
+        replicatedLog.setLastApplied(replicatedLog.lastIndex());
     }
 
     @Override

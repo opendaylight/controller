@@ -281,8 +281,8 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         raftBehavior.close();
     }
 
-    protected MockRaftActorContext.SimpleReplicatedLog setLastLogEntry(
-        final MockRaftActorContext actorContext, final long term, final long index, final Payload data) {
+    protected MockRaftActorContext.SimpleReplicatedLog setLastLogEntry(final MockRaftActorContext actorContext,
+            final long term, final long index, final Payload data) {
         return setLastLogEntry(actorContext, new SimpleReplicatedLogEntry(index, term, data));
     }
 

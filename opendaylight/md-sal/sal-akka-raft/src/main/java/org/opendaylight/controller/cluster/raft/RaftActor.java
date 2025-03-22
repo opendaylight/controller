@@ -126,7 +126,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         localAccess = new LocalAccess(memberId, stateDir.resolve(memberId));
         dataPersistenceProvider = new RaftActorDataPersistenceProvider(this);
 
-        context = new RaftActorContextImpl(self(), getContext(), localAccess, -1, -1, peerAddresses,
+        context = new RaftActorContextImpl(self(), getContext(), localAccess, peerAddresses,
             configParams.orElseGet(DefaultConfigParamsImpl::new), payloadVersion, dataPersistenceProvider,
             this::handleApplyState, this::executeInSelf);
         context.setReplicatedLog(new ReplicatedLogImpl(context));
@@ -632,10 +632,12 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             // Clear the persistence pending flag in the log entry.
             persistedEntry.setPersistencePending(false);
 
+            final var currentLog = context.getReplicatedLog();
+
             if (!hasFollowers()) {
                 // Increment the Commit Index and the Last Applied values
-                context.setCommitIndex(persistedEntry.index());
-                context.setLastApplied(persistedEntry.index());
+                currentLog.setCommitIndex(persistedEntry.index());
+                currentLog.setLastApplied(persistedEntry.index());
 
                 // Apply the state immediately.
                 handleApplyState(new ApplyState(clientActor, identifier, persistedEntry));
@@ -645,7 +647,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 self().tell(new ApplyJournalEntries(persistedEntry.index()), self());
 
             } else {
-                context.getReplicatedLog().captureSnapshotIfReady(persistedEntry);
+                currentLog.captureSnapshotIfReady(persistedEntry);
 
                 // Local persistence is complete so send the CheckConsensusReached message to the behavior (which
                 // normally should still be the leader) to check if consensus has now been reached in conjunction with

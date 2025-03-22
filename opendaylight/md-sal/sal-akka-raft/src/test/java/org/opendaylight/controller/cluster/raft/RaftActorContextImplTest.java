@@ -53,7 +53,7 @@ public class RaftActorContextImplTest extends AbstractActorTest {
         peerMap.put("peer2", null);
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         RaftActorContextImpl context = new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
-            new LocalAccess("test", new TestTermInfoStore()), -1, -1, peerMap, configParams, (short) 0,
+            new LocalAccess("test", new TestTermInfoStore()), peerMap, configParams, (short) 0,
             TestDataProvider.INSTANCE, applyState -> { },  MoreExecutors.directExecutor());
 
         assertEquals("getPeerAddress", "peerAddress1", context.getPeerAddress("peer1"));
@@ -77,7 +77,7 @@ public class RaftActorContextImplTest extends AbstractActorTest {
     public void testSetPeerAddress() {
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         RaftActorContextImpl context = new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
-            new LocalAccess("test", new TestTermInfoStore()), -1, -1, Map.of("peer1", "peerAddress1"), configParams,
+            new LocalAccess("test", new TestTermInfoStore()), Map.of("peer1", "peerAddress1"), configParams,
             (short) 0, TestDataProvider.INSTANCE, applyState -> { }, MoreExecutors.directExecutor());
 
         context.setPeerAddress("peer1", "peerAddress1_1");
@@ -90,7 +90,7 @@ public class RaftActorContextImplTest extends AbstractActorTest {
     @Test
     public void testUpdatePeerIds() {
         RaftActorContextImpl context = new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
-            new LocalAccess("self", new TestTermInfoStore()), -1, -1, Map.of("peer1", "peerAddress1"),
+            new LocalAccess("self", new TestTermInfoStore()), Map.of("peer1", "peerAddress1"),
             new DefaultConfigParamsImpl(), (short) 0, TestDataProvider.INSTANCE, applyState -> { },
             MoreExecutors.directExecutor());
 
