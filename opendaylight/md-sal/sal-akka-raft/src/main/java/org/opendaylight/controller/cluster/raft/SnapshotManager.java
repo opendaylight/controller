@@ -21,6 +21,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStream;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.SnapshotComplete;
+import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader.SendInstallSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
@@ -398,10 +399,10 @@ public final class SnapshotManager {
                 throw new VerifyException("Unexpected stream " + installSnapshotStream);
             }
 
-            if (memberId().equals(currentBehavior.getLeaderId())) {
+            if (currentBehavior instanceof AbstractLeader leader) {
                 try {
                     final var snapshotBytes = snapshotStream.asByteSource();
-                    currentBehavior.handleMessage(context.getActor(), new SendInstallSnapshot(snapshot, snapshotBytes));
+                    leader.handleMessage(context.getActor(), new SendInstallSnapshot(snapshot, snapshotBytes));
                 } catch (IOException e) {
                     LOG.error("{}: Snapshot install failed due to an unrecoverable streaming error", memberId(), e);
                 }
