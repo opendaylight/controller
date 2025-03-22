@@ -63,7 +63,7 @@ public final class FollowerLogInformation {
      */
     @VisibleForTesting
     FollowerLogInformation(final PeerInfo peerInfo, final long matchIndex, final RaftActorContext context) {
-        nextIndex = context.getCommitIndex();
+        nextIndex = context.getReplicatedLog().getCommitIndex();
         this.matchIndex = matchIndex;
         this.context = context;
         this.peerInfo = requireNonNull(peerInfo);

@@ -402,14 +402,14 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
             final long replicatedToAllIndex) {
         TestRaftActor actor = actorRef.underlyingActor();
         RaftActorContext context = actor.getRaftActorContext();
+        final var log = context.getReplicatedLog();
         long snapshotIndex = lastIndex - 1;
-        assertEquals(name + " snapshot term", snapshotIndex < 0 ? -1 : currentTerm,
-                context.getReplicatedLog().getSnapshotTerm());
-        assertEquals(name + " snapshot index", snapshotIndex, context.getReplicatedLog().getSnapshotIndex());
-        assertEquals(name + " journal log size", 1, context.getReplicatedLog().size());
-        assertEquals(name + " journal last index", lastIndex, context.getReplicatedLog().lastIndex());
-        assertEquals(name + " commit index", lastIndex, context.getCommitIndex());
-        assertEquals(name + " last applied", lastIndex, context.getLastApplied());
+        assertEquals(name + " snapshot term", snapshotIndex < 0 ? -1 : currentTerm, log.getSnapshotTerm());
+        assertEquals(name + " snapshot index", snapshotIndex, log.getSnapshotIndex());
+        assertEquals(name + " journal log size", 1, log.size());
+        assertEquals(name + " journal last index", lastIndex, log.lastIndex());
+        assertEquals(name + " commit index", lastIndex, log.getCommitIndex());
+        assertEquals(name + " last applied", lastIndex, log.getLastApplied());
         assertEquals(name + " replicatedToAllIndex", replicatedToAllIndex,
                 actor.getCurrentBehavior().getReplicatedToAllIndex());
     }

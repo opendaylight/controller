@@ -106,7 +106,7 @@ public class FollowerLogInformationTest {
     public void testNonVotingState() {
         final PeerInfo peerInfo = new PeerInfo("follower1", null, VotingState.NON_VOTING);
         MockRaftActorContext context = new MockRaftActorContext();
-        context.setCommitIndex(0);
+        context.getReplicatedLog().setCommitIndex(0);
         FollowerLogInformation followerLogInformation = new FollowerLogInformation(peerInfo, context);
 
         assertTrue(followerLogInformation.okToReplicate(0));
@@ -118,7 +118,7 @@ public class FollowerLogInformationTest {
     @Test
     public void testDecrNextIndex() {
         MockRaftActorContext context = new MockRaftActorContext();
-        context.setCommitIndex(1);
+        context.getReplicatedLog().setCommitIndex(1);
         FollowerLogInformation followerLogInformation =
                 new FollowerLogInformation(new PeerInfo("follower1", null, VotingState.VOTING), 1, context);
 

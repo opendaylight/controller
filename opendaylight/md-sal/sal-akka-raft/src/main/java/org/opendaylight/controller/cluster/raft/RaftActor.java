@@ -249,9 +249,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 // as we delete messages from the persistent journal which have made it to the snapshot
                 // capturing the snapshot before applying makes the persistent journal and snapshot out of sync
                 // and recovery shows data missing
-                context.getReplicatedLog().captureSnapshotIfReady(applyState.getReplicatedLogEntry());
+                replicatedLog().captureSnapshotIfReady(applyState.getReplicatedLogEntry());
 
-                context.getSnapshotManager().trimLog(context.getLastApplied());
+                context.getSnapshotManager().trimLog(replicatedLog().getLastApplied());
             }
 
             possiblyHandleBehaviorMessage(message);
@@ -303,8 +303,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                     + " Current behavior: {}. Sending failure response",
                     memberId(), message, getCurrentBehavior().state());
             message.getReplyTo().tell(new LeadershipTransferFailedException("Cannot transfer leader to "
-                    + requestedFollowerId
-                    + ". RequestLeadership message was sent to non-leader " + memberId()), self());
+                + requestedFollowerId + ". RequestLeadership message was sent to non-leader " + memberId()), self());
             return;
         }
 
@@ -478,20 +477,22 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         final var currentBehavior = getCurrentBehavior();
         final var termInfo = context.termInfo();
+        final var replLog = replicatedLog();
+
         final var builder = newOnDemandRaftStateBuilder()
-                .commitIndex(context.getCommitIndex())
+                .commitIndex(replLog.getCommitIndex())
                 .currentTerm(termInfo.term())
-                .inMemoryJournalDataSize(replicatedLog().dataSize())
-                .inMemoryJournalLogSize(replicatedLog().size())
+                .inMemoryJournalDataSize(replLog.dataSize())
+                .inMemoryJournalLogSize(replLog.size())
                 .isSnapshotCaptureInitiated(context.getSnapshotManager().isCapturing())
-                .lastApplied(context.getLastApplied())
-                .lastIndex(replicatedLog().lastIndex())
-                .lastTerm(replicatedLog().lastTerm())
+                .lastApplied(replLog.getLastApplied())
+                .lastIndex(replLog.lastIndex())
+                .lastTerm(replLog.lastTerm())
                 .leader(getLeaderId())
                 .raftState(currentBehavior.state().toString())
                 .replicatedToAllIndex(currentBehavior.getReplicatedToAllIndex())
-                .snapshotIndex(replicatedLog().getSnapshotIndex())
-                .snapshotTerm(replicatedLog().getSnapshotTerm())
+                .snapshotIndex(replLog.getSnapshotIndex())
+                .snapshotTerm(replLog.getSnapshotTerm())
                 .votedFor(termInfo.votedFor())
                 .isVoting(context.isVotingMember())
                 .peerAddresses(peerAddresses)
@@ -632,7 +633,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             // Clear the persistence pending flag in the log entry.
             persistedEntry.setPersistencePending(false);
 
-            final var currentLog = context.getReplicatedLog();
+            final var currentLog = replicatedLog();
 
             if (!hasFollowers()) {
                 // Increment the Commit Index and the Last Applied values
@@ -914,8 +915,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         final var termInfo = context.termInfo();
         final var clusterConfig = context.getPeerServerInfo(true);
         if (isRecoveryApplicable()) {
-            final var captureSnapshot = context.getSnapshotManager().newCaptureSnapshot(
-                    context.getReplicatedLog().lastMeta(), -1, true);
+            final var captureSnapshot = context.getSnapshotManager().newCaptureSnapshot(replicatedLog().lastMeta(), -1,
+                true);
 
             return Snapshot.create(getRaftActorSnapshotCohort().takeSnapshot(), captureSnapshot.getUnAppliedEntries(),
                 captureSnapshot.getLastIndex(), captureSnapshot.getLastTerm(),

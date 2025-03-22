@@ -545,7 +545,8 @@ public final class SnapshotManager {
         }
 
         //  we would want to keep the lastApplied as its used while capturing snapshots
-        long lastApplied = context.getLastApplied();
+        final var replLog = context.getReplicatedLog();
+        long lastApplied = replLog.getLastApplied();
         long tempMin = Math.min(desiredTrimIndex, lastApplied > -1 ? lastApplied - 1 : -1);
 
         if (LOG.isTraceEnabled()) {
@@ -554,7 +555,6 @@ public final class SnapshotManager {
         }
 
         if (tempMin > -1) {
-            final var replLog = context.getReplicatedLog();
             if (replLog.isPresent(tempMin)) {
                 LOG.debug("{}: fakeSnapshot purging log to {} for term {}", memberId(), tempMin, context.currentTerm());
 

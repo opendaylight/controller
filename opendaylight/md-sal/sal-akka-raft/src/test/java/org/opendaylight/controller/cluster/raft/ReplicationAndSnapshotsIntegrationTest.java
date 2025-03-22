@@ -137,12 +137,13 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
 
         // The leader should have performed fake snapshots due to the follower's AppendEntriesReplies and
         // trimmed the in-memory log so that only the last entry remains.
-        assertEquals("Leader snapshot term", initialTerm, leaderContext.getReplicatedLog().getSnapshotTerm());
-        assertEquals("Leader snapshot index", 1, leaderContext.getReplicatedLog().getSnapshotIndex());
-        assertEquals("Leader journal log size", 1, leaderContext.getReplicatedLog().size());
-        assertEquals("Leader journal last index", 2, leaderContext.getReplicatedLog().lastIndex());
-        assertEquals("Leader commit index", 2, leaderContext.getCommitIndex());
-        assertEquals("Leader last applied", 2, leaderContext.getLastApplied());
+        final var leaderLog = leaderContext.getReplicatedLog();
+        assertEquals("Leader snapshot term", initialTerm, leaderLog.getSnapshotTerm());
+        assertEquals("Leader snapshot index", 1, leaderLog.getSnapshotIndex());
+        assertEquals("Leader journal log size", 1, leaderLog.size());
+        assertEquals("Leader journal last index", 2, leaderLog.lastIndex());
+        assertEquals("Leader commit index", 2, leaderLog.getCommitIndex());
+        assertEquals("Leader last applied", 2, leaderLog.getLastApplied());
         assertEquals("Leader replicatedToAllIndex", 1, leader.getReplicatedToAllIndex());
 
         // Verify the follower's persisted journal log.
