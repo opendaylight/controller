@@ -188,8 +188,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
         RaftActorBehavior newBehavior = candidate.handleMessage(peerActors[0], new AppendEntries(1, "test", 0, 0,
                 List.of(), 0, -1, (short) 0));
 
-        AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(
-                peerActors[0], AppendEntriesReply.class);
+        AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(peerActors[0], AppendEntriesReply.class);
         assertFalse("isSuccess", reply.isSuccess());
         assertEquals("getTerm", 2, reply.getTerm());
         assertTrue("New Behavior : " + newBehavior, newBehavior instanceof Candidate);
@@ -227,8 +226,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
         setupPeers(1);
         candidate.handleMessage(peerActors[0], new RequestVote(1, "test", 0, 0));
 
-        RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(
-                peerActors[0], RequestVoteReply.class);
+        RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(peerActors[0], RequestVoteReply.class);
         assertFalse("isVoteGranted", reply.isVoteGranted());
         assertEquals("getTerm", 2, reply.getTerm());
     }
@@ -245,8 +243,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
         setupPeers(1);
         candidate.handleMessage(peerActors[0], new RequestVote(1001, context.getId(), 10000, 999));
 
-        RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(
-                peerActors[0], RequestVoteReply.class);
+        RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(peerActors[0], RequestVoteReply.class);
         assertTrue("isVoteGranted", reply.isVoteGranted());
         assertEquals("getTerm", 1001, reply.getTerm());
     }
@@ -266,8 +263,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
         // (it votes for itself)
         candidate.handleMessage(peerActors[0], new RequestVote(1001, "candidate2", 10000, 999));
 
-        RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(
-                peerActors[0], RequestVoteReply.class);
+        RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(peerActors[0], RequestVoteReply.class);
         assertFalse("isVoteGranted", reply.isVoteGranted());
         assertEquals("getTerm", 1001, reply.getTerm());
     }
