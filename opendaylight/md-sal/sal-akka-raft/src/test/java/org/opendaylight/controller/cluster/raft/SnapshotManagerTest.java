@@ -14,6 +14,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -24,6 +25,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
+import com.google.common.io.ByteSource;
 import java.io.OutputStream;
 import java.util.List;
 import org.apache.pekko.actor.ActorRef;
@@ -39,7 +41,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.io.FileBackedOutputStreamFactory;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.SnapshotComplete;
-import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader.SnapshotBytes;
 import org.opendaylight.controller.cluster.raft.behaviors.Leader;
 import org.opendaylight.controller.cluster.raft.persisted.ByteState;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
@@ -344,13 +345,11 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         verify(mockReplicatedLog).snapshotPreCommit(9L, 6L);
 
-        final var sendInstallSnapshotArgumentCaptor = ArgumentCaptor.forClass(SnapshotBytes.class);
+        final var byteSourceCaptor = ArgumentCaptor.forClass(ByteSource.class);
 
-        verify(mockRaftActorBehavior).handleMessage(any(ActorRef.class), sendInstallSnapshotArgumentCaptor.capture());
+        verify(mockRaftActorBehavior).sendInstallSnapshot(eq(9L), eq(6L), byteSourceCaptor.capture());
 
-        final var sendInstallSnapshot = sendInstallSnapshotArgumentCaptor.getValue();
-
-        assertArrayEquals("state", snapshotState.bytes(), sendInstallSnapshot.bytes().read());
+        assertArrayEquals("state", snapshotState.bytes(), byteSourceCaptor.getValue().read());
     }
 
     @Test
@@ -361,7 +360,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         verify(mockReplicatedLog, never()).snapshotPreCommit(9L, 6L);
 
-        verify(mockRaftActorBehavior, never()).handleMessage(any(ActorRef.class), any(SnapshotBytes.class));
+        verify(mockRaftActorBehavior, never()).sendInstallSnapshot(anyLong(), anyLong(), any());
     }
 
     @Test

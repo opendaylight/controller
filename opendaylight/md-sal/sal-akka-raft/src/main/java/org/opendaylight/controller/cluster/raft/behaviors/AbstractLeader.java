@@ -74,13 +74,9 @@ import org.slf4j.LoggerFactory;
  * </ul>
  */
 public abstract sealed class AbstractLeader extends RaftActorBehavior permits IsolatedLeader, Leader, PreLeader {
-    /**
-     * Internal message sent from the SnapshotManager to its associated leader when a snapshot capture is complete to
-     * prompt the leader to install the snapshot on its followers as needed.
-     */
     @NonNullByDefault
-    public record SnapshotBytes(long index, long term, ByteSource bytes) {
-        public SnapshotBytes {
+    private record SnapshotHolder(long index, long term, ByteSource bytes) {
+        public SnapshotHolder {
             requireNonNull(bytes);
         }
     }
@@ -106,7 +102,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
     private final MessageSlicer appendEntriesMessageSlicer;
 
     private Cancellable heartbeatSchedule = null;
-    private SnapshotBytes snapshotHolder = null;
+    private SnapshotHolder snapshotHolder = null;
     private int minReplicationCount;
 
     AbstractLeader(final RaftActorContext context, final RaftState state,
@@ -523,8 +519,6 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
             beforeSendHeartbeat();
             sendHeartBeat();
             scheduleHeartBeat(context.getConfigParams().getHeartBeatInterval());
-        } else if (message instanceof SnapshotBytes snapshotBytes) {
-            sendInstallSnapshot(snapshotBytes);
         } else if (message instanceof Replicate replicate) {
             replicate(replicate);
         } else if (message instanceof InstallSnapshotReply installSnapshotReply) {
@@ -904,8 +898,8 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
     }
 
     @NonNullByDefault
-    private void sendInstallSnapshot(final SnapshotBytes snapshotBytes) {
-        snapshotHolder = snapshotBytes;
+    public final void sendInstallSnapshot(final long index, final long term, final ByteSource bytes) {
+        setSnapshot(index, term, bytes);
 
         LOG.debug("{}: sendInstallSnapshot", logName);
         for (var entry : followerToLog.entrySet()) {
@@ -934,7 +928,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
      * Sends a snapshot chunk to a given follower. InstallSnapshot should qualify as a heartbeat too.
      */
     private void sendSnapshotChunk(final ActorSelection followerActor, final FollowerLogInformation followerLogInfo,
-            final SnapshotBytes snapshot) {
+            final SnapshotHolder snapshot) {
         var installSnapshotState = followerLogInfo.getInstallSnapshotState();
         if (installSnapshotState == null) {
             installSnapshotState = new LeaderInstallSnapshotState(
@@ -1095,7 +1089,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
     @NonNullByDefault
     @VisibleForTesting
     final void setSnapshot(final long index, final long term, final ByteSource bytes) {
-        snapshotHolder = new SnapshotBytes(index, term, bytes);
+        snapshotHolder = new SnapshotHolder(index, term, bytes);
     }
 
     @VisibleForTesting
