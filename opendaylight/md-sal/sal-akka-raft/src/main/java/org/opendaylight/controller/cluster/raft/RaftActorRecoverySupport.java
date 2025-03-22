@@ -66,7 +66,7 @@ class RaftActorRecoverySupport {
     }
 
     boolean handleRecoveryMessage(final AbstractPersistentActor actor, final Object message) {
-        LOG.trace("{}: handleRecoveryMessage: {}", context.getId(), message);
+        LOG.trace("{}: handleRecoveryMessage: {}", memberId(), message);
 
         anyDataRecovered = anyDataRecovered || !(message instanceof RecoveryCompleted);
 
@@ -92,6 +92,10 @@ class RaftActorRecoverySupport {
         return false;
     }
 
+    private @NonNull String memberId() {
+        return localAccess.memberId();
+    }
+
     @SuppressWarnings("checkstyle:IllegalCatch")
     private void possiblyRestoreFromSnapshot() {
         final var restoreFromSnapshot = cohort.getRestoreFromSnapshot();
@@ -101,11 +105,11 @@ class RaftActorRecoverySupport {
 
         if (anyDataRecovered) {
             LOG.warn("{}: The provided restore snapshot was not applied because the persistence store is not empty",
-                    context.getId());
+                    memberId());
             return;
         }
 
-        LOG.debug("{}: Restore snapshot: {}", context.getId(), restoreFromSnapshot);
+        LOG.debug("{}: Restore snapshot: {}", memberId(), restoreFromSnapshot);
 
         context.getSnapshotManager().applyFromRecovery(restoreFromSnapshot);
     }
@@ -124,7 +128,7 @@ class RaftActorRecoverySupport {
     }
 
     private void onRecoveredSnapshot(final SnapshotOffer offer) {
-        LOG.debug("{}: SnapshotOffer called.", context.getId());
+        LOG.debug("{}: SnapshotOffer called.", memberId());
 
         initRecoveryTimers();
 
@@ -171,12 +175,12 @@ class RaftActorRecoverySupport {
         timer.stop();
         final var replLog = replicatedLog();
         LOG.info("Recovery snapshot applied for {} in {}: snapshotIndex={}, snapshotTerm={}, journal-size={}",
-                context.getId(), timer, replLog.getSnapshotIndex(), replLog.getSnapshotTerm(), replLog.size());
+                memberId(), timer, replLog.getSnapshotIndex(), replLog.getSnapshotTerm(), replLog.size());
     }
 
     private void onRecoveredJournalLogEntry(final ReplicatedLogEntry logEntry) {
         if (LOG.isDebugEnabled()) {
-            LOG.debug("{}: Received ReplicatedLogEntry for recovery: index: {}, size: {}", context.getId(),
+            LOG.debug("{}: Received ReplicatedLogEntry for recovery: index: {}, size: {}", memberId(),
                     logEntry.index(), logEntry.size());
         }
 
@@ -207,7 +211,7 @@ class RaftActorRecoverySupport {
         if (LOG.isDebugEnabled()) {
             // it can happen that lastUnappliedIndex > toIndex, if the AJE is in the persistent journal
             // but the entry itself has made it to that state and recovered via the snapshot
-            LOG.debug("{}: Received apply journal entries for recovery, applying to state: {} to {}", context.getId(),
+            LOG.debug("{}: Received apply journal entries for recovery, applying to state: {} to {}", memberId(),
                 lastUnappliedIndex, toIndex);
         }
 
@@ -227,7 +231,7 @@ class RaftActorRecoverySupport {
                 }
             } else {
                 // Shouldn't happen but cover it anyway.
-                LOG.error("{}: Log entry not found for index {}", context.getId(), i);
+                LOG.error("{}: Log entry not found for index {}", memberId(), i);
                 break;
             }
         }
@@ -306,7 +310,7 @@ class RaftActorRecoverySupport {
 
         final var replLog = replicatedLog();
         LOG.info("{}: Recovery completed {} - Switching actor to Follower - last log index = {}, last log term = {}, "
-                + "snapshot index = {}, snapshot term = {}, journal size = {}", context.getId(), recoveryTime,
+                + "snapshot index = {}, snapshot term = {}, journal size = {}", memberId(), recoveryTime,
                 replLog.lastIndex(), replLog.lastTerm(), replLog.getSnapshotIndex(), replLog.getSnapshotTerm(),
                 replLog.size());
 
@@ -324,19 +328,19 @@ class RaftActorRecoverySupport {
             }
 
             // From this point on we will not update TermInfo from Akka persistence
-            LOG.info("{}: Local TermInfo store seeded with {}", context.getId(), current);
+            LOG.info("{}: Local TermInfo store seeded with {}", memberId(), current);
         } else {
             // Undo whatever recovery has done to what we have observed
-            LOG.debug("{}: restoring local {}", context.getId(), orig);
+            LOG.debug("{}: restoring local {}", memberId(), orig);
             infoStore.setTerm(orig);
         }
 
         if (dataRecoveredWithPersistenceDisabled
                 || hasMigratedDataRecovered && !context.getPersistenceProvider().isRecoveryApplicable()) {
             if (hasMigratedDataRecovered) {
-                LOG.info("{}: Saving snapshot after recovery due to migrated messages", context.getId());
+                LOG.info("{}: Saving snapshot after recovery due to migrated messages", memberId());
             } else {
-                LOG.info("{}: Saving snapshot after recovery due to data persistence disabled", context.getId());
+                LOG.info("{}: Saving snapshot after recovery due to data persistence disabled", memberId());
             }
 
             // Either data persistence is disabled and we recovered some data entries (ie we must have just
@@ -344,13 +348,13 @@ class RaftActorRecoverySupport {
             // messages. Either way, we persist a snapshot and delete all the messages from the akka journal
             // to clean out unwanted messages.
 
-            Snapshot snapshot = Snapshot.create(EmptyState.INSTANCE, List.of(), -1, -1, -1, -1,
-                context.termInfo(), context.getPeerServerInfo(true));
+            Snapshot snapshot = Snapshot.create(EmptyState.INSTANCE, List.of(), -1, -1, -1, -1, context.termInfo(),
+                context.getPeerServerInfo(true));
 
             raftActor.saveSnapshot(snapshot);
             raftActor.deleteMessages(raftActor.lastSequenceNr());
         } else if (hasMigratedDataRecovered) {
-            LOG.info("{}: Snapshot capture initiated after recovery due to migrated messages", context.getId());
+            LOG.info("{}: Snapshot capture initiated after recovery due to migrated messages", memberId());
 
             context.getSnapshotManager().capture(replLog.lastMeta(), -1);
         } else {

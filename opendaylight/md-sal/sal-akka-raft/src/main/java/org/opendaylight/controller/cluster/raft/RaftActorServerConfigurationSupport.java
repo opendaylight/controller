@@ -12,7 +12,6 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.collect.ImmutableList;
 import java.time.Duration;
 import java.util.ArrayDeque;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Queue;
@@ -20,6 +19,7 @@ import java.util.UUID;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.Cancellable;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.SnapshotComplete;
@@ -101,9 +101,12 @@ class RaftActorServerConfigurationSupport {
         currentOperationState.onNewLeader(leaderId);
     }
 
+    private @NonNull String memberId() {
+        return raftActor.memberId();
+    }
+
     private void onChangeServersVotingStatus(final ChangeServersVotingStatus message, final ActorRef sender) {
-        LOG.debug("{}: onChangeServersVotingStatus: {}, state: {}", raftContext.getId(), message,
-                currentOperationState);
+        LOG.debug("{}: onChangeServersVotingStatus: {}, state: {}", memberId(), message, currentOperationState);
 
         // The following check is a special case. Normally we fail an operation if there's no leader.
         // Consider a scenario where one has 2 geographically-separated 3-node clusters, one a primary and
@@ -117,8 +120,7 @@ class RaftActorServerConfigurationSupport {
         // Therefore, if the local server is currently non-voting and is to be changed to voting and there is
         // no current leader, we will try to elect a leader using the new server config in order to replicate
         // the change and progress.
-        boolean localServerChangingToVoting = Boolean.TRUE.equals(message
-                .getServerVotingStatusMap().get(raftActor.getRaftActorContext().getId()));
+        boolean localServerChangingToVoting = Boolean.TRUE.equals(message.getServerVotingStatusMap().get(memberId()));
         boolean hasNoLeader = raftActor.getLeaderId() == null;
         if (localServerChangingToVoting && !raftContext.isVotingMember() && hasNoLeader) {
             currentOperationState.onNewOperation(new ChangeServersVotingStatusContext(message, sender, true));
@@ -128,8 +130,8 @@ class RaftActorServerConfigurationSupport {
     }
 
     private void onRemoveServer(final RemoveServer removeServer, final ActorRef sender) {
-        LOG.debug("{}: onRemoveServer: {}, state: {}", raftContext.getId(), removeServer, currentOperationState);
-        boolean isSelf = removeServer.getServerId().equals(raftContext.getId());
+        LOG.debug("{}: onRemoveServer: {}, state: {}", memberId(), removeServer, currentOperationState);
+        boolean isSelf = removeServer.getServerId().equals(memberId());
         if (isSelf && !raftContext.hasFollowers()) {
             sender.tell(new RemoveServerReply(ServerChangeStatus.NOT_SUPPORTED, raftActor.getLeaderId()),
                     raftActor.self());
@@ -175,7 +177,7 @@ class RaftActorServerConfigurationSupport {
      * </ul>
      */
     private void onAddServer(final AddServer addServer, final ActorRef sender) {
-        LOG.debug("{}: onAddServer: {}, state: {}", raftContext.getId(), addServer, currentOperationState);
+        LOG.debug("{}: onAddServer: {}, state: {}", memberId(), addServer, currentOperationState);
 
         onNewOperation(new AddServerContext(addServer, sender));
     }
@@ -186,10 +188,10 @@ class RaftActorServerConfigurationSupport {
         } else {
             ActorSelection leader = raftActor.getLeader();
             if (leader != null) {
-                LOG.debug("{}: Not leader - forwarding to leader {}", raftContext.getId(), leader);
+                LOG.debug("{}: Not leader - forwarding to leader {}", memberId(), leader);
                 leader.tell(operationContext.getOperation(), operationContext.getClientRequestor());
             } else {
-                LOG.debug("{}: No leader - returning NO_LEADER reply", raftContext.getId());
+                LOG.debug("{}: No leader - returning NO_LEADER reply", memberId());
                 operationContext.getClientRequestor().tell(operationContext.newReply(
                         ServerChangeStatus.NO_LEADER, null), raftActor.self());
             }
@@ -210,7 +212,7 @@ class RaftActorServerConfigurationSupport {
         void onNewOperation(final ServerOperationContext<?> operationContext) {
             // We're currently processing another operation so queue it to be processed later.
 
-            LOG.debug("{}: Server operation already in progress - queueing {}", raftContext.getId(),
+            LOG.debug("{}: Server operation already in progress - queueing {}", memberId(),
                     operationContext.getOperation());
 
             pendingOperationsQueue.add(operationContext);
@@ -240,7 +242,7 @@ class RaftActorServerConfigurationSupport {
 
             ClusterConfig payload = raftContext.getPeerServerInfo(
                     operationContext.includeSelfInNewConfiguration(raftActor));
-            LOG.debug("{}: New server configuration : {}", raftContext.getId(), payload.serverInfo());
+            LOG.debug("{}: New server configuration : {}", memberId(), payload.serverInfo());
 
             raftActor.persistData(operationContext.getClientRequestor(), operationContext.getContextId(),
                     payload, false);
@@ -272,8 +274,7 @@ class RaftActorServerConfigurationSupport {
         }
 
         protected void sendReply(final ServerOperationContext<?> operationContext, final ServerChangeStatus status) {
-            LOG.debug("{}: Returning {} for operation {}", raftContext.getId(), status,
-                    operationContext.getOperation());
+            LOG.debug("{}: Returning {} for operation {}", memberId(), status, operationContext.getOperation());
 
             operationContext.getClientRequestor().tell(operationContext.newReply(status, raftActor.getLeaderId()),
                     raftActor.self());
@@ -329,7 +330,7 @@ class RaftActorServerConfigurationSupport {
             // Sanity check - we could get an ApplyState from a previous operation that timed out so make
             // sure it's meant for us.
             if (operationContext.getContextId().equals(applyState.getIdentifier())) {
-                LOG.info("{}: {} has been successfully replicated to a majority of followers", raftContext.getId(),
+                LOG.info("{}: {} has been successfully replicated to a majority of followers", memberId(),
                         applyState.getReplicatedLogEntry().getData());
 
                 timer.cancel();
@@ -339,7 +340,7 @@ class RaftActorServerConfigurationSupport {
 
         @Override
         public void onServerOperationTimeout(final ServerOperationTimeout timeout) {
-            LOG.warn("{}: Timeout occured while replicating the new server configuration for {}", raftContext.getId(),
+            LOG.warn("{}: Timeout occured while replicating the new server configuration for {}", memberId(),
                     timeout.getLoggingContext());
 
             timedOut = true;
@@ -383,7 +384,7 @@ class RaftActorServerConfigurationSupport {
         void handleInstallSnapshotTimeout(final ServerOperationTimeout timeout) {
             String serverId = timeout.getLoggingContext();
 
-            LOG.debug("{}: handleInstallSnapshotTimeout for new server {}", raftContext.getId(), serverId);
+            LOG.debug("{}: handleInstallSnapshotTimeout for new server {}", memberId(), serverId);
 
             // cleanup
             raftContext.removePeer(serverId);
@@ -397,7 +398,6 @@ class RaftActorServerConfigurationSupport {
             operationComplete(getAddServerContext(), isLeader ? ServerChangeStatus.TIMEOUT
                     : ServerChangeStatus.NO_LEADER);
         }
-
     }
 
     /**
@@ -414,7 +414,7 @@ class RaftActorServerConfigurationSupport {
             final AbstractLeader leader = (AbstractLeader) raftActor.getCurrentBehavior();
             AddServer addServer = getAddServerContext().getOperation();
 
-            LOG.debug("{}: Initiating {}", raftContext.getId(), addServer);
+            LOG.debug("{}: Initiating {}", memberId(), addServer);
 
             if (raftContext.getPeerInfo(addServer.getNewServerId()) != null) {
                 operationComplete(getAddServerContext(), ServerChangeStatus.ALREADY_EXISTS);
@@ -429,21 +429,21 @@ class RaftActorServerConfigurationSupport {
 
             if (votingState == VotingState.VOTING_NOT_INITIALIZED) {
                 // schedule the install snapshot timeout timer
-                Cancellable installSnapshotTimer = newInstallSnapshotTimer();
-                if (leader.initiateCaptureSnapshot(addServer.getNewServerId())) {
-                    LOG.debug("{}: Initiating capture snapshot for new server {}", raftContext.getId(),
-                            addServer.getNewServerId());
+                final var installSnapshotTimer = newInstallSnapshotTimer();
+
+                final var newServerId = addServer.getNewServerId();
+                if (leader.initiateCaptureSnapshot(newServerId)) {
+                    LOG.debug("{}: Initiating capture snapshot for new server {}", memberId(), newServerId);
 
                     currentOperationState = new InstallingSnapshot(getAddServerContext(), installSnapshotTimer);
                 } else {
-                    LOG.debug("{}: Snapshot already in progress - waiting for completion", raftContext.getId());
+                    LOG.debug("{}: Snapshot already in progress - waiting for completion", memberId());
 
                     currentOperationState = new WaitingForPriorSnapshotComplete(getAddServerContext(),
                             installSnapshotTimer);
                 }
             } else {
-                LOG.debug("{}: New follower is non-voting - directly persisting new server configuration",
-                        raftContext.getId());
+                LOG.debug("{}: New follower is non-voting - directly persisting new server configuration", memberId());
 
                 persistNewServerConfiguration(getAddServerContext());
             }
@@ -466,13 +466,13 @@ class RaftActorServerConfigurationSupport {
         public void onServerOperationTimeout(final ServerOperationTimeout timeout) {
             handleInstallSnapshotTimeout(timeout);
 
-            LOG.warn("{}: Timeout occured for new server {} while installing snapshot", raftContext.getId(),
+            LOG.warn("{}: Timeout occured for new server {} while installing snapshot", memberId(),
                     timeout.getLoggingContext());
         }
 
         @Override
         public void onUnInitializedFollowerSnapshotReply(final UnInitializedFollowerSnapshotReply reply) {
-            LOG.debug("{}: onUnInitializedFollowerSnapshotReply: {}", raftContext.getId(), reply);
+            LOG.debug("{}: onUnInitializedFollowerSnapshotReply: {}", memberId(), reply);
 
             String followerId = reply.getFollowerId();
 
@@ -487,9 +487,8 @@ class RaftActorServerConfigurationSupport {
 
                 installSnapshotTimer.cancel();
             } else {
-                LOG.debug("{}: Dropping UnInitializedFollowerSnapshotReply for server {}: {}",
-                        raftContext.getId(), followerId,
-                        !raftActor.isLeader() ? "not leader" : "server Id doesn't match");
+                LOG.debug("{}: Dropping UnInitializedFollowerSnapshotReply for server {}: {}", memberId(), followerId,
+                    !raftActor.isLeader() ? "not leader" : "server Id doesn't match");
             }
         }
     }
@@ -508,16 +507,16 @@ class RaftActorServerConfigurationSupport {
 
         @Override
         public void onSnapshotComplete() {
-            LOG.debug("{}: onSnapshotComplete", raftContext.getId());
+            LOG.debug("{}: onSnapshotComplete", memberId());
 
             if (!raftActor.isLeader()) {
-                LOG.debug("{}: No longer the leader", raftContext.getId());
+                LOG.debug("{}: No longer the leader", memberId());
                 return;
             }
 
-            AbstractLeader leader = (AbstractLeader) raftActor.getCurrentBehavior();
+            final var leader = (AbstractLeader) raftActor.getCurrentBehavior();
             if (leader.initiateCaptureSnapshot(getAddServerContext().getOperation().getNewServerId())) {
-                LOG.debug("{}: Initiating capture snapshot for new server {}", raftContext.getId(),
+                LOG.debug("{}: Initiating capture snapshot for new server {}", memberId(),
                         getAddServerContext().getOperation().getNewServerId());
 
                 currentOperationState = new InstallingSnapshot(getAddServerContext(),
@@ -531,8 +530,8 @@ class RaftActorServerConfigurationSupport {
         public void onServerOperationTimeout(final ServerOperationTimeout timeout) {
             handleInstallSnapshotTimeout(timeout);
 
-            LOG.warn("{}: Timeout occured for new server {} while waiting for prior snapshot to complete",
-                    raftContext.getId(), timeout.getLoggingContext());
+            LOG.warn("{}: Timeout occured for new server {} while waiting for prior snapshot to complete", memberId(),
+                timeout.getLoggingContext());
         }
     }
 
@@ -703,7 +702,7 @@ class RaftActorServerConfigurationSupport {
             // If this leader changed to non-voting we need to step down as leader so we'll try to transfer
             // leadership.
             boolean localServerChangedToNonVoting = Boolean.FALSE.equals(getOperation()
-                    .getServerVotingStatusMap().get(raftActor.getRaftActorContext().getId()));
+                    .getServerVotingStatusMap().get(raftActor.memberId()));
             if (succeeded && localServerChangedToNonVoting) {
                 LOG.debug("Leader changed to non-voting - trying leadership transfer");
                 raftActor.becomeNonVoting();
@@ -740,7 +739,7 @@ class RaftActorServerConfigurationSupport {
         }
 
         private void initiateLocalLeaderElection() {
-            LOG.debug("{}: Sending local ElectionTimeout to start leader election", raftContext.getId());
+            LOG.debug("{}: Sending local ElectionTimeout to start leader election", memberId());
 
             final var previousServerConfig = raftContext.getPeerServerInfo(true);
             if (!updateLocalPeerInfo()) {
@@ -787,7 +786,7 @@ class RaftActorServerConfigurationSupport {
                 newServerInfoList.add(new ServerInfo(peerId, voting != null ? voting : peerInfo.isVoting()));
             }
 
-            final var myId = raftContext.getId();
+            final var myId = memberId();
             final var myVoting = serverVotingStatusMap.get(myId);
             newServerInfoList.add(new ServerInfo(myId, myVoting != null ? myVoting : raftContext.isVotingMember()));
 
@@ -815,7 +814,7 @@ class RaftActorServerConfigurationSupport {
                 return;
             }
 
-            LOG.debug("{}: New leader {} elected", raftContext.getId(), newLeader);
+            LOG.debug("{}: New leader {} elected", memberId(), newLeader);
 
             timer.cancel();
 
@@ -823,7 +822,7 @@ class RaftActorServerConfigurationSupport {
                 persistNewServerConfiguration(operationContext);
             } else {
                 // Edge case - some other node became leader so forward the operation.
-                LOG.debug("{}: Forwarding {} to new leader", raftContext.getId(), operationContext.getOperation());
+                LOG.debug("{}: Forwarding {} to new leader", memberId(), operationContext.getOperation());
 
                 // Revert the local server config change.
                 raftContext.updatePeerIds(previousServerConfig);
@@ -835,8 +834,8 @@ class RaftActorServerConfigurationSupport {
 
         @Override
         void onServerOperationTimeout(final ServerOperationTimeout timeout) {
-            LOG.warn("{}: Leader election timed out - cannot apply operation {}",
-                    raftContext.getId(), timeout.getLoggingContext());
+            LOG.warn("{}: Leader election timed out - cannot apply operation {}", memberId(),
+                timeout.getLoggingContext());
 
             // Revert the local server config change.
             raftContext.updatePeerIds(previousServerConfig);
@@ -846,12 +845,11 @@ class RaftActorServerConfigurationSupport {
         }
 
         private void tryToForwardOperationToAnotherServer() {
-            Collection<String> serversVisited = new HashSet<>(operationContext.getOperation().getServersVisited());
-
-            LOG.debug("{}: tryToForwardOperationToAnotherServer - servers already visited {}", raftContext.getId(),
+            final var serversVisited = new HashSet<>(operationContext.getOperation().getServersVisited());
+            LOG.debug("{}: tryToForwardOperationToAnotherServer - servers already visited {}", memberId(),
                     serversVisited);
 
-            serversVisited.add(raftContext.getId());
+            serversVisited.add(memberId());
 
             // Try to find another whose state is being changed from non-voting to voting and that we haven't
             // tried yet.
@@ -871,7 +869,7 @@ class RaftActorServerConfigurationSupport {
             }
 
             if (forwardToPeerActor != null) {
-                LOG.debug("{}: Found server {} to forward to", raftContext.getId(), forwardToPeerActor);
+                LOG.debug("{}: Found server {} to forward to", memberId(), forwardToPeerActor);
 
                 forwardToPeerActor.tell(new ChangeServersVotingStatus(serverVotingStatusMap, serversVisited),
                         operationContext.getClientRequestor());
