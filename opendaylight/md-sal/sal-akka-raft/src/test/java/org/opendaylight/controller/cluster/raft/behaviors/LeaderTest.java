@@ -59,7 +59,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
 import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
-import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader.SendInstallSnapshot;
+import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader.SnapshotBytes;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
@@ -70,7 +70,6 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ByteState;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.policy.DefaultRaftPolicy;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
@@ -603,11 +602,11 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         //update follower timestamp
         leader.markFollowerActive(FOLLOWER_ID);
 
-        ByteString bs = toByteString(Map.of("1", "A", "2", "B", "3", "C"));
-        leader.setSnapshot(commitIndex, snapshotTerm, ByteSource.wrap(bs.toByteArray()));
+        final var bs = ByteSource.wrap(toByteString(Map.of("1", "A", "2", "B", "3", "C")).toByteArray());
+        leader.setSnapshot(commitIndex, snapshotTerm, bs);
         LeaderInstallSnapshotState fts = new LeaderInstallSnapshotState(
                 actorContext.getConfigParams().getMaximumMessageSliceSize(), leader.logName);
-        fts.setSnapshotBytes(ByteSource.wrap(bs.toByteArray()));
+        fts.setSnapshotBytes(bs);
         leader.getFollower(FOLLOWER_ID).setLeaderInstallSnapshotState(fts);
 
         //send first chunk and no InstallSnapshotReply received yet
@@ -852,11 +851,9 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leader.getFollower(FOLLOWER_ID).setNextIndex(0);
 
         byte[] bytes = toByteString(leadersSnapshot).toByteArray();
-        Snapshot snapshot = Snapshot.create(ByteState.of(bytes), List.of(), lastAppliedIndex, snapshotTerm,
-                lastAppliedIndex, snapshotTerm, new TermInfo(-1), null);
 
         RaftActorBehavior raftBehavior = leader.handleMessage(leaderActor,
-                new SendInstallSnapshot(snapshot, ByteSource.wrap(bytes)));
+                new SnapshotBytes(lastAppliedIndex, snapshotTerm, ByteSource.wrap(bytes)));
 
         assertTrue(raftBehavior instanceof Leader);
 
@@ -904,11 +901,9 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leader.getFollower(FOLLOWER_ID).setNextIndex(-1);
 
         byte[] bytes = toByteString(leadersSnapshot).toByteArray();
-        Snapshot snapshot = Snapshot.create(ByteState.of(bytes), List.of(),
-                lastAppliedIndex, snapshotTerm, lastAppliedIndex, snapshotTerm, new TermInfo(-1), null);
 
         RaftActorBehavior raftBehavior = leader.handleMessage(leaderActor,
-                new SendInstallSnapshot(snapshot, ByteSource.wrap(bytes)));
+                new SnapshotBytes(lastAppliedIndex, snapshotTerm, ByteSource.wrap(bytes)));
 
         assertTrue(raftBehavior instanceof Leader);
 
@@ -1025,10 +1020,9 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         actorContext.setTermInfo(new TermInfo(currentTerm, leaderActor.path().toString()));
 
         ByteString bs = toByteString(leadersSnapshot);
-        Snapshot snapshot = Snapshot.create(ByteState.of(bs.toByteArray()), List.of(), commitIndex, snapshotTerm,
-                commitIndex, snapshotTerm, new TermInfo(-1), null);
 
-        leader.handleMessage(leaderActor, new SendInstallSnapshot(snapshot, ByteSource.wrap(bs.toByteArray())));
+        leader.handleMessage(leaderActor, new SnapshotBytes(commitIndex, snapshotTerm,
+            ByteSource.wrap(bs.toByteArray())));
 
         InstallSnapshot installSnapshot = MessageCollectorActor.expectFirstMatching(followerActor,
                 InstallSnapshot.class);
@@ -1098,14 +1092,12 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         actorContext.setTermInfo(new TermInfo(currentTerm, leaderActor.path().toString()));
 
         ByteString bs = toByteString(leadersSnapshot);
-        Snapshot snapshot = Snapshot.create(ByteState.of(bs.toByteArray()), List.of(), commitIndex, snapshotTerm,
-                commitIndex, snapshotTerm, new TermInfo(-1), null);
 
         Uninterruptibles.sleepUninterruptibly(Duration.ofSeconds(1));
-        leader.handleMessage(leaderActor, new SendInstallSnapshot(snapshot, ByteSource.wrap(bs.toByteArray())));
+        leader.handleMessage(leaderActor, new SnapshotBytes(commitIndex, snapshotTerm,
+            ByteSource.wrap(bs.toByteArray())));
 
-        InstallSnapshot installSnapshot = MessageCollectorActor.expectFirstMatching(followerActor,
-                InstallSnapshot.class);
+        var installSnapshot = MessageCollectorActor.expectFirstMatching(followerActor, InstallSnapshot.class);
 
         assertEquals(1, installSnapshot.getChunkIndex());
         assertEquals(3, installSnapshot.getTotalChunks());
@@ -1160,11 +1152,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
         actorContext.setTermInfo(new TermInfo(currentTerm, leaderActor.path().toString()));
 
-        ByteString bs = toByteString(leadersSnapshot);
-        Snapshot snapshot = Snapshot.create(ByteState.of(bs.toByteArray()), List.of(), commitIndex, snapshotTerm,
-                commitIndex, snapshotTerm, new TermInfo(-1), null);
-
-        leader.handleMessage(leaderActor, new SendInstallSnapshot(snapshot, ByteSource.wrap(bs.toByteArray())));
+        leader.handleMessage(leaderActor, new SnapshotBytes(commitIndex, snapshotTerm,
+            ByteSource.wrap(toByteString(leadersSnapshot).toByteArray())));
 
         InstallSnapshot installSnapshot = MessageCollectorActor.expectFirstMatching(followerActor,
                 InstallSnapshot.class);
