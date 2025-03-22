@@ -158,7 +158,7 @@ public final class SnapshotManager {
         this.context = requireNonNull(context);
     }
 
-    String memberId() {
+    @NonNull String memberId() {
         return context.getId();
     }
 
