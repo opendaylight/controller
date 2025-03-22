@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Queue;
 import java.util.concurrent.TimeUnit;
@@ -116,7 +115,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
     private final MessageSlicer appendEntriesMessageSlicer;
 
     private Cancellable heartbeatSchedule = null;
-    private Optional<SnapshotHolder> snapshotHolder = Optional.empty();
+    private SnapshotHolder snapshotHolder = null;
     private int minReplicationCount;
 
     AbstractLeader(final RaftActorContext context, final RaftState state,
@@ -597,7 +596,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         }
 
         // this was the last chunk reply
-        final long followerMatchIndex = snapshotHolder.orElseThrow().index;
+        final long followerMatchIndex = snapshotHolder.index;
         followerLogInfo.setMatchIndex(followerMatchIndex);
         followerLogInfo.setNextIndex(followerMatchIndex + 1);
         followerLogInfo.clearLeaderInstallSnapshotState();
@@ -886,13 +885,13 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
      */
     public boolean initiateCaptureSnapshot(final String followerId) {
         final var followerLogInfo = followerToLog.get(followerId);
-        if (snapshotHolder.isPresent()) {
+        if (snapshotHolder != null) {
             // If a snapshot is present in the memory, most likely another install is in progress no need to capture
             // snapshot. This could happen if another follower needs an install when one is going on.
             final var followerActor = context.getPeerActorSelection(followerId);
 
             // Note: sendSnapshotChunk will set the LeaderInstallSnapshotState.
-            sendSnapshotChunk(followerActor, followerLogInfo, snapshotHolder.orElseThrow());
+            sendSnapshotChunk(followerActor, followerLogInfo, snapshotHolder);
             return true;
         }
 
@@ -935,8 +934,8 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
     }
 
     private void sendSnapshotChunk(final ActorSelection followerActor, final FollowerLogInformation followerLogInfo) {
-        if (snapshotHolder.isPresent()) {
-            sendSnapshotChunk(followerActor, followerLogInfo, snapshotHolder.orElseThrow());
+        if (snapshotHolder != null) {
+            sendSnapshotChunk(followerActor, followerLogInfo, snapshotHolder);
         }
     }
 
@@ -997,7 +996,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
 
     private boolean resendSnapshotChunk(final ActorSelection followerActor,
                                         final FollowerLogInformation followerLogInfo) {
-        if (snapshotHolder.isEmpty()) {
+        if (snapshotHolder == null) {
             // Seems like we should never hit this case, but just in case we do, reset the snapshot progress so that it
             // can restart from the next AppendEntries.
             LOG.warn("{}: Attempting to resend snapshot with no snapshot holder present.", logName);
@@ -1010,7 +1009,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         installSnapshotState.resetChunkTimer();
         installSnapshotState.markSendStatus(false);
 
-        sendSnapshotChunk(followerActor, followerLogInfo, snapshotHolder.orElseThrow());
+        sendSnapshotChunk(followerActor, followerLogInfo, snapshotHolder);
         return true;
     }
 
@@ -1105,16 +1104,16 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
     @NonNullByDefault
     @VisibleForTesting
     final void setSnapshot(final long index, final long term, final ByteSource bytes) {
-        snapshotHolder = Optional.of(new SnapshotHolder(index, term, bytes));
+        snapshotHolder = new SnapshotHolder(index, term, bytes);
     }
 
     @VisibleForTesting
     final boolean hasSnapshot() {
-        return snapshotHolder.isPresent();
+        return snapshotHolder != null;
     }
 
     @VisibleForTesting
     final void clearSnapshot() {
-        snapshotHolder = Optional.empty();
+        snapshotHolder = null;
     }
 }
