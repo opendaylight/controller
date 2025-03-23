@@ -12,6 +12,7 @@ import static com.google.common.base.Verify.verify;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.VerifyException;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -113,10 +114,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     private final @NonNull RaftActorDataPersistenceProvider dataPersistenceProvider;
     private final @NonNull BehaviorStateTracker behaviorStateTracker = new BehaviorStateTracker();
 
-    // FIXME: should be valid only after recovery
-    private final @NonNull RaftActorContextImpl context;
+    private @NonNull RaftState raft;
 
-    private RaftActorRecoverySupport raftRecovery;
     private RaftActorSnapshotMessageSupport snapshotSupport;
     private RaftActorServerConfigurationSupport serverConfigurationSupport;
     private boolean shuttingDown;
@@ -128,9 +127,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         localAccess = new LocalAccess(memberId, stateDir.resolve(memberId));
         dataPersistenceProvider = new RaftActorDataPersistenceProvider(this);
 
-        context = new RaftActorContextImpl(self(), getContext(), localAccess, peerAddresses,
-            configParams.orElseGet(DefaultConfigParamsImpl::new), payloadVersion, dataPersistenceProvider,
-            this::handleApplyState, this::executeInSelf);
+        raft = new RaftCreated(new RaftActorContextImpl(memberId, self(), getContext(), localAccess.termInfoStore(),
+            peerAddresses, configParams.orElseGet(DefaultConfigParamsImpl::new), payloadVersion,
+            dataPersistenceProvider, this::handleApplyState, this::executeInSelf));
     }
 
     /**
@@ -142,6 +141,27 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         return persistenceId();
     }
 
+    final @NonNull RaftActorContext raftContext() {
+        return raft.context;
+    }
+
+    @Deprecated(forRemoval = true)
+    public final RaftActorContext getRaftActorContext() {
+        return raftContext();
+    }
+
+    private @NonNull ConfigParams configParams() {
+        return raft.configParams();
+    }
+
+    private ReplicatedLog replicatedLog() {
+        return raftContext().getReplicatedLog();
+    }
+
+    private @NonNull SnapshotManager snapshotManager() {
+        return raftContext().getSnapshotManager();
+    }
+
     @Override
     @Deprecated(since = "11.0.0", forRemoval = true)
     public final ActorRef getSender() {
@@ -150,15 +170,33 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     @Override
     public void preStart() throws Exception {
+        if (!(raft instanceof RaftCreated created)) {
+            throw new VerifyException("preStart() with " + raft);
+        }
+
         LOG.info("{}: Starting recovery with journal batch size {}", memberId(),
-            context.getConfigParams().getJournalRecoveryLogBatchSize());
+            created.configParams().getJournalRecoveryLogBatchSize());
 
-        super.preStart();
+        final var context = created.context;
+        final var snapshotManager = context.getSnapshotManager();
+        // FIXME: split off into separate state
+        snapshotManager.setSnapshotCohort(getRaftActorSnapshotCohort());
 
-        context.getSnapshotManager().setSnapshotCohort(getRaftActorSnapshotCohort());
-        snapshotSupport = newRaftActorSnapshotMessageSupport();
+        snapshotSupport = newRaftActorSnapshotMessageSupport(snapshotManager);
         serverConfigurationSupport = new RaftActorServerConfigurationSupport(this);
+        raft = newRaftActorRecoverySupport(created);
     }
+
+    @VisibleForTesting
+    @NonNull RaftActorRecoverySupport newRaftActorRecoverySupport(final RaftCreated prevState) {
+        return new RaftActorRecoverySupport(prevState, localAccess.termInfoStore(), getRaftActorRecoveryCohort());
+    }
+
+    /**
+     * Returns the RaftActorRecoveryCohort to participate in persistence recovery.
+     */
+    // FIXME: rename to something implying lifecycle -- at some point we will be closing this
+    protected abstract @NonNull RaftActorRecoveryCohort getRaftActorRecoveryCohort();
 
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
@@ -176,8 +214,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     @Override
     protected void handleRecover(final Object message) {
-        if (raftRecovery == null) {
-            raftRecovery = newRaftActorRecoverySupport();
+        if (!(raft instanceof RaftActorRecoverySupport raftRecovery)) {
+            throw new VerifyException("handleRecover() with " + raft);
         }
 
         boolean recoveryComplete = raftRecovery.handleRecoveryMessage(this, message);
@@ -185,19 +223,12 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             onRecoveryComplete();
 
             initializeBehavior();
-
-            raftRecovery = null;
         }
     }
 
     @VisibleForTesting
-    RaftActorRecoverySupport newRaftActorRecoverySupport() {
-        return new RaftActorRecoverySupport(localAccess, context, getRaftActorRecoveryCohort());
-    }
-
-    @VisibleForTesting
     void initializeBehavior() {
-        changeCurrentBehavior(new Follower(context));
+        changeCurrentBehavior(new Follower(raftContext()));
     }
 
     @VisibleForTesting
@@ -252,7 +283,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 // and recovery shows data missing
                 replicatedLog().captureSnapshotIfReady(applyState.getReplicatedLogEntry());
 
-                context.getSnapshotManager().trimLog(replicatedLog().getLastApplied());
+                snapshotManager().trimLog(replicatedLog().getLastApplied());
             }
 
             possiblyHandleBehaviorMessage(message);
@@ -353,31 +384,32 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             final @Nullable String followerId, final long newLeaderTimeoutInMillis) {
         LOG.debug("{}: Initiating leader transfer", memberId());
 
-        RaftActorLeadershipTransferCohort leadershipTransferInProgress = context.getRaftActorLeadershipTransferCohort();
-        if (leadershipTransferInProgress == null) {
-            leadershipTransferInProgress = new RaftActorLeadershipTransferCohort(this, followerId);
-            leadershipTransferInProgress.setNewLeaderTimeoutInMillis(newLeaderTimeoutInMillis);
-            leadershipTransferInProgress.addOnComplete(new RaftActorLeadershipTransferCohort.OnComplete() {
-                @Override
-                public void onSuccess(final ActorRef raftActorRef) {
-                    context.setRaftActorLeadershipTransferCohort(null);
-                }
-
-                @Override
-                public void onFailure(final ActorRef raftActorRef) {
-                    context.setRaftActorLeadershipTransferCohort(null);
-                }
-            });
-
-            leadershipTransferInProgress.addOnComplete(onComplete);
-
-            context.setRaftActorLeadershipTransferCohort(leadershipTransferInProgress);
-            leadershipTransferInProgress.init();
-
-        } else {
+        final var context = raftContext();
+        final var existing = context.getRaftActorLeadershipTransferCohort();
+        if (existing != null) {
             LOG.debug("{}: prior leader transfer in progress - adding callback", memberId());
-            leadershipTransferInProgress.addOnComplete(onComplete);
+            existing.addOnComplete(onComplete);
+            return;
         }
+
+        final var initiated = new RaftActorLeadershipTransferCohort(this, followerId);
+        initiated.setNewLeaderTimeoutInMillis(newLeaderTimeoutInMillis);
+        initiated.addOnComplete(new RaftActorLeadershipTransferCohort.OnComplete() {
+            @Override
+            public void onSuccess(final ActorRef raftActorRef) {
+                context.setRaftActorLeadershipTransferCohort(null);
+            }
+
+            @Override
+            public void onFailure(final ActorRef raftActorRef) {
+                context.setRaftActorLeadershipTransferCohort(null);
+            }
+        });
+
+        initiated.addOnComplete(onComplete);
+        context.setRaftActorLeadershipTransferCohort(initiated);
+
+        initiated.init();
     }
 
     private void onShutDown() {
@@ -400,7 +432,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 return;
         }
 
-        if (context.hasFollowers()) {
+        if (raftContext().hasFollowers()) {
             initiateLeadershipTransfer(new RaftActorLeadershipTransferCohort.OnComplete() {
                 @Override
                 public void onSuccess(final ActorRef raftActorRef) {
@@ -415,7 +447,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 }
             }, null, TimeUnit.MILLISECONDS.convert(2, TimeUnit.SECONDS));
         } else {
-            pauseLeader(new TimedRunnable(context.getConfigParams().getElectionTimeOutInterval(), this) {
+            pauseLeader(new TimedRunnable(configParams().getElectionTimeOutInterval(), this) {
                 @Override
                 protected void doRun() {
                     self().tell(PoisonPill.getInstance(), self());
@@ -441,6 +473,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     @NonNullByDefault
     private void switchBehavior(final Function<RaftActorContext, RaftActorBehavior> ctor, final long newTerm) {
+        final var context = raftContext();
         if (context.getRaftPolicy().automaticElectionsEnabled()) {
             LOG.warn("{}: Ignoring request to switch behavior when automatic elections are disabled", memberId());
             return;
@@ -462,8 +495,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     @VisibleForTesting
-    RaftActorSnapshotMessageSupport newRaftActorSnapshotMessageSupport() {
-        return new RaftActorSnapshotMessageSupport(context.getSnapshotManager());
+    @NonNullByDefault
+    RaftActorSnapshotMessageSupport newRaftActorSnapshotMessageSupport(final SnapshotManager snapshotManager) {
+        return new RaftActorSnapshotMessageSupport(snapshotManager);
     }
 
     private OnDemandRaftState getOnDemandRaftState() {
@@ -471,14 +505,15 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         final var peerAddresses = new HashMap<String, String>();
         final var peerVotingStates = new HashMap<String, Boolean>();
+        final var context = raftContext();
         for (var info : context.getPeers()) {
             peerVotingStates.put(info.getId(), info.isVoting());
             peerAddresses.put(info.getId(), info.getAddress() != null ? info.getAddress() : "");
         }
 
-        final var currentBehavior = getCurrentBehavior();
+        final var currentBehavior = context.getCurrentBehavior();
         final var termInfo = context.termInfo();
-        final var replLog = replicatedLog();
+        final var replLog = context.getReplicatedLog();
 
         final var builder = newOnDemandRaftStateBuilder()
                 .commitIndex(replLog.getCommitIndex())
@@ -517,7 +552,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     private @NonNull FollowerInfo formatLogInfo(final FollowerLogInformation logInfo) {
         final var followerId = logInfo.getId();
-        final var peerInfo = context.getPeerInfo(followerId);
+        final var peerInfo = raftContext().getPeerInfo(followerId);
 
         // "HH:mm:ss.SSS"
         final var d = Duration.ofNanos(logInfo.nanosSinceLastActivity());
@@ -558,7 +593,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
             onLeaderChanged(lastValidLeaderId, leaderId);
 
-            final var leadershipTransferInProgress = context.getRaftActorLeadershipTransferCohort();
+            final var leadershipTransferInProgress = raftContext().getRaftActorLeadershipTransferCohort();
             if (leadershipTransferInProgress != null) {
                 leadershipTransferInProgress.onNewLeader(leaderId);
             }
@@ -627,7 +662,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         // However, when Akka replays the journal during recovery, it replays it from the sequence number when the
         // snapshot was saved and not the number we saved. We would want to override it, by asking Akka to use the
         // last-sequence number known to us.
-        return context.getSnapshotManager().getLastSequenceNumber();
+        return snapshotManager().getLastSequenceNumber();
     }
 
     /**
@@ -643,7 +678,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     protected final void persistData(final ActorRef clientActor, final Identifier identifier, final Payload data,
             final boolean batchHint) {
         final var replLog = replicatedLog();
-        final var logEntry = new SimpleReplicatedLogEntry(replLog.lastIndex() + 1, context.currentTerm(), data);
+        final var logEntry = new SimpleReplicatedLogEntry(replLog.lastIndex() + 1, raftContext().currentTerm(), data);
         logEntry.setPersistencePending(true);
 
         LOG.debug("{}: Persist data {}", memberId(), logEntry);
@@ -685,17 +720,13 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         }
     }
 
-    private ReplicatedLog replicatedLog() {
-        return context.getReplicatedLog();
-    }
-
     @VisibleForTesting
-    void setCurrentBehavior(final RaftActorBehavior behavior) {
-        context.setCurrentBehavior(behavior);
+    final void setCurrentBehavior(final RaftActorBehavior behavior) {
+        raft.context.setCurrentBehavior(behavior);
     }
 
     protected final RaftActorBehavior getCurrentBehavior() {
-        return context.getCurrentBehavior();
+        return raftContext().getCurrentBehavior();
     }
 
     /**
@@ -704,7 +735,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
      *
      * @return true it this RaftActor is a Leader false otherwise
      */
-    protected boolean isLeader() {
+    protected final boolean isLeader() {
         return memberId().equals(getCurrentBehavior().getLeaderId());
     }
 
@@ -713,9 +744,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 && !shuttingDown && !isLeadershipTransferInProgress();
     }
 
-    protected boolean isLeadershipTransferInProgress() {
-        RaftActorLeadershipTransferCohort leadershipTransferInProgress = context.getRaftActorLeadershipTransferCohort();
-        return leadershipTransferInProgress != null && leadershipTransferInProgress.isTransferring();
+    protected final boolean isLeadershipTransferInProgress() {
+        final var transferCohort = raftContext().getRaftActorLeadershipTransferCohort();
+        return transferCohort != null && transferCohort.isTransferring();
     }
 
     /**
@@ -743,19 +774,15 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         return getCurrentBehavior().raftRole();
     }
 
-    public final RaftActorContext getRaftActorContext() {
-        return context;
-    }
-
     protected void updateConfigParams(final ConfigParams configParams) {
 
         // obtain the RaftPolicy for oldConfigParams and the updated one.
-        String oldRaftPolicy = context.getConfigParams().getCustomRaftPolicyImplementationClass();
+        String oldRaftPolicy = configParams().getCustomRaftPolicyImplementationClass();
         String newRaftPolicy = configParams.getCustomRaftPolicyImplementationClass();
 
         LOG.debug("{}: RaftPolicy used with prev.config {}, RaftPolicy used with newConfig {}", memberId(),
             oldRaftPolicy, newRaftPolicy);
-        context.setConfigParams(configParams);
+        raft.context.setConfigParams(configParams);
         if (!Objects.equals(oldRaftPolicy, newRaftPolicy)) {
             // The RaftPolicy was modified. If the current behavior is Follower then re-initialize to Follower
             // but transfer the previous leaderId so it doesn't immediately try to schedule an election. This
@@ -807,7 +834,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
      * this actor during construction an IllegalStateException will be thrown.
      */
     protected void setPeerAddress(final String peerId, final String peerAddress) {
-        context.setPeerAddress(peerId, peerAddress);
+        raftContext().setPeerAddress(peerId, peerAddress);
     }
 
     /**
@@ -828,11 +855,6 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
      *                    This should NEVER be null.
      */
     protected abstract void applyState(ActorRef clientActor, Identifier identifier, Object data);
-
-    /**
-     * Returns the RaftActorRecoveryCohort to participate in persistence recovery.
-     */
-    protected abstract @NonNull RaftActorRecoveryCohort getRaftActorRecoveryCohort();
 
     /**
      * This method is called when recovery is complete.
@@ -901,18 +923,18 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         if (leaderId == null) {
             return null;
         }
-        String peerAddress = context.getPeerAddress(leaderId);
+        String peerAddress = raftContext().getPeerAddress(leaderId);
         LOG.debug("{}: getLeaderAddress leaderId = {} peerAddress = {}", memberId(), leaderId, peerAddress);
 
         return peerAddress;
     }
 
     protected boolean hasFollowers() {
-        return context.hasFollowers();
+        return raftContext().hasFollowers();
     }
 
     private void captureSnapshot() {
-        final var snapshotManager = context.getSnapshotManager();
+        final var snapshotManager = snapshotManager();
 
         if (!snapshotManager.isCapturing()) {
             final long idx = getCurrentBehavior().getReplicatedToAllIndex();
@@ -927,11 +949,12 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     private @NonNull Snapshot getSnapshot() {
         LOG.debug("{}: onGetSnapshot", memberId());
 
+        final var context = raftContext();
         final var termInfo = context.termInfo();
         final var clusterConfig = context.getPeerServerInfo(true);
         if (isRecoveryApplicable()) {
-            final var captureSnapshot = context.getSnapshotManager().newCaptureSnapshot(replicatedLog().lastMeta(), -1,
-                true);
+            final var captureSnapshot = context.getSnapshotManager()
+                .newCaptureSnapshot(context.getReplicatedLog().lastMeta(), -1, true);
 
             return Snapshot.create(getRaftActorSnapshotCohort().takeSnapshot(), captureSnapshot.getUnAppliedEntries(),
                 captureSnapshot.getLastIndex(), captureSnapshot.getLastTerm(),

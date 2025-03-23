@@ -36,19 +36,19 @@ public class MockRaftActorContext extends RaftActorContextImpl {
     private Consumer<OutputStream> createSnapshotProcedure = out -> { };
 
     @NonNullByDefault
-    private static LocalAccess newLocalAccess(final String id) {
-        return new LocalAccess(id, new TestTermInfoStore(1, ""));
+    private static LocalAccess newLocalAccess(final String memberId) {
+        return new LocalAccess(memberId, new TestTermInfoStore(1, ""));
     }
 
     public MockRaftActorContext(final int payloadVersion) {
-        super(null, null, newLocalAccess("test"), new HashMap<>(), new DefaultConfigParamsImpl(),
+        super("test", null, null, new TestTermInfoStore(1, ""), new HashMap<>(), new DefaultConfigParamsImpl(),
             (short) payloadVersion, TestDataProvider.INSTANCE, applyState -> { }, MoreExecutors.directExecutor());
         resetReplicatedLog(new MockReplicatedLogBuilder().build());
     }
 
     public MockRaftActorContext(final String id, final ActorSystem system, final ActorRef actor,
             final int payloadVersion) {
-        super(actor, null, newLocalAccess(id), new HashMap<>(), new DefaultConfigParamsImpl(),
+        super(id, actor, null, new TestTermInfoStore(1, ""), new HashMap<>(), new DefaultConfigParamsImpl(),
             (short) payloadVersion, TestDataProvider.INSTANCE, applyState -> actor.tell(applyState, actor),
             MoreExecutors.directExecutor());
         this.system = system;
