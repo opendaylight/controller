@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Pantelis
  */
-class RaftActorRecoverySupport {
+final class RaftActorRecoverySupport {
     private static final Logger LOG = LoggerFactory.getLogger(RaftActorRecoverySupport.class);
 
     private final @NonNull LocalAccess localAccess;
