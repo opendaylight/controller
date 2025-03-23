@@ -49,20 +49,15 @@ public class RaftActorContextImpl implements RaftActorContext {
     private static final Logger LOG = LoggerFactory.getLogger(RaftActorContextImpl.class);
     private static final LongSupplier JVM_MEMORY_RETRIEVER = () -> Runtime.getRuntime().maxMemory();
 
-    private final ActorRef actor;
+    private final Map<String, PeerInfo> peerInfoMap = new HashMap<>();
+    private final @NonNull TermInfoStore termInfoStore;
+    private final @NonNull Executor executor;
+    private final @NonNull String memberId;
 
+    private final ActorRef actor;
     private final ActorContext context;
 
-    private final @NonNull Executor executor;
-
-    // Cached from LocalAccess instance
-    private final @NonNull String id;
-    private final @NonNull TermInfoStore termInformation;
-
     private ReplicatedLog replicatedLog;
-
-    private final Map<String, PeerInfo> peerInfoMap = new HashMap<>();
-
     private ConfigParams configParams;
 
     private boolean dynamicServerConfiguration = false;
@@ -92,14 +87,15 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     private RaftActorLeadershipTransferCohort leadershipTransferCohort;
 
-    public RaftActorContextImpl(final ActorRef actor, final ActorContext context, final @NonNull LocalAccess localStore,
-            final @NonNull Map<String, String> peerAddresses, final @NonNull ConfigParams configParams,
-            final short payloadVersion, final @NonNull DataPersistenceProvider persistenceProvider,
+    public RaftActorContextImpl(final @NonNull String memberId, final ActorRef actor, final ActorContext context,
+            final TermInfoStore termInfoStore, final @NonNull Map<String, String> peerAddresses,
+            final @NonNull ConfigParams configParams, final short payloadVersion,
+            final @NonNull DataPersistenceProvider persistenceProvider,
             final @NonNull Consumer<ApplyState> applyStateConsumer, final @NonNull Executor executor) {
+        this.memberId = requireNonNull(memberId);
+        this.termInfoStore = requireNonNull(termInfoStore);
         this.actor = actor;
         this.context = context;
-        id = localStore.memberId();
-        termInformation = localStore.termInfoStore();
         this.executor = requireNonNull(executor);
         this.configParams = requireNonNull(configParams);
         this.payloadVersion = payloadVersion;
@@ -131,7 +127,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     public String getId() {
-        return id;
+        return memberId;
     }
 
     @Override
@@ -153,7 +149,7 @@ public class RaftActorContextImpl implements RaftActorContext {
                 local = Optional.of(Cluster.get(getActorSystem()));
             } catch (Exception e) {
                 // An exception means there's no cluster configured. This will only happen in unit tests.
-                LOG.debug("{}: Could not obtain Cluster", id, e);
+                LOG.debug("{}: Could not obtain Cluster", memberId, e);
                 local = Optional.empty();
             }
             cluster = local;
@@ -163,17 +159,17 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     public TermInfo termInfo() {
-        return termInformation.currentTerm();
+        return termInfoStore.currentTerm();
     }
 
     @Override
     public void setTermInfo(final TermInfo newElectionInfo) {
-        termInformation.setTerm(newElectionInfo);
+        termInfoStore.setTerm(newElectionInfo);
     }
 
     @Override
     public void persistTermInfo(final TermInfo newElectionInfo) throws IOException {
-        termInformation.storeAndSetTerm(newElectionInfo);
+        termInfoStore.storeAndSetTerm(newElectionInfo);
     }
 
     @Override
@@ -184,7 +180,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Deprecated(forRemoval = true)
     public final void resetReplicatedLog(final @NonNull ReplicatedLog newState) {
-        this.replicatedLog = requireNonNull(newState);
+        replicatedLog = requireNonNull(newState);
     }
 
     @Override
@@ -234,7 +230,7 @@ public class RaftActorContextImpl implements RaftActorContext {
         boolean newVotingMember = false;
         var currentPeers = new HashSet<>(getPeerIds());
         for (var server : serverConfig.serverInfo()) {
-            if (id.equals(server.peerId())) {
+            if (memberId.equals(server.peerId())) {
                 newVotingMember = server.isVoting();
             } else {
                 final var votingState = server.isVoting() ? VotingState.VOTING : VotingState.NON_VOTING;
@@ -252,7 +248,7 @@ public class RaftActorContextImpl implements RaftActorContext {
         }
 
         votingMember = newVotingMember;
-        LOG.debug("{}: Updated server config: isVoting: {}, peers: {}", id, votingMember, peerInfoMap.values());
+        LOG.debug("{}: Updated server config: isVoting: {}, peers: {}", memberId, votingMember, peerInfoMap.values());
 
         setDynamicServerConfigurationInUse();
     }
@@ -270,7 +266,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     public void removePeer(final String name) {
-        if (id.equals(name)) {
+        if (memberId.equals(name)) {
             votingMember = false;
         } else {
             peerInfoMap.remove(name);
@@ -288,7 +284,7 @@ public class RaftActorContextImpl implements RaftActorContext {
     public void setPeerAddress(final String peerId, final String peerAddress) {
         final var peerInfo = peerInfoMap.get(peerId);
         if (peerInfo != null) {
-            LOG.info("{}: Peer address for peer {} set to {}", id, peerId, peerAddress);
+            LOG.info("{}: Peer address for peer {} set to {}", memberId, peerId, peerAddress);
             peerInfo.setAddress(peerAddress);
         }
     }
@@ -348,7 +344,7 @@ public class RaftActorContextImpl implements RaftActorContext {
         }
 
         if (includeSelf) {
-            newConfig.add(new ServerInfo(id, votingMember));
+            newConfig.add(new ServerInfo(memberId, votingMember));
         }
 
         return new ClusterConfig(newConfig.build());

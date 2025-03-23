@@ -57,7 +57,8 @@ class ReplicatedLogImplTest {
 
     @BeforeEach
     public void setup() {
-        context = new RaftActorContextImpl(null, null, new LocalAccess("test", stateDir), Map.of(), configParams,
+        final var access = new LocalAccess("test", stateDir);
+        context = new RaftActorContextImpl("test", null, null, access.termInfoStore(), Map.of(), configParams,
             (short) 0, mockPersistence, applyState -> { }, MoreExecutors.directExecutor());
     }
 

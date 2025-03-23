@@ -433,8 +433,8 @@ public abstract class RaftActorBehavior implements AutoCloseable {
             return this;
         }
 
-        LOG.info("{} :- Switching from behavior {} to {}, election term: {}", logName, raftRole(), newBehavior.raftRole(),
-            context.currentTerm());
+        LOG.info("{} :- Switching from behavior {} to {}, election term: {}", logName, raftRole(),
+            newBehavior.raftRole(), context.currentTerm());
         try {
             close();
         } catch (RuntimeException e) {
