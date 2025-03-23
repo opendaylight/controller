@@ -75,9 +75,9 @@ public class PreLeaderScenarioTest extends AbstractRaftActorIntegrationTest {
 
         // Verify the expected raft state changes. It should go to PreLeader since it has an uncommitted entry.
         List<RoleChanged> roleChange = expectMatching(follower1NotifierActor, RoleChanged.class, 3);
-        assertEquals("Role change 1", RaftState.Candidate.name(), roleChange.get(0).newRole());
-        assertEquals("Role change 2", RaftState.PreLeader.name(), roleChange.get(1).newRole());
-        assertEquals("Role change 3", RaftState.Leader.name(), roleChange.get(2).newRole());
+        assertEquals("Role change 1", RaftState.Candidate, roleChange.get(0).newRole());
+        assertEquals("Role change 2", RaftState.PreLeader, roleChange.get(1).newRole());
+        assertEquals("Role change 3", RaftState.Leader, roleChange.get(2).newRole());
 
         final long previousTerm = currentTerm;
         currentTerm = follower1Context.currentTerm();
