@@ -14,6 +14,9 @@ import java.io.Serializable;
  * Reply message sent from a RoleChangeNotifier to the Role Change Listener.
  * Can be sent to a separate actor system and hence should be made serializable.
  */
+// FIXME: get a cookie or something?
+// FIXME: definitely final
 public class RegisterRoleChangeListenerReply implements Serializable {
+    @java.io.Serial
     private static final long serialVersionUID = -1972061601184451430L;
 }

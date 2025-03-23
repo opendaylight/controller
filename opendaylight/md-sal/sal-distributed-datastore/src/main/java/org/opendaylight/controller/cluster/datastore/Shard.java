@@ -588,10 +588,8 @@ public class Shard extends RaftActor {
     }
 
     @Override
-    protected final LeaderStateChanged newLeaderStateChanged(final String memberId, final String leaderId,
-            final short leaderPayloadVersion) {
-        return isLeader() ? new ShardLeaderStateChanged(memberId, leaderId, store.getDataTree(), leaderPayloadVersion)
-                : new ShardLeaderStateChanged(memberId, leaderId, leaderPayloadVersion);
+    protected final LeaderStateChanged wrapLeaderStateChanged(final LeaderStateChanged change) {
+        return new ShardLeaderStateChanged(change, isLeader() ? store.getDataTree() : null);
     }
 
     private void onDatastoreContext(final DatastoreContext context) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2025 PANTHEON.tech, s.r.o. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -13,13 +13,14 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * Role Change message initiated internally from the  Raft Actor when a the behavior/role changes.
- * Since its internal, need not be serialized.
+ * Default implementation of {@link LeaderStateChanged}.
  */
 @NonNullByDefault
-public record RoleChanged(String memberId, @Nullable String oldRole, String newRole) implements MemberNotication {
-    public RoleChanged {
+public record DefaultLeaderStateChanged(
+        String memberId,
+        @Nullable String leaderId,
+        short leaderPayloadVersion) implements LeaderStateChanged {
+    public DefaultLeaderStateChanged {
         requireNonNull(memberId);
-        requireNonNull(newRole);
     }
 }
