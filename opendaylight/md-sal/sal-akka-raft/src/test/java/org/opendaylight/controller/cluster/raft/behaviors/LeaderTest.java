@@ -1227,16 +1227,17 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         return createActorContext(LEADER_ID, actorRef, payloadVersion);
     }
 
-    private static @NonNull MockRaftActorContext createActorContext(final String id, final ActorRef actorRef) {
+    private @NonNull MockRaftActorContext createActorContext(final String id, final ActorRef actorRef) {
         return createActorContext(id, actorRef, 0);
     }
 
-    private static @NonNull MockRaftActorContext createActorContext(final String id, final ActorRef actorRef,
+    private @NonNull MockRaftActorContext createActorContext(final String id, final ActorRef actorRef,
             final int payloadVersion) {
         final var configParams = new DefaultConfigParamsImpl();
         configParams.setHeartBeatInterval(Duration.ofMillis(50));
         configParams.setElectionTimeoutFactor(100000);
-        final var context = new MockRaftActorContext(id, getSystem(), actorRef, payloadVersion);
+        final var context = new MockRaftActorContext(id, stateDir.getRoot().toPath(), getSystem(), actorRef,
+            payloadVersion);
         context.setConfigParams(configParams);
         return context;
     }
@@ -1934,7 +1935,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         final ActorRef follower2Actor = actorFactory.createActor(MessageCollectorActor.props(), follower2ActorId);
 
         MockRaftActorContext leaderActorContext =
-                new MockRaftActorContext(leaderActorId, getSystem(), leaderActor);
+                new MockRaftActorContext(leaderActorId, stateDir.getRoot().toPath(), getSystem(), leaderActor);
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         configParams.setHeartBeatInterval(Duration.ofMillis(200));
