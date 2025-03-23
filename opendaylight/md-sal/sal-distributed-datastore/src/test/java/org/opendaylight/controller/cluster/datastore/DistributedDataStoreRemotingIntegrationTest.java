@@ -103,6 +103,7 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionChain;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
+import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.yangtools.yang.common.Uint64;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
@@ -942,7 +943,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
                 .shardIsolatedLeaderCheckIntervalInMillis(200));
 
         MemberNode.verifyRaftState(leaderDistributedDataStore, "cars",
-            raftState -> assertEquals("getRaftState", "IsolatedLeader", raftState.getRaftState()));
+            raftState -> assertEquals("getRaftState", RaftRole.IsolatedLeader, raftState.getRaftState()));
 
         final var noShardLeaderCohort = noShardLeaderWriteTx.ready();
         // tell-based canCommit() does not have a real timeout and hence continues

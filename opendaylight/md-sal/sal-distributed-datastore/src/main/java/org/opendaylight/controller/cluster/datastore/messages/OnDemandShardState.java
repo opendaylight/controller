@@ -8,8 +8,10 @@
 package org.opendaylight.controller.cluster.datastore.messages;
 
 import java.util.Collection;
+import java.util.List;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
 
 /**
@@ -17,9 +19,15 @@ import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftStat
  *
  * @author Thomas Pantelis
  */
-public class OnDemandShardState extends OnDemandRaftState {
-    private Collection<ActorSelection> treeChangeListenerActors;
-    private Collection<ActorRef> commitCohortActors;
+public final class OnDemandShardState extends OnDemandRaftState {
+    private final List<ActorSelection> treeChangeListenerActors;
+    private final List<ActorRef> commitCohortActors;
+
+    private OnDemandShardState(final Builder builder) {
+        super(builder);
+        treeChangeListenerActors = builder.treeChangeListenerActors;
+        commitCohortActors = builder.commitCohortActors;
+    }
 
     public Collection<ActorSelection> getTreeChangeListenerActors() {
         return treeChangeListenerActors;
@@ -29,31 +37,23 @@ public class OnDemandShardState extends OnDemandRaftState {
         return commitCohortActors;
     }
 
-    public static Builder newBuilder() {
-        return new Builder();
-    }
+    public static final class Builder extends AbstractBuilder<Builder, OnDemandShardState> {
+        private List<ActorSelection> treeChangeListenerActors = List.of();
+        private List<ActorRef> commitCohortActors = List.of();
 
-    public static class Builder extends AbstractBuilder<Builder, OnDemandShardState> {
-        private final OnDemandShardState state = new OnDemandShardState();
-
-        @Override
-        protected OnDemandRaftState state() {
-            return state;
-        }
-
-        public Builder treeChangeListenerActors(Collection<ActorSelection> actors) {
-            state.treeChangeListenerActors = actors;
+        public @NonNull Builder treeChangeListenerActors(final Collection<ActorSelection> value) {
+            treeChangeListenerActors = List.copyOf(value);
             return self();
         }
 
-        public Builder commitCohortActors(Collection<ActorRef> actors) {
-            state.commitCohortActors = actors;
+        public @NonNull Builder commitCohortActors(final Collection<ActorRef> value) {
+            commitCohortActors = List.copyOf(value);
             return self();
         }
 
         @Override
         public OnDemandShardState build() {
-            return super.build();
+            return new OnDemandShardState(this);
         }
     }
 }
