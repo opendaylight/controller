@@ -36,7 +36,6 @@ import org.opendaylight.controller.cluster.raft.ClientRequestTracker;
 import org.opendaylight.controller.cluster.raft.FollowerLogInformation;
 import org.opendaylight.controller.cluster.raft.PeerInfo;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
-import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.VotingState;
@@ -53,6 +52,7 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.messages.UnInitializedFollowerSnapshotReply;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
+import org.opendaylight.raft.api.RaftRoles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -118,7 +118,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
     private SnapshotHolder snapshotHolder = null;
     private int minReplicationCount;
 
-    AbstractLeader(final RaftActorContext context, final RaftState state,
+    AbstractLeader(final RaftActorContext context, final RaftRoles state,
             final @Nullable AbstractLeader initializeFromLeader) {
         super(context, state);
 
@@ -154,7 +154,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         scheduleHeartBeat(context.getConfigParams().getHeartBeatInterval());
     }
 
-    AbstractLeader(final RaftActorContext context, final RaftState state) {
+    AbstractLeader(final RaftActorContext context, final RaftRoles state) {
         this(context, state, null);
     }
 

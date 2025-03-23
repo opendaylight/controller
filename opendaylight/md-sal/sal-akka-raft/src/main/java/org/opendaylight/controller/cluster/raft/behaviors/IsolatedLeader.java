@@ -11,8 +11,8 @@ import static java.util.Objects.requireNonNull;
 
 import org.apache.pekko.actor.ActorRef;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
-import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
+import org.opendaylight.raft.api.RaftRoles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,11 +32,11 @@ public final class IsolatedLeader extends AbstractLeader {
     private static final Logger LOG = LoggerFactory.getLogger(IsolatedLeader.class);
 
     IsolatedLeader(final RaftActorContext context, final Leader initializeFromLeader) {
-        super(context, RaftState.IsolatedLeader, requireNonNull(initializeFromLeader));
+        super(context, RaftRoles.IsolatedLeader, requireNonNull(initializeFromLeader));
     }
 
     IsolatedLeader(final RaftActorContext context) {
-        super(context, RaftState.IsolatedLeader);
+        super(context, RaftRoles.IsolatedLeader);
     }
 
     // we received an Append Entries reply, we should switch the Behavior to Leader

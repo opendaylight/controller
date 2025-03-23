@@ -19,9 +19,9 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.FollowerLogInformation;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorLeadershipTransferCohort;
-import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
+import org.opendaylight.raft.api.RaftRoles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,16 +61,16 @@ public non-sealed class Leader extends AbstractLeader {
     private @Nullable LeadershipTransferContext leadershipTransferContext;
 
     Leader(final RaftActorContext context, final IsolatedLeader initializeFromLeader) {
-        super(context, RaftState.Leader, requireNonNull(initializeFromLeader));
+        super(context, RaftRoles.Leader, requireNonNull(initializeFromLeader));
     }
 
     Leader(final RaftActorContext context, final PreLeader initializeFromLeader) {
-        super(context, RaftState.Leader, requireNonNull(initializeFromLeader));
+        super(context, RaftRoles.Leader, requireNonNull(initializeFromLeader));
     }
 
     @VisibleForTesting
     public Leader(final RaftActorContext context) {
-        super(context, RaftState.Leader);
+        super(context, RaftRoles.Leader);
     }
 
     @Override

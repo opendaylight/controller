@@ -29,7 +29,6 @@ import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockReplicatedLogBuilder;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.SimpleReplicatedLog;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
-import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.TestActorFactory;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
@@ -44,6 +43,7 @@ import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
+import org.opendaylight.raft.api.RaftRoles;
 import org.slf4j.LoggerFactory;
 
 public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior> extends AbstractActorTest {
@@ -104,11 +104,11 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
 
         behavior = createBehavior(context);
 
-        RaftState expected = behavior.state();
+        RaftRoles expected = behavior.raftRole();
 
         RaftActorBehavior raftBehavior = behavior.handleMessage(behaviorActor, appendEntries);
 
-        assertEquals("Raft state", expected, raftBehavior.state());
+        assertEquals("Raft state", expected, raftBehavior.raftRole());
 
         // Also expect an AppendEntriesReply to be sent where success is false
 
@@ -137,14 +137,14 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
 
         assertFalse("This test should be overridden when testing Candidate", behavior instanceof Candidate);
 
-        RaftState expected = behavior.state();
+        RaftRoles expected = behavior.raftRole();
 
         // Check that the behavior does not handle unknwon message
         assertNull(behavior.handleMessage(behaviorActor, "unknown"));
 
         RaftActorBehavior raftBehavior = behavior.handleMessage(behaviorActor, appendEntries);
 
-        assertEquals("Raft state", expected, raftBehavior.state());
+        assertEquals("Raft state", expected, raftBehavior.raftRole());
 
         assertEquals("ReplicatedLog size", 1, context.getReplicatedLog().size());
 
@@ -280,7 +280,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         RaftActorBehavior origBehavior = createBehavior(actorContext);
         RaftActorBehavior raftBehavior = origBehavior.handleMessage(actorRef, rpc);
 
-        assertEquals("New raft state", RaftState.Follower, raftBehavior.state());
+        assertEquals("New raft state", RaftRoles.Follower, raftBehavior.raftRole());
         assertEquals("New election term", rpc.getTerm(), actorContext.currentTerm());
 
         origBehavior.close();

@@ -23,7 +23,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.messaging.MessageAssembler;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
-import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.ApplyLeaderSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
@@ -39,6 +38,7 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.spi.ImmutableRaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
+import org.opendaylight.raft.api.RaftRoles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +70,7 @@ public class Follower extends RaftActorBehavior {
 
     @VisibleForTesting
     Follower(final RaftActorContext context, final String initialLeaderId, final short initialLeaderPayloadVersion) {
-        super(context, RaftState.Follower);
+        super(context, RaftRoles.Follower);
         leaderId = initialLeaderId;
         leaderPayloadVersion = initialLeaderPayloadVersion;
 
