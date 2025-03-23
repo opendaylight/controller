@@ -15,13 +15,25 @@ import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 public class FollowerLogInformationTest {
+    @Rule
+    public TemporaryFolder stateDir = TemporaryFolder.builder().assureDeletion().build();
+
+    private MockRaftActorContext context;
+
+    @Before
+    public void before() {
+        context = new MockRaftActorContext(stateDir.getRoot().toPath());
+    }
+
     @Test
     public void testIsFollowerActive() {
 
-        MockRaftActorContext context = new MockRaftActorContext();
         context.getReplicatedLog().setCommitIndex(10);
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
@@ -64,7 +76,6 @@ public class FollowerLogInformationTest {
 
     @Test
     public void testOkToReplicate() {
-        MockRaftActorContext context = new MockRaftActorContext();
         context.getReplicatedLog().setCommitIndex(0);
         FollowerLogInformation followerLogInformation =
                 new FollowerLogInformation(new PeerInfo("follower1", null, VotingState.VOTING), 10, context);
@@ -85,7 +96,6 @@ public class FollowerLogInformationTest {
     @Test
     public void testVotingNotInitializedState() {
         final PeerInfo peerInfo = new PeerInfo("follower1", null, VotingState.VOTING_NOT_INITIALIZED);
-        MockRaftActorContext context = new MockRaftActorContext();
         context.getReplicatedLog().setCommitIndex(0);
         FollowerLogInformation followerLogInformation = new FollowerLogInformation(peerInfo, context);
 
@@ -104,7 +114,6 @@ public class FollowerLogInformationTest {
     @Test
     public void testNonVotingState() {
         final PeerInfo peerInfo = new PeerInfo("follower1", null, VotingState.NON_VOTING);
-        MockRaftActorContext context = new MockRaftActorContext();
         context.getReplicatedLog().setCommitIndex(0);
         FollowerLogInformation followerLogInformation = new FollowerLogInformation(peerInfo, context);
 
@@ -116,7 +125,6 @@ public class FollowerLogInformationTest {
 
     @Test
     public void testDecrNextIndex() {
-        MockRaftActorContext context = new MockRaftActorContext();
         context.getReplicatedLog().setCommitIndex(1);
         FollowerLogInformation followerLogInformation =
                 new FollowerLogInformation(new PeerInfo("follower1", null, VotingState.VOTING), 1, context);
