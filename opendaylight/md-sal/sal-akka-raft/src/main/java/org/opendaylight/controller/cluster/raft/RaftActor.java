@@ -35,6 +35,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActor;
 import org.opendaylight.controller.cluster.mgmt.api.FollowerInfo;
+import org.opendaylight.controller.cluster.notifications.DefaultLeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RoleChanged;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
@@ -595,9 +596,15 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         self().tell(applyState, self());
     }
 
-    protected LeaderStateChanged newLeaderStateChanged(final String memberId, final String leaderId,
+    @NonNullByDefault
+    final LeaderStateChanged newLeaderStateChanged(final String memberId, final @Nullable String leaderId,
             final short leaderPayloadVersion) {
-        return new LeaderStateChanged(memberId, leaderId, leaderPayloadVersion);
+        return wrapLeaderStateChanged(new DefaultLeaderStateChanged(memberId, leaderId, leaderPayloadVersion));
+    }
+
+    @NonNullByDefault
+    protected LeaderStateChanged wrapLeaderStateChanged(final LeaderStateChanged change) {
+        return change;
     }
 
     @Override

@@ -12,6 +12,7 @@ import com.google.common.base.Predicates;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -80,10 +81,10 @@ public class MessageCollectorActor extends UntypedAbstractActor {
      * @return the first matching message
      */
     public static <T> T getFirstMatching(final ActorRef actor, final Class<T> clazz) {
-        List<Object> allMessages = getAllMessages(actor);
+        final var allMessages = getAllMessages(actor);
 
-        for (Object message : allMessages) {
-            if (message.getClass().equals(clazz)) {
+        for (var message : allMessages) {
+            if (matches(clazz, message)) {
                 return clazz.cast(message);
             }
         }
@@ -215,13 +216,17 @@ public class MessageCollectorActor extends UntypedAbstractActor {
 
         List<T> output = new ArrayList<>();
 
-        for (Object message : allMessages) {
-            if (message.getClass().equals(clazz)) {
+        for (var message : allMessages) {
+            if (matches(clazz, message)) {
                 output.add(clazz.cast(message));
             }
         }
 
         return output;
+    }
+
+    private static boolean matches(final Class<?> clazz, final Object obj) {
+        return clazz.equals(obj.getClass()) || Modifier.isAbstract(clazz.getModifiers()) && clazz.isInstance(obj);
     }
 
     public static void waitUntilReady(final ActorRef actor) throws TimeoutException, InterruptedException {

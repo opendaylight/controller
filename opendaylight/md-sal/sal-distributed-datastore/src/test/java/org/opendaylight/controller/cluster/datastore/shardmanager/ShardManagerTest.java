@@ -111,7 +111,7 @@ import org.opendaylight.controller.cluster.datastore.utils.ForwardingActor;
 import org.opendaylight.controller.cluster.datastore.utils.MockClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.utils.MockConfiguration;
 import org.opendaylight.controller.cluster.datastore.utils.PrimaryShardInfoFutureCache;
-import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
+import org.opendaylight.controller.cluster.notifications.DefaultLeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListener;
 import org.opendaylight.controller.cluster.notifications.RoleChangeNotification;
 import org.opendaylight.controller.cluster.raft.RaftState;
@@ -463,7 +463,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         shardManager.tell(
             new RoleChangeNotification(memberId1, RaftState.Candidate.name(), RaftState.Follower.name()),
             mockShardActor);
-        shardManager.tell(new LeaderStateChanged(memberId1, memberId2, DataStoreVersions.CURRENT_VERSION),
+        shardManager.tell(new DefaultLeaderStateChanged(memberId1, memberId2, DataStoreVersions.CURRENT_VERSION),
             mockShardActor);
 
         shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME, false), kit.getRef());
