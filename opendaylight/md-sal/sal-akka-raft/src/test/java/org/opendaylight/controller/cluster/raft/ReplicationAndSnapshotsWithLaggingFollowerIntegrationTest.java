@@ -140,12 +140,13 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
 
         // The leader should not have performed fake snapshots to trim the log because the entries have not
         // been replicated to follower 2.
-        assertEquals("Leader snapshot term", -1, leaderContext.getReplicatedLog().getSnapshotTerm());
-        assertEquals("Leader snapshot index", -1, leaderContext.getReplicatedLog().getSnapshotIndex());
-        assertEquals("Leader journal log size", 2, leaderContext.getReplicatedLog().size());
-        assertEquals("Leader journal last index", 1, leaderContext.getReplicatedLog().lastIndex());
-        assertEquals("Leader commit index", 1, leaderContext.getCommitIndex());
-        assertEquals("Leader last applied", 1, leaderContext.getLastApplied());
+        final var log = leaderContext.getReplicatedLog();
+        assertEquals("Leader snapshot term", -1, log.getSnapshotTerm());
+        assertEquals("Leader snapshot index", -1, log.getSnapshotIndex());
+        assertEquals("Leader journal log size", 2, log.size());
+        assertEquals("Leader journal last index", 1, log.lastIndex());
+        assertEquals("Leader commit index", 1, log.getCommitIndex());
+        assertEquals("Leader last applied", 1, log.getLastApplied());
         assertEquals("Leader replicatedToAllIndex", -1, leader.getReplicatedToAllIndex());
 
         testLog.info(
@@ -234,12 +235,13 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         // last previously applied index (1) that was replicated to all followers at the time of capture.
         // Note: since the log size (3) did not exceed the snapshot batch count (4), the leader should not
         // have trimmed the log to the last index actually applied (5).
-        assertEquals("Leader snapshot term", currentTerm, leaderContext.getReplicatedLog().getSnapshotTerm());
-        assertEquals("Leader snapshot index", 1, leaderContext.getReplicatedLog().getSnapshotIndex());
-        assertEquals("Leader journal log size", 4, leaderContext.getReplicatedLog().size());
-        assertEquals("Leader journal last index", 5, leaderContext.getReplicatedLog().lastIndex());
-        assertEquals("Leader commit index", 5, leaderContext.getCommitIndex());
-        assertEquals("Leader last applied", 5, leaderContext.getLastApplied());
+        final var leaderLog = leaderContext.getReplicatedLog();
+        assertEquals("Leader snapshot term", currentTerm, leaderLog.getSnapshotTerm());
+        assertEquals("Leader snapshot index", 1, leaderLog.getSnapshotIndex());
+        assertEquals("Leader journal log size", 4, leaderLog.size());
+        assertEquals("Leader journal last index", 5, leaderLog.lastIndex());
+        assertEquals("Leader commit index", 5, leaderLog.getCommitIndex());
+        assertEquals("Leader last applied", 5, leaderLog.getLastApplied());
         assertEquals("Leader replicatedToAllIndex", 1, leader.getReplicatedToAllIndex());
 
         // Now stop dropping AppendEntries in follower 2.
@@ -836,16 +838,16 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         testRaftActor.waitForRecoveryComplete();
 
         int logSize = (int) (expSnapshotState.size() - firstJournalEntryIndex);
-        assertEquals("Leader snapshot term", currentTerm, leaderContext.getReplicatedLog().getSnapshotTerm());
-        assertEquals("Leader snapshot index", snapshotIndex, leaderContext.getReplicatedLog().getSnapshotIndex());
-        assertEquals("Leader journal log size", logSize, leaderContext.getReplicatedLog().size());
-        assertEquals("Leader journal last index", lastIndex, leaderContext.getReplicatedLog().lastIndex());
-        assertEquals("Leader commit index", lastIndex, leaderContext.getCommitIndex());
-        assertEquals("Leader last applied", lastIndex, leaderContext.getLastApplied());
+        final var leaderLog = leaderContext.getReplicatedLog();
+        assertEquals("Leader snapshot term", currentTerm, leaderLog.getSnapshotTerm());
+        assertEquals("Leader snapshot index", snapshotIndex, leaderLog.getSnapshotIndex());
+        assertEquals("Leader journal log size", logSize, leaderLog.size());
+        assertEquals("Leader journal last index", lastIndex, leaderLog.lastIndex());
+        assertEquals("Leader commit index", lastIndex, leaderLog.getCommitIndex());
+        assertEquals("Leader last applied", lastIndex, leaderLog.getLastApplied());
 
         for (long i = firstJournalEntryIndex; i < expSnapshotState.size(); i++) {
-            verifyReplicatedLogEntry(leaderContext.getReplicatedLog().get(i), currentTerm, i,
-                    expSnapshotState.get((int) i));
+            verifyReplicatedLogEntry(leaderLog.get(i), currentTerm, i, expSnapshotState.get((int) i));
         }
 
         assertEquals("Leader applied state", expSnapshotState, testRaftActor.getState());

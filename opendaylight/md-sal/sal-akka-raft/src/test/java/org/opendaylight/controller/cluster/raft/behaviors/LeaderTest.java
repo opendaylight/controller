@@ -184,7 +184,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
 
         // The follower would normally reply - simulate that explicitly here.
-        long lastIndex = actorContext.getReplicatedLog().lastIndex();
+        final var log = actorContext.getReplicatedLog();
+        long lastIndex = log.lastIndex();
         leader.handleMessage(followerActor, new AppendEntriesReply(
                 FOLLOWER_ID, term, true, lastIndex, term, (short)0));
         assertTrue("isFollowerActive", leader.getFollower(FOLLOWER_ID).isFollowerActive());
@@ -203,7 +204,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         assertEquals("Entry getIndex", lastIndex + 1, appendEntries.getEntries().get(0).index());
         assertEquals("Entry getTerm", term, appendEntries.getEntries().get(0).term());
         assertEquals("Entry payload", "foo", appendEntries.getEntries().get(0).getData().toString());
-        assertEquals("Commit Index", lastIndex, actorContext.getCommitIndex());
+        assertEquals("Commit Index", lastIndex, log.getCommitIndex());
     }
 
     @Test
@@ -229,14 +230,15 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         // The follower replies with the leader's current last index and term, simulating that it is
         // up to date with the leader.
-        long lastIndex = actorContext.getReplicatedLog().lastIndex();
-        leader.handleMessage(followerActor, new AppendEntriesReply(
-                FOLLOWER_ID, newTerm, true, lastIndex, prevTerm, (short)0));
+        final var log = actorContext.getReplicatedLog();
+        long lastIndex = log.lastIndex();
+        leader.handleMessage(followerActor,
+            new AppendEntriesReply(FOLLOWER_ID, newTerm, true, lastIndex, prevTerm, (short)0));
 
         // The commit index should not get updated even though consensus was reached. This is b/c the
         // last entry's term does match the current term. As per §5.4.1, "Raft never commits log entries
         // from previous terms by counting replicas".
-        assertEquals("Commit Index", -1, actorContext.getCommitIndex());
+        assertEquals("Commit Index", -1, log.getCommitIndex());
 
         followerActor.underlyingActor().clear();
 
@@ -255,10 +257,10 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         // The follower replies with success. The leader should now update the commit index to the new index
         // as per §5.4.1 "once an entry from the current term is committed by counting replicas, then all
         // prior entries are committed indirectly".
-        leader.handleMessage(followerActor, new AppendEntriesReply(
-                FOLLOWER_ID, newTerm, true, newIndex, newTerm, (short)0));
+        leader.handleMessage(followerActor,
+            new AppendEntriesReply(FOLLOWER_ID, newTerm, true, newIndex, newTerm, (short)0));
 
-        assertEquals("Commit Index", newIndex, actorContext.getCommitIndex());
+        assertEquals("Commit Index", newIndex, log.getCommitIndex());
     }
 
     @Test
@@ -277,7 +279,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
 
         // The follower would normally reply - simulate that explicitly here.
-        long lastIndex = actorContext.getReplicatedLog().lastIndex();
+        final var log = actorContext.getReplicatedLog();
+        long lastIndex = log.lastIndex();
         leader.handleMessage(followerActor, new AppendEntriesReply(
                 FOLLOWER_ID, term, true, lastIndex, term, (short) 0));
         assertTrue("isFollowerActive", leader.getFollower(FOLLOWER_ID).isFollowerActive());
@@ -296,7 +299,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         assertEquals("Entry getIndex", lastIndex + 1, appendEntries.getEntries().get(0).index());
         assertEquals("Entry getTerm", term, appendEntries.getEntries().get(0).term());
         assertEquals("Entry payload", "foo", appendEntries.getEntries().get(0).getData().toString());
-        assertEquals("Commit Index", lastIndex + 1, actorContext.getCommitIndex());
+        assertEquals("Commit Index", lastIndex + 1, log.getCommitIndex());
     }
 
     @Test
@@ -547,15 +550,15 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         final long term = actorContext.currentTerm();
         final var data = new MockRaftActorContext.MockPayload("foo");
 
-        actorContext.getReplicatedLog().append(new SimpleReplicatedLogEntry(newLogIndex, term, data));
+        final var log = actorContext.getReplicatedLog();
+        log.append(new SimpleReplicatedLogEntry(newLogIndex, term, data));
 
-        final Identifier id = new MockIdentifier("state-id");
-        final var raftBehavior = leader.handleMessage(leaderActor, new Replicate(newLogIndex, true, leaderActor, id));
-
+        final var identifier = new MockIdentifier("state-id");
         // State should not change
-        assertTrue(raftBehavior instanceof Leader);
+        assertSame(leader,
+            leader.handleMessage(leaderActor, new Replicate(newLogIndex, true, leaderActor, identifier)));
 
-        assertEquals("getCommitIndex", newLogIndex, actorContext.getCommitIndex());
+        assertEquals("getCommitIndex", newLogIndex, log.getCommitIndex());
 
         // We should get 2 ApplyState messages - 1 for new log entry and 1 for the previous
         // one since lastApplied state is 0.
@@ -570,7 +573,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         ApplyState last = applyStateList.get((int) newLogIndex - 1);
         assertEquals("getData", data, last.getReplicatedLogEntry().getData());
-        assertEquals("getIdentifier", id, last.getIdentifier());
+        assertEquals("getIdentifier", identifier, last.getIdentifier());
     }
 
     @Test
@@ -1371,7 +1374,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         assertEquals(2, appendEntriesReply.getLogLastIndex());
         assertEquals(1, appendEntriesReply.getLogLastTerm());
 
-        assertEquals(2, followerActorContext.getCommitIndex());
+        assertEquals(2, followerActorContext.getReplicatedLog().getCommitIndex());
 
         follower.close();
     }
@@ -1468,10 +1471,10 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leaderActorContext.setCommitIndex(leaderCommitIndex);
         leaderActorContext.setLastApplied(leaderCommitIndex);
 
-        final ReplicatedLogEntry leadersFirstLogEntry = leaderActorContext.getReplicatedLog().get(0);
-        final ReplicatedLogEntry leadersSecondLogEntry = leaderActorContext.getReplicatedLog().get(1);
+        final var leadersFirstLogEntry = leaderActorContext.getReplicatedLog().get(0);
+        final var leadersSecondLogEntry = leaderActorContext.getReplicatedLog().get(1);
 
-        MockRaftActorContext followerActorContext = createFollowerActorContextWithLeader();
+        final var followerActorContext = createFollowerActorContextWithLeader();
 
         followerActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().build());
         followerActorContext.setCommitIndex(-1);
@@ -1517,7 +1520,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         FollowerLogInformation followerInfo = leader.getFollower(FOLLOWER_ID);
         assertEquals("getNextIndex", 2, followerInfo.getNextIndex());
 
-        List<ApplyState> applyStateList = MessageCollectorActor.expectMatching(followerActor, ApplyState.class, 2);
+        final var applyStateList = MessageCollectorActor.expectMatching(followerActor, ApplyState.class, 2);
 
         ApplyState applyState = applyStateList.get(0);
         assertEquals("Follower's first ApplyState index", 0, applyState.getReplicatedLogEntry().index());
@@ -1531,8 +1534,9 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         assertEquals("Follower's second ApplyState data", leadersSecondLogEntry.getData(),
                 applyState.getReplicatedLogEntry().getData());
 
-        assertEquals("Follower's commit index", 1, followerActorContext.getCommitIndex());
-        assertEquals("Follower's lastIndex", 1, followerActorContext.getReplicatedLog().lastIndex());
+        final var followerLog = followerActorContext.getReplicatedLog();
+        assertEquals("Follower's commit index", 1, followerLog.getCommitIndex());
+        assertEquals("Follower's lastIndex", 1, followerLog.lastIndex());
     }
 
     @Test
@@ -1614,9 +1618,10 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         assertEquals("Follower's second ApplyState data", leadersSecondLogEntry.getData(),
                 applyState.getReplicatedLogEntry().getData());
 
-        assertEquals("Follower's commit index", 1, followerActorContext.getCommitIndex());
-        assertEquals("Follower's lastIndex", 1, followerActorContext.getReplicatedLog().lastIndex());
-        assertEquals("Follower's lastTerm", 2, followerActorContext.getReplicatedLog().lastTerm());
+        final var followerLog = followerActorContext.getReplicatedLog();
+        assertEquals("Follower's commit index", 1, followerLog.getCommitIndex());
+        assertEquals("Follower's lastIndex", 1, followerLog.lastIndex());
+        assertEquals("Follower's lastTerm", 2, followerLog.lastTerm());
     }
 
     @Test
@@ -1691,12 +1696,13 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         assertEquals(RaftState.Leader, raftActorBehavior.state());
 
-        assertEquals(2, leaderActorContext.getCommitIndex());
+        final var leaderLog = leaderActorContext.getReplicatedLog();
+        assertEquals(2, leaderLog.getCommitIndex());
 
-        ApplyJournalEntries applyJournalEntries = MessageCollectorActor.expectFirstMatching(
-                leaderActor, ApplyJournalEntries.class);
+        final var applyJournalEntries = MessageCollectorActor.expectFirstMatching(leaderActor,
+            ApplyJournalEntries.class);
 
-        assertEquals(2, leaderActorContext.getLastApplied());
+        assertEquals(2, leaderLog.getLastApplied());
 
         assertEquals(2, applyJournalEntries.getToIndex());
 
@@ -2229,7 +2235,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         assertEquals("Entry getIndex", 0, appendEntries.getEntries().get(0).index());
 
         leader.handleMessage(followerActor, new AppendEntriesReply(FOLLOWER_ID, term, true, 0, term, (short)0));
-        assertEquals("getCommitIndex", 0, leaderActorContext.getCommitIndex());
+        assertEquals("getCommitIndex", 0, leaderActorContext.getReplicatedLog().getCommitIndex());
         MessageCollectorActor.clearMessages(followerActor);
 
         // Now send a large payload that exceeds the maximum size for a single AppendEntries - it should be sliced.
