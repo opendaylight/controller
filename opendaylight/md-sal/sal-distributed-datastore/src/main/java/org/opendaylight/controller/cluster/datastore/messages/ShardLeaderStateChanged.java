@@ -9,8 +9,10 @@ package org.opendaylight.controller.cluster.datastore.messages;
 
 import static java.util.Objects.requireNonNull;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.cluster.notifications.DefaultLeaderStateChanged;
+import org.opendaylight.controller.cluster.notifications.ForwadingLeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.yangtools.yang.data.tree.api.ReadOnlyDataTree;
 
@@ -21,22 +23,34 @@ import org.opendaylight.yangtools.yang.data.tree.api.ReadOnlyDataTree;
  *
  * @author Thomas Pantelis
  */
-public final class ShardLeaderStateChanged extends LeaderStateChanged {
+@NonNullByDefault
+public final class ShardLeaderStateChanged extends ForwadingLeaderStateChanged {
     private final @Nullable ReadOnlyDataTree localShardDataTree;
+    private final LeaderStateChanged delegate;
 
-    public ShardLeaderStateChanged(final @NonNull String memberId, final @Nullable String leaderId,
-            final @NonNull ReadOnlyDataTree localShardDataTree, final short leaderPayloadVersion) {
-        super(memberId, leaderId, leaderPayloadVersion);
+    public ShardLeaderStateChanged(final LeaderStateChanged delegate,
+            final @Nullable ReadOnlyDataTree localShardDataTree) {
+        this.delegate = requireNonNull(delegate);
         this.localShardDataTree = requireNonNull(localShardDataTree);
     }
 
-    public ShardLeaderStateChanged(final @NonNull String memberId, final @Nullable String leaderId,
+    public ShardLeaderStateChanged(final String memberId, final @Nullable String leaderId,
+            final ReadOnlyDataTree localShardDataTree, final short leaderPayloadVersion) {
+        this(new DefaultLeaderStateChanged(memberId, leaderId, leaderPayloadVersion),
+            requireNonNull(localShardDataTree));
+    }
+
+    public ShardLeaderStateChanged(final String memberId, final @Nullable String leaderId,
             final short leaderPayloadVersion) {
-        super(memberId, leaderId, leaderPayloadVersion);
-        localShardDataTree = null;
+        this(new DefaultLeaderStateChanged(memberId, leaderId, leaderPayloadVersion), null);
     }
 
     public @Nullable ReadOnlyDataTree localShardDataTree() {
         return localShardDataTree;
+    }
+
+    @Override
+    protected LeaderStateChanged delegate() {
+        return delegate;
     }
 }

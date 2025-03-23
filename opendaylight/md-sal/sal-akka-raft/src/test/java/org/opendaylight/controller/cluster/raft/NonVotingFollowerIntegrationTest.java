@@ -387,14 +387,13 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
 
         LeaderStateChanged leaderStateChanged = MessageCollectorActor.expectFirstMatching(roleChangeNotifier,
                 LeaderStateChanged.class);
-        assertEquals("getLeaderId", null, leaderStateChanged.getLeaderId());
+        assertEquals("leaderId", null, leaderStateChanged.leaderId());
 
         MessageCollectorActor.clearMessages(roleChangeNotifier);
         followerInstance.stopDropMessages(AppendEntries.class);
 
-        leaderStateChanged = MessageCollectorActor.expectFirstMatching(roleChangeNotifier,
-                LeaderStateChanged.class);
-        assertEquals("getLeaderId", leaderId, leaderStateChanged.getLeaderId());
+        leaderStateChanged = MessageCollectorActor.expectFirstMatching(roleChangeNotifier, LeaderStateChanged.class);
+        assertEquals("leaderId", leaderId, leaderStateChanged.leaderId());
     }
 
     private void createNewLeaderActor() {

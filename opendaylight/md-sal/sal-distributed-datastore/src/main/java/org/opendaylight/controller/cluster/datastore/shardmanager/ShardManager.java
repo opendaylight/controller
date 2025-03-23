@@ -584,11 +584,11 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     private void onLeaderStateChanged(final ShardLeaderStateChanged leaderStateChanged) {
         LOG.info("{}: Received LeaderStateChanged message: {}", logName(), leaderStateChanged);
 
-        ShardInformation shardInformation = findShardInformation(leaderStateChanged.getMemberId());
+        ShardInformation shardInformation = findShardInformation(leaderStateChanged.memberId());
         if (shardInformation != null) {
             shardInformation.setLocalDataTree(leaderStateChanged.localShardDataTree());
-            shardInformation.setLeaderVersion(leaderStateChanged.getLeaderPayloadVersion());
-            if (shardInformation.setLeaderId(leaderStateChanged.getLeaderId())) {
+            shardInformation.setLeaderVersion(leaderStateChanged.leaderPayloadVersion());
+            if (shardInformation.setLeaderId(leaderStateChanged.leaderId())) {
                 primaryShardInfoCache.remove(shardInformation.getShardName());
 
                 notifyShardAvailabilityCallbacks(shardInformation);
@@ -596,7 +596,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
             checkReady();
         } else {
-            LOG.debug("No shard found with member Id {}", leaderStateChanged.getMemberId());
+            LOG.debug("No shard found with member Id {}", leaderStateChanged.memberId());
         }
     }
 
