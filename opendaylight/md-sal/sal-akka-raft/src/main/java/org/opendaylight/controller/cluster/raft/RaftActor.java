@@ -12,6 +12,9 @@ import static com.google.common.base.Verify.verify;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.MoreObjects;
+import com.google.common.base.MoreObjects.ToStringHelper;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -102,6 +105,65 @@ import org.slf4j.LoggerFactory;
  * </ul>
  */
 public abstract class RaftActor extends AbstractUntypedPersistentActor {
+    @NonNullByDefault
+    static final class Created extends RaftActorStage {
+        private final ConfigParams configParams;
+
+        private Created(final ConfigParams configParams) {
+            super("created");
+            this.configParams = requireNonNull(configParams);
+        }
+    }
+
+    @NonNullByDefault
+    static final class Initializing extends RaftActorStage {
+        private final Stopwatch elapsed = Stopwatch.createStarted();
+        private final RaftActorRecoverySupport raftRecovery;
+        private final ConfigParams configParams;
+
+        Initializing(final ConfigParams configParams, final RaftActorRecoverySupport raftRecovery) {
+            super("recovering");
+            this.configParams = requireNonNull(configParams);
+            this.raftRecovery = requireNonNull(raftRecovery);
+        }
+
+        @Override
+        ToStringHelper addToStringAttributes(final ToStringHelper helper) {
+            return helper.add("elapsed", elapsed);
+        }
+    }
+
+    @NonNullByDefault
+    abstract static sealed class Initialized extends RaftActorStage permits Started, Stopping {
+        final RaftActorContextImpl context;
+
+        Initialized(final RaftActorContextImpl context) {
+            this.context = requireNonNull(context);
+        }
+    }
+
+    @NonNullByDefault
+    private static final class Started extends Initialized {
+        Started(final RaftActorContextImpl context) {
+            super(context);
+        }
+    }
+
+    @NonNullByDefault
+    private static final class Stopping extends Initialized {
+        Stopping(final RaftActorContextImpl context) {
+            super(context);
+        }
+    }
+
+    static final class Stopped extends RaftActorStage {
+        static final Stopped INSTANCE = new Stopped();
+
+        private Stopped() {
+            // Hidden on purpose
+        }
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(RaftActor.class);
     private static final long APPLY_STATE_DELAY_THRESHOLD_IN_NANOS = TimeUnit.MILLISECONDS.toNanos(50);
 
@@ -111,10 +173,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     private final @NonNull RaftActorDataPersistenceProvider dataPersistenceProvider;
     private final @NonNull BehaviorStateTracker behaviorStateTracker = new BehaviorStateTracker();
 
-    // FIXME: should be valid only after recovery
-    private final @NonNull RaftActorContextImpl context;
+    private final @NonNull RaftActorStage stage;
 
-    private RaftActorRecoverySupport raftRecovery;
     private RaftActorSnapshotMessageSupport snapshotSupport;
     private RaftActorServerConfigurationSupport serverConfigurationSupport;
     private boolean shuttingDown;
@@ -125,6 +185,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         super(memberId);
         localAccess = new LocalAccess(memberId, stateDir.resolve(memberId));
         dataPersistenceProvider = new RaftActorDataPersistenceProvider(this);
+        stage = new Created(configParams.orElseGet(DefaultConfigParamsImpl::new));
 
         context = new RaftActorContextImpl(self(), getContext(), localAccess, peerAddresses,
             configParams.orElseGet(DefaultConfigParamsImpl::new), payloadVersion, dataPersistenceProvider,
@@ -148,10 +209,16 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     @Override
     public void preStart() throws Exception {
-        LOG.info("{}: Starting recovery with journal batch size {}", memberId(),
-            context.getConfigParams().getJournalRecoveryLogBatchSize());
+        if (!(stage instanceof Created created)) {
+            throw new IllegalStateException("Cannot preStart() in stage " + stage);
+        }
 
-        super.preStart();
+        final var configParams = created.configParams;
+        LOG.info("{}: Starting recovery with journal batch size {}", memberId(),
+            configParams.getJournalRecoveryLogBatchSize());
+
+        stage = new Initializing(configParams, null);
+
 
         context.getSnapshotManager().setSnapshotCohort(getRaftActorSnapshotCohort());
         snapshotSupport = newRaftActorSnapshotMessageSupport();
@@ -962,6 +1029,11 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 }
             }, null, RaftActorLeadershipTransferCohort.USE_DEFAULT_LEADER_TIMEOUT);
         }
+    }
+
+    @Override
+    public final String toString() {
+        return MoreObjects.toStringHelper(this).add("memberId", memberId()).add("stage", stage).toString();
     }
 
     /**
