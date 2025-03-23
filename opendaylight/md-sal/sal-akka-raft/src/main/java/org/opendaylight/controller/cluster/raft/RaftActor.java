@@ -536,15 +536,13 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     private void handleBehaviorChange(final BehaviorState oldBehaviorState, final RaftActorBehavior currentBehavior) {
-        RaftActorBehavior oldBehavior = oldBehaviorState.getBehavior();
-
+        final var oldBehavior = oldBehaviorState.getBehavior();
         if (oldBehavior != currentBehavior) {
             onStateChanged();
         }
 
-        String lastLeaderId = oldBehavior == null ? null : oldBehaviorState.getLastLeaderId();
-        String lastValidLeaderId = oldBehavior == null ? null : oldBehaviorState.getLastValidLeaderId();
-        String oldBehaviorStateName = oldBehavior == null ? null : oldBehavior.state().name();
+        final var lastLeaderId = oldBehavior == null ? null : oldBehaviorState.getLastLeaderId();
+        final var lastValidLeaderId = oldBehavior == null ? null : oldBehaviorState.getLastValidLeaderId();
 
         // it can happen that the state has not changed but the leader has changed.
         final var leaderId = currentBehavior.getLeaderId();
@@ -566,11 +564,26 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             serverConfigurationSupport.onNewLeader(leaderId);
         }
 
-        if (roleChangeNotifier != null && (oldBehavior == null || oldBehavior.state() != currentBehavior.state())) {
-            roleChangeNotifier.tell(new RoleChanged(memberId(), oldBehaviorStateName,
-                currentBehavior.state().name()), self());
+        if (roleChangeNotifier != null) {
+            notifyRoleChange(roleChangeNotifier, currentBehavior.state(), oldBehavior);
         }
     }
+
+    @NonNullByDefault
+    private void notifyRoleChange(final ActorRef target, final RaftState newState,
+            final @Nullable RaftActorBehavior oldBehavior) {
+        final RaftState oldState;
+        if (oldBehavior != null) {
+            oldState = oldBehavior.state();
+            if (newState.equals(oldState)) {
+                return;
+            }
+        } else {
+            oldState = null;
+        }
+        target.tell(new RoleChanged(memberId(), newState, oldState), self());
+    }
+
 
     private void handleApplyState(final ApplyState applyState) {
         final long startTime = System.nanoTime();
