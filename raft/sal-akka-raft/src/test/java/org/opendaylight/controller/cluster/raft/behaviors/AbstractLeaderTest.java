@@ -43,8 +43,8 @@ public abstract class AbstractLeaderTest<T extends AbstractLeader> extends Abstr
         final ActorRef follower1Actor = actorFactory.createActor(MessageCollectorActor.props(), follower1ActorId);
         final ActorRef follower2Actor = actorFactory.createActor(MessageCollectorActor.props(), follower2ActorId);
 
-        MockRaftActorContext leaderActorContext =
-                new MockRaftActorContext(leaderActorId, getSystem(), leaderActor);
+        final var leaderActorContext = new MockRaftActorContext(leaderActorId, stateDir.getRoot().toPath(), getSystem(),
+            leaderActor);
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         configParams.setHeartBeatInterval(Duration.ofMillis(200));
