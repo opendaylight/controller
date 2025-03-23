@@ -17,13 +17,13 @@ import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.SimpleReplicatedLog;
-import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
+import org.opendaylight.raft.api.RaftRole;
 
 /**
  * A leader election scenario test that partitions a candidate when trying to join a cluster on startup.
@@ -85,9 +85,9 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
 
         member3Actor.waitForBehaviorStateChange();
 
-        verifyBehaviorState("member 1", member1Actor, RaftState.Leader);
-        verifyBehaviorState("member 2", member2Actor, RaftState.Follower);
-        verifyBehaviorState("member 3", member3Actor, RaftState.Follower);
+        verifyBehaviorState("member 1", member1Actor, RaftRole.Leader);
+        verifyBehaviorState("member 2", member2Actor, RaftRole.Follower);
+        verifyBehaviorState("member 3", member3Actor, RaftRole.Follower);
 
         // newTerm should be 10.
 
@@ -135,9 +135,9 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
             assertFalse("isVoteGranted", requestVoteReply.isVoteGranted());
         }
 
-        verifyBehaviorState("member 1", member1Actor, RaftState.Follower);
-        verifyBehaviorState("member 2", member2Actor, RaftState.Follower);
-        verifyBehaviorState("member 3", member3Actor, RaftState.Candidate);
+        verifyBehaviorState("member 1", member1Actor, RaftRole.Follower);
+        verifyBehaviorState("member 2", member2Actor, RaftRole.Follower);
+        verifyBehaviorState("member 3", member3Actor, RaftRole.Candidate);
 
         // Even though member 3 didn't get voted for, member 1 and 2 should have updated their term
         // to member 3's.
@@ -196,9 +196,9 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         member1Actor.waitForExpectedMessages(RequestVote.class);
         member2Actor.waitForExpectedMessages(RequestVote.class);
 
-        verifyBehaviorState("member 1", member1Actor, RaftState.Leader);
-        verifyBehaviorState("member 2", member2Actor, RaftState.Follower);
-        verifyBehaviorState("member 3", member3Actor, RaftState.Candidate);
+        verifyBehaviorState("member 1", member1Actor, RaftRole.Leader);
+        verifyBehaviorState("member 2", member2Actor, RaftRole.Follower);
+        verifyBehaviorState("member 3", member3Actor, RaftRole.Candidate);
 
         assertEquals("member 1 election term", 3, member1Context.currentTerm());
         assertEquals("member 2 election term", 3, member2Context.currentTerm());

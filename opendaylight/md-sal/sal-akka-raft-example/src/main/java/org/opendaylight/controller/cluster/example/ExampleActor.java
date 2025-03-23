@@ -27,9 +27,8 @@ import org.opendaylight.controller.cluster.raft.ConfigParams;
 import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.RaftActorRecoveryCohort;
 import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
-import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
-import org.opendaylight.controller.cluster.raft.behaviors.Leader;
+import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.yangtools.concepts.Identifier;
@@ -87,16 +86,17 @@ public final class ExampleActor extends RaftActor
 
         } else if (message instanceof PrintRole) {
             if (LOG.isDebugEnabled()) {
-                if (getRaftState() == RaftState.Leader || getRaftState() == RaftState.IsolatedLeader) {
-                    final String followers = ((Leader)getCurrentBehavior()).printFollowerStates();
-                    LOG.debug("{} = {}, Peers={}, followers={}", memberId(), getRaftState(),
-                        getRaftActorContext().getPeerIds(), followers);
-                } else {
-                    LOG.debug("{} = {}, Peers={}", memberId(), getRaftState(),
-                        getRaftActorContext().getPeerIds());
+                final var behavior = getCurrentBehavior();
+                switch (behavior) {
+                    case AbstractLeader leader -> {
+                        LOG.debug("{} = {}, Peers={}, followers={}", memberId(), leader.raftRole(),
+                            getRaftActorContext().getPeerIds(), leader.printFollowerStates());
+                    }
+                    default -> {
+                        LOG.debug("{} = {}, Peers={}", memberId(), behavior.raftRole(),
+                            getRaftActorContext().getPeerIds());
+                    }
                 }
-
-
             }
 
         } else {
