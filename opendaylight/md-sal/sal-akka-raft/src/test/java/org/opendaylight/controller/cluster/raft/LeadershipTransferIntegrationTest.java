@@ -37,6 +37,7 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
+import org.opendaylight.raft.api.RaftRole;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
@@ -99,7 +100,7 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
         FiniteDuration duration = FiniteDuration.create(5, TimeUnit.SECONDS);
         final Future<Boolean> stopFuture = Patterns.gracefulStop(leaderActor, duration, Shutdown.INSTANCE);
 
-        verifyRaftState(follower1Actor, RaftState.Leader);
+        verifyRaftState(follower1Actor, RaftRole.Leader);
 
         Boolean stopped = Await.result(stopFuture, duration);
         assertEquals("Stopped", Boolean.TRUE, stopped);
@@ -198,8 +199,8 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
         testLog.info("createRaftActors starting");
     }
 
-    private static void verifyRaftState(final ActorRef raftActor, final RaftState expState) {
-        verifyRaftState(raftActor, rs -> assertEquals("getRaftState", expState.toString(), rs.getRaftState()));
+    private static void verifyRaftState(final ActorRef raftActor, final RaftRole expState) {
+        verifyRaftState(raftActor, rs -> assertEquals(expState.name(), rs.getRaftState()));
     }
 
     private static void verifyLeaderStateChangedMessages(final ActorRef notifierActor,
@@ -223,9 +224,9 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
 
         sendShutDown(leaderActor);
 
-        verifyRaftState(follower1Actor, RaftState.Follower);
-        verifyRaftState(follower2Actor, RaftState.Follower);
-        verifyRaftState(follower3Actor, RaftState.Follower);
+        verifyRaftState(follower1Actor, RaftRole.Follower);
+        verifyRaftState(follower2Actor, RaftRole.Follower);
+        verifyRaftState(follower3Actor, RaftRole.Follower);
 
         testLog.info("testLeaderTransferOnShutDown ending");
     }
@@ -268,7 +269,7 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
 
         sendFollower2RequestLeadershipTransferToLeader();
 
-        verifyRaftState(follower2Actor, RaftState.Leader);
+        verifyRaftState(follower2Actor, RaftRole.Leader);
 
         expectMatching(requestLeadershipResultCollectorActor, Status.Success.class, 1);
 
@@ -286,9 +287,9 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
 
         sendFollower2RequestLeadershipTransferToLeader();
 
-        verifyRaftState(follower1Actor, RaftState.Follower);
-        verifyRaftState(follower2Actor, RaftState.Follower);
-        verifyRaftState(follower3Actor, RaftState.Follower);
+        verifyRaftState(follower1Actor, RaftRole.Follower);
+        verifyRaftState(follower2Actor, RaftRole.Follower);
+        verifyRaftState(follower3Actor, RaftRole.Follower);
 
         Status.Failure failure = expectFirstMatching(requestLeadershipResultCollectorActor, Status.Failure.class);
         assertTrue(failure.cause() instanceof LeadershipTransferFailedException);
@@ -308,8 +309,8 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
 
         sendFollower2RequestLeadershipTransferToLeader();
 
-        verifyRaftState(follower1Actor, RaftState.Follower);
-        verifyRaftState(follower3Actor, RaftState.Follower);
+        verifyRaftState(follower1Actor, RaftRole.Follower);
+        verifyRaftState(follower3Actor, RaftRole.Follower);
 
         Status.Failure failure = expectFirstMatching(requestLeadershipResultCollectorActor, Status.Failure.class);
         assertTrue(failure.cause() instanceof LeadershipTransferFailedException);
@@ -331,8 +332,8 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
 
         expectFirstMatching(requestLeadershipResultCollectorActor, Status.Success.class);
 
-        verifyRaftState(follower2Actor, RaftState.Leader);
-        verifyRaftState(leaderActor, RaftState.Follower);
+        verifyRaftState(follower2Actor, RaftRole.Leader);
+        verifyRaftState(leaderActor, RaftRole.Follower);
 
         testLog.info("testRequestLeadershipTransferToFollower2WithOtherFollowersDown ending");
     }

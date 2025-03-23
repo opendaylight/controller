@@ -65,6 +65,7 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
+import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.concepts.Immutable;
 import org.slf4j.Logger;
@@ -167,7 +168,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             try {
                 behavior.close();
             } catch (Exception e) {
-                LOG.warn("{}: Error closing behavior {}", memberId(), behavior.state(), e);
+                LOG.warn("{}: Error closing behavior {}", memberId(), behavior.raftRole(), e);
             }
         }
         super.postStop();
@@ -301,7 +302,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             // non-leader cannot satisfy leadership request
             LOG.warn("{}: onRequestLeadership {} was sent to non-leader."
                     + " Current behavior: {}. Sending failure response",
-                    memberId(), message, getCurrentBehavior().state());
+                    memberId(), message, getCurrentBehavior().raftRole());
             message.getReplyTo().tell(new LeadershipTransferFailedException("Cannot transfer leader to "
                 + requestedFollowerId + ". RequestLeadership message was sent to non-leader " + memberId()), self());
             return;
@@ -388,7 +389,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         shuttingDown = true;
 
-        switch (getCurrentBehavior().state()) {
+        switch (getCurrentBehavior().raftRole()) {
             case Leader:
             case PreLeader:
                 // Fall-through to more work
@@ -431,7 +432,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     private void onLeaderTransitioning(final LeaderTransitioning leaderTransitioning) {
         LOG.debug("{}: onLeaderTransitioning: {}", memberId(), leaderTransitioning);
         final var roleChangeNotifier = roleChangeNotifier();
-        if (roleChangeNotifier != null && getRaftState() == RaftState.Follower
+        if (roleChangeNotifier != null && getRaftState() == RaftRole.Follower
                 && leaderTransitioning.getLeaderId().equals(getCurrentBehavior().getLeaderId())) {
             roleChangeNotifier.tell(newLeaderStateChanged(memberId(), null,
                 getCurrentBehavior().getLeaderPayloadVersion()), self());
@@ -489,7 +490,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 .lastIndex(replLog.lastIndex())
                 .lastTerm(replLog.lastTerm())
                 .leader(getLeaderId())
-                .raftState(currentBehavior.state().toString())
+                .raftState(currentBehavior.raftRole().name())
                 .replicatedToAllIndex(currentBehavior.getReplicatedToAllIndex())
                 .snapshotIndex(replLog.getSnapshotIndex())
                 .snapshotTerm(replLog.getSnapshotTerm())
@@ -566,25 +567,24 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         }
 
         if (roleChangeNotifier != null) {
-            notifyRoleChange(roleChangeNotifier, currentBehavior.state(), oldBehavior);
+            notifyRoleChange(roleChangeNotifier, currentBehavior.raftRole(), oldBehavior);
         }
     }
 
     @NonNullByDefault
-    private void notifyRoleChange(final ActorRef target, final RaftState newState,
+    private void notifyRoleChange(final ActorRef target, final RaftRole newRole,
             final @Nullable RaftActorBehavior oldBehavior) {
-        final RaftState oldState;
+        final RaftRole oldRole;
         if (oldBehavior != null) {
-            oldState = oldBehavior.state();
-            if (newState.equals(oldState)) {
+            oldRole = oldBehavior.raftRole();
+            if (newRole.equals(oldRole)) {
                 return;
             }
         } else {
-            oldState = null;
+            oldRole = null;
         }
-        target.tell(new RoleChanged(memberId(), newState, oldState), self());
+        target.tell(new RoleChanged(memberId(), newRole, oldRole), self());
     }
-
 
     private void handleApplyState(final ApplyState applyState) {
         final long startTime = System.nanoTime();
@@ -709,7 +709,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     protected final boolean isLeaderActive() {
-        return getRaftState() != RaftState.IsolatedLeader && getRaftState() != RaftState.PreLeader
+        return getRaftState() != RaftRole.IsolatedLeader && getRaftState() != RaftRole.PreLeader
                 && !shuttingDown && !isLeadershipTransferInProgress();
     }
 
@@ -739,8 +739,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     @VisibleForTesting
-    protected final RaftState getRaftState() {
-        return getCurrentBehavior().state();
+    protected final RaftRole getRaftState() {
+        return getCurrentBehavior().raftRole();
     }
 
     public final RaftActorContext getRaftActorContext() {
@@ -963,7 +963,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 private void ensureFollowerState() {
                     // Whether or not leadership transfer succeeded, we have to step down as leader and
                     // switch to Follower so ensure that.
-                    if (getRaftState() != RaftState.Follower) {
+                    if (getRaftState() != RaftRole.Follower) {
                         initializeBehavior();
                     }
                 }
