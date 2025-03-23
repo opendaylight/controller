@@ -490,7 +490,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 .lastIndex(replLog.lastIndex())
                 .lastTerm(replLog.lastTerm())
                 .leader(getLeaderId())
-                .raftState(currentBehavior.raftRole().name())
+                .raftState(currentBehavior.raftRole())
                 .replicatedToAllIndex(currentBehavior.getReplicatedToAllIndex())
                 .snapshotIndex(replLog.getSnapshotIndex())
                 .snapshotTerm(replLog.getSnapshotTerm())
