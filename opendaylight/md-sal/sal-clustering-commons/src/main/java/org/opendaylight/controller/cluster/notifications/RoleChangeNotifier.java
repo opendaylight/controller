@@ -81,13 +81,12 @@ public class RoleChangeNotifier extends AbstractUntypedActor implements AutoClos
             // this message is sent by RaftActor. Notify registered listeners when this message is received.
 
             LOG.info("RoleChangeNotifier for {} , received role change from {} to {}", memberId,
-                roleChanged.getOldRole(), roleChanged.getNewRole());
+                roleChanged.oldRole(), roleChanged.newRole());
 
-            latestRoleChangeNotification =
-                new RoleChangeNotification(roleChanged.getMemberId(),
-                    roleChanged.getOldRole(), roleChanged.getNewRole());
+            latestRoleChangeNotification = new RoleChangeNotification(roleChanged.memberId(), roleChanged.oldRole(),
+                roleChanged.newRole());
 
-            for (ActorRef listener : registeredListeners.values()) {
+            for (var listener : registeredListeners.values()) {
                 listener.tell(latestRoleChangeNotification, self());
             }
         } else if (message instanceof LeaderStateChanged leaderStateChanged) {

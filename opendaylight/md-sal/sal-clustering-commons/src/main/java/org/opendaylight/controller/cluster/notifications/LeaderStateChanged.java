@@ -7,9 +7,7 @@
  */
 package org.opendaylight.controller.cluster.notifications;
 
-import static java.util.Objects.requireNonNull;
-
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
@@ -17,34 +15,11 @@ import org.eclipse.jdt.annotation.Nullable;
  *
  * @author Thomas Pantelis
  */
-public class LeaderStateChanged {
-    private final @NonNull String memberId;
-    private final @Nullable String leaderId;
-    private final short leaderPayloadVersion;
+@NonNullByDefault
+public sealed interface LeaderStateChanged extends MemberNotication
+        permits DefaultLeaderStateChanged, ForwadingLeaderStateChanged {
 
-    public LeaderStateChanged(final @NonNull String memberId, final @Nullable String leaderId,
-            final short leaderPayloadVersion) {
-        this.memberId = requireNonNull(memberId);
-        this.leaderId = leaderId;
-        this.leaderPayloadVersion = leaderPayloadVersion;
-    }
+    @Nullable String leaderId();
 
-    public @NonNull String getMemberId() {
-        return memberId;
-    }
-
-    public @Nullable String getLeaderId() {
-        return leaderId;
-    }
-
-    public short getLeaderPayloadVersion() {
-        return leaderPayloadVersion;
-    }
-
-    @Override
-    public String toString() {
-        return "LeaderStateChanged [memberId=" + memberId
-                + ", leaderId=" + leaderId
-                + ", leaderPayloadVersion=" + leaderPayloadVersion + "]";
-    }
+    short leaderPayloadVersion();
 }
