@@ -8,11 +8,11 @@
 package org.opendaylight.controller.cluster.raft.client.messages;
 
 import com.google.common.collect.ImmutableMap;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.mgmt.api.FollowerInfo;
+import org.opendaylight.raft.api.RaftRole;
 
 /**
  * The response to a GetOnDemandRaftState message.
@@ -20,246 +20,315 @@ import org.opendaylight.controller.cluster.mgmt.api.FollowerInfo;
  * @author Thomas Pantelis
  */
 public class OnDemandRaftState {
-    private long lastLogIndex = -1L;
-    private long lastLogTerm = -1L;
-    private long currentTerm = -1L;
-    private long commitIndex = -1L;
-    private long lastApplied = -1L;
-    private long lastIndex = -1L;
-    private long lastTerm = -1L;
-    private long snapshotIndex = -1L;
-    private long snapshotTerm = -1L;
-    private long replicatedToAllIndex = -1L;
-    private long inMemoryJournalDataSize;
-    private long inMemoryJournalLogSize;
-    private String leader;
-    private String raftState;
-    private String votedFor;
-    private boolean isSnapshotCaptureInitiated;
-    private String customRaftPolicyClassName;
-    private boolean isVoting;
+    private final long lastLogIndex;
+    private final long lastLogTerm;
+    private final long currentTerm;
+    private final long commitIndex;
+    private final long lastApplied;
+    private final long lastIndex;
+    private final long lastTerm;
+    private final long snapshotIndex;
+    private final long snapshotTerm;
+    private final long replicatedToAllIndex;
+    private final String leader;
+    private final RaftRole raftState;
+    private final String votedFor;
+    private final boolean isSnapshotCaptureInitiated;
+    private final String customRaftPolicyClassName;
+    private final boolean isVoting;
 
-    private List<FollowerInfo> followerInfoList = Collections.emptyList();
-    private Map<String, String> peerAddresses = Collections.emptyMap();
-    private Map<String, Boolean> peerVotingStates = Collections.emptyMap();
+    private final List<FollowerInfo> followerInfoList;
+    private final Map<String, String> peerAddresses;
+    private final Map<String, Boolean> peerVotingStates;
 
-    protected OnDemandRaftState() {
+    private final long inMemoryJournalDataSize;
+    private final long inMemoryJournalLogSize;
+
+    private OnDemandRaftState(final AbstractBuilder<?, ?> builder) {
+        lastLogIndex = builder.lastLogIndex;
+        lastLogTerm = builder.lastLogTerm;
+        currentTerm = builder.currentTerm;
+        commitIndex = builder.commitIndex;
+        lastApplied = builder.lastApplied;
+        lastIndex = builder.lastIndex;
+        lastTerm = builder.lastTerm;
+        snapshotIndex = builder.snapshotIndex;
+        snapshotTerm = builder.snapshotTerm;
+        replicatedToAllIndex = builder.replicatedToAllIndex;
+        leader = builder.leader;
+        raftState = builder.raftState;
+        votedFor = builder.votedFor;
+        isSnapshotCaptureInitiated = builder.isSnapshotCaptureInitiated;
+        customRaftPolicyClassName = builder.customRaftPolicyClassName;
+        isVoting = builder.isVoting;
+        followerInfoList = builder.followerInfoList;
+        peerAddresses = builder.peerAddresses;
+        peerVotingStates = builder.peerVotingStates;
+        inMemoryJournalDataSize = builder.inMemoryJournalDataSize;
+        inMemoryJournalLogSize = builder.inMemoryJournalLogSize;
+    }
+
+    protected OnDemandRaftState(final OnDemandRaftState source) {
+        lastLogIndex = source.lastLogIndex;
+        lastLogTerm = source.lastLogTerm;
+        currentTerm = source.currentTerm;
+        commitIndex = source.commitIndex;
+        lastApplied = source.lastApplied;
+        lastIndex = source.lastIndex;
+        lastTerm = source.lastTerm;
+        snapshotIndex = source.snapshotIndex;
+        snapshotTerm = source.snapshotTerm;
+        replicatedToAllIndex = source.replicatedToAllIndex;
+        leader = source.leader;
+        raftState = source.raftState;
+        votedFor = source.votedFor;
+        isSnapshotCaptureInitiated = source.isSnapshotCaptureInitiated;
+        customRaftPolicyClassName = source.customRaftPolicyClassName;
+        isVoting = source.isVoting;
+        followerInfoList = source.followerInfoList;
+        peerAddresses = source.peerAddresses;
+        peerVotingStates = source.peerVotingStates;
+        inMemoryJournalDataSize = source.inMemoryJournalDataSize;
+        inMemoryJournalLogSize = source.inMemoryJournalLogSize;
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    public long getLastLogIndex() {
+    public final long getLastLogIndex() {
         return lastLogIndex;
     }
 
-    public long getLastLogTerm() {
+    public final long getLastLogTerm() {
         return lastLogTerm;
     }
 
-    public long getCurrentTerm() {
+    public final long getCurrentTerm() {
         return currentTerm;
     }
 
-    public long getCommitIndex() {
+    public final long getCommitIndex() {
         return commitIndex;
     }
 
-    public long getLastApplied() {
+    public final long getLastApplied() {
         return lastApplied;
     }
 
-    public long getLastIndex() {
+    public final long getLastIndex() {
         return lastIndex;
     }
 
-    public long getLastTerm() {
+    public final long getLastTerm() {
         return lastTerm;
     }
 
-    public long getSnapshotIndex() {
+    public final long getSnapshotIndex() {
         return snapshotIndex;
     }
 
-    public long getSnapshotTerm() {
+    public final long getSnapshotTerm() {
         return snapshotTerm;
     }
 
-    public long getReplicatedToAllIndex() {
+    public final long getReplicatedToAllIndex() {
         return replicatedToAllIndex;
     }
 
-    public long getInMemoryJournalDataSize() {
+    public final long getInMemoryJournalDataSize() {
         return inMemoryJournalDataSize;
     }
 
-    public long getInMemoryJournalLogSize() {
+    public final long getInMemoryJournalLogSize() {
         return inMemoryJournalLogSize;
     }
 
-    public String getLeader() {
+    public final String getLeader() {
         return leader;
     }
 
-    // FIXME: RaftRole here
-    public String getRaftState() {
+    public final RaftRole getRaftState() {
         return raftState;
     }
 
-    public String getVotedFor() {
+    public final String getVotedFor() {
         return votedFor;
     }
 
-    public boolean isSnapshotCaptureInitiated() {
+    public final boolean isSnapshotCaptureInitiated() {
         return isSnapshotCaptureInitiated;
     }
 
-    public boolean isVoting() {
+    public final boolean isVoting() {
         return isVoting;
     }
 
-    public List<FollowerInfo> getFollowerInfoList() {
+    public final List<FollowerInfo> getFollowerInfoList() {
         return followerInfoList;
     }
 
-    public Map<String, String> getPeerAddresses() {
+    public final Map<String, String> getPeerAddresses() {
         return peerAddresses;
     }
 
-    public Map<String, Boolean> getPeerVotingStates() {
+    public final Map<String, Boolean> getPeerVotingStates() {
         return peerVotingStates;
     }
 
-    public String getCustomRaftPolicyClassName() {
+    public final String getCustomRaftPolicyClassName() {
         return customRaftPolicyClassName;
     }
 
-    public abstract static class AbstractBuilder<B extends AbstractBuilder<B, T>, T extends OnDemandRaftState> {
-        @SuppressWarnings("unchecked")
-        protected B self() {
-            return (B) this;
-        }
-
-        protected abstract @NonNull OnDemandRaftState state();
-
-        public B lastLogIndex(final long value) {
-            state().lastLogIndex = value;
-            return self();
-        }
-
-        public B lastLogTerm(final long value) {
-            state().lastLogTerm = value;
-            return self();
-        }
-
-        public B currentTerm(final long value) {
-            state().currentTerm = value;
-            return self();
-        }
-
-        public B commitIndex(final long value) {
-            state().commitIndex = value;
-            return self();
-        }
-
-        public B lastApplied(final long value) {
-            state().lastApplied = value;
-            return self();
-        }
-
-        public B lastIndex(final long value) {
-            state().lastIndex = value;
-            return self();
-        }
-
-        public B lastTerm(final long value) {
-            state().lastTerm = value;
-            return self();
-        }
-
-        public B snapshotIndex(final long value) {
-            state().snapshotIndex = value;
-            return self();
-        }
-
-        public B snapshotTerm(final long value) {
-            state().snapshotTerm = value;
-            return self();
-        }
-
-        public B replicatedToAllIndex(final long value) {
-            state().replicatedToAllIndex = value;
-            return self();
-        }
-
-        public B inMemoryJournalDataSize(final long value) {
-            state().inMemoryJournalDataSize = value;
-            return self();
-        }
-
-        public B inMemoryJournalLogSize(final long value) {
-            state().inMemoryJournalLogSize = value;
-            return self();
-        }
-
-        public B leader(final String value) {
-            state().leader = value;
-            return self();
-        }
-
-        public B raftState(final String value) {
-            state().raftState = value;
-            return self();
-        }
-
-        public B votedFor(final String value) {
-            state().votedFor = value;
-            return self();
-        }
-
-        public B isVoting(final boolean isVoting) {
-            state().isVoting = isVoting;
-            return self();
-        }
-
-        public B followerInfoList(final List<FollowerInfo> followerInfoList) {
-            state().followerInfoList = followerInfoList;
-            return self();
-        }
-
-        public B peerAddresses(final Map<String, String> peerAddresses) {
-            state().peerAddresses = peerAddresses;
-            return self();
-        }
-
-        public B peerVotingStates(final Map<String, Boolean> peerVotingStates) {
-            state().peerVotingStates = ImmutableMap.copyOf(peerVotingStates);
-            return self();
-        }
-
-        public B isSnapshotCaptureInitiated(final boolean value) {
-            state().isSnapshotCaptureInitiated = value;
-            return self();
-        }
-
-        public B customRaftPolicyClassName(final String className) {
-            state().customRaftPolicyClassName = className;
-            return self();
-        }
-
-        @SuppressWarnings("unchecked")
-        public T build() {
-            return (T) state();
+    public static final class Builder extends AbstractBuilder<Builder, OnDemandRaftState> {
+        @Override
+        protected OnDemandRaftState buildImpl(final OnDemandRaftState product) {
+            return product;
         }
     }
 
-    public static class Builder extends AbstractBuilder<Builder, OnDemandRaftState> {
-        private final OnDemandRaftState state = new OnDemandRaftState();
+    public abstract static class AbstractBuilder<B extends AbstractBuilder<B, T>, T extends OnDemandRaftState> {
+        private List<FollowerInfo> followerInfoList = List.of();
+        private Map<String, String> peerAddresses = Map.of();
+        private Map<String, Boolean> peerVotingStates = Map.of();
+        private long lastLogIndex = -1L;
+        private long lastLogTerm = -1L;
+        private long currentTerm = -1L;
+        private long commitIndex = -1L;
+        private long lastApplied = -1L;
+        private long lastIndex = -1L;
+        private long lastTerm = -1L;
+        private long snapshotIndex = -1L;
+        private long snapshotTerm = -1L;
+        private long replicatedToAllIndex = -1L;
+        private long inMemoryJournalDataSize;
+        private long inMemoryJournalLogSize;
+        private String leader;
+        private RaftRole raftState;
+        private String votedFor;
+        private boolean isSnapshotCaptureInitiated;
+        private String customRaftPolicyClassName;
+        private boolean isVoting;
 
-        @Override
-        protected OnDemandRaftState state() {
-            return state;
+        public final @NonNull B lastLogIndex(final long value) {
+            lastLogIndex = value;
+            return self();
+        }
+
+        public final @NonNull B lastLogTerm(final long value) {
+            lastLogTerm = value;
+            return self();
+        }
+
+        public final @NonNull B currentTerm(final long value) {
+            currentTerm = value;
+            return self();
+        }
+
+        public final @NonNull B commitIndex(final long value) {
+            commitIndex = value;
+            return self();
+        }
+
+        public final @NonNull B lastApplied(final long value) {
+            lastApplied = value;
+            return self();
+        }
+
+        public final @NonNull B lastIndex(final long value) {
+            lastIndex = value;
+            return self();
+        }
+
+        public final @NonNull B lastTerm(final long value) {
+            lastTerm = value;
+            return self();
+        }
+
+        public final @NonNull B snapshotIndex(final long value) {
+            snapshotIndex = value;
+            return self();
+        }
+
+        public final @NonNull B snapshotTerm(final long value) {
+            snapshotTerm = value;
+            return self();
+        }
+
+        public final @NonNull B replicatedToAllIndex(final long value) {
+            replicatedToAllIndex = value;
+            return self();
+        }
+
+        public final @NonNull B inMemoryJournalDataSize(final long value) {
+            inMemoryJournalDataSize = value;
+            return self();
+        }
+
+        public final @NonNull B inMemoryJournalLogSize(final long value) {
+            inMemoryJournalLogSize = value;
+            return self();
+        }
+
+        public final @NonNull B leader(final String value) {
+            leader = value;
+            return self();
+        }
+
+        public final @NonNull B raftState(final RaftRole value) {
+            raftState = value;
+            return self();
+        }
+
+        public final @NonNull B votedFor(final String value) {
+            votedFor = value;
+            return self();
+        }
+
+        public final @NonNull B isVoting(final boolean value) {
+            isVoting = value;
+            return self();
+        }
+
+        public final @NonNull B followerInfoList(final List<FollowerInfo> value) {
+            followerInfoList = value != null ? List.copyOf(value) : null;
+            return self();
+        }
+
+        public final @NonNull B peerAddresses(final Map<String, String> value) {
+            peerAddresses = copyMap(value);
+            return self();
+        }
+
+        public final @NonNull B peerVotingStates(final Map<String, Boolean> value) {
+            peerVotingStates = copyMap(value);
+            return self();
+        }
+
+        public final @NonNull B isSnapshotCaptureInitiated(final boolean value) {
+            isSnapshotCaptureInitiated = value;
+            return self();
+        }
+
+        public final @NonNull B customRaftPolicyClassName(final String className) {
+            customRaftPolicyClassName = className;
+            return self();
+        }
+
+        public final @NonNull T build() {
+            return buildImpl(new OnDemandRaftState(this));
+        }
+
+        protected abstract @NonNull T buildImpl(@NonNull OnDemandRaftState product);
+
+        protected static final <K extends Comparable<?>, V> @NonNull Map<K, V> copyMap(final Map<K, V> map) {
+            // FIXME: sort by key
+            return ImmutableMap.copyOf(map);
+        }
+
+        @SuppressWarnings("unchecked")
+        protected final @NonNull B self() {
+            return (B) this;
         }
     }
 }
