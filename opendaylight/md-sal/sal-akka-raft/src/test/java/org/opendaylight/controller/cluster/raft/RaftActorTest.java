@@ -423,27 +423,27 @@ public class RaftActorTest extends AbstractActorTest {
 
         // check if the notifier got a role change from null to Follower
         RoleChanged raftRoleChanged = matches.get(0);
-        assertEquals(persistenceId, raftRoleChanged.getMemberId());
-        assertNull(raftRoleChanged.getOldRole());
-        assertEquals(RaftState.Follower.name(), raftRoleChanged.getNewRole());
+        assertEquals(persistenceId, raftRoleChanged.memberId());
+        assertNull(raftRoleChanged.oldRole());
+        assertEquals(RaftState.Follower.name(), raftRoleChanged.newRole());
 
         // check if the notifier got a role change from Follower to Candidate
         raftRoleChanged = matches.get(1);
-        assertEquals(persistenceId, raftRoleChanged.getMemberId());
-        assertEquals(RaftState.Follower.name(), raftRoleChanged.getOldRole());
-        assertEquals(RaftState.Candidate.name(), raftRoleChanged.getNewRole());
+        assertEquals(persistenceId, raftRoleChanged.memberId());
+        assertEquals(RaftState.Follower.name(), raftRoleChanged.oldRole());
+        assertEquals(RaftState.Candidate.name(), raftRoleChanged.newRole());
 
         // check if the notifier got a role change from Candidate to Leader
         raftRoleChanged = matches.get(2);
-        assertEquals(persistenceId, raftRoleChanged.getMemberId());
-        assertEquals(RaftState.Candidate.name(), raftRoleChanged.getOldRole());
-        assertEquals(RaftState.Leader.name(), raftRoleChanged.getNewRole());
+        assertEquals(persistenceId, raftRoleChanged.memberId());
+        assertEquals(RaftState.Candidate.name(), raftRoleChanged.oldRole());
+        assertEquals(RaftState.Leader.name(), raftRoleChanged.newRole());
 
         LeaderStateChanged leaderStateChange = MessageCollectorActor.expectFirstMatching(
                 notifierActor, LeaderStateChanged.class);
 
-        assertEquals(raftRoleChanged.getMemberId(), leaderStateChange.getLeaderId());
-        assertEquals(MockRaftActor.PAYLOAD_VERSION, leaderStateChange.getLeaderPayloadVersion());
+        assertEquals(raftRoleChanged.memberId(), leaderStateChange.leaderId());
+        assertEquals(MockRaftActor.PAYLOAD_VERSION, leaderStateChange.leaderPayloadVersion());
 
         MessageCollectorActor.clearMessages(notifierActor);
 
@@ -462,21 +462,21 @@ public class RaftActorTest extends AbstractActorTest {
         raftActor.newBehavior(follower);
 
         leaderStateChange = MessageCollectorActor.expectFirstMatching(notifierActor, LeaderStateChanged.class);
-        assertEquals(persistenceId, leaderStateChange.getMemberId());
-        assertEquals(null, leaderStateChange.getLeaderId());
+        assertEquals(persistenceId, leaderStateChange.memberId());
+        assertNull(leaderStateChange.leaderId());
 
         raftRoleChanged = MessageCollectorActor.expectFirstMatching(notifierActor, RoleChanged.class);
-        assertEquals(RaftState.Leader.name(), raftRoleChanged.getOldRole());
-        assertEquals(RaftState.Follower.name(), raftRoleChanged.getNewRole());
+        assertEquals(RaftState.Leader.name(), raftRoleChanged.oldRole());
+        assertEquals(RaftState.Follower.name(), raftRoleChanged.newRole());
 
         MessageCollectorActor.clearMessages(notifierActor);
 
         raftActor.handleCommand("any");
 
         leaderStateChange = MessageCollectorActor.expectFirstMatching(notifierActor, LeaderStateChanged.class);
-        assertEquals(persistenceId, leaderStateChange.getMemberId());
-        assertEquals(newLeaderId, leaderStateChange.getLeaderId());
-        assertEquals(newLeaderVersion, leaderStateChange.getLeaderPayloadVersion());
+        assertEquals(persistenceId, leaderStateChange.memberId());
+        assertEquals(newLeaderId, leaderStateChange.leaderId());
+        assertEquals(newLeaderVersion, leaderStateChange.leaderPayloadVersion());
 
         MessageCollectorActor.clearMessages(notifierActor);
 
@@ -517,15 +517,15 @@ public class RaftActorTest extends AbstractActorTest {
 
         // check if the notifier got a role change from null to Follower
         RoleChanged raftRoleChanged = matches.get(0);
-        assertEquals(persistenceId, raftRoleChanged.getMemberId());
-        assertNull(raftRoleChanged.getOldRole());
-        assertEquals(RaftState.Follower.name(), raftRoleChanged.getNewRole());
+        assertEquals(persistenceId, raftRoleChanged.memberId());
+        assertNull(raftRoleChanged.oldRole());
+        assertEquals(RaftState.Follower.name(), raftRoleChanged.newRole());
 
         // check if the notifier got a role change from Follower to Candidate
         raftRoleChanged = matches.get(1);
-        assertEquals(persistenceId, raftRoleChanged.getMemberId());
-        assertEquals(RaftState.Follower.name(), raftRoleChanged.getOldRole());
-        assertEquals(RaftState.Candidate.name(), raftRoleChanged.getNewRole());
+        assertEquals(persistenceId, raftRoleChanged.memberId());
+        assertEquals(RaftState.Follower.name(), raftRoleChanged.oldRole());
+        assertEquals(RaftState.Candidate.name(), raftRoleChanged.newRole());
     }
 
     @Test
@@ -1187,15 +1187,15 @@ public class RaftActorTest extends AbstractActorTest {
                 0L, -1L, (short)1), ActorRef.noSender());
         LeaderStateChanged leaderStateChange = MessageCollectorActor.expectFirstMatching(
                 notifierActor, LeaderStateChanged.class);
-        assertEquals("getLeaderId", "leader", leaderStateChange.getLeaderId());
+        assertEquals("leaderId", "leader", leaderStateChange.leaderId());
 
         MessageCollectorActor.clearMessages(notifierActor);
 
         raftActorRef.tell(new LeaderTransitioning("leader"), ActorRef.noSender());
 
         leaderStateChange = MessageCollectorActor.expectFirstMatching(notifierActor, LeaderStateChanged.class);
-        assertEquals("getMemberId", persistenceId, leaderStateChange.getMemberId());
-        assertEquals("getLeaderId", null, leaderStateChange.getLeaderId());
+        assertEquals(persistenceId, leaderStateChange.memberId());
+        assertNull(leaderStateChange.leaderId());
 
         TEST_LOG.info("testLeaderTransitioning ending");
     }
