@@ -723,10 +723,6 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         return getCurrentBehavior().state();
     }
 
-    protected Long getCurrentTerm() {
-        return context.currentTerm();
-    }
-
     public final RaftActorContext getRaftActorContext() {
         return context;
     }
