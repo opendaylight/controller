@@ -9,7 +9,7 @@ package org.opendaylight.controller.cluster.notifications;
 
 import static java.util.Objects.requireNonNull;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
@@ -17,34 +17,9 @@ import org.eclipse.jdt.annotation.Nullable;
  *
  * @author Thomas Pantelis
  */
-public class LeaderStateChanged {
-    private final @NonNull String memberId;
-    private final @Nullable String leaderId;
-    private final short leaderPayloadVersion;
-
-    public LeaderStateChanged(final @NonNull String memberId, final @Nullable String leaderId,
-            final short leaderPayloadVersion) {
-        this.memberId = requireNonNull(memberId);
-        this.leaderId = leaderId;
-        this.leaderPayloadVersion = leaderPayloadVersion;
-    }
-
-    public @NonNull String getMemberId() {
-        return memberId;
-    }
-
-    public @Nullable String getLeaderId() {
-        return leaderId;
-    }
-
-    public short getLeaderPayloadVersion() {
-        return leaderPayloadVersion;
-    }
-
-    @Override
-    public String toString() {
-        return "LeaderStateChanged [memberId=" + memberId
-                + ", leaderId=" + leaderId
-                + ", leaderPayloadVersion=" + leaderPayloadVersion + "]";
+@NonNullByDefault
+public record LeaderStateChanged(String memberId, @Nullable String leaderId, short leaderPayloadVersion) {
+    public LeaderStateChanged {
+        requireNonNull(memberId);
     }
 }

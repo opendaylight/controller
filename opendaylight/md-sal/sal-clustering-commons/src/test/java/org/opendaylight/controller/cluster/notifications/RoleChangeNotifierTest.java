@@ -7,60 +7,58 @@
  */
 package org.opendaylight.controller.cluster.notifications;
 
-import java.util.ArrayList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.List;
+import java.util.stream.Stream;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.testkit.TestProbe;
 import org.apache.pekko.testkit.javadsl.TestKit;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class RoleChangeNotifierTest {
-
+class RoleChangeNotifierTest {
     private static final String MEMBER_ID = "member-1";
     private static final int LISTENER_COUNT = 3;
-    private ActorSystem system;
+
     private List<TestProbe> listeners;
+    private ActorSystem system;
     private ActorRef notifier;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void beforeEach() {
         system = ActorSystem.apply();
         notifier = system.actorOf(RoleChangeNotifier.getProps(MEMBER_ID));
-        listeners = new ArrayList<>(LISTENER_COUNT);
-        for (int i = 0; i < LISTENER_COUNT; i++) {
-            listeners.add(new TestProbe(system));
-        }
+        Stream.generate(() -> new TestProbe(system)).limit(LISTENER_COUNT).toList();
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void afterEach() {
         TestKit.shutdownActorSystem(system);
     }
 
     @Test
-    public void testHandleReceiveRoleChange() {
+    void testHandleReceiveRoleChange() {
         registerListeners();
-        final RoleChanged msg = new RoleChanged(MEMBER_ID, "old", "new");
+        final var msg = new RoleChanged(MEMBER_ID, "old", "new");
         notifier.tell(msg, ActorRef.noSender());
         checkListenerRoleChangeNotification(msg);
     }
 
     @Test
-    public void testHandleReceiveLeaderStateChanged() {
+    void testHandleReceiveLeaderStateChanged() {
         registerListeners();
-        final LeaderStateChanged msg = new LeaderStateChanged(MEMBER_ID, "leader", (short) 0);
+        final var msg = new LeaderStateChanged(MEMBER_ID, "leader", (short) 0);
         notifier.tell(msg, ActorRef.noSender());
         checkListenerLeaderStateChanged(msg);
     }
 
     @Test
-    public void testHandleReceiveRegistrationAfterRoleChange() {
-        final RoleChanged roleChanged1 = new RoleChanged(MEMBER_ID, "old1", "new1");
-        final RoleChanged lastRoleChanged = new RoleChanged(MEMBER_ID, "old2", "new2");
+    void testHandleReceiveRegistrationAfterRoleChange() {
+        final var roleChanged1 = new RoleChanged(MEMBER_ID, "old1", "new1");
+        final var lastRoleChanged = new RoleChanged(MEMBER_ID, "old2", "new2");
         notifier.tell(roleChanged1, ActorRef.noSender());
         notifier.tell(lastRoleChanged, ActorRef.noSender());
         registerListeners();
@@ -68,9 +66,9 @@ public class RoleChangeNotifierTest {
     }
 
     @Test
-    public void testHandleReceiveRegistrationAfterLeaderStateChange() {
-        final LeaderStateChanged leaderStateChanged1 = new LeaderStateChanged(MEMBER_ID, "leader1", (short) 0);
-        final LeaderStateChanged lastLeaderStateChanged = new LeaderStateChanged(MEMBER_ID, "leader2", (short) 1);
+    void testHandleReceiveRegistrationAfterLeaderStateChange() {
+        final var leaderStateChanged1 = new LeaderStateChanged(MEMBER_ID, "leader1", (short) 0);
+        final var lastLeaderStateChanged = new LeaderStateChanged(MEMBER_ID, "leader2", (short) 1);
         notifier.tell(leaderStateChanged1, ActorRef.noSender());
         notifier.tell(lastLeaderStateChanged, ActorRef.noSender());
         registerListeners();
@@ -78,27 +76,21 @@ public class RoleChangeNotifierTest {
     }
 
     private void registerListeners() {
-        for (final TestProbe listener : listeners) {
+        for (var listener : listeners) {
             notifier.tell(new RegisterRoleChangeListener(), listener.ref());
             listener.expectMsgClass(RegisterRoleChangeListenerReply.class);
         }
     }
 
     private void checkListenerRoleChangeNotification(final RoleChanged roleChanged) {
-        for (final TestProbe listener : listeners) {
-            final RoleChangeNotification received = listener.expectMsgClass(RoleChangeNotification.class);
-            Assert.assertEquals(roleChanged.getMemberId(), received.getMemberId());
-            Assert.assertEquals(roleChanged.getOldRole(), received.getOldRole());
-            Assert.assertEquals(roleChanged.getNewRole(), received.getNewRole());
+        for (var listener : listeners) {
+            assertEquals(roleChanged, listener.expectMsgClass(RoleChangeNotification.class));
         }
     }
 
     private void checkListenerLeaderStateChanged(final LeaderStateChanged leaderStateChanged) {
-        for (final TestProbe listener : listeners) {
-            final LeaderStateChanged received = listener.expectMsgClass(LeaderStateChanged.class);
-            Assert.assertEquals(leaderStateChanged.getMemberId(), received.getMemberId());
-            Assert.assertEquals(leaderStateChanged.getLeaderId(), received.getLeaderId());
-            Assert.assertEquals(leaderStateChanged.getLeaderPayloadVersion(), received.getLeaderPayloadVersion());
+        for (var listener : listeners) {
+            assertEquals(leaderStateChanged, listener.expectMsgClass(LeaderStateChanged.class));
         }
     }
 
