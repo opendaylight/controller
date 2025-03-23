@@ -83,8 +83,8 @@ public class RoleChangeNotifier extends AbstractUntypedActor implements AutoClos
             LOG.info("RoleChangeNotifier for {} , received role change from {} to {}", memberId,
                 roleChanged.oldRole(), roleChanged.newRole());
 
-            latestRoleChangeNotification = new RoleChangeNotification(roleChanged.memberId(), roleChanged.oldRole(),
-                roleChanged.newRole());
+            latestRoleChangeNotification = new RoleChangeNotification(roleChanged.memberId(), roleChanged.newRole(),
+                roleChanged.oldRole());
 
             for (var listener : registeredListeners.values()) {
                 listener.tell(latestRoleChangeNotification, self());
