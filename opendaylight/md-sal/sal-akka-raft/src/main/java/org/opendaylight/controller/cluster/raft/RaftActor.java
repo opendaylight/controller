@@ -110,7 +110,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     // This context should NOT be passed directly to any other actor it is  only to be consumed
     // by the RaftActorBehaviors.
     private final @NonNull LocalAccess localAccess;
-    private final @NonNull RaftActorDataPersistenceProvider dataPersistenceProvider;
+    private final @NonNull PersistenceControl persistenceControl;
     private final @NonNull BehaviorStateTracker behaviorStateTracker = new BehaviorStateTracker();
 
     // FIXME: should be valid only after recovery
@@ -126,10 +126,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             final short payloadVersion) {
         super(memberId);
         localAccess = new LocalAccess(memberId, stateDir.resolve(memberId));
-        dataPersistenceProvider = new RaftActorDataPersistenceProvider(this);
+        persistenceControl = new PersistenceControl(this);
 
         context = new RaftActorContextImpl(self(), getContext(), localAccess, peerAddresses,
-            configParams.orElseGet(DefaultConfigParamsImpl::new), payloadVersion, dataPersistenceProvider,
+            configParams.orElseGet(DefaultConfigParamsImpl::new), payloadVersion, persistenceControl,
             this::handleApplyState, this::executeInSelf);
     }
 
@@ -283,10 +283,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             onRequestLeadership(requestLeadership);
         } else if (!possiblyHandleBehaviorMessage(message)) {
             if (message instanceof JournalProtocol.Response response
-                && dataPersistenceProvider.handleJournalResponse(response)) {
+                && persistenceControl.handleJournalResponse(response)) {
                 LOG.debug("{}: handled a journal response", memberId());
             } else if (message instanceof SnapshotProtocol.Response response
-                && dataPersistenceProvider.handleSnapshotResponse(response)) {
+                && persistenceControl.handleSnapshotResponse(response)) {
                 LOG.debug("{}: handled a snapshot response", memberId());
             } else {
                 handleNonRaftCommand(message);
@@ -775,23 +775,23 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     protected final @NonNull DataPersistenceProvider persistence() {
-        return dataPersistenceProvider.delegate();
+        return persistenceControl.delegate();
     }
 
     @Deprecated
     @VisibleForTesting
     protected final void setPersistence(final DataPersistenceProvider provider) {
-        dataPersistenceProvider.setDelegate(requireNonNull(provider));
+        persistenceControl.setDelegate(requireNonNull(provider));
     }
 
     protected final void setPersistence(final boolean persistent) {
         if (persistent) {
-            if (dataPersistenceProvider.becomePersistent() && getCurrentBehavior() != null) {
+            if (persistenceControl.becomePersistent() && getCurrentBehavior() != null) {
                 LOG.info("{}: Persistence has been enabled - capturing snapshot", memberId());
                 captureSnapshot();
             }
         } else {
-            dataPersistenceProvider.becomeTransient();
+            persistenceControl.becomeTransient();
         }
     }
 
