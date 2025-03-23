@@ -84,6 +84,7 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
+import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage.CommitSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.ForwardingDataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.ImmutableRaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
@@ -339,9 +340,8 @@ public class RaftActorTest extends AbstractActorTest {
         when(mockSupport.handleSnapshotMessage(same(saveSnapshotFailure))).thenReturn(true);
         mockRaftActor.handleCommand(saveSnapshotFailure);
 
-        when(mockSupport.handleSnapshotMessage(same(SnapshotManager.CommitSnapshot.INSTANCE)))
-            .thenReturn(true);
-        mockRaftActor.handleCommand(SnapshotManager.CommitSnapshot.INSTANCE);
+        when(mockSupport.handleSnapshotMessage(same(CommitSnapshot.INSTANCE))).thenReturn(true);
+        mockRaftActor.handleCommand(CommitSnapshot.INSTANCE);
 
         when(mockSupport.handleSnapshotMessage(same(GetSnapshot.INSTANCE))).thenReturn(true);
         mockRaftActor.handleCommand(GetSnapshot.INSTANCE);
@@ -350,7 +350,7 @@ public class RaftActorTest extends AbstractActorTest {
         verify(mockSupport).handleSnapshotMessage(same(captureSnapshotReply));
         verify(mockSupport).handleSnapshotMessage(same(saveSnapshotSuccess));
         verify(mockSupport).handleSnapshotMessage(same(saveSnapshotFailure));
-        verify(mockSupport).handleSnapshotMessage(same(SnapshotManager.CommitSnapshot.INSTANCE));
+        verify(mockSupport).handleSnapshotMessage(same(CommitSnapshot.INSTANCE));
         verify(mockSupport).handleSnapshotMessage(same(GetSnapshot.INSTANCE));
     }
 

@@ -25,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.ApplyLeaderSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.persisted.ByteState;
+import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage.CommitSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.ImmutableRaftEntryMeta;
 
 /**
@@ -90,7 +91,7 @@ class RaftActorSnapshotMessageSupportTest {
 
     @Test
     void testOnCommitSnapshot() {
-        sendMessageToSupport(SnapshotManager.CommitSnapshot.INSTANCE);
+        sendMessageToSupport(CommitSnapshot.INSTANCE);
 
         verify(mockSnapshotManager).commit(eq(-1L), eq(-1L));
     }
