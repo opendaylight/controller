@@ -170,7 +170,7 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
 
         candidateReplicatedLog.setCommitIndex(candidateReplicatedLog.lastIndex());
         candidateReplicatedLog.setLastApplied(candidateReplicatedLog.lastIndex());
-        member3Context.setReplicatedLog(candidateReplicatedLog);
+        member3Context.resetReplicatedLog(candidateReplicatedLog);
         member3Context.setTermInfo(new TermInfo(2, member1Context.getId()));
 
         // The member 3 Candidate will start a new term and send RequestVotes. However it will be
@@ -229,7 +229,7 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
 
         replicatedLog.setCommitIndex(replicatedLog.lastIndex());
         replicatedLog.setLastApplied(replicatedLog.lastIndex());
-        member2Context.setReplicatedLog(replicatedLog);
+        member2Context.resetReplicatedLog(replicatedLog);
         member2Context.setTermInfo(new TermInfo(3, "member1"));
 
         member2Actor.self().tell(new SetBehavior(new Follower(member2Context), member2Context),
@@ -247,7 +247,7 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
 
         replicatedLog.setCommitIndex(replicatedLog.lastIndex());
         replicatedLog.setLastApplied(replicatedLog.lastIndex());
-        member1Context.setReplicatedLog(replicatedLog);
+        member1Context.resetReplicatedLog(replicatedLog);
         member1Context.setTermInfo(new TermInfo(3, "member1"));
 
         initializeLeaderBehavior(member1Actor, member1Context, 1);

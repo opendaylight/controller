@@ -526,9 +526,10 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         logStart("testHandleAppendEntriesSenderPrevLogIndexIsInTheSnapshot");
 
         MockRaftActorContext context = createActorContext();
-        context.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(5, 8, 3).build());
-        context.getReplicatedLog().setSnapshotIndex(4);
-        context.getReplicatedLog().setSnapshotTerm(3);
+        final var log = new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(5, 8, 3).build();
+        log.setSnapshotIndex(4);
+        log.setSnapshotTerm(3);
+        context.resetReplicatedLog(log);
 
         AppendEntries appendEntries = new AppendEntries(3, "leader", 1, 3, List.of(), 8, -1, (short)0);
 
@@ -564,7 +565,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         log.append(newReplicatedLogEntry(1, 1, "one"));
         log.append(newReplicatedLogEntry(1, 2, "two"));
 
-        context.setReplicatedLog(log);
+        context.resetReplicatedLog(log);
 
         // Prepare the entries to be sent with AppendEntries
         List<ReplicatedLogEntry> entries = List.of(
@@ -615,7 +616,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         log.append(newReplicatedLogEntry(1, 1, "one"));
         log.append(newReplicatedLogEntry(1, 2, "two"));
 
-        context.setReplicatedLog(log);
+        context.resetReplicatedLog(log);
 
         // Prepare the entries to be sent with AppendEntries
         List<ReplicatedLogEntry> entries = List.of(
@@ -664,7 +665,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         log.append(newReplicatedLogEntry(1, 1, "one"));
         log.append(newReplicatedLogEntry(1, 2, "two"));
 
-        context.setReplicatedLog(log);
+        context.resetReplicatedLog(log);
 
         // Prepare the entries to be sent with AppendEntries
         List<ReplicatedLogEntry> entries = List.of(
@@ -698,7 +699,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         log.append(newReplicatedLogEntry(1, 1, "one"));
         log.append(newReplicatedLogEntry(1, 2, "two"));
 
-        context.setReplicatedLog(log);
+        context.resetReplicatedLog(log);
 
         // Prepare the entries to be sent with AppendEntries
         List<ReplicatedLogEntry> entries = List.of(newReplicatedLogEntry(1, 4, "four"));
@@ -727,7 +728,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         log.append(newReplicatedLogEntry(1, 0, "zero"));
         log.append(newReplicatedLogEntry(1, 1, "one"));
 
-        context.setReplicatedLog(log);
+        context.resetReplicatedLog(log);
 
         // Send the last entry again.
         List<ReplicatedLogEntry> entries = List.of(newReplicatedLogEntry(1, 1, "one"));
@@ -768,7 +769,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         log.setSnapshotIndex(3);
         log.setSnapshotTerm(1);
 
-        context.setReplicatedLog(log);
+        context.resetReplicatedLog(log);
 
         // Prepare the entries to be sent with AppendEntries
         List<ReplicatedLogEntry> entries = List.of(newReplicatedLogEntry(1, 4, "four"));
@@ -1270,7 +1271,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         logStart("testNeedsLeaderAddress");
 
         MockRaftActorContext context = createActorContext();
-        context.setReplicatedLog(new MockRaftActorContext.SimpleReplicatedLog());
+        context.resetReplicatedLog(new MockRaftActorContext.SimpleReplicatedLog());
         context.addToPeers("leader", null, VotingState.VOTING);
         ((DefaultConfigParamsImpl)context.getConfigParams()).setPeerAddressResolver(NoopPeerAddressResolver.INSTANCE);
 

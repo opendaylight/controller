@@ -230,7 +230,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         //log has 1 entry with replicatedToAllIndex = 0, does not do anything, returns the
         var log = new MockReplicatedLogBuilder().createEntries(0, 1, 1).build();
         log.setLastApplied(0);
-        context.setReplicatedLog(log);
+        context.resetReplicatedLog(log);
         abstractBehavior.performSnapshotWithoutCapture(0);
         assertEquals(-1, abstractBehavior.getReplicatedToAllIndex());
         assertEquals(1, log.size());
@@ -238,7 +238,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         //2 entries, lastApplied still 0, no purging.
         log = new MockReplicatedLogBuilder().createEntries(0, 2, 1).build();
         log.setLastApplied(0);
-        context.setReplicatedLog(log);
+        context.resetReplicatedLog(log);
         abstractBehavior.performSnapshotWithoutCapture(0);
         assertEquals(-1, abstractBehavior.getReplicatedToAllIndex());
         assertEquals(2, context.getReplicatedLog().size());
@@ -246,7 +246,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         //2 entries, lastApplied still 0, no purging.
         log = new MockReplicatedLogBuilder().createEntries(0, 2, 1).build();
         log.setLastApplied(1);
-        context.setReplicatedLog(log);
+        context.resetReplicatedLog(log);
         abstractBehavior.performSnapshotWithoutCapture(0);
         assertEquals(0, abstractBehavior.getReplicatedToAllIndex());
         assertEquals(1, context.getReplicatedLog().size());
@@ -255,7 +255,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         // 1 will only get purged
         log = new MockReplicatedLogBuilder().createEntries(0, 5, 1).build();
         log.setLastApplied(2);
-        context.setReplicatedLog(log);
+        context.resetReplicatedLog(log);
         abstractBehavior.performSnapshotWithoutCapture(3);
         assertEquals(1, abstractBehavior.getReplicatedToAllIndex());
         assertEquals(3, context.getReplicatedLog().size());
@@ -263,7 +263,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         // scenario where Last applied > Replicated to all index (becoz of a slow follower)
         log = new MockReplicatedLogBuilder().createEntries(0, 3, 1).build();
         log.setLastApplied(2);
-        context.setReplicatedLog(log);
+        context.resetReplicatedLog(log);
         abstractBehavior.performSnapshotWithoutCapture(1);
         assertEquals(1, abstractBehavior.getReplicatedToAllIndex());
         assertEquals(1, context.getReplicatedLog().size());
@@ -296,7 +296,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
             final ReplicatedLogEntry logEntry) {
         final var log = new SimpleReplicatedLog();
         log.append(logEntry);
-        actorContext.setReplicatedLog(log);
+        actorContext.resetReplicatedLog(log);
         return log;
     }
 

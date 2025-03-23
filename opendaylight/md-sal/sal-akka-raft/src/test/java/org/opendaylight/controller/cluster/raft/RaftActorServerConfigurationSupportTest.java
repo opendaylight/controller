@@ -148,7 +148,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         var followerLog = new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 3, 1).build();
         followerLog.setCommitIndex(2);
         followerLog.setLastApplied(2);
-        followerActorContext.setReplicatedLog(followerLog);
+        followerActorContext.resetReplicatedLog(followerLog);
 
         Follower follower = new Follower(followerActorContext);
         followerActor.underlyingActor().setBehavior(follower);
@@ -235,11 +235,11 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         LOG.info("testAddServerWithNoExistingFollower starting");
 
         setupNewFollower();
-        RaftActorContext initialActorContext = new MockRaftActorContext();
+        final var initialActorContext = new MockRaftActorContext();
         final var initialLog = new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 2, 1).build();
         initialLog.setCommitIndex(1);
         initialLog.setLastApplied(1);
-        initialActorContext.setReplicatedLog(initialLog);
+        initialActorContext.resetReplicatedLog(initialLog);
 
         TestActorRef<MockLeaderRaftActor> leaderActor = actorFactory.createTestActor(
                 MockLeaderRaftActor.props(stateDir(), Map.of(), initialActorContext)

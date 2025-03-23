@@ -178,8 +178,13 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     @Deprecated(forRemoval = true)
-    public void setReplicatedLog(final ReplicatedLog replicatedLog) {
-        this.replicatedLog = replicatedLog;
+    public final void setReplicatedLog(final ReplicatedLog replicatedLog) {
+        resetReplicatedLog(replicatedLog);
+    }
+
+    @Deprecated(forRemoval = true)
+    public final void resetReplicatedLog(final @NonNull ReplicatedLog newState) {
+        this.replicatedLog = requireNonNull(newState);
     }
 
     @Override

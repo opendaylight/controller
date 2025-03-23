@@ -43,7 +43,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
     public MockRaftActorContext(final int payloadVersion) {
         super(null, null, newLocalAccess("test"), new HashMap<>(), new DefaultConfigParamsImpl(),
             (short) payloadVersion, TestDataProvider.INSTANCE, applyState -> { }, MoreExecutors.directExecutor());
-        setReplicatedLog(new MockReplicatedLogBuilder().build());
+        resetReplicatedLog(new MockReplicatedLogBuilder().build());
     }
 
     public MockRaftActorContext(final String id, final ActorSystem system, final ActorRef actor,
@@ -68,7 +68,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         long term = currentTerm();
         replicatedLog.append(new SimpleReplicatedLogEntry(0, term, new MockPayload("1")));
         replicatedLog.append(new SimpleReplicatedLogEntry(1, term, new MockPayload("2")));
-        setReplicatedLog(replicatedLog);
+        resetReplicatedLog(replicatedLog);
         replicatedLog.setCommitIndex(replicatedLog.lastIndex());
         replicatedLog.setLastApplied(replicatedLog.lastIndex());
     }
