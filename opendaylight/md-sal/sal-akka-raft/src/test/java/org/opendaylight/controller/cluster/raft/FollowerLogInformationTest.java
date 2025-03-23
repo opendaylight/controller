@@ -18,19 +18,18 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 
 public class FollowerLogInformationTest {
-
     @Test
     public void testIsFollowerActive() {
 
         MockRaftActorContext context = new MockRaftActorContext();
-        context.setCommitIndex(10);
+        context.getReplicatedLog().setCommitIndex(10);
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         configParams.setHeartBeatInterval(Duration.ofMillis(500));
         configParams.setElectionTimeoutFactor(1);
         context.setConfigParams(configParams);
 
-        FollowerLogInformation followerLogInformation =
+        final var followerLogInformation =
                 new FollowerLogInformation(new PeerInfo("follower1", null, VotingState.VOTING), 9, context);
 
         assertFalse("Follower should be termed inactive before stopwatch starts",
@@ -38,19 +37,19 @@ public class FollowerLogInformationTest {
 
         followerLogInformation.markFollowerActive();
         if (sleepWithElaspsedTimeReturned(200) > 200) {
+            // FIXME: what?!
             return;
         }
         assertTrue("Follower should be active", followerLogInformation.isFollowerActive());
 
         if (sleepWithElaspsedTimeReturned(400) > 400) {
+            // FIXME: what?!
             return;
         }
-        assertFalse("Follower should be inactive after time lapsed",
-                followerLogInformation.isFollowerActive());
+        assertFalse("Follower should be inactive after time lapsed", followerLogInformation.isFollowerActive());
 
         followerLogInformation.markFollowerActive();
-        assertTrue("Follower should be active from inactive",
-                followerLogInformation.isFollowerActive());
+        assertTrue("Follower should be active from inactive", followerLogInformation.isFollowerActive());
     }
 
     // we cannot rely comfortably that the sleep will indeed sleep for the desired time
@@ -66,7 +65,7 @@ public class FollowerLogInformationTest {
     @Test
     public void testOkToReplicate() {
         MockRaftActorContext context = new MockRaftActorContext();
-        context.setCommitIndex(0);
+        context.getReplicatedLog().setCommitIndex(0);
         FollowerLogInformation followerLogInformation =
                 new FollowerLogInformation(new PeerInfo("follower1", null, VotingState.VOTING), 10, context);
 
@@ -87,7 +86,7 @@ public class FollowerLogInformationTest {
     public void testVotingNotInitializedState() {
         final PeerInfo peerInfo = new PeerInfo("follower1", null, VotingState.VOTING_NOT_INITIALIZED);
         MockRaftActorContext context = new MockRaftActorContext();
-        context.setCommitIndex(0);
+        context.getReplicatedLog().setCommitIndex(0);
         FollowerLogInformation followerLogInformation = new FollowerLogInformation(peerInfo, context);
 
         assertFalse(followerLogInformation.okToReplicate(0));

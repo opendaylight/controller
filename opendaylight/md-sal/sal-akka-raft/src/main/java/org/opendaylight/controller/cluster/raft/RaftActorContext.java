@@ -102,16 +102,6 @@ public interface RaftActorContext {
     void persistTermInfo(@NonNull TermInfo termInfo) throws IOException;
 
     /**
-     * Sets the index of highest log entry known to be committed.
-     *
-     * @param commitIndex new commit index
-     */
-    @Deprecated(forRemoval = true)
-    default void setCommitIndex(final long commitIndex) {
-        getReplicatedLog().setCommitIndex(commitIndex);
-    }
-
-    /**
      * Sets the ReplicatedLog instance.
      *
      * @param replicatedLog the ReplicatedLog instance.
