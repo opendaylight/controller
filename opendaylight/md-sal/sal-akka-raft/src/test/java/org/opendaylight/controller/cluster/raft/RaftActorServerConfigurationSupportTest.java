@@ -67,6 +67,7 @@ import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
+import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage.CommitSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.FailingTermInfoStore;
 import org.opendaylight.controller.cluster.raft.spi.ImmutableRaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.utils.ForwardMessageToBehaviorActor;
@@ -89,7 +90,6 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
     private static final String NEW_SERVER_ID = "new-server";
     private static final String NEW_SERVER_ID2 = "new-server2";
     private static final Logger LOG = LoggerFactory.getLogger(RaftActorServerConfigurationSupportTest.class);
-    private static final Class<?> COMMIT_MESSAGE_CLASS = SnapshotManager.CommitSnapshot.class;
     private static final boolean NO_PERSISTENCE = false;
     private static final boolean PERSISTENT = true;
 
@@ -448,7 +448,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         leaderActor.tell(new InitiateCaptureSnapshot(), leaderActor);
 
-        Object commitMsg = expectFirstMatching(leaderCollectorActor, COMMIT_MESSAGE_CLASS);
+        Object commitMsg = expectFirstMatching(leaderCollectorActor, CommitSnapshot.class);
 
         leaderActor.tell(new AddServer(NEW_SERVER_ID, newFollowerRaftActor.path().toString(), true), testKit.getRef());
 
@@ -491,7 +491,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setElectionTimeoutFactor(1);
 
         // Drop commit message so the snapshot doesn't complete.
-        leaderRaftActor.setDropMessageOfType(COMMIT_MESSAGE_CLASS);
+        leaderRaftActor.setDropMessageOfType(CommitSnapshot.class);
 
         leaderActor.tell(new InitiateCaptureSnapshot(), leaderActor);
 
@@ -524,13 +524,13 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         final ActorRef leaderCollectorActor = newLeaderCollectorActor(leaderRaftActor);
 
         // Drop the commit message so the snapshot doesn't complete yet.
-        leaderRaftActor.setDropMessageOfType(COMMIT_MESSAGE_CLASS);
+        leaderRaftActor.setDropMessageOfType(CommitSnapshot.class);
 
         leaderActor.tell(new InitiateCaptureSnapshot(), leaderActor);
 
         leaderActor.tell(new AddServer(NEW_SERVER_ID, newFollowerRaftActor.path().toString(), true), testKit.getRef());
 
-        Object commitMsg = expectFirstMatching(leaderCollectorActor, COMMIT_MESSAGE_CLASS);
+        Object commitMsg = expectFirstMatching(leaderCollectorActor, CommitSnapshot.class);
 
         // Change the leader behavior to follower
         leaderActor.tell(new Follower(leaderActorContext), leaderActor);

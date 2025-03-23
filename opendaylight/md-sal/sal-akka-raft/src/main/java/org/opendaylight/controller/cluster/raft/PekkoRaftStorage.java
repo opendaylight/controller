@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2025 PANTHEON.tech, s.r.o. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -16,51 +16,47 @@ import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SnapshotProtocol;
 import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
-import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
+import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
 
 /**
- * A DataPersistenceProvider implementation with persistence enabled.
+ * An {@link EnabledRaftStorage} backed by Pekko Persistence of an {@link RaftActor}.
  */
-final class PersistentDataProvider implements DataPersistenceProvider {
-    private final RaftActor persistentActor;
+// FIXME: remove this class once we have both Snapshots and Entries stored in files
+final class PekkoRaftStorage extends EnabledRaftStorage {
+    private final RaftActor actor;
 
-    PersistentDataProvider(final RaftActor persistentActor) {
-        this.persistentActor = requireNonNull(persistentActor, "persistentActor can't be null");
-    }
-
-    @Override
-    public boolean isRecoveryApplicable() {
-        return true;
+    PekkoRaftStorage(final RaftActor actor) {
+        this.actor = requireNonNull(actor);
     }
 
     @Override
     public <T> void persist(final T entry, final Consumer<T> callback) {
-        persistentActor.persist(entry, callback::accept);
+        actor.persist(entry, callback::accept);
     }
 
     @Override
     public <T> void persistAsync(final T entry, final Consumer<T> callback) {
-        persistentActor.persistAsync(entry, callback::accept);
+        actor.persistAsync(entry, callback::accept);
     }
 
     @Override
     public void saveSnapshot(final Snapshot snapshot) {
-        persistentActor.saveSnapshot(snapshot);
+        actor.saveSnapshot(snapshot);
     }
 
     @Override
     public void deleteSnapshots(final SnapshotSelectionCriteria criteria) {
-        persistentActor.deleteSnapshots(criteria);
+        actor.deleteSnapshots(criteria);
     }
 
     @Override
     public void deleteMessages(final long sequenceNumber) {
-        persistentActor.deleteMessages(sequenceNumber);
+        actor.deleteMessages(sequenceNumber);
     }
 
     @Override
     public long getLastSequenceNumber() {
-        return persistentActor.lastSequenceNr();
+        return actor.lastSequenceNr();
     }
 
     @Override

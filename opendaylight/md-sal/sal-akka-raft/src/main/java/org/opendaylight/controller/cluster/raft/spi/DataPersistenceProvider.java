@@ -17,6 +17,8 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 /**
  * This interface provides methods to persist data and is an abstraction of the akka-persistence persistence API.
  */
+// FIXME: find a better name for this interface. It is heavily influenced by Peeko Persistence, most notably the weird
+//        API around snapshots and message deletion -- which assumes the entity requesting it is the subclass itself.
 @NonNullByDefault
 public interface DataPersistenceProvider {
     /**
@@ -50,6 +52,7 @@ public interface DataPersistenceProvider {
      *
      * @param snapshot the snapshot object to save
      */
+    // FIXME: take a callback
     void saveSnapshot(Snapshot snapshot);
 
     /**
@@ -57,6 +60,7 @@ public interface DataPersistenceProvider {
      *
      * @param criteria the search criteria
      */
+    // FIXME: take a callback
     void deleteSnapshots(SnapshotSelectionCriteria criteria);
 
     /**
@@ -64,6 +68,7 @@ public interface DataPersistenceProvider {
      *
      * @param sequenceNumber the sequence number
      */
+    // FIXME: take a callback
     void deleteMessages(long sequenceNumber);
 
     /**

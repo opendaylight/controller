@@ -22,6 +22,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
+import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage;
+import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
 
 /**
  * Unit tests for RaftActorDelegatingPersistentDataProvider.
@@ -41,53 +43,53 @@ public class RaftActorDataPersistenceProviderTest {
     @Mock
     private ReplicatedLogEntry mockNonPersistentLogEntry;
     @Mock
-    private NonPersistentDataProvider mockTransientProvider;
+    private DisabledRaftStorage mockDisabledStorage;
     @Mock
-    private PersistentDataProvider mockPersistentProvider;
+    private EnabledRaftStorage mockEnabledStorage;
     @Mock
     private Consumer<Object> mockCallback;
     @Captor
     private ArgumentCaptor<Consumer<Object>> callbackCaptor;
 
-    private RaftActorDataPersistenceProvider provider;
+    private PersistenceControl provider;
 
     @Before
     public void setup() {
         doReturn(PERSISTENT_PAYLOAD).when(mockPersistentLogEntry).getData();
         doReturn(NON_PERSISTENT_PAYLOAD).when(mockNonPersistentLogEntry).getData();
-        provider = new RaftActorDataPersistenceProvider(mockPersistentProvider, mockTransientProvider);
+        provider = new PersistenceControl(mockDisabledStorage, mockEnabledStorage);
     }
 
     @Test
     public void testPersistWithPersistenceEnabled() {
-        doReturn(true).when(mockTransientProvider).isRecoveryApplicable();
+        doReturn(true).when(mockDisabledStorage).isRecoveryApplicable();
 
         provider.persist(mockPersistentLogEntry, mockCallback);
-        verify(mockTransientProvider).persist(mockPersistentLogEntry, mockCallback);
+        verify(mockDisabledStorage).persist(mockPersistentLogEntry, mockCallback);
 
         provider.persist(mockNonPersistentLogEntry, mockCallback);
-        verify(mockTransientProvider).persist(mockNonPersistentLogEntry, mockCallback);
+        verify(mockDisabledStorage).persist(mockNonPersistentLogEntry, mockCallback);
 
         provider.persist(OTHER_DATA_OBJECT, mockCallback);
-        verify(mockTransientProvider).persist(OTHER_DATA_OBJECT, mockCallback);
+        verify(mockDisabledStorage).persist(OTHER_DATA_OBJECT, mockCallback);
     }
 
     @Test
     public void testPersistWithPersistenceDisabled() throws Exception {
-        doReturn(false).when(mockTransientProvider).isRecoveryApplicable();
+        doReturn(false).when(mockDisabledStorage).isRecoveryApplicable();
 
         provider.persist(mockPersistentLogEntry, mockCallback);
 
-        verify(mockPersistentProvider).persist(eq(PERSISTENT_PAYLOAD), callbackCaptor.capture());
-        verify(mockTransientProvider, never()).persist(mockNonPersistentLogEntry, mockCallback);
+        verify(mockEnabledStorage).persist(eq(PERSISTENT_PAYLOAD), callbackCaptor.capture());
+        verify(mockDisabledStorage, never()).persist(mockNonPersistentLogEntry, mockCallback);
         callbackCaptor.getValue().accept(PERSISTENT_PAYLOAD);
         verify(mockCallback).accept(mockPersistentLogEntry);
 
         provider.persist(mockNonPersistentLogEntry, mockCallback);
-        verify(mockTransientProvider).persist(mockNonPersistentLogEntry, mockCallback);
+        verify(mockDisabledStorage).persist(mockNonPersistentLogEntry, mockCallback);
 
         provider.persist(OTHER_DATA_OBJECT, mockCallback);
-        verify(mockTransientProvider).persist(OTHER_DATA_OBJECT, mockCallback);
+        verify(mockDisabledStorage).persist(OTHER_DATA_OBJECT, mockCallback);
     }
 
     static class TestNonPersistentPayload extends Payload {
