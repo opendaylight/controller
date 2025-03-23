@@ -878,7 +878,7 @@ class ClusterAdminRpcServiceTest {
             new ExpState("member-4", true), new ExpState("member-5", true), new ExpState("member-6", true));
 
         verifyRaftState(replicaNode1.configDataStore(), "cars", raftState ->
-            assertEquals("Expected raft state", RaftRole.Follower.name(), raftState.getRaftState()));
+            assertEquals("Expected raft state", RaftRole.Follower, raftState.getRaftState()));
 
         final var service1 = new ClusterAdminRpcService(replicaNode1.configDataStore(), replicaNode1.operDataStore(),
             null);

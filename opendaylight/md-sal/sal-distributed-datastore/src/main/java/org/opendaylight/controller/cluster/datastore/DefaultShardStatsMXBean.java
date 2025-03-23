@@ -66,7 +66,7 @@ final class DefaultShardStatsMXBean extends AbstractMXBean implements ShardStats
             return state;
         } catch (Exception e) {
             statRetrievalError = e.getCause().toString();
-            return OnDemandRaftState.builder().build();
+            return new OnDemandRaftState.Builder().build();
         }
     }
 
@@ -82,7 +82,7 @@ final class DefaultShardStatsMXBean extends AbstractMXBean implements ShardStats
 
     @Override
     public String getRaftState() {
-        return getOnDemandRaftState().getRaftState();
+        return getOnDemandRaftState().getRaftState().name();
     }
 
     @Override
