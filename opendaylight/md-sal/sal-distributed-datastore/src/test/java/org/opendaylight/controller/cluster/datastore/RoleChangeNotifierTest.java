@@ -24,8 +24,8 @@ import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListe
 import org.opendaylight.controller.cluster.notifications.RoleChangeNotification;
 import org.opendaylight.controller.cluster.notifications.RoleChangeNotifier;
 import org.opendaylight.controller.cluster.notifications.RoleChanged;
-import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
+import org.opendaylight.raft.api.RaftRole;
 
 public class RoleChangeNotifierTest extends AbstractActorTest {
     private TestKit testKit;
@@ -63,7 +63,7 @@ public class RoleChangeNotifierTest extends AbstractActorTest {
         TestActorRef<RoleChangeNotifier> notifierTestActorRef = TestActorRef.create(getSystem(),
             RoleChangeNotifier.getProps(memberId), memberId);
 
-        notifierTestActorRef.tell(new RoleChanged(memberId, RaftState.Leader, RaftState.Candidate), shardActor);
+        notifierTestActorRef.tell(new RoleChanged(memberId, RaftRole.Leader, RaftRole.Candidate), shardActor);
 
         // no notification should be sent as listener has not yet
         // registered
@@ -80,8 +80,8 @@ public class RoleChangeNotifierTest extends AbstractActorTest {
         RoleChangeNotification notification = MessageCollectorActor.getFirstMatching(listenerActor,
             RoleChangeNotification.class);
         assertNotNull(notification);
-        assertEquals(RaftState.Candidate.name(), notification.oldRole());
-        assertEquals(RaftState.Leader.name(), notification.newRole());
+        assertEquals(RaftRole.Candidate.name(), notification.oldRole());
+        assertEquals(RaftRole.Leader.name(), notification.newRole());
     }
 
     @Test

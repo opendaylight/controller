@@ -9,10 +9,10 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import org.apache.pekko.actor.ActorRef;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
-import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.persisted.NoopPayload;
+import org.opendaylight.raft.api.RaftRole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +35,7 @@ public final class PreLeader extends AbstractLeader {
     private static final Logger LOG = LoggerFactory.getLogger(PreLeader.class);
 
     PreLeader(final RaftActorContext context) {
-        super(context, RaftState.PreLeader);
+        super(context, RaftRole.PreLeader);
 
         context.getActor().tell(NoopPayload.INSTANCE, context.getActor());
     }

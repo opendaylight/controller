@@ -18,7 +18,6 @@ import org.apache.pekko.actor.Cancellable;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
-import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLog;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
@@ -30,6 +29,7 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
+import org.opendaylight.raft.api.RaftRole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +47,7 @@ public abstract class RaftActorBehavior implements AutoCloseable {
     /**
      * The RaftState corresponding to his behavior.
      */
-    private final @NonNull RaftState state;
+    private final @NonNull RaftRole raftRole;
 
     /**
      * Prepended to log messages to provide appropriate context.
@@ -64,10 +64,10 @@ public abstract class RaftActorBehavior implements AutoCloseable {
      */
     private long replicatedToAllIndex = -1;
 
-    RaftActorBehavior(final RaftActorContext context, final RaftState state) {
+    RaftActorBehavior(final RaftActorContext context, final RaftRole raftRole) {
         this.context = requireNonNull(context);
-        this.state = requireNonNull(state);
-        logName = memberId() + " (" + state + ")";
+        this.raftRole = requireNonNull(raftRole);
+        logName = memberId() + " (" + raftRole + ")";
     }
 
     final @NonNull String memberId() {
@@ -79,12 +79,12 @@ public abstract class RaftActorBehavior implements AutoCloseable {
     }
 
     /**
-     * Returns the state associated with this behavior.
+     * Returns the {@linkplain RaftRole} associated with this behavior.
      *
-     * @return the RaftState
+     * @return the {@linkplain RaftRole} constant
      */
-    public final @NonNull RaftState state() {
-        return state;
+    public final @NonNull RaftRole raftRole() {
+        return raftRole;
     }
 
     /**
@@ -433,12 +433,12 @@ public abstract class RaftActorBehavior implements AutoCloseable {
             return this;
         }
 
-        LOG.info("{} :- Switching from behavior {} to {}, election term: {}", logName, state(), newBehavior.state(),
-            context.currentTerm());
+        LOG.info("{} :- Switching from behavior {} to {}, election term: {}", logName, raftRole(),
+            newBehavior.raftRole(), context.currentTerm());
         try {
             close();
         } catch (RuntimeException e) {
-            LOG.warn("{}: Failed to close behavior : {}", logName, state(), e);
+            LOG.warn("{}: Failed to close behavior : {}", logName, raftRole(), e);
         }
         return newBehavior;
     }

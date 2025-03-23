@@ -29,7 +29,7 @@ import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier
 import org.opendaylight.controller.cluster.datastore.messages.PeerAddressResolved;
 import org.opendaylight.controller.cluster.datastore.shardmanager.ShardManager.OnShardInitialized;
 import org.opendaylight.controller.cluster.datastore.shardmanager.ShardManager.OnShardReady;
-import org.opendaylight.controller.cluster.raft.RaftState;
+import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.yangtools.yang.data.tree.api.ReadOnlyDataTree;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.slf4j.Logger;
@@ -60,7 +60,7 @@ public final class ShardInformation {
 
     private boolean followerSyncStatus = false;
 
-    private String role ;
+    private String role;
     private String leaderId;
     private short leaderVersion;
 
@@ -140,13 +140,12 @@ public final class ShardInformation {
     }
 
     boolean isShardReady() {
-        return !RaftState.Candidate.name().equals(role) && !Strings.isNullOrEmpty(role);
+        return !RaftRole.Candidate.name().equals(role) && !Strings.isNullOrEmpty(role);
     }
 
     boolean isShardReadyWithLeaderId() {
-        return leaderAvailable && isShardReady() && !RaftState.IsolatedLeader.name().equals(role)
-                && !RaftState.PreLeader.name().equals(role)
-                && (isLeader() || addressResolver.resolve(leaderId) != null);
+        return leaderAvailable && isShardReady() && !RaftRole.IsolatedLeader.name().equals(role)
+            && !RaftRole.PreLeader.name().equals(role) && (isLeader() || addressResolver.resolve(leaderId) != null);
     }
 
     boolean isShardInitialized() {
@@ -213,12 +212,12 @@ public final class ShardInformation {
     }
 
     boolean isInSync() {
-        if (RaftState.Follower.name().equals(role)) {
+        if (RaftRole.Follower.name().equals(role)) {
             return followerSyncStatus;
-        } else if (RaftState.Leader.name().equals(role)) {
+        }
+        if (RaftRole.Leader.name().equals(role)) {
             return true;
         }
-
         return false;
     }
 
