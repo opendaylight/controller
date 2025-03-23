@@ -93,10 +93,11 @@ class RaftActorRecoverySupportTest {
         mockActorSystem = ActorSystem.create();
         mockActorRef = mockActorSystem.actorOf(Props.create(DoNothingActor.class));
         final var localAccess = new LocalAccess(localId, stateDir);
-        context = new RaftActorContextImpl(mockActorRef, null, localAccess, Map.of(), configParams, (short) 0,
-            mockPersistence, applyState -> { }, MoreExecutors.directExecutor());
+        context = new RaftActorContextImpl(localId, mockActorRef, null, localAccess.termInfoStore(), Map.of(),
+            configParams, (short) 0, mockPersistence, applyState -> { }, MoreExecutors.directExecutor());
 
-        support = new RaftActorRecoverySupport(localAccess, context, mockCohort);
+        support = new RaftActorRecoverySupport(new RaftCreated((RaftActorContextImpl) context),
+            localAccess.termInfoStore(), mockCohort);
     }
 
     @AfterEach

@@ -12,21 +12,33 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.opendaylight.controller.cluster.raft.RaftActor.Created;
 
 /**
  * One of the possible lifecycle phases in the life of a raft actor.
  */
 @NonNullByDefault
-abstract sealed class RaftState permits Created /*, Initializing, Initialized, Stopped */ {
+abstract sealed class RaftState permits RaftCreated, RaftActorRecoverySupport /* Initialized, Stopped */ {
     // FIXME: should be valid only after recovery
     final RaftActorContextImpl context;
 
     private final String stateName;
 
     RaftState(final String stateName, final RaftActorContextImpl context) {
-        this.context = requireNonNull(context);
         this.stateName = requireNonNull(stateName);
+        this.context = requireNonNull(context);
+    }
+
+    RaftState(final String stateName, final RaftState prev) {
+        this.stateName = requireNonNull(stateName);
+        context = prev.context;
+    }
+
+    final String memberId() {
+        return context.getId();
+    }
+
+    final ConfigParams configParams() {
+        return context.getConfigParams();
     }
 
     @Override
