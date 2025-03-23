@@ -32,6 +32,7 @@ import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.messages.RemoveServer;
 import org.opendaylight.controller.cluster.raft.messages.RemoveServerReply;
 import org.opendaylight.controller.cluster.raft.messages.ServerChangeReply;
+import org.opendaylight.controller.cluster.raft.messages.ServerChangeRequest;
 import org.opendaylight.controller.cluster.raft.messages.ServerChangeStatus;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.controller.cluster.raft.messages.UnInitializedFollowerSnapshotReply;
@@ -47,7 +48,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Pantelis
  */
-class RaftActorServerConfigurationSupport {
+final class RaftActorServerConfigurationSupport {
     private static final Logger LOG = LoggerFactory.getLogger(RaftActorServerConfigurationSupport.class);
 
     @SuppressWarnings("checkstyle:MemberName")
@@ -549,7 +550,7 @@ class RaftActorServerConfigurationSupport {
      *
      * @param <T> the operation type
      */
-    private abstract static class ServerOperationContext<T> {
+    private abstract static sealed class ServerOperationContext<T extends ServerChangeRequest<?>> {
         private final T operation;
         private final ActorRef clientRequestor;
         private final Identifier contextId;
@@ -560,19 +561,20 @@ class RaftActorServerConfigurationSupport {
             contextId = new ServerOperationContextIdentifier();
         }
 
-        Identifier getContextId() {
+        final Identifier getContextId() {
             return contextId;
         }
 
-        T getOperation() {
+        final T getOperation() {
             return operation;
         }
 
-        ActorRef getClientRequestor() {
+        final ActorRef getClientRequestor() {
             return clientRequestor;
         }
 
         void operationComplete(final RaftActor raftActor, final boolean succeeded) {
+            // No-op by default
         }
 
         boolean includeSelfInNewConfiguration(final RaftActor raftActor) {
@@ -589,7 +591,7 @@ class RaftActorServerConfigurationSupport {
     /**
      * Stores context information for an AddServer operation.
      */
-    private static class AddServerContext extends ServerOperationContext<AddServer> {
+    private static final class AddServerContext extends ServerOperationContext<AddServer> {
         AddServerContext(final AddServer addServer, final ActorRef clientRequestor) {
             super(addServer, clientRequestor);
         }
@@ -641,7 +643,7 @@ class RaftActorServerConfigurationSupport {
         }
     }
 
-    private static class RemoveServerContext extends ServerOperationContext<RemoveServer> {
+    private static final class RemoveServerContext extends ServerOperationContext<RemoveServer> {
         private final String peerAddress;
 
         RemoveServerContext(final RemoveServer operation, final String peerAddress, final ActorRef clientRequestor) {
@@ -678,7 +680,8 @@ class RaftActorServerConfigurationSupport {
         }
     }
 
-    private static class ChangeServersVotingStatusContext extends ServerOperationContext<ChangeServersVotingStatus> {
+    private static final class ChangeServersVotingStatusContext extends
+            ServerOperationContext<ChangeServersVotingStatus> {
         private final boolean tryToElectLeader;
 
         ChangeServersVotingStatusContext(final ChangeServersVotingStatus convertMessage, final ActorRef clientRequestor,

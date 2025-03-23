@@ -7,21 +7,20 @@
  */
 package org.opendaylight.controller.cluster.raft.messages;
 
-import java.io.Serializable;
-
 /**
  * Message sent to add a new server/replica (§4.1).
  *
  * @author Thomas Pantelis
  */
-public class AddServer implements Serializable {
+public final class AddServer implements ServerChangeRequest<AddServerReply> {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private final String newServerId;
     private final String newServerAddress;
     private final boolean votingMember;
 
-    public AddServer(String newServerId, String newServerAddress, boolean votingMember) {
+    public AddServer(final String newServerId, final String newServerAddress, final boolean votingMember) {
         this.newServerId = newServerId;
         this.newServerAddress = newServerAddress;
         this.votingMember = votingMember;

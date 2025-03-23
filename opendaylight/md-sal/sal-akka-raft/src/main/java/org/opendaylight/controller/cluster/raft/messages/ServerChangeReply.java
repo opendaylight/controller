@@ -12,10 +12,11 @@ package org.opendaylight.controller.cluster.raft.messages;
  *
  * @author Thomas Pantelis
  */
-public class ServerChangeReply extends AbstractServerChangeReply {
+public final class ServerChangeReply extends AbstractServerChangeReply {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
-    public ServerChangeReply(ServerChangeStatus status, String leaderHint) {
+    public ServerChangeReply(final ServerChangeStatus status, final String leaderHint) {
         super(status, leaderHint);
     }
 }

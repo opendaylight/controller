@@ -15,7 +15,7 @@ import org.eclipse.jdt.annotation.Nullable;
 public final class RemoveServerReply extends AbstractServerChangeReply {
     private static final long serialVersionUID = 1L;
 
-    public RemoveServerReply(ServerChangeStatus status, @Nullable String leaderHint) {
+    public RemoveServerReply(final ServerChangeStatus status, final @Nullable String leaderHint) {
         super(status, leaderHint);
     }
 }

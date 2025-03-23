@@ -21,7 +21,9 @@ import org.eclipse.jdt.annotation.Nullable;
  *
  * @author Thomas Pantelis
  */
-public abstract class AbstractServerChangeReply implements Serializable {
+public abstract sealed class AbstractServerChangeReply implements Serializable
+        permits AddServerReply, RemoveServerReply, ServerChangeReply {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private final String leaderHint;

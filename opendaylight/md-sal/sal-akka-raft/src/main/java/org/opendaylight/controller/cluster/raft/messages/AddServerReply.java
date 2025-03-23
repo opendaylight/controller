@@ -15,7 +15,7 @@ package org.opendaylight.controller.cluster.raft.messages;
 public final class AddServerReply extends AbstractServerChangeReply {
     private static final long serialVersionUID = 1L;
 
-    public AddServerReply(ServerChangeStatus status, String leaderHint) {
+    public AddServerReply(final ServerChangeStatus status, final String leaderHint) {
         super(status, leaderHint);
     }
 }
