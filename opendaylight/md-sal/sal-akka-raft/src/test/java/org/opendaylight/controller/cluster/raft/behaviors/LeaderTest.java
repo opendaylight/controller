@@ -50,7 +50,6 @@ import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockReplicatedLogBuilder;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorLeadershipTransferCohort;
-import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.VotingState;
@@ -75,6 +74,7 @@ import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.utils.ForwardMessageToBehaviorActor;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
+import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.yangtools.concepts.Identifier;
 
 public class LeaderTest extends AbstractLeaderTest<Leader> {
@@ -1660,7 +1660,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
                 AppendEntriesReply.class);
 
         assertFalse(appendEntriesReply.isSuccess());
-        assertEquals(RaftState.Leader, leaderActor.underlyingActor().getFirstBehaviorChange().state());
+        assertEquals(RaftRole.Leader, leaderActor.underlyingActor().getFirstBehaviorChange().raftRole());
 
         MessageCollectorActor.clearMessages(leaderActor);
     }
@@ -1688,7 +1688,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         RaftActorBehavior raftActorBehavior = leader.handleAppendEntriesReply(followerActor, reply);
 
-        assertEquals(RaftState.Leader, raftActorBehavior.state());
+        assertEquals(RaftRole.Leader, raftActorBehavior.raftRole());
 
         final var leaderLog = leaderActorContext.getReplicatedLog();
         assertEquals(2, leaderLog.getCommitIndex());
@@ -1726,7 +1726,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         RaftActorBehavior raftActorBehavior = leader.handleAppendEntriesReply(followerActor, reply);
 
-        assertEquals(RaftState.Leader, raftActorBehavior.state());
+        assertEquals(RaftRole.Leader, raftActorBehavior.raftRole());
     }
 
     @Test
