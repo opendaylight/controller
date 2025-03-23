@@ -8,34 +8,30 @@
 
 package org.opendaylight.controller.cluster.notifications;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.Serializable;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.cluster.raft.RaftState;
 
 /**
  * Notification message representing a Role change of a cluster member.
  * Roles generally are Leader, Follower and Candidate. But can be based on the consensus strategy/implementation.
  * The Listener could be in a separate ActorSystem and hence this message needs to be Serializable.
  */
-public class RoleChangeNotification implements Serializable {
+@NonNullByDefault
+public record RoleChangeNotification(String memberId, @Nullable String oldRole, String newRole)
+        implements Serializable {
+    @java.io.Serial
     private static final long serialVersionUID = -2873869509490117116L;
-    private final String memberId;
-    private final String oldRole;
-    private final String newRole;
 
-    public RoleChangeNotification(String memberId, String oldRole, String newRole) {
-        this.memberId = memberId;
-        this.oldRole = oldRole;
-        this.newRole = newRole;
+    public RoleChangeNotification {
+        requireNonNull(memberId);
+        requireNonNull(newRole);
     }
 
-    public String getMemberId() {
-        return memberId;
-    }
-
-    public String getOldRole() {
-        return oldRole;
-    }
-
-    public String getNewRole() {
-        return newRole;
+    public RoleChangeNotification(final String memberId, final RaftState newRole, final @Nullable RaftState oldRole) {
+        this(memberId, oldRole != null ? oldRole.name() : null, newRole.name());
     }
 }
