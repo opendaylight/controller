@@ -11,20 +11,20 @@ import static java.util.Objects.requireNonNull;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.raft.RaftState;
+import org.opendaylight.raft.api.RaftRole;
 
 /**
  * Role Change message initiated internally from the  Raft Actor when a the behavior/role changes.
  * Since its internal, need not be serialized.
  */
 @NonNullByDefault
-public record RoleChanged(String memberId, RaftState newRole, @Nullable RaftState oldRole) implements MemberNotication {
+public record RoleChanged(String memberId, RaftRole newRole, @Nullable RaftRole oldRole) implements MemberNotication {
     public RoleChanged {
         requireNonNull(memberId);
         requireNonNull(newRole);
     }
 
-    public RoleChanged(final String memberId, final RaftState newRole) {
+    public RoleChanged(final String memberId, final RaftRole newRole) {
         this(memberId, newRole, null);
     }
 }

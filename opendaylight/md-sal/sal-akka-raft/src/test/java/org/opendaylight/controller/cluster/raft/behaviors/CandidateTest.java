@@ -26,7 +26,6 @@ import org.junit.After;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
-import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.VotingState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
@@ -38,6 +37,7 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
+import org.opendaylight.raft.api.RaftRole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,7 +88,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
         RaftActorBehavior newBehavior =
             candidate.handleMessage(candidateActor, ElectionTimeout.INSTANCE);
 
-        assertEquals("Behavior", RaftState.Leader, newBehavior.state());
+        assertEquals("Behavior", RaftRole.Leader, newBehavior.raftRole());
     }
 
     @Test
@@ -99,7 +99,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
 
         candidate = candidate.handleMessage(candidateActor, ElectionTimeout.INSTANCE);
 
-        assertEquals("Behavior", RaftState.Candidate, candidate.state());
+        assertEquals("Behavior", RaftRole.Candidate, candidate.raftRole());
     }
 
     @Test
@@ -112,7 +112,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
 
         candidate = candidate.handleMessage(peerActors[0], new RequestVoteReply(1, true));
 
-        assertEquals("Behavior", RaftState.Leader, candidate.state());
+        assertEquals("Behavior", RaftRole.Leader, candidate.raftRole());
     }
 
     @Test
@@ -125,7 +125,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
         candidate = candidate.handleMessage(peerActors[0], new RequestVoteReply(1, true));
 
         // LastApplied is -1 and behind the last index.
-        assertEquals("Behavior", RaftState.PreLeader, candidate.state());
+        assertEquals("Behavior", RaftRole.PreLeader, candidate.raftRole());
     }
 
     @Test
@@ -173,11 +173,11 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
 
         candidate = candidate.handleMessage(peerActors[1], new RequestVoteReply(1, false));
 
-        assertEquals("Behavior", RaftState.Candidate, candidate.state());
+        assertEquals("Behavior", RaftRole.Candidate, candidate.raftRole());
 
         candidate = candidate.handleMessage(peerActors[2], new RequestVoteReply(1, true));
 
-        assertEquals("Behavior", RaftState.Leader, candidate.state());
+        assertEquals("Behavior", RaftRole.Leader, candidate.raftRole());
     }
 
     @Test
@@ -313,7 +313,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
 
         RaftActorBehavior raftBehavior = behavior.handleMessage(candidateActor, appendEntries);
 
-        assertEquals("Raft state", RaftState.Follower, raftBehavior.state());
+        assertEquals("Raft state", RaftRole.Follower, raftBehavior.raftRole());
 
         assertEquals("ReplicatedLog size", 1, context.getReplicatedLog().size());
 

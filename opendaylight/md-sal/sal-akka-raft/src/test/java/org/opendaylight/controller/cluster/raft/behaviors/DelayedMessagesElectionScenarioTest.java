@@ -14,12 +14,12 @@ import com.google.common.collect.ImmutableMap;
 import org.apache.pekko.actor.ActorRef;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
-import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
+import org.opendaylight.raft.api.RaftRole;
 
 /**
  * A leader election scenario test that delays various messages to behaviors to simulate network delays.
@@ -56,9 +56,9 @@ public class DelayedMessagesElectionScenarioTest extends AbstractLeaderElectionS
 
         member2Actor.waitForExpectedMessages(RequestVoteReply.class);
 
-        verifyBehaviorState("member 1", member1Actor, RaftState.Follower);
-        verifyBehaviorState("member 2", member2Actor, RaftState.Follower);
-        verifyBehaviorState("member 3", member3Actor, RaftState.Leader);
+        verifyBehaviorState("member 1", member1Actor, RaftRole.Follower);
+        verifyBehaviorState("member 2", member2Actor, RaftRole.Follower);
+        verifyBehaviorState("member 3", member3Actor, RaftRole.Leader);
 
         assertEquals("member 1 election term", 3, member1Context.currentTerm());
         assertEquals("member 2 election term", 3, member2Context.currentTerm());
@@ -87,13 +87,13 @@ public class DelayedMessagesElectionScenarioTest extends AbstractLeaderElectionS
         assertEquals("getTerm", member3Context.currentTerm(), requestVoteReply.getTerm());
         assertTrue("isVoteGranted", requestVoteReply.isVoteGranted());
 
-        verifyBehaviorState("member 3", member3Actor, RaftState.Leader);
+        verifyBehaviorState("member 3", member3Actor, RaftRole.Leader);
 
         // member 2 should've switched to Follower as member 3's RequestVote term (3) was greater
         // than member 2's term (2).
 
         member2Actor.waitForBehaviorStateChange();
-        verifyBehaviorState("member 2", member2Actor, RaftState.Follower);
+        verifyBehaviorState("member 2", member2Actor, RaftRole.Follower);
 
         // The switch to leader should cause an immediate AppendEntries heartbeat from member 3.
 
@@ -120,7 +120,7 @@ public class DelayedMessagesElectionScenarioTest extends AbstractLeaderElectionS
         member1Actor.waitForExpectedMessages(RequestVote.class);
 
         member1Actor.waitForBehaviorStateChange();
-        verifyBehaviorState("member 1", member1Actor, RaftState.Follower);
+        verifyBehaviorState("member 1", member1Actor, RaftRole.Follower);
 
         // Now forward member 3's captured RequestVote message to its behavior. Since member 3 is
         // already a Follower, it should update its term to 2 and send a RequestVoteReply back to
@@ -134,7 +134,7 @@ public class DelayedMessagesElectionScenarioTest extends AbstractLeaderElectionS
         member3Actor.expectMessageClass(RequestVote.class, 1);
         member3Actor.forwardCapturedMessageToBehavior(RequestVote.class, member2ActorRef);
         member3Actor.waitForExpectedMessages(RequestVote.class);
-        verifyBehaviorState("member 3", member3Actor, RaftState.Follower);
+        verifyBehaviorState("member 3", member3Actor, RaftRole.Follower);
 
         assertEquals("member 1 election term", 2, member1Context.currentTerm());
         assertEquals("member 2 election term", 2, member2Context.currentTerm());
@@ -167,7 +167,7 @@ public class DelayedMessagesElectionScenarioTest extends AbstractLeaderElectionS
         member3Actor.waitForExpectedMessages(RequestVote.class);
 
         member2Actor.waitForBehaviorStateChange();
-        verifyBehaviorState("member 2", member2Actor, RaftState.Candidate);
+        verifyBehaviorState("member 2", member2Actor, RaftRole.Candidate);
 
         assertEquals("member 1 election term", 1, member1Context.currentTerm());
         assertEquals("member 2 election term", 2, member2Context.currentTerm());
