@@ -12,6 +12,7 @@ import static com.google.common.base.Verify.verify;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.VerifyException;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -103,13 +104,6 @@ import org.slf4j.LoggerFactory;
  * </ul>
  */
 public abstract class RaftActor extends AbstractUntypedPersistentActor {
-    @NonNullByDefault
-    static final class Created extends RaftState {
-        private Created(final RaftActorContextImpl context) {
-            super("created", context);
-        }
-    }
-
     private static final Logger LOG = LoggerFactory.getLogger(RaftActor.class);
     private static final long APPLY_STATE_DELAY_THRESHOLD_IN_NANOS = TimeUnit.MILLISECONDS.toNanos(50);
 
@@ -119,9 +113,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     private final @NonNull RaftActorDataPersistenceProvider dataPersistenceProvider;
     private final @NonNull BehaviorStateTracker behaviorStateTracker = new BehaviorStateTracker();
 
-    private final @NonNull RaftState raft;
+    private @NonNull RaftState raft;
 
-    private RaftActorRecoverySupport raftRecovery;
     private RaftActorSnapshotMessageSupport snapshotSupport;
     private RaftActorServerConfigurationSupport serverConfigurationSupport;
     private boolean shuttingDown;
@@ -133,9 +126,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         localAccess = new LocalAccess(memberId, stateDir.resolve(memberId));
         dataPersistenceProvider = new RaftActorDataPersistenceProvider(this);
 
-        raft = new Created(new RaftActorContextImpl(self(), getContext(), localAccess, peerAddresses,
-            configParams.orElseGet(DefaultConfigParamsImpl::new), payloadVersion, dataPersistenceProvider,
-            this::handleApplyState, this::executeInSelf));
+        raft = new RaftCreated(new RaftActorContextImpl(memberId, self(), getContext(), localAccess.termInfoStore(),
+            peerAddresses, configParams.orElseGet(DefaultConfigParamsImpl::new), payloadVersion,
+            dataPersistenceProvider, this::handleApplyState, this::executeInSelf));
     }
 
     /**
@@ -157,7 +150,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     private @NonNull ConfigParams configParams() {
-        return raftContext().getConfigParams();
+        return raft.configParams();
     }
 
     private ReplicatedLog replicatedLog() {
@@ -176,15 +169,33 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     @Override
     public void preStart() throws Exception {
+        if (!(raft instanceof RaftCreated created)) {
+            throw new VerifyException("preStart() with " + raft);
+        }
+
         LOG.info("{}: Starting recovery with journal batch size {}", memberId(),
-            configParams().getJournalRecoveryLogBatchSize());
+            created.configParams().getJournalRecoveryLogBatchSize());
 
-        super.preStart();
+        final var context = created.context;
+        final var snapshotManager = context.getSnapshotManager();
+        // FIXME: split off into separate state
+        snapshotManager.setSnapshotCohort(getRaftActorSnapshotCohort());
 
-        snapshotManager().setSnapshotCohort(getRaftActorSnapshotCohort());
-        snapshotSupport = newRaftActorSnapshotMessageSupport();
+        snapshotSupport = newRaftActorSnapshotMessageSupport(snapshotManager);
         serverConfigurationSupport = new RaftActorServerConfigurationSupport(this);
+        raft = newRaftActorRecoverySupport(created);
     }
+
+    @VisibleForTesting
+    @NonNull RaftActorRecoverySupport newRaftActorRecoverySupport(final RaftCreated prevState) {
+        return new RaftActorRecoverySupport(prevState, localAccess.termInfoStore(), getRaftActorRecoveryCohort());
+    }
+
+    /**
+     * Returns the RaftActorRecoveryCohort to participate in persistence recovery.
+     */
+    // FIXME: rename to something implying lifecycle -- at some point we will be closing this
+    protected abstract @NonNull RaftActorRecoveryCohort getRaftActorRecoveryCohort();
 
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
@@ -202,8 +213,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     @Override
     protected void handleRecover(final Object message) {
-        if (raftRecovery == null) {
-            raftRecovery = newRaftActorRecoverySupport();
+        if (!(raft instanceof RaftActorRecoverySupport raftRecovery)) {
+            throw new VerifyException("handleRecover() with " + raft);
         }
 
         boolean recoveryComplete = raftRecovery.handleRecoveryMessage(this, message);
@@ -211,14 +222,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             onRecoveryComplete();
 
             initializeBehavior();
-
-            raftRecovery = null;
         }
-    }
-
-    @VisibleForTesting
-    RaftActorRecoverySupport newRaftActorRecoverySupport() {
-        return new RaftActorRecoverySupport(localAccess, raftContext(), getRaftActorRecoveryCohort());
     }
 
     @VisibleForTesting
@@ -490,8 +494,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     @VisibleForTesting
-    RaftActorSnapshotMessageSupport newRaftActorSnapshotMessageSupport() {
-        return new RaftActorSnapshotMessageSupport(raftContext().getSnapshotManager());
+    @NonNullByDefault
+    RaftActorSnapshotMessageSupport newRaftActorSnapshotMessageSupport(final SnapshotManager snapshotManager) {
+        return new RaftActorSnapshotMessageSupport(snapshotManager);
     }
 
     private OnDemandRaftState getOnDemandRaftState() {
@@ -505,7 +510,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             peerAddresses.put(info.getId(), info.getAddress() != null ? info.getAddress() : "");
         }
 
-        final var currentBehavior = getCurrentBehavior();
+        final var currentBehavior = context.getCurrentBehavior();
         final var termInfo = context.termInfo();
         final var replLog = context.getReplicatedLog();
 
@@ -843,11 +848,6 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
      *                    This should NEVER be null.
      */
     protected abstract void applyState(ActorRef clientActor, Identifier identifier, Object data);
-
-    /**
-     * Returns the RaftActorRecoveryCohort to participate in persistence recovery.
-     */
-    protected abstract @NonNull RaftActorRecoveryCohort getRaftActorRecoveryCohort();
 
     /**
      * This method is called when recovery is complete.

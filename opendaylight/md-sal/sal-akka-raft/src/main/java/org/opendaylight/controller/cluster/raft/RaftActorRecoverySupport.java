@@ -29,6 +29,7 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
+import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,11 +38,11 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Pantelis
  */
-class RaftActorRecoverySupport {
+// FIXME: rename to RecoveringState
+final class RaftActorRecoverySupport extends RaftState {
     private static final Logger LOG = LoggerFactory.getLogger(RaftActorRecoverySupport.class);
 
-    private final @NonNull LocalAccess localAccess;
-    private final @NonNull RaftActorContext context;
+    private final @NonNull TermInfoStore termInfoStore;
     private final @NonNull RaftActorRecoveryCohort cohort;
     private final @Nullable TermInfo origTermInfo;
 
@@ -53,13 +54,14 @@ class RaftActorRecoverySupport {
     private Stopwatch recoveryTimer;
     private Stopwatch recoverySnapshotTimer;
 
-    RaftActorRecoverySupport(final @NonNull LocalAccess localAccess, final RaftActorContext context,
+    RaftActorRecoverySupport(final RaftCreated prev, final TermInfoStore termInfoStore,
             final RaftActorRecoveryCohort cohort) {
-        this.localAccess = requireNonNull(localAccess);
-        this.context = requireNonNull(context);
+        super("recovering", prev);
         this.cohort = requireNonNull(cohort);
+        this.termInfoStore = requireNonNull(termInfoStore);
+
         try {
-            origTermInfo = localAccess.termInfoStore().loadAndSetTerm();
+            origTermInfo = termInfoStore.loadAndSetTerm();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -80,7 +82,7 @@ class RaftActorRecoverySupport {
             case ApplyJournalEntries msg -> onRecoveredApplyLogEntries(msg.getToIndex());
             case DeleteEntries msg -> onDeleteEntries(msg);
             case ClusterConfig msg -> context.updatePeerIds(msg);
-            case UpdateElectionTerm(var termInfo) -> context.setTermInfo(termInfo);
+            case UpdateElectionTerm(final var termInfo) -> context.setTermInfo(termInfo);
             case RecoveryCompleted msg -> {
                 onRecoveryCompletedMessage(actor);
                 return true;
@@ -90,10 +92,6 @@ class RaftActorRecoverySupport {
             }
         }
         return false;
-    }
-
-    private @NonNull String memberId() {
-        return localAccess.memberId();
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
@@ -314,13 +312,12 @@ class RaftActorRecoverySupport {
 
 
         // Populate property-based storage if needed, or roll-back any voting information leaked by recovery process
-        final var infoStore = localAccess.termInfoStore();
         final var orig = origTermInfo;
         if (orig == null) {
             // No original info observed, seed it after recovery and trigger a snapshot
-            final var current = infoStore.currentTerm();
+            final var current = termInfoStore.currentTerm();
             try {
-                infoStore.storeAndSetTerm(current);
+                termInfoStore.storeAndSetTerm(current);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
@@ -330,7 +327,7 @@ class RaftActorRecoverySupport {
         } else {
             // Undo whatever recovery has done to what we have observed
             LOG.debug("{}: restoring local {}", memberId(), orig);
-            infoStore.setTerm(orig);
+            termInfoStore.setTerm(orig);
         }
 
         if (dataRecoveredWithPersistenceDisabled
