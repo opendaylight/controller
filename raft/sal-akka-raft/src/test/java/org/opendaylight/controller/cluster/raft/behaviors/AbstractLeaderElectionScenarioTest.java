@@ -33,6 +33,8 @@ import org.apache.pekko.testkit.javadsl.TestKit;
 import org.apache.pekko.util.Timeout;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.TemporaryFolder;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.TestActorFactory;
@@ -203,6 +205,9 @@ public class AbstractLeaderElectionScenarioTest {
         }
     }
 
+    @Rule
+    public TemporaryFolder stateDir = TemporaryFolder.builder().assureDeletion().build();
+
     protected final Logger testLog = LoggerFactory.getLogger(MockRaftActorContext.class);
     protected final ActorSystem system = ActorSystem.create("test");
     protected final TestActorFactory factory = new TestActorFactory(system);
@@ -242,7 +247,7 @@ public class AbstractLeaderElectionScenarioTest {
 
     MockRaftActorContext newRaftActorContext(final String id, final ActorRef actor,
             final Map<String, String> peerAddresses) {
-        MockRaftActorContext context = new MockRaftActorContext(id, system, actor);
+        MockRaftActorContext context = new MockRaftActorContext(id, stateDir.getRoot().toPath(), system, actor);
         context.setPeerAddresses(peerAddresses);
         try {
             context.persistTermInfo(new TermInfo(1, ""));

@@ -55,7 +55,8 @@ public class IsolatedLeaderTest extends AbstractLeaderTest<IsolatedLeader> {
     protected MockRaftActorContext createActorContext(final ActorRef actor, final int payloadVersion) {
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         configParams.setElectionTimeoutFactor(100000);
-        MockRaftActorContext context = new MockRaftActorContext("isolated-leader", getSystem(), actor, payloadVersion);
+        MockRaftActorContext context = new MockRaftActorContext("isolated-leader", stateDir.getRoot().toPath(),
+            getSystem(), actor, payloadVersion);
         context.setConfigParams(configParams);
         return context;
     }

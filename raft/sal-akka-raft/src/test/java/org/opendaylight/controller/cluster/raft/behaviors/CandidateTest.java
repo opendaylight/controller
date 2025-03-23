@@ -327,7 +327,8 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
 
     @Override
     protected MockRaftActorContext createActorContext(final int payloadVersion) {
-        return new MockRaftActorContext("candidate", getSystem(), candidateActor, payloadVersion);
+        return new MockRaftActorContext("candidate", stateDir.getRoot().toPath(), getSystem(), candidateActor,
+            payloadVersion);
     }
 
     private Map<String, String> setupPeers(final int count) {

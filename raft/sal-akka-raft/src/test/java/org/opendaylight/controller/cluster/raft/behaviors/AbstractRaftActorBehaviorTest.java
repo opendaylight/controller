@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft.behaviors;
 
 import static org.junit.Assert.assertEquals;
@@ -23,7 +22,9 @@ import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.protobuf.ByteString;
 import org.eclipse.jdt.annotation.NonNull;
 import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.opendaylight.controller.cluster.raft.AbstractActorTest;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockReplicatedLogBuilder;
@@ -51,6 +52,9 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
 
     private final ActorRef behaviorActor = actorFactory.createActor(MessageCollectorActor.props(),
         actorFactory.generateActorId("behavior"));
+
+    @Rule
+    public TemporaryFolder stateDir = TemporaryFolder.builder().assureDeletion().build();
 
     RaftActorBehavior behavior;
 
@@ -219,7 +223,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
 
     @Test
     public void testPerformSnapshot() {
-        MockRaftActorContext context = new MockRaftActorContext("test", getSystem(), behaviorActor);
+        final var context = new MockRaftActorContext("test", stateDir.getRoot().toPath(), getSystem(), behaviorActor);
         RaftActorBehavior abstractBehavior = createBehavior(context);
         if (abstractBehavior instanceof Candidate) {
             return;
@@ -317,15 +321,15 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
     }
 
     protected @NonNull MockRaftActorContext createActorContext(final int payloadVersion) {
-        return new MockRaftActorContext(payloadVersion);
+        return new MockRaftActorContext(stateDir.getRoot().toPath(), payloadVersion);
     }
 
-    protected static final @NonNull MockRaftActorContext createActorContext(final ActorRef actor) {
-        return new MockRaftActorContext("test", getSystem(), actor, 0);
+    protected final @NonNull MockRaftActorContext createActorContext(final ActorRef actor) {
+        return new MockRaftActorContext("test", stateDir.getRoot().toPath(), getSystem(), actor, 0);
     }
 
     protected @NonNull MockRaftActorContext createActorContext(final ActorRef actor, final int payloadVersion) {
-        return new MockRaftActorContext("test", getSystem(), actor, payloadVersion);
+        return new MockRaftActorContext("test", stateDir.getRoot().toPath(), getSystem(), actor, payloadVersion);
     }
 
     protected AppendEntries createAppendEntriesWithNewerTerm() {

@@ -11,6 +11,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.util.concurrent.MoreExecutors;
 import java.io.Serializable;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -30,31 +31,34 @@ public class MockRaftActorContext extends RaftActorContextImpl {
     private RaftPolicy raftPolicy;
 
     @NonNullByDefault
-    private static LocalAccess newLocalAccess(final String id) {
-        return new LocalAccess(id, new TestTermInfoStore(1, ""));
+    private static LocalAccess newLocalAccess(final String id, final Path stateDir) {
+        return new LocalAccess(id, stateDir, new TestTermInfoStore(1, ""));
     }
 
-    public MockRaftActorContext(final int payloadVersion) {
-        super(null, null, newLocalAccess("test"), new HashMap<>(), new DefaultConfigParamsImpl(),
+    public MockRaftActorContext(final Path stateDir, final int payloadVersion) {
+        super(null, null, newLocalAccess("test", stateDir), new HashMap<>(), new DefaultConfigParamsImpl(),
             (short) payloadVersion, new TestDataProvider(), applyState -> { }, MoreExecutors.directExecutor());
         resetReplicatedLog(new MockReplicatedLogBuilder().build());
     }
 
-    public MockRaftActorContext(final String id, final ActorSystem system, final ActorRef actor,
+    @NonNullByDefault
+    public MockRaftActorContext(final String id, final Path stateDir, final ActorSystem system, final ActorRef actor,
             final int payloadVersion) {
-        super(actor, null, newLocalAccess(id), new HashMap<>(), new DefaultConfigParamsImpl(),
+        super(actor, null, newLocalAccess(id, stateDir), new HashMap<>(), new DefaultConfigParamsImpl(),
             (short) payloadVersion, new TestDataProvider(), applyState -> actor.tell(applyState, actor),
             MoreExecutors.directExecutor());
         this.system = system;
         initReplicatedLog();
     }
 
-    public MockRaftActorContext() {
-        this(0);
+    @NonNullByDefault
+    public MockRaftActorContext(final Path stateDir) {
+        this(stateDir, 0);
     }
 
-    public MockRaftActorContext(final String id, final ActorSystem system, final ActorRef actor) {
-        this(id, system, actor, 0);
+    @NonNullByDefault
+    public MockRaftActorContext(final String id, final Path stateDir, final ActorSystem system, final ActorRef actor) {
+        this(id, stateDir, system, actor, 0);
     }
 
     public void initReplicatedLog() {
