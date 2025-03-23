@@ -192,7 +192,7 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
         follower3CollectorActor = follower3Actor.underlyingActor().collectorActor();
         leaderCollectorActor = leaderActor.underlyingActor().collectorActor();
 
-        leaderContext = leaderActor.underlyingActor().getRaftActorContext();
+        leaderContext = leaderActor.underlyingActor().raftContext();
 
         waitUntilLeader(leaderActor);
 
