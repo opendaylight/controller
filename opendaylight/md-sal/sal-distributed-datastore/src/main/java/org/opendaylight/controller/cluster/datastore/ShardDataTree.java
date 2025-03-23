@@ -31,6 +31,7 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
@@ -1147,7 +1148,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         processNextPendingCommit();
     }
 
-    final Collection<ActorRef> getCohortActors() {
+    final List<ActorRef> getCohortActors() {
         return cohortRegistry.getCohortActors();
     }
 

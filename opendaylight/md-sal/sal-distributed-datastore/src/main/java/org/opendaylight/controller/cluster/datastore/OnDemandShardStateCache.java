@@ -40,7 +40,7 @@ final class OnDemandShardStateCache {
 
     OnDemandShardState get() throws Exception {
         if (shardActor == null) {
-            return OnDemandShardState.newBuilder().build();
+            return new OnDemandShardState.Builder().build();
         }
 
         return ONDEMAND_SHARD_STATE_CACHE.get(shardName, this::retrieveState);

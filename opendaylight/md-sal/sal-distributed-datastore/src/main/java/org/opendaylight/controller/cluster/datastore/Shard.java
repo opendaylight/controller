@@ -745,7 +745,7 @@ public class Shard extends RaftActor {
 
     @Override
     protected final OnDemandRaftState.AbstractBuilder<?, ?> newOnDemandRaftStateBuilder() {
-        return OnDemandShardState.newBuilder()
+        return new OnDemandShardState.Builder()
             .treeChangeListenerActors(treeChangeSupport.getListenerActors())
             .commitCohortActors(store.getCohortActors());
     }

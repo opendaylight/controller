@@ -45,8 +45,8 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
 
     private final Map<ActorRef, Node<ActorRef>> cohortToNode = new HashMap<>();
 
-    Collection<ActorRef> getCohortActors() {
-        return new ArrayList<>(cohortToNode.keySet());
+    List<ActorRef> getCohortActors() {
+        return List.copyOf(cohortToNode.keySet());
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
