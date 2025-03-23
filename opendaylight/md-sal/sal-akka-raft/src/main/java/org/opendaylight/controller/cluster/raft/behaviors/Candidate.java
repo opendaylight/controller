@@ -14,7 +14,6 @@ import java.time.Duration;
 import org.apache.pekko.actor.ActorRef;
 import org.opendaylight.controller.cluster.raft.PeerInfo;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
-import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
@@ -24,6 +23,7 @@ import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
+import org.opendaylight.raft.api.RaftRole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +53,7 @@ public final class Candidate extends RaftActorBehavior {
     private int voteCount;
 
     Candidate(final RaftActorContext context) {
-        super(context, RaftState.Candidate);
+        super(context, RaftRole.Candidate);
 
         votingPeers = context.getPeers().stream()
             .filter(PeerInfo::isVoting)

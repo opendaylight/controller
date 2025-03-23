@@ -5,9 +5,13 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.raft;
+package org.opendaylight.raft.api;
 
-public enum RaftState {
+/**
+ * Enumeration of know RAFT roles. Please use {@link #name()} and {@link #valueOf(String)} for conversion to/from
+ * canonical string.
+ */
+public enum RaftRole {
     Candidate,
     Follower,
     Leader,
