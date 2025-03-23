@@ -89,6 +89,7 @@ import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
+import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -198,7 +199,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         mockRaftActor.waitForInitializeBehaviorComplete();
 
-        assertEquals("getRaftState", RaftState.Follower, mockRaftActor.getRaftState());
+        assertEquals("getRaftState", RaftRole.Follower, mockRaftActor.getRaftState());
 
         TEST_LOG.info("testRaftActorRecoveryWithPersistenceEnabled ending");
     }
@@ -220,7 +221,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         mockRaftActor.waitForInitializeBehaviorComplete();
 
-        assertEquals("getRaftState", RaftState.Follower, mockRaftActor.getRaftState());
+        assertEquals("getRaftState", RaftRole.Follower, mockRaftActor.getRaftState());
     }
 
     @Test
@@ -425,19 +426,19 @@ public class RaftActorTest extends AbstractActorTest {
         RoleChanged raftRoleChanged = matches.get(0);
         assertEquals(persistenceId, raftRoleChanged.memberId());
         assertNull(raftRoleChanged.oldRole());
-        assertEquals(RaftState.Follower.name(), raftRoleChanged.newRole());
+        assertEquals(RaftRole.Follower.name(), raftRoleChanged.newRole());
 
         // check if the notifier got a role change from Follower to Candidate
         raftRoleChanged = matches.get(1);
         assertEquals(persistenceId, raftRoleChanged.memberId());
-        assertEquals(RaftState.Follower.name(), raftRoleChanged.oldRole());
-        assertEquals(RaftState.Candidate.name(), raftRoleChanged.newRole());
+        assertEquals(RaftRole.Follower.name(), raftRoleChanged.oldRole());
+        assertEquals(RaftRole.Candidate.name(), raftRoleChanged.newRole());
 
         // check if the notifier got a role change from Candidate to Leader
         raftRoleChanged = matches.get(2);
         assertEquals(persistenceId, raftRoleChanged.memberId());
-        assertEquals(RaftState.Candidate.name(), raftRoleChanged.oldRole());
-        assertEquals(RaftState.Leader.name(), raftRoleChanged.newRole());
+        assertEquals(RaftRole.Candidate.name(), raftRoleChanged.oldRole());
+        assertEquals(RaftRole.Leader.name(), raftRoleChanged.newRole());
 
         LeaderStateChanged leaderStateChange = MessageCollectorActor.expectFirstMatching(
                 notifierActor, LeaderStateChanged.class);
@@ -466,8 +467,8 @@ public class RaftActorTest extends AbstractActorTest {
         assertNull(leaderStateChange.leaderId());
 
         raftRoleChanged = MessageCollectorActor.expectFirstMatching(notifierActor, RoleChanged.class);
-        assertEquals(RaftState.Leader.name(), raftRoleChanged.oldRole());
-        assertEquals(RaftState.Follower.name(), raftRoleChanged.newRole());
+        assertEquals(RaftRole.Leader.name(), raftRoleChanged.oldRole());
+        assertEquals(RaftRole.Follower.name(), raftRoleChanged.newRole());
 
         MessageCollectorActor.clearMessages(notifierActor);
 
@@ -519,13 +520,13 @@ public class RaftActorTest extends AbstractActorTest {
         RoleChanged raftRoleChanged = matches.get(0);
         assertEquals(persistenceId, raftRoleChanged.memberId());
         assertNull(raftRoleChanged.oldRole());
-        assertEquals(RaftState.Follower.name(), raftRoleChanged.newRole());
+        assertEquals(RaftRole.Follower.name(), raftRoleChanged.newRole());
 
         // check if the notifier got a role change from Follower to Candidate
         raftRoleChanged = matches.get(1);
         assertEquals(persistenceId, raftRoleChanged.memberId());
-        assertEquals(RaftState.Follower.name(), raftRoleChanged.oldRole());
-        assertEquals(RaftState.Candidate.name(), raftRoleChanged.newRole());
+        assertEquals(RaftRole.Follower.name(), raftRoleChanged.oldRole());
+        assertEquals(RaftRole.Candidate.name(), raftRoleChanged.newRole());
     }
 
     @Test
@@ -561,7 +562,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         Leader leader = new Leader(leaderActor.getRaftActorContext());
         leaderActor.setCurrentBehavior(leader);
-        assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
+        assertEquals(RaftRole.Leader, leaderActor.getCurrentBehavior().raftRole());
 
         MockRaftActorContext.MockReplicatedLogBuilder logBuilder = new MockRaftActorContext.MockReplicatedLogBuilder();
         leaderActor.getRaftActorContext().setReplicatedLog(logBuilder.createEntries(0, 8, 1).build());
@@ -574,18 +575,18 @@ public class RaftActorTest extends AbstractActorTest {
 
         assertEquals(8, leaderActor.getReplicatedLog().size());
 
-        assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
+        assertEquals(RaftRole.Leader, leaderActor.getCurrentBehavior().raftRole());
         //fake snapshot on index 5
         leaderActor.handleCommand(new AppendEntriesReply(follower1Id, 1, true, 5, 1, (short)0));
 
         assertEquals(8, leaderActor.getReplicatedLog().size());
 
         //fake snapshot on index 6
-        assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
+        assertEquals(RaftRole.Leader, leaderActor.getCurrentBehavior().raftRole());
         leaderActor.handleCommand(new AppendEntriesReply(follower1Id, 1, true, 6, 1, (short)0));
         assertEquals(8, leaderActor.getReplicatedLog().size());
 
-        assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
+        assertEquals(RaftRole.Leader, leaderActor.getCurrentBehavior().raftRole());
 
         assertEquals(8, leaderActor.getReplicatedLog().size());
 
@@ -647,7 +648,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         Follower follower = new Follower(followerActor.getRaftActorContext());
         followerActor.setCurrentBehavior(follower);
-        assertEquals(RaftState.Follower, followerActor.getCurrentBehavior().state());
+        assertEquals(RaftRole.Follower, followerActor.getCurrentBehavior().raftRole());
 
         // create 6 entries in the log - 0 to 4 are applied and will get picked up as part of the capture snapshot
         MockRaftActorContext.MockReplicatedLogBuilder logBuilder = new MockRaftActorContext.MockReplicatedLogBuilder();
@@ -670,14 +671,14 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals(7, followerActor.getReplicatedLog().size());
 
         //fake snapshot on index 7
-        assertEquals(RaftState.Follower, followerActor.getCurrentBehavior().state());
+        assertEquals(RaftRole.Follower, followerActor.getCurrentBehavior().raftRole());
 
         entries = List.of(new SimpleReplicatedLogEntry(7, 1,
                 new MockRaftActorContext.MockPayload("foo-7")));
         followerActor.handleCommand(new AppendEntries(1, leaderId, 6, 1, entries, 6, 6, (short) 0));
         assertEquals(8, followerActor.getReplicatedLog().size());
 
-        assertEquals(RaftState.Follower, followerActor.getCurrentBehavior().state());
+        assertEquals(RaftRole.Follower, followerActor.getCurrentBehavior().raftRole());
 
 
         ByteString snapshotBytes = fromObject(List.of(
@@ -738,7 +739,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         Leader leader = new Leader(leaderActor.getRaftActorContext());
         leaderActor.setCurrentBehavior(leader);
-        assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
+        assertEquals(RaftRole.Leader, leaderActor.getCurrentBehavior().raftRole());
 
         // create 5 entries in the log
         MockRaftActorContext.MockReplicatedLogBuilder logBuilder = new MockRaftActorContext.MockReplicatedLogBuilder();
@@ -749,23 +750,23 @@ public class RaftActorTest extends AbstractActorTest {
         //setting replicatedToAllIndex = 9, for the log to clear
         leader.setReplicatedToAllIndex(9);
         assertEquals(5, leaderActor.getReplicatedLog().size());
-        assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
+        assertEquals(RaftRole.Leader, leaderActor.getCurrentBehavior().raftRole());
 
         leaderActor.handleCommand(new AppendEntriesReply(follower1Id, 1, true, 9, 1, (short) 0));
         assertEquals(5, leaderActor.getReplicatedLog().size());
-        assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
+        assertEquals(RaftRole.Leader, leaderActor.getCurrentBehavior().raftRole());
 
         // set the 2nd follower nextIndex to 1 which has been snapshotted
         leaderActor.handleCommand(new AppendEntriesReply(follower2Id, 1, true, 0, 1, (short)0));
         assertEquals(5, leaderActor.getReplicatedLog().size());
-        assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
+        assertEquals(RaftRole.Leader, leaderActor.getCurrentBehavior().raftRole());
 
         // simulate a real snapshot
         leaderActor.handleCommand(SendHeartBeat.INSTANCE);
         assertEquals(5, leaderActor.getReplicatedLog().size());
         assertEquals(String.format("expected to be Leader but was %s. Current Leader = %s ",
-                leaderActor.getCurrentBehavior().state(), leaderActor.getLeaderId()),
-                RaftState.Leader, leaderActor.getCurrentBehavior().state());
+                leaderActor.getCurrentBehavior().raftRole(), leaderActor.getLeaderId()),
+                RaftRole.Leader, leaderActor.getCurrentBehavior().raftRole());
 
 
         //reply from a slow follower does not initiate a fake snapshot
@@ -1160,7 +1161,7 @@ public class RaftActorTest extends AbstractActorTest {
         // Sleep a bit and verify it didn't get an election timeout and schedule an election.
 
         Uninterruptibles.sleepUninterruptibly(400, TimeUnit.MILLISECONDS);
-        assertEquals("getRaftState", RaftState.Follower, mockRaftActor.getRaftState());
+        assertEquals("getRaftState", RaftRole.Follower, mockRaftActor.getRaftState());
 
         TEST_LOG.info("testNonVotingOnRecovery ending");
     }

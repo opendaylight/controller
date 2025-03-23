@@ -102,6 +102,7 @@ public class OnDemandRaftState {
         return leader;
     }
 
+    // FIXME: RaftRole here
     public String getRaftState() {
         return raftState;
     }
@@ -142,107 +143,107 @@ public class OnDemandRaftState {
 
         protected abstract @NonNull OnDemandRaftState state();
 
-        public B lastLogIndex(long value) {
+        public B lastLogIndex(final long value) {
             state().lastLogIndex = value;
             return self();
         }
 
-        public B lastLogTerm(long value) {
+        public B lastLogTerm(final long value) {
             state().lastLogTerm = value;
             return self();
         }
 
-        public B currentTerm(long value) {
+        public B currentTerm(final long value) {
             state().currentTerm = value;
             return self();
         }
 
-        public B commitIndex(long value) {
+        public B commitIndex(final long value) {
             state().commitIndex = value;
             return self();
         }
 
-        public B lastApplied(long value) {
+        public B lastApplied(final long value) {
             state().lastApplied = value;
             return self();
         }
 
-        public B lastIndex(long value) {
+        public B lastIndex(final long value) {
             state().lastIndex = value;
             return self();
         }
 
-        public B lastTerm(long value) {
+        public B lastTerm(final long value) {
             state().lastTerm = value;
             return self();
         }
 
-        public B snapshotIndex(long value) {
+        public B snapshotIndex(final long value) {
             state().snapshotIndex = value;
             return self();
         }
 
-        public B snapshotTerm(long value) {
+        public B snapshotTerm(final long value) {
             state().snapshotTerm = value;
             return self();
         }
 
-        public B replicatedToAllIndex(long value) {
+        public B replicatedToAllIndex(final long value) {
             state().replicatedToAllIndex = value;
             return self();
         }
 
-        public B inMemoryJournalDataSize(long value) {
+        public B inMemoryJournalDataSize(final long value) {
             state().inMemoryJournalDataSize = value;
             return self();
         }
 
-        public B inMemoryJournalLogSize(long value) {
+        public B inMemoryJournalLogSize(final long value) {
             state().inMemoryJournalLogSize = value;
             return self();
         }
 
-        public B leader(String value) {
+        public B leader(final String value) {
             state().leader = value;
             return self();
         }
 
-        public B raftState(String value) {
+        public B raftState(final String value) {
             state().raftState = value;
             return self();
         }
 
-        public B votedFor(String value) {
+        public B votedFor(final String value) {
             state().votedFor = value;
             return self();
         }
 
-        public B isVoting(boolean isVoting) {
+        public B isVoting(final boolean isVoting) {
             state().isVoting = isVoting;
             return self();
         }
 
-        public B followerInfoList(List<FollowerInfo> followerInfoList) {
+        public B followerInfoList(final List<FollowerInfo> followerInfoList) {
             state().followerInfoList = followerInfoList;
             return self();
         }
 
-        public B peerAddresses(Map<String, String> peerAddresses) {
+        public B peerAddresses(final Map<String, String> peerAddresses) {
             state().peerAddresses = peerAddresses;
             return self();
         }
 
-        public B peerVotingStates(Map<String, Boolean> peerVotingStates) {
+        public B peerVotingStates(final Map<String, Boolean> peerVotingStates) {
             state().peerVotingStates = ImmutableMap.copyOf(peerVotingStates);
             return self();
         }
 
-        public B isSnapshotCaptureInitiated(boolean value) {
+        public B isSnapshotCaptureInitiated(final boolean value) {
             state().isSnapshotCaptureInitiated = value;
             return self();
         }
 
-        public B customRaftPolicyClassName(String className) {
+        public B customRaftPolicyClassName(final String className) {
             state().customRaftPolicyClassName = className;
             return self();
         }
