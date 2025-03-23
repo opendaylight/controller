@@ -25,6 +25,7 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.persisted.NoopPayload;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
+import org.opendaylight.raft.api.RaftRole;
 
 /**
  * Tests PreLeader raft state functionality end-to-end.
@@ -75,9 +76,9 @@ public class PreLeaderScenarioTest extends AbstractRaftActorIntegrationTest {
 
         // Verify the expected raft state changes. It should go to PreLeader since it has an uncommitted entry.
         List<RoleChanged> roleChange = expectMatching(follower1NotifierActor, RoleChanged.class, 3);
-        assertEquals("Role change 1", RaftState.Candidate, roleChange.get(0).newRole());
-        assertEquals("Role change 2", RaftState.PreLeader, roleChange.get(1).newRole());
-        assertEquals("Role change 3", RaftState.Leader, roleChange.get(2).newRole());
+        assertEquals("Role change 1", RaftRole.Candidate, roleChange.get(0).newRole());
+        assertEquals("Role change 2", RaftRole.PreLeader, roleChange.get(1).newRole());
+        assertEquals("Role change 3", RaftRole.Leader, roleChange.get(2).newRole());
 
         final long previousTerm = currentTerm;
         currentTerm = follower1Context.currentTerm();

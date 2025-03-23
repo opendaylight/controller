@@ -35,12 +35,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
-import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.TestActorFactory;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
+import org.opendaylight.raft.api.RaftRole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
@@ -86,7 +86,7 @@ public class AbstractLeaderElectionScenarioTest {
             }
 
             if (message instanceof GetBehaviorState(var replyTo)) {
-                replyTo.tell(behavior != null ? behavior.state()
+                replyTo.tell(behavior != null ? behavior.raftRole()
                     : new Status.Failure(new IllegalStateException("RaftActorBehavior is not set in MemberActor")),
                     self());
             }
@@ -253,10 +253,10 @@ public class AbstractLeaderElectionScenarioTest {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    void verifyBehaviorState(final String name, final MemberActor actor, final RaftState expState) {
-        RaftState actualState;
+    void verifyBehaviorState(final String name, final MemberActor actor, final RaftRole expState) {
+        RaftRole actualState;
         try {
-            actualState = (RaftState) Await.result(Patterns.askWithReplyTo(actor.self(), GetBehaviorState::new,
+            actualState = (RaftRole) Await.result(Patterns.askWithReplyTo(actor.self(), GetBehaviorState::new,
                 Timeout.apply(5, TimeUnit.SECONDS)), FiniteDuration.create(5, TimeUnit.SECONDS));
         } catch (RuntimeException e) {
             throw e;

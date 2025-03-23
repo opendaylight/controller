@@ -52,7 +52,6 @@ import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfigura
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.CreateShard;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
-import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
@@ -60,6 +59,7 @@ import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
+import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.AddReplicasForAllShardsInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.AddShardReplicaInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.BackupDatastoreInputBuilder;
@@ -878,7 +878,7 @@ class ClusterAdminRpcServiceTest {
             new ExpState("member-4", true), new ExpState("member-5", true), new ExpState("member-6", true));
 
         verifyRaftState(replicaNode1.configDataStore(), "cars", raftState ->
-            assertEquals("Expected raft state", RaftState.Follower.toString(), raftState.getRaftState()));
+            assertEquals("Expected raft state", RaftRole.Follower.name(), raftState.getRaftState()));
 
         final var service1 = new ClusterAdminRpcService(replicaNode1.configDataStore(), replicaNode1.operDataStore(),
             null);
