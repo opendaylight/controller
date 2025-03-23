@@ -13,7 +13,7 @@ import static java.util.Objects.requireNonNull;
 import java.io.Serializable;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.raft.RaftState;
+import org.opendaylight.raft.api.RaftRoles;
 
 /**
  * Notification message representing a Role change of a cluster member.
@@ -31,7 +31,7 @@ public record RoleChangeNotification(String memberId, @Nullable String oldRole, 
         requireNonNull(newRole);
     }
 
-    public RoleChangeNotification(final String memberId, final RaftState newRole, final @Nullable RaftState oldRole) {
+    public RoleChangeNotification(final String memberId, final RaftRoles newRole, final @Nullable RaftRoles oldRole) {
         this(memberId, oldRole != null ? oldRole.name() : null, newRole.name());
     }
 }
