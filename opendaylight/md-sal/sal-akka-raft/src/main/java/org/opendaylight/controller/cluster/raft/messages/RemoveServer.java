@@ -9,12 +9,11 @@ package org.opendaylight.controller.cluster.raft.messages;
 
 import static java.util.Objects.requireNonNull;
 
-import java.io.Serializable;
-
 /**
  * Message sent to remove a replica (§4.1).
  */
-public class RemoveServer implements Serializable {
+public final class RemoveServer implements ServerChangeRequest<RemoveServerReply> {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private final String serverId;

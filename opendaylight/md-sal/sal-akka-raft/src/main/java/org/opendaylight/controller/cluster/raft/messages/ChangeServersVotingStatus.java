@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.raft.messages;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableSet;
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,18 +20,19 @@ import org.eclipse.jdt.annotation.NonNull;
  *
  * @author Thomas Pantelis
  */
-public class ChangeServersVotingStatus implements Serializable {
+public final class ChangeServersVotingStatus implements ServerChangeRequest<ServerChangeReply> {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private final Map<String, Boolean> serverVotingStatusMap;
     private final Collection<String> serversVisited;
 
-    public ChangeServersVotingStatus(@NonNull Map<String, Boolean> serverVotingStatusMap) {
+    public ChangeServersVotingStatus(final @NonNull Map<String, Boolean> serverVotingStatusMap) {
         this(serverVotingStatusMap, ImmutableSet.of());
     }
 
-    public ChangeServersVotingStatus(@NonNull Map<String, Boolean> serverVotingStatusMap,
-            @NonNull Collection<String> serversVisited) {
+    public ChangeServersVotingStatus(final @NonNull Map<String, Boolean> serverVotingStatusMap,
+            final @NonNull Collection<String> serversVisited) {
         this.serverVotingStatusMap = new HashMap<>(requireNonNull(serverVotingStatusMap));
         this.serversVisited = ImmutableSet.copyOf(requireNonNull(serversVisited));
     }
