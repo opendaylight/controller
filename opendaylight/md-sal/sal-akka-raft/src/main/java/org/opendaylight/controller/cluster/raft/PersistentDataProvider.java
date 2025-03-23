@@ -21,8 +21,7 @@ import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 /**
  * A DataPersistenceProvider implementation with persistence enabled.
  */
-// Non-final for testing
-class PersistentDataProvider implements DataPersistenceProvider {
+final class PersistentDataProvider implements DataPersistenceProvider {
     private final RaftActor persistentActor;
 
     PersistentDataProvider(final RaftActor persistentActor) {
@@ -30,7 +29,7 @@ class PersistentDataProvider implements DataPersistenceProvider {
     }
 
     @Override
-    public final boolean isRecoveryApplicable() {
+    public boolean isRecoveryApplicable() {
         return true;
     }
 
