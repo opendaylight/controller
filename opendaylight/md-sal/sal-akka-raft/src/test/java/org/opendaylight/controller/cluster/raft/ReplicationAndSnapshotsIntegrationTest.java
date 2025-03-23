@@ -272,12 +272,13 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
 
         // The leader should have performed fake snapshots due to the follower's AppendEntriesReplies and
         // trimmed the in-memory log so that only the last entry remains.
-        assertEquals("Leader snapshot term", currentTerm, leaderContext.getReplicatedLog().getSnapshotTerm());
-        assertEquals("Leader snapshot index", 5, leaderContext.getReplicatedLog().getSnapshotIndex());
-        assertEquals("Leader journal log size", 1, leaderContext.getReplicatedLog().size());
-        assertEquals("Leader journal last index", 6, leaderContext.getReplicatedLog().lastIndex());
-        assertEquals("Leader commit index", 6, leaderContext.getCommitIndex());
-        assertEquals("Leader last applied", 6, leaderContext.getLastApplied());
+        final var leaderLog = leaderContext.getReplicatedLog();
+        assertEquals("Leader snapshot term", currentTerm, leaderLog.getSnapshotTerm());
+        assertEquals("Leader snapshot index", 5, leaderLog.getSnapshotIndex());
+        assertEquals("Leader journal log size", 1, leaderLog.size());
+        assertEquals("Leader journal last index", 6, leaderLog.lastIndex());
+        assertEquals("Leader commit index", 6, leaderLog.getCommitIndex());
+        assertEquals("Leader last applied", 6, leaderLog.getLastApplied());
         assertEquals("Leader replicatedToAllIndex", 5, leader.getReplicatedToAllIndex());
 
         // Verify follower 1 applies the states.
@@ -335,7 +336,7 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         MessageCollectorActor.clearMessages(leaderCollectorActor);
         MessageCollectorActor.expectFirstMatching(leaderCollectorActor, AppendEntriesReply.class);
 
-        final var leaderLog = leaderContext.getReplicatedLog();
+        var leaderLog = leaderContext.getReplicatedLog();
         assertEquals("Leader snapshot term", currentTerm, leaderLog.getSnapshotTerm());
         assertEquals("Leader snapshot index", 5, leaderLog.getSnapshotIndex());
         assertEquals("Leader journal log size", 2, leaderLog.size());
@@ -355,11 +356,13 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         // snapshot index and trimmed the log since we're no longer in a snapshot.
         MessageCollectorActor.clearMessages(leaderCollectorActor);
         MessageCollectorActor.expectFirstMatching(leaderCollectorActor, AppendEntriesReply.class);
-        assertEquals("Leader snapshot term", currentTerm, leaderContext.getReplicatedLog().getSnapshotTerm());
-        assertEquals("Leader snapshot index", 6, leaderContext.getReplicatedLog().getSnapshotIndex());
-        assertEquals("Leader journal log size", 1, leaderContext.getReplicatedLog().size());
-        assertEquals("Leader journal last index", 7, leaderContext.getReplicatedLog().lastIndex());
-        assertEquals("Leader commit index", 7, leaderContext.getCommitIndex());
+
+        leaderLog = leaderContext.getReplicatedLog();
+        assertEquals("Leader snapshot term", currentTerm, leaderLog.getSnapshotTerm());
+        assertEquals("Leader snapshot index", 6, leaderLog.getSnapshotIndex());
+        assertEquals("Leader journal log size", 1, leaderLog.size());
+        assertEquals("Leader journal last index", 7, leaderLog.lastIndex());
+        assertEquals("Leader commit index", 7, leaderLog.getCommitIndex());
 
         // Verify the persisted snapshot. This should reflect the snapshot index as the last applied
         // log entry (7) and shouldn't contain any unapplied entries as we capture persisted the snapshot data
@@ -396,20 +399,22 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         MessageCollectorActor.clearMessages(follower1CollectorActor);
         MessageCollectorActor.expectFirstMatching(follower1CollectorActor, AppendEntries.class);
         follower1Context = follower1Actor.underlyingActor().getRaftActorContext();
-        assertEquals("Follower 1 snapshot term", currentTerm, follower1Context.getReplicatedLog().getSnapshotTerm());
-        assertEquals("Follower 1 snapshot index", 6, follower1Context.getReplicatedLog().getSnapshotIndex());
-        assertEquals("Follower 1 journal log size", 1, follower1Context.getReplicatedLog().size());
-        assertEquals("Follower 1 journal last index", 7, follower1Context.getReplicatedLog().lastIndex());
-        assertEquals("Follower 1 commit index", 7, follower1Context.getCommitIndex());
+        final var folloer1log = follower1Context.getReplicatedLog();
+        assertEquals("Follower 1 snapshot term", currentTerm, folloer1log.getSnapshotTerm());
+        assertEquals("Follower 1 snapshot index", 6, folloer1log.getSnapshotIndex());
+        assertEquals("Follower 1 journal log size", 1, folloer1log.size());
+        assertEquals("Follower 1 journal last index", 7, folloer1log.lastIndex());
+        assertEquals("Follower 1 commit index", 7, folloer1log.getCommitIndex());
 
         MessageCollectorActor.clearMessages(follower2CollectorActor);
         MessageCollectorActor.expectFirstMatching(follower2CollectorActor, AppendEntries.class);
         follower2Context = follower2Actor.underlyingActor().getRaftActorContext();
-        assertEquals("Follower 2 snapshot term", currentTerm, follower2Context.getReplicatedLog().getSnapshotTerm());
-        assertEquals("Follower 2 snapshot index", 6, follower2Context.getReplicatedLog().getSnapshotIndex());
-        assertEquals("Follower 2 journal log size", 1, follower2Context.getReplicatedLog().size());
-        assertEquals("Follower 2 journal last index", 7, follower2Context.getReplicatedLog().lastIndex());
-        assertEquals("Follower 2 commit index", 7, follower2Context.getCommitIndex());
+        final var folloer2log = follower2Context.getReplicatedLog();
+        assertEquals("Follower 2 snapshot term", currentTerm, folloer2log.getSnapshotTerm());
+        assertEquals("Follower 2 snapshot index", 6, folloer2log.getSnapshotIndex());
+        assertEquals("Follower 2 journal log size", 1, folloer2log.size());
+        assertEquals("Follower 2 journal last index", 7, folloer2log.lastIndex());
+        assertEquals("Follower 2 commit index", 7, folloer2log.getCommitIndex());
 
         expSnapshotState.add(payload7);
 

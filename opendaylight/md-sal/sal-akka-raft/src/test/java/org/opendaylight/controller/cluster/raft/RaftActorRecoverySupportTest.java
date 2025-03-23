@@ -121,13 +121,14 @@ class RaftActorRecoverySupportTest {
 
         sendMessageToSupport(logEntry);
 
-        assertEquals("Journal log size", 1, context.getReplicatedLog().size());
-        assertEquals("Journal data size", 5, context.getReplicatedLog().dataSize());
-        assertEquals("Last index", 1, context.getReplicatedLog().lastIndex());
-        assertEquals("Last applied", -1, context.getLastApplied());
-        assertEquals("Commit index", -1, context.getCommitIndex());
-        assertEquals("Snapshot term", -1, context.getReplicatedLog().getSnapshotTerm());
-        assertEquals("Snapshot index", -1, context.getReplicatedLog().getSnapshotIndex());
+        final var log = context.getReplicatedLog();
+        assertEquals("Journal log size", 1, log.size());
+        assertEquals("Journal data size", 5, log.dataSize());
+        assertEquals("Last index", 1, log.lastIndex());
+        assertEquals("Last applied", -1, log.getLastApplied());
+        assertEquals("Commit index", -1, log.getCommitIndex());
+        assertEquals("Snapshot term", -1, log.getSnapshotTerm());
+        assertEquals("Snapshot index", -1, log.getSnapshotIndex());
     }
 
     @Test
@@ -146,21 +147,21 @@ class RaftActorRecoverySupportTest {
 
         sendMessageToSupport(new ApplyJournalEntries(2));
 
-        assertEquals("Last applied", 2, context.getLastApplied());
-        assertEquals("Commit index", 2, context.getCommitIndex());
+        assertEquals("Last applied", 2, replicatedLog.getLastApplied());
+        assertEquals("Commit index", 2, replicatedLog.getCommitIndex());
 
         sendMessageToSupport(new ApplyJournalEntries(4));
 
-        assertEquals("Last applied", 4, context.getLastApplied());
-        assertEquals("Last applied", 4, context.getLastApplied());
+        assertEquals("Last applied", 4, replicatedLog.getLastApplied());
+        assertEquals("Last applied", 4, replicatedLog.getLastApplied());
 
         sendMessageToSupport(new ApplyJournalEntries(5));
 
-        assertEquals("Last index", 5, context.getReplicatedLog().lastIndex());
-        assertEquals("Last applied", 5, context.getLastApplied());
-        assertEquals("Commit index", 5, context.getCommitIndex());
-        assertEquals("Snapshot term", -1, context.getReplicatedLog().getSnapshotTerm());
-        assertEquals("Snapshot index", -1, context.getReplicatedLog().getSnapshotIndex());
+        assertEquals("Last index", 5, replicatedLog.lastIndex());
+        assertEquals("Last applied", 5, replicatedLog.getLastApplied());
+        assertEquals("Commit index", 5, replicatedLog.getCommitIndex());
+        assertEquals("Snapshot term", -1, replicatedLog.getSnapshotTerm());
+        assertEquals("Snapshot index", -1, replicatedLog.getSnapshotIndex());
 
         final var inOrder = Mockito.inOrder(mockCohort);
         inOrder.verify(mockCohort).startLogRecoveryBatch(5);
@@ -211,7 +212,7 @@ class RaftActorRecoverySupportTest {
     public void testOnSnapshotOffer() {
         doReturn(true).when(mockPersistence).isRecoveryApplicable();
 
-        final var replicatedLog = context.getReplicatedLog();
+        var replicatedLog = context.getReplicatedLog();
         replicatedLog.append(new SimpleReplicatedLogEntry(1, 1, new MockRaftActorContext.MockPayload("1")));
         replicatedLog.append(new SimpleReplicatedLogEntry(2, 1, new MockRaftActorContext.MockPayload("2")));
         replicatedLog.append(new SimpleReplicatedLogEntry(3, 1, new MockRaftActorContext.MockPayload("3")));
@@ -234,13 +235,14 @@ class RaftActorRecoverySupportTest {
 
         sendMessageToSupport(snapshotOffer);
 
-        assertEquals("Journal log size", 2, context.getReplicatedLog().size());
-        assertEquals("Journal data size", 9, context.getReplicatedLog().dataSize());
-        assertEquals("Last index", lastIndexDuringSnapshotCapture, context.getReplicatedLog().lastIndex());
-        assertEquals("Last applied", lastAppliedDuringSnapshotCapture, context.getLastApplied());
-        assertEquals("Commit index", lastAppliedDuringSnapshotCapture, context.getCommitIndex());
-        assertEquals("Snapshot term", 1, context.getReplicatedLog().getSnapshotTerm());
-        assertEquals("Snapshot index", lastAppliedDuringSnapshotCapture, context.getReplicatedLog().getSnapshotIndex());
+        replicatedLog = context.getReplicatedLog();
+        assertEquals("Journal log size", 2, replicatedLog.size());
+        assertEquals("Journal data size", 9, replicatedLog.dataSize());
+        assertEquals("Last index", lastIndexDuringSnapshotCapture, replicatedLog.lastIndex());
+        assertEquals("Last applied", lastAppliedDuringSnapshotCapture, replicatedLog.getLastApplied());
+        assertEquals("Commit index", lastAppliedDuringSnapshotCapture, replicatedLog.getCommitIndex());
+        assertEquals("Snapshot term", 1, replicatedLog.getSnapshotTerm());
+        assertEquals("Snapshot index", lastAppliedDuringSnapshotCapture, replicatedLog.getSnapshotIndex());
         assertEquals("Election term", new TermInfo(electionTerm, electionVotedFor), context.termInfo());
         assertFalse("Dynamic server configuration", context.isDynamicServerConfigurationInUse());
 
@@ -251,7 +253,7 @@ class RaftActorRecoverySupportTest {
     public void testOnRecoveryCompletedWithRemainingBatch() {
         doReturn(true).when(mockPersistence).isRecoveryApplicable();
 
-        ReplicatedLog replicatedLog = context.getReplicatedLog();
+        final var replicatedLog = context.getReplicatedLog();
         replicatedLog.append(new SimpleReplicatedLogEntry(0, 1, new MockRaftActorContext.MockPayload("0")));
         replicatedLog.append(new SimpleReplicatedLogEntry(1, 1, new MockRaftActorContext.MockPayload("1")));
 
@@ -259,8 +261,8 @@ class RaftActorRecoverySupportTest {
 
         sendMessageToSupport(RecoveryCompleted.getInstance(), true);
 
-        assertEquals("Last applied", 1, context.getLastApplied());
-        assertEquals("Commit index", 1, context.getCommitIndex());
+        assertEquals("Last applied", 1, replicatedLog.getLastApplied());
+        assertEquals("Commit index", 1, replicatedLog.getCommitIndex());
 
         InOrder inOrder = Mockito.inOrder(mockCohort);
         inOrder.verify(mockCohort).startLogRecoveryBatch(anyInt());

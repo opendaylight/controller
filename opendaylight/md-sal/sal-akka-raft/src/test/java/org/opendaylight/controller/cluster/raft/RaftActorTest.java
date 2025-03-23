@@ -187,13 +187,13 @@ public class RaftActorTest extends AbstractActorTest {
 
         mockRaftActor.waitForRecoveryComplete();
 
-        RaftActorContext context = mockRaftActor.getRaftActorContext();
-        assertEquals("Journal log size", snapshotUnappliedEntries.size() + 3,
-                context.getReplicatedLog().size());
-        assertEquals("Journal data size", 10, context.getReplicatedLog().dataSize());
-        assertEquals("Last index", lastIndex, context.getReplicatedLog().lastIndex());
-        assertEquals("Last applied", lastAppliedToState, context.getLastApplied());
-        assertEquals("Commit index", lastAppliedToState, context.getCommitIndex());
+        final var context = mockRaftActor.getRaftActorContext();
+        final var log = context.getReplicatedLog();
+        assertEquals("Journal log size", snapshotUnappliedEntries.size() + 3, log.size());
+        assertEquals("Journal data size", 10, log.dataSize());
+        assertEquals("Last index", lastIndex, log.lastIndex());
+        assertEquals("Last applied", lastAppliedToState, log.getLastApplied());
+        assertEquals("Commit index", lastAppliedToState, log.getCommitIndex());
         assertEquals("Recovered state size", 6, mockRaftActor.getState().size());
 
         mockRaftActor.waitForInitializeBehaviorComplete();
@@ -1069,11 +1069,12 @@ public class RaftActorTest extends AbstractActorTest {
 
         verify(mockRaftActor.snapshotCohortDelegate, timeout(5000)).applySnapshot(any());
 
-        RaftActorContext context = mockRaftActor.getRaftActorContext();
-        assertEquals("Journal log size", 1, context.getReplicatedLog().size());
-        assertEquals("Last index", snapshotLastIndex, context.getReplicatedLog().lastIndex());
-        assertEquals("Last applied", snapshotLastApplied, context.getLastApplied());
-        assertEquals("Commit index", snapshotLastApplied, context.getCommitIndex());
+        var context = mockRaftActor.getRaftActorContext();
+        final var log = context.getReplicatedLog();
+        assertEquals("Journal log size", 1, log.size());
+        assertEquals("Last index", snapshotLastIndex, log.lastIndex());
+        assertEquals("Last applied", snapshotLastApplied, log.getLastApplied());
+        assertEquals("Commit index", snapshotLastApplied, log.getCommitIndex());
         assertEquals("Recovered state", snapshotState.state(), mockRaftActor.getState());
         assertEquals("Current term", new TermInfo(1, "member-1"), context.termInfo());
 
@@ -1125,10 +1126,11 @@ public class RaftActorTest extends AbstractActorTest {
         verify(mockRaftActor.snapshotCohortDelegate, never()).applySnapshot(any());
 
         RaftActorContext context = mockRaftActor.getRaftActorContext();
-        assertEquals("Journal log size", 1, context.getReplicatedLog().size());
-        assertEquals("Last index", 0, context.getReplicatedLog().lastIndex());
-        assertEquals("Last applied", -1, context.getLastApplied());
-        assertEquals("Commit index", -1, context.getCommitIndex());
+        final var log = context.getReplicatedLog();
+        assertEquals("Journal log size", 1, log.size());
+        assertEquals("Last index", 0, log.lastIndex());
+        assertEquals("Last applied", -1, log.getLastApplied());
+        assertEquals("Commit index", -1, log.getCommitIndex());
         assertEquals("Current term", TermInfo.INITIAL, context.termInfo());
 
         TEST_LOG.info("testRestoreFromSnapshotWithRecoveredData ending");
@@ -1215,7 +1217,8 @@ public class RaftActorTest extends AbstractActorTest {
         MockRaftActor leaderActor = leaderActorRef.underlyingActor();
         leaderActor.waitForInitializeBehaviorComplete();
 
-        leaderActor.getRaftActorContext().setTermInfo(new TermInfo(1, leaderId));
+        final var leaderContext = leaderActor.getRaftActorContext();
+        leaderContext.setTermInfo(new TermInfo(1, leaderId));
 
         Leader leader = new Leader(leaderActor.getRaftActorContext());
         leaderActor.setCurrentBehavior(leader);
@@ -1223,21 +1226,22 @@ public class RaftActorTest extends AbstractActorTest {
         leaderActor.persistData(leaderActorRef, new MockIdentifier("1"), new MockRaftActorContext.MockPayload("1"),
                 false);
 
-        ReplicatedLogEntry logEntry = leaderActor.getReplicatedLog().get(0);
+        final var leaderLog = leaderActor.getReplicatedLog();
+        final var logEntry = leaderLog.get(0);
         assertNotNull("ReplicatedLogEntry not found", logEntry);
         assertTrue("isPersistencePending", logEntry.isPersistencePending());
-        assertEquals("getCommitIndex", -1, leaderActor.getRaftActorContext().getCommitIndex());
+        assertEquals("getCommitIndex", -1, leaderLog.getCommitIndex());
 
         leaderActor.handleCommand(new AppendEntriesReply(followerId, 1, true, 0, 1, (short)0));
-        assertEquals("getCommitIndex", -1, leaderActor.getRaftActorContext().getCommitIndex());
+        assertEquals("getCommitIndex", -1, leaderLog.getCommitIndex());
 
         ArgumentCaptor<Consumer<Object>> callbackCaptor = ArgumentCaptor.forClass(Consumer.class);
         verify(mockPersistenceProvider).persistAsync(eq(logEntry), callbackCaptor.capture());
 
         callbackCaptor.getValue().accept(logEntry);
 
-        assertEquals("getCommitIndex", 0, leaderActor.getRaftActorContext().getCommitIndex());
-        assertEquals("getLastApplied", 0, leaderActor.getRaftActorContext().getLastApplied());
+        assertEquals("getCommitIndex", 0, leaderLog.getCommitIndex());
+        assertEquals("getLastApplied", 0, leaderLog.getLastApplied());
     }
 
     @Test

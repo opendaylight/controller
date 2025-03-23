@@ -481,8 +481,9 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         final var context = createActorContext();
 
         setLastLogEntry(context, 1, 100, new MockRaftActorContext.MockPayload(""));
-        context.getReplicatedLog().setLastApplied(100);
-        context.getReplicatedLog().setSnapshotIndex(99);
+        final var log = context.getReplicatedLog();
+        log.setLastApplied(100);
+        log.setSnapshotIndex(99);
 
         final var entries = List.of(newReplicatedLogEntry(2, 101, "foo"));
 
@@ -492,7 +493,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         follower = createBehavior(context);
         follower.handleMessage(leaderActor, appendEntries);
 
-        assertEquals("getLastApplied", 101L, context.getLastApplied());
+        assertEquals("getLastApplied", 101L, log.getLastApplied());
     }
 
     /**
