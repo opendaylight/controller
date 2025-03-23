@@ -166,11 +166,11 @@ public class PreLeaderScenarioTest extends AbstractRaftActorIntegrationTest {
         clearMessages(follower1CollectorActor);
         clearMessages(follower2CollectorActor);
 
-        leaderContext = leaderActor.underlyingActor().getRaftActorContext();
+        leaderContext = leaderActor.underlyingActor().raftContext();
         currentTerm = leaderContext.currentTerm();
 
-        follower1Context = follower1Actor.underlyingActor().getRaftActorContext();
-        follower2Context = follower2Actor.underlyingActor().getRaftActorContext();
+        follower1Context = follower1Actor.underlyingActor().raftContext();
+        follower2Context = follower2Actor.underlyingActor().raftContext();
 
         testLog.info("createRaftActors ending - follower1: {}, follower2: {}", follower1Id, follower2Id);
     }

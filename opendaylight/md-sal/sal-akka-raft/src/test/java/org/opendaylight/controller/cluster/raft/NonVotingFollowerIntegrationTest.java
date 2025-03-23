@@ -403,7 +403,7 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         leaderInstance = leaderActor.underlyingActor();
         leaderCollectorActor = leaderInstance.collectorActor();
         waitUntilLeader(leaderActor);
-        leaderContext = leaderInstance.getRaftActorContext();
+        leaderContext = leaderInstance.raftContext();
     }
 
     private void setupLeaderAndNonVotingFollower() {
