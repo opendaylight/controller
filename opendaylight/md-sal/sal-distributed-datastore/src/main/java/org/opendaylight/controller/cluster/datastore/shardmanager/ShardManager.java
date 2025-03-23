@@ -633,17 +633,16 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     }
 
     private void onRoleChangeNotification(final RoleChangeNotification roleChanged) {
-        LOG.info("{}: Received role changed for {} from {} to {}", logName(), roleChanged.getMemberId(),
-                roleChanged.getOldRole(), roleChanged.getNewRole());
+        LOG.info("{}: Received role changed for {} from {} to {}", logName(), roleChanged.memberId(),
+            roleChanged.oldRole(), roleChanged.newRole());
 
-        ShardInformation shardInformation = findShardInformation(roleChanged.getMemberId());
+        ShardInformation shardInformation = findShardInformation(roleChanged.memberId());
         if (shardInformation != null) {
-            shardInformation.setRole(roleChanged.getNewRole());
+            shardInformation.setRole(roleChanged.newRole());
             checkReady();
             shardManagerMBean.setSyncStatus(isInSync());
         }
     }
-
 
     private ShardInformation findShardInformation(final String memberId) {
         for (ShardInformation info : localShards.values()) {

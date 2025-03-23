@@ -73,11 +73,10 @@ public class ExampleRoleChangeListener extends AbstractUntypedActor implements A
         } else if (message instanceof RoleChangeNotification notification) {
             // called by the Notifier
             LOG.info("Role Change Notification received for member:{}, old role:{}, new role:{}",
-                notification.getMemberId(), notification.getOldRole(), notification.getNewRole());
+                notification.memberId(), notification.oldRole(), notification.newRole());
 
             // the apps dependent on such notifications can be called here
             //TODO: add implementation here
-
         }
     }
 

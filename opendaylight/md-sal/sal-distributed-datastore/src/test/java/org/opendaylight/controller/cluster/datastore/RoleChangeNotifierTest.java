@@ -63,8 +63,7 @@ public class RoleChangeNotifierTest extends AbstractActorTest {
         TestActorRef<RoleChangeNotifier> notifierTestActorRef = TestActorRef.create(getSystem(),
             RoleChangeNotifier.getProps(memberId), memberId);
 
-        notifierTestActorRef.tell(
-            new RoleChanged(memberId, RaftState.Candidate.name(), RaftState.Leader.name()), shardActor);
+        notifierTestActorRef.tell(new RoleChanged(memberId, RaftState.Candidate, RaftState.Leader), shardActor);
 
         // no notification should be sent as listener has not yet
         // registered
@@ -81,8 +80,8 @@ public class RoleChangeNotifierTest extends AbstractActorTest {
         RoleChangeNotification notification = MessageCollectorActor.getFirstMatching(listenerActor,
             RoleChangeNotification.class);
         assertNotNull(notification);
-        assertEquals(RaftState.Candidate.name(), notification.getOldRole());
-        assertEquals(RaftState.Leader.name(), notification.getNewRole());
+        assertEquals(RaftState.Candidate, notification.oldRole());
+        assertEquals(RaftState.Leader, notification.newRole());
     }
 
     @Test
