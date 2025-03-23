@@ -82,14 +82,16 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     @Override
-    RaftActorRecoverySupport newRaftActorRecoverySupport() {
-        return raftActorRecoverySupport != null ? raftActorRecoverySupport : super.newRaftActorRecoverySupport();
+    RaftActorRecoverySupport newRaftActorRecoverySupport(final RaftCreated prevState) {
+        return raftActorRecoverySupport != null ? raftActorRecoverySupport
+            : super.newRaftActorRecoverySupport(prevState);
     }
 
     @Override
-    protected RaftActorSnapshotMessageSupport newRaftActorSnapshotMessageSupport() {
+    protected RaftActorSnapshotMessageSupport newRaftActorSnapshotMessageSupport(
+            final SnapshotManager snapshotManager) {
         if (snapshotMessageSupport == null) {
-            snapshotMessageSupport = super.newRaftActorSnapshotMessageSupport();
+            snapshotMessageSupport = super.newRaftActorSnapshotMessageSupport(snapshotManager);
         }
         return snapshotMessageSupport;
     }
@@ -100,7 +102,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
 
     public void waitForRecoveryComplete() {
         try {
-            assertTrue("Recovery complete", recoveryComplete.await(5,  TimeUnit.SECONDS));
+            assertTrue("Recovery complete", recoveryComplete.await(5, TimeUnit.SECONDS));
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -108,7 +110,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
 
     public void waitForInitializeBehaviorComplete() {
         try {
-            assertTrue("Behavior initialized", initializeBehaviorComplete.await(5,  TimeUnit.SECONDS));
+            assertTrue("Behavior initialized", initializeBehaviorComplete.await(5, TimeUnit.SECONDS));
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -256,7 +258,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     public ReplicatedLog getReplicatedLog() {
-        return getRaftActorContext().getReplicatedLog();
+        return raftContext().getReplicatedLog();
     }
 
     @Override
