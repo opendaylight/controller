@@ -47,6 +47,7 @@ import org.opendaylight.controller.cluster.messaging.MessageSliceReply;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.FollowerLogInformation;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
+import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockReplicatedLogBuilder;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorLeadershipTransferCohort;
 import org.opendaylight.controller.cluster.raft.RaftState;
@@ -212,8 +213,9 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         logStart("testHandleReplicateMessageWithHigherTermThanPreviousEntry");
 
         MockRaftActorContext actorContext = createActorContextWithFollower();
-        actorContext.setCommitIndex(-1);
-        actorContext.setLastApplied(-1);
+        final var log = actorContext.getReplicatedLog();
+        log.setCommitIndex(-1);
+        log.setLastApplied(-1);
 
         // The raft context is initialized with a couple log entries. However the commitIndex
         // is -1, simulating that the leader previously didn't get consensus and thus the log entries weren't
@@ -230,7 +232,6 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         // The follower replies with the leader's current last index and term, simulating that it is
         // up to date with the leader.
-        final var log = actorContext.getReplicatedLog();
         long lastIndex = log.lastIndex();
         leader.handleMessage(followerActor,
             new AppendEntriesReply(FOLLOWER_ID, newTerm, true, lastIndex, prevTerm, (short)0));
@@ -543,14 +544,13 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         MockRaftActorContext actorContext = createActorContext();
 
         leader = new Leader(actorContext);
+        final var log = actorContext.getReplicatedLog();
+        log.setLastApplied(0);
 
-        actorContext.setLastApplied(0);
-
-        final long newLogIndex = actorContext.getReplicatedLog().lastIndex() + 1;
+        final long newLogIndex = log.lastIndex() + 1;
         final long term = actorContext.currentTerm();
         final var data = new MockRaftActorContext.MockPayload("foo");
 
-        final var log = actorContext.getReplicatedLog();
         log.append(new SimpleReplicatedLogEntry(newLogIndex, term, data));
 
         final var identifier = new MockIdentifier("state-id");
@@ -685,8 +685,9 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         MockRaftActorContext actorContext = createActorContextWithFollower();
 
+        final var log = actorContext.getReplicatedLog();
         //clears leaders log
-        actorContext.getReplicatedLog().removeFrom(0);
+        log.removeFrom(0);
 
         final int followersLastIndex = 2;
         final int snapshotIndex = 3;
@@ -695,10 +696,10 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         final int currentTerm = 2;
 
         // set the snapshot variables in replicatedlog
-        actorContext.getReplicatedLog().setSnapshotIndex(snapshotIndex);
-        actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
-        actorContext.setLastApplied(3);
-        actorContext.setCommitIndex(followersLastIndex);
+        log.setSnapshotIndex(snapshotIndex);
+        log.setSnapshotTerm(snapshotTerm);
+        log.setLastApplied(3);
+        log.setCommitIndex(followersLastIndex);
 
         leader = new Leader(actorContext);
 
@@ -709,7 +710,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leader.clearSnapshot();
 
         // new entry
-        actorContext.getReplicatedLog().append(
+        log.append(
             new SimpleReplicatedLogEntry(newEntryIndex, currentTerm, new MockRaftActorContext.MockPayload("D")));
 
         //update follower timestamp
@@ -745,10 +746,11 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         final int currentTerm = 2;
 
         // set the snapshot variables in replicatedlog
-        actorContext.getReplicatedLog().setSnapshotIndex(snapshotIndex);
-        actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
-        actorContext.setLastApplied(3);
-        actorContext.setCommitIndex(followersLastIndex);
+        final var log = actorContext.getReplicatedLog();
+        log.setSnapshotIndex(snapshotIndex);
+        log.setSnapshotTerm(snapshotTerm);
+        log.setLastApplied(3);
+        log.setCommitIndex(followersLastIndex);
 
         actorContext.getReplicatedLog().removeFrom(0);
 
@@ -765,12 +767,11 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leader.clearSnapshot();
 
         for (int i = 0; i < 4; i++) {
-            actorContext.getReplicatedLog().append(new SimpleReplicatedLogEntry(i, 1,
-                    new MockRaftActorContext.MockPayload("X" + i)));
+            log.append(new SimpleReplicatedLogEntry(i, 1, new MockRaftActorContext.MockPayload("X" + i)));
         }
 
         // new entry
-        actorContext.getReplicatedLog().append(
+        log.append(
             new SimpleReplicatedLogEntry(newEntryIndex, currentTerm, new MockRaftActorContext.MockPayload("D")));
 
         //update follower timestamp
@@ -829,8 +830,9 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leadersSnapshot.put("2", "B");
         leadersSnapshot.put("3", "C");
 
+        final var log = actorContext.getReplicatedLog();
         //clears leaders log
-        actorContext.getReplicatedLog().removeFrom(0);
+        log.removeFrom(0);
 
         final int lastAppliedIndex = 3;
         final int snapshotIndex = 2;
@@ -838,11 +840,11 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         final int currentTerm = 2;
 
         // set the snapshot variables in replicatedlog
-        actorContext.getReplicatedLog().setSnapshotIndex(snapshotIndex);
-        actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
+        log.setSnapshotIndex(snapshotIndex);
+        log.setSnapshotTerm(snapshotTerm);
         actorContext.setTermInfo(new TermInfo(currentTerm, leaderActor.path().toString()));
-        actorContext.setCommitIndex(lastAppliedIndex);
-        actorContext.setLastApplied(lastAppliedIndex);
+        log.setCommitIndex(lastAppliedIndex);
+        log.setLastApplied(lastAppliedIndex);
 
         leader = new Leader(actorContext);
 
@@ -1465,20 +1467,17 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         MockRaftActorContext leaderActorContext = createActorContextWithFollower();
         ((DefaultConfigParamsImpl )leaderActorContext.getConfigParams()).setHeartBeatInterval(Duration.ofSeconds(1000));
 
-        leaderActorContext.setReplicatedLog(
-                new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 2, 1).build());
-        long leaderCommitIndex = 1;
-        leaderActorContext.setCommitIndex(leaderCommitIndex);
-        leaderActorContext.setLastApplied(leaderCommitIndex);
-
-        final var leadersFirstLogEntry = leaderActorContext.getReplicatedLog().get(0);
-        final var leadersSecondLogEntry = leaderActorContext.getReplicatedLog().get(1);
+        final long leaderCommitIndex = 1;
+        final var leaderLog = new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 2, 1).build();
+        final var leadersFirstLogEntry = leaderLog.get(0);
+        final var leadersSecondLogEntry = leaderLog.get(1);
+        leaderLog.setCommitIndex(leaderCommitIndex);
+        leaderLog.setLastApplied(leaderCommitIndex);
+        leaderActorContext.setReplicatedLog(leaderLog);
 
         final var followerActorContext = createFollowerActorContextWithLeader();
 
         followerActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().build());
-        followerActorContext.setCommitIndex(-1);
-        followerActorContext.setLastApplied(-1);
 
         Follower follower = new Follower(followerActorContext);
         followerActor.underlyingActor().setBehavior(follower);
@@ -1546,11 +1545,11 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         MockRaftActorContext leaderActorContext = createActorContextWithFollower();
         ((DefaultConfigParamsImpl) leaderActorContext.getConfigParams()).setHeartBeatInterval(Duration.ofSeconds(1000));
 
-        leaderActorContext.setReplicatedLog(
-                new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 2, 2).build());
-        long leaderCommitIndex = 1;
-        leaderActorContext.setCommitIndex(leaderCommitIndex);
-        leaderActorContext.setLastApplied(leaderCommitIndex);
+        final long leaderCommitIndex = 1;
+        final var leaderLog = new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 2, 2).build();
+        leaderLog.setCommitIndex(leaderCommitIndex);
+        leaderLog.setLastApplied(leaderCommitIndex);
+        leaderActorContext.setReplicatedLog(leaderLog);
 
         final ReplicatedLogEntry leadersFirstLogEntry = leaderActorContext.getReplicatedLog().get(0);
         final ReplicatedLogEntry leadersSecondLogEntry = leaderActorContext.getReplicatedLog().get(1);
@@ -1559,8 +1558,6 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         followerActorContext.setReplicatedLog(
                 new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 1, 1).build());
-        followerActorContext.setCommitIndex(-1);
-        followerActorContext.setLastApplied(-1);
 
         Follower follower = new Follower(followerActorContext);
         followerActor.underlyingActor().setBehavior(follower);
@@ -1676,11 +1673,10 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         MockRaftActorContext leaderActorContext = createActorContextWithFollower();
 
-        leaderActorContext.setReplicatedLog(
-                new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 3, 1).build());
-
-        leaderActorContext.setCommitIndex(1);
-        leaderActorContext.setLastApplied(1);
+        final var log = new MockReplicatedLogBuilder().createEntries(0, 3, 1).build();
+        log.setCommitIndex(1);
+        log.setLastApplied(1);
+        leaderActorContext.setReplicatedLog(log);
         leaderActorContext.setTermInfo(new TermInfo(1, "leader"));
 
         leader = new Leader(leaderActorContext);
@@ -1992,9 +1988,10 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         MockRaftActorContext leaderActorContext = createActorContextWithFollower();
         ((DefaultConfigParamsImpl) leaderActorContext.getConfigParams()).setHeartBeatInterval(Duration.ofSeconds(1000));
 
-        leaderActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().build());
-        leaderActorContext.setCommitIndex(-1);
-        leaderActorContext.setLastApplied(-1);
+        final var leaderLog = new MockRaftActorContext.MockReplicatedLogBuilder().build();
+        leaderLog.setCommitIndex(-1);
+        leaderLog.setLastApplied(-1);
+        leaderActorContext.setReplicatedLog(leaderLog);
 
         String nonVotingFollowerId = "nonvoting-follower";
         ActorRef nonVotingFollowerActor = actorFactory.createActor(
@@ -2056,7 +2053,6 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         logStart("testTransferLeadershipWithFollowerInSync");
 
         MockRaftActorContext leaderActorContext = createActorContextWithFollower();
-        leaderActorContext.setLastApplied(-1);
         ((DefaultConfigParamsImpl) leaderActorContext.getConfigParams()).setHeartBeatInterval(Duration.ofSeconds(1000));
         leaderActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().build());
 
@@ -2214,9 +2210,11 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         MockRaftActorContext leaderActorContext = createActorContextWithFollower();
         ((DefaultConfigParamsImpl) leaderActorContext.getConfigParams()).setHeartBeatInterval(Duration.ofMillis(300));
         ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setMaximumMessageSliceSize(serializedSize - 50);
-        leaderActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().build());
-        leaderActorContext.setCommitIndex(-1);
-        leaderActorContext.setLastApplied(-1);
+
+        final var leaderLog = new MockRaftActorContext.MockReplicatedLogBuilder().build();
+        leaderLog.setCommitIndex(-1);
+        leaderLog.setLastApplied(-1);
+        leaderActorContext.setReplicatedLog(leaderLog);
 
         leader = new Leader(leaderActorContext);
         leaderActorContext.setCurrentBehavior(leader);
@@ -2345,9 +2343,10 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         MockRaftActorContext leaderActorContext = createActorContextWithFollower();
         ((DefaultConfigParamsImpl) leaderActorContext.getConfigParams()).setHeartBeatInterval(Duration.ofMillis(50));
-        leaderActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().build());
-        leaderActorContext.setCommitIndex(-1);
-        leaderActorContext.setLastApplied(-1);
+        final var leaderLog = new MockRaftActorContext.MockReplicatedLogBuilder().build();
+        leaderLog.setCommitIndex(-1);
+        leaderLog.setLastApplied(-1);
+        leaderActorContext.setReplicatedLog(leaderLog);
 
         ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setPeerAddressResolver(
             peerId -> leaderActor.path().toString());

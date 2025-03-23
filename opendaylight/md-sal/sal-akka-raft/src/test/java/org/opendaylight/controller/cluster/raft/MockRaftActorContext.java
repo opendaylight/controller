@@ -242,7 +242,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
     }
 
     public static class MockReplicatedLogBuilder {
-        private final ReplicatedLog mockLog = new SimpleReplicatedLog();
+        private final SimpleReplicatedLog mockLog = new SimpleReplicatedLog();
 
         public MockReplicatedLogBuilder createEntries(final int start, final int end, final int term) {
             for (int i = start; i < end; i++) {

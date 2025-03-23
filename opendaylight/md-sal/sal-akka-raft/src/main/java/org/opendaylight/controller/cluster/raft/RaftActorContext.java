@@ -112,16 +112,6 @@ public interface RaftActorContext {
     }
 
     /**
-     * Sets index of highest log entry applied to state machine.
-     *
-     * @param lastApplied the new applied index.
-     */
-    @Deprecated(forRemoval = true)
-    default void setLastApplied(final long lastApplied) {
-        getReplicatedLog().setLastApplied(lastApplied);
-    }
-
-    /**
      * Sets the ReplicatedLog instance.
      *
      * @param replicatedLog the ReplicatedLog instance.

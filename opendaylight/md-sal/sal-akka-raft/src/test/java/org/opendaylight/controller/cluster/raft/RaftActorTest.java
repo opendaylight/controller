@@ -805,14 +805,15 @@ public class RaftActorTest extends AbstractActorTest {
                 persistenceId);
 
         MockRaftActor leaderActor = mockActorRef.underlyingActor();
-        leaderActor.getRaftActorContext().setCommitIndex(3);
-        leaderActor.getRaftActorContext().setLastApplied(3);
+        final var leaderContext = leaderActor.getRaftActorContext();
+        final var leaderLog = leaderContext.getReplicatedLog();
+        leaderLog.setCommitIndex(3);
+        leaderLog.setLastApplied(3);
         leaderActor.getRaftActorContext().setTermInfo(new TermInfo(1, persistenceId));
 
         leaderActor.waitForInitializeBehaviorComplete();
         for (int i = 0; i < 4; i++) {
-            leaderActor.getReplicatedLog().append(new SimpleReplicatedLogEntry(i, 1,
-                    new MockRaftActorContext.MockPayload("A")));
+            leaderLog.append(new SimpleReplicatedLogEntry(i, 1, new MockRaftActorContext.MockPayload("A")));
         }
 
         final var leader = new Leader(leaderActor.getRaftActorContext());
@@ -827,7 +828,7 @@ public class RaftActorTest extends AbstractActorTest {
         mockActorRef.tell(new CaptureSnapshotReply(ByteState.of(fromObject("foo").toByteArray()), null), mockActorRef);
 
         // Trimming log in this scenario is a no-op
-        assertEquals(-1, leaderActor.getReplicatedLog().getSnapshotIndex());
+        assertEquals(-1, leaderLog.getSnapshotIndex());
         assertTrue(leaderActor.getRaftActorContext().getSnapshotManager().isCapturing());
         assertEquals(-1, leader.getReplicatedToAllIndex());
     }
@@ -847,10 +848,12 @@ public class RaftActorTest extends AbstractActorTest {
                 persistenceId);
 
         MockRaftActor leaderActor = mockActorRef.underlyingActor();
-        leaderActor.getRaftActorContext().setCommitIndex(3);
-        leaderActor.getRaftActorContext().setLastApplied(3);
-        leaderActor.getRaftActorContext().setTermInfo(new TermInfo(1, persistenceId));
-        leaderActor.getReplicatedLog().setSnapshotIndex(3);
+        final var leaderContext = leaderActor.getRaftActorContext();
+        final var leaderLog = leaderContext.getReplicatedLog();
+        leaderLog.setCommitIndex(3);
+        leaderLog.setLastApplied(3);
+        leaderContext.setTermInfo(new TermInfo(1, persistenceId));
+        leaderLog.setSnapshotIndex(3);
 
         leaderActor.waitForInitializeBehaviorComplete();
         Leader leader = new Leader(leaderActor.getRaftActorContext());
@@ -865,8 +868,8 @@ public class RaftActorTest extends AbstractActorTest {
         verify(leaderActor.snapshotCohortDelegate).takeSnapshot();
 
         // Trimming log in this scenario is a no-op
-        assertEquals(3, leaderActor.getReplicatedLog().getSnapshotIndex());
-        assertTrue(leaderActor.getRaftActorContext().getSnapshotManager().isCapturing());
+        assertEquals(3, leaderLog.getSnapshotIndex());
+        assertTrue(leaderContext.getSnapshotManager().isCapturing());
         assertEquals(3, leader.getReplicatedToAllIndex());
     }
 
