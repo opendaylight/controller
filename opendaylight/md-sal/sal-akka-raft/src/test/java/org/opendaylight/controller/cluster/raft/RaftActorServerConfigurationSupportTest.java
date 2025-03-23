@@ -73,6 +73,7 @@ import org.opendaylight.controller.cluster.raft.utils.ForwardMessageToBehaviorAc
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
+import org.opendaylight.raft.api.RaftRoles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1103,8 +1104,8 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         verifyServerConfigurationPayloadEntry(follower2RaftActor.underlyingActor().getRaftActorContext()
                 .getReplicatedLog(), nonVotingServer(LEADER_ID), votingServer(FOLLOWER_ID), votingServer(FOLLOWER_ID2));
 
-        verifyRaftState(RaftState.Leader, follower1RaftActor.underlyingActor(), follower2RaftActor.underlyingActor());
-        verifyRaftState(RaftState.Follower, leaderActor.underlyingActor());
+        verifyRaftState(RaftRoles.Leader, follower1RaftActor.underlyingActor(), follower2RaftActor.underlyingActor());
+        verifyRaftState(RaftRoles.Follower, leaderActor.underlyingActor());
 
         MessageCollectorActor.expectMatching(leaderCollector, AppendEntries.class, 2);
 
@@ -1175,7 +1176,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
                 nonVotingServer(node1ID), nonVotingServer(node2ID), votingServer("downNode1"),
                 votingServer("downNode2"));
         assertFalse("isVotingMember", node1RaftActor.getRaftActorContext().isVotingMember());
-        assertEquals("getRaftState", RaftState.Follower, node1RaftActor.getRaftState());
+        assertEquals("getRaftState", RaftRoles.Follower, node1RaftActor.getRaftState());
         assertEquals("getLeaderId", null, node1RaftActor.getLeaderId());
 
         verifyServerConfigurationPayloadEntry(node2RaftActor.getRaftActorContext().getReplicatedLog(),
@@ -1195,7 +1196,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         node1RaftActorRef.tell(changeServers, testKit.getRef());
         ServerChangeReply reply = testKit.expectMsgClass(Duration.ofSeconds(5), ServerChangeReply.class);
         assertEquals("getStatus", ServerChangeStatus.NO_LEADER, reply.getStatus());
-        assertEquals("getRaftState", RaftState.Follower, node1RaftActor.getRaftState());
+        assertEquals("getRaftState", RaftRoles.Follower, node1RaftActor.getRaftState());
 
         // Send an AppendEntries so node1 has a leaderId
 
@@ -1224,7 +1225,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
                 votingServer(node1ID), votingServer(node2ID), nonVotingServer("downNode1"),
                 nonVotingServer("downNode2"));
         assertTrue("isVotingMember", node1RaftActor.getRaftActorContext().isVotingMember());
-        assertEquals("getRaftState", RaftState.Leader, node1RaftActor.getRaftState());
+        assertEquals("getRaftState", RaftRoles.Leader, node1RaftActor.getRaftState());
 
         apply = MessageCollectorActor.expectFirstMatching(node2Collector, ApplyJournalEntries.class);
         assertEquals("getToIndex", 1, apply.getToIndex());
@@ -1232,7 +1233,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
                 votingServer(node1ID), votingServer(node2ID), nonVotingServer("downNode1"),
                 nonVotingServer("downNode2"));
         assertTrue("isVotingMember", node2RaftActor.getRaftActorContext().isVotingMember());
-        assertEquals("getRaftState", RaftState.Follower, node2RaftActor.getRaftState());
+        assertEquals("getRaftState", RaftRoles.Follower, node2RaftActor.getRaftState());
 
         LOG.info("testChangeToVotingWithNoLeader ending");
     }
@@ -1293,7 +1294,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         assertEquals("Server config", Set.of(nonVotingServer(node1ID), votingServer(node2ID)),
             Set.copyOf(node1RaftActor.getRaftActorContext().getPeerServerInfo(true).serverInfo()));
-        assertEquals("getRaftState", RaftState.Follower, node1RaftActor.getRaftState());
+        assertEquals("getRaftState", RaftRoles.Follower, node1RaftActor.getRaftState());
 
         LOG.info("testChangeToVotingWithNoLeaderAndElectionTimeout ending");
     }
@@ -1354,13 +1355,13 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         MessageCollectorActor.expectFirstMatching(node2Collector, ApplyJournalEntries.class);
         verifyServerConfigurationPayloadEntry(node2RaftActor.getRaftActorContext().getReplicatedLog(),
                 votingServer(node1ID), votingServer(node2ID));
-        assertEquals("getRaftState", RaftState.Leader, node2RaftActor.getRaftState());
+        assertEquals("getRaftState", RaftRoles.Leader, node2RaftActor.getRaftState());
 
         MessageCollectorActor.expectFirstMatching(node1Collector, ApplyJournalEntries.class);
         verifyServerConfigurationPayloadEntry(node1RaftActor.getRaftActorContext().getReplicatedLog(),
                 votingServer(node1ID), votingServer(node2ID));
         assertTrue("isVotingMember", node1RaftActor.getRaftActorContext().isVotingMember());
-        assertEquals("getRaftState", RaftState.Follower, node1RaftActor.getRaftState());
+        assertEquals("getRaftState", RaftRoles.Follower, node1RaftActor.getRaftState());
 
         LOG.info("testChangeToVotingWithNoLeaderAndForwardedToOtherNodeAfterElectionTimeout ending");
     }
@@ -1424,18 +1425,18 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         verifyServerConfigurationPayloadEntry(node1RaftActor.getRaftActorContext().getReplicatedLog(),
                 votingServer(node1ID), votingServer(node2ID));
         assertTrue("isVotingMember", node1RaftActor.getRaftActorContext().isVotingMember());
-        assertEquals("getRaftState", RaftState.Follower, node1RaftActor.getRaftState());
+        assertEquals("getRaftState", RaftRoles.Follower, node1RaftActor.getRaftState());
 
         MessageCollectorActor.expectFirstMatching(node2Collector, ApplyJournalEntries.class);
         verifyServerConfigurationPayloadEntry(node2RaftActor.getRaftActorContext().getReplicatedLog(),
                 votingServer(node1ID), votingServer(node2ID));
-        assertEquals("getRaftState", RaftState.Leader, node2RaftActor.getRaftState());
+        assertEquals("getRaftState", RaftRoles.Leader, node2RaftActor.getRaftState());
 
         LOG.info("testChangeToVotingWithNoLeaderAndOtherLeaderElected ending");
     }
 
     // FIXME: use awaitility here
-    private static void verifyRaftState(final RaftState expState, final RaftActor... raftActors) {
+    private static void verifyRaftState(final RaftRoles expState, final RaftActor... raftActors) {
         Stopwatch sw = Stopwatch.createStarted();
         while (sw.elapsed(TimeUnit.SECONDS) <= 5) {
             for (RaftActor raftActor : raftActors) {
