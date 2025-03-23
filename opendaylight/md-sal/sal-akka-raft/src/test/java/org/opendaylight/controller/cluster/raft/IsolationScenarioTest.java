@@ -16,7 +16,6 @@ import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorAct
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.getAllMatching;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import java.time.Duration;
 import java.util.List;
 import org.apache.pekko.actor.ActorRef;
@@ -93,12 +92,13 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         verifyApplyJournalEntries(follower1CollectorActor, 2);
         verifyApplyJournalEntries(follower2CollectorActor, 2);
 
-        assertEquals("Follower 1 journal last term", currentTerm, follower1Context.getReplicatedLog().lastTerm());
-        assertEquals("Follower 1 journal last index", 2, follower1Context.getReplicatedLog().lastIndex());
-        assertEquals("Follower 1 commit index", 2, follower1Context.getCommitIndex());
-        verifyReplicatedLogEntry(follower1Context.getReplicatedLog().get(2), currentTerm, 2, newLeaderPayload2);
+        final var follower1log = follower1Context.getReplicatedLog();
+        assertEquals("Follower 1 journal last term", currentTerm, follower1log.lastTerm());
+        assertEquals("Follower 1 journal last index", 2, follower1log.lastIndex());
+        assertEquals("Follower 1 commit index", 2, follower1log.getCommitIndex());
+        verifyReplicatedLogEntry(follower1log.get(2), currentTerm, 2, newLeaderPayload2);
 
-        assertEquals("Follower 1 state", Lists.newArrayList(payload0, payload1, newLeaderPayload2),
+        assertEquals("Follower 1 state", List.of(payload0, payload1, newLeaderPayload2),
                 follower1Actor.underlyingActor().getState());
 
         removeIsolation();
@@ -114,12 +114,13 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
 
         verifyApplyJournalEntries(leaderCollectorActor, 2);
 
-        assertEquals("Prior leader journal last term", currentTerm, leaderContext.getReplicatedLog().lastTerm());
-        assertEquals("Prior leader journal last index", 2, leaderContext.getReplicatedLog().lastIndex());
-        assertEquals("Prior leader commit index", 2, leaderContext.getCommitIndex());
-        verifyReplicatedLogEntry(leaderContext.getReplicatedLog().get(2), currentTerm, 2, newLeaderPayload2);
+        final var leaderLog = leaderContext.getReplicatedLog();
+        assertEquals("Prior leader journal last term", currentTerm, leaderLog.lastTerm());
+        assertEquals("Prior leader journal last index", 2, leaderLog.lastIndex());
+        assertEquals("Prior leader commit index", 2, leaderLog.getCommitIndex());
+        verifyReplicatedLogEntry(leaderLog.get(2), currentTerm, 2, newLeaderPayload2);
 
-        assertEquals("Prior leader state", Lists.newArrayList(payload0, payload1, newLeaderPayload2),
+        assertEquals("Prior leader state", List.of(payload0, payload1, newLeaderPayload2),
                 leaderActor.underlyingActor().getState());
 
         testLog.info("testLeaderIsolationWithAllPriorEntriesCommitted ending");
@@ -200,12 +201,13 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         verifyApplyJournalEntries(follower1CollectorActor, 3);
         verifyApplyJournalEntries(follower2CollectorActor, 3);
 
-        assertEquals("Follower 1 journal last term", currentTerm, follower1Context.getReplicatedLog().lastTerm());
-        assertEquals("Follower 1 journal last index", 3, follower1Context.getReplicatedLog().lastIndex());
-        assertEquals("Follower 1 commit index", 3, follower1Context.getCommitIndex());
-        verifyReplicatedLogEntry(follower1Context.getReplicatedLog().get(3), currentTerm, 3, newLeaderPayload2);
+        final var follower1log = follower1Context.getReplicatedLog();
+        assertEquals("Follower 1 journal last term", currentTerm, follower1log.lastTerm());
+        assertEquals("Follower 1 journal last index", 3, follower1log.lastIndex());
+        assertEquals("Follower 1 commit index", 3, follower1log.getCommitIndex());
+        verifyReplicatedLogEntry(follower1log.get(3), currentTerm, 3, newLeaderPayload2);
 
-        assertEquals("Follower 1 state", Lists.newArrayList(payload0, payload1, newLeaderPayload2),
+        assertEquals("Follower 1 state", List.of(payload0, payload1, newLeaderPayload2),
                 follower1Actor.underlyingActor().getState());
 
         removeIsolation();
@@ -228,7 +230,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
             assertEquals("Prior leader commit index", 3, leaderLog.getCommitIndex());
         });
 
-        assertEquals("Prior leader state", Lists.newArrayList(payload0, payload1, newLeaderPayload2),
+        assertEquals("Prior leader state", List.of(payload0, payload1, newLeaderPayload2),
                 leaderActor.underlyingActor().getState());
 
         // Ensure the prior leader didn't apply its conflicting entry with index 2, term 1.
@@ -323,18 +325,19 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
 
         testLog.info("Sending 3 payloads to new leader");
 
-        final MockPayload newLeaderPayload2 = sendPayloadData(follower1Actor, "two-new");
-        final MockPayload newLeaderPayload3 = sendPayloadData(follower1Actor, "three-new");
-        final MockPayload newLeaderPayload4 = sendPayloadData(follower1Actor, "four-new");
+        final var newLeaderPayload2 = sendPayloadData(follower1Actor, "two-new");
+        final var newLeaderPayload3 = sendPayloadData(follower1Actor, "three-new");
+        final var newLeaderPayload4 = sendPayloadData(follower1Actor, "four-new");
         verifyApplyJournalEntries(follower1CollectorActor, 5);
         verifyApplyJournalEntries(follower2CollectorActor, 5);
 
-        assertEquals("Follower 1 journal last term", currentTerm, follower1Context.getReplicatedLog().lastTerm());
-        assertEquals("Follower 1 journal last index", 5, follower1Context.getReplicatedLog().lastIndex());
-        assertEquals("Follower 1 commit index", 5, follower1Context.getCommitIndex());
+        final var follower1log = follower1Context.getReplicatedLog();
+        assertEquals("Follower 1 journal last term", currentTerm, follower1log.lastTerm());
+        assertEquals("Follower 1 journal last index", 5, follower1log.lastIndex());
+        assertEquals("Follower 1 commit index", 5, follower1log.getCommitIndex());
         verifyReplicatedLogEntry(follower1Context.getReplicatedLog().get(5), currentTerm, 5, newLeaderPayload4);
 
-        assertEquals("Follower 1 state", Lists.newArrayList(payload0, payload1, newLeaderPayload2, newLeaderPayload3,
+        assertEquals("Follower 1 state", List.of(payload0, payload1, newLeaderPayload2, newLeaderPayload3,
                 newLeaderPayload4), follower1Actor.underlyingActor().getState());
 
         removeIsolation();
@@ -357,8 +360,9 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
             assertEquals("Prior leader commit index", 5, leaderLog.getCommitIndex());
         });
 
-        assertEquals("Prior leader state", Lists.newArrayList(payload0, payload1, newLeaderPayload2, newLeaderPayload3,
-                newLeaderPayload4), leaderActor.underlyingActor().getState());
+        assertEquals("Prior leader state",
+            List.of(payload0, payload1, newLeaderPayload2, newLeaderPayload3, newLeaderPayload4),
+            leaderActor.underlyingActor().getState());
 
         // Ensure the prior leader didn't apply any of its conflicting entries with term 1.
 

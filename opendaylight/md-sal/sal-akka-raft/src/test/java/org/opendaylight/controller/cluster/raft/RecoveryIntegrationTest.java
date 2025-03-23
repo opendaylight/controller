@@ -83,8 +83,8 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
 
         reinstateLeaderActor();
 
-        assertEquals("Leader snapshot term", currentTerm, leaderContext.getReplicatedLog().getSnapshotTerm());
         final var leaderLog = leaderContext.getReplicatedLog();
+        assertEquals("Leader snapshot term", currentTerm, leaderLog.getSnapshotTerm());
         assertEquals("Leader snapshot index", 1, leaderLog.getSnapshotIndex());
         assertEquals("Leader journal log size", 3, leaderLog.size());
         assertEquals("Leader journal last index", 4, leaderLog.lastIndex());
