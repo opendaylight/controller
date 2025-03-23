@@ -9,17 +9,23 @@ package org.opendaylight.controller.cluster.raft;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.spi.ImmediateDataPersistenceProvider;
 
 @NonNullByDefault
-final class TestDataProvider extends NonPersistentDataProvider {
+final class TestDataProvider implements ImmediateDataPersistenceProvider {
     static final TestDataProvider INSTANCE = new TestDataProvider();
 
     private TestDataProvider() {
-        super(Runnable::run);
+        // Hidden in purpose
     }
 
     @Override
     public void saveSnapshot(final Snapshot snapshot) {
         // no-op
+    }
+
+    @Override
+    public void executeInSelf(final Runnable runnable) {
+        runnable.run();
     }
 }
