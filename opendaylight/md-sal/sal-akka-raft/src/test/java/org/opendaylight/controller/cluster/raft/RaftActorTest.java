@@ -425,19 +425,19 @@ public class RaftActorTest extends AbstractActorTest {
         RoleChanged raftRoleChanged = matches.get(0);
         assertEquals(persistenceId, raftRoleChanged.memberId());
         assertNull(raftRoleChanged.oldRole());
-        assertEquals(RaftState.Follower.name(), raftRoleChanged.newRole());
+        assertEquals(RaftState.Follower, raftRoleChanged.newRole());
 
         // check if the notifier got a role change from Follower to Candidate
         raftRoleChanged = matches.get(1);
         assertEquals(persistenceId, raftRoleChanged.memberId());
-        assertEquals(RaftState.Follower.name(), raftRoleChanged.oldRole());
-        assertEquals(RaftState.Candidate.name(), raftRoleChanged.newRole());
+        assertEquals(RaftState.Follower, raftRoleChanged.oldRole());
+        assertEquals(RaftState.Candidate, raftRoleChanged.newRole());
 
         // check if the notifier got a role change from Candidate to Leader
         raftRoleChanged = matches.get(2);
         assertEquals(persistenceId, raftRoleChanged.memberId());
-        assertEquals(RaftState.Candidate.name(), raftRoleChanged.oldRole());
-        assertEquals(RaftState.Leader.name(), raftRoleChanged.newRole());
+        assertEquals(RaftState.Candidate, raftRoleChanged.oldRole());
+        assertEquals(RaftState.Leader, raftRoleChanged.newRole());
 
         LeaderStateChanged leaderStateChange = MessageCollectorActor.expectFirstMatching(
                 notifierActor, LeaderStateChanged.class);
@@ -466,8 +466,8 @@ public class RaftActorTest extends AbstractActorTest {
         assertNull(leaderStateChange.leaderId());
 
         raftRoleChanged = MessageCollectorActor.expectFirstMatching(notifierActor, RoleChanged.class);
-        assertEquals(RaftState.Leader.name(), raftRoleChanged.oldRole());
-        assertEquals(RaftState.Follower.name(), raftRoleChanged.newRole());
+        assertEquals(RaftState.Leader, raftRoleChanged.oldRole());
+        assertEquals(RaftState.Follower, raftRoleChanged.newRole());
 
         MessageCollectorActor.clearMessages(notifierActor);
 
@@ -519,13 +519,13 @@ public class RaftActorTest extends AbstractActorTest {
         RoleChanged raftRoleChanged = matches.get(0);
         assertEquals(persistenceId, raftRoleChanged.memberId());
         assertNull(raftRoleChanged.oldRole());
-        assertEquals(RaftState.Follower.name(), raftRoleChanged.newRole());
+        assertEquals(RaftState.Follower, raftRoleChanged.newRole());
 
         // check if the notifier got a role change from Follower to Candidate
         raftRoleChanged = matches.get(1);
         assertEquals(persistenceId, raftRoleChanged.memberId());
-        assertEquals(RaftState.Follower.name(), raftRoleChanged.oldRole());
-        assertEquals(RaftState.Candidate.name(), raftRoleChanged.newRole());
+        assertEquals(RaftState.Follower, raftRoleChanged.oldRole());
+        assertEquals(RaftState.Candidate, raftRoleChanged.newRole());
     }
 
     @Test
