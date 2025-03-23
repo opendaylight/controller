@@ -209,7 +209,7 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
         Collections.reverse(leaderStateChanges);
         final var actual = leaderStateChanges.iterator();
         for (int i = expLeaderIds.length - 1; i >= 0; i--) {
-            assertEquals("getLeaderId", expLeaderIds[i], actual.next().getLeaderId());
+            assertEquals("getLeaderId", expLeaderIds[i], actual.next().leaderId());
         }
     }
 

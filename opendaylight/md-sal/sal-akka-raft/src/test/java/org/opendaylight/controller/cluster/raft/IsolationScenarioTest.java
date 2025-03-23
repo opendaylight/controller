@@ -79,7 +79,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         // The leader should transition to IsolatedLeader.
 
         expectFirstMatching(leaderNotifierActor, RoleChanged.class,
-            rc -> rc.getNewRole().equals(RaftState.IsolatedLeader.name()));
+            rc -> rc.newRole().equals(RaftState.IsolatedLeader.name()));
 
         forceElectionOnFollower1();
 
@@ -107,7 +107,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         // with a higher term.
 
         expectFirstMatching(leaderNotifierActor, RoleChanged.class,
-            rc -> rc.getNewRole().equals(RaftState.Follower.name()));
+            rc -> rc.newRole().equals(RaftState.Follower.name()));
 
         // The previous leader has a conflicting log entry at index 2 with a different term which should get
         // replaced by the new leader's index 1 entry.
@@ -187,7 +187,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         // The leader should transition to IsolatedLeader.
 
         expectFirstMatching(leaderNotifierActor, RoleChanged.class,
-            rc -> rc.getNewRole().equals(RaftState.IsolatedLeader.name()));
+            rc -> rc.newRole().equals(RaftState.IsolatedLeader.name()));
 
         forceElectionOnFollower1();
 
@@ -216,7 +216,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         // with a higher term.
 
         expectFirstMatching(leaderNotifierActor, RoleChanged.class,
-            rc -> rc.getNewRole().equals(RaftState.Follower.name()));
+            rc -> rc.newRole().equals(RaftState.Follower.name()));
 
         // The previous leader has a conflicting log entry at index 2 with a different term which should get
         // replaced by the new leader's entry.
@@ -315,7 +315,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         // The leader should transition to IsolatedLeader.
 
         expectFirstMatching(leaderNotifierActor, RoleChanged.class,
-            rc -> rc.getNewRole().equals(RaftState.IsolatedLeader.name()));
+            rc -> rc.newRole().equals(RaftState.IsolatedLeader.name()));
 
         forceElectionOnFollower1();
 
@@ -346,7 +346,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         // with a higher term.
 
         expectFirstMatching(leaderNotifierActor, RoleChanged.class,
-            rc -> rc.getNewRole().equals(RaftState.Follower.name()));
+            rc -> rc.newRole().equals(RaftState.Follower.name()));
 
         // The previous leader has conflicting log entries starting at index 2 with different terms which should get
         // replaced by the new leader's entries.
@@ -400,7 +400,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         follower1Actor.tell(TimeoutNow.INSTANCE, ActorRef.noSender());
 
         expectFirstMatching(follower1NotifierActor, RoleChanged.class,
-            rc -> rc.getNewRole().equals(RaftState.Leader.name()));
+            rc -> rc.newRole().equals(RaftState.Leader.name()));
 
         currentTerm = follower1Context.currentTerm();
     }
