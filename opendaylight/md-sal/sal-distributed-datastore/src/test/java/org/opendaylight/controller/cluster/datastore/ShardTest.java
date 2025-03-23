@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import static java.util.Objects.requireNonNull;
 import static org.apache.pekko.actor.ActorRef.noSender;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.startsWith;
@@ -35,17 +34,13 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.Props;
 import org.apache.pekko.actor.Status.Failure;
 import org.apache.pekko.dispatch.Dispatchers;
 import org.apache.pekko.japi.Creator;
-import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SaveSnapshotSuccess;
-import org.apache.pekko.persistence.SnapshotProtocol;
-import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.apache.pekko.testkit.TestActorRef;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -103,6 +98,7 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
+import org.opendaylight.controller.cluster.raft.spi.ForwardingDataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
@@ -1471,66 +1467,25 @@ public class ShardTest extends AbstractShardTest {
         final var latch = new AtomicReference<>(new CountDownLatch(1));
         final var savedSnapshot = new AtomicReference<Snapshot>();
 
-        final class TestDataPersistenceProvider implements DataPersistenceProvider {
-            private final DataPersistenceProvider delegate;
-
-            TestDataPersistenceProvider(final DataPersistenceProvider delegate) {
-                this.delegate = requireNonNull(delegate);
-            }
-
-            @Override
-            public boolean isRecoveryApplicable() {
-                return delegate.isRecoveryApplicable();
-            }
-
-            @Override
-            public <T> void persist(final T entry, final Consumer<T> callback) {
-                delegate.persist(entry, callback);
-            }
-
-            @Override
-            public <T> void persistAsync(final T entry, final Consumer<T> callback) {
-                delegate.persistAsync(entry, callback);
-            }
-
-            @Override
-            public void saveSnapshot(final Snapshot entry) {
-                savedSnapshot.set(entry);
-                delegate.saveSnapshot(entry);
-            }
-
-            @Override
-            public void deleteSnapshots(final SnapshotSelectionCriteria criteria) {
-                delegate.deleteSnapshots(criteria);
-            }
-
-            @Override
-            public void deleteMessages(final long sequenceNumber) {
-                delegate.deleteMessages(sequenceNumber);
-            }
-
-            @Override
-            public long getLastSequenceNumber() {
-                return delegate.getLastSequenceNumber();
-            }
-
-            @Override
-            public boolean handleJournalResponse(final JournalProtocol.Response response) {
-                return delegate.handleJournalResponse(response);
-            }
-
-            @Override
-            public boolean handleSnapshotResponse(final SnapshotProtocol.Response response) {
-                return delegate.handleSnapshotResponse(response);
-            }
-        }
-
         dataStoreContextBuilder.persistent(persistent);
 
         final class TestShard extends Shard {
             TestShard(final Path stateDir, final AbstractBuilder<?, ?> builder) {
                 super(stateDir, builder);
-                setPersistence(new TestDataPersistenceProvider(super.persistence()));
+
+                final var delegate = persistence();
+                setPersistence(new ForwardingDataPersistenceProvider() {
+                    @Override
+                    public void saveSnapshot(final Snapshot entry) {
+                        savedSnapshot.set(entry);
+                        super.saveSnapshot(entry);
+                    }
+
+                    @Override
+                    protected DataPersistenceProvider delegate() {
+                        return delegate;
+                    }
+                });
             }
 
             @Override

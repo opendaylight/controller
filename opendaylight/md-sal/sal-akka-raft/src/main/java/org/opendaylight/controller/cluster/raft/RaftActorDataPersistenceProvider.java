@@ -11,13 +11,10 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import java.util.function.Consumer;
-import org.apache.pekko.persistence.JournalProtocol;
-import org.apache.pekko.persistence.SnapshotProtocol;
-import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
+import org.opendaylight.controller.cluster.raft.spi.ForwardingDataPersistenceProvider;
 
 /**
  * The DelegatingPersistentDataProvider used by RaftActor to override the configured persistent provider to
@@ -26,7 +23,7 @@ import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
  * @author Thomas Pantelis
  */
 @NonNullByDefault
-final class RaftActorDataPersistenceProvider implements DataPersistenceProvider {
+final class RaftActorDataPersistenceProvider extends ForwardingDataPersistenceProvider {
     private final PersistentDataProvider persistentProvider;
     private final NonPersistentDataProvider transientProvider;
 
@@ -44,7 +41,8 @@ final class RaftActorDataPersistenceProvider implements DataPersistenceProvider 
         this(new PersistentDataProvider(raftActor), new TransientDataProvider(raftActor));
     }
 
-    DataPersistenceProvider delegate() {
+    @Override
+    protected DataPersistenceProvider delegate() {
         return delegate;
     }
 
@@ -63,11 +61,6 @@ final class RaftActorDataPersistenceProvider implements DataPersistenceProvider 
     @Deprecated
     void setDelegate(final DataPersistenceProvider delegate) {
         this.delegate = requireNonNull(delegate);
-    }
-
-    @Override
-    public boolean isRecoveryApplicable() {
-        return delegate.isRecoveryApplicable();
     }
 
     @Override
@@ -100,35 +93,5 @@ final class RaftActorDataPersistenceProvider implements DataPersistenceProvider 
         } else {
             delegate.persist(entry, callback);
         }
-    }
-
-    @Override
-    public void saveSnapshot(final Snapshot entry) {
-        delegate.saveSnapshot(entry);
-    }
-
-    @Override
-    public void deleteSnapshots(final SnapshotSelectionCriteria criteria) {
-        delegate.deleteSnapshots(criteria);
-    }
-
-    @Override
-    public void deleteMessages(final long sequenceNumber) {
-        delegate.deleteMessages(sequenceNumber);
-    }
-
-    @Override
-    public long getLastSequenceNumber() {
-        return delegate.getLastSequenceNumber();
-    }
-
-    @Override
-    public boolean handleJournalResponse(final JournalProtocol.Response response) {
-        return delegate.handleJournalResponse(response);
-    }
-
-    @Override
-    public boolean handleSnapshotResponse(final SnapshotProtocol.Response response) {
-        return delegate.handleSnapshotResponse(response);
     }
 }
