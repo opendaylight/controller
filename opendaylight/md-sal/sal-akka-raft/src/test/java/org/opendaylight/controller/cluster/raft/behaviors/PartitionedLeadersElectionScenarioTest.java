@@ -15,13 +15,13 @@ import com.google.common.collect.ImmutableMap;
 import org.apache.pekko.actor.ActorRef;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
-import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
+import org.opendaylight.raft.api.RaftRole;
 
 /**
  * A leader election scenario test that causes partitioned leaders by dropping messages between 2 members.
@@ -96,9 +96,9 @@ public class PartitionedLeadersElectionScenarioTest extends AbstractLeaderElecti
 
         member2Actor.waitForExpectedMessages(AppendEntriesReply.class);
 
-        verifyBehaviorState("member 1", member1Actor, RaftState.Follower);
-        verifyBehaviorState("member 2", member2Actor, RaftState.Leader);
-        verifyBehaviorState("member 3", member3Actor, RaftState.Follower);
+        verifyBehaviorState("member 1", member1Actor, RaftRole.Follower);
+        verifyBehaviorState("member 2", member2Actor, RaftRole.Leader);
+        verifyBehaviorState("member 3", member3Actor, RaftRole.Follower);
 
         assertEquals("member 1 election term", 3, member1Context.currentTerm());
         assertEquals("member 2 election term", 3, member2Context.currentTerm());
@@ -132,9 +132,9 @@ public class PartitionedLeadersElectionScenarioTest extends AbstractLeaderElecti
         assertFalse("isSuccess", appendEntriesReply.isSuccess());
         assertEquals("getTerm", 3, appendEntriesReply.getTerm());
 
-        verifyBehaviorState("member 1", member1Actor, RaftState.Follower);
-        verifyBehaviorState("member 2", member2Actor, RaftState.Leader);
-        verifyBehaviorState("member 3", member3Actor, RaftState.Follower);
+        verifyBehaviorState("member 1", member1Actor, RaftRole.Follower);
+        verifyBehaviorState("member 2", member2Actor, RaftRole.Leader);
+        verifyBehaviorState("member 3", member3Actor, RaftRole.Follower);
 
         assertEquals("member 1 election term", 3, member1Context.currentTerm());
         assertEquals("member 2 election term", 3, member2Context.currentTerm());
@@ -180,9 +180,9 @@ public class PartitionedLeadersElectionScenarioTest extends AbstractLeaderElecti
         // We end up with 2 partitioned leaders both leading member 1. The term for member 1 and 3
         // is 3 and member 3's term is 2.
 
-        verifyBehaviorState("member 1", member1Actor, RaftState.Follower);
-        verifyBehaviorState("member 2", member2Actor, RaftState.Leader);
-        verifyBehaviorState("member 3", member3Actor, RaftState.Leader);
+        verifyBehaviorState("member 1", member1Actor, RaftRole.Follower);
+        verifyBehaviorState("member 2", member2Actor, RaftRole.Leader);
+        verifyBehaviorState("member 3", member3Actor, RaftRole.Leader);
 
         assertEquals("member 1 election term", 3, member1Context.currentTerm());
         assertEquals("member 2 election term", 3, member2Context.currentTerm());
@@ -229,9 +229,9 @@ public class PartitionedLeadersElectionScenarioTest extends AbstractLeaderElecti
         member2Actor.waitForExpectedMessages(AppendEntries.class);
         member3Actor.waitForExpectedMessages(AppendEntriesReply.class);
 
-        verifyBehaviorState("member 1", member1Actor, RaftState.Follower);
-        verifyBehaviorState("member 2", member2Actor, RaftState.Candidate);
-        verifyBehaviorState("member 3", member3Actor, RaftState.Leader);
+        verifyBehaviorState("member 1", member1Actor, RaftRole.Follower);
+        verifyBehaviorState("member 2", member2Actor, RaftRole.Candidate);
+        verifyBehaviorState("member 3", member3Actor, RaftRole.Leader);
 
         assertEquals("member 1 election term", 2, member1Context.currentTerm());
         assertEquals("member 2 election term", 2, member2Context.currentTerm());
@@ -263,12 +263,12 @@ public class PartitionedLeadersElectionScenarioTest extends AbstractLeaderElecti
         // Original leader member 1 should switch to Follower as the RequestVote term is greater than its
         // term. It won't send back a RequestVoteReply in this case.
 
-        verifyBehaviorState("member 1", member1Actor, RaftState.Follower);
+        verifyBehaviorState("member 1", member1Actor, RaftRole.Follower);
 
         // member 2 should switch to Candidate since it didn't get a RequestVoteReply from the other 2 members.
 
         member2Actor.waitForBehaviorStateChange();
-        verifyBehaviorState("member 2", member2Actor, RaftState.Candidate);
+        verifyBehaviorState("member 2", member2Actor, RaftRole.Candidate);
 
         assertEquals("member 1 election term", 2, member1Context.currentTerm());
         assertEquals("member 2 election term", 2, member2Context.currentTerm());

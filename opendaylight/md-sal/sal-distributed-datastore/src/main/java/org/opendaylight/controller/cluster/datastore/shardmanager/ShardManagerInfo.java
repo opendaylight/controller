@@ -15,10 +15,10 @@ import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.pattern.Patterns;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
-import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.base.messages.SwitchBehavior.BecomeFollower;
 import org.opendaylight.controller.cluster.raft.base.messages.SwitchBehavior.BecomeLeader;
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
+import org.opendaylight.raft.api.RaftRole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
@@ -73,7 +73,7 @@ final class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfoM
     @SuppressWarnings("checkstyle:IllegalCatch")
     private void requestSwitchShardState(final ShardIdentifier shardId, final String newState, final long term) {
         // Validates strings argument
-        final var state = RaftState.valueOf(newState);
+        final var state = RaftRole.valueOf(newState);
 
         // Leader and Follower are the only states to which we can switch externally
         final var behavior = switch (state) {
