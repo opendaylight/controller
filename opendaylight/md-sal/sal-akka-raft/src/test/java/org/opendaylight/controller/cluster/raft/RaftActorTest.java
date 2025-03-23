@@ -84,6 +84,7 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
+import org.opendaylight.controller.cluster.raft.spi.ForwardingDataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.ImmutableRaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
@@ -1313,13 +1314,19 @@ public class RaftActorTest extends AbstractActorTest {
         Leader leader = new Leader(leaderActor.getRaftActorContext());
         leaderActor.setCurrentBehavior(leader);
 
-        final var executorService = Executors.newSingleThreadExecutor();
+        final var executorService = Executors.newSingleThreadExecutor(Thread.ofPlatform().name("testApplyStateRace-executor").factory());
+        final var delegate = leaderActor.persistence();
 
-        leaderActor.setPersistence(new PersistentDataProvider(leaderActor) {
+        leaderActor.setPersistence(new ForwardingDataPersistenceProvider() {
             @Override
-            public <T> void persistAsync(final T entry, final Consumer<T> procedure) {
+            public <T> void persistAsync(final T entry, final Consumer<T> callback) {
                 // needs to be executed from another thread to simulate the persistence actor calling this callback
-                executorService.submit(() -> procedure.accept(entry), "persistence-callback");
+                super.persistAsync(entry, persisted -> executorService.submit(() -> callback.accept(persisted)));
+            }
+
+            @Override
+            protected DataPersistenceProvider delegate() {
+                return delegate;
             }
         });
 
