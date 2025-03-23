@@ -84,25 +84,27 @@ public class PreLeaderScenarioTest extends AbstractRaftActorIntegrationTest {
 
         // Since it went to Leader, it should've appended and successfully replicated a NoopPaylod with the
         // new term to follower2 and committed both entries, including the first payload from the previous term.
-        assertEquals("Follower 1 journal log size", 2, follower1Context.getReplicatedLog().size());
-        assertEquals("Follower 1 journal last index", 1, follower1Context.getReplicatedLog().lastIndex());
-        assertEquals("Follower 1 commit index", 1, follower1Context.getCommitIndex());
-        verifyReplicatedLogEntry(follower1Context.getReplicatedLog().get(0), previousTerm, 0, payload0);
-        verifyReplicatedLogEntry(follower1Context.getReplicatedLog().get(1), currentTerm, 1, NoopPayload.INSTANCE);
+        var follower1log = follower1Context.getReplicatedLog();
+        assertEquals("Follower 1 journal log size", 2, follower1log.size());
+        assertEquals("Follower 1 journal last index", 1, follower1log.lastIndex());
+        assertEquals("Follower 1 commit index", 1, follower1log.getCommitIndex());
+        verifyReplicatedLogEntry(follower1log.get(0), previousTerm, 0, payload0);
+        verifyReplicatedLogEntry(follower1log.get(1), currentTerm, 1, NoopPayload.INSTANCE);
 
         // Both entries should be applied to the state.
         expectMatching(follower1CollectorActor, ApplyState.class, 2);
         expectMatching(follower2CollectorActor, ApplyState.class, 2);
 
-        assertEquals("Follower 1 last applied index", 1, follower1Context.getLastApplied());
+        assertEquals("Follower 1 last applied index", 1, follower1log.getLastApplied());
 
         // Verify follower2's journal matches follower1's.
-        assertEquals("Follower 2 journal log size", 2, follower2Context.getReplicatedLog().size());
-        assertEquals("Follower 2 journal last index", 1, follower2Context.getReplicatedLog().lastIndex());
-        assertEquals("Follower 2 commit index", 1, follower2Context.getCommitIndex());
-        assertEquals("Follower 2 last applied index", 1, follower2Context.getLastApplied());
-        verifyReplicatedLogEntry(follower2Context.getReplicatedLog().get(0), previousTerm, 0, payload0);
-        verifyReplicatedLogEntry(follower2Context.getReplicatedLog().get(1), currentTerm, 1, NoopPayload.INSTANCE);
+        final var follower2log = follower2Context.getReplicatedLog();
+        assertEquals("Follower 2 journal log size", 2, follower2log.size());
+        assertEquals("Follower 2 journal last index", 1, follower2log.lastIndex());
+        assertEquals("Follower 2 commit index", 1, follower2log.getCommitIndex());
+        assertEquals("Follower 2 last applied index", 1, follower2log.getLastApplied());
+        verifyReplicatedLogEntry(follower2log.get(0), previousTerm, 0, payload0);
+        verifyReplicatedLogEntry(follower2log.get(1), currentTerm, 1, NoopPayload.INSTANCE);
 
         // Reinstate follower1.
         killActor(follower1Actor);
@@ -114,12 +116,13 @@ public class PreLeaderScenarioTest extends AbstractRaftActorIntegrationTest {
         follower1Context = follower1Actor.underlyingActor().getRaftActorContext();
 
         // Verify follower1's journal was persisted and recovered correctly.
-        assertEquals("Follower 1 journal log size", 2, follower1Context.getReplicatedLog().size());
-        assertEquals("Follower 1 journal last index", 1, follower1Context.getReplicatedLog().lastIndex());
-        assertEquals("Follower 1 commit index", 1, follower1Context.getCommitIndex());
-        assertEquals("Follower 1 last applied index", 1, follower1Context.getLastApplied());
-        verifyReplicatedLogEntry(follower1Context.getReplicatedLog().get(0), previousTerm, 0, payload0);
-        verifyReplicatedLogEntry(follower1Context.getReplicatedLog().get(1), currentTerm, 1, NoopPayload.INSTANCE);
+        follower1log = follower1Context.getReplicatedLog();
+        assertEquals("Follower 1 journal log size", 2, follower1log.size());
+        assertEquals("Follower 1 journal last index", 1, follower1log.lastIndex());
+        assertEquals("Follower 1 commit index", 1, follower1log.getCommitIndex());
+        assertEquals("Follower 1 last applied index", 1, follower1log.getLastApplied());
+        verifyReplicatedLogEntry(follower1log.get(0), previousTerm, 0, payload0);
+        verifyReplicatedLogEntry(follower1log.get(1), currentTerm, 1, NoopPayload.INSTANCE);
 
         testLog.info("testUnComittedEntryOnLeaderChange ending");
     }

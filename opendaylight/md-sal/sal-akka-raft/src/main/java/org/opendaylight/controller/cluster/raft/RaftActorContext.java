@@ -102,16 +102,6 @@ public interface RaftActorContext {
     void persistTermInfo(@NonNull TermInfo termInfo) throws IOException;
 
     /**
-     * Returns the index of highest log entry known to be committed.
-     *
-     * @return index of highest log entry known to be committed.
-     */
-    @Deprecated(forRemoval = true)
-    default long getCommitIndex() {
-        return getReplicatedLog().getCommitIndex();
-    }
-
-    /**
      * Sets the index of highest log entry known to be committed.
      *
      * @param commitIndex new commit index
@@ -119,16 +109,6 @@ public interface RaftActorContext {
     @Deprecated(forRemoval = true)
     default void setCommitIndex(final long commitIndex) {
         getReplicatedLog().setCommitIndex(commitIndex);
-    }
-
-    /**
-     * Returns index of highest log entry applied to state machine.
-     *
-     * @return index of highest log entry applied to state machine.
-     */
-    @Deprecated(forRemoval = true)
-    default long getLastApplied() {
-        return getReplicatedLog().getLastApplied();
     }
 
     /**

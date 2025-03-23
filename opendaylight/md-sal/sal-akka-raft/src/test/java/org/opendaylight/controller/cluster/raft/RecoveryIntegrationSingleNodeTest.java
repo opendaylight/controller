@@ -41,7 +41,7 @@ public class RecoveryIntegrationSingleNodeTest extends AbstractRaftActorIntegrat
         waitUntilLeader(singleNodeActorRef);
 
         ActorRef singleNodeCollectorActor = singleNodeActorRef.underlyingActor().collectorActor();
-        final RaftActorContext singleNodeContext = singleNodeActorRef.underlyingActor().getRaftActorContext();
+        final var singleNodeContext = singleNodeActorRef.underlyingActor().getRaftActorContext();
 
         InMemoryJournal.addWriteMessagesCompleteLatch(persistenceId, 6, ApplyJournalEntries.class);
 
@@ -66,7 +66,7 @@ public class RecoveryIntegrationSingleNodeTest extends AbstractRaftActorIntegrat
 
         MessageCollectorActor.expectMatching(singleNodeCollectorActor, ApplyJournalEntries.class, 6);
 
-        assertEquals("Last applied", 5, singleNodeContext.getLastApplied());
+        assertEquals("Last applied", 5, singleNodeContext.getReplicatedLog().getLastApplied());
 
         assertEquals("Incorrect State after snapshot success is received ",
                 List.of(payload0, payload1, payload2, payload3, payload4, payload5),

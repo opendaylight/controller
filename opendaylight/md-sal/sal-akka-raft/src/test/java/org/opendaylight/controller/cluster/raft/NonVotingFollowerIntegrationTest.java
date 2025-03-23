@@ -61,7 +61,7 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyState.class, 3);
         MessageCollectorActor.expectMatching(follower1CollectorActor, ApplyState.class, 3);
 
-        final var leaderLog = leaderContext.getReplicatedLog();
+        var leaderLog = leaderContext.getReplicatedLog();
         assertEquals("Leader journal lastIndex", 2, leaderLog.lastIndex());
         assertEquals("Leader commit index", 2, leaderLog.getCommitIndex());
 
@@ -83,9 +83,10 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         //follower1Actor.underlyingActor().startDropMessages(AppendEntries.class);
 
         currentTerm++;
+        leaderLog = leaderContext.getReplicatedLog();
         assertEquals("Leader term", currentTerm, leaderContext.currentTerm());
-        assertEquals("Leader journal lastIndex", -1, leaderContext.getReplicatedLog().lastIndex());
-        assertEquals("Leader commit index", -1, leaderContext.getCommitIndex());
+        assertEquals("Leader journal lastIndex", -1, leaderLog.lastIndex());
+        assertEquals("Leader commit index", -1, leaderLog.getCommitIndex());
 
         // After restart, the leader's log and the follower's log will be ahead so the leader should force an
         // install snapshot to re-sync the follower's log and state.
@@ -93,15 +94,15 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         MessageCollectorActor.expectFirstMatching(follower1CollectorActor, SnapshotComplete.class);
 
         assertEquals("Follower term", currentTerm, follower1Context.currentTerm());
-        assertEquals("Follower journal lastIndex", -1, follower1Context.getReplicatedLog().lastIndex());
-        assertEquals("Follower commit index", -1, follower1Context.getCommitIndex());
+        assertEquals("Follower journal lastIndex", -1, follower1log.lastIndex());
+        assertEquals("Follower commit index", -1, follower1log.getCommitIndex());
 
         expSnapshotState.add(sendPayloadData(leaderActor, "zero-1"));
 
         MessageCollectorActor.expectFirstMatching(follower1CollectorActor, ApplyState.class);
 
-        assertEquals("Follower journal lastIndex", 0, follower1Context.getReplicatedLog().lastIndex());
-        assertEquals("Follower commit index", 0, follower1Context.getCommitIndex());
+        assertEquals("Follower journal lastIndex", 0, follower1log.lastIndex());
+        assertEquals("Follower commit index", 0, follower1log.getCommitIndex());
         assertEquals("Follower applied state", expSnapshotState, followerInstance.getState());
 
         testLog.info("testFollowerResyncWithEmptyLeaderLogAfterNonPersistentLeaderRestart ending");
@@ -129,10 +130,12 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyState.class, 3);
         MessageCollectorActor.expectMatching(follower1CollectorActor, ApplyState.class, 3);
 
-        assertEquals("Leader journal lastIndex", 2, leaderContext.getReplicatedLog().lastIndex());
-        assertEquals("Leader commit index", 2, leaderContext.getCommitIndex());
-        assertEquals("Follower journal lastIndex", 2, follower1Context.getReplicatedLog().lastIndex());
-        assertEquals("Follower commit index", 2, follower1Context.getCommitIndex());
+        var leaderLog = leaderContext.getReplicatedLog();
+        assertEquals("Leader journal lastIndex", 2, leaderLog.lastIndex());
+        assertEquals("Leader commit index", 2, leaderLog.getCommitIndex());
+        var follower1log = follower1Context.getReplicatedLog();
+        assertEquals("Follower journal lastIndex", 2, follower1log.lastIndex());
+        assertEquals("Follower commit index", 2, follower1log.getCommitIndex());
         assertEquals("Follower applied state", expSnapshotState, followerInstance.getState());
 
         // Restart the leader
@@ -146,9 +149,10 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         createNewLeaderActor();
 
         currentTerm++;
+        leaderLog = leaderContext.getReplicatedLog();
         assertEquals("Leader term", currentTerm, leaderContext.currentTerm());
-        assertEquals("Leader journal lastIndex", -1, leaderContext.getReplicatedLog().lastIndex());
-        assertEquals("Leader commit index", -1, leaderContext.getCommitIndex());
+        assertEquals("Leader journal lastIndex", -1, leaderLog.lastIndex());
+        assertEquals("Leader commit index", -1, leaderLog.getCommitIndex());
 
         // Add new log entries to the leader - one less than the prior log entries
 
@@ -156,8 +160,8 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         expSnapshotState.add(sendPayloadData(leaderActor, "one-1"));
 
         MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyState.class, 2);
-        assertEquals("Leader journal lastIndex", 1, leaderContext.getReplicatedLog().lastIndex());
-        assertEquals("Leader commit index", 1, leaderContext.getCommitIndex());
+        assertEquals("Leader journal lastIndex", 1, leaderLog.lastIndex());
+        assertEquals("Leader commit index", 1, leaderLog.getCommitIndex());
 
         // Re-enable AppendEntries to the follower. The leaders previous index will be present in the
         // follower's but the terms won't match and the follower's log will be ahead of the leader's log
@@ -166,10 +170,11 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         followerInstance.stopDropMessages(AppendEntries.class);
         MessageCollectorActor.expectFirstMatching(follower1CollectorActor, SnapshotComplete.class);
 
+        follower1log = follower1Context.getReplicatedLog();
         assertEquals("Follower term", currentTerm, follower1Context.currentTerm());
-        assertEquals("Follower journal lastIndex", 1, follower1Context.getReplicatedLog().lastIndex());
-        assertEquals("Follower journal lastTerm", currentTerm, follower1Context.getReplicatedLog().lastTerm());
-        assertEquals("Follower commit index", 1, follower1Context.getCommitIndex());
+        assertEquals("Follower journal lastIndex", 1, follower1log.lastIndex());
+        assertEquals("Follower journal lastTerm", currentTerm, follower1log.lastTerm());
+        assertEquals("Follower commit index", 1, follower1log.getCommitIndex());
         assertEquals("Follower applied state", expSnapshotState, followerInstance.getState());
 
         testLog.info("testFollowerResyncWithLessLeaderLogEntriesAfterNonPersistentLeaderRestart ending");
@@ -196,10 +201,12 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyState.class, 2);
         MessageCollectorActor.expectMatching(follower1CollectorActor, ApplyState.class, 2);
 
-        assertEquals("Leader journal lastIndex", 1, leaderContext.getReplicatedLog().lastIndex());
-        assertEquals("Leader commit index", 1, leaderContext.getCommitIndex());
-        assertEquals("Follower journal lastIndex", 1, follower1Context.getReplicatedLog().lastIndex());
-        assertEquals("Follower commit index", 1, follower1Context.getCommitIndex());
+        var leaderLog = leaderContext.getReplicatedLog();
+        assertEquals("Leader journal lastIndex", 1, leaderLog.lastIndex());
+        assertEquals("Leader commit index", 1, leaderLog.getCommitIndex());
+        final var follower1log = follower1Context.getReplicatedLog();
+        assertEquals("Follower journal lastIndex", 1, follower1log.lastIndex());
+        assertEquals("Follower commit index", 1, follower1log.getCommitIndex());
         assertEquals("Follower applied state", expSnapshotState, followerInstance.getState());
 
         // Restart the leader
@@ -213,9 +220,10 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         createNewLeaderActor();
 
         currentTerm++;
+        leaderLog = leaderContext.getReplicatedLog();
         assertEquals("Leader term", currentTerm, leaderContext.currentTerm());
-        assertEquals("Leader journal lastIndex", -1, leaderContext.getReplicatedLog().lastIndex());
-        assertEquals("Leader commit index", -1, leaderContext.getCommitIndex());
+        assertEquals("Leader journal lastIndex", -1, leaderLog.lastIndex());
+        assertEquals("Leader commit index", -1, leaderLog.getCommitIndex());
 
         // Add new log entries to the leader - one more than the prior log entries
 
@@ -224,8 +232,8 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         expSnapshotState.add(sendPayloadData(leaderActor, "two-1"));
 
         MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyState.class, 3);
-        assertEquals("Leader journal lastIndex", 2, leaderContext.getReplicatedLog().lastIndex());
-        assertEquals("Leader commit index", 2, leaderContext.getCommitIndex());
+        assertEquals("Leader journal lastIndex", 2, leaderLog.lastIndex());
+        assertEquals("Leader commit index", 2, leaderLog.getCommitIndex());
         assertEquals("Leader replicatedToAllIndex", -1, leaderInstance.getCurrentBehavior().getReplicatedToAllIndex());
 
         // Re-enable AppendEntries to the follower. The follower's log will be out of sync and it should
@@ -235,9 +243,9 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         MessageCollectorActor.expectFirstMatching(follower1CollectorActor, SnapshotComplete.class);
 
         assertEquals("Follower term", currentTerm, follower1Context.currentTerm());
-        assertEquals("Follower journal lastIndex", 2, follower1Context.getReplicatedLog().lastIndex());
-        assertEquals("Follower journal lastTerm", currentTerm, follower1Context.getReplicatedLog().lastTerm());
-        assertEquals("Follower commit index", 2, follower1Context.getCommitIndex());
+        assertEquals("Follower journal lastIndex", 2, follower1log.lastIndex());
+        assertEquals("Follower journal lastTerm", currentTerm, follower1log.lastTerm());
+        assertEquals("Follower commit index", 2, follower1log.getCommitIndex());
         assertEquals("Follower applied state", expSnapshotState, followerInstance.getState());
 
         testLog.info("testFollowerResyncWithOneMoreLeaderLogEntryAfterNonPersistentLeaderRestart ending");
@@ -267,16 +275,18 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         MessageCollectorActor.expectMatching(follower1CollectorActor, ApplyState.class, expSnapshotState.size());
 
         long lastIndex = 2;
-        assertEquals("Leader journal lastIndex", lastIndex, leaderContext.getReplicatedLog().lastIndex());
-        assertEquals("Leader commit index", lastIndex, leaderContext.getCommitIndex());
-        assertEquals("Follower journal lastIndex", lastIndex, follower1Context.getReplicatedLog().lastIndex());
-        assertEquals("Follower commit index", lastIndex, follower1Context.getCommitIndex());
+        var leaderLog = leaderContext.getReplicatedLog();
+        assertEquals("Leader journal lastIndex", lastIndex, leaderLog.lastIndex());
+        assertEquals("Leader commit index", lastIndex, leaderLog.getCommitIndex());
+        var follower1log = follower1Context.getReplicatedLog();
+        assertEquals("Follower journal lastIndex", lastIndex, follower1log.lastIndex());
+        assertEquals("Follower commit index", lastIndex, follower1log.getCommitIndex());
         assertEquals("Follower applied state", expSnapshotState, followerInstance.getState());
 
         MessageCollectorActor.clearMessages(follower1CollectorActor);
         MessageCollectorActor.expectFirstMatching(follower1CollectorActor, AppendEntries.class);
-        assertEquals("Follower snapshot index", lastIndex - 1, follower1Context.getReplicatedLog().getSnapshotIndex());
-        assertEquals("Follower journal size", 1, leaderContext.getReplicatedLog().size());
+        assertEquals("Follower snapshot index", lastIndex - 1, follower1log.getSnapshotIndex());
+        assertEquals("Follower journal size", 1, leaderLog.size());
 
         // Restart the leader
 
@@ -320,9 +330,10 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         createNewLeaderActor();
 
         currentTerm++;
+        leaderLog = leaderContext.getReplicatedLog();
         assertEquals("Leader term", currentTerm, leaderContext.currentTerm());
-        assertEquals("Leader journal lastIndex", -1, leaderContext.getReplicatedLog().lastIndex());
-        assertEquals("Leader commit index", -1, leaderContext.getCommitIndex());
+        assertEquals("Leader journal lastIndex", -1, leaderLog.lastIndex());
+        assertEquals("Leader commit index", -1, leaderLog.getCommitIndex());
 
         // Add new log entries to the leader - several more than the prior log entries
 
@@ -336,9 +347,9 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         MessageCollectorActor.expectMatching(follower2CollectorActor, ApplyState.class, expSnapshotState.size());
 
         lastIndex = 4;
-        assertEquals("Leader journal lastIndex", lastIndex, leaderContext.getReplicatedLog().lastIndex());
-        assertEquals("Leader commit index", lastIndex, leaderContext.getCommitIndex());
-        assertEquals("Leader snapshot index", -1, leaderContext.getReplicatedLog().getSnapshotIndex());
+        assertEquals("Leader journal lastIndex", lastIndex, leaderLog.lastIndex());
+        assertEquals("Leader commit index", lastIndex, leaderLog.getCommitIndex());
+        assertEquals("Leader snapshot index", -1, leaderLog.getSnapshotIndex());
         assertEquals("Leader replicatedToAllIndex", -1, leaderInstance.getCurrentBehavior().getReplicatedToAllIndex());
 
         // Re-enable AppendEntries to the follower. The follower's log will be out of sync and it should
@@ -347,10 +358,11 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         followerInstance.stopDropMessages(AppendEntries.class);
         MessageCollectorActor.expectFirstMatching(follower1CollectorActor, SnapshotComplete.class);
 
+        follower1log = follower1Context.getReplicatedLog();
         assertEquals("Follower term", currentTerm, follower1Context.currentTerm());
-        assertEquals("Follower journal lastIndex", lastIndex, follower1Context.getReplicatedLog().lastIndex());
-        assertEquals("Follower journal lastTerm", currentTerm, follower1Context.getReplicatedLog().lastTerm());
-        assertEquals("Follower commit index", lastIndex, follower1Context.getCommitIndex());
+        assertEquals("Follower journal lastIndex", lastIndex, follower1log.lastIndex());
+        assertEquals("Follower journal lastTerm", currentTerm, follower1log.lastTerm());
+        assertEquals("Follower commit index", lastIndex, follower1log.getCommitIndex());
         assertEquals("Follower applied state", expSnapshotState, followerInstance.getState());
 
         testLog.info("testFollowerResyncWithMoreLeaderLogEntriesAndDownPeerAfterNonPersistentLeaderRestart ending");
