@@ -21,22 +21,29 @@ import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
 @NonNullByDefault
 final class LocalAccess {
     private static final Path TERM_INFO_PROPS = Path.of("TermInfo.properties");
+    private static final Path SNAPSHOTS = Path.of("snapshots");
 
     private final String memberId;
     private final TermInfoStore termInfoStore;
+    private final Path stateDir;
 
     @VisibleForTesting
-    LocalAccess(final String memberId, final TermInfoStore termInfoStore) {
+    LocalAccess(final String memberId, final Path stateDir, final TermInfoStore termInfoStore) {
         this.memberId = requireNonNull(memberId);
+        this.stateDir = requireNonNull(stateDir);
         this.termInfoStore = requireNonNull(termInfoStore);
     }
 
     LocalAccess(final String memberId, final Path stateDir) {
-        this(memberId, new PropertiesTermInfoStore(memberId, stateDir.resolve(TERM_INFO_PROPS)));
+        this(memberId, stateDir, new PropertiesTermInfoStore(memberId, stateDir.resolve(TERM_INFO_PROPS)));
     }
 
     String memberId() {
         return memberId;
+    }
+
+    Path snapshotDir() {
+        return stateDir.resolve(SNAPSHOTS);
     }
 
     TermInfoStore termInfoStore() {
@@ -52,6 +59,10 @@ final class LocalAccess {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this).add("memberId", memberId).add("termInfo", termInfoStore).toString();
+        return MoreObjects.toStringHelper(this)
+            .add("memberId", memberId)
+            .add("directory", stateDir)
+            .add("termInfo", termInfoStore)
+            .toString();
     }
 }
