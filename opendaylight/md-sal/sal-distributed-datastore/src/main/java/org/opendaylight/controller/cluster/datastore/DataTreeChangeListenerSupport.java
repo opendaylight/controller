@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
@@ -48,8 +48,8 @@ final class DataTreeChangeListenerSupport extends LeaderLocalDelegateFactory<Reg
                             removeListenerActor(listenerActor)), ActorRef.noSender()));
     }
 
-    Collection<ActorSelection> getListenerActors() {
-        return new ArrayList<>(allListenerActors);
+    List<ActorSelection> getListenerActors() {
+        return List.copyOf(allListenerActors);
     }
 
     @Override

@@ -200,7 +200,7 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
     }
 
     private static void verifyRaftState(final ActorRef raftActor, final RaftRole expState) {
-        verifyRaftState(raftActor, rs -> assertEquals(expState.name(), rs.getRaftState()));
+        verifyRaftState(raftActor, rs -> assertEquals(expState, rs.getRaftState()));
     }
 
     private static void verifyLeaderStateChangedMessages(final ActorRef notifierActor,
