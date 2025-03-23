@@ -17,6 +17,7 @@ import org.apache.pekko.testkit.TestActorRef;
 import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.notifications.DefaultLeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListener;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListenerReply;
@@ -90,7 +91,7 @@ public class RoleChangeNotifierTest extends AbstractActorTest {
         TestActorRef<RoleChangeNotifier> notifierTestActorRef = TestActorRef.create(getSystem(),
             RoleChangeNotifier.getProps(actorId), actorId);
 
-        notifierTestActorRef.tell(new LeaderStateChanged("member1", "leader1", (short) 5), ActorRef.noSender());
+        notifierTestActorRef.tell(new DefaultLeaderStateChanged("member1", "leader1", (short) 5), ActorRef.noSender());
 
         // listener registers after the sate has been changed, ensure we
         // sent the latest state change after a reply
@@ -99,15 +100,15 @@ public class RoleChangeNotifierTest extends AbstractActorTest {
         testKit.expectMsgClass(RegisterRoleChangeListenerReply.class);
 
         LeaderStateChanged leaderStateChanged = testKit.expectMsgClass(LeaderStateChanged.class);
-        assertEquals("getMemberId", "member1", leaderStateChanged.getMemberId());
-        assertEquals("getLeaderId", "leader1", leaderStateChanged.getLeaderId());
-        assertEquals("getLeaderPayloadVersion", 5, leaderStateChanged.getLeaderPayloadVersion());
+        assertEquals("getMemberId", "member1", leaderStateChanged.memberId());
+        assertEquals("getLeaderId", "leader1", leaderStateChanged.leaderId());
+        assertEquals("getLeaderPayloadVersion", 5, leaderStateChanged.leaderPayloadVersion());
 
-        notifierTestActorRef.tell(new LeaderStateChanged("member1", "leader2", (short) 6), ActorRef.noSender());
+        notifierTestActorRef.tell(new DefaultLeaderStateChanged("member1", "leader2", (short) 6), ActorRef.noSender());
 
         leaderStateChanged = testKit.expectMsgClass(LeaderStateChanged.class);
-        assertEquals("getMemberId", "member1", leaderStateChanged.getMemberId());
-        assertEquals("getLeaderId", "leader2", leaderStateChanged.getLeaderId());
-        assertEquals("getLeaderPayloadVersion", 6, leaderStateChanged.getLeaderPayloadVersion());
+        assertEquals("getMemberId", "member1", leaderStateChanged.memberId());
+        assertEquals("getLeaderId", "leader2", leaderStateChanged.leaderId());
+        assertEquals("getLeaderPayloadVersion", 6, leaderStateChanged.leaderPayloadVersion());
     }
 }
