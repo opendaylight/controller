@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.6.0" name="odl-raft-api">
+    <feature name="odl-raft-api">
+        <bundle>mvn:org.opendaylight.controller/raft-api/{{versionAsInProject}}</bundle>
+    </feature>
+</features>

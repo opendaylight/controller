@@ -32,7 +32,12 @@
                 <version>${project.version}</version>
             </dependency>
 
-            <!-- RAFT Journal -->
+            <!-- RAFT -->
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>raft-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>raft-journal</artifactId>
@@ -73,7 +78,7 @@
                 <scope>test</scope>
             </dependency>
 
-            <!-- Clustered implementation -->
+            <!-- Clustered Pekko-based implementation -->
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>sal-clustering-commons</artifactId>
@@ -338,11 +343,19 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>odl-raft-api</artifactId>
+                <version>${project.version}</version>
+                <type>xml</type>
+                <classifier>features</classifier>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>odl-toaster</artifactId>
                 <version>${project.version}</version>
                 <type>xml</type>
                 <classifier>features</classifier>
             </dependency>
+            <!-- FIXME: revisit the need for this -->
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>odl-jolokia</artifactId>

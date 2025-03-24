@@ -9,20 +9,27 @@ package org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard;
 
 import java.util.List;
 import javax.management.MXBean;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.mgmt.api.FollowerInfo;
+import org.opendaylight.raft.api.RaftRole;
 
 /**
  * MXBean interface for shard stats.
  *
  * @author syedbahm
  */
+// FIXME: A large part of this (lastLogIndex, etx.) should be exposed as RaftMXBean for reuse
 @MXBean
 public interface ShardStatsMXBean {
-
+    // FIXME: clarify relationship with RaftActor.memberId() and ShardIdentifier
+    //           fullName = memberName.getName() + "-shard-" + shardName + "-" + type;
+    //        but then that gets translated, etc. We should really be exposing ShardIdentifier
     String getShardName();
 
+    // FIXME: java.time.Instant
     String getStatRetrievalTime();
 
+    // FIXME: a specific Exception if possible, or at least something structured, or 'ErrorMessage'?
     String getStatRetrievalError();
 
     long getCommittedTransactionsCount();
@@ -31,6 +38,7 @@ public interface ShardStatsMXBean {
 
     long getReadWriteTransactionCount();
 
+    // FIXME: can we merge these using RaftEntryMeta?
     long getLastLogIndex();
 
     long getLastLogTerm();
@@ -51,6 +59,7 @@ public interface ShardStatsMXBean {
 
     long getReplicatedToAllIndex();
 
+    // FIXME: can we use java.time.Instant for this?
     String getLastCommittedTransactionTime();
 
     long getFailedTransactionsCount();
@@ -59,11 +68,11 @@ public interface ShardStatsMXBean {
 
     long getFailedReadTransactionsCount();
 
-    String getLeader();
+    @Nullable String getLeader();
 
-    String getRaftState();
+    @Nullable RaftRole getRaftState();
 
-    String getVotedFor();
+    @Nullable String getVotedFor();
 
     boolean isSnapshotCaptureInitiated();
 
@@ -71,6 +80,7 @@ public interface ShardStatsMXBean {
 
     void resetTransactionCounters();
 
+    // FIXME: bytes? can we report something human-friendly?
     long getInMemoryJournalDataSize();
 
     long getInMemoryJournalLogSize();
@@ -79,8 +89,10 @@ public interface ShardStatsMXBean {
 
     List<FollowerInfo> getFollowerInfo();
 
+    // FIXME: 'peer addresses' implies Map<memberName(), (ActorRef|SocketAddress)>
     String getPeerAddresses();
 
+    // FIXME: 'peer states' implies Map<memberName(), Boolean>)>
     String getPeerVotingStates();
 
     long getLeadershipChangeCount();
