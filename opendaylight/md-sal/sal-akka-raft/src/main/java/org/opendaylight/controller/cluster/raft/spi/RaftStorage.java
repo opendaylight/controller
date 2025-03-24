@@ -7,9 +7,13 @@
  */
 package org.opendaylight.controller.cluster.raft.spi;
 
+import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
+import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.raft.spi.SnapshotSource;
 
 /**
  * Internal interface towards storage entities.
@@ -26,6 +30,9 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
     //         - for small snapshots just use memory and throw them away as sson as unreferenced
     //         - for large snapshots keep them on disk even after they become unreferenced -- for some time, or journal
     //           activity.
+
+    @Beta
+    public abstract @Nullable SnapshotSource findLatestSnapshot() throws IOException;
 
     /**
      * Returns the member name associated with this storage.
