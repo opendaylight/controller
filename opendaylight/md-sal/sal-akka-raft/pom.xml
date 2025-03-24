@@ -80,7 +80,11 @@
                 <configuration>
                     <instructions>
                         <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
-                        <Export-package>org.opendaylight.cluster.raft</Export-package>
+                        <!--
+                            Needed for Class.forName() we use to instantiate RaftPolicy.
+                            It was originally introduce to deal with serialization issues, so take needs to taken
+                            with testing in OSGi if this is to be removed.
+                         -->
                         <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
                 </configuration>
