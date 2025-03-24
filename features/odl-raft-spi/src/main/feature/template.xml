@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.6.0" name="odl-raft-spi">
+    <repository>mvn:org.opendaylight.odlparent/odl-guava/{{versionAsInProject}}/xml/features</repository>
+    <repository>mvn:org.opendaylight.controller/odl-lz4/{{versionAsInProject}}/xml/features</repository>
+    <repository>mvn:org.opendaylight.controller/odl-raft-api/{{versionAsInProject}}/xml/features</repository>
+    <feature name="odl-raft-spi">
+        <feature version="[14,15)">odl-guava</feature>
+        <feature version="{{semVerRange}}">odl-lz4</feature>
+        <feature version="{{semVerRange}}">odl-raft-api</feature>
+        <bundle>mvn:org.opendaylight.controller/raft-spi/{{versionAsInProject}}</bundle>
+    </feature>
+</features>

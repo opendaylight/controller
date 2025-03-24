@@ -9,9 +9,6 @@ package org.opendaylight.raft.spi;
 
 import java.io.IOException;
 import java.io.InputStream;
-import net.jpountz.lz4.LZ4Factory;
-import net.jpountz.lz4.LZ4FrameInputStream;
-import net.jpountz.xxhash.XXHashFactory;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -20,9 +17,11 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public final class Lz4PlainSnapshotStream extends DelegatedSnapshotSource<Lz4SnapshotSource>
         implements PlainSnapshotSource {
-    private static final LZ4Factory LZ4_FACTORY = LZ4Factory.fastestInstance();
-    private static final XXHashFactory HASH_FACTORY = XXHashFactory.fastestInstance();
-
+    /**
+     * Default constructor.
+     *
+     * @param delegate source {@link Lz4SnapshotSource}
+     */
     public Lz4PlainSnapshotStream(final Lz4SnapshotSource delegate) {
         super(delegate);
     }
@@ -34,6 +33,6 @@ public final class Lz4PlainSnapshotStream extends DelegatedSnapshotSource<Lz4Sna
      */
     @Override
     public InputStream openStream() throws IOException {
-        return new LZ4FrameInputStream(delegate().openStream(), LZ4_FACTORY.safeDecompressor(), HASH_FACTORY.hash32());
+        return Lz4Support.newDecompressInputStream(delegate().openStream());
     }
 }
