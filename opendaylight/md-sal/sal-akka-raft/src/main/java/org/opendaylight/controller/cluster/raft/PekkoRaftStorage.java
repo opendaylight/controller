@@ -17,6 +17,7 @@ import org.apache.pekko.persistence.SnapshotProtocol;
 import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
+import org.opendaylight.raft.spi.SnapshotSource;
 
 /**
  * An {@link EnabledRaftStorage} backed by Pekko Persistence of an {@link RaftActor}.
@@ -32,6 +33,12 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
     @Override
     protected String memberId() {
         return actor.memberId();
+    }
+
+    @Override
+    public SnapshotSource findLatestSnapshot() {
+        // TODO: cache last encountered snapshot along with its lifecycle
+        return null;
     }
 
     @Override

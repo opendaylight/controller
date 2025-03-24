@@ -12,10 +12,12 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.annotations.Beta;
 import org.apache.pekko.actor.ActorRef;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.raft.spi.SnapshotSource;
 
 /**
  * A {@link RaftStorage} backing non-persistent mode of {@link RaftActor} operation. It works with any actor which can
@@ -51,6 +53,12 @@ public final class DisabledRaftStorage extends RaftStorage implements ImmediateD
     @Override
     protected String memberId() {
         return memberId;
+    }
+
+    @Override
+    public @Nullable SnapshotSource findLatestSnapshot() {
+        // TODO: cache last encountered snapshot along with its lifecycle
+        return null;
     }
 
     /**
