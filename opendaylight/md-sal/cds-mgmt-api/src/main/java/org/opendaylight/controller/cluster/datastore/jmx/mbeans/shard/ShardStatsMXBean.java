@@ -9,7 +9,9 @@ package org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard;
 
 import java.util.List;
 import javax.management.MXBean;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.mgmt.api.FollowerInfo;
+import org.opendaylight.raft.api.RaftRole;
 
 /**
  * MXBean interface for shard stats.
@@ -61,7 +63,7 @@ public interface ShardStatsMXBean {
 
     String getLeader();
 
-    String getRaftState();
+    @Nullable RaftRole getRaftState();
 
     String getVotedFor();
 

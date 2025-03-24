@@ -17,13 +17,20 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  *
  * @author Thomas Pantelis
  */
+// FIXME: this definitely should be in 'raft.api'
+// FIXME: should be a record, really, but do not commit to Serializable just yet
 @NonNullByDefault
 public final class FollowerInfo {
+    // FIXME: memberId/serverId ?
     private final String id;
+    // FIXME: uint64 safety vs. JMX mapping? Uint64? raft.api.JournalIndex?
     private final long nextIndex;
     private final long matchIndex;
     private final boolean isActive;
+    // FIXME: can this be a java.time.Duration?
     private final String timeSinceLastActivity;
+    // FIXME: document this one, as =false is an topic which requires a documentation link to FAQ/etc.
+    //        it certainly deserves to be in a separate structure.
     private final boolean isVoting;
 
     @ConstructorParameters({"id","nextIndex", "matchIndex", "active", "timeSinceLastActivity", "voting"})
@@ -32,9 +39,9 @@ public final class FollowerInfo {
         this.id = requireNonNull(id);
         this.nextIndex = nextIndex;
         this.matchIndex = matchIndex;
-        this.isActive = active;
+        isActive = active;
         this.timeSinceLastActivity = timeSinceLastActivity;
-        this.isVoting = voting;
+        isVoting = voting;
     }
 
     public String getId() {

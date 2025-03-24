@@ -14,8 +14,10 @@ import javax.management.MXBean;
  *
  * @author Thomas Pantelis
  */
+// FIXME: revisit the methods when moving this mbean.
 @MXBean
 public interface DatastoreConfigurationMXBean {
+
     long getShardTransactionIdleTimeoutInSeconds();
 
     long getOperationTimeoutInSeconds();
