@@ -11,7 +11,7 @@ import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
-import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
+import org.opendaylight.raft.api.EntryMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +57,7 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog {
     }
 
     @Override
-    public void captureSnapshotIfReady(final RaftEntryMeta replicatedLogEntry) {
+    public void captureSnapshotIfReady(final EntryMeta replicatedLogEntry) {
         if (shouldCaptureSnapshot(replicatedLogEntry.index())) {
             boolean started = context.getSnapshotManager().capture(replicatedLogEntry,
                     context.getCurrentBehavior().getReplicatedToAllIndex());

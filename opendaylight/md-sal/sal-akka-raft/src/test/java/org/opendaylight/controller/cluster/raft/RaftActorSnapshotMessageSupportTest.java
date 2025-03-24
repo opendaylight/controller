@@ -26,7 +26,7 @@ import org.opendaylight.controller.cluster.raft.SnapshotManager.ApplyLeaderSnaps
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.persisted.ByteState;
 import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage.CommitSnapshot;
-import org.opendaylight.controller.cluster.raft.spi.ImmutableRaftEntryMeta;
+import org.opendaylight.raft.api.EntryInfo;
 
 /**
  * Unit tests for RaftActorSnapshotMessageSupport.
@@ -57,7 +57,7 @@ class RaftActorSnapshotMessageSupportTest {
 
     @Test
     void testOnApplySnapshot() {
-        final var snapshot = new ApplyLeaderSnapshot("leaderId", 1, ImmutableRaftEntryMeta.of(2, 1),
+        final var snapshot = new ApplyLeaderSnapshot("leaderId", 1, EntryInfo.of(2, 1),
             ByteSource.wrap(new byte[] { 1, 2, 3, 4, 5 }), null, mockCallback);
         sendMessageToSupport(snapshot);
 

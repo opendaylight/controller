@@ -16,8 +16,8 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
-import org.opendaylight.controller.cluster.raft.spi.ImmutableRaftEntryMeta;
-import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
+import org.opendaylight.raft.api.EntryInfo;
+import org.opendaylight.raft.api.EntryMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -320,32 +320,31 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
     }
 
     @NonNullByDefault
-    static final RaftEntryMeta computeLastAppliedEntry(final ReplicatedLog log, final long originalIndex,
-            final @Nullable RaftEntryMeta lastLogEntry, final boolean hasFollowers) {
+    static final EntryMeta computeLastAppliedEntry(final ReplicatedLog log, final long originalIndex,
+            final @Nullable EntryMeta lastLogEntry, final boolean hasFollowers) {
         return hasFollowers ? compulateLastAppliedEntry(log, originalIndex)
             : compulateLastAppliedEntry(log, lastLogEntry);
     }
 
     @NonNullByDefault
-    static final RaftEntryMeta compulateLastAppliedEntry(final ReplicatedLog log, final long originalIndex) {
+    static final EntryMeta compulateLastAppliedEntry(final ReplicatedLog log, final long originalIndex) {
         final var entry = log.lookupMeta(originalIndex);
         if (entry != null) {
             return entry;
         }
 
         final var snapshotIndex = log.getSnapshotIndex();
-        return snapshotIndex > -1 ? ImmutableRaftEntryMeta.of(snapshotIndex, log.getSnapshotTerm())
-            : ImmutableRaftEntryMeta.of(-1, -1);
+        return snapshotIndex > -1 ? EntryInfo.of(snapshotIndex, log.getSnapshotTerm()) : EntryInfo.of(-1, -1);
     }
 
     @NonNullByDefault
-    static final RaftEntryMeta compulateLastAppliedEntry(final ReplicatedLog log,
-            final @Nullable RaftEntryMeta lastLogEntry) {
+    static final EntryMeta compulateLastAppliedEntry(final ReplicatedLog log,
+            final @Nullable EntryMeta lastLogEntry) {
         if (lastLogEntry != null) {
             // since we have persisted the last-log-entry to persistent journal before the capture, we would want
             // to snapshot from this entry.
             return lastLogEntry;
         }
-        return ImmutableRaftEntryMeta.of(-1, -1);
+        return EntryInfo.of(-1, -1);
     }
 }
