@@ -86,11 +86,11 @@ import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolic
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage.CommitSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.ForwardingDataPersistenceProvider;
-import org.opendaylight.controller.cluster.raft.spi.ImmutableRaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
+import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.slf4j.Logger;
@@ -321,7 +321,7 @@ public class RaftActorTest extends AbstractActorTest {
         // Wait for akka's recovery to complete so it doesn't interfere.
         mockRaftActor.waitForRecoveryComplete();
 
-        final var applySnapshot = new ApplyLeaderSnapshot(persistenceId, 0, ImmutableRaftEntryMeta.of(0, 0),
+        final var applySnapshot = new ApplyLeaderSnapshot(persistenceId, 0, EntryInfo.of(0, 0),
             ByteSource.wrap(new byte[1]), null, mock(ApplyLeaderSnapshot.Callback.class));
 
         when(mockSupport.handleSnapshotMessage(same(applySnapshot))).thenReturn(true);
@@ -570,7 +570,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         assertEquals(8, leaderActor.getReplicatedLog().size());
 
-        leaderActor.getRaftActorContext().getSnapshotManager().captureToInstall(ImmutableRaftEntryMeta.of(6, 1), 4,
+        leaderActor.getRaftActorContext().getSnapshotManager().captureToInstall(EntryInfo.of(6, 1), 4,
             "xyzzy");
         verify(leaderActor.snapshotCohortDelegate).createSnapshot(any(), any());
 
@@ -659,8 +659,7 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals(6, followerActor.getReplicatedLog().size());
 
         //snapshot on 4
-        followerActor.getRaftActorContext().getSnapshotManager().captureToInstall(ImmutableRaftEntryMeta.of(5, 1), 4,
-            "xyzzy");
+        followerActor.getRaftActorContext().getSnapshotManager().captureToInstall(EntryInfo.of(5, 1), 4, "xyzzy");
         verify(followerActor.snapshotCohortDelegate).createSnapshot(any(), any());
 
         assertEquals(6, followerActor.getReplicatedLog().size());
@@ -674,8 +673,7 @@ public class RaftActorTest extends AbstractActorTest {
         //fake snapshot on index 7
         assertEquals(RaftRole.Follower, followerActor.getCurrentBehavior().raftRole());
 
-        entries = List.of(new SimpleReplicatedLogEntry(7, 1,
-                new MockRaftActorContext.MockPayload("foo-7")));
+        entries = List.of(new SimpleReplicatedLogEntry(7, 1, new MockRaftActorContext.MockPayload("foo-7")));
         followerActor.handleCommand(new AppendEntries(1, leaderId, 6, 1, entries, 6, 6, (short) 0));
         assertEquals(8, followerActor.getReplicatedLog().size());
 

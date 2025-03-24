@@ -5,15 +5,12 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.raft.spi;
-
-import com.google.common.annotations.Beta;
+package org.opendaylight.raft.api;
 
 /**
- * Metadata about a RAFT journal entry.
+ * Information about a RAFT log entry. EntryInfo
  */
-@Beta
-public interface RaftEntryMeta {
+public interface EntryMeta {
     /**
      * Returns the index of the entry.
      *

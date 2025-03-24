@@ -36,8 +36,8 @@ import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
-import org.opendaylight.controller.cluster.raft.spi.ImmutableRaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
+import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.RaftRole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -649,7 +649,7 @@ public class Follower extends RaftActorBehavior {
         }
 
         actor().tell(new ApplyLeaderSnapshot(leaderId, installSnapshot.getTerm(),
-            ImmutableRaftEntryMeta.of(installSnapshot.getLastIncludedIndex(), installSnapshot.getLastIncludedTerm()),
+            EntryInfo.of(installSnapshot.getLastIncludedIndex(), installSnapshot.getLastIncludedTerm()),
             snapshotBytes, installSnapshot.serverConfig(), new ApplyLeaderSnapshot.Callback() {
                 @Override
                 public void onSuccess() {

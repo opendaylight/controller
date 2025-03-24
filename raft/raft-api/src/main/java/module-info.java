@@ -12,6 +12,7 @@ module org.opendaylight.raft.api {
     exports org.opendaylight.raft.api;
 
     // Annotations
+    requires static transitive java.management;
     requires static transitive org.eclipse.jdt.annotation;
     requires static org.osgi.annotation.bundle;
 }

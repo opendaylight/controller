@@ -69,11 +69,11 @@ import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage.CommitSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.FailingTermInfoStore;
-import org.opendaylight.controller.cluster.raft.spi.ImmutableRaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.utils.ForwardMessageToBehaviorActor;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
+import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.RaftRole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -174,7 +174,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         final var applySnapshot = expectFirstMatching(newFollowerCollectorActor, ApplyLeaderSnapshot.class);
         assertEquals("leader", applySnapshot.leaderId());
         assertEquals(1, applySnapshot.term());
-        assertEquals(ImmutableRaftEntryMeta.of(2, 1), applySnapshot.lastEntry());
+        assertEquals(EntryInfo.of(2, 1), applySnapshot.lastEntry());
         assertNull(applySnapshot.serverConfig());
 
         AddServerReply addServerReply = testKit.expectMsgClass(Duration.ofSeconds(5), AddServerReply.class);
