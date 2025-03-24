@@ -26,8 +26,8 @@ import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
-import org.opendaylight.controller.cluster.raft.spi.ImmutableRaftEntryMeta;
-import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
+import org.opendaylight.raft.api.EntryInfo;
+import org.opendaylight.raft.api.EntryMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +46,7 @@ public final class SnapshotManager {
     public record ApplyLeaderSnapshot(
             String leaderId,
             long term,
-            ImmutableRaftEntryMeta lastEntry,
+            EntryInfo lastEntry,
             ByteSource snapshot,
             @Nullable ClusterConfig serverConfig,
             ApplyLeaderSnapshot.Callback callback) {
@@ -182,7 +182,7 @@ public final class SnapshotManager {
      * @param targetFollower the id of the follower on which to install
      * @return true if capture was started
      */
-    public boolean captureToInstall(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex,
+    public boolean captureToInstall(final EntryMeta lastLogEntry, final long replicatedToAllIndex,
             final String targetFollower) {
         requireNonNull(targetFollower);
         if (!(task instanceof Idle)) {
@@ -219,7 +219,7 @@ public final class SnapshotManager {
      * @param replicatedToAllIndex the current replicatedToAllIndex
      * @return true if capture was started
      */
-    boolean captureWithForcedTrim(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex) {
+    boolean captureWithForcedTrim(final EntryMeta lastLogEntry, final long replicatedToAllIndex) {
         if (!(task instanceof Idle)) {
             LOG.debug("{}: captureWithForcedTrim should not be called in state {}", memberId(), task);
             return false;
@@ -234,7 +234,7 @@ public final class SnapshotManager {
      * @param replicatedToAllIndex the current replicatedToAllIndex
      * @return true if capture was started
      */
-    public boolean capture(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex) {
+    public boolean capture(final EntryMeta lastLogEntry, final long replicatedToAllIndex) {
         if (!(task instanceof Idle)) {
             LOG.debug("{}: capture should not be called in state {}", memberId(), task);
             return false;
@@ -588,14 +588,14 @@ public final class SnapshotManager {
      * @param replicatedToAllIndex the index of the last entry replicated to all followers.
      * @return a new CaptureSnapshot instance.
      */
-    @NonNull CaptureSnapshot newCaptureSnapshot(final RaftEntryMeta lastLogEntry, final long replicatedToAllIndex,
+    @NonNull CaptureSnapshot newCaptureSnapshot(final EntryMeta lastLogEntry, final long replicatedToAllIndex,
             final boolean mandatoryTrim) {
         final var replLog = context.getReplicatedLog();
         final var lastAppliedEntry = AbstractReplicatedLog.computeLastAppliedEntry(replLog, replLog.getLastApplied(),
             lastLogEntry, context.hasFollowers());
 
         final var entry = replLog.get(replicatedToAllIndex);
-        final var replicatedToAllEntry = entry != null ? entry : ImmutableRaftEntryMeta.of(-1, -1);
+        final var replicatedToAllEntry = entry != null ? entry : EntryInfo.of(-1, -1);
 
         long lastAppliedIndex = lastAppliedEntry.index();
         long lastAppliedTerm = lastAppliedEntry.term();

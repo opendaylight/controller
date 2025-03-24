@@ -12,7 +12,7 @@ import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
-import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
+import org.opendaylight.raft.api.EntryMeta;
 
 /**
  * Represents the ReplicatedLog that needs to be kept in sync by the RaftActor.
@@ -24,8 +24,8 @@ public interface ReplicatedLog {
      * Return the replicated log entry at the specified index.
      *
      * @param index the index of the log entry
-     * @return the ReplicatedLogEntry if found, otherwise null if the adjusted index less than 0 or
-     *         greater than the size of the in-memory journal
+     * @return the ReplicatedLogEntry if found, otherwise null if the adjusted index less than 0 or greater than the
+     *         size of the in-memory journal
      */
     @Nullable ReplicatedLogEntry get(long index);
 
@@ -33,10 +33,10 @@ public interface ReplicatedLog {
      * Return metadata about a replicated entry.
      *
      * @param index the index of the log entry
-     * @return the RaftEntryMeta if found, otherwise null if the adjusted index less than 0 or
-     *         greater than the size of the in-memory journal
+     * @return the EntryMeta if found, otherwise null if the adjusted index less than 0 or greater than the size of the
+     *         in-memory journal
      */
-    default @Nullable RaftEntryMeta lookupMeta(final long index) {
+    default @Nullable EntryMeta lookupMeta(final long index) {
         return get(index);
     }
 
@@ -52,7 +52,7 @@ public interface ReplicatedLog {
      *
      * @return the last replicated log entry in the log or null of not found.
      */
-    default @Nullable RaftEntryMeta lastMeta() {
+    default @Nullable EntryMeta lastMeta() {
         return last();
     }
 
@@ -268,7 +268,7 @@ public interface ReplicatedLog {
      *
      * @param replicatedLogEntry the last log entry.
      */
-    void captureSnapshotIfReady(RaftEntryMeta replicatedLogEntry);
+    void captureSnapshotIfReady(EntryMeta replicatedLogEntry);
 
     /**
      * Determines if a snapshot should be captured based on the count/memory consumed.

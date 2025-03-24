@@ -99,7 +99,6 @@ import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolic
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage.CommitSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.ForwardingDataPersistenceProvider;
-import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
@@ -107,6 +106,7 @@ import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelpe
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
+import org.opendaylight.raft.api.EntryMeta;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
@@ -128,8 +128,7 @@ public class ShardTest extends AbstractShardTest {
     public void testRegisterDataTreeChangeListener() throws Exception {
         final ShardTestKit testKit = new ShardTestKit(getSystem());
         final TestActorRef<Shard> shard = actorFactory.createTestActor(
-            newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()),
-            "testRegisterDataTreeChangeListener");
+            newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()), "testRegisterDataTreeChangeListener");
 
         ShardTestKit.waitUntilLeader(shard);
 
@@ -1512,10 +1511,10 @@ public class ShardTest extends AbstractShardTest {
         final var shardActor = shard.underlyingActor();
         final var snapshotManager = shardActor.getRaftActorContext().getSnapshotManager();
 
-        shardActor.executeInSelf(() -> snapshotManager.capture(mock(RaftEntryMeta.class), -1));
+        shardActor.executeInSelf(() -> snapshotManager.capture(mock(EntryMeta.class), -1));
         awaitAndValidateSnapshot(latch, savedSnapshot, expectedRoot);
 
-        shardActor.executeInSelf(() -> snapshotManager.capture(mock(RaftEntryMeta.class), -1));
+        shardActor.executeInSelf(() -> snapshotManager.capture(mock(EntryMeta.class), -1));
         awaitAndValidateSnapshot(latch, savedSnapshot, expectedRoot);
     }
 

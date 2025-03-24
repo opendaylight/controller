@@ -27,8 +27,8 @@ import org.opendaylight.controller.cluster.raft.persisted.ByteState;
 import org.opendaylight.controller.cluster.raft.persisted.ByteStateSnapshotCohort;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
-import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.spi.TestTermInfoStore;
+import org.opendaylight.raft.api.EntryMeta;
 
 public class MockRaftActorContext extends RaftActorContextImpl {
     private ActorSystem system;
@@ -146,7 +146,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         }
 
         @Override
-        public void captureSnapshotIfReady(final RaftEntryMeta replicatedLogEntry) {
+        public void captureSnapshotIfReady(final EntryMeta replicatedLogEntry) {
             // No-op
         }
 
