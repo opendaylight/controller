@@ -18,6 +18,11 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 public final class FilePlainSnapshotSource extends FileSnapshotSource implements PlainSnapshotSource {
+    /**
+     * Default constructor.
+     *
+     * @param path file path
+     */
     public FilePlainSnapshotSource(final Path path) {
         super(path);
     }
