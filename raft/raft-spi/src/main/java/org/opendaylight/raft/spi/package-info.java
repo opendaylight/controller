@@ -8,4 +8,5 @@
 /**
  * Classes that are helpful for implementing RAFT.
  */
+@org.osgi.annotation.bundle.Export
 package org.opendaylight.raft.spi;

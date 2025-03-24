@@ -8,7 +8,7 @@
 package org.opendaylight.raft.spi;
 
 /**
- * A LZ4-compressed {@link SnapshotSource}.
+ * A <a href="https://en.wikipedia.org/wiki/LZ4_(compression_algorithm)">LZ4</a>-compressed {@link SnapshotSource}.
  */
 public non-sealed interface Lz4SnapshotSource extends SnapshotSource {
     // Nothing else
