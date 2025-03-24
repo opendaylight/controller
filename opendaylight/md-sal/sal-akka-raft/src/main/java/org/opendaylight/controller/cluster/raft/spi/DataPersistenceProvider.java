@@ -21,7 +21,7 @@ import org.opendaylight.raft.spi.SnapshotSource;
 /**
  * This interface provides methods to persist data and is an abstraction of the akka-persistence persistence API.
  */
-// FIXME: find a better name for this interface. It is heavily influenced by Peeko Persistence, most notably the weird
+// FIXME: find a better name for this interface. It is heavily influenced by Pekko Persistence, most notably the weird
 //        API around snapshots and message deletion -- which assumes the entity requesting it is the subclass itself.
 @NonNullByDefault
 public interface DataPersistenceProvider {
@@ -43,6 +43,7 @@ public interface DataPersistenceProvider {
      * @param entry the journal entry to persist
      * @param callback the callback when persistence is complete
      */
+    // FIXME: no callback and throw an IOException
     <T> void persist(T entry, Consumer<T> callback);
 
     /**
@@ -52,6 +53,7 @@ public interface DataPersistenceProvider {
      * @param entry the journal entry to persist
      * @param callback the callback when persistence is complete
      */
+    // FIXME: a BiConsumer<? super T, ? super Throwable> callback
     <T> void persistAsync(T entry, Consumer<T> callback);
 
     /**
@@ -59,7 +61,7 @@ public interface DataPersistenceProvider {
      *
      * @param snapshot the snapshot object to save
      */
-    // FIXME: take a callback
+    // FIXME: add a BiConsumer<SnapshotSource, ? super Throwable> callback
     void saveSnapshot(Snapshot snapshot);
 
     /**
@@ -67,7 +69,8 @@ public interface DataPersistenceProvider {
      *
      * @param criteria the search criteria
      */
-    // FIXME: take a callback
+    // FIXME: criteria == max size? max snapshots?
+    // FIXME: throws IOException
     void deleteSnapshots(SnapshotSelectionCriteria criteria);
 
     /**
@@ -75,7 +78,7 @@ public interface DataPersistenceProvider {
      *
      * @param sequenceNumber the sequence number
      */
-    // FIXME: take a callback
+    // FIXME: throws IOException
     void deleteMessages(long sequenceNumber);
 
     /**
