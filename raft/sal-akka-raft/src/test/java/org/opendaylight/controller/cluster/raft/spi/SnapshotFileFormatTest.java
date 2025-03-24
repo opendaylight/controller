@@ -32,7 +32,6 @@ import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
-import org.opendaylight.controller.cluster.raft.spi.SnapshotFile.RaftRecovery;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.raft.spi.CompressionSupport;
@@ -107,7 +106,7 @@ class SnapshotFileFormatTest {
         assertEquals(EntryInfo.of(-1, -1), open.lastIncluded());
         assertEquals(TIMESTAMP, open.timestamp());
 
-        assertEquals(new RaftRecovery(SERVER_CONFIG, ENTRIES), open.readRaftRecovery());
+        assertEquals(new RaftSnapshot(SERVER_CONFIG, ENTRIES), open.readRaftSnapshot());
 
         assertEquals(STATE, open.readSnapshot(ByteState.reader()));
     }
