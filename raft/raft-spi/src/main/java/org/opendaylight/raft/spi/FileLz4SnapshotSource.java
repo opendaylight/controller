@@ -18,6 +18,11 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 public final class FileLz4SnapshotSource extends FileSnapshotSource implements Lz4SnapshotSource {
+    /**
+     * Default constructor.
+     *
+     * @param path file path
+     */
     public FileLz4SnapshotSource(final Path path) {
         super(path);
     }

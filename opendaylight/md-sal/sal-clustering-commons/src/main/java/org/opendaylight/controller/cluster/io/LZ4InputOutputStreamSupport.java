@@ -7,38 +7,37 @@
  */
 package org.opendaylight.controller.cluster.io;
 
+import static java.util.Objects.requireNonNull;
+
+import com.google.common.base.MoreObjects;
 import com.google.common.io.ByteSource;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
-import net.jpountz.lz4.LZ4Factory;
-import net.jpountz.lz4.LZ4FrameInputStream;
-import net.jpountz.lz4.LZ4FrameOutputStream;
-import net.jpountz.lz4.LZ4FrameOutputStream.FLG.Bits;
-import net.jpountz.xxhash.XXHashFactory;
+import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.raft.spi.Lz4BlockSize;
+import org.opendaylight.raft.spi.Lz4Support;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 final class LZ4InputOutputStreamSupport extends InputOutputStreamFactory {
     private static final Logger LOG = LoggerFactory.getLogger(LZ4InputOutputStreamSupport.class);
-    private static final LZ4Factory LZ4_FACTORY = LZ4Factory.fastestInstance();
-    private static final XXHashFactory HASH_FACTORY = XXHashFactory.fastestInstance();
 
-    private final LZ4FrameOutputStream.BLOCKSIZE blocksize;
+    private final @NonNull Lz4BlockSize blockSize;
 
-    LZ4InputOutputStreamSupport(final LZ4FrameOutputStream.BLOCKSIZE blocksize) {
-        this.blocksize = blocksize;
+    LZ4InputOutputStreamSupport(final Lz4BlockSize blockSize) {
+        this.blockSize = requireNonNull(blockSize);
     }
 
     @Override
     public InputStream createInputStream(final ByteSource input) throws IOException {
-        final InputStream stream = input.openStream();
+        final var in = input.openStream();
         try {
-            return new LZ4FrameInputStream(stream, LZ4_FACTORY.safeDecompressor(), HASH_FACTORY.hash32());
+            return Lz4Support.newDecompressInputStream(in);
         } catch (IOException e) {
-            stream.close();
+            in.close();
             LOG.warn("Error loading with lz4 decompression, using default one", e);
             return input.openBufferedStream();
         }
@@ -47,11 +46,11 @@ final class LZ4InputOutputStreamSupport extends InputOutputStreamFactory {
     @Override
     public InputStream createInputStream(final File file) throws IOException {
         final var path = file.toPath();
-        final var fileInput = Files.newInputStream(path);
+        final var in = Files.newInputStream(path);
         try {
-            return new LZ4FrameInputStream(fileInput, LZ4_FACTORY.safeDecompressor(), HASH_FACTORY.hash32());
+            return Lz4Support.newDecompressInputStream(in);
         } catch (IOException e) {
-            fileInput.close();
+            in.close();
             LOG.warn("Error loading file with lz4 decompression, using default one", e);
             return defaultCreateInputStream(path);
         }
@@ -59,13 +58,17 @@ final class LZ4InputOutputStreamSupport extends InputOutputStreamFactory {
 
     @Override
     public OutputStream createOutputStream(final File file) throws IOException {
-        return new LZ4FrameOutputStream(Files.newOutputStream(file.toPath()), blocksize, -1,
-            LZ4_FACTORY.fastCompressor(), HASH_FACTORY.hash32(), Bits.BLOCK_INDEPENDENCE);
+        // FIXME: pass down file size?
+        return Lz4Support.newCompressOutputStream(Files.newOutputStream(file.toPath()), blockSize, -1);
     }
 
     @Override
     public OutputStream wrapOutputStream(final OutputStream output) throws IOException {
-        return new LZ4FrameOutputStream(output, blocksize, -1, LZ4_FACTORY.fastCompressor(), HASH_FACTORY.hash32(),
-            Bits.BLOCK_INDEPENDENCE);
+        return Lz4Support.newCompressOutputStream(output, blockSize);
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this).add("blockSize", blockSize).toString();
     }
 }

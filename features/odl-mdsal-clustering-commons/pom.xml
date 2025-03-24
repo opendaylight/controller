@@ -29,7 +29,7 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
-            <artifactId>odl-raft-api</artifactId>
+            <artifactId>odl-raft-spi</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
