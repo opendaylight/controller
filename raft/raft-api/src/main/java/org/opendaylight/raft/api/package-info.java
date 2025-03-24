@@ -8,4 +8,5 @@
 /**
  * Classes that constitute what would be a RAFT protocol API.
  */
+@org.osgi.annotation.bundle.Export
 package org.opendaylight.raft.api;
