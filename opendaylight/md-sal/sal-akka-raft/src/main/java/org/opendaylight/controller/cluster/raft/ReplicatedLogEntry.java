@@ -8,12 +8,12 @@
 package org.opendaylight.controller.cluster.raft;
 
 import org.opendaylight.controller.cluster.raft.messages.Payload;
-import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
+import org.opendaylight.raft.api.EntryMeta;
 
 /**
  * Represents one entry in the replicated log.
  */
-public interface ReplicatedLogEntry extends RaftEntryMeta {
+public interface ReplicatedLogEntry extends EntryMeta {
     /**
      * Returns the payload/data to be replicated.
      *

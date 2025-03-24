@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.raft;
 
 import java.util.function.Consumer;
-import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
+import org.opendaylight.raft.api.EntryMeta;
 
 final class MockReplicatedLog extends AbstractReplicatedLog {
     MockReplicatedLog() {
@@ -30,7 +30,7 @@ final class MockReplicatedLog extends AbstractReplicatedLog {
     }
 
     @Override
-    public void captureSnapshotIfReady(final RaftEntryMeta replicatedLogEntry) {
+    public void captureSnapshotIfReady(final EntryMeta replicatedLogEntry) {
         // No-op
     }
 

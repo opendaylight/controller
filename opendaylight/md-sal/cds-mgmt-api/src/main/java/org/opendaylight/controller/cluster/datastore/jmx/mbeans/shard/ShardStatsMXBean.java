@@ -38,7 +38,7 @@ public interface ShardStatsMXBean {
 
     long getReadWriteTransactionCount();
 
-    // FIXME: can we merge these using RaftEntryMeta?
+    // FIXME: can we merge these using EntryInfo?
     long getLastLogIndex();
 
     long getLastLogTerm();

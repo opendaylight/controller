@@ -27,8 +27,8 @@ import org.opendaylight.controller.cluster.raft.persisted.MigratedSerializable;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
-import org.opendaylight.controller.cluster.raft.spi.RaftEntryMeta;
 import org.opendaylight.controller.cluster.raft.spi.TermInfo;
+import org.opendaylight.raft.api.EntryMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -266,7 +266,7 @@ class RaftActorRecoverySupport {
         }
     }
 
-    private void takeRecoverySnapshot(final RaftEntryMeta logEntry) {
+    private void takeRecoverySnapshot(final EntryMeta logEntry) {
         LOG.info("Time for recovery snapshot on entry with index {}", logEntry.index());
         final var snapshotManager = context.getSnapshotManager();
         if (snapshotManager.capture(logEntry, -1)) {
