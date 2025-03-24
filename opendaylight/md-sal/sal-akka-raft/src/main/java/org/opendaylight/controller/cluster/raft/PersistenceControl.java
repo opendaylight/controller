@@ -47,7 +47,8 @@ final class PersistenceControl extends ForwardingDataPersistenceProvider {
     }
 
     PersistenceControl(final RaftActor raftActor) {
-        this(new DisabledRaftStorage(raftActor, raftActor.self()), new PekkoRaftStorage(raftActor));
+        this(new DisabledRaftStorage(raftActor.memberId(), raftActor, raftActor.self()),
+            new PekkoRaftStorage(raftActor));
     }
 
     @Override

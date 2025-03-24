@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.raft.spi;
 
+import com.google.common.base.MoreObjects;
+import com.google.common.base.MoreObjects.ToStringHelper;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -15,7 +17,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public abstract sealed class RaftStorage implements DataPersistenceProvider
         permits DisabledRaftStorage, EnabledRaftStorage {
-    // Nothing else for now, but there is lot more to come.
     // FIXME: we should bave the concept of being 'open', when we have a thread pool to perform the asynchronous part
     //        of RaftActorSnapshotCohort.createSnapshot(), using virtual-thread-per-task
 
@@ -25,4 +26,20 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
     //         - for small snapshots just use memory and throw them away as sson as unreferenced
     //         - for large snapshots keep them on disk even after they become unreferenced -- for some time, or journal
     //           activity.
+
+    /**
+     * Returns the member name associated with this storage.
+     *
+     * @return the member name associated with this storage
+     */
+    protected abstract String memberId();
+
+    @Override
+    public final String toString() {
+        return addToStringAtrributes(MoreObjects.toStringHelper(this)).toString();
+    }
+
+    protected ToStringHelper addToStringAtrributes(final ToStringHelper helper) {
+        return helper.add("memberId", memberId());
+    }
 }

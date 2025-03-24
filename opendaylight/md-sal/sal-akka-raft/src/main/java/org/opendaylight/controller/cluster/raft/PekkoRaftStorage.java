@@ -30,6 +30,11 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
     }
 
     @Override
+    protected String memberId() {
+        return actor.memberId();
+    }
+
+    @Override
     public <T> void persist(final T entry, final Consumer<T> callback) {
         actor.persist(entry, callback::accept);
     }
