@@ -11,6 +11,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
@@ -49,10 +50,10 @@ final class PersistenceControl extends ForwardingDataPersistenceProvider {
         delegate = disabledStorage;
     }
 
-    PersistenceControl(final RaftActor raftActor, final CompressionSupport compression,
+    PersistenceControl(final RaftActor raftActor, final Path directory, final CompressionSupport compression,
             final Configuration streamConfig) {
-        this(new DisabledRaftStorage(raftActor.memberId(), raftActor, raftActor.self(), compression, streamConfig),
-            new PekkoRaftStorage(raftActor, compression, streamConfig));
+        this(new DisabledRaftStorage(raftActor.memberId(), raftActor, directory, raftActor.self(), compression,
+            streamConfig), new PekkoRaftStorage(raftActor, directory, compression, streamConfig));
     }
 
     void start() throws IOException {

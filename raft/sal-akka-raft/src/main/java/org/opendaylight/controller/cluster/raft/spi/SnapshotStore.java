@@ -34,12 +34,24 @@ public interface SnapshotStore {
         void invoke(Exception failure, T success);
     }
 
+    /**
+     * Returns the last available snapshot.
+     *
+     * @return the last available snapshot
+     * @throws IOException if an I/O error occurs
+     */
     @Nullable SnapshotFile lastSnapshot() throws IOException;
 
-//    @NonNullByDefault
-//    <T extends StateSnapshot> void storeSnapshot(T snapshot, StateSnapshot.Writer<T> writer,
-//        Callback<SnapshotFile> callback);
-
+    /**
+     * Serialize a {@link StateSnapshot} and make the result available as an {@link InstallableSnapshot} to the
+     * specified callback.
+     *
+     * @param <T> the type of {@link StateSnapshot}
+     * @param lastIncluded last included index/term
+     * @param snapshot the snapshot
+     * @param writer the writer to use
+     * @param callback the callback to invoke
+     */
     @NonNullByDefault
     <T extends StateSnapshot> void streamToInstall(EntryInfo lastIncluded, T snapshot, StateSnapshot.Writer<T> writer,
         Callback<InstallableSnapshot> callback);
@@ -49,8 +61,12 @@ public interface SnapshotStore {
      *
      * @param snapshot the snapshot object to save
      */
-    // FIXME: replace with the below, combining the save functionality
+    // FIXME: Callback<SnapshotFile> callback
     void saveSnapshot(@NonNull Snapshot snapshot);
+
+    //  @NonNullByDefault
+    //  <T extends StateSnapshot> void storeSnapshot(T snapshot, StateSnapshot.Writer<T> writer,
+    //      Callback<SnapshotFile> callback);
 
     /**
      * Deletes snapshots based on the given criteria.

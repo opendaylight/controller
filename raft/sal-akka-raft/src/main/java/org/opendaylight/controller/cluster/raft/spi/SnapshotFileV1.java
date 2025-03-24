@@ -317,7 +317,7 @@ final class SnapshotFileV1 implements SnapshotFile {
     }
 
     @Override
-    public RaftRecovery readRaftRecovery() throws IOException {
+    public RaftSnapshot readRaftSnapshot() throws IOException {
         try (var dis = serverStream.openDataInput()) {
             dis.skipNBytes(HEADER_SIZE);
 
@@ -329,7 +329,7 @@ final class SnapshotFileV1 implements SnapshotFile {
                 throw new IOException("Invalid ReplicatedLogEntry count " + uaCount);
             }
             if (uaCount == 0) {
-                return new RaftRecovery(clusterConfig, ImmutableList.of());
+                return new RaftSnapshot(clusterConfig, ImmutableList.of());
             }
 
             final var uaBuilder = ImmutableList.<ReplicatedLogEntry>builderWithExpectedSize(uaCount);
@@ -356,7 +356,7 @@ final class SnapshotFileV1 implements SnapshotFile {
                     prevTerm = term;
                 }
             }
-            return new RaftRecovery(clusterConfig, uaBuilder.build());
+            return new RaftSnapshot(clusterConfig, uaBuilder.build());
         }
     }
 

@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft.spi;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.Beta;
+import java.nio.file.Path;
 import org.apache.pekko.actor.ActorRef;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -41,19 +42,12 @@ public final class DisabledRaftStorage extends RaftStorage implements ImmediateD
         }
     }
 
-    private final String memberId;
     private final ActorRef actorRef;
 
-    public DisabledRaftStorage(final String memberId, final ExecuteInSelfActor executeInSelf, final ActorRef actorRef,
-            final CompressionSupport compression, final Configuration streamConfig) {
-        super(executeInSelf, compression, streamConfig);
-        this.memberId = requireNonNull(memberId);
+    public DisabledRaftStorage(final String memberId, final ExecuteInSelfActor executeInSelf, final Path directory,
+            final ActorRef actorRef, final CompressionSupport compression, final Configuration streamConfig) {
+        super(memberId, executeInSelf, directory, compression, streamConfig);
         this.actorRef = requireNonNull(actorRef);
-    }
-
-    @Override
-    protected String memberId() {
-        return memberId;
     }
 
     @Override
