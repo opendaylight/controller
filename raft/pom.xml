@@ -28,5 +28,6 @@
     <modules>
         <module>raft-api</module>
         <module>raft-journal</module>
+        <module>raft-spi</module>
     </modules>
 </project>
