@@ -21,7 +21,6 @@ import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
 @NonNullByDefault
 public final class LocalAccess {
     private static final Path TERM_INFO_PROPS = Path.of("TermInfo.properties");
-    private static final Path SNAPSHOTS = Path.of("snapshots");
 
     private final String memberId;
     private final TermInfoStore termInfoStore;
@@ -42,8 +41,8 @@ public final class LocalAccess {
         return memberId;
     }
 
-    Path snapshotDir() {
-        return stateDir.resolve(SNAPSHOTS);
+    Path stateDir() {
+        return stateDir;
     }
 
     TermInfoStore termInfoStore() {
