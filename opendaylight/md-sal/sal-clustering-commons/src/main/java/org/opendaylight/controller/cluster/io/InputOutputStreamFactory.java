@@ -19,8 +19,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import net.jpountz.lz4.LZ4FrameOutputStream;
 import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.raft.spi.Lz4BlockSize;
 
 @Beta
 public abstract class InputOutputStreamFactory {
@@ -33,10 +33,16 @@ public abstract class InputOutputStreamFactory {
     }
 
     public static @NonNull InputOutputStreamFactory lz4(final String blockSize) {
-        return lz4(LZ4FrameOutputStream.BLOCKSIZE.valueOf("SIZE_" + blockSize));
+        return lz4(switch(blockSize) {
+            case "64KB" -> Lz4BlockSize.LZ4_64KB;
+            case "256KB" -> Lz4BlockSize.LZ4_256KB;
+            case "1MB" -> Lz4BlockSize.LZ4_1MB;
+            case "4MB" -> Lz4BlockSize.LZ4_4MB;
+            default -> throw new IllegalArgumentException("Invalid block size '" + blockSize + "'");
+        });
     }
 
-    public static @NonNull InputOutputStreamFactory lz4(final LZ4FrameOutputStream.BLOCKSIZE blockSize) {
+    public static @NonNull InputOutputStreamFactory lz4(final Lz4BlockSize blockSize) {
         return new LZ4InputOutputStreamSupport(requireNonNull(blockSize));
     }
 

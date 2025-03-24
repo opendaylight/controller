@@ -43,6 +43,11 @@
                 <artifactId>raft-journal</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>raft-spi</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <!-- Atomix -->
             <dependency>
@@ -280,6 +285,14 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>odl-lz4</artifactId>
+                <version>${project.version}</version>
+                <type>xml</type>
+                <classifier>features</classifier>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <!-- FIXME: 'odl-pekko' -->
                 <artifactId>odl-controller-akka</artifactId>
                 <version>${project.version}</version>
                 <type>xml</type>
@@ -287,6 +300,7 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <!-- FIXME: 'odl-scala' -->
                 <artifactId>odl-controller-scala</artifactId>
                 <version>${project.version}</version>
                 <type>xml</type>
@@ -344,6 +358,13 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>odl-raft-api</artifactId>
+                <version>${project.version}</version>
+                <type>xml</type>
+                <classifier>features</classifier>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>odl-raft-spi</artifactId>
                 <version>${project.version}</version>
                 <type>xml</type>
                 <classifier>features</classifier>
