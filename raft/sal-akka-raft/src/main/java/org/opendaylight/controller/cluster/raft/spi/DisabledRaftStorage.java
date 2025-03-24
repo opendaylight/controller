@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft.spi;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.Beta;
+import java.nio.file.Path;
 import org.apache.pekko.actor.ActorRef;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -19,7 +20,6 @@ import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.raft.spi.CompressionSupport;
 import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
-import org.opendaylight.raft.spi.SnapshotSource;
 
 /**
  * A {@link RaftStorage} backing non-persistent mode of {@link RaftActor} operation. It works with any actor which can
@@ -42,19 +42,12 @@ public final class DisabledRaftStorage extends RaftStorage implements ImmediateD
         }
     }
 
-    private final String memberId;
     private final ActorRef actorRef;
 
-    public DisabledRaftStorage(final String memberId, final ExecuteInSelfActor executeInSelf, final ActorRef actorRef,
-            final CompressionSupport compression, final Configuration streamConfig) {
-        super(executeInSelf, compression, streamConfig);
-        this.memberId = requireNonNull(memberId);
+    public DisabledRaftStorage(final String memberId, final ExecuteInSelfActor executeInSelf, final Path directory,
+            final ActorRef actorRef, final CompressionSupport compression, final Configuration streamConfig) {
+        super(memberId, executeInSelf, directory, compression, streamConfig);
         this.actorRef = requireNonNull(actorRef);
-    }
-
-    @Override
-    protected String memberId() {
-        return memberId;
     }
 
     @Override
@@ -73,7 +66,7 @@ public final class DisabledRaftStorage extends RaftStorage implements ImmediateD
     }
 
     @Override
-    public @Nullable SnapshotSource tryLatestSnapshot() {
+    public @Nullable SnapshotFile tryLatestSnapshot() {
         // TODO: cache last encountered snapshot along with its lifecycle
         return null;
     }

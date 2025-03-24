@@ -30,7 +30,7 @@ public abstract class ForwardingDataPersistenceProvider implements DataPersisten
     }
 
     @Override
-    public @Nullable SnapshotSource tryLatestSnapshot() throws IOException {
+    public @Nullable SnapshotFile tryLatestSnapshot() throws IOException {
         return delegate().tryLatestSnapshot();
     }
 
