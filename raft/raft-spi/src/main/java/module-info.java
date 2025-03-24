@@ -5,11 +5,16 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.raft.spi;
-
 /**
- * A LZ4-compressed {@link SnapshotSource}.
+ * RAFT APIs.
  */
-public non-sealed interface Lz4SnapshotSource extends SnapshotSource {
-    // Nothing else
+module org.opendaylight.raft.spi {
+    exports org.opendaylight.raft.spi;
+
+    requires com.google.common;
+    requires org.lz4.java;
+
+    // Annotations
+    requires static transitive org.eclipse.jdt.annotation;
+    requires static org.osgi.annotation.bundle;
 }

@@ -46,7 +46,9 @@
         <module>odl-controller-scala</module>
         <module>odl-controller-akka</module>
 
+        <module>odl-lz4</module>
         <module>odl-raft-api</module>
+        <module>odl-raft-spi</module>
 
         <!-- Single features, to be cleaned up -->
         <module>odl-controller-blueprint</module>
