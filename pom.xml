@@ -26,15 +26,17 @@
     <module>features</module>
     <module>karaf</module>
 
-    <module>pekko</module>
     <module>atomix-storage</module>
+    <module>benchmark</module>
     <module>bnd-parent</module>
     <module>bundle-parent</module>
-    <module>benchmark</module>
     <module>jolokia</module>
-    <module>raft-journal</module>
+    <module>pekko</module>
+    <module>raft</module>
 
+    <!-- FIXME: remove Blueprint -->
     <module>opendaylight/blueprint</module>
+    <!-- FIXME: inline 'md-sal' as 'mdsal' -->
     <module>opendaylight/md-sal</module>
   </modules>
 

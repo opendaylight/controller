@@ -7,52 +7,55 @@
  and is available at http://www.eclipse.org/legal/epl-v10.html
  -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>org.opendaylight.odlparent</groupId>
-    <artifactId>odlparent-lite</artifactId>
-    <version>14.0.8</version>
-    <relativePath/>
-  </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.opendaylight.odlparent</groupId>
+        <artifactId>odlparent-lite</artifactId>
+        <version>14.0.8</version>
+        <relativePath/>
+    </parent>
 
-  <groupId>org.opendaylight.controller</groupId>
-  <artifactId>features-aggregator</artifactId>
-  <version>11.0.0-SNAPSHOT</version>
-  <packaging>pom</packaging>
+    <groupId>org.opendaylight.controller</groupId>
+    <artifactId>features-aggregator</artifactId>
+    <version>11.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
 
-  <properties>
-    <maven.deploy.skip>true</maven.deploy.skip>
-    <maven.install.skip>true</maven.install.skip>
-  </properties>
+    <properties>
+        <maven.deploy.skip>true</maven.deploy.skip>
+        <maven.install.skip>true</maven.install.skip>
+    </properties>
 
-  <modules>
-    <!-- Common infra to cut down definitions -->
-    <module>single-feature-parent</module>
+    <modules>
+        <!-- Common infra to cut down definitions -->
+        <module>parent</module>
+        <module>single-feature-parent</module>
 
-    <!-- Production features -->
-    <module>features-controller</module>
+        <!-- Production features -->
+        <module>features-controller</module>
 
-    <!-- Experimental features -->
-    <module>features-controller-experimental</module>
-    <module>odl-toaster</module>
+        <!-- Experimental features -->
+        <module>features-controller-experimental</module>
+        <module>odl-toaster</module>
 
-    <!-- CSIT features -->
-    <module>features-controller-testing</module>
-    <module>odl-clustering-test-app</module>
-    <module>odl-mdsal-benchmark</module>
+        <!-- CSIT features -->
+        <module>features-controller-testing</module>
+        <module>odl-clustering-test-app</module>
+        <module>odl-mdsal-benchmark</module>
 
-    <!-- Scala/Akka features -->
-    <module>odl-controller-scala</module>
-    <module>odl-controller-akka</module>
+        <!-- Scala/Akka features -->
+        <module>odl-controller-scala</module>
+        <module>odl-controller-akka</module>
 
-    <!-- Single features, to be cleaned up -->
-    <module>odl-controller-blueprint</module>
-    <module>odl-controller-broker-local</module>
-    <module>odl-controller-mdsal-common</module>
-    <module>odl-jolokia</module>
-    <module>odl-mdsal-broker</module>
-    <module>odl-mdsal-clustering-commons</module>
-    <module>odl-mdsal-distributed-datastore</module>
-    <module>odl-mdsal-remoterpc-connector</module>
-  </modules>
+        <module>odl-raft-api</module>
+
+        <!-- Single features, to be cleaned up -->
+        <module>odl-controller-blueprint</module>
+        <module>odl-controller-broker-local</module>
+        <module>odl-controller-mdsal-common</module>
+        <module>odl-jolokia</module>
+        <module>odl-mdsal-broker</module>
+        <module>odl-mdsal-clustering-commons</module>
+        <module>odl-mdsal-distributed-datastore</module>
+        <module>odl-mdsal-remoterpc-connector</module>
+    </modules>
 </project>

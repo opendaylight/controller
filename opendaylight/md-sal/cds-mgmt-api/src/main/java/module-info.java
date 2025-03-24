@@ -7,11 +7,12 @@
  */
 module org.opendaylight.controller.cluster.mgmt.api {
     exports org.opendaylight.controller.cluster.mgmt.api;
-    // FIXME: 4.0.0: collapse these packages
+    // FIXME: 12.0.0: collapse this to something more reasonable, like 'raft.server', 'raft.datastore' or somesuch
     exports org.opendaylight.controller.cluster.datastore.jmx.mbeans;
     exports org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard;
 
     // Annotation-only dependencies
     requires static transitive java.management;
     requires static transitive org.eclipse.jdt.annotation;
+    requires static transitive org.opendaylight.raft.api;
 }

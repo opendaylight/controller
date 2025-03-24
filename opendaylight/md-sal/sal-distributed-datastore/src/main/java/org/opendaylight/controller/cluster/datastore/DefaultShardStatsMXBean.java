@@ -23,6 +23,7 @@ import org.opendaylight.controller.cluster.mgmt.api.FollowerInfo;
 import org.opendaylight.controller.cluster.raft.base.messages.InitiateCaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
+import org.opendaylight.raft.api.RaftRole;
 
 /**
  * Maintains statistics for a shard.
@@ -81,8 +82,8 @@ final class DefaultShardStatsMXBean extends AbstractMXBean implements ShardStats
     }
 
     @Override
-    public String getRaftState() {
-        return getOnDemandRaftState().getRaftState().name();
+    public RaftRole getRaftState() {
+        return getOnDemandRaftState().getRaftState();
     }
 
     @Override
