@@ -23,11 +23,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.PoisonPill;
 import org.apache.pekko.actor.Status;
+import org.apache.pekko.japi.Procedure;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SnapshotProtocol;
 import org.eclipse.jdt.annotation.NonNull;
@@ -131,7 +133,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         localAccess = new LocalAccess(memberId, stateDir.resolve(memberId));
         final var streamConfig = new FileBackedOutputStream.Configuration(config.getFileBackedStreamingThreshold(),
             config.getTempFileDirectory());
-        persistenceControl = new PersistenceControl(this, config.getPreferredCompression(), streamConfig);
+        persistenceControl = new PersistenceControl(this, localAccess.stateDir(), config.getPreferredCompression(),
+            streamConfig);
 
         context = new RaftActorContextImpl(self(), getContext(), localAccess, peerAddresses, config, payloadVersion,
             persistenceControl, this::handleApplyState, this::executeInSelf);
@@ -972,6 +975,26 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 }
             }, null, RaftActorLeadershipTransferCohort.USE_DEFAULT_LEADER_TIMEOUT);
         }
+    }
+
+    @Override
+    @Deprecated(since = "11.0.0", forRemoval = true)
+    public final <A> void persist(final A entry, final Procedure<A> callback) {
+        throw new UnsupportedOperationException();
+    }
+
+    final <A> void persist(final A entry, final Consumer<A> callback) {
+        super.persist(entry, callback::accept);
+    }
+
+    @Override
+    @Deprecated(since = "11.0.0", forRemoval = true)
+    public final <A> void persistAsync(final A entry, final Procedure<A> callback) {
+        throw new UnsupportedOperationException();
+    }
+
+    final <A> void persistAsync(final A entry, final Consumer<A> callback) {
+        super.persistAsync(entry, callback::accept);
     }
 
     /**

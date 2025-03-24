@@ -17,7 +17,6 @@ import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
-import org.opendaylight.raft.spi.SnapshotSource;
 
 /**
  * An immediate {@link DataPersistenceProvider}. Offloads asynchronous persist responses via {@link ExecuteInSelfActor}
@@ -34,7 +33,7 @@ public interface ImmediateDataPersistenceProvider extends DataPersistenceProvide
     }
 
     @Override
-    default @Nullable SnapshotSource tryLatestSnapshot() throws IOException {
+    default @Nullable SnapshotFile tryLatestSnapshot() throws IOException {
         return null;
     }
 

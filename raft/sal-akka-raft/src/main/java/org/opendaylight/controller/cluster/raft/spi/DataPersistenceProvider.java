@@ -44,7 +44,7 @@ public interface DataPersistenceProvider {
     boolean isRecoveryApplicable();
 
     @Beta
-    @Nullable SnapshotSource tryLatestSnapshot() throws IOException;
+    @Nullable SnapshotFile tryLatestSnapshot() throws IOException;
 
     /**
      * Persists an entry to the applicable journal synchronously.

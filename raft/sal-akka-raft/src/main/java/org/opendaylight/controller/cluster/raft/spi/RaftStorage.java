@@ -12,6 +12,8 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,10 +35,10 @@ import org.slf4j.LoggerFactory;
  */
 public abstract sealed class RaftStorage implements DataPersistenceProvider
         permits DisabledRaftStorage, EnabledRaftStorage {
-    private abstract class CancellableTask<T> implements Runnable {
+    protected abstract class CancellableTask<T> implements Runnable {
         private final BiConsumer<? super T, ? super Throwable> callback;
 
-        CancellableTask(final BiConsumer<? super T, ? super Throwable> callback) {
+       protected CancellableTask(final BiConsumer<? super T, ? super Throwable> callback) {
             this.callback = requireNonNull(callback);
         }
 
@@ -44,7 +46,7 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
         @SuppressWarnings("checkstyle:illegalCatch")
         public final void run() {
             if (!tasks.remove(this)) {
-                LOG.debug("{}: not executing task {}", memberId(), this);
+                LOG.debug("{}: not executing task {}", memberId, this);
                 return;
             }
 
@@ -58,7 +60,7 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
             executeInSelf.executeInSelf(() -> callback.accept(result, null));
         }
 
-        abstract @NonNull T compute() throws Exception;
+        protected abstract @NonNull T compute() throws Exception;
     }
 
     private final class StreamSnapshotTask extends CancellableTask<SnapshotSource> {
@@ -71,7 +73,7 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
         }
 
         @Override
-        SnapshotSource compute() throws IOException {
+        protected SnapshotSource compute() throws IOException {
             try (var outer = new FileBackedOutputStream(streamConfig)) {
                 try (var inner = compression.encodeOutput(outer)) {
                     snapshot.writeTo(inner);
@@ -83,17 +85,21 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
 
     private static final Logger LOG = LoggerFactory.getLogger(RaftStorage.class);
 
-    private final Set<CancellableTask<?>> tasks = ConcurrentHashMap.newKeySet();
-    private final @NonNull CompressionSupport compression;
-    private final @NonNull Configuration streamConfig;
-
     protected final @NonNull ExecuteInSelfActor executeInSelf;
+    protected final @NonNull CompressionSupport compression;
+    protected final @NonNull String memberId;
+    protected final @NonNull Path directory;
+
+    private final Set<CancellableTask<?>> tasks = ConcurrentHashMap.newKeySet();
+    private final @NonNull Configuration streamConfig;
 
     private ExecutorService executor;
 
-    protected RaftStorage(final ExecuteInSelfActor executeInSelf, final CompressionSupport compression,
-            final Configuration streamConfig) {
+    protected RaftStorage(final String memberId, final ExecuteInSelfActor executeInSelf, final Path directory,
+            final CompressionSupport compression, final Configuration streamConfig) {
+        this.memberId = requireNonNull(memberId);
         this.executeInSelf = requireNonNull(executeInSelf);
+        this.directory = requireNonNull(directory);
         this.compression = requireNonNull(compression);
         this.streamConfig = requireNonNull(streamConfig);
     }
@@ -105,23 +111,18 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
     //         - for large snapshots keep them on disk even after they become unreferenced -- for some time, or journal
     //           activity.
 
-    /**
-     * Returns the member name associated with this storage.
-     *
-     * @return the member name associated with this storage
-     */
-    protected abstract String memberId();
-
     public final void start() throws IOException {
         if (executor != null) {
-            throw new IllegalStateException("Storage " + memberId() + " already started");
+            throw new IllegalStateException("Storage " + memberId + " already started");
         }
 
+        Files.createDirectories(directory);
+
         final var local = Executors.newThreadPerTaskExecutor(Thread.ofVirtual()
-            .name(memberId() + "-%d", ThreadLocalRandom.current().nextInt(0, 1_000_000))
+            .name(memberId + "-%d", ThreadLocalRandom.current().nextInt(0, 1_000_000))
             .factory());
         executor = local;
-        LOG.debug("{}: started executor", memberId());
+        LOG.debug("{}: started executor", memberId);
 
         try {
             postStart();
@@ -133,7 +134,7 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
     }
 
     private void stopExecutor(final ExecutorService service) {
-        LOG.debug("{}: stopped executor with {} remaining tasks", memberId(), service.shutdownNow().size());
+        LOG.debug("{}: stopped executor with {} remaining tasks", memberId, service.shutdownNow().size());
     }
 
     protected abstract void postStart() throws IOException;
@@ -141,7 +142,7 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
     public final void stop() {
         final var local = executor;
         if (local == null) {
-            throw new IllegalStateException("Storage " + memberId() + " already stopped");
+            throw new IllegalStateException("Storage " + memberId + " already stopped");
         }
 
         try {
@@ -158,7 +159,7 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
             if (tasks.remove(task)) {
                 task.callback.accept(null, new CancellationException("Storage closed"));
             } else {
-                LOG.debug("{}: not cancelling task {}", memberId(), task);
+                LOG.debug("{}: not cancelling task {}", memberId, task);
             }
         }
     }
@@ -180,13 +181,17 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
     }
 
     protected ToStringHelper addToStringAtrributes(final ToStringHelper helper) {
-        return helper.add("memberId", memberId()).add("compression", compression).add("streams", streamConfig);
+        return helper
+            .add("memberId", memberId)
+            .add("directory", directory)
+            .add("compression", compression)
+            .add("streams", streamConfig);
     }
 
     private ExecutorService checkNotClosed() {
         final var local = executor;
         if (local == null) {
-            throw new IllegalStateException("Storage " + memberId() + " already stopped");
+            throw new IllegalStateException("Storage " + memberId + " already stopped");
         }
         return local;
     }
