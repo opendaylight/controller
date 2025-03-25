@@ -905,6 +905,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         return nextIndex == -1 || !replLog.isPresent(nextIndex) && replLog.isInSnapshot(nextIndex);
     }
 
+    // FIXME: use SnapshotSource
     @NonNullByDefault
     public final void sendInstallSnapshot(final long index, final long term, final ByteSource bytes) {
         setSnapshot(index, term, bytes);

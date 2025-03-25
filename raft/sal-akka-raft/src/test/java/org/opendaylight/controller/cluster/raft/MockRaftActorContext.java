@@ -104,6 +104,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
             }
 
             @Override
+            @Deprecated(forRemoval = true)
             public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
                 createSnapshotProcedure.accept(installSnapshotStream);
             }
@@ -116,6 +117,11 @@ public class MockRaftActorContext extends RaftActorContextImpl {
             @Override
             public ByteState deserializeSnapshot(final InputStreamProvider snapshotBytes) throws IOException {
                 return ByteState.of(snapshotBytes.openStream().readAllBytes());
+            }
+
+            @Override
+            public void serializeSnapshot(final ByteState snapshotState, final OutputStream out) throws IOException {
+                out.write(snapshotState.bytes());
             }
         });
 
