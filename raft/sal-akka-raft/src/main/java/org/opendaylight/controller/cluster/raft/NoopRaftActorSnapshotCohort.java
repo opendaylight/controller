@@ -36,12 +36,18 @@ public final class NoopRaftActorSnapshotCohort implements RaftActorSnapshotCohor
     }
 
     @Override
+    @Deprecated(forRemoval = true)
     public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
         // No-op
     }
 
     @Override
     public void applySnapshot(final EmptyState snapshotState) {
+        // No-op
+    }
+
+    @Override
+    public void serializeSnapshot(final EmptyState snapshotState, final OutputStream out) {
         // No-op
     }
 
