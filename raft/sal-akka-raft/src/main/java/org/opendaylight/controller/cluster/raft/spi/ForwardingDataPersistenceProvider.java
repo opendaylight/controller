@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft.spi;
 
 import com.google.common.base.MoreObjects;
 import java.io.IOException;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SnapshotProtocol;
@@ -46,6 +47,12 @@ public abstract class ForwardingDataPersistenceProvider implements DataPersisten
     @Override
     public void saveSnapshot(final Snapshot entry) {
         delegate().saveSnapshot(entry);
+    }
+
+    @Override
+    public void streamToInstall(final WritableSnapshot snapshot,
+            final BiConsumer<SnapshotSource, ? super Throwable> callback) {
+        delegate().streamToInstall(snapshot, callback);
     }
 
     @Override
