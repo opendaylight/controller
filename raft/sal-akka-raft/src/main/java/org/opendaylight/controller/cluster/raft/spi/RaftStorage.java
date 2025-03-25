@@ -12,14 +12,18 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import java.io.IOException;
-import java.util.concurrent.Callable;
+import java.util.Set;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.BiConsumer;
 import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.raft.spi.FileBackedOutputStream;
 import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
 import org.opendaylight.raft.spi.SnapshotFileFormat;
+import org.opendaylight.raft.spi.SnapshotSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,20 +32,66 @@ import org.slf4j.LoggerFactory;
  */
 public abstract sealed class RaftStorage implements DataPersistenceProvider
         permits DisabledRaftStorage, EnabledRaftStorage {
+    private abstract class CancellableTask<T> implements Runnable {
+        private final BiConsumer<? super T, ? super Throwable> callback;
+
+        CancellableTask(final BiConsumer<? super T, ? super Throwable> callback) {
+            this.callback = requireNonNull(callback);
+        }
+
+        @Override
+        @SuppressWarnings("checkstyle:illegalCatch")
+        public final void run() {
+            if (!tasks.remove(this)) {
+                LOG.debug("{}: not executing task {}", memberId(), this);
+                return;
+            }
+
+            final T result;
+            try {
+                result = compute();
+            } catch (Exception e) {
+                callback.accept(null, e);
+                return;
+            }
+            callback.accept(result, null);
+        }
+
+        abstract @NonNull T compute() throws Exception;
+    }
+
+    private final class StreamSnapshotTask extends CancellableTask<SnapshotSource> {
+        private final WritableSnapshot snapshot;
+
+        StreamSnapshotTask(final BiConsumer<SnapshotSource, ? super Throwable> callback,
+                final WritableSnapshot snapshot) {
+            super(callback);
+            this.snapshot = requireNonNull(snapshot);
+        }
+
+        @Override
+        SnapshotSource compute() throws IOException {
+            try (var outer = new FileBackedOutputStream(streamConfig)) {
+                try (var inner = preferredFormat.encodeOutput(outer)) {
+                    snapshot.writeTo(inner);
+                }
+                return preferredFormat.sourceFor(outer.asByteSource()::openStream);
+            }
+        }
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(RaftStorage.class);
 
+    private final Set<CancellableTask<?>> tasks = ConcurrentHashMap.newKeySet();
     private final @NonNull SnapshotFileFormat preferredFormat;
     private final @NonNull Configuration streamConfig;
+
+    private ExecutorService executor;
 
     protected RaftStorage(final SnapshotFileFormat preferredFormat, final Configuration streamConfig) {
         this.preferredFormat = requireNonNull(preferredFormat);
         this.streamConfig = requireNonNull(streamConfig);
     }
-
-    private ExecutorService executor;
-
-    // FIXME: we should have the concept of being 'open', when we have a thread pool to perform the asynchronous part
-    //        of RaftActorSnapshotCohort.createSnapshot(), using virtual-thread-per-task
 
     // FIXME: this class should also be tracking the last snapshot bytes -- i.e. what AbstractLeader.SnapshotHolder.
     //        for file-based enabled storage, this means keeping track of the last snapshot we have. For disabled the
@@ -84,35 +134,36 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
     protected abstract void postStart() throws IOException;
 
     public final void stop() {
-        final var local = executor;
-        if (local == null) {
-            throw new IllegalStateException("Storage " + memberId() + " already stopped");
-        }
+        final var local = checkNotClosed();
 
         try {
             preStop();
         } finally {
             executor = null;
             stopExecutor(local);
+            cancelTasks();
+        }
+    }
+
+    private void cancelTasks() {
+        for (var task : tasks) {
+            if (tasks.remove(task)) {
+                task.callback.accept(null, new CancellationException("Storage closed"));
+            } else {
+                LOG.debug("{}: not cancelling task {}", memberId(), task);
+            }
         }
     }
 
     protected abstract void preStop();
 
-    protected final <T> @NonNull Future<T> submit(final @NonNull Callable<T> task) {
-        return doSubmit(requireNonNull(task));
-    }
-
-    protected final @NonNull Future<Void> submit(final @NonNull Runnable task) {
-        return doSubmit(Executors.<Void>callable(task, null));
-    }
-
-    private <T> @NonNull Future<T> doSubmit(final @NonNull Callable<T> task) {
-        final var local = executor;
-        if (local == null) {
-            throw new IllegalStateException("Storage " + memberId() + " is stopped");
-        }
-        return local.submit(task);
+    @Override
+    public final void streamToInstall(final WritableSnapshot snapshot,
+            final BiConsumer<SnapshotSource, ? super Throwable> callback) {
+        final var local = checkNotClosed();
+        final var task = new StreamSnapshotTask(callback, snapshot);
+        tasks.add(task);
+        local.execute(task);
     }
 
     @Override
@@ -122,5 +173,13 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
 
     protected ToStringHelper addToStringAtrributes(final ToStringHelper helper) {
         return helper.add("memberId", memberId()).add("preferredFormat", preferredFormat).add("streams", streamConfig);
+    }
+
+    private ExecutorService checkNotClosed() {
+        final var local = executor;
+        if (local == null) {
+            throw new IllegalStateException("Storage " + memberId() + " already stopped");
+        }
+        return local;
     }
 }

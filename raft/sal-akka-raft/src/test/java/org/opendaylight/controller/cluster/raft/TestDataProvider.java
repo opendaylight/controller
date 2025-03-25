@@ -9,10 +9,16 @@ package org.opendaylight.controller.cluster.raft;
 
 import static java.util.Objects.requireNonNull;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.function.BiConsumer;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.ImmediateDataPersistenceProvider;
+import org.opendaylight.raft.spi.ByteArray;
+import org.opendaylight.raft.spi.PlainSnapshotSource;
+import org.opendaylight.raft.spi.SnapshotSource;
 
 @NonNullByDefault
 final class TestDataProvider implements ImmediateDataPersistenceProvider {
@@ -34,6 +40,20 @@ final class TestDataProvider implements ImmediateDataPersistenceProvider {
     @Override
     public void saveSnapshot(final Snapshot snapshot) {
         // no-op
+    }
+
+    @Override
+    public void streamToInstall(final WritableSnapshot snapshot,
+            final BiConsumer<SnapshotSource, ? super Throwable> callback) {
+        final byte[] bytes;
+        try (var baos = new ByteArrayOutputStream()) {
+            snapshot.writeTo(baos);
+            bytes = baos.toByteArray();
+        } catch (IOException e) {
+            actor.executeInSelf(() -> callback.accept(null, e));
+            return;
+        }
+        actor.executeInSelf(() -> callback.accept(new PlainSnapshotSource(ByteArray.wrap(bytes)), null));
     }
 
     void setActor(final ExecuteInSelfActor actor) {
