@@ -139,7 +139,7 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
             try (var inner = preferredFormat.encodeOutput(outer)) {
                 writeTo.writeTo(inner);
             }
-            return preferredFormat.sourceForByteSource(outer.asByteSource());
+            return preferredFormat.sourceFor(outer.asByteSource()::openStream);
         }
     }
 

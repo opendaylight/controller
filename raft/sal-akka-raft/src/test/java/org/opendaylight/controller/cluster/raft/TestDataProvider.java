@@ -7,13 +7,13 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import com.google.common.io.ByteSource;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.function.BiConsumer;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.ImmediateDataPersistenceProvider;
-import org.opendaylight.raft.spi.ByteSourcePlainSnapshotSource;
+import org.opendaylight.raft.spi.PlainSnapshotSource;
 import org.opendaylight.raft.spi.SnapshotSource;
 
 final class TestDataProvider implements ImmediateDataPersistenceProvider {
@@ -39,7 +39,7 @@ final class TestDataProvider implements ImmediateDataPersistenceProvider {
             callback.accept(null, e);
             return;
         }
-        callback.accept(new ByteSourcePlainSnapshotSource(ByteSource.wrap(bytes)), null);
+        callback.accept(new PlainSnapshotSource(() -> new ByteArrayInputStream(bytes)), null);
     }
 
     @Override
