@@ -9,10 +9,8 @@ package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import java.io.OutputStream;
 import org.apache.pekko.persistence.SaveSnapshotFailure;
 import org.apache.pekko.persistence.SaveSnapshotSuccess;
 import org.apache.pekko.persistence.SnapshotMetadata;
@@ -22,8 +20,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.ApplyLeaderSnapshot;
-import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
-import org.opendaylight.controller.cluster.raft.persisted.ByteState;
 import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage.CommitSnapshot;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.ByteArray;
@@ -62,15 +58,6 @@ class RaftActorSnapshotMessageSupportTest {
         sendMessageToSupport(snapshot);
 
         verify(mockSnapshotManager).applyFromLeader(snapshot);
-    }
-
-    @Test
-    void testOnCaptureSnapshotReply() {
-        final var state = ByteState.of(new byte[]{1,2,3,4,5});
-        final var stream = mock(OutputStream.class);
-        sendMessageToSupport(new CaptureSnapshotReply(state, stream));
-
-        verify(mockSnapshotManager).persist(eq(state), eq(stream));
     }
 
     @Test

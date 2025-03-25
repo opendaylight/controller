@@ -22,15 +22,14 @@ import static org.mockito.Mockito.verify;
 import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.PoisonPill;
@@ -52,6 +51,7 @@ import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorLeadershipTransferCohort;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.TestDataProvider;
 import org.opendaylight.controller.cluster.raft.VotingState;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
@@ -68,6 +68,7 @@ import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ByteState;
+import org.opendaylight.controller.cluster.raft.persisted.ByteStateSnapshotCohort;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.policy.DefaultRaftPolicy;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
@@ -756,8 +757,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         actorContext.getReplicatedLog().removeFrom(0);
 
-        final var installSnapshotStream = new AtomicReference<Optional<OutputStream>>();
-        actorContext.setCreateSnapshotProcedure(stream -> installSnapshotStream.set(Optional.ofNullable(stream)));
+        final var mockState = ByteState.of(new byte[] { 1, 2, 3 });
+        actorContext.getSnapshotManager().setSnapshotCohort((ByteStateSnapshotCohort) () -> mockState);
 
         leader = new Leader(actorContext);
         actorContext.setCurrentBehavior(leader);
@@ -779,22 +780,24 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         //update follower timestamp
         leader.markFollowerActive(FOLLOWER_ID);
 
+        final var runnables = new ArrayList<Runnable>();
+        final var persistence = assertInstanceOf(TestDataProvider.class, actorContext.getPersistenceProvider());
+        persistence.setActor(runnables::add);
+
         // Sending this AppendEntriesReply forces the Leader to capture a snapshot, which subsequently gets
         // installed with a SendInstallSnapshot
         leader.handleMessage(leaderActor, new AppendEntriesReply(FOLLOWER_ID, 1, false, 1, 1, (short) 1, true, false,
                 RaftVersions.CURRENT_VERSION));
 
         assertTrue("isCapturing", actorContext.getSnapshotManager().isCapturing());
+        assertEquals(1, runnables.size());
+        persistence.setActor(Runnable::run);
 
         final var cs = actorContext.getSnapshotManager().getCaptureSnapshot();
         assertEquals(3, cs.getLastAppliedIndex());
         assertEquals(1, cs.getLastAppliedTerm());
         assertEquals(4, cs.getLastIndex());
         assertEquals(2, cs.getLastTerm());
-
-        final var optStream = installSnapshotStream.get();
-        assertNotNull("Create snapshot procedure not invoked", optStream);
-        final var stream = optStream.orElseThrow(() -> new AssertionError("Install snapshot stream present"));
 
         MessageCollectorActor.clearMessages(followerActor);
 
@@ -808,9 +811,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         assertSame("CaptureSnapshot instance", cs, actorContext.getSnapshotManager().getCaptureSnapshot());
 
         // Now simulate the CaptureSnapshotReply to initiate snapshot install - the first chunk should be sent.
-        final byte[] bytes = new byte[] { 1, 2, 3 };
-        stream.write(bytes);
-        actorContext.getSnapshotManager().persist(ByteState.of(bytes), stream);
+        runnables.getFirst().run();
+
         MessageCollectorActor.expectFirstMatching(followerActor, InstallSnapshot.class);
 
         // Sending another AppendEntriesReply to force a snapshot should be a no-op and not try to re-send the chunk.
@@ -819,7 +821,6 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
                 RaftVersions.CURRENT_VERSION));
         MessageCollectorActor.assertNoneMatching(followerActor, InstallSnapshot.class, 200);
     }
-
 
     @Test
     public void testInstallSnapshot() {
@@ -1847,6 +1848,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         MockRaftActorContext followerActorContext = createFollowerActorContextWithLeader();
         Follower follower = new Follower(followerActorContext);
         followerActor.underlyingActor().setBehavior(follower);
+        followerActorContext.setCurrentBehavior(follower);
 
         MockRaftActorContext leaderActorContext = createActorContextWithFollower();
         ((DefaultConfigParamsImpl) leaderActorContext.getConfigParams()).setHeartBeatInterval(Duration.ofSeconds(1000));
@@ -1854,8 +1856,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         leader = new Leader(leaderActorContext);
         leader.getFollower(FOLLOWER_ID).markFollowerActive();
-        RaftActorBehavior newBehavior = leader.handleMessage(leaderActor, Leader.ISOLATED_LEADER_CHECK);
-        assertTrue("Expected Leader", newBehavior instanceof Leader);
+        assertInstanceOf(Leader.class, leader.handleMessage(leaderActor, Leader.ISOLATED_LEADER_CHECK));
     }
 
     private RaftActorBehavior setupIsolatedLeaderCheckTestWithTwoFollowers(final RaftPolicy raftPolicy) {

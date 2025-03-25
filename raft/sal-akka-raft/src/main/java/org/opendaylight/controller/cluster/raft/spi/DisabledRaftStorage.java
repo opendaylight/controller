@@ -85,12 +85,14 @@ public final class DisabledRaftStorage extends RaftStorage implements ImmediateD
      *
      * <p>The way snapshotting works is:
      * <ol>
-     *   <li>RaftActor calls {@link RaftActorSnapshotCohort#createSnapshot(ActorRef, java.io.OutputStream)}
-     *   <li>the cohort sends a CaptureSnapshotReply and RaftActor then calls this method
+     *   <li>RaftActor calls {@link RaftActorSnapshotCohort#takeSnapshot()}</li>
+     *   <li>RaftActor calls {@code DataPersistenceProvider.streamToInstall()}</li>
+     *   <li>the storage eventually calls {@code RaftActorSnapshotCohort.serializeSnapshot()} and notifies RaftActor
+     *       and it calls this method</li>
      *   <li>When saveSnapshot is invoked on the akka-persistence API it uses the SnapshotStore to save
      *       the snapshot. The SnapshotStore sends SaveSnapshotSuccess or SaveSnapshotFailure. When the
      *       RaftActor gets SaveSnapshot success it commits the snapshot to the in-memory journal. This
-     *       commitSnapshot is mimicking what is done in SaveSnapshotSuccess.
+     *       commitSnapshot is mimicking what is done in SaveSnapshotSuccess.</li>
      * </ol>
      */
     @Override

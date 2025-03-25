@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.raft;
 
 import java.io.OutputStream;
-import org.apache.pekko.actor.ActorRef;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
 import org.opendaylight.raft.spi.InputStreamProvider;
@@ -36,12 +35,12 @@ public final class NoopRaftActorSnapshotCohort implements RaftActorSnapshotCohor
     }
 
     @Override
-    public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
+    public void applySnapshot(final EmptyState snapshotState) {
         // No-op
     }
 
     @Override
-    public void applySnapshot(final EmptyState snapshotState) {
+    public void serializeSnapshot(final EmptyState snapshotState, final OutputStream out) {
         // No-op
     }
 
