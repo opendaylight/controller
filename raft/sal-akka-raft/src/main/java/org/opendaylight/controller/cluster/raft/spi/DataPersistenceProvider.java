@@ -9,10 +9,13 @@ package org.opendaylight.controller.cluster.raft.spi;
 
 import com.google.common.annotations.Beta;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SnapshotProtocol;
 import org.apache.pekko.persistence.SnapshotSelectionCriteria;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
@@ -23,8 +26,15 @@ import org.opendaylight.raft.spi.SnapshotSource;
  */
 // FIXME: find a better name for this interface. It is heavily influenced by Pekko Persistence, most notably the weird
 //        API around snapshots and message deletion -- which assumes the entity requesting it is the subclass itself.
-@NonNullByDefault
 public interface DataPersistenceProvider {
+    @Beta
+    @NonNullByDefault
+    @FunctionalInterface
+    interface WritableSnapshot {
+
+        void writeTo(OutputStream out) throws IOException;
+    }
+
     /**
      * Returns whether or not persistence recovery is applicable/enabled.
      *
@@ -43,8 +53,9 @@ public interface DataPersistenceProvider {
      * @param entry the journal entry to persist
      * @param callback the callback when persistence is complete
      */
-    // FIXME: no callback and throw an IOException
-    <T> void persist(T entry, Consumer<T> callback);
+    // FIXME: replace with:
+    //        void persist(Object entry) throws IOException
+    <T> void persist(@NonNull T entry, @NonNull Consumer<T> callback);
 
     /**
      * Persists an entry to the applicable journal asynchronously.
@@ -53,16 +64,20 @@ public interface DataPersistenceProvider {
      * @param entry the journal entry to persist
      * @param callback the callback when persistence is complete
      */
-    // FIXME: a BiConsumer<? super T, ? super Throwable> callback
-    <T> void persistAsync(T entry, Consumer<T> callback);
+    // FIXME: replace with:
+    //        void persistAsync(T entry, BiConsumer<? super T, ? super Throwable> callback)
+    <T> void persistAsync(@NonNull T entry, @NonNull Consumer<T> callback);
 
     /**
      * Saves a snapshot.
      *
      * @param snapshot the snapshot object to save
      */
-    // FIXME: add a BiConsumer<SnapshotSource, ? super Throwable> callback
-    void saveSnapshot(Snapshot snapshot);
+    // FIXME: replace with the below, combining the save functionality
+    void saveSnapshot(@NonNull Snapshot snapshot);
+
+    void streamToInstall(@NonNull WritableSnapshot snapshot,
+        @NonNull BiConsumer<SnapshotSource, ? super Throwable> callback);
 
     /**
      * Deletes snapshots based on the given criteria.
@@ -71,7 +86,7 @@ public interface DataPersistenceProvider {
      */
     // FIXME: criteria == max size? max snapshots?
     // FIXME: throws IOException
-    void deleteSnapshots(SnapshotSelectionCriteria criteria);
+    void deleteSnapshots(@NonNull SnapshotSelectionCriteria criteria);
 
     /**
      * Deletes journal entries up to the given sequence number.
@@ -94,7 +109,7 @@ public interface DataPersistenceProvider {
      * @param response A {@link JournalProtocol} response
      * @return {@code true} if the response was handled
      */
-    boolean handleJournalResponse(JournalProtocol.Response response);
+    boolean handleJournalResponse(JournalProtocol.@NonNull Response response);
 
     /**
      * Receive and potentially handle a {@link SnapshotProtocol} response.
@@ -102,5 +117,5 @@ public interface DataPersistenceProvider {
      * @param response A {@link SnapshotProtocol} response
      * @return {@code true} if the response was handled
      */
-    boolean handleSnapshotResponse(SnapshotProtocol.Response response);
+    boolean handleSnapshotResponse(SnapshotProtocol.@NonNull Response response);
 }
