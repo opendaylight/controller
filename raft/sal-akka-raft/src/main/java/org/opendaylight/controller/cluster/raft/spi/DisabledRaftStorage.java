@@ -14,6 +14,8 @@ import org.apache.pekko.actor.ActorRef;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
+import org.opendaylight.controller.cluster.io.FileBackedOutputStream;
+import org.opendaylight.controller.cluster.io.FileBackedOutputStreamFactory;
 import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
@@ -44,13 +46,15 @@ public final class DisabledRaftStorage extends RaftStorage implements ImmediateD
     private final String memberId;
     private final ExecuteInSelfActor actor;
     private final ActorRef actorRef;
+    private final FileBackedOutputStreamFactory streamFactory;
 
     public DisabledRaftStorage(final String memberId, final ExecuteInSelfActor actor, final ActorRef actorRef,
-            final SnapshotFileFormat preferredFormat) {
+            final SnapshotFileFormat preferredFormat, final FileBackedOutputStreamFactory streamFactory) {
         super(preferredFormat);
         this.memberId = requireNonNull(memberId);
         this.actor = requireNonNull(actor);
         this.actorRef = requireNonNull(actorRef);
+        this.streamFactory = requireNonNull(streamFactory);
     }
 
     @Override
@@ -98,5 +102,10 @@ public final class DisabledRaftStorage extends RaftStorage implements ImmediateD
     @Override
     public void executeInSelf(final Runnable runnable) {
         actor.executeInSelf(runnable);
+    }
+
+    @Override
+    protected FileBackedOutputStream newFileBackedStream() {
+        return streamFactory.newInstance();
     }
 }
