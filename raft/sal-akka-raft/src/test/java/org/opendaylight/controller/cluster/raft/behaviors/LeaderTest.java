@@ -820,7 +820,6 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         MessageCollectorActor.assertNoneMatching(followerActor, InstallSnapshot.class, 200);
     }
 
-
     @Test
     public void testInstallSnapshot() {
         logStart("testInstallSnapshot");
