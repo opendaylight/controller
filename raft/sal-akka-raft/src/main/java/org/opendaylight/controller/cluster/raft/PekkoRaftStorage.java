@@ -36,6 +36,16 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
     }
 
     @Override
+    protected void postStart() {
+        // No-op
+    }
+
+    @Override
+    protected void preStop() {
+        // No-op
+    }
+
+    @Override
     public SnapshotSource tryLatestSnapshot() {
         // TODO: cache last encountered snapshot along with its lifecycle
         return null;
