@@ -7,17 +7,30 @@
  */
 package org.opendaylight.controller.cluster.raft.spi;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
-import org.eclipse.jdt.annotation.NonNullByDefault;
+import java.io.IOException;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadLocalRandom;
+import org.eclipse.jdt.annotation.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Internal interface towards storage entities.
  */
-@NonNullByDefault
 public abstract sealed class RaftStorage implements DataPersistenceProvider
         permits DisabledRaftStorage, EnabledRaftStorage {
-    // FIXME: we should bave the concept of being 'open', when we have a thread pool to perform the asynchronous part
+    private static final Logger LOG = LoggerFactory.getLogger(RaftStorage.class);
+
+    private ExecutorService executor;
+
+    // FIXME: we should have the concept of being 'open', when we have a thread pool to perform the asynchronous part
     //        of RaftActorSnapshotCohort.createSnapshot(), using virtual-thread-per-task
 
     // FIXME: this class should also be tracking the last snapshot bytes -- i.e. what AbstractLeader.SnapshotHolder.
@@ -33,6 +46,64 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
      * @return the member name associated with this storage
      */
     protected abstract String memberId();
+
+    public final void start() throws IOException {
+        if (executor != null) {
+            throw new IllegalStateException("Storage " + memberId() + " already started");
+        }
+
+        final var local = Executors.newThreadPerTaskExecutor(Thread.ofVirtual()
+            .name(memberId() + "-%d", ThreadLocalRandom.current().nextInt())
+            .factory());
+        executor = local;
+        LOG.debug("{}: started executor", memberId());
+
+        try {
+            postStart();
+        } catch (IOException e) {
+            executor = null;
+            stopExecutor(local);
+            throw e;
+        }
+    }
+
+    private void stopExecutor(final ExecutorService service) {
+        LOG.debug("{}: stopped executor with {} remaining tasks", memberId(), service.shutdownNow().size());
+    }
+
+    protected abstract void postStart() throws IOException;
+
+    public final void stop() {
+        final var local = executor;
+        if (local == null) {
+            throw new IllegalStateException("Storage " + memberId() + " already stopped");
+        }
+
+        try {
+            preStop();
+        } finally {
+            executor = null;
+            stopExecutor(local);
+        }
+    }
+
+    protected abstract void preStop();
+
+    protected final <T> @NonNull Future<T> submit(final @NonNull Callable<T> task) {
+        return doSubmit(requireNonNull(task));
+    }
+
+    protected final @NonNull Future<Void> submit(final @NonNull Runnable task) {
+        return doSubmit(Executors.<Void>callable(task, null));
+    }
+
+    private <T> @NonNull Future<T> doSubmit(final @NonNull Callable<T> task) {
+        final var local = executor;
+        if (local == null) {
+            throw new IllegalStateException("Storage " + memberId() + " is stopped");
+        }
+        return local.submit(task);
+    }
 
     @Override
     public final String toString() {
