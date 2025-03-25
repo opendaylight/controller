@@ -26,6 +26,7 @@ import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnap
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
 import org.opendaylight.controller.cluster.io.InputOutputStreamFactory;
 import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
+import org.opendaylight.raft.spi.Lz4BlockSize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +57,7 @@ final class ShardSnapshotCohort implements RaftActorSnapshotCohort<ShardSnapshot
         final var applyHistoryId = new LocalHistoryIdentifier(ClientIdentifier.create(
             FrontendIdentifier.create(memberName, SNAPSHOT_APPLY), 0), 0);
         final var streamFactory = context.isUseLz4Compression()
-                ? InputOutputStreamFactory.lz4("256KB") : InputOutputStreamFactory.simple();
+                ? InputOutputStreamFactory.lz4(Lz4BlockSize.LZ4_256KB) : InputOutputStreamFactory.simple();
         // Create a snapshot actor. This actor will act as a worker to offload snapshot serialization for all requests.
         final var snapshotActor = actorContext.actorOf(ShardSnapshotActor.props(streamFactory),
             "shard-" + memberName.getName() + ':' + "snapshot-read");
