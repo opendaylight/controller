@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft.spi;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.opendaylight.raft.api.TermInfo;
 
 @NonNullByDefault
 public final class FailingTermInfoStore extends AbstractTermInfoStore {

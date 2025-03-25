@@ -12,6 +12,7 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.base.MoreObjects;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.raft.api.TermInfo;
 
 @NonNullByDefault
 abstract class AbstractTermInfoStore implements TermInfoStore {

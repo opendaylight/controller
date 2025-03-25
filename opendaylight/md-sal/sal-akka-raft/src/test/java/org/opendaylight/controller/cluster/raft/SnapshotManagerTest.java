@@ -46,9 +46,9 @@ import org.opendaylight.controller.cluster.raft.persisted.ByteState;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
-import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.raft.api.EntryInfo;
+import org.opendaylight.raft.api.TermInfo;
 
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class SnapshotManagerTest extends AbstractActorTest {

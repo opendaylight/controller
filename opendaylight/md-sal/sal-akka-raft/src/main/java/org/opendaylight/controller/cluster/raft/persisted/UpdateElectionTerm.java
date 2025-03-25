@@ -13,7 +13,7 @@ import com.google.common.base.MoreObjects;
 import java.io.Serializable;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.raft.spi.TermInfo;
+import org.opendaylight.raft.api.TermInfo;
 
 /**
  * Message class to persist election term information.
