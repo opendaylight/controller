@@ -185,6 +185,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         }
 
         @Override
+        @Deprecated(forRemoval = true)
         public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
             MockSnapshotState snapshotState = takeSnapshot();
             if (installSnapshotStream != null) {

@@ -15,6 +15,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 
+@Deprecated(forRemoval = true)
 public final class CaptureSnapshotReply implements ControlMessage {
     private final Snapshot.@NonNull State snapshotState;
     private final @Nullable OutputStream installSnapshotStream;
