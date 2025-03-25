@@ -18,6 +18,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
 import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.raft.spi.SnapshotFileFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +28,12 @@ import org.slf4j.LoggerFactory;
 public abstract sealed class RaftStorage implements DataPersistenceProvider
         permits DisabledRaftStorage, EnabledRaftStorage {
     private static final Logger LOG = LoggerFactory.getLogger(RaftStorage.class);
+
+    private final @NonNull SnapshotFileFormat preferredFormat;
+
+    protected RaftStorage(final SnapshotFileFormat preferredFormat) {
+        this.preferredFormat = requireNonNull(preferredFormat);
+    }
 
     private ExecutorService executor;
 
@@ -111,6 +118,6 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
     }
 
     protected ToStringHelper addToStringAtrributes(final ToStringHelper helper) {
-        return helper.add("memberId", memberId());
+        return helper.add("memberId", memberId()).add("preferredFormat", preferredFormat);
     }
 }

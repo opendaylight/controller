@@ -17,6 +17,7 @@ import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage;
 import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
 import org.opendaylight.controller.cluster.raft.spi.ForwardingDataPersistenceProvider;
+import org.opendaylight.raft.spi.SnapshotFileFormat;
 
 /**
  * Storage facade sitting between {@link RaftActor} and persistence provider, taking care of multiplexing between
@@ -46,9 +47,9 @@ final class PersistenceControl extends ForwardingDataPersistenceProvider {
         delegate = disabledStorage;
     }
 
-    PersistenceControl(final RaftActor raftActor) {
-        this(new DisabledRaftStorage(raftActor.memberId(), raftActor, raftActor.self()),
-            new PekkoRaftStorage(raftActor));
+    PersistenceControl(final RaftActor raftActor, final SnapshotFileFormat preferredFormat) {
+        this(new DisabledRaftStorage(raftActor.memberId(), raftActor, raftActor.self(), preferredFormat),
+            new PekkoRaftStorage(raftActor, preferredFormat));
     }
 
     @Override

@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft;
 import java.time.Duration;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
+import org.opendaylight.raft.spi.SnapshotFileFormat;
 
 /**
  * Configuration Parameter interface for configuring the Raft consensus system. Any component using this implementation
@@ -19,8 +20,6 @@ import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
  * @author Kamal Rameshan
  */
 public interface ConfigParams {
-    int MEGABYTE = 1048576;
-
     /**
      * Returns the minimum number of entries to be present in the in-memory Raft log for a snapshot to be taken.
      *
@@ -154,4 +153,11 @@ public interface ConfigParams {
      * @return the threshold in terms of number of journal entries.
      */
     long getSyncIndexThreshold();
+
+    /**
+     * Retuns the preferred {@link SnapshotFileFormat}.
+     *
+     * @return the preferred {@link SnapshotFileFormat}
+     */
+    @NonNull SnapshotFileFormat getPreferredFileFormat();
 }

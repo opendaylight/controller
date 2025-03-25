@@ -360,7 +360,7 @@ public final class SnapshotManager {
 
         final var config = context.getConfigParams();
         final long absoluteThreshold = config.getSnapshotDataThreshold();
-        final long dataThreshold = absoluteThreshold != 0 ? absoluteThreshold * ConfigParams.MEGABYTE
+        final long dataThreshold = absoluteThreshold != 0 ? absoluteThreshold * 1_048_576
                 : context.getTotalMemory() * config.getSnapshotDataThresholdPercentage() / 100;
 
         final var replLog = context.getReplicatedLog();

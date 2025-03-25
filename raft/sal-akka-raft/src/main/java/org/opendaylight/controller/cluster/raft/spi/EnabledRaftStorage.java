@@ -7,12 +7,19 @@
  */
 package org.opendaylight.controller.cluster.raft.spi;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.RaftActor;
+import org.opendaylight.raft.spi.SnapshotFileFormat;
 
 /**
  * A {@link RaftStorage} backing persistent mode of {@link RaftActor} operation.
  */
+@NonNullByDefault
 public abstract non-sealed class EnabledRaftStorage extends RaftStorage {
+    protected EnabledRaftStorage(final SnapshotFileFormat preferredFormat) {
+        super(preferredFormat);
+    }
+
     @Override
     public final boolean isRecoveryApplicable() {
         return true;
