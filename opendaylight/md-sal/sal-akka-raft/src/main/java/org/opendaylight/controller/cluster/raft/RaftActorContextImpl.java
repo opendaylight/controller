@@ -33,8 +33,8 @@ import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
-import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
+import org.opendaylight.raft.api.TermInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

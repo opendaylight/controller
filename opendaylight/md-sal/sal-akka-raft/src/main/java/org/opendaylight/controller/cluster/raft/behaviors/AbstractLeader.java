@@ -51,8 +51,8 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.messages.UnInitializedFollowerSnapshotReply;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
-import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.raft.api.RaftRole;
+import org.opendaylight.raft.api.TermInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

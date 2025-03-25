@@ -15,7 +15,7 @@ import java.nio.file.Path;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.opendaylight.controller.cluster.raft.spi.TermInfo;
+import org.opendaylight.raft.api.TermInfo;
 
 /**
  * Unit tests for ElectionTermImpl.

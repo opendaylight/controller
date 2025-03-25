@@ -54,8 +54,8 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
-import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
+import org.opendaylight.raft.api.TermInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
