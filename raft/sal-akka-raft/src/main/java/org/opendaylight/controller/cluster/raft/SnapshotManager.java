@@ -197,20 +197,29 @@ public final class SnapshotManager {
         LOG.debug("{}: lastSequenceNumber prior to capture: {}", memberId(), lastSeq);
 
         task = new Capture(lastSeq, request);
-        return captureToInstall(context.getFileBackedOutputStreamFactory().newInstance());
+        return captureToInstall(snapshotCohort, request);
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private boolean captureToInstall(final @NonNull FileBackedOutputStream outputStream) {
-        try {
-            snapshotCohort.createSnapshot(context.getActor(), outputStream);
-        } catch (Exception e) {
-            task = Idle.INSTANCE;
-            LOG.error("{}: Error creating snapshot", memberId(), e);
-            return false;
-        }
+    private <T extends Snapshot.State> boolean captureToInstall(final RaftActorSnapshotCohort<T> typedCohort,
+            final @NonNull CaptureSnapshot request) {
+        final var snapshot = typedCohort.takeSnapshot();
+        final var persistence = context.getPersistenceProvider();
+
+        persistence.saveSnapshotForInstall(out -> snapshotCohort.serializeSnapshot(snapshot, out),
+            (source, ex) -> {
+                if (ex != null) {
+                    task = Idle.INSTANCE;
+                    LOG.error("{}: Error creating snapshot", memberId(), ex);
+                    // FIXME: somehow route to leader, or something ...
+                    return;
+                }
+
+                // FIXME: okay, now route the response to the leader ?
+            });
         return true;
     }
+
 
     /**
      * Initiates a capture snapshot, while enforcing trimming of the log up to lastAppliedIndex.
