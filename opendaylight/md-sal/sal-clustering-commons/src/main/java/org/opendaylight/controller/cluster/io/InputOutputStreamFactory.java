@@ -32,16 +32,6 @@ public abstract class InputOutputStreamFactory {
         return PlainInputOutputStreamSupport.INSTANCE;
     }
 
-    public static @NonNull InputOutputStreamFactory lz4(final String blockSize) {
-        return lz4(switch(blockSize) {
-            case "64KB" -> Lz4BlockSize.LZ4_64KB;
-            case "256KB" -> Lz4BlockSize.LZ4_256KB;
-            case "1MB" -> Lz4BlockSize.LZ4_1MB;
-            case "4MB" -> Lz4BlockSize.LZ4_4MB;
-            default -> throw new IllegalArgumentException("Invalid block size '" + blockSize + "'");
-        });
-    }
-
     public static @NonNull InputOutputStreamFactory lz4(final Lz4BlockSize blockSize) {
         return new LZ4InputOutputStreamSupport(requireNonNull(blockSize));
     }

@@ -43,6 +43,7 @@ import org.apache.pekko.persistence.snapshot.japi.SnapshotStore;
 import org.apache.pekko.serialization.JavaSerializer;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.io.InputOutputStreamFactory;
+import org.opendaylight.raft.spi.Lz4BlockSize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.ExecutionContext;
@@ -73,8 +74,15 @@ public final class LocalSnapshotStore extends SnapshotStore {
         maxLoadAttempts = localMaxLoadAttempts > 0 ? localMaxLoadAttempts : 1;
 
         if (config.getBoolean("use-lz4-compression")) {
-            final String size = config.getString("lz4-blocksize");
-            streamFactory = InputOutputStreamFactory.lz4(size);
+            final var size = config.getString("lz4-blocksize");
+            final var blockSize = switch(size) {
+                case "64KB" -> Lz4BlockSize.LZ4_64KB;
+                case "256KB" -> Lz4BlockSize.LZ4_256KB;
+                case "1MB" -> Lz4BlockSize.LZ4_1MB;
+                case "4MB" -> Lz4BlockSize.LZ4_4MB;
+                default -> throw new IllegalArgumentException("Invalid block size '" + size + "'");
+            };
+            streamFactory = InputOutputStreamFactory.lz4(blockSize);
             LOG.debug("Using LZ4 Input/Output Stream, blocksize: {}", size);
         } else {
             streamFactory = InputOutputStreamFactory.simple();
