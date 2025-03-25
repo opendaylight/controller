@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft.spi;
 import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.raft.api.TermInfo;
 
 /**
  * Storage for {@link TermInfo}. Provides access to current term and updates to it both transient, via
