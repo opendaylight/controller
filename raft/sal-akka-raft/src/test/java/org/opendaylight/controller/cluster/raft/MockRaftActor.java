@@ -189,6 +189,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     @Override
+    @Deprecated(forRemoval = true)
     public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
         LOG.info("{}: createSnapshot called", memberId());
         snapshotCohortDelegate.createSnapshot(actorRef, installSnapshotStream);
@@ -199,6 +200,12 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         LOG.info("{}: applySnapshot called", memberId());
         applySnapshotState(newState);
         snapshotCohortDelegate.applySnapshot(newState);
+    }
+
+    @Override
+    public void serializeSnapshot(final MockSnapshotState snapshotState, final OutputStream out) throws IOException {
+        LOG.info("{}: serializeSnapshot called", memberId());
+        snapshotCohortDelegate.serializeSnapshot(snapshotState, out);
     }
 
     @Override

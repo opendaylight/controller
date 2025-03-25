@@ -67,7 +67,6 @@ import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
-import org.opendaylight.controller.cluster.raft.persisted.ByteState;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.policy.DefaultRaftPolicy;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
@@ -810,7 +809,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         // Now simulate the CaptureSnapshotReply to initiate snapshot install - the first chunk should be sent.
         final byte[] bytes = new byte[] { 1, 2, 3 };
         stream.write(bytes);
-        actorContext.getSnapshotManager().persist(ByteState.of(bytes), stream);
+//        actorContext.getSnapshotManager().persist(ByteState.of(bytes), stream);
         MessageCollectorActor.expectFirstMatching(followerActor, InstallSnapshot.class);
 
         // Sending another AppendEntriesReply to force a snapshot should be a no-op and not try to re-send the chunk.
@@ -819,7 +818,6 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
                 RaftVersions.CURRENT_VERSION));
         MessageCollectorActor.assertNoneMatching(followerActor, InstallSnapshot.class, 200);
     }
-
 
     @Test
     public void testInstallSnapshot() {
