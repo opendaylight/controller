@@ -10,6 +10,13 @@ package org.opendaylight.controller.cluster.raft.spi;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.Beta;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.MoreExecutors;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.concurrent.Callable;
+import java.util.function.BiConsumer;
 import org.apache.pekko.actor.ActorRef;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -17,6 +24,7 @@ import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.raft.spi.PlainSnapshotSource;
 import org.opendaylight.raft.spi.SnapshotSource;
 
 /**
@@ -90,6 +98,29 @@ public final class DisabledRaftStorage extends RaftStorage implements ImmediateD
         // Committing the snapshot here would end up calling commit in the creating state which would
         // be a state violation. That's why now we send a message to commit the snapshot.
         actorRef.tell(CommitSnapshot.INSTANCE, ActorRef.noSender());
+    }
+
+    @Override
+    public void saveSnapshot(final SnapshotWriter writer,
+            final BiConsumer<@Nullable SnapshotSource, @Nullable ? super Throwable> callback) {
+        Futures.addCallback(submit((Callable<SnapshotSource>) () -> {
+            // FIXME: actual temp file, etc.
+            final byte[] bytes;
+            try (var baos = new ByteArrayOutputStream()) {
+                bytes = baos.toByteArray();
+            }
+            return (PlainSnapshotSource) () -> new ByteArrayInputStream(bytes);
+        }), new FutureCallback<>() {
+            @Override
+            public void onSuccess(final @Nullable SnapshotSource result) {
+                callback.accept(result, null);
+            }
+
+            @Override
+            public void onFailure(final @Nullable Throwable failure) {
+                callback.accept(null, failure);
+            }
+        }, MoreExecutors.directExecutor());
     }
 
     @Override

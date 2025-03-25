@@ -7,9 +7,12 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import java.util.function.BiConsumer;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.ImmediateDataPersistenceProvider;
+import org.opendaylight.raft.spi.SnapshotSource;
 
 @NonNullByDefault
 final class TestDataProvider implements ImmediateDataPersistenceProvider {
@@ -22,6 +25,12 @@ final class TestDataProvider implements ImmediateDataPersistenceProvider {
     @Override
     public void saveSnapshot(final Snapshot snapshot) {
         // no-op
+    }
+
+    @Override
+    public void saveSnapshot(final SnapshotWriter writer,
+            final BiConsumer<@Nullable SnapshotSource, @Nullable ? super Throwable> callback) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

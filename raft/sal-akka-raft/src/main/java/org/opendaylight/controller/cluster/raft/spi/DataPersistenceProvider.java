@@ -9,6 +9,8 @@ package org.opendaylight.controller.cluster.raft.spi;
 
 import com.google.common.annotations.Beta;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SnapshotProtocol;
@@ -25,6 +27,12 @@ import org.opendaylight.raft.spi.SnapshotSource;
 //        API around snapshots and message deletion -- which assumes the entity requesting it is the subclass itself.
 @NonNullByDefault
 public interface DataPersistenceProvider {
+    @FunctionalInterface
+    interface SnapshotWriter {
+
+        void writeSnapshot(OutputStream out) throws IOException;
+    }
+
     /**
      * Returns whether or not persistence recovery is applicable/enabled.
      *
@@ -61,8 +69,11 @@ public interface DataPersistenceProvider {
      *
      * @param snapshot the snapshot object to save
      */
-    // FIXME: add a BiConsumer<SnapshotSource, ? super Throwable> callback
+    // FIXME: remove this method
     void saveSnapshot(Snapshot snapshot);
+
+    void saveSnapshot(SnapshotWriter writer,
+        BiConsumer<@Nullable SnapshotSource, @Nullable ? super Throwable> callback);
 
     /**
      * Deletes snapshots based on the given criteria.
