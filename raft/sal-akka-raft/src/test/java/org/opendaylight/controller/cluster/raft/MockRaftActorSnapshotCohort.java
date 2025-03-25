@@ -7,9 +7,12 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import org.apache.pekko.actor.ActorRef;
-import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.raft.spi.InputStreamProvider;
 
 /**
@@ -27,12 +30,18 @@ public interface MockRaftActorSnapshotCohort extends RaftActorSnapshotCohort<Moc
     }
 
     @Override
-    default MockSnapshotState deserializeSnapshot(final InputStreamProvider snapshotBytes) {
-        throw new UnsupportedOperationException();
+    default void serializeSnapshot(final MockSnapshotState snapshotState, final OutputStream out) throws IOException {
+        try (var oos = new ObjectOutputStream(out)) {
+            oos.writeObject(snapshotState);
+        }
     }
 
     @Override
-    default void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
-        actorRef.tell(new CaptureSnapshotReply(takeSnapshot(), installSnapshotStream), actorRef);
+    default MockSnapshotState deserializeSnapshot(final InputStreamProvider snapshotBytes) throws IOException {
+        try (var ois = new ObjectInputStream(snapshotBytes.openStream())) {
+            return assertInstanceOf(MockSnapshotState.class, ois.readObject());
+        } catch (ClassNotFoundException e) {
+            throw new AssertionError(e);
+        }
     }
 }

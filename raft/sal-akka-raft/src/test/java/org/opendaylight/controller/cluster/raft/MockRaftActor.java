@@ -8,9 +8,10 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.mock;
 
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -25,7 +26,6 @@ import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
-import org.apache.commons.lang3.SerializationUtils;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Props;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
@@ -62,8 +62,17 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         actorDelegate = mock(RaftActor.class);
         recoveryCohortDelegate = mock(RaftActorRecoveryCohort.class);
 
-        snapshotCohortDelegate = builder.snapshotCohort != null ? builder.snapshotCohort
-            : mock(MockRaftActorSnapshotCohort.class);
+        if (builder.snapshotCohort == null) {
+            snapshotCohortDelegate = mock(MockRaftActorSnapshotCohort.class);
+            try {
+                doCallRealMethod().when(snapshotCohortDelegate).serializeSnapshot(any(), any());
+                doCallRealMethod().when(snapshotCohortDelegate).deserializeSnapshot(any());
+            } catch (IOException e) {
+                throw new AssertionError(e);
+            }
+        } else {
+            snapshotCohortDelegate = builder.snapshotCohort;
+        }
 
         if (builder.dataPersistenceProvider == null) {
             setPersistence(builder.persistent.isPresent() ? builder.persistent.orElseThrow() : true);
@@ -189,12 +198,6 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     @Override
-    public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
-        LOG.info("{}: createSnapshot called", memberId());
-        snapshotCohortDelegate.createSnapshot(actorRef, installSnapshotStream);
-    }
-
-    @Override
     public void applySnapshot(final MockSnapshotState newState) {
         LOG.info("{}: applySnapshot called", memberId());
         applySnapshotState(newState);
@@ -202,13 +205,15 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     @Override
-    public MockSnapshotState deserializeSnapshot(final InputStreamProvider snapshotBytes) {
-        try {
-            return verifyNotNull(SerializationUtils.<MockSnapshotState>deserialize(
-                snapshotBytes.openStream().readAllBytes()));
-        } catch (IOException e) {
-            throw new RuntimeException("Error deserializing state", e);
-        }
+    public void serializeSnapshot(final MockSnapshotState snapshotState, final OutputStream out) throws IOException {
+        LOG.info("{}: serializeSnapshot called", memberId());
+        snapshotCohortDelegate.serializeSnapshot(snapshotState, out);
+    }
+
+    @Override
+    public MockSnapshotState deserializeSnapshot(final InputStreamProvider snapshotBytes) throws IOException {
+        LOG.info("{}: deserializeSnapshot called", memberId());
+        return snapshotCohortDelegate.deserializeSnapshot(snapshotBytes);
     }
 
     @Override

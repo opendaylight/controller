@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.raft;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.util.concurrent.MoreExecutors;
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,8 +20,6 @@ import org.apache.pekko.actor.ActorSystem;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
-import org.opendaylight.controller.cluster.raft.persisted.ByteState;
-import org.opendaylight.controller.cluster.raft.persisted.ByteStateSnapshotCohort;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.TestTermInfoStore;
@@ -31,7 +28,6 @@ import org.opendaylight.raft.api.EntryMeta;
 public class MockRaftActorContext extends RaftActorContextImpl {
     private ActorSystem system;
     private RaftPolicy raftPolicy;
-    private Consumer<OutputStream> createSnapshotProcedure = out -> { };
 
     @NonNullByDefault
     private static LocalAccess newLocalAccess(final String id) {
@@ -89,34 +85,6 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         for (Map.Entry<String, String> e: peerAddresses.entrySet()) {
             addToPeers(e.getKey(), e.getValue(), VotingState.VOTING);
         }
-    }
-
-    @Override
-    public SnapshotManager getSnapshotManager() {
-        final var snapshotManager = super.getSnapshotManager();
-
-        snapshotManager.setSnapshotCohort(new ByteStateSnapshotCohort() {
-            @Override
-            public ByteState takeSnapshot() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
-                createSnapshotProcedure.accept(installSnapshotStream);
-            }
-
-            @Override
-            public void applySnapshot(final ByteState snapshotState) {
-                // No-op
-            }
-        });
-
-        return snapshotManager;
-    }
-
-    public void setCreateSnapshotProcedure(final Consumer<OutputStream> createSnapshotProcedure) {
-        this.createSnapshotProcedure = requireNonNull(createSnapshotProcedure);
     }
 
     @Override
