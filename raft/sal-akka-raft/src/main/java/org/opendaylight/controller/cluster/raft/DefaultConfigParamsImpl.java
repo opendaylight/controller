@@ -17,6 +17,7 @@ import java.util.function.Supplier;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.policy.DefaultRaftPolicy;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
+import org.opendaylight.raft.spi.SnapshotFileFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,9 +78,11 @@ public class DefaultConfigParamsImpl implements ConfigParams {
 
     private String tempFileDirectory = "";
 
-    private int fileBackedStreamingThreshold = 128 * MEGABYTE;
+    private int fileBackedStreamingThreshold = 128 * 1_048_576;
 
     private long syncIndexThreshold = 10;
+
+    private @NonNull SnapshotFileFormat preferredFileFormat = SnapshotFileFormat.PLAIN;
 
     public void setHeartBeatInterval(final Duration heartBeatInterval) {
         this.heartBeatInterval = requireNonNull(heartBeatInterval);
@@ -237,6 +240,15 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     public void setSyncIndexThreshold(final long syncIndexThreshold) {
         checkArgument(syncIndexThreshold >= 0);
         this.syncIndexThreshold = syncIndexThreshold;
+    }
+
+    @Override
+    public SnapshotFileFormat getPreferredFileFormat() {
+        return preferredFileFormat;
+    }
+
+    public void setPreferredFileFormat(final SnapshotFileFormat preferredFileFormat) {
+        this.preferredFileFormat = requireNonNull(preferredFileFormat);
     }
 
     private RaftPolicy getPolicy() {

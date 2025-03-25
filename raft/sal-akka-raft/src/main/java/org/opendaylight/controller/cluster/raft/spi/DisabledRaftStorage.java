@@ -17,6 +17,7 @@ import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.raft.spi.SnapshotFileFormat;
 import org.opendaylight.raft.spi.SnapshotSource;
 
 /**
@@ -44,7 +45,9 @@ public final class DisabledRaftStorage extends RaftStorage implements ImmediateD
     private final ExecuteInSelfActor actor;
     private final ActorRef actorRef;
 
-    public DisabledRaftStorage(final String memberId, final ExecuteInSelfActor actor, final ActorRef actorRef) {
+    public DisabledRaftStorage(final String memberId, final ExecuteInSelfActor actor, final ActorRef actorRef,
+            final SnapshotFileFormat preferredFormat) {
+        super(preferredFormat);
         this.memberId = requireNonNull(memberId);
         this.actor = requireNonNull(actor);
         this.actorRef = requireNonNull(actorRef);

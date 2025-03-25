@@ -125,12 +125,13 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             final Map<String, String> peerAddresses, final Optional<ConfigParams> configParams,
             final short payloadVersion) {
         super(memberId);
-        localAccess = new LocalAccess(memberId, stateDir.resolve(memberId));
-        persistenceControl = new PersistenceControl(this);
 
-        context = new RaftActorContextImpl(self(), getContext(), localAccess, peerAddresses,
-            configParams.orElseGet(DefaultConfigParamsImpl::new), payloadVersion, persistenceControl,
-            this::handleApplyState, this::executeInSelf);
+        final var config = configParams.orElseGet(DefaultConfigParamsImpl::new);
+        localAccess = new LocalAccess(memberId, stateDir.resolve(memberId));
+        persistenceControl = new PersistenceControl(this, config.getPreferredFileFormat());
+
+        context = new RaftActorContextImpl(self(), getContext(), localAccess, peerAddresses, config, payloadVersion,
+            persistenceControl, this::handleApplyState, this::executeInSelf);
     }
 
     /**
