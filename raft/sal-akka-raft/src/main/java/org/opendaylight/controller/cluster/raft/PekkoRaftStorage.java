@@ -9,12 +9,14 @@ package org.opendaylight.controller.cluster.raft;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import org.apache.pekko.persistence.DeleteMessagesSuccess;
 import org.apache.pekko.persistence.DeleteSnapshotsSuccess;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SnapshotProtocol;
 import org.apache.pekko.persistence.SnapshotSelectionCriteria;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
 import org.opendaylight.raft.spi.SnapshotSource;
@@ -64,6 +66,12 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
     @Override
     public void saveSnapshot(final Snapshot snapshot) {
         actor.saveSnapshot(snapshot);
+    }
+
+    @Override
+    public void saveSnapshot(final Snapshot snapshot,
+            final BiConsumer<@Nullable SnapshotSource, @Nullable ? super Throwable> callback) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

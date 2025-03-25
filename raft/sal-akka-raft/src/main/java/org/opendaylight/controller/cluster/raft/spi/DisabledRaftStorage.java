@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft.spi;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.Beta;
+import java.util.function.BiConsumer;
 import org.apache.pekko.actor.ActorRef;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -90,6 +91,13 @@ public final class DisabledRaftStorage extends RaftStorage implements ImmediateD
         // Committing the snapshot here would end up calling commit in the creating state which would
         // be a state violation. That's why now we send a message to commit the snapshot.
         actorRef.tell(CommitSnapshot.INSTANCE, ActorRef.noSender());
+    }
+
+    @Override
+    public void saveSnapshot(final Snapshot snapshot,
+            final BiConsumer<@Nullable SnapshotSource, @Nullable ? super Throwable> callback) {
+        // FIXME: implement this
+        throw new UnsupportedOperationException();
     }
 
     @Override

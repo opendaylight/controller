@@ -110,7 +110,7 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
         return addToStringAtrributes(MoreObjects.toStringHelper(this)).toString();
     }
 
-    protected ToStringHelper addToStringAtrributes(final ToStringHelper helper) {
+    protected @NonNull ToStringHelper addToStringAtrributes(final @NonNull ToStringHelper helper) {
         return helper.add("memberId", memberId());
     }
 }

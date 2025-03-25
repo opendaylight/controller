@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft.spi;
 
 import com.google.common.annotations.Beta;
 import java.io.IOException;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SnapshotProtocol;
@@ -61,8 +62,10 @@ public interface DataPersistenceProvider {
      *
      * @param snapshot the snapshot object to save
      */
-    // FIXME: add a BiConsumer<SnapshotSource, ? super Throwable> callback
+    // FIXME: remove this method
     void saveSnapshot(Snapshot snapshot);
+
+    void saveSnapshot(Snapshot snapshot, BiConsumer<@Nullable SnapshotSource, @Nullable ? super Throwable> callback);
 
     /**
      * Deletes snapshots based on the given criteria.
