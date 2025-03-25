@@ -1562,6 +1562,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         }
 
         @Override
+        @Deprecated(forRemoval = true)
         public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
             MockSnapshotState snapshotState = takeSnapshot();
             if (installSnapshotStream != null) {
