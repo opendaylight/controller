@@ -9,20 +9,30 @@ package org.opendaylight.controller.cluster.raft.spi;
 
 import static java.util.Objects.requireNonNull;
 
+import java.io.IOException;
 import java.util.function.Consumer;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SnapshotProtocol;
 import org.apache.pekko.persistence.SnapshotSelectionCriteria;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
+import org.opendaylight.raft.spi.SnapshotSource;
 
 /**
  * An immediate {@link DataPersistenceProvider}. Offloads asynchronous persist responses via
  * {@link #executeInSelf(Runnable)}.
  */
+@NonNullByDefault
 public interface ImmediateDataPersistenceProvider extends DataPersistenceProvider, ExecuteInSelfActor {
     @Override
     default boolean isRecoveryApplicable() {
         return false;
+    }
+
+    @Override
+    default @Nullable SnapshotSource tryLatestSnapshot() throws IOException {
+        return null;
     }
 
     @Override

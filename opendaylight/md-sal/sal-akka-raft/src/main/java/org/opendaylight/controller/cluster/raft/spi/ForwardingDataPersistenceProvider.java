@@ -8,20 +8,29 @@
 package org.opendaylight.controller.cluster.raft.spi;
 
 import com.google.common.base.MoreObjects;
+import java.io.IOException;
 import java.util.function.Consumer;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SnapshotProtocol;
 import org.apache.pekko.persistence.SnapshotSelectionCriteria;
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.raft.spi.SnapshotSource;
 
+@NonNullByDefault
 public abstract class ForwardingDataPersistenceProvider implements DataPersistenceProvider {
 
-    protected abstract @NonNull DataPersistenceProvider delegate();
+    protected abstract DataPersistenceProvider delegate();
 
     @Override
     public boolean isRecoveryApplicable() {
         return delegate().isRecoveryApplicable();
+    }
+
+    @Override
+    public @Nullable SnapshotSource tryLatestSnapshot() throws IOException {
+        return delegate().tryLatestSnapshot();
     }
 
     @Override

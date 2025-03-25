@@ -56,7 +56,7 @@ public final class DisabledRaftStorage extends RaftStorage implements ImmediateD
     }
 
     @Override
-    public @Nullable SnapshotSource findLatestSnapshot() {
+    public @Nullable SnapshotSource tryLatestSnapshot() {
         // TODO: cache last encountered snapshot along with its lifecycle
         return null;
     }
