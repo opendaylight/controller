@@ -11,13 +11,21 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.BiConsumer;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.cluster.io.FileBackedOutputStream;
+import org.opendaylight.raft.spi.PlainSnapshotSource;
+import org.opendaylight.raft.spi.SnapshotSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,28 +97,56 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
 
     protected abstract void preStop();
 
-    protected final <T> @NonNull Future<T> submit(final @NonNull Callable<T> task) {
+    protected final <T> @NonNull ListenableFuture<T> submit(final @NonNull Callable<T> task) {
         return doSubmit(requireNonNull(task));
     }
 
-    protected final @NonNull Future<Void> submit(final @NonNull Runnable task) {
+    protected final @NonNull ListenableFuture<Void> submit(final @NonNull Runnable task) {
         return doSubmit(Executors.<Void>callable(task, null));
     }
 
-    private <T> @NonNull Future<T> doSubmit(final @NonNull Callable<T> task) {
+    private <T> @NonNull ListenableFuture<T> doSubmit(final @NonNull Callable<T> task) {
         final var local = executor;
         if (local == null) {
             throw new IllegalStateException("Storage " + memberId() + " is stopped");
         }
-        return local.submit(task);
+        return Futures.submit(task, local);
     }
+
+    @Override
+    public final void saveSnapshotForInstall(final WritableSnapshot writer,
+            final BiConsumer<@Nullable SnapshotSource, @Nullable ? super Throwable> callback) {
+        Futures.addCallback(submit((Callable<SnapshotSource>) () -> {
+            final var stream = newFileBackedStream();
+            try {
+                writer.writeTo(stream);
+            } catch (IOException e) {
+                stream.close();
+                throw e;
+            }
+            final var bs = stream.asByteSource();
+            return (PlainSnapshotSource) bs::openStream;
+        }), new FutureCallback<>() {
+            @Override
+            public void onSuccess(final @Nullable SnapshotSource result) {
+                callback.accept(result, null);
+            }
+
+            @Override
+            public void onFailure(final @Nullable Throwable failure) {
+                callback.accept(null, failure);
+            }
+        }, MoreExecutors.directExecutor());
+    }
+
+    protected abstract FileBackedOutputStream newFileBackedStream();
 
     @Override
     public final String toString() {
         return addToStringAtrributes(MoreObjects.toStringHelper(this)).toString();
     }
 
-    protected ToStringHelper addToStringAtrributes(final ToStringHelper helper) {
+    protected @NonNull ToStringHelper addToStringAtrributes(final @NonNull ToStringHelper helper) {
         return helper.add("memberId", memberId());
     }
 }

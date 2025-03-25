@@ -9,6 +9,8 @@ package org.opendaylight.controller.cluster.raft.spi;
 
 import com.google.common.annotations.Beta;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SnapshotProtocol;
@@ -25,6 +27,12 @@ import org.opendaylight.raft.spi.SnapshotSource;
 //        API around snapshots and message deletion -- which assumes the entity requesting it is the subclass itself.
 @NonNullByDefault
 public interface DataPersistenceProvider {
+    @FunctionalInterface
+    interface WritableSnapshot {
+
+        void writeTo(OutputStream out) throws IOException;
+    }
+
     /**
      * Returns whether or not persistence recovery is applicable/enabled.
      *
@@ -43,7 +51,8 @@ public interface DataPersistenceProvider {
      * @param entry the journal entry to persist
      * @param callback the callback when persistence is complete
      */
-    // FIXME: no callback and throw an IOException
+    // FIXME: replace with:
+    //        void persist(Object entry) throws IOException
     <T> void persist(T entry, Consumer<T> callback);
 
     /**
@@ -53,7 +62,8 @@ public interface DataPersistenceProvider {
      * @param entry the journal entry to persist
      * @param callback the callback when persistence is complete
      */
-    // FIXME: a BiConsumer<? super T, ? super Throwable> callback
+    // FIXME: replace with:
+    //        void persistAsync(T entry, BiConsumer<? super T, ? super Throwable> callback)
     <T> void persistAsync(T entry, Consumer<T> callback);
 
     /**
@@ -61,8 +71,12 @@ public interface DataPersistenceProvider {
      *
      * @param snapshot the snapshot object to save
      */
-    // FIXME: add a BiConsumer<SnapshotSource, ? super Throwable> callback
+    // FIXME: replace with:
+    ///       void saveSnapshot(WritableSnapshot writer, Consumer<? super Throwable> callback)
     void saveSnapshot(Snapshot snapshot);
+
+    void saveSnapshotForInstall(WritableSnapshot writer,
+        BiConsumer<@Nullable SnapshotSource, @Nullable ? super Throwable> callback);
 
     /**
      * Deletes snapshots based on the given criteria.
