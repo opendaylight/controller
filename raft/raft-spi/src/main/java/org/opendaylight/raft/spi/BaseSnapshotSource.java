@@ -16,7 +16,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * name suggests, this class does not actually implement the interface.
  */
 @NonNullByDefault
-abstract sealed class BaseSnapshotSource permits DelegatedSnapshotSource, FileSnapshotSource {
+abstract sealed class BaseSnapshotSource permits ByteSourceSnapshotSource, DelegatedSnapshotSource, FileSnapshotSource {
 
     abstract ToStringHelper addToStringAttributes(ToStringHelper helper);
 
