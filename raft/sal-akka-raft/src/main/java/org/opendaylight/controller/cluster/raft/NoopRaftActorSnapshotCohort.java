@@ -8,8 +8,8 @@
 package org.opendaylight.controller.cluster.raft;
 
 import com.google.common.io.ByteSource;
+import java.io.IOException;
 import java.io.OutputStream;
-import org.apache.pekko.actor.ActorRef;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
 
@@ -36,18 +36,18 @@ public final class NoopRaftActorSnapshotCohort implements RaftActorSnapshotCohor
     }
 
     @Override
-    public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
-        // No-op
-    }
-
-    @Override
     public void applySnapshot(final EmptyState snapshotState) {
         // No-op
     }
 
     @Override
     public EmptyState deserializeSnapshot(final ByteSource snapshotBytes) {
-        // XXX: we really should be reading the bytes
+        // FIXME: check whether snapshotBytes is empty
         return takeSnapshot();
+    }
+
+    @Override
+    public void serializeSnapshot(final EmptyState snapshotState, final OutputStream out) throws IOException {
+        // No-op
     }
 }

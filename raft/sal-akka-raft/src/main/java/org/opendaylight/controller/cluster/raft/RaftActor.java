@@ -34,6 +34,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActor;
+import org.opendaylight.controller.cluster.io.FileBackedOutputStreamFactory;
 import org.opendaylight.controller.cluster.mgmt.api.FollowerInfo;
 import org.opendaylight.controller.cluster.notifications.DefaultLeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
@@ -125,12 +126,15 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             final Map<String, String> peerAddresses, final Optional<ConfigParams> configParams,
             final short payloadVersion) {
         super(memberId);
-        localAccess = new LocalAccess(memberId, stateDir.resolve(memberId));
-        persistenceControl = new PersistenceControl(this);
 
-        context = new RaftActorContextImpl(self(), getContext(), localAccess, peerAddresses,
-            configParams.orElseGet(DefaultConfigParamsImpl::new), payloadVersion, persistenceControl,
-            this::handleApplyState, this::executeInSelf);
+        final var config = configParams.orElseGet(DefaultConfigParamsImpl::new);
+        localAccess = new LocalAccess(memberId, stateDir.resolve(memberId));
+        final var streamFactory = new FileBackedOutputStreamFactory(
+            config.getFileBackedStreamingThreshold(), config.getTempFileDirectory());
+        persistenceControl = new PersistenceControl(this, streamFactory);
+
+        context = new RaftActorContextImpl(self(), getContext(), localAccess, peerAddresses, config,
+            payloadVersion, persistenceControl, streamFactory, this::handleApplyState, this::executeInSelf);
     }
 
     /**

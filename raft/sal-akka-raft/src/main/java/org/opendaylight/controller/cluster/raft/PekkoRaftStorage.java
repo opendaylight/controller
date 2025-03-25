@@ -15,6 +15,7 @@ import org.apache.pekko.persistence.DeleteSnapshotsSuccess;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SnapshotProtocol;
 import org.apache.pekko.persistence.SnapshotSelectionCriteria;
+import org.opendaylight.controller.cluster.io.FileBackedOutputStreamFactory;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
 import org.opendaylight.raft.spi.SnapshotSource;
@@ -25,9 +26,11 @@ import org.opendaylight.raft.spi.SnapshotSource;
 // FIXME: remove this class once we have both Snapshots and Entries stored in files
 final class PekkoRaftStorage extends EnabledRaftStorage {
     private final RaftActor actor;
+    private final FileBackedOutputStreamFactory streamFactory;
 
-    PekkoRaftStorage(final RaftActor actor) {
+    PekkoRaftStorage(final RaftActor actor, final FileBackedOutputStreamFactory streamFactory) {
         this.actor = requireNonNull(actor);
+        this.streamFactory = requireNonNull(streamFactory);
     }
 
     @Override

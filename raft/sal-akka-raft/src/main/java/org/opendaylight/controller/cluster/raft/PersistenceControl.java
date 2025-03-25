@@ -12,6 +12,7 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.opendaylight.controller.cluster.io.FileBackedOutputStreamFactory;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage;
@@ -46,9 +47,9 @@ final class PersistenceControl extends ForwardingDataPersistenceProvider {
         delegate = disabledStorage;
     }
 
-    PersistenceControl(final RaftActor raftActor) {
-        this(new DisabledRaftStorage(raftActor.memberId(), raftActor, raftActor.self()),
-            new PekkoRaftStorage(raftActor));
+    PersistenceControl(final RaftActor raftActor, final FileBackedOutputStreamFactory streamFactory) {
+        this(new DisabledRaftStorage(raftActor.memberId(), raftActor, raftActor.self(), streamFactory),
+            new PekkoRaftStorage(raftActor, streamFactory));
     }
 
     @Override

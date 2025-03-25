@@ -86,15 +86,16 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     private Optional<Cluster> cluster;
 
-    private final Consumer<ApplyState> applyStateConsumer;
+    private final @NonNull Consumer<ApplyState> applyStateConsumer;
 
-    private final FileBackedOutputStreamFactory fileBackedOutputStreamFactory;
+    private final @NonNull FileBackedOutputStreamFactory streamFactory;
 
     private RaftActorLeadershipTransferCohort leadershipTransferCohort;
 
     public RaftActorContextImpl(final ActorRef actor, final ActorContext context, final @NonNull LocalAccess localStore,
             final @NonNull Map<String, String> peerAddresses, final @NonNull ConfigParams configParams,
             final short payloadVersion, final @NonNull DataPersistenceProvider persistenceProvider,
+            final @NonNull FileBackedOutputStreamFactory streamFactory,
             final @NonNull Consumer<ApplyState> applyStateConsumer, final @NonNull Executor executor) {
         this.actor = actor;
         this.context = context;
@@ -104,16 +105,27 @@ public class RaftActorContextImpl implements RaftActorContext {
         this.configParams = requireNonNull(configParams);
         this.payloadVersion = payloadVersion;
         this.persistenceProvider = requireNonNull(persistenceProvider);
+        this.streamFactory = requireNonNull(streamFactory);
         this.applyStateConsumer = requireNonNull(applyStateConsumer);
 
-        fileBackedOutputStreamFactory = new FileBackedOutputStreamFactory(
-                configParams.getFileBackedStreamingThreshold(), configParams.getTempFileDirectory());
-
-        for (Map.Entry<String, String> e : requireNonNull(peerAddresses).entrySet()) {
-            peerInfoMap.put(e.getKey(), new PeerInfo(e.getKey(), e.getValue(), VotingState.VOTING));
+        for (var entry : requireNonNull(peerAddresses).entrySet()) {
+            final var peerId = entry.getKey();
+            peerInfoMap.put(peerId, new PeerInfo(peerId, entry.getValue(), VotingState.VOTING));
         }
 
         replicatedLog = new ReplicatedLogImpl(this);
+    }
+
+    @VisibleForTesting
+    protected RaftActorContextImpl(final ActorRef actor, final ActorContext context,
+            final @NonNull LocalAccess localStore, final @NonNull Map<String, String> peerAddresses,
+            final @NonNull ConfigParams configParams, final short payloadVersion,
+            final @NonNull DataPersistenceProvider persistenceProvider,
+            final @NonNull Consumer<ApplyState> applyStateConsumer, final @NonNull Executor executor) {
+        this(actor, context, localStore, peerAddresses, configParams, payloadVersion, persistenceProvider,
+            new FileBackedOutputStreamFactory(configParams.getFileBackedStreamingThreshold(),
+                configParams.getTempFileDirectory()),
+            applyStateConsumer, executor);
     }
 
     @Override
@@ -184,7 +196,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Deprecated(forRemoval = true)
     public final void resetReplicatedLog(final @NonNull ReplicatedLog newState) {
-        this.replicatedLog = requireNonNull(newState);
+        replicatedLog = requireNonNull(newState);
     }
 
     @Override
@@ -389,7 +401,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     public FileBackedOutputStreamFactory getFileBackedOutputStreamFactory() {
-        return fileBackedOutputStreamFactory;
+        return streamFactory;
     }
 
     @Override

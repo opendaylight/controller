@@ -13,7 +13,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.VerifyException;
 import com.google.common.io.ByteSource;
 import java.io.IOException;
-import java.io.OutputStream;
 import org.apache.pekko.dispatch.ControlMessage;
 import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.eclipse.jdt.annotation.NonNull;
@@ -192,16 +191,20 @@ public final class SnapshotManager {
 
         final var request = newCaptureSnapshot(lastLogEntry, replicatedToAllIndex, false);
         LOG.info("{}: Initiating snapshot capture {} to install on {}", memberId(), request, targetFollower);
+        return captureToInstall(snapshotCohort, request);
+    }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
+    private <T extends Snapshot.State> boolean captureToInstall(final RaftActorSnapshotCohort<T> typedCohort,
+            final @NonNull CaptureSnapshot request) {
+        final var snapshot = typedCohort.takeSnapshot();
         final var lastSeq = context.getPersistenceProvider().getLastSequenceNumber();
         LOG.debug("{}: lastSequenceNumber prior to capture: {}", memberId(), lastSeq);
 
         task = new Capture(lastSeq, request);
-        return captureToInstall(context.getFileBackedOutputStreamFactory().newInstance());
-    }
 
-    @SuppressWarnings("checkstyle:IllegalCatch")
-    private boolean captureToInstall(final @NonNull OutputStream outputStream) {
+
+
         try {
             snapshotCohort.createSnapshot(context.getActor(), outputStream);
         } catch (Exception e) {
@@ -315,7 +318,7 @@ public final class SnapshotManager {
      *        on a follower.
      */
     @VisibleForTesting
-    public void persist(final Snapshot.State snapshotState, final @Nullable OutputStream installSnapshotStream) {
+    public void persist(final Snapshot.State snapshotState) {
         if (!(task instanceof Capture(var lastSeq, var request))) {
             LOG.debug("{}: persist should not be called in state {}", memberId(), task);
             return;
