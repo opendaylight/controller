@@ -76,6 +76,7 @@ public class MigratedMessagesTest extends AbstractActorTest {
             }
 
             @Override
+            @Deprecated(forRemoval = true)
             public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
                 actorRef.tell(new CaptureSnapshotReply(takeSnapshot(), installSnapshotStream), actorRef);
             }
@@ -83,6 +84,11 @@ public class MigratedMessagesTest extends AbstractActorTest {
             @Override
             public void applySnapshot(final MockSnapshotState snapshotState) {
                 // Nothing
+            }
+
+            @Override
+            public void serializeSnapshot(final MockSnapshotState snapshotState, final OutputStream out) {
+                // No-op
             }
 
             @Override
@@ -122,6 +128,7 @@ public class MigratedMessagesTest extends AbstractActorTest {
             }
 
             @Override
+            @Deprecated(forRemoval = true)
             public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
                 actorRef.tell(new CaptureSnapshotReply(snapshotState, installSnapshotStream), actorRef);
             }
@@ -129,6 +136,11 @@ public class MigratedMessagesTest extends AbstractActorTest {
             @Override
             public void applySnapshot(final MockSnapshotState newState) {
                 // Nothing
+            }
+
+            @Override
+            public void serializeSnapshot(final MockSnapshotState snapshotState, final OutputStream out) {
+                // No-op
             }
 
             @Override

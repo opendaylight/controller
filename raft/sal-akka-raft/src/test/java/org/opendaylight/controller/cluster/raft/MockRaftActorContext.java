@@ -102,6 +102,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
             }
 
             @Override
+            @Deprecated(forRemoval = true)
             public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
                 createSnapshotProcedure.accept(installSnapshotStream);
             }

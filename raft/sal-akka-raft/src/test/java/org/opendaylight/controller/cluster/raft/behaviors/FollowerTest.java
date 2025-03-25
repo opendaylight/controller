@@ -1305,6 +1305,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
             }
 
             @Override
+            @Deprecated(forRemoval = true)
             public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
                 actorRef.tell(new CaptureSnapshotReply(takeSnapshot(), installSnapshotStream), actorRef);
             }
@@ -1317,6 +1318,11 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
             @Override
             public MockSnapshotState deserializeSnapshot(final InputStreamProvider snapshotBytes) {
                 throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public void serializeSnapshot(final MockSnapshotState snapshotState, final OutputStream out) {
+                // No-op
             }
         };
         return snapshotCohort;
