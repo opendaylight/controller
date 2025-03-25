@@ -29,5 +29,6 @@
         <module>raft-api</module>
         <module>raft-journal</module>
         <module>raft-spi</module>
+        <module>sal-akka-raft</module>
     </modules>
 </project>
