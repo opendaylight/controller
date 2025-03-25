@@ -224,6 +224,7 @@ module cluster-admin {
           range 1..max;
         }
         units "seconds";
+        default 60;
         description "Optional timeout in seconds for the backup operation which will override all the different
                      timeouts that are being hit on the backend.";
       }
