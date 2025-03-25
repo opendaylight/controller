@@ -10,16 +10,14 @@ package org.opendaylight.controller.cluster.raft;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.VerifyException;
 import com.google.common.io.ByteSource;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.InputStream;
 import org.apache.pekko.dispatch.ControlMessage;
 import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.io.FileBackedOutputStream;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
@@ -28,6 +26,7 @@ import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.EntryMeta;
+import org.opendaylight.raft.spi.SnapshotSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -197,20 +196,29 @@ public final class SnapshotManager {
         LOG.debug("{}: lastSequenceNumber prior to capture: {}", memberId(), lastSeq);
 
         task = new Capture(lastSeq, request);
-        return captureToInstall(context.getFileBackedOutputStreamFactory().newInstance());
+        return captureToInstall(snapshotCohort, request);
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private boolean captureToInstall(final @NonNull FileBackedOutputStream outputStream) {
-        try {
-            snapshotCohort.createSnapshot(context.getActor(), outputStream);
-        } catch (Exception e) {
-            task = Idle.INSTANCE;
-            LOG.error("{}: Error creating snapshot", memberId(), e);
-            return false;
-        }
+    private <T extends Snapshot.State> boolean captureToInstall(final RaftActorSnapshotCohort<T> typedCohort,
+            final @NonNull CaptureSnapshot request) {
+        final var snapshot = typedCohort.takeSnapshot();
+        final var persistence = context.getPersistenceProvider();
+
+        persistence.saveSnapshotForInstall(out -> typedCohort.serializeSnapshot(snapshot, out),
+            (source, ex) -> {
+                if (ex != null) {
+                    task = Idle.INSTANCE;
+                    LOG.error("{}: Error creating snapshot", memberId(), ex);
+                    // FIXME: somehow route to leader, or something ...
+                    return;
+                }
+
+                persist(snapshot, source);
+            });
         return true;
     }
+
 
     /**
      * Initiates a capture snapshot, while enforcing trimming of the log up to lastAppliedIndex.
@@ -315,7 +323,7 @@ public final class SnapshotManager {
      *        on a follower.
      */
     @VisibleForTesting
-    public void persist(final Snapshot.State snapshotState, final @Nullable OutputStream installSnapshotStream) {
+    public void persist(final Snapshot.State snapshotState, final SnapshotSource source) {
         if (!(task instanceof Capture(var lastSeq, var request))) {
             LOG.debug("{}: persist should not be called in state {}", memberId(), task);
             return;
@@ -323,26 +331,14 @@ public final class SnapshotManager {
 
         persist(lastSeq, request, snapshotState);
 
-        if (installSnapshotStream != null) {
-            // FIXME: this should not be necessary
-            if (!(installSnapshotStream instanceof FileBackedOutputStream snapshotStream)) {
-                throw new VerifyException("Unexpected stream " + installSnapshotStream);
-            }
-
-            if (!(context.getCurrentBehavior() instanceof AbstractLeader leader)) {
-                snapshotStream.cleanup();
-                return;
-            }
-
-            final ByteSource bytes;
-            try {
-                bytes = snapshotStream.asByteSource();
-            } catch (IOException e) {
-                LOG.error("{}: Snapshot install failed due to an unrecoverable streaming error", memberId(), e);
-                return;
-            }
-
-            leader.sendInstallSnapshot(request.getLastAppliedIndex(), request.getLastAppliedTerm(), bytes);
+        if (context.getCurrentBehavior() instanceof AbstractLeader leader) {
+            leader.sendInstallSnapshot(request.getLastAppliedIndex(), request.getLastAppliedTerm(),
+                new ByteSource() {
+                    @Override
+                    public InputStream openStream() throws IOException {
+                        return source.openStream();
+                    }
+                });
         }
     }
 

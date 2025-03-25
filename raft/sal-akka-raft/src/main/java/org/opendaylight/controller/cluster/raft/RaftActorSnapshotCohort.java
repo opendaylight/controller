@@ -48,6 +48,8 @@ public interface RaftActorSnapshotCohort<T extends State> {
      *        serialized data back to a State instance on the follower end. The serialization for snapshot install is
      *        passed off so the cost of serialization is not charged to the raft actor's thread.
      */
+    // FIXME: remove this method
+    @Deprecated(forRemoval = true)
     void createSnapshot(@NonNull ActorRef actorRef, @NonNull OutputStream installSnapshotStream);
 
     /**
@@ -58,6 +60,15 @@ public interface RaftActorSnapshotCohort<T extends State> {
     void applySnapshot(@NonNull T snapshotState);
 
     /**
+     * Serialize a snapshot into an {@link OutputStream}.
+     *
+     * @param snapshotState snapshot to serialize
+     * @param out the {@link OutputStream}
+     * @throws IOException if an I/O error occurs
+     */
+    void serializeSnapshot(@NonNull T snapshotState, @NonNull OutputStream out) throws IOException;
+
+    /**
      * This method is called to de-serialize snapshot data that was previously serialized via {@link #createSnapshot}
      * to a State instance.
      *
@@ -65,5 +76,6 @@ public interface RaftActorSnapshotCohort<T extends State> {
      * @return the converted snapshot State
      * @throws IOException if an error occurs accessing the ByteSource or de-serializing
      */
+    // FIXME: switch to SnapshotSource
     @NonNull T deserializeSnapshot(@NonNull ByteSource snapshotBytes) throws IOException;
 }
