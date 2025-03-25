@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.function.BiConsumer;
@@ -20,15 +21,16 @@ import org.opendaylight.raft.spi.ByteArray;
 import org.opendaylight.raft.spi.PlainSnapshotSource;
 import org.opendaylight.raft.spi.SnapshotSource;
 
+@VisibleForTesting
 @NonNullByDefault
-final class TestDataProvider implements ImmediateDataPersistenceProvider {
+public final class TestDataProvider implements ImmediateDataPersistenceProvider {
     private ExecuteInSelfActor actor;
 
-    TestDataProvider() {
+    public TestDataProvider() {
         this(Runnable::run);
     }
 
-    TestDataProvider(final ExecuteInSelfActor actor) {
+    public TestDataProvider(final ExecuteInSelfActor actor) {
         this.actor = requireNonNull(actor);
     }
 
@@ -56,7 +58,7 @@ final class TestDataProvider implements ImmediateDataPersistenceProvider {
         actor.executeInSelf(() -> callback.accept(new PlainSnapshotSource(ByteArray.wrap(bytes)), null));
     }
 
-    void setActor(final ExecuteInSelfActor actor) {
+    public void setActor(final ExecuteInSelfActor actor) {
         this.actor = requireNonNull(actor);
     }
 }

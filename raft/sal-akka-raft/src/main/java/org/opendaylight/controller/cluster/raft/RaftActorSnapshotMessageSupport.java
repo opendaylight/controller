@@ -13,7 +13,6 @@ import org.apache.pekko.persistence.SaveSnapshotFailure;
 import org.apache.pekko.persistence.SaveSnapshotSuccess;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.ApplyLeaderSnapshot;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.SnapshotComplete;
-import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage.CommitSnapshot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,10 +44,6 @@ class RaftActorSnapshotMessageSupport {
             case SaveSnapshotFailure msg -> {
                 LOG.error("{}: SaveSnapshotFailure received for snapshot", snapshotManager.memberId(), msg.cause());
                 snapshotManager.rollback();
-            }
-            case CaptureSnapshotReply msg -> {
-                LOG.debug("{}: CaptureSnapshotReply received by actor", snapshotManager.memberId());
-                snapshotManager.persist(msg.snapshotState(), msg.installSnapshotStream());
             }
             case SnapshotComplete msg -> LOG.debug("{}: SnapshotComplete received", snapshotManager.memberId());
             default -> {

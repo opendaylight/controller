@@ -12,7 +12,6 @@ import static org.junit.Assert.assertNotNull;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Uninterruptibles;
-import java.io.OutputStream;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -22,7 +21,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import org.apache.commons.lang3.SerializationUtils;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.InvalidActorNameException;
 import org.apache.pekko.actor.PoisonPill;
@@ -36,7 +34,6 @@ import org.apache.pekko.util.Timeout;
 import org.junit.After;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
-import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
@@ -182,16 +179,6 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         @Override
         public MockSnapshotState takeSnapshot() {
             return new MockSnapshotState(List.copyOf(getState()));
-        }
-
-        @Override
-        public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
-            MockSnapshotState snapshotState = takeSnapshot();
-            if (installSnapshotStream != null) {
-                SerializationUtils.serialize(snapshotState, installSnapshotStream);
-            }
-
-            actorRef.tell(new CaptureSnapshotReply(snapshotState, installSnapshotStream), actorRef);
         }
 
         public ActorRef collectorActor() {
