@@ -11,6 +11,8 @@ package org.opendaylight.controller.cluster.raft;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.mock;
 
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -62,8 +64,17 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         actorDelegate = mock(RaftActor.class);
         recoveryCohortDelegate = mock(RaftActorRecoveryCohort.class);
 
-        snapshotCohortDelegate = builder.snapshotCohort != null ? builder.snapshotCohort
-            : mock(MockRaftActorSnapshotCohort.class);
+        if (builder.snapshotCohort == null) {
+            snapshotCohortDelegate = mock(MockRaftActorSnapshotCohort.class);
+            try {
+                doCallRealMethod().when(snapshotCohortDelegate).serializeSnapshot(any(), any());
+                doCallRealMethod().when(snapshotCohortDelegate).deserializeSnapshot(any());
+            } catch (IOException e) {
+                throw new AssertionError(e);
+            }
+        } else {
+            snapshotCohortDelegate = builder.snapshotCohort;
+        }
 
         if (builder.dataPersistenceProvider == null) {
             setPersistence(builder.persistent.isPresent() ? builder.persistent.orElseThrow() : true);
@@ -189,6 +200,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     @Override
+    @Deprecated(forRemoval = true)
     public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
         LOG.info("{}: createSnapshot called", memberId());
         snapshotCohortDelegate.createSnapshot(actorRef, installSnapshotStream);
@@ -199,6 +211,12 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         LOG.info("{}: applySnapshot called", memberId());
         applySnapshotState(newState);
         snapshotCohortDelegate.applySnapshot(newState);
+    }
+
+    @Override
+    public void serializeSnapshot(final MockSnapshotState snapshotState, final OutputStream out) throws IOException {
+        LOG.info("{}: serializeSnapshot called", memberId());
+        snapshotCohortDelegate.serializeSnapshot(snapshotState, out);
     }
 
     @Override
