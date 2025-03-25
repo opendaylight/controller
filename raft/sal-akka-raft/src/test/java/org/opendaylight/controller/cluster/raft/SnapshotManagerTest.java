@@ -43,6 +43,7 @@ import org.opendaylight.controller.cluster.raft.SnapshotManager.SnapshotComplete
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.behaviors.Leader;
 import org.opendaylight.controller.cluster.raft.persisted.ByteState;
+import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
@@ -113,15 +114,13 @@ public class SnapshotManagerTest extends AbstractActorTest {
     }
 
     @Test
-    public void testCaptureToInstall() {
-
+    public void testCaptureToInstall() throws Exception {
         // Force capturing toInstall = true
+        doReturn(EmptyState.INSTANCE).when(mockCohort).takeSnapshot();
         snapshotManager.captureToInstall(EntryInfo.of(0, 1), 0, "follower-1");
 
         assertTrue(snapshotManager.isCapturing());
-
-        verify(mockCohort).createSnapshot(any(), outputStreamCaptor.capture());
-        assertNotNull(outputStreamCaptor.getValue());
+        verify(mockCohort).takeSnapshot();
 
         CaptureSnapshot captureSnapshot = snapshotManager.getCaptureSnapshot();
 
