@@ -28,7 +28,7 @@ import org.opendaylight.controller.cluster.datastore.persisted.ShardManagerSnaps
 import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshotReply;
 import org.opendaylight.controller.cluster.raft.persisted.ByteState;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
-import org.opendaylight.controller.cluster.raft.spi.TermInfo;
+import org.opendaylight.raft.api.TermInfo;
 import scala.concurrent.duration.FiniteDuration;
 
 /**

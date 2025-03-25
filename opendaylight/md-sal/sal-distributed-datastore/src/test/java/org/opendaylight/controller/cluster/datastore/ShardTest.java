@@ -99,7 +99,6 @@ import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolic
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage.CommitSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.ForwardingDataPersistenceProvider;
-import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
@@ -107,6 +106,7 @@ import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
 import org.opendaylight.raft.api.EntryMeta;
+import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
@@ -264,7 +264,7 @@ public class ShardTest extends AbstractShardTest {
         final NormalizedNode expected = readStore(store, root);
 
         final Snapshot snapshot = Snapshot.create(new ShardSnapshotState(new MetadataShardDataTreeSnapshot(expected)),
-                List.of(), 1, 2, 3, 4, new TermInfo(-1, null), null);
+                List.of(), 1, 2, 3, 4, new TermInfo(-1), null);
 
         shard.underlyingActor().getRaftActorContext().getSnapshotManager().applyFromRecovery(snapshot);
 

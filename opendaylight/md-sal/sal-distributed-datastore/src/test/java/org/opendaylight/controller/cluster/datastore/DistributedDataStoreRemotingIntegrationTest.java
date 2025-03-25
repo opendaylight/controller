@@ -84,7 +84,6 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
-import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.spi.UnsignedLongBitmap;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
@@ -104,6 +103,7 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionChain;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.raft.api.RaftRole;
+import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.yangtools.yang.common.Uint64;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
@@ -1148,7 +1148,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         final NormalizedNode snapshotRoot = AbstractShardTest.readStore(tree, YangInstanceIdentifier.of());
         final Snapshot initialSnapshot = Snapshot.create(
                 new ShardSnapshotState(new MetadataShardDataTreeSnapshot(snapshotRoot)),
-                List.of(), 5, 1, 5, 1, new TermInfo(1, null), null);
+                List.of(), 5, 1, 5, 1, new TermInfo(1), null);
         InMemorySnapshotStore.addSnapshot(leaderCarShardName, initialSnapshot);
 
         InMemorySnapshotStore.addSnapshotSavedLatch(leaderCarShardName);

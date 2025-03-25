@@ -14,7 +14,7 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.spi.TermInfo;
+import org.opendaylight.raft.api.TermInfo;
 
 /**
  * Unit tests for Snapshot.

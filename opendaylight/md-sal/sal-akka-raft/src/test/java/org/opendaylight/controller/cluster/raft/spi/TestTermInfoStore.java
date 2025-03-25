@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft.spi;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.raft.api.TermInfo;
 
 @NonNullByDefault
 public final class TestTermInfoStore extends AbstractTermInfoStore  {

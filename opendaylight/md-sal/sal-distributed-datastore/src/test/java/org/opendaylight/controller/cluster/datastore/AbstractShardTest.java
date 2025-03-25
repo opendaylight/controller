@@ -47,12 +47,12 @@ import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardData
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
 import org.opendaylight.controller.cluster.raft.TestActorFactory;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
-import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
@@ -261,7 +261,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
 
         InMemorySnapshotStore.addSnapshot(shardID.toString(), Snapshot.create(
                 new ShardSnapshotState(new MetadataShardDataTreeSnapshot(root)),
-                List.of(), 0, 1, -1, -1, new TermInfo(1, null), null));
+                List.of(), 0, 1, -1, -1, new TermInfo(1), null));
         return testStore;
     }
 

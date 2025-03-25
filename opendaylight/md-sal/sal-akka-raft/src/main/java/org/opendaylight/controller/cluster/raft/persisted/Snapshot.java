@@ -13,8 +13,8 @@ import java.io.Serializable;
 import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.raft.api.EntryMeta;
+import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.yangtools.concepts.Immutable;
 
 /**

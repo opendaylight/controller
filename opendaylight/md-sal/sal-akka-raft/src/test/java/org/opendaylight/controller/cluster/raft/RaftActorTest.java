@@ -86,12 +86,12 @@ import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolic
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage.CommitSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.ForwardingDataPersistenceProvider;
-import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.RaftRole;
+import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

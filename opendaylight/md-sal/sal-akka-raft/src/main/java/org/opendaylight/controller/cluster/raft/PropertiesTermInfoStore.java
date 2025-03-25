@@ -19,8 +19,8 @@ import java.nio.file.StandardOpenOption;
 import java.util.Properties;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
+import org.opendaylight.raft.api.TermInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
