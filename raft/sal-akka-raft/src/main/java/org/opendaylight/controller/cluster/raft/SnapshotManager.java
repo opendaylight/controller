@@ -201,7 +201,7 @@ public final class SnapshotManager {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private boolean captureToInstall(final @NonNull OutputStream outputStream) {
+    private boolean captureToInstall(final @NonNull FileBackedOutputStream outputStream) {
         try {
             snapshotCohort.createSnapshot(context.getActor(), outputStream);
         } catch (Exception e) {
