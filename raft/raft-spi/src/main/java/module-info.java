@@ -11,8 +11,8 @@
 module org.opendaylight.raft.spi {
     exports org.opendaylight.raft.spi;
 
+    requires transitive com.google.common;
     requires transitive org.opendaylight.raft.api;
-    requires com.google.common;
     requires org.lz4.java;
 
     // Annotations

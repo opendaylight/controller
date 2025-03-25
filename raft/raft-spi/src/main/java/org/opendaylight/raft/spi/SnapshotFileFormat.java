@@ -9,6 +9,7 @@ package org.opendaylight.raft.spi;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -39,6 +40,11 @@ public enum SnapshotFileFormat {
         public OutputStream encodeOutput(final OutputStream out) {
             return out;
         }
+
+        @Override
+        public ByteSourcePlainSnapshotSource sourceForByteSource(final ByteSource byteSource) {
+            return new ByteSourcePlainSnapshotSource(byteSource);
+        }
     },
     /**
      * A plain file.
@@ -47,6 +53,11 @@ public enum SnapshotFileFormat {
         @Override
         public FileLz4SnapshotSource sourceForFile(final Path path) {
             return new FileLz4SnapshotSource(path);
+        }
+
+        @Override
+        public ByteSourceLz4SnapshotSource sourceForByteSource(final ByteSource byteSource) {
+            return new ByteSourceLz4SnapshotSource(byteSource);
         }
 
         @Override
@@ -90,6 +101,8 @@ public enum SnapshotFileFormat {
      */
     public abstract SnapshotSource sourceForFile(Path path);
 
+    public abstract SnapshotSource sourceForByteSource(ByteSource byteSource);
+
     /**
      * Return an {@link InputStream} which produces plain snapshot bytes based on this format's stream obtained from
      * specified input.
@@ -124,4 +137,5 @@ public enum SnapshotFileFormat {
         }
         return null;
     }
+
 }
