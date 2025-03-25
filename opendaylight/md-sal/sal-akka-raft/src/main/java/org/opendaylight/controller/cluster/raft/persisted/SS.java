@@ -18,7 +18,7 @@ import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
-import org.opendaylight.controller.cluster.raft.spi.TermInfo;
+import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.yangtools.concepts.WritableObjects;
 
 /**

@@ -13,7 +13,7 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import org.opendaylight.controller.cluster.raft.spi.TermInfo;
+import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.yangtools.concepts.WritableObjects;
 
 /**

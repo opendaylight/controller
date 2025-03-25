@@ -27,8 +27,8 @@ import org.opendaylight.controller.cluster.raft.persisted.MigratedSerializable;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
-import org.opendaylight.controller.cluster.raft.spi.TermInfo;
 import org.opendaylight.raft.api.EntryMeta;
+import org.opendaylight.raft.api.TermInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
