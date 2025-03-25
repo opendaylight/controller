@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.example;
 
 import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -26,7 +27,6 @@ import org.opendaylight.controller.cluster.raft.ConfigParams;
 import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.RaftActorRecoveryCohort;
 import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
-import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
@@ -136,18 +136,6 @@ public final class ExampleActor extends RaftActor
     }
 
     @Override
-    @SuppressWarnings("checkstyle:IllegalCatch")
-    public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
-        final var snapshot = takeSnapshot();
-        try {
-            SerializationUtils.serialize(snapshot.state, installSnapshotStream);
-        } catch (RuntimeException e) {
-            LOG.error("Exception in creating snapshot", e);
-        }
-        self().tell(new CaptureSnapshotReply(snapshot, installSnapshotStream), null);
-    }
-
-    @Override
     public void applySnapshot(final MapState snapshotState) {
         state.clear();
         state.putAll(snapshotState.state);
@@ -198,13 +186,16 @@ public final class ExampleActor extends RaftActor
     }
 
     @Override
-    public MapState deserializeSnapshot(final InputStreamProvider snapshotBytes) {
-        try {
-            return new MapState(SerializationUtils.<Map<String, String>>deserialize(
-                snapshotBytes.openStream().readAllBytes()));
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
+    public void serializeSnapshot(final MapState snapshotState, final OutputStream out) throws IOException {
+        try (var oos = new ObjectOutputStream(out)) {
+            oos.writeObject(snapshotState.state);
         }
+    }
+
+    @Override
+    public MapState deserializeSnapshot(final InputStreamProvider snapshotBytes) throws IOException {
+        return new MapState(SerializationUtils.<Map<String, String>>deserialize(
+            snapshotBytes.openStream().readAllBytes()));
     }
 
     static class MapState implements Snapshot.State {

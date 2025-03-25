@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.raft;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import org.apache.pekko.actor.ActorRef;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 import org.opendaylight.raft.spi.InputStreamProvider;
@@ -36,21 +35,6 @@ public interface RaftActorSnapshotCohort<T extends State> {
     @NonNull T takeSnapshot();
 
     /**
-     * This method is called by the RaftActor when a snapshot needs to be
-     * created. The implementation should send a CaptureSnapshotReply to the given actor.
-     *
-     * @param actorRef the actor to which to respond
-     * @param installSnapshotStream OutputStream that is present if the snapshot is to also be installed
-     *        on a follower. The implementation must serialize its state to the OutputStream and return the
-     *        installSnapshotStream instance in the CaptureSnapshotReply along with the snapshot State instance.
-     *        The snapshot State is serialized directly to the snapshot store while the OutputStream is used to send
-     *        the state data to follower(s) in chunks. The {@link #deserializeSnapshot} method is used to convert the
-     *        serialized data back to a State instance on the follower end. The serialization for snapshot install is
-     *        passed off so the cost of serialization is not charged to the raft actor's thread.
-     */
-    void createSnapshot(@NonNull ActorRef actorRef, @NonNull OutputStream installSnapshotStream);
-
-    /**
      * This method is called to apply a snapshot installed by the leader.
      *
      * @param snapshotState a snapshot of the state of the actor
@@ -58,8 +42,17 @@ public interface RaftActorSnapshotCohort<T extends State> {
     void applySnapshot(@NonNull T snapshotState);
 
     /**
-     * This method is called to de-serialize snapshot data that was previously serialized via {@link #createSnapshot}
-     * to a State instance.
+     * Serialize a snapshot into an {@link OutputStream}.
+     *
+     * @param snapshotState snapshot to serialize
+     * @param out the {@link OutputStream}
+     * @throws IOException if an I/O error occurs
+     */
+    void serializeSnapshot(@NonNull T snapshotState, @NonNull OutputStream out) throws IOException;
+
+    /**
+     * This method is called to de-serialize snapshot data that was previously serialized via
+     * {@link #serializeSnapshot(State, OutputStream)}.
      *
      * @param snapshotBytes the {@link InputStreamProvider} containing the serialized data
      * @return the converted snapshot State
