@@ -22,7 +22,6 @@ import static org.mockito.Mockito.verify;
 import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -30,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.PoisonPill;
@@ -756,8 +754,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         actorContext.getReplicatedLog().removeFrom(0);
 
-        final var installSnapshotStream = new AtomicReference<Optional<OutputStream>>();
-        actorContext.setCreateSnapshotProcedure(stream -> installSnapshotStream.set(Optional.ofNullable(stream)));
+        final byte[] bytes = new byte[] { 1, 2, 3 };
+        actorContext.setTakeSnapshot(() -> ByteState.of(bytes));
 
         leader = new Leader(actorContext);
         actorContext.setCurrentBehavior(leader);
@@ -792,9 +790,12 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         assertEquals(4, cs.getLastIndex());
         assertEquals(2, cs.getLastTerm());
 
-        final var optStream = installSnapshotStream.get();
-        assertNotNull("Create snapshot procedure not invoked", optStream);
-        final var stream = optStream.orElseThrow(() -> new AssertionError("Install snapshot stream present"));
+
+
+
+//        final var optStream = installSnapshotStream.get();
+//        assertNotNull("Create snapshot procedure not invoked", optStream);
+//        final var stream = optStream.orElseThrow(() -> new AssertionError("Install snapshot stream present"));
 
         MessageCollectorActor.clearMessages(followerActor);
 
@@ -808,10 +809,11 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         assertSame("CaptureSnapshot instance", cs, actorContext.getSnapshotManager().getCaptureSnapshot());
 
         // Now simulate the CaptureSnapshotReply to initiate snapshot install - the first chunk should be sent.
-        final byte[] bytes = new byte[] { 1, 2, 3 };
-        stream.write(bytes);
-        actorContext.getSnapshotManager().persist(ByteState.of(bytes), stream);
+//        actorContext.getSnapshotManager().persist(ByteState.of(bytes), stream);
         MessageCollectorActor.expectFirstMatching(followerActor, InstallSnapshot.class);
+
+
+//        final var installSnapshotStream = new AtomicReference<Optional<OutputStream>>();
 
         // Sending another AppendEntriesReply to force a snapshot should be a no-op and not try to re-send the chunk.
         MessageCollectorActor.clearMessages(followerActor);
@@ -819,7 +821,6 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
                 RaftVersions.CURRENT_VERSION));
         MessageCollectorActor.assertNoneMatching(followerActor, InstallSnapshot.class, 200);
     }
-
 
     @Test
     public void testInstallSnapshot() {

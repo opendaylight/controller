@@ -11,6 +11,7 @@ import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import org.apache.pekko.actor.ActorContext;
 import org.apache.pekko.actor.ActorRef;
@@ -75,6 +76,7 @@ final class ShardSnapshotCohort implements RaftActorSnapshotCohort<ShardSnapshot
     }
 
     @Override
+    @Deprecated(forRemoval = true)
     public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
         // Forward the request to the snapshot actor
         final var snapshot = takeSnapshot();
@@ -99,6 +101,13 @@ final class ShardSnapshotCohort implements RaftActorSnapshotCohort<ShardSnapshot
             return;
         }
         LOG.info("{}: Done applying snapshot", memberName);
+    }
+
+    @Override
+    public void serializeSnapshot(final ShardSnapshotState snapshotState, final OutputStream out) throws IOException {
+        try (var oos = new ObjectOutputStream(out)) {
+            snapshotState.getSnapshot().serialize(oos);
+        }
     }
 
     @Override

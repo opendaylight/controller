@@ -1335,7 +1335,6 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertFalse("isNeedsLeaderAddress", reply.isNeedsLeaderAddress());
     }
 
-
     private static ReplicatedLogEntry newReplicatedLogEntry(final long term, final long index, final String data) {
         return new SimpleReplicatedLogEntry(index, term, new MockRaftActorContext.MockPayload(data));
     }

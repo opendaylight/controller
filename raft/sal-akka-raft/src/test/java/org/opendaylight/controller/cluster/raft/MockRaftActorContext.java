@@ -10,11 +10,11 @@ package org.opendaylight.controller.cluster.raft;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.util.concurrent.MoreExecutors;
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.ActorSystem;
@@ -31,7 +31,7 @@ import org.opendaylight.raft.api.EntryMeta;
 public class MockRaftActorContext extends RaftActorContextImpl {
     private ActorSystem system;
     private RaftPolicy raftPolicy;
-    private Consumer<OutputStream> createSnapshotProcedure = out -> { };
+    private Supplier<ByteState> takeSnapshot = ByteState::empty;
 
     @NonNullByDefault
     private static LocalAccess newLocalAccess(final String id) {
@@ -95,28 +95,13 @@ public class MockRaftActorContext extends RaftActorContextImpl {
     public SnapshotManager getSnapshotManager() {
         final var snapshotManager = super.getSnapshotManager();
 
-        snapshotManager.setSnapshotCohort(new ByteStateSnapshotCohort() {
-            @Override
-            public ByteState takeSnapshot() {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
-                createSnapshotProcedure.accept(installSnapshotStream);
-            }
-
-            @Override
-            public void applySnapshot(final ByteState snapshotState) {
-                // No-op
-            }
-        });
+        snapshotManager.setSnapshotCohort((ByteStateSnapshotCohort) takeSnapshot::get);
 
         return snapshotManager;
     }
 
-    public void setCreateSnapshotProcedure(final Consumer<OutputStream> createSnapshotProcedure) {
-        this.createSnapshotProcedure = requireNonNull(createSnapshotProcedure);
+    public void setTakeSnapshot(final Supplier<ByteState> takeSnapshot) {
+        this.takeSnapshot = requireNonNull(takeSnapshot);
     }
 
     @Override
