@@ -7,12 +7,42 @@
  */
 package org.opendaylight.raft.spi;
 
+import static java.util.Objects.requireNonNull;
+
+import com.google.common.base.MoreObjects.ToStringHelper;
+import java.io.IOException;
+import java.io.InputStream;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * A {@link SnapshotSource} corresponding directly to the serialization format of a snapshot.
  */
-public non-sealed interface PlainSnapshotSource extends SnapshotSource {
+@NonNullByDefault
+public final class PlainSnapshotSource extends SnapshotSource {
+    private final InputStreamProvider provider;
+
+    /**
+     * Default constructor.
+     *
+     * @param provider the {@link InputStreamProvider}
+     */
+
+    public PlainSnapshotSource(final InputStreamProvider provider) {
+        this.provider = requireNonNull(provider);
+    }
+
     @Override
-    default PlainSnapshotSource toPlainSource() {
+    public PlainSnapshotSource toPlainSource() {
         return this;
+    }
+
+    @Override
+    public InputStream openStream() throws IOException {
+        return provider.openStream();
+    }
+
+    @Override
+    ToStringHelper addToStringAttributes(final ToStringHelper helper) {
+        return helper.add("provider", provider);
     }
 }

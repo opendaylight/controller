@@ -12,7 +12,6 @@ import static java.util.Objects.requireNonNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.file.Path;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -26,8 +25,8 @@ public enum SnapshotFileFormat {
      */
     PLAIN(".plain") {
         @Override
-        public FilePlainSnapshotSource sourceForFile(final Path path) {
-            return new FilePlainSnapshotSource(path);
+        public SnapshotSource sourceFor(final InputStreamProvider provider) {
+            return new Lz4SnapshotSource(provider);
         }
 
         @Override
@@ -45,8 +44,8 @@ public enum SnapshotFileFormat {
      */
     LZ4(".lz4") {
         @Override
-        public FileLz4SnapshotSource sourceForFile(final Path path) {
-            return new FileLz4SnapshotSource(path);
+        public SnapshotSource sourceFor(final InputStreamProvider provider) {
+            return new Lz4SnapshotSource(provider);
         }
 
         @Override
@@ -64,6 +63,7 @@ public enum SnapshotFileFormat {
             //   time :)
             return Lz4Support.newCompressOutputStream(out, Lz4BlockSize.LZ4_256KB);
         }
+
     };
 
     // Note: starts with ".", to make operations easier
@@ -83,12 +83,12 @@ public enum SnapshotFileFormat {
     }
 
     /**
-     * Create a new {@link SnapshotSource} backed by specified file path.
+     * Create a new {@link SnapshotSource} backed by an {@link InputStreamProvider}.
      *
-     * @param path the path
+     * @param provider the provider
      * @return a {@link SnapshotSource}
      */
-    public abstract SnapshotSource sourceForFile(Path path);
+    public abstract SnapshotSource sourceFor(InputStreamProvider provider);
 
     /**
      * Return an {@link InputStream} which produces plain snapshot bytes based on this format's stream obtained from
@@ -124,4 +124,5 @@ public enum SnapshotFileFormat {
         }
         return null;
     }
+
 }

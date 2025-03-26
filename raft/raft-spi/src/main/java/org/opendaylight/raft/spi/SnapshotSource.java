@@ -7,26 +7,35 @@
  */
 package org.opendaylight.raft.spi;
 
-import java.io.IOException;
-import java.io.InputStream;
+import com.google.common.base.MoreObjects;
+import com.google.common.base.MoreObjects.ToStringHelper;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  * A source of bytes comprising the contents of a snapshot. It may or may not directly correspond to the serialization
  * format of a snapshot.
  */
-public sealed interface SnapshotSource permits PlainSnapshotSource, Lz4SnapshotSource {
+@NonNullByDefault
+public abstract sealed class SnapshotSource implements InputStreamProvider
+        permits PlainSnapshotSource, Lz4SnapshotSource {
     /**
-     * Open this stream as an {@link InputStream}.
-     *
-     * @return an InputStream
-     * @throws IOException if an error occurs
+     * Default constructor.
      */
-    InputStream openStream() throws IOException;
+    SnapshotSource() {
+        // Hidden in purpose
+    }
 
     /**
      * Returns the equivalent of this source as a {@linkplain PlainSnapshotSource}.
      *
      * @return the equivalent of this source as a {@linkplain PlainSnapshotSource}
      */
-    PlainSnapshotSource toPlainSource();
+    public abstract PlainSnapshotSource toPlainSource();
+
+    abstract ToStringHelper addToStringAttributes(ToStringHelper helper);
+
+    @Override
+    public final String toString() {
+        return MoreObjects.toStringHelper(this).toString();
+    }
 }

@@ -9,26 +9,19 @@ package org.opendaylight.raft.spi;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * A {@link PlainSnapshotSource} backed by a file {@link Path}.
+ * Interface capturing the ability to open {@link InputStream}s.
  */
 @NonNullByDefault
-public final class FilePlainSnapshotSource extends FileSnapshotSource implements PlainSnapshotSource {
+@FunctionalInterface
+public interface InputStreamProvider {
     /**
-     * Default constructor.
+     * Open an {@link InputStream}.
      *
-     * @param path file path
+     * @return an InputStream
+     * @throws IOException if an error occurs
      */
-    public FilePlainSnapshotSource(final Path path) {
-        super(path);
-    }
-
-    @Override
-    public InputStream openStream() throws IOException {
-        return Files.newInputStream(path());
-    }
+    InputStream openStream() throws IOException;
 }
