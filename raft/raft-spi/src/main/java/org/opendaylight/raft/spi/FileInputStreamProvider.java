@@ -7,6 +7,8 @@
  */
 package org.opendaylight.raft.spi;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -14,26 +16,23 @@ import java.nio.file.Path;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * A {@link Lz4SnapshotSource} backed by a backed by a file {@link Path}.
+ * An {@link InputStreamProvider} backed by a file.
+ *
+ * @param path the file path
  */
 @NonNullByDefault
-public final class FileLz4SnapshotSource extends FileSnapshotSource implements Lz4SnapshotSource {
+public record FileInputStreamProvider(Path path) implements InputStreamProvider {
     /**
      * Default constructor.
      *
-     * @param path file path
+     * @param path the file path
      */
-    public FileLz4SnapshotSource(final Path path) {
-        super(path);
+    public FileInputStreamProvider {
+        requireNonNull(path);
     }
 
     @Override
     public InputStream openStream() throws IOException {
-        return Files.newInputStream(path());
-    }
-
-    @Override
-    public Lz4PlainSnapshotStream toPlainSource() {
-        return new Lz4PlainSnapshotStream(this);
+        return Files.newInputStream(path);
     }
 }
