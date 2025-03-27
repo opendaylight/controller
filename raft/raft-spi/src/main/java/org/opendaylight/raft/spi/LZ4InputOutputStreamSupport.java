@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.io;
+package org.opendaylight.raft.spi;
 
 import static java.util.Objects.requireNonNull;
 
@@ -17,8 +17,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import org.eclipse.jdt.annotation.NonNull;
-import org.opendaylight.raft.spi.Lz4BlockSize;
-import org.opendaylight.raft.spi.Lz4Support;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -3,10 +3,12 @@
     <repository>mvn:org.opendaylight.odlparent/odl-guava/{{versionAsInProject}}/xml/features</repository>
     <repository>mvn:org.opendaylight.controller/odl-lz4/{{versionAsInProject}}/xml/features</repository>
     <repository>mvn:org.opendaylight.controller/odl-raft-api/{{versionAsInProject}}/xml/features</repository>
+    <repository>mvn:org.opendaylight.yangtools/odl-yangtools-util/{{versionAsInProject}}/xml/features</repository>
     <feature name="odl-raft-spi">
         <feature version="[14,15)">odl-guava</feature>
         <feature version="{{semVerRange}}">odl-lz4</feature>
         <feature version="{{semVerRange}}">odl-raft-api</feature>
+        <feature version="[14,15)">odl-yangtools-util</feature>
         <bundle>mvn:org.opendaylight.controller/raft-spi/{{versionAsInProject}}</bundle>
     </feature>
 </features>

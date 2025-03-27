@@ -30,8 +30,8 @@ import org.apache.pekko.actor.ActorRef;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.opendaylight.controller.cluster.io.FileBackedOutputStream;
 import org.opendaylight.controller.cluster.messaging.MessageAssembler.Builder;
+import org.opendaylight.raft.spi.FileBackedOutputStream;
 
 /**
  * Unit tests for MessageAssembler.

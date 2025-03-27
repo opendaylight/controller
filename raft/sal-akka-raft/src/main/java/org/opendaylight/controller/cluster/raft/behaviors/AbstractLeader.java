@@ -29,7 +29,6 @@ import org.apache.pekko.actor.Cancellable;
 import org.apache.pekko.dispatch.ControlMessage;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.io.SharedFileBackedOutputStream;
 import org.opendaylight.controller.cluster.messaging.MessageSlicer;
 import org.opendaylight.controller.cluster.messaging.SliceOptions;
 import org.opendaylight.controller.cluster.raft.ClientRequestTracker;
@@ -53,6 +52,7 @@ import org.opendaylight.controller.cluster.raft.messages.UnInitializedFollowerSn
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.api.TermInfo;
+import org.opendaylight.raft.spi.SharedFileBackedOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

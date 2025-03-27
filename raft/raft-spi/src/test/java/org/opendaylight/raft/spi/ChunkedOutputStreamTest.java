@@ -5,23 +5,22 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.io;
+package org.opendaylight.raft.spi;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.io.IOException;
 import java.util.List;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class ChunkedOutputStreamTest {
+class ChunkedOutputStreamTest {
     private static final int INITIAL_SIZE = 256;
     private static final int MAX_ARRAY_SIZE = 256 * 1024;
 
     private final ChunkedOutputStream stream = new ChunkedOutputStream(INITIAL_SIZE, MAX_ARRAY_SIZE);
 
     @Test
-    public void testBasicWrite() throws IOException {
+    void testBasicWrite() throws Exception {
         for (int i = 0; i < INITIAL_SIZE; ++i) {
             stream.write(i);
         }
@@ -34,20 +33,20 @@ public class ChunkedOutputStreamTest {
     }
 
     @Test
-    public void testBasicLargeWrite() throws IOException {
-        final byte[] array = createArray(INITIAL_SIZE);
+    void testBasicLargeWrite() throws Exception {
+        final var array = createArray(INITIAL_SIZE);
         stream.write(array);
-        final byte[] chunk = assertFinishedStream(INITIAL_SIZE, 1).get(0);
+        final var chunk = assertFinishedStream(INITIAL_SIZE, 1).get(0);
         assertArrayEquals(array, chunk);
     }
 
     @Test
-    public void testGrowWrite() throws IOException {
+    void testGrowWrite() throws Exception {
         for (int i = 0; i < INITIAL_SIZE * 2; ++i) {
             stream.write(i);
         }
 
-        final byte[] chunk = assertFinishedStream(INITIAL_SIZE * 2, 1).get(0);
+        final var chunk = assertFinishedStream(INITIAL_SIZE * 2, 1).get(0);
         assertEquals(INITIAL_SIZE * 2, chunk.length);
         for (int i = 0; i < INITIAL_SIZE * 2; ++i) {
             assertEquals((byte) i, chunk[i]);
@@ -55,7 +54,7 @@ public class ChunkedOutputStreamTest {
     }
 
     @Test
-    public void testGrowLargeWrite() throws IOException {
+    void testGrowLargeWrite() throws Exception {
         final byte[] array = createArray(INITIAL_SIZE * 2);
         stream.write(array);
         final byte[] chunk = assertFinishedStream(INITIAL_SIZE * 2, 1).get(0);
@@ -63,7 +62,7 @@ public class ChunkedOutputStreamTest {
     }
 
     @Test
-    public void testTwoChunksWrite() throws IOException {
+    void testTwoChunksWrite() throws Exception {
         int size = MAX_ARRAY_SIZE + 1;
         for (int i = 0; i < size; ++i) {
             stream.write(i);
@@ -79,16 +78,16 @@ public class ChunkedOutputStreamTest {
 
     private List<byte[]> assertFinishedStream(final int expectedSize, final int expectedChunks) {
         stream.close();
-        final ChunkedByteArray array = stream.toChunkedByteArray();
+        final var array = stream.toChunkedByteArray();
         assertEquals(expectedSize, array.size());
 
-        final List<byte[]> chunks = array.getChunks();
+        final var chunks = array.chunks();
         assertEquals(expectedChunks, chunks.size());
         return chunks;
     }
 
     private static byte[] createArray(final int size) {
-        final byte[] array = new byte[size];
+        final var array = new byte[size];
         for (int i = 0; i < size; ++i) {
             array[i] = (byte) i;
         }

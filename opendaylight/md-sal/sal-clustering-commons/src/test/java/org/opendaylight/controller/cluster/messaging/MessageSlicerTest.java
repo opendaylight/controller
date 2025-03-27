@@ -29,7 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.opendaylight.controller.cluster.io.FileBackedOutputStream;
+import org.opendaylight.raft.spi.FileBackedOutputStream;
 import org.opendaylight.yangtools.concepts.Identifier;
 
 /**

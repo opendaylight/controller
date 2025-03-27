@@ -26,7 +26,6 @@ import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.cluster.Cluster;
 import org.eclipse.jdt.annotation.NonNull;
-import org.opendaylight.controller.cluster.io.FileBackedOutputStreamFactory;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
@@ -35,6 +34,7 @@ import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
 import org.opendaylight.raft.api.TermInfo;
+import org.opendaylight.raft.spi.FileBackedOutputStreamFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -184,7 +184,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Deprecated(forRemoval = true)
     public final void resetReplicatedLog(final @NonNull ReplicatedLog newState) {
-        this.replicatedLog = requireNonNull(newState);
+        replicatedLog = requireNonNull(newState);
     }
 
     @Override
