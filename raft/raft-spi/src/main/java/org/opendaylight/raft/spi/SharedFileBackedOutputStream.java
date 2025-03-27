@@ -5,9 +5,10 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.io;
+package org.opendaylight.raft.spi;
 
 import com.google.common.base.Preconditions;
+import com.google.common.io.ByteSource;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -19,13 +20,24 @@ import java.util.function.Consumer;
  *
  * @author Thomas Pantelis
  */
-public class SharedFileBackedOutputStream extends FileBackedOutputStream {
+public final class SharedFileBackedOutputStream extends FileBackedOutputStream {
     private final AtomicInteger usageCount = new AtomicInteger(1);
+
+    // FIXME: err... what?
     @SuppressWarnings("rawtypes")
     private Consumer onCleanupCallback;
     private Object onCleanupContext;
 
-    public SharedFileBackedOutputStream(int fileThreshold, String fileDirectory) {
+    /**
+     * Default constructor. Resulting instance uses the given file threshold, and does not reset the data when the
+     * {@link ByteSource} returned by {@link #asByteSource} is finalized.
+     *
+     * @param fileThreshold the number of bytes before the stream should switch to buffering to a file
+     * @param fileDirectory the directory in which to create the file if needed. If {@code null}, the default temp file
+     *                      location is used.
+     */
+    // FIXME: java.nio.file.Path
+    public SharedFileBackedOutputStream(final int fileThreshold, final String fileDirectory) {
         super(fileThreshold, fileDirectory);
     }
 
@@ -33,6 +45,7 @@ public class SharedFileBackedOutputStream extends FileBackedOutputStream {
      * Increments the usage count. This must be followed by a corresponding call to {@link #cleanup()} when this
      * instance is no longer needed.
      */
+    // FIXME: incRef() ... do we want this to be a ByteBuf?
     public void incrementUsageCount() {
         usageCount.getAndIncrement();
     }
@@ -42,6 +55,7 @@ public class SharedFileBackedOutputStream extends FileBackedOutputStream {
      *
      * @return the current usage count
      */
+    // FIXME: refCount()
     public int getUsageCount() {
         return usageCount.get();
     }
@@ -49,8 +63,13 @@ public class SharedFileBackedOutputStream extends FileBackedOutputStream {
     /**
      * Sets the callback to be notified when {@link FileBackedOutputStream#cleanup()} is called to delete the backing
      * file.
+     *
+     * @param <T> context type
+     * @param callback the callback
+     * @param context the context
      */
-    public <T> void setOnCleanupCallback(Consumer<T> callback, T context) {
+    // FIXME: just a Runnable
+    public <T> void setOnCleanupCallback(final Consumer<T> callback, final T context) {
         onCleanupCallback = callback;
         onCleanupContext = context;
     }
@@ -58,6 +77,7 @@ public class SharedFileBackedOutputStream extends FileBackedOutputStream {
     /**
      * Overridden to decrement the usage count.
      */
+    // FIXME: decRef(), really
     @SuppressWarnings("unchecked")
     @Override
     public void cleanup() {
