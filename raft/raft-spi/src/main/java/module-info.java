@@ -14,8 +14,10 @@ module org.opendaylight.raft.spi {
     requires transitive org.opendaylight.raft.api;
     requires com.google.common;
     requires org.lz4.java;
+    requires org.slf4j;
 
     // Annotations
     requires static transitive org.eclipse.jdt.annotation;
     requires static org.osgi.annotation.bundle;
+    requires org.opendaylight.yangtools.concepts;
 }

@@ -42,7 +42,7 @@ import org.apache.pekko.persistence.serialization.SnapshotSerializer;
 import org.apache.pekko.persistence.snapshot.japi.SnapshotStore;
 import org.apache.pekko.serialization.JavaSerializer;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.io.InputOutputStreamFactory;
+import org.opendaylight.raft.spi.InputOutputStreamFactory;
 import org.opendaylight.raft.spi.Lz4BlockSize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

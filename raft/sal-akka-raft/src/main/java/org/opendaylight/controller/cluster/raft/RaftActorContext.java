@@ -19,7 +19,6 @@ import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.cluster.Cluster;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.io.FileBackedOutputStreamFactory;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
@@ -27,6 +26,7 @@ import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
 import org.opendaylight.raft.api.TermInfo;
+import org.opendaylight.raft.spi.FileBackedOutputStreamFactory;
 
 /**
  * The RaftActorContext contains that portion of the RaftActors state that
@@ -304,7 +304,7 @@ public interface RaftActorContext {
     /**
      * Returns the {@link FileBackedOutputStreamFactory} instance with a common configuration.
      *
-     * @return the {@link FileBackedOutputStreamFactory};
+     * @return the {@link FileBackedOutputStreamFactory}
      */
     @NonNull FileBackedOutputStreamFactory getFileBackedOutputStreamFactory();
 

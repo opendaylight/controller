@@ -5,6 +5,7 @@
     <repository>mvn:org.opendaylight.controller/odl-raft-api/{{versionAsInProject}}/xml/features</repository>
     <feature name="odl-raft-spi">
         <feature version="[14,15)">odl-guava</feature>
+        <feature version="[14,15)">odl-yangtools-util</feature>
         <feature version="{{semVerRange}}">odl-lz4</feature>
         <feature version="{{semVerRange}}">odl-raft-api</feature>
         <bundle>mvn:org.opendaylight.controller/raft-spi/{{versionAsInProject}}</bundle>

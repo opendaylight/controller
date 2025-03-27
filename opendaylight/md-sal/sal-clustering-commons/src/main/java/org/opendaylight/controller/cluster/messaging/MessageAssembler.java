@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import org.apache.pekko.actor.ActorRef;
 import org.eclipse.jdt.annotation.NonNull;
-import org.opendaylight.controller.cluster.io.FileBackedOutputStreamFactory;
+import org.opendaylight.raft.spi.FileBackedOutputStreamFactory;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
