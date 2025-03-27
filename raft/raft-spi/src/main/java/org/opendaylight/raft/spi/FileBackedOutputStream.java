@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.io;
+package org.opendaylight.raft.spi;
 
 import com.google.common.io.ByteSource;
 import java.io.ByteArrayInputStream;
@@ -61,16 +61,27 @@ public class FileBackedOutputStream extends OutputStream {
     private long count;
 
     /**
-     * Creates a new instance that uses the given file threshold, and does not reset the data when the
+     * Default constructor. Resulting instance uses the given file threshold, and does not reset the data when the
      * {@link ByteSource} returned by {@link #asByteSource} is finalized.
      *
      * @param fileThreshold the number of bytes before the stream should switch to buffering to a file
-     * @param fileDirectory the directory in which to create the file if needed. If null, the default temp file
+     * @param fileDirectory the directory in which to create the file if needed. If {@code null}, the default temp file
      *                      location is used.
      */
+    // FIXME: java.io.Path
     public FileBackedOutputStream(final int fileThreshold, @Nullable final String fileDirectory) {
         this.fileThreshold = fileThreshold;
         this.fileDirectory = fileDirectory;
+    }
+
+    /**
+     * Default constructor. Resulting instance uses the given file threshold, and does not reset the data when the
+     * {@link ByteSource} returned by {@link #asByteSource} is finalized.
+     *
+     * @param fileThreshold the number of bytes before the stream should switch to buffering to a file
+     */
+    public FileBackedOutputStream(final int fileThreshold) {
+        this(fileThreshold, null);
     }
 
     /**
@@ -80,6 +91,7 @@ public class FileBackedOutputStream extends OutputStream {
      * @return a ByteSource instance
      * @throws IOException if close fails
      */
+    // FIXME: toInputStreamProvider()
     public synchronized @NonNull ByteSource asByteSource() throws IOException {
         close();
 
@@ -143,6 +155,12 @@ public class FileBackedOutputStream extends OutputStream {
         }
     }
 
+    /**
+     * Returns current reference count.
+     *
+     * @return current reference count
+     */
+    // FIXME: refCount()
     public synchronized long getCount() {
         return count;
     }
@@ -150,6 +168,7 @@ public class FileBackedOutputStream extends OutputStream {
     /**
      * Calls {@link #close} if not already closed and, if data was buffered to a file, deletes the file.
      */
+    // FIXME: decRef()?
     public synchronized void cleanup() {
         LOG.debug("In cleanup");
         closeQuietly();

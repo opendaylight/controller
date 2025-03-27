@@ -19,8 +19,8 @@ import org.apache.pekko.actor.Scheduler;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.common.actor.Dispatchers;
-import org.opendaylight.controller.cluster.io.FileBackedOutputStreamFactory;
 import org.opendaylight.controller.cluster.messaging.MessageSlicer;
+import org.opendaylight.raft.spi.FileBackedOutputStreamFactory;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import scala.concurrent.ExecutionContext;
 

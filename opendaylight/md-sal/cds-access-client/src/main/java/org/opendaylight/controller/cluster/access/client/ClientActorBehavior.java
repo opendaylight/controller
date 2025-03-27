@@ -33,8 +33,8 @@ import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestExcepti
 import org.opendaylight.controller.cluster.access.concepts.SuccessEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.common.actor.Dispatchers.DispatcherType;
-import org.opendaylight.controller.cluster.io.FileBackedOutputStreamFactory;
 import org.opendaylight.controller.cluster.messaging.MessageAssembler;
+import org.opendaylight.raft.spi.FileBackedOutputStreamFactory;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.concepts.Registration;

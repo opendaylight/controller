@@ -14,8 +14,8 @@ import java.io.Serializable;
 import java.util.function.Consumer;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
-import org.opendaylight.controller.cluster.io.FileBackedOutputStream;
-import org.opendaylight.controller.cluster.io.FileBackedOutputStreamFactory;
+import org.opendaylight.raft.spi.FileBackedOutputStream;
+import org.opendaylight.raft.spi.FileBackedOutputStreamFactory;
 import org.opendaylight.yangtools.concepts.Identifier;
 
 /**

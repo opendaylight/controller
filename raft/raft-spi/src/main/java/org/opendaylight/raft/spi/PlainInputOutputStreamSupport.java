@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.io;
+package org.opendaylight.raft.spi;
 
 import com.google.common.io.ByteSource;
 import java.io.File;

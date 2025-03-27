@@ -24,10 +24,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.opendaylight.controller.cluster.io.FileBackedOutputStream;
-import org.opendaylight.controller.cluster.io.FileBackedOutputStreamFactory;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.behaviors.SnapshotTracker.InvalidChunkException;
+import org.opendaylight.raft.spi.FileBackedOutputStream;
+import org.opendaylight.raft.spi.FileBackedOutputStreamFactory;
 
 @ExtendWith(MockitoExtension.class)
 class SnapshotTrackerTest {
