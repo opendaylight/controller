@@ -22,9 +22,9 @@ import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
-import org.opendaylight.controller.cluster.io.InputOutputStreamFactory;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
+import org.opendaylight.raft.spi.InputOutputStreamFactory;
 
 public class ShardSnapshotActorTest extends AbstractActorTest {
     private static final InputOutputStreamFactory STREAM_FACTORY = InputOutputStreamFactory.simple();

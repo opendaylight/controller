@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.io;
+package org.opendaylight.raft.spi;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
@@ -16,14 +16,12 @@ import static com.google.common.math.IntMath.isPowerOfTwo;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Deque;
-import java.util.Iterator;
 import org.opendaylight.yangtools.concepts.Either;
 
 /**
@@ -56,6 +54,7 @@ import org.opendaylight.yangtools.concepts.Either;
  * @author Robert Varga
  * @author Tomas Olvecky
  */
+// FIXME: This really is ChunkedByteArray.Builder :)
 @Beta
 public final class ChunkedOutputStream extends OutputStream {
     private static final int MIN_ARRAY_SIZE = 32;
@@ -71,6 +70,12 @@ public final class ChunkedOutputStream extends OutputStream {
     private int currentOffset;
     private int size;
 
+    /**
+     * Default constructor.
+     *
+     * @param requestedInitialCapacity initial capacity
+     * @param maxChunkSize maximum chunk size, must be power-of-two
+     */
     public ChunkedOutputStream(final int requestedInitialCapacity, final int maxChunkSize) {
         checkArgument(isPowerOfTwo(maxChunkSize), "Maximum chunk size %s is not a power of two", maxChunkSize);
         checkArgument(maxChunkSize > 0, "Maximum chunk size %s is not positive", maxChunkSize);
@@ -118,10 +123,21 @@ public final class ChunkedOutputStream extends OutputStream {
         }
     }
 
+    /**
+     * Returns the overall size of this stream.
+     *
+     * @return the overall size of this stream
+     */
     public int size() {
         return size;
     }
 
+    /**
+     * Uppack this stream.
+     *
+     * @return either a byte[] or a ChunkedByteArray
+     */
+    // FIXME: sealed interface of a capture
     public Either<byte[], ChunkedByteArray> toVariant() {
         checkClosed();
         return result instanceof byte[] bytes ? Either.ofFirst(bytes)
@@ -164,9 +180,9 @@ public final class ChunkedOutputStream extends OutputStream {
         // end up trimming this array.
         int headSize = 0;
         int headCount = 0;
-        final Iterator<byte[]> it = prevChunks.iterator();
+        final var it = prevChunks.iterator();
         do {
-            final byte[] chunk = it.next();
+            final var chunk = it.next();
             if (chunk.length == maxChunkSize) {
                 break;
             }
@@ -176,10 +192,10 @@ public final class ChunkedOutputStream extends OutputStream {
         } while (it.hasNext());
 
         // Compact initial chunks into a single one
-        final byte[] head = new byte[headSize];
+        final var head = new byte[headSize];
         int offset = 0;
         for (int i = 0; i < headCount; ++i) {
-            final byte[] chunk = prevChunks.removeFirst();
+            final var chunk = prevChunks.removeFirst();
             System.arraycopy(chunk, 0, head, offset, chunk.length);
             offset += chunk.length;
         }
@@ -191,7 +207,7 @@ public final class ChunkedOutputStream extends OutputStream {
             return ImmutableList.copyOf(prevChunks);
         }
 
-        final Builder<byte[]> builder = ImmutableList.builderWithExpectedSize(prevChunks.size() + 1);
+        final var builder = ImmutableList.builderWithExpectedSize(prevChunks.size() + 1);
         builder.addAll(prevChunks);
         builder.add(trimChunk(currentChunk, currentOffset));
         return builder.build();

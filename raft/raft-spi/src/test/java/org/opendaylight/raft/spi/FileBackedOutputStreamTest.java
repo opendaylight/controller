@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.io;
+package org.opendaylight.raft.spi;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -18,13 +18,11 @@ import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,46 +31,27 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Pantelis
  */
-public class FileBackedOutputStreamTest {
+class FileBackedOutputStreamTest {
     private static final Logger LOG = LoggerFactory.getLogger(FileBackedOutputStreamTest.class);
-    private static final String TEMP_DIR = "target/FileBackedOutputStreamTest";
 
-    @BeforeClass
-    public static void staticSetup() {
-        createDir(TEMP_DIR);
-    }
-
-    @AfterClass
-    public static void staticCleanup() {
-        deleteTempFiles(TEMP_DIR);
-        deleteFile(TEMP_DIR);
-    }
-
-    @Before
-    public void setup() {
-        deleteTempFiles(TEMP_DIR);
-    }
-
-    @After
-    public void cleanup() {
-        deleteTempFiles(TEMP_DIR);
-    }
+    @TempDir
+    private Path tempDir;
 
     @Test
-    public void testFileThresholdNotReached() throws IOException {
+    void testFileThresholdNotReached() throws Exception {
         LOG.info("testFileThresholdNotReached starting");
-        try (FileBackedOutputStream fbos = new FileBackedOutputStream(10, TEMP_DIR)) {
-            byte[] bytes = new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9};
-            fbos.write(bytes[0]);
-            fbos.write(bytes, 1, bytes.length - 1);
+        try (var fbos = new FileBackedOutputStream(10, tempDir.toString())) {
+            final var expected = new byte[]{ 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+            fbos.write(expected[0]);
+            fbos.write(expected, 1, expected.length - 1);
 
-            assertEquals("getCount", bytes.length, fbos.getCount());
-            assertNull("Found unexpected temp file", findTempFileName(TEMP_DIR));
-            assertEquals("Size", bytes.length, fbos.asByteSource().size());
+            assertEquals("getCount", expected.length, fbos.getCount());
+            assertNull("Found unexpected temp file", findTempFileName(tempDir));
+            assertEquals("Size", expected.length, fbos.asByteSource().size());
 
             // Read bytes twice.
-            assertArrayEquals("Read bytes", bytes, fbos.asByteSource().read());
-            assertArrayEquals("Read bytes", bytes, fbos.asByteSource().read());
+            assertArrayEquals("Read bytes", expected, fbos.asByteSource().read());
+            assertArrayEquals("Read bytes", expected, fbos.asByteSource().read());
 
             fbos.cleanup();
         }
@@ -81,26 +60,27 @@ public class FileBackedOutputStreamTest {
     }
 
     @Test
-    public void testFileThresholdReachedWithWriteBytes() throws IOException {
+    void testFileThresholdReachedWithWriteBytes() throws Exception {
         LOG.info("testFileThresholdReachedWithWriteBytes starting");
-        try (FileBackedOutputStream fbos = new FileBackedOutputStream(10, TEMP_DIR)) {
+        try (var fbos = new FileBackedOutputStream(10, tempDir.toString())) {
             byte[] bytes = new byte[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
             fbos.write(bytes[0]);
             fbos.write(bytes, 1, 11);
 
-            String tempFileName = findTempFileName(TEMP_DIR);
+            final var tempFileName = findTempFileName(tempDir);
             assertNotNull("Expected temp file created", tempFileName);
 
             fbos.write(bytes[12]);
             fbos.write(bytes, 13, bytes.length - 13);
 
-            assertEquals("Temp file", tempFileName, findTempFileName(TEMP_DIR));
+            assertEquals("Temp file", tempFileName, findTempFileName(tempDir));
             assertEquals("Size", bytes.length, fbos.asByteSource().size());
 
             try (var inputStream = fbos.asByteSource().openStream()) {
                 assertArrayEquals("Read bytes", bytes, fbos.asByteSource().read());
 
-                byte[] inBytes = new byte[bytes.length];
+                // FIXME: assert hex string
+                final var inBytes = new byte[bytes.length];
                 assertEquals("# bytes read", bytes.length, inputStream.read(inBytes));
                 assertArrayEquals("Read InputStream", bytes, inBytes);
                 assertEquals("End of stream", -1, inputStream.read());
@@ -108,26 +88,26 @@ public class FileBackedOutputStreamTest {
 
             fbos.cleanup();
 
-            assertNull("Found unexpected temp file", findTempFileName(TEMP_DIR));
+            assertNull("Found unexpected temp file", findTempFileName(tempDir));
         }
 
         LOG.info("testFileThresholdReachedWithWriteBytes ending");
     }
 
     @Test
-    public void testFileThresholdReachedWithWriteByte() throws IOException {
+    void testFileThresholdReachedWithWriteByte() throws Exception {
         LOG.info("testFileThresholdReachedWithWriteByte starting");
-        try (FileBackedOutputStream fbos = new FileBackedOutputStream(2, TEMP_DIR)) {
-            byte[] bytes = new byte[]{0, 1, 2};
+        try (var fbos = new FileBackedOutputStream(2, tempDir.toString())) {
+            final var bytes = new byte[]{0, 1, 2};
             fbos.write(bytes[0]);
             fbos.write(bytes[1]);
 
-            assertNull("Found unexpected temp file", findTempFileName(TEMP_DIR));
+            assertNull("Found unexpected temp file", findTempFileName(tempDir));
 
             fbos.write(bytes[2]);
             fbos.flush();
 
-            assertNotNull("Expected temp file created", findTempFileName(TEMP_DIR));
+            assertNotNull("Expected temp file created", findTempFileName(tempDir));
 
             assertEquals("Size", bytes.length, fbos.asByteSource().size());
             assertArrayEquals("Read bytes", bytes, fbos.asByteSource().read());
@@ -139,11 +119,11 @@ public class FileBackedOutputStreamTest {
     @Test(expected = IOException.class)
     public void testWriteAfterAsByteSource() throws IOException {
         LOG.info("testWriteAfterAsByteSource starting");
-        try (FileBackedOutputStream fbos = new FileBackedOutputStream(3, TEMP_DIR)) {
-            byte[] bytes = new byte[]{0, 1, 2};
+        try (var fbos = new FileBackedOutputStream(3, tempDir.toString())) {
+            final var bytes = new byte[]{0, 1, 2};
             fbos.write(bytes);
 
-            assertNull("Found unexpected temp file", findTempFileName(TEMP_DIR));
+            assertNull("Found unexpected temp file", findTempFileName(tempDir));
             assertEquals("Size", bytes.length, fbos.asByteSource().size());
 
             // Should throw IOException after call to asByteSource.
@@ -155,22 +135,16 @@ public class FileBackedOutputStreamTest {
     public void testTempFileDeletedOnGC() throws IOException {
         LOG.info("testTempFileDeletedOnGC starting");
 
-        FileBackedOutputStream fbos = null;
-        try {
-            fbos = new FileBackedOutputStream(1, TEMP_DIR);
+        try (var fbos = new FileBackedOutputStream(1, tempDir.toString())) {
             fbos.write(new byte[] {0, 1});
-            assertNotNull("Expected temp file created", findTempFileName(TEMP_DIR));
-        } finally {
-            if (fbos != null) {
-                fbos.close();
-            }
-            fbos = null;
+            assertNotNull("Expected temp file created", findTempFileName(tempDir));
         }
 
-        Stopwatch sw = Stopwatch.createStarted();
+        // FIXME: use awaitility
+        final var sw = Stopwatch.createStarted();
         while (sw.elapsed(TimeUnit.SECONDS) <= 20) {
             System.gc();
-            if (findTempFileName(TEMP_DIR) == null) {
+            if (findTempFileName(tempDir) == null) {
                 return;
             }
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
@@ -179,8 +153,8 @@ public class FileBackedOutputStreamTest {
         fail("Temp file was not deleted");
     }
 
-    static String findTempFileName(final String dirPath) {
-        String[] files = new File(dirPath).list();
+    static String findTempFileName(final Path dirPath) {
+        final var files = dirPath.toFile().list();
         assertNotNull(files);
         assertTrue("Found more than one temp file: " + Arrays.toString(files), files.length < 2);
         return files.length == 1 ? files[0] : null;
@@ -191,7 +165,7 @@ public class FileBackedOutputStreamTest {
     }
 
     static void deleteTempFiles(final String path) {
-        String[] files = new File(path).list();
+        final var files = new File(path).list();
         if (files != null) {
             for (String file : files) {
                 deleteFile(path + File.separator + file);
