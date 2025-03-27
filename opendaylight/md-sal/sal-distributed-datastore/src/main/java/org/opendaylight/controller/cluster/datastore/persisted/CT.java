@@ -17,7 +17,7 @@ import java.io.ObjectOutput;
 import java.io.StreamCorruptedException;
 import org.opendaylight.controller.cluster.datastore.persisted.CommitTransactionPayload.Chunked;
 import org.opendaylight.controller.cluster.datastore.persisted.CommitTransactionPayload.Simple;
-import org.opendaylight.controller.cluster.io.ChunkedByteArray;
+import org.opendaylight.raft.spi.ChunkedByteArray;
 
 /**
  * Serialization proxy for {@link CommitTransactionPayload}.
