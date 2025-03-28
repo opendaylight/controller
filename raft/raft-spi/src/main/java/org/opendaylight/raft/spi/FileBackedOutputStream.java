@@ -69,10 +69,9 @@ public class FileBackedOutputStream extends OutputStream {
      * @param fileDirectory the directory in which to create the file if needed. If {@code null}, the default temp file
      *                      location is used.
      */
-    // FIXME: java.io.Path
-    public FileBackedOutputStream(final int fileThreshold, final @Nullable String fileDirectory) {
+    public FileBackedOutputStream(final int fileThreshold, final @Nullable Path fileDirectory) {
         this.fileThreshold = fileThreshold;
-        this.fileDirectory = fileDirectory != null ? Path.of(fileDirectory) : null;
+        this.fileDirectory = fileDirectory;
     }
 
     /**

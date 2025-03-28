@@ -9,6 +9,7 @@ package org.opendaylight.raft.spi;
 
 import com.google.common.base.Preconditions;
 import com.google.common.io.ByteSource;
+import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -36,8 +37,7 @@ public final class SharedFileBackedOutputStream extends FileBackedOutputStream {
      * @param fileDirectory the directory in which to create the file if needed. If {@code null}, the default temp file
      *                      location is used.
      */
-    // FIXME: java.nio.file.Path
-    public SharedFileBackedOutputStream(final int fileThreshold, final String fileDirectory) {
+    public SharedFileBackedOutputStream(final int fileThreshold, final Path fileDirectory) {
         super(fileThreshold, fileDirectory);
     }
 

@@ -7,6 +7,7 @@
  */
 package org.opendaylight.raft.spi;
 
+import java.nio.file.Path;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
@@ -17,16 +18,16 @@ import org.eclipse.jdt.annotation.Nullable;
  */
 public class FileBackedOutputStreamFactory {
     private final int fileThreshold;
-    private final String fileDirectory;
+    private final Path fileDirectory;
 
     /**
-     * Constructor.
+     * Default constructor.
      *
      * @param fileThreshold the number of bytes before streams should switch to buffering to a file
-     * @param fileDirectory the directory in which to create files if needed. If null, the default temp file
+     * @param fileDirectory the directory in which to create files if needed. If {@code null}, the default temp file
      *                      location is used.
      */
-    public FileBackedOutputStreamFactory(final int fileThreshold, final @Nullable String fileDirectory) {
+    public FileBackedOutputStreamFactory(final int fileThreshold, final @Nullable Path fileDirectory) {
         this.fileThreshold = fileThreshold;
         this.fileDirectory = fileDirectory;
     }

@@ -12,6 +12,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.Strings;
 import com.google.common.base.Suppliers;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.function.Supplier;
 import org.eclipse.jdt.annotation.NonNull;
@@ -25,8 +26,8 @@ import org.slf4j.LoggerFactory;
  * Default implementation of the ConfigParams.
  */
 public class DefaultConfigParamsImpl implements ConfigParams {
-
     private static final Logger LOG = LoggerFactory.getLogger(DefaultConfigParamsImpl.class);
+    private static final Path EMPTY_PATH = Path.of("");
 
     private static final int SNAPSHOT_BATCH_COUNT = 20000;
     /**
@@ -76,7 +77,7 @@ public class DefaultConfigParamsImpl implements ConfigParams {
 
     private PeerAddressResolver peerAddressResolver = NoopPeerAddressResolver.INSTANCE;
 
-    private String tempFileDirectory = "";
+    private Path tempFileDirectory = EMPTY_PATH;
 
     private int fileBackedStreamingThreshold = 128 * 1_048_576;
 
@@ -127,8 +128,8 @@ public class DefaultConfigParamsImpl implements ConfigParams {
         this.candidateElectionTimeoutDivisor = candidateElectionTimeoutDivisor;
     }
 
-    public void setTempFileDirectory(final String tempFileDirectory) {
-        this.tempFileDirectory = tempFileDirectory;
+    public void setTempFileDirectory(final Path tempFileDirectory) {
+        this.tempFileDirectory = requireNonNull(tempFileDirectory);
     }
 
     public void setFileBackedStreamingThreshold(final int fileBackedStreamingThreshold) {
@@ -213,7 +214,7 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     }
 
     @Override
-    public String getTempFileDirectory() {
+    public Path getTempFileDirectory() {
         return tempFileDirectory;
     }
 

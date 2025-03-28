@@ -32,7 +32,9 @@ import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -52,6 +54,9 @@ import org.opendaylight.raft.spi.FileBackedOutputStreamFactory;
 
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class SnapshotManagerTest extends AbstractActorTest {
+    @Rule
+    public final TemporaryFolder tempDir = TemporaryFolder.builder().assureDeletion().build();
+
     @Mock
     private RaftActorContext mockRaftActorContext;
     @Mock
@@ -90,7 +95,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         doReturn(mockRaftActorBehavior).when(mockRaftActorContext).getCurrentBehavior();
         doReturn(mockTermInfo).when(mockRaftActorContext).termInfo();
 
-        doReturn(new FileBackedOutputStreamFactory(10000000, "target"))
+        doReturn(new FileBackedOutputStreamFactory(10000000, tempDir.getRoot().toPath()))
                 .when(mockRaftActorContext).getFileBackedOutputStreamFactory();
 
         snapshotManager = new SnapshotManager(mockRaftActorContext);

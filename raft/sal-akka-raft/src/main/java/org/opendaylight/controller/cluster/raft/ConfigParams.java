@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import java.nio.file.Path;
 import java.time.Duration;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
@@ -136,7 +137,7 @@ public interface ConfigParams {
      *
      * @return the directory in which to create temp files.
      */
-    @NonNull String getTempFileDirectory();
+    @NonNull Path getTempFileDirectory();
 
     /**
      * Returns the threshold in terms of number of bytes when streaming data before it should switch from storing in

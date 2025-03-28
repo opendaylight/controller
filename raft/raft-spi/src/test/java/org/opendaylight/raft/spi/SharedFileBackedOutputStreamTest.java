@@ -39,7 +39,7 @@ class SharedFileBackedOutputStreamTest {
     @Test
     void testSingleUsage() throws Exception {
         LOG.info("testSingleUsage starting");
-        try (var fbos = new SharedFileBackedOutputStream(5, tempDir.toString())) {
+        try (var fbos = new SharedFileBackedOutputStream(5, tempDir)) {
             final var bytes = new byte[] { 0, 1, 2, 3, 4, 5, 6 };
             fbos.write(bytes);
 
@@ -54,9 +54,9 @@ class SharedFileBackedOutputStreamTest {
     @Test
     void testSharing() throws Exception {
         LOG.info("testSharing starting");
-        try (var fbos = new SharedFileBackedOutputStream(5, tempDir.toString())) {
+        try (var fbos = new SharedFileBackedOutputStream(5, tempDir)) {
             String context = "context";
-            fbos.setOnCleanupCallback(mockCallback , context);
+            fbos.setOnCleanupCallback(mockCallback, context);
 
             final var bytes = new byte[] { 0, 1, 2, 3, 4, 5, 6 };
             fbos.write(bytes);

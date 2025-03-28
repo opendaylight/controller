@@ -14,6 +14,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.OptionalInt;
@@ -22,6 +23,7 @@ import org.apache.pekko.protobuf.ByteString;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
@@ -33,8 +35,11 @@ import org.opendaylight.raft.spi.FileBackedOutputStreamFactory;
 class SnapshotTrackerTest {
     private final HashMap<String, String> data = new HashMap<>();
 
+    @TempDir
+    private Path tempDir;
     @Mock
     private RaftActorContext mockContext;
+
     private FileBackedOutputStream fbos;
     private ByteString byteString;
     private byte[] chunk1;
@@ -52,7 +57,7 @@ class SnapshotTrackerTest {
         chunk2 = getNextChunk(byteString, 10, 10);
         chunk3 = getNextChunk(byteString, 20, byteString.size());
 
-        fbos = spy(new FileBackedOutputStream(100000000, "target"));
+        fbos = spy(new FileBackedOutputStream(100000000, tempDir));
         final var mockFactory = mock(FileBackedOutputStreamFactory.class);
         doReturn(fbos).when(mockFactory).newInstance();
         doReturn(mockFactory).when(mockContext).getFileBackedOutputStreamFactory();

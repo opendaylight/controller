@@ -7,6 +7,9 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
+import java.nio.file.Path;
+import org.eclipse.jdt.annotation.NonNull;
+
 /**
  * Interface for client actor configuration parameters.
  *
@@ -33,7 +36,7 @@ public interface ClientActorConfig {
      *
      * @return the directory name
      */
-    String getTempFileDirectory();
+    @NonNull Path getTempFileDirectory();
 
     /**
      * Returns the timer interval whereby, on expiration after response inactivity from the back-end, the connection to

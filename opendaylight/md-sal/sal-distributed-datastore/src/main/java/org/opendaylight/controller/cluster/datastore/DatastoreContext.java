@@ -11,6 +11,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.text.WordUtils;
@@ -242,11 +243,11 @@ public class DatastoreContext implements ClientActorConfig {
     }
 
     @Override
-    public String getTempFileDirectory() {
+    public Path getTempFileDirectory() {
         return raftConfig.getTempFileDirectory();
     }
 
-    private void setTempFileDirectory(final String tempFileDirectory) {
+    private void setTempFileDirectory(final Path tempFileDirectory) {
         raftConfig.setTempFileDirectory(tempFileDirectory);
     }
 
@@ -604,7 +605,12 @@ public class DatastoreContext implements ClientActorConfig {
             return this;
         }
 
+        @Deprecated
         public Builder tempFileDirectory(final String tempFileDirectory) {
+            return tempFileDirectory(Path.of(tempFileDirectory));
+        }
+
+        public Builder tempFileDirectory(final Path tempFileDirectory) {
             datastoreContext.setTempFileDirectory(tempFileDirectory);
             return this;
         }
