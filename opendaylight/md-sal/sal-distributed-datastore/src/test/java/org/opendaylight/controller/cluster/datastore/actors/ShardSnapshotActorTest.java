@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.datastore.actors;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
-import com.google.common.io.ByteSource;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.time.Duration;
@@ -24,6 +23,7 @@ import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnap
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
+import org.opendaylight.raft.spi.ByteArray;
 import org.opendaylight.raft.spi.InputOutputStreamFactory;
 
 public class ShardSnapshotActorTest extends AbstractActorTest {
@@ -46,7 +46,7 @@ public class ShardSnapshotActorTest extends AbstractActorTest {
 
         final ShardDataTreeSnapshot deserialized;
         try (var in = new ObjectInputStream(STREAM_FACTORY.createInputStream(
-            ByteSource.wrap(installSnapshotStream.toByteArray())))) {
+            ByteArray.wrap(installSnapshotStream.toByteArray())))) {
             deserialized = ShardDataTreeSnapshot.deserialize(in).getSnapshot();
         }
 
