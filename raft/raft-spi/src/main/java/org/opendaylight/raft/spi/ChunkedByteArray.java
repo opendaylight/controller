@@ -28,7 +28,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 final class ChunkedByteArray extends ByteArray {
     private final List<byte[]> chunks;
-    private final int size;
 
     /**
      * Default constructor.
@@ -37,18 +36,13 @@ final class ChunkedByteArray extends ByteArray {
      * @param chunks the chunks
      */
     ChunkedByteArray(final int size, final List<byte[]> chunks) {
-        this.size = size;
+        super(size);
         this.chunks = requireNonNull(chunks);
     }
 
     @Override
     public InputStream openStream() {
-        return new ChunkedInputStream(size, chunks.iterator());
-    }
-
-    @Override
-    public int size() {
-        return size;
+        return new ChunkedInputStream(size(), chunks.iterator());
     }
 
     @Override
