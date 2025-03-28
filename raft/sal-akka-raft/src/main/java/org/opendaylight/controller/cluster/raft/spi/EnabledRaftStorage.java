@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft.spi;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.RaftActor;
+import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
 import org.opendaylight.raft.spi.SnapshotFileFormat;
 
 /**
@@ -16,8 +17,8 @@ import org.opendaylight.raft.spi.SnapshotFileFormat;
  */
 @NonNullByDefault
 public abstract non-sealed class EnabledRaftStorage extends RaftStorage {
-    protected EnabledRaftStorage(final SnapshotFileFormat preferredFormat) {
-        super(preferredFormat);
+    protected EnabledRaftStorage(final SnapshotFileFormat preferredFormat, final Configuration streamConfig) {
+        super(preferredFormat, streamConfig);
     }
 
     @Override

@@ -32,6 +32,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.opendaylight.controller.cluster.messaging.MessageAssembler.Builder;
 import org.opendaylight.raft.spi.FileBackedOutputStream;
+import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
 
 /**
  * Unit tests for MessageAssembler.
@@ -68,18 +69,18 @@ public class MessageAssemblerTest extends AbstractMessagingTest {
 
     @Test
     public void testSingleMessageSlice() {
-        try (MessageAssembler assembler = newMessageAssembler("testSingleMessageSlice")) {
-            final FileBackedOutputStream fileBackStream = spy(new FileBackedOutputStream(100000000, null));
+        try (var assembler = newMessageAssembler("testSingleMessageSlice")) {
+            final var fileBackStream = spy(new FileBackedOutputStream(new Configuration(100000000, null)));
             doReturn(fileBackStream).when(mockFiledBackedStreamFactory).newInstance();
 
-            final MessageSliceIdentifier identifier = new MessageSliceIdentifier(IDENTIFIER, 1);
-            final BytesMessage message = new BytesMessage(new byte[]{1, 2, 3});
+            final var identifier = new MessageSliceIdentifier(IDENTIFIER, 1);
+            final var message = new BytesMessage(new byte[] { 1, 2, 3 });
 
-            final MessageSlice messageSlice = new MessageSlice(identifier, SerializationUtils.serialize(message), 1, 1,
+            final var messageSlice = new MessageSlice(identifier, SerializationUtils.serialize(message), 1, 1,
                     SlicedMessageState.INITIAL_SLICE_HASH_CODE, testProbe.ref());
             assembler.handleMessage(messageSlice, testProbe.ref());
 
-            final MessageSliceReply reply = testProbe.expectMsgClass(MessageSliceReply.class);
+            final var reply = testProbe.expectMsgClass(MessageSliceReply.class);
             assertSuccessfulMessageSliceReply(reply, IDENTIFIER, 1);
 
             assertAssembledMessage(mockAssembledMessageCallback, message, testProbe.ref());

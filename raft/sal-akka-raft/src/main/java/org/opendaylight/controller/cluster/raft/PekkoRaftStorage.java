@@ -17,6 +17,7 @@ import org.apache.pekko.persistence.SnapshotProtocol;
 import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
+import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
 import org.opendaylight.raft.spi.SnapshotFileFormat;
 import org.opendaylight.raft.spi.SnapshotSource;
 
@@ -27,8 +28,9 @@ import org.opendaylight.raft.spi.SnapshotSource;
 final class PekkoRaftStorage extends EnabledRaftStorage {
     private final RaftActor actor;
 
-    PekkoRaftStorage(final RaftActor actor, final SnapshotFileFormat preferredFormat) {
-        super(preferredFormat);
+    PekkoRaftStorage(final RaftActor actor, final SnapshotFileFormat preferredFormat,
+            final Configuration streamConfig) {
+        super(preferredFormat, streamConfig);
         this.actor = requireNonNull(actor);
     }
 

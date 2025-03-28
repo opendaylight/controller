@@ -66,6 +66,7 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.api.TermInfo;
+import org.opendaylight.raft.spi.FileBackedOutputStream;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.concepts.Immutable;
 import org.slf4j.Logger;
@@ -128,7 +129,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         final var config = configParams.orElseGet(DefaultConfigParamsImpl::new);
         localAccess = new LocalAccess(memberId, stateDir.resolve(memberId));
-        persistenceControl = new PersistenceControl(this, config.getPreferredFileFormat());
+        final var streamConfig = new FileBackedOutputStream.Configuration(config.getFileBackedStreamingThreshold(),
+            config.getTempFileDirectory());
+        persistenceControl = new PersistenceControl(this, config.getPreferredFileFormat(), streamConfig);
 
         context = new RaftActorContextImpl(self(), getContext(), localAccess, peerAddresses, config, payloadVersion,
             persistenceControl, this::handleApplyState, this::executeInSelf);

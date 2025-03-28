@@ -10,7 +10,6 @@ package org.opendaylight.raft.spi;
 import com.google.common.io.ByteSource;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -31,7 +30,25 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Pantelis
  */
+// Non-sealed for testing
 public class FileBackedOutputStream extends OutputStream {
+    /**
+     * Configuration for {@link FileBackedOutputStream}.
+     *
+     * @param threshold the number of bytes before the stream should switch to buffering to a file
+     * @param directory the directory in which to create the file if needed. If {@code null}, the default temp file
+     *                      location is used.
+     */
+    public record Configuration(int threshold, @Nullable Path directory) {
+        // Nothing else
+    }
+
+    @FunctionalInterface
+    private interface TempFileCreator {
+
+        Path newTempFile() throws IOException;
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(FileBackedOutputStream.class);
 
     /**
@@ -40,24 +57,19 @@ public class FileBackedOutputStream extends OutputStream {
      */
     private static final Cleaner FILE_CLEANER = Cleaner.create();
 
-    private final int fileThreshold;
-    private final Path fileDirectory;
+    private final TempFileCreator fileCreator;
+    private final int threshold;
 
     @GuardedBy("this")
     private MemoryOutputStream memory = new MemoryOutputStream();
-
     @GuardedBy("this")
     private OutputStream out = memory;
-
     @GuardedBy("this")
-    private File file;
-
+    private Path file;
     @GuardedBy("this")
     private Cleanable fileCleanup;
-
     @GuardedBy("this")
     private ByteSource source;
-
     @GuardedBy("this")
     private long count;
 
@@ -65,23 +77,14 @@ public class FileBackedOutputStream extends OutputStream {
      * Default constructor. Resulting instance uses the given file threshold, and does not reset the data when the
      * {@link ByteSource} returned by {@link #asByteSource} is finalized.
      *
-     * @param fileThreshold the number of bytes before the stream should switch to buffering to a file
-     * @param fileDirectory the directory in which to create the file if needed. If {@code null}, the default temp file
-     *                      location is used.
+     * @param config the {@link Configuration} to use
      */
-    public FileBackedOutputStream(final int fileThreshold, final @Nullable Path fileDirectory) {
-        this.fileThreshold = fileThreshold;
-        this.fileDirectory = fileDirectory;
-    }
+    public FileBackedOutputStream(final Configuration config) {
+        threshold = config.threshold;
 
-    /**
-     * Default constructor. Resulting instance uses the given file threshold, and does not reset the data when the
-     * {@link ByteSource} returned by {@link #asByteSource} is finalized.
-     *
-     * @param fileThreshold the number of bytes before the stream should switch to buffering to a file
-     */
-    public FileBackedOutputStream(final int fileThreshold) {
-        this(fileThreshold, null);
+        final var dir = config.directory;
+        fileCreator = dir == null ? () -> Files.createTempFile("FileBackedOutputStream", null)
+            : () -> Files.createTempFile(dir, "FileBackedOutputStream", null);
     }
 
     /**
@@ -95,16 +98,17 @@ public class FileBackedOutputStream extends OutputStream {
     public synchronized @NonNull ByteSource asByteSource() throws IOException {
         close();
 
-        if (source == null) {
-            source = new ByteSource() {
+        var local = source;
+        if (local == null) {
+            // Note: needs to retain reference to 'this' so as to keep the cleaner being invoked. we really should
+            //       have that taken careof by having a live object encapsulating the file
+            // FIXME: for the non-file case we would just use ByteSource.wrap()
+            source = local = new ByteSource() {
                 @Override
                 public InputStream openStream() throws IOException {
                     synchronized (FileBackedOutputStream.this) {
-                        if (file != null) {
-                            return Files.newInputStream(file.toPath());
-                        } else {
-                            return new ByteArrayInputStream(memory.buf(), 0, memory.count());
-                        }
+                        return file != null ? Files.newInputStream(file) :
+                            new ByteArrayInputStream(memory.buf(), 0, memory.count());
                     }
                 }
 
@@ -117,7 +121,7 @@ public class FileBackedOutputStream extends OutputStream {
             };
         }
 
-        return source;
+        return local;
     }
 
     @Override
@@ -197,47 +201,52 @@ public class FileBackedOutputStream extends OutputStream {
             throw new IOException("Stream already closed");
         }
 
-        if (file == null && memory.count() + len > fileThreshold) {
-            final var temp = File.createTempFile("FileBackedOutputStream", null,
-                    fileDirectory == null ? null : fileDirectory.toFile());
-            temp.deleteOnExit();
-            final var cleanable = FILE_CLEANER.register(this, () -> deleteFile(temp));
-
-            LOG.debug("Byte count {} has exceeded threshold {} - switching to file: {}", memory.count() + len,
-                    fileThreshold, temp);
-
-            final OutputStream transfer;
-            try {
-                transfer = Files.newOutputStream(temp.toPath());
-                try {
-                    transfer.write(memory.buf(), 0, memory.count());
-                    transfer.flush();
-                } catch (IOException e) {
-                    try {
-                        transfer.close();
-                    } catch (IOException ex) {
-                        LOG.debug("Error closing temp file {}", temp, ex);
-                    }
-                    throw e;
-                }
-            } catch (IOException e) {
-                cleanable.clean();
-                throw e;
+        if (file == null) {
+            final var newLength = memory.count() + len;
+            if (newLength > threshold) {
+                switchToFile(newLength);
             }
-
-            // We've successfully transferred the data; switch to writing to file
-            out = transfer;
-            file = temp;
-            fileCleanup = cleanable;
-            memory = null;
         }
     }
 
-    private static void deleteFile(final File file) {
-        LOG.debug("Deleting temp file {}", file);
-        if (!file.delete()) {
-            LOG.warn("Could not delete temp file {}", file);
+    private void switchToFile(final int newLength) throws IOException {
+        final var temp = fileCreator.newTempFile();
+        temp.toFile().deleteOnExit();
+        final var cleanable = FILE_CLEANER.register(this, () -> {
+            LOG.debug("Deleting temp file {}", temp);
+            try {
+                Files.delete(temp);
+            } catch (IOException e) {
+                LOG.warn("Could not delete temp file {}", temp, e);
+            }
+        });
+
+        LOG.debug("Byte count {} has exceeded threshold {} - switching to file: {}", newLength, threshold, temp);
+
+        final OutputStream transfer;
+        try {
+            transfer = Files.newOutputStream(temp);
+            try {
+                transfer.write(memory.buf(), 0, memory.count());
+                transfer.flush();
+            } catch (IOException e) {
+                try {
+                    transfer.close();
+                } catch (IOException ex) {
+                    LOG.debug("Error closing temp file {}", temp, ex);
+                }
+                throw e;
+            }
+        } catch (IOException e) {
+            cleanable.clean();
+            throw e;
         }
+
+        // We've successfully transferred the data; switch to writing to file
+        out = transfer;
+        file = temp;
+        fileCleanup = cleanable;
+        memory = null;
     }
 
     /**

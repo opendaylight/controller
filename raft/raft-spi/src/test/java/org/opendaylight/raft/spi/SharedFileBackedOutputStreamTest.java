@@ -19,6 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,10 +37,14 @@ class SharedFileBackedOutputStreamTest {
     @Mock
     private Consumer<String> mockCallback;
 
+    private SharedFileBackedOutputStream newStream() {
+        return new SharedFileBackedOutputStream(new Configuration(5, tempDir));
+    }
+
     @Test
     void testSingleUsage() throws Exception {
         LOG.info("testSingleUsage starting");
-        try (var fbos = new SharedFileBackedOutputStream(5, tempDir)) {
+        try (var fbos = newStream()) {
             final var bytes = new byte[] { 0, 1, 2, 3, 4, 5, 6 };
             fbos.write(bytes);
 
@@ -54,7 +59,7 @@ class SharedFileBackedOutputStreamTest {
     @Test
     void testSharing() throws Exception {
         LOG.info("testSharing starting");
-        try (var fbos = new SharedFileBackedOutputStream(5, tempDir)) {
+        try (var fbos = newStream()) {
             String context = "context";
             fbos.setOnCleanupCallback(mockCallback, context);
 

@@ -7,8 +7,13 @@
  */
 package org.opendaylight.raft.spi;
 
+import static java.util.Objects.requireNonNull;
+
+import com.google.common.base.MoreObjects;
 import java.nio.file.Path;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
 
 /**
  * A factory for creating {@link FileBackedOutputStream} instances.
@@ -17,19 +22,26 @@ import org.eclipse.jdt.annotation.Nullable;
  * @see FileBackedOutputStream
  */
 public class FileBackedOutputStreamFactory {
-    private final int fileThreshold;
-    private final Path fileDirectory;
+    private final @NonNull Configuration config;
+
+    /**
+     * Convenience constructor. Construcs and intermediate {@link Configuration}.
+     *
+     * @param threshold the number of bytes before streams should switch to buffering to a file
+     * @param directory the directory in which to create files if needed. If {@code null}, the default temp file
+     *                      location is used.
+     */
+    public FileBackedOutputStreamFactory(final int threshold, final @Nullable Path directory) {
+        this(new Configuration(threshold, directory));
+    }
 
     /**
      * Default constructor.
      *
-     * @param fileThreshold the number of bytes before streams should switch to buffering to a file
-     * @param fileDirectory the directory in which to create files if needed. If {@code null}, the default temp file
-     *                      location is used.
+     * @param config the {@link Configuration} to use
      */
-    public FileBackedOutputStreamFactory(final int fileThreshold, final @Nullable Path fileDirectory) {
-        this.fileThreshold = fileThreshold;
-        this.fileDirectory = fileDirectory;
+    public FileBackedOutputStreamFactory(final Configuration config) {
+        this.config = requireNonNull(config);
     }
 
     /**
@@ -38,7 +50,7 @@ public class FileBackedOutputStreamFactory {
      * @return a {@link FileBackedOutputStream} instance
      */
     public FileBackedOutputStream newInstance() {
-        return new FileBackedOutputStream(fileThreshold, fileDirectory);
+        return new FileBackedOutputStream(config);
     }
 
     /**
@@ -47,6 +59,11 @@ public class FileBackedOutputStreamFactory {
      * @return a {@link SharedFileBackedOutputStream} instance
      */
     public SharedFileBackedOutputStream newSharedInstance() {
-        return new SharedFileBackedOutputStream(fileThreshold, fileDirectory);
+        return new SharedFileBackedOutputStream(config);
+    }
+
+    @Override
+    public final String toString() {
+        return MoreObjects.toStringHelper(this).add("config", config).toString();
     }
 }

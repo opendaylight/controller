@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,10 +38,14 @@ class FileBackedOutputStreamTest {
     @TempDir
     private Path tempDir;
 
+    private FileBackedOutputStream newStream(final int threshold) {
+        return new FileBackedOutputStream(new Configuration(threshold, tempDir));
+    }
+
     @Test
     void testFileThresholdNotReached() throws Exception {
         LOG.info("testFileThresholdNotReached starting");
-        try (var fbos = new FileBackedOutputStream(10, tempDir)) {
+        try (var fbos = newStream(10)) {
             final var expected = new byte[]{ 1, 2, 3, 4, 5, 6, 7, 8, 9 };
             fbos.write(expected[0]);
             fbos.write(expected, 1, expected.length - 1);
@@ -62,7 +67,7 @@ class FileBackedOutputStreamTest {
     @Test
     void testFileThresholdReachedWithWriteBytes() throws Exception {
         LOG.info("testFileThresholdReachedWithWriteBytes starting");
-        try (var fbos = new FileBackedOutputStream(10, tempDir)) {
+        try (var fbos = newStream(10)) {
             final var bytes = new byte[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
             fbos.write(bytes[0]);
             fbos.write(bytes, 1, 11);
@@ -97,7 +102,7 @@ class FileBackedOutputStreamTest {
     @Test
     void testFileThresholdReachedWithWriteByte() throws Exception {
         LOG.info("testFileThresholdReachedWithWriteByte starting");
-        try (var fbos = new FileBackedOutputStream(2, tempDir)) {
+        try (var fbos = newStream(2)) {
             final var bytes = new byte[]{0, 1, 2};
             fbos.write(bytes[0]);
             fbos.write(bytes[1]);
@@ -119,8 +124,8 @@ class FileBackedOutputStreamTest {
     @Test
     void testWriteAfterAsByteSource() throws Exception {
         LOG.info("testWriteAfterAsByteSource starting");
-        try (var fbos = new FileBackedOutputStream(3, tempDir)) {
-            final var bytes = new byte[]{0, 1, 2};
+        try (var fbos = newStream(3)) {
+            final var bytes = new byte[] { 0, 1, 2 };
             fbos.write(bytes);
 
             assertNull(findTempFileName(tempDir));
@@ -135,7 +140,7 @@ class FileBackedOutputStreamTest {
     void testTempFileDeletedOnGC() throws Exception {
         LOG.info("testTempFileDeletedOnGC starting");
 
-        try (var fbos = new FileBackedOutputStream(1, tempDir)) {
+        try (var fbos = newStream(1)) {
             fbos.write(new byte[] { 0, 1 });
             assertNotNull(findTempFileName(tempDir));
         }

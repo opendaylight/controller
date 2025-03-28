@@ -18,6 +18,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
 import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
 import org.opendaylight.raft.spi.SnapshotFileFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,9 +31,11 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
     private static final Logger LOG = LoggerFactory.getLogger(RaftStorage.class);
 
     private final @NonNull SnapshotFileFormat preferredFormat;
+    private final @NonNull Configuration streamConfig;
 
-    protected RaftStorage(final SnapshotFileFormat preferredFormat) {
+    protected RaftStorage(final SnapshotFileFormat preferredFormat, final Configuration streamConfig) {
         this.preferredFormat = requireNonNull(preferredFormat);
+        this.streamConfig = requireNonNull(streamConfig);
     }
 
     private ExecutorService executor;
@@ -118,6 +121,6 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
     }
 
     protected ToStringHelper addToStringAtrributes(final ToStringHelper helper) {
-        return helper.add("memberId", memberId()).add("preferredFormat", preferredFormat);
+        return helper.add("memberId", memberId()).add("preferredFormat", preferredFormat).add("streams", streamConfig);
     }
 }

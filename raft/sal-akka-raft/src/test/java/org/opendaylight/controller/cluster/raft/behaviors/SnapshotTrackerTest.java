@@ -29,6 +29,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.behaviors.SnapshotTracker.InvalidChunkException;
 import org.opendaylight.raft.spi.FileBackedOutputStream;
+import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
 import org.opendaylight.raft.spi.FileBackedOutputStreamFactory;
 
 @ExtendWith(MockitoExtension.class)
@@ -57,7 +58,7 @@ class SnapshotTrackerTest {
         chunk2 = getNextChunk(byteString, 10, 10);
         chunk3 = getNextChunk(byteString, 20, byteString.size());
 
-        fbos = spy(new FileBackedOutputStream(100000000, tempDir));
+        fbos = spy(new FileBackedOutputStream(new Configuration(100000000, tempDir)));
         final var mockFactory = mock(FileBackedOutputStreamFactory.class);
         doReturn(fbos).when(mockFactory).newInstance();
         doReturn(mockFactory).when(mockContext).getFileBackedOutputStreamFactory();

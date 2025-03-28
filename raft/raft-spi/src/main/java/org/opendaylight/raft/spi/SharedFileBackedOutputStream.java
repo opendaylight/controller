@@ -9,7 +9,6 @@ package org.opendaylight.raft.spi;
 
 import com.google.common.base.Preconditions;
 import com.google.common.io.ByteSource;
-import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -22,6 +21,7 @@ import java.util.function.Consumer;
  * @author Thomas Pantelis
  */
 public final class SharedFileBackedOutputStream extends FileBackedOutputStream {
+    // FIXME: refCount
     private final AtomicInteger usageCount = new AtomicInteger(1);
 
     // FIXME: err... what?
@@ -33,12 +33,10 @@ public final class SharedFileBackedOutputStream extends FileBackedOutputStream {
      * Default constructor. Resulting instance uses the given file threshold, and does not reset the data when the
      * {@link ByteSource} returned by {@link #asByteSource} is finalized.
      *
-     * @param fileThreshold the number of bytes before the stream should switch to buffering to a file
-     * @param fileDirectory the directory in which to create the file if needed. If {@code null}, the default temp file
-     *                      location is used.
+     * @param config the configuration.
      */
-    public SharedFileBackedOutputStream(final int fileThreshold, final Path fileDirectory) {
-        super(fileThreshold, fileDirectory);
+    public SharedFileBackedOutputStream(final Configuration config) {
+        super(config);
     }
 
     /**

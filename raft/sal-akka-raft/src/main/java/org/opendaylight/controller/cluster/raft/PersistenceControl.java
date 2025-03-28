@@ -17,6 +17,7 @@ import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage;
 import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
 import org.opendaylight.controller.cluster.raft.spi.ForwardingDataPersistenceProvider;
+import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
 import org.opendaylight.raft.spi.SnapshotFileFormat;
 
 /**
@@ -47,9 +48,10 @@ final class PersistenceControl extends ForwardingDataPersistenceProvider {
         delegate = disabledStorage;
     }
 
-    PersistenceControl(final RaftActor raftActor, final SnapshotFileFormat preferredFormat) {
-        this(new DisabledRaftStorage(raftActor.memberId(), raftActor, raftActor.self(), preferredFormat),
-            new PekkoRaftStorage(raftActor, preferredFormat));
+    PersistenceControl(final RaftActor raftActor, final SnapshotFileFormat preferredFormat,
+            final Configuration streamConfig) {
+        this(new DisabledRaftStorage(raftActor.memberId(), raftActor, raftActor.self(), preferredFormat, streamConfig),
+            new PekkoRaftStorage(raftActor, preferredFormat, streamConfig));
     }
 
     @Override
