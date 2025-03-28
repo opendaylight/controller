@@ -22,7 +22,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.OutputStream;
 import java.time.Duration;
@@ -73,6 +72,7 @@ import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.raft.api.TermInfo;
+import org.opendaylight.raft.spi.InputStreamProvider;
 
 public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     private final short ourPayloadVersion = 5;
@@ -824,7 +824,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertEquals("getLastIncludedTerm", lastInstallSnapshot.getLastIncludedTerm(),
             applySnapshot.lastEntry().term());
         assertEquals("getLastTerm", lastInstallSnapshot.getLastIncludedTerm(), lastInstallSnapshot.getTerm());
-        assertArrayEquals("getState", bsSnapshot.toByteArray(), applySnapshot.snapshot().read());
+        assertArrayEquals("getState", bsSnapshot.toByteArray(), applySnapshot.snapshot().openStream().readAllBytes());
         applySnapshot.callback().onSuccess();
 
         final var replies = MessageCollectorActor.getAllMatching(leaderActor, InstallSnapshotReply.class);
@@ -1315,7 +1315,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
             }
 
             @Override
-            public MockSnapshotState deserializeSnapshot(final ByteSource snapshotBytes) {
+            public MockSnapshotState deserializeSnapshot(final InputStreamProvider snapshotBytes) {
                 throw new UnsupportedOperationException();
             }
         };

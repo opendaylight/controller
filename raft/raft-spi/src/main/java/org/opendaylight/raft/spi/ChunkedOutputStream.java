@@ -8,12 +8,11 @@
 package org.opendaylight.raft.spi;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Verify.verify;
 import static com.google.common.math.IntMath.ceilingPowerOfTwo;
 import static com.google.common.math.IntMath.isPowerOfTwo;
 
-import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.VerifyException;
 import com.google.common.collect.ImmutableList;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -21,7 +20,7 @@ import java.io.OutputStream;
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Deque;
-import org.opendaylight.yangtools.concepts.Either;
+import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * An {@link OutputStream} implementation which collects data is a series of {@code byte[]} chunks, each of which has
@@ -53,13 +52,13 @@ import org.opendaylight.yangtools.concepts.Either;
  * @author Robert Varga
  * @author Tomas Olvecky
  */
-// FIXME: This really is ChunkedByteArray.Builder :)
+// FIXME: This really is ByteArray.Builder :)
 public final class ChunkedOutputStream extends OutputStream {
     private static final int MIN_ARRAY_SIZE = 32;
 
     private final int maxChunkSize;
 
-    // byte[] or a List
+    // byte[] or an ImmutableList
     private Object result;
     // Lazily-allocated to reduce pressure for single-chunk streams
     private Deque<byte[]> prevChunks;
@@ -131,22 +130,18 @@ public final class ChunkedOutputStream extends OutputStream {
     }
 
     /**
-     * Uppack this stream.
+     * Return current contents as an {@link InputStreamProvider}.
      *
-     * @return either a byte[] or a ChunkedByteArray
+     * @return an {@link InputStreamProvider}
+     * @throws IllegalStateException if this stream is not closed
      */
-    // FIXME: sealed interface of a capture
-    public Either<byte[], ChunkedByteArray> toVariant() {
-        checkClosed();
-        return result instanceof byte[] bytes ? Either.ofFirst(bytes)
-                : Either.ofSecond(new ChunkedByteArray(size, (ImmutableList<byte[]>) result));
-    }
-
-    @VisibleForTesting
-    ChunkedByteArray toChunkedByteArray() {
-        checkClosed();
-        return new ChunkedByteArray(size, result instanceof byte[] bytes ? ImmutableList.of(bytes)
-            : (ImmutableList<byte[]>) result);
+    public @NonNull ByteArray toByteArray() {
+        return switch (result) {
+            case null -> throw new IllegalStateException("Stream has not been closed yet");
+            case byte[] bytes -> ByteArray.wrap(bytes);
+            case ImmutableList<?> list -> new ChunkedByteArray(size, (ImmutableList<byte[]>) list);
+            default -> throw new VerifyException("Unexpected result " + result);
+        };
     }
 
     private Object computeResult() {
@@ -238,10 +233,6 @@ public final class ChunkedOutputStream extends OutputStream {
         prevChunks.addLast(currentChunk);
         currentChunk = new byte[chunkSize];
         currentOffset = 0;
-    }
-
-    private void checkClosed() {
-        checkState(result != null, "Stream has not been closed yet");
     }
 
     private void checkNotClosed() throws IOException {

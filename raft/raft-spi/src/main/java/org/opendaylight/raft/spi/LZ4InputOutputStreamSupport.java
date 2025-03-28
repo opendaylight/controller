@@ -10,7 +10,6 @@ package org.opendaylight.raft.spi;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.io.ByteSource;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,27 +29,14 @@ final class LZ4InputOutputStreamSupport extends InputOutputStreamFactory {
     }
 
     @Override
-    public InputStream createInputStream(final ByteSource input) throws IOException {
+    public InputStream createInputStream(final InputStreamProvider input) throws IOException {
         final var in = input.openStream();
         try {
             return Lz4Support.newDecompressInputStream(in);
         } catch (IOException e) {
             in.close();
             LOG.warn("Error loading with lz4 decompression, using default one", e);
-            return input.openBufferedStream();
-        }
-    }
-
-    @Override
-    public InputStream createInputStream(final File file) throws IOException {
-        final var path = file.toPath();
-        final var in = Files.newInputStream(path);
-        try {
-            return Lz4Support.newDecompressInputStream(in);
-        } catch (IOException e) {
-            in.close();
-            LOG.warn("Error loading file with lz4 decompression, using default one", e);
-            return defaultCreateInputStream(path);
+            return ensureBuffered(input.openStream());
         }
     }
 
