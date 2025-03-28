@@ -41,13 +41,6 @@
             <classifier>features</classifier>
         </dependency>
         <dependency>
-            <!-- FIXME: remove this -->
-            <groupId>org.opendaylight.yangtools</groupId>
-            <artifactId>odl-yangtools-util</artifactId>
-            <type>xml</type>
-            <classifier>features</classifier>
-        </dependency>
-        <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>raft-spi</artifactId>
         </dependency>

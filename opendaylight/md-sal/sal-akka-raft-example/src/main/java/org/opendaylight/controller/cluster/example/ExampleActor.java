@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.example;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Path;
@@ -31,6 +30,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotRep
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.raft.spi.InputStreamProvider;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.util.AbstractStringIdentifier;
 import org.slf4j.Logger;
@@ -198,9 +198,10 @@ public final class ExampleActor extends RaftActor
     }
 
     @Override
-    public MapState deserializeSnapshot(final ByteSource snapshotBytes) {
+    public MapState deserializeSnapshot(final InputStreamProvider snapshotBytes) {
         try {
-            return new MapState(SerializationUtils.<Map<String, String>>deserialize(snapshotBytes.read()));
+            return new MapState(SerializationUtils.<Map<String, String>>deserialize(
+                snapshotBytes.openStream().readAllBytes()));
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }

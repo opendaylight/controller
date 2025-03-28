@@ -78,7 +78,7 @@ class ChunkedOutputStreamTest {
 
     private List<byte[]> assertFinishedStream(final int expectedSize, final int expectedChunks) {
         stream.close();
-        final var array = stream.toChunkedByteArray();
+        final var array = stream.toByteArray();
         assertEquals(expectedSize, array.size());
 
         final var chunks = array.chunks();

@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.raft;
 import static org.junit.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.OutputStream;
 import java.util.List;
@@ -32,6 +31,7 @@ import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
+import org.opendaylight.raft.spi.InputStreamProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,7 +86,7 @@ public class MigratedMessagesTest extends AbstractActorTest {
             }
 
             @Override
-            public MockSnapshotState deserializeSnapshot(final ByteSource snapshotBytes) {
+            public MockSnapshotState deserializeSnapshot(final InputStreamProvider snapshotBytes) {
                 throw new UnsupportedOperationException();
             }
         };
@@ -132,7 +132,7 @@ public class MigratedMessagesTest extends AbstractActorTest {
             }
 
             @Override
-            public MockSnapshotState deserializeSnapshot(final ByteSource snapshotBytes) {
+            public MockSnapshotState deserializeSnapshot(final InputStreamProvider snapshotBytes) {
                 throw new UnsupportedOperationException();
             }
         };

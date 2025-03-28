@@ -26,7 +26,6 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
@@ -92,6 +91,7 @@ import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.api.TermInfo;
+import org.opendaylight.raft.spi.ByteArray;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -322,7 +322,7 @@ public class RaftActorTest extends AbstractActorTest {
         mockRaftActor.waitForRecoveryComplete();
 
         final var applySnapshot = new ApplyLeaderSnapshot(persistenceId, 0, EntryInfo.of(0, 0),
-            ByteSource.wrap(new byte[1]), null, mock(ApplyLeaderSnapshot.Callback.class));
+            ByteArray.wrap(new byte[1]), null, mock(ApplyLeaderSnapshot.Callback.class));
 
         when(mockSupport.handleSnapshotMessage(same(applySnapshot))).thenReturn(true);
         mockRaftActor.handleCommand(applySnapshot);
