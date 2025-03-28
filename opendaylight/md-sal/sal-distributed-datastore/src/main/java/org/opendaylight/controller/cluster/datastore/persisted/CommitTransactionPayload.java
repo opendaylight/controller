@@ -16,7 +16,6 @@ import com.google.common.base.MoreObjects;
 import com.google.common.io.ByteStreams;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.DataInput;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutput;
@@ -26,7 +25,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.raft.messages.IdentifiablePayload;
-import org.opendaylight.raft.spi.ChunkedByteArray;
+import org.opendaylight.raft.spi.ByteArray;
 import org.opendaylight.raft.spi.ChunkedOutputStream;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.ReusableStreamReceiver;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion;
@@ -77,9 +76,15 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
             DataTreeCandidateInputOutput.writeDataTreeCandidate(dos, version, candidate);
         }
 
-        final var source = cos.toVariant();
-        LOG.debug("Initial buffer capacity {}, actual serialized size {}", initialSerializedBufferCapacity, cos.size());
-        return source.isFirst() ? new Simple(source.getFirst()) : new Chunked(source.getSecond());
+        final var array = cos.toByteArray();
+        LOG.debug("Initial buffer capacity {}, actual serialized size {}", initialSerializedBufferCapacity,
+            array.size());
+
+        final var chunks = array.chunks();
+        return switch (chunks.size()) {
+            case 1 -> new Simple(chunks.getFirst());
+            default -> new Chunked(array);
+        };
     }
 
     @VisibleForTesting
@@ -153,7 +158,7 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
 
     abstract void writeBytes(ObjectOutput out) throws IOException;
 
-    abstract DataInput newDataInput();
+    abstract DataInput newDataInput() throws IOException;
 
     @Override
     public final Object writeReplace() {
@@ -191,9 +196,9 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
         private static final long serialVersionUID = 1L;
 
         @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "Handled via serialization proxy")
-        private final ChunkedByteArray source;
+        private final ByteArray source;
 
-        Chunked(final ChunkedByteArray source) {
+        Chunked(final ByteArray source) {
             this.source = requireNonNull(source);
         }
 
@@ -208,8 +213,8 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
         }
 
         @Override
-        DataInput newDataInput() {
-            return new DataInputStream(source.openStream());
+        DataInput newDataInput() throws IOException {
+            return source.newDataInput();
         }
     }
 

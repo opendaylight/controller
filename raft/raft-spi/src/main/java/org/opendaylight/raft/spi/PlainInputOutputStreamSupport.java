@@ -7,7 +7,6 @@
  */
 package org.opendaylight.raft.spi;
 
-import com.google.common.io.ByteSource;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,13 +21,8 @@ final class PlainInputOutputStreamSupport extends InputOutputStreamFactory {
     }
 
     @Override
-    public InputStream createInputStream(final ByteSource input) throws IOException {
-        return input.openBufferedStream();
-    }
-
-    @Override
-    public InputStream createInputStream(final File file) throws IOException {
-        return defaultCreateInputStream(file.toPath());
+    public InputStream createInputStream(final InputStreamProvider input) throws IOException {
+        return ensureBuffered(input.openStream());
     }
 
     @Override

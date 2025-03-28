@@ -7,6 +7,8 @@
  */
 package org.opendaylight.raft.spi;
 
+import java.io.DataInput;
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -21,7 +23,18 @@ public interface InputStreamProvider {
      * Open an {@link InputStream}.
      *
      * @return an InputStream
-     * @throws IOException if an error occurs
+     * @throws IOException if an I/O error occurs
      */
     InputStream openStream() throws IOException;
+
+    /**
+     * Open a {@link DataInput}.
+     *
+     * @return a {@link DataInput}
+     * @throws IOException if an I/O error occurs
+     */
+    default DataInput newDataInput() throws IOException {
+        final var stream = openStream();
+        return stream instanceof DataInput dataInput ? dataInput : new DataInputStream(stream);
+    }
 }

@@ -13,7 +13,6 @@ import static java.util.Objects.requireNonNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
-import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -34,6 +33,7 @@ import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage.CommitSnapshot;
+import org.opendaylight.raft.spi.InputStreamProvider;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -202,9 +202,10 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     @Override
-    public MockSnapshotState deserializeSnapshot(final ByteSource snapshotBytes) {
+    public MockSnapshotState deserializeSnapshot(final InputStreamProvider snapshotBytes) {
         try {
-            return verifyNotNull(SerializationUtils.<MockSnapshotState>deserialize(snapshotBytes.read()));
+            return verifyNotNull(SerializationUtils.<MockSnapshotState>deserialize(
+                snapshotBytes.openStream().readAllBytes()));
         } catch (IOException e) {
             throw new RuntimeException("Error deserializing state", e);
         }
