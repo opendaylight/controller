@@ -117,7 +117,7 @@ public final class CommitTransactionPayload extends IdentifiablePayload<Transact
     }
 
     public @NonNull CandidateTransaction getCandidate(final ReusableStreamReceiver receiver) throws IOException {
-        final var in = source.newDataInput();
+        final var in = source.openDataInput();
         final var transactionId = TransactionIdentifier.readFrom(in);
         final var readCandidate = DataTreeCandidateInputOutput.readDataTreeCandidate(in, receiver);
 

@@ -14,11 +14,10 @@ import java.io.InputStream;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * Interface capturing the ability to open {@link InputStream}s.
+ * A source of data. Access is provided via {@link #openStream()} and {@link #openDataInput()}.
  */
 @NonNullByDefault
-@FunctionalInterface
-public interface InputStreamProvider {
+public interface DataSource {
     /**
      * Open an {@link InputStream}.
      *
@@ -33,7 +32,7 @@ public interface InputStreamProvider {
      * @return a {@link DataInput}
      * @throws IOException if an I/O error occurs
      */
-    default DataInput newDataInput() throws IOException {
+    default DataInput openDataInput() throws IOException {
         final var stream = openStream();
         return stream instanceof DataInput dataInput ? dataInput : new DataInputStream(stream);
     }

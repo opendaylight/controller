@@ -15,8 +15,8 @@ import java.util.Arrays;
 import java.util.OptionalInt;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
+import org.opendaylight.raft.spi.DataSource;
 import org.opendaylight.raft.spi.FileBackedOutputStream;
-import org.opendaylight.raft.spi.InputStreamProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,14 +87,13 @@ class SnapshotTracker implements AutoCloseable {
         return sealed;
     }
 
-    // FIXME: InputStreamProvider
-    @NonNull InputStreamProvider getSnapshotBytes() throws IOException {
+    @NonNull DataSource getSnapshotBytes() throws IOException {
         if (!sealed) {
             throw new IllegalStateException("lastChunk not received yet");
         }
 
         bufferedStream.close();
-        return fileBackedStream.asByteSource()::openStream;
+        return fileBackedStream.asDataSource();
     }
 
     String getLeaderId() {

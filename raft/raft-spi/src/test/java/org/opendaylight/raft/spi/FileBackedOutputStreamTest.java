@@ -47,11 +47,11 @@ class FileBackedOutputStreamTest {
 
             assertEquals(expected.length, fbos.getCount());
             assertNull(findTempFileName(tempDir));
-            assertEquals(expected.length, fbos.asByteSource().size());
+            assertEquals(expected.length, fbos.asDataSource().size());
 
             // Read bytes twice.
-            assertArrayEquals(expected, fbos.asByteSource().read());
-            assertArrayEquals(expected, fbos.asByteSource().read());
+            assertArrayEquals(expected, fbos.asDataSource().read());
+            assertArrayEquals(expected, fbos.asDataSource().read());
 
             fbos.cleanup();
         }
@@ -74,10 +74,10 @@ class FileBackedOutputStreamTest {
             fbos.write(bytes, 13, bytes.length - 13);
 
             assertEquals(tempFileName, findTempFileName(tempDir));
-            assertEquals(bytes.length, fbos.asByteSource().size());
+            assertEquals(bytes.length, fbos.asDataSource().size());
 
-            try (var inputStream = fbos.asByteSource().openStream()) {
-                assertArrayEquals(bytes, fbos.asByteSource().read());
+            try (var inputStream = fbos.asDataSource().openStream()) {
+                assertArrayEquals(bytes, fbos.asDataSource().read());
 
                 // FIXME: assert hex string
                 final var inBytes = new byte[bytes.length];
@@ -109,8 +109,8 @@ class FileBackedOutputStreamTest {
 
             assertNotNull(findTempFileName(tempDir));
 
-            assertEquals(bytes.length, fbos.asByteSource().size());
-            assertArrayEquals(bytes, fbos.asByteSource().read());
+            assertEquals(bytes.length, fbos.asDataSource().size());
+            assertArrayEquals(bytes, fbos.asDataSource().read());
         }
 
         LOG.info("testFileThresholdReachedWithWriteByte ending");
@@ -124,7 +124,7 @@ class FileBackedOutputStreamTest {
             fbos.write(bytes);
 
             assertNull(findTempFileName(tempDir));
-            assertEquals(bytes.length, fbos.asByteSource().size());
+            assertEquals(bytes.length, fbos.asDataSource().size());
 
             // Should throw IOException after call to asByteSource.
             assertThrows(IOException.class, () -> fbos.write(1));

@@ -56,7 +56,7 @@ public abstract sealed class InputOutputStreamFactory
      * @return an {@link InputStream}
      * @throws IOException if an I/O error occurs
      */
-    public abstract @NonNull InputStream createInputStream(InputStreamProvider input) throws IOException;
+    public abstract @NonNull InputStream createInputStream(DataSource input) throws IOException;
 
     /**
      * Create a new {@link OutputStream}.

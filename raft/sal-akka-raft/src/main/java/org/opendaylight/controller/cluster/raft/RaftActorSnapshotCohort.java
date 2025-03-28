@@ -12,7 +12,7 @@ import java.io.OutputStream;
 import org.apache.pekko.actor.ActorRef;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
-import org.opendaylight.raft.spi.InputStreamProvider;
+import org.opendaylight.raft.spi.DataSource;
 
 /**
  * Interface for a class that participates in raft actor snapshotting.
@@ -61,9 +61,9 @@ public interface RaftActorSnapshotCohort<T extends State> {
      * This method is called to de-serialize snapshot data that was previously serialized via {@link #createSnapshot}
      * to a State instance.
      *
-     * @param snapshotBytes the {@link InputStreamProvider} containing the serialized data
+     * @param snapshotBytes the {@link DataSource} containing the serialized data
      * @return the converted snapshot State
      * @throws IOException if an error occurs accessing the ByteSource or de-serializing
      */
-    @NonNull T deserializeSnapshot(@NonNull InputStreamProvider snapshotBytes) throws IOException;
+    @NonNull T deserializeSnapshot(@NonNull DataSource snapshotBytes) throws IOException;
 }

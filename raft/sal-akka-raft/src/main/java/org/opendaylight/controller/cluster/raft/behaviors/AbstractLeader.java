@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.UncheckedIOException;
@@ -52,6 +51,7 @@ import org.opendaylight.controller.cluster.raft.messages.UnInitializedFollowerSn
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.api.TermInfo;
+import org.opendaylight.raft.spi.DataSource;
 import org.opendaylight.raft.spi.SharedFileBackedOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,9 +88,9 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
     }
 
     @NonNullByDefault
-    private record SnapshotHolder(long index, long term, ByteSource bytes) {
+    private record SnapshotHolder(long index, long term, DataSource source) {
         public SnapshotHolder {
-            requireNonNull(bytes);
+            requireNonNull(source);
         }
     }
 
@@ -906,8 +906,8 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
     }
 
     @NonNullByDefault
-    public final void sendInstallSnapshot(final long index, final long term, final ByteSource bytes) {
-        setSnapshot(index, term, bytes);
+    public final void sendInstallSnapshot(final long index, final long term, final DataSource source) {
+        setSnapshot(index, term, source);
 
         LOG.debug("{}: sendInstallSnapshot", logName);
         for (var entry : followerToLog.entrySet()) {
@@ -947,7 +947,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         final byte[] data;
         try {
             // Ensure the snapshot bytes are set - this is a no-op.
-            installSnapshotState.setSnapshotBytes(snapshot.bytes);
+            installSnapshotState.setSnapshotBytes(snapshot.source);
 
             if (installSnapshotState.canSendNextChunk()) {
                 data = installSnapshotState.getNextChunk();
@@ -1104,8 +1104,8 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
 
     @NonNullByDefault
     @VisibleForTesting
-    final void setSnapshot(final long index, final long term, final ByteSource bytes) {
-        snapshotHolder = new SnapshotHolder(index, term, bytes);
+    final void setSnapshot(final long index, final long term, final DataSource source) {
+        snapshotHolder = new SnapshotHolder(index, term, source);
     }
 
     @VisibleForTesting

@@ -25,7 +25,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
-import com.google.common.io.ByteSource;
 import java.io.OutputStream;
 import java.util.List;
 import org.apache.pekko.actor.ActorRef;
@@ -48,6 +47,7 @@ import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.TermInfo;
+import org.opendaylight.raft.spi.DataSource;
 import org.opendaylight.raft.spi.FileBackedOutputStreamFactory;
 
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
@@ -345,7 +345,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         verify(mockReplicatedLog).snapshotPreCommit(9L, 6L);
 
-        final var byteSourceCaptor = ArgumentCaptor.forClass(ByteSource.class);
+        final var byteSourceCaptor = ArgumentCaptor.forClass(DataSource.class);
 
         verify(mockRaftActorBehavior).sendInstallSnapshot(eq(9L), eq(6L), byteSourceCaptor.capture());
 

@@ -11,7 +11,6 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.VerifyException;
-import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.OutputStream;
 import org.apache.pekko.dispatch.ControlMessage;
@@ -27,8 +26,8 @@ import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.EntryMeta;
+import org.opendaylight.raft.spi.DataSource;
 import org.opendaylight.raft.spi.FileBackedOutputStream;
-import org.opendaylight.raft.spi.InputStreamProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +48,7 @@ public final class SnapshotManager {
             long term,
             EntryInfo lastEntry,
             // FIXME: SnapshotSource
-            InputStreamProvider snapshot,
+            DataSource snapshot,
             @Nullable ClusterConfig serverConfig,
             ApplyLeaderSnapshot.Callback callback) {
         public ApplyLeaderSnapshot {
@@ -336,15 +335,15 @@ public final class SnapshotManager {
                 return;
             }
 
-            final ByteSource bytes;
+            final DataSource source;
             try {
-                bytes = snapshotStream.asByteSource();
+                source = snapshotStream.asDataSource();
             } catch (IOException e) {
                 LOG.error("{}: Snapshot install failed due to an unrecoverable streaming error", memberId(), e);
                 return;
             }
 
-            leader.sendInstallSnapshot(request.getLastAppliedIndex(), request.getLastAppliedTerm(), bytes);
+            leader.sendInstallSnapshot(request.getLastAppliedIndex(), request.getLastAppliedTerm(), source);
         }
     }
 

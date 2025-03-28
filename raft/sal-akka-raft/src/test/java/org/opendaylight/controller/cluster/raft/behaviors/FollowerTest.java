@@ -72,7 +72,7 @@ import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.raft.api.TermInfo;
-import org.opendaylight.raft.spi.InputStreamProvider;
+import org.opendaylight.raft.spi.DataSource;
 
 public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     private final short ourPayloadVersion = 5;
@@ -1315,7 +1315,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
             }
 
             @Override
-            public MockSnapshotState deserializeSnapshot(final InputStreamProvider snapshotBytes) {
+            public MockSnapshotState deserializeSnapshot(final DataSource snapshotBytes) {
                 throw new UnsupportedOperationException();
             }
         };
