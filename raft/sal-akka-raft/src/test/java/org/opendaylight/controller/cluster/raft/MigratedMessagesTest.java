@@ -31,7 +31,7 @@ import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
-import org.opendaylight.raft.spi.InputStreamProvider;
+import org.opendaylight.raft.spi.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,7 +86,7 @@ public class MigratedMessagesTest extends AbstractActorTest {
             }
 
             @Override
-            public MockSnapshotState deserializeSnapshot(final InputStreamProvider snapshotBytes) {
+            public MockSnapshotState deserializeSnapshot(final DataSource snapshotBytes) {
                 throw new UnsupportedOperationException();
             }
         };
@@ -132,7 +132,7 @@ public class MigratedMessagesTest extends AbstractActorTest {
             }
 
             @Override
-            public MockSnapshotState deserializeSnapshot(final InputStreamProvider snapshotBytes) {
+            public MockSnapshotState deserializeSnapshot(final DataSource snapshotBytes) {
                 throw new UnsupportedOperationException();
             }
         };

@@ -33,7 +33,7 @@ import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage.CommitSnapshot;
-import org.opendaylight.raft.spi.InputStreamProvider;
+import org.opendaylight.raft.spi.DataSource;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -202,7 +202,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     @Override
-    public MockSnapshotState deserializeSnapshot(final InputStreamProvider snapshotBytes) {
+    public MockSnapshotState deserializeSnapshot(final DataSource snapshotBytes) {
         try {
             return verifyNotNull(SerializationUtils.<MockSnapshotState>deserialize(
                 snapshotBytes.openStream().readAllBytes()));

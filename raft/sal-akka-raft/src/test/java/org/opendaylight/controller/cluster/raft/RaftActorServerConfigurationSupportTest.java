@@ -74,7 +74,7 @@ import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.RaftRole;
-import org.opendaylight.raft.spi.InputStreamProvider;
+import org.opendaylight.raft.spi.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1537,7 +1537,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
                 }
 
                 @Override
-                public MockSnapshotState deserializeSnapshot(final InputStreamProvider snapshotBytes) {
+                public MockSnapshotState deserializeSnapshot(final DataSource snapshotBytes) {
                     throw new UnsupportedOperationException();
                 }
             };

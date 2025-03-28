@@ -28,7 +28,7 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.TestTermInfoStore;
 import org.opendaylight.raft.api.EntryMeta;
-import org.opendaylight.raft.spi.InputStreamProvider;
+import org.opendaylight.raft.spi.DataSource;
 
 public class MockRaftActorContext extends RaftActorContextImpl {
     private ActorSystem system;
@@ -114,7 +114,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
             }
 
             @Override
-            public ByteState deserializeSnapshot(final InputStreamProvider snapshotBytes) throws IOException {
+            public ByteState deserializeSnapshot(final DataSource snapshotBytes) throws IOException {
                 return ByteState.of(snapshotBytes.openStream().readAllBytes());
             }
         });

@@ -13,14 +13,14 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * An {@link InputStreamProvider} which performs on-the-fly transformation of the stream provided by a delegate.
+ * An {@link DataSource} which performs on-the-fly transformation of the stream provided by a delegate.
  *
  * @param delegate the delegate
  * @param adapter the transform
  */
 @NonNullByDefault
-public record AdaptingInputStreamProvider(InputStreamProvider delegate, OpenStreamAdapter adapter)
-        implements InputStreamProvider {
+public record AdaptingInputStreamProvider(DataSource delegate, OpenStreamAdapter adapter)
+        implements DataSource {
     /**
      * The stream adaptation method, called upon just after the delegate is open.
      */

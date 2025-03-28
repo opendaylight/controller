@@ -21,7 +21,7 @@ final class PlainInputOutputStreamSupport extends InputOutputStreamFactory {
     }
 
     @Override
-    public InputStream createInputStream(final InputStreamProvider input) throws IOException {
+    public InputStream createInputStream(final DataSource input) throws IOException {
         return ensureBuffered(input.openStream());
     }
 

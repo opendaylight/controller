@@ -19,14 +19,14 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 public final class Lz4SnapshotSource extends SnapshotSource {
-    private final InputStreamProvider provider;
+    private final DataSource provider;
 
     /**
      * Default constructor.
      *
-     * @param provider the {@link InputStreamProvider}
+     * @param provider the {@link DataSource}
      */
-    public Lz4SnapshotSource(final InputStreamProvider provider) {
+    public Lz4SnapshotSource(final DataSource provider) {
         this.provider = requireNonNull(provider);
     }
 

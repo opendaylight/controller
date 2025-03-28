@@ -16,18 +16,18 @@ import java.nio.file.Path;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * An {@link InputStreamProvider} backed by a file.
+ * An {@link DataSource} backed by a file.
  *
  * @param path the file path
  */
 @NonNullByDefault
-public record FileInputStreamProvider(Path path) implements InputStreamProvider {
+public record FileDataSource(Path path) implements DataSource {
     /**
      * Default constructor.
      *
      * @param path the file path
      */
-    public FileInputStreamProvider {
+    public FileDataSource {
         requireNonNull(path);
     }
 

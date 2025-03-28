@@ -8,11 +8,8 @@
 package org.opendaylight.raft.spi;
 
 import com.google.common.io.ByteSource;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.ref.Cleaner;
 import java.lang.ref.Cleaner.Cleanable;
@@ -56,7 +53,7 @@ public class FileBackedOutputStream extends OutputStream {
     private Cleanable fileCleanup;
 
     @GuardedBy("this")
-    private ByteSource source;
+    private DataSource source;
 
     @GuardedBy("this")
     private long count;
@@ -86,39 +83,21 @@ public class FileBackedOutputStream extends OutputStream {
     }
 
     /**
-     * Returns a readable {@link ByteSource} view of the data that has been written to this stream. This stream is
+     * Returns a readable {@link DataSource} view of the data that has been written to this stream. This stream is
      * closed and further attempts to write to it will result in an IOException.
      *
-     * @return a ByteSource instance
+     * @return a {@link DataSource} instance
      * @throws IOException if close fails
      */
-    // FIXME: toInputStreamProvider()
-    public synchronized @NonNull ByteSource asByteSource() throws IOException {
+    public synchronized @NonNull DataSource asDataSource() throws IOException {
         close();
 
-        if (source == null) {
-            source = new ByteSource() {
-                @Override
-                public InputStream openStream() throws IOException {
-                    synchronized (FileBackedOutputStream.this) {
-                        if (file != null) {
-                            return Files.newInputStream(file.toPath());
-                        } else {
-                            return new ByteArrayInputStream(memory.buf(), 0, memory.count());
-                        }
-                    }
-                }
-
-                @Override
-                public long size() {
-                    synchronized (FileBackedOutputStream.this) {
-                        return count;
-                    }
-                }
-            };
+        var local = source;
+        if (local == null) {
+            final var lf = file;
+            source = local = lf != null ? new FileDataSource(lf.toPath()) : memory.toDataSource();
         }
-
-        return source;
+        return local;
     }
 
     @Override
@@ -238,19 +217,6 @@ public class FileBackedOutputStream extends OutputStream {
         LOG.debug("Deleting temp file {}", file);
         if (!file.delete()) {
             LOG.warn("Could not delete temp file {}", file);
-        }
-    }
-
-    /**
-     * ByteArrayOutputStream that exposes its internals for efficiency.
-     */
-    private static final class MemoryOutputStream extends ByteArrayOutputStream {
-        byte[] buf() {
-            return buf;
-        }
-
-        int count() {
-            return count;
         }
     }
 }

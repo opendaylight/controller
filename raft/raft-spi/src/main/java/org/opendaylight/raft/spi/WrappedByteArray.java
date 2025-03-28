@@ -22,26 +22,32 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 final class WrappedByteArray extends ByteArray {
-    static final WrappedByteArray EMPTY = new WrappedByteArray(new byte[0]);
+    static final WrappedByteArray EMPTY = new WrappedByteArray(new byte[0], 0);
 
     private final byte[] bytes;
+    private final int size;
 
     /**
      * Default constructor.
      *
      * @param bytes backing byte array
      */
-    private WrappedByteArray(final byte[] bytes) {
+    private WrappedByteArray(final byte[] bytes, final int size) {
         this.bytes = requireNonNull(bytes);
+        this.size = size;
     }
 
     static WrappedByteArray of(final byte[] bytes) {
-        return bytes.length == 0 ? EMPTY : new WrappedByteArray(bytes);
+        return of(bytes, bytes.length);
+    }
+
+    static WrappedByteArray of(final byte[] bytes, final int size) {
+        return bytes.length == 0 ? EMPTY : new WrappedByteArray(bytes, size);
     }
 
     @Override
     public int size() {
-        return bytes.length;
+        return size;
     }
 
     @Override
@@ -51,16 +57,16 @@ final class WrappedByteArray extends ByteArray {
 
     @Override
     public InputStream openStream() {
-        return new ByteArrayInputStream(bytes);
+        return new ByteArrayInputStream(bytes, 0, size);
     }
 
     @Override
     public void copyTo(final DataOutput output) throws IOException {
-        output.write(bytes);
+        output.write(bytes, 0, size);
     }
 
     @Override
     public void copyTo(final OutputStream output) throws IOException {
-        output.write(bytes, 0, bytes.length);
+        output.write(bytes, 0, size);
     }
 }

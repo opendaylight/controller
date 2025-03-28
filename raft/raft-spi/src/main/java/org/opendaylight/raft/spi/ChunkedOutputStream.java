@@ -130,9 +130,9 @@ public final class ChunkedOutputStream extends OutputStream {
     }
 
     /**
-     * Return current contents as an {@link InputStreamProvider}.
+     * Return current contents as an {@link DataSource}.
      *
-     * @return an {@link InputStreamProvider}
+     * @return an {@link DataSource}
      * @throws IllegalStateException if this stream is not closed
      */
     public @NonNull ByteArray toByteArray() {

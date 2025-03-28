@@ -75,6 +75,7 @@ import org.opendaylight.controller.cluster.raft.utils.ForwardMessageToBehaviorAc
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.api.TermInfo;
+import org.opendaylight.raft.spi.ByteArray;
 import org.opendaylight.yangtools.concepts.Identifier;
 
 public class LeaderTest extends AbstractLeaderTest<Leader> {
@@ -605,7 +606,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         //update follower timestamp
         leader.markFollowerActive(FOLLOWER_ID);
 
-        final var bs = ByteSource.wrap(toByteString(Map.of("1", "A", "2", "B", "3", "C")).toByteArray());
+        final var bs = ByteArray.wrap(toByteString(Map.of("1", "A", "2", "B", "3", "C")).toByteArray());
         leader.setSnapshot(commitIndex, snapshotTerm, bs);
         LeaderInstallSnapshotState fts = new LeaderInstallSnapshotState(
                 actorContext.getConfigParams().getMaximumMessageSliceSize(), leader.logName);
@@ -858,7 +859,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         byte[] bytes = toByteString(leadersSnapshot).toByteArray();
 
-        leader.sendInstallSnapshot(lastAppliedIndex, snapshotTerm, ByteSource.wrap(bytes));
+        leader.sendInstallSnapshot(lastAppliedIndex, snapshotTerm, ByteArray.wrap(bytes));
 
         // check if installsnapshot gets called with the correct values.
 
@@ -903,7 +904,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         byte[] bytes = toByteString(leadersSnapshot).toByteArray();
 
-        leader.sendInstallSnapshot(lastAppliedIndex, snapshotTerm, ByteSource.wrap(bytes));
+        leader.sendInstallSnapshot(lastAppliedIndex, snapshotTerm, ByteArray.wrap(bytes));
 
         // check if installsnapshot gets called with the correct values.
         final var installSnapshot = MessageCollectorActor.expectFirstMatching(followerActor, InstallSnapshot.class);
@@ -948,7 +949,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         actorContext.setTermInfo(new TermInfo(currentTerm, leaderActor.path().toString()));
 
         ByteString bs = toByteString(leadersSnapshot);
-        leader.setSnapshot(commitIndex, snapshotTerm, ByteSource.wrap(bs.toByteArray()));
+        leader.setSnapshot(commitIndex, snapshotTerm, ByteArray.wrap(bs.toByteArray()));
         LeaderInstallSnapshotState fts = new LeaderInstallSnapshotState(
                 actorContext.getConfigParams().getMaximumMessageSliceSize(), leader.logName);
         fts.setSnapshotBytes(ByteSource.wrap(bs.toByteArray()));
@@ -1015,7 +1016,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         ByteString bs = toByteString(leadersSnapshot);
 
-        leader.sendInstallSnapshot(commitIndex, snapshotTerm, ByteSource.wrap(bs.toByteArray()));
+        leader.sendInstallSnapshot(commitIndex, snapshotTerm, ByteArray.wrap(bs.toByteArray()));
 
         var installSnapshot = MessageCollectorActor.expectFirstMatching(followerActor, InstallSnapshot.class);
 
@@ -1087,7 +1088,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         ByteString bs = toByteString(leadersSnapshot);
 
         Uninterruptibles.sleepUninterruptibly(Duration.ofSeconds(1));
-        leader.sendInstallSnapshot(commitIndex, snapshotTerm, ByteSource.wrap(bs.toByteArray()));
+        leader.sendInstallSnapshot(commitIndex, snapshotTerm, ByteArray.wrap(bs.toByteArray()));
 
         var installSnapshot = MessageCollectorActor.expectFirstMatching(followerActor, InstallSnapshot.class);
 
@@ -1146,7 +1147,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         actorContext.setTermInfo(new TermInfo(currentTerm, leaderActor.path().toString()));
 
         leader.sendInstallSnapshot(commitIndex, snapshotTerm,
-            ByteSource.wrap(toByteString(leadersSnapshot).toByteArray()));
+            ByteArray.wrap(toByteString(leadersSnapshot).toByteArray()));
 
         var installSnapshot = MessageCollectorActor.expectFirstMatching(followerActor, InstallSnapshot.class);
         assertEquals(1, installSnapshot.getChunkIndex());

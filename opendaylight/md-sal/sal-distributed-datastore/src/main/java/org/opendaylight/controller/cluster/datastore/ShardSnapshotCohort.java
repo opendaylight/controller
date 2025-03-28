@@ -24,8 +24,8 @@ import org.opendaylight.controller.cluster.datastore.actors.ShardSnapshotActor;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
 import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
+import org.opendaylight.raft.spi.DataSource;
 import org.opendaylight.raft.spi.InputOutputStreamFactory;
-import org.opendaylight.raft.spi.InputStreamProvider;
 import org.opendaylight.raft.spi.Lz4BlockSize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,7 +102,7 @@ final class ShardSnapshotCohort implements RaftActorSnapshotCohort<ShardSnapshot
     }
 
     @Override
-    public ShardSnapshotState deserializeSnapshot(final InputStreamProvider snapshotBytes) throws IOException {
+    public ShardSnapshotState deserializeSnapshot(final DataSource snapshotBytes) throws IOException {
         try (var in = new ObjectInputStream(streamFactory.createInputStream(snapshotBytes))) {
             return ShardDataTreeSnapshot.deserialize(in);
         }

@@ -22,13 +22,20 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * The moral equivalent of a {@code byte[]}, but perhaps allocated in chunks so as to be GC-friendly.
  */
 @NonNullByDefault
-public abstract sealed class ByteArray implements InputStreamProvider permits ChunkedByteArray, WrappedByteArray {
+public abstract sealed class ByteArray implements DataSource permits ChunkedByteArray, WrappedByteArray {
     ByteArray() {
         // Hidden on purpose
     }
 
     @Override
     public abstract InputStream openStream();
+
+    /**
+     * Returns the size of this array.
+     *
+     * @return the size of this array
+     */
+    public abstract int size();
 
     /**
      * Copy this array into specified {@link DataOutput}.
@@ -45,13 +52,6 @@ public abstract sealed class ByteArray implements InputStreamProvider permits Ch
      * @throws IOException if an I/O error occurs
      */
     public abstract void copyTo(OutputStream output) throws IOException;
-
-    /**
-     * Returns the size of this array.
-     *
-     * @return the size of this array
-     */
-    public abstract int size();
 
     /**
      * Returns the list of chunks.

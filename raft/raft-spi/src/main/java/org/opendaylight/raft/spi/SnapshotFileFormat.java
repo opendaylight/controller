@@ -25,7 +25,7 @@ public enum SnapshotFileFormat {
      */
     PLAIN(".plain") {
         @Override
-        public SnapshotSource sourceFor(final InputStreamProvider provider) {
+        public SnapshotSource sourceFor(final DataSource provider) {
             return new Lz4SnapshotSource(provider);
         }
 
@@ -44,7 +44,7 @@ public enum SnapshotFileFormat {
      */
     LZ4(".lz4") {
         @Override
-        public SnapshotSource sourceFor(final InputStreamProvider provider) {
+        public SnapshotSource sourceFor(final DataSource provider) {
             return new Lz4SnapshotSource(provider);
         }
 
@@ -83,12 +83,12 @@ public enum SnapshotFileFormat {
     }
 
     /**
-     * Create a new {@link SnapshotSource} backed by an {@link InputStreamProvider}.
+     * Create a new {@link SnapshotSource} backed by an {@link DataSource}.
      *
      * @param provider the provider
      * @return a {@link SnapshotSource}
      */
-    public abstract SnapshotSource sourceFor(InputStreamProvider provider);
+    public abstract SnapshotSource sourceFor(DataSource provider);
 
     /**
      * Return an {@link InputStream} which produces plain snapshot bytes based on this format's stream obtained from

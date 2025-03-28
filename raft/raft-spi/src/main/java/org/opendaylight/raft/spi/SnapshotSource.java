@@ -16,7 +16,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * format of a snapshot.
  */
 @NonNullByDefault
-public abstract sealed class SnapshotSource implements InputStreamProvider
+public abstract sealed class SnapshotSource implements DataSource
         permits PlainSnapshotSource, Lz4SnapshotSource {
     /**
      * Default constructor.
