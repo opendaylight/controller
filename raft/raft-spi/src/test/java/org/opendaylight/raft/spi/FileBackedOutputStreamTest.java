@@ -40,7 +40,7 @@ class FileBackedOutputStreamTest {
     @Test
     void testFileThresholdNotReached() throws Exception {
         LOG.info("testFileThresholdNotReached starting");
-        try (var fbos = new FileBackedOutputStream(10, tempDir.toString())) {
+        try (var fbos = new FileBackedOutputStream(10, tempDir)) {
             final var expected = new byte[]{ 1, 2, 3, 4, 5, 6, 7, 8, 9 };
             fbos.write(expected[0]);
             fbos.write(expected, 1, expected.length - 1);
@@ -62,8 +62,8 @@ class FileBackedOutputStreamTest {
     @Test
     void testFileThresholdReachedWithWriteBytes() throws Exception {
         LOG.info("testFileThresholdReachedWithWriteBytes starting");
-        try (var fbos = new FileBackedOutputStream(10, tempDir.toString())) {
-            byte[] bytes = new byte[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
+        try (var fbos = new FileBackedOutputStream(10, tempDir)) {
+            final var bytes = new byte[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
             fbos.write(bytes[0]);
             fbos.write(bytes, 1, 11);
 
@@ -97,7 +97,7 @@ class FileBackedOutputStreamTest {
     @Test
     void testFileThresholdReachedWithWriteByte() throws Exception {
         LOG.info("testFileThresholdReachedWithWriteByte starting");
-        try (var fbos = new FileBackedOutputStream(2, tempDir.toString())) {
+        try (var fbos = new FileBackedOutputStream(2, tempDir)) {
             final var bytes = new byte[]{0, 1, 2};
             fbos.write(bytes[0]);
             fbos.write(bytes[1]);
@@ -117,9 +117,9 @@ class FileBackedOutputStreamTest {
     }
 
     @Test
-    void testWriteAfterAsByteSource() throws IOException {
+    void testWriteAfterAsByteSource() throws Exception {
         LOG.info("testWriteAfterAsByteSource starting");
-        try (var fbos = new FileBackedOutputStream(3, tempDir.toString())) {
+        try (var fbos = new FileBackedOutputStream(3, tempDir)) {
             final var bytes = new byte[]{0, 1, 2};
             fbos.write(bytes);
 
@@ -132,10 +132,10 @@ class FileBackedOutputStreamTest {
     }
 
     @Test
-    void testTempFileDeletedOnGC() throws IOException {
+    void testTempFileDeletedOnGC() throws Exception {
         LOG.info("testTempFileDeletedOnGC starting");
 
-        try (var fbos = new FileBackedOutputStream(1, tempDir.toString())) {
+        try (var fbos = new FileBackedOutputStream(1, tempDir)) {
             fbos.write(new byte[] { 0, 1 });
             assertNotNull(findTempFileName(tempDir));
         }
