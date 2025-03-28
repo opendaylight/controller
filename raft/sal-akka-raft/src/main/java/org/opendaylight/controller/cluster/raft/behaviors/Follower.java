@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
-import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.HashSet;
@@ -39,6 +38,7 @@ import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.api.TermInfo;
+import org.opendaylight.raft.spi.InputStreamProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -638,7 +638,7 @@ public class Follower extends RaftActorBehavior {
         snapshotTracker = null;
 
         LOG.info("{}: Snapshot received from leader: {}", logName, leaderId);
-        final ByteSource snapshotBytes;
+        final InputStreamProvider snapshotBytes;
         try {
             snapshotBytes = tracker.getSnapshotBytes();
         } catch (IOException e) {

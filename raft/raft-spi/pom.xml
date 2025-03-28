@@ -48,11 +48,6 @@
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>raft-api</artifactId>
         </dependency>
-        <!-- FIXME: remove this? -->
-        <dependency>
-            <groupId>org.opendaylight.yangtools</groupId>
-            <artifactId>concepts</artifactId>
-        </dependency>
     </dependencies>
 
     <build>

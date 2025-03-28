@@ -13,20 +13,19 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
-import com.google.common.io.ByteStreams;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import java.io.DataInput;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutput;
+import java.io.NotSerializableException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectStreamException;
 import java.io.Serializable;
 import org.apache.commons.lang3.SerializationUtils;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.raft.messages.IdentifiablePayload;
-import org.opendaylight.raft.spi.ChunkedByteArray;
+import org.opendaylight.raft.spi.ByteArray;
 import org.opendaylight.raft.spi.ChunkedOutputStream;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.ReusableStreamReceiver;
 import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion;
@@ -37,13 +36,10 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Payload persisted when a transaction commits. It contains the transaction identifier and the
- * {@link DataTreeCandidate}
- *
- * @author Robert Varga
+ * {@link DataTreeCandidate}.
  */
 @Beta
-public abstract sealed class CommitTransactionPayload extends IdentifiablePayload<TransactionIdentifier>
-        implements Serializable {
+public final class CommitTransactionPayload extends IdentifiablePayload<TransactionIdentifier> implements Serializable {
     @NonNullByDefault
     public record CandidateTransaction(
             TransactionIdentifier transactionId,
@@ -56,16 +52,28 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
         }
     }
 
+    // Exists to break initialization dependency between CommitTransactionPayload/Simple/Proxy
+    private static final class ProxySizeHolder {
+        static final int PROXY_SIZE = SerializationUtils.serialize(new CT(ByteArray.empty())).length;
+
+        private ProxySizeHolder() {
+            // Hidden on purpose
+        }
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(CommitTransactionPayload.class);
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     static final int MAX_ARRAY_SIZE = ceilingPowerOfTwo(Integer.getInteger(
         "org.opendaylight.controller.cluster.datastore.persisted.max-array-size", 256 * 1024));
 
+    private final @NonNull ByteArray source;
+
     private volatile CandidateTransaction candidate = null;
 
-    private CommitTransactionPayload() {
-        // hidden on purpose
+    CommitTransactionPayload(final ByteArray source) {
+        this.source = requireNonNull(source);
     }
 
     public static @NonNull CommitTransactionPayload create(final TransactionIdentifier transactionId,
@@ -77,9 +85,10 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
             DataTreeCandidateInputOutput.writeDataTreeCandidate(dos, version, candidate);
         }
 
-        final var source = cos.toVariant();
-        LOG.debug("Initial buffer capacity {}, actual serialized size {}", initialSerializedBufferCapacity, cos.size());
-        return source.isFirst() ? new Simple(source.getFirst()) : new Chunked(source.getSecond());
+        final var source = cos.toByteArray();
+        LOG.debug("Initial buffer capacity {}, actual serialized size {}", initialSerializedBufferCapacity,
+            source.size());
+        return new CommitTransactionPayload(source);
     }
 
     @VisibleForTesting
@@ -107,8 +116,8 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
         return localCandidate;
     }
 
-    public final @NonNull CandidateTransaction getCandidate(final ReusableStreamReceiver receiver) throws IOException {
-        final var in = newDataInput();
+    public @NonNull CandidateTransaction getCandidate(final ReusableStreamReceiver receiver) throws IOException {
+        final var in = source.newDataInput();
         final var transactionId = TransactionIdentifier.readFrom(in);
         final var readCandidate = DataTreeCandidateInputOutput.readDataTreeCandidate(in, receiver);
 
@@ -125,9 +134,14 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
     }
 
     @Override
-    public final int serializedSize() {
+    public int serializedSize() {
         // TODO: this is not entirely accurate as the the byte[] can be chunked by the serialization stream
         return ProxySizeHolder.PROXY_SIZE + size();
+    }
+
+    @Override
+    public int size() {
+        return source.size();
     }
 
     /**
@@ -142,7 +156,7 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
     }
 
     @Override
-    public final String toString() {
+    public String toString() {
         final var helper = MoreObjects.toStringHelper(this);
         final var localCandidate = candidate;
         if (localCandidate != null) {
@@ -151,74 +165,27 @@ public abstract sealed class CommitTransactionPayload extends IdentifiablePayloa
         return helper.add("size", size()).toString();
     }
 
-    abstract void writeBytes(ObjectOutput out) throws IOException;
-
-    abstract DataInput newDataInput();
-
     @Override
-    public final Object writeReplace() {
-        return new CT(this);
+    public Object writeReplace() {
+        return new CT(source);
     }
 
-    static final class Simple extends CommitTransactionPayload {
-        @java.io.Serial
-        private static final long serialVersionUID = 1L;
-
-        private final byte[] serialized;
-
-        Simple(final byte[] serialized) {
-            this.serialized = requireNonNull(serialized);
-        }
-
-        @Override
-        public int size() {
-            return serialized.length;
-        }
-
-        @Override
-        DataInput newDataInput() {
-            return ByteStreams.newDataInput(serialized);
-        }
-
-        @Override
-        void writeBytes(final ObjectOutput out) throws IOException {
-            out.write(serialized);
-        }
+    @java.io.Serial
+    private void readObject(final ObjectInputStream stream) throws IOException, ClassNotFoundException {
+        throwNSE();
     }
 
-    static final class Chunked extends CommitTransactionPayload {
-        @java.io.Serial
-        private static final long serialVersionUID = 1L;
-
-        @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "Handled via serialization proxy")
-        private final ChunkedByteArray source;
-
-        Chunked(final ChunkedByteArray source) {
-            this.source = requireNonNull(source);
-        }
-
-        @Override
-        void writeBytes(final ObjectOutput out) throws IOException {
-            source.copyTo(out);
-        }
-
-        @Override
-        public int size() {
-            return source.size();
-        }
-
-        @Override
-        DataInput newDataInput() {
-            return new DataInputStream(source.openStream());
-        }
+    @java.io.Serial
+    private void readObjectNoData() throws ObjectStreamException {
+        throwNSE();
     }
 
-    // Exists to break initialization dependency between CommitTransactionPayload/Simple/Proxy
-    private static final class ProxySizeHolder {
-        static final int PROXY_SIZE = SerializationUtils.serialize(new CT(new Simple(new byte[0]))).length;
+    @java.io.Serial
+    private void writeObject(final ObjectOutputStream stream) throws IOException {
+        throwNSE();
+    }
 
-        private ProxySizeHolder() {
-            // Hidden on purpose
-        }
+    private static void throwNSE() throws NotSerializableException {
+        throw new NotSerializableException(CommitTransactionPayload.class.getName());
     }
 }

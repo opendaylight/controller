@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.datastore.persisted;
 
-import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
 import java.io.Externalizable;
@@ -15,9 +14,7 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.StreamCorruptedException;
-import org.opendaylight.controller.cluster.datastore.persisted.CommitTransactionPayload.Chunked;
-import org.opendaylight.controller.cluster.datastore.persisted.CommitTransactionPayload.Simple;
-import org.opendaylight.raft.spi.ChunkedByteArray;
+import org.opendaylight.raft.spi.ByteArray;
 
 /**
  * Serialization proxy for {@link CommitTransactionPayload}.
@@ -26,21 +23,21 @@ final class CT implements Externalizable {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
-    private CommitTransactionPayload payload;
+    private ByteArray source;
 
     @SuppressWarnings("checkstyle:RedundantModifier")
     public CT() {
         // For Externalizable
     }
 
-    CT(final CommitTransactionPayload payload) {
-        this.payload = requireNonNull(payload);
+    CT(final ByteArray source) {
+        this.source = requireNonNull(source);
     }
 
     @Override
     public void writeExternal(final ObjectOutput out) throws IOException {
-        out.writeInt(payload.size());
-        payload.writeBytes(out);
+        out.writeInt(source.size());
+        source.copyTo(out);
     }
 
     @Override
@@ -48,17 +45,13 @@ final class CT implements Externalizable {
         final int length = in.readInt();
         if (length < 0) {
             throw new StreamCorruptedException("Invalid payload length " + length);
-        } else if (length < CommitTransactionPayload.MAX_ARRAY_SIZE) {
-            final byte[] serialized = new byte[length];
-            in.readFully(serialized);
-            payload = new Simple(serialized);
-        } else {
-            payload = new Chunked(ChunkedByteArray.readFrom(in, length, CommitTransactionPayload.MAX_ARRAY_SIZE));
         }
+
+        source = ByteArray.readFrom(in, length, CommitTransactionPayload.MAX_ARRAY_SIZE);
     }
 
     @java.io.Serial
     private Object readResolve() {
-        return verifyNotNull(payload);
+        return  new CommitTransactionPayload(source);
     }
 }
