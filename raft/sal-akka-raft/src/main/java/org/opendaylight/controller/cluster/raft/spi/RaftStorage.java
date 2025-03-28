@@ -63,7 +63,7 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
         }
 
         final var local = Executors.newThreadPerTaskExecutor(Thread.ofVirtual()
-            .name(memberId() + "-%d", ThreadLocalRandom.current().nextInt())
+            .name(memberId() + "-%d", ThreadLocalRandom.current().nextInt(0, 1_000_000))
             .factory());
         executor = local;
         LOG.debug("{}: started executor", memberId());

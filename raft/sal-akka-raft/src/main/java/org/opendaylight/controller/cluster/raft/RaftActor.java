@@ -159,6 +159,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         super.preStart();
 
+        persistenceControl.start();
         context.getSnapshotManager().setSnapshotCohort(getRaftActorSnapshotCohort());
         snapshotSupport = newRaftActorSnapshotMessageSupport();
         serverConfigurationSupport = new RaftActorServerConfigurationSupport(this);
@@ -175,6 +176,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 LOG.warn("{}: Error closing behavior {}", memberId(), behavior.raftRole(), e);
             }
         }
+        persistenceControl.stop();
+
         super.postStop();
     }
 

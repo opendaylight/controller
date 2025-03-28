@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
+import java.io.IOException;
 import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
@@ -52,6 +53,25 @@ final class PersistenceControl extends ForwardingDataPersistenceProvider {
             final Configuration streamConfig) {
         this(new DisabledRaftStorage(raftActor.memberId(), raftActor, raftActor.self(), preferredFormat, streamConfig),
             new PekkoRaftStorage(raftActor, preferredFormat, streamConfig));
+    }
+
+    void start() throws IOException {
+        try {
+            disabledStorage.start();
+        } catch (IOException de) {
+            try {
+                enabledStorage.start();
+            } catch (IOException ee) {
+                ee.addSuppressed(de);
+                throw ee;
+            }
+            throw de;
+        }
+    }
+
+    void stop() {
+        enabledStorage.stop();
+        disabledStorage.stop();
     }
 
     @Override
