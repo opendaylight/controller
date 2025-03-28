@@ -11,10 +11,6 @@
     <artifactId>sal-clustering-commons</artifactId>
     <packaging>bundle</packaging>
 
-    <properties>
-        <odlparent.modernizer.enforce>false</odlparent.modernizer.enforce>
-    </properties>
-
     <dependencies>
         <dependency>
             <!-- Enforce Netty’s optional dependency on servlet API -->
@@ -53,11 +49,6 @@
         <dependency>
             <groupId>io.dropwizard.metrics</groupId>
             <artifactId>metrics-jmx</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.checkerframework</groupId>
-            <artifactId>checker-qual</artifactId>
-            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jdt</groupId>
