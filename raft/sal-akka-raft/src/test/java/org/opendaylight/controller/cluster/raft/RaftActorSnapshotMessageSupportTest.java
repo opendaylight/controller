@@ -12,7 +12,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import com.google.common.io.ByteSource;
 import java.io.OutputStream;
 import org.apache.pekko.persistence.SaveSnapshotFailure;
 import org.apache.pekko.persistence.SaveSnapshotSuccess;
@@ -27,6 +26,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotRep
 import org.opendaylight.controller.cluster.raft.persisted.ByteState;
 import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage.CommitSnapshot;
 import org.opendaylight.raft.api.EntryInfo;
+import org.opendaylight.raft.spi.ByteArray;
 
 /**
  * Unit tests for RaftActorSnapshotMessageSupport.
@@ -58,7 +58,7 @@ class RaftActorSnapshotMessageSupportTest {
     @Test
     void testOnApplySnapshot() {
         final var snapshot = new ApplyLeaderSnapshot("leaderId", 1, EntryInfo.of(2, 1),
-            ByteSource.wrap(new byte[] { 1, 2, 3, 4, 5 }), null, mockCallback);
+            ByteArray.wrap(new byte[] { 1, 2, 3, 4, 5 }), null, mockCallback);
         sendMessageToSupport(snapshot);
 
         verify(mockSnapshotManager).applyFromLeader(snapshot);
