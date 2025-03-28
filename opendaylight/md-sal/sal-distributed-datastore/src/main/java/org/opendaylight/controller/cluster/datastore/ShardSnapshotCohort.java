@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.OutputStream;
@@ -26,6 +25,7 @@ import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnap
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
 import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
 import org.opendaylight.raft.spi.InputOutputStreamFactory;
+import org.opendaylight.raft.spi.InputStreamProvider;
 import org.opendaylight.raft.spi.Lz4BlockSize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,7 +102,7 @@ final class ShardSnapshotCohort implements RaftActorSnapshotCohort<ShardSnapshot
     }
 
     @Override
-    public ShardSnapshotState deserializeSnapshot(final ByteSource snapshotBytes) throws IOException {
+    public ShardSnapshotState deserializeSnapshot(final InputStreamProvider snapshotBytes) throws IOException {
         try (var in = new ObjectInputStream(streamFactory.createInputStream(snapshotBytes))) {
             return ShardDataTreeSnapshot.deserialize(in);
         }

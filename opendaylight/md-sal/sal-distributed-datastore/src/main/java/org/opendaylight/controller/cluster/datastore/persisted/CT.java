@@ -15,9 +15,7 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.StreamCorruptedException;
-import org.opendaylight.controller.cluster.datastore.persisted.CommitTransactionPayload.Chunked;
-import org.opendaylight.controller.cluster.datastore.persisted.CommitTransactionPayload.Simple;
-import org.opendaylight.raft.spi.ChunkedByteArray;
+import org.opendaylight.raft.spi.ByteArray;
 
 /**
  * Serialization proxy for {@link CommitTransactionPayload}.
@@ -48,13 +46,9 @@ final class CT implements Externalizable {
         final int length = in.readInt();
         if (length < 0) {
             throw new StreamCorruptedException("Invalid payload length " + length);
-        } else if (length < CommitTransactionPayload.MAX_ARRAY_SIZE) {
-            final byte[] serialized = new byte[length];
-            in.readFully(serialized);
-            payload = new Simple(serialized);
-        } else {
-            payload = new Chunked(ChunkedByteArray.readFrom(in, length, CommitTransactionPayload.MAX_ARRAY_SIZE));
         }
+
+        payload = new CommitTransactionPayload(ByteArray.readFrom(in, length, CommitTransactionPayload.MAX_ARRAY_SIZE));
     }
 
     @java.io.Serial

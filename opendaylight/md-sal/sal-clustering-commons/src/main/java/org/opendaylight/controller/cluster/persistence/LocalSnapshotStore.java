@@ -42,6 +42,7 @@ import org.apache.pekko.persistence.serialization.SnapshotSerializer;
 import org.apache.pekko.persistence.snapshot.japi.SnapshotStore;
 import org.apache.pekko.serialization.JavaSerializer;
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.raft.spi.FileInputStreamProvider;
 import org.opendaylight.raft.spi.InputOutputStreamFactory;
 import org.opendaylight.raft.spi.Lz4BlockSize;
 import org.slf4j.Logger;
@@ -150,7 +151,8 @@ public final class LocalSnapshotStore extends SnapshotStore {
     private Object deserialize(final Path file) throws IOException {
         return JavaSerializer.currentSystem().withValue((ExtendedActorSystem) context().system(),
             (Callable<Object>) () -> {
-                try (var in = new ObjectInputStream(streamFactory.createInputStream(file.toFile()))) {
+                try (var in = new ObjectInputStream(streamFactory.createInputStream(
+                        new FileInputStreamProvider(file)))) {
                     return in.readObject();
                 } catch (ClassNotFoundException e) {
                     throw new IOException("Error loading snapshot file " + file, e);
