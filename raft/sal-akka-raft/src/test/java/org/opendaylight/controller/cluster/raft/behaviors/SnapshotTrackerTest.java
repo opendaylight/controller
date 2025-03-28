@@ -66,7 +66,7 @@ class SnapshotTrackerTest {
             tracker.addChunk(3, chunk3, OptionalInt.of(Arrays.hashCode(chunk2)));
 
             final var snapshotBytes = tracker.getSnapshotBytes();
-            assertEquals(data, SerializationUtils.deserialize(snapshotBytes.read()));
+            assertEquals(data, SerializationUtils.deserialize(snapshotBytes.openStream().readAllBytes()));
         }
 
         verify(fbos).cleanup();

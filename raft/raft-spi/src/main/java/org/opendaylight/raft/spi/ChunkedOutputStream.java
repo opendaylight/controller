@@ -22,7 +22,7 @@ import java.io.OutputStream;
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Deque;
-import org.opendaylight.yangtools.concepts.Either;
+import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * An {@link OutputStream} implementation which collects data is a series of {@code byte[]} chunks, each of which has
@@ -133,15 +133,17 @@ public final class ChunkedOutputStream extends OutputStream {
     }
 
     /**
-     * Uppack this stream.
+     * Return current contents as an {@link InputStreamProvider}.
      *
-     * @return either a byte[] or a ChunkedByteArray
+     * @return an {@link InputStreamProvider}
+     * @throws IllegalStateException if this stream is not closed
      */
     // FIXME: sealed interface of a capture
-    public Either<byte[], ChunkedByteArray> toVariant() {
+    public @NonNull ByteArray toByteArray() {
         checkClosed();
-        return result instanceof byte[] bytes ? Either.ofFirst(bytes)
-                : Either.ofSecond(new ChunkedByteArray(size, (ImmutableList<byte[]>) result));
+
+        return result instanceof byte[] bytes ? new WrappedByteArray(bytes)
+            : new ChunkedByteArray(size, (ImmutableList<byte[]>) result);
     }
 
     @VisibleForTesting

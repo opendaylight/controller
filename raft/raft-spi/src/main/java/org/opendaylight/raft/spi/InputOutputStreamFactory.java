@@ -9,9 +9,9 @@ package org.opendaylight.raft.spi;
 
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.io.ByteSource;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,6 +19,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  * Support for opening {@link InputStream}s -- be it {@link #simple()} or {@link #lz4(Lz4BlockSize)}.
@@ -55,17 +56,7 @@ public abstract sealed class InputOutputStreamFactory
      * @return an {@link InputStream}
      * @throws IOException if an I/O error occurs
      */
-    // FIXME: InputStreamProvider
-    public abstract @NonNull InputStream createInputStream(ByteSource input) throws IOException;
-
-    /**
-     * Create a new {@link InputStream}.
-     *
-     * @param file source of backing input stream
-     * @return an {@link InputStream}
-     * @throws IOException if an I/O error occurs
-     */
-    public abstract @NonNull InputStream createInputStream(File file) throws IOException;
+    public abstract @NonNull InputStream createInputStream(InputStreamProvider input) throws IOException;
 
     /**
      * Create a new {@link OutputStream}.
@@ -83,7 +74,17 @@ public abstract sealed class InputOutputStreamFactory
      * @return an {@link OutputStream}
      * @throws IOException if an I/O error occurs
      */
-    public abstract @NonNull OutputStream wrapOutputStream(OutputStream output) throws IOException;
+    @NonNullByDefault
+    public abstract OutputStream wrapOutputStream(OutputStream output) throws IOException;
+
+    @NonNullByDefault
+    static final InputStream ensureBuffered(final InputStream stream) {
+        return switch (stream) {
+            case BufferedInputStream bis -> bis;
+            case ByteArrayInputStream bais -> bais;
+            default -> new BufferedInputStream(stream);
+        };
+    }
 
     static final @NonNull BufferedInputStream defaultCreateInputStream(final Path file) throws IOException {
         return new BufferedInputStream(Files.newInputStream(file));

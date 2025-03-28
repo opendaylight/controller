@@ -9,20 +9,18 @@ package org.opendaylight.raft.spi;
 
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.MoreObjects;
-import com.google.common.collect.ImmutableList;
+import com.google.common.base.MoreObjects.ToStringHelper;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.List;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.opendaylight.yangtools.concepts.Immutable;
 
 /**
- * The moral equivalent of `byte[]`, but allocated in chunks so as to be GC-friendly.
+ * A {@link ByteArray} containing multiple chunks so as to be GC-friendly.
  */
 // FIXME: this should be an internal implementation record of an API: sealed interfaces allows us to do so cleanly via
 //        the static factory method.
@@ -30,8 +28,8 @@ import org.opendaylight.yangtools.concepts.Immutable;
 //                  java.lang.foreign.MemorySegment, which let's us store these off-heap.
 //
 @NonNullByDefault
-public final class ChunkedByteArray implements Immutable, InputStreamProvider {
-    private final ImmutableList<byte[]> chunks;
+public final class ChunkedByteArray extends ByteArray {
+    private final List<byte[]> chunks;
     private final int size;
 
     /**
@@ -40,7 +38,7 @@ public final class ChunkedByteArray implements Immutable, InputStreamProvider {
      * @param size the size
      * @param chunks the chunks
      */
-    ChunkedByteArray(final int size, final ImmutableList<byte[]> chunks) {
+    ChunkedByteArray(final int size, final List<byte[]> chunks) {
         this.size = size;
         this.chunks = requireNonNull(chunks);
     }
@@ -69,7 +67,7 @@ public final class ChunkedByteArray implements Immutable, InputStreamProvider {
             remaining -= buffer.length;
         } while (remaining != 0);
 
-        return new ChunkedByteArray(size, ImmutableList.copyOf(chunks));
+        return new ChunkedByteArray(size, List.copyOf(chunks));
     }
 
     @Override
@@ -77,33 +75,24 @@ public final class ChunkedByteArray implements Immutable, InputStreamProvider {
         return new ChunkedInputStream(size, chunks.iterator());
     }
 
-    /**
-     * Returns the size of this array.
-     *
-     * @return the size of this array
-     */
+    @Override
     public int size() {
         return size;
     }
 
-    /**
-     * Copy this array into specified {@link DataOutput}.
-     *
-     * @param output the data output
-     * @throws IOException if an I/O error occurs
-     */
+    @Override
+    public List<byte[]> chunks() {
+        return chunks;
+    }
+
+    @Override
     public void copyTo(final DataOutput output) throws IOException {
         for (var chunk : chunks) {
             output.write(chunk, 0, chunk.length);
         }
     }
 
-    /**
-     * Copy this array into specified {@link DataOutput}.
-     *
-     * @param output the data output
-     * @throws IOException if an I/O error occurs
-     */
+    @Override
     public void copyTo(final OutputStream output) throws IOException {
         for (var chunk : chunks) {
             output.write(chunk);
@@ -111,13 +100,8 @@ public final class ChunkedByteArray implements Immutable, InputStreamProvider {
     }
 
     @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this).add("size", size).add("chunks", chunks.size()).toString();
-    }
-
-    @VisibleForTesting
-    ImmutableList<byte[]> chunks() {
-        return chunks;
+    ToStringHelper addToStringAttributes(final ToStringHelper helper) {
+        return helper.add("chunks", chunks.size());
     }
 
     // FIXME: is this a Math operation? :)

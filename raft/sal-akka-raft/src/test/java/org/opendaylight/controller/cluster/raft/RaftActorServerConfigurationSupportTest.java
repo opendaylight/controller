@@ -19,7 +19,6 @@ import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorAct
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.expectMatching;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.io.ObjectInputStream;
 import java.io.OutputStream;
@@ -75,6 +74,7 @@ import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.RaftRole;
+import org.opendaylight.raft.spi.InputStreamProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1537,7 +1537,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
                 }
 
                 @Override
-                public MockSnapshotState deserializeSnapshot(final ByteSource snapshotBytes) {
+                public MockSnapshotState deserializeSnapshot(final InputStreamProvider snapshotBytes) {
                     throw new UnsupportedOperationException();
                 }
             };
