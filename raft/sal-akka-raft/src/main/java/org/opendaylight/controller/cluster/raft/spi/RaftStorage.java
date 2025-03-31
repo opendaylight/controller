@@ -85,8 +85,9 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
 
     public final void stop() {
         final var local = executor;
-        if (local == null) {
-            throw new IllegalStateException("Storage " + memberId() + " already stopped");
+        if (executor == null) {
+            LOG.debug("{}: storage {} already stopped", memberId(), getClass().getSimpleName());
+            return;
         }
 
         try {
