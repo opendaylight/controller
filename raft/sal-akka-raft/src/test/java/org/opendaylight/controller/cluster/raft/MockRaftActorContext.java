@@ -40,14 +40,14 @@ public class MockRaftActorContext extends RaftActorContextImpl {
 
     public MockRaftActorContext(final int payloadVersion) {
         super(null, null, newLocalAccess("test"), new HashMap<>(), new DefaultConfigParamsImpl(),
-            (short) payloadVersion, TestDataProvider.INSTANCE, applyState -> { }, MoreExecutors.directExecutor());
+            (short) payloadVersion, new TestDataProvider(), applyState -> { }, MoreExecutors.directExecutor());
         resetReplicatedLog(new MockReplicatedLogBuilder().build());
     }
 
     public MockRaftActorContext(final String id, final ActorSystem system, final ActorRef actor,
             final int payloadVersion) {
         super(actor, null, newLocalAccess(id), new HashMap<>(), new DefaultConfigParamsImpl(),
-            (short) payloadVersion, TestDataProvider.INSTANCE, applyState -> actor.tell(applyState, actor),
+            (short) payloadVersion, new TestDataProvider(), applyState -> actor.tell(applyState, actor),
             MoreExecutors.directExecutor());
         this.system = system;
         initReplicatedLog();

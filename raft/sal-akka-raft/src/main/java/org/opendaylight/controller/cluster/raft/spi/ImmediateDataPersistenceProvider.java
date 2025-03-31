@@ -20,11 +20,14 @@ import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.opendaylight.raft.spi.SnapshotSource;
 
 /**
- * An immediate {@link DataPersistenceProvider}. Offloads asynchronous persist responses via
- * {@link #executeInSelf(Runnable)}.
+ * An immediate {@link DataPersistenceProvider}. Offloads asynchronous persist responses via {@link ExecuteInSelfActor}
+ * exposed by {@link #actor()}.
  */
 @NonNullByDefault
-public interface ImmediateDataPersistenceProvider extends DataPersistenceProvider, ExecuteInSelfActor {
+public interface ImmediateDataPersistenceProvider extends DataPersistenceProvider {
+
+    ExecuteInSelfActor actor();
+
     @Override
     default boolean isRecoveryApplicable() {
         return false;
@@ -44,7 +47,7 @@ public interface ImmediateDataPersistenceProvider extends DataPersistenceProvide
     default <T> void persistAsync(final T entry, final Consumer<T> callback) {
         requireNonNull(entry);
         requireNonNull(callback);
-        executeInSelf(() -> callback.accept(entry));
+        actor().executeInSelf(() -> callback.accept(entry));
     }
 
     @Override

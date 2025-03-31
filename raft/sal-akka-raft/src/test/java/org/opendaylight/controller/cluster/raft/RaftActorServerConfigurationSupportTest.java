@@ -1481,7 +1481,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         return new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
             new LocalAccess(id, new FailingTermInfoStore(1, LEADER_ID)), Map.of(LEADER_ID, ""), configParams, (short) 0,
-            TestDataProvider.INSTANCE, applyState -> actor.tell(applyState, actor), MoreExecutors.directExecutor());
+            new TestDataProvider(), applyState -> actor.tell(applyState, actor), MoreExecutors.directExecutor());
     }
 
     abstract static class AbstractMockRaftActor extends MockRaftActor {

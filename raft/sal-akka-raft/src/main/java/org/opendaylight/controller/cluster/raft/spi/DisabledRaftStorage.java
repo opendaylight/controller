@@ -70,6 +70,11 @@ public final class DisabledRaftStorage extends RaftStorage implements ImmediateD
     }
 
     @Override
+    public ExecuteInSelfActor actor() {
+        return actor;
+    }
+
+    @Override
     public @Nullable SnapshotSource tryLatestSnapshot() {
         // TODO: cache last encountered snapshot along with its lifecycle
         return null;
@@ -94,10 +99,5 @@ public final class DisabledRaftStorage extends RaftStorage implements ImmediateD
         // Committing the snapshot here would end up calling commit in the creating state which would
         // be a state violation. That's why now we send a message to commit the snapshot.
         actorRef.tell(CommitSnapshot.INSTANCE, ActorRef.noSender());
-    }
-
-    @Override
-    public void executeInSelf(final Runnable runnable) {
-        actor.executeInSelf(runnable);
     }
 }

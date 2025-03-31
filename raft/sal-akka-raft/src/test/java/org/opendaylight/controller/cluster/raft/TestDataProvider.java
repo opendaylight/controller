@@ -7,16 +7,28 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static java.util.Objects.requireNonNull;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.ImmediateDataPersistenceProvider;
 
 @NonNullByDefault
 final class TestDataProvider implements ImmediateDataPersistenceProvider {
-    static final TestDataProvider INSTANCE = new TestDataProvider();
+    private ExecuteInSelfActor actor;
 
-    private TestDataProvider() {
-        // Hidden in purpose
+    TestDataProvider() {
+        this(Runnable::run);
+    }
+
+    TestDataProvider(final ExecuteInSelfActor actor) {
+        this.actor = requireNonNull(actor);
+    }
+
+    @Override
+    public ExecuteInSelfActor actor() {
+        return actor;
     }
 
     @Override
@@ -24,8 +36,7 @@ final class TestDataProvider implements ImmediateDataPersistenceProvider {
         // no-op
     }
 
-    @Override
-    public void executeInSelf(final Runnable runnable) {
-        runnable.run();
+    void setActor(final ExecuteInSelfActor actor) {
+        this.actor = requireNonNull(actor);
     }
 }
