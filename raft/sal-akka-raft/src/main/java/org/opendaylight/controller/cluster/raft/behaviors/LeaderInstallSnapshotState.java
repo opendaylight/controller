@@ -67,7 +67,8 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
 
         this.snapshotBytes = snapshotBytes;
 
-        totalChunks = (int) (snapshotSize / snapshotChunkSize + (snapshotSize % snapshotChunkSize > 0 ? 1 : 0));
+        totalChunks = snapshotSize == 0 ? 1
+            : (int) (snapshotSize / snapshotChunkSize + (snapshotSize % snapshotChunkSize > 0 ? 1 : 0));
 
         LOG.debug("{}: Snapshot {} bytes, total chunks to send: {}", logName, snapshotSize, totalChunks);
 
@@ -148,14 +149,7 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
                 size = (int) (snapshotSize - start);
             }
 
-            currentChunk = new byte[size];
-            final var numRead = snapshotInputStream.read(currentChunk);
-            if (numRead != size) {
-                throw new IOException(String.format(
-                        "The # of bytes read from the input stream, %d, does not match the expected # %d",
-                        numRead, size));
-            }
-
+            currentChunk = snapshotInputStream.readNBytes(size);
             nextChunkHashCode = Arrays.hashCode(currentChunk);
 
             LOG.debug("{}: Next chunk: total length={}, offset={}, size={}, hashCode={}", logName,
