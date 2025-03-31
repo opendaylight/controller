@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.raft;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.util.concurrent.MoreExecutors;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.HashMap;
@@ -28,7 +27,6 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.TestTermInfoStore;
 import org.opendaylight.raft.api.EntryMeta;
-import org.opendaylight.raft.spi.InputStreamProvider;
 
 public class MockRaftActorContext extends RaftActorContextImpl {
     private ActorSystem system;
@@ -111,11 +109,6 @@ public class MockRaftActorContext extends RaftActorContextImpl {
             @Override
             public void applySnapshot(final ByteState snapshotState) {
                 // No-op
-            }
-
-            @Override
-            public ByteState deserializeSnapshot(final InputStreamProvider snapshotBytes) throws IOException {
-                return ByteState.of(snapshotBytes.openStream().readAllBytes());
             }
         });
 
