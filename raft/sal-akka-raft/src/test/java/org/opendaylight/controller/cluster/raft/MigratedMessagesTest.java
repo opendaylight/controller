@@ -9,21 +9,18 @@ package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Uninterruptibles;
-import java.io.OutputStream;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.dispatch.Dispatchers;
 import org.apache.pekko.testkit.TestActorRef;
 import org.eclipse.jdt.annotation.NonNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
@@ -31,7 +28,6 @@ import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
-import org.opendaylight.raft.spi.InputStreamProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,31 +65,12 @@ public class MigratedMessagesTest extends AbstractActorTest {
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
         config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
 
-        final var snapshotCohort = new MockRaftActorSnapshotCohort() {
-            @Override
-            public MockSnapshotState takeSnapshot() {
-                return new MockSnapshotState(List.of());
-            }
-
-            @Override
-            public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
-                actorRef.tell(new CaptureSnapshotReply(takeSnapshot(), installSnapshotStream), actorRef);
-            }
-
-            @Override
-            public void applySnapshot(final MockSnapshotState snapshotState) {
-                // Nothing
-            }
-
-            @Override
-            public MockSnapshotState deserializeSnapshot(final InputStreamProvider snapshotBytes) {
-                throw new UnsupportedOperationException();
-            }
-        };
-
         TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.builder()
-            .id(id).config(config).snapshotCohort(snapshotCohort)
-            .persistent(Optional.of(Boolean.TRUE)).props(stateDir())
+            .id(id)
+            .config(config)
+            .snapshotCohort((MockRaftActorSnapshotCohort) () -> new MockSnapshotState(List.of()))
+            .persistent(Optional.of(Boolean.TRUE))
+            .props(stateDir())
             .withDispatcher(Dispatchers.DefaultDispatcherId()), id);
         MockRaftActor mockRaftActor = raftActorRef.underlyingActor();
 
@@ -115,31 +92,13 @@ public class MigratedMessagesTest extends AbstractActorTest {
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
         config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
 
-        final var snapshotCohort = new MockRaftActorSnapshotCohort() {
-            @Override
-            public MockSnapshotState takeSnapshot() {
-                return snapshotState;
-            }
-
-            @Override
-            public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
-                actorRef.tell(new CaptureSnapshotReply(snapshotState, installSnapshotStream), actorRef);
-            }
-
-            @Override
-            public void applySnapshot(final MockSnapshotState newState) {
-                // Nothing
-            }
-
-            @Override
-            public MockSnapshotState deserializeSnapshot(final InputStreamProvider snapshotBytes) {
-                throw new UnsupportedOperationException();
-            }
-        };
-
-        TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.builder().id(id)
-            .config(config).snapshotCohort(snapshotCohort).persistent(Optional.of(persistent))
-            .peerAddresses(ImmutableMap.of("peer", "")).props(stateDir())
+        TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.builder()
+            .id(id)
+            .config(config)
+            .snapshotCohort((MockRaftActorSnapshotCohort) () -> snapshotState)
+            .persistent(Optional.of(persistent))
+            .peerAddresses(Map.of("peer", ""))
+            .props(stateDir())
             .withDispatcher(Dispatchers.DefaultDispatcherId()), id);
         MockRaftActor mockRaftActor = raftActorRef.underlyingActor();
 

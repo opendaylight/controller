@@ -7,6 +7,11 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import java.io.OutputStream;
+import org.apache.pekko.actor.ActorRef;
+import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
+import org.opendaylight.raft.spi.InputStreamProvider;
+
 /**
  * {@link RaftActorSnapshotCohort} corresponding to {@link MockSnapshotState}.
  */
@@ -14,5 +19,20 @@ public interface MockRaftActorSnapshotCohort extends RaftActorSnapshotCohort<Moc
     @Override
     default Class<MockSnapshotState> stateClass() {
         return MockSnapshotState.class;
+    }
+
+    @Override
+    default void applySnapshot(final MockSnapshotState snapshotState) {
+        // No-op
+    }
+
+    @Override
+    default MockSnapshotState deserializeSnapshot(final InputStreamProvider snapshotBytes) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    default void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
+        actorRef.tell(new CaptureSnapshotReply(takeSnapshot(), installSnapshotStream), actorRef);
     }
 }

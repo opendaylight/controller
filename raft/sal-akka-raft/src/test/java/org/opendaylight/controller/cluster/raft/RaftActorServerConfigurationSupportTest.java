@@ -74,7 +74,6 @@ import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.RaftRole;
-import org.opendaylight.raft.spi.InputStreamProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1520,27 +1519,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         CollectingMockRaftActor(final Path stateDir, final String id, final Map<String, String> peerAddresses,
                 final Optional<ConfigParams> config, final boolean persistent, final ActorRef collectorActor) {
             super(stateDir, id, peerAddresses, config, persistent, collectorActor);
-            snapshotCohortDelegate = new MockRaftActorSnapshotCohort() {
-                @Override
-                public MockSnapshotState takeSnapshot() {
-                    return new MockSnapshotState(List.of());
-                }
-
-                @Override
-                public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
-                    actorRef.tell(new CaptureSnapshotReply(takeSnapshot(), installSnapshotStream), actorRef);
-                }
-
-                @Override
-                public void applySnapshot(final MockSnapshotState snapshotState) {
-                    // No-op
-                }
-
-                @Override
-                public MockSnapshotState deserializeSnapshot(final InputStreamProvider snapshotBytes) {
-                    throw new UnsupportedOperationException();
-                }
-            };
+            snapshotCohortDelegate = () -> new MockSnapshotState(List.of());
         }
 
         public static Props props(final Path stateDir, final String id, final Map<String, String> peerAddresses,

@@ -23,7 +23,6 @@ import static org.mockito.Mockito.verify;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Uninterruptibles;
-import java.io.OutputStream;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +49,6 @@ import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.ApplyLeaderSnapshot;
 import org.opendaylight.controller.cluster.raft.VotingState;
-import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
 import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
@@ -72,7 +70,6 @@ import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.raft.api.TermInfo;
-import org.opendaylight.raft.spi.InputStreamProvider;
 
 public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     private final short ourPayloadVersion = 5;
@@ -1298,28 +1295,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
     private static MockRaftActorSnapshotCohort newRaftActorSnapshotCohort(
             final AtomicReference<MockRaftActor> followerRaftActor) {
-        final var snapshotCohort = new MockRaftActorSnapshotCohort() {
-            @Override
-            public MockSnapshotState takeSnapshot() {
-                return new MockSnapshotState(followerRaftActor.get().getState());
-            }
-
-            @Override
-            public void createSnapshot(final ActorRef actorRef, final OutputStream installSnapshotStream) {
-                actorRef.tell(new CaptureSnapshotReply(takeSnapshot(), installSnapshotStream), actorRef);
-            }
-
-            @Override
-            public void applySnapshot(final MockSnapshotState snapshotState) {
-                // No-op
-            }
-
-            @Override
-            public MockSnapshotState deserializeSnapshot(final InputStreamProvider snapshotBytes) {
-                throw new UnsupportedOperationException();
-            }
-        };
-        return snapshotCohort;
+        return () -> new MockSnapshotState(followerRaftActor.get().getState());
     }
 
     public byte[] getNextChunk(final ByteString bs, final int offset, final int chunkSize) {
