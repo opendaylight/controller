@@ -27,8 +27,8 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.ApplyLeaderSnapshot;
+import org.opendaylight.controller.cluster.raft.SnapshotManager.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
-import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
@@ -510,9 +510,9 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         InMemoryJournal.waitForWriteMessagesComplete(leaderId);
 
         // Verify a snapshot is not triggered.
-        CaptureSnapshot captureSnapshot = MessageCollectorActor.getFirstMatching(leaderCollectorActor,
-                CaptureSnapshot.class);
-        assertNull("Leader received unexpected CaptureSnapshot", captureSnapshot);
+        // FIXME: this never happens and needs to be migrated
+        assertNull("Leader received unexpected CaptureSnapshot",
+            MessageCollectorActor.getFirstMatching(leaderCollectorActor, CaptureSnapshot.class));
 
         expSnapshotState.add(payload1);
 

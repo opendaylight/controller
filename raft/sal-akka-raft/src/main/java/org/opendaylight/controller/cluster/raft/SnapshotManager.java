@@ -13,12 +13,12 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import org.apache.pekko.dispatch.ControlMessage;
 import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
@@ -64,6 +64,76 @@ public final class SnapshotManager {
             void onSuccess();
 
             void onFailure();
+        }
+    }
+
+    @VisibleForTesting
+    public static final class CaptureSnapshot {
+        private final long lastAppliedIndex;
+        private final long lastAppliedTerm;
+        private final long lastIndex;
+        private final long lastTerm;
+        private final long replicatedToAllIndex;
+        private final long replicatedToAllTerm;
+        private final List<ReplicatedLogEntry> unAppliedEntries;
+        private final boolean mandatoryTrim;
+
+        CaptureSnapshot(final long lastIndex, final long lastTerm, final long lastAppliedIndex,
+                final long lastAppliedTerm, final long replicatedToAllIndex, final long replicatedToAllTerm,
+                final List<ReplicatedLogEntry> unAppliedEntries, final boolean mandatoryTrim) {
+            this.lastIndex = lastIndex;
+            this.lastTerm = lastTerm;
+            this.lastAppliedIndex = lastAppliedIndex;
+            this.lastAppliedTerm = lastAppliedTerm;
+            this.replicatedToAllIndex = replicatedToAllIndex;
+            this.replicatedToAllTerm = replicatedToAllTerm;
+            this.unAppliedEntries = List.copyOf(unAppliedEntries);
+            this.mandatoryTrim = mandatoryTrim;
+        }
+
+        public long getLastAppliedIndex() {
+            return lastAppliedIndex;
+        }
+
+        public long getLastAppliedTerm() {
+            return lastAppliedTerm;
+        }
+
+        public long getLastIndex() {
+            return lastIndex;
+        }
+
+        public long getLastTerm() {
+            return lastTerm;
+        }
+
+        long getReplicatedToAllIndex() {
+            return replicatedToAllIndex;
+        }
+
+        long getReplicatedToAllTerm() {
+            return replicatedToAllTerm;
+        }
+
+        List<ReplicatedLogEntry> getUnAppliedEntries() {
+            return unAppliedEntries;
+        }
+
+        boolean isMandatoryTrim() {
+            return mandatoryTrim;
+        }
+
+        @Override
+        public String toString() {
+            return "CaptureSnapshot [lastAppliedIndex=" + lastAppliedIndex
+                + ", lastAppliedTerm=" + lastAppliedTerm
+                + ", lastIndex=" + lastIndex
+                + ", lastTerm=" + lastTerm
+                + ", installSnapshotInitiated="
+                + ", replicatedToAllIndex=" + replicatedToAllIndex
+                + ", replicatedToAllTerm=" + replicatedToAllTerm
+                + ", unAppliedEntries size=" + unAppliedEntries.size()
+                + ", mandatoryTrim=" + mandatoryTrim + "]";
         }
     }
 

@@ -39,8 +39,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.opendaylight.controller.cluster.raft.SnapshotManager.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.SnapshotComplete;
-import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.behaviors.Leader;
 import org.opendaylight.controller.cluster.raft.persisted.ByteState;
 import org.opendaylight.controller.cluster.raft.persisted.ByteStateSnapshotCohort;
@@ -128,7 +128,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         assertTrue(snapshotManager.isCapturing());
         verify(mockCohort).takeSnapshot();
 
-        CaptureSnapshot captureSnapshot = snapshotManager.getCaptureSnapshot();
+        final var captureSnapshot = snapshotManager.getCaptureSnapshot();
 
         // LastIndex and LastTerm are picked up from the lastLogEntry
         assertEquals(0L, captureSnapshot.getLastIndex());
