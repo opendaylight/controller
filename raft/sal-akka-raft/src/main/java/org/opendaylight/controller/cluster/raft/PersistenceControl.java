@@ -56,16 +56,12 @@ final class PersistenceControl extends ForwardingDataPersistenceProvider {
     }
 
     void start() throws IOException {
+        disabledStorage.start();
         try {
-            disabledStorage.start();
-        } catch (IOException de) {
-            try {
-                enabledStorage.start();
-            } catch (IOException ee) {
-                ee.addSuppressed(de);
-                throw ee;
-            }
-            throw de;
+            enabledStorage.start();
+        } catch (IOException e) {
+            disabledStorage.stop();
+            throw e;
         }
     }
 
