@@ -11,12 +11,11 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.apache.pekko.actor.ActorRef;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.raft.FollowerLogInformation;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorLeadershipTransferCohort;
 import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
@@ -48,6 +47,24 @@ import org.slf4j.LoggerFactory;
  */
 // Non-final for testing
 public non-sealed class Leader extends AbstractLeader {
+    @NonNullByDefault
+    private static final class LeadershipTransferContext {
+        final RaftActorLeadershipTransferCohort transferCohort;
+        final Stopwatch timer = Stopwatch.createStarted();
+
+        LeadershipTransferContext(final RaftActorLeadershipTransferCohort transferCohort) {
+            this.transferCohort = requireNonNull(transferCohort);
+        }
+
+        boolean isExpired(final long timeout) {
+            if (timer.elapsed(TimeUnit.MILLISECONDS) >= timeout) {
+                transferCohort.abortTransfer();
+                return true;
+            }
+            return false;
+        }
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(Leader.class);
 
     /**
@@ -130,7 +147,7 @@ public non-sealed class Leader extends AbstractLeader {
      *
      * @param leadershipTransferCohort the cohort participating in the leadership transfer
      */
-    public void transferLeadership(@NonNull final RaftActorLeadershipTransferCohort leadershipTransferCohort) {
+    public void transferLeadership(final @NonNull RaftActorLeadershipTransferCohort leadershipTransferCohort) {
         LOG.debug("{}: Attempting to transfer leadership", logName);
 
         leadershipTransferContext = new LeadershipTransferContext(leadershipTransferCohort);
@@ -140,18 +157,18 @@ public non-sealed class Leader extends AbstractLeader {
     }
 
     private void tryToCompleteLeadershipTransfer(final String followerId) {
-        if (leadershipTransferContext == null) {
+        final var local = leadershipTransferContext;
+        if (local == null) {
             return;
         }
 
-        final Optional<String> requestedFollowerIdOptional
-                = leadershipTransferContext.transferCohort.getRequestedFollowerId();
+        final var requestedFollowerIdOptional = local.transferCohort.getRequestedFollowerId();
         if (requestedFollowerIdOptional.isPresent() && !requestedFollowerIdOptional.orElseThrow().equals(followerId)) {
             // we want to transfer leadership to specific follower
             return;
         }
 
-        FollowerLogInformation followerInfo = getFollower(followerId);
+        final var followerInfo = getFollower(followerId);
         if (followerInfo == null) {
             return;
         }
@@ -175,19 +192,18 @@ public non-sealed class Leader extends AbstractLeader {
 
             LOG.debug("{}: Leader transfer complete", logName);
 
-            leadershipTransferContext.transferCohort.transferComplete();
+            local.transferCohort.transferComplete();
             leadershipTransferContext = null;
         }
     }
 
     @Override
     public final void close() {
-        if (leadershipTransferContext != null) {
-            LeadershipTransferContext localLeadershipTransferContext = leadershipTransferContext;
+        final var local = leadershipTransferContext;
+        if (local != null) {
             leadershipTransferContext = null;
-            localLeadershipTransferContext.transferCohort.abortTransfer();
+            local.transferCohort.abortTransfer();
         }
-
         super.close();
     }
 
@@ -199,23 +215,5 @@ public non-sealed class Leader extends AbstractLeader {
     @VisibleForTesting
     final void markFollowerInActive(final String followerId) {
         getFollower(followerId).markFollowerInActive();
-    }
-
-    private static class LeadershipTransferContext {
-        RaftActorLeadershipTransferCohort transferCohort;
-        Stopwatch timer = Stopwatch.createStarted();
-
-        LeadershipTransferContext(final RaftActorLeadershipTransferCohort transferCohort) {
-            this.transferCohort = transferCohort;
-        }
-
-        boolean isExpired(final long timeout) {
-            if (timer.elapsed(TimeUnit.MILLISECONDS) >= timeout) {
-                transferCohort.abortTransfer();
-                return true;
-            }
-
-            return false;
-        }
     }
 }
