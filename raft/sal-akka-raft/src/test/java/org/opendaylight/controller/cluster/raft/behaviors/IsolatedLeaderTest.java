@@ -8,6 +8,8 @@
 package org.opendaylight.controller.cluster.raft.behaviors;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -73,23 +75,18 @@ public class IsolatedLeaderTest extends AbstractLeaderTest<IsolatedLeader> {
 
         isolatedLeader = new IsolatedLeader(leaderActorContext);
         leaderActorContext.setCurrentBehavior(isolatedLeader);
-        assertEquals("Raft state", RaftRole.IsolatedLeader, isolatedLeader.raftRole());
 
         // in a 3 node cluster, even if 1 follower is returns a reply, the isolatedLeader is not isolated
-        RaftActorBehavior newBehavior = isolatedLeader.handleMessage(senderActor,
+        final var newBehavior = assertInstanceOf(Leader.class, isolatedLeader.handleMessage(senderActor,
                 new AppendEntriesReply("follower-1", isolatedLeader.lastTerm() - 1, true,
-                        isolatedLeader.lastIndex() - 1, isolatedLeader.lastTerm() - 1, (short)0));
-
-        assertEquals("Raft state", RaftRole.Leader, newBehavior.raftRole());
+                        isolatedLeader.lastIndex() - 1, isolatedLeader.lastTerm() - 1, (short)0)));
 
         isolatedLeader.close();
-        isolatedLeader = (AbstractLeader) newBehavior;
+        isolatedLeader = newBehavior;
 
-        newBehavior = isolatedLeader.handleMessage(senderActor,
+        assertSame(isolatedLeader, isolatedLeader.handleMessage(senderActor,
                 new AppendEntriesReply("follower-2", isolatedLeader.lastTerm() - 1, true,
-                        isolatedLeader.lastIndex() - 1, isolatedLeader.lastTerm() - 1, (short) 0));
-
-        assertEquals("Raft state", RaftRole.Leader, newBehavior.raftRole());
+                        isolatedLeader.lastIndex() - 1, isolatedLeader.lastTerm() - 1, (short) 0)));
     }
 
     @Test
@@ -109,29 +106,22 @@ public class IsolatedLeaderTest extends AbstractLeaderTest<IsolatedLeader> {
 
         isolatedLeader = new IsolatedLeader(leaderActorContext);
         leaderActorContext.setCurrentBehavior(isolatedLeader);
-        assertEquals("Raft state", RaftRole.IsolatedLeader, isolatedLeader.raftRole());
 
         // in a 5 member cluster, atleast 2 followers need to be active and return a reply
-        RaftActorBehavior newBehavior = isolatedLeader.handleMessage(senderActor,
+        assertSame(isolatedLeader, isolatedLeader.handleMessage(senderActor,
                 new AppendEntriesReply("follower-1", isolatedLeader.lastTerm() - 1, true,
-                        isolatedLeader.lastIndex() - 1, isolatedLeader.lastTerm() - 1, (short) 0));
+                        isolatedLeader.lastIndex() - 1, isolatedLeader.lastTerm() - 1, (short) 0)));
 
-        assertEquals("Raft state", RaftRole.IsolatedLeader, newBehavior.raftRole());
-
-        newBehavior = isolatedLeader.handleMessage(senderActor,
+        final var newBehavior = assertInstanceOf(Leader.class, isolatedLeader.handleMessage(senderActor,
                 new AppendEntriesReply("follower-2", isolatedLeader.lastTerm() - 1, true,
-                        isolatedLeader.lastIndex() - 1, isolatedLeader.lastTerm() - 1, (short) 0));
-
-        assertEquals("Raft state", RaftRole.Leader, newBehavior.raftRole());
+                        isolatedLeader.lastIndex() - 1, isolatedLeader.lastTerm() - 1, (short) 0)));
 
         isolatedLeader.close();
-        isolatedLeader = (AbstractLeader) newBehavior;
+        isolatedLeader = newBehavior;
 
-        newBehavior = isolatedLeader.handleMessage(senderActor,
+        assertSame(isolatedLeader, isolatedLeader.handleMessage(senderActor,
                 new AppendEntriesReply("follower-3", isolatedLeader.lastTerm() - 1, true,
-                        isolatedLeader.lastIndex() - 1, isolatedLeader.lastTerm() - 1, (short) 0));
-
-        assertEquals("Raft state", RaftRole.Leader, newBehavior.raftRole());
+                        isolatedLeader.lastIndex() - 1, isolatedLeader.lastTerm() - 1, (short) 0)));
     }
 
     @Test
@@ -151,12 +141,9 @@ public class IsolatedLeaderTest extends AbstractLeaderTest<IsolatedLeader> {
         // if an append-entries reply is received by the isolated-leader, and that reply
         // has a term  > than its own term, then IsolatedLeader switches to Follower
         // bowing itself to another leader in the cluster
-        RaftActorBehavior newBehavior = isolatedLeader.handleMessage(senderActor,
+        final var newBehavior = assertInstanceOf(Follower.class, isolatedLeader.handleMessage(senderActor,
                 new AppendEntriesReply("follower-1", isolatedLeader.lastTerm() + 1, true,
-                        isolatedLeader.lastIndex() + 1, isolatedLeader.lastTerm() + 1, (short)0));
-
-        assertEquals("Raft state", RaftRole.Follower, newBehavior.raftRole());
-
+                        isolatedLeader.lastIndex() + 1, isolatedLeader.lastTerm() + 1, (short)0)));
         newBehavior.close();
     }
 }

@@ -36,7 +36,6 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
-import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.api.TermInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,10 +84,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
         RaftActorContext raftActorContext = createActorContext();
         candidate = new Candidate(raftActorContext);
 
-        RaftActorBehavior newBehavior =
-            candidate.handleMessage(candidateActor, ElectionTimeout.INSTANCE);
-
-        assertEquals("Behavior", RaftRole.Leader, newBehavior.raftRole());
+        candidate = assertInstanceOf(Leader.class, candidate.handleMessage(candidateActor, ElectionTimeout.INSTANCE));
     }
 
     @Test
@@ -97,9 +93,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
         raftActorContext.setPeerAddresses(setupPeers(1));
         candidate = new Candidate(raftActorContext);
 
-        candidate = candidate.handleMessage(candidateActor, ElectionTimeout.INSTANCE);
-
-        assertEquals("Behavior", RaftRole.Candidate, candidate.raftRole());
+        assertSame(candidate, candidate.handleMessage(candidateActor, ElectionTimeout.INSTANCE));
     }
 
     @Test
@@ -110,9 +104,8 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
         raftActorContext.setPeerAddresses(setupPeers(2));
         candidate = new Candidate(raftActorContext);
 
-        candidate = candidate.handleMessage(peerActors[0], new RequestVoteReply(1, true));
-
-        assertEquals("Behavior", RaftRole.Leader, candidate.raftRole());
+        candidate = assertInstanceOf(Leader.class,
+            candidate.handleMessage(peerActors[0], new RequestVoteReply(1, true)));
     }
 
     @Test
@@ -122,10 +115,9 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
         raftActorContext.setPeerAddresses(setupPeers(2));
         candidate = new Candidate(raftActorContext);
 
-        candidate = candidate.handleMessage(peerActors[0], new RequestVoteReply(1, true));
-
         // LastApplied is -1 and behind the last index.
-        assertEquals("Behavior", RaftRole.PreLeader, candidate.raftRole());
+        candidate = assertInstanceOf(PreLeader.class,
+            candidate.handleMessage(peerActors[0], new RequestVoteReply(1, true)));
     }
 
     @Test
@@ -171,13 +163,10 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
         MessageCollectorActor.assertNoneMatching(peerActors[0], RequestVote.class, 300);
         MessageCollectorActor.assertNoneMatching(peerActors[3], RequestVote.class, 100);
 
-        candidate = candidate.handleMessage(peerActors[1], new RequestVoteReply(1, false));
+        assertSame(candidate, candidate.handleMessage(peerActors[1], new RequestVoteReply(1, false)));
 
-        assertEquals("Behavior", RaftRole.Candidate, candidate.raftRole());
-
-        candidate = candidate.handleMessage(peerActors[2], new RequestVoteReply(1, true));
-
-        assertEquals("Behavior", RaftRole.Leader, candidate.raftRole());
+        candidate = assertInstanceOf(Leader.class,
+            candidate.handleMessage(peerActors[2], new RequestVoteReply(1, true)));
     }
 
     @Test
@@ -311,11 +300,10 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
         // Send an unknown message so that the state of the RaftActor remains unchanged
         behavior.handleMessage(candidateActor, "unknown");
 
-        RaftActorBehavior raftBehavior = behavior.handleMessage(candidateActor, appendEntries);
+        final var raftBehavior = assertInstanceOf(Follower.class,
+            behavior.handleMessage(candidateActor, appendEntries));
 
-        assertEquals("Raft state", RaftRole.Follower, raftBehavior.raftRole());
-
-        assertEquals("ReplicatedLog size", 1, context.getReplicatedLog().size());
+        assertEquals(1, context.getReplicatedLog().size());
 
         handleAppendEntriesAddSameEntryToLogReply(candidateActor);
     }

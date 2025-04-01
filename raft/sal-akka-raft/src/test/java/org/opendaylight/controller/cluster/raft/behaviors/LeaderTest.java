@@ -74,7 +74,6 @@ import org.opendaylight.controller.cluster.raft.policy.DefaultRaftPolicy;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.utils.ForwardMessageToBehaviorActor;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
-import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.yangtools.concepts.Identifier;
 
@@ -1661,7 +1660,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
                 AppendEntriesReply.class);
 
         assertFalse(appendEntriesReply.isSuccess());
-        assertEquals(RaftRole.Leader, leaderActor.underlyingActor().getFirstBehaviorChange().raftRole());
+        assertSame(leader, leaderActor.underlyingActor().getFirstBehaviorChange());
 
         MessageCollectorActor.clearMessages(leaderActor);
     }
@@ -1687,9 +1686,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         AppendEntriesReply reply = new AppendEntriesReply(FOLLOWER_ID, 1, true, 2, 1, ourPayloadVersion);
 
-        RaftActorBehavior raftActorBehavior = leader.handleAppendEntriesReply(followerActor, reply);
-
-        assertEquals(RaftRole.Leader, raftActorBehavior.raftRole());
+        assertSame(leader, leader.handleAppendEntriesReply(followerActor, reply));
 
         final var leaderLog = leaderActorContext.getReplicatedLog();
         assertEquals(2, leaderLog.getCommitIndex());
@@ -1725,9 +1722,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         AppendEntriesReply reply = new AppendEntriesReply("unkown-follower", 1, false, 10, 1, (short)0);
 
-        RaftActorBehavior raftActorBehavior = leader.handleAppendEntriesReply(followerActor, reply);
-
-        assertEquals(RaftRole.Leader, raftActorBehavior.raftRole());
+        assertSame(leader, leader.handleAppendEntriesReply(followerActor, reply));
     }
 
     @Test

@@ -565,7 +565,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         Leader leader = new Leader(leaderActor.getRaftActorContext());
         leaderActor.setCurrentBehavior(leader);
-        assertEquals(RaftRole.Leader, leaderActor.getCurrentBehavior().raftRole());
+        assertSame(leader, leaderActor.getCurrentBehavior());
 
         leaderActor.getRaftActorContext().setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder()
             .createEntries(0, 8, 1)
@@ -592,18 +592,18 @@ public class RaftActorTest extends AbstractActorTest {
 
         assertEquals(8, leaderActor.getReplicatedLog().size());
 
-        assertEquals(RaftRole.Leader, leaderActor.getCurrentBehavior().raftRole());
+        assertSame(leader, leaderActor.getCurrentBehavior());
         //fake snapshot on index 5
         leaderActor.handleCommand(new AppendEntriesReply(follower1Id, 1, true, 5, 1, (short)0));
 
         assertEquals(8, leaderActor.getReplicatedLog().size());
 
         //fake snapshot on index 6
-        assertEquals(RaftRole.Leader, leaderActor.getCurrentBehavior().raftRole());
+        assertSame(leader, leaderActor.getCurrentBehavior());
         leaderActor.handleCommand(new AppendEntriesReply(follower1Id, 1, true, 6, 1, (short)0));
         assertEquals(8, leaderActor.getReplicatedLog().size());
 
-        assertEquals(RaftRole.Leader, leaderActor.getCurrentBehavior().raftRole());
+        assertSame(leader, leaderActor.getCurrentBehavior());
 
         assertEquals(8, leaderActor.getReplicatedLog().size());
 
@@ -662,7 +662,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         Follower follower = new Follower(followerActor.getRaftActorContext());
         followerActor.setCurrentBehavior(follower);
-        assertEquals(RaftRole.Follower, followerActor.getCurrentBehavior().raftRole());
+        assertSame(follower, followerActor.getCurrentBehavior());
 
         // create 6 entries in the log - 0 to 4 are applied and will get picked up as part of the capture snapshot
         MockRaftActorContext.MockReplicatedLogBuilder logBuilder = new MockRaftActorContext.MockReplicatedLogBuilder();
@@ -693,13 +693,13 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals(7, followerActor.getReplicatedLog().size());
 
         //fake snapshot on index 7
-        assertEquals(RaftRole.Follower, followerActor.getCurrentBehavior().raftRole());
+        assertInstanceOf(Follower.class, followerActor.getCurrentBehavior());
 
         entries = List.of(new SimpleReplicatedLogEntry(7, 1, new MockRaftActorContext.MockPayload("foo-7")));
         followerActor.handleCommand(new AppendEntries(1, leaderId, 6, 1, entries, 6, 6, (short) 0));
         assertEquals(8, followerActor.getReplicatedLog().size());
 
-        assertEquals(RaftRole.Follower, followerActor.getCurrentBehavior().raftRole());
+        assertInstanceOf(Follower.class, followerActor.getCurrentBehavior());
 
         runnables.getLast().run();
         assertTrue(followerActor.getRaftActorContext().getSnapshotManager().isCapturing());
@@ -753,7 +753,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         Leader leader = new Leader(leaderActor.getRaftActorContext());
         leaderActor.setCurrentBehavior(leader);
-        assertEquals(RaftRole.Leader, leaderActor.getCurrentBehavior().raftRole());
+        assertSame(leader, leaderActor.getCurrentBehavior());
 
         // create 5 entries in the log
         leaderActor.getRaftActorContext().setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder()
@@ -765,11 +765,11 @@ public class RaftActorTest extends AbstractActorTest {
         //setting replicatedToAllIndex = 9, for the log to clear
         leader.setReplicatedToAllIndex(9);
         assertEquals(5, leaderActor.getReplicatedLog().size());
-        assertEquals(RaftRole.Leader, leaderActor.getCurrentBehavior().raftRole());
+        assertSame(leader, leaderActor.getCurrentBehavior());
 
         leaderActor.handleCommand(new AppendEntriesReply(follower1Id, 1, true, 9, 1, (short) 0));
         assertEquals(5, leaderActor.getReplicatedLog().size());
-        assertEquals(RaftRole.Leader, leaderActor.getCurrentBehavior().raftRole());
+        assertSame(leader, leaderActor.getCurrentBehavior());
 
         doReturn(new MockSnapshotState(List.of(
             new MockRaftActorContext.MockPayload("foo-0"),
@@ -784,16 +784,14 @@ public class RaftActorTest extends AbstractActorTest {
         // set the 2nd follower nextIndex to 1 which has been snapshotted
         leaderActor.handleCommand(new AppendEntriesReply(follower2Id, 1, true, 0, 1, (short)0));
         assertEquals(5, leaderActor.getReplicatedLog().size());
-        assertEquals(RaftRole.Leader, leaderActor.getCurrentBehavior().raftRole());
+        assertSame(leader, leaderActor.getCurrentBehavior());
         assertEquals(1, runnables.size());
         dataPersistenceProvider.setActor(Runnable::run);
 
         // simulate a real snapshot
         leaderActor.handleCommand(SendHeartBeat.INSTANCE);
         assertEquals(5, leaderActor.getReplicatedLog().size());
-        assertEquals(String.format("expected to be Leader but was %s. Current Leader = %s ",
-                leaderActor.getCurrentBehavior().raftRole(), leaderActor.getLeaderId()),
-                RaftRole.Leader, leaderActor.getCurrentBehavior().raftRole());
+        assertSame(leader, leaderActor.getCurrentBehavior());
 
         //reply from a slow follower does not initiate a fake snapshot
         leaderActor.handleCommand(new AppendEntriesReply(follower2Id, 1, true, 9, 1, (short)0));

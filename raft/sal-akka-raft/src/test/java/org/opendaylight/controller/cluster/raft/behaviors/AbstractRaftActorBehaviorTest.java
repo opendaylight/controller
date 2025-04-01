@@ -11,7 +11,9 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -42,7 +44,6 @@ import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
-import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.api.TermInfo;
 import org.slf4j.LoggerFactory;
 
@@ -104,11 +105,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
 
         behavior = createBehavior(context);
 
-        RaftRole expected = behavior.raftRole();
-
-        RaftActorBehavior raftBehavior = behavior.handleMessage(behaviorActor, appendEntries);
-
-        assertEquals("Raft state", expected, raftBehavior.raftRole());
+        assertSame(behavior, behavior.handleMessage(behaviorActor, appendEntries));
 
         // Also expect an AppendEntriesReply to be sent where success is false
 
@@ -137,16 +134,12 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
 
         assertFalse("This test should be overridden when testing Candidate", behavior instanceof Candidate);
 
-        RaftRole expected = behavior.raftRole();
-
-        // Check that the behavior does not handle unknwon message
+        // Check that the behavior does not handle unknown message
         assertNull(behavior.handleMessage(behaviorActor, "unknown"));
 
-        RaftActorBehavior raftBehavior = behavior.handleMessage(behaviorActor, appendEntries);
+        assertSame(behavior, behavior.handleMessage(behaviorActor, appendEntries));
 
-        assertEquals("Raft state", expected, raftBehavior.raftRole());
-
-        assertEquals("ReplicatedLog size", 1, context.getReplicatedLog().size());
+        assertEquals(1, context.getReplicatedLog().size());
 
         handleAppendEntriesAddSameEntryToLogReply(behaviorActor);
     }
@@ -277,11 +270,10 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         setLastLogEntry(actorContext, 1, 0, payload);
         actorContext.setTermInfo(new TermInfo(1, "test"));
 
-        RaftActorBehavior origBehavior = createBehavior(actorContext);
-        RaftActorBehavior raftBehavior = origBehavior.handleMessage(actorRef, rpc);
+        final var origBehavior = createBehavior(actorContext);
+        final var raftBehavior = assertInstanceOf(Follower.class, origBehavior.handleMessage(actorRef, rpc));
 
-        assertEquals("New raft state", RaftRole.Follower, raftBehavior.raftRole());
-        assertEquals("New election term", rpc.getTerm(), actorContext.currentTerm());
+        assertEquals(rpc.getTerm(), actorContext.currentTerm());
 
         origBehavior.close();
         raftBehavior.close();

@@ -5,10 +5,9 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft.utils;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,13 +36,13 @@ public class ForwardMessageToBehaviorActor extends MessageCollectorActor {
     }
 
     public RaftActorBehavior getFirstBehaviorChange() {
-        assertTrue("no behavior changes present", behaviorChanges.size() > 0);
-        return behaviorChanges.get(0);
+        assertFalse("no behavior changes present", behaviorChanges.isEmpty());
+        return behaviorChanges.getFirst();
     }
 
     public RaftActorBehavior getLastBehaviorChange() {
-        assertTrue("no behavior changes present", behaviorChanges.size() > 0);
-        return behaviorChanges.get(behaviorChanges.size() - 1);
+        assertFalse("no behavior changes present", behaviorChanges.isEmpty());
+        return behaviorChanges.getLast();
     }
 
     public List<RaftActorBehavior> getBehaviorChanges() {
