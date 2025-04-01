@@ -77,7 +77,8 @@ final class PropertiesTermInfoStore implements TermInfoStore {
         try {
             props = loadFile();
         } catch (NoSuchFileException e) {
-            LOG.debug("{} does not exist", propFile, e);
+            LOG.debug("{} does not exist", propFile);
+            LOG.trace("Detailed cause", e);
             return null;
         }
 
