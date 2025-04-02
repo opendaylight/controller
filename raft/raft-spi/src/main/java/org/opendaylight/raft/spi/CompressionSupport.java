@@ -7,23 +7,20 @@
  */
 package org.opendaylight.raft.spi;
 
-import static java.util.Objects.requireNonNull;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * Enumeration of file formats we support for {@link SnapshotSource}.
+ * Enumeration of compression schemes we support for data streams and {@link SnapshotSource}s.
  */
 @NonNullByDefault
-public enum SnapshotFileFormat {
+public enum CompressionSupport {
     /**
-     * A plain file.
+     * No compression at all.
      */
-    PLAIN(".plain") {
+    NONE {
         @Override
         public SnapshotSource sourceFor(final InputStreamProvider provider) {
             return new Lz4SnapshotSource(provider);
@@ -40,9 +37,9 @@ public enum SnapshotFileFormat {
         }
     },
     /**
-     * A plain file.
+     * Compressed by LZ4.
      */
-    LZ4(".lz4") {
+    LZ4 {
         @Override
         public SnapshotSource sourceFor(final InputStreamProvider provider) {
             return new Lz4SnapshotSource(provider);
@@ -65,22 +62,6 @@ public enum SnapshotFileFormat {
         }
 
     };
-
-    // Note: starts with ".", to make operations easier
-    private final String extension;
-
-    SnapshotFileFormat(final String extension) {
-        this.extension = requireNonNull(extension);
-    }
-
-    /**
-     * Returns the extension associated with this file format.
-     *
-     * @return the extension associated with this file format
-     */
-    public final String extension() {
-        return extension;
-    }
 
     /**
      * Create a new {@link SnapshotSource} backed by an {@link InputStreamProvider}.
@@ -109,20 +90,5 @@ public enum SnapshotFileFormat {
      * @throws IOException when an I/O error occurs
      */
     public abstract OutputStream encodeOutput(OutputStream out) throws IOException;
-
-    /**
-     * Returns the {@link SnapshotFileFormat} corresponding to specified file name by examining its extension.
-     *
-     * @param fileName the file name
-     * @return the {@link SnapshotFileFormat}, or {@code null} if the file extension is not recognized.
-     */
-    public static @Nullable SnapshotFileFormat forFileName(final String fileName) {
-        for (var format : values()) {
-            if (fileName.endsWith(format.extension)) {
-                return format;
-            }
-        }
-        return null;
-    }
 
 }
