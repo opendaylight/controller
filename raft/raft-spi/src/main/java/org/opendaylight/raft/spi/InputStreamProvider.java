@@ -16,6 +16,9 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 /**
  * Interface capturing the ability to open {@link InputStream}s.
  */
+// FIXME: StreamSource when we are ready to go live with this
+// TODO: decide on definite set of methods
+// TODO: openStream() vs openBufferedStream()?
 @NonNullByDefault
 @FunctionalInterface
 public interface InputStreamProvider {
