@@ -20,9 +20,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BiConsumer;
 import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.raft.spi.CompressionSupport;
 import org.opendaylight.raft.spi.FileBackedOutputStream;
 import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
-import org.opendaylight.raft.spi.SnapshotFileFormat;
 import org.opendaylight.raft.spi.SnapshotSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,10 +72,10 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
         @Override
         SnapshotSource compute() throws IOException {
             try (var outer = new FileBackedOutputStream(streamConfig)) {
-                try (var inner = preferredFormat.encodeOutput(outer)) {
+                try (var inner = compression.encodeOutput(outer)) {
                     snapshot.writeTo(inner);
                 }
-                return preferredFormat.sourceFor(outer.asByteSource()::openStream);
+                return compression.sourceFor(outer.asByteSource()::openStream);
             }
         }
     }
@@ -83,13 +83,13 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
     private static final Logger LOG = LoggerFactory.getLogger(RaftStorage.class);
 
     private final Set<CancellableTask<?>> tasks = ConcurrentHashMap.newKeySet();
-    private final @NonNull SnapshotFileFormat preferredFormat;
+    private final @NonNull CompressionSupport compression;
     private final @NonNull Configuration streamConfig;
 
     private ExecutorService executor;
 
-    protected RaftStorage(final SnapshotFileFormat preferredFormat, final Configuration streamConfig) {
-        this.preferredFormat = requireNonNull(preferredFormat);
+    protected RaftStorage(final CompressionSupport compression, final Configuration streamConfig) {
+        this.compression = requireNonNull(compression);
         this.streamConfig = requireNonNull(streamConfig);
     }
 
@@ -175,7 +175,7 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
     }
 
     protected ToStringHelper addToStringAtrributes(final ToStringHelper helper) {
-        return helper.add("memberId", memberId()).add("preferredFormat", preferredFormat).add("streams", streamConfig);
+        return helper.add("memberId", memberId()).add("compression", compression).add("streams", streamConfig);
     }
 
     private ExecutorService checkNotClosed() {
