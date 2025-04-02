@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.List;
-import org.opendaylight.controller.cluster.raft.messages.Payload;
+import org.opendaylight.controller.cluster.raft.spi.AbstractRaftDelta;
 
 /**
  * Payload data for server configuration log entries.
@@ -21,7 +21,7 @@ import org.opendaylight.controller.cluster.raft.messages.Payload;
  * @author Thomas Pantelis
  */
 @Deprecated(since = "11.0.0", forRemoval = true)
-abstract class ServerConfigurationPayload extends Payload {
+abstract class ServerConfigurationPayload extends AbstractRaftDelta {
     static final class Proxy implements Externalizable {
         @java.io.Serial
         private static final long serialVersionUID = 1L;

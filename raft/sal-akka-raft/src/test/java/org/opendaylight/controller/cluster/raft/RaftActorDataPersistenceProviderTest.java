@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
+import org.opendaylight.controller.cluster.raft.spi.AbstractStateDelta;
 import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage;
 import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
 
@@ -92,7 +93,7 @@ public class RaftActorDataPersistenceProviderTest {
         verify(mockDisabledStorage).persist(OTHER_DATA_OBJECT, mockCallback);
     }
 
-    static class TestNonPersistentPayload extends Payload {
+    static class TestNonPersistentPayload extends AbstractStateDelta {
         @java.io.Serial
         private static final long serialVersionUID = 1L;
 

@@ -15,7 +15,7 @@ import java.io.ObjectOutputStream;
 import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.messages.Payload;
+import org.opendaylight.controller.cluster.raft.spi.AbstractRaftDelta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  * RAFT cluster configuration. This payload is always persisted, no matter whether or not we are persisting other data
  * distributed via {@link ReplicatedLogEntry}.
  */
-public final class ClusterConfig extends Payload {
+public final class ClusterConfig extends AbstractRaftDelta {
     private static final Logger LOG = LoggerFactory.getLogger(ClusterConfig.class);
     @java.io.Serial
     private static final long serialVersionUID = 1L;

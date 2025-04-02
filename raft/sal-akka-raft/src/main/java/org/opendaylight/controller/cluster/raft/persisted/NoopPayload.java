@@ -10,15 +10,16 @@ package org.opendaylight.controller.cluster.raft.persisted;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.pekko.dispatch.ControlMessage;
 import org.eclipse.jdt.annotation.NonNull;
-import org.opendaylight.controller.cluster.raft.messages.Payload;
+import org.opendaylight.controller.cluster.raft.behaviors.PreLeader;
+import org.opendaylight.controller.cluster.raft.spi.AbstractRaftDelta;
 
 /**
- * Payload used for no-op log entries that are put into the journal by the PreLeader in order to commit
- * entries from the prior term.
+ * Payload used for no-op log entries that are put into the journal by the {@link PreLeader} in order to commit entries
+ * from the prior term.
  *
  * @author Thomas Pantelis
  */
-public final class NoopPayload extends Payload implements ControlMessage {
+public final class NoopPayload extends AbstractRaftDelta implements ControlMessage {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
     private static final @NonNull NP PROXY = new NP();

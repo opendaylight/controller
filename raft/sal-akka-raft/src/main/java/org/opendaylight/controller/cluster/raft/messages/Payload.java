@@ -7,7 +7,15 @@
  */
 package org.opendaylight.controller.cluster.raft.messages;
 
+import java.io.IOException;
+import java.io.NotSerializableException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectStreamException;
 import java.io.Serializable;
+import org.opendaylight.controller.cluster.raft.spi.AbstractRaftDelta;
+import org.opendaylight.controller.cluster.raft.spi.AbstractStateDelta;
+import org.opendaylight.controller.cluster.raft.spi.EntryData;
 
 /**
  * An instance of a {@link Payload} class is meant to be used as the Payload for {@link AppendEntries}.
@@ -16,7 +24,9 @@ import java.io.Serializable;
  * class. Similarly when state needs to be applied to the derived RaftActor it will be passed an instance of the
  * Payload class.
  */
-public abstract class Payload implements Serializable {
+// TODO: This is a tie-in between EntryData and Serializable. At some point we should operate without Serializable
+//       being in the picture.
+public abstract sealed class Payload implements EntryData, Serializable permits AbstractRaftDelta, AbstractStateDelta {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
@@ -43,4 +53,23 @@ public abstract class Payload implements Serializable {
      */
     @java.io.Serial
     protected abstract Object writeReplace();
+
+    @java.io.Serial
+    private void readObject(final ObjectInputStream stream) throws IOException, ClassNotFoundException {
+        throwNSE();
+    }
+
+    @java.io.Serial
+    private void readObjectNoData() throws ObjectStreamException {
+        throwNSE();
+    }
+
+    @java.io.Serial
+    private void writeObject(final ObjectOutputStream stream) throws IOException {
+        throwNSE();
+    }
+
+    private void throwNSE() throws NotSerializableException {
+        throw new NotSerializableException(getClass().getName());
+    }
 }
