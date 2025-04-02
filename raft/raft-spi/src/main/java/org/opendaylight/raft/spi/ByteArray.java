@@ -51,6 +51,7 @@ public abstract sealed class ByteArray implements InputStreamProvider permits Ch
      *
      * @return the size of this array
      */
+    // FIXME: we really should integrate with SizedDataSource
     public abstract int size();
 
     /**

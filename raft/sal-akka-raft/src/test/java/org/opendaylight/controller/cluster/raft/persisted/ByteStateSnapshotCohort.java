@@ -23,7 +23,9 @@ public interface ByteStateSnapshotCohort extends RaftActorSnapshotCohort<ByteSta
 
     @Override
     default ByteState deserializeSnapshot(final InputStreamProvider snapshotBytes) throws IOException {
-        return ByteState.of(snapshotBytes.openStream().readAllBytes());
+        try (var is = snapshotBytes.openStream()) {
+            return ByteState.of(is.readAllBytes());
+        }
     }
 
     @Override
