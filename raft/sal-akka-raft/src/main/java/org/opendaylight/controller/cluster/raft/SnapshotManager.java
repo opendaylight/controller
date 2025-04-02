@@ -271,12 +271,13 @@ public final class SnapshotManager {
         return captureToInstall(snapshotCohort, request);
     }
 
+    @NonNullByDefault
     private <T extends Snapshot.State> boolean captureToInstall(final RaftActorSnapshotCohort<T> typedCohort,
-            final @NonNull CaptureSnapshot request) {
+            final CaptureSnapshot request) {
         final var snapshot = typedCohort.takeSnapshot();
         final var persistence = context.getPersistenceProvider();
 
-        persistence.streamToInstall(out -> typedCohort.serializeSnapshot(snapshot, out), (source, ex) -> {
+        persistence.streamToInstall(out -> typedCohort.writeSnapshot(snapshot, out), (source, ex) -> {
             if (ex != null) {
                 task = Idle.INSTANCE;
                 LOG.error("{}: Error creating snapshot", memberId(), ex);

@@ -65,7 +65,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         if (builder.snapshotCohort == null) {
             snapshotCohortDelegate = mock(MockRaftActorSnapshotCohort.class);
             try {
-                doCallRealMethod().when(snapshotCohortDelegate).serializeSnapshot(any(), any());
+                doCallRealMethod().when(snapshotCohortDelegate).writeSnapshot(any(), any());
                 doCallRealMethod().when(snapshotCohortDelegate).deserializeSnapshot(any());
             } catch (IOException e) {
                 throw new AssertionError(e);
@@ -205,9 +205,9 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     @Override
-    public void serializeSnapshot(final MockSnapshotState snapshotState, final OutputStream out) throws IOException {
+    public void writeSnapshot(final MockSnapshotState snapshotState, final OutputStream out) throws IOException {
         LOG.info("{}: serializeSnapshot called", memberId());
-        snapshotCohortDelegate.serializeSnapshot(snapshotState, out);
+        snapshotCohortDelegate.writeSnapshot(snapshotState, out);
     }
 
     @Override

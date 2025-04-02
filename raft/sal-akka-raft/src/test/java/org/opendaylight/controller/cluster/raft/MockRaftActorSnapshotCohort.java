@@ -13,11 +13,13 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.raft.spi.InputStreamProvider;
 
 /**
  * {@link RaftActorSnapshotCohort} corresponding to {@link MockSnapshotState}.
  */
+@NonNullByDefault
 public interface MockRaftActorSnapshotCohort extends RaftActorSnapshotCohort<MockSnapshotState> {
     @Override
     default Class<MockSnapshotState> stateClass() {
@@ -30,9 +32,9 @@ public interface MockRaftActorSnapshotCohort extends RaftActorSnapshotCohort<Moc
     }
 
     @Override
-    default void serializeSnapshot(final MockSnapshotState snapshotState, final OutputStream out) throws IOException {
+    default void writeSnapshot(final MockSnapshotState snapshot, final OutputStream out) throws IOException {
         try (var oos = new ObjectOutputStream(out)) {
-            oos.writeObject(snapshotState);
+            oos.writeObject(snapshot);
         }
     }
 

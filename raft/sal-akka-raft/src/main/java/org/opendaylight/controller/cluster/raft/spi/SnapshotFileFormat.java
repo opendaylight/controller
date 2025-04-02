@@ -15,7 +15,6 @@ import java.time.Instant;
 import java.util.List;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
@@ -33,13 +32,13 @@ public enum SnapshotFileFormat {
      */
     SNAPSHOT_V1(".v1") {
         @Override
-        public <T extends Snapshot.State> void createNew(final Path file, final Instant timestamp,
+        public <T extends StateSnapshot> void createNew(final Path file, final Instant timestamp,
                 final EntryInfo lastIncluded, final ClusterConfig serverConfig,
                 final CompressionSupport entryCompress, final List<ReplicatedLogEntry> unappliedEntries,
-                final CompressionSupport stateCompress, final RaftActorSnapshotCohort<T> stateSerdes, final T state)
+                final CompressionSupport stateCompress, final StateSnapshot.Writer<T> stateWriter, final T state)
                     throws IOException {
             SnapshotFileV1.createNew(file, timestamp, lastIncluded, serverConfig, entryCompress, unappliedEntries,
-                stateCompress, stateSerdes, state);
+                stateCompress, stateWriter, state);
         }
 
         @Override
@@ -98,13 +97,13 @@ public enum SnapshotFileFormat {
      * @param entryCompress the compression to apply to unapplied entries
      * @param unappliedEntries the unapplied entries
      * @param stateCompress the compression to apply to user state
-     * @param stateSerdes serialization support for the state type
+     * @param stateWriter serialization support for the state type
      * @param state the state
      * @throws IOException if an I/O error occurs
      */
-    public abstract <T extends Snapshot.State> void createNew(Path file, Instant timestamp, EntryInfo lastIncluded,
+    public abstract <T extends StateSnapshot> void createNew(Path file, Instant timestamp, EntryInfo lastIncluded,
         ClusterConfig serverConfig, CompressionSupport entryCompress, List<ReplicatedLogEntry> unappliedEntries,
-        CompressionSupport stateCompress, RaftActorSnapshotCohort<T> stateSerdes, T state) throws IOException;
+        CompressionSupport stateCompress, StateSnapshot.Writer<T> stateWriter, T state) throws IOException;
 
     /**
      * Open an existing file of this format.

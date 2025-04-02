@@ -9,12 +9,14 @@ package org.opendaylight.controller.cluster.raft.persisted;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
 import org.opendaylight.raft.spi.InputStreamProvider;
 
 /**
  * {@link RaftActorSnapshotCohort} for {@link ByteState}.
  */
+@NonNullByDefault
 public interface ByteStateSnapshotCohort extends RaftActorSnapshotCohort<ByteState> {
     @Override
     default Class<ByteState> stateClass() {
@@ -29,8 +31,8 @@ public interface ByteStateSnapshotCohort extends RaftActorSnapshotCohort<ByteSta
     }
 
     @Override
-    default void serializeSnapshot(final ByteState snapshotState, final OutputStream out) throws IOException {
-        out.write(snapshotState.bytes());
+    default void writeSnapshot(final ByteState snapshot, final OutputStream out) throws IOException {
+        ByteState.writer().writeSnapshot(snapshot, out);
     }
 
     @Override

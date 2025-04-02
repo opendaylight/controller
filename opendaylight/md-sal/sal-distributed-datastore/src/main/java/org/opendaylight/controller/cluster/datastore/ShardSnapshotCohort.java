@@ -14,7 +14,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import org.apache.pekko.actor.ActorContext;
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
@@ -34,13 +34,14 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Pantelis
  */
+@NonNullByDefault
 final class ShardSnapshotCohort implements RaftActorSnapshotCohort<ShardSnapshotState> {
     private static final Logger LOG = LoggerFactory.getLogger(ShardSnapshotCohort.class);
     private static final FrontendType SNAPSHOT_APPLY = FrontendType.forName("snapshot-apply");
 
-    private final @NonNull InputOutputStreamFactory streamFactory;
-    private final @NonNull ShardDataTree store;
-    private final @NonNull String memberName;
+    private final InputOutputStreamFactory streamFactory;
+    private final ShardDataTree store;
+    private final String memberName;
 
     ShardSnapshotCohort(final InputOutputStreamFactory streamFactory, final LocalHistoryIdentifier applyHistoryId,
             final ShardDataTree store, final String memberName) {
@@ -49,7 +50,7 @@ final class ShardSnapshotCohort implements RaftActorSnapshotCohort<ShardSnapshot
         this.memberName = requireNonNull(memberName);
     }
 
-    static @NonNull ShardSnapshotCohort create(final ActorContext actorContext, final MemberName memberName,
+    static ShardSnapshotCohort create(final ActorContext actorContext, final MemberName memberName,
             final ShardDataTree store, final String logId, final DatastoreContext context) {
         final var applyHistoryId = new LocalHistoryIdentifier(ClientIdentifier.create(
             FrontendIdentifier.create(memberName, SNAPSHOT_APPLY), 0), 0);
@@ -88,9 +89,9 @@ final class ShardSnapshotCohort implements RaftActorSnapshotCohort<ShardSnapshot
     }
 
     @Override
-    public void serializeSnapshot(final ShardSnapshotState snapshotState, final OutputStream out) throws IOException {
+    public void writeSnapshot(final ShardSnapshotState snapshot, final OutputStream out) throws IOException {
         try (var oos = new ObjectOutputStream(out)) {
-            snapshotState.getSnapshot().serialize(oos);
+            snapshot.getSnapshot().serialize(oos);
         }
     }
 
