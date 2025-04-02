@@ -7,11 +7,10 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
-import org.opendaylight.raft.spi.InputStreamProvider;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 
 /**
  * Interface for a class that participates in raft actor snapshotting.
@@ -19,13 +18,14 @@ import org.opendaylight.raft.spi.InputStreamProvider;
  * @param <T> type of state
  * @author Thomas Pantelis
  */
-public interface RaftActorSnapshotCohort<T extends State> {
+@NonNullByDefault
+public interface RaftActorSnapshotCohort<T extends State> extends StateSnapshot.Reader<T>, StateSnapshot.Writer<T> {
     /**
      * Return the type of state supported by this cohort.
      *
      * @return the state class
      */
-    @NonNull Class<T> stateClass();
+    Class<T> stateClass();
 
     /**
      * Take a snapshot of current state.
@@ -40,23 +40,4 @@ public interface RaftActorSnapshotCohort<T extends State> {
      * @param snapshotState a snapshot of the state of the actor
      */
     void applySnapshot(@NonNull T snapshotState);
-
-    /**
-     * Serialize a snapshot into an {@link OutputStream}.
-     *
-     * @param snapshotState snapshot to serialize
-     * @param out the {@link OutputStream}
-     * @throws IOException if an I/O error occurs
-     */
-    void serializeSnapshot(@NonNull T snapshotState, @NonNull OutputStream out) throws IOException;
-
-    /**
-     * This method is called to de-serialize snapshot data that was previously serialized via
-     * {@link #serializeSnapshot(State, OutputStream)}.
-     *
-     * @param snapshotBytes the {@link InputStreamProvider} containing the serialized data
-     * @return the converted snapshot State
-     * @throws IOException if an error occurs accessing the ByteSource or de-serializing
-     */
-    @NonNull T deserializeSnapshot(@NonNull InputStreamProvider snapshotBytes) throws IOException;
 }

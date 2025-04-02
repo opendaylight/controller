@@ -13,9 +13,9 @@ import java.io.Serializable;
 import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 import org.opendaylight.raft.api.EntryMeta;
 import org.opendaylight.raft.api.TermInfo;
-import org.opendaylight.yangtools.concepts.Immutable;
 
 /**
  * Represents a snapshot of the raft data.
@@ -28,16 +28,8 @@ public final class Snapshot implements Serializable {
      *
      * @author Thomas Pantelis
      */
-    public interface State extends Immutable, Serializable {
-        /**
-         * Indicate whether the snapshot requires migration, i.e. a new snapshot should be created after recovery.
-         * Default implementation returns false, i.e. do not re-snapshot.
-         *
-         * @return True if complete recovery based upon this snapshot should trigger a new snapshot.
-         */
-        default boolean needsMigration() {
-            return false;
-        }
+    public interface State extends StateSnapshot, Serializable {
+        // Nothing else
     }
 
     @java.io.Serial

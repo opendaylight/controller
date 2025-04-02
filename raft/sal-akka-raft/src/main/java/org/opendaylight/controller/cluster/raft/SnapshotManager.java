@@ -271,12 +271,13 @@ public final class SnapshotManager {
         return captureToInstall(snapshotCohort, request);
     }
 
+    @NonNullByDefault
     private <T extends Snapshot.State> boolean captureToInstall(final RaftActorSnapshotCohort<T> typedCohort,
-            final @NonNull CaptureSnapshot request) {
+            final CaptureSnapshot request) {
         final var snapshot = typedCohort.takeSnapshot();
         final var persistence = context.getPersistenceProvider();
 
-        persistence.streamToInstall(out -> typedCohort.serializeSnapshot(snapshot, out), (source, ex) -> {
+        persistence.streamToInstall(out -> typedCohort.writeSnapshot(snapshot, out), (source, ex) -> {
             if (ex != null) {
                 task = Idle.INSTANCE;
                 LOG.error("{}: Error creating snapshot", memberId(), ex);
@@ -339,12 +340,12 @@ public final class SnapshotManager {
             return;
         }
 
-        final var snapshotBytes = snapshot.snapshot();
-        LOG.info("{}: Applying snapshot on follower: {}", memberId(), snapshotBytes);
+        final var source = snapshot.snapshot();
+        LOG.info("{}: Applying snapshot on follower: {}", memberId(), source);
 
         final Snapshot.State snapshotState;
         try {
-            snapshotState = snapshotCohort.deserializeSnapshot(snapshotBytes);
+            snapshotState = snapshotCohort.readSnapshot(source);
         } catch (IOException e) {
             LOG.debug("{}: failed to convert InstallSnapshot to state", memberId(), e);
             snapshot.callback().onFailure();
@@ -538,8 +539,9 @@ public final class SnapshotManager {
         };
     }
 
-    private <T extends Snapshot.State> void applySnapshotState(final @NonNull RaftActorSnapshotCohort<T> cohort,
-            final Snapshot.@NonNull State state) {
+    @NonNullByDefault
+    private <T extends Snapshot.State> void applySnapshotState(final RaftActorSnapshotCohort<T> cohort,
+            final Snapshot.State state) {
         final T casted;
         try {
             casted = cohort.stateClass().cast(state);

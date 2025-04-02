@@ -315,7 +315,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         doReturn(Integer.MAX_VALUE).when(mockReplicatedLog).dataSize();
         ByteState snapshotState = ByteState.of(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
         doReturn(snapshotState).when(mockCohort).takeSnapshot();
-        doCallRealMethod().when(mockCohort).serializeSnapshot(any(), any());
+        doCallRealMethod().when(mockCohort).writeSnapshot(any(), any());
 
         // when replicatedToAllIndex = -1
         boolean capture = snapshotManager.captureToInstall(EntryInfo.of(9, 6), -1, "follower-1");

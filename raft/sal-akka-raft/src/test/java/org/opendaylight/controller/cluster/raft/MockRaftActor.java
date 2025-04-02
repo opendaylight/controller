@@ -65,8 +65,8 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         if (builder.snapshotCohort == null) {
             snapshotCohortDelegate = mock(MockRaftActorSnapshotCohort.class);
             try {
-                doCallRealMethod().when(snapshotCohortDelegate).serializeSnapshot(any(), any());
-                doCallRealMethod().when(snapshotCohortDelegate).deserializeSnapshot(any());
+                doCallRealMethod().when(snapshotCohortDelegate).writeSnapshot(any(), any());
+                doCallRealMethod().when(snapshotCohortDelegate).readSnapshot(any());
             } catch (IOException e) {
                 throw new AssertionError(e);
             }
@@ -205,15 +205,15 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     @Override
-    public void serializeSnapshot(final MockSnapshotState snapshotState, final OutputStream out) throws IOException {
-        LOG.info("{}: serializeSnapshot called", memberId());
-        snapshotCohortDelegate.serializeSnapshot(snapshotState, out);
+    public void writeSnapshot(final MockSnapshotState snapshot, final OutputStream out) throws IOException {
+        LOG.info("{}: writeSnapshot called", memberId());
+        snapshotCohortDelegate.writeSnapshot(snapshot, out);
     }
 
     @Override
-    public MockSnapshotState deserializeSnapshot(final InputStreamProvider snapshotBytes) throws IOException {
-        LOG.info("{}: deserializeSnapshot called", memberId());
-        return snapshotCohortDelegate.deserializeSnapshot(snapshotBytes);
+    public MockSnapshotState readSnapshot(final InputStreamProvider source) throws IOException {
+        LOG.info("{}: readSnapshot called", memberId());
+        return snapshotCohortDelegate.readSnapshot(source);
     }
 
     @Override

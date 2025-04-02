@@ -18,6 +18,8 @@ import java.util.Optional;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Props;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.example.messages.KeyValue;
 import org.opendaylight.controller.cluster.example.messages.KeyValueSaved;
 import org.opendaylight.controller.cluster.example.messages.PrintRole;
@@ -39,6 +41,7 @@ import org.slf4j.LoggerFactory;
 /**
  * A sample actor showing how the RaftActor is to be extended.
  */
+@NonNullByDefault
 public final class ExampleActor extends RaftActor
         implements RaftActorRecoveryCohort, RaftActorSnapshotCohort<ExampleActor.MapState> {
     private static final class PayloadIdentifier extends AbstractStringIdentifier<PayloadIdentifier> {
@@ -70,7 +73,7 @@ public final class ExampleActor extends RaftActor
     }
 
     @Override
-    protected void handleNonRaftCommand(final Object message) {
+    protected void handleNonRaftCommand(final @Nullable Object message) {
         if (message instanceof KeyValue kv) {
             if (isLeader()) {
                 persistData(getSender(), new PayloadIdentifier(persistIdentifier++), kv, false);
@@ -111,7 +114,7 @@ public final class ExampleActor extends RaftActor
     }
 
     @Override
-    protected ActorRef roleChangeNotifier() {
+    protected @Nullable ActorRef roleChangeNotifier() {
         return roleChangeNotifier;
     }
 
@@ -121,7 +124,8 @@ public final class ExampleActor extends RaftActor
     }
 
     @Override
-    protected void applyState(final ActorRef clientActor, final Identifier identifier, final Object data) {
+    protected void applyState(final @Nullable ActorRef clientActor, final @Nullable Identifier identifier,
+            final @Nullable Object data) {
         if (data instanceof KeyValue kv) {
             state.put(kv.getKey(), kv.getValue());
             if (clientActor != null) {
@@ -160,7 +164,7 @@ public final class ExampleActor extends RaftActor
     }
 
     @Override
-    public void appendRecoveredLogEntry(final Payload data) {
+    public void appendRecoveredLogEntry(final @Nullable Payload data) {
     }
 
     @Override
@@ -172,7 +176,7 @@ public final class ExampleActor extends RaftActor
     }
 
     @Override
-    public void applyRecoverySnapshot(final Snapshot.State snapshotState) {
+    public void applyRecoverySnapshot(final Snapshot.@Nullable State snapshotState) {
     }
 
     @Override
@@ -181,21 +185,20 @@ public final class ExampleActor extends RaftActor
     }
 
     @Override
-    public Snapshot getRestoreFromSnapshot() {
+    public @Nullable Snapshot getRestoreFromSnapshot() {
         return null;
     }
 
     @Override
-    public void serializeSnapshot(final MapState snapshotState, final OutputStream out) throws IOException {
+    public void writeSnapshot(final MapState snapshot, final OutputStream out) throws IOException {
         try (var oos = new ObjectOutputStream(out)) {
-            oos.writeObject(snapshotState.state);
+            oos.writeObject(snapshot.state);
         }
     }
 
     @Override
-    public MapState deserializeSnapshot(final InputStreamProvider snapshotBytes) throws IOException {
-        return new MapState(SerializationUtils.<Map<String, String>>deserialize(
-            snapshotBytes.openStream().readAllBytes()));
+    public MapState readSnapshot(final InputStreamProvider source) throws IOException {
+        return new MapState(SerializationUtils.<Map<String, String>>deserialize(source.openStream().readAllBytes()));
     }
 
     static class MapState implements Snapshot.State {

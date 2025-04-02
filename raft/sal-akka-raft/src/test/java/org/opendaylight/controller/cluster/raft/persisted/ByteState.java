@@ -11,33 +11,48 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
 import java.util.Arrays;
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 
 /**
  * Snapshot State implementation backed by a byte[].
  *
  * @author Thomas Pantelis
  */
+@NonNullByDefault
 public final class ByteState implements Snapshot.State {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
-    private final byte @NonNull[] bytes;
+    private final byte[] bytes;
 
-    private ByteState(final byte @NonNull[] bytes) {
+    private ByteState(final byte[] bytes) {
         this.bytes = requireNonNull(bytes);
     }
 
-    public static @NonNull ByteState of(final byte @NonNull[] bytes) {
+    public static ByteState of(final byte[] bytes) {
         return new ByteState(bytes);
     }
 
-    public static @NonNull ByteState empty() {
+    public static ByteState empty() {
         return new ByteState(new byte[0]);
     }
 
-    public byte @NonNull[] bytes() {
+    public byte[] bytes() {
         return bytes;
+    }
+
+    public static StateSnapshot.Reader<ByteState> reader() {
+        return source -> {
+            try (var in = source.openStream()) {
+                return ByteState.of(in.readAllBytes());
+            }
+        };
+    }
+
+    public static StateSnapshot.Writer<ByteState> writer() {
+        return (snapshot, out) -> out.write(snapshot.bytes());
     }
 
     @Override
@@ -46,7 +61,7 @@ public final class ByteState implements Snapshot.State {
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(final @Nullable Object obj) {
         return this == obj || obj instanceof ByteState other && Arrays.equals(bytes, other.bytes);
     }
 

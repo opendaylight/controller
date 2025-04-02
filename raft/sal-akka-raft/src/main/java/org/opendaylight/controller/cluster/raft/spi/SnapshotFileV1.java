@@ -32,13 +32,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.zip.CRC32C;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.CompressionSupport;
 import org.opendaylight.raft.spi.FileStreamSource;
@@ -114,10 +112,10 @@ final class SnapshotFileV1 implements SnapshotFile {
         stateStream = new FileStreamSource(file, sso, limit);
     }
 
-    static <T extends Snapshot.State> void createNew(final Path file, final Instant timestamp,
+    static <T extends StateSnapshot> void createNew(final Path file, final Instant timestamp,
             final EntryInfo lastIncluded, final ClusterConfig serverConfig,
             final CompressionSupport entryCompress, final List<ReplicatedLogEntry> unappliedEntries,
-            final CompressionSupport stateCompress, final RaftActorSnapshotCohort<T> stateSerdes, final T state)
+            final CompressionSupport stateCompress, final StateSnapshot.Writer<T> stateWriter, final T state)
                 throws IOException {
         final var entryFormat = computeFormat(entryCompress, "entry");
         final var stateFormat = computeFormat(stateCompress, "state");
@@ -175,7 +173,7 @@ final class SnapshotFileV1 implements SnapshotFile {
 
                 // emit state
                 try (var eos = stateCompress.encodeOutput(dos)) {
-                    stateSerdes.serializeSnapshot(state, eos);
+                    stateWriter.writeSnapshot(state, eos);
                 }
 
                 // record limit
