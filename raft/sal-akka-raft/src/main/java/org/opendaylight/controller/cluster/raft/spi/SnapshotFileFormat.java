@@ -1,0 +1,102 @@
+/*
+ * Copyright (c) 2025 PANTHEON.tech, s.r.o. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+package org.opendaylight.controller.cluster.raft.spi;
+
+import static java.util.Objects.requireNonNull;
+
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.List;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
+import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
+import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.raft.api.EntryInfo;
+import org.opendaylight.raft.api.TermInfo;
+import org.opendaylight.raft.spi.CompressionSupport;
+
+/**
+ * All supported snapshot file formats. Content closely mirrors {@link Snapshot}, but does not include {@link TermInfo}
+ */
+@NonNullByDefault
+public enum SnapshotFileFormat {
+    /**
+     * First version of snapshot file format.
+     */
+    SNAPSHOT_FILE_V1(".v1") {
+        @Override
+        public <T extends Snapshot.State> SnapshotFile create(final Path file, final EntryInfo lastIncluded,
+                final ClusterConfig serverConfig,
+                final CompressionSupport entryCompress, final List<ReplicatedLogEntry> unappliedEntries,
+                final CompressionSupport stateCompress, final RaftActorSnapshotCohort<T> stateSupport, final T state)
+                    throws IOException {
+            return SnapshotFileV1.create(file, lastIncluded, serverConfig, entryCompress, unappliedEntries,
+                stateCompress, stateSupport, state);
+        }
+
+        @Override
+        public SnapshotFile open(final Path file) throws IOException {
+            return SnapshotFileV1.open(file);
+        }
+    };
+
+    private final String extension;
+
+    SnapshotFileFormat(final String extension) {
+        this.extension = requireNonNull(extension);
+    }
+
+    /**
+     * Returns the extension associated with this file format.
+     *
+     * @return the extension associated with this file format
+     */
+    public final String extension() {
+        return extension;
+    }
+
+    /**
+     * Returns the latest format.
+     *
+     * @return the latest format
+     */
+    public static SnapshotFileFormat latest() {
+        return SNAPSHOT_FILE_V1;
+    }
+
+    /**
+     * Returns the {@link CompressionSupport} corresponding to specified file name by examining its extension.
+     *
+     * @param fileName the file name
+     * @return the {@link CompressionSupport}, or {@code null} if the file extension is not recognized.
+     */
+    public static @Nullable SnapshotFileFormat forFileName(final String fileName) {
+        for (var format : values()) {
+            if (fileName.endsWith(format.extension)) {
+                return format;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Create a file of this format with the content of specified snapshot.
+     *
+     * @param file the file to write
+     * @param snapshot the snapshot to store
+     * @return the name of created file
+     * @throws IOException if an I/O error occurs
+     */
+    public abstract <T extends Snapshot.State> SnapshotFile create(Path file, EntryInfo lastIncluded,
+        ClusterConfig serverConfig, CompressionSupport entryCompress, List<ReplicatedLogEntry> unappliedEntries,
+        CompressionSupport stateCompress, RaftActorSnapshotCohort<T> stateSupport, final T state) throws IOException;
+
+    public abstract SnapshotFile open(Path file) throws IOException;
+}
