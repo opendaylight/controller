@@ -18,7 +18,7 @@ import java.util.function.Supplier;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.policy.DefaultRaftPolicy;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
-import org.opendaylight.raft.spi.SnapshotFileFormat;
+import org.opendaylight.raft.spi.CompressionSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,7 +83,7 @@ public class DefaultConfigParamsImpl implements ConfigParams {
 
     private long syncIndexThreshold = 10;
 
-    private @NonNull SnapshotFileFormat preferredFileFormat = SnapshotFileFormat.PLAIN;
+    private @NonNull CompressionSupport preferredFileFormat = CompressionSupport.NONE;
 
     public void setHeartBeatInterval(final Duration heartBeatInterval) {
         this.heartBeatInterval = requireNonNull(heartBeatInterval);
@@ -244,11 +244,11 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     }
 
     @Override
-    public SnapshotFileFormat getPreferredFileFormat() {
+    public CompressionSupport getPreferredFileFormat() {
         return preferredFileFormat;
     }
 
-    public void setPreferredFileFormat(final SnapshotFileFormat preferredFileFormat) {
+    public void setPreferredFileFormat(final CompressionSupport preferredFileFormat) {
         this.preferredFileFormat = requireNonNull(preferredFileFormat);
     }
 

@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.raft.spi;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
-import org.opendaylight.raft.spi.SnapshotFileFormat;
 
 /**
  * A {@link RaftStorage} backing persistent mode of {@link RaftActor} operation.

@@ -19,11 +19,11 @@ import org.eclipse.jdt.annotation.Nullable;
  * Enumeration of file formats we support for {@link SnapshotSource}.
  */
 @NonNullByDefault
-public enum SnapshotFileFormat {
+public enum CompressionSupport {
     /**
      * A plain file.
      */
-    PLAIN(".plain") {
+    NONE(".plain") {
         @Override
         public SnapshotSource sourceFor(final InputStreamProvider provider) {
             return new Lz4SnapshotSource(provider);
@@ -69,7 +69,7 @@ public enum SnapshotFileFormat {
     // Note: starts with ".", to make operations easier
     private final String extension;
 
-    SnapshotFileFormat(final String extension) {
+    CompressionSupport(final String extension) {
         this.extension = requireNonNull(extension);
     }
 
@@ -111,12 +111,12 @@ public enum SnapshotFileFormat {
     public abstract OutputStream encodeOutput(OutputStream out) throws IOException;
 
     /**
-     * Returns the {@link SnapshotFileFormat} corresponding to specified file name by examining its extension.
+     * Returns the {@link CompressionSupport} corresponding to specified file name by examining its extension.
      *
      * @param fileName the file name
-     * @return the {@link SnapshotFileFormat}, or {@code null} if the file extension is not recognized.
+     * @return the {@link CompressionSupport}, or {@code null} if the file extension is not recognized.
      */
-    public static @Nullable SnapshotFileFormat forFileName(final String fileName) {
+    public static @Nullable CompressionSupport forFileName(final String fileName) {
         for (var format : values()) {
             if (fileName.endsWith(format.extension)) {
                 return format;

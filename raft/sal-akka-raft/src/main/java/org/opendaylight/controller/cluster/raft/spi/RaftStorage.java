@@ -22,7 +22,6 @@ import java.util.function.BiConsumer;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.raft.spi.FileBackedOutputStream;
 import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
-import org.opendaylight.raft.spi.SnapshotFileFormat;
 import org.opendaylight.raft.spi.SnapshotSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

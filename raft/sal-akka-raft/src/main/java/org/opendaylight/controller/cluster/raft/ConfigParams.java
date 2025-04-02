@@ -11,7 +11,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
-import org.opendaylight.raft.spi.SnapshotFileFormat;
+import org.opendaylight.raft.spi.CompressionSupport;
 
 /**
  * Configuration Parameter interface for configuring the Raft consensus system. Any component using this implementation
@@ -156,9 +156,9 @@ public interface ConfigParams {
     long getSyncIndexThreshold();
 
     /**
-     * Retuns the preferred {@link SnapshotFileFormat}.
+     * Retuns the preferred {@link CompressionSupport}.
      *
-     * @return the preferred {@link SnapshotFileFormat}
+     * @return the preferred {@link CompressionSupport}
      */
-    @NonNull SnapshotFileFormat getPreferredFileFormat();
+    @NonNull CompressionSupport getPreferredFileFormat();
 }

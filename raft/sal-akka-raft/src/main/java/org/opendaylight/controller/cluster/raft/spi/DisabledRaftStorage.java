@@ -18,7 +18,6 @@ import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
-import org.opendaylight.raft.spi.SnapshotFileFormat;
 import org.opendaylight.raft.spi.SnapshotSource;
 
 /**
