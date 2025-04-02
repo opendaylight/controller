@@ -22,8 +22,8 @@ public enum CompressionSupport {
      */
     NONE {
         @Override
-        public SnapshotSource sourceFor(final InputStreamProvider provider) {
-            return new Lz4SnapshotSource(provider);
+        public PlainSnapshotSource sourceFor(final InputStreamProvider provider) {
+            return new PlainSnapshotSource(provider);
         }
 
         @Override
