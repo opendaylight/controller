@@ -28,7 +28,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.ByteState;
-import org.opendaylight.controller.cluster.raft.persisted.ByteStateSnapshotCohort;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
@@ -50,9 +49,6 @@ class SnapshotFileFormatTest {
         cold and timid souls who knew neither victory nor defeat.
         —Theodore Roosevelt
         Speech at the Sorbonne, Paris, April 23, 1910""".getBytes(StandardCharsets.UTF_8));
-    private static final ByteStateSnapshotCohort STATE_SUPPORT = () -> {
-        throw new UnsupportedOperationException();
-    };
     private static final Instant TIMESTAMP = Instant.ofEpochSecond(1743608039, 960467747);
     private static final ClusterConfig SERVER_CONFIG = new ClusterConfig(List.of(
         new ServerInfo("member-1", false), new ServerInfo("member-2", true)));
@@ -101,7 +97,7 @@ class SnapshotFileFormatTest {
 
         final var file = tempDir.resolve(fileName);
         fileFormat.createNew(file, TIMESTAMP, EntryInfo.of(-1, -1), SERVER_CONFIG, entryCompress, ENTRIES,
-            stateCompress, STATE_SUPPORT, STATE);
+            stateCompress, ByteState.writer(), STATE);
 
         assertTrue(Files.isRegularFile(file));
         assertEquals(expectedSize, Files.size(file));
@@ -113,9 +109,7 @@ class SnapshotFileFormatTest {
 
         assertEquals(new RaftRecovery(SERVER_CONFIG, ENTRIES), open.readRaftRecovery());
 
-        final var encSource = open.dataSource();
-        final var plainSource = encSource.toPlainSource();
-        assertEquals(STATE, STATE_SUPPORT.deserializeSnapshot(plainSource));
+        assertEquals(STATE, open.readSnapshot(ByteState.reader()));
     }
 
     private static List<Arguments> createAndOpen() {

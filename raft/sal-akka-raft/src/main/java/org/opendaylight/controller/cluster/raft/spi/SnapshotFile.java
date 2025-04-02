@@ -50,4 +50,9 @@ public interface SnapshotFile extends InstallableSnapshot {
     @Beta
     // FIXME: note: we need data dictionary to interpret ByteStream to Payload for ReplicatedLogEntry.getData()
     RaftRecovery readRaftRecovery() throws IOException;
+
+    default <T extends StateSnapshot> T readSnapshot(final StateSnapshot.Reader<? extends T> reader)
+            throws IOException {
+        return reader.readSnapshot(dataSource().toPlainSource());
+    }
 }

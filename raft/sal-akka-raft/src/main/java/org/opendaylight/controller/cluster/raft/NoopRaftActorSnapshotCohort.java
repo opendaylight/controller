@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.raft;
 
 import java.io.OutputStream;
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
 import org.opendaylight.raft.spi.InputStreamProvider;
 
@@ -17,8 +17,9 @@ import org.opendaylight.raft.spi.InputStreamProvider;
  *
  * @author Thomas Pantelis
  */
+@NonNullByDefault
 public final class NoopRaftActorSnapshotCohort implements RaftActorSnapshotCohort<EmptyState> {
-    public static final @NonNull NoopRaftActorSnapshotCohort INSTANCE = new NoopRaftActorSnapshotCohort();
+    public static final NoopRaftActorSnapshotCohort INSTANCE = new NoopRaftActorSnapshotCohort();
 
     private NoopRaftActorSnapshotCohort() {
         // Hidden on purpose
@@ -40,12 +41,12 @@ public final class NoopRaftActorSnapshotCohort implements RaftActorSnapshotCohor
     }
 
     @Override
-    public void serializeSnapshot(final EmptyState snapshotState, final OutputStream out) {
+    public void writeSnapshot(final EmptyState snapshot, final OutputStream out) {
         // No-op
     }
 
     @Override
-    public EmptyState deserializeSnapshot(final InputStreamProvider snapshotBytes) {
+    public EmptyState readSnapshot(final InputStreamProvider source) {
         // XXX: we really should be reading the bytes
         return takeSnapshot();
     }
