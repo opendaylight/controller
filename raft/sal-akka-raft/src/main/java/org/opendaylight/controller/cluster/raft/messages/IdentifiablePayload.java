@@ -7,10 +7,11 @@
  */
 package org.opendaylight.controller.cluster.raft.messages;
 
+import org.opendaylight.controller.cluster.raft.spi.AbstractStateDelta;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.concepts.Identifier;
 
-public abstract class IdentifiablePayload<T extends Identifier> extends Payload implements Identifiable<T> {
+public abstract class IdentifiablePayload<T extends Identifier> extends AbstractStateDelta implements Identifiable<T> {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 }

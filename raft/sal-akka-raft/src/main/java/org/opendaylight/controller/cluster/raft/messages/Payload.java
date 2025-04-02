@@ -7,7 +7,15 @@
  */
 package org.opendaylight.controller.cluster.raft.messages;
 
+import java.io.IOException;
+import java.io.NotSerializableException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectStreamException;
 import java.io.Serializable;
+import org.opendaylight.controller.cluster.raft.spi.AbstractRaftDelta;
+import org.opendaylight.controller.cluster.raft.spi.AbstractStateDelta;
+import org.opendaylight.controller.cluster.raft.spi.EntryData;
 
 /**
  * An instance of a {@link Payload} class is meant to be used as the Payload for {@link AppendEntries}.
@@ -16,7 +24,29 @@ import java.io.Serializable;
  * class. Similarly when state needs to be applied to the derived RaftActor it will be passed an instance of the
  * Payload class.
  */
-public abstract class Payload implements Serializable {
+// FIXME: This class is geared towards on-heap storage in that it is estimating/knowing its in-memory and serialized
+//        footprint -- soemthing that is mirrored in ReplicatedLogEntry's fields.
+//        What we really want here is a split between serialized and non-serialized form, because the exact nature of
+//        storage concerns are separate. We really have a few serialization strategies:
+//        - a leader persistence request, where we want to hang on to unserialized state for the purposes of handing
+//          the handle to applyState(). On the leader we start with unserialized state, then store/replicate the entry
+//          and call applyState() when consensus is reached.
+//        - a follower-received request, where we start with serialized state and deserialize for the purposes of
+//          applyState()
+//        Preferred data entry storage differs based on mode of operation, based on persistence, presence of peers and
+//        perhaps voting status:
+//        - enabled persistence means entry data is serialized to durable storage before applyState() is called
+//        - disabled persistence with peers means the same, except there may be a number of storage strategies:
+//        - ClusterConfig is always durable
+//        - serial form is stored in-memory:
+//        - currently on-heap (via ByteArray)
+//        - we want also off-heap (via NativeByteArray)
+//        - we want also memory-mapped file (via MappedByteArray)
+//        - we want to compress select entries (marked, opt-in)
+//        - disabled persistence without peers does not need any serialization
+//        For all of this to happen, though, we need to have well-defined transitions between strategies. There is also
+//        interplay with AppendEntries compression/slicing to consider.
+public abstract sealed class Payload implements EntryData, Serializable permits AbstractRaftDelta, AbstractStateDelta {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
@@ -43,4 +73,23 @@ public abstract class Payload implements Serializable {
      */
     @java.io.Serial
     protected abstract Object writeReplace();
+
+    @java.io.Serial
+    private void readObject(final ObjectInputStream stream) throws IOException, ClassNotFoundException {
+        throwNSE();
+    }
+
+    @java.io.Serial
+    private void readObjectNoData() throws ObjectStreamException {
+        throwNSE();
+    }
+
+    @java.io.Serial
+    private void writeObject(final ObjectOutputStream stream) throws IOException {
+        throwNSE();
+    }
+
+    private void throwNSE() throws NotSerializableException {
+        throw new NotSerializableException(getClass().getName());
+    }
 }

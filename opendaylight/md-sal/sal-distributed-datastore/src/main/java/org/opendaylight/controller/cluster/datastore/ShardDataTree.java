@@ -69,6 +69,7 @@ import org.opendaylight.controller.cluster.datastore.utils.DataTreeModificationO
 import org.opendaylight.controller.cluster.datastore.utils.PruningDataTreeModification;
 import org.opendaylight.controller.cluster.raft.base.messages.InitiateCaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
+import org.opendaylight.controller.cluster.raft.spi.AbstractStateDelta;
 import org.opendaylight.controller.cluster.raft.spi.ImmutableUnsignedLongSet;
 import org.opendaylight.mdsal.common.api.OptimisticLockFailedException;
 import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
@@ -484,7 +485,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         }
     }
 
-    private void replicatePayload(final Identifier id, final Payload payload, final @Nullable Runnable callback) {
+    private void replicatePayload(final Identifier id, final AbstractStateDelta payload,
+            final @Nullable Runnable callback) {
         if (callback != null) {
             replicationCallbacks.put(payload, callback);
         }
@@ -1108,7 +1110,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         LOG.debug("{}: Starting commit for transaction {}", logContext, current.transactionId());
 
         final TransactionIdentifier txId = cohort.transactionId();
-        final Payload payload;
+        final CommitTransactionPayload payload;
         try {
             payload = CommitTransactionPayload.create(txId, candidate, PayloadVersion.current(),
                     shard.getDatastoreContext().getInitialPayloadSerializedBufferCapacity());

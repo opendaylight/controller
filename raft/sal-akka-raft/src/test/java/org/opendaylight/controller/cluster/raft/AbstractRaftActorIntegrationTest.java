@@ -134,7 +134,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
             getRaftActorContext().setTotalMemoryRetriever(mockTotalMemory > 0 ? () -> mockTotalMemory : null);
         }
 
-        @SuppressWarnings({ "rawtypes", "unchecked", "checkstyle:IllegalCatch" })
+        @SuppressWarnings("checkstyle:IllegalCatch")
         @Override
         public void handleCommand(final Object message) {
             if (message instanceof MockPayload payload) {
@@ -158,7 +158,8 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
             }
 
             try {
-                Predicate drop = dropMessages.get(message.getClass());
+                @SuppressWarnings({ "rawtypes", "unchecked" })
+                final Predicate<Object> drop = (Predicate) dropMessages.get(message.getClass());
                 if (drop == null || !drop.test(message)) {
                     super.handleCommand(message);
                 }

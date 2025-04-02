@@ -32,6 +32,7 @@ import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.spi.StateDelta;
 import org.opendaylight.raft.spi.InputStreamProvider;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.util.AbstractStringIdentifier;
@@ -125,7 +126,7 @@ public final class ExampleActor extends RaftActor
 
     @Override
     protected void applyState(final @Nullable ActorRef clientActor, final @Nullable Identifier identifier,
-            final @Nullable Object data) {
+            final StateDelta data) {
         if (data instanceof KeyValue kv) {
             state.put(kv.getKey(), kv.getValue());
             if (clientActor != null) {

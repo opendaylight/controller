@@ -33,6 +33,7 @@ import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage.CommitSnapshot;
+import org.opendaylight.controller.cluster.raft.spi.StateDelta;
 import org.opendaylight.raft.spi.InputStreamProvider;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.slf4j.Logger;
@@ -137,11 +138,11 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     @Override
-    protected void applyState(final ActorRef clientActor, final Identifier identifier, final Object data) {
-        actorDelegate.applyState(clientActor, identifier, data);
-        LOG.info("{}: applyState called: {}", memberId(), data);
+    protected void applyState(final ActorRef clientActor, final Identifier identifier, final StateDelta delta) {
+        actorDelegate.applyState(clientActor, identifier, delta);
+        LOG.info("{}: applyState called: {}", memberId(), delta);
 
-        state.add(data);
+        state.add(delta);
     }
 
     @Override

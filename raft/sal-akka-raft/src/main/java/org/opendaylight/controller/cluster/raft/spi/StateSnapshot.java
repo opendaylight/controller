@@ -14,7 +14,8 @@ import org.opendaylight.raft.spi.InputStreamProvider;
 import org.opendaylight.yangtools.concepts.Immutable;
 
 /**
- * Marker interface for objects representing a snapshot of RAFT-replicated user state.
+ * Marker interface for objects representing a snapshot of RAFT-replicated user state. A {@link StateSnapshot}
+ * represents a logical sum of all {@link StateDelta}s applied to the journal at a particular point in time.
  */
 @NonNullByDefault
 public interface StateSnapshot extends Immutable {

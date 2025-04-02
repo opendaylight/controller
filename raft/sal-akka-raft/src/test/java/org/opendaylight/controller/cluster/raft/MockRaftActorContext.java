@@ -20,9 +20,9 @@ import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.ActorSystem;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
-import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
+import org.opendaylight.controller.cluster.raft.spi.AbstractStateDelta;
 import org.opendaylight.controller.cluster.raft.spi.TestTermInfoStore;
 import org.opendaylight.raft.api.EntryMeta;
 
@@ -137,7 +137,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         }
     }
 
-    public static final class MockPayload extends Payload {
+    public static final class MockPayload extends AbstractStateDelta {
         @java.io.Serial
         private static final long serialVersionUID = 3121380393130864247L;
 

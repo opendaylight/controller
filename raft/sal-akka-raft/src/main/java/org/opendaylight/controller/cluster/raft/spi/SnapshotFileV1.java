@@ -35,7 +35,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
-import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.CompressionSupport;
@@ -64,9 +63,9 @@ final class SnapshotFileV1 implements SnapshotFile {
     //                  - 0x00 = plain List<ReplicatedLogEntry> \w Serializable
     //                  - 0x80 = LZ4 List<ReplicatedLogEntry> \w Serializable
     //                  Note: each entry has only 'term' and 'data', index is computed
-    //      6   u8      Snapshot.State format:
-    //                  - 0x00 = plain \w Serializable
-    //                  - 0x80 = LZ4 \w Serializable
+    //      6   u8      StateSnapshot format:
+    //                  - 0x00 = plain
+    //                  - 0x80 = LZ4
     //      7   u8      reserved=0x00
     //      8   s64     last index
     //     16   s64     last term
@@ -78,16 +77,16 @@ final class SnapshotFileV1 implements SnapshotFile {
     //     56   <var>   ClusterConfig
     //  <var>   <var>   List<ReplicatedLogEntry>
     //  <SSO>   <var>   Snapshot.State
-    private static final int HEADER_SIZE = 56;
-    private static final int MAGIC_BITS = 0xE34C80B7;
-    private static final byte COMPRESS_MASK = (byte) 0xC0;
+    private static final int HEADER_SIZE       = 56;
+    private static final int MAGIC_BITS        = 0xE34C80B7;
+    private static final byte COMPRESS_MASK    = (byte) 0xC0;
     // 0x30 reserved
-    private static final byte SERDES_MASK   = (byte) 0x03;
-    private static final byte COMPRESS_NONE = (byte) 0x00;
-    private static final byte COMPRESS_LZ4  = (byte) 0x80;
+    private static final byte SERDES_MASK      = (byte) 0x03;
+    private static final byte COMPRESS_NONE    = (byte) 0x00;
+    private static final byte COMPRESS_LZ4     = (byte) 0x80;
     // 0x40 reserved for compress method
     // 0xC0 reserved for compress method
-    private static final byte SERDES_JAVA   = (byte) 0x00;
+    private static final byte SERDES_STATELESS = (byte) 0x00;
     // 0x01 reserved for serdes method
     // 0x02 reserved for serdes method
     // 0x03 reserved for serdes method
@@ -149,12 +148,7 @@ final class SnapshotFileV1 implements SnapshotFile {
             final long limit;
             try (var dos = new DataOutputStream(new UncloseableBufferedOutputStream(Channels.newOutputStream(fc)))) {
                 // Emit server configuration
-                final var si = serverConfig.serverInfo();
-                dos.writeInt(si.size());
-                for (var info : si) {
-                    dos.writeUTF(info.peerId());
-                    dos.writeBoolean(info.isVoting());
-                }
+                ClusterConfig.writer().writeDelta(serverConfig, dos);
 
                 // Emit unapplied entries, if any
                 dos.writeInt(unappliedEntries.size());
@@ -207,8 +201,8 @@ final class SnapshotFileV1 implements SnapshotFile {
 
     private static byte computeFormat(final CompressionSupport compress, final String which) throws IOException {
         return switch (compress) {
-            case NONE -> COMPRESS_NONE | SERDES_JAVA;
-            case LZ4 -> COMPRESS_LZ4 | SERDES_JAVA;
+            case NONE -> COMPRESS_NONE | SERDES_STATELESS;
+            case LZ4 -> COMPRESS_LZ4 | SERDES_STATELESS;
             default -> throw new IOException("Unsupported " + which + " compression " + compress);
         };
     }
@@ -308,7 +302,7 @@ final class SnapshotFileV1 implements SnapshotFile {
     }
 
     private static void selectSerdes(final byte format, final String which) throws IOException {
-        if ((format & SERDES_MASK) != SERDES_JAVA) {
+        if ((format & SERDES_MASK) != SERDES_STATELESS) {
             throw new IOException("Unhandled serialization in " + which + " format " + HF.toHexDigits(format));
         }
     }
@@ -329,16 +323,7 @@ final class SnapshotFileV1 implements SnapshotFile {
             dis.skipNBytes(HEADER_SIZE);
 
             // Note: we do not compress ClusterConfig on purpose, so as to ease debugging in case of any issues
-            final var siCount = dis.readInt();
-            if (siCount < 0) {
-                throw new IOException("Invalid ServerInfo count " + siCount);
-            }
-
-            final var siBuilder = ImmutableList.<ServerInfo>builderWithExpectedSize(siCount);
-            for (int i = 0; i < siCount; i++) {
-                siBuilder.add(new ServerInfo(dis.readUTF(), dis.readBoolean()));
-            }
-            final var clusterConfig = new ClusterConfig(siBuilder.build());
+            final var clusterConfig = ClusterConfig.reader().readDelta(dis);
 
             final var uaCount = dis.readInt();
             if (uaCount < 0) {

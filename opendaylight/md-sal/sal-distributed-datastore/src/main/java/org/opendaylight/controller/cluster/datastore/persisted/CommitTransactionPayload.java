@@ -13,6 +13,7 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.NotSerializableException;
@@ -25,6 +26,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.raft.messages.IdentifiablePayload;
+import org.opendaylight.controller.cluster.raft.spi.StateDelta;
 import org.opendaylight.raft.spi.ByteArray;
 import org.opendaylight.raft.spi.ChunkedOutputStream;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.ReusableStreamReceiver;
@@ -40,15 +42,35 @@ import org.slf4j.LoggerFactory;
  */
 @Beta
 public final class CommitTransactionPayload extends IdentifiablePayload<TransactionIdentifier> implements Serializable {
+    // FIXME: rename to CommitTransactionDelta
     @NonNullByDefault
     public record CandidateTransaction(
             TransactionIdentifier transactionId,
             DataTreeCandidate candidate,
-            NormalizedNodeStreamVersion streamVersion) {
+            NormalizedNodeStreamVersion streamVersion) implements StateDelta {
         public CandidateTransaction {
             requireNonNull(transactionId);
             requireNonNull(candidate);
             requireNonNull(streamVersion);
+        }
+
+        public static Reader<CandidateTransaction> reader() {
+            return reader(ReusableImmutableNormalizedNodeStreamWriter.create());
+        }
+
+        public static Reader<CandidateTransaction> reader(final ReusableStreamReceiver receiver) {
+            return in -> {
+                final var transactionId = TransactionIdentifier.readFrom(in);
+                final var readCandidate = DataTreeCandidateInputOutput.readDataTreeCandidate(in, receiver);
+                return new CandidateTransaction(transactionId, readCandidate.candidate(), readCandidate.version());
+            };
+        }
+
+        public static Writer<CandidateTransaction> writer() {
+            return (delta, out) -> {
+                delta.transactionId.writeTo(out);
+                DataTreeCandidateInputOutput.writeDataTreeCandidate(out, delta.streamVersion, delta.candidate);
+            };
         }
     }
 
@@ -116,12 +138,11 @@ public final class CommitTransactionPayload extends IdentifiablePayload<Transact
         return localCandidate;
     }
 
-    public @NonNull CandidateTransaction getCandidate(final ReusableStreamReceiver receiver) throws IOException {
-        final var in = source.newDataInput();
-        final var transactionId = TransactionIdentifier.readFrom(in);
-        final var readCandidate = DataTreeCandidateInputOutput.readDataTreeCandidate(in, receiver);
-
-        return new CandidateTransaction(transactionId, readCandidate.candidate(), readCandidate.version());
+    @NonNullByDefault
+    public CandidateTransaction getCandidate(final ReusableStreamReceiver receiver) throws IOException {
+        try (var in = new DataInputStream(source.openStream())) {
+            return CandidateTransaction.reader(receiver).readDelta(in);
+        }
     }
 
     @Override
