@@ -35,7 +35,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
-import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.CompressionSupport;
@@ -149,12 +148,7 @@ final class SnapshotFileV1 implements SnapshotFile {
             final long limit;
             try (var dos = new DataOutputStream(new UncloseableBufferedOutputStream(Channels.newOutputStream(fc)))) {
                 // Emit server configuration
-                final var si = serverConfig.serverInfo();
-                dos.writeInt(si.size());
-                for (var info : si) {
-                    dos.writeUTF(info.peerId());
-                    dos.writeBoolean(info.isVoting());
-                }
+                ClusterConfig.writer().writeDelta(serverConfig, dos);
 
                 // Emit unapplied entries, if any
                 dos.writeInt(unappliedEntries.size());
@@ -329,16 +323,7 @@ final class SnapshotFileV1 implements SnapshotFile {
             dis.skipNBytes(HEADER_SIZE);
 
             // Note: we do not compress ClusterConfig on purpose, so as to ease debugging in case of any issues
-            final var siCount = dis.readInt();
-            if (siCount < 0) {
-                throw new IOException("Invalid ServerInfo count " + siCount);
-            }
-
-            final var siBuilder = ImmutableList.<ServerInfo>builderWithExpectedSize(siCount);
-            for (int i = 0; i < siCount; i++) {
-                siBuilder.add(new ServerInfo(dis.readUTF(), dis.readBoolean()));
-            }
-            final var clusterConfig = new ClusterConfig(siBuilder.build());
+            final var clusterConfig = ClusterConfig.reader().readDelta(dis);
 
             final var uaCount = dis.readInt();
             if (uaCount < 0) {

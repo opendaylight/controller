@@ -13,9 +13,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.List;
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.messages.Payload;
+import org.opendaylight.controller.cluster.raft.spi.AbstractRaftDelta;
+import org.opendaylight.controller.cluster.raft.spi.EntryData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,13 +25,14 @@ import org.slf4j.LoggerFactory;
  * RAFT cluster configuration. This payload is always persisted, no matter whether or not we are persisting other data
  * distributed via {@link ReplicatedLogEntry}.
  */
-public final class ClusterConfig extends Payload {
+@NonNullByDefault
+public final class ClusterConfig extends AbstractRaftDelta {
     private static final Logger LOG = LoggerFactory.getLogger(ClusterConfig.class);
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     // FIXME: should be a Map<String, ServerInfo>, but then it really should be something like 'ElectionPolicy'
-    private final @NonNull ImmutableList<ServerInfo> serverInfo;
+    private final ImmutableList<ServerInfo> serverInfo;
 
     private int serializedSize = -1;
 
@@ -41,8 +44,34 @@ public final class ClusterConfig extends Payload {
         this.serverInfo = ImmutableList.copyOf(serverInfo);
     }
 
-    public ClusterConfig(final @NonNull List<ServerInfo> serverInfo) {
+    public ClusterConfig(final List<ServerInfo> serverInfo) {
         this.serverInfo = ImmutableList.copyOf(serverInfo);
+    }
+
+    public static EntryData.Reader<ClusterConfig> reader() {
+        return in -> {
+            final var siCount = in.readInt();
+            if (siCount < 0) {
+                throw new IOException("Invalid ServerInfo count " + siCount);
+            }
+
+            final var siBuilder = ImmutableList.<ServerInfo>builderWithExpectedSize(siCount);
+            for (int i = 0; i < siCount; i++) {
+                siBuilder.add(new ServerInfo(in.readUTF(), in.readBoolean()));
+            }
+            return new ClusterConfig(siBuilder.build());
+        };
+    }
+
+    public static EntryData.Writer<ClusterConfig> writer() {
+        return (delta, out) -> {
+            final var si = delta.serverInfo();
+            out.writeInt(si.size());
+            for (var info : si) {
+                out.writeUTF(info.peerId());
+                out.writeBoolean(info.isVoting());
+            }
+        };
     }
 
     /**
@@ -50,7 +79,7 @@ public final class ClusterConfig extends Payload {
      *
      * @return known {@link ServerInfo} structures
      */
-    public @NonNull List<ServerInfo> serverInfo() {
+    public List<ServerInfo> serverInfo() {
         return serverInfo;
     }
 
@@ -83,7 +112,7 @@ public final class ClusterConfig extends Payload {
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(final @Nullable Object obj) {
         return this == obj || obj instanceof ClusterConfig other && serverInfo.equals(other.serverInfo);
     }
 

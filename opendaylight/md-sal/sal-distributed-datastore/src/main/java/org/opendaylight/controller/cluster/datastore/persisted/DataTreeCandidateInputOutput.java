@@ -166,7 +166,13 @@ public final class DataTreeCandidateInputOutput {
     @VisibleForTesting
     public static void writeDataTreeCandidate(final DataOutput out, final PayloadVersion version,
             final DataTreeCandidate candidate) throws IOException {
-        try (var writer = version.getStreamVersion().newDataOutput(out)) {
+        writeDataTreeCandidate(out, version.getStreamVersion(), candidate);
+    }
+
+    @VisibleForTesting
+    public static void writeDataTreeCandidate(final DataOutput out, final NormalizedNodeStreamVersion streamVersion,
+            final DataTreeCandidate candidate) throws IOException {
+        try (var writer = streamVersion.newDataOutput(out)) {
             writer.writeYangInstanceIdentifier(candidate.getRootPath());
 
             final var node = candidate.getRootNode();
