@@ -24,8 +24,7 @@ import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.EntryMeta;
-import org.opendaylight.raft.spi.InstallableSnapshotSource;
-import org.opendaylight.raft.spi.SnapshotSource;
+import org.opendaylight.raft.spi.InstallableSnapshot;
 import org.opendaylight.raft.spi.StreamSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,6 +97,10 @@ public final class SnapshotManager {
             return lastAppliedTerm;
         }
 
+        public @NonNull EntryInfo lastApplied() {
+            return EntryInfo.of(lastAppliedIndex, lastAppliedTerm);
+        }
+
         public long getLastIndex() {
             return lastIndex;
         }
@@ -106,12 +109,20 @@ public final class SnapshotManager {
             return lastTerm;
         }
 
+        public @NonNull EntryInfo lastEntry() {
+            return EntryInfo.of(lastIndex, lastTerm);
+        }
+
         long getReplicatedToAllIndex() {
             return replicatedToAllIndex;
         }
 
         long getReplicatedToAllTerm() {
             return replicatedToAllTerm;
+        }
+
+        public @NonNull EntryInfo replicatedToAll() {
+            return EntryInfo.of(replicatedToAllIndex, replicatedToAllTerm);
         }
 
         List<ReplicatedLogEntry> getUnAppliedEntries() {
@@ -276,13 +287,13 @@ public final class SnapshotManager {
         final var snapshot = typedCohort.takeSnapshot();
         final var persistence = context.getPersistenceProvider();
 
-        persistence.streamToInstall(out -> typedCohort.writeSnapshot(snapshot, out), (source, ex) -> {
-            if (ex != null) {
+        persistence.streamToInstall(request.lastApplied(), snapshot, typedCohort, (cause, installable) -> {
+            if (cause != null) {
                 task = Idle.INSTANCE;
-                LOG.error("{}: Error creating snapshot", memberId(), ex);
+                LOG.error("{}: Error creating snapshot", memberId(), cause);
                 // FIXME: somehow route to leader, or something ...
             } else {
-                persist(snapshot, source);
+                persist(snapshot, installable);
             }
         });
         return true;
@@ -387,11 +398,11 @@ public final class SnapshotManager {
      * Persists a snapshot.
      *
      * @param snapshotState the snapshot State
-     * @param source the snapshot source
+     * @param installable the {@link InstallableSnapshot}
      */
     @NonNullByDefault
     @VisibleForTesting
-    public void persist(final Snapshot.State snapshotState, final SnapshotSource source) {
+    public void persist(final Snapshot.State snapshotState, final InstallableSnapshot installable) {
         if (!(task instanceof Capture(var lastSeq, var request))) {
             LOG.debug("{}: persist should not be called in state {}", memberId(), task);
             return;
@@ -400,8 +411,7 @@ public final class SnapshotManager {
         persist(lastSeq, request, snapshotState);
 
         if (context.getCurrentBehavior() instanceof AbstractLeader leader) {
-            leader.sendInstallSnapshot(
-                new InstallableSnapshotSource(request.getLastAppliedIndex(), request.getLastAppliedTerm(), source));
+            leader.sendInstallSnapshot(installable);
         }
     }
 

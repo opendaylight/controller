@@ -7,34 +7,19 @@
  */
 package org.opendaylight.controller.cluster.raft.spi;
 
-import com.google.common.annotations.Beta;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SnapshotProtocol;
 import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
-import org.opendaylight.raft.spi.SnapshotSource;
 
 /**
  * This interface provides methods to persist data and is an abstraction of the akka-persistence persistence API.
  */
 // FIXME: find a better name for this interface. It is heavily influenced by Pekko Persistence, most notably the weird
 //        API around snapshots and message deletion -- which assumes the entity requesting it is the subclass itself.
-public interface DataPersistenceProvider {
-    @Beta
-    @NonNullByDefault
-    @FunctionalInterface
-    interface WritableSnapshot {
-
-        void writeTo(OutputStream out) throws IOException;
-    }
-
+public interface DataPersistenceProvider extends SnapshotStore {
     /**
      * Returns whether or not persistence recovery is applicable/enabled.
      *
@@ -42,9 +27,6 @@ public interface DataPersistenceProvider {
      *         may not have anything to be recovered
      */
     boolean isRecoveryApplicable();
-
-    @Beta
-    @Nullable SnapshotSource tryLatestSnapshot() throws IOException;
 
     /**
      * Persists an entry to the applicable journal synchronously.
@@ -75,9 +57,6 @@ public interface DataPersistenceProvider {
      */
     // FIXME: replace with the below, combining the save functionality
     void saveSnapshot(@NonNull Snapshot snapshot);
-
-    void streamToInstall(@NonNull WritableSnapshot snapshot,
-        @NonNull BiConsumer<SnapshotSource, ? super Throwable> callback);
 
     /**
      * Deletes snapshots based on the given criteria.
