@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.raft.spi;
 
 import com.google.common.base.MoreObjects;
 import java.io.IOException;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SnapshotProtocol;
@@ -17,7 +16,8 @@ import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
-import org.opendaylight.raft.spi.SnapshotSource;
+import org.opendaylight.raft.api.EntryInfo;
+import org.opendaylight.raft.spi.InstallableSnapshot;
 
 @NonNullByDefault
 public abstract class ForwardingDataPersistenceProvider implements DataPersistenceProvider {
@@ -30,8 +30,8 @@ public abstract class ForwardingDataPersistenceProvider implements DataPersisten
     }
 
     @Override
-    public @Nullable SnapshotSource tryLatestSnapshot() throws IOException {
-        return delegate().tryLatestSnapshot();
+    public @Nullable SnapshotFile lastSnapshot() throws IOException {
+        return delegate().lastSnapshot();
     }
 
     @Override
@@ -50,9 +50,9 @@ public abstract class ForwardingDataPersistenceProvider implements DataPersisten
     }
 
     @Override
-    public void streamToInstall(final WritableSnapshot snapshot,
-            final BiConsumer<SnapshotSource, ? super Throwable> callback) {
-        delegate().streamToInstall(snapshot, callback);
+    public <T extends StateSnapshot> void streamToInstall(final EntryInfo lastIncluded, final T snapshot,
+            final StateSnapshot.Writer<T> writer, final Callback<InstallableSnapshot> callback) {
+        delegate().streamToInstall(lastIncluded, snapshot, writer, callback);
     }
 
     @Override
