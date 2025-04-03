@@ -19,7 +19,6 @@ import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.raft.spi.CompressionSupport;
 import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
-import org.opendaylight.raft.spi.SnapshotSource;
 
 /**
  * A {@link RaftStorage} backing non-persistent mode of {@link RaftActor} operation. It works with any actor which can
@@ -73,7 +72,7 @@ public final class DisabledRaftStorage extends RaftStorage implements ImmediateD
     }
 
     @Override
-    public @Nullable SnapshotSource tryLatestSnapshot() {
+    public @Nullable SnapshotFile lastSnapshot() {
         // TODO: cache last encountered snapshot along with its lifecycle
         return null;
     }

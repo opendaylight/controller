@@ -24,9 +24,9 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.util.List;
-import java.util.function.BiConsumer;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.persistence.SnapshotSelectionCriteria;
+import org.eclipse.jdt.annotation.NonNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -45,13 +45,14 @@ import org.opendaylight.controller.cluster.raft.persisted.ByteStateSnapshotCohor
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
-import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider.WritableSnapshot;
+import org.opendaylight.controller.cluster.raft.spi.SnapshotStore.Callback;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.raft.spi.ByteArray;
 import org.opendaylight.raft.spi.InstallableSnapshot;
+import org.opendaylight.raft.spi.InstallableSnapshotSource;
 import org.opendaylight.raft.spi.PlainSnapshotSource;
-import org.opendaylight.raft.spi.SnapshotSource;
 
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class SnapshotManagerTest extends AbstractActorTest {
@@ -77,7 +78,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     @Captor
     private ArgumentCaptor<Snapshot> snapshotCaptor;
     @Captor
-    private ArgumentCaptor<BiConsumer<SnapshotSource, ? super Throwable>> callbackCaptor;
+    private ArgumentCaptor<Callback<InstallableSnapshot>> callbackCaptor;
 
     private final TermInfo mockTermInfo = new TermInfo(5, "member5");
 
@@ -322,14 +323,18 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         verify(mockCohort).takeSnapshot();
 
-        final var writableSnapshotCaptor = ArgumentCaptor.forClass(WritableSnapshot.class);
-        verify(mockDataPersistenceProvider).streamToInstall(writableSnapshotCaptor.capture(), callbackCaptor.capture());
+        final var stateSnapshotCaptor = ArgumentCaptor.forClass(StateSnapshot.class);
+        final var lastIncludedCaptor = ArgumentCaptor.forClass(EntryInfo.class);
+        final var writerCaptor = ArgumentCaptor.<StateSnapshot.Writer<@NonNull StateSnapshot>>captor();
+        verify(mockDataPersistenceProvider).streamToInstall(lastIncludedCaptor.capture(), stateSnapshotCaptor.capture(),
+            writerCaptor.capture(), callbackCaptor.capture());
 
         final var baos = new ByteArrayOutputStream();
-        writableSnapshotCaptor.getValue().writeTo(baos);
+        writerCaptor.getValue().writeSnapshot(stateSnapshotCaptor.getValue(), baos);
         final var result = ByteArray.wrap(baos.toByteArray());
 
-        callbackCaptor.getValue().accept(new PlainSnapshotSource(result), null);
+        callbackCaptor.getValue().invoke(null, new InstallableSnapshotSource(lastIncludedCaptor.getValue(),
+            new PlainSnapshotSource(result)));
 
         assertTrue(snapshotManager.isCapturing());
 
@@ -363,9 +368,10 @@ public class SnapshotManagerTest extends AbstractActorTest {
         // when replicatedToAllIndex = -1
         snapshotManager.captureToInstall(EntryInfo.of(9, 6), -1, "xyzzy");
 
-        snapshotManager.persist(ByteState.empty(), new PlainSnapshotSource(ByteArray.wrap(new byte[0])));
+        final var snapshot = new InstallableSnapshotSource(9, 6, new PlainSnapshotSource(ByteArray.wrap(new byte[0])));
 
-        snapshotManager.persist(ByteState.empty(), new PlainSnapshotSource(ByteArray.wrap(new byte[0])));
+        snapshotManager.persist(ByteState.empty(), snapshot);
+        snapshotManager.persist(ByteState.empty(), snapshot);
 
         verify(mockDataPersistenceProvider).saveSnapshot(any(Snapshot.class));
 

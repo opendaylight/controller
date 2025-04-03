@@ -39,7 +39,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.PoisonPill;
@@ -53,6 +52,7 @@ import org.apache.pekko.persistence.SnapshotOffer;
 import org.apache.pekko.protobuf.ByteString;
 import org.apache.pekko.testkit.TestActorRef;
 import org.apache.pekko.testkit.javadsl.TestKit;
+import org.eclipse.jdt.annotation.NonNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -87,15 +87,17 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
-import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider.WritableSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage.CommitSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.ForwardingDataPersistenceProvider;
+import org.opendaylight.controller.cluster.raft.spi.SnapshotStore.Callback;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.raft.spi.ByteArray;
+import org.opendaylight.raft.spi.InstallableSnapshot;
+import org.opendaylight.raft.spi.InstallableSnapshotSource;
 import org.opendaylight.raft.spi.PlainSnapshotSource;
-import org.opendaylight.raft.spi.SnapshotSource;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -578,13 +580,16 @@ public class RaftActorTest extends AbstractActorTest {
             new MockRaftActorContext.MockPayload("foo-4")));
 
         doReturn(snapshotState).when(leaderActor.snapshotCohortDelegate).takeSnapshot();
-        doNothing().when(dataPersistenceProvider).streamToInstall(any(), any());
+        doNothing().when(dataPersistenceProvider).streamToInstall(any(), any(), any(), any());
         leaderActor.getRaftActorContext().getSnapshotManager().captureToInstall(EntryInfo.of(6, 1), 4, "xyzzy");
         verify(leaderActor.snapshotCohortDelegate).takeSnapshot();
 
-        final var snapshotCaptor = ArgumentCaptor.forClass(WritableSnapshot.class);
-        final ArgumentCaptor<BiConsumer<SnapshotSource, ? super Throwable>> callbackCaptor = ArgumentCaptor.captor();
-        verify(dataPersistenceProvider).streamToInstall(snapshotCaptor.capture(), callbackCaptor.capture());
+        final var lastIncludedCaptor = ArgumentCaptor.forClass(EntryInfo.class);
+        final var snapshotCaptor = ArgumentCaptor.forClass(StateSnapshot.class);
+        final var callbackCaptor = ArgumentCaptor.<Callback<InstallableSnapshot>>captor();
+        final var writerCaptor = ArgumentCaptor.<StateSnapshot.Writer<@NonNull StateSnapshot>>captor();
+        verify(dataPersistenceProvider).streamToInstall(lastIncludedCaptor.capture(), snapshotCaptor.capture(),
+            writerCaptor.capture(), callbackCaptor.capture());
         assertTrue(leaderActor.getRaftActorContext().getSnapshotManager().isCapturing());
 
         assertEquals(8, leaderActor.getReplicatedLog().size());
@@ -606,9 +611,9 @@ public class RaftActorTest extends AbstractActorTest {
 
         // Finish snapshot commit
         try (var baos = new ByteArrayOutputStream()) {
-            snapshotCaptor.getValue().writeTo(baos);
-            callbackCaptor.getValue().accept(
-                new PlainSnapshotSource(ByteArray.wrap(baos.toByteArray())), null);
+            writerCaptor.getValue().writeSnapshot(snapshotCaptor.getValue(), baos);
+            callbackCaptor.getValue().invoke(null, new InstallableSnapshotSource(lastIncludedCaptor.getValue(),
+                new PlainSnapshotSource(ByteArray.wrap(baos.toByteArray()))));
         }
 
         // The commit is needed to complete the snapshot creation process
