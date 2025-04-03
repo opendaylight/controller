@@ -9,12 +9,13 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Stopwatch;
-import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
+import org.opendaylight.raft.spi.SizedStreamSource;
+import org.opendaylight.raft.spi.StreamSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +38,7 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
 
     private final int snapshotChunkSize;
     private final String logName;
-    private ByteSource snapshotBytes;
+    private SizedStreamSource snapshotBytes;
     private long offset = INITIAL_OFFSET;
     // the next snapshot chunk is sent only if the replyReceivedForOffset matches offset
     private long replyReceivedForOffset = -1;
@@ -47,7 +48,6 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
     private int totalChunks;
     private int lastChunkHashCode = INITIAL_LAST_CHUNK_HASH_CODE;
     private int nextChunkHashCode = INITIAL_LAST_CHUNK_HASH_CODE;
-    private long snapshotSize;
     private InputStream snapshotInputStream;
     private final Stopwatch chunkTimer = Stopwatch.createUnstarted();
     private byte[] currentChunk = null;
@@ -57,22 +57,19 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
         this.logName = logName;
     }
 
-    void setSnapshotBytes(final ByteSource snapshotBytes) throws IOException {
+    void setSnapshotBytes(final StreamSource snapshotBytes) throws IOException {
         if (this.snapshotBytes != null) {
             return;
         }
 
-        snapshotSize = snapshotBytes.size();
+        this.snapshotBytes = snapshotBytes.toSizedStreamSource();
         snapshotInputStream = snapshotBytes.openStream();
 
-        this.snapshotBytes = snapshotBytes;
-
+        final var snapshotSize = this.snapshotBytes.size();
         totalChunks = (int) (snapshotSize / snapshotChunkSize + (snapshotSize % snapshotChunkSize > 0 ? 1 : 0));
-
-        LOG.debug("{}: Snapshot {} bytes, total chunks to send: {}", logName, snapshotSize, totalChunks);
-
         replyReceivedForOffset = INITIAL_OFFSET;
         chunkIndex = FIRST_CHUNK_INDEX;
+        LOG.debug("{}: Snapshot {} bytes, total chunks to send: {}", logName, snapshotSize, totalChunks);
     }
 
     private long incrementOffset() {
@@ -141,6 +138,7 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
         // markSendStatus() is called with either success or failure
         final var start = incrementOffset();
         if (replyStatus || currentChunk == null) {
+            final var snapshotSize = snapshotBytes.size();
             int size = snapshotChunkSize;
             if (snapshotChunkSize > snapshotSize) {
                 size = (int) snapshotSize;
@@ -151,15 +149,15 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
             currentChunk = new byte[size];
             final var numRead = snapshotInputStream.read(currentChunk);
             if (numRead != size) {
-                throw new IOException(String.format(
-                        "The # of bytes read from the input stream, %d, does not match the expected # %d",
+                throw new IOException(
+                    "The # of bytes read from the input stream, %d, does not match the expected # %d".formatted(
                         numRead, size));
             }
 
             nextChunkHashCode = Arrays.hashCode(currentChunk);
 
-            LOG.debug("{}: Next chunk: total length={}, offset={}, size={}, hashCode={}", logName,
-                    snapshotSize, start, size, nextChunkHashCode);
+            LOG.debug("{}: Next chunk: total length={}, offset={}, size={}, hashCode={}", logName, snapshotSize, start,
+                size, nextChunkHashCode);
         }
 
         return currentChunk;
@@ -220,7 +218,7 @@ public final class LeaderInstallSnapshotState implements AutoCloseable {
                 .add("totalChunks", totalChunks)
                 .add("lastChunkHashCode", lastChunkHashCode)
                 .add("nextChunkHashCode", nextChunkHashCode)
-                .add("snapshotSize", snapshotSize)
+                .add("snapshotSize", snapshotBytes.size())
                 .add("chunkTimer", chunkTimer)
                 .toString();
     }

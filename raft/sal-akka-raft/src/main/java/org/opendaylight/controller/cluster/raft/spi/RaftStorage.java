@@ -75,7 +75,7 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
                 try (var inner = compression.encodeOutput(outer)) {
                     snapshot.writeTo(inner);
                 }
-                return compression.sourceFor(outer.asByteSource()::openStream);
+                return compression.nativeSource(outer.toStreamSource());
             }
         }
     }

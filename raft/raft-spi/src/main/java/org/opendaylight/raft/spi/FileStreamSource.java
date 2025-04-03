@@ -10,6 +10,7 @@ package org.opendaylight.raft.spi;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.io.ByteStreams;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -60,6 +61,11 @@ public record FileStreamSource(Path file, long position, long limit) implements 
             limit);
         is.skipNBytes(position);
         return is;
+    }
+
+    @Override
+    public InputStream openBufferedStream() throws IOException {
+        return new BufferedInputStream(openStream());
     }
 
     @Override

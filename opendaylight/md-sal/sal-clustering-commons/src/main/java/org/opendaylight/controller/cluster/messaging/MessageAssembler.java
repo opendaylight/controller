@@ -14,7 +14,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalNotification;
-import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.concurrent.ExecutionException;
@@ -174,12 +173,11 @@ public final  class MessageAssembler implements AutoCloseable {
 
     private static Object reAssembleMessage(final AssembledMessageState state) throws MessageSliceException {
         try {
-            final ByteSource assembledBytes = state.getAssembledBytes();
-            try (ObjectInputStream in = new ObjectInputStream(assembledBytes.openStream())) {
+            final var assembledBytes = state.getAssembledBytes();
+            try (var in = new ObjectInputStream(assembledBytes.openStream())) {
                 return in.readObject();
             }
-
-        } catch (IOException | ClassNotFoundException  e) {
+        } catch (IOException | ClassNotFoundException e) {
             throw new MessageSliceException(String.format("Error re-assembling bytes for identifier %s",
                     state.getIdentifier()), e);
         }

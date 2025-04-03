@@ -36,7 +36,7 @@ final class CT implements Externalizable {
 
     @Override
     public void writeExternal(final ObjectOutput out) throws IOException {
-        out.writeInt(source.size());
+        out.writeInt(source.legacySize());
         source.copyTo(out);
     }
 

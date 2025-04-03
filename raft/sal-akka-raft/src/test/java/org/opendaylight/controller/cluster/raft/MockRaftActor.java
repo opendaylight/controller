@@ -34,7 +34,7 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage.CommitSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.StateDelta;
-import org.opendaylight.raft.spi.InputStreamProvider;
+import org.opendaylight.raft.spi.StreamSource;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -212,7 +212,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     @Override
-    public MockSnapshotState readSnapshot(final InputStreamProvider source) throws IOException {
+    public MockSnapshotState readSnapshot(final StreamSource source) throws IOException {
         LOG.info("{}: readSnapshot called", memberId());
         return snapshotCohortDelegate.readSnapshot(source);
     }

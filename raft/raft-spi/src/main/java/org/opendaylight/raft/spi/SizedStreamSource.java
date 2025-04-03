@@ -7,10 +7,13 @@
  */
 package org.opendaylight.raft.spi;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
- * An {@link InputStreamProvider} which knows its size. Essentially the moral equivalent of Guava's {@code ByteSource}.
+ * An {@link StreamSource} which knows its size. Essentially the moral equivalent of Guava's {@code ByteSource}.
  */
-public interface SizedStreamSource extends InputStreamProvider {
+@NonNullByDefault
+public non-sealed interface SizedStreamSource extends StreamSource {
     /**
      * Returns the size of this data source, which is to say the number of bytes available for reading from the stream
      * returned by {@link #openStream()}.
@@ -18,4 +21,9 @@ public interface SizedStreamSource extends InputStreamProvider {
      * @return the size of this data source
      */
     long size();
+
+    @Override
+    default SizedStreamSource toSizedStreamSource() {
+        return this;
+    }
 }

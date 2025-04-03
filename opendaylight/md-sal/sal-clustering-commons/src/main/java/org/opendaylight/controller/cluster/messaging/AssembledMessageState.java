@@ -7,13 +7,12 @@
  */
 package org.opendaylight.controller.cluster.messaging;
 
-import com.google.common.base.Preconditions;
-import com.google.common.io.ByteSource;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import org.opendaylight.raft.spi.FileBackedOutputStream;
 import org.opendaylight.raft.spi.FileBackedOutputStreamFactory;
+import org.opendaylight.raft.spi.SizedStreamSource;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,9 +118,11 @@ public class AssembledMessageState implements AutoCloseable {
      * @throws IOException if an error occurs obtaining the assembled bytes
      * @throws IllegalStateException is this instance is not sealed
      */
-    public ByteSource getAssembledBytes() throws IOException {
-        Preconditions.checkState(sealed, "Last slice not received yet");
-        return fileBackedStream.asByteSource();
+    public SizedStreamSource getAssembledBytes() throws IOException {
+        if (!sealed) {
+            throw new IllegalStateException("Last slice not received yet");
+        }
+        return fileBackedStream.toStreamSource();
     }
 
     private void validateSlice(final int sliceIndex, final int lastSliceHashCode) throws MessageSliceException {

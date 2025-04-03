@@ -12,7 +12,6 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 
-import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.InputStream;
 import org.apache.pekko.actor.ActorSystem;
@@ -25,6 +24,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.raft.spi.FileBackedOutputStream;
 import org.opendaylight.raft.spi.FileBackedOutputStreamFactory;
+import org.opendaylight.raft.spi.SizedStreamSource;
 
 /**
  * Abstract base class for messaging tests.
@@ -44,7 +44,7 @@ public class AbstractMessagingTest {
     protected FileBackedOutputStream mockFiledBackedStream;
 
     @Mock
-    protected ByteSource mockByteSource;
+    protected SizedStreamSource mockByteSource;
 
     @Mock
     protected InputStream mockInputStream;
@@ -60,7 +60,7 @@ public class AbstractMessagingTest {
 
         doReturn(mockFiledBackedStream).when(mockFiledBackedStreamFactory).newInstance();
         setupMockFiledBackedStream(mockFiledBackedStream);
-        doReturn(mockByteSource).when(mockFiledBackedStream).asByteSource();
+        doReturn(mockByteSource).when(mockFiledBackedStream).toStreamSource();
 
         doReturn(mockInputStream).when(mockByteSource).openStream();
         doReturn(mockInputStream).when(mockByteSource).openBufferedStream();
@@ -81,6 +81,6 @@ public class AbstractMessagingTest {
         doNothing().when(mockOutputStream).close();
         doNothing().when(mockOutputStream).cleanup();
         doNothing().when(mockOutputStream).flush();
-        doReturn(mockByteSource).when(mockOutputStream).asByteSource();
+        doReturn(mockByteSource).when(mockOutputStream).toStreamSource();
     }
 }

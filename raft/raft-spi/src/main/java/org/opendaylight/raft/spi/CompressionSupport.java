@@ -22,7 +22,7 @@ public enum CompressionSupport {
      */
     NONE {
         @Override
-        public PlainSnapshotSource sourceFor(final InputStreamProvider provider) {
+        public PlainSnapshotSource nativeSource(final StreamSource provider) {
             return new PlainSnapshotSource(provider);
         }
 
@@ -41,7 +41,7 @@ public enum CompressionSupport {
      */
     LZ4 {
         @Override
-        public SnapshotSource sourceFor(final InputStreamProvider provider) {
+        public SnapshotSource nativeSource(final StreamSource provider) {
             return new Lz4SnapshotSource(provider);
         }
 
@@ -64,12 +64,12 @@ public enum CompressionSupport {
     };
 
     /**
-     * Create a new {@link SnapshotSource} backed by an {@link InputStreamProvider}.
+     * Create a new {@link SnapshotSource} backed by an {@link StreamSource}.
      *
      * @param provider the provider
      * @return a {@link SnapshotSource}
      */
-    public abstract SnapshotSource sourceFor(InputStreamProvider provider);
+    public abstract SnapshotSource nativeSource(StreamSource provider);
 
     /**
      * Return an {@link InputStream} which produces plain snapshot bytes based on this format's stream obtained from

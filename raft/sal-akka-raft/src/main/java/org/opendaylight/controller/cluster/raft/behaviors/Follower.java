@@ -38,7 +38,7 @@ import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.api.TermInfo;
-import org.opendaylight.raft.spi.InputStreamProvider;
+import org.opendaylight.raft.spi.SizedStreamSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -638,7 +638,7 @@ public class Follower extends RaftActorBehavior {
         snapshotTracker = null;
 
         LOG.info("{}: Snapshot received from leader: {}", logName, leaderId);
-        final InputStreamProvider snapshotBytes;
+        final SizedStreamSource snapshotBytes;
         try {
             snapshotBytes = tracker.getSnapshotBytes();
         } catch (IOException e) {

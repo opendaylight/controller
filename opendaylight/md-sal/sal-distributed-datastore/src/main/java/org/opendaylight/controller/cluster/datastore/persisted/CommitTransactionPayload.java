@@ -162,7 +162,7 @@ public final class CommitTransactionPayload extends IdentifiablePayload<Transact
 
     @Override
     public int size() {
-        return source.size();
+        return source.legacySize();
     }
 
     /**
