@@ -36,11 +36,11 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
+import org.opendaylight.controller.cluster.raft.MessageCollectorActor;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.TestActorFactory;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
-import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.api.TermInfo;
 import org.slf4j.Logger;
@@ -56,7 +56,7 @@ import scala.concurrent.duration.FiniteDuration;
 public class AbstractLeaderElectionScenarioTest {
     static final int HEARTBEAT_INTERVAL = 50;
 
-    static class MemberActor extends MessageCollectorActor {
+    public static class MemberActor extends MessageCollectorActor {
         private volatile RaftActorBehavior behavior;
         Map<Class<?>, CountDownLatch> messagesReceivedLatches = new ConcurrentHashMap<>();
         Map<Class<?>, Boolean> dropMessagesToBehavior = new ConcurrentHashMap<>();

@@ -18,9 +18,9 @@ import org.apache.pekko.actor.ActorRef;
 import org.junit.After;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.AbstractActorTest;
+import org.opendaylight.controller.cluster.raft.MessageCollectorActor;
 import org.opendaylight.controller.cluster.raft.TestActorFactory;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
-import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 
 public class SyncStatusTrackerTest extends AbstractActorTest {
     protected final TestActorFactory actorFactory = new TestActorFactory(getSystem());

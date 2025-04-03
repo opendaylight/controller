@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft.base.messages;
 
 import org.apache.pekko.actor.ActorRef;
@@ -21,7 +20,8 @@ public class ApplyState implements ControlMessage {
     private final Identifier identifier;
     private final ReplicatedLogEntry replicatedLogEntry;
 
-    public ApplyState(ActorRef clientActor, Identifier identifier, ReplicatedLogEntry replicatedLogEntry) {
+    public ApplyState(final ActorRef clientActor, final Identifier identifier,
+            final ReplicatedLogEntry replicatedLogEntry) {
         this.clientActor = clientActor;
         this.identifier = identifier;
         this.replicatedLogEntry = replicatedLogEntry;

@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.expectMatching;
+import static org.opendaylight.controller.cluster.raft.MessageCollectorActor.expectMatching;
 
 import java.util.List;
 import java.util.Map;

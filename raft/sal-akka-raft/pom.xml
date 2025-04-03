@@ -3,15 +3,19 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.opendaylight.controller</groupId>
-        <artifactId>bundle-parent</artifactId>
+        <artifactId>bnd-parent</artifactId>
         <version>11.0.0-SNAPSHOT</version>
-        <relativePath>../bundle-parent</relativePath>
+        <relativePath>../bnd-parent</relativePath>
     </parent>
 
     <artifactId>sal-akka-raft</artifactId>
-    <packaging>bundle</packaging>
+    <packaging>jar</packaging>
+    <name>${project.artifactId}</name>
+    <description>Pekko-based RAFT implementation</description>
 
     <properties>
+        <!-- FIXME: fix these up and set maven.javadoc.failOnWarnings=true -->
+        <doclint>all,-missing</doclint>
         <odlparent.dependency.enforce>true</odlparent.dependency.enforce>
     </properties>
 
@@ -62,6 +66,10 @@
             <artifactId>util</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.framework</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
         </dependency>
@@ -85,22 +93,6 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
-                        <!--
-                            Needed for Class.forName() we use to instantiate RaftPolicy.
-                            It was originally introduce to deal with serialization issues, so take needs to taken
-                            with testing in OSGi if this is to be removed.
-                         -->
-                        <DynamicImport-Package>*</DynamicImport-Package>
-                    </instructions>
-                </configuration>
-            </plugin>
             <plugin>
                 <artifactId>maven-jar-plugin</artifactId>
                 <executions>

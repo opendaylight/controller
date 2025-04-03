@@ -24,7 +24,7 @@ import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListe
 import org.opendaylight.controller.cluster.notifications.RoleChangeNotification;
 import org.opendaylight.controller.cluster.notifications.RoleChangeNotifier;
 import org.opendaylight.controller.cluster.notifications.RoleChanged;
-import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
+import org.opendaylight.controller.cluster.raft.MessageCollectorActor;
 import org.opendaylight.raft.api.RaftRole;
 
 public class RoleChangeNotifierTest extends AbstractActorTest {
