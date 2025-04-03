@@ -29,7 +29,7 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
     private final RaftActor actor;
 
     PekkoRaftStorage(final RaftActor actor, final CompressionSupport compression, final Configuration streamConfig) {
-        super(compression, streamConfig);
+        super(actor, compression, streamConfig);
         this.actor = requireNonNull(actor);
     }
 

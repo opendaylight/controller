@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft.spi;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.raft.spi.CompressionSupport;
 import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
@@ -17,8 +18,9 @@ import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
  */
 @NonNullByDefault
 public abstract non-sealed class EnabledRaftStorage extends RaftStorage {
-    protected EnabledRaftStorage(final CompressionSupport compression, final Configuration streamConfig) {
-        super(compression, streamConfig);
+    protected EnabledRaftStorage(final ExecuteInSelfActor executeInSelf, final CompressionSupport compression,
+            final Configuration streamConfig) {
+        super(executeInSelf, compression, streamConfig);
     }
 
     @Override

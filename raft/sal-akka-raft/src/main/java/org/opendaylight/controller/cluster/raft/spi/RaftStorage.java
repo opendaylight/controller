@@ -20,6 +20,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BiConsumer;
 import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.opendaylight.raft.spi.CompressionSupport;
 import org.opendaylight.raft.spi.FileBackedOutputStream;
 import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
@@ -51,10 +52,10 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
             try {
                 result = compute();
             } catch (Exception e) {
-                callback.accept(null, e);
+                executeInSelf.executeInSelf(() -> callback.accept(null, e));
                 return;
             }
-            callback.accept(result, null);
+            executeInSelf.executeInSelf(() -> callback.accept(result, null));
         }
 
         abstract @NonNull T compute() throws Exception;
@@ -86,9 +87,13 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
     private final @NonNull CompressionSupport compression;
     private final @NonNull Configuration streamConfig;
 
+    protected final @NonNull ExecuteInSelfActor executeInSelf;
+
     private ExecutorService executor;
 
-    protected RaftStorage(final CompressionSupport compression, final Configuration streamConfig) {
+    protected RaftStorage(final ExecuteInSelfActor executeInSelf, final CompressionSupport compression,
+            final Configuration streamConfig) {
+        this.executeInSelf = requireNonNull(executeInSelf);
         this.compression = requireNonNull(compression);
         this.streamConfig = requireNonNull(streamConfig);
     }

@@ -43,14 +43,12 @@ public final class DisabledRaftStorage extends RaftStorage implements ImmediateD
     }
 
     private final String memberId;
-    private final ExecuteInSelfActor actor;
     private final ActorRef actorRef;
 
-    public DisabledRaftStorage(final String memberId, final ExecuteInSelfActor actor, final ActorRef actorRef,
+    public DisabledRaftStorage(final String memberId, final ExecuteInSelfActor executeInSelf, final ActorRef actorRef,
             final CompressionSupport compression, final Configuration streamConfig) {
-        super(compression, streamConfig);
+        super(executeInSelf, compression, streamConfig);
         this.memberId = requireNonNull(memberId);
-        this.actor = requireNonNull(actor);
         this.actorRef = requireNonNull(actorRef);
     }
 
@@ -71,7 +69,7 @@ public final class DisabledRaftStorage extends RaftStorage implements ImmediateD
 
     @Override
     public ExecuteInSelfActor actor() {
-        return actor;
+        return executeInSelf;
     }
 
     @Override
