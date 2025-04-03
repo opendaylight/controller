@@ -23,7 +23,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * Utilities supporting LZ4 compression and decompression.
  */
 @NonNullByDefault
-public final class Lz4Support {
+final class Lz4Support {
     private static final LZ4Factory LZ4_FACTORY = LZ4Factory.fastestInstance();
     private static final XXHashFactory HASH_FACTORY = XXHashFactory.fastestInstance();
 
@@ -39,7 +39,7 @@ public final class Lz4Support {
      * @return an InputStream
      * @throws IOException if an I/O error occurs
      */
-    public static InputStream newDecompressInputStream(final InputStream in) throws IOException {
+    static InputStream newDecompressInputStream(final InputStream in) throws IOException {
         return new LZ4FrameInputStream(requireNonNull(in), LZ4_FACTORY.safeDecompressor(), HASH_FACTORY.hash32());
     }
 
@@ -55,7 +55,7 @@ public final class Lz4Support {
      * @return an OutputStream
      * @throws IOException if an I/O error occurs
      */
-    public static OutputStream newCompressOutputStream(final OutputStream out, final Lz4BlockSize blockSize)
+    static OutputStream newCompressOutputStream(final OutputStream out, final Lz4BlockSize blockSize)
             throws IOException {
         return newCompressOutputStream(out, blockSize, -1);
     }
@@ -69,7 +69,7 @@ public final class Lz4Support {
      * @return an OutputStream
      * @throws IOException if an I/O error occurs
      */
-    public static OutputStream newCompressOutputStream(final OutputStream out, final Lz4BlockSize blockSize,
+    static OutputStream newCompressOutputStream(final OutputStream out, final Lz4BlockSize blockSize,
             final long knownSize) throws IOException {
         return new LZ4FrameOutputStream(requireNonNull(out), blockSize.libArgument(), knownSize,
             LZ4_FACTORY.fastCompressor(), HASH_FACTORY.hash32(), Bits.BLOCK_INDEPENDENCE);

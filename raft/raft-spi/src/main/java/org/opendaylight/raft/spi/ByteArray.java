@@ -12,7 +12,6 @@ import com.google.common.base.MoreObjects.ToStringHelper;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,13 +21,22 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * The moral equivalent of a {@code byte[]}, but perhaps allocated in chunks so as to be GC-friendly.
  */
 @NonNullByDefault
-public abstract sealed class ByteArray implements InputStreamProvider permits ChunkedByteArray, WrappedByteArray {
+public abstract sealed class ByteArray implements SizedStreamSource permits ChunkedByteArray, WrappedByteArray {
     ByteArray() {
         // Hidden on purpose
     }
 
     @Override
-    public abstract InputStream openStream();
+    public final long size() {
+        return legacySize();
+    }
+
+    /**
+     * Returns the size of this array.
+     *
+     * @return the size of this array
+     */
+    public abstract int legacySize();
 
     /**
      * Copy this array into specified {@link DataOutput}.
@@ -45,14 +53,6 @@ public abstract sealed class ByteArray implements InputStreamProvider permits Ch
      * @throws IOException if an I/O error occurs
      */
     public abstract void copyTo(OutputStream output) throws IOException;
-
-    /**
-     * Returns the size of this array.
-     *
-     * @return the size of this array
-     */
-    // FIXME: we really should integrate with SizedDataSource
-    public abstract int size();
 
     /**
      * Returns the list of chunks.

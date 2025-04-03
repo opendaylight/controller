@@ -9,12 +9,12 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import static org.junit.Assert.assertEquals;
 
-import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Objects;
 import org.junit.Test;
+import org.opendaylight.raft.spi.SizedStreamSource;
 
 public class LeaderInstallSnapshotStateTest {
     // Prime number on purpose
@@ -51,7 +51,7 @@ public class LeaderInstallSnapshotStateTest {
         }
     }
 
-    private static final class MockByteSource extends ByteSource {
+    private static final class MockByteSource implements SizedStreamSource {
         private final long size;
 
         private MockByteSource(final long size) {

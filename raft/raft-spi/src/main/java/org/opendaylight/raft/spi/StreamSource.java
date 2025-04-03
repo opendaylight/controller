@@ -7,7 +7,6 @@
  */
 package org.opendaylight.raft.spi;
 
-import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,12 +15,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 /**
  * Interface capturing the ability to open {@link InputStream}s.
  */
-// FIXME: StreamSource when we are ready to go live with this
-// TODO: decide on definite set of methods
-// TODO: openStream() vs openBufferedStream()?
 @NonNullByDefault
-@FunctionalInterface
-public interface InputStreamProvider {
+public sealed interface StreamSource permits UnsizedStreamSource, SizedStreamSource {
     /**
      * Open an {@link InputStream}.
      *
@@ -31,13 +26,22 @@ public interface InputStreamProvider {
     InputStream openStream() throws IOException;
 
     /**
-     * Open a {@link DataInput}.
+     * Return the {@link SizedStreamSource} equivalent of this {@link StreamSource}.
      *
-     * @return a {@link DataInput}
+     * @return the {@link SizedStreamSource} equivalent of this {@link StreamSource}
      * @throws IOException if an I/O error occurs
      */
-    default DataInput newDataInput() throws IOException {
+    SizedStreamSource toSizedStreamSource() throws IOException;
+
+    /**
+     * Open a {@link DataInputStream}.
+     *
+     * @return a {@link DataInputStream}
+     * @throws IOException if an I/O error occurs
+     */
+    default DataInputStream openDataInput() throws IOException {
+        // FIXME: openBufferedStream()?
         final var stream = openStream();
-        return stream instanceof DataInput dataInput ? dataInput : new DataInputStream(stream);
+        return stream instanceof DataInputStream dis ? dis : new DataInputStream(stream);
     }
 }

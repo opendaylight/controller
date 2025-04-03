@@ -18,7 +18,7 @@ public interface InstallableSnapshot {
     /**
      * Returns the combined {@code lastIncludedIndex}/{@code lastIncludedTerm}.
      *
-     * @return  the combined {@code lastIncludedIndex}/{@code lastIncludedTerm}
+     * @return the combined {@code lastIncludedIndex}/{@code lastIncludedTerm}
      */
     EntryInfo lastIncluded();
 
@@ -27,5 +27,5 @@ public interface InstallableSnapshot {
      *
      * @return the source of byte stream carrying user state snapshot
      */
-    SnapshotSource dataSource();
+    SnapshotSource source();
 }

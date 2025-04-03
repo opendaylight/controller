@@ -362,8 +362,8 @@ final class SnapshotFileV1 implements SnapshotFile {
     }
 
     @Override
-    public SnapshotSource dataSource() {
-        return stateCompress.sourceFor(stateStream);
+    public SnapshotSource source() {
+        return stateCompress.nativeSource(stateStream);
     }
 
     @Override

@@ -40,7 +40,7 @@ final class WrappedByteArray extends ByteArray {
     }
 
     @Override
-    public int size() {
+    public int legacySize() {
         return bytes.length;
     }
 

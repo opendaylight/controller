@@ -47,7 +47,7 @@ final class ChunkedByteArray extends ByteArray {
     }
 
     @Override
-    public int size() {
+    public int legacySize() {
         return size;
     }
 

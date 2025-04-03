@@ -7,8 +7,9 @@
  */
 package org.opendaylight.raft.spi;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.MoreObjects;
-import com.google.common.base.MoreObjects.ToStringHelper;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -16,13 +17,16 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * format of a snapshot.
  */
 @NonNullByDefault
-public abstract sealed class SnapshotSource implements InputStreamProvider
-        permits PlainSnapshotSource, Lz4SnapshotSource {
+public abstract sealed class SnapshotSource permits PlainSnapshotSource, Lz4SnapshotSource {
+    private final StreamSource io;
+
     /**
      * Default constructor.
+     *
+     * @param io the {@link StreamSource} backing this {@link SnapshotSource}.
      */
-    SnapshotSource() {
-        // Hidden in purpose
+    SnapshotSource(final StreamSource io) {
+        this.io = requireNonNull(io);
     }
 
     /**
@@ -32,10 +36,17 @@ public abstract sealed class SnapshotSource implements InputStreamProvider
      */
     public abstract PlainSnapshotSource toPlainSource();
 
-    abstract ToStringHelper addToStringAttributes(ToStringHelper helper);
+    /**
+     * Returns the {@link StreamSource} backing this {@link SnapshotSource}.
+     *
+     * @return the {@link StreamSource} backing this {@link SnapshotSource}.
+     */
+    public final StreamSource io() {
+        return io;
+    }
 
     @Override
     public final String toString() {
-        return MoreObjects.toStringHelper(this).toString();
+        return MoreObjects.toStringHelper(this).add("io", io).toString();
     }
 }

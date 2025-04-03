@@ -13,7 +13,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
@@ -22,7 +21,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
-import com.google.common.io.ByteSource;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.util.List;
@@ -51,6 +49,7 @@ import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider.Writ
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.raft.spi.ByteArray;
+import org.opendaylight.raft.spi.InstallableSnapshot;
 import org.opendaylight.raft.spi.PlainSnapshotSource;
 import org.opendaylight.raft.spi.SnapshotSource;
 
@@ -338,11 +337,12 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         verify(mockReplicatedLog).snapshotPreCommit(9L, 6L);
 
-        final var byteSourceCaptor = ArgumentCaptor.forClass(ByteSource.class);
+        final var installCaptor = ArgumentCaptor.forClass(InstallableSnapshot.class);
+        verify(mockRaftActorBehavior).sendInstallSnapshot(installCaptor.capture());
+        final var install = installCaptor.getValue();
+        assertEquals(EntryInfo.of(9, 6), install.lastIncluded());
 
-        verify(mockRaftActorBehavior).sendInstallSnapshot(eq(9L), eq(6L), byteSourceCaptor.capture());
-
-        assertArrayEquals("state", snapshotState.bytes(), byteSourceCaptor.getValue().read());
+        assertArrayEquals("state", snapshotState.bytes(), install.source().io().openStream().readAllBytes());
     }
 
     @Test
@@ -353,7 +353,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         verify(mockReplicatedLog, never()).snapshotPreCommit(9L, 6L);
 
-        verify(mockRaftActorBehavior, never()).sendInstallSnapshot(anyLong(), anyLong(), any());
+        verify(mockRaftActorBehavior, never()).sendInstallSnapshot(any());
     }
 
     @Test
