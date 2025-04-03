@@ -13,11 +13,11 @@ import java.nio.file.Path;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * An {@link AbstractFileStreamSource} backed by an explicitly-managed file.
+ * An {@link AbstractFileStreamSource} backed by a {@link TransientFile}.
  */
 @NonNullByDefault
-public final class FileStreamSource extends AbstractFileStreamSource {
-    private final Path file;
+public final class TransientFileStreamSource extends AbstractFileStreamSource {
+    private final TransientFile file;
 
     /**
      * Default constructor.
@@ -26,13 +26,13 @@ public final class FileStreamSource extends AbstractFileStreamSource {
      * @param position position of first byte
      * @param limit position of next-to-last byte
      */
-    public FileStreamSource(final Path file, final long position, final long limit) {
+    public TransientFileStreamSource(final TransientFile file, final long position, final long limit) {
         super(position, limit);
         this.file = requireNonNull(file);
     }
 
     @Override
     public Path file() {
-        return file;
+        return file.path();
     }
 }
