@@ -10,9 +10,7 @@ package org.opendaylight.controller.cluster.raft;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.io.ByteSource;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import org.apache.pekko.dispatch.ControlMessage;
 import org.apache.pekko.persistence.SnapshotSelectionCriteria;
@@ -26,8 +24,9 @@ import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.EntryMeta;
-import org.opendaylight.raft.spi.InputStreamProvider;
+import org.opendaylight.raft.spi.InstallableSnapshotSource;
 import org.opendaylight.raft.spi.SnapshotSource;
+import org.opendaylight.raft.spi.StreamSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +47,7 @@ public final class SnapshotManager {
             long term,
             EntryInfo lastEntry,
             // FIXME: SnapshotSource
-            InputStreamProvider snapshot,
+            StreamSource snapshot,
             @Nullable ClusterConfig serverConfig,
             ApplyLeaderSnapshot.Callback callback) {
         public ApplyLeaderSnapshot {
@@ -390,6 +389,7 @@ public final class SnapshotManager {
      * @param snapshotState the snapshot State
      * @param source the snapshot source
      */
+    @NonNullByDefault
     @VisibleForTesting
     public void persist(final Snapshot.State snapshotState, final SnapshotSource source) {
         if (!(task instanceof Capture(var lastSeq, var request))) {
@@ -400,13 +400,8 @@ public final class SnapshotManager {
         persist(lastSeq, request, snapshotState);
 
         if (context.getCurrentBehavior() instanceof AbstractLeader leader) {
-            leader.sendInstallSnapshot(request.getLastAppliedIndex(), request.getLastAppliedTerm(),
-                new ByteSource() {
-                    @Override
-                    public InputStream openStream() throws IOException {
-                        return source.openStream();
-                    }
-                });
+            leader.sendInstallSnapshot(
+                new InstallableSnapshotSource(request.getLastAppliedIndex(), request.getLastAppliedTerm(), source));
         }
     }
 

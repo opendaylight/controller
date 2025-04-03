@@ -12,7 +12,6 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -319,7 +318,7 @@ final class SnapshotFileV1 implements SnapshotFile {
 
     @Override
     public RaftRecovery readRaftRecovery() throws IOException {
-        try (var dis = new DataInputStream(serverStream.openStream())) {
+        try (var dis = serverStream.openDataInput()) {
             dis.skipNBytes(HEADER_SIZE);
 
             // Note: we do not compress ClusterConfig on purpose, so as to ease debugging in case of any issues
@@ -362,8 +361,8 @@ final class SnapshotFileV1 implements SnapshotFile {
     }
 
     @Override
-    public SnapshotSource dataSource() {
-        return stateCompress.sourceFor(stateStream);
+    public SnapshotSource source() {
+        return stateCompress.nativeSource(stateStream);
     }
 
     @Override

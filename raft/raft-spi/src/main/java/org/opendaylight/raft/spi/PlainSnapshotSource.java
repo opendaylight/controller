@@ -7,11 +7,6 @@
  */
 package org.opendaylight.raft.spi;
 
-import static java.util.Objects.requireNonNull;
-
-import com.google.common.base.MoreObjects.ToStringHelper;
-import java.io.IOException;
-import java.io.InputStream;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -19,30 +14,17 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 public final class PlainSnapshotSource extends SnapshotSource {
-    private final InputStreamProvider provider;
-
     /**
      * Default constructor.
      *
-     * @param provider the {@link InputStreamProvider}
+     * @param io the {@link StreamSource} backing this {@link PlainSnapshotSource}.
      */
-
-    public PlainSnapshotSource(final InputStreamProvider provider) {
-        this.provider = requireNonNull(provider);
+    public PlainSnapshotSource(final StreamSource io) {
+        super(io);
     }
 
     @Override
     public PlainSnapshotSource toPlainSource() {
         return this;
-    }
-
-    @Override
-    public InputStream openStream() throws IOException {
-        return provider.openStream();
-    }
-
-    @Override
-    ToStringHelper addToStringAttributes(final ToStringHelper helper) {
-        return helper.add("provider", provider);
     }
 }

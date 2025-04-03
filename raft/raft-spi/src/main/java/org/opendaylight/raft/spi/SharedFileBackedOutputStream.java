@@ -7,8 +7,6 @@
  */
 package org.opendaylight.raft.spi;
 
-import com.google.common.base.Preconditions;
-import com.google.common.io.ByteSource;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -31,7 +29,7 @@ public final class SharedFileBackedOutputStream extends FileBackedOutputStream {
 
     /**
      * Default constructor. Resulting instance uses the given file threshold, and does not reset the data when the
-     * {@link ByteSource} returned by {@link #asByteSource} is finalized.
+     * {@link SizedStreamSource} returned by {@link #toStreamSource()} is finalized.
      *
      * @param config the configuration.
      */
@@ -79,7 +77,9 @@ public final class SharedFileBackedOutputStream extends FileBackedOutputStream {
     @SuppressWarnings("unchecked")
     @Override
     public void cleanup() {
-        Preconditions.checkState(usageCount.get() > 0);
+        if (usageCount.get() <= 0) {
+            throw new IllegalStateException("Usage count underflow");
+        }
 
         if (usageCount.decrementAndGet() == 0) {
             super.cleanup();

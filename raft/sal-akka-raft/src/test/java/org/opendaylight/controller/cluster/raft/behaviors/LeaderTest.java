@@ -19,7 +19,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
-import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.IOException;
 import java.time.Duration;
@@ -39,6 +38,7 @@ import org.apache.pekko.protobuf.ByteString;
 import org.apache.pekko.testkit.TestActorRef;
 import org.apache.pekko.testkit.javadsl.TestKit;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.After;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.messaging.MessageSlice;
@@ -75,6 +75,10 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
 import org.opendaylight.controller.cluster.raft.policy.DefaultRaftPolicy;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.raft.api.TermInfo;
+import org.opendaylight.raft.spi.ByteArray;
+import org.opendaylight.raft.spi.InstallableSnapshot;
+import org.opendaylight.raft.spi.InstallableSnapshotSource;
+import org.opendaylight.raft.spi.PlainSnapshotSource;
 import org.opendaylight.yangtools.concepts.Identifier;
 
 public class LeaderTest extends AbstractLeaderTest<Leader> {
@@ -605,7 +609,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         //update follower timestamp
         leader.markFollowerActive(FOLLOWER_ID);
 
-        final var bs = ByteSource.wrap(toByteString(Map.of("1", "A", "2", "B", "3", "C")).toByteArray());
+        final var bs = ByteArray.wrap(toByteString(Map.of("1", "A", "2", "B", "3", "C")).toByteArray());
         leader.setSnapshot(commitIndex, snapshotTerm, bs);
         LeaderInstallSnapshotState fts = new LeaderInstallSnapshotState(
                 actorContext.getConfigParams().getMaximumMessageSliceSize(), leader.logName);
@@ -856,9 +860,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leader.getFollower(FOLLOWER_ID).setMatchIndex(-1);
         leader.getFollower(FOLLOWER_ID).setNextIndex(0);
 
-        byte[] bytes = toByteString(leadersSnapshot).toByteArray();
-
-        leader.sendInstallSnapshot(lastAppliedIndex, snapshotTerm, ByteSource.wrap(bytes));
+        leader.sendInstallSnapshot(newInstall(lastAppliedIndex, snapshotTerm, toByteString(leadersSnapshot)));
 
         // check if installsnapshot gets called with the correct values.
 
@@ -901,9 +903,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leader.getFollower(FOLLOWER_ID).setMatchIndex(-1);
         leader.getFollower(FOLLOWER_ID).setNextIndex(-1);
 
-        byte[] bytes = toByteString(leadersSnapshot).toByteArray();
-
-        leader.sendInstallSnapshot(lastAppliedIndex, snapshotTerm, ByteSource.wrap(bytes));
+        leader.sendInstallSnapshot(newInstall(lastAppliedIndex, snapshotTerm, toByteString(leadersSnapshot)));
 
         // check if installsnapshot gets called with the correct values.
         final var installSnapshot = MessageCollectorActor.expectFirstMatching(followerActor, InstallSnapshot.class);
@@ -948,10 +948,10 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         actorContext.setTermInfo(new TermInfo(currentTerm, leaderActor.path().toString()));
 
         ByteString bs = toByteString(leadersSnapshot);
-        leader.setSnapshot(commitIndex, snapshotTerm, ByteSource.wrap(bs.toByteArray()));
+        leader.setSnapshot(commitIndex, snapshotTerm, ByteArray.wrap(bs.toByteArray()));
         LeaderInstallSnapshotState fts = new LeaderInstallSnapshotState(
                 actorContext.getConfigParams().getMaximumMessageSliceSize(), leader.logName);
-        fts.setSnapshotBytes(ByteSource.wrap(bs.toByteArray()));
+        fts.setSnapshotBytes(ByteArray.wrap(bs.toByteArray()));
         leader.getFollower(FOLLOWER_ID).setLeaderInstallSnapshotState(fts);
         while (!fts.isLastChunk(fts.getChunkIndex())) {
             fts.getNextChunk();
@@ -1015,7 +1015,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         ByteString bs = toByteString(leadersSnapshot);
 
-        leader.sendInstallSnapshot(commitIndex, snapshotTerm, ByteSource.wrap(bs.toByteArray()));
+        leader.sendInstallSnapshot(newInstall(commitIndex, snapshotTerm, bs));
 
         var installSnapshot = MessageCollectorActor.expectFirstMatching(followerActor, InstallSnapshot.class);
 
@@ -1087,7 +1087,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         ByteString bs = toByteString(leadersSnapshot);
 
         Uninterruptibles.sleepUninterruptibly(Duration.ofSeconds(1));
-        leader.sendInstallSnapshot(commitIndex, snapshotTerm, ByteSource.wrap(bs.toByteArray()));
+        leader.sendInstallSnapshot(newInstall(commitIndex, snapshotTerm, bs));
 
         var installSnapshot = MessageCollectorActor.expectFirstMatching(followerActor, InstallSnapshot.class);
 
@@ -1145,8 +1145,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         log.setSnapshotTerm(snapshotTerm);
         actorContext.setTermInfo(new TermInfo(currentTerm, leaderActor.path().toString()));
 
-        leader.sendInstallSnapshot(commitIndex, snapshotTerm,
-            ByteSource.wrap(toByteString(leadersSnapshot).toByteArray()));
+        leader.sendInstallSnapshot(newInstall(commitIndex, snapshotTerm, toByteString(leadersSnapshot)));
 
         var installSnapshot = MessageCollectorActor.expectFirstMatching(followerActor, InstallSnapshot.class);
         assertEquals(1, installSnapshot.getChunkIndex());
@@ -1167,6 +1166,11 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         assertEquals(OptionalInt.of(hashCode), installSnapshot.getLastChunkHashCode());
     }
 
+    @NonNullByDefault
+    private static InstallableSnapshot newInstall(final long index, final long term, final ByteString bs) {
+        return new InstallableSnapshotSource(index, term, new PlainSnapshotSource(ByteArray.wrap(bs.toByteArray())));
+    }
+
     @Test
     public void testLeaderInstallSnapshotState() throws IOException {
         logStart("testLeaderInstallSnapshotState");
@@ -1180,7 +1184,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         byte[] barray = bs.toByteArray();
 
         LeaderInstallSnapshotState fts = new LeaderInstallSnapshotState(50, "test");
-        fts.setSnapshotBytes(ByteSource.wrap(barray));
+        fts.setSnapshotBytes(ByteArray.wrap(barray));
 
         assertEquals(bs.size(), barray.length);
 

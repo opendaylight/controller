@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
-import org.opendaylight.raft.spi.InputStreamProvider;
+import org.opendaylight.raft.spi.StreamSource;
 
 /**
  * {@link RaftActorSnapshotCohort} for {@link ByteState}.
@@ -24,7 +24,7 @@ public interface ByteStateSnapshotCohort extends RaftActorSnapshotCohort<ByteSta
     }
 
     @Override
-    default ByteState readSnapshot(final InputStreamProvider source) throws IOException {
+    default ByteState readSnapshot(final StreamSource source) throws IOException {
         return ByteState.reader().readSnapshot(source);
     }
 

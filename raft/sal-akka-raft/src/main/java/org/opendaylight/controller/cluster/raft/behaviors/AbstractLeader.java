@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.UncheckedIOException;
@@ -52,7 +51,11 @@ import org.opendaylight.controller.cluster.raft.messages.UnInitializedFollowerSn
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.api.TermInfo;
+import org.opendaylight.raft.spi.InstallableSnapshot;
+import org.opendaylight.raft.spi.InstallableSnapshotSource;
+import org.opendaylight.raft.spi.PlainSnapshotSource;
 import org.opendaylight.raft.spi.SharedFileBackedOutputStream;
+import org.opendaylight.raft.spi.StreamSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,13 +90,6 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         }
     }
 
-    @NonNullByDefault
-    private record SnapshotHolder(long index, long term, ByteSource bytes) {
-        public SnapshotHolder {
-            requireNonNull(bytes);
-        }
-    }
-
     private static final Logger LOG = LoggerFactory.getLogger(AbstractLeader.class);
 
     private final Map<String, FollowerLogInformation> followerToLog = new HashMap<>();
@@ -115,7 +111,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
     private final MessageSlicer appendEntriesMessageSlicer;
 
     private Cancellable heartbeatSchedule = null;
-    private SnapshotHolder snapshotHolder = null;
+    private InstallableSnapshot snapshotHolder = null;
     private int minReplicationCount;
 
     AbstractLeader(final RaftActorContext context, final RaftRole state,
@@ -585,7 +581,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         }
 
         // this was the last chunk reply
-        final long followerMatchIndex = snapshotHolder.index;
+        final long followerMatchIndex = snapshotHolder.lastIncluded().index();
         followerLogInfo.setMatchIndex(followerMatchIndex);
         followerLogInfo.setNextIndex(followerMatchIndex + 1);
         followerLogInfo.clearLeaderInstallSnapshotState();
@@ -905,10 +901,9 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         return nextIndex == -1 || !replLog.isPresent(nextIndex) && replLog.isInSnapshot(nextIndex);
     }
 
-    // FIXME: use SnapshotSource
     @NonNullByDefault
-    public final void sendInstallSnapshot(final long index, final long term, final ByteSource bytes) {
-        setSnapshot(index, term, bytes);
+    public final void sendInstallSnapshot(final InstallableSnapshot snapshot) {
+        snapshotHolder = requireNonNull(snapshot);
 
         LOG.debug("{}: sendInstallSnapshot", logName);
         for (var entry : followerToLog.entrySet()) {
@@ -937,7 +932,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
      * Sends a snapshot chunk to a given follower. InstallSnapshot should qualify as a heartbeat too.
      */
     private void sendSnapshotChunk(final ActorSelection followerActor, final FollowerLogInformation followerLogInfo,
-            final SnapshotHolder snapshot) {
+            final InstallableSnapshot snapshot) {
         var installSnapshotState = followerLogInfo.getInstallSnapshotState();
         if (installSnapshotState == null) {
             installSnapshotState = new LeaderInstallSnapshotState(
@@ -948,7 +943,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         final byte[] data;
         try {
             // Ensure the snapshot bytes are set - this is a no-op.
-            installSnapshotState.setSnapshotBytes(snapshot.bytes);
+            installSnapshotState.setSnapshotBytes(snapshot.source().io());
 
             if (installSnapshotState.canSendNextChunk()) {
                 data = installSnapshotState.getNextChunk();
@@ -975,7 +970,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         followerActor.tell(
             new InstallSnapshot(currentTerm(), memberId(),
                 // snapshot term/index inforation
-                snapshot.index, snapshot.term,
+                snapshot.lastIncluded().index(), snapshot.lastIncluded().term(),
                 // this chunk and its indexing info and previous hash code
                 data, chunkIndex, totalChunks, OptionalInt.of(installSnapshotState.getLastChunkHashCode()),
                 // server configuration, if present
@@ -1105,8 +1100,8 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
 
     @NonNullByDefault
     @VisibleForTesting
-    final void setSnapshot(final long index, final long term, final ByteSource bytes) {
-        snapshotHolder = new SnapshotHolder(index, term, bytes);
+    final void setSnapshot(final long index, final long term, final StreamSource source) {
+        snapshotHolder = new InstallableSnapshotSource(index, term, new PlainSnapshotSource(source));
     }
 
     @VisibleForTesting

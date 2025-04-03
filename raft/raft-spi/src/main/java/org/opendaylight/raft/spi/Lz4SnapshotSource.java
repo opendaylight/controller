@@ -7,11 +7,6 @@
  */
 package org.opendaylight.raft.spi;
 
-import static java.util.Objects.requireNonNull;
-
-import com.google.common.base.MoreObjects.ToStringHelper;
-import java.io.IOException;
-import java.io.InputStream;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -19,29 +14,17 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 public final class Lz4SnapshotSource extends SnapshotSource {
-    private final InputStreamProvider provider;
-
     /**
      * Default constructor.
      *
-     * @param provider the {@link InputStreamProvider}
+     * @param io the {@link StreamSource} backing this {@link Lz4SnapshotSource}.
      */
-    public Lz4SnapshotSource(final InputStreamProvider provider) {
-        this.provider = requireNonNull(provider);
-    }
-
-    @Override
-    public InputStream openStream() throws IOException {
-        return provider.openStream();
+    public Lz4SnapshotSource(final StreamSource io) {
+        super(io);
     }
 
     @Override
     public PlainSnapshotSource toPlainSource() {
-        return new PlainSnapshotSource(new AdaptingInputStreamProvider(provider, Lz4Support::newDecompressInputStream));
-    }
-
-    @Override
-    ToStringHelper addToStringAttributes(final ToStringHelper helper) {
-        return helper.add("provider", provider);
+        return new PlainSnapshotSource(new UnsizedDecompressLz4(io()));
     }
 }

@@ -29,7 +29,7 @@ final class LZ4InputOutputStreamSupport extends InputOutputStreamFactory {
     }
 
     @Override
-    public InputStream createInputStream(final InputStreamProvider input) throws IOException {
+    public InputStream createInputStream(final StreamSource input) throws IOException {
         final var in = input.openStream();
         try {
             return Lz4Support.newDecompressInputStream(in);

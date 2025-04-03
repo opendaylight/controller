@@ -14,7 +14,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.opendaylight.raft.spi.InputStreamProvider;
+import org.opendaylight.raft.spi.StreamSource;
 
 /**
  * {@link RaftActorSnapshotCohort} corresponding to {@link MockSnapshotState}.
@@ -39,7 +39,7 @@ public interface MockRaftActorSnapshotCohort extends RaftActorSnapshotCohort<Moc
     }
 
     @Override
-    default MockSnapshotState readSnapshot(final InputStreamProvider source) throws IOException {
+    default MockSnapshotState readSnapshot(final StreamSource source) throws IOException {
         try (var ois = new ObjectInputStream(source.openStream())) {
             return assertInstanceOf(MockSnapshotState.class, ois.readObject());
         } catch (ClassNotFoundException e) {

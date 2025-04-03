@@ -7,12 +7,12 @@
  */
 package org.opendaylight.controller.cluster.messaging;
 
-import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.function.Consumer;
 import org.opendaylight.raft.spi.FileBackedOutputStream;
+import org.opendaylight.raft.spi.SizedStreamSource;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +36,7 @@ public class SlicedMessageState<T> implements AutoCloseable {
     private final int messageSliceSize;
     private final FileBackedOutputStream fileBackedStream;
     private final T replyTarget;
-    private final ByteSource messageBytes;
+    private final SizedStreamSource messageBytes;
     private final int totalSlices;
     private final long totalMessageSize;
     private final int maxRetries;
@@ -73,7 +73,7 @@ public class SlicedMessageState<T> implements AutoCloseable {
         this.onFailureCallback = onFailureCallback;
         this.logContext = logContext;
 
-        messageBytes = fileBackedStream.asByteSource();
+        messageBytes = fileBackedStream.toStreamSource();
         totalMessageSize = messageBytes.size();
         messageInputStream = messageBytes.openStream();
 
