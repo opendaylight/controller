@@ -22,6 +22,7 @@ import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider.StreamToInstall;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.EntryMeta;
 import org.opendaylight.raft.spi.InstallableSnapshotSource;
@@ -276,13 +277,14 @@ public final class SnapshotManager {
         final var snapshot = typedCohort.takeSnapshot();
         final var persistence = context.getPersistenceProvider();
 
-        persistence.streamToInstall(out -> typedCohort.writeSnapshot(snapshot, out), (source, ex) -> {
-            if (ex != null) {
-                task = Idle.INSTANCE;
-                LOG.error("{}: Error creating snapshot", memberId(), ex);
-                // FIXME: somehow route to leader, or something ...
-            } else {
-                persist(snapshot, source);
+        persistence.streamToInstall(snapshot, typedCohort, result -> {
+            switch (result) {
+                case StreamToInstall.Success(var source) -> persist(snapshot, source);
+                case StreamToInstall.Failure(var cause) -> {
+                    task = Idle.INSTANCE;
+                    LOG.error("{}: Error creating snapshot", memberId(), cause);
+                    // FIXME: somehow route to leader, or something ...
+                }
             }
         });
         return true;

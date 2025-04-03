@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.cluster.raft.spi;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.Beta;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SnapshotProtocol;
@@ -29,10 +29,18 @@ import org.opendaylight.raft.spi.SnapshotSource;
 public interface DataPersistenceProvider {
     @Beta
     @NonNullByDefault
-    @FunctionalInterface
-    interface WritableSnapshot {
+    sealed interface StreamToInstall {
+        record Success(SnapshotSource source) implements StreamToInstall {
+            public Success {
+                requireNonNull(source);
+            }
+        }
 
-        void writeTo(OutputStream out) throws IOException;
+        record Failure(Exception cause) implements StreamToInstall {
+            public Failure {
+                requireNonNull(cause);
+            }
+        }
     }
 
     /**
@@ -76,8 +84,9 @@ public interface DataPersistenceProvider {
     // FIXME: replace with the below, combining the save functionality
     void saveSnapshot(@NonNull Snapshot snapshot);
 
-    void streamToInstall(@NonNull WritableSnapshot snapshot,
-        @NonNull BiConsumer<SnapshotSource, ? super Throwable> callback);
+    @NonNullByDefault
+    <T extends StateSnapshot> void streamToInstall(T snapshot, StateSnapshot.Writer<T> writer,
+            Consumer<StreamToInstall> callback);
 
     /**
      * Deletes snapshots based on the given criteria.
