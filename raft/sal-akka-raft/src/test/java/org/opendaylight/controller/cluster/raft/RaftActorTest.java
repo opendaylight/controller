@@ -87,7 +87,6 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
-import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider.WritableSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage.CommitSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.ForwardingDataPersistenceProvider;
 import org.opendaylight.raft.api.EntryInfo;
@@ -578,7 +577,7 @@ public class RaftActorTest extends AbstractActorTest {
             new MockRaftActorContext.MockPayload("foo-4")));
 
         doReturn(snapshotState).when(leaderActor.snapshotCohortDelegate).takeSnapshot();
-        doNothing().when(dataPersistenceProvider).streamToInstall(any(), any());
+        doNothing().when(dataPersistenceProvider).streamToInstall(any(), any(), any());
         leaderActor.getRaftActorContext().getSnapshotManager().captureToInstall(EntryInfo.of(6, 1), 4, "xyzzy");
         verify(leaderActor.snapshotCohortDelegate).takeSnapshot();
 

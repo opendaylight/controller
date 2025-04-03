@@ -12,14 +12,14 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.annotations.VisibleForTesting;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.ImmediateDataPersistenceProvider;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 import org.opendaylight.raft.spi.ByteArray;
 import org.opendaylight.raft.spi.PlainSnapshotSource;
-import org.opendaylight.raft.spi.SnapshotSource;
 
 @VisibleForTesting
 @NonNullByDefault
@@ -45,17 +45,20 @@ public final class TestDataProvider implements ImmediateDataPersistenceProvider 
     }
 
     @Override
-    public void streamToInstall(final WritableSnapshot snapshot,
-            final BiConsumer<SnapshotSource, ? super Throwable> callback) {
+    public <T extends StateSnapshot> void streamToInstall(final T snapshot, final StateSnapshot.Writer<T> writer,
+            final Consumer<StreamToInstall> callback) {
         final byte[] bytes;
         try (var baos = new ByteArrayOutputStream()) {
-            snapshot.writeTo(baos);
+            writer.writeSnapshot(snapshot, baos);
             bytes = baos.toByteArray();
         } catch (IOException e) {
-            actor.executeInSelf(() -> callback.accept(null, e));
+            final var result = new StreamToInstall.Failure(e);
+            actor.executeInSelf(() -> callback.accept(result));
             return;
         }
-        actor.executeInSelf(() -> callback.accept(new PlainSnapshotSource(ByteArray.wrap(bytes)), null));
+
+        final var result = new StreamToInstall.Success(new PlainSnapshotSource(ByteArray.wrap(bytes)));
+        actor.executeInSelf(() -> callback.accept(result));
     }
 
     public void setActor(final ExecuteInSelfActor actor) {
