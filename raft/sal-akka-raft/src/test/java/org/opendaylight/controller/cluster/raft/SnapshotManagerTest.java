@@ -24,7 +24,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.util.List;
-import java.util.function.BiConsumer;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.junit.After;
@@ -45,13 +44,13 @@ import org.opendaylight.controller.cluster.raft.persisted.ByteStateSnapshotCohor
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
-import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider.WritableSnapshot;
+import org.opendaylight.controller.cluster.raft.spi.SnapshotStore.Callback;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.raft.spi.ByteArray;
 import org.opendaylight.raft.spi.InstallableSnapshot;
 import org.opendaylight.raft.spi.PlainSnapshotSource;
-import org.opendaylight.raft.spi.SnapshotSource;
 
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class SnapshotManagerTest extends AbstractActorTest {
@@ -77,7 +76,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     @Captor
     private ArgumentCaptor<Snapshot> snapshotCaptor;
     @Captor
-    private ArgumentCaptor<BiConsumer<SnapshotSource, ? super Throwable>> callbackCaptor;
+    private ArgumentCaptor<Callback<InstallableSnapshot>> callbackCaptor;
 
     private final TermInfo mockTermInfo = new TermInfo(5, "member5");
 
@@ -322,11 +321,11 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         verify(mockCohort).takeSnapshot();
 
-        final var writableSnapshotCaptor = ArgumentCaptor.forClass(WritableSnapshot.class);
-        verify(mockDataPersistenceProvider).streamToInstall(writableSnapshotCaptor.capture(), callbackCaptor.capture());
+        final var stateSnapshotCaptor = ArgumentCaptor.forClass(StateSnapshot.class);
+        verify(mockDataPersistenceProvider).streamToInstall(stateSnapshotCaptor.capture(), callbackCaptor.capture());
 
         final var baos = new ByteArrayOutputStream();
-        writableSnapshotCaptor.getValue().writeTo(baos);
+        stateSnapshotCaptor.getValue().writeTo(baos);
         final var result = ByteArray.wrap(baos.toByteArray());
 
         callbackCaptor.getValue().accept(new PlainSnapshotSource(result), null);
