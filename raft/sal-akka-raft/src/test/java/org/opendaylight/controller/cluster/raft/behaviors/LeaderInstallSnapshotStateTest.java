@@ -67,11 +67,6 @@ public class LeaderInstallSnapshotStateTest {
         public InputStream openStream() {
             return new MockInputStream(size);
         }
-
-        @Override
-        public InputStream openBufferedStream() {
-            return openStream();
-        }
     }
 
     private static final class MockInputStream extends InputStream {

@@ -29,12 +29,7 @@ record UnsizedDecompressLz4(StreamSource compressed) implements UnsizedStreamSou
     }
 
     @Override
-    public InputStream openBufferedStream() throws IOException {
-        return openStream();
-    }
-
-    @Override
-    public SizedStreamSource toSizedStreamSource() throws IOException {
+    public SizedDecompressLz4 toSizedStreamSource() throws IOException {
         final long size;
         try (var is = openStream()) {
             size = is.transferTo(OutputStream.nullOutputStream());

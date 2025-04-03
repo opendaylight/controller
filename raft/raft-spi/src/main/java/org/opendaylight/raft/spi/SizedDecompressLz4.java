@@ -18,9 +18,4 @@ record SizedDecompressLz4(UnsizedDecompressLz4 unsized, long size) implements Si
     public InputStream openStream() throws IOException {
         return unsized.openStream();
     }
-
-    @Override
-    public InputStream openBufferedStream() throws IOException {
-        return unsized.openBufferedStream();
-    }
 }
