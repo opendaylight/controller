@@ -33,7 +33,7 @@ import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.StateDelta;
-import org.opendaylight.raft.spi.InputStreamProvider;
+import org.opendaylight.raft.spi.StreamSource;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.util.AbstractStringIdentifier;
 import org.slf4j.Logger;
@@ -198,7 +198,7 @@ public final class ExampleActor extends RaftActor
     }
 
     @Override
-    public MapState readSnapshot(final InputStreamProvider source) throws IOException {
+    public MapState readSnapshot(final StreamSource source) throws IOException {
         return new MapState(SerializationUtils.<Map<String, String>>deserialize(source.openStream().readAllBytes()));
     }
 

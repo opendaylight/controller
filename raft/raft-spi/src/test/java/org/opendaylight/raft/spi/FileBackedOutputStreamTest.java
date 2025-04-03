@@ -52,11 +52,11 @@ class FileBackedOutputStreamTest {
 
             assertEquals(expected.length, fbos.getCount());
             assertNull(findTempFileName(tempDir));
-            assertEquals(expected.length, fbos.asByteSource().size());
+            assertEquals(expected.length, fbos.toStreamSource().size());
 
             // Read bytes twice.
-            assertArrayEquals(expected, fbos.asByteSource().read());
-            assertArrayEquals(expected, fbos.asByteSource().read());
+            assertArrayEquals(expected, fbos.toStreamSource().openStream().readAllBytes());
+            assertArrayEquals(expected, fbos.toStreamSource().openStream().readAllBytes());
 
             fbos.cleanup();
         }
@@ -79,10 +79,10 @@ class FileBackedOutputStreamTest {
             fbos.write(bytes, 13, bytes.length - 13);
 
             assertEquals(tempFileName, findTempFileName(tempDir));
-            assertEquals(bytes.length, fbos.asByteSource().size());
+            assertEquals(bytes.length, fbos.toStreamSource().size());
 
-            try (var inputStream = fbos.asByteSource().openStream()) {
-                assertArrayEquals(bytes, fbos.asByteSource().read());
+            try (var inputStream = fbos.toStreamSource().openStream()) {
+                assertArrayEquals(bytes, fbos.toStreamSource().openStream().readAllBytes());
 
                 // FIXME: assert hex string
                 final var inBytes = new byte[bytes.length];
@@ -114,8 +114,8 @@ class FileBackedOutputStreamTest {
 
             assertNotNull(findTempFileName(tempDir));
 
-            assertEquals(bytes.length, fbos.asByteSource().size());
-            assertArrayEquals(bytes, fbos.asByteSource().read());
+            assertEquals(bytes.length, fbos.toStreamSource().size());
+            assertArrayEquals(bytes, fbos.toStreamSource().openStream().readAllBytes());
         }
 
         LOG.info("testFileThresholdReachedWithWriteByte ending");
@@ -129,7 +129,7 @@ class FileBackedOutputStreamTest {
             fbos.write(bytes);
 
             assertNull(findTempFileName(tempDir));
-            assertEquals(bytes.length, fbos.asByteSource().size());
+            assertEquals(bytes.length, fbos.toStreamSource().size());
 
             // Should throw IOException after call to asByteSource.
             assertThrows(IOException.class, () -> fbos.write(1));

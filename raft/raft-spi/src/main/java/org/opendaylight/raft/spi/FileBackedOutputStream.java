@@ -7,7 +7,6 @@
  */
 package org.opendaylight.raft.spi;
 
-import com.google.common.io.ByteSource;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -69,13 +68,13 @@ public class FileBackedOutputStream extends OutputStream {
     @GuardedBy("this")
     private Cleanable fileCleanup;
     @GuardedBy("this")
-    private ByteSource source;
+    private SizedStreamSource source;
     @GuardedBy("this")
     private long count;
 
     /**
      * Default constructor. Resulting instance uses the given file threshold, and does not reset the data when the
-     * {@link ByteSource} returned by {@link #asByteSource} is finalized.
+     * {@link SizedStreamSource} returned by {@link #toStreamSource()} is finalized.
      *
      * @param config the {@link Configuration} to use
      */
@@ -88,27 +87,26 @@ public class FileBackedOutputStream extends OutputStream {
     }
 
     /**
-     * Returns a readable {@link ByteSource} view of the data that has been written to this stream. This stream is
-     * closed and further attempts to write to it will result in an IOException.
+     * Returns a readable {@link SizedStreamSource} view of the data that has been written to this stream. This stream
+     * is closed and further attempts to write to it will result in an IOException.
      *
-     * @return a ByteSource instance
+     * @return a SizedStreamSource instance
      * @throws IOException if close fails
      */
-    // FIXME: toInputStreamProvider()
-    public synchronized @NonNull ByteSource asByteSource() throws IOException {
+    public synchronized @NonNull SizedStreamSource toStreamSource() throws IOException {
         close();
 
         var local = source;
         if (local == null) {
             // Note: needs to retain reference to 'this' so as to keep the cleaner being invoked. we really should
             //       have that taken careof by having a live object encapsulating the file
-            // FIXME: for the non-file case we would just use ByteSource.wrap()
-            source = local = new ByteSource() {
+            source = local = new SizedStreamSource() {
                 @Override
                 public InputStream openStream() throws IOException {
                     synchronized (FileBackedOutputStream.this) {
-                        return file != null ? Files.newInputStream(file) :
-                            new ByteArrayInputStream(memory.buf(), 0, memory.count());
+                        return file != null ? Files.newInputStream(file)
+                            // FIXME: we would be able to use ByteArray.wrap() or similar
+                            : new ByteArrayInputStream(memory.buf(), 0, memory.count());
                     }
                 }
 

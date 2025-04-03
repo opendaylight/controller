@@ -22,7 +22,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * The moral equivalent of a {@code byte[]}, but perhaps allocated in chunks so as to be GC-friendly.
  */
 @NonNullByDefault
-public abstract sealed class ByteArray implements InputStreamProvider permits ChunkedByteArray, WrappedByteArray {
+public abstract sealed class ByteArray implements StreamSource permits ChunkedByteArray, WrappedByteArray {
     ByteArray() {
         // Hidden on purpose
     }

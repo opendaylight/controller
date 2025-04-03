@@ -11,28 +11,19 @@ import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * An {@link InputStreamProvider} backed by a file.
- *
- * @param path the file path
+ * An {@link StreamSource} performing transparent LZ4 decompression of a backing {@link StreamSource}.
  */
 @NonNullByDefault
-public record FileInputStreamProvider(Path path) implements InputStreamProvider {
-    /**
-     * Default constructor.
-     *
-     * @param path the file path
-     */
-    public FileInputStreamProvider {
-        requireNonNull(path);
+record DecompressLz4Source(StreamSource compressed) implements StreamSource {
+    DecompressLz4Source {
+        requireNonNull(compressed);
     }
 
     @Override
     public InputStream openStream() throws IOException {
-        return Files.newInputStream(path);
+        return Lz4Support.newDecompressInputStream(compressed.openStream());
     }
 }

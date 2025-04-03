@@ -8,9 +8,9 @@
 package org.opendaylight.raft.spi;
 
 /**
- * An {@link InputStreamProvider} which knows its size. Essentially the moral equivalent of Guava's {@code ByteSource}.
+ * An {@link StreamSource} which knows its size. Essentially the moral equivalent of Guava's {@code ByteSource}.
  */
-public interface SizedStreamSource extends InputStreamProvider {
+public interface SizedStreamSource extends StreamSource {
     /**
      * Returns the size of this data source, which is to say the number of bytes available for reading from the stream
      * returned by {@link #openStream()}.

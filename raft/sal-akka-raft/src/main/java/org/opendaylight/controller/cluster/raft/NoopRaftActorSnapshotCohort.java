@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.raft;
 import java.io.OutputStream;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
-import org.opendaylight.raft.spi.InputStreamProvider;
+import org.opendaylight.raft.spi.StreamSource;
 
 /**
  * RaftActorSnapshotCohort implementation that does nothing.
@@ -46,7 +46,7 @@ public final class NoopRaftActorSnapshotCohort implements RaftActorSnapshotCohor
     }
 
     @Override
-    public EmptyState readSnapshot(final InputStreamProvider source) {
+    public EmptyState readSnapshot(final StreamSource source) {
         // XXX: we really should be reading the bytes
         return takeSnapshot();
     }

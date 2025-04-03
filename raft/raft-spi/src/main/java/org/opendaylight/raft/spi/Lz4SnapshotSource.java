@@ -19,14 +19,14 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 public final class Lz4SnapshotSource extends SnapshotSource {
-    private final InputStreamProvider provider;
+    private final StreamSource provider;
 
     /**
      * Default constructor.
      *
-     * @param provider the {@link InputStreamProvider}
+     * @param provider the {@link StreamSource}
      */
-    public Lz4SnapshotSource(final InputStreamProvider provider) {
+    public Lz4SnapshotSource(final StreamSource provider) {
         this.provider = requireNonNull(provider);
     }
 
@@ -37,7 +37,7 @@ public final class Lz4SnapshotSource extends SnapshotSource {
 
     @Override
     public PlainSnapshotSource toPlainSource() {
-        return new PlainSnapshotSource(new AdaptingInputStreamProvider(provider, Lz4Support::newDecompressInputStream));
+        return new PlainSnapshotSource(new DecompressLz4Source(provider));
     }
 
     @Override

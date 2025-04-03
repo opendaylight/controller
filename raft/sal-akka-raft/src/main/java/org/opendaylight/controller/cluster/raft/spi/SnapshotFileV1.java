@@ -363,7 +363,7 @@ final class SnapshotFileV1 implements SnapshotFile {
 
     @Override
     public SnapshotSource dataSource() {
-        return stateCompress.sourceFor(stateStream);
+        return stateCompress.nativeSource(stateStream);
     }
 
     @Override

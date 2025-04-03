@@ -26,8 +26,8 @@ import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.EntryMeta;
-import org.opendaylight.raft.spi.InputStreamProvider;
 import org.opendaylight.raft.spi.SnapshotSource;
+import org.opendaylight.raft.spi.StreamSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +48,7 @@ public final class SnapshotManager {
             long term,
             EntryInfo lastEntry,
             // FIXME: SnapshotSource
-            InputStreamProvider snapshot,
+            StreamSource snapshot,
             @Nullable ClusterConfig serverConfig,
             ApplyLeaderSnapshot.Callback callback) {
         public ApplyLeaderSnapshot {
