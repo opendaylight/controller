@@ -31,7 +31,6 @@ import org.junit.rules.TemporaryFolder;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.spi.TestTermInfoStore;
-import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
 
 /**
  * Unit tests for RaftActorContextImpl.

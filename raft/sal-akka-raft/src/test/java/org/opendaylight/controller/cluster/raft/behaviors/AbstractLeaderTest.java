@@ -19,10 +19,10 @@ import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.testkit.TestActorRef;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
+import org.opendaylight.controller.cluster.raft.ForwardMessageToBehaviorActor;
+import org.opendaylight.controller.cluster.raft.MessageCollectorActor;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader.SendHeartBeat;
-import org.opendaylight.controller.cluster.raft.utils.ForwardMessageToBehaviorActor;
-import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 
 public abstract class AbstractLeaderTest<T extends AbstractLeader> extends AbstractRaftActorBehaviorTest<T> {
     /**

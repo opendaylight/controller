@@ -8,9 +8,9 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
-import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.clearMessages;
-import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.expectFirstMatching;
-import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.expectMatching;
+import static org.opendaylight.controller.cluster.raft.MessageCollectorActor.clearMessages;
+import static org.opendaylight.controller.cluster.raft.MessageCollectorActor.expectFirstMatching;
+import static org.opendaylight.controller.cluster.raft.MessageCollectorActor.expectMatching;
 
 import com.google.common.collect.ImmutableMap;
 import java.time.Duration;
@@ -24,7 +24,6 @@ import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.persisted.NoopPayload;
-import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.raft.api.RaftRole;
 
 /**

@@ -45,6 +45,8 @@ import org.opendaylight.controller.cluster.messaging.MessageSlice;
 import org.opendaylight.controller.cluster.messaging.MessageSliceReply;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.FollowerLogInformation;
+import org.opendaylight.controller.cluster.raft.ForwardMessageToBehaviorActor;
+import org.opendaylight.controller.cluster.raft.MessageCollectorActor;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockReplicatedLogBuilder;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
@@ -72,8 +74,6 @@ import org.opendaylight.controller.cluster.raft.persisted.ByteStateSnapshotCohor
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.policy.DefaultRaftPolicy;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
-import org.opendaylight.controller.cluster.raft.utils.ForwardMessageToBehaviorActor;
-import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.yangtools.concepts.Identifier;
 

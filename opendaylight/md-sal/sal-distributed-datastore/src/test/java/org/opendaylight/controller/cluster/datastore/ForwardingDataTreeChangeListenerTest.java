@@ -14,7 +14,7 @@ import java.util.List;
 import org.apache.pekko.actor.ActorRef;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.messages.DataTreeChanged;
-import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
+import org.opendaylight.controller.cluster.raft.MessageCollectorActor;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 
 public class ForwardingDataTreeChangeListenerTest extends AbstractActorTest {
