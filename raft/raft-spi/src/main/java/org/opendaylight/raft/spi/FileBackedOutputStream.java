@@ -7,19 +7,21 @@
  */
 package org.opendaylight.raft.spi;
 
-import java.io.BufferedInputStream;
+import static java.util.Objects.requireNonNull;
+
+import com.google.common.base.MoreObjects;
+import com.google.common.io.CountingOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.ref.Cleaner;
-import java.lang.ref.Cleaner.Cleanable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.checkerframework.checker.lock.qual.Holding;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,35 +45,140 @@ public class FileBackedOutputStream extends OutputStream {
         // Nothing else
     }
 
+    @NonNullByDefault
     @FunctionalInterface
     private interface TempFileCreator {
 
         Path newTempFile() throws IOException;
     }
 
-    private static final Logger LOG = LoggerFactory.getLogger(FileBackedOutputStream.class);
+    @NonNullByDefault
+    private sealed interface State permits Closed, Open {
 
-    /**
-     * A Cleaner instance responsible for deleting any files which may be lost due to us not being cleaning up
-     * temporary files.
-     */
-    private static final Cleaner FILE_CLEANER = Cleaner.create();
+        long count();
+    }
+
+    @NonNullByDefault
+    private sealed interface WithFile permits ClosedFile, OpenFile {
+
+        TransientFile file();
+    }
+
+    @NonNullByDefault
+    private record Cleaned(Path file, long count) implements Closed {
+        Cleaned {
+            requireNonNull(file);
+        }
+    }
+
+    @NonNullByDefault
+    private sealed interface Closed extends State permits Cleaned, ClosedFile, ClosedMemory {
+        // Nothing else
+    }
+
+    @NonNullByDefault
+    private record ClosedFile(TransientFile file, long count) implements Closed, WithFile {
+        ClosedFile {
+            requireNonNull(file);
+        }
+    }
+
+    @NonNullByDefault
+    private record ClosedMemory(MemoryStream memory) implements Closed {
+        @Override
+        public long count() {
+            return memory.count();
+        }
+    }
+
+    @NonNullByDefault
+    private sealed interface Open extends State permits OpenFile, OpenMemory {
+
+        OutputStream out();
+
+        Closed toClosed() throws IOException;
+    }
+
+    @NonNullByDefault
+    private record OpenFile(CountingOutputStream out, TransientFile file) implements Open, WithFile {
+        OpenFile {
+            requireNonNull(out);
+            requireNonNull(file);
+        }
+
+        @Override
+        public long count() {
+            return out.getCount();
+        }
+
+        @Override
+        public ClosedFile toClosed() throws IOException {
+            out.close();
+            return new ClosedFile(file, out.getCount());
+        }
+    }
+
+    @NonNullByDefault
+    private record OpenMemory(MemoryStream out) implements Open {
+        OpenMemory {
+            requireNonNull(out);
+        }
+
+        @Override
+        public long count() {
+            return out.count();
+        }
+
+        @Override
+        public ClosedMemory toClosed() {
+            return new ClosedMemory(out);
+        }
+    }
+
+    // For un-synchronized access to count/buffer
+    @NonNullByDefault
+    private static final class MemoryStream extends ByteArrayOutputStream {
+        public void transferTo(final OutputStream out) throws IOException {
+            out.write(buf, 0, count);
+            out.flush();
+        }
+
+        int count() {
+            return count;
+        }
+
+        MemoryStreamSource toStreamSource() {
+            return new MemoryStreamSource(buf, count);
+        }
+    }
+
+    @NonNullByDefault
+    private record MemoryStreamSource(byte[] bytes, int count) implements SizedStreamSource {
+        @Override
+        public InputStream openStream() throws IOException {
+            return new ByteArrayInputStream(bytes, 0, count);
+        }
+
+        @Override
+        public long size() {
+            return count;
+        }
+
+        @Override
+        public String toString() {
+            return MoreObjects.toStringHelper(this).add("size", count).toString();
+        }
+    }
+
+    private static final Logger LOG = LoggerFactory.getLogger(FileBackedOutputStream.class);
 
     private final TempFileCreator fileCreator;
     private final int threshold;
 
     @GuardedBy("this")
-    private MemoryOutputStream memory = new MemoryOutputStream();
-    @GuardedBy("this")
-    private OutputStream out = memory;
-    @GuardedBy("this")
-    private Path file;
-    @GuardedBy("this")
-    private Cleanable fileCleanup;
+    private State state = new OpenMemory(new MemoryStream());
     @GuardedBy("this")
     private SizedStreamSource source;
-    @GuardedBy("this")
-    private long count;
 
     /**
      * Default constructor. Resulting instance uses the given file threshold, and does not reset the data when the
@@ -95,45 +202,32 @@ public class FileBackedOutputStream extends OutputStream {
      * @throws IOException if close fails
      */
     public synchronized @NonNull SizedStreamSource toStreamSource() throws IOException {
-        close();
-
-        var local = source;
-        if (local == null) {
-            // Note: needs to retain reference to 'this' so as to keep the cleaner being invoked. we really should
-            //       have that taken careof by having a live object encapsulating the file
-            source = local = new SizedStreamSource() {
-                @Override
-                public InputStream openStream() throws IOException {
-                    synchronized (FileBackedOutputStream.this) {
-                        return file != null ? Files.newInputStream(file)
-                            // FIXME: we would be able to use ByteArray.wrap() or similar
-                            : new ByteArrayInputStream(memory.buf(), 0, memory.count());
-                    }
-                }
-
-                @Override
-                public InputStream openBufferedStream() throws IOException {
-                    final var stream = openStream();
-                    return stream instanceof ByteArrayInputStream baos ? baos : new BufferedInputStream(stream);
-                }
-
-                @Override
-                public long size() {
-                    synchronized (FileBackedOutputStream.this) {
-                        return count;
-                    }
-                }
-            };
+        final Closed closed;
+        switch (state) {
+            case Closed already -> closed = already;
+            case Open open -> {
+                state = closed = open.toClosed();
+            }
         }
 
+        var local = source;
+        if (local != null) {
+            return local;
+        }
+
+        source = local = switch (closed) {
+            case Cleaned cleaned -> throw new IOException("Reference to " + cleaned.file + " already cleaned");
+            // Note: needs to retain reference to 'this' so as to keep the cleaner being invoked. we really should
+            //       have that taken care of by having a live object encapsulating the Path reference.
+            case ClosedFile file -> new TransientFileStreamSource(file.file, 0, file.count);
+            case ClosedMemory(var memory) -> memory.toStreamSource();
+        };
         return local;
     }
 
     @Override
     public synchronized void write(final int value) throws IOException {
-        possiblySwitchToFile(1);
-        out.write(value);
-        count++;
+        ensureCapacity(1).write(value);
     }
 
     @Override
@@ -143,35 +237,30 @@ public class FileBackedOutputStream extends OutputStream {
 
     @Override
     public synchronized void write(final byte[] bytes, final int off, final int len) throws IOException {
-        possiblySwitchToFile(len);
-        out.write(bytes, off, len);
-        count += len;
+        ensureCapacity(len).write(bytes, off, len);
     }
 
     @Override
     public synchronized void close() throws IOException {
-        if (out != null) {
-            OutputStream closeMe = out;
-            out = null;
-            closeMe.close();
+        if (state instanceof Open open) {
+            state = open.toClosed();
         }
     }
 
     @Override
     public synchronized void flush() throws IOException {
-        if (out != null) {
-            out.flush();
+        if (state instanceof Open open) {
+            open.out().flush();
         }
     }
 
     /**
-     * Returns current reference count.
+     * Returns current byte size.
      *
-     * @return current reference count
+     * @return current byte size
      */
-    // FIXME: refCount()
     public synchronized long getCount() {
-        return count;
+        return state.count();
     }
 
     /**
@@ -180,90 +269,63 @@ public class FileBackedOutputStream extends OutputStream {
     // FIXME: decRef()?
     public synchronized void cleanup() {
         LOG.debug("In cleanup");
-        closeQuietly();
-        if (fileCleanup != null) {
-            fileCleanup.clean();
-        }
-        // Already deleted above
-        file = null;
-    }
 
-    @Holding("this")
-    private void closeQuietly() {
-        try {
-            close();
-        } catch (IOException e) {
-            LOG.warn("Error closing output stream {}", out, e);
-        }
-    }
-
-    /**
-     * Checks if writing {@code len} bytes would go over threshold, and switches to file buffering if so.
-     */
-    @Holding("this")
-    private void possiblySwitchToFile(final int len) throws IOException {
-        if (out == null) {
-            throw new IOException("Stream already closed");
-        }
-
-        if (file == null) {
-            final var newLength = memory.count() + len;
-            if (newLength > threshold) {
-                switchToFile(newLength);
-            }
-        }
-    }
-
-    private void switchToFile(final int newLength) throws IOException {
-        final var temp = fileCreator.newTempFile();
-        temp.toFile().deleteOnExit();
-        final var cleanable = FILE_CLEANER.register(this, () -> {
-            LOG.debug("Deleting temp file {}", temp);
+        var local = state;
+        if (local instanceof Open open) {
             try {
-                Files.delete(temp);
+                state = local = open.toClosed();
             } catch (IOException e) {
-                LOG.warn("Could not delete temp file {}", temp, e);
+                LOG.warn("Error closing output stream {}", open.out(), e);
             }
-        });
+        }
+        if (local instanceof WithFile withFile) {
+            source = null;
+            final var ref = withFile.file();
+            ref.delete();
+            state = new Cleaned(ref.path(), local.count());
+        }
+    }
 
-        LOG.debug("Byte count {} has exceeded threshold {} - switching to file: {}", newLength, threshold, temp);
+    @Holding("this")
+    private @NonNull OutputStream ensureCapacity(final int len) throws IOException {
+        return switch (state) {
+            case OpenMemory(final var out) -> {
+                // if writing {@code len} bytes would go over threshold, and switches to file buffering if so.
+                final var newLength = out.count() + len;
+                yield newLength <= threshold ? out : switchToFile(out, newLength);
+            }
+            case OpenFile open -> open.out;
+            case Closed closed -> throw new IOException("Stream already closed");
+        };
+    }
 
-        final OutputStream transfer;
+    @Holding("this")
+    private @NonNull CountingOutputStream switchToFile(final MemoryStream oldOut, final int newLength)
+            throws IOException {
+        final var file = new TransientFile(fileCreator.newTempFile());
+
+        LOG.debug("Byte count {} has exceeded threshold {} - switching to file: {}", newLength, threshold, file.path());
+
+        final CountingOutputStream newOut;
         try {
-            transfer = Files.newOutputStream(temp);
+            newOut = new CountingOutputStream(Files.newOutputStream(file.path()));
             try {
-                transfer.write(memory.buf(), 0, memory.count());
-                transfer.flush();
+                oldOut.transferTo(newOut);
             } catch (IOException e) {
                 try {
-                    transfer.close();
+                    newOut.close();
                 } catch (IOException ex) {
-                    LOG.debug("Error closing temp file {}", temp, ex);
+                    LOG.debug("Error closing temp file {}", file.path(), ex);
                 }
                 throw e;
             }
         } catch (IOException e) {
-            cleanable.clean();
+            file.delete();
             throw e;
         }
 
         // We've successfully transferred the data; switch to writing to file
-        out = transfer;
-        file = temp;
-        fileCleanup = cleanable;
-        memory = null;
-    }
-
-    /**
-     * ByteArrayOutputStream that exposes its internals for efficiency.
-     */
-    private static final class MemoryOutputStream extends ByteArrayOutputStream {
-        byte[] buf() {
-            return buf;
-        }
-
-        int count() {
-            return count;
-        }
+        state = new OpenFile(newOut, file);
+        return newOut;
     }
 }
