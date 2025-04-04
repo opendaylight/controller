@@ -9,10 +9,7 @@ package org.opendaylight.controller.cluster.raft.spi;
 
 import java.util.function.Consumer;
 import org.apache.pekko.persistence.JournalProtocol;
-import org.apache.pekko.persistence.SnapshotProtocol;
-import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.eclipse.jdt.annotation.NonNull;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 
 /**
  * This interface provides methods to persist data and is an abstraction of the akka-persistence persistence API.
@@ -51,23 +48,6 @@ public interface DataPersistenceProvider extends SnapshotStore {
     <T> void persistAsync(@NonNull T entry, @NonNull Consumer<T> callback);
 
     /**
-     * Saves a snapshot.
-     *
-     * @param snapshot the snapshot object to save
-     */
-    // FIXME: replace with the below, combining the save functionality
-    void saveSnapshot(@NonNull Snapshot snapshot);
-
-    /**
-     * Deletes snapshots based on the given criteria.
-     *
-     * @param criteria the search criteria
-     */
-    // FIXME: criteria == max size? max snapshots?
-    // FIXME: throws IOException
-    void deleteSnapshots(@NonNull SnapshotSelectionCriteria criteria);
-
-    /**
      * Deletes journal entries up to the given sequence number.
      *
      * @param sequenceNumber the sequence number
@@ -89,12 +69,4 @@ public interface DataPersistenceProvider extends SnapshotStore {
      * @return {@code true} if the response was handled
      */
     boolean handleJournalResponse(JournalProtocol.@NonNull Response response);
-
-    /**
-     * Receive and potentially handle a {@link SnapshotProtocol} response.
-     *
-     * @param response A {@link SnapshotProtocol} response
-     * @return {@code true} if the response was handled
-     */
-    boolean handleSnapshotResponse(SnapshotProtocol.@NonNull Response response);
 }

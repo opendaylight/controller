@@ -8,9 +8,13 @@
 package org.opendaylight.controller.cluster.raft.spi;
 
 import java.io.IOException;
+import org.apache.pekko.persistence.SnapshotProtocol;
+import org.apache.pekko.persistence.SnapshotSelectionCriteria;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.RaftActor;
+import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.InstallableSnapshot;
 
@@ -39,4 +43,29 @@ public interface SnapshotStore {
     @NonNullByDefault
     <T extends StateSnapshot> void streamToInstall(EntryInfo lastIncluded, T snapshot, StateSnapshot.Writer<T> writer,
         Callback<InstallableSnapshot> callback);
+
+    /**
+     * Saves a snapshot.
+     *
+     * @param snapshot the snapshot object to save
+     */
+    // FIXME: replace with the below, combining the save functionality
+    void saveSnapshot(@NonNull Snapshot snapshot);
+
+    /**
+     * Deletes snapshots based on the given criteria.
+     *
+     * @param criteria the search criteria
+     */
+    // FIXME: criteria == max size? max snapshots?
+    // FIXME: throws IOException
+    void deleteSnapshots(@NonNull SnapshotSelectionCriteria criteria);
+
+    /**
+     * Receive and potentially handle a {@link SnapshotProtocol} response.
+     *
+     * @param response A {@link SnapshotProtocol} response
+     * @return {@code true} if the response was handled
+     */
+    boolean handleSnapshotResponse(SnapshotProtocol.@NonNull Response response);
 }
