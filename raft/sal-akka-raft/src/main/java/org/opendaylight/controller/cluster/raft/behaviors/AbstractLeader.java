@@ -903,7 +903,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
 
     @NonNullByDefault
     public final void sendInstallSnapshot(final InstallableSnapshot snapshot) {
-        snapshotHolder = requireNonNull(snapshot);
+        snapshotHolder = decompressIfNeeded(requireNonNull(snapshot));
 
         LOG.debug("{}: sendInstallSnapshot", logName);
         for (var entry : followerToLog.entrySet()) {
@@ -920,6 +920,19 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
                 }
             }
         }
+    }
+
+    @NonNullByDefault
+    private InstallableSnapshot decompressIfNeeded(final InstallableSnapshot fromStore) {
+        // We do not try to compress if not already compressed
+        return switch (context.getConfigParams().getPreferredCompression()) {
+            case LZ4 -> fromStore;
+            case NONE -> {
+                final var source = fromStore.source();
+                yield source instanceof PlainSnapshotSource ? fromStore
+                    : new InstallableSnapshotSource(fromStore.lastIncluded(), source.toPlainSource());
+            }
+        };
     }
 
     private void sendSnapshotChunk(final ActorSelection followerActor, final FollowerLogInformation followerLogInfo) {

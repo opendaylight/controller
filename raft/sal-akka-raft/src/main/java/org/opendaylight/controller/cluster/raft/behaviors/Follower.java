@@ -19,6 +19,7 @@ import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.cluster.Member;
 import org.apache.pekko.cluster.MemberStatus;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.messaging.MessageAssembler;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
@@ -38,7 +39,10 @@ import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.api.TermInfo;
+import org.opendaylight.raft.spi.CompressionSupport;
+import org.opendaylight.raft.spi.PlainSnapshotSource;
 import org.opendaylight.raft.spi.SizedStreamSource;
+import org.opendaylight.raft.spi.SnapshotSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -141,9 +145,9 @@ public class Follower extends RaftActorBehavior {
             LOG.debug("{}: handleAppendEntries: {}", logName, appendEntries);
         }
 
-        if (snapshotTracker != null && !snapshotTracker.getLeaderId().equals(appendEntries.getLeaderId())) {
+        if (snapshotTracker != null && !snapshotTracker.leaderId().equals(appendEntries.getLeaderId())) {
             LOG.debug("{}: snapshot install is in progress but the prior snapshot leaderId {} does not match the "
-                + "AppendEntries leaderId {}", logName, snapshotTracker.getLeaderId(), appendEntries.getLeaderId());
+                + "AppendEntries leaderId {}", logName, snapshotTracker.leaderId(), appendEntries.getLeaderId());
             closeSnapshotTracker();
         }
 
@@ -609,7 +613,14 @@ public class Follower extends RaftActorBehavior {
         // update leader
         leaderId = installSnapshot.getLeaderId();
         if (snapshotTracker == null) {
-            snapshotTracker = new SnapshotTracker(logName, installSnapshot.getTotalChunks(), leaderId, context);
+            final var chunkIndex = installSnapshot.getChunkIndex();
+            if (chunkIndex != 1) {
+                LOG.debug("{}: expected chunkIndex 1 got {}", logName, chunkIndex);
+                sender.tell(new InstallSnapshotReply(currentTerm(), memberId(), -1, false), actor());
+                return;
+            }
+            snapshotTracker = new SnapshotTracker(logName, installSnapshot.getTotalChunks(), leaderId,
+                context.getFileBackedOutputStreamFactory().newInstance(), installSnapshot.compression());
         }
 
         updateInitialSyncStatus(installSnapshot.getLastIncludedIndex(), leaderId);
@@ -640,7 +651,7 @@ public class Follower extends RaftActorBehavior {
         LOG.info("{}: Snapshot received from leader: {}", logName, leaderId);
         final SizedStreamSource snapshotBytes;
         try {
-            snapshotBytes = tracker.getSnapshotBytes();
+            snapshotBytes = tracker.toStreamSource();
         } catch (IOException e) {
             LOG.debug("{}: failed to reconstract InstallSnapshot state", logName, e);
             tracker.close();
@@ -650,7 +661,8 @@ public class Follower extends RaftActorBehavior {
 
         actor().tell(new ApplyLeaderSnapshot(leaderId, installSnapshot.getTerm(),
             EntryInfo.of(installSnapshot.getLastIncludedIndex(), installSnapshot.getLastIncludedTerm()),
-            snapshotBytes, installSnapshot.serverConfig(), new ApplyLeaderSnapshot.Callback() {
+            createSource(snapshotBytes, tracker.compression()), installSnapshot.serverConfig(),
+            new ApplyLeaderSnapshot.Callback() {
                 @Override
                 public void onSuccess() {
                     LOG.debug("{}: handleInstallSnapshot returning: {}", logName, successReply);
@@ -664,6 +676,33 @@ public class Follower extends RaftActorBehavior {
                     sender.tell(new InstallSnapshotReply(currentTerm(), memberId(), -1, false), actor());
                 }
             }), actor());
+    }
+
+    @NonNullByDefault
+    private static SnapshotSource createSource(final SizedStreamSource io,
+            final @Nullable CompressionSupport compression) {
+        return compression != null ? compression.nativeSource(io) : guessSource(io);
+    }
+
+    @NonNullByDefault
+    private static SnapshotSource guessSource(final SizedStreamSource io) {
+        // LZ4 Frame Header is at least 7 bytes
+        if (io.size() < 7) {
+            return new PlainSnapshotSource(io);
+        }
+
+        try (var in = io.openDataInput()) {
+            final var magic = in.readInt();
+            if (magic == 0x184D2204) {
+                // Try deserialization
+                final var src = CompressionSupport.LZ4.nativeSource(io);
+                src.io().openStream().close();
+                return src;
+            }
+        } catch (IOException e) {
+            LOG.warn("Error loading with lz4 decompression, using default one", e);
+        }
+        return new PlainSnapshotSource(io);
     }
 
     private void closeSnapshotTracker() {

@@ -20,6 +20,7 @@ import java.util.OptionalInt;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
+import org.opendaylight.raft.spi.CompressionSupport;
 
 /**
  * Message sent from a leader to install a snapshot chunk on a follower.
@@ -38,6 +39,7 @@ public final class InstallSnapshot extends RaftRPC {
     private final OptionalInt lastChunkHashCode;
     private final @Nullable ClusterConfig serverConfig;
     private final short recipientRaftVersion;
+    private final @Nullable CompressionSupport compression = null;
 
     @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = """
         Stores a reference to an externally mutable byte[] object but this is OK since this class is merely a DTO and \
@@ -87,6 +89,20 @@ public final class InstallSnapshot extends RaftRPC {
         return data;
     }
 
+    /**
+     * Return the {@link CompressionSupport compression format} of {@link #getData()}. Can only be called if
+     * {@code chunkIndex == 0}.
+     *
+     * @return the format of {@link #getData()}, or {@code null} if not known
+     * @throws IllegalStateException if {@code chunkIndex} is not 0
+     */
+    public @Nullable CompressionSupport compression() {
+        if (chunkIndex != 1) {
+            throw new IllegalStateException("Cannot access in chunk " + chunkIndex);
+        }
+        return compression;
+    }
+
     public int getChunkIndex() {
         return chunkIndex;
     }
@@ -112,7 +128,8 @@ public final class InstallSnapshot extends RaftRPC {
             .add("datasize", data.length)
             .add("chunk", chunkIndex + "/" + totalChunks)
             .add("lastChunkHashCode", lastChunkHashCode)
-            .add("serverConfig", serverConfig);
+            .add("serverConfig", serverConfig)
+            .add("compression", compression);
     }
 
     @Override

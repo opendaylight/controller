@@ -37,6 +37,6 @@ public interface SnapshotFile extends InstallableSnapshot {
 
     default <T extends StateSnapshot> T readSnapshot(final StateSnapshot.Reader<? extends T> reader)
             throws IOException {
-        return reader.readSnapshot(source().toPlainSource().io());
+        return reader.readSnapshot(source().toPlainSource().io().openBufferedStream());
     }
 }
