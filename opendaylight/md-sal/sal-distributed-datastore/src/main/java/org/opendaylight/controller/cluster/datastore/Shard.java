@@ -87,7 +87,6 @@ import org.opendaylight.controller.cluster.notifications.RoleChangeNotifier;
 import org.opendaylight.controller.cluster.raft.LeadershipTransferFailedException;
 import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.RaftActorRecoveryCohort;
-import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
@@ -635,7 +634,7 @@ public class Shard extends RaftActor {
     }
 
     @Override
-    protected final RaftActorSnapshotCohort getRaftActorSnapshotCohort() {
+    protected final ShardSnapshotCohort getRaftActorSnapshotCohort() {
         return snapshotCohort;
     }
 
