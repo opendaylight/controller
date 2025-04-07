@@ -668,7 +668,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         final var applySnapshot = MessageCollectorActor.expectFirstMatching(follower2CollectorActor,
                 ApplyLeaderSnapshot.class);
         final MockSnapshotState state;
-        try (var ois = new ObjectInputStream(applySnapshot.snapshot().openStream())) {
+        try (var ois = new ObjectInputStream(applySnapshot.snapshot().io().openStream())) {
             state = (MockSnapshotState) ois.readObject();
         } catch (IOException | ClassNotFoundException e) {
             throw new AssertionError(e);

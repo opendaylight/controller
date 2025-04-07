@@ -53,6 +53,8 @@ final class IS implements Externalizable {
             flags |= SERVER_CONFIG;
         }
 
+        // FIXME: CONTROLLER-2074: propagate installSnapshot.format()
+
         WritableObjects.writeLong(out, installSnapshot.getTerm(), flags);
         out.writeObject(installSnapshot.getLeaderId());
         WritableObjects.writeLongs(out, installSnapshot.getLastIncludedIndex(), installSnapshot.getLastIncludedTerm());

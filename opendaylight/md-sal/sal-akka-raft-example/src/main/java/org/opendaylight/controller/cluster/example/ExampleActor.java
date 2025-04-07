@@ -198,8 +198,7 @@ public final class ExampleActor extends RaftActor
 
     @Override
     public Reader<MapState> reader() {
-        return source ->
-            new MapState(SerializationUtils.<Map<String, String>>deserialize(source.openStream().readAllBytes()));
+        return in -> new MapState(SerializationUtils.<Map<String, String>>deserialize(in.readAllBytes()));
     }
 
     @Override

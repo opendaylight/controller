@@ -11,7 +11,10 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 
 /**
@@ -22,6 +25,32 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 public final class ShardSnapshotState implements Snapshot.State {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
+
+    @NonNullByDefault
+    public static final Support<ShardSnapshotState> SUPPORT = new Support<>() {
+        @Override
+        public Class<ShardSnapshotState> snapshotType() {
+            return ShardSnapshotState.class;
+        }
+
+        @Override
+        public Reader<ShardSnapshotState> reader() {
+            return in -> {
+                try (var oin = new ObjectInputStream(in)) {
+                    return ShardDataTreeSnapshot.deserialize(oin);
+                }
+            };
+        }
+
+        @Override
+        public Writer<ShardSnapshotState> writer() {
+            return (snapshot, out) -> {
+                try (var oos = new ObjectOutputStream(out)) {
+                    snapshot.getSnapshot().serialize(oos);
+                }
+            };
+        }
+    };
 
     @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = """
         This field is not Serializable but this class \

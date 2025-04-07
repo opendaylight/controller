@@ -328,7 +328,7 @@ public class RaftActorTest extends AbstractActorTest {
         mockRaftActor.waitForRecoveryComplete();
 
         final var applySnapshot = new ApplyLeaderSnapshot(persistenceId, 0, EntryInfo.of(0, 0),
-            ByteArray.wrap(new byte[1]), null, mock(ApplyLeaderSnapshot.Callback.class));
+            new PlainSnapshotSource(ByteArray.wrap(new byte[1])), null, mock(ApplyLeaderSnapshot.Callback.class));
 
         when(mockSupport.handleSnapshotMessage(same(applySnapshot))).thenReturn(true);
         mockRaftActor.handleCommand(applySnapshot);

@@ -14,7 +14,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.OptionalInt;
 import org.eclipse.jdt.annotation.NonNull;
-import org.opendaylight.controller.cluster.raft.RaftActorContext;
+import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.raft.spi.CompressionSupport;
 import org.opendaylight.raft.spi.FileBackedOutputStream;
 import org.opendaylight.raft.spi.SizedStreamSource;
 import org.slf4j.Logger;
@@ -27,10 +28,11 @@ class SnapshotTracker implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(SnapshotTracker.class);
 
     private final int totalChunks;
-    private final String leaderId;
-    private final BufferedOutputStream bufferedStream;
-    private final FileBackedOutputStream fileBackedStream;
+    private final @NonNull String leaderId;
+    private final @NonNull BufferedOutputStream bufferedStream;
+    private final @NonNull FileBackedOutputStream fileBackedStream;
     private final @NonNull String logName;
+    private final @Nullable CompressionSupport compression;
 
     private int lastChunkIndex = LeaderInstallSnapshotState.FIRST_CHUNK_INDEX - 1;
     private boolean sealed = false;
@@ -38,12 +40,13 @@ class SnapshotTracker implements AutoCloseable {
     private long count;
 
     SnapshotTracker(final String logName, final int totalChunks, final String leaderId,
-            final RaftActorContext context) {
+            final FileBackedOutputStream fileBackedStream, final @Nullable CompressionSupport compression) {
         this.logName = requireNonNull(logName);
         this.totalChunks = totalChunks;
         this.leaderId = requireNonNull(leaderId);
-        fileBackedStream = context.getFileBackedOutputStreamFactory().newInstance();
+        this.fileBackedStream = requireNonNull(fileBackedStream);
         bufferedStream = new BufferedOutputStream(fileBackedStream);
+        this.compression = compression;
     }
 
     /**
@@ -87,7 +90,7 @@ class SnapshotTracker implements AutoCloseable {
         return sealed;
     }
 
-    @NonNull SizedStreamSource getSnapshotBytes() throws IOException {
+    @NonNull SizedStreamSource toStreamSource() throws IOException {
         if (!sealed) {
             throw new IllegalStateException("lastChunk not received yet");
         }
@@ -96,7 +99,11 @@ class SnapshotTracker implements AutoCloseable {
         return fileBackedStream.toStreamSource();
     }
 
-    String getLeaderId() {
+    CompressionSupport compression() {
+        return compression;
+    }
+
+    String leaderId() {
         return leaderId;
     }
 
