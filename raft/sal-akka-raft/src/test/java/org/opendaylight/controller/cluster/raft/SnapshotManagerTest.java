@@ -278,7 +278,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         doReturn(ByteState.empty()).when(mockCohort).takeSnapshot();
         snapshotManager.capture(EntryInfo.of(9, 6), -1);
 
-        verify(mockDataPersistenceProvider).saveSnapshot(any(Snapshot.class));
+        verify(mockDataPersistenceProvider).saveSnapshot(any(), any(), any(), any(), any());
 
         verify(mockReplicatedLog).snapshotPreCommit(9L, 6L);
 

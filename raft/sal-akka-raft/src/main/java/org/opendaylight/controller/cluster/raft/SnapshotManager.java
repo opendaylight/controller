@@ -11,6 +11,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.List;
 import org.apache.pekko.dispatch.ControlMessage;
 import org.apache.pekko.persistence.SnapshotSelectionCriteria;
@@ -22,6 +23,9 @@ import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
+import org.opendaylight.controller.cluster.raft.spi.SnapshotStore.Callback;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.EntryMeta;
 import org.opendaylight.raft.spi.InstallableSnapshot;
@@ -392,6 +396,13 @@ public final class SnapshotManager {
         task = persisting;
         LOG.debug("{}: lastSequenceNumber prior to persisting applied snapshot: {}", memberId(), lastSeq);
         persistence.saveSnapshot(persisting.snapshot);
+    }
+
+    @NonNullByDefault
+    private <T extends StateSnapshot> void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
+            final T stateSnapshot, final StateSnapshot.Writer<T> writer, final Callback<Instant> callback) {
+
+        context.getPersistenceProvider().saveSnapshot(raftSnapshot, lastIncluded, stateSnapshot, writer, callback);
     }
 
     /**

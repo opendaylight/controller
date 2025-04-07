@@ -8,13 +8,13 @@
 package org.opendaylight.controller.cluster.raft.spi;
 
 import java.io.IOException;
+import java.time.Instant;
 import org.apache.pekko.persistence.SnapshotProtocol;
 import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.RaftActor;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.InstallableSnapshot;
 
@@ -61,8 +61,9 @@ public interface SnapshotStore {
      *
      * @param snapshot the snapshot object to save
      */
-    // FIXME: Callback<SnapshotFile> callback
-    void saveSnapshot(@NonNull Snapshot snapshot);
+    @NonNullByDefault
+    <T extends StateSnapshot> void saveSnapshot(RaftSnapshot raftSnapshot, EntryInfo lastIncluded, T stateSnapshot,
+        StateSnapshot.Writer<T> writer, Callback<Instant> callback);
 
     //  @NonNullByDefault
     //  <T extends StateSnapshot> void storeSnapshot(T snapshot, StateSnapshot.Writer<T> writer,

@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft.spi;
 import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.function.Consumer;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SnapshotProtocol;
@@ -17,6 +18,7 @@ import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
+import org.opendaylight.raft.api.EntryInfo;
 
 /**
  * An immediate {@link DataPersistenceProvider}. Offloads asynchronous persist responses via {@link ExecuteInSelfActor}
@@ -47,6 +49,13 @@ public interface ImmediateDataPersistenceProvider extends DataPersistenceProvide
         requireNonNull(entry);
         requireNonNull(callback);
         actor().executeInSelf(() -> callback.accept(entry));
+    }
+
+    @Override
+    default <T extends StateSnapshot> void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
+            final T stateSnapshot, final StateSnapshot.Writer<T> writer, final Callback<Instant> callback) {
+        final var timestamp = Instant.now();
+        actor().executeInSelf(() -> callback.invoke(null, timestamp));
     }
 
     @Override

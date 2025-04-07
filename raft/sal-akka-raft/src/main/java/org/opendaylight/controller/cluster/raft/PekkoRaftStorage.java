@@ -28,8 +28,10 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
+import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFileFormat;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.CompressionSupport;
 import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
@@ -180,6 +182,17 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
     }
 
     @Override
+    public <T extends StateSnapshot> void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
+            final T stateSnapshot, final StateSnapshot.Writer<T> writer, final Callback<Instant> callback) {
+        // FIXME: implement this
+    }
+
+    @Override
+    public void deleteSnapshots(final SnapshotSelectionCriteria criteria) {
+        actor.deleteSnapshots(criteria);
+    }
+
+    @Override
     public <T> void persist(final T entry, final Consumer<T> callback) {
         actor.persist(entry, callback);
     }
@@ -187,16 +200,6 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
     @Override
     public <T> void persistAsync(final T entry, final Consumer<T> callback) {
         actor.persistAsync(entry, callback);
-    }
-
-    @Override
-    public void saveSnapshot(final Snapshot snapshot) {
-        actor.saveSnapshot(snapshot);
-    }
-
-    @Override
-    public void deleteSnapshots(final SnapshotSelectionCriteria criteria) {
-        actor.deleteSnapshots(criteria);
     }
 
     @Override

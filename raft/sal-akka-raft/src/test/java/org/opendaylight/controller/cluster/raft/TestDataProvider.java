@@ -14,7 +14,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.ImmediateDataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 import org.opendaylight.raft.api.EntryInfo;
@@ -39,11 +38,6 @@ public final class TestDataProvider implements ImmediateDataPersistenceProvider 
     @Override
     public ExecuteInSelfActor actor() {
         return actor;
-    }
-
-    @Override
-    public void saveSnapshot(final Snapshot snapshot) {
-        // no-op
     }
 
     @Override
