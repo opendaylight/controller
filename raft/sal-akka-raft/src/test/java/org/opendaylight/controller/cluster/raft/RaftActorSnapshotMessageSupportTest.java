@@ -23,6 +23,7 @@ import org.opendaylight.controller.cluster.raft.SnapshotManager.ApplyLeaderSnaps
 import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage.CommitSnapshot;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.ByteArray;
+import org.opendaylight.raft.spi.PlainSnapshotSource;
 
 /**
  * Unit tests for RaftActorSnapshotMessageSupport.
@@ -54,7 +55,7 @@ class RaftActorSnapshotMessageSupportTest {
     @Test
     void testOnApplySnapshot() {
         final var snapshot = new ApplyLeaderSnapshot("leaderId", 1, EntryInfo.of(2, 1),
-            ByteArray.wrap(new byte[] { 1, 2, 3, 4, 5 }), null, mockCallback);
+            new PlainSnapshotSource(ByteArray.wrap(new byte[] { 1, 2, 3, 4, 5 })), null, mockCallback);
         sendMessageToSupport(snapshot);
 
         verify(mockSnapshotManager).applyFromLeader(snapshot);

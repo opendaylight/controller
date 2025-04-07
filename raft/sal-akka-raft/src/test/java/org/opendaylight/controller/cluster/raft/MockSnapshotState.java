@@ -27,8 +27,8 @@ public record MockSnapshotState(List<Object> state) implements Snapshot.State {
 
         @Override
         public Reader<MockSnapshotState> reader() {
-            return source -> {
-                try (var ois = new ObjectInputStream(source.openStream())) {
+            return in -> {
+                try (var ois = new ObjectInputStream(in)) {
                     return assertInstanceOf(MockSnapshotState.class, ois.readObject());
                 } catch (ClassNotFoundException e) {
                     throw new AssertionError(e);

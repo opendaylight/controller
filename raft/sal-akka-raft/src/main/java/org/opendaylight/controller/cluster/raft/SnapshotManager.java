@@ -25,7 +25,7 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.EntryMeta;
 import org.opendaylight.raft.spi.InstallableSnapshot;
-import org.opendaylight.raft.spi.StreamSource;
+import org.opendaylight.raft.spi.SnapshotSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,8 +45,7 @@ public final class SnapshotManager {
             String leaderId,
             long term,
             EntryInfo lastEntry,
-            // FIXME: SnapshotSource
-            StreamSource snapshot,
+            SnapshotSource snapshot,
             @Nullable ClusterConfig serverConfig,
             ApplyLeaderSnapshot.Callback callback) {
         public ApplyLeaderSnapshot {
@@ -355,8 +354,8 @@ public final class SnapshotManager {
         LOG.info("{}: Applying snapshot on follower: {}", memberId(), source);
 
         final Snapshot.State snapshotState;
-        try {
-            snapshotState = snapshotCohort.support().reader().readSnapshot(source);
+        try (var in = source.toPlainSource().io().openBufferedStream()) {
+            snapshotState = snapshotCohort.support().reader().readSnapshot(in);
         } catch (IOException e) {
             LOG.debug("{}: failed to convert InstallSnapshot to state", memberId(), e);
             snapshot.callback().onFailure();
