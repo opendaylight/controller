@@ -13,9 +13,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
-import org.opendaylight.controller.cluster.raft.spi.AbstractRaftDelta;
-import org.opendaylight.controller.cluster.raft.spi.AbstractStateDelta;
-import org.opendaylight.controller.cluster.raft.spi.EntryData;
+import org.opendaylight.controller.cluster.raft.spi.AbstractRaftCommand;
+import org.opendaylight.controller.cluster.raft.spi.AbstractStateCommand;
+import org.opendaylight.controller.cluster.raft.spi.StateMachineCommand;
 
 /**
  * An instance of a {@link Payload} class is meant to be used as the Payload for {@link AppendEntries}.
@@ -46,7 +46,8 @@ import org.opendaylight.controller.cluster.raft.spi.EntryData;
 //        - disabled persistence without peers does not need any serialization
 //        For all of this to happen, though, we need to have well-defined transitions between strategies. There is also
 //        interplay with AppendEntries compression/slicing to consider.
-public abstract sealed class Payload implements EntryData, Serializable permits AbstractRaftDelta, AbstractStateDelta {
+public abstract sealed class Payload implements StateMachineCommand, Serializable
+        permits AbstractRaftCommand, AbstractStateCommand {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 

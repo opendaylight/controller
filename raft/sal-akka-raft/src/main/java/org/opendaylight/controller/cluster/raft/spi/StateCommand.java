@@ -7,12 +7,9 @@
  */
 package org.opendaylight.controller.cluster.raft.spi;
 
-import org.opendaylight.controller.cluster.raft.messages.Payload;
-
 /**
- * Abstract base class for {@link RaftDelta} implementations.
+ * An individual change in RAFT-replicated user state.
  */
-public abstract non-sealed class AbstractStateDelta extends Payload implements StateDelta {
-    @java.io.Serial
-    private static final long serialVersionUID = 1L;
+public non-sealed interface StateCommand extends StateMachineCommand {
+    // Nothing else
 }

@@ -8,9 +8,9 @@
 package org.opendaylight.controller.cluster.raft.spi;
 
 /**
- * An {@link EntryData} internal to the RAFT implementation, contributing towards forward progress in RAFT journal
- * maintenance. This includes changes in cluster configur
+ * An {@link StateMachineCommand} internal to the RAFT implementation, contributing towards forward progress in RAFT
+ * journal maintenance. This includes changes in cluster configuration.
  */
-public sealed interface RaftDelta extends EntryData permits AbstractRaftDelta {
+public sealed interface RaftCommand extends StateMachineCommand permits AbstractRaftCommand {
     // Nothing else
 }

@@ -147,7 +147,7 @@ final class SnapshotFileV1 implements SnapshotFile {
             final long limit;
             try (var dos = new DataOutputStream(new UncloseableBufferedOutputStream(Channels.newOutputStream(fc)))) {
                 // Emit server configuration
-                ClusterConfig.writer().writeDelta(serverConfig, dos);
+                ClusterConfig.writer().writeCommand(serverConfig, dos);
 
                 // Emit unapplied entries, if any
                 dos.writeInt(unappliedEntries.size());
@@ -322,7 +322,7 @@ final class SnapshotFileV1 implements SnapshotFile {
             dis.skipNBytes(HEADER_SIZE);
 
             // Note: we do not compress ClusterConfig on purpose, so as to ease debugging in case of any issues
-            final var clusterConfig = ClusterConfig.reader().readDelta(dis);
+            final var clusterConfig = ClusterConfig.reader().readCommand(dis);
 
             final var uaCount = dis.readInt();
             if (uaCount < 0) {

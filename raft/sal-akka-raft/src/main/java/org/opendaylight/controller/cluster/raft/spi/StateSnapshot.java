@@ -15,7 +15,7 @@ import org.opendaylight.yangtools.concepts.Immutable;
 
 /**
  * Marker interface for objects representing a snapshot of RAFT-replicated user state. A {@link StateSnapshot}
- * represents a logical sum of all {@link StateDelta}s applied to the journal at a particular point in time.
+ * represents a logical sum of all {@link StateCommand}s applied to the journal at a particular point in time.
  */
 @NonNullByDefault
 public interface StateSnapshot extends Immutable {
@@ -53,5 +53,34 @@ public interface StateSnapshot extends Immutable {
          * @throws IOException if an I/O error occurs
          */
         void writeSnapshot(T snapshot, OutputStream out) throws IOException;
+    }
+
+    /**
+     * A combination of a {@link Reader} and a {@link Writer} for a concrete {@link StateSnapshot} type, as indicated by
+     * {@link #snapshotType()}.
+     *
+     * @param <T> the {@link StateMachineCommand} type
+     */
+    interface Support<T extends StateSnapshot> {
+        /**
+         * Returns the {@link StateSnapshot} type supported by this {@link Support}.
+         *
+         * @return the {@link StateSnapshot} type supported by this {@link Support}
+         */
+        Class<T> snapshotType();
+
+        /**
+         * Returns the {@link Reader}.
+         *
+         * @return the reader
+         */
+        Reader<T> reader();
+
+        /**
+         * Returns the {@link Writer}.
+         *
+         * @return the writer
+         */
+        Writer<T> writer();
     }
 }

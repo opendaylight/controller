@@ -16,7 +16,7 @@ import java.util.List;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.spi.AbstractRaftDelta;
+import org.opendaylight.controller.cluster.raft.spi.AbstractRaftCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,8 +24,9 @@ import org.slf4j.LoggerFactory;
  * RAFT cluster configuration. This payload is always persisted, no matter whether or not we are persisting other data
  * distributed via {@link ReplicatedLogEntry}.
  */
+// FIXME: rename to 'SetRaftConfiguration' or somesuch, perhaps with interface + non-serializable record
 @NonNullByDefault
-public final class ClusterConfig extends AbstractRaftDelta {
+public final class ClusterConfig extends AbstractRaftCommand {
     private static final Logger LOG = LoggerFactory.getLogger(ClusterConfig.class);
     @java.io.Serial
     private static final long serialVersionUID = 1L;

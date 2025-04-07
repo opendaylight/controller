@@ -11,6 +11,7 @@ import static java.util.Objects.requireNonNull;
 
 import java.io.Serializable;
 import org.apache.commons.lang3.SerializationUtils;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 
@@ -27,7 +28,7 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Seria
 
     private final long index;
     private final long term;
-    private final Payload payload;
+    private final @NonNull Payload payload;
     private boolean persistencePending;
 
     /**
@@ -44,7 +45,7 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Seria
     }
 
     @Override
-    public Payload getData() {
+    public Payload command() {
         return payload;
     }
 

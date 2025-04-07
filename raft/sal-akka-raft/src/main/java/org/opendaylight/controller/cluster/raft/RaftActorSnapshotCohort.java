@@ -11,6 +11,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.Support;
 
 /**
  * Interface for a class that participates in raft actor snapshotting.
@@ -19,14 +20,7 @@ import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
  * @author Thomas Pantelis
  */
 @NonNullByDefault
-public interface RaftActorSnapshotCohort<T extends State> extends StateSnapshot.Reader<T>, StateSnapshot.Writer<T> {
-    /**
-     * Return the type of state supported by this cohort.
-     *
-     * @return the state class
-     */
-    Class<T> stateClass();
-
+public interface RaftActorSnapshotCohort<T extends State> {
     /**
      * Take a snapshot of current state.
      *
@@ -40,4 +34,11 @@ public interface RaftActorSnapshotCohort<T extends State> extends StateSnapshot.
      * @param snapshotState a snapshot of the state of the actor
      */
     void applySnapshot(@NonNull T snapshotState);
+
+    /**
+     * Returns the {@link StateSnapshot}.
+     *
+     * @return the {@link StateSnapshot}
+     */
+    Support<T> support();
 }

@@ -8,9 +8,7 @@
 package org.opendaylight.controller.cluster.example;
 
 import com.google.common.collect.ImmutableMap;
-import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,8 +30,10 @@ import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
-import org.opendaylight.controller.cluster.raft.spi.StateDelta;
-import org.opendaylight.raft.spi.StreamSource;
+import org.opendaylight.controller.cluster.raft.spi.StateCommand;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.Reader;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.Support;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.Writer;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.util.AbstractStringIdentifier;
 import org.slf4j.Logger;
@@ -44,7 +44,8 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 public final class ExampleActor extends RaftActor
-        implements RaftActorRecoveryCohort, RaftActorSnapshotCohort<ExampleActor.MapState> {
+        implements RaftActorRecoveryCohort, RaftActorSnapshotCohort<ExampleActor.MapState>,
+                   Support<ExampleActor.MapState> {
     private static final class PayloadIdentifier extends AbstractStringIdentifier<PayloadIdentifier> {
         @java.io.Serial
         private static final long serialVersionUID = 1L;
@@ -120,14 +121,14 @@ public final class ExampleActor extends RaftActor
     }
 
     @Override
-    public Class<MapState> stateClass() {
+    public Class<MapState> snapshotType() {
         return MapState.class;
     }
 
     @Override
     protected void applyState(final @Nullable ActorRef clientActor, final @Nullable Identifier identifier,
-            final StateDelta data) {
-        if (data instanceof KeyValue kv) {
+            final StateCommand command) {
+        if (command instanceof KeyValue kv) {
             state.put(kv.getKey(), kv.getValue());
             if (clientActor != null) {
                 clientActor.tell(new KeyValueSaved(), self());
@@ -191,15 +192,23 @@ public final class ExampleActor extends RaftActor
     }
 
     @Override
-    public void writeSnapshot(final MapState snapshot, final OutputStream out) throws IOException {
-        try (var oos = new ObjectOutputStream(out)) {
-            oos.writeObject(snapshot.state);
-        }
+    public Support<MapState> support() {
+        return this;
     }
 
     @Override
-    public MapState readSnapshot(final StreamSource source) throws IOException {
-        return new MapState(SerializationUtils.<Map<String, String>>deserialize(source.openStream().readAllBytes()));
+    public Reader<MapState> reader() {
+        return source ->
+            new MapState(SerializationUtils.<Map<String, String>>deserialize(source.openStream().readAllBytes()));
+    }
+
+    @Override
+    public Writer<MapState> writer() {
+        return (snapshot, out) -> {
+            try (var oos = new ObjectOutputStream(out)) {
+                oos.writeObject(snapshot.state);
+            }
+        };
     }
 
     static class MapState implements Snapshot.State {

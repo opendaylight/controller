@@ -9,10 +9,8 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static java.util.Objects.requireNonNull;
 
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
@@ -22,9 +20,11 @@ import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
 import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.Reader;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.Support;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.Writer;
 import org.opendaylight.raft.spi.InputOutputStreamFactory;
 import org.opendaylight.raft.spi.Lz4BlockSize;
-import org.opendaylight.raft.spi.StreamSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,15 +38,41 @@ final class ShardSnapshotCohort implements RaftActorSnapshotCohort<ShardSnapshot
     private static final Logger LOG = LoggerFactory.getLogger(ShardSnapshotCohort.class);
     private static final FrontendType SNAPSHOT_APPLY = FrontendType.forName("snapshot-apply");
 
-    private final InputOutputStreamFactory streamFactory;
+    private final Support<ShardSnapshotState> support;
     private final ShardDataTree store;
     private final String memberName;
 
     ShardSnapshotCohort(final InputOutputStreamFactory streamFactory, final LocalHistoryIdentifier applyHistoryId,
             final ShardDataTree store, final String memberName) {
-        this.streamFactory = requireNonNull(streamFactory);
+        requireNonNull(streamFactory);
         this.store = requireNonNull(store);
         this.memberName = requireNonNull(memberName);
+
+        support = new Support<>() {
+            @Override
+            public Class<ShardSnapshotState> snapshotType() {
+                return ShardSnapshotState.class;
+            }
+
+            @Override
+            public Reader<ShardSnapshotState> reader() {
+                return source -> {
+                    // FIXME: this guesswork is for LZ4 decompression. which should be handled elsewhere
+                    try (var in = new ObjectInputStream(streamFactory.createInputStream(source))) {
+                        return ShardDataTreeSnapshot.deserialize(in);
+                    }
+                };
+            }
+
+            @Override
+            public Writer<ShardSnapshotState> writer() {
+                return (snapshot, out) -> {
+                    try (var oos = new ObjectOutputStream(out)) {
+                        snapshot.getSnapshot().serialize(oos);
+                    }
+                };
+            }
+        };
     }
 
     static ShardSnapshotCohort create(final MemberName memberName, final ShardDataTree store, final String logId,
@@ -59,8 +85,8 @@ final class ShardSnapshotCohort implements RaftActorSnapshotCohort<ShardSnapshot
     }
 
     @Override
-    public Class<ShardSnapshotState> stateClass() {
-        return ShardSnapshotState.class;
+    public Support<ShardSnapshotState> support() {
+        return support;
     }
 
     @Override
@@ -85,19 +111,5 @@ final class ShardSnapshotCohort implements RaftActorSnapshotCohort<ShardSnapshot
             return;
         }
         LOG.info("{}: Done applying snapshot", memberName);
-    }
-
-    @Override
-    public void writeSnapshot(final ShardSnapshotState snapshot, final OutputStream out) throws IOException {
-        try (var oos = new ObjectOutputStream(out)) {
-            snapshot.getSnapshot().serialize(oos);
-        }
-    }
-
-    @Override
-    public ShardSnapshotState readSnapshot(final StreamSource source) throws IOException {
-        try (var in = new ObjectInputStream(streamFactory.createInputStream(source))) {
-            return ShardDataTreeSnapshot.deserialize(in);
-        }
     }
 }

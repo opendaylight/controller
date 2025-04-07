@@ -13,7 +13,7 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.apache.pekko.dispatch.ControlMessage;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.behaviors.PreLeader;
-import org.opendaylight.controller.cluster.raft.spi.AbstractRaftDelta;
+import org.opendaylight.controller.cluster.raft.spi.AbstractRaftCommand;
 
 /**
  * Payload used for no-op log entries that are put into the journal by the {@link PreLeader} in order to commit entries
@@ -21,12 +21,12 @@ import org.opendaylight.controller.cluster.raft.spi.AbstractRaftDelta;
  *
  * @author Thomas Pantelis
  */
-// FIXME: Rename to TermLeaderDelta
+// FIXME: Rename to SetRaftLeader with a @NonNull leaderId()
 // FIXME: not ControlMessage?
 // FIXME: Should contain RaftVersions constant to indicate minimum required participant version. Incompatible peers
 //        should reject to persist the payload, eventually leading to new elections if necessary.
 @NonNullByDefault
-public final class NoopPayload extends AbstractRaftDelta implements ControlMessage {
+public final class NoopPayload extends AbstractRaftCommand implements ControlMessage {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
     private static final NP PROXY = new NP();

@@ -33,6 +33,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -69,7 +70,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     private DataPersistenceProvider mockDataPersistenceProvider;
     @Mock
     private Leader mockRaftActorBehavior;
-    @Mock
+    @Mock(answer = Answers.CALLS_REAL_METHODS)
     private ByteStateSnapshotCohort mockCohort;
     @Mock
     private ReplicatedLogEntry replicatedLogEntry;
@@ -314,7 +315,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         doReturn(Integer.MAX_VALUE).when(mockReplicatedLog).dataSize();
         ByteState snapshotState = ByteState.of(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
         doReturn(snapshotState).when(mockCohort).takeSnapshot();
-        doCallRealMethod().when(mockCohort).writeSnapshot(any(), any());
+        doCallRealMethod().when(mockCohort).support();
 
         // when replicatedToAllIndex = -1
         boolean capture = snapshotManager.captureToInstall(EntryInfo.of(9, 6), -1, "follower-1");

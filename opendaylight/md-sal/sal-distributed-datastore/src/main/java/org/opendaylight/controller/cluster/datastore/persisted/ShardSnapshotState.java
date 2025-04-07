@@ -23,9 +23,10 @@ public final class ShardSnapshotState implements Snapshot.State {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
-    @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This field is not Serializable but this class "
-            + "implements writeReplace to delegate serialization to a Proxy class and thus instances of this class "
-            + "aren't serialized. FindBugs does not recognize this.")
+    @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = """
+        This field is not Serializable but this class \
+        implements writeReplace to delegate serialization to a Proxy class and thus instances of this class \
+        aren't serialized. FindBugs does not recognize this.""")
     private final @NonNull ShardDataTreeSnapshot snapshot;
     private final boolean migrated;
 

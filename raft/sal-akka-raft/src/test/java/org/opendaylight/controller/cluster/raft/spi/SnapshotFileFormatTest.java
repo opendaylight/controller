@@ -96,7 +96,7 @@ class SnapshotFileFormatTest {
 
         final var file = tempDir.resolve(fileName);
         fileFormat.createNew(file, TIMESTAMP, EntryInfo.of(-1, -1), SERVER_CONFIG, entryCompress, ENTRIES,
-            stateCompress, ByteState.writer(), STATE);
+            stateCompress, ByteState.SUPPORT.writer(), STATE);
 
         assertTrue(Files.isRegularFile(file));
         assertEquals(expectedSize, Files.size(file));
@@ -108,7 +108,7 @@ class SnapshotFileFormatTest {
 
         assertEquals(new RaftSnapshot(SERVER_CONFIG, ENTRIES), open.readRaftSnapshot());
 
-        assertEquals(STATE, open.readSnapshot(ByteState.reader()));
+        assertEquals(STATE, open.readSnapshot(ByteState.SUPPORT.reader()));
     }
 
     private static List<Arguments> createAndOpen() {

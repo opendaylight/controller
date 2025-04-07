@@ -9,6 +9,8 @@ package org.opendaylight.controller.cluster.raft.persisted;
 
 import com.google.common.base.MoreObjects;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 
 /**
  * Empty Snapshot State implementation.
@@ -18,8 +20,27 @@ import org.eclipse.jdt.annotation.NonNull;
 public final class EmptyState implements Snapshot.State {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
-
     public static final @NonNull EmptyState INSTANCE = new EmptyState();
+    @NonNullByDefault
+    public static final StateSnapshot.Support<EmptyState> SUPPORT = new Support<>() {
+        @Override
+        public Class<EmptyState> snapshotType() {
+            return EmptyState.class;
+        }
+
+        @Override
+        public Reader<EmptyState> reader() {
+            // XXX: we really should be reading the bytes
+            return source -> INSTANCE;
+        }
+
+        @Override
+        public Writer<EmptyState> writer() {
+            return (snapshot, out) -> {
+                // No-op
+            };
+        }
+    };
 
     private EmptyState() {
         // Hidden on purpose

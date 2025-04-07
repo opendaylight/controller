@@ -287,15 +287,16 @@ public final class SnapshotManager {
         final var snapshot = typedCohort.takeSnapshot();
         final var persistence = context.getPersistenceProvider();
 
-        persistence.streamToInstall(request.lastApplied(), snapshot, typedCohort, (cause, installable) -> {
-            if (cause != null) {
-                task = Idle.INSTANCE;
-                LOG.error("{}: Error creating snapshot", memberId(), cause);
-                // FIXME: somehow route to leader, or something ...
-            } else {
-                persist(snapshot, installable);
-            }
-        });
+        persistence.streamToInstall(request.lastApplied(), snapshot, typedCohort.support().writer(),
+            (cause, installable) -> {
+                if (cause != null) {
+                    task = Idle.INSTANCE;
+                    LOG.error("{}: Error creating snapshot", memberId(), cause);
+                    // FIXME: somehow route to leader, or something ...
+                } else {
+                    persist(snapshot, installable);
+                }
+            });
         return true;
     }
 
@@ -355,7 +356,7 @@ public final class SnapshotManager {
 
         final Snapshot.State snapshotState;
         try {
-            snapshotState = snapshotCohort.readSnapshot(source);
+            snapshotState = snapshotCohort.support().reader().readSnapshot(source);
         } catch (IOException e) {
             LOG.debug("{}: failed to convert InstallSnapshot to state", memberId(), e);
             snapshot.callback().onFailure();
@@ -549,7 +550,7 @@ public final class SnapshotManager {
             final Snapshot.State state) {
         final T casted;
         try {
-            casted = cohort.stateClass().cast(state);
+            casted = cohort.support().snapshotType().cast(state);
         } catch (ClassCastException e) {
             LOG.warn("{}: not applyling state {}", memberId(), state, e);
             return;

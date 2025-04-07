@@ -7,16 +7,12 @@
  */
 package org.opendaylight.controller.cluster.raft.spi;
 
-import java.util.function.Consumer;
-import org.apache.pekko.persistence.JournalProtocol;
-import org.eclipse.jdt.annotation.NonNull;
-
 /**
  * This interface provides methods to persist data and is an abstraction of the akka-persistence persistence API.
  */
 // FIXME: find a better name for this interface. It is heavily influenced by Pekko Persistence, most notably the weird
 //        API around snapshots and message deletion -- which assumes the entity requesting it is the subclass itself.
-public interface DataPersistenceProvider extends SnapshotStore {
+public interface DataPersistenceProvider extends EntryStore, SnapshotStore {
     /**
      * Returns whether or not persistence recovery is applicable/enabled.
      *
@@ -26,47 +22,9 @@ public interface DataPersistenceProvider extends SnapshotStore {
     boolean isRecoveryApplicable();
 
     /**
-     * Persists an entry to the applicable journal synchronously.
-     *
-     * @param <T> the type of the journal entry
-     * @param entry the journal entry to persist
-     * @param callback the callback when persistence is complete
-     */
-    // FIXME: replace with:
-    //        void persist(Object entry) throws IOException
-    <T> void persist(@NonNull T entry, @NonNull Consumer<T> callback);
-
-    /**
-     * Persists an entry to the applicable journal asynchronously.
-     *
-     * @param <T> the type of the journal entry
-     * @param entry the journal entry to persist
-     * @param callback the callback when persistence is complete
-     */
-    // FIXME: replace with:
-    //        void persistAsync(T entry, BiConsumer<? super T, ? super Throwable> callback)
-    <T> void persistAsync(@NonNull T entry, @NonNull Consumer<T> callback);
-
-    /**
-     * Deletes journal entries up to the given sequence number.
-     *
-     * @param sequenceNumber the sequence number
-     */
-    // FIXME: throws IOException
-    void deleteMessages(long sequenceNumber);
-
-    /**
      * Returns the last sequence number contained in the journal.
      *
      * @return the last sequence number
      */
     long getLastSequenceNumber();
-
-    /**
-     * Receive and potentially handle a {@link JournalProtocol} response.
-     *
-     * @param response A {@link JournalProtocol} response
-     * @return {@code true} if the response was handled
-     */
-    boolean handleJournalResponse(JournalProtocol.@NonNull Response response);
 }

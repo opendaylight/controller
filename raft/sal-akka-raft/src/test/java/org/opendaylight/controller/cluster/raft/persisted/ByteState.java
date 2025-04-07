@@ -24,6 +24,26 @@ import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 public final class ByteState implements Snapshot.State {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
+    public static final StateSnapshot.Support<ByteState> SUPPORT = new Support<>() {
+        @Override
+        public Class<ByteState> snapshotType() {
+            return ByteState.class;
+        }
+
+        @Override
+        public Reader<ByteState> reader() {
+            return source -> {
+                try (var in = source.openStream()) {
+                    return ByteState.of(in.readAllBytes());
+                }
+            };
+        }
+
+        @Override
+        public Writer<ByteState> writer() {
+            return (snapshot, out) -> out.write(snapshot.bytes());
+        }
+    };
 
     private final byte[] bytes;
 
@@ -41,18 +61,6 @@ public final class ByteState implements Snapshot.State {
 
     public byte[] bytes() {
         return bytes;
-    }
-
-    public static StateSnapshot.Reader<ByteState> reader() {
-        return source -> {
-            try (var in = source.openStream()) {
-                return ByteState.of(in.readAllBytes());
-            }
-        };
-    }
-
-    public static StateSnapshot.Writer<ByteState> writer() {
-        return (snapshot, out) -> out.write(snapshot.bytes());
     }
 
     @Override

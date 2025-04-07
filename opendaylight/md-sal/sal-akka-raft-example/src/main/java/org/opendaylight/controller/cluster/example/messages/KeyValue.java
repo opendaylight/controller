@@ -7,9 +7,9 @@
  */
 package org.opendaylight.controller.cluster.example.messages;
 
-import org.opendaylight.controller.cluster.raft.spi.AbstractStateDelta;
+import org.opendaylight.controller.cluster.raft.spi.AbstractStateCommand;
 
-public final class KeyValue extends AbstractStateDelta {
+public final class KeyValue extends AbstractStateCommand {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 

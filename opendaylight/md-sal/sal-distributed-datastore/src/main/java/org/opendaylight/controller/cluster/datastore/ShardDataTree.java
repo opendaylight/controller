@@ -69,7 +69,7 @@ import org.opendaylight.controller.cluster.datastore.utils.DataTreeModificationO
 import org.opendaylight.controller.cluster.datastore.utils.PruningDataTreeModification;
 import org.opendaylight.controller.cluster.raft.base.messages.InitiateCaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
-import org.opendaylight.controller.cluster.raft.spi.AbstractStateDelta;
+import org.opendaylight.controller.cluster.raft.spi.AbstractStateCommand;
 import org.opendaylight.controller.cluster.raft.spi.ImmutableUnsignedLongSet;
 import org.opendaylight.mdsal.common.api.OptimisticLockFailedException;
 import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
@@ -485,7 +485,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         }
     }
 
-    private void replicatePayload(final Identifier id, final AbstractStateDelta payload,
+    private void replicatePayload(final Identifier id, final AbstractStateCommand payload,
             final @Nullable Runnable callback) {
         if (callback != null) {
             replicationCallbacks.put(payload, callback);

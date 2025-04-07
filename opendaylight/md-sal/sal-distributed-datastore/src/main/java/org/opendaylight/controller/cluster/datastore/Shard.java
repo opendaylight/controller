@@ -94,8 +94,8 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.messages.RequestLeadership;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
-import org.opendaylight.controller.cluster.raft.spi.AbstractStateDelta;
-import org.opendaylight.controller.cluster.raft.spi.StateDelta;
+import org.opendaylight.controller.cluster.raft.spi.AbstractStateCommand;
+import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev250130.DataStoreProperties.ExportOnRecovery;
 import org.opendaylight.yangtools.concepts.Identifier;
@@ -604,7 +604,7 @@ public class Shard extends RaftActor {
 
     // applyState() will be invoked once consensus is reached on the payload
     // non-final for mocking
-    void persistPayload(final Identifier id, final AbstractStateDelta payload, final boolean batchHint) {
+    void persistPayload(final Identifier id, final AbstractStateCommand payload, final boolean batchHint) {
         final boolean canSkipPayload = !hasFollowers() && !isRecoveryApplicable();
         if (canSkipPayload) {
             applyState(self(), id, payload);
@@ -665,8 +665,9 @@ public class Shard extends RaftActor {
     }
 
     @Override
-    protected final void applyState(final ActorRef clientActor, final Identifier identifier, final StateDelta data) {
-        if (data instanceof Payload payload) {
+    protected final void applyState(final ActorRef clientActor, final Identifier identifier,
+            final StateCommand command) {
+        if (command instanceof Payload payload) {
             if (payload instanceof DisableTrackingPayload disableTracking) {
                 LOG.debug("{}: ignoring legacy {}", memberId(), disableTracking);
                 return;
@@ -678,7 +679,7 @@ public class Shard extends RaftActor {
                 LOG.error("{}: Error applying replica {}", memberId(), identifier, e);
             }
         } else {
-            LOG.error("{}: Unknown state for {} received {}", memberId(), identifier, data);
+            LOG.error("{}: Unknown state for {} received {}", memberId(), identifier, command);
         }
     }
 

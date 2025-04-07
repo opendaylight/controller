@@ -65,7 +65,7 @@ import org.opendaylight.controller.cluster.raft.persisted.NoopPayload;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
-import org.opendaylight.controller.cluster.raft.spi.StateDelta;
+import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.raft.spi.FileBackedOutputStream;
@@ -605,8 +605,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             LOG.debug("{}: Applying state for log index {} data {}", memberId(), entry.index(), payload);
         }
 
-        if (payload instanceof StateDelta delta) {
-            applyState(applyState.getClientActor(), applyState.getIdentifier(), delta);
+        if (payload instanceof StateCommand stateCommand) {
+            applyState(applyState.getClientActor(), applyState.getIdentifier(), stateCommand);
         }
 
         final long elapsedTime = System.nanoTime() - startTime;
@@ -616,6 +616,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         }
 
         // Send the ApplyState message back to self to handle further processing asynchronously.
+        // FIXME: executeInSelf() invoking the further processing part
         self().tell(applyState, self());
     }
 
@@ -641,8 +642,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     /**
-     * Persists the given Payload in the journal and replicates to any followers. After successful completion,
-     * {@link #applyState(ActorRef, Identifier, StateDelta)} is notified.
+     * Persists the given {@link Payload} in the journal and replicates to any followers. After successful completion,
+     * {@link #applyState(ActorRef, Identifier, StateCommand)} is notified.
      *
      * @param clientActor optional ActorRef that is provided via the applyState callback
      * @param identifier the payload identifier
@@ -830,10 +831,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
      * @param identifier  The identifier of the persisted data. This is also the same identifier that was passed to
      *                    {@link #persistData(ActorRef, Identifier, Payload, boolean)} by the derived actor. May be
      *                    {@code null} when the RaftActor is behaving as a follower or during recovery
-     * @param delta       A piece of data that was persisted by the persistData call
+     * @param command     the {@link StateCommand} to apply
      */
     protected abstract void applyState(@Nullable ActorRef clientActor, @Nullable Identifier identifier,
-        @NonNull StateDelta delta);
+        @NonNull StateCommand command);
 
     /**
      * Returns the RaftActorRecoveryCohort to participate in persistence recovery.

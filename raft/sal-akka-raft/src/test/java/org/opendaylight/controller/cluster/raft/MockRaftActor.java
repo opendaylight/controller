@@ -10,13 +10,10 @@ package org.opendaylight.controller.cluster.raft;
 
 import static java.util.Objects.requireNonNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.mock;
 
 import com.google.common.util.concurrent.Uninterruptibles;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,13 +25,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Props;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage.CommitSnapshot;
-import org.opendaylight.controller.cluster.raft.spi.StateDelta;
-import org.opendaylight.raft.spi.StreamSource;
+import org.opendaylight.controller.cluster.raft.spi.StateCommand;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.Support;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,12 +63,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
 
         if (builder.snapshotCohort == null) {
             snapshotCohortDelegate = mock(MockRaftActorSnapshotCohort.class);
-            try {
-                doCallRealMethod().when(snapshotCohortDelegate).writeSnapshot(any(), any());
-                doCallRealMethod().when(snapshotCohortDelegate).readSnapshot(any());
-            } catch (IOException e) {
-                throw new AssertionError(e);
-            }
+            doCallRealMethod().when(snapshotCohortDelegate).support();
         } else {
             snapshotCohortDelegate = builder.snapshotCohort;
         }
@@ -138,7 +131,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     @Override
-    protected void applyState(final ActorRef clientActor, final Identifier identifier, final StateDelta delta) {
+    protected void applyState(final ActorRef clientActor, final Identifier identifier, final StateCommand delta) {
         actorDelegate.applyState(clientActor, identifier, delta);
         LOG.info("{}: applyState called: {}", memberId(), delta);
 
@@ -206,15 +199,10 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     @Override
-    public void writeSnapshot(final MockSnapshotState snapshot, final OutputStream out) throws IOException {
-        LOG.info("{}: writeSnapshot called", memberId());
-        snapshotCohortDelegate.writeSnapshot(snapshot, out);
-    }
-
-    @Override
-    public MockSnapshotState readSnapshot(final StreamSource source) throws IOException {
-        LOG.info("{}: readSnapshot called", memberId());
-        return snapshotCohortDelegate.readSnapshot(source);
+    @NonNullByDefault
+    public Support<MockSnapshotState> support() {
+        LOG.info("{}: support() called", memberId());
+        return snapshotCohortDelegate.support();
     }
 
     @Override

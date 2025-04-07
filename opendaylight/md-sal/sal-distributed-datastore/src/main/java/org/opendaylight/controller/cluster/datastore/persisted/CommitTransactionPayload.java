@@ -26,7 +26,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.raft.messages.IdentifiablePayload;
-import org.opendaylight.controller.cluster.raft.spi.StateDelta;
+import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.raft.spi.ByteArray;
 import org.opendaylight.raft.spi.ChunkedOutputStream;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.ReusableStreamReceiver;
@@ -47,7 +47,7 @@ public final class CommitTransactionPayload extends IdentifiablePayload<Transact
     public record CandidateTransaction(
             TransactionIdentifier transactionId,
             DataTreeCandidate candidate,
-            NormalizedNodeStreamVersion streamVersion) implements StateDelta {
+            NormalizedNodeStreamVersion streamVersion) implements StateCommand {
         public CandidateTransaction {
             requireNonNull(transactionId);
             requireNonNull(candidate);
@@ -141,7 +141,7 @@ public final class CommitTransactionPayload extends IdentifiablePayload<Transact
     @NonNullByDefault
     public CandidateTransaction getCandidate(final ReusableStreamReceiver receiver) throws IOException {
         try (var in = new DataInputStream(source.openStream())) {
-            return CandidateTransaction.reader(receiver).readDelta(in);
+            return CandidateTransaction.reader(receiver).readCommand(in);
         }
     }
 

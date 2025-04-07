@@ -8,15 +8,11 @@
 package org.opendaylight.controller.cluster.raft.spi;
 
 import org.opendaylight.controller.cluster.raft.messages.Payload;
-import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
-import org.opendaylight.controller.cluster.raft.persisted.NoopPayload;
-import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
 
 /**
- * Abstract base class for {@link RaftDelta} implementations.
+ * Abstract base class for {@link RaftCommand} implementations.
  */
-public abstract sealed class AbstractRaftDelta extends Payload implements RaftDelta
-        permits ClusterConfig, NoopPayload, ServerConfigurationPayload {
+public abstract non-sealed class AbstractStateCommand extends Payload implements StateCommand {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 }

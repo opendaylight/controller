@@ -30,6 +30,7 @@ public final class AppendEntries extends RaftRPC {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
+    // FIXME: split out to RaftRPC.FromLeader for sharing with InstallSnapshot
     // So that follower can redirect clients
     private final @NonNull String leaderId;
 

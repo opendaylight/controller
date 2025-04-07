@@ -7,19 +7,27 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
-import org.opendaylight.raft.api.EntryMeta;
+import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 
 /**
  * Represents one entry in the replicated log.
  */
-public interface ReplicatedLogEntry extends EntryMeta {
+@NonNullByDefault
+public interface ReplicatedLogEntry extends LogEntry {
     /**
      * Returns the payload/data to be replicated.
      *
      * @return the payload/data
      */
-    Payload getData();
+    @Deprecated(forRemoval = true)
+    default Payload getData() {
+        return command();
+    }
+
+    @Override
+    Payload command();
 
     /**
      * Returns the size of the entry in bytes. An approximate number may be good enough.
