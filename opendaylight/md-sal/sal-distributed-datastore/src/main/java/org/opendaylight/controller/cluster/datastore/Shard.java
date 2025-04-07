@@ -247,8 +247,7 @@ public class Shard extends RaftActor {
 
         dispatchers = new Dispatchers(getContext().system().dispatchers());
 
-        snapshotCohort = ShardSnapshotCohort.create(getContext(), builder.getId().getMemberName(), store, name,
-            datastoreContext);
+        snapshotCohort = ShardSnapshotCohort.create(builder.getId().getMemberName(), store, name, datastoreContext);
 
         responseMessageSlicer = MessageSlicer.builder().logContext(name)
                 .messageSliceSize(datastoreContext.getMaximumMessageSliceSize())
