@@ -822,7 +822,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertEquals("getLastIncludedTerm", lastInstallSnapshot.getLastIncludedTerm(),
             applySnapshot.lastEntry().term());
         assertEquals("getLastTerm", lastInstallSnapshot.getLastIncludedTerm(), lastInstallSnapshot.getTerm());
-        assertArrayEquals("getState", bsSnapshot.toByteArray(), applySnapshot.snapshot().openStream().readAllBytes());
+        assertArrayEquals("getState", bsSnapshot.toByteArray(),
+            applySnapshot.snapshot().io().openStream().readAllBytes());
         applySnapshot.callback().onSuccess();
 
         final var replies = MessageCollectorActor.getAllMatching(leaderActor, InstallSnapshotReply.class);

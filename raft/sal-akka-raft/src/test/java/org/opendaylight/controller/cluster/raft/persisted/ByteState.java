@@ -32,11 +32,7 @@ public final class ByteState implements Snapshot.State {
 
         @Override
         public Reader<ByteState> reader() {
-            return source -> {
-                try (var in = source.openStream()) {
-                    return ByteState.of(in.readAllBytes());
-                }
-            };
+            return in -> ByteState.of(in.readAllBytes());
         }
 
         @Override

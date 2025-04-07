@@ -8,9 +8,9 @@
 package org.opendaylight.controller.cluster.raft.spi;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.opendaylight.raft.spi.StreamSource;
 import org.opendaylight.yangtools.concepts.Immutable;
 
 /**
@@ -35,12 +35,11 @@ public interface StateSnapshot extends Immutable {
          * This method is called to de-serialize snapshot data that was previously serialized via
          * {@link Writer#writeSnapshot(StateSnapshot, OutputStream)}.
          *
-         * @param source the {@link StreamSource} containing the serialized data
+         * @param in the {@link InputStream} containing the serialized data
          * @return the converted snapshot State
-         * @throws IOException if an error occurs accessing the ByteSource or de-serializing
+         * @throws IOException if an I/O error occurs
          */
-        // TODO: just DataInput once we have dealt with LZ4 decompression retried open
-        T readSnapshot(StreamSource source) throws IOException;
+        T readSnapshot(InputStream in) throws IOException;
     }
 
     @FunctionalInterface
