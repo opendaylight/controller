@@ -51,7 +51,7 @@ public final class SegmentedByteBufJournal implements RaftJournal {
     private final @NonNull StorageLevel storageLevel;
     private final @NonNull File directory;
     private final @NonNull String name;
-    private final @NonNull EntryWriter writer;
+    private final @NonNull SegmentedByteBufWriter writer;
     private final int maxSegmentSize;
     private final int maxEntrySize;
     @Deprecated(forRemoval = true)
@@ -422,6 +422,7 @@ public final class SegmentedByteBufJournal implements RaftJournal {
     public void close() {
         if (currentSegment != null) {
             currentSegment = null;
+            writer.close();
             segments.values().forEach(JournalSegment::close);
             segments.clear();
         }
