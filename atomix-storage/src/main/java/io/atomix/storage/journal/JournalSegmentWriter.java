@@ -18,7 +18,6 @@ package io.atomix.storage.journal;
 import static io.atomix.storage.journal.SegmentEntry.HEADER_BYTES;
 import static java.util.Objects.requireNonNull;
 
-import io.atomix.storage.journal.JournalSegment.Inactive;
 import io.atomix.storage.journal.StorageException.TooLarge;
 import io.atomix.storage.journal.index.JournalIndex;
 import java.io.EOFException;
@@ -44,14 +43,6 @@ final class JournalSegmentWriter {
         this.segment = requireNonNull(segment);
         this.journalIndex = requireNonNull(journalIndex);
         this.currentPosition = currentPosition;
-    }
-
-    JournalSegmentWriter(final FileWriter fileWriter, final JournalSegment segment, final JournalIndex journalIndex,
-            final Inactive segmentState) {
-        this.fileWriter = requireNonNull(fileWriter);
-        this.segment = requireNonNull(segment);
-        this.journalIndex = requireNonNull(journalIndex);
-        currentPosition = segmentState.position();
     }
 
     int currentPosition() {
