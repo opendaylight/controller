@@ -268,7 +268,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 context.getSnapshotManager().trimLog(replicatedLog().getLastApplied());
             }
 
-            possiblyHandleBehaviorMessage(message);
+            possiblyHandleBehaviorMessage(applyState);
         } else if (message instanceof ApplyJournalEntries applyEntries) {
             LOG.debug("{}: Persisting ApplyJournalEntries with index={}", memberId(), applyEntries.getToIndex());
             persistence().persistAsync(applyEntries, unused -> { });
@@ -675,10 +675,18 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
      * @param identifier optional identifier to report back
      * @param command the command
      */
+    @VisibleForTesting
     @NonNullByDefault
-    protected final void submitCommand(final Identifier identifier, final AbstractStateCommand command,
+    public final void submitCommand(final Identifier identifier, final AbstractStateCommand command,
             final boolean batchHint) {
-        submitCommand(requireNonNull(identifier), (Payload) command, batchHint);
+        requireNonNull(identifier);
+        requireNonNull(command);
+
+        if (hasFollowers() || isRecoveryApplicable()) {
+            submitCommand(identifier, (Payload) command, batchHint);
+        } else {
+            applyCommand(identifier, command);
+        }
     }
 
     @NonNullByDefault
@@ -725,6 +733,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             getCurrentBehavior().handleMessage(self(),
                 new Replicate(logEntry.index(), !batchHint, identifier));
         }
+    }
+
+    private boolean hasFollowers() {
+        return context.hasFollowers();
     }
 
     private ReplicatedLog replicatedLog() {
@@ -812,6 +824,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         }
     }
 
+    @VisibleForTesting
     public final boolean isRecoveryApplicable() {
         return persistence().isRecoveryApplicable();
     }
@@ -928,10 +941,6 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         LOG.debug("{}: getLeaderAddress leaderId = {} peerAddress = {}", memberId(), leaderId, peerAddress);
 
         return peerAddress;
-    }
-
-    protected boolean hasFollowers() {
-        return context.hasFollowers();
     }
 
     private void captureSnapshot() {

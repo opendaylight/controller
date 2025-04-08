@@ -39,7 +39,6 @@ import org.apache.pekko.persistence.RecoveryCompleted;
 import org.apache.pekko.persistence.SnapshotOffer;
 import org.apache.pekko.serialization.JavaSerializer;
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.commands.ConnectClientRequest;
@@ -95,7 +94,6 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.messages.RequestLeadership;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
-import org.opendaylight.controller.cluster.raft.spi.AbstractStateCommand;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev250130.DataStoreProperties.ExportOnRecovery;
@@ -601,21 +599,6 @@ public class Shard extends RaftActor {
         setPersistence(datastoreContext.isPersistent());
 
         updateConfigParams(datastoreContext.getShardRaftConfig());
-    }
-
-    // applyState() will be invoked once consensus is reached on the payload
-    // non-final for mocking
-    @NonNullByDefault
-    void persistPayload(final Identifier id, final AbstractStateCommand payload, final boolean batchHint) {
-        requireNonNull(id);
-        requireNonNull(payload);
-        final boolean canSkipPayload = !hasFollowers() && !isRecoveryApplicable();
-        if (canSkipPayload) {
-            applyCommand(id, payload);
-        } else {
-            // We are faking the sender
-            submitCommand(id, payload, batchHint);
-        }
     }
 
     protected boolean isIsolatedLeader() {
