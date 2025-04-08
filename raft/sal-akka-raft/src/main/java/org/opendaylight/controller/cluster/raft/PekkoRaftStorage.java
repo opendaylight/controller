@@ -23,16 +23,19 @@ import org.apache.pekko.persistence.DeleteMessagesSuccess;
 import org.apache.pekko.persistence.DeleteSnapshotsSuccess;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SnapshotProtocol;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
+import org.opendaylight.controller.cluster.raft.spi.LogJournal;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFileFormat;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 import org.opendaylight.raft.api.EntryInfo;
+import org.opendaylight.raft.journal.StorageLevel;
 import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
 import org.slf4j.Logger;
@@ -42,15 +45,17 @@ import org.slf4j.LoggerFactory;
  * An {@link EnabledRaftStorage} backed by Pekko Persistence of an {@link RaftActor}.
  */
 // FIXME: remove this class once we have both Snapshots and Entries stored in files
-@NonNullByDefault
 final class PekkoRaftStorage extends EnabledRaftStorage {
     private static final Logger LOG = LoggerFactory.getLogger(PekkoRaftStorage.class);
     private static final HexFormat HF = HexFormat.of().withUpperCase();
 
     private static final String FILENAME_START_STR = "snapshot-";
 
-    private final RaftActor actor;
+    private final @NonNull RaftActor actor;
 
+    private LogJournal journal;
+
+    @NonNullByDefault
     PekkoRaftStorage(final RaftActor actor, final Path directory, final CompressionType compression,
             final Configuration streamConfig) {
         super(actor.memberId(), actor, directory, compression, streamConfig);
@@ -65,8 +70,8 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
     //     - determine nextSequence
 
     @Override
-    protected void postStart() {
-        // No-op
+    protected void postStart() throws IOException {
+        journal = new LogJournal(directory, StorageLevel.MAPPED, 512 * 1024 * 1024);
     }
 
     // FIXME:  and more: more things:
@@ -95,6 +100,7 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
         return first;
     }
 
+    @NonNullByDefault
     private List<SnapshotFile> listFiles() throws IOException {
         if (!Files.exists(directory)) {
             LOG.debug("{}: directory {} does not exist", memberId, directory);
@@ -111,6 +117,7 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
         return ret;
     }
 
+    @NonNullByDefault
     private @Nullable SnapshotFile pathToFile(final Path path) {
         if (!Files.isRegularFile(path)) {
             LOG.debug("{}: skipping non-file {}", memberId, path);
@@ -171,6 +178,7 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
     }
 
     @Override
+    @NonNullByDefault
     public <T extends StateSnapshot> void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
             final @Nullable T snapshot, final StateSnapshot.Writer<T> writer, final RaftCallback<Instant> callback) {
         requireNonNull(raftSnapshot);
@@ -188,6 +196,7 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
     }
 
     @Override
+    @NonNullByDefault
     public <T extends StateSnapshot> void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
             final @Nullable T snapshot, final StateSnapshot.Writer<T> writer, final Instant timestamp)
                 throws IOException {

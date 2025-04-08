@@ -24,6 +24,7 @@ module org.opendaylight.controller.cluster.raft {
     opens org.opendaylight.controller.cluster.raft to org.opendaylight.controller.repackaged.pekko;
 
     requires transitive org.opendaylight.raft.api;
+    requires transitive org.opendaylight.raft.journal;
     requires transitive org.opendaylight.raft.spi;
     requires transitive org.opendaylight.yangtools.concepts;
     requires transitive org.opendaylight.controller.repackaged.pekko;
