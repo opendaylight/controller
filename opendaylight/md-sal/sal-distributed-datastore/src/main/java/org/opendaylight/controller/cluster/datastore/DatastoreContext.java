@@ -24,7 +24,7 @@ import org.opendaylight.controller.cluster.raft.ConfigParams;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.PeerAddressResolver;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
-import org.opendaylight.raft.spi.CompressionSupport;
+import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev250130.DataStoreProperties.ExportOnRecovery;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import scala.concurrent.duration.FiniteDuration;
@@ -139,7 +139,7 @@ public class DatastoreContext implements ClientActorConfig {
         noProgressTimeout = other.noProgressTimeout;
         initialPayloadSerializedBufferCapacity = other.initialPayloadSerializedBufferCapacity;
         useLz4Compression = other.useLz4Compression;
-        raftConfig.setPreferredCompression(useLz4Compression ? CompressionSupport.LZ4 : CompressionSupport.NONE);
+        raftConfig.setPreferredCompression(useLz4Compression ? CompressionType.LZ4 : CompressionType.NONE);
         exportOnRecovery = other.exportOnRecovery;
         recoveryExportBaseDir = other.recoveryExportBaseDir;
 
@@ -567,7 +567,7 @@ public class DatastoreContext implements ClientActorConfig {
         public Builder useLz4Compression(final boolean value) {
             datastoreContext.useLz4Compression = value;
             datastoreContext.raftConfig.setPreferredCompression(
-                value ? CompressionSupport.LZ4 : CompressionSupport.NONE);
+                value ? CompressionType.LZ4 : CompressionType.NONE);
             return this;
         }
 

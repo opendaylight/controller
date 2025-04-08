@@ -25,7 +25,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.opendaylight.raft.api.EntryInfo;
-import org.opendaylight.raft.spi.CompressionSupport;
+import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.FileBackedOutputStream;
 import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
 import org.opendaylight.raft.spi.InstallableSnapshot;
@@ -110,7 +110,7 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
     private static final Logger LOG = LoggerFactory.getLogger(RaftStorage.class);
 
     protected final @NonNull ExecuteInSelfActor executeInSelf;
-    protected final @NonNull CompressionSupport compression;
+    protected final @NonNull CompressionType compression;
     protected final @NonNull String memberId;
     protected final @NonNull Path directory;
 
@@ -120,7 +120,7 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
     private ExecutorService executor;
 
     protected RaftStorage(final String memberId, final ExecuteInSelfActor executeInSelf, final Path directory,
-            final CompressionSupport compression, final Configuration streamConfig) {
+            final CompressionType compression, final Configuration streamConfig) {
         this.memberId = requireNonNull(memberId);
         this.executeInSelf = requireNonNull(executeInSelf);
         this.directory = requireNonNull(directory);

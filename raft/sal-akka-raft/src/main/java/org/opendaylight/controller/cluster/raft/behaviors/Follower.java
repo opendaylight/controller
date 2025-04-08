@@ -39,7 +39,7 @@ import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.api.TermInfo;
-import org.opendaylight.raft.spi.CompressionSupport;
+import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.PlainSnapshotSource;
 import org.opendaylight.raft.spi.SizedStreamSource;
 import org.opendaylight.raft.spi.SnapshotSource;
@@ -680,7 +680,7 @@ public class Follower extends RaftActorBehavior {
 
     @NonNullByDefault
     private static SnapshotSource createSource(final SizedStreamSource io,
-            final @Nullable CompressionSupport compression) {
+            final @Nullable CompressionType compression) {
         return compression != null ? compression.nativeSource(io) : guessSource(io);
     }
 
@@ -695,7 +695,7 @@ public class Follower extends RaftActorBehavior {
             final var magic = in.readInt();
             if (magic == 0x184D2204) {
                 // Try deserialization
-                final var src = CompressionSupport.LZ4.nativeSource(io);
+                final var src = CompressionType.LZ4.nativeSource(io);
                 src.io().openStream().close();
                 return src;
             }

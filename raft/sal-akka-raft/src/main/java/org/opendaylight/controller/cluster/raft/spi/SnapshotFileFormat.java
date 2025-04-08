@@ -20,7 +20,7 @@ import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.TermInfo;
-import org.opendaylight.raft.spi.CompressionSupport;
+import org.opendaylight.raft.spi.CompressionType;
 
 /**
  * All supported snapshot file formats. Content closely mirrors {@link Snapshot}, but does not include {@link TermInfo}
@@ -34,8 +34,8 @@ public enum SnapshotFileFormat {
         @Override
         public <T extends StateSnapshot> void createNew(final Path file, final Instant timestamp,
                 final EntryInfo lastIncluded, final ClusterConfig serverConfig,
-                final CompressionSupport entryCompress, final List<ReplicatedLogEntry> unappliedEntries,
-                final CompressionSupport stateCompress, final StateSnapshot.Writer<T> stateWriter, final T state)
+                final CompressionType entryCompress, final List<ReplicatedLogEntry> unappliedEntries,
+                final CompressionType stateCompress, final StateSnapshot.Writer<T> stateWriter, final T state)
                     throws IOException {
             SnapshotFileV1.createNew(file, timestamp, lastIncluded, serverConfig, entryCompress, unappliedEntries,
                 stateCompress, stateWriter, state);
@@ -72,10 +72,10 @@ public enum SnapshotFileFormat {
     }
 
     /**
-     * Returns the {@link CompressionSupport} corresponding to specified file name by examining its extension.
+     * Returns the {@link CompressionType} corresponding to specified file name by examining its extension.
      *
      * @param fileName the file name
-     * @return the {@link CompressionSupport}, or {@code null} if the file extension is not recognized.
+     * @return the {@link CompressionType}, or {@code null} if the file extension is not recognized.
      */
     public static @Nullable SnapshotFileFormat forFileName(final String fileName) {
         for (var format : values()) {
@@ -102,8 +102,8 @@ public enum SnapshotFileFormat {
      * @throws IOException if an I/O error occurs
      */
     public abstract <T extends StateSnapshot> void createNew(Path file, Instant timestamp, EntryInfo lastIncluded,
-        ClusterConfig serverConfig, CompressionSupport entryCompress, List<ReplicatedLogEntry> unappliedEntries,
-        CompressionSupport stateCompress, StateSnapshot.Writer<T> stateWriter, T state) throws IOException;
+        ClusterConfig serverConfig, CompressionType entryCompress, List<ReplicatedLogEntry> unappliedEntries,
+        CompressionType stateCompress, StateSnapshot.Writer<T> stateWriter, T state) throws IOException;
 
     /**
      * Open an existing file of this format.

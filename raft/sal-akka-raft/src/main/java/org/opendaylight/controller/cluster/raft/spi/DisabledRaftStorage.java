@@ -18,7 +18,7 @@ import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
-import org.opendaylight.raft.spi.CompressionSupport;
+import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
 
 /**
@@ -45,7 +45,7 @@ public final class DisabledRaftStorage extends RaftStorage implements ImmediateD
     private final ActorRef actorRef;
 
     public DisabledRaftStorage(final String memberId, final ExecuteInSelfActor executeInSelf, final Path directory,
-            final ActorRef actorRef, final CompressionSupport compression, final Configuration streamConfig) {
+            final ActorRef actorRef, final CompressionType compression, final Configuration streamConfig) {
         super(memberId, executeInSelf, directory, compression, streamConfig);
         this.actorRef = requireNonNull(actorRef);
     }

@@ -34,7 +34,7 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.TermInfo;
-import org.opendaylight.raft.spi.CompressionSupport;
+import org.opendaylight.raft.spi.CompressionType;
 
 class SnapshotFileFormatTest {
     // see https://www.trcp.org/2011/01/18/it-is-not-the-critic-who-counts/
@@ -68,7 +68,7 @@ class SnapshotFileFormatTest {
 
     @ParameterizedTest
     @MethodSource
-    void legacySizes(final CompressionSupport compressed, final long expectedSize) throws Exception {
+    void legacySizes(final CompressionType compressed, final long expectedSize) throws Exception {
         // Not quite what LocalSnapshotStore is doing, but close enough for comparison
         try (var baos = new ByteArrayOutputStream()) {
             try (var oos = new ObjectOutputStream(compressed.encodeOutput(baos))) {
@@ -81,14 +81,14 @@ class SnapshotFileFormatTest {
 
     private static List<Arguments> legacySizes() {
         return List.of(
-            arguments(CompressionSupport.NONE, 1191),
-            arguments(CompressionSupport.LZ4, 944));
+            arguments(CompressionType.NONE, 1191),
+            arguments(CompressionType.LZ4, 944));
     }
 
     @ParameterizedTest
     @MethodSource
-    void createAndOpen(final String extension, final CompressionSupport entryCompress,
-            final CompressionSupport stateCompress, final long expectedSize, final String expectedBytes)
+    void createAndOpen(final String extension, final CompressionType entryCompress,
+            final CompressionType stateCompress, final long expectedSize, final String expectedBytes)
                 throws Exception {
         final var fileName = "test" + extension;
         final var fileFormat = SnapshotFileFormat.forFileName(fileName);
@@ -114,7 +114,7 @@ class SnapshotFileFormatTest {
     private static List<Arguments> createAndOpen() {
         return List.of(
             // Note: vs. 1191, clear win: no Serializable overhead
-            arguments(".v1", CompressionSupport.NONE, CompressionSupport.NONE, 1059, """
+            arguments(".v1", CompressionType.NONE, CompressionType.NONE, 1059, """
                 B7804CE300000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF12010000000000002304000000000000E758ED670000000023933F3\
                 98F3755FA0000000200086D656D6265722D310000086D656D6265722D320100000002ACED000577080000000000000000737200\
                 536F72672E6F70656E6461796C696768742E636F6E74726F6C6C65722E636C75737465722E726166742E7065727369737465642\
@@ -136,7 +136,7 @@ class SnapshotFileFormatTest {
                 2074686F736520636F6C6420616E642074696D696420736F756C732077686F206B6E6577206E65697468657220766963746F727\
                 9206E6F72206465666561742E0AE280945468656F646F726520526F6F736576656C740A5370656563682061742074686520536F\
                 72626F6E6E652C2050617269732C20417072696C2032332C2031393130"""),
-            arguments(".v1", CompressionSupport.NONE, CompressionSupport.LZ4, 964, """
+            arguments(".v1", CompressionType.NONE, CompressionType.LZ4, 964, """
                 B7804CE300008000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF1201000000000000C403000000000000E758ED670000000023933F3\
                 94A0C0B2D0000000200086D656D6265722D310000086D656D6265722D320100000002ACED000577080000000000000000737200\
                 536F72672E6F70656E6461796C696768742E636F6E74726F6C6C65722E636C75737465722E726166742E7065727369737465642\
@@ -156,7 +156,7 @@ class SnapshotFileFormatTest {
                 6C206E657665722062653101212074C70141636F6C647D009174696D696420736F755700F4306F206B6E6577206E65697468657\
                 220766963746F7279206E6F72206465666561742E0AE280945468656F646F726520526F6F736576656C740A5370656563681001\
                 F010536F72626F6E6E652C2050617269732C20417072696C2032332C203139313000000000"""),
-            arguments(".v1", CompressionSupport.LZ4, CompressionSupport.NONE, 1050, """
+            arguments(".v1", CompressionType.LZ4, CompressionType.NONE, 1050, """
                 B7804CE300800000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF09010000000000001A04000000000000E758ED670000000023933F3\
                 98BEC31380000000200086D656D6265722D310000086D656D6265722D32010000000204224D186050FBA400000073ACED000577\
                 08000100F348737200536F72672E6F70656E6461796C696768742E636F6E74726F6C6C65722E636C75737465722E726166742E7\
@@ -179,7 +179,7 @@ class SnapshotFileFormatTest {
                 561742E0AE280945468656F646F726520526F6F736576656C740A5370656563682061742074686520536F72626F6E6E652C2050\
                 617269732C20417072696C2032332C2031393130"""),
             // Note: vs. 944 , slight loss: we have uncompressed header and two separate LZ4 streams
-            arguments(".v1", CompressionSupport.LZ4, CompressionSupport.LZ4, 955, """
+            arguments(".v1", CompressionType.LZ4, CompressionType.LZ4, 955, """
                 B7804CE300808000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0901000000000000BB03000000000000E758ED670000000023933F3\
                 93D1324B10000000200086D656D6265722D310000086D656D6265722D32010000000204224D186050FBA400000073ACED000577\
                 08000100F348737200536F72672E6F70656E6461796C696768742E636F6E74726F6C6C65722E636C75737465722E726166742E7\

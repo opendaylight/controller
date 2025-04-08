@@ -31,7 +31,7 @@ import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFileFormat;
 import org.opendaylight.raft.api.EntryInfo;
-import org.opendaylight.raft.spi.CompressionSupport;
+import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,7 +90,7 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
 
     private final RaftActor actor;
 
-    PekkoRaftStorage(final RaftActor actor, final Path directory, final CompressionSupport compression,
+    PekkoRaftStorage(final RaftActor actor, final Path directory, final CompressionType compression,
             final Configuration streamConfig) {
         super(actor.memberId(), actor, directory, compression, streamConfig);
         this.actor = requireNonNull(actor);

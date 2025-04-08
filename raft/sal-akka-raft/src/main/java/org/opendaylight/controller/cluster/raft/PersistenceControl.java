@@ -19,7 +19,7 @@ import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage;
 import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
 import org.opendaylight.controller.cluster.raft.spi.ForwardingDataPersistenceProvider;
-import org.opendaylight.raft.spi.CompressionSupport;
+import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
 
 /**
@@ -50,7 +50,7 @@ final class PersistenceControl extends ForwardingDataPersistenceProvider {
         delegate = disabledStorage;
     }
 
-    PersistenceControl(final RaftActor raftActor, final Path directory, final CompressionSupport compression,
+    PersistenceControl(final RaftActor raftActor, final Path directory, final CompressionType compression,
             final Configuration streamConfig) {
         this(new DisabledRaftStorage(raftActor.memberId(), raftActor, directory, raftActor.self(), compression,
             streamConfig), new PekkoRaftStorage(raftActor, directory, compression, streamConfig));

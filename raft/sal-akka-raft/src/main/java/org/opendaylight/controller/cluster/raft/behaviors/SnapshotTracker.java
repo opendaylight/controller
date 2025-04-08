@@ -15,7 +15,7 @@ import java.util.Arrays;
 import java.util.OptionalInt;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.raft.spi.CompressionSupport;
+import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.FileBackedOutputStream;
 import org.opendaylight.raft.spi.SizedStreamSource;
 import org.slf4j.Logger;
@@ -32,7 +32,7 @@ class SnapshotTracker implements AutoCloseable {
     private final @NonNull BufferedOutputStream bufferedStream;
     private final @NonNull FileBackedOutputStream fileBackedStream;
     private final @NonNull String logName;
-    private final @Nullable CompressionSupport compression;
+    private final @Nullable CompressionType compression;
 
     private int lastChunkIndex = LeaderInstallSnapshotState.FIRST_CHUNK_INDEX - 1;
     private boolean sealed = false;
@@ -40,7 +40,7 @@ class SnapshotTracker implements AutoCloseable {
     private long count;
 
     SnapshotTracker(final String logName, final int totalChunks, final String leaderId,
-            final FileBackedOutputStream fileBackedStream, final @Nullable CompressionSupport compression) {
+            final FileBackedOutputStream fileBackedStream, final @Nullable CompressionType compression) {
         this.logName = requireNonNull(logName);
         this.totalChunks = totalChunks;
         this.leaderId = requireNonNull(leaderId);
@@ -99,7 +99,7 @@ class SnapshotTracker implements AutoCloseable {
         return fileBackedStream.toStreamSource();
     }
 
-    CompressionSupport compression() {
+    CompressionType compression() {
         return compression;
     }
 

@@ -16,7 +16,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * Enumeration of compression schemes we support for data streams and {@link SnapshotSource}s.
  */
 @NonNullByDefault
-public enum CompressionSupport {
+public enum CompressionType {
     /**
      * No compression at all.
      */
@@ -60,7 +60,6 @@ public enum CompressionSupport {
             //   time :)
             return Lz4Support.newCompressOutputStream(out, Lz4BlockSize.LZ4_256KB);
         }
-
     };
 
     /**
@@ -90,5 +89,4 @@ public enum CompressionSupport {
      * @throws IOException when an I/O error occurs
      */
     public abstract OutputStream encodeOutput(OutputStream out) throws IOException;
-
 }

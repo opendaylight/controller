@@ -11,7 +11,7 @@ import java.nio.file.Path;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.opendaylight.controller.cluster.raft.RaftActor;
-import org.opendaylight.raft.spi.CompressionSupport;
+import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
 
 /**
@@ -20,7 +20,7 @@ import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
 @NonNullByDefault
 public abstract non-sealed class EnabledRaftStorage extends RaftStorage {
     protected EnabledRaftStorage(final String memberId, final ExecuteInSelfActor executeInSelf, final Path directory,
-            final CompressionSupport compression, final Configuration streamConfig) {
+            final CompressionType compression, final Configuration streamConfig) {
         super(memberId, executeInSelf, directory, compression, streamConfig);
     }
 

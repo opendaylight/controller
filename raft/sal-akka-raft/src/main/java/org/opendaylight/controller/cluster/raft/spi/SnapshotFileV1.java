@@ -36,7 +36,7 @@ import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.raft.api.EntryInfo;
-import org.opendaylight.raft.spi.CompressionSupport;
+import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.FileStreamSource;
 import org.opendaylight.raft.spi.SnapshotSource;
 import org.slf4j.Logger;
@@ -93,13 +93,13 @@ final class SnapshotFileV1 implements SnapshotFile {
     private final Path file;
     private final EntryInfo lastIncluded;
     private final Instant timestamp;
-    private final CompressionSupport entryCompress;
-    private final CompressionSupport stateCompress;
+    private final CompressionType entryCompress;
+    private final CompressionType stateCompress;
     private final FileStreamSource serverStream;
     private final FileStreamSource stateStream;
 
     SnapshotFileV1(final Path file, final EntryInfo lastIncluded, final Instant timestamp,
-            final CompressionSupport entryCompress, final CompressionSupport stateCompress,
+            final CompressionType entryCompress, final CompressionType stateCompress,
             final long sso, final long limit) {
         this.file = requireNonNull(file);
         this.lastIncluded = requireNonNull(lastIncluded);
@@ -112,8 +112,8 @@ final class SnapshotFileV1 implements SnapshotFile {
 
     static <T extends StateSnapshot> void createNew(final Path file, final Instant timestamp,
             final EntryInfo lastIncluded, final ClusterConfig serverConfig,
-            final CompressionSupport entryCompress, final List<ReplicatedLogEntry> unappliedEntries,
-            final CompressionSupport stateCompress, final StateSnapshot.Writer<T> stateWriter, final T state)
+            final CompressionType entryCompress, final List<ReplicatedLogEntry> unappliedEntries,
+            final CompressionType stateCompress, final StateSnapshot.Writer<T> stateWriter, final T state)
                 throws IOException {
         final var entryFormat = computeFormat(entryCompress, "entry");
         final var stateFormat = computeFormat(stateCompress, "state");
@@ -198,7 +198,7 @@ final class SnapshotFileV1 implements SnapshotFile {
         }
     }
 
-    private static byte computeFormat(final CompressionSupport compress, final String which) throws IOException {
+    private static byte computeFormat(final CompressionType compress, final String which) throws IOException {
         return switch (compress) {
             case NONE -> COMPRESS_NONE | SERDES_STATELESS;
             case LZ4 -> COMPRESS_LZ4 | SERDES_STATELESS;
@@ -292,10 +292,10 @@ final class SnapshotFileV1 implements SnapshotFile {
             stateCompress, sso, limit);
     }
 
-    private static CompressionSupport selectCompression(final byte format, final String which) throws IOException {
+    private static CompressionType selectCompression(final byte format, final String which) throws IOException {
         return switch (format & COMPRESS_MASK) {
-            case COMPRESS_NONE -> CompressionSupport.NONE;
-            case COMPRESS_LZ4 -> CompressionSupport.LZ4;
+            case COMPRESS_NONE -> CompressionType.NONE;
+            case COMPRESS_LZ4 -> CompressionType.LZ4;
             default -> throw new IOException("Unhandled compression in " + which + " format " + HF.toHexDigits(format));
         };
     }
