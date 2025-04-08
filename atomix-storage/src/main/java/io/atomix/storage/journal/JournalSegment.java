@@ -51,14 +51,16 @@ final class JournalSegment {
      * Journal segment is active, i.e. there is a associated with it.
      */
     @NonNullByDefault
-    record Active(FileAccess access, JournalSegmentWriter writer) implements State {
+    private record Active(FileAccess access, FileWriter fileWriter, JournalSegmentWriter writer) implements State {
         Active {
             requireNonNull(access);
+            requireNonNull(fileWriter);
             requireNonNull(writer);
         }
 
         Inactive deactivate() {
             final var inactive = new Inactive(writer.currentPosition());
+            fileWriter.release();
             access.close();
             return inactive;
         }
@@ -68,11 +70,12 @@ final class JournalSegment {
      * Journal segment is inactive, i.e. there is no writer associated with it.
      */
     @NonNullByDefault
-    record Inactive(int position) implements State {
+    private record Inactive(int position) implements State {
         Active activate(final JournalSegment segment) throws IOException {
             final var access = segment.file.newAccess(segment.storageLevel, segment.maxEntrySize);
-            return new Active(access, new JournalSegmentWriter(access.newFileWriter(), segment, segment.journalIndex,
-                position));
+            final var fileWriter = access.newFileWriter();
+            return new Active(access, fileWriter,
+                new JournalSegmentWriter(fileWriter, segment, segment.journalIndex, position));
         }
     }
 
