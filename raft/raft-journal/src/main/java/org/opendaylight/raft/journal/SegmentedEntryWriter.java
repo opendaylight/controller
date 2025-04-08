@@ -55,10 +55,7 @@ final class SegmentedEntryWriter implements EntryWriter {
 
     //  Slow path: we do not have enough capacity
     private <T> int appendToNextSegment(final ToByteBufMapper<T> mapper, final T entry) throws IOException {
-        currentWriter.flush();
-        currentSegment.releaseWriter();
-        currentSegment = journal.createNextSegment();
-        currentWriter = currentSegment.acquireWriter();
+        checkpoint();
         return verifyNotNull(currentWriter.append(mapper, entry));
     }
 
@@ -104,6 +101,14 @@ final class SegmentedEntryWriter implements EntryWriter {
     @Override
     public void flush() throws IOException {
         currentWriter.flush();
+    }
+
+    @Override
+    public void checkpoint() throws IOException {
+        currentWriter.flush();
+        currentSegment.releaseWriter();
+        currentSegment = journal.createNextSegment();
+        currentWriter = currentSegment.acquireWriter();
     }
 
     void close() {

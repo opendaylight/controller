@@ -63,4 +63,11 @@ public interface EntryWriter {
      * @throws IOException when an I/O error occurs
      */
     void flush() throws IOException;
+
+    /**
+     * Checkpoints current state so that it can be easily trimmed in the future.
+     *
+     * @throws IOException when an I/O error occurs
+     */
+    void checkpoint() throws IOException;
 }

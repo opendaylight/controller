@@ -37,7 +37,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A {@link RaftJournal} Implementation.
+ * A {@link RaftJournal} Implementation based on append-only files which are rolled one after another. When
+ * a {@link EntryWriter#checkpoint()} is requested, current file is closed and a new one is created.
  */
 public final class SegmentedRaftJournal implements RaftJournal {
     private static final Logger LOG = LoggerFactory.getLogger(SegmentedRaftJournal.class);
