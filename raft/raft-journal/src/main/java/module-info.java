@@ -20,6 +20,7 @@ module org.opendaylight.controller.raft.journal {
     exports org.opendaylight.controller.raft.journal;
 
     requires transitive io.netty.buffer;
+    requires transitive io.netty.common;
 
     // Annotations
     requires static transitive org.eclipse.jdt.annotation;
