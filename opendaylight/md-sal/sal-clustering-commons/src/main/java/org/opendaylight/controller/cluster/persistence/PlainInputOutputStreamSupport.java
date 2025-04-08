@@ -5,13 +5,14 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.raft.spi;
+package org.opendaylight.controller.cluster.persistence;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.raft.spi.StreamSource;
 
 final class PlainInputOutputStreamSupport extends InputOutputStreamFactory {
     static final @NonNull PlainInputOutputStreamSupport INSTANCE = new PlainInputOutputStreamSupport();

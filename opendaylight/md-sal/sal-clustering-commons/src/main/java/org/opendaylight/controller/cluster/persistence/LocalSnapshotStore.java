@@ -43,7 +43,6 @@ import org.apache.pekko.persistence.snapshot.japi.SnapshotStore;
 import org.apache.pekko.serialization.JavaSerializer;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.raft.spi.FileStreamSource;
-import org.opendaylight.raft.spi.InputOutputStreamFactory;
 import org.opendaylight.raft.spi.Lz4BlockSize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

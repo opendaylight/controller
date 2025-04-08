@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.raft.spi;
+package org.opendaylight.controller.cluster.persistence;
 
 import static java.util.Objects.requireNonNull;
 
@@ -20,12 +20,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.opendaylight.raft.spi.Lz4BlockSize;
+import org.opendaylight.raft.spi.StreamSource;
 
 /**
  * Support for opening {@link InputStream}s -- be it {@link #simple()} or {@link #lz4(Lz4BlockSize)}.
  */
-public abstract sealed class InputOutputStreamFactory
-        permits LZ4InputOutputStreamSupport, PlainInputOutputStreamSupport {
+abstract sealed class InputOutputStreamFactory permits LZ4InputOutputStreamSupport, PlainInputOutputStreamSupport {
     InputOutputStreamFactory() {
         // Hidden on purpose
     }
