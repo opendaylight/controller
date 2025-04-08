@@ -491,7 +491,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         if (callback != null) {
             replicationCallbacks.put(payload, callback);
         }
-        shard.persistPayload(id, payload, true);
+        shard.submitCommand(id, payload, true);
     }
 
     private void payloadReplicationComplete(final AbstractIdentifiablePayload<?> payload) {
@@ -1140,7 +1140,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         boolean replicationBatchHint = peekNextPendingCommit();
 
         // Once completed, we will continue via payloadReplicationComplete
-        shard.persistPayload(txId, payload, replicationBatchHint);
+        shard.submitCommand(txId, payload, replicationBatchHint);
 
         current.setLastAccess(readTime());
 

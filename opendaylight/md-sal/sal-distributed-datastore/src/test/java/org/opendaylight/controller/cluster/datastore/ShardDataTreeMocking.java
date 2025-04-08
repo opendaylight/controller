@@ -184,7 +184,7 @@ public final class ShardDataTreeMocking {
         doAnswer(invocation -> {
             shardDataTree.applyReplicatedPayload(invocation.getArgument(0), invocation.getArgument(1));
             return null;
-        }).when(mockShard).persistPayload(any(TransactionIdentifier.class), any(CommitTransactionPayload.class),
+        }).when(mockShard).submitCommand(any(TransactionIdentifier.class), any(CommitTransactionPayload.class),
                 anyBoolean());
     }
 }
