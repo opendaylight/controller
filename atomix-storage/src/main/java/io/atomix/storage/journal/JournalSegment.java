@@ -72,7 +72,7 @@ final class JournalSegment {
         Active activate(final JournalSegment segment) throws IOException {
             final var access = segment.file.newAccess(segment.storageLevel, segment.maxEntrySize);
             return new Active(access, new JournalSegmentWriter(access.newFileWriter(), segment, segment.journalIndex,
-                this));
+                position));
         }
     }
 
