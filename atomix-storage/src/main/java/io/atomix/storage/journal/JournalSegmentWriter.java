@@ -39,14 +39,6 @@ final class JournalSegmentWriter {
     private int currentPosition;
 
     JournalSegmentWriter(final FileWriter fileWriter, final JournalSegment segment, final JournalIndex journalIndex,
-            final int currentPosition) {
-        this.fileWriter = requireNonNull(fileWriter);
-        this.segment = requireNonNull(segment);
-        this.journalIndex = requireNonNull(journalIndex);
-        this.currentPosition = currentPosition;
-    }
-
-    JournalSegmentWriter(final FileWriter fileWriter, final JournalSegment segment, final JournalIndex journalIndex,
             final Inactive segmentState) {
         this.fileWriter = requireNonNull(fileWriter);
         this.segment = requireNonNull(segment);
