@@ -434,7 +434,7 @@ public class Follower extends RaftActorBehavior {
 
     @Override
     final ApplyState getApplyStateFor(final ReplicatedLogEntry entry) {
-        return new ApplyState(null, null, entry);
+        return new ApplyState(null, entry);
     }
 
     @Override

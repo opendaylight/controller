@@ -7,9 +7,8 @@
  */
 package org.opendaylight.controller.cluster.raft.base.messages;
 
-import org.apache.pekko.actor.ActorRef;
 import org.opendaylight.yangtools.concepts.Identifier;
 
-public record Replicate(long logIndex, boolean sendImmediate, ActorRef clientActor, Identifier identifier) {
+public record Replicate(long logIndex, boolean sendImmediate, Identifier identifier) {
     // Nothing else here
 }

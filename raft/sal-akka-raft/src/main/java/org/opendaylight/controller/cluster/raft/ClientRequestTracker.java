@@ -7,17 +7,21 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import org.apache.pekko.actor.ActorRef;
+import static java.util.Objects.requireNonNull;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.yangtools.concepts.Identifier;
 
 /**
  * Consensus forwarding tracker.
  *
- * @param clientActor the client actor that should be sent a response when consensus is achieved
  * @param identifier the identifier of the object that is to be replicated. For example a transaction identifier in the
  *        case of a transaction
  * @param logIndex the index of the log entry that is to be replicated
  */
-public record ClientRequestTracker(long logIndex, ActorRef clientActor, Identifier identifier) {
-
+@NonNullByDefault
+public record ClientRequestTracker(long logIndex, Identifier identifier) {
+    public ClientRequestTracker {
+        requireNonNull(identifier);
+    }
 }

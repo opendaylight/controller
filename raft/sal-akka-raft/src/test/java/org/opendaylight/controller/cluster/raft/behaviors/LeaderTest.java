@@ -171,7 +171,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
     private RaftActorBehavior sendReplicate(final MockRaftActorContext actorContext, final long term, final long index,
             final Payload payload) {
         actorContext.getReplicatedLog().append(new SimpleReplicatedLogEntry(index, term, payload));
-        return leader.handleMessage(leaderActor, new Replicate(index, true, null, null));
+        return leader.handleMessage(leaderActor, new Replicate(index, true, null));
     }
 
     @Test
@@ -559,8 +559,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         final var identifier = new MockIdentifier("state-id");
         // State should not change
-        assertSame(leader,
-            leader.handleMessage(leaderActor, new Replicate(newLogIndex, true, leaderActor, identifier)));
+        assertSame(leader, leader.handleMessage(leaderActor, new Replicate(newLogIndex, true, identifier)));
 
         assertEquals("getCommitIndex", newLogIndex, log.getCommitIndex());
 
@@ -677,8 +676,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leader.markFollowerActive(FOLLOWER_ID);
 
         // this should invoke a sendinstallsnapshot as followersLastIndex < snapshotIndex
-        RaftActorBehavior raftBehavior = leader.handleMessage(
-                leaderActor, new Replicate(newEntryIndex, true, null, new MockIdentifier("state-id")));
+        RaftActorBehavior raftBehavior = leader.handleMessage(leaderActor,
+            new Replicate(newEntryIndex, true, new MockIdentifier("state-id")));
 
         assertInstanceOf(Leader.class, raftBehavior);
 
@@ -722,7 +721,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         //update follower timestamp
         leader.markFollowerActive(FOLLOWER_ID);
 
-        leader.handleMessage(leaderActor, new Replicate(newEntryIndex, true, null, new MockIdentifier("state-id")));
+        leader.handleMessage(leaderActor, new Replicate(newEntryIndex, true, new MockIdentifier("state-id")));
 
         assertTrue("isCapturing", actorContext.getSnapshotManager().isCapturing());
 
@@ -733,8 +732,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         assertEquals(4, cs.getLastIndex());
         assertEquals(2, cs.getLastTerm());
 
-        // if an initiate is started again when first is in progress, it shouldnt initiate Capture
-        leader.handleMessage(leaderActor, new Replicate(newEntryIndex, true, null, new MockIdentifier("state-id")));
+        // if an initiate is started again when first is in progress, it should not initiate Capture
+        leader.handleMessage(leaderActor, new Replicate(newEntryIndex, true, new MockIdentifier("state-id")));
 
         assertSame("CaptureSnapshot instance", cs, actorContext.getSnapshotManager().getCaptureSnapshot());
     }
@@ -805,7 +804,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         MessageCollectorActor.clearMessages(followerActor);
 
         // Sending Replicate message should not initiate another capture since the first is in progress.
-        leader.handleMessage(leaderActor, new Replicate(newEntryIndex, true, null, new MockIdentifier("state-id")));
+        leader.handleMessage(leaderActor, new Replicate(newEntryIndex, true, new MockIdentifier("state-id")));
         assertSame("CaptureSnapshot instance", cs, actorContext.getSnapshotManager().getCaptureSnapshot());
 
         // Similarly sending another AppendEntriesReply to force a snapshot should not initiate another capture.

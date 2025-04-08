@@ -64,7 +64,10 @@ import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
 import org.opendaylight.controller.cluster.raft.persisted.NoopPayload;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.spi.AbstractRaftCommand;
+import org.opendaylight.controller.cluster.raft.spi.AbstractStateCommand;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
+import org.opendaylight.controller.cluster.raft.spi.RaftCommand;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.api.TermInfo;
@@ -137,7 +140,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             streamConfig);
 
         context = new RaftActorContextImpl(self(), getContext(), localAccess, peerAddresses, config, payloadVersion,
-            persistenceControl, this::handleApplyState, this::executeInSelf);
+            persistenceControl, this::applyCommand, this::executeInSelf);
     }
 
     /**
@@ -288,7 +291,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         } else if (message instanceof Runnable runnable) {
             runnable.run();
         } else if (message instanceof NoopPayload noopPayload) {
-            persistData(null, null, noopPayload, false);
+            submitCommand(null, noopPayload);
         } else if (message instanceof RequestLeadership requestLeadership) {
             onRequestLeadership(requestLeadership);
         } else if (!possiblyHandleBehaviorMessage(message)) {
@@ -596,7 +599,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         target.tell(new RoleChanged(memberId(), newRole, oldRole), self());
     }
 
-    private void handleApplyState(final ApplyState applyState) {
+    private void applyCommand(final ApplyState applyState) {
         final long startTime = System.nanoTime();
 
         final var entry = applyState.getReplicatedLogEntry();
@@ -606,7 +609,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         }
 
         if (payload instanceof StateCommand stateCommand) {
-            applyState(applyState.getClientActor(), applyState.getIdentifier(), stateCommand);
+            applyCommand(applyState.getIdentifier(), stateCommand);
         }
 
         final long elapsedTime = System.nanoTime() - startTime;
@@ -619,6 +622,17 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         // FIXME: executeInSelf() invoking the further processing part
         self().tell(applyState, self());
     }
+
+    /**
+     * Apply a {@link StateCommand} to update the actor's state.
+     *
+     * @param identifier  The identifier of the persisted data. This is also the same identifier that was passed to
+     *                    {@link #submitCommand(Identifier, AbstractStateCommand, boolean)} by the derived actor. May be
+     *                     {@code null} when the RaftActor is behaving as a follower or during recovery
+     * @param command     the {@link StateCommand} to apply
+     */
+    @NonNullByDefault
+    protected abstract void applyCommand(@Nullable Identifier identifier, StateCommand command);
 
     @NonNullByDefault
     final LeaderStateChanged newLeaderStateChanged(final String memberId, final @Nullable String leaderId,
@@ -642,20 +656,36 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     /**
-     * Persists the given {@link Payload} in the journal and replicates to any followers. After successful completion,
-     * {@link #applyState(ActorRef, Identifier, StateCommand)} is notified.
+     * Request a {@link RaftCommand} to be applied to the finite state machine. Once consensus is reached,
+     * {@link #applyCommand(ApplyState)} will be called with matching arguments.
      *
-     * @param clientActor optional ActorRef that is provided via the applyState callback
-     * @param identifier the payload identifier
-     * @param data the payload data to persist
-     * @param batchHint if true, an attempt is made to delay immediate replication and batch the payload with
-     *        subsequent payloads for efficiency. Otherwise the payload is immediately replicated.
+     * @param identifier optional identifier to report back
+     * @param command the command
      */
-    // FIXME: split between AbstractRaftDelta and AbstractStateDelta
-    protected final void persistData(final ActorRef clientActor, final Identifier identifier, final Payload data,
+    @VisibleForTesting
+    @NonNullByDefault
+    final void submitCommand(final @Nullable Identifier identifier, final AbstractRaftCommand command) {
+        submitCommand(identifier, command, false);
+    }
+
+    /**
+     * Request a {@link StateCommand} to be applied to the finite state machine. Once consensus is reached,
+     * {@link #applyCommand(Identifier, StateCommand)} will be called with matching arguments.
+     *
+     * @param identifier optional identifier to report back
+     * @param command the command
+     */
+    @NonNullByDefault
+    protected final void submitCommand(final Identifier identifier, final AbstractStateCommand command,
             final boolean batchHint) {
+        submitCommand(requireNonNull(identifier), (Payload) command, batchHint);
+    }
+
+    @NonNullByDefault
+    private void submitCommand(final @Nullable Identifier identifier, final Payload command, final boolean batchHint) {
+        requireNonNull(command);
         final var replLog = replicatedLog();
-        final var logEntry = new SimpleReplicatedLogEntry(replLog.lastIndex() + 1, context.currentTerm(), data);
+        final var logEntry = new SimpleReplicatedLogEntry(replLog.lastIndex() + 1, context.currentTerm(), command);
         logEntry.setPersistencePending(true);
 
         LOG.debug("{}: Persist data {}", memberId(), logEntry);
@@ -672,7 +702,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 currentLog.setLastApplied(persistedEntry.index());
 
                 // Apply the state immediately.
-                handleApplyState(new ApplyState(clientActor, identifier, persistedEntry));
+                applyCommand(new ApplyState(identifier, persistedEntry));
 
                 // Send a ApplyJournalEntries message so that we write the fact that we applied
                 // the state to durable storage
@@ -693,7 +723,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         if (wasAppended && hasFollowers()) {
             // Send log entry for replication.
             getCurrentBehavior().handleMessage(self(),
-                new Replicate(logEntry.index(), !batchHint, clientActor, identifier));
+                new Replicate(logEntry.index(), !batchHint, identifier));
         }
     }
 
@@ -821,20 +851,6 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     protected void setPeerAddress(final String peerId, final String peerAddress) {
         context.setPeerAddress(peerId, peerAddress);
     }
-
-    /**
-     * The applyState method will be called by the RaftActor when some data needs to be applied to the actor's state.
-     *
-     * @param clientActor A reference to the client who sent this message. This is the same reference that was passed
-     *                    to {@link #persistData(ActorRef, Identifier, Payload, boolean)} by the derived actor. May be
-     *                    {@code null} when the RaftActor is behaving as a follower or during recovery.
-     * @param identifier  The identifier of the persisted data. This is also the same identifier that was passed to
-     *                    {@link #persistData(ActorRef, Identifier, Payload, boolean)} by the derived actor. May be
-     *                    {@code null} when the RaftActor is behaving as a follower or during recovery
-     * @param command     the {@link StateCommand} to apply
-     */
-    protected abstract void applyState(@Nullable ActorRef clientActor, @Nullable Identifier identifier,
-        @NonNull StateCommand command);
 
     /**
      * Returns the RaftActorRecoveryCohort to participate in persistence recovery.

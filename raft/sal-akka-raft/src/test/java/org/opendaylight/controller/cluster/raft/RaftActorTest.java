@@ -98,7 +98,6 @@ import org.opendaylight.raft.spi.ByteArray;
 import org.opendaylight.raft.spi.InstallableSnapshot;
 import org.opendaylight.raft.spi.InstallableSnapshotSource;
 import org.opendaylight.raft.spi.PlainSnapshotSource;
-import org.opendaylight.yangtools.concepts.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -396,12 +395,12 @@ public class RaftActorTest extends AbstractActorTest {
 
         mockRaftActor.waitForInitializeBehaviorComplete();
 
-        ReplicatedLogEntry entry = new SimpleReplicatedLogEntry(5, 1, new MockRaftActorContext.MockPayload("F"));
+        final var entry = new SimpleReplicatedLogEntry(5, 1, new MockRaftActorContext.MockPayload("F"));
 
-        final Identifier id = new MockIdentifier("apply-state");
-        mockRaftActor.getRaftActorContext().getApplyStateConsumer().accept(new ApplyState(mockActorRef, id, entry));
+        final var id = new MockIdentifier("apply-state");
+        mockRaftActor.getRaftActorContext().getApplyStateConsumer().accept(new ApplyState(id, entry));
 
-        verify(mockRaftActor.actorDelegate).applyState(eq(mockActorRef), eq(id), any());
+        verify(mockRaftActor.actorDelegate).applyCommand(eq(id), any());
     }
 
     @Test
@@ -884,8 +883,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         // Persist another entry, this will cause a CaptureSnapshot to be triggered
         doReturn(new MockSnapshotState(List.of())).when(leaderActor.snapshotCohortDelegate).takeSnapshot();
-        leaderActor.persistData(mockActorRef, new MockIdentifier("x"),
-                new MockRaftActorContext.MockPayload("duh"), false);
+        leaderActor.submitCommand(new MockIdentifier("x"), new MockRaftActorContext.MockPayload("duh"), false);
         verify(leaderActor.snapshotCohortDelegate).takeSnapshot();
 
         // Trimming log in this scenario is a no-op
@@ -1247,8 +1245,7 @@ public class RaftActorTest extends AbstractActorTest {
         Leader leader = new Leader(leaderActor.getRaftActorContext());
         leaderActor.setCurrentBehavior(leader);
 
-        leaderActor.persistData(leaderActorRef, new MockIdentifier("1"), new MockRaftActorContext.MockPayload("1"),
-                false);
+        leaderActor.submitCommand(new MockIdentifier("1"), new MockRaftActorContext.MockPayload("1"), false);
 
         final var leaderLog = leaderActor.getReplicatedLog();
         final var logEntry = leaderLog.get(0);
@@ -1259,7 +1256,7 @@ public class RaftActorTest extends AbstractActorTest {
         leaderActor.handleCommand(new AppendEntriesReply(followerId, 1, true, 0, 1, (short)0));
         assertEquals("getCommitIndex", -1, leaderLog.getCommitIndex());
 
-        ArgumentCaptor<Consumer<Object>> callbackCaptor = ArgumentCaptor.forClass(Consumer.class);
+        final var callbackCaptor = ArgumentCaptor.<Consumer<Object>>captor();
         verify(mockPersistenceProvider).persistAsync(eq(logEntry), callbackCaptor.capture());
 
         callbackCaptor.getValue().accept(logEntry);
@@ -1295,13 +1292,13 @@ public class RaftActorTest extends AbstractActorTest {
 
         leaderActor.handleCommand(new AppendEntriesReply(followerId, 1, true, -1, -1, (short)0));
 
-        leaderActor.persistData(leaderActorRef, new MockIdentifier("1"), new MockPayload("1"), true);
+        leaderActor.submitCommand(new MockIdentifier("1"), new MockPayload("1"), true);
         MessageCollectorActor.assertNoneMatching(followerActor, AppendEntries.class, 500);
 
-        leaderActor.persistData(leaderActorRef, new MockIdentifier("2"), new MockPayload("2"), true);
+        leaderActor.submitCommand(new MockIdentifier("2"), new MockPayload("2"), true);
         MessageCollectorActor.assertNoneMatching(followerActor, AppendEntries.class, 500);
 
-        leaderActor.persistData(leaderActorRef, new MockIdentifier("3"), new MockPayload("3"), false);
+        leaderActor.submitCommand(new MockIdentifier("3"), new MockPayload("3"), false);
         AppendEntries appendEntries = MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
         assertEquals("AppendEntries size", 3, appendEntries.getEntries().size());
     }

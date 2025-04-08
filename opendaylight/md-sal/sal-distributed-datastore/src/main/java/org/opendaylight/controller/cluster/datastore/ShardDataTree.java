@@ -485,8 +485,9 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         }
     }
 
-    private void replicatePayload(final Identifier id, final AbstractStateCommand payload,
+    private void replicatePayload(final @NonNull Identifier id, final AbstractStateCommand payload,
             final @Nullable Runnable callback) {
+        requireNonNull(id);
         if (callback != null) {
             replicationCallbacks.put(payload, callback);
         }

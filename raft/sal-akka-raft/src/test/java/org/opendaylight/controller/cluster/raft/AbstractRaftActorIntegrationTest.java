@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static java.util.Objects.requireNonNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -31,6 +32,7 @@ import org.apache.pekko.pattern.Patterns;
 import org.apache.pekko.testkit.TestActorRef;
 import org.apache.pekko.testkit.javadsl.TestKit;
 import org.apache.pekko.util.Timeout;
+import org.eclipse.jdt.annotation.NonNull;
 import org.junit.After;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
@@ -85,14 +87,13 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
      * Message intended for testing to allow triggering persistData via the mailbox.
      */
     public static final class TestPersist {
-
         private final ActorRef actorRef;
-        private final Identifier identifier;
-        private final Payload payload;
+        private final @NonNull Identifier identifier;
+        private final MockPayload payload;
 
-        TestPersist(final ActorRef actorRef, final Identifier identifier, final Payload payload) {
+        TestPersist(final ActorRef actorRef, final Identifier identifier, final MockPayload payload) {
             this.actorRef = actorRef;
-            this.identifier = identifier;
+            this.identifier = requireNonNull(identifier);
             this.payload = payload;
         }
 
@@ -100,11 +101,11 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
             return actorRef;
         }
 
-        public Identifier getIdentifier() {
+        public @NonNull Identifier getIdentifier() {
             return identifier;
         }
 
-        public Payload getPayload() {
+        public MockPayload getPayload() {
             return payload;
         }
     }
@@ -134,16 +135,17 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
             getRaftActorContext().setTotalMemoryRetriever(mockTotalMemory > 0 ? () -> mockTotalMemory : null);
         }
 
-        @SuppressWarnings("checkstyle:IllegalCatch")
         @Override
+        @Deprecated
+        @SuppressWarnings("checkstyle:IllegalCatch")
         public void handleCommand(final Object message) {
             if (message instanceof MockPayload payload) {
-                super.persistData(collectorActor, new MockIdentifier(payload.toString()), payload, false);
+                submitCommand(new MockIdentifier(payload.toString()), payload, false);
                 return;
             }
 
             if (message instanceof ClusterConfig payload) {
-                super.persistData(collectorActor, new MockIdentifier("serverConfig"), payload, false);
+                submitCommand(new MockIdentifier("serverConfig"), payload);
                 return;
             }
 
@@ -153,7 +155,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
             }
 
             if (message instanceof TestPersist testPersist) {
-                persistData(testPersist.getActorRef(), testPersist.getIdentifier(), testPersist.getPayload(), false);
+                submitCommand(testPersist.getIdentifier(), testPersist.getPayload(), false);
                 return;
             }
 
@@ -351,12 +353,9 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
 
     protected void verifyApplyState(final ApplyState applyState, final ActorRef expClientActor,
             final String expId, final long expTerm, final long expIndex, final Payload payload) {
-        assertEquals("ApplyState getClientActor", expClientActor, applyState.getClientActor());
-
-        final Identifier id = expId == null ? null : new MockIdentifier(expId);
+        final var id = expId == null ? null : new MockIdentifier(expId);
         assertEquals("ApplyState getIdentifier", id, applyState.getIdentifier());
-        ReplicatedLogEntry replicatedLogEntry = applyState.getReplicatedLogEntry();
-        verifyReplicatedLogEntry(replicatedLogEntry, expTerm, expIndex, payload);
+        verifyReplicatedLogEntry(applyState.getReplicatedLogEntry(), expTerm, expIndex, payload);
     }
 
     protected void verifyReplicatedLogEntry(final ReplicatedLogEntry replicatedLogEntry, final long expTerm,

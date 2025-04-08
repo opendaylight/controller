@@ -53,7 +53,7 @@ public class LogGenerator {
                 }
                 String key = clientActor.path().name();
                 int randomInt = random.nextInt(100);
-                clientActor.tell(new KeyValue(key + "-key-" + randomInt, "value-" + randomInt), null);
+                clientActor.tell(new KeyValue(key + "-key-" + randomInt, "value-" + randomInt), ActorRef.noSender());
 
                 try {
                     Thread.sleep(randomInt % 10 * 1000L);

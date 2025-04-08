@@ -36,7 +36,6 @@ import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.controller.cluster.raft.messages.UnInitializedFollowerSnapshotReply;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
-import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.util.AbstractUUIDIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -242,8 +241,7 @@ class RaftActorServerConfigurationSupport {
                     operationContext.includeSelfInNewConfiguration(raftActor));
             LOG.debug("{}: New server configuration : {}", memberId(), payload.serverInfo());
 
-            raftActor.persistData(operationContext.getClientRequestor(), operationContext.getContextId(),
-                    payload, false);
+            raftActor.submitCommand(operationContext.getContextId(), payload);
 
             currentOperationState = new Persisting(operationContext, newTimer(new ServerOperationTimeout(
                     operationContext.getLoggingContext())));
@@ -548,29 +546,29 @@ class RaftActorServerConfigurationSupport {
      * @param <T> the operation type
      */
     private abstract static class ServerOperationContext<T> {
+        private final @NonNull ServerOperationContextIdentifier contextId = new ServerOperationContextIdentifier();
         private final T operation;
         private final ActorRef clientRequestor;
-        private final Identifier contextId;
 
         ServerOperationContext(final T operation, final ActorRef clientRequestor) {
             this.operation = operation;
             this.clientRequestor = clientRequestor;
-            contextId = new ServerOperationContextIdentifier();
         }
 
-        Identifier getContextId() {
+        final @NonNull ServerOperationContextIdentifier getContextId() {
             return contextId;
         }
 
-        T getOperation() {
+        final T getOperation() {
             return operation;
         }
 
-        ActorRef getClientRequestor() {
+        final ActorRef getClientRequestor() {
             return clientRequestor;
         }
 
         void operationComplete(final RaftActor raftActor, final boolean succeeded) {
+            // No-op by default
         }
 
         boolean includeSelfInNewConfiguration(final RaftActor raftActor) {

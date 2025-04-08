@@ -39,6 +39,7 @@ import org.apache.pekko.persistence.RecoveryCompleted;
 import org.apache.pekko.persistence.SnapshotOffer;
 import org.apache.pekko.serialization.JavaSerializer;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.commands.ConnectClientRequest;
@@ -604,13 +605,16 @@ public class Shard extends RaftActor {
 
     // applyState() will be invoked once consensus is reached on the payload
     // non-final for mocking
+    @NonNullByDefault
     void persistPayload(final Identifier id, final AbstractStateCommand payload, final boolean batchHint) {
+        requireNonNull(id);
+        requireNonNull(payload);
         final boolean canSkipPayload = !hasFollowers() && !isRecoveryApplicable();
         if (canSkipPayload) {
-            applyState(self(), id, payload);
+            applyCommand(id, payload);
         } else {
             // We are faking the sender
-            persistData(self(), id, payload, batchHint);
+            submitCommand(id, payload, batchHint);
         }
     }
 
@@ -665,8 +669,7 @@ public class Shard extends RaftActor {
     }
 
     @Override
-    protected final void applyState(final ActorRef clientActor, final Identifier identifier,
-            final StateCommand command) {
+    protected final void applyCommand(final Identifier identifier, final StateCommand command) {
         if (command instanceof Payload payload) {
             if (payload instanceof DisableTrackingPayload disableTracking) {
                 LOG.debug("{}: ignoring legacy {}", memberId(), disableTracking);

@@ -76,7 +76,7 @@ public final class Main {
 
                     if ("k".equals(command)) {
                         int num = Integer.parseInt(actor);
-                        examples.get(num - 1).tell(PoisonPill.getInstance(), null);
+                        examples.get(num - 1).tell(PoisonPill.getInstance(), ActorRef.noSender());
                         continue;
                     } else if ("s".equals(command)) {
                         int num = Integer.parseInt(actor);
@@ -93,7 +93,7 @@ public final class Main {
                 if (num == 0) {
                     System.exit(0);
                 }
-                clientActor.tell(new KeyValue("key " + num, "value " + num), null);
+                clientActor.tell(new KeyValue("key " + num, "value " + num), ActorRef.noSender());
             } catch (NumberFormatException nfe) {
                 System.err.println("Invalid Format!");
             }

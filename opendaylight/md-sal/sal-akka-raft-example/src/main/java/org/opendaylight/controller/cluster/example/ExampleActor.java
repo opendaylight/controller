@@ -19,7 +19,6 @@ import org.apache.pekko.actor.Props;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.example.messages.KeyValue;
-import org.opendaylight.controller.cluster.example.messages.KeyValueSaved;
 import org.opendaylight.controller.cluster.example.messages.PrintRole;
 import org.opendaylight.controller.cluster.example.messages.PrintState;
 import org.opendaylight.controller.cluster.notifications.RoleChangeNotifier;
@@ -78,7 +77,7 @@ public final class ExampleActor extends RaftActor
     protected void handleNonRaftCommand(final @Nullable Object message) {
         if (message instanceof KeyValue kv) {
             if (isLeader()) {
-                persistData(getSender(), new PayloadIdentifier(persistIdentifier++), kv, false);
+                submitCommand(new PayloadIdentifier(persistIdentifier++), kv, false);
             } else if (getLeader() != null) {
                 getLeader().forward(message, getContext());
             }
@@ -126,13 +125,9 @@ public final class ExampleActor extends RaftActor
     }
 
     @Override
-    protected void applyState(final @Nullable ActorRef clientActor, final @Nullable Identifier identifier,
-            final StateCommand command) {
+    protected void applyCommand(final @Nullable Identifier identifier, final StateCommand command) {
         if (command instanceof KeyValue kv) {
             state.put(kv.getKey(), kv.getValue());
-            if (clientActor != null) {
-                clientActor.tell(new KeyValueSaved(), self());
-            }
         }
     }
 

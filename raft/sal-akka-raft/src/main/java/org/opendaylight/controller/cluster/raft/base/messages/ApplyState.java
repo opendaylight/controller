@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.raft.base.messages;
 
-import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.dispatch.ControlMessage;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.yangtools.concepts.Identifier;
@@ -16,19 +15,12 @@ import org.opendaylight.yangtools.concepts.Identifier;
  * Local message sent by a RaftActor to itself to signal state has been applied to the state machine.
  */
 public class ApplyState implements ControlMessage {
-    private final ActorRef clientActor;
     private final Identifier identifier;
     private final ReplicatedLogEntry replicatedLogEntry;
 
-    public ApplyState(final ActorRef clientActor, final Identifier identifier,
-            final ReplicatedLogEntry replicatedLogEntry) {
-        this.clientActor = clientActor;
+    public ApplyState(final Identifier identifier, final ReplicatedLogEntry replicatedLogEntry) {
         this.identifier = identifier;
         this.replicatedLogEntry = replicatedLogEntry;
-    }
-
-    public ActorRef getClientActor() {
-        return clientActor;
     }
 
     public Identifier getIdentifier() {

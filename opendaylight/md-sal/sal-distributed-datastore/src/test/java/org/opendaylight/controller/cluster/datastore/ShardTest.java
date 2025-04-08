@@ -287,7 +287,7 @@ public class ShardTest extends AbstractShardTest {
         writeMod.write(TestModel.TEST_PATH, node);
         writeMod.ready();
 
-        shard.underlyingActor().applyState(null, null, payloadForModification(store, writeMod, nextTransactionId()));
+        shard.underlyingActor().applyCommand(null, payloadForModification(store, writeMod, nextTransactionId()));
 
         await().atMost(Duration.ofSeconds(5)).pollDelay(Duration.ofMillis(75))
             .untilAsserted(() -> assertEquals("Applied state", node, readStore(shard, TestModel.TEST_PATH)));

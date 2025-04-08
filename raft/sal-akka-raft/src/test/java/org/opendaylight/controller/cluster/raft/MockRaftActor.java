@@ -131,11 +131,10 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     @Override
-    protected void applyState(final ActorRef clientActor, final Identifier identifier, final StateCommand delta) {
-        actorDelegate.applyState(clientActor, identifier, delta);
-        LOG.info("{}: applyState called: {}", memberId(), delta);
-
-        state.add(delta);
+    protected void applyCommand(final Identifier identifier, final StateCommand command) {
+        LOG.info("{}: applyState called: {}", memberId(), command);
+        actorDelegate.applyCommand(identifier, command);
+        state.add(command);
     }
 
     @Override
@@ -150,6 +149,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
 
     @Override
     public void startLogRecoveryBatch(final int maxBatchSize) {
+        // No-op
     }
 
     @Override
@@ -159,6 +159,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
 
     @Override
     public void applyCurrentLogRecoveryBatch() {
+        // No-op
     }
 
     @Override

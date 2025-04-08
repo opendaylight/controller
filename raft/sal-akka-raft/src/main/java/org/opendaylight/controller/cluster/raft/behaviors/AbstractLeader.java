@@ -463,17 +463,17 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         // have the ClientRequestTracker.
         final var tracker = removeClientRequestTracker(entry.index());
         if (tracker != null) {
-            return new ApplyState(tracker.clientActor(), tracker.identifier(), entry);
+            return new ApplyState(tracker.identifier(), entry);
         }
 
         // Tracker is missing, this means that we switched behaviours between replicate and applystate
         // and became the leader again,. We still want to apply this as a local modification because
         // we have resumed leadership with that log entry having been committed.
         if (entry.command() instanceof IdentifiablePayload<?> identifiable) {
-            return new ApplyState(null, identifiable.getIdentifier(), entry);
+            return new ApplyState(identifiable.getIdentifier(), entry);
         }
 
-        return new ApplyState(null, null, entry);
+        return new ApplyState(null, entry);
     }
 
     @Override
@@ -630,9 +630,9 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
 
         // Create a tracker entry we will use this later to notify the
         // client actor
-        final var clientActor = replicate.clientActor();
-        if (clientActor != null) {
-            trackers.add(new ClientRequestTracker(logIndex, clientActor, replicate.identifier()));
+        final var identifier = replicate.identifier();
+        if (identifier != null) {
+            trackers.add(new ClientRequestTracker(logIndex, identifier));
         }
 
         boolean applyModificationToState = !context.anyVotingPeers()
