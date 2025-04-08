@@ -112,4 +112,9 @@ final class SegmentedByteBufWriter implements EntryWriter {
     public void flush() {
         currentWriter.flush();
     }
+
+    void close() {
+        currentSegment.releaseWriter();
+        currentSegment = null;
+    }
 }
