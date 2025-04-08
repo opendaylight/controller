@@ -16,6 +16,7 @@
 package org.opendaylight.raft.journal;
 
 import io.netty.buffer.ByteBuf;
+import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -32,6 +33,7 @@ public interface FromByteBufMapper<T> {
      * @param index entry index
      * @param bytes entry bytes
      * @return resulting object
+     * @throws IOException if some other I/O error occurs
      */
-    T bytesToObject(long index, ByteBuf bytes);
+    T bytesToObject(long index, ByteBuf bytes) throws IOException;
 }

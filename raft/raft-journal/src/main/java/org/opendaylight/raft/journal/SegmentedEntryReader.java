@@ -19,6 +19,7 @@ package org.opendaylight.raft.journal;
 import static java.util.Objects.requireNonNull;
 
 import io.netty.buffer.ByteBuf;
+import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNull;
 
 /**
@@ -100,7 +101,7 @@ sealed class SegmentedEntryReader implements EntryReader permits SegmentedCommit
     }
 
     @Override
-    public final <T> T tryNext(final FromByteBufMapper<T> mapper) {
+    public final <T> T tryNext(final FromByteBufMapper<T> mapper) throws IOException {
         final var index = nextIndex;
         final var bytes = tryAdvance(index);
         return bytes == null ? null : mapper.bytesToObject(index, bytes);
