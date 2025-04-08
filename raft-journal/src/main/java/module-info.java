@@ -17,6 +17,9 @@ module org.opendaylight.controller.raft.journal {
     exports org.opendaylight.controller.raft.journal;
 
     requires transitive io.netty.buffer;
+    // TODO: ByteBuf implements ReferenceCounted and therefore netty-buffer
+    //       should contain this
+    requires transitive io.netty.common;
 
     // Annotations
     requires static transitive org.eclipse.jdt.annotation;
