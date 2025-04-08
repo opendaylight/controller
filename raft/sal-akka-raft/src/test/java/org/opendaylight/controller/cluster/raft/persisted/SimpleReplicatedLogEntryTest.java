@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.cluster.raft.persisted;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.apache.commons.lang3.SerializationUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 
 /**
@@ -18,16 +18,16 @@ import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
  *
  * @author Thomas Pantelis
  */
-public class SimpleReplicatedLogEntryTest {
+class SimpleReplicatedLogEntryTest {
     @Test
-    public void testSerialization() {
+    void testSerialization() {
         final var expected = new SimpleReplicatedLogEntry(0, 1, new MockRaftActorContext.MockPayload("A"));
         final var bytes = SerializationUtils.serialize(expected);
         assertEquals(218, bytes.length);
         final var cloned = SerializationUtils.<SimpleReplicatedLogEntry>deserialize(bytes);
 
-        assertEquals("getTerm", expected.term(), cloned.term());
-        assertEquals("getIndex", expected.index(), cloned.index());
-        assertEquals("getData", expected.getData(), cloned.getData());
+        assertEquals(expected.term(), cloned.term());
+        assertEquals(expected.index(), cloned.index());
+        assertEquals(expected.command(), cloned.command());
     }
 }

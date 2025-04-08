@@ -1465,7 +1465,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
     private static void verifyServerConfigurationPayloadEntry(final ReplicatedLog log, final ServerInfo... expected) {
         ReplicatedLogEntry logEntry = log.get(log.lastIndex());
-        final var payload = assertInstanceOf(ClusterConfig.class, logEntry.getData());
+        final var payload = assertInstanceOf(ClusterConfig.class, logEntry.command());
         assertEquals("Server config", Set.of(expected), Set.copyOf(payload.serverInfo()));
     }
 
@@ -1538,7 +1538,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
             for (int i = 0; i < fromLog.size(); i++) {
                 final var entry = fromLog.get(i);
-                getState().add(entry.getData());
+                getState().add(entry.command());
                 toLog.append(entry);
             }
 

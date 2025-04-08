@@ -16,16 +16,6 @@ import org.opendaylight.controller.cluster.raft.spi.LogEntry;
  */
 @NonNullByDefault
 public interface ReplicatedLogEntry extends LogEntry {
-    /**
-     * Returns the payload/data to be replicated.
-     *
-     * @return the payload/data
-     */
-    @Deprecated(forRemoval = true)
-    default Payload getData() {
-        return command();
-    }
-
     @Override
     Payload command();
 

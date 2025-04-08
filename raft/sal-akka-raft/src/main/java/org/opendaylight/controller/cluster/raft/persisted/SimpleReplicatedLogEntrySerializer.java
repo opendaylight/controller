@@ -56,7 +56,7 @@ public class SimpleReplicatedLogEntrySerializer extends JSerializer {
         final byte[] bytes = baos.toByteArray();
 
         if (LOG.isDebugEnabled()) {
-            final var data = replicatedLogEntry.getData();
+            final var data = replicatedLogEntry.command();
             LOG.debug("Estimated serialized size {}, data size {} for payload: {}. Actual serialized size: {}",
                 estimatedSerializedSize, data.size(), data, bytes.length);
         }

@@ -155,7 +155,7 @@ final class SnapshotFileV1 implements SnapshotFile {
                     try (var oos = new ObjectOutputStream(entryCompress.encodeOutput(dos))) {
                         for (var entry : unappliedEntries) {
                             oos.writeLong(entry.term());
-                            oos.writeObject(entry.getData());
+                            oos.writeObject(entry.command());
                         }
                     }
                 }

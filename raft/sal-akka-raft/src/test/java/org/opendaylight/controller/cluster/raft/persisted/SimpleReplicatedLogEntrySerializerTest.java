@@ -7,13 +7,13 @@
  */
 package org.opendaylight.controller.cluster.raft.persisted;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 import java.io.NotSerializableException;
 import org.apache.pekko.actor.ExtendedActorSystem;
 import org.apache.pekko.testkit.javadsl.TestKit;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 
 /**
@@ -21,29 +21,24 @@ import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
  *
  * @author Thomas Pantelis
  */
-public class SimpleReplicatedLogEntrySerializerTest {
-
+class SimpleReplicatedLogEntrySerializerTest {
     @Test
-    public void testToAndFromBinary() throws NotSerializableException {
-        SimpleReplicatedLogEntry expected = new SimpleReplicatedLogEntry(0, 1,
-                new MockRaftActorContext.MockPayload("A"));
+    void testToAndFromBinary() throws NotSerializableException {
+        final var expected = new SimpleReplicatedLogEntry(0, 1, new MockRaftActorContext.MockPayload("A"));
 
-        final ExtendedActorSystem system = (ExtendedActorSystem) ExtendedActorSystem.create("test");
-        final Object deserialized;
+        final var system = (ExtendedActorSystem) ExtendedActorSystem.create("test");
+        final SimpleReplicatedLogEntry actual;
         try {
-            final SimpleReplicatedLogEntrySerializer serializer = new SimpleReplicatedLogEntrySerializer(system);
+            final var serializer = new SimpleReplicatedLogEntrySerializer(system);
             final byte[] bytes = serializer.toBinary(expected);
-            deserialized = serializer.fromBinary(bytes, SimpleReplicatedLogEntry.class);
+            actual = assertInstanceOf(SimpleReplicatedLogEntry.class,
+                serializer.fromBinary(bytes, SimpleReplicatedLogEntry.class));
         } finally {
             TestKit.shutdownActorSystem(system);
         }
 
-        assertNotNull("fromBinary returned null", deserialized);
-        assertEquals("fromBinary return type", SimpleReplicatedLogEntry.class, deserialized.getClass());
-
-        SimpleReplicatedLogEntry actual = (SimpleReplicatedLogEntry)deserialized;
-        assertEquals("getTerm", expected.term(), actual.term());
-        assertEquals("getIndex", expected.index(), actual.index());
-        assertEquals("getData", expected.getData(), actual.getData());
+        assertEquals(expected.term(), actual.term());
+        assertEquals(expected.index(), actual.index());
+        assertEquals(expected.command(), actual.command());
     }
 }

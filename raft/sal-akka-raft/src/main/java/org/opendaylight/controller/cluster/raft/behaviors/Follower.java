@@ -314,13 +314,13 @@ public class Follower extends RaftActorBehavior {
         for (int i = addEntriesFrom; i < numLogEntries; i++) {
             final var entry = entries.get(i);
 
-            LOG.debug("{}: Append entry to log {}", logName, entry.getData());
+            LOG.debug("{}: Append entry to log {}", logName, entry.command());
 
             replLog.appendAndPersist(entry, appendAndPersistCallback, false);
 
             shouldCaptureSnapshot.compareAndSet(false, replLog.shouldCaptureSnapshot(entry.index()));
 
-            if (entry.getData() instanceof ClusterConfig serverConfiguration) {
+            if (entry.command() instanceof ClusterConfig serverConfiguration) {
                 context.updatePeerIds(serverConfiguration);
             }
         }

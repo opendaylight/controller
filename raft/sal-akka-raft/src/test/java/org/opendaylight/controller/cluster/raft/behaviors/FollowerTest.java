@@ -638,7 +638,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertEquals("Next index", 3, log.lastIndex());
         //assertEquals("Entry 2", entries.get(0), log.get(2));
 
-        assertEquals("Entry 1 data", "one", log.get(1).getData().toString());
+        assertEquals("Entry 1 data", "one", log.get(1).command().toString());
 
         // Check that the entry at index 2 has the new data
         assertEquals("Entry 2", entries.get(0), log.get(2));
@@ -1126,7 +1126,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertEquals("Snapshot getLastAppliedIndex", 1, snapshot.getLastAppliedIndex());
         assertEquals("Snapshot getLastTerm", 1, snapshot.getLastTerm());
         assertEquals("Snapshot getLastIndex", 1, snapshot.getLastIndex());
-        assertEquals("Snapshot state", List.of(entries.get(0).getData(), entries.get(1).getData()),
+        assertEquals("Snapshot state", List.of(entries.get(0).command(), entries.get(1).command()),
                 MockRaftActor.fromState(snapshot.getState()));
     }
 
@@ -1182,8 +1182,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertEquals("Snapshot getLastAppliedIndex", 2, snapshot.getLastAppliedIndex());
         assertEquals("Snapshot getLastTerm", 1, snapshot.getLastTerm());
         assertEquals("Snapshot getLastIndex", 2, snapshot.getLastIndex());
-        assertEquals("Snapshot state", List.of(entries.get(0).getData(), entries.get(1).getData(),
-                entries.get(2).getData()), MockRaftActor.fromState(snapshot.getState()));
+        assertEquals("Snapshot state", List.of(entries.get(0).command(), entries.get(1).command(),
+                entries.get(2).command()), MockRaftActor.fromState(snapshot.getState()));
 
         assertEquals("Journal size", 0, followerRaftActor.get().getReplicatedLog().size());
         assertEquals("Snapshot index", 2, followerRaftActor.get().getReplicatedLog().getSnapshotIndex());
@@ -1202,7 +1202,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertEquals("Last index", 2, followerLog.lastIndex());
         assertEquals("Last applied index", 2, followerLog.getLastApplied());
         assertEquals("Commit index", 2, followerLog.getCommitIndex());
-        assertEquals("State", List.of(entries.get(0).getData(), entries.get(1).getData(), entries.get(2).getData()),
+        assertEquals("State", List.of(entries.get(0).command(), entries.get(1).command(), entries.get(2).command()),
             followerRaftActor.get().getState());
     }
 
@@ -1260,7 +1260,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertEquals("Snapshot getLastAppliedIndex", 0, snapshot.getLastAppliedIndex());
         assertEquals("Snapshot getLastTerm", 1, snapshot.getLastTerm());
         assertEquals("Snapshot getLastIndex", 2, snapshot.getLastIndex());
-        assertEquals("Snapshot state", List.of(entries.get(0).getData()),
+        assertEquals("Snapshot state", List.of(entries.get(0).command()),
                 MockRaftActor.fromState(snapshot.getState()));
     }
 

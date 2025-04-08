@@ -28,7 +28,6 @@ import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
 import org.opendaylight.controller.cluster.raft.messages.AddServer;
 import org.opendaylight.controller.cluster.raft.messages.AddServerReply;
 import org.opendaylight.controller.cluster.raft.messages.ChangeServersVotingStatus;
-import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.messages.RemoveServer;
 import org.opendaylight.controller.cluster.raft.messages.RemoveServerReply;
 import org.opendaylight.controller.cluster.raft.messages.ServerChangeReply;
@@ -146,8 +145,7 @@ class RaftActorServerConfigurationSupport {
     }
 
     private boolean onApplyState(final ApplyState applyState) {
-        Payload data = applyState.getReplicatedLogEntry().getData();
-        if (data instanceof ClusterConfig) {
+        if (applyState.getReplicatedLogEntry().command() instanceof ClusterConfig) {
             currentOperationState.onApplyState(applyState);
             return true;
         }
@@ -331,7 +329,7 @@ class RaftActorServerConfigurationSupport {
             // sure it's meant for us.
             if (operationContext.getContextId().equals(applyState.getIdentifier())) {
                 LOG.info("{}: {} has been successfully replicated to a majority of followers", memberId(),
-                        applyState.getReplicatedLogEntry().getData());
+                        applyState.getReplicatedLogEntry().command());
 
                 timer.cancel();
                 operationComplete(operationContext, null);

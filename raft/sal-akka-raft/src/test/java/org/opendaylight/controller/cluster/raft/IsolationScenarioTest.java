@@ -156,12 +156,12 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         // message is forwarded to the followers.
 
         expectFirstMatching(follower1CollectorActor, AppendEntries.class, ae ->
-                ae.getEntries().size() == 1 && ae.getEntries().get(0).index() == 1
-                        && ae.getEntries().get(0).getData().equals(payload1));
+                ae.getEntries().size() == 1 && ae.getEntries().getFirst().index() == 1
+                        && ae.getEntries().getFirst().command().equals(payload1));
 
         expectFirstMatching(follower2CollectorActor, AppendEntries.class, ae ->
-                ae.getEntries().size() == 1 && ae.getEntries().get(0).index() == 1
-                        && ae.getEntries().get(0).getData().equals(payload1));
+                ae.getEntries().size() == 1 && ae.getEntries().getFirst().index() == 1
+                        && ae.getEntries().getFirst().command().equals(payload1));
 
         verifyApplyJournalEntries(leaderCollectorActor, 1);
 
@@ -277,12 +277,12 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         // message is forwarded to the followers.
 
         expectFirstMatching(follower1CollectorActor, AppendEntries.class, ae ->
-                ae.getEntries().size() == 1 && ae.getEntries().get(0).index() == 1
-                        && ae.getEntries().get(0).getData().equals(payload1));
+                ae.getEntries().size() == 1 && ae.getEntries().getFirst().index() == 1
+                        && ae.getEntries().getFirst().command().equals(payload1));
 
         expectFirstMatching(follower2CollectorActor, AppendEntries.class, ae ->
-                ae.getEntries().size() == 1 && ae.getEntries().get(0).index() == 1
-                        && ae.getEntries().get(0).getData().equals(payload1));
+                ae.getEntries().size() == 1 && ae.getEntries().getFirst().index() == 1
+                        && ae.getEntries().getFirst().command().equals(payload1));
 
         verifyApplyJournalEntries(leaderCollectorActor, 1);
 
