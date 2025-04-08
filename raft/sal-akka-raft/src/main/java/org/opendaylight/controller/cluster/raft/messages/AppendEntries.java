@@ -180,7 +180,7 @@ public final class AppendEntries extends RaftRPC {
             for (ReplicatedLogEntry e: appendEntries.entries) {
                 out.writeLong(e.index());
                 out.writeLong(e.term());
-                out.writeObject(e.getData());
+                out.writeObject(e.command());
             }
 
             out.writeObject(appendEntries.leaderAddress);

@@ -600,7 +600,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         final long startTime = System.nanoTime();
 
         final var entry = applyState.getReplicatedLogEntry();
-        final var payload = entry.getData();
+        final var payload = entry.command();
         if (LOG.isDebugEnabled()) {
             LOG.debug("{}: Applying state for log index {} data {}", memberId(), entry.index(), payload);
         }

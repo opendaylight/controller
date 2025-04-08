@@ -109,7 +109,7 @@ final class PersistenceControl extends ForwardingDataPersistenceProvider {
         //   We persist the ClusterConfig but not the ReplicatedLogEntry to avoid gaps in the journal indexes
         //   on recovery if data persistence is later enabled.
         if (!delegate.isRecoveryApplicable() && obj instanceof ReplicatedLogEntry entry
-            && entry.getData() instanceof ClusterConfig serverConfig) {
+            && entry.command() instanceof ClusterConfig serverConfig) {
             method.invoke(enabledStorage, serverConfig, p -> callback.accept(obj));
         } else  {
             method.invoke(delegate, obj, callback);

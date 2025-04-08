@@ -469,7 +469,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         // Tracker is missing, this means that we switched behaviours between replicate and applystate
         // and became the leader again,. We still want to apply this as a local modification because
         // we have resumed leadership with that log entry having been committed.
-        if (entry.getData() instanceof IdentifiablePayload<?> identifiable) {
+        if (entry.command() instanceof IdentifiablePayload<?> identifiable) {
             return new ApplyState(null, identifiable.getIdentifier(), entry);
         }
 
@@ -765,13 +765,13 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
 
         // If the first entry's size exceeds the max data size threshold, it will be returned from the call above. If
         // that is the case, then we need to slice it into smaller chunks.
-        if (entries.size() != 1 || entries.getFirst().getData().serializedSize() <= maxDataSize) {
+        if (entries.size() != 1 || entries.getFirst().command().serializedSize() <= maxDataSize) {
             // Don't need to slice.
             return entries;
         }
 
         final var firstEntry = entries.getFirst();
-        LOG.debug("{}: Log entry size {} exceeds max payload size {}", logName, firstEntry.getData().size(),
+        LOG.debug("{}: Log entry size {} exceeds max payload size {}", logName, firstEntry.command().size(),
                 maxDataSize);
 
         // If an AppendEntries has already been serialized for the log index then reuse the

@@ -40,7 +40,7 @@ final class LE implements Externalizable {
     LE(final SimpleReplicatedLogEntry logEntry) {
         index = logEntry.index();
         term = logEntry.term();
-        data = logEntry.getData();
+        data = logEntry.command();
     }
 
     @Override

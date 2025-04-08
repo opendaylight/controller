@@ -181,18 +181,18 @@ class RaftActorRecoverySupport {
                     logEntry.index(), logEntry.size());
         }
 
-        final var data = logEntry.getData();
-        if (isMigratedSerializable(data)) {
+        final var command = logEntry.command();
+        if (isMigratedSerializable(command)) {
             hasMigratedDataRecovered = true;
         }
 
-        if (data instanceof ClusterConfig clusterConfig) {
+        if (command instanceof ClusterConfig clusterConfig) {
             context.updatePeerIds(clusterConfig);
         }
 
         if (context.getPersistenceProvider().isRecoveryApplicable()) {
             replicatedLog().append(logEntry);
-        } else if (!(data instanceof ClusterConfig)) {
+        } else if (!(command instanceof ClusterConfig)) {
             dataRecoveredWithPersistenceDisabled = true;
         }
     }
@@ -249,7 +249,7 @@ class RaftActorRecoverySupport {
     private void batchRecoveredLogEntry(final ReplicatedLogEntry logEntry) {
         initRecoveryTimers();
 
-        if (logEntry.getData() instanceof ClusterConfig) {
+        if (logEntry.command() instanceof ClusterConfig) {
             // FIXME: explain why ClusterConfig is special
             return;
         }
@@ -259,7 +259,7 @@ class RaftActorRecoverySupport {
             cohort.startLogRecoveryBatch(batchSize);
         }
 
-        cohort.appendRecoveredLogEntry(logEntry.getData());
+        cohort.appendRecoveredLogEntry(logEntry.command());
 
         if (++currentRecoveryBatchCount >= batchSize) {
             endCurrentLogRecoveryBatch();
@@ -361,7 +361,7 @@ class RaftActorRecoverySupport {
     }
 
     private static boolean isMigratedPayload(final ReplicatedLogEntry repLogEntry) {
-        return isMigratedSerializable(repLogEntry.getData());
+        return isMigratedSerializable(repLogEntry.command());
     }
 
     private static boolean isMigratedSerializable(final Object message) {

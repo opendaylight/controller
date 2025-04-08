@@ -56,8 +56,8 @@ public class RaftActorDataPersistenceProviderTest {
 
     @Before
     public void setup() {
-        doReturn(PERSISTENT_PAYLOAD).when(mockPersistentLogEntry).getData();
-        doReturn(NON_PERSISTENT_PAYLOAD).when(mockNonPersistentLogEntry).getData();
+        doReturn(PERSISTENT_PAYLOAD).when(mockPersistentLogEntry).command();
+        doReturn(NON_PERSISTENT_PAYLOAD).when(mockNonPersistentLogEntry).command();
         provider = new PersistenceControl(mockDisabledStorage, mockEnabledStorage);
     }
 

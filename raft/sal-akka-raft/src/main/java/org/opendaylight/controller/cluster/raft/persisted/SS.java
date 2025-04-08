@@ -54,7 +54,7 @@ final class SS implements Externalizable {
         out.writeInt(unAppliedEntries.size());
         for (var e : unAppliedEntries) {
             WritableObjects.writeLongs(out, e.index(), e.term());
-            out.writeObject(e.getData());
+            out.writeObject(e.command());
         }
 
         out.writeObject(snapshot.getState());

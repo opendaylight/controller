@@ -329,7 +329,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         for (int i = 0; i < expJournal.size(); i++) {
             final var expected = expJournal.get(i);
             final var actual = journal.get(i);
-            verifyReplicatedLogEntry(expected, actual.term(), actual.index(), actual.getData());
+            verifyReplicatedLogEntry(expected, actual.term(), actual.index(), actual.command());
         }
     }
 
@@ -361,9 +361,9 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
 
     protected void verifyReplicatedLogEntry(final ReplicatedLogEntry replicatedLogEntry, final long expTerm,
             final long expIndex, final Payload payload) {
-        assertEquals("ReplicatedLogEntry getTerm", expTerm, replicatedLogEntry.term());
-        assertEquals("ReplicatedLogEntry getIndex", expIndex, replicatedLogEntry.index());
-        assertEquals("ReplicatedLogEntry getData", payload, replicatedLogEntry.getData());
+        assertEquals(expTerm, replicatedLogEntry.term());
+        assertEquals(expIndex, replicatedLogEntry.index());
+        assertEquals(payload, replicatedLogEntry.command());
     }
 
     protected String testActorPath(final String id) {

@@ -66,8 +66,8 @@ class AbstractReplicatedLogTest {
     @Test
     void testIndexOperations() {
         // check if the values returned are correct, with snapshotIndex = -1
-        assertEquals("B", replicatedLogImpl.get(1).getData().toString());
-        assertEquals("D", replicatedLogImpl.last().getData().toString());
+        assertEquals("B", replicatedLogImpl.get(1).command().toString());
+        assertEquals("D", replicatedLogImpl.last().command().toString());
         assertEquals(3, replicatedLogImpl.lastIndex());
         assertEquals(2, replicatedLogImpl.lastTerm());
         assertEquals(2, replicatedLogImpl.getFrom(2).size());
@@ -84,8 +84,8 @@ class AbstractReplicatedLogTest {
         // check the values after the snapshot.
         // each index value passed in the test is the logical index (log entry index)
         // which gets mapped to the list's physical index
-        assertEquals("D", replicatedLogImpl.get(3).getData().toString());
-        assertEquals("D", replicatedLogImpl.last().getData().toString());
+        assertEquals("D", replicatedLogImpl.get(3).command().toString());
+        assertEquals("D", replicatedLogImpl.last().command().toString());
         assertNull(replicatedLogImpl.get(1));
         assertEquals(3, replicatedLogImpl.lastIndex());
         assertEquals(2, replicatedLogImpl.lastTerm());
@@ -104,9 +104,9 @@ class AbstractReplicatedLogTest {
 
         // check their values as well
         assertEquals(5, replicatedLogImpl.size());
-        assertEquals("D", replicatedLogImpl.get(3).getData().toString());
-        assertEquals("E", replicatedLogImpl.get(4).getData().toString());
-        assertEquals("H", replicatedLogImpl.last().getData().toString());
+        assertEquals("D", replicatedLogImpl.get(3).command().toString());
+        assertEquals("E", replicatedLogImpl.get(4).command().toString());
+        assertEquals("H", replicatedLogImpl.last().command().toString());
         assertEquals(3, replicatedLogImpl.lastTerm());
         assertEquals(7, replicatedLogImpl.lastIndex());
         assertTrue(replicatedLogImpl.isPresent(7));
@@ -131,14 +131,14 @@ class AbstractReplicatedLogTest {
     void testGetFromWithMax() {
         var from = replicatedLogImpl.getFrom(0, 1, ReplicatedLog.NO_MAX_SIZE);
         assertEquals(1, from.size());
-        assertEquals("A", from.get(0).getData().toString());
+        assertEquals("A", from.get(0).command().toString());
 
         from = replicatedLogImpl.getFrom(0, 20, ReplicatedLog.NO_MAX_SIZE);
         assertEquals(4, from.size());
-        assertEquals("A", from.get(0).getData().toString());
-        assertEquals("B", from.get(1).getData().toString());
-        assertEquals("C", from.get(2).getData().toString());
-        assertEquals("D", from.get(3).getData().toString());
+        assertEquals("A", from.get(0).command().toString());
+        assertEquals("B", from.get(1).command().toString());
+        assertEquals("C", from.get(2).command().toString());
+        assertEquals("D", from.get(3).command().toString());
 
         // Pre-calculate sizing information for use with capping
         final int sizeB = from.get(1).serializedSize();
@@ -147,29 +147,29 @@ class AbstractReplicatedLogTest {
 
         from = replicatedLogImpl.getFrom(1, 2, ReplicatedLog.NO_MAX_SIZE);
         assertEquals(2, from.size());
-        assertEquals("B", from.get(0).getData().toString());
-        assertEquals("C", from.get(1).getData().toString());
+        assertEquals("B", from.get(0).command().toString());
+        assertEquals("C", from.get(1).command().toString());
 
         from = replicatedLogImpl.getFrom(1, 3, sizeB + sizeC);
         assertEquals(2, from.size());
-        assertEquals("B", from.get(0).getData().toString());
-        assertEquals("C", from.get(1).getData().toString());
+        assertEquals("B", from.get(0).command().toString());
+        assertEquals("C", from.get(1).command().toString());
 
         from = replicatedLogImpl.getFrom(1, 3, sizeB + sizeC + sizeD);
         assertEquals(3, from.size());
-        assertEquals("B", from.get(0).getData().toString());
-        assertEquals("C", from.get(1).getData().toString());
-        assertEquals("D", from.get(2).getData().toString());
+        assertEquals("B", from.get(0).command().toString());
+        assertEquals("C", from.get(1).command().toString());
+        assertEquals("D", from.get(2).command().toString());
 
         from = replicatedLogImpl.getFrom(1, 2, sizeB + sizeC + sizeD);
         assertEquals(2, from.size());
-        assertEquals("B", from.get(0).getData().toString());
-        assertEquals("C", from.get(1).getData().toString());
+        assertEquals("B", from.get(0).command().toString());
+        assertEquals("C", from.get(1).command().toString());
 
         replicatedLogImpl.append(new SimpleReplicatedLogEntry(4, 2, new MockPayload("12345")));
         from = replicatedLogImpl.getFrom(4, 2, 2);
         assertEquals(1, from.size());
-        assertEquals("12345", from.get(0).getData().toString());
+        assertEquals("12345", from.get(0).command().toString());
     }
 
     @Test
@@ -300,7 +300,7 @@ class AbstractReplicatedLogTest {
         long lastTerm = 0;
         for (int i = 0; i < numEntries; i++) {
             final var entry = replicatedLogImpl.getAtPhysicalIndex(i);
-            map.put(entry.index(), entry.getData().toString());
+            map.put(entry.index(), entry.command().toString());
             lastIndex = entry.index();
             lastTerm = entry.term();
         }

@@ -78,6 +78,6 @@ class AppendEntriesTest {
     private static void assertReplicatedLogEntry(final ReplicatedLogEntry expected, final ReplicatedLogEntry actual) {
         assertEquals(expected.index(), actual.index());
         assertEquals(expected.term(), actual.term());
-        assertEquals(expected.getData().toString(), actual.getData().toString());
+        assertEquals(expected.command().toString(), actual.command().toString());
     }
 }
