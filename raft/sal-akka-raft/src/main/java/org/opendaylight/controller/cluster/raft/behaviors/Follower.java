@@ -25,7 +25,6 @@ import org.opendaylight.controller.cluster.messaging.MessageAssembler;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.ApplyLeaderSnapshot;
-import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
@@ -36,6 +35,7 @@ import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
+import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.api.TermInfo;
@@ -43,6 +43,7 @@ import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.PlainSnapshotSource;
 import org.opendaylight.raft.spi.SizedStreamSource;
 import org.opendaylight.raft.spi.SnapshotSource;
+import org.opendaylight.yangtools.concepts.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -433,8 +434,8 @@ public class Follower extends RaftActorBehavior {
     }
 
     @Override
-    final ApplyState getApplyStateFor(final ReplicatedLogEntry entry) {
-        return new ApplyState(null, entry);
+    Identifier applyIdentifierFor(final LogEntry entry) {
+        return null;
     }
 
     @Override
