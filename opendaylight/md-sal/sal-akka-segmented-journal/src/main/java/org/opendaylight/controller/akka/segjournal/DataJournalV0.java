@@ -15,6 +15,7 @@ import io.atomix.storage.journal.JournalWriter;
 import io.atomix.storage.journal.SegmentedByteBufJournal;
 import io.atomix.storage.journal.SegmentedJournal;
 import io.atomix.storage.journal.StorageLevel;
+import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -146,7 +147,8 @@ final class DataJournalV0 extends DataJournal {
         return new WrittenMessages(message, responses, writtenBytes);
     }
 
-    private long writePayload(final JournalWriter<DataJournalEntry> writer, final List<PersistentRepr> reprs) {
+    private long writePayload(final JournalWriter<DataJournalEntry> writer, final List<PersistentRepr> reprs)
+            throws IOException {
         long bytes = 0;
         for (var repr : reprs) {
             final Object payload = repr.payload();

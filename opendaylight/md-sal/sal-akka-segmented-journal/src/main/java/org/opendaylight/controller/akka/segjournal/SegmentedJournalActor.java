@@ -22,6 +22,8 @@ import io.atomix.storage.journal.JournalSerdes;
 import io.atomix.storage.journal.SegmentedByteBufJournal;
 import io.atomix.storage.journal.SegmentedJournal;
 import io.atomix.storage.journal.StorageLevel;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayDeque;
@@ -423,7 +425,12 @@ abstract sealed class SegmentedJournalActor extends AbstractActor {
 
             lastDelete = to;
             final var deleteWriter = deleteJournal.writer();
-            final var entry = deleteWriter.append(lastDelete);
+            final Indexed<Long> entry;
+            try {
+                entry = deleteWriter.append(lastDelete);
+            } catch (IOException e) {
+                throw new UncheckedIOException("Failed to append delete to " + lastDelete, e);
+            }
             deleteWriter.commit(entry.index());
             dataJournal.deleteTo(lastDelete);
 
