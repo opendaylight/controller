@@ -799,10 +799,10 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
 
             sharedSerializedAppendEntriesStreams.put(logIndex, fileBackedStream);
 
-            fileBackedStream.setOnCleanupCallback(index -> {
-                LOG.debug("{}: On SharedFileBackedOutputStream cleanup for index {}", logName, index);
-                sharedSerializedAppendEntriesStreams.remove(index);
-            }, logIndex);
+            fileBackedStream.setOnCleanupCallback(() -> {
+                LOG.debug("{}: On SharedFileBackedOutputStream cleanup for index {}", logName, logIndex);
+                sharedSerializedAppendEntriesStreams.remove(logIndex);
+            });
         } else {
             LOG.debug("{}: Reusing SharedFileBackedOutputStream for follower {}", logName, followerLogInfo.getId());
             fileBackedStream.incrementUsageCount();

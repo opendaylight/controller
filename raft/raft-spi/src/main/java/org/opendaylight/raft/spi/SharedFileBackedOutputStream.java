@@ -7,8 +7,9 @@
  */
 package org.opendaylight.raft.spi;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 
 /**
  * A FileBackedOutputStream that allows for sharing in that it maintains a usage count and the backing file isn't
@@ -22,10 +23,7 @@ public final class SharedFileBackedOutputStream extends FileBackedOutputStream {
     // FIXME: refCount
     private final AtomicInteger usageCount = new AtomicInteger(1);
 
-    // FIXME: err... what?
-    @SuppressWarnings("rawtypes")
-    private Consumer onCleanupCallback;
-    private Object onCleanupContext;
+    private Runnable onCleanupCallback;
 
     /**
      * Default constructor. Resulting instance uses the given file threshold, and does not reset the data when the
@@ -60,14 +58,10 @@ public final class SharedFileBackedOutputStream extends FileBackedOutputStream {
      * Sets the callback to be notified when {@link FileBackedOutputStream#cleanup()} is called to delete the backing
      * file.
      *
-     * @param <T> context type
      * @param callback the callback
-     * @param context the context
      */
-    // FIXME: just a Runnable
-    public <T> void setOnCleanupCallback(final Consumer<T> callback, final T context) {
-        onCleanupCallback = callback;
-        onCleanupContext = context;
+    public void setOnCleanupCallback(final Runnable callback) {
+        onCleanupCallback = requireNonNull(callback);
     }
 
     /**
@@ -85,7 +79,7 @@ public final class SharedFileBackedOutputStream extends FileBackedOutputStream {
             super.cleanup();
 
             if (onCleanupCallback != null) {
-                onCleanupCallback.accept(onCleanupContext);
+                onCleanupCallback.run();
             }
         }
     }

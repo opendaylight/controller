@@ -13,7 +13,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import java.nio.file.Path;
-import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
@@ -35,7 +34,7 @@ class SharedFileBackedOutputStreamTest {
     @TempDir
     private Path tempDir;
     @Mock
-    private Consumer<String> mockCallback;
+    private Runnable mockCallback;
 
     private SharedFileBackedOutputStream newStream() {
         return new SharedFileBackedOutputStream(new Configuration(5, tempDir));
@@ -60,8 +59,7 @@ class SharedFileBackedOutputStreamTest {
     void testSharing() throws Exception {
         LOG.info("testSharing starting");
         try (var fbos = newStream()) {
-            String context = "context";
-            fbos.setOnCleanupCallback(mockCallback, context);
+            fbos.setOnCleanupCallback(mockCallback);
 
             final var bytes = new byte[] { 0, 1, 2, 3, 4, 5, 6 };
             fbos.write(bytes);
@@ -81,12 +79,12 @@ class SharedFileBackedOutputStreamTest {
             fbos.cleanup();
             assertNotNull(FileBackedOutputStreamTest.findTempFileName(tempDir));
 
-            verify(mockCallback, never()).accept(context);
+            verify(mockCallback, never()).run();
 
             fbos.cleanup();
             assertNull(FileBackedOutputStreamTest.findTempFileName(tempDir));
 
-            verify(mockCallback).accept(context);
+            verify(mockCallback).run();
         }
 
         LOG.info("testSharing ending");
