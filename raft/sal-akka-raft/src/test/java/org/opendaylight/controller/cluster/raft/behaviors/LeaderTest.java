@@ -570,13 +570,13 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         for (int i = 0; i <= newLogIndex - 1; i++) {
             ApplyState applyState = applyStateList.get(i);
-            assertEquals("getIndex", i + 1, applyState.getReplicatedLogEntry().index());
-            assertEquals("getTerm", term, applyState.getReplicatedLogEntry().term());
+            assertEquals("getIndex", i + 1, applyState.entry().index());
+            assertEquals("getTerm", term, applyState.entry().term());
         }
 
         ApplyState last = applyStateList.get((int) newLogIndex - 1);
-        assertEquals("getData", data, last.getReplicatedLogEntry().command());
-        assertEquals("getIdentifier", identifier, last.getIdentifier());
+        assertEquals("getData", data, last.entry().command());
+        assertEquals("getIdentifier", identifier, last.identifier());
     }
 
     @Test
@@ -1446,16 +1446,14 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         final var applyStateList = MessageCollectorActor.expectMatching(followerActor, ApplyState.class, 2);
 
         ApplyState applyState = applyStateList.get(0);
-        assertEquals("Follower's first ApplyState index", 1, applyState.getReplicatedLogEntry().index());
-        assertEquals("Follower's first ApplyState term", 1, applyState.getReplicatedLogEntry().term());
-        assertEquals("Follower's first ApplyState data", leadersSecondLogEntry.command(),
-                applyState.getReplicatedLogEntry().command());
+        assertEquals("Follower's first ApplyState index", 1, applyState.entry().index());
+        assertEquals("Follower's first ApplyState term", 1, applyState.entry().term());
+        assertEquals("Follower's first ApplyState data", leadersSecondLogEntry.command(), applyState.entry().command());
 
         applyState = applyStateList.get(1);
-        assertEquals("Follower's second ApplyState index", 2, applyState.getReplicatedLogEntry().index());
-        assertEquals("Follower's second ApplyState term", 1, applyState.getReplicatedLogEntry().term());
-        assertEquals("Follower's second ApplyState data", leadersThirdLogEntry.command(),
-                applyState.getReplicatedLogEntry().command());
+        assertEquals("Follower's second ApplyState index", 2, applyState.entry().index());
+        assertEquals("Follower's second ApplyState term", 1, applyState.entry().term());
+        assertEquals("Follower's second ApplyState data", leadersThirdLogEntry.command(), applyState.entry().command());
 
         followerLog = followerActorContext.getReplicatedLog();
         assertEquals("Follower's commit index", 2, followerLog.getCommitIndex());
@@ -1524,16 +1522,15 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         final var applyStateList = MessageCollectorActor.expectMatching(followerActor, ApplyState.class, 2);
 
         ApplyState applyState = applyStateList.get(0);
-        assertEquals("Follower's first ApplyState index", 0, applyState.getReplicatedLogEntry().index());
-        assertEquals("Follower's first ApplyState term", 1, applyState.getReplicatedLogEntry().term());
-        assertEquals("Follower's first ApplyState data", leadersFirstLogEntry.command(),
-                applyState.getReplicatedLogEntry().command());
+        assertEquals("Follower's first ApplyState index", 0, applyState.entry().index());
+        assertEquals("Follower's first ApplyState term", 1, applyState.entry().term());
+        assertEquals("Follower's first ApplyState data", leadersFirstLogEntry.command(), applyState.entry().command());
 
         applyState = applyStateList.get(1);
-        assertEquals("Follower's second ApplyState index", 1, applyState.getReplicatedLogEntry().index());
-        assertEquals("Follower's second ApplyState term", 1, applyState.getReplicatedLogEntry().term());
+        assertEquals("Follower's second ApplyState index", 1, applyState.entry().index());
+        assertEquals("Follower's second ApplyState term", 1, applyState.entry().term());
         assertEquals("Follower's second ApplyState data", leadersSecondLogEntry.command(),
-                applyState.getReplicatedLogEntry().command());
+            applyState.entry().command());
 
         final var followerLog = followerActorContext.getReplicatedLog();
         assertEquals("Follower's commit index", 1, followerLog.getCommitIndex());
@@ -1606,16 +1603,15 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         List<ApplyState> applyStateList = MessageCollectorActor.expectMatching(followerActor, ApplyState.class, 2);
 
         ApplyState applyState = applyStateList.get(0);
-        assertEquals("Follower's first ApplyState index", 0, applyState.getReplicatedLogEntry().index());
-        assertEquals("Follower's first ApplyState term", 2, applyState.getReplicatedLogEntry().term());
-        assertEquals("Follower's first ApplyState data", leadersFirstLogEntry.command(),
-                applyState.getReplicatedLogEntry().command());
+        assertEquals("Follower's first ApplyState index", 0, applyState.entry().index());
+        assertEquals("Follower's first ApplyState term", 2, applyState.entry().term());
+        assertEquals("Follower's first ApplyState data", leadersFirstLogEntry.command(), applyState.entry().command());
 
         applyState = applyStateList.get(1);
-        assertEquals("Follower's second ApplyState index", 1, applyState.getReplicatedLogEntry().index());
-        assertEquals("Follower's second ApplyState term", 2, applyState.getReplicatedLogEntry().term());
+        assertEquals("Follower's second ApplyState index", 1, applyState.entry().index());
+        assertEquals("Follower's second ApplyState term", 2, applyState.entry().term());
         assertEquals("Follower's second ApplyState data", leadersSecondLogEntry.command(),
-                applyState.getReplicatedLogEntry().command());
+            applyState.entry().command());
 
         final var followerLog = followerActorContext.getReplicatedLog();
         assertEquals("Follower's commit index", 1, followerLog.getCommitIndex());
@@ -1708,7 +1704,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         ApplyState applyState = applyStateList.get(0);
 
-        assertEquals(2, applyState.getReplicatedLogEntry().index());
+        assertEquals(2, applyState.entry().index());
 
         assertEquals(2, followerInfo.getMatchIndex());
         assertEquals(3, followerInfo.getNextIndex());

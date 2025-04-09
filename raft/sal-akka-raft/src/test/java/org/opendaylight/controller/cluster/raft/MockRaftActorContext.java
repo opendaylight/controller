@@ -19,6 +19,7 @@ import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.ActorSystem;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
@@ -37,7 +38,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
 
     public MockRaftActorContext(final Path stateDir, final int payloadVersion) {
         super(null, null, newLocalAccess("test", stateDir), new HashMap<>(), new DefaultConfigParamsImpl(),
-            (short) payloadVersion, new TestDataProvider(), applyState -> { }, MoreExecutors.directExecutor());
+            (short) payloadVersion, new TestDataProvider(), (identifier, entry) -> { }, MoreExecutors.directExecutor());
         resetReplicatedLog(new MockReplicatedLogBuilder().build());
     }
 
@@ -45,8 +46,8 @@ public class MockRaftActorContext extends RaftActorContextImpl {
     public MockRaftActorContext(final String id, final Path stateDir, final ActorSystem system, final ActorRef actor,
             final int payloadVersion) {
         super(actor, null, newLocalAccess(id, stateDir), new HashMap<>(), new DefaultConfigParamsImpl(),
-            (short) payloadVersion, new TestDataProvider(), applyState -> actor.tell(applyState, actor),
-            MoreExecutors.directExecutor());
+            (short) payloadVersion, new TestDataProvider(),
+            (identifier, entry) -> actor.tell(new ApplyState(identifier, entry), actor), MoreExecutors.directExecutor());
         this.system = system;
         initReplicatedLog();
     }

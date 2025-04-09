@@ -11,7 +11,6 @@ import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.concurrent.Executor;
-import java.util.function.Consumer;
 import java.util.function.LongSupplier;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
@@ -19,7 +18,6 @@ import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.cluster.Cluster;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
@@ -297,9 +295,9 @@ public interface RaftActorContext {
      * Returns the consumer of ApplyState operations. This is invoked by a behavior when a log entry needs to be
      * applied to the state.
      *
-     * @return the Consumer
+     * @return the {@link ApplyEntryMethod}
      */
-    Consumer<ApplyState> getApplyStateConsumer();
+    ApplyEntryMethod applyEntryMethod();
 
     /**
      * Returns the {@link FileBackedOutputStreamFactory} instance with a common configuration.

@@ -7,32 +7,20 @@
  */
 package org.opendaylight.controller.cluster.raft.base.messages;
 
+import static java.util.Objects.requireNonNull;
+
 import org.apache.pekko.dispatch.ControlMessage;
-import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.yangtools.concepts.Identifier;
 
 /**
  * Local message sent by a RaftActor to itself to signal state has been applied to the state machine.
  */
-public class ApplyState implements ControlMessage {
-    private final Identifier identifier;
-    private final ReplicatedLogEntry replicatedLogEntry;
-
-    public ApplyState(final Identifier identifier, final ReplicatedLogEntry replicatedLogEntry) {
-        this.identifier = identifier;
-        this.replicatedLogEntry = replicatedLogEntry;
-    }
-
-    public Identifier getIdentifier() {
-        return identifier;
-    }
-
-    public ReplicatedLogEntry getReplicatedLogEntry() {
-        return replicatedLogEntry;
-    }
-
-    @Override
-    public String toString() {
-        return "ApplyState [identifier=" + identifier + ", replicatedLogEntry=" + replicatedLogEntry + "]";
+@NonNullByDefault
+public record ApplyState(@Nullable Identifier identifier, LogEntry entry) implements ControlMessage {
+    public ApplyState {
+        requireNonNull(entry);
     }
 }

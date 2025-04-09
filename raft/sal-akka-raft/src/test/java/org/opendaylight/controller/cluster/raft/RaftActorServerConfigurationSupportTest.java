@@ -894,12 +894,12 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         assertEquals("getStatus", ServerChangeStatus.OK, removeServerReply.getStatus());
 
         ApplyState applyState = MessageCollectorActor.expectFirstMatching(leaderCollector, ApplyState.class);
-        assertEquals(0L, applyState.getReplicatedLogEntry().index());
+        assertEquals(0L, applyState.entry().index());
         verifyServerConfigurationPayloadEntry(leaderActor.underlyingActor().getRaftActorContext().getReplicatedLog(),
                 votingServer(LEADER_ID), votingServer(FOLLOWER_ID2), votingServer(downNodeId));
 
         applyState = MessageCollectorActor.expectFirstMatching(follower2Collector, ApplyState.class);
-        assertEquals(0L, applyState.getReplicatedLogEntry().index());
+        assertEquals(0L, applyState.entry().index());
         verifyServerConfigurationPayloadEntry(leaderActor.underlyingActor().getRaftActorContext().getReplicatedLog(),
                 votingServer(LEADER_ID), votingServer(FOLLOWER_ID2), votingServer(downNodeId));
 
@@ -944,7 +944,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         assertEquals("getStatus", ServerChangeStatus.OK, removeServerReply.getStatus());
 
         final ApplyState applyState = MessageCollectorActor.expectFirstMatching(followerCollector, ApplyState.class);
-        assertEquals(0L, applyState.getReplicatedLogEntry().index());
+        assertEquals(0L, applyState.entry().index());
         verifyServerConfigurationPayloadEntry(leaderActor.underlyingActor().getRaftActorContext().getReplicatedLog(),
                 votingServer(FOLLOWER_ID));
 
@@ -1009,7 +1009,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         assertEquals("getStatus", ServerChangeStatus.OK, reply.getStatus());
 
         final ApplyState applyState = MessageCollectorActor.expectFirstMatching(leaderCollector, ApplyState.class);
-        assertEquals(0L, applyState.getReplicatedLogEntry().index());
+        assertEquals(0L, applyState.entry().index());
         verifyServerConfigurationPayloadEntry(leaderActor.underlyingActor().getRaftActorContext().getReplicatedLog(),
                 votingServer(LEADER_ID), nonVotingServer(FOLLOWER_ID), nonVotingServer(FOLLOWER_ID2));
 
@@ -1477,7 +1477,8 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         return new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
             new LocalAccess(id, stateDir(), new FailingTermInfoStore(1, LEADER_ID)), Map.of(LEADER_ID, ""),
-            configParams, (short) 0, new TestDataProvider(), applyState -> actor.tell(applyState, actor),
+            configParams, (short) 0, new TestDataProvider(),
+            (identifier, entry) -> actor.tell(new ApplyState(identifier, entry), actor),
             MoreExecutors.directExecutor());
     }
 

@@ -144,7 +144,7 @@ class RaftActorServerConfigurationSupport {
     }
 
     private boolean onApplyState(final ApplyState applyState) {
-        if (applyState.getReplicatedLogEntry().command() instanceof ClusterConfig) {
+        if (applyState.entry().command() instanceof ClusterConfig) {
             currentOperationState.onApplyState(applyState);
             return true;
         }
@@ -325,9 +325,9 @@ class RaftActorServerConfigurationSupport {
         public void onApplyState(final ApplyState applyState) {
             // Sanity check - we could get an ApplyState from a previous operation that timed out so make
             // sure it's meant for us.
-            if (operationContext.getContextId().equals(applyState.getIdentifier())) {
+            if (operationContext.getContextId().equals(applyState.identifier())) {
                 LOG.info("{}: {} has been successfully replicated to a majority of followers", memberId(),
-                        applyState.getReplicatedLogEntry().command());
+                        applyState.entry().command());
 
                 timer.cancel();
                 operationComplete(operationContext, null);
