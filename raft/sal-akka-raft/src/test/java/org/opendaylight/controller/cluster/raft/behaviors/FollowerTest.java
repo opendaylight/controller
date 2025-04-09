@@ -40,6 +40,7 @@ import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.MessageCollectorActor;
+import org.opendaylight.controller.cluster.raft.MockCommand;
 import org.opendaylight.controller.cluster.raft.MockRaftActor;
 import org.opendaylight.controller.cluster.raft.MockRaftActor.Builder;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
@@ -350,7 +351,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         // Clear all the messages
         MessageCollectorActor.clearMessages(followerActor);
 
-        final var log = setLastLogEntry(context, 1, 101, new MockRaftActorContext.MockPayload(""));
+        final var log = setLastLogEntry(context, 1, 101, new MockCommand(""));
         log.setLastApplied(101);
         log.setCommitIndex(101);
 
@@ -398,7 +399,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         MessageCollectorActor.clearMessages(followerActor);
 
         context.getReplicatedLog().setLastApplied(100);
-        setLastLogEntry(context, 1, 100, new MockRaftActorContext.MockPayload(""));
+        setLastLogEntry(context, 1, 100, new MockCommand(""));
 
         entries = List.of(newReplicatedLogEntry(2, 101, "foo"));
 
@@ -434,7 +435,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         // Clear all the messages
         MessageCollectorActor.clearMessages(followerActor);
 
-        var log = setLastLogEntry(context, 1, 101, new MockRaftActorContext.MockPayload(""));
+        var log = setLastLogEntry(context, 1, 101, new MockCommand(""));
         log.setLastApplied(101);
         log.setCommitIndex(101);
 
@@ -451,7 +452,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         // Clear all the messages
         MessageCollectorActor.clearMessages(followerActor);
 
-        log = setLastLogEntry(context, 1, 100, new MockRaftActorContext.MockPayload(""));
+        log = setLastLogEntry(context, 1, 100, new MockCommand(""));
         log.setLastApplied(100);
 
         entries = List.of(newReplicatedLogEntry(2, 101, "foo"));
@@ -478,7 +479,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         final var context = createActorContext();
 
-        setLastLogEntry(context, 1, 100, new MockRaftActorContext.MockPayload(""));
+        setLastLogEntry(context, 1, 100, new MockCommand(""));
         final var log = context.getReplicatedLog();
         log.setLastApplied(100);
         log.setSnapshotIndex(99);
@@ -966,7 +967,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         // Clear all the messages
         MessageCollectorActor.clearMessages(followerActor);
 
-        final var log = setLastLogEntry(context, 1, 101, new MockRaftActorContext.MockPayload(""));
+        final var log = setLastLogEntry(context, 1, 101, new MockCommand(""));
         log.setLastApplied(101);
         log.setCommitIndex(101);
 
@@ -1338,7 +1339,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
     private static ReplicatedLogEntry newReplicatedLogEntry(final long term, final long index, final String data) {
-        return new SimpleReplicatedLogEntry(index, term, new MockRaftActorContext.MockPayload(data));
+        return new SimpleReplicatedLogEntry(index, term, new MockCommand(data));
     }
 
     private ByteString createSnapshot() {

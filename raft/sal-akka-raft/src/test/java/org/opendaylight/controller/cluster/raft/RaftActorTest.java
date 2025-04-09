@@ -61,7 +61,6 @@ import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RoleChanged;
 import org.opendaylight.controller.cluster.raft.AbstractRaftActorIntegrationTest.TestPersist;
 import org.opendaylight.controller.cluster.raft.AbstractRaftActorIntegrationTest.TestRaftActor;
-import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.ApplyLeaderSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.LeaderTransitioning;
@@ -151,26 +150,23 @@ public class RaftActorTest extends AbstractActorTest {
         kit.watch(followerActor);
 
         List<ReplicatedLogEntry> snapshotUnappliedEntries = List.of(
-            new SimpleReplicatedLogEntry(4, 1, new MockRaftActorContext.MockPayload("E")));
+            new SimpleReplicatedLogEntry(4, 1, new MockCommand("E")));
 
         int lastAppliedDuringSnapshotCapture = 3;
         int lastIndexDuringSnapshotCapture = 4;
 
         // 4 messages as part of snapshot, which are applied to state
         MockSnapshotState snapshotState = new MockSnapshotState(List.of(
-                new MockRaftActorContext.MockPayload("A"),
-                new MockRaftActorContext.MockPayload("B"),
-                new MockRaftActorContext.MockPayload("C"),
-                new MockRaftActorContext.MockPayload("D")));
+            new MockCommand("A"), new MockCommand("B"), new MockCommand("C"), new MockCommand("D")));
 
         Snapshot snapshot = Snapshot.create(snapshotState, snapshotUnappliedEntries, lastIndexDuringSnapshotCapture, 1,
                 lastAppliedDuringSnapshotCapture, 1, new TermInfo(-1), null);
         InMemorySnapshotStore.addSnapshot(persistenceId, snapshot);
 
         // add more entries after snapshot is taken
-        ReplicatedLogEntry entry2 = new SimpleReplicatedLogEntry(5, 1, new MockRaftActorContext.MockPayload("F", 2));
-        ReplicatedLogEntry entry3 = new SimpleReplicatedLogEntry(6, 1, new MockRaftActorContext.MockPayload("G", 3));
-        ReplicatedLogEntry entry4 = new SimpleReplicatedLogEntry(7, 1, new MockRaftActorContext.MockPayload("H", 4));
+        ReplicatedLogEntry entry2 = new SimpleReplicatedLogEntry(5, 1, new MockCommand("F", 2));
+        ReplicatedLogEntry entry3 = new SimpleReplicatedLogEntry(6, 1, new MockCommand("G", 3));
+        ReplicatedLogEntry entry4 = new SimpleReplicatedLogEntry(7, 1, new MockCommand("H", 4));
 
         final int lastAppliedToState = 5;
         final int lastIndex = 7;
@@ -289,7 +285,7 @@ public class RaftActorTest extends AbstractActorTest {
         SnapshotOffer snapshotOffer = new SnapshotOffer(new SnapshotMetadata("test", 6, 12345), snapshot);
         mockRaftActor.handleRecover(snapshotOffer);
 
-        ReplicatedLogEntry logEntry = new SimpleReplicatedLogEntry(1, 1, new MockRaftActorContext.MockPayload("1", 5));
+        ReplicatedLogEntry logEntry = new SimpleReplicatedLogEntry(1, 1, new MockCommand("1", 5));
         mockRaftActor.handleRecover(logEntry);
 
         ApplyJournalEntries applyJournalEntries = new ApplyJournalEntries(2);
@@ -395,7 +391,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         mockRaftActor.waitForInitializeBehaviorComplete();
 
-        final var entry = new SimpleReplicatedLogEntry(5, 1, new MockRaftActorContext.MockPayload("F"));
+        final var entry = new SimpleReplicatedLogEntry(5, 1, new MockCommand("F"));
 
         final var id = new MockIdentifier("apply-state");
         mockRaftActor.getRaftActorContext().getApplyStateConsumer().accept(new ApplyState(id, entry));
@@ -572,11 +568,11 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals(8, leaderActor.getReplicatedLog().size());
 
         final var snapshotState = new MockSnapshotState(List.of(
-            new MockRaftActorContext.MockPayload("foo-0"),
-            new MockRaftActorContext.MockPayload("foo-1"),
-            new MockRaftActorContext.MockPayload("foo-2"),
-            new MockRaftActorContext.MockPayload("foo-3"),
-            new MockRaftActorContext.MockPayload("foo-4")));
+            new MockCommand("foo-0"),
+            new MockCommand("foo-1"),
+            new MockCommand("foo-2"),
+            new MockCommand("foo-3"),
+            new MockCommand("foo-4")));
 
         doReturn(snapshotState).when(leaderActor.snapshotCohortDelegate).takeSnapshot();
         doNothing().when(dataPersistenceProvider).streamToInstall(any(), any(), any(), any());
@@ -625,7 +621,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         // add another non-replicated entry
         leaderActor.getReplicatedLog().append(
-                new SimpleReplicatedLogEntry(8, 1, new MockRaftActorContext.MockPayload("foo-8")));
+                new SimpleReplicatedLogEntry(8, 1, new MockCommand("foo-8")));
 
         //fake snapshot on index 7, since lastApplied = 7 , we would keep the last applied
         leaderActor.handleCommand(new AppendEntriesReply(follower1Id, 1, true, 7, 1, (short)0));
@@ -674,11 +670,11 @@ public class RaftActorTest extends AbstractActorTest {
 
         //snapshot on 4
         doReturn(new MockSnapshotState(List.of(
-            new MockRaftActorContext.MockPayload("foo-0"),
-            new MockRaftActorContext.MockPayload("foo-1"),
-            new MockRaftActorContext.MockPayload("foo-2"),
-            new MockRaftActorContext.MockPayload("foo-3"),
-            new MockRaftActorContext.MockPayload("foo-4")))).when(followerActor.snapshotCohortDelegate).takeSnapshot();
+            new MockCommand("foo-0"),
+            new MockCommand("foo-1"),
+            new MockCommand("foo-2"),
+            new MockCommand("foo-3"),
+            new MockCommand("foo-4")))).when(followerActor.snapshotCohortDelegate).takeSnapshot();
         final var runnables = new ArrayList<Runnable>();
         dataPersistenceProvider.setActor(runnables::add);
         followerActor.getRaftActorContext().getSnapshotManager().captureToInstall(EntryInfo.of(5, 1), 4, "xyzzy");
@@ -688,15 +684,14 @@ public class RaftActorTest extends AbstractActorTest {
         dataPersistenceProvider.setActor(Runnable::run);
 
         //fake snapshot on index 6
-        List<ReplicatedLogEntry> entries = List.of(
-                new SimpleReplicatedLogEntry(6, 1, new MockRaftActorContext.MockPayload("foo-6")));
+        List<ReplicatedLogEntry> entries = List.of( new SimpleReplicatedLogEntry(6, 1, new MockCommand("foo-6")));
         followerActor.handleCommand(new AppendEntries(1, leaderId, 5, 1, entries, 5, 5, (short)0));
         assertEquals(7, followerActor.getReplicatedLog().size());
 
         //fake snapshot on index 7
         assertInstanceOf(Follower.class, followerActor.getCurrentBehavior());
 
-        entries = List.of(new SimpleReplicatedLogEntry(7, 1, new MockRaftActorContext.MockPayload("foo-7")));
+        entries = List.of(new SimpleReplicatedLogEntry(7, 1, new MockCommand("foo-7")));
         followerActor.handleCommand(new AppendEntries(1, leaderId, 6, 1, entries, 6, 6, (short) 0));
         assertEquals(8, followerActor.getReplicatedLog().size());
 
@@ -712,7 +707,7 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals(3, followerActor.getReplicatedLog().size()); //indexes 5,6,7 left in the log
         assertEquals(7, followerActor.getReplicatedLog().lastIndex());
 
-        entries = List.of(new SimpleReplicatedLogEntry(8, 1, new MockRaftActorContext.MockPayload("foo-7")));
+        entries = List.of(new SimpleReplicatedLogEntry(8, 1, new MockCommand("foo-7")));
         // send an additional entry 8 with leaderCommit = 7
         followerActor.handleCommand(new AppendEntries(1, leaderId, 7, 1, entries, 7, 7, (short) 0));
 
@@ -773,11 +768,11 @@ public class RaftActorTest extends AbstractActorTest {
         assertSame(leader, leaderActor.getCurrentBehavior());
 
         doReturn(new MockSnapshotState(List.of(
-            new MockRaftActorContext.MockPayload("foo-0"),
-            new MockRaftActorContext.MockPayload("foo-1"),
-            new MockRaftActorContext.MockPayload("foo-2"),
-            new MockRaftActorContext.MockPayload("foo-3"),
-            new MockRaftActorContext.MockPayload("foo-4")))).when(leaderActor.snapshotCohortDelegate).takeSnapshot();
+            new MockCommand("foo-0"),
+            new MockCommand("foo-1"),
+            new MockCommand("foo-2"),
+            new MockCommand("foo-3"),
+            new MockCommand("foo-4")))).when(leaderActor.snapshotCohortDelegate).takeSnapshot();
 
         final var runnables = new ArrayList<Runnable>();
         dataPersistenceProvider.setActor(runnables::add);
@@ -833,7 +828,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         leaderActor.waitForInitializeBehaviorComplete();
         for (int i = 0; i < 4; i++) {
-            leaderLog.append(new SimpleReplicatedLogEntry(i, 1, new MockRaftActorContext.MockPayload("A")));
+            leaderLog.append(new SimpleReplicatedLogEntry(i, 1, new MockCommand("A")));
         }
 
         final var leader = new Leader(leaderContext);
@@ -883,7 +878,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         // Persist another entry, this will cause a CaptureSnapshot to be triggered
         doReturn(new MockSnapshotState(List.of())).when(leaderActor.snapshotCohortDelegate).takeSnapshot();
-        leaderActor.submitCommand(new MockIdentifier("x"), new MockRaftActorContext.MockPayload("duh"), false);
+        leaderActor.submitCommand(new MockIdentifier("x"), new MockCommand("duh"), false);
         verify(leaderActor.snapshotCohortDelegate).takeSnapshot();
 
         // Trimming log in this scenario is a no-op
@@ -991,13 +986,10 @@ public class RaftActorTest extends AbstractActorTest {
         long term = 3;
         long seqN = 1;
         InMemoryJournal.addEntry(persistenceId, seqN++, new UpdateElectionTerm(term, "member-1"));
-        InMemoryJournal.addEntry(persistenceId, seqN++, new SimpleReplicatedLogEntry(0, term,
-                new MockRaftActorContext.MockPayload("A")));
-        InMemoryJournal.addEntry(persistenceId, seqN++, new SimpleReplicatedLogEntry(1, term,
-                new MockRaftActorContext.MockPayload("B")));
+        InMemoryJournal.addEntry(persistenceId, seqN++, new SimpleReplicatedLogEntry(0, term, new MockCommand("A")));
+        InMemoryJournal.addEntry(persistenceId, seqN++, new SimpleReplicatedLogEntry(1, term, new MockCommand("B")));
         InMemoryJournal.addEntry(persistenceId, seqN++, new ApplyJournalEntries(1));
-        InMemoryJournal.addEntry(persistenceId, seqN++, new SimpleReplicatedLogEntry(2, term,
-                new MockRaftActorContext.MockPayload("C")));
+        InMemoryJournal.addEntry(persistenceId, seqN++, new SimpleReplicatedLogEntry(2, term, new MockCommand("C")));
 
         TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.props(persistenceId,
             stateDir(), Map.of("member1", "address"), config)
@@ -1057,16 +1049,13 @@ public class RaftActorTest extends AbstractActorTest {
         config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
 
         List<ReplicatedLogEntry> snapshotUnappliedEntries = List.of(
-            new SimpleReplicatedLogEntry(4, 1, new MockRaftActorContext.MockPayload("E")));
+            new SimpleReplicatedLogEntry(4, 1, new MockCommand("E")));
 
         int snapshotLastApplied = 3;
         int snapshotLastIndex = 4;
 
         MockSnapshotState snapshotState = new MockSnapshotState(List.of(
-                new MockRaftActorContext.MockPayload("A"),
-                new MockRaftActorContext.MockPayload("B"),
-                new MockRaftActorContext.MockPayload("C"),
-                new MockRaftActorContext.MockPayload("D")));
+            new MockCommand("A"), new MockCommand("B"), new MockCommand("C"), new MockCommand("D")));
 
         Snapshot snapshot = Snapshot.create(snapshotState, snapshotUnappliedEntries,
                 snapshotLastIndex, 1, snapshotLastApplied, 1, new TermInfo(1, "member-1"), null);
@@ -1130,12 +1119,11 @@ public class RaftActorTest extends AbstractActorTest {
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
         config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
 
-        final var state = List.of(new MockRaftActorContext.MockPayload("A"));
+        final var state = List.of(new MockCommand("A"));
         Snapshot snapshot = Snapshot.create(ByteState.of(fromObject(state).toByteArray()),
                 List.of(), 5, 2, 5, 2, new TermInfo(2, "member-1"), null);
 
-        InMemoryJournal.addEntry(persistenceId, 1, new SimpleReplicatedLogEntry(0, 1,
-                new MockRaftActorContext.MockPayload("B")));
+        InMemoryJournal.addEntry(persistenceId, 1, new SimpleReplicatedLogEntry(0, 1, new MockCommand("B")));
 
         TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.builder().id(persistenceId)
             .config(config).restoreFromSnapshot(snapshot).props(stateDir())
@@ -1245,7 +1233,7 @@ public class RaftActorTest extends AbstractActorTest {
         Leader leader = new Leader(leaderActor.getRaftActorContext());
         leaderActor.setCurrentBehavior(leader);
 
-        leaderActor.submitCommand(new MockIdentifier("1"), new MockRaftActorContext.MockPayload("1"), false);
+        leaderActor.submitCommand(new MockIdentifier("1"), new MockCommand("1"), false);
 
         final var leaderLog = leaderActor.getReplicatedLog();
         final var logEntry = leaderLog.get(0);
@@ -1292,13 +1280,13 @@ public class RaftActorTest extends AbstractActorTest {
 
         leaderActor.handleCommand(new AppendEntriesReply(followerId, 1, true, -1, -1, (short)0));
 
-        leaderActor.submitCommand(new MockIdentifier("1"), new MockPayload("1"), true);
+        leaderActor.submitCommand(new MockIdentifier("1"), new MockCommand("1"), true);
         MessageCollectorActor.assertNoneMatching(followerActor, AppendEntries.class, 500);
 
-        leaderActor.submitCommand(new MockIdentifier("2"), new MockPayload("2"), true);
+        leaderActor.submitCommand(new MockIdentifier("2"), new MockCommand("2"), true);
         MessageCollectorActor.assertNoneMatching(followerActor, AppendEntries.class, 500);
 
-        leaderActor.submitCommand(new MockIdentifier("3"), new MockPayload("3"), false);
+        leaderActor.submitCommand(new MockIdentifier("3"), new MockCommand("3"), false);
         AppendEntries appendEntries = MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
         assertEquals("AppendEntries size", 3, appendEntries.getEntries().size());
     }
@@ -1353,7 +1341,7 @@ public class RaftActorTest extends AbstractActorTest {
         // hitting this is flimsy so run multiple times to improve the chance of things
         // blowing up while breaking actor containment
         final TestPersist message =
-                new TestPersist(leaderActorRef, new MockIdentifier("1"), new MockPayload("1"));
+                new TestPersist(leaderActorRef, new MockIdentifier("1"), new MockCommand("1"));
         for (int i = 0; i < 100; i++) {
             leaderActorRef.tell(message, null);
 

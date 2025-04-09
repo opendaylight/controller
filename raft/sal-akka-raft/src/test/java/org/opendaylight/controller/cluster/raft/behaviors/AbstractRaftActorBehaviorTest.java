@@ -31,6 +31,7 @@ import org.opendaylight.controller.cluster.raft.AbstractActorTest;
 import org.opendaylight.controller.cluster.raft.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.MessageCollectorActor;
+import org.opendaylight.controller.cluster.raft.MockCommand;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockReplicatedLogBuilder;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.SimpleReplicatedLog;
@@ -126,7 +127,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         context.setTermInfo(new TermInfo(2, "test"));
 
         // Prepare the receivers log
-        MockRaftActorContext.MockPayload payload = new MockRaftActorContext.MockPayload("zero");
+        MockCommand payload = new MockCommand("zero");
         setLastLogEntry(context, 2, 0, payload);
 
         List<ReplicatedLogEntry> entries = new ArrayList<>();
@@ -186,7 +187,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         context.setTermInfo(new TermInfo(1, "test"));
 
         int index = 2000;
-        setLastLogEntry(context, context.currentTerm(), index, new MockRaftActorContext.MockPayload(""));
+        setLastLogEntry(context, context.currentTerm(), index, new MockCommand(""));
 
         behavior.handleMessage(behaviorActor,
             new RequestVote(context.currentTerm(), "test", index - 1, context.currentTerm()));
@@ -270,7 +271,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
     protected void assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(final MockRaftActorContext actorContext,
             final ActorRef actorRef, final RaftRPC rpc) {
 
-        Payload payload = new MockRaftActorContext.MockPayload("");
+        Payload payload = new MockCommand("");
         setLastLogEntry(actorContext, 1, 0, payload);
         actorContext.setTermInfo(new TermInfo(1, "test"));
 

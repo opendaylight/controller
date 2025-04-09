@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import java.util.List;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.jupiter.api.Test;
-import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
+import org.opendaylight.controller.cluster.raft.MockCommand;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
@@ -26,9 +26,9 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
 class AppendEntriesTest {
     @Test
     void testSerialization() {
-        var entry1 = new SimpleReplicatedLogEntry(1, 2, new MockPayload("payload1"));
+        var entry1 = new SimpleReplicatedLogEntry(1, 2, new MockCommand("payload1"));
 
-        var entry2 = new SimpleReplicatedLogEntry(3, 4, new MockPayload("payload2"));
+        var entry2 = new SimpleReplicatedLogEntry(3, 4, new MockCommand("payload2"));
 
         short payloadVersion = 5;
 

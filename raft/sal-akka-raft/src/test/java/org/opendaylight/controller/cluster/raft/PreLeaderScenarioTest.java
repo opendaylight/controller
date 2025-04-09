@@ -18,7 +18,6 @@ import java.util.List;
 import org.apache.pekko.actor.ActorRef;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.notifications.RoleChanged;
-import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
@@ -47,7 +46,7 @@ public class PreLeaderScenarioTest extends AbstractRaftActorIntegrationTest {
         follower2Actor.underlyingActor().startDropMessages(AppendEntries.class);
 
         // Send a payload and verify AppendEntries is received in follower1.
-        MockPayload payload0 = sendPayloadData(leaderActor, "zero");
+        MockCommand payload0 = sendPayloadData(leaderActor, "zero");
 
         AppendEntries appendEntries = expectFirstMatching(follower1CollectorActor, AppendEntries.class);
         assertEquals("AppendEntries - # entries", 1, appendEntries.getEntries().size());
