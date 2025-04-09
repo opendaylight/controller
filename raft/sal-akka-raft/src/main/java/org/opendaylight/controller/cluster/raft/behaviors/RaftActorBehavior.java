@@ -20,7 +20,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.ReplicatedLog;
-import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
@@ -376,7 +375,7 @@ public abstract class RaftActorBehavior implements AutoCloseable {
                 LOG.debug("{}: Setting last applied to {}", logName, i);
 
                 replLog.setLastApplied(i);
-                context.getApplyStateConsumer().accept(new ApplyState(identifier, replicatedLogEntry));
+                context.applyEntryMethod().applyEntry(identifier, replicatedLogEntry);
             } else {
                 //if one index is not present in the log, no point in looping
                 // around as the rest wont be present either

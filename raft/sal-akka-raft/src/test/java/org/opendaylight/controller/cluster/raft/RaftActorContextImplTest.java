@@ -58,7 +58,7 @@ public class RaftActorContextImplTest extends AbstractActorTest {
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         RaftActorContextImpl context = new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
             new LocalAccess("test", stateDir.getRoot().toPath(), new TestTermInfoStore()), peerMap, configParams,
-            (short) 0, new TestDataProvider(), applyState -> { },  MoreExecutors.directExecutor());
+            (short) 0, new TestDataProvider(), (identifier, entry) -> { },  MoreExecutors.directExecutor());
 
         assertEquals("getPeerAddress", "peerAddress1", context.getPeerAddress("peer1"));
         assertEquals("getPeerAddress", null, context.getPeerAddress("peer2"));
@@ -82,8 +82,8 @@ public class RaftActorContextImplTest extends AbstractActorTest {
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         RaftActorContextImpl context = new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
             new LocalAccess("test", stateDir.getRoot().toPath(), new TestTermInfoStore()),
-            Map.of("peer1", "peerAddress1"), configParams, (short) 0, new TestDataProvider(), applyState -> { },
-            MoreExecutors.directExecutor());
+            Map.of("peer1", "peerAddress1"), configParams, (short) 0, new TestDataProvider(),
+            (identifier, entry) -> { }, MoreExecutors.directExecutor());
 
         context.setPeerAddress("peer1", "peerAddress1_1");
         assertEquals("getPeerAddress", "peerAddress1_1", context.getPeerAddress("peer1"));
@@ -97,7 +97,7 @@ public class RaftActorContextImplTest extends AbstractActorTest {
         RaftActorContextImpl context = new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
             new LocalAccess("self", stateDir.getRoot().toPath(), new TestTermInfoStore()),
             Map.of("peer1", "peerAddress1"), new DefaultConfigParamsImpl(), (short) 0, new TestDataProvider(),
-            applyState -> { }, MoreExecutors.directExecutor());
+            (identifier, entry) -> { }, MoreExecutors.directExecutor());
 
         context.updatePeerIds(new ClusterConfig(
             new ServerInfo("self", false), new ServerInfo("peer2", true), new ServerInfo("peer3", false)));

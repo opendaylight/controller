@@ -18,7 +18,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Executor;
-import java.util.function.Consumer;
 import java.util.function.LongSupplier;
 import org.apache.pekko.actor.ActorContext;
 import org.apache.pekko.actor.ActorRef;
@@ -26,7 +25,6 @@ import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.cluster.Cluster;
 import org.eclipse.jdt.annotation.NonNull;
-import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
@@ -86,7 +84,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     private Optional<Cluster> cluster;
 
-    private final Consumer<ApplyState> applyStateConsumer;
+    private final @NonNull ApplyEntryMethod applyEntryMethod;
 
     private final FileBackedOutputStreamFactory fileBackedOutputStreamFactory;
 
@@ -95,7 +93,7 @@ public class RaftActorContextImpl implements RaftActorContext {
     public RaftActorContextImpl(final ActorRef actor, final ActorContext context, final @NonNull LocalAccess localStore,
             final @NonNull Map<String, String> peerAddresses, final @NonNull ConfigParams configParams,
             final short payloadVersion, final @NonNull DataPersistenceProvider persistenceProvider,
-            final @NonNull Consumer<ApplyState> applyStateConsumer, final @NonNull Executor executor) {
+            final @NonNull ApplyEntryMethod applyEntryMethod, final @NonNull Executor executor) {
         this.actor = actor;
         this.context = context;
         id = localStore.memberId();
@@ -104,7 +102,7 @@ public class RaftActorContextImpl implements RaftActorContext {
         this.configParams = requireNonNull(configParams);
         this.payloadVersion = payloadVersion;
         this.persistenceProvider = requireNonNull(persistenceProvider);
-        this.applyStateConsumer = requireNonNull(applyStateConsumer);
+        this.applyEntryMethod = requireNonNull(applyEntryMethod);
 
         fileBackedOutputStreamFactory = new FileBackedOutputStreamFactory(
                 configParams.getFileBackedStreamingThreshold(), configParams.getTempFileDirectory());
@@ -383,8 +381,8 @@ public class RaftActorContextImpl implements RaftActorContext {
     }
 
     @Override
-    public Consumer<ApplyState> getApplyStateConsumer() {
-        return applyStateConsumer;
+    public ApplyEntryMethod applyEntryMethod() {
+        return applyEntryMethod;
     }
 
     @Override

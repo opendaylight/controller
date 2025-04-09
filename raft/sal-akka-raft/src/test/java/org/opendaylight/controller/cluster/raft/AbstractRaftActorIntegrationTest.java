@@ -43,6 +43,7 @@ import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.util.AbstractStringIdentifier;
 import org.slf4j.Logger;
@@ -353,12 +354,12 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
     protected void verifyApplyState(final ApplyState applyState, final ActorRef expClientActor,
             final String expId, final long expTerm, final long expIndex, final Payload payload) {
         final var id = expId == null ? null : new MockIdentifier(expId);
-        assertEquals("ApplyState getIdentifier", id, applyState.getIdentifier());
-        verifyReplicatedLogEntry(applyState.getReplicatedLogEntry(), expTerm, expIndex, payload);
+        assertEquals("ApplyState getIdentifier", id, applyState.identifier());
+        verifyReplicatedLogEntry(applyState.entry(), expTerm, expIndex, payload);
     }
 
-    protected void verifyReplicatedLogEntry(final ReplicatedLogEntry replicatedLogEntry, final long expTerm,
-            final long expIndex, final Payload payload) {
+    protected void verifyReplicatedLogEntry(final LogEntry replicatedLogEntry, final long expTerm, final long expIndex,
+            final Payload payload) {
         assertEquals(expTerm, replicatedLogEntry.term());
         assertEquals(expIndex, replicatedLogEntry.index());
         assertEquals(payload, replicatedLogEntry.command());

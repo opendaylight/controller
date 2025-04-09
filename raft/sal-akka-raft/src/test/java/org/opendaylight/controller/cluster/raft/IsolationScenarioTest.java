@@ -232,7 +232,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
 
         final var applyState = getAllMatching(leaderCollectorActor, ApplyState.class);
         for (var as : applyState) {
-            if (as.getReplicatedLogEntry().index() == 2 && as.getReplicatedLogEntry().term() == 1) {
+            if (as.entry().index() == 2 && as.entry().term() == 1) {
                 fail("Got unexpected ApplyState: " + as);
             }
         }
@@ -359,9 +359,9 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
 
         // Ensure the prior leader didn't apply any of its conflicting entries with term 1.
 
-        List<ApplyState> applyState = getAllMatching(leaderCollectorActor, ApplyState.class);
-        for (ApplyState as: applyState) {
-            if (as.getReplicatedLogEntry().term() == 1) {
+        final var applyState = getAllMatching(leaderCollectorActor, ApplyState.class);
+        for (var as : applyState) {
+            if (as.entry().term() == 1) {
                 fail("Got unexpected ApplyState: " + as);
             }
         }

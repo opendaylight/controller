@@ -62,7 +62,6 @@ import org.opendaylight.controller.cluster.notifications.RoleChanged;
 import org.opendaylight.controller.cluster.raft.AbstractRaftActorIntegrationTest.TestPersist;
 import org.opendaylight.controller.cluster.raft.AbstractRaftActorIntegrationTest.TestRaftActor;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.ApplyLeaderSnapshot;
-import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.LeaderTransitioning;
 import org.opendaylight.controller.cluster.raft.base.messages.SwitchBehavior.BecomeFollower;
 import org.opendaylight.controller.cluster.raft.base.messages.SwitchBehavior.BecomeLeader;
@@ -394,7 +393,7 @@ public class RaftActorTest extends AbstractActorTest {
         final var entry = new SimpleReplicatedLogEntry(5, 1, new MockCommand("F"));
 
         final var id = new MockIdentifier("apply-state");
-        mockRaftActor.getRaftActorContext().getApplyStateConsumer().accept(new ApplyState(id, entry));
+        mockRaftActor.getRaftActorContext().applyEntryMethod().applyEntry(id, entry);
 
         verify(mockRaftActor.actorDelegate).applyCommand(eq(id), any());
     }

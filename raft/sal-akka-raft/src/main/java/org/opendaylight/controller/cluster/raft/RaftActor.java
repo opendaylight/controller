@@ -67,6 +67,7 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.AbstractRaftCommand;
 import org.opendaylight.controller.cluster.raft.spi.AbstractStateCommand;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
+import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.controller.cluster.raft.spi.RaftCommand;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.raft.api.RaftRole;
@@ -263,7 +264,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 // as we delete messages from the persistent journal which have made it to the snapshot
                 // capturing the snapshot before applying makes the persistent journal and snapshot out of sync
                 // and recovery shows data missing
-                replicatedLog().captureSnapshotIfReady(applyState.getReplicatedLogEntry());
+                replicatedLog().captureSnapshotIfReady(applyState.entry());
 
                 context.getSnapshotManager().trimLog(replicatedLog().getLastApplied());
             }
@@ -599,28 +600,28 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         target.tell(new RoleChanged(memberId(), newRole, oldRole), self());
     }
 
-    private void applyCommand(final ApplyState applyState) {
+    @NonNullByDefault
+    private void applyCommand(final @Nullable Identifier identifier, final LogEntry entry) {
         final long startTime = System.nanoTime();
 
-        final var entry = applyState.getReplicatedLogEntry();
         final var payload = entry.command();
         if (LOG.isDebugEnabled()) {
             LOG.debug("{}: Applying state for log index {} data {}", memberId(), entry.index(), payload);
         }
 
         if (payload instanceof StateCommand stateCommand) {
-            applyCommand(applyState.getIdentifier(), stateCommand);
+            applyCommand(identifier, stateCommand);
         }
 
         final long elapsedTime = System.nanoTime() - startTime;
         if (elapsedTime >= APPLY_STATE_DELAY_THRESHOLD_IN_NANOS) {
-            LOG.debug("{}: ApplyState took more time than expected. Elapsed Time = {} ms ApplyState = {}", memberId(),
-                TimeUnit.NANOSECONDS.toMillis(elapsedTime), applyState);
+            LOG.debug("{}: ApplyState took more time than expected. Elapsed Time = {} ms Entry = {}", memberId(),
+                TimeUnit.NANOSECONDS.toMillis(elapsedTime), entry);
         }
 
         // Send the ApplyState message back to self to handle further processing asynchronously.
         // FIXME: executeInSelf() invoking the further processing part
-        self().tell(applyState, self());
+        self().tell(new ApplyState(identifier, entry), self());
     }
 
     /**
@@ -710,7 +711,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 currentLog.setLastApplied(persistedEntry.index());
 
                 // Apply the state immediately.
-                applyCommand(new ApplyState(identifier, persistedEntry));
+                applyCommand(identifier, persistedEntry);
 
                 // Send a ApplyJournalEntries message so that we write the fact that we applied
                 // the state to durable storage
