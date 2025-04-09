@@ -25,9 +25,6 @@ public class StorageException extends RuntimeException {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
-    public StorageException() {
-    }
-
     public StorageException(final String message) {
         super(message);
     }
@@ -38,22 +35,6 @@ public class StorageException extends RuntimeException {
 
     public StorageException(final Throwable cause) {
         super(cause);
-    }
-
-    /**
-     * Exception thrown when an entry being stored is too large.
-     */
-    public static class TooLarge extends StorageException {
-        @java.io.Serial
-        private static final long serialVersionUID = 1L;
-
-        public TooLarge(final String message) {
-            super(message);
-        }
-
-        public TooLarge(final String message, final Throwable cause) {
-            super(message, cause);
-        }
     }
 
     /**

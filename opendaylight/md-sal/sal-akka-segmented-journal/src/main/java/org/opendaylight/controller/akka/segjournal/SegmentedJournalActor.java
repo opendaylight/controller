@@ -22,6 +22,7 @@ import io.atomix.storage.journal.JournalSerdes;
 import io.atomix.storage.journal.SegmentedByteBufJournal;
 import io.atomix.storage.journal.SegmentedJournal;
 import io.atomix.storage.journal.StorageLevel;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayDeque;
@@ -418,23 +419,31 @@ abstract sealed class SegmentedJournalActor extends AbstractActor {
         final long to = Long.min(dataJournal.lastWrittenSequenceNr(), message.toSequenceNr);
         LOG.debug("{}: adjusted delete to {}", persistenceId, to);
 
-        if (lastDelete < to) {
-            LOG.debug("{}: deleting entries up to {}", persistenceId, to);
-
-            lastDelete = to;
-            final var deleteWriter = deleteJournal.writer();
-            final var entry = deleteWriter.append(lastDelete);
-            deleteWriter.commit(entry.index());
-            dataJournal.deleteTo(lastDelete);
-
-            LOG.debug("{}: compaction started", persistenceId);
-            dataJournal.compactTo(lastDelete);
-            deleteJournal.compact(entry.index());
-            LOG.debug("{}: compaction finished", persistenceId);
-        } else {
+        if (lastDelete >= to) {
             LOG.debug("{}: entries up to {} already deleted", persistenceId, lastDelete);
+            message.promise.success(null);
+            return;
         }
 
+        LOG.debug("{}: deleting entries up to {}", persistenceId, to);
+
+        final var deleteWriter = deleteJournal.writer();
+        final Indexed<Long> entry;
+        try {
+            entry = deleteWriter.append(to);
+        } catch (IOException e) {
+            LOG.warn("{}: failed to issue delete to {}", persistenceId, to, e);
+            message.promise.success(null);
+            return;
+        }
+        deleteWriter.commit(entry.index());
+        dataJournal.deleteTo(to);
+        lastDelete = to;
+
+        LOG.debug("{}: compaction started", persistenceId);
+        dataJournal.compactTo(lastDelete);
+        deleteJournal.compact(entry.index());
+        LOG.debug("{}: compaction finished", persistenceId);
         message.promise.success(null);
     }
 

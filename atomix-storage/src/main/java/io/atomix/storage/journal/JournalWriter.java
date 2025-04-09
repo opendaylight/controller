@@ -15,6 +15,7 @@
  */
 package io.atomix.storage.journal;
 
+import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNull;
 
 /**
@@ -35,8 +36,9 @@ public interface JournalWriter<E> {
      *
      * @param entry The entry to append.
      * @return The appended indexed entry.
+     * @throws IOException if an I/O error occurs
      */
-    <T extends E> @NonNull Indexed<T> append(T entry);
+    <T extends E> @NonNull Indexed<T> append(T entry) throws IOException;
 
     /**
      * Commits entries up to the given index.
