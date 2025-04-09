@@ -15,6 +15,7 @@
  */
 package org.opendaylight.controller.raft.journal;
 
+import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -36,9 +37,9 @@ public interface EntryWriter {
      * @param mapper a {@link ToByteBufMapper} to use with entry
      * @param entry entry to append
      * @return the on-disk size of the entry
+     * @throws IOException if an I/O error occurs
      */
-    // FIXME: throws IOException
-    <T> int append(ToByteBufMapper<T> mapper, T entry);
+    <T> int append(ToByteBufMapper<T> mapper, T entry) throws IOException;
 
     /**
      * Commits entries up to the given index.
