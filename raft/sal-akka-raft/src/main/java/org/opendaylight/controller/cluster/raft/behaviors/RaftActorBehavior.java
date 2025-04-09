@@ -16,10 +16,10 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Cancellable;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.ReplicatedLog;
-import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
@@ -28,8 +28,10 @@ import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
+import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.api.TermInfo;
+import org.opendaylight.yangtools.concepts.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -369,12 +371,12 @@ public abstract class RaftActorBehavior implements AutoCloseable {
                 // Send a local message to the local RaftActor (it's derived class to be
                 // specific to apply the log to it's index)
 
-                final var applyState = getApplyStateFor(replicatedLogEntry);
+                final var identifier = applyIdentifierFor(replicatedLogEntry);
 
                 LOG.debug("{}: Setting last applied to {}", logName, i);
 
                 replLog.setLastApplied(i);
-                context.getApplyStateConsumer().accept(applyState);
+                context.getApplyStateConsumer().accept(new ApplyState(identifier, replicatedLogEntry));
             } else {
                 //if one index is not present in the log, no point in looping
                 // around as the rest wont be present either
@@ -391,12 +393,13 @@ public abstract class RaftActorBehavior implements AutoCloseable {
     }
 
     /**
-     * Create an ApplyState message for a particular log entry so we can determine how to apply this entry.
+     * Look up the Identifier for a particular log entry so we can determine how to apply this entry.
      *
      * @param entry the log entry
-     * @return ApplyState for this entry
+     * @return Identifier for this entry
      */
-    abstract ApplyState getApplyStateFor(ReplicatedLogEntry entry);
+    @NonNullByDefault
+    abstract @Nullable Identifier applyIdentifierFor(LogEntry entry);
 
     /**
      * Handle a message. If the processing of the message warrants a state

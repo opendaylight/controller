@@ -37,7 +37,6 @@ import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.VotingState;
-import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
@@ -49,6 +48,7 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.messages.UnInitializedFollowerSnapshotReply;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
+import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.raft.spi.InstallableSnapshot;
@@ -56,6 +56,7 @@ import org.opendaylight.raft.spi.InstallableSnapshotSource;
 import org.opendaylight.raft.spi.PlainSnapshotSource;
 import org.opendaylight.raft.spi.SharedFileBackedOutputStream;
 import org.opendaylight.raft.spi.StreamSource;
+import org.opendaylight.yangtools.concepts.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -456,24 +457,24 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
     }
 
     @Override
-    final ApplyState getApplyStateFor(final ReplicatedLogEntry entry) {
+    final Identifier applyIdentifierFor(final LogEntry entry) {
         // first check whether a ClientRequestTracker exists for this entry.
         // If it does that means the leader wasn't dropped before the transaction applied.
         // That means that this transaction can be safely applied as a local transaction since we
         // have the ClientRequestTracker.
         final var tracker = removeClientRequestTracker(entry.index());
         if (tracker != null) {
-            return new ApplyState(tracker.identifier(), entry);
+            return tracker.identifier();
         }
 
         // Tracker is missing, this means that we switched behaviours between replicate and applystate
         // and became the leader again,. We still want to apply this as a local modification because
         // we have resumed leadership with that log entry having been committed.
         if (entry.command() instanceof IdentifiablePayload<?> identifiable) {
-            return new ApplyState(identifiable.getIdentifier(), entry);
+            return identifiable.getIdentifier();
         }
 
-        return new ApplyState(null, entry);
+        return null;
     }
 
     @Override
