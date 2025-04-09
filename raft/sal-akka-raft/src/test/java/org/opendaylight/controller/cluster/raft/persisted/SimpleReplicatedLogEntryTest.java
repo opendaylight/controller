@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.jupiter.api.Test;
-import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
+import org.opendaylight.controller.cluster.raft.MockCommand;
 
 /**
  * Unit tests for SimpleReplicatedLogEntry.
@@ -21,9 +21,9 @@ import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 class SimpleReplicatedLogEntryTest {
     @Test
     void testSerialization() {
-        final var expected = new SimpleReplicatedLogEntry(0, 1, new MockRaftActorContext.MockPayload("A"));
+        final var expected = new SimpleReplicatedLogEntry(0, 1, new MockCommand("A"));
         final var bytes = SerializationUtils.serialize(expected);
-        assertEquals(218, bytes.length);
+        assertEquals(197, bytes.length);
         final var cloned = SerializationUtils.<SimpleReplicatedLogEntry>deserialize(bytes);
 
         assertEquals(expected.term(), cloned.term());

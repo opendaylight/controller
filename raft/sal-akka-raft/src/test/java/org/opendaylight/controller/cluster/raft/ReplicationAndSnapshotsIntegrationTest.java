@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.pekko.persistence.SaveSnapshotSuccess;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
@@ -31,14 +30,14 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
 
     private List<SimpleReplicatedLogEntry> origLeaderJournal;
 
-    private MockPayload recoveredPayload0;
-    private MockPayload recoveredPayload1;
-    private MockPayload recoveredPayload2;
-    private MockPayload payload3;
-    private MockPayload payload4;
-    private MockPayload payload5;
-    private MockPayload payload6;
-    private MockPayload payload7;
+    private MockCommand recoveredPayload0;
+    private MockCommand recoveredPayload1;
+    private MockCommand recoveredPayload2;
+    private MockCommand payload3;
+    private MockCommand payload4;
+    private MockCommand payload5;
+    private MockCommand payload6;
+    private MockCommand payload7;
 
     @Test
     public void runTest() {
@@ -48,11 +47,11 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         // than the snapshotBatchCount).
         long seqId = 1;
         InMemoryJournal.addEntry(leaderId, seqId++, new UpdateElectionTerm(initialTerm, leaderId));
-        recoveredPayload0 = new MockPayload("zero");
+        recoveredPayload0 = new MockCommand("zero");
         InMemoryJournal.addEntry(leaderId, seqId++, new SimpleReplicatedLogEntry(0, initialTerm, recoveredPayload0));
-        recoveredPayload1 = new MockPayload("one");
+        recoveredPayload1 = new MockCommand("one");
         InMemoryJournal.addEntry(leaderId, seqId++, new SimpleReplicatedLogEntry(1, initialTerm, recoveredPayload1));
-        recoveredPayload2 = new MockPayload("two");
+        recoveredPayload2 = new MockCommand("two");
         InMemoryJournal.addEntry(leaderId, seqId++, new SimpleReplicatedLogEntry(2, initialTerm, recoveredPayload2));
         InMemoryJournal.addEntry(leaderId, seqId++, new ApplyJournalEntries(2));
 

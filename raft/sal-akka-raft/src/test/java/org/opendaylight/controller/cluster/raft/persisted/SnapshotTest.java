@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.List;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.jupiter.api.Test;
-import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
+import org.opendaylight.controller.cluster.raft.MockCommand;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.raft.api.TermInfo;
 
@@ -24,9 +24,9 @@ import org.opendaylight.raft.api.TermInfo;
 class SnapshotTest {
     @Test
     void testSerialization() {
-        testSerialization(new byte[]{1, 2, 3, 4, 5, 6, 7}, List.of(
-                new SimpleReplicatedLogEntry(6, 2, new MockPayload("payload"))), 491);
-        testSerialization(new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9}, List.of(), 345);
+        testSerialization(new byte[] { 1, 2, 3, 4, 5, 6, 7 },
+            List.of(new SimpleReplicatedLogEntry(6, 2, new MockCommand("payload"))), 470);
+        testSerialization(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, List.of(), 345);
     }
 
     private static void testSerialization(final byte[] state, final List<ReplicatedLogEntry> unapplied,

@@ -21,7 +21,6 @@ import java.util.List;
 import org.apache.pekko.actor.ActorRef;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.notifications.RoleChanged;
-import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
@@ -53,8 +52,8 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
 
         // Send an initial payloads and verify replication.
 
-        final MockPayload payload0 = sendPayloadData(leaderActor, "zero");
-        final MockPayload payload1 = sendPayloadData(leaderActor, "one");
+        final MockCommand payload0 = sendPayloadData(leaderActor, "zero");
+        final MockCommand payload1 = sendPayloadData(leaderActor, "one");
         verifyApplyJournalEntries(leaderCollectorActor, 1);
         verifyApplyJournalEntries(follower1CollectorActor, 1);
         verifyApplyJournalEntries(follower2CollectorActor, 1);
@@ -65,7 +64,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
 
         testLog.info("Sending payload to isolated leader");
 
-        final MockPayload isolatedLeaderPayload2 = sendPayloadData(leaderActor, "two");
+        final MockCommand isolatedLeaderPayload2 = sendPayloadData(leaderActor, "two");
 
         // Wait for the isolated leader to send AppendEntries to follower1 with the entry at index 2. Note the message
         // is collected but not forwarded to the follower RaftActor.
@@ -87,7 +86,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
 
         testLog.info("Sending payload to new leader");
 
-        final MockPayload newLeaderPayload2 = sendPayloadData(follower1Actor, "two-new");
+        final MockCommand newLeaderPayload2 = sendPayloadData(follower1Actor, "two-new");
         verifyApplyJournalEntries(follower1CollectorActor, 2);
         verifyApplyJournalEntries(follower2CollectorActor, 2);
 
@@ -138,7 +137,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
 
         // Submit an initial payload that is committed/applied on all nodes.
 
-        final MockPayload payload0 = sendPayloadData(leaderActor, "zero");
+        final MockCommand payload0 = sendPayloadData(leaderActor, "zero");
         verifyApplyJournalEntries(leaderCollectorActor, 0);
         verifyApplyJournalEntries(follower1CollectorActor, 0);
         verifyApplyJournalEntries(follower2CollectorActor, 0);
@@ -150,7 +149,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         follower1Actor.underlyingActor().startDropMessages(AppendEntries.class, ae -> ae.getLeaderCommit() == 1);
         follower2Actor.underlyingActor().startDropMessages(AppendEntries.class, ae -> ae.getLeaderCommit() == 1);
 
-        MockPayload payload1 = sendPayloadData(leaderActor, "one");
+        MockCommand payload1 = sendPayloadData(leaderActor, "one");
 
         // Wait for the isolated leader to send AppendEntries to the followers with the new entry with index 1. This
         // message is forwarded to the followers.
@@ -171,7 +170,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
 
         testLog.info("Sending payload to isolated leader");
 
-        final MockPayload isolatedLeaderPayload2 = sendPayloadData(leaderActor, "two");
+        final MockCommand isolatedLeaderPayload2 = sendPayloadData(leaderActor, "two");
 
         // Wait for the isolated leader to send AppendEntries to follower1 with the entry at index 2. Note the message
         // is collected but not forwarded to the follower RaftActor.
@@ -194,7 +193,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
 
         testLog.info("Sending payload to new leader");
 
-        final MockPayload newLeaderPayload2 = sendPayloadData(follower1Actor, "two-new");
+        final MockCommand newLeaderPayload2 = sendPayloadData(follower1Actor, "two-new");
         verifyApplyJournalEntries(follower1CollectorActor, 3);
         verifyApplyJournalEntries(follower2CollectorActor, 3);
 
@@ -259,7 +258,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
 
         // Submit an initial payload that is committed/applied on all nodes.
 
-        final MockPayload payload0 = sendPayloadData(leaderActor, "zero");
+        final MockCommand payload0 = sendPayloadData(leaderActor, "zero");
         verifyApplyJournalEntries(leaderCollectorActor, 0);
         verifyApplyJournalEntries(follower1CollectorActor, 0);
         verifyApplyJournalEntries(follower2CollectorActor, 0);
@@ -271,7 +270,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         follower1Actor.underlyingActor().startDropMessages(AppendEntries.class, ae -> ae.getLeaderCommit() == 1);
         follower2Actor.underlyingActor().startDropMessages(AppendEntries.class, ae -> ae.getLeaderCommit() == 1);
 
-        MockPayload payload1 = sendPayloadData(leaderActor, "one");
+        MockCommand payload1 = sendPayloadData(leaderActor, "one");
 
         // Wait for the isolated leader to send AppendEntries to the followers with the new entry with index 1. This
         // message is forwarded to the followers.

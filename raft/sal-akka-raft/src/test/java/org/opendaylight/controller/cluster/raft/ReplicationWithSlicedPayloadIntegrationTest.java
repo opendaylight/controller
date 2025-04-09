@@ -12,7 +12,6 @@ import static org.opendaylight.controller.cluster.raft.MessageCollectorActor.exp
 import java.util.List;
 import java.util.Map;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 
 /**
@@ -58,11 +57,11 @@ public class ReplicationWithSlicedPayloadIntegrationTest extends AbstractRaftAct
 
         // Send a large payload that exceeds the size threshold and needs to be sliced.
 
-        MockPayload largePayload = sendPayloadData(leaderActor, "large", maximumMessageSliceSize + 1);
+        MockCommand largePayload = sendPayloadData(leaderActor, "large", maximumMessageSliceSize + 1);
 
         // Then send a small payload that does not need to be sliced.
 
-        MockPayload smallPayload = sendPayloadData(leaderActor, "normal", maximumMessageSliceSize - 1);
+        MockCommand smallPayload = sendPayloadData(leaderActor, "normal", maximumMessageSliceSize - 1);
 
         final List<ApplyState> leaderApplyState = expectMatching(leaderCollectorActor, ApplyState.class, 2);
         verifyApplyState(leaderApplyState.get(0), leaderCollectorActor,

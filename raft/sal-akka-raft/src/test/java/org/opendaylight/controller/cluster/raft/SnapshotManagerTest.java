@@ -215,8 +215,8 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         doReturn(8L).when(mockReplicatedLog).getLastApplied();
 
-        final var lastLogEntry = new SimpleReplicatedLogEntry(9L, 3L, new MockRaftActorContext.MockPayload());
-        final var lastAppliedEntry = new SimpleReplicatedLogEntry(8L, 2L, new MockRaftActorContext.MockPayload());
+        final var lastLogEntry = new SimpleReplicatedLogEntry(9L, 3L, new MockCommand(""));
+        final var lastAppliedEntry = new SimpleReplicatedLogEntry(8L, 2L, new MockCommand(""));
 
         doReturn(lastAppliedEntry).when(mockReplicatedLog).get(8L);
         doReturn(List.of(lastLogEntry)).when(mockReplicatedLog).getFrom(9L);
@@ -601,7 +601,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         assertEquals("getIndex", -1L, reader.index());
 
         // Followers and valid originalIndex entry
-        doReturn(new SimpleReplicatedLogEntry(8L, 5L, new MockRaftActorContext.MockPayload()))
+        doReturn(new SimpleReplicatedLogEntry(8L, 5L, new MockCommand("")))
             .when(mockReplicatedLog).get(8L);
         reader = AbstractReplicatedLog.computeLastAppliedEntry(mockReplicatedLog, 8L, lastLogEntry, true);
         assertEquals("getTerm", 5L, reader.term());

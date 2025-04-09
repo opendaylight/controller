@@ -776,8 +776,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         boolean handled = support.handleMessage(new ApplyState(null, serverConfigEntry), ActorRef.noSender());
         assertTrue("Message handled", handled);
 
-        ReplicatedLogEntry nonServerConfigEntry = new SimpleReplicatedLogEntry(1, 1,
-                new MockRaftActorContext.MockPayload("1"));
+        ReplicatedLogEntry nonServerConfigEntry = new SimpleReplicatedLogEntry(1, 1, new MockCommand("1"));
         handled = support.handleMessage(new ApplyState(null, nonServerConfigEntry), ActorRef.noSender());
         assertFalse("Message handled", handled);
 
@@ -1318,8 +1317,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         InMemoryJournal.addEntry(node1ID, 2, persistedServerConfigEntry);
         InMemoryJournal.addEntry(node2ID, 1, new UpdateElectionTerm(1, "node1"));
         InMemoryJournal.addEntry(node2ID, 2, persistedServerConfigEntry);
-        InMemoryJournal.addEntry(node2ID, 3, new SimpleReplicatedLogEntry(1, 1,
-                new MockRaftActorContext.MockPayload("2")));
+        InMemoryJournal.addEntry(node2ID, 3, new SimpleReplicatedLogEntry(1, 1, new MockCommand("2")));
         InMemoryJournal.addEntry(node2ID, 4, new ApplyJournalEntries(1));
 
         ActorRef node1Collector = actorFactory.createActor(

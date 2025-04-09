@@ -25,7 +25,6 @@ import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.persistence.SaveSnapshotSuccess;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.ApplyLeaderSnapshot;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
@@ -118,8 +117,8 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         follower2Actor.underlyingActor().startDropMessages(AppendEntries.class);
 
         // Send the payloads.
-        MockPayload payload0 = sendPayloadData(leaderActor, "zero");
-        MockPayload payload1 = sendPayloadData(leaderActor, "one");
+        MockCommand payload0 = sendPayloadData(leaderActor, "zero");
+        MockCommand payload1 = sendPayloadData(leaderActor, "one");
 
         // Verify the leader got consensus and applies each log entry even though follower 2 didn't respond.
         List<ApplyState> applyStates = MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyState.class, 2);
@@ -192,7 +191,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         follower2Actor.underlyingActor().startDropMessages(AppendEntries.class);
 
         // Send the first payload and verify it gets applied by the leader and follower 1.
-        MockPayload payload2 = sendPayloadData(leaderActor, "two");
+        MockCommand payload2 = sendPayloadData(leaderActor, "two");
 
         ApplyState applyState = MessageCollectorActor.expectFirstMatching(leaderCollectorActor, ApplyState.class);
         verifyApplyState(applyState, leaderCollectorActor, payload2.toString(), currentTerm, 2, payload2);
@@ -206,15 +205,15 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         MessageCollectorActor.clearMessages(follower1CollectorActor);
 
         // Send another payload - this should cause a snapshot due to snapshotBatchCount reached.
-        MockPayload payload3 = sendPayloadData(leaderActor, "three");
+        MockCommand payload3 = sendPayloadData(leaderActor, "three");
 
         MessageCollectorActor.expectFirstMatching(leaderCollectorActor, SaveSnapshotSuccess.class);
 
         testLog.info("testLeaderSnapshotWithLaggingFollowerCaughtUpViaAppendEntries: sending 2 more payloads");
 
         // Send 2 more payloads - not enough to trigger another snapshot.
-        MockPayload payload4 = sendPayloadData(leaderActor, "four");
-        MockPayload payload5 = sendPayloadData(leaderActor, "five");
+        MockCommand payload4 = sendPayloadData(leaderActor, "four");
+        MockCommand payload5 = sendPayloadData(leaderActor, "five");
 
         // Verify the leader got consensus and applies each log entry even though follower 2 didn't respond.
         List<ApplyState> applyStates = MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyState.class, 3);
@@ -316,11 +315,11 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
                 TimeUnit.MILLISECONDS);
 
         // Send 5 payloads - the second should cause a leader snapshot.
-        final MockPayload payload2 = sendPayloadData(leaderActor, "two");
-        final MockPayload payload3 = sendPayloadData(leaderActor, "three");
-        final MockPayload payload4 = sendPayloadData(leaderActor, "four");
-        final MockPayload payload5 = sendPayloadData(leaderActor, "five");
-        final MockPayload payload6 = sendPayloadData(leaderActor, "six");
+        final MockCommand payload2 = sendPayloadData(leaderActor, "two");
+        final MockCommand payload3 = sendPayloadData(leaderActor, "three");
+        final MockCommand payload4 = sendPayloadData(leaderActor, "four");
+        final MockCommand payload5 = sendPayloadData(leaderActor, "five");
+        final MockCommand payload6 = sendPayloadData(leaderActor, "six");
 
         MessageCollectorActor.expectFirstMatching(leaderCollectorActor, SaveSnapshotSuccess.class);
 
@@ -336,7 +335,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
                 + "sending 1 more payload to trigger second snapshot");
 
         // Send another payload to trigger a second leader snapshot.
-        MockPayload payload7 = sendPayloadData(leaderActor, "seven");
+        MockCommand payload7 = sendPayloadData(leaderActor, "seven");
 
         MessageCollectorActor.expectFirstMatching(leaderCollectorActor, SaveSnapshotSuccess.class);
 
@@ -414,11 +413,11 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
                 TimeUnit.MILLISECONDS);
 
         // Send 5 payloads - the second should cause a leader snapshot.
-        final MockPayload payload2 = sendPayloadData(leaderActor, "two");
-        final MockPayload payload3 = sendPayloadData(leaderActor, "three");
-        final MockPayload payload4 = sendPayloadData(leaderActor, "four");
-        final MockPayload payload5 = sendPayloadData(leaderActor, "five");
-        final MockPayload payload6 = sendPayloadData(leaderActor, "six");
+        final MockCommand payload2 = sendPayloadData(leaderActor, "two");
+        final MockCommand payload3 = sendPayloadData(leaderActor, "three");
+        final MockCommand payload4 = sendPayloadData(leaderActor, "four");
+        final MockCommand payload5 = sendPayloadData(leaderActor, "five");
+        final MockCommand payload6 = sendPayloadData(leaderActor, "six");
 
         MessageCollectorActor.expectFirstMatching(leaderCollectorActor, SaveSnapshotSuccess.class);
 
@@ -434,7 +433,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
                 + "sending 1 more payload to trigger second snapshot");
 
         // Send another payload to trigger a second leader snapshot.
-        MockPayload payload7 = sendPayloadData(leaderActor, "seven");
+        MockCommand payload7 = sendPayloadData(leaderActor, "seven");
 
         MessageCollectorActor.expectFirstMatching(leaderCollectorActor, SaveSnapshotSuccess.class);
 
@@ -495,7 +494,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
                 TimeUnit.MILLISECONDS);
 
         // Send a payload with a large relative size but not enough to trigger a snapshot.
-        MockPayload payload1 = sendPayloadData(leaderActor, "one", 500);
+        MockCommand payload1 = sendPayloadData(leaderActor, "one", 500);
 
         // Verify the leader got consensus and applies the first log entry even though follower 2 didn't respond.
         List<ApplyState> applyStates = MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyState.class, 1);
@@ -519,7 +518,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
 
         // Send another payload with a large enough relative size in combination with the last payload
         // that exceeds the memory threshold (70% * 1000 = 700) - this should do a snapshot.
-        MockPayload payload2 = sendPayloadData(leaderActor, "two", 201);
+        MockCommand payload2 = sendPayloadData(leaderActor, "two", 201);
 
         // Verify the leader applies the last log entry.
         applyStates = MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyState.class, 2);
@@ -575,7 +574,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         ApplyState applyState;
         CaptureSnapshot captureSnapshot;
 
-        MockPayload payload3 = sendPayloadData(leaderActor, "three");
+        MockCommand payload3 = sendPayloadData(leaderActor, "three");
 
         // Verify the leader applies the state.
         applyState = MessageCollectorActor.expectFirstMatching(leaderCollectorActor, ApplyState.class);
@@ -721,7 +720,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
                 leader.getReplicatedToAllIndex());
 
         // Send another payload - a snapshot should occur.
-        MockPayload payload4 = sendPayloadData(leaderActor, "four");
+        MockCommand payload4 = sendPayloadData(leaderActor, "four");
 
         // Wait for the snapshot to complete.
         MessageCollectorActor.expectFirstMatching(leaderCollectorActor, SaveSnapshotSuccess.class);
@@ -749,8 +748,8 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         }
 
         // Send a couple more payloads.
-        MockPayload payload5 = sendPayloadData(leaderActor, "five");
-        MockPayload payload6 = sendPayloadData(leaderActor, "six");
+        MockCommand payload5 = sendPayloadData(leaderActor, "five");
+        MockCommand payload6 = sendPayloadData(leaderActor, "six");
 
         // Verify the leader applies the 2 log entries.
         List<ApplyState> applyStates = MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyState.class, 3);
@@ -864,7 +863,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         final var leaderStates = MessageCollectorActor.expectMatching(leaderCollectorActor,
             ApplyState.class, numEntries);
         for (int i = 0; i < expSnapshotState.size(); i++) {
-            final MockPayload payload = expSnapshotState.get(i);
+            final MockCommand payload = expSnapshotState.get(i);
             verifyApplyState(leaderStates.get(i), leaderCollectorActor, payload.toString(), currentTerm, i, payload);
         }
 
@@ -872,7 +871,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         final var follower1States = MessageCollectorActor.expectMatching(follower1CollectorActor,
             ApplyState.class, numEntries);
         for (int i = 0; i < expSnapshotState.size(); i++) {
-            final MockPayload payload = expSnapshotState.get(i);
+            final MockCommand payload = expSnapshotState.get(i);
             verifyApplyState(follower1States.get(i), null, null, currentTerm, i, payload);
         }
 
@@ -880,7 +879,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         final var follower2States = MessageCollectorActor.expectMatching(follower2CollectorActor,
             ApplyState.class, numEntries);
         for (int i = 0; i < expSnapshotState.size(); i++) {
-            final MockPayload payload = expSnapshotState.get(i);
+            final MockCommand payload = expSnapshotState.get(i);
             verifyApplyState(follower2States.get(i), null, null, currentTerm, i, payload);
         }
 
