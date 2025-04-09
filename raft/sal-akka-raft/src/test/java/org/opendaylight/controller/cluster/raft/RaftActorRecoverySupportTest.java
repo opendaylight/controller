@@ -44,7 +44,6 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
@@ -116,7 +115,7 @@ class RaftActorRecoverySupportTest {
     void testOnReplicatedLogEntry() {
         doReturn(true).when(mockPersistence).isRecoveryApplicable();
 
-        final var logEntry = new SimpleReplicatedLogEntry(1, 1, new MockRaftActorContext.MockPayload("1", 5));
+        final var logEntry = new SimpleReplicatedLogEntry(1, 1, new MockCommand("1", 5));
 
         sendMessageToSupport(logEntry);
 
@@ -137,12 +136,12 @@ class RaftActorRecoverySupportTest {
         configParams.setJournalRecoveryLogBatchSize(5);
 
         final var replicatedLog = context.getReplicatedLog();
-        replicatedLog.append(new SimpleReplicatedLogEntry(0, 1, new MockRaftActorContext.MockPayload("0")));
-        replicatedLog.append(new SimpleReplicatedLogEntry(1, 1, new MockRaftActorContext.MockPayload("1")));
-        replicatedLog.append(new SimpleReplicatedLogEntry(2, 1, new MockRaftActorContext.MockPayload("2")));
-        replicatedLog.append(new SimpleReplicatedLogEntry(3, 1, new MockRaftActorContext.MockPayload("3")));
-        replicatedLog.append(new SimpleReplicatedLogEntry(4, 1, new MockRaftActorContext.MockPayload("4")));
-        replicatedLog.append(new SimpleReplicatedLogEntry(5, 1, new MockRaftActorContext.MockPayload("5")));
+        replicatedLog.append(new SimpleReplicatedLogEntry(0, 1, new MockCommand("0")));
+        replicatedLog.append(new SimpleReplicatedLogEntry(1, 1, new MockCommand("1")));
+        replicatedLog.append(new SimpleReplicatedLogEntry(2, 1, new MockCommand("2")));
+        replicatedLog.append(new SimpleReplicatedLogEntry(3, 1, new MockCommand("3")));
+        replicatedLog.append(new SimpleReplicatedLogEntry(4, 1, new MockCommand("4")));
+        replicatedLog.append(new SimpleReplicatedLogEntry(5, 1, new MockCommand("5")));
 
         sendMessageToSupport(new ApplyJournalEntries(2));
 
@@ -191,7 +190,7 @@ class RaftActorRecoverySupportTest {
 
             for (int i = 0; i <= numberOfEntries; i++) {
                 replicatedLog.append(new SimpleReplicatedLogEntry(i, 1,
-                    new MockRaftActorContext.MockPayload(String.valueOf(i))));
+                    new MockCommand(String.valueOf(i))));
             }
 
             final var entryCount = new AtomicInteger();
@@ -212,19 +211,19 @@ class RaftActorRecoverySupportTest {
         doReturn(true).when(mockPersistence).isRecoveryApplicable();
 
         var replicatedLog = context.getReplicatedLog();
-        replicatedLog.append(new SimpleReplicatedLogEntry(1, 1, new MockRaftActorContext.MockPayload("1")));
-        replicatedLog.append(new SimpleReplicatedLogEntry(2, 1, new MockRaftActorContext.MockPayload("2")));
-        replicatedLog.append(new SimpleReplicatedLogEntry(3, 1, new MockRaftActorContext.MockPayload("3")));
+        replicatedLog.append(new SimpleReplicatedLogEntry(1, 1, new MockCommand("1")));
+        replicatedLog.append(new SimpleReplicatedLogEntry(2, 1, new MockCommand("2")));
+        replicatedLog.append(new SimpleReplicatedLogEntry(3, 1, new MockCommand("3")));
 
-        final var unAppliedEntry1 = new SimpleReplicatedLogEntry(4, 1, new MockRaftActorContext.MockPayload("4", 4));
-        final var unAppliedEntry2 = new SimpleReplicatedLogEntry(5, 1, new MockRaftActorContext.MockPayload("5", 5));
+        final var unAppliedEntry1 = new SimpleReplicatedLogEntry(4, 1, new MockCommand("4", 4));
+        final var unAppliedEntry2 = new SimpleReplicatedLogEntry(5, 1, new MockCommand("5", 5));
 
         final long lastAppliedDuringSnapshotCapture = 3;
         final long lastIndexDuringSnapshotCapture = 5;
         final long electionTerm = 2;
         final var electionVotedFor = "member-2";
 
-        final var snapshotState = new MockSnapshotState(List.of(new MockPayload("1")));
+        final var snapshotState = new MockSnapshotState(List.of(new MockCommand("1")));
         final var snapshot = Snapshot.create(snapshotState,
                 List.of(unAppliedEntry1, unAppliedEntry2), lastIndexDuringSnapshotCapture, 1,
                 lastAppliedDuringSnapshotCapture, 1, new TermInfo(electionTerm, electionVotedFor), null);
@@ -252,8 +251,8 @@ class RaftActorRecoverySupportTest {
         doReturn(true).when(mockPersistence).isRecoveryApplicable();
 
         final var replicatedLog = context.getReplicatedLog();
-        replicatedLog.append(new SimpleReplicatedLogEntry(0, 1, new MockRaftActorContext.MockPayload("0")));
-        replicatedLog.append(new SimpleReplicatedLogEntry(1, 1, new MockRaftActorContext.MockPayload("1")));
+        replicatedLog.append(new SimpleReplicatedLogEntry(0, 1, new MockCommand("0")));
+        replicatedLog.append(new SimpleReplicatedLogEntry(1, 1, new MockCommand("1")));
 
         sendMessageToSupport(new ApplyJournalEntries(1));
 
@@ -287,9 +286,9 @@ class RaftActorRecoverySupportTest {
         doReturn(true).when(mockPersistence).isRecoveryApplicable();
 
         ReplicatedLog replicatedLog = context.getReplicatedLog();
-        replicatedLog.append(new SimpleReplicatedLogEntry(0, 1, new MockRaftActorContext.MockPayload("0")));
-        replicatedLog.append(new SimpleReplicatedLogEntry(1, 1, new MockRaftActorContext.MockPayload("1")));
-        replicatedLog.append(new SimpleReplicatedLogEntry(2, 1, new MockRaftActorContext.MockPayload("2")));
+        replicatedLog.append(new SimpleReplicatedLogEntry(0, 1, new MockCommand("0")));
+        replicatedLog.append(new SimpleReplicatedLogEntry(1, 1, new MockCommand("1")));
+        replicatedLog.append(new SimpleReplicatedLogEntry(2, 1, new MockCommand("2")));
 
         sendMessageToSupport(new DeleteEntries(1));
 
@@ -309,7 +308,7 @@ class RaftActorRecoverySupportTest {
         doReturn(false).when(mockPersistence).isRecoveryApplicable();
         doReturn(10L).when(mockActor).lastSequenceNr();
 
-        Snapshot snapshot = Snapshot.create(new MockSnapshotState(List.of(new MockPayload("1"))),
+        Snapshot snapshot = Snapshot.create(new MockSnapshotState(List.of(new MockCommand("1"))),
                 List.of(), 3, 1, 3, 1, new TermInfo(-1), null);
         SnapshotOffer snapshotOffer = new SnapshotOffer(new SnapshotMetadata("test", 6, 12345), snapshot);
 
@@ -317,8 +316,8 @@ class RaftActorRecoverySupportTest {
 
         sendMessageToSupport(new UpdateElectionTerm(5, "member2"));
 
-        sendMessageToSupport(new SimpleReplicatedLogEntry(4, 1, new MockRaftActorContext.MockPayload("4")));
-        sendMessageToSupport(new SimpleReplicatedLogEntry(5, 1, new MockRaftActorContext.MockPayload("5")));
+        sendMessageToSupport(new SimpleReplicatedLogEntry(4, 1, new MockCommand("4")));
+        sendMessageToSupport(new SimpleReplicatedLogEntry(5, 1, new MockCommand("5")));
 
         sendMessageToSupport(new ApplyJournalEntries(4));
 
@@ -427,7 +426,7 @@ class RaftActorRecoverySupportTest {
                 new ServerInfo("follower1", true),
                 new ServerInfo("follower2", true));
 
-        MockSnapshotState snapshotState = new MockSnapshotState(List.of(new MockPayload("1")));
+        MockSnapshotState snapshotState = new MockSnapshotState(List.of(new MockCommand("1")));
         Snapshot snapshot = Snapshot.create(snapshotState, List.of(),
                 -1, -1, -1, -1, new TermInfo(electionTerm, electionVotedFor), serverPayload);
 

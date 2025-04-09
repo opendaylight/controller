@@ -42,20 +42,20 @@ public class RecoveryIntegrationSingleNodeTest extends AbstractRaftActorIntegrat
 
         InMemoryJournal.addWriteMessagesCompleteLatch(persistenceId, 6, ApplyJournalEntries.class);
 
-        final MockRaftActorContext.MockPayload payload0 = sendPayloadData(singleNodeActorRef, "zero");
-        final MockRaftActorContext.MockPayload payload1 = sendPayloadData(singleNodeActorRef, "one");
-        final MockRaftActorContext.MockPayload payload2 = sendPayloadData(singleNodeActorRef, "two");
+        final MockCommand payload0 = sendPayloadData(singleNodeActorRef, "zero");
+        final MockCommand payload1 = sendPayloadData(singleNodeActorRef, "one");
+        final MockCommand payload2 = sendPayloadData(singleNodeActorRef, "two");
 
         MessageCollectorActor.expectMatching(singleNodeCollectorActor, ApplyJournalEntries.class, 3);
 
         // this should trigger a snapshot
-        final MockRaftActorContext.MockPayload payload3 = sendPayloadData(singleNodeActorRef, "three");
+        final MockCommand payload3 = sendPayloadData(singleNodeActorRef, "three");
 
         MessageCollectorActor.expectMatching(singleNodeCollectorActor, ApplyJournalEntries.class, 4);
 
         //add 2 more
-        final MockRaftActorContext.MockPayload payload4 = sendPayloadData(singleNodeActorRef, "four");
-        final MockRaftActorContext.MockPayload payload5 = sendPayloadData(singleNodeActorRef, "five");
+        final MockCommand payload4 = sendPayloadData(singleNodeActorRef, "four");
+        final MockCommand payload5 = sendPayloadData(singleNodeActorRef, "five");
 
 
         // Wait for snapshot complete.

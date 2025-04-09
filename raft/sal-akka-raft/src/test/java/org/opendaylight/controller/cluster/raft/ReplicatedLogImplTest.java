@@ -28,7 +28,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.internal.matchers.Same;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
@@ -79,7 +78,7 @@ class ReplicatedLogImplTest {
     void testAppendAndPersistExpectingNoCapture() throws Exception {
         final var log = new ReplicatedLogImpl(context);
 
-        final var logEntry1 = new SimpleReplicatedLogEntry(1, 1, new MockPayload("1"));
+        final var logEntry1 = new SimpleReplicatedLogEntry(1, 1, new MockCommand("1"));
 
         log.appendAndPersist(logEntry1, null, true);
 
@@ -89,7 +88,7 @@ class ReplicatedLogImplTest {
 
         reset(mockPersistence);
 
-        final var logEntry2 = new SimpleReplicatedLogEntry(2, 1, new MockPayload("2"));
+        final var logEntry2 = new SimpleReplicatedLogEntry(2, 1, new MockCommand("2"));
         log.appendAndPersist(logEntry2, mockCallback, true);
 
         verifyPersist(logEntry2);
@@ -103,7 +102,7 @@ class ReplicatedLogImplTest {
     void testAppendAndPersisWithDuplicateEntry() throws Exception {
         final var log = new ReplicatedLogImpl(context);
 
-        final var logEntry = new SimpleReplicatedLogEntry(1, 1, new MockPayload("1"));
+        final var logEntry = new SimpleReplicatedLogEntry(1, 1, new MockCommand("1"));
 
         log.appendAndPersist(logEntry, mockCallback, true);
 
@@ -126,8 +125,8 @@ class ReplicatedLogImplTest {
 
         final var log = new ReplicatedLogImpl(context);
 
-        final var logEntry1 = new SimpleReplicatedLogEntry(2, 1, new MockPayload("2"));
-        final var logEntry2 = new SimpleReplicatedLogEntry(3, 1, new MockPayload("3"));
+        final var logEntry1 = new SimpleReplicatedLogEntry(2, 1, new MockCommand("2"));
+        final var logEntry2 = new SimpleReplicatedLogEntry(3, 1, new MockCommand("3"));
 
         log.appendAndPersist(logEntry1, null, true);
         verifyPersist(logEntry1);
@@ -147,14 +146,14 @@ class ReplicatedLogImplTest {
         final var log = new ReplicatedLogImpl(context);
 
         int dataSize = 600;
-        var logEntry = new SimpleReplicatedLogEntry(2, 1, new MockPayload("2", dataSize));
+        var logEntry = new SimpleReplicatedLogEntry(2, 1, new MockCommand("2", dataSize));
 
         log.appendAndPersist(logEntry, null, true);
         verifyPersist(logEntry);
 
         reset(mockPersistence);
 
-        logEntry = new SimpleReplicatedLogEntry(3, 1, new MockPayload("3", 5));
+        logEntry = new SimpleReplicatedLogEntry(3, 1, new MockCommand("3", 5));
 
         log.appendAndPersist(logEntry, null, true);
         verifyPersist(logEntry);
@@ -166,9 +165,9 @@ class ReplicatedLogImplTest {
     void testRemoveFromAndPersist() throws Exception {
         final var log = new ReplicatedLogImpl(context);
 
-        log.append(new SimpleReplicatedLogEntry(0, 1, new MockPayload("0")));
-        log.append(new SimpleReplicatedLogEntry(1, 1, new MockPayload("1")));
-        log.append(new SimpleReplicatedLogEntry(2, 1, new MockPayload("2")));
+        log.append(new SimpleReplicatedLogEntry(0, 1, new MockCommand("0")));
+        log.append(new SimpleReplicatedLogEntry(1, 1, new MockCommand("1")));
+        log.append(new SimpleReplicatedLogEntry(2, 1, new MockCommand("2")));
 
         log.removeFromAndPersist(1);
 
@@ -188,7 +187,7 @@ class ReplicatedLogImplTest {
     void testCommitFakeSnapshot() {
         final var log = new ReplicatedLogImpl(context);
 
-        log.append(new SimpleReplicatedLogEntry(0, 1, new MockPayload("0")));
+        log.append(new SimpleReplicatedLogEntry(0, 1, new MockCommand("0")));
         final int dataSizeAfterFirstPayload = log.dataSize();
 
         log.snapshotPreCommit(0,1);

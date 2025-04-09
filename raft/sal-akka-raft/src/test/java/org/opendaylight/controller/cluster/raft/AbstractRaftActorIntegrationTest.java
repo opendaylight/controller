@@ -34,7 +34,6 @@ import org.apache.pekko.testkit.javadsl.TestKit;
 import org.apache.pekko.util.Timeout;
 import org.eclipse.jdt.annotation.NonNull;
 import org.junit.After;
-import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
@@ -89,9 +88,9 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
     public static final class TestPersist {
         private final ActorRef actorRef;
         private final @NonNull Identifier identifier;
-        private final MockPayload payload;
+        private final MockCommand payload;
 
-        TestPersist(final ActorRef actorRef, final Identifier identifier, final MockPayload payload) {
+        TestPersist(final ActorRef actorRef, final Identifier identifier, final MockCommand payload) {
             this.actorRef = actorRef;
             this.identifier = requireNonNull(identifier);
             this.payload = payload;
@@ -105,7 +104,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
             return identifier;
         }
 
-        public MockPayload getPayload() {
+        public MockCommand getPayload() {
             return payload;
         }
     }
@@ -139,7 +138,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         @Deprecated
         @SuppressWarnings("checkstyle:IllegalCatch")
         public void handleCommand(final Object message) {
-            if (message instanceof MockPayload payload) {
+            if (message instanceof MockCommand payload) {
                 submitCommand(new MockIdentifier(payload.toString()), payload, false);
                 return;
             }
@@ -237,7 +236,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
     protected int snapshotBatchCount = 4;
     protected int maximumMessageSliceSize = MAXIMUM_MESSAGE_SLICE_SIZE;
 
-    protected List<MockPayload> expSnapshotState = new ArrayList<>();
+    protected List<MockCommand> expSnapshotState = new ArrayList<>();
 
     @After
     public void tearDown() {
@@ -335,16 +334,16 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         }
     }
 
-    protected MockPayload sendPayloadData(final ActorRef actor, final String data) {
+    protected MockCommand sendPayloadData(final ActorRef actor, final String data) {
         return sendPayloadData(actor, data, 0);
     }
 
-    protected MockPayload sendPayloadData(final ActorRef actor, final String data, final int size) {
-        MockPayload payload;
+    protected MockCommand sendPayloadData(final ActorRef actor, final String data, final int size) {
+        MockCommand payload;
         if (size > 0) {
-            payload = new MockPayload(data, size);
+            payload = new MockCommand(data, size);
         } else {
-            payload = new MockPayload(data);
+            payload = new MockCommand(data);
         }
 
         actor.tell(payload, ActorRef.noSender());

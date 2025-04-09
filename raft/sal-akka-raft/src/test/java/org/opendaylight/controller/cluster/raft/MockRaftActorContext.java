@@ -7,10 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import static java.util.Objects.requireNonNull;
-
 import com.google.common.util.concurrent.MoreExecutors;
-import java.io.Serializable;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,7 +19,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
-import org.opendaylight.controller.cluster.raft.spi.AbstractStateCommand;
 import org.opendaylight.controller.cluster.raft.spi.TestTermInfoStore;
 import org.opendaylight.raft.api.EntryMeta;
 
@@ -64,8 +60,8 @@ public class MockRaftActorContext extends RaftActorContextImpl {
     public void initReplicatedLog() {
         final var replicatedLog = new SimpleReplicatedLog();
         long term = currentTerm();
-        replicatedLog.append(new SimpleReplicatedLogEntry(0, term, new MockPayload("1")));
-        replicatedLog.append(new SimpleReplicatedLogEntry(1, term, new MockPayload("2")));
+        replicatedLog.append(new SimpleReplicatedLogEntry(0, term, new MockCommand("1")));
+        replicatedLog.append(new SimpleReplicatedLogEntry(1, term, new MockCommand("2")));
         resetReplicatedLog(replicatedLog);
         replicatedLog.setCommitIndex(replicatedLog.lastIndex());
         replicatedLog.setLastApplied(replicatedLog.lastIndex());
@@ -137,86 +133,17 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         }
     }
 
-    public static final class MockPayload extends AbstractStateCommand {
-        @java.io.Serial
-        private static final long serialVersionUID = 3121380393130864247L;
-
-        private final String data;
-        private final int size;
-
-        public MockPayload() {
-            this("");
-        }
-
-        public MockPayload(final String data) {
-            this(data, data.length());
-        }
-
-        public MockPayload(final String data, final int size) {
-            this.data = requireNonNull(data);
-            this.size = size;
-        }
-
-        @Override
-        public int size() {
-            return size;
-        }
-
-        @Override
-        public int serializedSize() {
-            return size;
-        }
-
-        @Override
-        public String toString() {
-            return data;
-        }
-
-        @Override
-        public int hashCode() {
-            return data.hashCode();
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            return this == obj || obj instanceof MockPayload other && size == other.size && data.equals(other.data);
-        }
-
-        @Override
-        protected Object writeReplace() {
-            return new MockPayloadProxy(data, size);
-        }
-    }
-
-    private static final class MockPayloadProxy implements Serializable {
-        @java.io.Serial
-        private static final long serialVersionUID = 1L;
-
-        private final String value;
-        private final int size;
-
-        MockPayloadProxy(final String value, final int size) {
-            this.value = value;
-            this.size = size;
-        }
-
-        @java.io.Serial
-        private Object readResolve() {
-            return new MockPayload(value, size);
-        }
-    }
-
     public static class MockReplicatedLogBuilder {
         private final SimpleReplicatedLog mockLog = new SimpleReplicatedLog();
 
         public MockReplicatedLogBuilder createEntries(final int start, final int end, final int term) {
             for (int i = start; i < end; i++) {
-                mockLog.append(new SimpleReplicatedLogEntry(i, term, new MockPayload(Integer.toString(i))));
+                mockLog.append(new SimpleReplicatedLogEntry(i, term, new MockCommand(Integer.toString(i))));
             }
             return this;
         }
 
-        public MockReplicatedLogBuilder addEntry(final int index, final int term, final MockPayload payload) {
+        public MockReplicatedLogBuilder addEntry(final int index, final int term, final MockCommand payload) {
             mockLog.append(new SimpleReplicatedLogEntry(index, term, payload));
             return this;
         }

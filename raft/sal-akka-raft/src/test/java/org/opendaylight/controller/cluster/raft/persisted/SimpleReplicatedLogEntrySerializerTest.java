@@ -14,7 +14,7 @@ import java.io.NotSerializableException;
 import org.apache.pekko.actor.ExtendedActorSystem;
 import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.jupiter.api.Test;
-import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
+import org.opendaylight.controller.cluster.raft.MockCommand;
 
 /**
  * Unit tests for SimpleReplicatedLogEntrySerializer.
@@ -24,7 +24,7 @@ import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 class SimpleReplicatedLogEntrySerializerTest {
     @Test
     void testToAndFromBinary() throws NotSerializableException {
-        final var expected = new SimpleReplicatedLogEntry(0, 1, new MockRaftActorContext.MockPayload("A"));
+        final var expected = new SimpleReplicatedLogEntry(0, 1, new MockCommand("A"));
 
         final var system = (ExtendedActorSystem) ExtendedActorSystem.create("test");
         final SimpleReplicatedLogEntry actual;

@@ -57,7 +57,7 @@ public class MigratedMessagesTest extends AbstractActorTest {
         String id = factory.generateActorId("test-actor-");
 
         InMemoryJournal.addEntry(id, 1, new UpdateElectionTerm(1, id));
-        InMemoryJournal.addEntry(id, 2, new SimpleReplicatedLogEntry(0, 1, new MockRaftActorContext.MockPayload("A")));
+        InMemoryJournal.addEntry(id, 2, new SimpleReplicatedLogEntry(0, 1, new MockCommand("A")));
         InMemoryJournal.addEntry(id, 3, new ApplyJournalEntries(0));
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();

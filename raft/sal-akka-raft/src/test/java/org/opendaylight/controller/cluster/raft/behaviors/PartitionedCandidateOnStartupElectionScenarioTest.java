@@ -15,7 +15,7 @@ import com.google.common.collect.ImmutableMap;
 import org.apache.pekko.actor.ActorRef;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
-import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
+import org.opendaylight.controller.cluster.raft.MockCommand;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.SimpleReplicatedLog;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
@@ -166,7 +166,7 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         // will be 2 and the last term will be 1 so it is behind the leader's log.
 
         SimpleReplicatedLog candidateReplicatedLog = new SimpleReplicatedLog();
-        candidateReplicatedLog.append(new SimpleReplicatedLogEntry(0, 2, new MockPayload("")));
+        candidateReplicatedLog.append(new SimpleReplicatedLogEntry(0, 2, new MockCommand("")));
 
         candidateReplicatedLog.setCommitIndex(candidateReplicatedLog.lastIndex());
         candidateReplicatedLog.setLastApplied(candidateReplicatedLog.lastIndex());
@@ -214,8 +214,8 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         // will be 3 and the last term will be 2.
 
         SimpleReplicatedLog replicatedLog = new SimpleReplicatedLog();
-        replicatedLog.append(new SimpleReplicatedLogEntry(0, 2, new MockPayload("")));
-        replicatedLog.append(new SimpleReplicatedLogEntry(1, 3, new MockPayload("")));
+        replicatedLog.append(new SimpleReplicatedLogEntry(0, 2, new MockCommand("")));
+        replicatedLog.append(new SimpleReplicatedLogEntry(1, 3, new MockCommand("")));
 
         // Create member 2's behavior as Follower.
 

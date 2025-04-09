@@ -16,7 +16,6 @@ import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.persistence.SaveSnapshotSuccess;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.ApplyLeaderSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
@@ -27,9 +26,8 @@ import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
  * @author Thomas Pantelis
  */
 public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
-
-    private MockPayload payload0;
-    private MockPayload payload1;
+    private MockCommand payload0;
+    private MockCommand payload1;
 
     @Before
     public void setup() {
@@ -55,15 +53,15 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         leaderActor.underlyingActor().startDropMessages(SaveSnapshotSuccess.class);
         follower1Actor.underlyingActor().startDropMessages(AppendEntries.class);
 
-        final MockPayload payload2 = sendPayloadData(leaderActor, "two");
+        final MockCommand payload2 = sendPayloadData(leaderActor, "two");
 
         // This should trigger a snapshot.
-        final MockPayload payload3 = sendPayloadData(leaderActor, "three");
+        final MockCommand payload3 = sendPayloadData(leaderActor, "three");
 
         MessageCollectorActor.expectMatching(follower1CollectorActor, AppendEntries.class, 3);
 
         // Send another payload.
-        final MockPayload payload4 = sendPayloadData(leaderActor, "four");
+        final MockCommand payload4 = sendPayloadData(leaderActor, "four");
 
         // Now deliver the AppendEntries to the follower
         follower1Actor.underlyingActor().stopDropMessages(AppendEntries.class);
@@ -101,13 +99,13 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         // Block these messages initially so we can control the sequence.
         follower1Actor.underlyingActor().startDropMessages(AppendEntries.class);
 
-        final MockPayload payload2 = sendPayloadData(leaderActor, "two");
+        final MockCommand payload2 = sendPayloadData(leaderActor, "two");
 
         // This should trigger a snapshot.
-        final MockPayload payload3 = sendPayloadData(leaderActor, "three");
+        final MockCommand payload3 = sendPayloadData(leaderActor, "three");
 
         // Send another payload.
-        final MockPayload payload4 = sendPayloadData(leaderActor, "four");
+        final MockCommand payload4 = sendPayloadData(leaderActor, "four");
 
         MessageCollectorActor.expectMatching(follower1CollectorActor, AppendEntries.class, 3);
 
@@ -146,7 +144,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
 
         leaderActor.tell(new SetPeerAddress(follower2Id, follower2Actor.path().toString()), ActorRef.noSender());
 
-        final MockPayload payload2 = sendPayloadData(leaderActor, "two");
+        final MockCommand payload2 = sendPayloadData(leaderActor, "two");
 
         // Verify the leader applies the 3rd payload state.
         MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyJournalEntries.class, 1);
@@ -177,7 +175,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         // Wait for the follower to persist the snapshot.
         MessageCollectorActor.expectFirstMatching(follower2CollectorActor, SaveSnapshotSuccess.class);
 
-        final List<MockPayload> expFollowerState = List.of(payload0, payload1, payload2);
+        final List<MockCommand> expFollowerState = List.of(payload0, payload1, payload2);
 
         var follower2log = follower2Context.getReplicatedLog();
         assertEquals("Follower commit index", 2, follower2log.getCommitIndex());
@@ -232,11 +230,11 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         });
 
         // Send new payloads
-        final MockPayload payload4 = sendPayloadData(leaderActor, "newFour");
+        final MockCommand payload4 = sendPayloadData(leaderActor, "newFour");
         await().untilAsserted(() -> assertEquals(
                 "leader journal last index", 4, leaderContext.getReplicatedLog().lastIndex()));
 
-        final MockPayload payload5 = sendPayloadData(leaderActor, "newFive");
+        final MockCommand payload5 = sendPayloadData(leaderActor, "newFive");
         await().untilAsserted(() -> assertEquals(
                 "leader journal last index", 5, leaderContext.getReplicatedLog().lastIndex()));
 

@@ -25,6 +25,7 @@ import org.apache.pekko.testkit.TestActorRef;
 import org.junit.After;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.MessageCollectorActor;
+import org.opendaylight.controller.cluster.raft.MockCommand;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
@@ -280,7 +281,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
         context.setTermInfo(new TermInfo(2, "test"));
 
         // Prepare the receivers log
-        MockRaftActorContext.MockPayload payload = new MockRaftActorContext.MockPayload("zero");
+        MockCommand payload = new MockCommand("zero");
         setLastLogEntry(context, 2, 0, payload);
 
         List<ReplicatedLogEntry> entries = new ArrayList<>();
