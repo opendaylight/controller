@@ -16,7 +16,6 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Cancellable;
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.ReplicatedLog;
@@ -397,8 +396,7 @@ public abstract class RaftActorBehavior implements AutoCloseable {
      * @param entry the log entry
      * @return Identifier for this entry
      */
-    @NonNullByDefault
-    abstract @Nullable Identifier applyIdentifierFor(LogEntry entry);
+    abstract @Nullable Identifier applyIdentifierFor(@NonNull LogEntry entry);
 
     /**
      * Handle a message. If the processing of the message warrants a state
