@@ -18,7 +18,6 @@ package io.atomix.storage.journal;
 import static io.atomix.storage.journal.SegmentEntry.HEADER_BYTES;
 import static java.util.Objects.requireNonNull;
 
-import io.atomix.storage.journal.StorageException.TooLarge;
 import io.atomix.storage.journal.index.JournalIndex;
 import java.io.EOFException;
 import java.io.IOException;
@@ -65,8 +64,9 @@ final class JournalSegmentWriter {
      * @param mapper the mapper to use
      * @param entry the entry
      * @return the entry size, or {@code null} if segment has no space
+     * @throws IOException if some other I/O error occurs
      */
-    <T> @Nullable Integer append(final ToByteBufMapper<T> mapper, final T entry) {
+    <T> @Nullable Integer append(final ToByteBufMapper<T> mapper, final T entry) throws IOException {
         // we are appending at this index and position
         final long index = nextIndex();
         final int position = currentPosition;
@@ -96,14 +96,13 @@ final class JournalSegmentWriter {
             if (writeLimit == maxEntrySize) {
                 // - it is the entry and/or mapper. This is not exactly accurate, as there may be other serialization
                 //   fault. This is as good as it gets.
-                throw new TooLarge("Serialized entry size exceeds maximum allowed bytes (" + maxEntrySize + ")", e);
+                throw new EntryTooLargeException(
+                    "Serialized entry size exceeds maximum allowed bytes (" + maxEntrySize + ")", e);
             }
 
             // - it is us, as we do not have the capacity to hold maxEntrySize bytes
             LOG.trace("Tail serialization with {} bytes available failed", writeLimit, e);
             return null;
-        } catch (IOException e) {
-            throw new StorageException(e);
         }
 
         // Determine length, trim disktEntry and compute checksum.

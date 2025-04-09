@@ -18,6 +18,7 @@ package io.atomix.storage.journal;
 
 import static java.util.Objects.requireNonNull;
 
+import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.raft.journal.EntryWriter;
 import org.opendaylight.controller.raft.journal.ToByteBufMapper;
@@ -46,7 +47,7 @@ final class SegmentedJournalWriter<E> implements JournalWriter<E> {
     }
 
     @Override
-    public <T extends E> Indexed<T> append(final T entry) {
+    public <T extends E> Indexed<T> append(final T entry) throws IOException {
         final var index = writer.nextIndex();
         return new Indexed<>(index, entry, writer.append(mapper, entry));
     }
