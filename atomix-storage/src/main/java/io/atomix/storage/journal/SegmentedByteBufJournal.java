@@ -17,7 +17,6 @@
 package io.atomix.storage.journal;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import io.netty.buffer.ByteBufAllocator;
@@ -136,7 +135,9 @@ public final class SegmentedByteBufJournal implements RaftJournal {
      * @throws IllegalStateException if the segment manager is not open
      */
     private void assertOpen() {
-        checkState(currentSegment != null, "journal not open");
+        if (currentSegment == null) {
+            throw new IllegalStateException("journal not open");
+        }
     }
 
     /**

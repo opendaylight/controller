@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
@@ -42,7 +41,9 @@ public final class ModifyTransactionRequestBuilder implements Identifiable<Trans
     }
 
     private void checkNotFinished() {
-        checkState(protocol == null, "Batch has already been finished");
+        if (protocol != null) {
+            throw new IllegalStateException("Batch has already been finished");
+        }
     }
 
     public ModifyTransactionRequestBuilder addModification(final TransactionModification modification) {
@@ -64,7 +65,9 @@ public final class ModifyTransactionRequestBuilder implements Identifiable<Trans
     }
 
     public ModifyTransactionRequestBuilder setSequence(final long sequence) {
-        checkState(!haveSequence, "Sequence has already been set");
+        if (haveSequence) {
+            throw new IllegalStateException("Sequence has already been set");
+        }
         this.sequence = sequence;
         haveSequence = true;
         return this;
@@ -95,7 +98,9 @@ public final class ModifyTransactionRequestBuilder implements Identifiable<Trans
     }
 
     public @NonNull ModifyTransactionRequest build() {
-        checkState(haveSequence, "Request sequence has not been set");
+        if (!haveSequence) {
+            throw new IllegalStateException("Request sequence has not been set");
+        }
 
         final ModifyTransactionRequest ret = new ModifyTransactionRequest(identifier, sequence, replyTo, modifications,
             protocol);
