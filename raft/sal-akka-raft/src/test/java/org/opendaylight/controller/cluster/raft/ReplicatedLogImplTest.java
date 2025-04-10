@@ -8,7 +8,8 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.same;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -27,9 +28,9 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
-import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
+import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 
 /**
  * Unit tests for ReplicatedLogImpl.
@@ -43,7 +44,7 @@ class ReplicatedLogImplTest {
     @Mock
     private RaftActorBehavior mockBehavior;
     @Mock
-    private Consumer<ReplicatedLogEntry> mockCallback;
+    private Consumer<LogEntry> mockCallback;
     @Captor
     private ArgumentCaptor<Consumer<ReplicatedLogEntry>> procedureCaptor;
     @TempDir
@@ -58,104 +59,104 @@ class ReplicatedLogImplTest {
             (short) 0, mockPersistence, (identifier, entry) -> { }, MoreExecutors.directExecutor());
     }
 
-    private void verifyPersist(final ReplicatedLogEntry entry) {
-        verifyPersist(entry, true);
+    private void verifyPersist(final long index, final long term, final MockCommand command) throws Exception {
+        verifyPersist(new ArgumentMatcher<SimpleReplicatedLogEntry>() {
+            @Override
+            public boolean matches(final SimpleReplicatedLogEntry argument) {
+                return index == argument.index() && term == argument.term() && command == argument.command();
+            }
+
+            @Override
+            public Class<?> type() {
+                return SimpleReplicatedLogEntry.class;
+            }
+        }, true);
     }
 
-    private void verifyPersist(final ReplicatedLogEntry entry, final boolean async) {
+    private <T extends ReplicatedLogEntry> void verifyPersist(final ArgumentMatcher<T> matcher, final boolean async) {
+        final var entryCaptor = ArgumentCaptor.<T>captor();
+
         if (async) {
-            verify(mockPersistence).startPersistEntry(same(entry), procedureCaptor.capture());
+            verify(mockPersistence).startPersistEntry(entryCaptor.capture(), procedureCaptor.capture());
         } else {
-            verify(mockPersistence).persistEntry(same(entry), procedureCaptor.capture());
+            verify(mockPersistence).persistEntry(entryCaptor.capture(), procedureCaptor.capture());
         }
-        procedureCaptor.getValue().accept(entry);
+
+        final var message = entryCaptor.getValue();
+        assertTrue(matcher.matches(message));
+        procedureCaptor.getValue().accept(message);
     }
 
     @Test
-    void testAppendAndPersistExpectingNoCapture() {
+    void testAppendAndPersistExpectingNoCapture() throws Exception {
         final var log = new ReplicatedLogImpl(context);
+        log.setSnapshotIndex(0);
 
-        final var logEntry1 = new SimpleReplicatedLogEntry(1, 1, new MockCommand("1"));
+        final var command1 = new MockCommand("1");
 
-        log.appendSubmitted(logEntry1, null);
+        assertEquals(1, log.appendSubmitted(1, command1, mockCallback));
 
-        verifyPersist(logEntry1);
+        verifyPersist(1, 1, command1);
 
         assertEquals(1, log.size());
 
         reset(mockPersistence);
 
-        final var logEntry2 = new SimpleReplicatedLogEntry(2, 1, new MockCommand("2"));
-        log.appendSubmitted(logEntry2, mockCallback);
 
-        verifyPersist(logEntry2);
+        final var command2 = new MockCommand("2");
+        assertEquals(2, log.appendSubmitted(1, command2, mockCallback));
 
-        verify(mockCallback).accept(same(logEntry2));
+        verifyPersist(2, 1, command2);
+
+        final var captor = ArgumentCaptor.forClass(LogEntry.class);
+        verify(mockCallback).accept(captor.capture());
+        assertSame(command2, captor.getValue().command());
 
         assertEquals(2, log.size());
     }
 
     @Test
-    void testAppendAndPersisWithDuplicateEntry() {
-        final var log = new ReplicatedLogImpl(context);
-
-        final var logEntry = new SimpleReplicatedLogEntry(1, 1, new MockCommand("1"));
-
-        log.appendSubmitted(logEntry, mockCallback);
-
-        verifyPersist(logEntry);
-
-        assertEquals(1, log.size());
-
-        reset(mockPersistence, mockCallback);
-
-        log.appendSubmitted(logEntry, mockCallback);
-
-        verifyNoMoreInteractions(mockPersistence, mockCallback);
-
-        assertEquals(1, log.size());
-    }
-
-    @Test
-    void testAppendAndPersistExpectingCaptureDueToJournalCount() {
+    void testAppendAndPersistExpectingCaptureDueToJournalCount() throws Exception {
         configParams.setSnapshotBatchCount(2);
 
         final var log = new ReplicatedLogImpl(context);
+        log.setSnapshotIndex(1);
 
-        final var logEntry1 = new SimpleReplicatedLogEntry(2, 1, new MockCommand("2"));
-        final var logEntry2 = new SimpleReplicatedLogEntry(3, 1, new MockCommand("3"));
+        final var command1 = new MockCommand("2");
 
-        log.appendSubmitted(logEntry1, null);
-        verifyPersist(logEntry1);
+        assertEquals(2, log.appendSubmitted(1, command1, mockCallback));
+        verifyPersist(2, 1, command1);
 
         reset(mockPersistence);
 
-        log.appendSubmitted(logEntry2, null);
-        verifyPersist(logEntry2);
+        final var command2 = new MockCommand("3");
+        assertEquals(3, log.appendSubmitted(1, command2, mockCallback));
+        verifyPersist(3, 1, command2);
 
         assertEquals(2, log.size());
     }
 
     @Test
-    void testAppendAndPersistExpectingCaptureDueToDataSize() {
+    void testAppendAndPersistExpectingCaptureDueToDataSize() throws Exception {
         context.setTotalMemoryRetriever(() -> 100);
 
         final var log = new ReplicatedLogImpl(context);
+        log.setSnapshotIndex(1);
 
         int dataSize = 600;
-        var logEntry = new SimpleReplicatedLogEntry(2, 1, new MockCommand("2", dataSize));
+        var command = new MockCommand("2", dataSize);
 
-        log.appendSubmitted(logEntry, null);
-        verifyPersist(logEntry);
+        assertEquals(2, log.appendSubmitted(1, command, mockCallback));
+        assertEquals(1, log.size());
+        verifyPersist(2, 1, command);
 
         reset(mockPersistence);
 
-        logEntry = new SimpleReplicatedLogEntry(3, 1, new MockCommand("3", 5));
-
-        log.appendSubmitted(logEntry, null);
-        verifyPersist(logEntry);
-
+        command = new MockCommand("3", 5);
+        assertEquals(3, log.appendSubmitted(1, command, mockCallback));
         assertEquals(2, log.size());
+
+        verifyPersist(3, 1, command);
     }
 
     @Test
@@ -167,6 +168,9 @@ class ReplicatedLogImplTest {
         log.append(new SimpleReplicatedLogEntry(2, 1, new MockCommand("2")));
 
         log.trimToReceive(1);
+
+//        this.<DeleteEntries>verifyPersist(other -> other.getFromIndex() == 1, false);
+
         assertEquals(1, log.size());
         verify(mockPersistence).deleteEntries(1);
 
@@ -188,9 +192,5 @@ class ReplicatedLogImplTest {
 
         assertEquals(0, log.size());
         assertEquals(dataSizeAfterFirstPayload, log.dataSize());
-    }
-
-    private static ArgumentMatcher<DeleteEntries> match(final DeleteEntries actual) {
-        return other -> actual.getFromIndex() == other.getFromIndex();
     }
 }
