@@ -128,15 +128,6 @@ public final class FollowerLogInformation {
     }
 
     /**
-     * Increments the value of the follower's match index.
-     *
-     * @return the new value of matchIndex.
-     */
-    public long incrMatchIndex() {
-        return matchIndex++;
-    }
-
-    /**
      * Sets the index of the follower's highest log entry.
      *
      * @param matchIndex the new index.
