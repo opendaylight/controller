@@ -23,7 +23,6 @@ import static java.util.Objects.requireNonNull;
 import io.netty.buffer.ByteBufAllocator;
 import java.io.File;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.TreeMap;
@@ -304,8 +303,9 @@ public final class SegmentedByteBufJournal implements RaftJournal {
      * Loads all segments from disk.
      *
      * @return A collection of segments for the log.
+     * @throws IOException if an I/O error occurs
      */
-    private Collection<JournalSegment> loadSegments() {
+    private Collection<JournalSegment> loadSegments() throws IOException {
         // Ensure log directories are created.
         final var dirFile = directory.toFile();
         dirFile.mkdirs();
@@ -322,14 +322,22 @@ public final class SegmentedByteBufJournal implements RaftJournal {
                 try {
                     segmentFile = JournalSegmentFile.openExisting(filePath, allocator);
                 } catch (IOException e) {
-                    throw new UncheckedIOException(e);
+                    segmentsMap.values().forEach(JournalSegment::close);
+                    throw e;
                 }
 
                 // Load the segment.
                 LOG.debug("Loaded disk segment: {} ({})", segmentFile.segmentId(), segmentFile.path());
 
                 // Add the segment to the segments list.
-                final var segment = new JournalSegment(segmentFile, storageLevel, maxEntrySize, indexDensity);
+                final JournalSegment segment;
+                try {
+                    segment = new JournalSegment(segmentFile, storageLevel, maxEntrySize, indexDensity);
+                } catch (IOException e) {
+                    segmentFile.close();
+                    segmentsMap.values().forEach(JournalSegment::close);
+                    throw e;
+                }
                 segmentsMap.put(segment.firstIndex(), segment);
             }
         }

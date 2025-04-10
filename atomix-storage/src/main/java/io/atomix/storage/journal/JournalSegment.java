@@ -16,7 +16,6 @@
  */
 package io.atomix.storage.journal;
 
-import static io.atomix.storage.journal.SegmentEntry.HEADER_BYTES;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
@@ -89,11 +88,8 @@ final class JournalSegment {
     private State state;
     private boolean open = true;
 
-    JournalSegment(
-        final JournalSegmentFile file,
-        final StorageLevel storageLevel,
-        final int maxEntrySize,
-        final double indexDensity) {
+    JournalSegment(final JournalSegmentFile file, final StorageLevel storageLevel, final int maxEntrySize,
+            final double indexDensity) throws IOException {
         this.file = requireNonNull(file);
         this.storageLevel = requireNonNull(storageLevel);
         this.maxEntrySize = maxEntrySize;
@@ -107,8 +103,6 @@ final class JournalSegment {
             } finally {
                 fileReader.release();
             }
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
         }
     }
 
@@ -323,7 +317,7 @@ final class JournalSegment {
 
             journalIndex.index(nextIndex++, position);
             // Update the current position for indexing.
-            position += HEADER_BYTES + buf.readableBytes();
+            position += SegmentEntry.HEADER_BYTES + buf.readableBytes();
         }
 
         return position;
