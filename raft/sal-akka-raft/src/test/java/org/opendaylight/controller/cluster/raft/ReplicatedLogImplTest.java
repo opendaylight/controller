@@ -80,7 +80,7 @@ class ReplicatedLogImplTest {
 
         final var logEntry1 = new SimpleReplicatedLogEntry(1, 1, new MockCommand("1"));
 
-        log.appendAndPersist(logEntry1, null, true);
+        log.appendSubmitted(logEntry1, null);
 
         verifyPersist(logEntry1);
 
@@ -89,7 +89,7 @@ class ReplicatedLogImplTest {
         reset(mockPersistence);
 
         final var logEntry2 = new SimpleReplicatedLogEntry(2, 1, new MockCommand("2"));
-        log.appendAndPersist(logEntry2, mockCallback, true);
+        log.appendSubmitted(logEntry2, mockCallback);
 
         verifyPersist(logEntry2);
 
@@ -104,7 +104,7 @@ class ReplicatedLogImplTest {
 
         final var logEntry = new SimpleReplicatedLogEntry(1, 1, new MockCommand("1"));
 
-        log.appendAndPersist(logEntry, mockCallback, true);
+        log.appendSubmitted(logEntry, mockCallback);
 
         verifyPersist(logEntry);
 
@@ -112,7 +112,7 @@ class ReplicatedLogImplTest {
 
         reset(mockPersistence, mockCallback);
 
-        log.appendAndPersist(logEntry, mockCallback, true);
+        log.appendSubmitted(logEntry, mockCallback);
 
         verifyNoMoreInteractions(mockPersistence, mockCallback);
 
@@ -128,12 +128,12 @@ class ReplicatedLogImplTest {
         final var logEntry1 = new SimpleReplicatedLogEntry(2, 1, new MockCommand("2"));
         final var logEntry2 = new SimpleReplicatedLogEntry(3, 1, new MockCommand("3"));
 
-        log.appendAndPersist(logEntry1, null, true);
+        log.appendSubmitted(logEntry1, null);
         verifyPersist(logEntry1);
 
         reset(mockPersistence);
 
-        log.appendAndPersist(logEntry2, null, true);
+        log.appendSubmitted(logEntry2, null);
         verifyPersist(logEntry2);
 
         assertEquals(2, log.size());
@@ -148,14 +148,14 @@ class ReplicatedLogImplTest {
         int dataSize = 600;
         var logEntry = new SimpleReplicatedLogEntry(2, 1, new MockCommand("2", dataSize));
 
-        log.appendAndPersist(logEntry, null, true);
+        log.appendSubmitted(logEntry, null);
         verifyPersist(logEntry);
 
         reset(mockPersistence);
 
         logEntry = new SimpleReplicatedLogEntry(3, 1, new MockCommand("3", 5));
 
-        log.appendAndPersist(logEntry, null, true);
+        log.appendSubmitted(logEntry, null);
         verifyPersist(logEntry);
 
         assertEquals(2, log.size());

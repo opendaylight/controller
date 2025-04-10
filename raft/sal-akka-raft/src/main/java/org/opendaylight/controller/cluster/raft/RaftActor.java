@@ -699,7 +699,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         LOG.debug("{}: Persist data {}", memberId(), logEntry);
 
-        boolean wasAppended = replLog.appendAndPersist(logEntry, persistedEntry -> {
+        boolean wasAppended = replLog.appendSubmitted(logEntry, persistedEntry -> {
             // Clear the persistence pending flag in the log entry.
             persistedEntry.setPersistencePending(false);
 
@@ -727,7 +727,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                     leader.checkConsensusReached();
                 }
             }
-        }, true);
+        });
 
         if (wasAppended && hasFollowers()) {
             // Send log entry for replication.

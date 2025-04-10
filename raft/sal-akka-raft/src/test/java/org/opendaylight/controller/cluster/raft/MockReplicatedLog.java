@@ -21,10 +21,17 @@ final class MockReplicatedLog extends AbstractReplicatedLog {
     }
 
     @Override
-    public <T extends ReplicatedLogEntry> boolean appendAndPersist(final T replicatedLogEntry,
-            final Consumer<T> callback, final boolean doAsync) {
+    public <T extends ReplicatedLogEntry> boolean appendReceived(final T entry, final Consumer<T> callback) {
         if (callback != null) {
-            callback.accept(replicatedLogEntry);
+            callback.accept(entry);
+        }
+        return false;
+    }
+
+    @Override
+    public <T extends ReplicatedLogEntry> boolean appendSubmitted(final T entry, final Consumer<T> callback) {
+        if (callback != null) {
+            callback.accept(entry);
         }
         return true;
     }

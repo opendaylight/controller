@@ -166,19 +166,25 @@ public interface ReplicatedLog {
     void increaseJournalLogCapacity(int amount);
 
     /**
-     * Appends an entry to the in-memory log and persists it as well.
+     * Appends an entry received by a follower to the in-memory log and persists it as well, returning an indication
+     * whether or not a snapshot should be taken.
      *
      * @param <T> entry type
-     * @param replicatedLogEntry the entry to append
-     * @param callback the callback to be notified when persistence is complete (optional).
-     * @param doAsync if true, the persistent actor can receive subsequent messages to process in between the persist
-     *        call and the execution of the associated callback. If false, subsequent messages are stashed and get
-     *        delivered after persistence is complete and the associated callback is executed. In either case the
-     *        callback is guaranteed to execute in the context of the actor associated with this log.
-     * @return true if the entry was successfully appended, false otherwise.
+     * @param entry the entry to append
+     * @param callback optional callback to be notified when persistence is complete
+     * @return {@code true} if the journal requires trimming and a snapshot needs to be taken
      */
-    <T extends ReplicatedLogEntry> boolean appendAndPersist(@NonNull T replicatedLogEntry,
-            @Nullable Consumer<T> callback, boolean doAsync);
+    <T extends ReplicatedLogEntry> boolean appendReceived(@NonNull T entry, @Nullable Consumer<T> callback);
+
+    /**
+     * Appends an entry submitted on the leader to the in-memory log and persists it as well.
+     *
+     * @param <T> entry type
+     * @param entry the entry to append
+     * @param callback the callback to be notified when persistence is complete (optional).
+     * @return {@code true} if the entry was successfully appended, false otherwise.
+     */
+    <T extends ReplicatedLogEntry> boolean appendSubmitted(@NonNull T entry, @Nullable Consumer<T> callback);
 
     /**
      * Returns a list of log entries starting from the given index to the end of the log.
