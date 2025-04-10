@@ -91,17 +91,14 @@ public final class SegmentedByteBufJournal implements RaftJournal {
      * Returns the total size of the journal.
      *
      * @return the total size of the journal
+     * @throws IOException if an I/O error occurs
      */
-    public long size() {
-        return segments.values().stream()
-            .mapToLong(segment -> {
-                try {
-                    return segment.file().size();
-                } catch (IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-            })
-            .sum();
+    public long size() throws IOException {
+        long size = 0;
+        for (var segment : segments.values()) {
+            size += segment.file().size();
+        }
+        return size;
     }
 
     @Override
