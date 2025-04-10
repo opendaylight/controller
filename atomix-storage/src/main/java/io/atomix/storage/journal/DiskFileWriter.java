@@ -21,6 +21,7 @@ import static java.util.Objects.requireNonNull;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.channels.FileChannel;
 
 /**
@@ -50,7 +51,7 @@ final class DiskFileWriter extends FileWriter {
         try {
             ZERO_ENTRY_HEADER.getBytes(0, channel, position, HEADER_BYTES);
         } catch (IOException e) {
-            throw new StorageException(e);
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -64,7 +65,7 @@ final class DiskFileWriter extends FileWriter {
         try {
             entry.readBytes(channel, position, entry.readableBytes());
         } catch (IOException e) {
-            throw new StorageException(e);
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -74,7 +75,7 @@ final class DiskFileWriter extends FileWriter {
             try {
                 channel.force(true);
             } catch (IOException e) {
-                throw new StorageException(e);
+                throw new UncheckedIOException(e);
             }
         }
     }

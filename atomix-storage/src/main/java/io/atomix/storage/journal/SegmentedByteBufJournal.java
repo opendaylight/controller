@@ -23,6 +23,7 @@ import static java.util.Objects.requireNonNull;
 import io.netty.buffer.ByteBufAllocator;
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.TreeMap;
@@ -97,7 +98,7 @@ public final class SegmentedByteBufJournal implements RaftJournal {
                 try {
                     return segment.file().size();
                 } catch (IOException e) {
-                    throw new StorageException(e);
+                    throw new UncheckedIOException(e);
                 }
             })
             .sum();
@@ -278,7 +279,7 @@ public final class SegmentedByteBufJournal implements RaftJournal {
                 .withUpdated(System.currentTimeMillis())
                 .build());
         } catch (IOException e) {
-            throw new StorageException(e);
+            throw new UncheckedIOException(e);
         }
 
         final var segment = new JournalSegment(file, storageLevel, maxEntrySize, indexDensity);
@@ -325,7 +326,7 @@ public final class SegmentedByteBufJournal implements RaftJournal {
                 try {
                     segmentFile = JournalSegmentFile.openExisting(filePath, allocator);
                 } catch (IOException e) {
-                    throw new StorageException(e);
+                    throw new UncheckedIOException(e);
                 }
 
                 // Load the segment.
