@@ -180,7 +180,8 @@ final class JournalSegment {
     /**
      * Acquires a reference to the segment writer.
      *
-     * @return The segment writer.
+     * @return The segment writer
+     * @throws IllegalStateException if this writer is closed
      */
     JournalSegmentWriter acquireWriter() {
         checkOpen();
@@ -197,7 +198,8 @@ final class JournalSegment {
     /**
      * Creates a new segment reader.
      *
-     * @return A new segment reader.
+     * @return A new segment reader
+     * @throws IllegalStateException if this writer is closed
      */
     JournalSegmentReader createReader() {
         checkOpen();
