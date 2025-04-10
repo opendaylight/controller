@@ -7,17 +7,27 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 
 /**
  * Interface for a class that participates in raft actor persistence recovery.
  *
  * @author Thomas Pantelis
  */
+// FIXME: promote this interface into raft.spi with a tad saner semantics:
+//        - we have an explicit recovery start, when this object is allocated
+//        - we then can receive either a snapshot or command (the start of a batch)
+//        - we then can only receive a number of batches
+//        - we also can take snapshots
+//        - we *mumble-mumble* with getRestoreFromSnapshot()
+//        - we complete by giving out something supports:
+//          -- RaftActorSnapshotCohort
+//          -- RaftActor.applyCommand()
+@NonNullByDefault
 public interface RaftActorRecoveryCohort {
-
     /**
      * This method is called during recovery at the start of a batch of state entries. Derived
      * classes should perform any initialization needed to start a batch.
@@ -27,23 +37,26 @@ public interface RaftActorRecoveryCohort {
     void startLogRecoveryBatch(int maxBatchSize);
 
     /**
-     * This method is called during recovery to append state data to the current batch. This method
-     * is called 1 or more times after {@link #startLogRecoveryBatch}.
+     * This method is called during recovery to append a {@link StateCommand} to the current batch. This method is
+     * called 1 or more times after {@link #startLogRecoveryBatch}.
      *
-     * @param data the state data
+     * @param command the command
      */
-    void appendRecoveredLogEntry(Payload data);
+    // FIXME: allow an IOException (or some other checked exception) to be thrown here
+    void appendRecoveredCommand(StateCommand command);
 
     /**
      * This method is called during recovery to reconstruct the state of the actor.
      *
      * @param snapshotState A snapshot of the state of the actor
      */
+    // FIXME: StateSnapshot instead
+    // FIXME: allow an IOException (or some other checked exception) to be thrown here
     void applyRecoverySnapshot(Snapshot.State snapshotState);
 
     /**
-     * This method is called during recovery at the end of a batch to apply the current batched
-     * log entries. This method is called after {@link #appendRecoveredLogEntry}.
+     * This method is called during recovery at the end of a batch to apply the current batched commands. This method is
+     * called after {@link #appendRecoveredCommand}.
      */
     void applyCurrentLogRecoveryBatch();
 

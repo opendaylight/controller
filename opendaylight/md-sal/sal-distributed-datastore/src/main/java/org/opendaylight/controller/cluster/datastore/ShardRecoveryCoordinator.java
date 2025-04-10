@@ -14,8 +14,8 @@ import java.io.File;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
 import org.opendaylight.controller.cluster.datastore.utils.NormalizedNodeXMLOutput;
 import org.opendaylight.controller.cluster.raft.RaftActorRecoveryCohort;
-import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,15 +84,14 @@ abstract class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
 
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public void appendRecoveredLogEntry(final Payload payload) {
+    public void appendRecoveredCommand(final StateCommand command) {
         checkState(open, "call startLogRecovery before calling appendRecoveredLogEntry");
 
         try {
-            store.applyRecoveryPayload(payload);
+            store.applyRecoveryCommand(command);
         } catch (Exception e) {
-            LOG.error("{}: failed to apply payload {}", memberId, payload, e);
-            throw new IllegalStateException(String.format("%s: Failed to apply recovery payload %s",
-                memberId, payload), e);
+            LOG.error("{}: failed to apply payload {}", memberId, command, e);
+            throw new IllegalStateException("%s: Failed to apply recovery payload %s".formatted(memberId, command), e);
         }
     }
 
