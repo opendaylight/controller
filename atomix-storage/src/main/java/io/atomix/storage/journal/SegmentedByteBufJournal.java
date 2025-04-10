@@ -78,7 +78,7 @@ public final class SegmentedByteBufJournal implements RaftJournal {
         // Load existing log segments from disk.
         segments = loadSegments();
         currentSegment = ensureLastSegment();
-        writer = new SegmentedByteBufWriter(this);
+        writer = new SegmentedByteBufWriter(this, currentSegment);
     }
 
     /**
