@@ -9,8 +9,10 @@ package org.opendaylight.controller.cluster.raft;
 
 import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
+import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.raft.api.EntryMeta;
 import org.slf4j.Logger;
@@ -100,18 +102,12 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog {
     }
 
     @Override
-    public <T extends ReplicatedLogEntry> boolean appendSubmitted(final T entry, final Consumer<T> callback)  {
-        LOG.debug("{}: Append log entry and persist {} ", memberId, entry);
-
-        final var ret = append(entry);
-        if (ret) {
-            context.getPersistenceProvider().persistAsync(entry, persisted -> invokeAsync(persisted, callback));
-        }
-        return ret;
+    void appendSubmitted(final SimpleReplicatedLogEntry entry, final Consumer<LogEntry> callback) {
+        context.getPersistenceProvider().persistAsync(entry, persisted -> invokeAsync(persisted, callback));
     }
 
-    private <T extends ReplicatedLogEntry> void invokeAsync(final @NonNull T entry,
-            final @Nullable Consumer<T> callback) {
+    @NonNullByDefault
+    private void invokeAsync(final SimpleReplicatedLogEntry entry, final @Nullable Consumer<LogEntry> callback) {
         context.getExecutor().execute(() -> invokeSync(entry, callback));
     }
 

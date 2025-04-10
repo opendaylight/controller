@@ -12,10 +12,14 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.cluster.raft.messages.Payload;
+import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.EntryMeta;
 import org.slf4j.Logger;
@@ -158,8 +162,7 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
         final var entryIndex = replicatedLogEntry.index();
         final var lastIndex = lastIndex();
         if (entryIndex > lastIndex) {
-            journal.add(replicatedLogEntry);
-            dataSize += replicatedLogEntry.size();
+            appendEntry(replicatedLogEntry);
             return true;
         }
 
@@ -167,6 +170,27 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
             entryIndex, lastIndex, new Exception("stack trace"));
         return false;
     }
+
+    @NonNullByDefault
+    private void appendEntry(final ReplicatedLogEntry entry) {
+        journal.add(entry);
+        dataSize += entry.size();
+    }
+
+    @Override
+    public final long appendSubmitted(final long term, final Payload command, final Consumer<LogEntry> callback) {
+        final var index = lastIndex() + 1;
+        final var entry = new SimpleReplicatedLogEntry(index, term, command);
+        entry.setPersistencePending(true);
+
+        LOG.debug("{}: Append log entry and persist {} ", memberId, entry);
+        appendEntry(entry);
+        appendSubmitted(entry, callback);
+        return index;
+    }
+
+    @NonNullByDefault
+    abstract void appendSubmitted(SimpleReplicatedLogEntry entry, @Nullable Consumer<LogEntry> callback);
 
     @Override
     public final void increaseJournalLogCapacity(final int amount) {

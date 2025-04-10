@@ -14,6 +14,7 @@ import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.raft.api.EntryMeta;
@@ -178,14 +179,15 @@ public interface ReplicatedLog {
     boolean appendReceived(ReplicatedLogEntry entry, @Nullable Consumer<LogEntry> callback);
 
     /**
-     * Appends an entry submitted on the leader to the in-memory log and persists it as well.
+     * Appends an entry for a command submitted on the leader in its term to the in-memory log and persists it as well.
      *
-     * @param <T> entry type
-     * @param entry the entry to append
-     * @param callback the callback to be notified when persistence is complete (optional).
-     * @return {@code true} if the entry was successfully appended, false otherwise.
+     * @param term the term, i.e. the new {@link #lastTerm()}
+     * @param command the command
+     * @param callback the callback to be notified when persistence is complete
+     * @return the index at which the entry was appended, i.e. the new {@link #lastIndex()}
      */
-    <T extends ReplicatedLogEntry> boolean appendSubmitted(@NonNull T entry, @Nullable Consumer<T> callback);
+    @NonNullByDefault
+    long appendSubmitted(long term, Payload command, @Nullable Consumer<LogEntry> callback);
 
     /**
      * Returns a list of log entries starting from the given index to the end of the log.
