@@ -59,7 +59,8 @@ public interface EntryWriter {
 
     /**
      * Flushes written entries to disk.
+     *
+     * @throws IOException when an I/O error occurs
      */
-    // FIXME: throws IOException
-    void flush();
+    void flush() throws IOException;
 }

@@ -21,7 +21,6 @@ import static java.util.Objects.requireNonNull;
 import io.atomix.storage.journal.index.JournalIndex;
 import java.io.EOFException;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.raft.journal.ToByteBufMapper;
@@ -146,12 +145,10 @@ final class JournalSegmentWriter {
 
     /**
      * Flushes written entries to disk.
+     *
+     * @throws IOException when an I/O error occurs
      */
-    void flush() {
-        try {
-            fileWriter.flush();
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+    void flush() throws IOException {
+        fileWriter.flush();
     }
 }

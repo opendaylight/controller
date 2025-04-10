@@ -36,7 +36,7 @@ public interface JournalWriter<E> {
      *
      * @param entry The entry to append.
      * @return The appended indexed entry.
-     * @throws IOException if an I/O error occurs
+     * @throws IOException when an I/O error occurs
      */
     <T extends E> @NonNull Indexed<T> append(T entry) throws IOException;
 
@@ -57,6 +57,8 @@ public interface JournalWriter<E> {
 
     /**
      * Flushes written entries to disk.
+     *
+     * @throws IOException when an I/O error occurs
      */
-    void flush();
+    void flush() throws IOException;
 }

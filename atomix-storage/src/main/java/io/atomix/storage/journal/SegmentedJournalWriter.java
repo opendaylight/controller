@@ -58,7 +58,7 @@ final class SegmentedJournalWriter<E> implements JournalWriter<E> {
     }
 
     @Override
-    public void flush() {
+    public void flush() throws IOException {
         writer.flush();
     }
 }

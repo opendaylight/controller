@@ -104,7 +104,7 @@ final class SegmentedByteBufWriter implements EntryWriter {
     }
 
     @Override
-    public void flush() {
+    public void flush() throws IOException {
         currentWriter.flush();
     }
 

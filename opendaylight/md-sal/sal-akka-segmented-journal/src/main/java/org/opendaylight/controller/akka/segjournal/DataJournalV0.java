@@ -17,6 +17,7 @@ import io.atomix.storage.journal.SegmentedJournal;
 import io.atomix.storage.journal.StorageLevel;
 import java.io.IOException;
 import java.io.Serializable;
+import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -80,7 +81,11 @@ final class DataJournalV0 extends DataJournal {
 
     @Override
     void flush() {
-        entries.writer().flush();
+        try {
+            entries.writer().flush();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     @Override
