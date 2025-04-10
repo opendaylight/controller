@@ -124,12 +124,21 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         }
 
         @Override
-        public <T extends ReplicatedLogEntry> boolean appendAndPersist(final T replicatedLogEntry,
-                final Consumer<T> callback, final boolean doAsync) {
-            append(replicatedLogEntry);
-
+        public <T extends ReplicatedLogEntry> boolean appendReceived(final T entry, final Consumer<T> callback) {
+            // FIXME: assertion here?
+            append(entry);
             if (callback != null) {
-                callback.accept(replicatedLogEntry);
+                callback.accept(entry);
+            }
+            return false;
+        }
+
+        @Override
+        public <T extends ReplicatedLogEntry> boolean appendSubmitted(final T entry, final Consumer<T> callback) {
+            // FIXME: do not ignore return value here: we should be returning that instead of 'true'
+            append(entry);
+            if (callback != null) {
+                callback.accept(entry);
             }
             return true;
         }

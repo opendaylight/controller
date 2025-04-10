@@ -87,36 +87,41 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog {
     }
 
     @Override
-    public <T extends ReplicatedLogEntry> boolean appendAndPersist(final T replicatedLogEntry,
-            final Consumer<T> callback, final boolean doAsync)  {
-        LOG.debug("{}: Append log entry and persist {} ", memberId, replicatedLogEntry);
+    public <T extends ReplicatedLogEntry> boolean appendReceived(final T entry, final Consumer<T> callback)  {
+        LOG.debug("{}: Append log entry and persist {} ", memberId, entry);
 
-        if (!append(replicatedLogEntry)) {
-            return false;
+        // FIXME: When can 'false' happen? Wouldn't that be an indication that Follower.handleAppendEntries() is doing
+        //        something wrong?
+        if (append(entry)) {
+            context.getPersistenceProvider().persist(entry, persisted -> invokeSync(persisted, callback));
         }
-
-        final var provider = context.getPersistenceProvider();
-        if (doAsync) {
-            provider.persistAsync(replicatedLogEntry, entry -> persistCallback(entry, callback));
-        } else {
-            provider.persist(replicatedLogEntry, entry -> syncPersistCallback(entry, callback));
-        }
-        return true;
+        return shouldCaptureSnapshot(entry.index());
     }
 
-    private <T extends ReplicatedLogEntry> void persistCallback(final @NonNull T persistedLogEntry,
-            final @Nullable Consumer<T> callback) {
-        context.getExecutor().execute(() -> syncPersistCallback(persistedLogEntry, callback));
+    @Override
+    public <T extends ReplicatedLogEntry> boolean appendSubmitted(final T entry, final Consumer<T> callback)  {
+        LOG.debug("{}: Append log entry and persist {} ", memberId, entry);
+
+        final var ret = append(entry);
+        if (ret) {
+            context.getPersistenceProvider().persistAsync(entry, persisted -> invokeAsync(persisted, callback));
+        }
+        return ret;
     }
 
-    private <T extends ReplicatedLogEntry> void syncPersistCallback(final @NonNull T persistedLogEntry,
+    private <T extends ReplicatedLogEntry> void invokeAsync(final @NonNull T entry,
             final @Nullable Consumer<T> callback) {
-        LOG.debug("{}: persist complete {}", memberId, persistedLogEntry);
+        context.getExecutor().execute(() -> invokeSync(entry, callback));
+    }
 
-        dataSizeSinceLastSnapshot += persistedLogEntry.size();
+    private <T extends ReplicatedLogEntry> void invokeSync(final @NonNull T entry,
+            final @Nullable Consumer<T> callback) {
+        LOG.debug("{}: persist complete {}", memberId, entry);
+
+        dataSizeSinceLastSnapshot += entry.size();
 
         if (callback != null) {
-            callback.accept(persistedLogEntry);
+            callback.accept(entry);
         }
     }
 }

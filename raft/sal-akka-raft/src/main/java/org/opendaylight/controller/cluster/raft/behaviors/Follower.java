@@ -309,7 +309,7 @@ public class Follower extends RaftActorBehavior {
         // applied to the state already, as the persistence callback occurs async, and we want those entries
         // purged from the persisted log as well.
         final var shouldCaptureSnapshot = new AtomicBoolean(false);
-        final Consumer<ReplicatedLogEntry> appendAndPersistCallback = logEntry -> {
+        final Consumer<ReplicatedLogEntry> callback = logEntry -> {
             if (shouldCaptureSnapshot.get() && logEntry == entries.getLast()) {
                 context.getSnapshotManager().capture(replLog.lastMeta(), getReplicatedToAllIndex());
             }
@@ -336,9 +336,7 @@ public class Follower extends RaftActorBehavior {
             //        - stable index indicating which entry we know to be in stable storage, which guides the leader's
             //          consensus decisions
 
-            replLog.appendAndPersist(entry, appendAndPersistCallback, false);
-
-            shouldCaptureSnapshot.compareAndSet(false, replLog.shouldCaptureSnapshot(entry.index()));
+            shouldCaptureSnapshot.compareAndSet(false, replLog.appendReceived(entry, callback));
 
             if (entry.command() instanceof ClusterConfig serverConfiguration) {
                 context.updatePeerIds(serverConfiguration);
