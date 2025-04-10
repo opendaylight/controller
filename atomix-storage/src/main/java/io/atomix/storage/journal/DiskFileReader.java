@@ -20,6 +20,7 @@ import static java.util.Objects.requireNonNull;
 
 import io.netty.buffer.ByteBuf;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.channels.FileChannel;
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -96,7 +97,7 @@ final class DiskFileReader extends FileReader {
         try {
             bytesRead = buffer.writeBytes(channel, readPosition, readAtLeast);
         } catch (IOException e) {
-            throw new StorageException(e);
+            throw new UncheckedIOException(e);
         }
         verify(bytesRead >= readAtLeast, "Short read %s, expected %s", bytesRead, readAtLeast);
     }

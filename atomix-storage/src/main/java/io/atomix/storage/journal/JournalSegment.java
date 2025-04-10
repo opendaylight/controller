@@ -24,6 +24,7 @@ import io.atomix.storage.journal.index.JournalIndex;
 import io.atomix.storage.journal.index.Position;
 import io.atomix.storage.journal.index.SparseJournalIndex;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -107,7 +108,7 @@ final class JournalSegment {
                 fileReader.release();
             }
         } catch (IOException e) {
-            throw new StorageException(e);
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -161,7 +162,7 @@ final class JournalSegment {
         try {
             ret = ((Inactive) state).activate(this);
         } catch (IOException e) {
-            throw new StorageException(e);
+            throw new UncheckedIOException(e);
         }
         state = ret;
         return ret;
@@ -259,7 +260,7 @@ final class JournalSegment {
         try {
             file.close();
         } catch (IOException e) {
-            throw new StorageException(e);
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -272,7 +273,7 @@ final class JournalSegment {
         try {
             Files.deleteIfExists(file.path());
         } catch (IOException e) {
-            throw new StorageException(e);
+            throw new UncheckedIOException(e);
         }
     }
 
