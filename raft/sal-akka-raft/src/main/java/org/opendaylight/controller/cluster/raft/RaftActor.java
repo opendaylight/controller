@@ -62,7 +62,6 @@ import org.opendaylight.controller.cluster.raft.messages.RequestLeadership;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
 import org.opendaylight.controller.cluster.raft.persisted.NoopPayload;
-import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.AbstractRaftCommand;
 import org.opendaylight.controller.cluster.raft.spi.AbstractStateCommand;
@@ -693,32 +692,11 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     @NonNullByDefault
     private void submitCommand(final @Nullable Identifier identifier, final Payload command, final boolean batchHint) {
         requireNonNull(command);
-        final var replLog = replicatedLog();
-        final var logEntry = new SimpleReplicatedLogEntry(replLog.lastIndex() + 1, context.currentTerm(), command);
-        logEntry.setPersistencePending(true);
+        final long index = replicatedLog().appendSubmitted(context.currentTerm(), command, entry -> {
+            final var replLog = replicatedLog();
 
-        LOG.debug("{}: Persist data {}", memberId(), logEntry);
-
-        boolean wasAppended = replLog.appendSubmitted(logEntry, persistedEntry -> {
-            // Clear the persistence pending flag in the log entry.
-            persistedEntry.setPersistencePending(false);
-
-            final var currentLog = replicatedLog();
-
-            if (!hasFollowers()) {
-                // Increment the Commit Index and the Last Applied values
-                currentLog.setCommitIndex(persistedEntry.index());
-                currentLog.setLastApplied(persistedEntry.index());
-
-                // Apply the state immediately.
-                applyCommand(identifier, persistedEntry);
-
-                // Send a ApplyJournalEntries message so that we write the fact that we applied
-                // the state to durable storage
-                self().tell(new ApplyJournalEntries(persistedEntry.index()), self());
-
-            } else {
-                currentLog.captureSnapshotIfReady(persistedEntry);
+            if (hasFollowers()) {
+                replLog.captureSnapshotIfReady(entry);
 
                 // Local persistence is complete so send the CheckConsensusReached message to the behavior (which
                 // normally should still be the leader) to check if consensus has now been reached in conjunction with
@@ -726,13 +704,23 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 if (getCurrentBehavior() instanceof AbstractLeader leader) {
                     leader.checkConsensusReached();
                 }
+            } else {
+                // Increment the Commit Index and the Last Applied values
+                replLog.setCommitIndex(entry.index());
+                replLog.setLastApplied(entry.index());
+
+                // Apply the state immediately.
+                applyCommand(identifier, entry);
+
+                // Send a ApplyJournalEntries message so that we write the fact that we applied
+                // the state to durable storage
+                self().tell(new ApplyJournalEntries(entry.index()), self());
             }
         });
 
-        if (wasAppended && hasFollowers()) {
+        if (index >= 0 && hasFollowers()) {
             // Send log entry for replication.
-            getCurrentBehavior().handleMessage(self(),
-                new Replicate(logEntry.index(), !batchHint, identifier));
+            getCurrentBehavior().handleMessage(self(), new Replicate(index, !batchHint, identifier));
         }
     }
 

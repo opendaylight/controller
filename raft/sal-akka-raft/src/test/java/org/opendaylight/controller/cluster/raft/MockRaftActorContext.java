@@ -20,6 +20,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
+import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.controller.cluster.raft.spi.TestTermInfoStore;
 import org.opendaylight.raft.api.EntryMeta;
 
@@ -134,13 +135,11 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         }
 
         @Override
-        public <T extends ReplicatedLogEntry> boolean appendSubmitted(final T entry, final Consumer<T> callback) {
-            // FIXME: do not ignore return value here: we should be returning that instead of 'true'
-            append(entry);
+        void appendSubmitted(final SimpleReplicatedLogEntry entry, final Consumer<LogEntry> callback) {
             if (callback != null) {
+                entry.setPersistencePending(false);
                 callback.accept(entry);
             }
-            return true;
         }
     }
 
