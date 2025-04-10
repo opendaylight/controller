@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.datastore.utils;
 
 import java.io.DataOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -40,12 +39,6 @@ public final class DataTreeModificationOutput {
         } catch (IOException | RuntimeException e) {
             LOG.error("Error writing DataTreeModification to file {}", file, e);
         }
-    }
-
-    @Deprecated
-    @SuppressWarnings("checkstyle:IllegalCatch")
-    public static void toFile(final File file, final DataTreeModification modification) {
-        toFile(file.toPath(), modification);
     }
 
     private static class DataTreeModificationOutputCursor extends AbstractDataTreeModificationCursor {

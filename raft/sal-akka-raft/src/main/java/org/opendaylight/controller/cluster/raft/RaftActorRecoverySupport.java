@@ -25,8 +25,8 @@ import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
 import org.opendaylight.controller.cluster.raft.persisted.MigratedSerializable;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
+import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.raft.api.EntryMeta;
 import org.opendaylight.raft.api.TermInfo;
 import org.slf4j.Logger;
@@ -157,7 +157,7 @@ class RaftActorRecoverySupport {
         final var timer = Stopwatch.createStarted();
 
         // Apply the snapshot to the actors state
-        final State snapshotState = snapshot.getState();
+        final var snapshotState = snapshot.getState();
         if (snapshotState.needsMigration()) {
             hasMigratedDataRecovered = true;
         }
@@ -218,7 +218,13 @@ class RaftActorRecoverySupport {
             final var logEntry = replicatedLog().get(i);
             if (logEntry != null) {
                 lastApplied++;
-                batchRecoveredLogEntry(logEntry);
+                initRecoveryTimers();
+
+                // We deal with RaftCommands separately
+                if (logEntry.command() instanceof StateCommand command) {
+                    batchRecoveredCommand(command);
+                }
+
                 if (shouldTakeRecoverySnapshot() && !context.getSnapshotManager().isCapturing()) {
                     if (currentRecoveryBatchCount > 0) {
                         endCurrentLogRecoveryBatch();
@@ -246,20 +252,13 @@ class RaftActorRecoverySupport {
         }
     }
 
-    private void batchRecoveredLogEntry(final ReplicatedLogEntry logEntry) {
-        initRecoveryTimers();
-
-        if (logEntry.command() instanceof ClusterConfig) {
-            // FIXME: explain why ClusterConfig is special
-            return;
-        }
-
+    private void batchRecoveredCommand(final StateCommand command) {
         int batchSize = context.getConfigParams().getJournalRecoveryLogBatchSize();
         if (currentRecoveryBatchCount == 0) {
             cohort.startLogRecoveryBatch(batchSize);
         }
 
-        cohort.appendRecoveredLogEntry(logEntry.command());
+        cohort.appendRecoveredCommand(command);
 
         if (++currentRecoveryBatchCount >= batchSize) {
             endCurrentLogRecoveryBatch();

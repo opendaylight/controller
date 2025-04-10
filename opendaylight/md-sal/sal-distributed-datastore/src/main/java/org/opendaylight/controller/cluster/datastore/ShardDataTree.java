@@ -22,8 +22,8 @@ import com.google.common.collect.Iterables;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -56,6 +56,7 @@ import org.opendaylight.controller.cluster.datastore.persisted.AbortTransactionP
 import org.opendaylight.controller.cluster.datastore.persisted.AbstractIdentifiablePayload;
 import org.opendaylight.controller.cluster.datastore.persisted.CloseLocalHistoryPayload;
 import org.opendaylight.controller.cluster.datastore.persisted.CommitTransactionPayload;
+import org.opendaylight.controller.cluster.datastore.persisted.CommitTransactionPayload.CandidateTransaction;
 import org.opendaylight.controller.cluster.datastore.persisted.CreateLocalHistoryPayload;
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.PayloadVersion;
@@ -71,6 +72,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.InitiateCaptureSna
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.spi.AbstractStateCommand;
 import org.opendaylight.controller.cluster.raft.spi.ImmutableUnsignedLongSet;
+import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.mdsal.common.api.OptimisticLockFailedException;
 import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
@@ -312,22 +314,24 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private void applyRecoveryCandidate(final CommitTransactionPayload payload) throws IOException {
-        final var entry = payload.acquireCandidate();
+    private void applyRecoveredCandidate(final CandidateTransaction transaction) throws IOException {
         final var unwrapped = newModification();
         final var pruningMod = createPruningModification(unwrapped,
-            NormalizedNodeStreamVersion.MAGNESIUM.compareTo(entry.streamVersion()) > 0);
+            NormalizedNodeStreamVersion.MAGNESIUM.compareTo(transaction.streamVersion()) > 0);
 
-        DataTreeCandidates.applyToModification(pruningMod, entry.candidate());
+        DataTreeCandidates.applyToModification(pruningMod, transaction.candidate());
         pruningMod.ready();
         LOG.trace("{}: Applying recovery modification {}", logContext, unwrapped);
 
         try {
+            // FIXME: split these up into individual blocks and report separate IOExceptions
             dataTree.validate(unwrapped);
             dataTree.commit(dataTree.prepare(unwrapped));
         } catch (Exception e) {
-            final var file = new File(System.getProperty("karaf.data", "."),
-                    "failed-recovery-payload-" + logContext + ".out");
+            // FIXME: use our local storage: define a dedicated IOException with a dumpCommand(DataOutputStream) method
+            //        and catch that exception whereever our IOException is being handled
+            final var file = Path.of(System.getProperty("karaf.data", "."))
+                .resolve("failed-recovery-payload-" + logContext + ".out");
             DataTreeModificationOutput.toFile(file, unwrapped);
             throw new IllegalStateException(
                 "%s: Failed to apply recovery payload. Modification data was written to file %s".formatted(
@@ -335,7 +339,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
                 e);
         }
 
-        allMetadataCommittedTransaction(entry.transactionId());
+        allMetadataCommittedTransaction(transaction.transactionId());
     }
 
     private PruningDataTreeModification createPruningModification(final DataTreeModification unwrapped,
@@ -347,23 +351,22 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     /**
-     * Apply a payload coming from recovery. This method does not assume the SchemaContexts match and performs data
+     * Apply a command coming from recovery. This method does not assume the SchemaContexts match and performs data
      * pruning in an attempt to adjust the state to our current SchemaContext.
      *
-     * @param payload Payload
+     * @param command the command
      * @throws IOException when the snapshot fails to deserialize
-     * @throws DataValidationFailedException when the snapshot fails to apply
      */
-    final void applyRecoveryPayload(final @NonNull Payload payload) throws IOException {
-        switch (payload) {
-            case CommitTransactionPayload commit -> applyRecoveryCandidate(commit);
+    final void applyRecoveryCommand(final @NonNull StateCommand command) throws IOException {
+        switch (command) {
+            case CommitTransactionPayload commit -> applyRecoveredCandidate(commit.acquireCandidate());
             case AbortTransactionPayload abort -> allMetadataAbortedTransaction(abort.getIdentifier());
             case PurgeTransactionPayload purge -> allMetadataPurgedTransaction(purge.getIdentifier());
             case CreateLocalHistoryPayload create -> allMetadataCreatedLocalHistory(create.getIdentifier());
             case CloseLocalHistoryPayload close -> allMetadataClosedLocalHistory(close.getIdentifier());
             case PurgeLocalHistoryPayload purge -> allMetadataPurgedLocalHistory(purge.getIdentifier());
             case SkipTransactionsPayload skip -> allMetadataSkipTransactions(skip);
-            default -> LOG.debug("{}: ignoring unhandled payload {}", logContext, payload);
+            default -> LOG.debug("{}: ignoring unhandled payload {}", logContext, command);
         }
     }
 

@@ -44,7 +44,6 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
@@ -53,6 +52,7 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
+import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.raft.api.TermInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -165,12 +165,13 @@ class RaftActorRecoverySupportTest {
         inOrder.verify(mockCohort).startLogRecoveryBatch(5);
 
         for (int i = 0; i < replicatedLog.size() - 1; i++) {
-            inOrder.verify(mockCohort).appendRecoveredLogEntry(replicatedLog.get(i).command());
+            inOrder.verify(mockCohort).appendRecoveredCommand((StateCommand) replicatedLog.get(i).command());
         }
 
         inOrder.verify(mockCohort).applyCurrentLogRecoveryBatch();
         inOrder.verify(mockCohort).startLogRecoveryBatch(5);
-        inOrder.verify(mockCohort).appendRecoveredLogEntry(replicatedLog.get(replicatedLog.size() - 1).command());
+        inOrder.verify(mockCohort).appendRecoveredCommand(
+            (StateCommand) replicatedLog.get(replicatedLog.size() - 1).command());
 
         inOrder.verifyNoMoreInteractions();
     }
@@ -265,7 +266,7 @@ class RaftActorRecoverySupportTest {
         inOrder.verify(mockCohort).startLogRecoveryBatch(anyInt());
 
         for (int i = 0; i < replicatedLog.size(); i++) {
-            inOrder.verify(mockCohort).appendRecoveredLogEntry(replicatedLog.get(i).command());
+            inOrder.verify(mockCohort).appendRecoveredCommand((StateCommand) replicatedLog.get(i).command());
         }
 
         inOrder.verify(mockCohort).applyCurrentLogRecoveryBatch();
@@ -388,7 +389,7 @@ class RaftActorRecoverySupportTest {
         sendMessageToSupport(new ApplyJournalEntries(0));
 
         verify(mockCohort, never()).startLogRecoveryBatch(anyInt());
-        verify(mockCohort, never()).appendRecoveredLogEntry(any(Payload.class));
+        verify(mockCohort, never()).appendRecoveredCommand(any());
 
         //remove existing follower1
         obj = new ClusterConfig(

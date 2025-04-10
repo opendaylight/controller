@@ -27,7 +27,6 @@ import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.RaftActorRecoveryCohort;
 import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
-import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.Reader;
@@ -161,7 +160,8 @@ public final class ExampleActor extends RaftActor
     }
 
     @Override
-    public void appendRecoveredLogEntry(final @Nullable Payload data) {
+    public void appendRecoveredCommand(final StateCommand command) {
+        // No-op
     }
 
     @Override

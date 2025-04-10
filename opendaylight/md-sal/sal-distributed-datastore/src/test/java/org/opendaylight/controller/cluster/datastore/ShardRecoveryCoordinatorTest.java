@@ -57,7 +57,7 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
     public void testAppendRecoveredLogEntryCommitTransactionPayload() throws IOException,
             DataValidationFailedException {
         try {
-            coordinator.appendRecoveredLogEntry(CommitTransactionPayload.create(nextTransactionId(), createCar()));
+            coordinator.appendRecoveredCommand(CommitTransactionPayload.create(nextTransactionId(), createCar()));
         } catch (final SchemaValidationFailedException e) {
             fail("SchemaValidationFailedException should not happen if pruning is done");
         }

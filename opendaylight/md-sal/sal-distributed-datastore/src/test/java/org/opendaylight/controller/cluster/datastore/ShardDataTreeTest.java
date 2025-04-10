@@ -482,7 +482,7 @@ public class ShardDataTreeTest extends AbstractTest {
 
     @Test
     public void testUintCommitPayload() throws IOException {
-        shardDataTree.applyRecoveryPayload(CommitTransactionPayload.create(nextTransactionId(),
+        shardDataTree.applyRecoveryCommand(CommitTransactionPayload.create(nextTransactionId(),
             DataTreeCandidates.fromNormalizedNode(YangInstanceIdentifier.of(), bigIntegerRoot()),
             PayloadVersion.POTASSIUM));
 
@@ -539,9 +539,9 @@ public class ShardDataTreeTest extends AbstractTest {
         shardDataTree.applyRecoverySnapshot(new ShardSnapshotState(
             new MetadataShardDataTreeSnapshot(first.getRootNode().getDataAfter()), true));
         // Apply the other two snapshots as transactions
-        shardDataTree.applyRecoveryPayload(CommitTransactionPayload.create(nextTransactionId(), second,
+        shardDataTree.applyRecoveryCommand(CommitTransactionPayload.create(nextTransactionId(), second,
             PayloadVersion.POTASSIUM));
-        shardDataTree.applyRecoveryPayload(CommitTransactionPayload.create(nextTransactionId(), third,
+        shardDataTree.applyRecoveryCommand(CommitTransactionPayload.create(nextTransactionId(), third,
             PayloadVersion.POTASSIUM));
 
         // Verify uint translation
