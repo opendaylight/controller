@@ -1235,18 +1235,21 @@ public class RaftActorTest extends AbstractActorTest {
         leaderActor.submitCommand(new MockIdentifier("1"), new MockCommand("1"), false);
 
         final var leaderLog = leaderActor.getReplicatedLog();
-        final var logEntry = leaderLog.get(0);
-        assertNotNull("ReplicatedLogEntry not found", logEntry);
-        assertTrue("isPersistencePending", logEntry.isPersistencePending());
-        assertEquals("getCommitIndex", -1, leaderLog.getCommitIndex());
+        final var storedMeta = leaderLog.lookupStoredMeta(0);
+        assertNotNull(storedMeta);
+        assertFalse(storedMeta.durable());
+        assertEquals(-1, leaderLog.getCommitIndex());
 
         leaderActor.handleCommand(new AppendEntriesReply(followerId, 1, true, 0, 1, (short)0));
         assertEquals("getCommitIndex", -1, leaderLog.getCommitIndex());
 
+        final var entryCaptor = ArgumentCaptor.forClass(ReplicatedLogEntry.class);
         final var callbackCaptor = ArgumentCaptor.<Consumer<Object>>captor();
-        verify(mockPersistenceProvider).persistAsync(eq(logEntry), callbackCaptor.capture());
+        verify(mockPersistenceProvider).persistAsync(entryCaptor.capture(), callbackCaptor.capture());
 
-        callbackCaptor.getValue().accept(logEntry);
+        final var entry = entryCaptor.getValue();
+        assertSame(storedMeta.meta(), entry);
+        callbackCaptor.getValue().accept(entry);
 
         assertEquals("getCommitIndex", 0, leaderLog.getCommitIndex());
         assertEquals("getLastApplied", 0, leaderLog.getLastApplied());

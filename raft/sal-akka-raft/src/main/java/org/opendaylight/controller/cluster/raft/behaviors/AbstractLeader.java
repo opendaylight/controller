@@ -345,25 +345,48 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         //   set commitIndex = N (§5.3, §5.4).
         final var replLog = context.getReplicatedLog();
         for (long index = replLog.getCommitIndex() + 1; ; index++) {
-            final var logEntry = replLog.get(index);
-            if (logEntry == null) {
+            final var storedMeta = replLog.lookupStoredMeta(index);
+            if (storedMeta == null) {
                 LOG.trace("{}: ReplicatedLogEntry not found for index {} - snapshotIndex: {}, journal size: {}",
                         logName, index, replLog.getSnapshotIndex(), replLog.size());
                 break;
             }
 
-            // TODO: revisit this piece of code once we have simplified ReplicatedLog/persistence/snapshotting
-            //       interactions to see if we can get to pre-CONTROLLER-1568 world, i.e. just not count ourselves as
-            //       as a replica.
-            if (logEntry.isPersistencePending()) {
+            final var logEntry = storedMeta.meta();
+            int replicatedCount = storedMeta.durable() ? 1 : 0;
+            if (replicatedCount == 0) {
+                // FIXME: Revisit this piece of code once we have simplified ReplicatedLog/persistence/snapshotting
+                //        interactions. We really should be counting ourselves as 0 in replicatedCount -- i.e. the state
+                //        before CONTROLLER-1490's https://git.opendaylight.org/gerrit/c/controller/+/48441.
+                //
+                // Original comment explained the following:
+                //
+                //     We don't commit and apply a log entry until we've gotten the ack from our local persistence.
+                //     Ideally we should be able to update the commit index if we get a consensus amongst the followers
+                //     w/o the local persistence ack however this can cause timing issues with snapshot capture
+                //     which may lead to an entry that is neither in the serialized snapshot state nor in the snapshot's
+                //     unapplied entries. This can happen if the lastAppliedIndex is updated but the corresponding
+                //     ApplyState message is still pending in the message queue and thus the corresponding log entry
+                //     hasn't actually been applied to the state yet. This would be alleviated by eliminating the
+                //     ApplyState message in lieu of synchronously updating lastAppliedIndex and applying to state.
+                //
+                // ApplyState/snapshotting was re-visited in CONTROLLER-1568, the comment was shorted to its current
+                // form as part of https://git.opendaylight.org/gerrit/c/controller/+/49404
+                //
+                // Since then ApplyState has fewer instantiations and we have ExecuteInActor available, with state
+                // snapshot being a direct call (via RaftActorSnapshotCohort.takeSnapshot()), so this should be a
+                // non-issue.
+                //
+                // BUT followers respond before they reach local stability right now, so if we remove this block, we can
+                // get into a state where consensus is reached, but there is no stable replica. See the corresponding
+                // comment in Follower.processNewEntries().
+
                 // We don't commit and apply a log entry until we have gotten the ack from our local persistence,
                 // even though there *should not* be any issue with updating the commit index if we get a consensus
                 // amongst the followers w/o the local persistence ack.
                 LOG.trace("{}: log entry at index {} has not finished persisting", logName, index);
                 break;
             }
-
-            int replicatedCount = 1;
 
             LOG.trace("{}: checking Nth index {}", logName, index);
             for (var logInfo : followerToLog.values()) {

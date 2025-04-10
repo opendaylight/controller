@@ -7,9 +7,12 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.List;
 import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.raft.api.EntryMeta;
@@ -18,6 +21,26 @@ import org.opendaylight.raft.api.EntryMeta;
  * Represents the ReplicatedLog that needs to be kept in sync by the RaftActor.
  */
 public interface ReplicatedLog {
+    /**
+     * A combination of {@link EntryMeta} and indicator of whether the entry is stable.
+     *
+     * @param meta the {@link EntryMeta}
+     * @param durable {@code true} if the entry is known to be durable
+     */
+    @NonNullByDefault
+    record StoredEntryMeta(EntryMeta meta, boolean durable) {
+        /**
+         * Default constructor.
+         *
+         * @param meta the {@link EntryMeta}
+         * @param durable {@code true} if the entry is known to be durable
+         */
+        public StoredEntryMeta {
+            requireNonNull(meta);
+        }
+    }
+
+    // FIXME: document this constant
     long NO_MAX_SIZE = -1;
 
     /**
@@ -33,12 +56,21 @@ public interface ReplicatedLog {
      * Return metadata about a replicated entry.
      *
      * @param index the index of the log entry
-     * @return the EntryMeta if found, otherwise null if the adjusted index less than 0 or greater than the size of the
-     *         in-memory journal
+     * @return the {@link EntryMeta} if found, otherwise null if the adjusted index less than 0 or greater than the size
+     *         of the in-memory journal
      */
     default @Nullable EntryMeta lookupMeta(final long index) {
         return get(index);
     }
+
+    /**
+     * Return {@link StoredEntryMeta} a replicated entry.
+     *
+     * @param index the index of the log entry
+     * @return the {@link StoredEntryMeta} if found, otherwise null if the adjusted index less than 0 or greater than
+     *         the size of the in-memory journal
+     */
+    @Nullable StoredEntryMeta lookupStoredMeta(long index);
 
     /**
      * Return the last replicated log entry in the log or null of not found.

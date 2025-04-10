@@ -84,6 +84,12 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
     }
 
     @Override
+    public final StoredEntryMeta lookupStoredMeta(final long index) {
+        final var entry = get(index);
+        return entry == null ? null : new StoredEntryMeta(entry, !entry.isPersistencePending());
+    }
+
+    @Override
     public final ReplicatedLogEntry last() {
         if (journal.isEmpty()) {
             return null;

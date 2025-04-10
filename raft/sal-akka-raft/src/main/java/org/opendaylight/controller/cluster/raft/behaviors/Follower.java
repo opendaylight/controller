@@ -318,8 +318,23 @@ public class Follower extends RaftActorBehavior {
         // Append any new entries not already in the log
         for (int i = addEntriesFrom; i < numLogEntries; i++) {
             final var entry = entries.get(i);
-
             LOG.debug("{}: Append entry to log {}", logName, entry.command());
+
+            // FIXME: Eventhough we are indicating synchronous operation here, the entry operation is only synchronous
+            //        w.r.t. receiving other actor messages. The contract here is that we will see the callback firing
+            //        or the actor restarted before we are asked to process another message.
+            //
+            //        Most notably we will use replLog.lastIndex(), which the leader will use to check consensus in
+            //        AbstractLeader.possiblyUpdateCommitIndex().
+            //
+            //        AFAICT this means there is a window when a consensus is reached without any nodes having an entry
+            //        in stable storage -- which can mean we could be losing data.
+            //
+            //        AppendEntriesReply really needs to carry two separate indices:
+            //        - last index+term indicating which entry is the last we received, which guides the leader's
+            //          transmission of entries
+            //        - stable index indicating which entry we know to be in stable storage, which guides the leader's
+            //          consensus decisions
 
             replLog.appendAndPersist(entry, appendAndPersistCallback, false);
 
