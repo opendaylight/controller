@@ -33,9 +33,9 @@ final class SegmentedByteBufWriter implements EntryWriter {
     private JournalSegment currentSegment;
     private JournalSegmentWriter currentWriter;
 
-    SegmentedByteBufWriter(final SegmentedByteBufJournal journal) {
+    SegmentedByteBufWriter(final SegmentedByteBufJournal journal, final JournalSegment currentSegment) {
         this.journal = requireNonNull(journal);
-        currentSegment = journal.lastSegment();
+        this.currentSegment = requireNonNull(currentSegment);
         currentWriter = currentSegment.acquireWriter();
     }
 
