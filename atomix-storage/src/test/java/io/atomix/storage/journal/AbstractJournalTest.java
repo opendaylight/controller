@@ -76,13 +76,20 @@ public abstract class AbstractJournalTest {
     }
 
     private SegmentedJournal<TestEntry> createJournal() {
-        return new SegmentedJournal<>(SegmentedByteBufJournal.builder()
-            .withName("test")
-            .withDirectory(PATH.toFile())
-            .withStorageLevel(storageLevel)
-            .withMaxSegmentSize(maxSegmentSize)
-            .withIndexDensity(.2)
-            .build(), NAMESPACE.toReadMapper(), NAMESPACE.toWriteMapper());
+        final SegmentedByteBufJournal byteBufJournal;
+        try {
+            byteBufJournal = SegmentedByteBufJournal.builder()
+                .withName("test")
+                .withDirectory(PATH.toFile())
+                .withStorageLevel(storageLevel)
+                .withMaxSegmentSize(maxSegmentSize)
+                .withIndexDensity(.2)
+                .build();
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
+
+        return new SegmentedJournal<>(byteBufJournal, NAMESPACE.toReadMapper(), NAMESPACE.toWriteMapper());
     }
 
     @Test

@@ -20,6 +20,7 @@ import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import org.opendaylight.controller.raft.journal.EntryWriter;
 import org.opendaylight.controller.raft.journal.ToByteBufMapper;
 
@@ -91,7 +92,11 @@ final class SegmentedByteBufWriter implements EntryWriter {
         // 1. delete all segments with first indexes greater than the given index.
         while (prevIndex < currentSegment.firstIndex() && currentSegment != journal.firstSegment()) {
             currentSegment.releaseWriter();
-            journal.removeSegment(currentSegment);
+            try {
+                journal.removeSegment(currentSegment);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
             currentSegment = journal.lastSegment();
             currentWriter = currentSegment.acquireWriter();
         }

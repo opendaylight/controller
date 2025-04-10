@@ -40,7 +40,8 @@ final class DataJournalV0 extends DataJournal {
     private final SegmentedJournal<DataJournalEntry> entries;
 
     DataJournalV0(final String persistenceId, final Histogram messageSize, final ActorSystem system,
-            final StorageLevel storage, final Path directory, final int maxEntrySize, final int maxSegmentSize) {
+            final StorageLevel storage, final Path directory, final int maxEntrySize, final int maxSegmentSize)
+                throws IOException {
         super(persistenceId, messageSize);
 
         final var serdes = JournalSerdes.builder()
