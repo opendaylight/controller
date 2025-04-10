@@ -27,7 +27,6 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.function.BiFunction;
 import org.eclipse.jdt.annotation.NonNull;
@@ -46,7 +45,7 @@ public final class SegmentedByteBufJournal implements RaftJournal {
     private static final Logger LOG = LoggerFactory.getLogger(SegmentedByteBufJournal.class);
     private static final int SEGMENT_BUFFER_FACTOR = 3;
 
-    private final ConcurrentNavigableMap<Long, JournalSegment> segments = new ConcurrentSkipListMap<>();
+    private final ConcurrentSkipListMap<@NonNull Long, @NonNull JournalSegment> segments;
     private final Collection<EntryReader> readers = ConcurrentHashMap.newKeySet();
     private final @NonNull ByteBufAllocator allocator;
     private final @NonNull StorageLevel storageLevel;
@@ -78,11 +77,8 @@ public final class SegmentedByteBufJournal implements RaftJournal {
         this.flushOnCommit = flushOnCommit;
 
         // Load existing log segments from disk.
-        for (var segment : loadSegments()) {
-            segments.put(segment.firstIndex(), segment);
-        }
+        segments = loadSegments();
         currentSegment = ensureLastSegment();
-
         writer = new SegmentedByteBufWriter(this);
     }
 
@@ -160,7 +156,7 @@ public final class SegmentedByteBufJournal implements RaftJournal {
      * @return the first segment
      * @throws IOException when an I/O error occurs
      */
-    JournalSegment resetSegments(final long index) throws IOException {
+    @NonNull JournalSegment resetSegments(final long index) throws IOException {
         assertOpen();
 
         // If the index already equals the first segment index, skip the reset.
@@ -181,7 +177,7 @@ public final class SegmentedByteBufJournal implements RaftJournal {
      *
      * @throws IllegalStateException if the segment manager is not open
      */
-    JournalSegment firstSegment() {
+    @NonNull JournalSegment firstSegment() {
         assertOpen();
         return segments.firstEntry().getValue();
     }
@@ -191,7 +187,7 @@ public final class SegmentedByteBufJournal implements RaftJournal {
      *
      * @throws IllegalStateException if the segment manager is not open
      */
-    JournalSegment lastSegment() {
+    @NonNull JournalSegment lastSegment() {
         assertOpen();
         return segments.lastEntry().getValue();
     }
@@ -293,7 +289,7 @@ public final class SegmentedByteBufJournal implements RaftJournal {
      * @return the last segment
      * @throws IOException when an I/O error occurs
      */
-    private JournalSegment ensureLastSegment() throws IOException {
+    private @NonNull JournalSegment ensureLastSegment() throws IOException {
         final var lastEntry = segments.lastEntry();
         // if there is no segment, create an initial segment starting at index 1.
         return lastEntry != null ? lastEntry.getValue() : createInitialSegment();
@@ -305,7 +301,8 @@ public final class SegmentedByteBufJournal implements RaftJournal {
      * @return A collection of segments for the log.
      * @throws IOException if an I/O error occurs
      */
-    private Collection<JournalSegment> loadSegments() throws IOException {
+    @NonNullByDefault
+    private ConcurrentSkipListMap<Long, JournalSegment> loadSegments() throws IOException {
         // Ensure log directories are created.
         final var dirFile = directory.toFile();
         dirFile.mkdirs();
@@ -359,7 +356,7 @@ public final class SegmentedByteBufJournal implements RaftJournal {
             previousSegment = segment;
         }
 
-        return segmentsMap.values();
+        return new ConcurrentSkipListMap<>(segmentsMap);
     }
 
     /**
