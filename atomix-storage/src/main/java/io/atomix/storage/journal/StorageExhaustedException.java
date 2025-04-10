@@ -1,6 +1,5 @@
 /*
- * Copyright 2015-2021 Open Networking Foundation
- * Copyright 2023 PANTHEON.tech, s.r.o.
+ * Copyright (c) 2025 PANTHEON.tech, s.r.o. and others.  All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +15,16 @@
  */
 package io.atomix.storage.journal;
 
+import java.io.IOException;
+
 /**
- * Log exception.
- *
- * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
+ * Exception thrown when storage runs out of space.
  */
-public class StorageException extends RuntimeException {
+public final class StorageExhaustedException extends IOException {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
-    public StorageException(final Throwable cause) {
-        super(cause);
+    public StorageExhaustedException(final String message) {
+        super(message);
     }
 }
