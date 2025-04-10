@@ -149,10 +149,10 @@ public final class SegmentedByteBufJournal implements RaftJournal {
     /**
      * Asserts that enough disk space is available to allocate a new segment.
      */
-    private void assertDiskSpace() {
+    private void assertDiskSpace() throws StorageExhaustedException {
         // FIXME: Use FileStore.getUsableSpace() instead
         if (directory.toFile().getUsableSpace() < maxSegmentSize * SEGMENT_BUFFER_FACTOR) {
-            throw new StorageException.OutOfDiskSpace("Not enough space to allocate a new journal segment");
+            throw new StorageExhaustedException("Not enough space to allocate a new journal segment");
         }
     }
 
@@ -214,8 +214,9 @@ public final class SegmentedByteBufJournal implements RaftJournal {
      *
      * @return The next segment.
      * @throws IllegalStateException if the segment manager is not open
+     * @throws StorageExhaustedException when storage space runs out
      */
-    synchronized @NonNull JournalSegment createNextSegment() {
+    synchronized @NonNull JournalSegment createNextSegment() throws StorageExhaustedException {
         assertOpen();
         assertDiskSpace();
 
