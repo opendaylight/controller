@@ -56,7 +56,6 @@ public final class SegmentedByteBufJournal implements RaftJournal {
     @Deprecated(forRemoval = true)
     private final int maxEntriesPerSegment;
     private final double indexDensity;
-    private final boolean flushOnCommit;
 
     // null when closed
     private JournalSegment currentSegment;
@@ -64,7 +63,7 @@ public final class SegmentedByteBufJournal implements RaftJournal {
 
     SegmentedByteBufJournal(final String name, final StorageLevel storageLevel, final Path directory,
             final int maxSegmentSize, final int maxEntrySize, final int maxEntriesPerSegment, final double indexDensity,
-            final boolean flushOnCommit, final ByteBufAllocator allocator) throws IOException {
+            final ByteBufAllocator allocator) throws IOException {
         this.name = requireNonNull(name, "name cannot be null");
         this.storageLevel = requireNonNull(storageLevel, "storageLevel cannot be null");
         this.directory = requireNonNull(directory, "directory cannot be null");
@@ -73,7 +72,6 @@ public final class SegmentedByteBufJournal implements RaftJournal {
         this.maxEntrySize = maxEntrySize;
         this.maxEntriesPerSegment = maxEntriesPerSegment;
         this.indexDensity = indexDensity;
-        this.flushOnCommit = flushOnCommit;
 
         // Load existing log segments from disk.
         segments = loadSegments();
@@ -436,21 +434,15 @@ public final class SegmentedByteBufJournal implements RaftJournal {
     }
 
     /**
-     * Returns whether {@code flushOnCommit} is enabled for the log.
+     * Updates commit index to the given value. If the current commitIndex is greater than the proposed value, this
+     * method does nothing.
      *
-     * @return Indicates whether {@code flushOnCommit} is enabled for the log.
+     * @param newCommitIndex The index value.
      */
-    boolean isFlushOnCommit() {
-        return flushOnCommit;
-    }
-
-    /**
-     * Updates commit index to the given value.
-     *
-     * @param index The index value.
-     */
-    void setCommitIndex(final long index) {
-        commitIndex = index;
+    void setCommitIndex(final long newCommitIndex) {
+        if (newCommitIndex > commitIndex) {
+            commitIndex = newCommitIndex;
+        }
     }
 
     /**
@@ -470,7 +462,6 @@ public final class SegmentedByteBufJournal implements RaftJournal {
      * Segmented byte journal builder.
      */
     public static final class Builder {
-        private static final boolean DEFAULT_FLUSH_ON_COMMIT = false;
         private static final String DEFAULT_NAME = "atomix";
         private static final String DEFAULT_DIRECTORY = System.getProperty("user.dir");
         private static final int DEFAULT_MAX_SEGMENT_SIZE = 1024 * 1024 * 32;
@@ -485,7 +476,6 @@ public final class SegmentedByteBufJournal implements RaftJournal {
         private int maxEntrySize = DEFAULT_MAX_ENTRY_SIZE;
         private int maxEntriesPerSegment = DEFAULT_MAX_ENTRIES_PER_SEGMENT;
         private double indexDensity = DEFAULT_INDEX_DENSITY;
-        private boolean flushOnCommit = DEFAULT_FLUSH_ON_COMMIT;
         private ByteBufAllocator byteBufAllocator = ByteBufAllocator.DEFAULT;
 
         private Builder() {
@@ -628,33 +618,6 @@ public final class SegmentedByteBufJournal implements RaftJournal {
         }
 
         /**
-         * Enables flushing buffers to disk when entries are committed to a segment.
-         *
-         * <p>When flush-on-commit is enabled, log entry buffers will be automatically flushed to disk each time
-         * an entry is committed in a given segment.
-         *
-         * @return The builder instance
-         */
-        public Builder withFlushOnCommit() {
-            return withFlushOnCommit(true);
-        }
-
-        /**
-         * Sets whether to flush buffers to disk when entries are committed to a segment.
-         *
-         * <p>When flush-on-commit is enabled, log entry buffers will be automatically flushed to disk each time
-         * an entry is committed in a given segment.
-         *
-         * @param flushOnCommit Whether to flush buffers to disk when entries are committed to a segment.
-         * @return The builder instance
-         */
-        @SuppressWarnings("checkstyle:hiddenField")
-        public Builder withFlushOnCommit(final boolean flushOnCommit) {
-            this.flushOnCommit = flushOnCommit;
-            return this;
-        }
-
-        /**
          * Sets the {@link ByteBufAllocator} to use for allocating various buffers.
          *
          * @param byteBufAllocator the allocator to use
@@ -674,7 +637,7 @@ public final class SegmentedByteBufJournal implements RaftJournal {
          */
         public SegmentedByteBufJournal build() throws IOException {
             return new SegmentedByteBufJournal(name, storageLevel, directory, maxSegmentSize, maxEntrySize,
-                maxEntriesPerSegment, indexDensity, flushOnCommit, byteBufAllocator);
+                maxEntriesPerSegment, indexDensity, byteBufAllocator);
         }
     }
 }

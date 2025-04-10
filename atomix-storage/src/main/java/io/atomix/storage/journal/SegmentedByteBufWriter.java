@@ -46,12 +46,7 @@ final class SegmentedByteBufWriter implements EntryWriter {
 
     @Override
     public void commit(final long index) {
-        if (index > journal.getCommitIndex()) {
-            journal.setCommitIndex(index);
-            if (journal.isFlushOnCommit()) {
-                flush();
-            }
-        }
+        journal.setCommitIndex(index);
     }
 
     @Override
