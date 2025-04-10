@@ -509,18 +509,36 @@ abstract sealed class SegmentedJournalActor extends AbstractActor {
         }
 
         final var sw = Stopwatch.createStarted();
-        deleteJournal = new SegmentedJournal<>(SegmentedByteBufJournal.builder()
-            .withDirectory(directory)
-            .withName("delete")
-            .withMaxSegmentSize(DELETE_SEGMENT_SIZE)
-            .build(), READ_MAPPER, WRITE_MAPPER);
+        final SegmentedByteBufJournal deleteByteBuf;
+        try {
+            deleteByteBuf = SegmentedByteBufJournal.builder()
+                .withDirectory(directory)
+                .withName("delete")
+                .withMaxSegmentSize(DELETE_SEGMENT_SIZE)
+                .build();
+        } catch (IOException e) {
+            throw new UncheckedIOException("Failed to open delete journal", e);
+        }
+
+        deleteJournal = new SegmentedJournal<>(deleteByteBuf, READ_MAPPER, WRITE_MAPPER);
         try (var reader = deleteJournal.openReader(deleteJournal.lastIndex())) {
             final var lastDeleteRecovered = reader.tryNext((index, value, length) -> value);
             lastDelete = lastDeleteRecovered == null ? 0 : lastDeleteRecovered;
         }
 
-        dataJournal = new DataJournalV0(persistenceId, messageSize, context().system(), storage, directory,
-            maxEntrySize, maxSegmentSize);
+        try {
+            dataJournal = new DataJournalV0(persistenceId, messageSize, context().system(), storage, directory,
+                maxEntrySize, maxSegmentSize);
+        } catch (IOException e) {
+            lastDelete = 0;
+            try {
+                deleteJournal.close();
+            } finally {
+                deleteJournal = null;
+            }
+            throw new UncheckedIOException("Failed to open data journal", e);
+        }
+
         dataJournal.deleteTo(lastDelete);
         LOG.debug("{}: journal open in {} with last index {}, deleted to {}", persistenceId, sw,
             dataJournal.lastWrittenSequenceNr(), lastDelete);
