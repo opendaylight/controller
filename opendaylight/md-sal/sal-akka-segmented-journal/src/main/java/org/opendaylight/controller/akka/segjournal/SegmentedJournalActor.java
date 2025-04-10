@@ -506,9 +506,10 @@ abstract sealed class SegmentedJournalActor extends AbstractActor {
             .withName("delete")
             .withMaxSegmentSize(DELETE_SEGMENT_SIZE)
             .build(), READ_MAPPER, WRITE_MAPPER);
-        final var lastDeleteRecovered = deleteJournal.openReader(deleteJournal.lastIndex())
-            .tryNext((index, value, length) -> value);
-        lastDelete = lastDeleteRecovered == null ? 0 : lastDeleteRecovered;
+        try (var reader = deleteJournal.openReader(deleteJournal.lastIndex())) {
+            final var lastDeleteRecovered = reader.tryNext((index, value, length) -> value);
+            lastDelete = lastDeleteRecovered == null ? 0 : lastDeleteRecovered;
+        }
 
         dataJournal = new DataJournalV0(persistenceId, messageSize, context().system(), storage, directory,
             maxEntrySize, maxSegmentSize);
