@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.datastore.actors;
 
-import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import com.google.gson.stream.JsonWriter;
@@ -23,7 +22,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.controller.cluster.datastore.persisted.CommitTransactionPayload;
-import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNodeContainer;
@@ -50,10 +49,10 @@ public final class JsonExportActor extends AbstractUntypedActor {
     }
 
     public static final class ExportJournal {
-        private final ReplicatedLogEntry replicatedLogEntry;
+        private final LogEntry entry;
 
-        public ExportJournal(final ReplicatedLogEntry replicatedLogEntry) {
-            this.replicatedLogEntry = requireNonNull(replicatedLogEntry);
+        public ExportJournal(final LogEntry entry) {
+            this.entry = requireNonNull(entry);
         }
     }
 
@@ -65,7 +64,7 @@ public final class JsonExportActor extends AbstractUntypedActor {
         }
     }
 
-    private final List<ReplicatedLogEntry> entries = new ArrayList<>();
+    private final List<LogEntry> entries = new ArrayList<>();
     private final @NonNull EffectiveModelContext schemaContext;
     private final @NonNull Path baseDirPath;
 
@@ -98,19 +97,21 @@ public final class JsonExportActor extends AbstractUntypedActor {
         final Path filePath = snapshotDir.resolve(exportSnapshot.id + "-snapshot.json");
         LOG.debug("Creating JSON file : {}", filePath);
 
-        final NormalizedNode root = exportSnapshot.dataTreeCandidate.getRootNode().getDataAfter();
-        checkState(root instanceof NormalizedNodeContainer, "Unexpected root %s", root);
-
-        writeSnapshot(filePath, (NormalizedNodeContainer<?>) root);
-        LOG.debug("Created JSON file: {}", filePath);
+        final var root = exportSnapshot.dataTreeCandidate.getRootNode().getDataAfter();
+        if (root instanceof NormalizedNodeContainer<?> container) {
+            writeSnapshot(filePath, container);
+            LOG.debug("Created JSON file: {}", filePath);
+        } else {
+            throw new IllegalStateException("Unexpected root " + root);
+        }
     }
 
     private void onExportJournal(final ExportJournal exportJournal) {
-        entries.add(exportJournal.replicatedLogEntry);
+        entries.add(exportJournal.entry);
     }
 
     private void onFinishExport(final FinishExport finishExport) {
-        final Path journalDir = baseDirPath.resolve("journals");
+        final var journalDir = baseDirPath.resolve("journals");
         createDir(journalDir);
 
         final Path filePath = journalDir.resolve(finishExport.id + "-journal.json");
@@ -120,7 +121,7 @@ public final class JsonExportActor extends AbstractUntypedActor {
     }
 
     private void writeSnapshot(final Path path, final NormalizedNodeContainer<?> root) {
-        try (JsonWriter jsonWriter = new JsonWriter(Files.newBufferedWriter(path))) {
+        try (var jsonWriter = new JsonWriter(Files.newBufferedWriter(path))) {
             jsonWriter.beginObject();
 
             try (var nnWriter = NormalizedNodeWriter.forStreamWriter(JSONNormalizedNodeStreamWriter.createNestedWriter(

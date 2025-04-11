@@ -87,13 +87,13 @@ import org.opendaylight.controller.cluster.notifications.RoleChangeNotifier;
 import org.opendaylight.controller.cluster.raft.LeadershipTransferFailedException;
 import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.RaftActorRecoveryCohort;
-import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.messages.RequestLeadership;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
+import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev250130.DataStoreProperties.ExportOnRecovery;
@@ -294,8 +294,8 @@ public class Shard extends RaftActor {
                     exportActor.tell(
                         new JsonExportActor.ExportSnapshot(store.readCurrentData().orElseThrow(), memberId()),
                         ActorRef.noSender());
-                } else if (message instanceof ReplicatedLogEntry replicatedLogEntry) {
-                    exportActor.tell(new JsonExportActor.ExportJournal(replicatedLogEntry), ActorRef.noSender());
+                } else if (message instanceof LogEntry entry) {
+                    exportActor.tell(new JsonExportActor.ExportJournal(entry), ActorRef.noSender());
                 } else if (message instanceof RecoveryCompleted) {
                     exportActor.tell(new JsonExportActor.FinishExport(memberId()), ActorRef.noSender());
                     exportActor.tell(PoisonPill.getInstance(), ActorRef.noSender());
