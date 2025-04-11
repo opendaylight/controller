@@ -162,7 +162,7 @@ class RaftActorRecoverySupport {
             hasMigratedDataRecovered = true;
         }
         if (!(snapshotState instanceof EmptyState)) {
-            cohort.applyRecoverySnapshot(snapshotState);
+            cohort.applyRecoveredSnapshot(snapshotState);
         }
 
         if (snapshot.getServerConfiguration() != null) {

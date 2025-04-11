@@ -29,6 +29,7 @@ import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.Reader;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.Support;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.Writer;
@@ -173,7 +174,8 @@ public final class ExampleActor extends RaftActor
     }
 
     @Override
-    public void applyRecoverySnapshot(final Snapshot.@Nullable State snapshotState) {
+    public void applyRecoveredSnapshot(final StateSnapshot snapshot) {
+        // No-op
     }
 
     @Override

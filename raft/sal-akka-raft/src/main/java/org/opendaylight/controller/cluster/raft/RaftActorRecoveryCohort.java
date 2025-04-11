@@ -11,6 +11,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 
 /**
  * Interface for a class that participates in raft actor persistence recovery.
@@ -48,11 +49,10 @@ public interface RaftActorRecoveryCohort {
     /**
      * This method is called during recovery to reconstruct the state of the actor.
      *
-     * @param snapshotState A snapshot of the state of the actor
+     * @param snapshot the {@link StateSnapshot} to apply
      */
-    // FIXME: StateSnapshot instead
     // FIXME: allow an IOException (or some other checked exception) to be thrown here
-    void applyRecoverySnapshot(Snapshot.State snapshotState);
+    void applyRecoveredSnapshot(StateSnapshot snapshot);
 
     /**
      * This method is called during recovery at the end of a batch to apply the current batched commands. This method is

@@ -31,6 +31,7 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage.CommitSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.Support;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.slf4j.Logger;
@@ -174,13 +175,13 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     @Override
-    public void applyRecoverySnapshot(final Snapshot.State newState) {
-        recoveryCohortDelegate.applyRecoverySnapshot(newState);
-        applySnapshotState(newState);
+    public void applyRecoveredSnapshot(final StateSnapshot snapshot) {
+        recoveryCohortDelegate.applyRecoveredSnapshot(snapshot);
+        applySnapshotState(snapshot);
     }
 
-    private void applySnapshotState(final Snapshot.State newState) {
-        if (newState instanceof MockSnapshotState mockState) {
+    private void applySnapshotState(final StateSnapshot snapshot) {
+        if (snapshot instanceof MockSnapshotState mockState) {
             state.clear();
             state.addAll(mockState.state());
         }
