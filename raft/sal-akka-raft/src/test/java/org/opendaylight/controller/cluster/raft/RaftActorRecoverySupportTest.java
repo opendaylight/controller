@@ -244,7 +244,7 @@ class RaftActorRecoverySupportTest {
         assertEquals("Election term", new TermInfo(electionTerm, electionVotedFor), context.termInfo());
         assertFalse("Dynamic server configuration", context.isDynamicServerConfigurationInUse());
 
-        verify(mockCohort).applyRecoverySnapshot(snapshotState);
+        verify(mockCohort).applyRecoveredSnapshot(snapshotState);
     }
 
     @Test
@@ -336,7 +336,7 @@ class RaftActorRecoverySupportTest {
 
         sendMessageToSupport(RecoveryCompleted.getInstance(), true);
 
-        verify(mockCohort, never()).applyRecoverySnapshot(any());
+        verify(mockCohort, never()).applyRecoveredSnapshot(any());
         verify(mockCohort, never()).getRestoreFromSnapshot();
         verifyNoMoreInteractions(mockCohort);
 

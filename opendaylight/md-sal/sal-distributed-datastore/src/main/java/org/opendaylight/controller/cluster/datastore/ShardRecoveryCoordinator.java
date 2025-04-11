@@ -16,6 +16,7 @@ import org.opendaylight.controller.cluster.datastore.utils.NormalizedNodeXMLOutp
 import org.opendaylight.controller.cluster.raft.RaftActorRecoveryCohort;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,13 +115,13 @@ abstract class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
     /**
      * Applies a recovered snapshot to the data store.
      *
-     * @param snapshotState the serialized snapshot
+     * @param snapshot the serialized snapshot
      */
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public void applyRecoverySnapshot(final Snapshot.State snapshotState) {
-        if (!(snapshotState instanceof ShardSnapshotState shardSnapshotState)) {
-            LOG.debug("{}: applyRecoverySnapshot ignoring snapshot: {}", memberId, snapshotState);
+    public void applyRecoveredSnapshot(final StateSnapshot snapshot) {
+        if (!(snapshot instanceof ShardSnapshotState shardSnapshotState)) {
+            LOG.debug("{}: applyRecoverySnapshot ignoring snapshot: {}", memberId, snapshot);
             return;
         }
 

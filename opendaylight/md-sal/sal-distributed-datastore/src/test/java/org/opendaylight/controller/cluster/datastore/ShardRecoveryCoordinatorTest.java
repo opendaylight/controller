@@ -66,8 +66,8 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
     }
 
     @Test
-    public void testApplyRecoverySnapshot() throws DataValidationFailedException {
-        coordinator.applyRecoverySnapshot(createSnapshot());
+    public void testApplyRecoveredSnapshot() throws DataValidationFailedException {
+        coordinator.applyRecoveredSnapshot(createSnapshot());
 
         assertFalse(readCars(peopleDataTree).isPresent());
         assertTrue(readPeople(peopleDataTree).isPresent());
