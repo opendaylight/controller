@@ -15,6 +15,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.raft.api.EntryMeta;
 
 /**
@@ -169,12 +170,12 @@ public interface ReplicatedLog {
      * Appends an entry received by a follower to the in-memory log and persists it as well, returning an indication
      * whether or not a snapshot should be taken.
      *
-     * @param <T> entry type
      * @param entry the entry to append
      * @param callback optional callback to be notified when persistence is complete
      * @return {@code true} if the journal requires trimming and a snapshot needs to be taken
      */
-    <T extends ReplicatedLogEntry> boolean appendReceived(@NonNull T entry, @Nullable Consumer<T> callback);
+    @NonNullByDefault
+    boolean appendReceived(ReplicatedLogEntry entry, @Nullable Consumer<LogEntry> callback);
 
     /**
      * Appends an entry submitted on the leader to the in-memory log and persists it as well.

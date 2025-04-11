@@ -23,7 +23,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.messaging.MessageAssembler;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
-import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.ApplyLeaderSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
@@ -309,7 +308,13 @@ public class Follower extends RaftActorBehavior {
         // applied to the state already, as the persistence callback occurs async, and we want those entries
         // purged from the persisted log as well.
         final var shouldCaptureSnapshot = new AtomicBoolean(false);
-        final Consumer<ReplicatedLogEntry> callback = logEntry -> {
+
+        // Note: this is quite fishy: while we are reusing this callback, the capture part of is only used for the
+        //       last entry -- so we really should split the below loop into 'leading entries' with a 'null' callback
+        //       and the last entry, with this callback.
+        //       Furthermore the correctness of this relies on the fact that the callback is invoked asynchronously,
+        //       i.e. in the next RaftActor processing cycle.
+        final Consumer<LogEntry> callback = logEntry -> {
             if (shouldCaptureSnapshot.get() && logEntry == entries.getLast()) {
                 context.getSnapshotManager().capture(replLog.lastMeta(), getReplicatedToAllIndex());
             }

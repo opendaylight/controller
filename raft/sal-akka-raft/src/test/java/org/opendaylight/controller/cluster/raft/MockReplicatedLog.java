@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft;
 
 import java.util.function.Consumer;
+import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.raft.api.EntryMeta;
 
 final class MockReplicatedLog extends AbstractReplicatedLog {
@@ -21,7 +22,7 @@ final class MockReplicatedLog extends AbstractReplicatedLog {
     }
 
     @Override
-    public <T extends ReplicatedLogEntry> boolean appendReceived(final T entry, final Consumer<T> callback) {
+    public boolean appendReceived(final ReplicatedLogEntry entry, final Consumer<LogEntry> callback) {
         if (callback != null) {
             callback.accept(entry);
         }

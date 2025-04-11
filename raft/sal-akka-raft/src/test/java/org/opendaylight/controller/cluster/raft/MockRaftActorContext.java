@@ -20,6 +20,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
+import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.controller.cluster.raft.spi.TestTermInfoStore;
 import org.opendaylight.raft.api.EntryMeta;
 
@@ -124,7 +125,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         }
 
         @Override
-        public <T extends ReplicatedLogEntry> boolean appendReceived(final T entry, final Consumer<T> callback) {
+        public boolean appendReceived(final ReplicatedLogEntry entry, final Consumer<LogEntry> callback) {
             // FIXME: assertion here?
             append(entry);
             if (callback != null) {

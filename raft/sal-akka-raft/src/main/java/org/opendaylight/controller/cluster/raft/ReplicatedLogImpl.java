@@ -11,6 +11,7 @@ import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
+import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.raft.api.EntryMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,7 +88,7 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog {
     }
 
     @Override
-    public <T extends ReplicatedLogEntry> boolean appendReceived(final T entry, final Consumer<T> callback)  {
+    public boolean appendReceived(final ReplicatedLogEntry entry, final Consumer<LogEntry> callback) {
         LOG.debug("{}: Append log entry and persist {} ", memberId, entry);
 
         // FIXME: When can 'false' happen? Wouldn't that be an indication that Follower.handleAppendEntries() is doing
@@ -115,7 +116,7 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog {
     }
 
     private <T extends ReplicatedLogEntry> void invokeSync(final @NonNull T entry,
-            final @Nullable Consumer<T> callback) {
+            final @Nullable Consumer<? super T> callback) {
         LOG.debug("{}: persist complete {}", memberId, entry);
 
         dataSizeSinceLastSnapshot += entry.size();
