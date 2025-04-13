@@ -12,6 +12,7 @@ import com.google.common.collect.ImmutableList;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.List;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -122,7 +123,7 @@ public final class ClusterConfig extends AbstractRaftCommand {
     }
 
     @Override
-    protected Object writeReplace() {
+    public Serializable toSerialForm() {
         return new ServerConfigurationPayload.Proxy(this);
     }
 }

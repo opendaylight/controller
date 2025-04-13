@@ -73,7 +73,9 @@ public abstract sealed class Payload implements StateMachineCommand, Serializabl
      * @return Serialization proxy
      */
     @java.io.Serial
-    protected abstract Object writeReplace();
+    protected final Object writeReplace() {
+        return toSerialForm();
+    }
 
     @java.io.Serial
     private void readObject(final ObjectInputStream stream) throws IOException, ClassNotFoundException {

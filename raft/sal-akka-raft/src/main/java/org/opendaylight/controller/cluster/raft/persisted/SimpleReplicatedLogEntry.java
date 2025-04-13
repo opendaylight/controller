@@ -20,6 +20,8 @@ import org.opendaylight.controller.cluster.raft.messages.Payload;
  *
  * @author Thomas Pantelis
  */
+// FIXME: a record
+// FIXME: 12.0.0: not Serializable
 public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Serializable {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
@@ -70,6 +72,11 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Seria
     }
 
     @Override
+    public Serializable toSerialForm() {
+        return new LE(this);
+    }
+
+    @Override
     public boolean isPersistencePending() {
         return persistencePending;
     }
@@ -106,6 +113,6 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Seria
 
     @java.io.Serial
     private Object writeReplace() {
-        return new LE(this);
+        return toSerialForm();
     }
 }

@@ -605,12 +605,12 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     private void applyCommand(final @Nullable Identifier identifier, final LogEntry entry) {
         final long startTime = System.nanoTime();
 
-        final var payload = entry.command();
+        final var command = entry.command();
         if (LOG.isDebugEnabled()) {
-            LOG.debug("{}: Applying state for log index {} data {}", memberId(), entry.index(), payload);
+            LOG.debug("{}: Applying state for log index {} data {}", memberId(), entry.index(), command);
         }
 
-        if (payload instanceof StateCommand stateCommand) {
+        if (command instanceof StateCommand stateCommand) {
             applyCommand(identifier, stateCommand);
         }
 

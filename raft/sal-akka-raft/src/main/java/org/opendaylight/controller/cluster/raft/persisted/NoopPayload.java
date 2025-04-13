@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft.persisted;
 
 import static java.util.Objects.requireNonNull;
 
+import java.io.Serializable;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.pekko.dispatch.ControlMessage;
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -61,7 +62,7 @@ public final class NoopPayload extends AbstractRaftCommand implements ControlMes
     }
 
     @Override
-    protected Object writeReplace() {
+    public Serializable toSerialForm() {
         return PROXY;
     }
 }

@@ -23,6 +23,7 @@ public interface EntryStore {
      * @param entry the journal entry to persist
      * @param callback the callback when persistence is complete
      */
+    // FIXME: specialize for LogEntry and ClusterConfig
     // FIXME: replace with:
     //        void persist(Object entry) throws IOException
     <T> void persist(@NonNull T entry, @NonNull Consumer<T> callback);

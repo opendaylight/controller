@@ -12,6 +12,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import java.io.Serializable;
 import java.util.function.Consumer;
 import org.junit.Before;
 import org.junit.Test;
@@ -108,7 +109,7 @@ public class RaftActorDataPersistenceProviderTest {
         }
 
         @Override
-        protected Object writeReplace() {
+        public Serializable toSerialForm() {
             // Not needed
             throw new UnsupportedOperationException();
         }
