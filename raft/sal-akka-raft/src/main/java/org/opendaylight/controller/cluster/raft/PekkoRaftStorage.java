@@ -23,7 +23,6 @@ import org.apache.pekko.persistence.DeleteMessagesSuccess;
 import org.apache.pekko.persistence.DeleteSnapshotsSuccess;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SnapshotProtocol;
-import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
@@ -195,8 +194,8 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
     }
 
     @Override
-    public void deleteSnapshots(final SnapshotSelectionCriteria criteria) {
-        actor.deleteSnapshots(criteria);
+    public void deleteSnapshots(final long maxTimestamp) {
+        actor.deleteSnapshots(maxTimestamp);
     }
 
     @Override

@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.util.function.Consumer;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SnapshotProtocol;
-import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
@@ -50,7 +49,7 @@ public interface ImmediateDataPersistenceProvider extends DataPersistenceProvide
     }
 
     @Override
-    default void deleteSnapshots(final SnapshotSelectionCriteria criteria) {
+    default void deleteSnapshots(final long maxTimestamp) {
         // no-op
     }
 

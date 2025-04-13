@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.apache.pekko.persistence.AbstractPersistentActor;
 import org.apache.pekko.persistence.RecoveryCompleted;
 import org.apache.pekko.persistence.SnapshotOffer;
 import org.eclipse.jdt.annotation.NonNull;
@@ -65,7 +64,7 @@ class RaftActorRecoverySupport {
         }
     }
 
-    boolean handleRecoveryMessage(final AbstractPersistentActor actor, final Object message) {
+    boolean handleRecoveryMessage(final RaftActor actor, final Object message) {
         LOG.trace("{}: handleRecoveryMessage: {}", memberId(), message);
 
         anyDataRecovered = anyDataRecovered || !(message instanceof RecoveryCompleted);
@@ -287,7 +286,7 @@ class RaftActorRecoverySupport {
         currentRecoveryBatchCount = 0;
     }
 
-    private void onRecoveryCompletedMessage(final AbstractPersistentActor raftActor) {
+    private void onRecoveryCompletedMessage(final RaftActor raftActor) {
         if (currentRecoveryBatchCount > 0) {
             endCurrentLogRecoveryBatch();
         }
@@ -345,10 +344,8 @@ class RaftActorRecoverySupport {
             // messages. Either way, we persist a snapshot and delete all the messages from the akka journal
             // to clean out unwanted messages.
 
-            Snapshot snapshot = Snapshot.create(EmptyState.INSTANCE, List.of(), -1, -1, -1, -1, context.termInfo(),
-                context.getPeerServerInfo(true));
-
-            raftActor.saveSnapshot(snapshot);
+            raftActor.saveSnapshot(Snapshot.create(EmptyState.INSTANCE, List.of(), -1, -1, -1, -1, context.termInfo(),
+                context.getPeerServerInfo(true)));
             raftActor.deleteMessages(raftActor.lastSequenceNr());
         } else if (hasMigratedDataRecovered) {
             LOG.info("{}: Snapshot capture initiated after recovery due to migrated messages", memberId());

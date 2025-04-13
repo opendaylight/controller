@@ -32,6 +32,7 @@ import org.apache.pekko.actor.Status;
 import org.apache.pekko.japi.Procedure;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SnapshotProtocol;
+import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -1022,6 +1023,39 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     final <A> void persistAsync(final A entry, final Consumer<A> callback) {
         super.persistAsync(entry, callback::accept);
+    }
+
+    @Override
+    @Deprecated(since = "11.0.0", forRemoval = true)
+    public final void loadSnapshot(final String persistenceId, final SnapshotSelectionCriteria criteria,
+            final long toSequenceNr) {
+        super.loadSnapshot(persistenceId, criteria, toSequenceNr);
+    }
+
+    @Override
+    @Deprecated(since = "11.0.0", forRemoval = true)
+    public final void saveSnapshot(final Object snapshot) {
+        throw new UnsupportedOperationException();
+    }
+
+    final void saveSnapshot(final Snapshot snapshot) {
+        super.saveSnapshot(snapshot);
+    }
+
+    @Override
+    @Deprecated(since = "11.0.0", forRemoval = true)
+    public final void deleteSnapshot(final long sequenceNr) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    @Deprecated(since = "11.0.0", forRemoval = true)
+    public final void deleteSnapshots(final SnapshotSelectionCriteria criteria) {
+        throw new UnsupportedOperationException();
+    }
+
+    final void deleteSnapshots(final long maxTimestamp) {
+        super.deleteSnapshots(SnapshotSelectionCriteria.create(Long.MAX_VALUE, maxTimestamp));
     }
 
     /**

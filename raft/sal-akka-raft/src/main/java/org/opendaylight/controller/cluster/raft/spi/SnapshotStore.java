@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.raft.spi;
 
 import java.io.IOException;
 import org.apache.pekko.persistence.SnapshotProtocol;
-import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -62,6 +61,7 @@ public interface SnapshotStore {
      * @param snapshot the snapshot object to save
      */
     // FIXME: Callback<SnapshotFile> callback
+    // FIXME: imply async deletion of all other snapshots, only the last one will be reported
     void saveSnapshot(@NonNull Snapshot snapshot);
 
     //  @NonNullByDefault
@@ -69,13 +69,12 @@ public interface SnapshotStore {
     //      Callback<SnapshotFile> callback);
 
     /**
-     * Deletes snapshots based on the given criteria.
+     * Deletes snapshots up to and including a time.
      *
-     * @param criteria the search criteria
+     * @param maxTimestamp the timestamp, in Epoch milliseconds
      */
-    // FIXME: criteria == max size? max snapshots?
-    // FIXME: throws IOException
-    void deleteSnapshots(@NonNull SnapshotSelectionCriteria criteria);
+    // FIXME: integrate into saveSnapshot()
+    void deleteSnapshots(long maxTimestamp);
 
     /**
      * Receive and potentially handle a {@link SnapshotProtocol} response.

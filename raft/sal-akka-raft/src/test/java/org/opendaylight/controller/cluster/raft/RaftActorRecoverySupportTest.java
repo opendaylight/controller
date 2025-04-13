@@ -29,7 +29,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.actor.Props;
-import org.apache.pekko.persistence.AbstractPersistentActor;
 import org.apache.pekko.persistence.RecoveryCompleted;
 import org.apache.pekko.persistence.SnapshotMetadata;
 import org.apache.pekko.persistence.SnapshotOffer;
@@ -74,7 +73,7 @@ class RaftActorRecoverySupportTest {
     @Mock
     private RaftActorRecoveryCohort mockCohort;
     @Mock
-    private AbstractPersistentActor mockActor;
+    private RaftActor mockActor;
     @Mock
     private RaftActorSnapshotCohort<?> mockSnapshotCohort;
     @TempDir

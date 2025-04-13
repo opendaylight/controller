@@ -44,7 +44,6 @@ import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.PoisonPill;
 import org.apache.pekko.actor.Terminated;
 import org.apache.pekko.dispatch.Dispatchers;
-import org.apache.pekko.persistence.AbstractPersistentActor;
 import org.apache.pekko.persistence.SaveSnapshotFailure;
 import org.apache.pekko.persistence.SaveSnapshotSuccess;
 import org.apache.pekko.persistence.SnapshotMetadata;
@@ -296,11 +295,11 @@ public class RaftActorTest extends AbstractActorTest {
         UpdateElectionTerm updateElectionTerm = new UpdateElectionTerm(5, "member2");
         mockRaftActor.handleRecover(updateElectionTerm);
 
-        verify(mockSupport).handleRecoveryMessage(any(AbstractPersistentActor.class), same(snapshotOffer));
-        verify(mockSupport).handleRecoveryMessage(any(AbstractPersistentActor.class), same(logEntry));
-        verify(mockSupport).handleRecoveryMessage(any(AbstractPersistentActor.class), same(applyJournalEntries));
-        verify(mockSupport).handleRecoveryMessage(any(AbstractPersistentActor.class), same(deleteEntries));
-        verify(mockSupport).handleRecoveryMessage(any(AbstractPersistentActor.class), same(updateElectionTerm));
+        verify(mockSupport).handleRecoveryMessage(any(), same(snapshotOffer));
+        verify(mockSupport).handleRecoveryMessage(any(), same(logEntry));
+        verify(mockSupport).handleRecoveryMessage(any(), same(applyJournalEntries));
+        verify(mockSupport).handleRecoveryMessage(any(), same(deleteEntries));
+        verify(mockSupport).handleRecoveryMessage(any(), same(updateElectionTerm));
     }
 
     @Test

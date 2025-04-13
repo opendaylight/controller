@@ -25,7 +25,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.util.List;
 import org.apache.pekko.actor.ActorRef;
-import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.eclipse.jdt.annotation.NonNull;
 import org.junit.After;
 import org.junit.Before;
@@ -397,12 +396,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         verify(mockDataPersistenceProvider).deleteMessages(50L);
 
-        final var criteriaCaptor = ArgumentCaptor.forClass(SnapshotSelectionCriteria.class);
-
-        verify(mockDataPersistenceProvider).deleteSnapshots(criteriaCaptor.capture());
-
-        assertEquals(Long.MAX_VALUE, criteriaCaptor.getValue().maxSequenceNr());
-        assertEquals(1233L, criteriaCaptor.getValue().maxTimestamp());
+        verify(mockDataPersistenceProvider).deleteSnapshots(1233L);
 
         MessageCollectorActor.expectFirstMatching(actorRef, SnapshotComplete.class);
     }
@@ -418,7 +412,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         verify(mockDataPersistenceProvider, never()).deleteMessages(100L);
 
-        verify(mockDataPersistenceProvider, never()).deleteSnapshots(any(SnapshotSelectionCriteria.class));
+        verify(mockDataPersistenceProvider, never()).deleteSnapshots(anyLong());
     }
 
     @Test
@@ -429,7 +423,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         verify(mockDataPersistenceProvider, never()).deleteMessages(anyLong());
 
-        verify(mockDataPersistenceProvider, never()).deleteSnapshots(any(SnapshotSelectionCriteria.class));
+        verify(mockDataPersistenceProvider, never()).deleteSnapshots(anyLong());
 
     }
 
@@ -449,7 +443,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         verify(mockDataPersistenceProvider, times(1)).deleteMessages(50L);
 
-        verify(mockDataPersistenceProvider, times(1)).deleteSnapshots(any(SnapshotSelectionCriteria.class));
+        verify(mockDataPersistenceProvider, times(1)).deleteSnapshots(anyLong());
     }
 
     @Test

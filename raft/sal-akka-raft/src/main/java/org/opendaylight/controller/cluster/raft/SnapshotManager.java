@@ -13,7 +13,6 @@ import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
 import java.util.List;
 import org.apache.pekko.dispatch.ControlMessage;
-import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -489,9 +488,9 @@ public final class SnapshotManager {
      * Commit the snapshot by trimming the log.
      *
      * @param sequenceNumber the sequence number of the persisted snapshot
-     * @param timeStamp the time stamp of the persisted snapshot
+     * @param timestamp the time stamp of the persisted snapshot
      */
-    void commit(final long sequenceNumber, final long timeStamp) {
+    void commit(final long sequenceNumber, final long timestamp) {
         if (!(task instanceof Persist persist)) {
             LOG.debug("{}: commit should not be called in state {}", memberId(), task);
             return;
@@ -501,7 +500,7 @@ public final class SnapshotManager {
         final var lastSequenceNumber = commit(persist);
 
         final var persistence = context.getPersistenceProvider();
-        persistence.deleteSnapshots(new SnapshotSelectionCriteria(scala.Long.MaxValue(), timeStamp - 1, 0L, 0L));
+        persistence.deleteSnapshots(timestamp - 1);
         persistence.deleteMessages(lastSequenceNumber);
 
         snapshotComplete();

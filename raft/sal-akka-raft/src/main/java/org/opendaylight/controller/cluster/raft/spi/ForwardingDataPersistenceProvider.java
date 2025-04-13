@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.util.function.Consumer;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SnapshotProtocol;
-import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
@@ -56,8 +55,8 @@ public abstract class ForwardingDataPersistenceProvider implements DataPersisten
     }
 
     @Override
-    public void deleteSnapshots(final SnapshotSelectionCriteria criteria) {
-        delegate().deleteSnapshots(criteria);
+    public void deleteSnapshots(final long maxTimestamp) {
+        delegate().deleteSnapshots(maxTimestamp);
     }
 
     @Override
