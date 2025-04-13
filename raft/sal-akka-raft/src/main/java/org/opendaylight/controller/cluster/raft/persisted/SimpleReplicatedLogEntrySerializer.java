@@ -12,7 +12,8 @@ import static java.util.Objects.requireNonNull;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import org.apache.commons.lang3.SerializationUtils;
+import java.io.ObjectOutputStream;
+import java.io.UncheckedIOException;
 import org.apache.pekko.actor.ExtendedActorSystem;
 import org.apache.pekko.serialization.JSerializer;
 import org.apache.pekko.util.ClassLoaderObjectInputStream;
@@ -45,20 +46,25 @@ public class SimpleReplicatedLogEntrySerializer extends JSerializer {
 
     @Override
     public byte[] toBinary(final Object obj) {
-        if (!(obj instanceof SimpleReplicatedLogEntry replicatedLogEntry)) {
+        if (!(obj instanceof SimpleReplicatedLogEntry entry)) {
             throw new IllegalArgumentException("Unsupported object type " + obj.getClass());
         }
 
-        final int estimatedSerializedSize = replicatedLogEntry.serializedSize();
-
-        final var baos = new ByteArrayOutputStream(estimatedSerializedSize);
-        SerializationUtils.serialize(replicatedLogEntry, baos);
-        final byte[] bytes = baos.toByteArray();
+        final int estimatedSize = entry.serializedSize();
+        final byte[] bytes;
+        try (var baos = new ByteArrayOutputStream(estimatedSize)) {
+            try (var out = new ObjectOutputStream(baos)) {
+                out.writeObject(obj);
+            }
+            bytes = baos.toByteArray();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
 
         if (LOG.isDebugEnabled()) {
-            final var data = replicatedLogEntry.command();
+            final var payload = entry.command();
             LOG.debug("Estimated serialized size {}, data size {} for payload: {}. Actual serialized size: {}",
-                estimatedSerializedSize, data.size(), data, bytes.length);
+                estimatedSize, payload.size(), payload, bytes.length);
         }
 
         return bytes;
