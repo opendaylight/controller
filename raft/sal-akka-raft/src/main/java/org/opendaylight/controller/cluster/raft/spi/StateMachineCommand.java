@@ -7,9 +7,11 @@
  */
 package org.opendaylight.controller.cluster.raft.spi;
 
+import com.google.common.annotations.Beta;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.io.Serializable;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.yangtools.concepts.Immutable;
@@ -81,4 +83,13 @@ public sealed interface StateMachineCommand extends Immutable permits RaftComman
          */
         Writer<T> writer();
     }
+
+    /**
+     * Returns the {@link Serializable} form. Returned object must {@code readResolve()} into an equivalent object.
+     *
+     * @return the {@link Serializable} form
+     */
+    @Beta
+    // FIXME: CONTROLLER-2044: this should be handled by separate serialization support/protocol
+    Serializable toSerialForm();
 }

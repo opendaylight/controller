@@ -38,8 +38,8 @@ public final class MockCommand extends AbstractStateCommand {
     }
 
     @Override
-    public String toString() {
-        return data;
+    protected Object writeReplace() {
+        return new MockCommandProxy(data, size);
     }
 
     @Override
@@ -53,7 +53,7 @@ public final class MockCommand extends AbstractStateCommand {
     }
 
     @Override
-    protected Object writeReplace() {
-        return new MockCommandProxy(data, size);
+    public String toString() {
+        return data;
     }
 }
