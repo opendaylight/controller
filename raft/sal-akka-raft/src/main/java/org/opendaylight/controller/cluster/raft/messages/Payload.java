@@ -25,7 +25,7 @@ import org.opendaylight.controller.cluster.raft.spi.StateMachineCommand;
  * Payload class.
  */
 // FIXME: This class is geared towards on-heap storage in that it is estimating/knowing its in-memory and serialized
-//        footprint -- soemthing that is mirrored in ReplicatedLogEntry's fields.
+//        footprint -- something that is mirrored in ReplicatedLogEntry's fields.
 //        What we really want here is a split between serialized and non-serialized form, because the exact nature of
 //        storage concerns are separate. We really have a few serialization strategies:
 //        - a leader persistence request, where we want to hang on to unserialized state for the purposes of handing
@@ -66,6 +66,11 @@ public abstract sealed class Payload implements StateMachineCommand, Serializabl
      * @return An estimate of serialized size.
      */
     public abstract int serializedSize();
+
+    @Override
+    public final Serializable toSerialForm() {
+        return this;
+    }
 
     /**
      * Return the serialization proxy for this object.

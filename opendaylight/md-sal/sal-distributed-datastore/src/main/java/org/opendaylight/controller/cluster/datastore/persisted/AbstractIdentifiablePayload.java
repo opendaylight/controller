@@ -114,13 +114,13 @@ public abstract class AbstractIdentifiablePayload<T extends Identifier> extends 
     }
 
     @Override
-    public final String toString() {
-        return MoreObjects.toStringHelper(this).add("identifier", identifier).add("size", size()).toString();
+    protected final Object writeReplace() {
+        return verifyNotNull(externalizableProxy(serialized));
     }
 
     @Override
-    public final Object writeReplace() {
-        return verifyNotNull(externalizableProxy(serialized));
+    public final String toString() {
+        return MoreObjects.toStringHelper(this).add("identifier", identifier).add("size", size()).toString();
     }
 
     protected abstract @NonNull SerialForm externalizableProxy(byte @NonNull[] serialized);

@@ -65,7 +65,7 @@ final class IS implements Externalizable {
             out.writeInt(lastChunkHashCode.orElseThrow());
         }
         if (votingConfig != null) {
-            out.writeObject(votingConfig);
+            out.writeObject(votingConfig.toSerialForm());
         }
 
         out.writeObject(installSnapshot.getData());

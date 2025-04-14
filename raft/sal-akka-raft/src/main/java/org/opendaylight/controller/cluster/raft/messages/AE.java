@@ -53,7 +53,7 @@ final class AE implements Externalizable {
         out.writeInt(entries.size());
         for (var e : entries) {
             WritableObjects.writeLongs(out, e.index(), e.term());
-            out.writeObject(e.command());
+            out.writeObject(e.command().toSerialForm());
         }
 
         out.writeObject(appendEntries.leaderAddress());

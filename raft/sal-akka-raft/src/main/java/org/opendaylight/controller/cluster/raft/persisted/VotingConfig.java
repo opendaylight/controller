@@ -80,6 +80,11 @@ public final class VotingConfig extends AbstractRaftCommand {
     }
 
     @Override
+    protected Object writeReplace() {
+        return new ServerConfigurationPayload.Proxy(this);
+    }
+
+    @Override
     public int hashCode() {
         return serverInfo.hashCode();
     }
@@ -92,10 +97,5 @@ public final class VotingConfig extends AbstractRaftCommand {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this).add("serverInfo", serverInfo).toString();
-    }
-
-    @Override
-    protected Object writeReplace() {
-        return new ServerConfigurationPayload.Proxy(this);
     }
 }

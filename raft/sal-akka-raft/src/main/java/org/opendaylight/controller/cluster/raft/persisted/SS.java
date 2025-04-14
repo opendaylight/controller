@@ -48,13 +48,14 @@ final class SS implements Externalizable {
         WritableObjects.writeLong(out, termInfo.term());
         out.writeObject(termInfo.votedFor());
 
-        out.writeObject(snapshot.votingConfig());
+        final var vc = snapshot.votingConfig();
+        out.writeObject(vc != null ? vc.toSerialForm() : null);
 
         final var unAppliedEntries = snapshot.getUnAppliedEntries();
         out.writeInt(unAppliedEntries.size());
         for (var e : unAppliedEntries) {
             WritableObjects.writeLongs(out, e.index(), e.term());
-            out.writeObject(e.command());
+            out.writeObject(e.command().toSerialForm());
         }
 
         out.writeObject(snapshot.getState());

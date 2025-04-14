@@ -21,6 +21,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
+import java.io.UncheckedIOException;
 import org.apache.commons.lang3.SerializationUtils;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -42,7 +43,7 @@ import org.slf4j.LoggerFactory;
  */
 @Beta
 public final class CommitTransactionPayload extends IdentifiablePayload<TransactionIdentifier> implements Serializable {
-    // FIXME: rename to CommitTransactionDelta
+    // FIXME: rename to CommitTransaction
     @NonNullByDefault
     public record CandidateTransaction(
             TransactionIdentifier transactionId,
@@ -71,6 +72,15 @@ public final class CommitTransactionPayload extends IdentifiablePayload<Transact
                 delta.transactionId.writeTo(out);
                 DataTreeCandidateInputOutput.writeDataTreeCandidate(out, delta.streamVersion, delta.candidate);
             };
+        }
+
+        @Override
+        public Serializable toSerialForm() {
+            try {
+                return CommitTransactionPayload.create(transactionId, candidate);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
         }
     }
 
@@ -165,6 +175,11 @@ public final class CommitTransactionPayload extends IdentifiablePayload<Transact
         return source.legacySize();
     }
 
+    @Override
+    protected Object writeReplace() {
+        return new CT(source);
+    }
+
     /**
      * The cached candidate needs to be cleared after it is done applying to the DataTree, otherwise it would be keeping
      * deserialized in memory which are not needed anymore leading to wasted memory. This lets the payload know that
@@ -184,11 +199,6 @@ public final class CommitTransactionPayload extends IdentifiablePayload<Transact
             helper.add("identifier", candidate.transactionId());
         }
         return helper.add("size", size()).toString();
-    }
-
-    @Override
-    public Object writeReplace() {
-        return new CT(source);
     }
 
     @java.io.Serial
