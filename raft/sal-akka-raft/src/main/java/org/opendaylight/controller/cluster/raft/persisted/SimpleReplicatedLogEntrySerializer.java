@@ -54,7 +54,7 @@ public class SimpleReplicatedLogEntrySerializer extends JSerializer {
         final byte[] bytes;
         try (var baos = new ByteArrayOutputStream(estimatedSize)) {
             try (var out = new ObjectOutputStream(baos)) {
-                out.writeObject(obj);
+                out.writeObject(entry);
             }
             bytes = baos.toByteArray();
         } catch (IOException e) {
