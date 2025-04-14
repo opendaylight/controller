@@ -120,8 +120,8 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         }
 
         @Override
-        public boolean removeFromAndPersist(final long index) {
-            return removeFrom(index) >= 0;
+        public boolean trimToReceive(final long fromIndex) {
+            return removeFrom(fromIndex) >= 0;
         }
 
         @Override

@@ -587,7 +587,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         final MockRaftActorContext actorContext = createActorContextWithFollower();
 
         //clears leaders log
-        actorContext.getReplicatedLog().removeFrom(0);
+        actorContext.getReplicatedLog().clear();
 
         final int commitIndex = 3;
         final int snapshotIndex = 2;
@@ -650,7 +650,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leadersSnapshot.put("3", "C");
 
         //clears leaders log
-        actorContext.getReplicatedLog().removeFrom(0);
+        actorContext.getReplicatedLog().clear();
 
         final int followersLastIndex = 2;
         final int snapshotIndex = 3;
@@ -693,7 +693,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         final var log = actorContext.getReplicatedLog();
         //clears leaders log
-        log.removeFrom(0);
+        log.clear();
 
         final int followersLastIndex = 2;
         final int snapshotIndex = 3;
@@ -758,7 +758,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         log.setLastApplied(3);
         log.setCommitIndex(followersLastIndex);
 
-        actorContext.getReplicatedLog().removeFrom(0);
+        actorContext.getReplicatedLog().clear();
 
         final var mockState = ByteState.of(new byte[] { 1, 2, 3 });
         actorContext.getSnapshotManager().setSnapshotCohort((ByteStateSnapshotCohort) () -> mockState);
@@ -838,7 +838,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         final var log = actorContext.getReplicatedLog();
         //clears leaders log
-        log.removeFrom(0);
+        log.clear();
 
         final int lastAppliedIndex = 3;
         final int snapshotIndex = 2;
@@ -959,7 +959,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         }
 
         //clears leaders log
-        log.removeFrom(0);
+        log.clear();
 
         assertSame(leader, leader.handleMessage(followerActor,
                 new InstallSnapshotReply(currentTerm, FOLLOWER_ID, fts.getChunkIndex(), true)));
@@ -1278,7 +1278,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         leaderActorContext.setPeerAddresses(peerAddresses);
 
-        leaderActorContext.getReplicatedLog().removeFrom(0);
+        leaderActorContext.getReplicatedLog().clear();
 
         //create 3 entries
         final var leaderLog = new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 3, 1).build();
@@ -1286,7 +1286,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leaderActorContext.resetReplicatedLog(leaderLog);
 
         // follower too has the exact same log entries and has the same commit index
-        followerActorContext.getReplicatedLog().removeFrom(0);
+        followerActorContext.getReplicatedLog().clear();
         final var followerLog = new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 3, 1).build();
         followerLog.setCommitIndex(1);
         followerActorContext.resetReplicatedLog(followerLog);
@@ -1331,14 +1331,14 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         leaderActorContext.setPeerAddresses(leaderPeerAddresses);
 
-        leaderActorContext.getReplicatedLog().removeFrom(0);
+        leaderActorContext.getReplicatedLog().clear();
 
         final var leaderLog = new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 3, 1).build();
         leaderLog.setCommitIndex(1);
         leaderActorContext.resetReplicatedLog(leaderLog);
 
         // follower has the same log entries but its commit index > leaders commit index
-        followerActorContext.getReplicatedLog().removeFrom(0);
+        followerActorContext.getReplicatedLog().clear();
         final var followerLog = new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 3, 1).build();
         followerLog.setCommitIndex(2);
         followerActorContext.resetReplicatedLog(followerLog);

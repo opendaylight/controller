@@ -184,6 +184,11 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
     }
 
     @Override
+    public void deleteEntries(final long fromIndex) {
+        actor.deleteEntries(fromIndex);
+    }
+
+    @Override
     public <T> void persistAsync(final T entry, final Consumer<T> callback) {
         actor.persistAsync(entry, callback);
     }

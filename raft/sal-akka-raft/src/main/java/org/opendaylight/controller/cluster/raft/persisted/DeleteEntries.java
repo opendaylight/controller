@@ -7,14 +7,16 @@
  */
 package org.opendaylight.controller.cluster.raft.persisted;
 
-import java.io.Serializable;
+import org.opendaylight.controller.cluster.raft.ReplicatedLog;
 
 /**
- * Internal message that is stored in the akka's persistent journal to delete journal entries.
+ * Internal message that is stored in the Pekko persistence to trim previously persisted log entries, which have been
+ * {@link ReplicatedLog#trimToReceive(long) removed}.
  *
  * @author Thomas Pantelis
  */
-public final class DeleteEntries implements Serializable {
+@Deprecated(since = "11.0.0", forRemoval = true)
+public final class DeleteEntries implements PekkoPersistenceContract {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 

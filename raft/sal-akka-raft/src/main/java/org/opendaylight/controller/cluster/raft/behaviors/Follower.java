@@ -231,6 +231,12 @@ public class Follower extends RaftActorBehavior {
         return this;
     }
 
+    // FIXME: CONTROLLER-2044: This entire method centers around ReplicatedLog receiving a list of entries and perhaps
+    //                         sending an AppendEntriesReply() and reporting a boolean to the caller. Most of it should
+    //                         live in RepliciatedLog reporting only a 'success' flag, i.e. true unless
+    //                         ReplicatedLog.trimToReceive() fails.
+    //                         At that point this method becomes primitive enough to be inlined into
+    //                         handleAppendEntries()
     private boolean processNewEntries(final AppendEntries appendEntries, final ActorRef sender) {
         final var entries = appendEntries.getEntries();
         final int numLogEntries = entries.size();
@@ -273,8 +279,7 @@ public class Follower extends RaftActorBehavior {
 
                     // Entries do not match so remove all subsequent entries but only if the existing entries haven't
                     // been applied to the state yet.
-                    if (matchEntry.index() <= replLog.getLastApplied()
-                            || !replLog.removeFromAndPersist(matchEntry.index())) {
+                    if (matchEntry.index() <= replLog.getLastApplied() || !replLog.trimToReceive(matchEntry.index())) {
                         // Could not remove the entries - this means the matchEntry index must be in the
                         // snapshot and not the log. In this case the prior entries are part of the state
                         // so we must send back a reply to force a snapshot to completely re-sync the

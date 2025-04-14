@@ -28,6 +28,13 @@ public interface EntryStore {
     <T> void persist(@NonNull T entry, @NonNull Consumer<T> callback);
 
     /**
+     * Delete entries starting from specified index.
+     *
+     * @param fromIndex the index of first entry to delete
+     */
+    void deleteEntries(long fromIndex);
+
+    /**
      * Persists an entry to the applicable journal asynchronously.
      *
      * @param <T> the type of the journal entry

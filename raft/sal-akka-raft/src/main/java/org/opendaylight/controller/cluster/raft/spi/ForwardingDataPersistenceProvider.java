@@ -39,6 +39,11 @@ public abstract class ForwardingDataPersistenceProvider implements DataPersisten
     }
 
     @Override
+    public void deleteEntries(final long fromIndex) {
+        delegate().deleteEntries(fromIndex);
+    }
+
+    @Override
     public <T> void persistAsync(final T entry, final Consumer<T> callback) {
         delegate().persistAsync(entry, callback);
     }

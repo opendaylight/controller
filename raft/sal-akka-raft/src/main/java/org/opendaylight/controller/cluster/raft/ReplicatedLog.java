@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.util.List;
 import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNull;
@@ -132,23 +133,26 @@ public interface ReplicatedLog {
     void setLastApplied(long lastApplied);
 
     /**
-     * Removes entries from the in-memory log starting at the given index.
+     * Removes entries from the in-memory log starting at the given index. This method exists only to deal with the
+     * effects of {@link #trimToReceive(long)} with Pekko Persistence.
      *
-     * @param index the index of the first log entry to remove
+     * @param fromIndex the index of the first log entry to remove
      * @return the adjusted index of the first log entry removed or -1 if the log entry is not found.
      */
-    long removeFrom(long index);
+    @Deprecated(since = "11.0.0", forRemoval = true)
+    long removeRecoveredEntries(long fromIndex);
 
     /**
-     * Removes entries from the in-memory log and the persisted log starting at the given index.
+     * Removes entries all entries from the log starting at the given index, resetting {@link #lastIndex()} to
+     * {@code nextIndex - 1}.
      *
-     * <p>The persisted information would then be used during recovery to properly reconstruct the state
-     * of the in-memory replicated log
-     *
-     * @param index the index of the first log entry to remove
-     * @return true if entries were removed, false otherwise
+     * @param nextIndex the index of the first log entry to remove
+     * @return {@code true} if the operation succeeds
      */
-    boolean removeFromAndPersist(long index);
+    // TODO: This method should only ever be invoked from a Follower, split it to a separate interface accessible only
+    //       to Follower (i.e. invoke some .toFollower() which will give out FollowerReplicatedLog with this method.
+    // FIXME: CONTROLLER-2044: change to appendEntries(List<ReplicatedLogEntry>)
+    boolean trimToReceive(long nextIndex);
 
     /**
      * Appends an entry to the log.
@@ -259,11 +263,22 @@ public interface ReplicatedLog {
     void setSnapshotTerm(long snapshotTerm);
 
     /**
+     * Clears all entries.
+     *
+     * @deprecated Use {@link #resetToSnapshot(Snapshot)} instead.
+     */
+    @VisibleForTesting
+    @Deprecated(since = "11.0.0", forRemoval = true)
+    void clear();
+
+    /**
      * Clears the journal entries with startIndex (inclusive) and endIndex (exclusive).
      *
      * @param startIndex the start index (inclusive)
      * @param endIndex the end index (exclusive)
      */
+    // FIXME: this method does not update dataSize()
+    @VisibleForTesting
     void clear(int startIndex, int endIndex);
 
     /**

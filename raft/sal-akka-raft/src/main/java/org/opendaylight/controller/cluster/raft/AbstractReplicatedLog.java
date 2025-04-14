@@ -138,18 +138,35 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
     }
 
     @Override
-    public final long removeFrom(final long logEntryIndex) {
-        int adjustedIndex = adjustedIndex(logEntryIndex);
-        if (adjustedIndex < 0 || adjustedIndex >= journal.size()) {
-            // physical index should be less than list size and >= 0
+    @Deprecated(since = "11.0.0", forRemoval = true)
+    public final long removeRecoveredEntries(final long fromIndex) {
+        return removeFrom(fromIndex);
+    }
+
+    /**
+     * Removes entries from the in-memory log starting at the given index.
+     *
+     * @param fromIndex the index of the first log entry to remove
+     * @return the adjusted index of the first log entry removed or -1 if the log entry is not found
+     */
+    protected final long removeFrom(final long fromIndex) {
+        final int adjustedIndex = adjustedIndex(fromIndex);
+        if (adjustedIndex < 0) {
+            // physical index should be >= 0
             return -1;
         }
 
-        for (int i = adjustedIndex; i < journal.size(); i++) {
-            dataSize -= journal.get(i).size();
+        final var size = journal.size();
+        if (adjustedIndex >= size) {
+            // physical index should be less than list size
+            return -1;
         }
 
-        journal.subList(adjustedIndex , journal.size()).clear();
+        final var toRemove = journal.subList(adjustedIndex, size);
+        for (var entry : toRemove) {
+            dataSize -= entry.size();
+        }
+        toRemove.clear();
 
         return adjustedIndex;
     }
@@ -269,6 +286,13 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
     @Override
     public final void clear(final int startIndex, final int endIndex) {
         journal.subList(startIndex, endIndex).clear();
+    }
+
+    @Override
+    @Deprecated(since = "11.0.0", forRemoval = true)
+    public final void clear() {
+        // Note: this could be optimized, but it's going away anyway
+        removeFrom(0);
     }
 
     @Override

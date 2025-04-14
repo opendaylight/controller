@@ -60,12 +60,11 @@ class ReplicatedLogImplTest {
             (short) 0, mockPersistence, (identifier, entry) -> { }, MoreExecutors.directExecutor());
     }
 
-    private void verifyPersist(final Object message) throws Exception {
+    private void verifyPersist(final Object message) {
         verifyPersist(message, new Same(message), true);
     }
 
-    private void verifyPersist(final Object message, final ArgumentMatcher<?> matcher, final boolean async)
-            throws Exception {
+    private void verifyPersist(final Object message, final ArgumentMatcher<?> matcher, final boolean async) {
         if (async) {
             verify(mockPersistence).persistAsync(argThat(matcher), procedureCaptor.capture());
         } else {
@@ -75,7 +74,7 @@ class ReplicatedLogImplTest {
     }
 
     @Test
-    void testAppendAndPersistExpectingNoCapture() throws Exception {
+    void testAppendAndPersistExpectingNoCapture() {
         final var log = new ReplicatedLogImpl(context);
 
         final var logEntry1 = new SimpleReplicatedLogEntry(1, 1, new MockCommand("1"));
@@ -99,7 +98,7 @@ class ReplicatedLogImplTest {
     }
 
     @Test
-    void testAppendAndPersisWithDuplicateEntry() throws Exception {
+    void testAppendAndPersisWithDuplicateEntry() {
         final var log = new ReplicatedLogImpl(context);
 
         final var logEntry = new SimpleReplicatedLogEntry(1, 1, new MockCommand("1"));
@@ -120,7 +119,7 @@ class ReplicatedLogImplTest {
     }
 
     @Test
-    void testAppendAndPersistExpectingCaptureDueToJournalCount() throws Exception {
+    void testAppendAndPersistExpectingCaptureDueToJournalCount() {
         configParams.setSnapshotBatchCount(2);
 
         final var log = new ReplicatedLogImpl(context);
@@ -140,7 +139,7 @@ class ReplicatedLogImplTest {
     }
 
     @Test
-    void testAppendAndPersistExpectingCaptureDueToDataSize() throws Exception {
+    void testAppendAndPersistExpectingCaptureDueToDataSize() {
         context.setTotalMemoryRetriever(() -> 100);
 
         final var log = new ReplicatedLogImpl(context);
@@ -162,24 +161,20 @@ class ReplicatedLogImplTest {
     }
 
     @Test
-    void testRemoveFromAndPersist() throws Exception {
+    void testRemoveFromAndPersist() {
         final var log = new ReplicatedLogImpl(context);
 
         log.append(new SimpleReplicatedLogEntry(0, 1, new MockCommand("0")));
         log.append(new SimpleReplicatedLogEntry(1, 1, new MockCommand("1")));
         log.append(new SimpleReplicatedLogEntry(2, 1, new MockCommand("2")));
 
-        log.removeFromAndPersist(1);
-
-        final var deleteEntries = new DeleteEntries(1);
-        verifyPersist(deleteEntries, match(deleteEntries), false);
-
+        log.trimToReceive(1);
         assertEquals(1, log.size());
+        verify(mockPersistence).deleteEntries(1);
 
-        reset(mockPersistence);
-
-        log.removeFromAndPersist(1);
-
+        // already trimmed, hence no-op
+        log.trimToReceive(1);
+        assertEquals(1, log.size());
         verifyNoMoreInteractions(mockPersistence);
     }
 

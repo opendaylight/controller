@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.raft;
 import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.raft.api.EntryMeta;
 import org.slf4j.Logger;
@@ -34,13 +33,12 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog {
     }
 
     @Override
-    public boolean removeFromAndPersist(final long logEntryIndex) {
-        long adjustedIndex = removeFrom(logEntryIndex);
+    public boolean trimToReceive(final long fromIndex) {
+        long adjustedIndex = removeFrom(fromIndex);
         if (adjustedIndex >= 0) {
-            context.getPersistenceProvider().persist(new DeleteEntries(logEntryIndex), unused -> { });
+            context.getPersistenceProvider().deleteEntries(fromIndex);
             return true;
         }
-
         return false;
     }
 

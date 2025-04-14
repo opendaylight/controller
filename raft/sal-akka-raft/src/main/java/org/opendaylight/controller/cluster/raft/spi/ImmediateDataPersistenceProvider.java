@@ -42,6 +42,11 @@ public interface ImmediateDataPersistenceProvider extends DataPersistenceProvide
     }
 
     @Override
+    default void deleteEntries(final long fromIndex) {
+        // No-op
+    }
+
+    @Override
     default <T> void persistAsync(final T entry, final Consumer<T> callback) {
         requireNonNull(entry);
         requireNonNull(callback);

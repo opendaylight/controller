@@ -17,7 +17,7 @@ final class MockReplicatedLog extends AbstractReplicatedLog {
     }
 
     @Override
-    public boolean removeFromAndPersist(final long index) {
+    public boolean trimToReceive(final long fromIndex) {
         return true;
     }
 

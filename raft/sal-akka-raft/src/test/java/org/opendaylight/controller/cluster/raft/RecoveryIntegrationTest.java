@@ -223,7 +223,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         });
 
         // Remove entries started from 4 index
-        leaderActor.underlyingActor().getReplicatedLog().removeFromAndPersist(4);
+        leaderActor.underlyingActor().getReplicatedLog().trimToReceive(4);
 
         verifyRaftState(leaderActor, raftState -> {
             assertEquals("leader journal last index", 3, leaderContext.getReplicatedLog().lastIndex());

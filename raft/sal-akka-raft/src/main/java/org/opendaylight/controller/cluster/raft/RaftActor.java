@@ -61,6 +61,7 @@ import org.opendaylight.controller.cluster.raft.client.messages.Shutdown;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.messages.RequestLeadership;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
+import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
 import org.opendaylight.controller.cluster.raft.persisted.NoopPayload;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
@@ -1013,6 +1014,14 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     final <A> void persist(final A entry, final Consumer<A> callback) {
         super.persist(entry, callback::accept);
+    }
+
+    // FIXME: CONTROLLER-2137: remove this method
+    @Deprecated(forRemoval = true)
+    final void deleteEntries(final long fromIndex) {
+        super.persist(new DeleteEntries(fromIndex), deleteEntries -> {
+            // No-op
+        });
     }
 
     @Override

@@ -243,9 +243,10 @@ class RaftActorRecoverySupport {
         replLog.setCommitIndex(lastApplied);
     }
 
+    @Deprecated(since = "11.0.0", forRemoval = true)
     private void onDeleteEntries(final DeleteEntries deleteEntries) {
         if (context.getPersistenceProvider().isRecoveryApplicable()) {
-            replicatedLog().removeFrom(deleteEntries.getFromIndex());
+            replicatedLog().removeRecoveredEntries(deleteEntries.getFromIndex());
         } else {
             dataRecoveredWithPersistenceDisabled = true;
         }
