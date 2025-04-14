@@ -8,9 +8,11 @@
 package org.opendaylight.controller.cluster.raft.spi;
 
 import java.nio.file.Path;
+import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.opendaylight.controller.cluster.raft.RaftActor;
+import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
 
@@ -28,4 +30,13 @@ public abstract non-sealed class EnabledRaftStorage extends RaftStorage {
     public final boolean isRecoveryApplicable() {
         return true;
     }
+
+    /**
+     * Persists a {@link ClusterConfig} to the applicable journal synchronously. The contract is that the callback will
+     * be invoked before {@link RaftActor} sees any other message.
+     *
+     * @param entry the journal entry to persist
+     * @param callback the callback when persistence is complete
+     */
+    public abstract void persistConfig(ClusterConfig config, Consumer<ClusterConfig> callback);
 }

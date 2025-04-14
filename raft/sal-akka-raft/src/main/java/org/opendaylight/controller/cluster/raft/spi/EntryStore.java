@@ -10,6 +10,9 @@ package org.opendaylight.controller.cluster.raft.spi;
 import java.util.function.Consumer;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.opendaylight.controller.cluster.raft.RaftActor;
+import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.raft.api.EntryMeta;
 
 /**
@@ -17,15 +20,14 @@ import org.opendaylight.raft.api.EntryMeta;
  */
 public interface EntryStore {
     /**
-     * Persists an entry to the applicable journal synchronously.
+     * Persists an entry to the applicable journal synchronously. The contract is that the callback will be invoked
+     * before {@link RaftActor} sees any other message.
      *
-     * @param <T> the type of the journal entry
      * @param entry the journal entry to persist
      * @param callback the callback when persistence is complete
      */
-    // FIXME: replace with:
-    //        void persist(Object entry) throws IOException
-    <T> void persist(@NonNull T entry, @NonNull Consumer<T> callback);
+    @NonNullByDefault
+    void persistEntry(ReplicatedLogEntry entry, Consumer<ReplicatedLogEntry> callback);
 
     /**
      * Delete entries starting from specified index.

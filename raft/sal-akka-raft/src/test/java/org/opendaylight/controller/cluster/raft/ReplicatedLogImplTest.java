@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -26,7 +25,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.internal.matchers.Same;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
@@ -47,7 +45,7 @@ class ReplicatedLogImplTest {
     @Mock
     private Consumer<ReplicatedLogEntry> mockCallback;
     @Captor
-    private ArgumentCaptor<Consumer<Object>> procedureCaptor;
+    private ArgumentCaptor<Consumer<ReplicatedLogEntry>> procedureCaptor;
     @TempDir
     private Path stateDir;
 
@@ -60,17 +58,17 @@ class ReplicatedLogImplTest {
             (short) 0, mockPersistence, (identifier, entry) -> { }, MoreExecutors.directExecutor());
     }
 
-    private void verifyPersist(final Object message) {
-        verifyPersist(message, new Same(message), true);
+    private void verifyPersist(final ReplicatedLogEntry entry) {
+        verifyPersist(entry, true);
     }
 
-    private void verifyPersist(final Object message, final ArgumentMatcher<?> matcher, final boolean async) {
+    private void verifyPersist(final ReplicatedLogEntry entry, final boolean async) {
         if (async) {
-            verify(mockPersistence).persistAsync(argThat(matcher), procedureCaptor.capture());
+            verify(mockPersistence).persistAsync(same(entry), procedureCaptor.capture());
         } else {
-            verify(mockPersistence).persist(argThat(matcher), procedureCaptor.capture());
+            verify(mockPersistence).persistEntry(same(entry), procedureCaptor.capture());
         }
-        procedureCaptor.getValue().accept(message);
+        procedureCaptor.getValue().accept(entry);
     }
 
     @Test

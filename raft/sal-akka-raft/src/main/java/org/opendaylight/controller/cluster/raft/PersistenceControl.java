@@ -94,25 +94,26 @@ final class PersistenceControl extends ForwardingDataPersistenceProvider {
     }
 
     @Override
-    public <T> void persist(final T entry, final Consumer<T> callback) {
-        callPersist(DataPersistenceProvider::persist, entry, callback);
+    public void persistEntry(final ReplicatedLogEntry entry, final Consumer<ReplicatedLogEntry> callback) {
+        if (!delegate.isRecoveryApplicable() && entry.command() instanceof ClusterConfig serverConfig) {
+            requireNonNull(callback);
+            enabledStorage.persistConfig(serverConfig, unused -> callback.accept(entry));
+        } else {
+            delegate.persistEntry(entry, callback);
+        }
     }
 
     @Override
-    public <T> void persistAsync(final T entry, final Consumer<T> callback) {
-        callPersist(DataPersistenceProvider::persistAsync, entry, callback);
-    }
-
-    private <T> void callPersist(final PersistMethod method, final T obj, final Consumer<T> callback) {
+    public <T> void persistAsync(final T obj, final Consumer<T> callback) {
         // TODO: revisit this statement with EntryStore
         //
         //   We persist the ClusterConfig but not the ReplicatedLogEntry to avoid gaps in the journal indexes
         //   on recovery if data persistence is later enabled.
         if (!delegate.isRecoveryApplicable() && obj instanceof ReplicatedLogEntry entry
             && entry.command() instanceof ClusterConfig serverConfig) {
-            method.invoke(enabledStorage, serverConfig, p -> callback.accept(obj));
-        } else  {
-            method.invoke(delegate, obj, callback);
+            enabledStorage.persistAsync(serverConfig, unused -> callback.accept(obj));
+        } else {
+            delegate.persistAsync(obj, callback);
         }
     }
 }

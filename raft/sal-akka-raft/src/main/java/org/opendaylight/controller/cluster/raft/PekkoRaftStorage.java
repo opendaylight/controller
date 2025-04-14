@@ -25,6 +25,7 @@ import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SnapshotProtocol;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
@@ -179,8 +180,13 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
     }
 
     @Override
-    public <T> void persist(final T entry, final Consumer<T> callback) {
+    public void persistEntry(final ReplicatedLogEntry entry, final Consumer<ReplicatedLogEntry> callback) {
         actor.persist(entry, callback);
+    }
+
+    @Override
+    public void persistConfig(final ClusterConfig config, final Consumer<ClusterConfig> callback) {
+        actor.persist(config, callback);
     }
 
     @Override

@@ -92,7 +92,7 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog {
         // FIXME: When can 'false' happen? Wouldn't that be an indication that Follower.handleAppendEntries() is doing
         //        something wrong?
         if (append(entry)) {
-            context.getPersistenceProvider().persist(entry, persisted -> invokeSync(persisted, callback));
+            context.getPersistenceProvider().persistEntry(entry, persisted -> invokeSync(persisted, callback));
         }
         return shouldCaptureSnapshot(entry.index());
     }
