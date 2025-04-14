@@ -46,7 +46,8 @@ final class LE implements Externalizable {
     @Override
     public void writeExternal(final ObjectOutput out) throws IOException {
         WritableObjects.writeLongs(out, index, term);
-        out.writeObject(data);
+        final var local = data;
+        out.writeObject(local != null ? local.toSerialForm() : null);
     }
 
     @Override
