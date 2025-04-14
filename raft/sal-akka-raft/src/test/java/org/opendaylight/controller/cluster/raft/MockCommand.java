@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft;
 
 import static java.util.Objects.requireNonNull;
 
+import java.io.Serializable;
 import org.opendaylight.controller.cluster.raft.spi.AbstractStateCommand;
 
 public final class MockCommand extends AbstractStateCommand {
@@ -37,9 +38,10 @@ public final class MockCommand extends AbstractStateCommand {
         return size;
     }
 
+
     @Override
-    public String toString() {
-        return data;
+    public Serializable toSerialForm() {
+        return new MockCommandProxy(data, size);
     }
 
     @Override
@@ -53,7 +55,7 @@ public final class MockCommand extends AbstractStateCommand {
     }
 
     @Override
-    protected Object writeReplace() {
-        return new MockCommandProxy(data, size);
+    public String toString() {
+        return data;
     }
 }
