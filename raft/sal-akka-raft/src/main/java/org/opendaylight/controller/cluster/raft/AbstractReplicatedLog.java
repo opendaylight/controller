@@ -48,6 +48,7 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
         this.memberId = requireNonNull(memberId);
     }
 
+    // FIXME: do not trim to int -- callers should do that for access to journal.get() purposes
     protected final int adjustedIndex(final long logEntryIndex) {
         if (snapshotIndex < 0) {
             return (int) logEntryIndex;
