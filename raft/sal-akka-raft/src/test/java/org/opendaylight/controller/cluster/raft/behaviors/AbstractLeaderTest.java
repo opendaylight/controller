@@ -53,7 +53,7 @@ public abstract class AbstractLeaderTest<T extends AbstractLeader> extends Abstr
         leaderActorContext.setConfigParams(configParams);
 
         leaderActorContext.resetReplicatedLog(
-                new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(1,5,1).build());
+                new MockRaftActorContext.Builder().createEntries(1,5,1).build());
 
         Map<String, String> peerAddresses = new HashMap<>();
         peerAddresses.put(follower1ActorId,

@@ -36,7 +36,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
     public MockRaftActorContext(final Path stateDir, final int payloadVersion) {
         super(null, null, newLocalAccess("test", stateDir), new HashMap<>(), new DefaultConfigParamsImpl(),
             (short) payloadVersion, new TestDataProvider(), (identifier, entry) -> { }, MoreExecutors.directExecutor());
-        resetReplicatedLog(new MockReplicatedLogBuilder().build());
+        resetReplicatedLog(new Builder().build());
     }
 
     @NonNullByDefault
@@ -145,17 +145,17 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         }
     }
 
-    public static class MockReplicatedLogBuilder {
+    public static final class Builder {
         private final SimpleReplicatedLog mockLog = new SimpleReplicatedLog();
 
-        public MockReplicatedLogBuilder createEntries(final int start, final int end, final int term) {
+        public Builder createEntries(final int start, final int end, final int term) {
             for (int i = start; i < end; i++) {
                 mockLog.append(new SimpleReplicatedLogEntry(i, term, new MockCommand(Integer.toString(i))));
             }
             return this;
         }
 
-        public MockReplicatedLogBuilder addEntry(final int index, final int term, final MockCommand payload) {
+        public Builder addEntry(final int index, final int term, final MockCommand payload) {
             mockLog.append(new SimpleReplicatedLogEntry(index, term, payload));
             return this;
         }

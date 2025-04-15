@@ -125,7 +125,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     public void testBecomeLeaderOnReceivingMajorityVotesInFiveNodeCluster() {
         MockRaftActorContext raftActorContext = createActorContext();
         raftActorContext.setTermInfo(new TermInfo(2L, "other"));
-        final var log = new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 5, 1).build();
+        final var log = new MockRaftActorContext.Builder().createEntries(0, 5, 1).build();
         log.setCommitIndex(log.lastIndex());
         log.setLastApplied(log.lastIndex());
         raftActorContext.resetReplicatedLog(log);
@@ -154,7 +154,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     public void testBecomeLeaderOnReceivingMajorityVotesWithNonVotingPeers() {
         final var raftActorContext = createActorContext();
         raftActorContext.setPeerAddresses(setupPeers(4));
-        raftActorContext.resetReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().build());
+        raftActorContext.resetReplicatedLog(new MockRaftActorContext.Builder().build());
         raftActorContext.getPeerInfo("peer1").setVotingState(VotingState.NON_VOTING);
         raftActorContext.getPeerInfo("peer4").setVotingState(VotingState.NON_VOTING);
         candidate = new Candidate(raftActorContext);

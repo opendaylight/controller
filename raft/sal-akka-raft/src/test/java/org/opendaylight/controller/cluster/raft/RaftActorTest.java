@@ -559,7 +559,7 @@ public class RaftActorTest extends AbstractActorTest {
         leaderActor.setCurrentBehavior(leader);
         assertSame(leader, leaderActor.getCurrentBehavior());
 
-        leaderActor.getRaftActorContext().setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder()
+        leaderActor.getRaftActorContext().setReplicatedLog(new MockRaftActorContext.Builder()
             .createEntries(0, 8, 1)
             .build());
 
@@ -660,7 +660,7 @@ public class RaftActorTest extends AbstractActorTest {
         assertSame(follower, followerActor.getCurrentBehavior());
 
         // create 6 entries in the log - 0 to 4 are applied and will get picked up as part of the capture snapshot
-        MockRaftActorContext.MockReplicatedLogBuilder logBuilder = new MockRaftActorContext.MockReplicatedLogBuilder();
+        MockRaftActorContext.Builder logBuilder = new MockRaftActorContext.Builder();
         followerActor.getRaftActorContext().setReplicatedLog(logBuilder.createEntries(0, 6, 1).build());
 
         // log has indices 0-5
@@ -750,7 +750,7 @@ public class RaftActorTest extends AbstractActorTest {
         assertSame(leader, leaderActor.getCurrentBehavior());
 
         // create 5 entries in the log
-        leaderActor.getRaftActorContext().setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder()
+        leaderActor.getRaftActorContext().setReplicatedLog(new MockRaftActorContext.Builder()
             .createEntries(5, 10, 1)
             .build());
 

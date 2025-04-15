@@ -33,7 +33,7 @@ import org.opendaylight.controller.cluster.raft.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.MessageCollectorActor;
 import org.opendaylight.controller.cluster.raft.MockCommand;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
-import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockReplicatedLogBuilder;
+import org.opendaylight.controller.cluster.raft.MockRaftActorContext.Builder;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.SimpleReplicatedLog;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
@@ -226,7 +226,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         context.setTermInfo(new TermInfo(1, "test"));
 
         //log has 1 entry with replicatedToAllIndex = 0, does not do anything, returns the
-        var log = new MockReplicatedLogBuilder().createEntries(0, 1, 1).build();
+        var log = new Builder().createEntries(0, 1, 1).build();
         log.setLastApplied(0);
         context.resetReplicatedLog(log);
         abstractBehavior.performSnapshotWithoutCapture(0);
@@ -234,7 +234,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         assertEquals(1, log.size());
 
         //2 entries, lastApplied still 0, no purging.
-        log = new MockReplicatedLogBuilder().createEntries(0, 2, 1).build();
+        log = new Builder().createEntries(0, 2, 1).build();
         log.setLastApplied(0);
         context.resetReplicatedLog(log);
         abstractBehavior.performSnapshotWithoutCapture(0);
@@ -242,7 +242,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         assertEquals(2, context.getReplicatedLog().size());
 
         //2 entries, lastApplied still 0, no purging.
-        log = new MockReplicatedLogBuilder().createEntries(0, 2, 1).build();
+        log = new Builder().createEntries(0, 2, 1).build();
         log.setLastApplied(1);
         context.resetReplicatedLog(log);
         abstractBehavior.performSnapshotWithoutCapture(0);
@@ -251,7 +251,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
 
         // 5 entries, lastApplied =2 and replicatedIndex = 3, but since we want to keep the lastapplied, indices 0 and
         // 1 will only get purged
-        log = new MockReplicatedLogBuilder().createEntries(0, 5, 1).build();
+        log = new Builder().createEntries(0, 5, 1).build();
         log.setLastApplied(2);
         context.resetReplicatedLog(log);
         abstractBehavior.performSnapshotWithoutCapture(3);
@@ -259,7 +259,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         assertEquals(3, context.getReplicatedLog().size());
 
         // scenario where Last applied > Replicated to all index (becoz of a slow follower)
-        log = new MockReplicatedLogBuilder().createEntries(0, 3, 1).build();
+        log = new Builder().createEntries(0, 3, 1).build();
         log.setLastApplied(2);
         context.resetReplicatedLog(log);
         abstractBehavior.performSnapshotWithoutCapture(1);

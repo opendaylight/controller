@@ -525,7 +525,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         logStart("testHandleAppendEntriesSenderPrevLogIndexIsInTheSnapshot");
 
         MockRaftActorContext context = createActorContext();
-        final var log = new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(5, 8, 3).build();
+        final var log = new MockRaftActorContext.Builder().createEntries(5, 8, 3).build();
         log.setSnapshotIndex(4);
         log.setSnapshotTerm(3);
         context.resetReplicatedLog(log);
