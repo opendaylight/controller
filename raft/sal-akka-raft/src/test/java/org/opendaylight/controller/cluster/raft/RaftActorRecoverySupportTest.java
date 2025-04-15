@@ -38,7 +38,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
-import org.mockito.ArgumentMatchers;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -81,19 +80,18 @@ class RaftActorRecoverySupportTest {
 
     private ActorRef mockActorRef;
     private ActorSystem mockActorSystem;
-    private RaftActorRecoverySupport support;
-
+    private LocalAccess localAccess;
     private RaftActorContext context;
+
+    private RaftActorRecoverySupport support;
 
     @BeforeEach
     void setup() {
         mockActorSystem = ActorSystem.create();
         mockActorRef = mockActorSystem.actorOf(Props.create(DoNothingActor.class));
-        final var localAccess = new LocalAccess(localId, stateDir);
+        localAccess = new LocalAccess(localId, stateDir);
         context = new RaftActorContextImpl(mockActorRef, null, localAccess, Map.of(), configParams, (short) 0,
             mockPersistence, (identifier, entry) -> { }, MoreExecutors.directExecutor());
-
-        support = new RaftActorRecoverySupport(localAccess, context, mockCohort);
     }
 
     @AfterEach
@@ -112,7 +110,7 @@ class RaftActorRecoverySupportTest {
 
     @Test
     void testOnReplicatedLogEntry() {
-        doReturn(true).when(mockPersistence).isRecoveryApplicable();
+        support = new RaftActorRecoverySupport(localAccess, context, mockCohort, true);
 
         final var logEntry = new SimpleReplicatedLogEntry(1, 1, new MockCommand("1", 5));
 
@@ -129,8 +127,8 @@ class RaftActorRecoverySupportTest {
     }
 
     @Test
-    public void testOnApplyJournalEntries() {
-        doReturn(true).when(mockPersistence).isRecoveryApplicable();
+    void testOnApplyJournalEntries() {
+        support = new RaftActorRecoverySupport(localAccess, context, mockCohort, true);
 
         configParams.setJournalRecoveryLogBatchSize(5);
 
@@ -176,8 +174,8 @@ class RaftActorRecoverySupportTest {
     }
 
     @Test
-    public void testIncrementalRecovery() throws Exception {
-        doReturn(true).when(mockPersistence).isRecoveryApplicable();
+    void testIncrementalRecovery() throws Exception {
+        support = new RaftActorRecoverySupport(localAccess, context, mockCohort, true);
 
         int recoverySnapshotInterval = 3;
         int numberOfEntries = 5;
@@ -207,8 +205,8 @@ class RaftActorRecoverySupportTest {
     }
 
     @Test
-    public void testOnSnapshotOffer() {
-        doReturn(true).when(mockPersistence).isRecoveryApplicable();
+    void testOnSnapshotOffer() {
+        support = new RaftActorRecoverySupport(localAccess, context, mockCohort, true);
 
         var replicatedLog = context.getReplicatedLog();
         replicatedLog.append(new SimpleReplicatedLogEntry(1, 1, new MockCommand("1")));
@@ -247,8 +245,8 @@ class RaftActorRecoverySupportTest {
     }
 
     @Test
-    public void testOnRecoveryCompletedWithRemainingBatch() {
-        doReturn(true).when(mockPersistence).isRecoveryApplicable();
+    void testOnRecoveryCompletedWithRemainingBatch() {
+        support = new RaftActorRecoverySupport(localAccess, context, mockCohort, true);
 
         final var replicatedLog = context.getReplicatedLog();
         replicatedLog.append(new SimpleReplicatedLogEntry(0, 1, new MockCommand("0")));
@@ -274,7 +272,9 @@ class RaftActorRecoverySupportTest {
     }
 
     @Test
-    public void testOnRecoveryCompletedWithNoRemainingBatch() {
+    void testOnRecoveryCompletedWithNoRemainingBatch() {
+        support = new RaftActorRecoverySupport(localAccess, context, mockCohort, false);
+
         sendMessageToSupport(RecoveryCompleted.getInstance(), true);
 
         verify(mockCohort).getRestoreFromSnapshot();
@@ -282,8 +282,8 @@ class RaftActorRecoverySupportTest {
     }
 
     @Test
-    public void testOnDeleteEntries() {
-        doReturn(true).when(mockPersistence).isRecoveryApplicable();
+    void testOnDeleteEntries() {
+        support = new RaftActorRecoverySupport(localAccess, context, mockCohort, true);
 
         ReplicatedLog replicatedLog = context.getReplicatedLog();
         replicatedLog.append(new SimpleReplicatedLogEntry(0, 1, new MockCommand("0")));
@@ -297,15 +297,18 @@ class RaftActorRecoverySupportTest {
     }
 
     @Test
-    public void testUpdateElectionTerm() {
+    void testUpdateElectionTerm() {
+        support = new RaftActorRecoverySupport(localAccess, context, mockCohort, false);
+
         sendMessageToSupport(new UpdateElectionTerm(5, "member2"));
 
         assertEquals("Current term", new TermInfo(5, "member2"), context.termInfo());
     }
 
     @Test
-    public void testDataRecoveredWithPersistenceDisabled() {
-        doReturn(false).when(mockPersistence).isRecoveryApplicable();
+    void testDataRecoveredWithPersistenceDisabled() {
+        support = new RaftActorRecoverySupport(localAccess, context, mockCohort, false);
+
         doReturn(10L).when(mockActor).lastSequenceNr();
 
         Snapshot snapshot = Snapshot.create(new MockSnapshotState(List.of(new MockCommand("1"))),
@@ -342,12 +345,10 @@ class RaftActorRecoverySupportTest {
 //        verify(mockPersistentProvider).deleteMessages(10L);
     }
 
-    static UpdateElectionTerm updateElectionTerm(final long term, final String votedFor) {
-        return ArgumentMatchers.argThat(new TermInfo(term, votedFor)::equals);
-    }
-
     @Test
-    public void testNoDataRecoveredWithPersistenceDisabled() {
+    void testNoDataRecoveredWithPersistenceDisabled() {
+        support = new RaftActorRecoverySupport(localAccess, context, mockCohort, false);
+
         sendMessageToSupport(new UpdateElectionTerm(5, "member2"));
 
         assertEquals("Current term", new TermInfo(5, "member2"), context.termInfo());
@@ -359,8 +360,8 @@ class RaftActorRecoverySupportTest {
     }
 
     @Test
-    public void testServerConfigurationPayloadApplied() {
-        doReturn(true).when(mockPersistence).isRecoveryApplicable();
+    void testServerConfigurationPayloadApplied() {
+        support = new RaftActorRecoverySupport(localAccess, context, mockCohort, true);
 
         String follower1 = "follower1";
         String follower2 = "follower2";
@@ -404,8 +405,8 @@ class RaftActorRecoverySupportTest {
     }
 
     @Test
-    public void testServerConfigurationPayloadAppliedWithPersistenceDisabled() {
-        doReturn(false).when(mockPersistence).isRecoveryApplicable();
+    void testServerConfigurationPayloadAppliedWithPersistenceDisabled() {
+        support = new RaftActorRecoverySupport(localAccess, context, mockCohort, false);
 
         final var obj = new ClusterConfig(new ServerInfo(localId, true), new ServerInfo("follower", true));
 
@@ -416,8 +417,8 @@ class RaftActorRecoverySupportTest {
     }
 
     @Test
-    public void testOnSnapshotOfferWithServerConfiguration() {
-        doReturn(true).when(mockPersistence).isRecoveryApplicable();
+    void testOnSnapshotOfferWithServerConfiguration() {
+        support = new RaftActorRecoverySupport(localAccess, context, mockCohort, true);
 
         long electionTerm = 2;
         String electionVotedFor = "member-2";

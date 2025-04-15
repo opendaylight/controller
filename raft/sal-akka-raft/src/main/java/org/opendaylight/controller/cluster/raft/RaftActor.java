@@ -208,7 +208,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     @VisibleForTesting
     RaftActorRecoverySupport newRaftActorRecoverySupport() {
-        return new RaftActorRecoverySupport(localAccess, context, getRaftActorRecoveryCohort());
+        return new RaftActorRecoverySupport(localAccess, context, getRaftActorRecoveryCohort(), isRecoveryApplicable());
     }
 
     @VisibleForTesting

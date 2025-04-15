@@ -43,6 +43,7 @@ class RaftActorRecoverySupport {
     private final @NonNull RaftActorContext context;
     private final @NonNull RaftActorRecoveryCohort cohort;
     private final @Nullable TermInfo origTermInfo;
+    private final boolean recoveryApplicable;
 
     private int currentRecoveryBatchCount;
     private boolean dataRecoveredWithPersistenceDisabled;
@@ -52,11 +53,14 @@ class RaftActorRecoverySupport {
     private Stopwatch recoveryTimer;
     private Stopwatch recoverySnapshotTimer;
 
+
     RaftActorRecoverySupport(final @NonNull LocalAccess localAccess, final RaftActorContext context,
-            final RaftActorRecoveryCohort cohort) {
+            final RaftActorRecoveryCohort cohort, final boolean recoveryApplicable) {
         this.localAccess = requireNonNull(localAccess);
         this.context = requireNonNull(context);
         this.cohort = requireNonNull(cohort);
+        this.recoveryApplicable = recoveryApplicable;
+
         try {
             origTermInfo = localAccess.termInfoStore().loadAndSetTerm();
         } catch (IOException e) {
@@ -139,7 +143,7 @@ class RaftActorRecoverySupport {
             }
         }
 
-        if (!context.isRecoveryApplicable()) {
+        if (!recoveryApplicable) {
             // We may have just transitioned to disabled and have a snapshot containing state data and/or log
             // entries - we don't want to preserve these, only the server config and election term info.
 
@@ -189,7 +193,7 @@ class RaftActorRecoverySupport {
             context.updatePeerIds(clusterConfig);
         }
 
-        if (context.isRecoveryApplicable()) {
+        if (recoveryApplicable) {
             replicatedLog().append(logEntry);
         } else if (!(command instanceof ClusterConfig)) {
             dataRecoveredWithPersistenceDisabled = true;
@@ -197,7 +201,7 @@ class RaftActorRecoverySupport {
     }
 
     private void onRecoveredApplyLogEntries(final long toIndex) {
-        if (!context.isRecoveryApplicable()) {
+        if (!recoveryApplicable) {
             dataRecoveredWithPersistenceDisabled = true;
             return;
         }
@@ -245,7 +249,7 @@ class RaftActorRecoverySupport {
 
     @Deprecated(since = "11.0.0", forRemoval = true)
     private void onDeleteEntries(final DeleteEntries deleteEntries) {
-        if (context.isRecoveryApplicable()) {
+        if (recoveryApplicable) {
             replicatedLog().removeRecoveredEntries(deleteEntries.getFromIndex());
         } else {
             dataRecoveredWithPersistenceDisabled = true;
@@ -332,7 +336,7 @@ class RaftActorRecoverySupport {
             infoStore.setTerm(orig);
         }
 
-        if (dataRecoveredWithPersistenceDisabled || hasMigratedDataRecovered && !context.isRecoveryApplicable()) {
+        if (dataRecoveredWithPersistenceDisabled || hasMigratedDataRecovered && !recoveryApplicable) {
             if (hasMigratedDataRecovered) {
                 LOG.info("{}: Saving snapshot after recovery due to migrated messages", memberId());
             } else {
