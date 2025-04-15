@@ -66,7 +66,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         // Now deliver the AppendEntries to the follower
         follower1Actor.underlyingActor().stopDropMessages(AppendEntries.class);
 
-        MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyJournalEntries.class, 1);
+        verifyApplyIndex(leaderActor, 4);
 
         // Now deliver the SaveSnapshotSuccess to the leader.
         final var saveSuccess = MessageCollectorActor.expectFirstMatching(
@@ -147,9 +147,8 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         final MockCommand payload2 = sendPayloadData(leaderActor, "two");
 
         // Verify the leader applies the 3rd payload state.
-        MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyJournalEntries.class, 1);
-
-        MessageCollectorActor.expectMatching(follower2CollectorActor, ApplyJournalEntries.class, 1);
+        verifyApplyIndex(leaderActor, 2);
+        verifyApplyIndex(follower2Actor, 2);
 
         final var leaderLog = leaderContext.getReplicatedLog();
         assertEquals("Leader commit index", 2, leaderLog.getCommitIndex());
@@ -265,12 +264,12 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
 
         payload0 = sendPayloadData(leaderActor, "zero");
 
-        MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyJournalEntries.class, 1);
+        verifyApplyIndex(leaderActor, 0);
 
         payload1 = sendPayloadData(leaderActor, "one");
 
         // Verify the leader applies the states.
-        MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyJournalEntries.class, 2);
+        verifyApplyIndex(leaderActor, 1);
 
         assertEquals("Leader last applied", 1, leaderContext.getReplicatedLog().getLastApplied());
 

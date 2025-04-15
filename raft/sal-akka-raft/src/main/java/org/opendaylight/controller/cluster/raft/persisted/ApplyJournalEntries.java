@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.raft.persisted;
 
 import java.io.Serializable;
-import org.apache.pekko.dispatch.ControlMessage;
 
 /**
  * This is an internal message that is stored in the akka's persistent journal. During recovery, this
@@ -18,7 +17,8 @@ import org.apache.pekko.dispatch.ControlMessage;
  *
  * @author Thomas Pantelis
  */
-public final class ApplyJournalEntries implements Serializable, ControlMessage {
+@Deprecated(since = "11.0.0", forRemoval = true)
+public final class ApplyJournalEntries implements PekkoPersistenceContract, Serializable {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 

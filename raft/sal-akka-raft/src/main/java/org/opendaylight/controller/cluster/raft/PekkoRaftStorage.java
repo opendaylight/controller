@@ -200,6 +200,11 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
     }
 
     @Override
+    public void markLastApplied(final long lastApplied) {
+        actor.markLastApplied(lastApplied);
+    }
+
+    @Override
     public void saveSnapshot(final Snapshot snapshot) {
         actor.saveSnapshot(snapshot);
     }

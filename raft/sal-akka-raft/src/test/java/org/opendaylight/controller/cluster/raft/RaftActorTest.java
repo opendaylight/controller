@@ -349,30 +349,6 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testApplyJournalEntriesCallsDataPersistence() throws Exception {
-        String persistenceId = factory.generateActorId("leader-");
-
-        DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
-
-        config.setHeartBeatInterval(ONE_DAY);
-
-        DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
-
-        TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(MockRaftActor.props(persistenceId,
-            stateDir(), Map.of(), config, dataPersistenceProvider), persistenceId);
-
-        MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
-
-        mockRaftActor.waitForInitializeBehaviorComplete();
-
-        mockRaftActor.waitUntilLeader();
-
-        mockRaftActor.handleCommand(new ApplyJournalEntries(10));
-
-        verify(dataPersistenceProvider).persistAsync(any(ApplyJournalEntries.class), any(Consumer.class));
-    }
-
-    @Test
     public void testApplyState() {
         String persistenceId = factory.generateActorId("leader-");
 
