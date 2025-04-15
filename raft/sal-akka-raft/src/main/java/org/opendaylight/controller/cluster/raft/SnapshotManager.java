@@ -272,7 +272,7 @@ public final class SnapshotManager {
         final var request = newCaptureSnapshot(lastLogEntry, replicatedToAllIndex, false);
         LOG.info("{}: Initiating snapshot capture {} to install on {}", memberId(), request, targetFollower);
 
-        final var lastSeq = context.getPersistenceProvider().getLastSequenceNumber();
+        final var lastSeq = context.entryStore().lastSequenceNumber();
         LOG.debug("{}: lastSequenceNumber prior to capture: {}", memberId(), lastSeq);
 
         task = new Capture(lastSeq, request);
@@ -283,9 +283,7 @@ public final class SnapshotManager {
     private <T extends Snapshot.State> boolean captureToInstall(final RaftActorSnapshotCohort<T> typedCohort,
             final CaptureSnapshot request) {
         final var snapshot = typedCohort.takeSnapshot();
-        final var persistence = context.getPersistenceProvider();
-
-        persistence.streamToInstall(request.lastApplied(), snapshot, typedCohort.support().writer(),
+        context.snapshotStore().streamToInstall(request.lastApplied(), snapshot, typedCohort.support().writer(),
             (cause, installable) -> {
                 if (cause != null) {
                     task = Idle.INSTANCE;
@@ -330,7 +328,7 @@ public final class SnapshotManager {
 
     private boolean capture(final @NonNull CaptureSnapshot request) {
         LOG.info("{}: Initiating snapshot capture {}", memberId(), request);
-        final var lastSeq = context.getPersistenceProvider().getLastSequenceNumber();
+        final var lastSeq = context.entryStore().lastSequenceNumber();
         final var snapshotState = snapshotCohort.takeSnapshot();
         LOG.debug("{}: captured snapshot at lastSequenceNumber: {}", memberId(), lastSeq);
         persist(lastSeq, request, snapshotState);
@@ -384,13 +382,12 @@ public final class SnapshotManager {
 
     @NonNullByDefault
     private void persistSnapshot(final Snapshot snapshot, final ApplyLeaderSnapshot.@Nullable Callback callback) {
-        final var persistence = context.getPersistenceProvider();
-        final var lastSeq = persistence.getLastSequenceNumber();
+        final var lastSeq = context.entryStore().lastSequenceNumber();
         final var persisting = new PersistApply(lastSeq, snapshot, callback);
 
         task = persisting;
         LOG.debug("{}: lastSequenceNumber prior to persisting applied snapshot: {}", memberId(), lastSeq);
-        persistence.saveSnapshot(persisting.snapshot);
+        context.snapshotStore().saveSnapshot(persisting.snapshot);
     }
 
     /**
@@ -422,7 +419,7 @@ public final class SnapshotManager {
                 request.getLastAppliedIndex(), request.getLastAppliedTerm(),
                 context.termInfo(), context.getPeerServerInfo(true));
 
-        context.getPersistenceProvider().saveSnapshot(snapshot);
+        context.snapshotStore().saveSnapshot(snapshot);
 
         LOG.info("{}: Persisting of snapshot done: {}", memberId(), snapshot);
 
@@ -499,9 +496,8 @@ public final class SnapshotManager {
         LOG.debug("{}: Snapshot success -  sequence number: {}", memberId(), sequenceNumber);
         final var lastSequenceNumber = commit(persist);
 
-        final var persistence = context.getPersistenceProvider();
-        persistence.deleteSnapshots(timestamp - 1);
-        persistence.deleteMessages(lastSequenceNumber);
+        context.snapshotStore().deleteSnapshots(timestamp - 1);
+        context.entryStore().deleteMessages(lastSequenceNumber);
 
         snapshotComplete();
     }

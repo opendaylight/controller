@@ -20,11 +20,4 @@ public interface DataPersistenceProvider extends EntryStore, SnapshotStore {
      *         may not have anything to be recovered
      */
     boolean isRecoveryApplicable();
-
-    /**
-     * Returns the last sequence number contained in the journal.
-     *
-     * @return the last sequence number
-     */
-    long getLastSequenceNumber();
 }

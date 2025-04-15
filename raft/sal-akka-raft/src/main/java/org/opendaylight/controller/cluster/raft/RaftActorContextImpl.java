@@ -30,6 +30,8 @@ import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
+import org.opendaylight.controller.cluster.raft.spi.EntryStore;
+import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
 import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.raft.spi.FileBackedOutputStreamFactory;
@@ -316,6 +318,21 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     public DataPersistenceProvider getPersistenceProvider() {
+        return persistenceProvider;
+    }
+
+    @Override
+    public boolean isRecoveryApplicable() {
+        return persistenceProvider.isRecoveryApplicable();
+    }
+
+    @Override
+    public EntryStore entryStore() {
+        return persistenceProvider;
+    }
+
+    @Override
+    public SnapshotStore snapshotStore() {
         return persistenceProvider;
     }
 

@@ -65,7 +65,7 @@ public interface ImmediateDataPersistenceProvider extends DataPersistenceProvide
     }
 
     @Override
-    default long getLastSequenceNumber() {
+    default long lastSequenceNumber() {
         return -1;
     }
 

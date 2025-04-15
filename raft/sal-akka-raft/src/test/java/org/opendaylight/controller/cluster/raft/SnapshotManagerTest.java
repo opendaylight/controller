@@ -380,7 +380,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
     @Test
     public void testCommit() {
-        doReturn(50L).when(mockDataPersistenceProvider).getLastSequenceNumber();
+        doReturn(50L).when(mockDataPersistenceProvider).lastSequenceNumber();
 
         // when replicatedToAllIndex = -1
         doReturn(ByteState.empty()).when(mockCohort).takeSnapshot();
@@ -429,7 +429,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
     @Test
     public void testCallingCommitMultipleTimesCausesNoHarm() {
-        doReturn(50L).when(mockDataPersistenceProvider).getLastSequenceNumber();
+        doReturn(50L).when(mockDataPersistenceProvider).lastSequenceNumber();
 
         // when replicatedToAllIndex = -1
         doReturn(ByteState.empty()).when(mockCohort).takeSnapshot();
