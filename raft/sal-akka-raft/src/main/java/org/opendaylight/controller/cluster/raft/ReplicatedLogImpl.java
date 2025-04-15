@@ -123,4 +123,9 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog {
             callback.accept(entry);
         }
     }
+
+    @Override
+    public void markLastApplied() {
+        context.getPersistenceProvider().markLastApplied(getLastApplied());
+    }
 }
