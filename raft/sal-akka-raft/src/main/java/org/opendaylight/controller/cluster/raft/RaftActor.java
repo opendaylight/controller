@@ -272,9 +272,6 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             }
 
             possiblyHandleBehaviorMessage(applyState);
-        } else if (message instanceof ApplyJournalEntries applyEntries) {
-            LOG.debug("{}: Persisting ApplyJournalEntries with index={}", memberId(), applyEntries.getToIndex());
-            persistence().persistAsync(applyEntries, unused -> { });
         } else if (message instanceof FindLeader) {
             getSender().tell(new FindLeaderReply(getLeaderAddress()), self());
         } else if (message instanceof GetOnDemandRaftState) {
@@ -715,10 +712,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 // Apply the state immediately.
                 applyCommand(identifier, persistedEntry);
 
-                // Send a ApplyJournalEntries message so that we write the fact that we applied
-                // the state to durable storage
-                self().tell(new ApplyJournalEntries(persistedEntry.index()), self());
-
+                // We have finished applying the command, tell ReplicatedLog about that
+                currentLog.markLastApplied();
             } else {
                 currentLog.captureSnapshotIfReady(persistedEntry);
 
@@ -1032,6 +1027,13 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     final <A> void persistAsync(final A entry, final Consumer<A> callback) {
         super.persistAsync(entry, callback::accept);
+    }
+
+    final void markLastApplied(final long lastApplied) {
+        LOG.debug("{}: Persisting ApplyJournalEntries with index={}", memberId(), lastApplied);
+        super.persistAsync(new ApplyJournalEntries(lastApplied), unused -> {
+            // No-op
+        });
     }
 
     @Override

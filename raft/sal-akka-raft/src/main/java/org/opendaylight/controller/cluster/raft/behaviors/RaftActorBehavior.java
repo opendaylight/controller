@@ -25,7 +25,6 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
-import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.api.TermInfo;
@@ -385,9 +384,9 @@ public abstract class RaftActorBehavior implements AutoCloseable {
 
         // send a message to persist a ApplyLogEntries marker message into akka's persistent journal
         // will be used during recovery
-        //in case if the above code throws an error and this message is not sent, it would be fine
+        // in case if the above code throws an error and this message is not sent, it would be fine
         // as the  append entries received later would initiate add this message to the journal
-        actor().tell(new ApplyJournalEntries(replLog.getLastApplied()), actor());
+        replLog.markLastApplied();
     }
 
     /**

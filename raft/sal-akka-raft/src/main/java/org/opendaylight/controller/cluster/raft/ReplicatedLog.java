@@ -133,6 +133,11 @@ public interface ReplicatedLog {
     void setLastApplied(long lastApplied);
 
     /**
+     * Mark the current value {@link #getLastApplied()} for recovery purposes.
+     */
+    void markLastApplied();
+
+    /**
      * Removes entries from the in-memory log starting at the given index. This method exists only to deal with the
      * effects of {@link #trimToReceive(long)} with Pekko Persistence.
      *

@@ -143,6 +143,11 @@ public class MockRaftActorContext extends RaftActorContextImpl {
             }
             return true;
         }
+
+        @Override
+        public void markLastApplied() {
+            // No-op
+        }
     }
 
     public static class MockReplicatedLogBuilder {
