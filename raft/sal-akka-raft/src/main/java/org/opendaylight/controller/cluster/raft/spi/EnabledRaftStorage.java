@@ -35,7 +35,7 @@ public abstract non-sealed class EnabledRaftStorage extends RaftStorage {
      * Persists a {@link ClusterConfig} to the applicable journal synchronously. The contract is that the callback will
      * be invoked before {@link RaftActor} sees any other message.
      *
-     * @param entry the journal entry to persist
+     * @param config the configuration to persist
      * @param callback the callback when persistence is complete
      */
     public abstract void persistConfig(ClusterConfig config, Consumer<ClusterConfig> callback);
