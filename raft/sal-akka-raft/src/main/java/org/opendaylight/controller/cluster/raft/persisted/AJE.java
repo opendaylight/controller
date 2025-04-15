@@ -19,7 +19,8 @@ import org.opendaylight.yangtools.concepts.WritableObjects;
 /**
  * Serialization proxy for {@link ApplyJournalEntries}.
  */
-final class AJE implements Externalizable {
+@Deprecated(since = "11.0.0", forRemoval = true)
+final class AJE implements PekkoPersistenceContract, Externalizable {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 

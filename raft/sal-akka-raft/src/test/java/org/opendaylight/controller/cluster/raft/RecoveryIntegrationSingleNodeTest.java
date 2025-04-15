@@ -11,7 +11,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 import java.util.Map;
-import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.persistence.SaveSnapshotSuccess;
 import org.apache.pekko.testkit.TestActorRef;
 import org.junit.Before;
@@ -37,7 +36,7 @@ public class RecoveryIntegrationSingleNodeTest extends AbstractRaftActorIntegrat
 
         waitUntilLeader(singleNodeActorRef);
 
-        ActorRef singleNodeCollectorActor = singleNodeActorRef.underlyingActor().collectorActor();
+        final var singleNodeCollectorActor = singleNodeActorRef.underlyingActor().collectorActor();
         final var singleNodeContext = singleNodeActorRef.underlyingActor().getRaftActorContext();
 
         InMemoryJournal.addWriteMessagesCompleteLatch(persistenceId, 6, ApplyJournalEntries.class);
@@ -46,12 +45,12 @@ public class RecoveryIntegrationSingleNodeTest extends AbstractRaftActorIntegrat
         final MockCommand payload1 = sendPayloadData(singleNodeActorRef, "one");
         final MockCommand payload2 = sendPayloadData(singleNodeActorRef, "two");
 
-        MessageCollectorActor.expectMatching(singleNodeCollectorActor, ApplyJournalEntries.class, 3);
+        verifyApplyIndex(singleNodeActorRef, 2);
 
         // this should trigger a snapshot
         final MockCommand payload3 = sendPayloadData(singleNodeActorRef, "three");
 
-        MessageCollectorActor.expectMatching(singleNodeCollectorActor, ApplyJournalEntries.class, 4);
+        verifyApplyIndex(singleNodeActorRef, 3);
 
         //add 2 more
         final MockCommand payload4 = sendPayloadData(singleNodeActorRef, "four");
@@ -61,7 +60,7 @@ public class RecoveryIntegrationSingleNodeTest extends AbstractRaftActorIntegrat
         // Wait for snapshot complete.
         MessageCollectorActor.expectFirstMatching(singleNodeCollectorActor, SaveSnapshotSuccess.class);
 
-        MessageCollectorActor.expectMatching(singleNodeCollectorActor, ApplyJournalEntries.class, 6);
+        verifyApplyIndex(singleNodeActorRef, 5);
 
         assertEquals("Last applied", 5, singleNodeContext.getReplicatedLog().getLastApplied());
 
