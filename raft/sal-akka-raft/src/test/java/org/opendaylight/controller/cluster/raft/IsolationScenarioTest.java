@@ -138,9 +138,9 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         // Submit an initial payload that is committed/applied on all nodes.
 
         final MockCommand payload0 = sendPayloadData(leaderActor, "zero");
-        verifyApplyJournalEntries(leaderCollectorActor, 0);
-        verifyApplyJournalEntries(follower1CollectorActor, 0);
-        verifyApplyJournalEntries(follower2CollectorActor, 0);
+        verifyApplyIndex(leaderActor, 0);
+        verifyApplyIndex(follower1Actor, 0);
+        verifyApplyIndex(follower2Actor, 0);
 
         // Submit another payload that is replicated to all followers and committed on the leader but the leader is
         // isolated before the entry is committed on the followers. To accomplish this we drop the AppendEntries
@@ -162,7 +162,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
                 ae.getEntries().size() == 1 && ae.getEntries().getFirst().index() == 1
                         && ae.getEntries().getFirst().command().equals(payload1));
 
-        verifyApplyJournalEntries(leaderCollectorActor, 1);
+        verifyApplyIndex(leaderActor, 1);
 
         isolateLeader();
 
@@ -193,9 +193,9 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
 
         testLog.info("Sending payload to new leader");
 
-        final MockCommand newLeaderPayload2 = sendPayloadData(follower1Actor, "two-new");
-        verifyApplyJournalEntries(follower1CollectorActor, 3);
-        verifyApplyJournalEntries(follower2CollectorActor, 3);
+        final var newLeaderPayload2 = sendPayloadData(follower1Actor, "two-new");
+        verifyApplyIndex(follower1Actor, 3);
+        verifyApplyIndex(follower2Actor, 3);
 
         final var follower1log = follower1Context.getReplicatedLog();
         assertEquals("Follower 1 journal last term", currentTerm, follower1log.lastTerm());
@@ -216,7 +216,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         // The previous leader has a conflicting log entry at index 2 with a different term which should get
         // replaced by the new leader's entry.
 
-        verifyApplyJournalEntries(leaderCollectorActor, 3);
+        verifyApplyIndex(leaderActor, 3);
 
         verifyRaftState(leaderActor, raftState -> {
             final var leaderLog = leaderContext.getReplicatedLog();

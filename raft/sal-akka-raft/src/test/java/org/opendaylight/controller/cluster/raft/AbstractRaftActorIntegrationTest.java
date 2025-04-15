@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static java.util.Objects.requireNonNull;
+import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -307,6 +308,12 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
     protected void verifyApplyJournalEntries(final ActorRef actor, final long expIndex) {
         MessageCollectorActor.expectFirstMatching(actor, ApplyJournalEntries.class,
             msg -> msg.getToIndex() == expIndex);
+    }
+
+    protected void verifyApplyIndex(final TestActorRef<TestRaftActor> actor, final long expIndex) {
+        await().atMost(Duration.ofSeconds(5)).untilAsserted(() -> {
+            assertEquals(expIndex, actor.underlyingActor().getRaftActorContext().getReplicatedLog().getLastApplied());
+        });
     }
 
     protected void verifySnapshot(final String prefix, final Snapshot snapshot, final long lastAppliedTerm,

@@ -50,6 +50,11 @@ public abstract class ForwardingDataPersistenceProvider implements DataPersisten
     }
 
     @Override
+    public void markLastApplied(final long lastApplied) {
+        delegate().markLastApplied(lastApplied);
+    }
+
+    @Override
     public void saveSnapshot(final Snapshot entry) {
         delegate().saveSnapshot(entry);
     }
