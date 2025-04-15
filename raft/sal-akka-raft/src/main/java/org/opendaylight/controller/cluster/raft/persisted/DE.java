@@ -19,7 +19,8 @@ import org.opendaylight.yangtools.concepts.WritableObjects;
 /**
  * Serialization proxy for {@link DeleteEntries}.
  */
-final class DE implements Externalizable {
+@Deprecated(since = "11.0.0", forRemoval = true)
+final class DE implements PekkoPersistenceContract, Externalizable {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 

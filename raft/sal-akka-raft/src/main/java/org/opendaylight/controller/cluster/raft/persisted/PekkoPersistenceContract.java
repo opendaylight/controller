@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.raft.persisted;
 
-import java.io.Serializable;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActor;
 import org.opendaylight.controller.cluster.raft.RaftActor;
 
@@ -16,6 +15,6 @@ import org.opendaylight.controller.cluster.raft.RaftActor;
  * interface are to be removed when {@link RaftActor} stops extending {@link AbstractUntypedPersistentActor}.
  */
 @Deprecated(since = "11.0.0", forRemoval = true)
-public interface PekkoPersistenceContract extends Serializable {
+public interface PekkoPersistenceContract {
     // Nothing else
 }

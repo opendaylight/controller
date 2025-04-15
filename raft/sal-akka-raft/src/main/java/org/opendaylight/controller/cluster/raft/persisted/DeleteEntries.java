@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft.persisted;
 
+import java.io.Serializable;
 import org.opendaylight.controller.cluster.raft.ReplicatedLog;
 
 /**
@@ -16,7 +17,7 @@ import org.opendaylight.controller.cluster.raft.ReplicatedLog;
  * @author Thomas Pantelis
  */
 @Deprecated(since = "11.0.0", forRemoval = true)
-public final class DeleteEntries implements PekkoPersistenceContract {
+public final class DeleteEntries implements PekkoPersistenceContract, Serializable {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
