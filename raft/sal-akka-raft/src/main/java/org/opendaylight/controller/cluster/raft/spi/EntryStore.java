@@ -63,6 +63,21 @@ public interface EntryStore {
     long lastSequenceNumber();
 
     /**
+     * Record a known value of {@code lastApplied} as a recovery optimization. If we can recover this information,
+     * recovery can re-apply these entries before we attempt to talk to other members. It is okay to lose this marker,
+     * as in that case we will just apply those entries as part of being a follower or becoming a leader.
+     *
+     * <p>This amounts to persisting a lower bound on {@code commitIndex}, which is explicitly volatile state. We could
+     * remember that instead (or perhaps as well) -- but now we just derive it.
+     *
+     * <p>If we later discover that this index lies beyond current leader's {@code commitIndex}, we will ask for
+     * a complete snapshot -- which is not particularly nice, but should happen seldom enough for it not to matter much.
+     *
+     * @param lastApplied lastApplied index to remember
+     */
+    void markLastApplied(long lastApplied);
+
+    /**
      * Receive and potentially handle a {@link JournalProtocol} response.
      *
      * @param response A {@link JournalProtocol} response
