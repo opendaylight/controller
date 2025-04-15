@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft.persisted;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
+import java.io.Serializable;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.raft.api.TermInfo;
@@ -18,7 +19,7 @@ import org.opendaylight.raft.api.TermInfo;
  * Message class to persist election term information.
  */
 @Deprecated(since = "11.0.0", forRemoval = true)
-public record UpdateElectionTerm(@NonNull TermInfo termInfo) implements PekkoPersistenceContract {
+public record UpdateElectionTerm(@NonNull TermInfo termInfo) implements PekkoPersistenceContract, Serializable {
     public UpdateElectionTerm {
         requireNonNull(termInfo);
     }
