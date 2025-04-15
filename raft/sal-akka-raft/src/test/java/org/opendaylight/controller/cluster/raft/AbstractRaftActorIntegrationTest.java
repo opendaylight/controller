@@ -40,7 +40,6 @@ import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
-import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
@@ -302,11 +301,6 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         testkit.expectMsgClass(Duration.ofSeconds(5), Terminated.class);
 
         testkit.unwatch(actor);
-    }
-
-    protected void verifyApplyJournalEntries(final ActorRef actor, final long expIndex) {
-        MessageCollectorActor.expectFirstMatching(actor, ApplyJournalEntries.class,
-            msg -> msg.getToIndex() == expIndex);
     }
 
     protected void verifySnapshot(final String prefix, final Snapshot snapshot, final long lastAppliedTerm,

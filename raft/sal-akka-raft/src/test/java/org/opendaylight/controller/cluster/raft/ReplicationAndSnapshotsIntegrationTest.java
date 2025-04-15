@@ -110,14 +110,13 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
 
         // The followers should receive AppendEntries for each leader log entry that was recovered from
         // persistence and apply each one.
-        List<ApplyState> applyStates = MessageCollectorActor.expectMatching(
-                follower1CollectorActor, ApplyState.class, 3);
+        var applyStates = MessageCollectorActor.expectMatching(follower1CollectorActor, ApplyState.class, 3);
         verifyApplyState(applyStates.get(0), null, null, initialTerm, 0, recoveredPayload0);
         verifyApplyState(applyStates.get(1), null, null, initialTerm, 1, recoveredPayload1);
         verifyApplyState(applyStates.get(2), null, null, initialTerm, 2, recoveredPayload2);
 
         // Verify follower 1 applies a log entry for at least the last entry index.
-        verifyApplyJournalEntries(follower1CollectorActor, 2);
+        verifyApplyIndex(follower1Actor, 2);
 
         applyStates = MessageCollectorActor.expectMatching(follower2CollectorActor, ApplyState.class, 3);
         verifyApplyState(applyStates.get(0), null, null, initialTerm, 0, recoveredPayload0);
@@ -125,7 +124,7 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         verifyApplyState(applyStates.get(2), null, null, initialTerm, 2, recoveredPayload2);
 
         // Verify follower 1]2 applies a log entry for at least the last entry index.
-        verifyApplyJournalEntries(follower2CollectorActor, 2);
+        verifyApplyIndex(follower2Actor, 2);
 
         MessageCollectorActor.clearMessages(leaderCollectorActor);
         MessageCollectorActor.clearMessages(follower1CollectorActor);
@@ -206,7 +205,7 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         ApplyState applyState = MessageCollectorActor.expectFirstMatching(leaderCollectorActor, ApplyState.class);
         verifyApplyState(applyState, leaderCollectorActor, payload3.toString(), currentTerm, 3, payload3);
 
-        verifyApplyJournalEntries(leaderCollectorActor, 3);
+        verifyApplyIndex(leaderActor, 3);
 
         final var leaderLog = leaderContext.getReplicatedLog();
         assertEquals("Leader commit index", 3, leaderLog.getCommitIndex());
@@ -214,12 +213,12 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         applyState = MessageCollectorActor.expectFirstMatching(follower1CollectorActor, ApplyState.class);
         verifyApplyState(applyState, null, null, currentTerm, 3, payload3);
 
-        verifyApplyJournalEntries(follower1CollectorActor, 3);
+        verifyApplyIndex(follower1Actor, 3);
 
         applyState = MessageCollectorActor.expectFirstMatching(follower2CollectorActor, ApplyState.class);
         verifyApplyState(applyState, null, null, currentTerm, 3, payload3);
 
-        verifyApplyJournalEntries(follower2CollectorActor, 3);
+        verifyApplyIndex(follower2Actor, 3);
 
         assertEquals("Leader snapshot term", initialTerm, leaderLog.getSnapshotTerm());
         assertEquals("Leader snapshot index", 2, leaderLog.getSnapshotIndex());
@@ -264,7 +263,7 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         verifyApplyState(applyStates.get(2), leaderCollectorActor, payload6.toString(), currentTerm, 6, payload6);
 
         // Verify the leader applies a log entry for at least the last entry index.
-        verifyApplyJournalEntries(leaderCollectorActor, 6);
+        verifyApplyIndex(leaderActor, 6);
 
         // The leader should have performed fake snapshots due to the follower's AppendEntriesReplies and
         // trimmed the in-memory log so that only the last entry remains.
@@ -284,7 +283,7 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         verifyApplyState(applyStates.get(2), null, null, currentTerm, 6, payload6);
 
         // Verify follower 1 applies a log entry for at least the last entry index.
-        verifyApplyJournalEntries(follower1CollectorActor, 6);
+        verifyApplyIndex(follower1Actor, 6);
 
         // Verify follower 2 applies the states.
         applyStates = MessageCollectorActor.expectMatching(follower2CollectorActor, ApplyState.class, 3);
@@ -293,7 +292,7 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         verifyApplyState(applyStates.get(2), null, null, currentTerm, 6, payload6);
 
         // Verify follower 2 applies a log entry for at least the last entry index.
-        verifyApplyJournalEntries(follower2CollectorActor, 6);
+        verifyApplyIndex(follower2Actor, 6);
 
         MessageCollectorActor.clearMessages(leaderCollectorActor);
 

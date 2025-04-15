@@ -757,7 +757,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         verifyApplyState(applyStates.get(2), leaderCollectorActor, payload6.toString(), currentTerm, 6, payload6);
 
         // Verify the leader applies a log entry for at least the last entry index.
-        verifyApplyJournalEntries(leaderCollectorActor, 6);
+        verifyApplyIndex(leaderActor, 6);
 
         // Ensure there's at least 1 more heartbeat to trim the log.
         MessageCollectorActor.clearMessages(leaderCollectorActor);
