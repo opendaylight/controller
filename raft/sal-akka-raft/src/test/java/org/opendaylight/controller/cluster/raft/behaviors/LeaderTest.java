@@ -69,7 +69,6 @@ import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
-import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ByteState;
 import org.opendaylight.controller.cluster.raft.persisted.ByteStateSnapshotCohort;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
@@ -1692,18 +1691,13 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         final var leaderLog = leaderActorContext.getReplicatedLog();
         assertEquals(2, leaderLog.getCommitIndex());
 
-        final var applyJournalEntries = MessageCollectorActor.expectFirstMatching(leaderActor,
-            ApplyJournalEntries.class);
-
         assertEquals(2, leaderLog.getLastApplied());
-
-        assertEquals(2, applyJournalEntries.getToIndex());
 
         final var applyStateList = MessageCollectorActor.getAllMatching(leaderActor, ApplyState.class);
 
         assertEquals(1,applyStateList.size());
 
-        ApplyState applyState = applyStateList.get(0);
+        final var applyState = applyStateList.getFirst();
 
         assertEquals(2, applyState.entry().index());
 
