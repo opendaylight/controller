@@ -38,6 +38,11 @@ final class MockReplicatedLog extends AbstractReplicatedLog {
     }
 
     @Override
+    public void markLastApplied() {
+        // No-op
+    }
+
+    @Override
     public void captureSnapshotIfReady(final EntryMeta replicatedLogEntry) {
         // No-op
     }

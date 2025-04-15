@@ -8,17 +8,16 @@
 package org.opendaylight.controller.cluster.raft.persisted;
 
 import java.io.Serializable;
-import org.apache.pekko.dispatch.ControlMessage;
 
 /**
  * This is an internal message that is stored in the akka's persistent journal. During recovery, this
  * message is used to apply recovered journal entries to the state whose indexes range from the context's
- * current lastApplied index to "toIndex" contained in the message. This message is sent internally from a
- * behavior to the RaftActor to persist.
+ * current lastApplied index to "toIndex" contained in the message.
  *
  * @author Thomas Pantelis
  */
-public final class ApplyJournalEntries implements Serializable, ControlMessage {
+@Deprecated(since = "11.0.0", forRemoval = true)
+public final class ApplyJournalEntries implements PekkoPersistenceContract, Serializable {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
