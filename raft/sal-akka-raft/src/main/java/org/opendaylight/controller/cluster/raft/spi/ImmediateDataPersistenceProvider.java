@@ -55,6 +55,11 @@ public interface ImmediateDataPersistenceProvider extends DataPersistenceProvide
     }
 
     @Override
+    default void markLastApplied(final long lastApplied) {
+        // No-op
+    }
+
+    @Override
     default void deleteSnapshots(final long maxTimestamp) {
         // no-op
     }
