@@ -1212,17 +1212,14 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         reply = testKit.expectMsgClass(Duration.ofSeconds(5), ServerChangeReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, reply.getStatus());
 
-        ApplyJournalEntries apply = MessageCollectorActor.expectFirstMatching(node1Collector,
-                ApplyJournalEntries.class);
-        assertEquals("getToIndex", 1, apply.getToIndex());
+        verifyApplyIndex(node1RaftActorRef, 1);
         verifyServerConfigurationPayloadEntry(node1RaftActor.getRaftActorContext().getReplicatedLog(),
                 votingServer(node1ID), votingServer(node2ID), nonVotingServer("downNode1"),
                 nonVotingServer("downNode2"));
         assertTrue("isVotingMember", node1RaftActor.getRaftActorContext().isVotingMember());
         assertEquals("getRaftState", RaftRole.Leader, node1RaftActor.getRaftState());
 
-        apply = MessageCollectorActor.expectFirstMatching(node2Collector, ApplyJournalEntries.class);
-        assertEquals("getToIndex", 1, apply.getToIndex());
+        verifyApplyIndex(node2RaftActorRef, 1);
         verifyServerConfigurationPayloadEntry(node2RaftActor.getRaftActorContext().getReplicatedLog(),
                 votingServer(node1ID), votingServer(node2ID), nonVotingServer("downNode1"),
                 nonVotingServer("downNode2"));
@@ -1339,18 +1336,17 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         // is behind node2's so node2 should not grant node1's vote. This should cause node1 to time out and
         // forward the request to node2.
 
-        ChangeServersVotingStatus changeServers = new ChangeServersVotingStatus(
-                Map.of(node1ID, true, node2ID, true));
+        final var changeServers = new ChangeServersVotingStatus(Map.of(node1ID, true, node2ID, true));
         node1RaftActorRef.tell(changeServers, testKit.getRef());
-        ServerChangeReply reply = testKit.expectMsgClass(Duration.ofSeconds(5), ServerChangeReply.class);
+        final var reply = testKit.expectMsgClass(Duration.ofSeconds(5), ServerChangeReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, reply.getStatus());
 
-        MessageCollectorActor.expectFirstMatching(node2Collector, ApplyJournalEntries.class);
+        verifyApplyIndex(node2RaftActorRef, 2);
         verifyServerConfigurationPayloadEntry(node2RaftActor.getRaftActorContext().getReplicatedLog(),
                 votingServer(node1ID), votingServer(node2ID));
         assertEquals("getRaftState", RaftRole.Leader, node2RaftActor.getRaftState());
 
-        MessageCollectorActor.expectFirstMatching(node1Collector, ApplyJournalEntries.class);
+        verifyApplyIndex(node1RaftActorRef, 2);
         verifyServerConfigurationPayloadEntry(node1RaftActor.getRaftActorContext().getReplicatedLog(),
                 votingServer(node1ID), votingServer(node2ID));
         assertTrue("isVotingMember", node1RaftActor.getRaftActorContext().isVotingMember());
@@ -1414,13 +1410,14 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         ServerChangeReply reply = testKit.expectMsgClass(Duration.ofSeconds(5), ServerChangeReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, reply.getStatus());
 
-        MessageCollectorActor.expectFirstMatching(node1Collector, ApplyJournalEntries.class);
+        verifyApplyIndex(node1RaftActorRef, 1);
         verifyServerConfigurationPayloadEntry(node1RaftActor.getRaftActorContext().getReplicatedLog(),
                 votingServer(node1ID), votingServer(node2ID));
         assertTrue("isVotingMember", node1RaftActor.getRaftActorContext().isVotingMember());
         assertEquals("getRaftState", RaftRole.Follower, node1RaftActor.getRaftState());
 
-        MessageCollectorActor.expectFirstMatching(node2Collector, ApplyJournalEntries.class);
+        verifyApplyIndex(node2RaftActorRef, 1);
+
         verifyServerConfigurationPayloadEntry(node2RaftActor.getRaftActorContext().getReplicatedLog(),
                 votingServer(node1ID), votingServer(node2ID));
         assertEquals("getRaftState", RaftRole.Leader, node2RaftActor.getRaftState());

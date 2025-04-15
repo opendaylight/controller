@@ -18,7 +18,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.ApplyLeaderSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
-import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 
 /**
  * Tests raft actor persistence recovery end-to-end using real RaftActors and behavior communication.
@@ -66,7 +65,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         // Now deliver the AppendEntries to the follower
         follower1Actor.underlyingActor().stopDropMessages(AppendEntries.class);
 
-        MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyJournalEntries.class, 1);
+        verifyApplyIndex(leaderActor, 4);
 
         // Now deliver the SaveSnapshotSuccess to the leader.
         final var saveSuccess = MessageCollectorActor.expectFirstMatching(
@@ -115,7 +114,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         // Now deliver the AppendEntries to the follower
         follower1Actor.underlyingActor().stopDropMessages(AppendEntries.class);
 
-        MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyJournalEntries.class, 1);
+        verifyApplyIndex(leaderActor, 4);
 
         reinstateLeaderActor();
 
@@ -147,9 +146,8 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         final MockCommand payload2 = sendPayloadData(leaderActor, "two");
 
         // Verify the leader applies the 3rd payload state.
-        MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyJournalEntries.class, 1);
-
-        MessageCollectorActor.expectMatching(follower2CollectorActor, ApplyJournalEntries.class, 1);
+        verifyApplyIndex(leaderActor, 2);
+        verifyApplyIndex(follower2Actor, 2);
 
         final var leaderLog = leaderContext.getReplicatedLog();
         assertEquals("Leader commit index", 2, leaderLog.getCommitIndex());
@@ -209,7 +207,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         sendPayloadData(leaderActor, "three");
 
         MessageCollectorActor.expectFirstMatching(leaderCollectorActor, SaveSnapshotSuccess.class);
-        MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyJournalEntries.class, 2);
+        verifyApplyIndex(leaderActor, 3);
 
         // Disconnect follower from leader
         killActor(follower1Actor);
@@ -265,12 +263,12 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
 
         payload0 = sendPayloadData(leaderActor, "zero");
 
-        MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyJournalEntries.class, 1);
+        verifyApplyIndex(leaderActor, 0);
 
         payload1 = sendPayloadData(leaderActor, "one");
 
         // Verify the leader applies the states.
-        MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyJournalEntries.class, 2);
+        verifyApplyIndex(leaderActor, 1);
 
         assertEquals("Leader last applied", 1, leaderContext.getReplicatedLog().getLastApplied());
 
