@@ -22,6 +22,8 @@ import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
+import org.opendaylight.controller.cluster.raft.spi.EntryStore;
+import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
 import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.raft.spi.FileBackedOutputStreamFactory;
@@ -210,7 +212,31 @@ public interface RaftActorContext {
      *
      * @return the DataPersistenceProvider instance.
      */
+    @Deprecated(since = "11.0.0", forRemoval = true)
+    @VisibleForTesting
     @NonNull DataPersistenceProvider getPersistenceProvider();
+
+    /**
+     * Returns whether or not persistence recovery is applicable/enabled.
+     *
+     * @return {@code true} if recovery is applicable, otherwise false, in which case the provider is not persistent and
+     *         may not have anything to be recovered
+     */
+    boolean isRecoveryApplicable();
+
+    /**
+     * Returns the {@link EntryStore}.
+     *
+     * @return the {@link EntryStore}
+     */
+    @NonNull EntryStore entryStore();
+
+    /**
+     * Returns the {@link SnapshotStore}.
+     *
+     * @return the {@link SnapshotStore}
+     */
+    @NonNull SnapshotStore snapshotStore();
 
     /**
      * Determines if there are any peer followers.

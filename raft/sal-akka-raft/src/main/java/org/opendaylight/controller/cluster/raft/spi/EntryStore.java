@@ -56,6 +56,13 @@ public interface EntryStore {
     void deleteMessages(long sequenceNumber);
 
     /**
+     * Returns the last sequence number contained in the journal.
+     *
+     * @return the last sequence number
+     */
+    long lastSequenceNumber();
+
+    /**
      * Receive and potentially handle a {@link JournalProtocol} response.
      *
      * @param response A {@link JournalProtocol} response

@@ -71,8 +71,8 @@ public abstract class ForwardingDataPersistenceProvider implements DataPersisten
     }
 
     @Override
-    public long getLastSequenceNumber() {
-        return delegate().getLastSequenceNumber();
+    public long lastSequenceNumber() {
+        return delegate().lastSequenceNumber();
     }
 
     @Override

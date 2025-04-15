@@ -139,7 +139,7 @@ class RaftActorRecoverySupport {
             }
         }
 
-        if (!context.getPersistenceProvider().isRecoveryApplicable()) {
+        if (!context.isRecoveryApplicable()) {
             // We may have just transitioned to disabled and have a snapshot containing state data and/or log
             // entries - we don't want to preserve these, only the server config and election term info.
 
@@ -189,7 +189,7 @@ class RaftActorRecoverySupport {
             context.updatePeerIds(clusterConfig);
         }
 
-        if (context.getPersistenceProvider().isRecoveryApplicable()) {
+        if (context.isRecoveryApplicable()) {
             replicatedLog().append(logEntry);
         } else if (!(command instanceof ClusterConfig)) {
             dataRecoveredWithPersistenceDisabled = true;
@@ -197,7 +197,7 @@ class RaftActorRecoverySupport {
     }
 
     private void onRecoveredApplyLogEntries(final long toIndex) {
-        if (!context.getPersistenceProvider().isRecoveryApplicable()) {
+        if (!context.isRecoveryApplicable()) {
             dataRecoveredWithPersistenceDisabled = true;
             return;
         }
@@ -245,7 +245,7 @@ class RaftActorRecoverySupport {
 
     @Deprecated(since = "11.0.0", forRemoval = true)
     private void onDeleteEntries(final DeleteEntries deleteEntries) {
-        if (context.getPersistenceProvider().isRecoveryApplicable()) {
+        if (context.isRecoveryApplicable()) {
             replicatedLog().removeRecoveredEntries(deleteEntries.getFromIndex());
         } else {
             dataRecoveredWithPersistenceDisabled = true;
@@ -332,8 +332,7 @@ class RaftActorRecoverySupport {
             infoStore.setTerm(orig);
         }
 
-        if (dataRecoveredWithPersistenceDisabled
-                || hasMigratedDataRecovered && !context.getPersistenceProvider().isRecoveryApplicable()) {
+        if (dataRecoveredWithPersistenceDisabled || hasMigratedDataRecovered && !context.isRecoveryApplicable()) {
             if (hasMigratedDataRecovered) {
                 LOG.info("{}: Saving snapshot after recovery due to migrated messages", memberId());
             } else {

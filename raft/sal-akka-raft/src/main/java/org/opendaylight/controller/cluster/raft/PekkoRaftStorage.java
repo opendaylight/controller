@@ -215,7 +215,7 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
     }
 
     @Override
-    public long getLastSequenceNumber() {
+    public long lastSequenceNumber() {
         return actor.lastSequenceNr();
     }
 

@@ -36,7 +36,7 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog {
     public boolean trimToReceive(final long fromIndex) {
         long adjustedIndex = removeFrom(fromIndex);
         if (adjustedIndex >= 0) {
-            context.getPersistenceProvider().deleteEntries(fromIndex);
+            context.entryStore().deleteEntries(fromIndex);
             return true;
         }
         return false;
@@ -92,7 +92,7 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog {
         // FIXME: When can 'false' happen? Wouldn't that be an indication that Follower.handleAppendEntries() is doing
         //        something wrong?
         if (append(entry)) {
-            context.getPersistenceProvider().persistEntry(entry, persisted -> invokeSync(persisted, callback));
+            context.entryStore().persistEntry(entry, persisted -> invokeSync(persisted, callback));
         }
         return shouldCaptureSnapshot(entry.index());
     }
@@ -103,7 +103,7 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog {
 
         final var ret = append(entry);
         if (ret) {
-            context.getPersistenceProvider().persistAsync(entry, persisted -> invokeAsync(persisted, callback));
+            context.entryStore().persistAsync(entry, persisted -> invokeAsync(persisted, callback));
         }
         return ret;
     }

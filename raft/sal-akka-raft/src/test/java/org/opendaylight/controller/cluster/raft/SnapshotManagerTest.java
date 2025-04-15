@@ -95,7 +95,8 @@ public class SnapshotManagerTest extends AbstractActorTest {
         doReturn(mockReplicatedLog).when(mockRaftActorContext).getReplicatedLog();
         doReturn("123").when(mockRaftActorContext).getId();
         doCallRealMethod().when(mockReplicatedLog).lookupMeta(anyLong());
-        doReturn(mockDataPersistenceProvider).when(mockRaftActorContext).getPersistenceProvider();
+        doReturn(mockDataPersistenceProvider).when(mockRaftActorContext).entryStore();
+        doReturn(mockDataPersistenceProvider).when(mockRaftActorContext).snapshotStore();
         doReturn(mockRaftActorBehavior).when(mockRaftActorContext).getCurrentBehavior();
         doReturn(mockTermInfo).when(mockRaftActorContext).termInfo();
 
@@ -380,7 +381,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
     @Test
     public void testCommit() {
-        doReturn(50L).when(mockDataPersistenceProvider).getLastSequenceNumber();
+        doReturn(50L).when(mockDataPersistenceProvider).lastSequenceNumber();
 
         // when replicatedToAllIndex = -1
         doReturn(ByteState.empty()).when(mockCohort).takeSnapshot();
@@ -429,7 +430,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
     @Test
     public void testCallingCommitMultipleTimesCausesNoHarm() {
-        doReturn(50L).when(mockDataPersistenceProvider).getLastSequenceNumber();
+        doReturn(50L).when(mockDataPersistenceProvider).lastSequenceNumber();
 
         // when replicatedToAllIndex = -1
         doReturn(ByteState.empty()).when(mockCohort).takeSnapshot();
