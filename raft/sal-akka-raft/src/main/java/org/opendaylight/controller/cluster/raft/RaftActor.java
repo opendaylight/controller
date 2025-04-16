@@ -125,7 +125,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     // FIXME: should be valid only after recovery
     private final @NonNull RaftActorContextImpl context;
 
-    private RaftActorRecoverySupport raftRecovery;
+    private RaftActorRecovery raftRecovery;
     private RaftActorSnapshotMessageSupport snapshotSupport;
     private RaftActorServerConfigurationSupport serverConfigurationSupport;
     private boolean shuttingDown;
@@ -191,9 +191,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     @Override
-    protected void handleRecover(final Object message) {
+    protected void handleRecover(final Object message) throws Exception {
         if (raftRecovery == null) {
-            raftRecovery = newRaftActorRecoverySupport();
+            final var support = newRaftActorRecoverySupport();
+            raftRecovery = isRecoveryApplicable() ? support.recoverToPersistent() : support.recoverToTransient();
         }
 
         boolean recoveryComplete = raftRecovery.handleRecoveryMessage(this, message);
@@ -208,7 +209,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     @VisibleForTesting
     RaftActorRecoverySupport newRaftActorRecoverySupport() {
-        return new RaftActorRecoverySupport(localAccess, context, getRaftActorRecoveryCohort(), isRecoveryApplicable());
+        return new RaftActorRecoverySupport(localAccess, context, getRaftActorRecoveryCohort());
     }
 
     @VisibleForTesting
