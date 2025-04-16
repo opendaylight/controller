@@ -30,6 +30,7 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFileFormat;
+import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
@@ -47,7 +48,7 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
 
         private final Snapshot snapshot;
 
-        PersistSnapshotTask(final Snapshot snapshot, final Callback<SnapshotFile> callback) {
+        PersistSnapshotTask(final Snapshot snapshot, final RaftCallback<SnapshotFile> callback) {
             super(callback);
             this.snapshot = requireNonNull(snapshot);
         }

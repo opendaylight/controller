@@ -45,8 +45,8 @@ import org.opendaylight.controller.cluster.raft.persisted.ByteStateSnapshotCohor
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
-import org.opendaylight.controller.cluster.raft.spi.SnapshotStore.Callback;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
+import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.raft.spi.ByteArray;
@@ -78,7 +78,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     @Captor
     private ArgumentCaptor<Snapshot> snapshotCaptor;
     @Captor
-    private ArgumentCaptor<Callback<InstallableSnapshot>> callbackCaptor;
+    private ArgumentCaptor<RaftCallback<InstallableSnapshot>> callbackCaptor;
 
     private final TermInfo mockTermInfo = new TermInfo(5, "member5");
 

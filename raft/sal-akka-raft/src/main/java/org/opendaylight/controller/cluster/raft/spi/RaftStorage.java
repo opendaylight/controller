@@ -40,9 +40,9 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
         permits DisabledRaftStorage, EnabledRaftStorage {
     @NonNullByDefault
     protected abstract class CancellableTask<T> implements Runnable {
-        private final Callback<T> callback;
+        private final RaftCallback<T> callback;
 
-        protected CancellableTask(final Callback<T> callback) {
+        protected CancellableTask(final RaftCallback<T> callback) {
             this.callback = requireNonNull(callback);
         }
 
@@ -88,8 +88,8 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
         private final EntryInfo lastIncluded;
         private final S snapshot;
 
-        StreamSnapshotTask(final Callback<InstallableSnapshot> callback, final EntryInfo lastIncluded, final S snapshot,
-                final StateSnapshot.Writer<S> writer) {
+        StreamSnapshotTask(final RaftCallback<InstallableSnapshot> callback, final EntryInfo lastIncluded,
+                final S snapshot, final StateSnapshot.Writer<S> writer) {
             super(callback);
             this.lastIncluded = requireNonNull(lastIncluded);
             this.snapshot = requireNonNull(snapshot);
@@ -188,7 +188,7 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
     @Override
     @NonNullByDefault
     public final <T extends StateSnapshot> void streamToInstall(final EntryInfo lastIncluded, final T snapshot,
-            final StateSnapshot.Writer<T> writer, final Callback<InstallableSnapshot> callback) {
+            final StateSnapshot.Writer<T> writer, final RaftCallback<InstallableSnapshot> callback) {
         final var local = checkNotClosed();
         final var task = new StreamSnapshotTask<>(callback, lastIncluded, snapshot, writer);
         tasks.add(task);
