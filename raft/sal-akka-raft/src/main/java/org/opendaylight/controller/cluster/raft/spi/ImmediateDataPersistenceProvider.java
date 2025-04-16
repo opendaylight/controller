@@ -48,7 +48,7 @@ public interface ImmediateDataPersistenceProvider extends DataPersistenceProvide
     }
 
     @Override
-    default <T> void persistAsync(final T entry, final Consumer<T> callback) {
+    default void startPersistEntry(final ReplicatedLogEntry entry, final Consumer<ReplicatedLogEntry> callback) {
         requireNonNull(entry);
         requireNonNull(callback);
         actor().executeInSelf(() -> callback.accept(entry));
