@@ -261,7 +261,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testRaftActorForwardsToRaftActorRecoverySupport() {
+    public void testRaftActorForwardsToRaftActorRecoverySupport() throws Exception {
         String persistenceId = factory.generateActorId("leader-");
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
@@ -276,7 +276,9 @@ public class RaftActorTest extends AbstractActorTest {
         // Wait for akka's recovery to complete so it doesn't interfere.
         mockRaftActor.waitForRecoveryComplete();
 
-        RaftActorRecoverySupport mockSupport = mock(RaftActorRecoverySupport.class);
+        final var mockSupport = mock(RaftActorRecoverySupport.class);
+        final var mockRecovery = mock(RaftActorRecovery.class);
+        doReturn(mockRecovery).when(mockSupport).recoverToPersistent();
         mockRaftActor.setRaftActorRecoverySupport(mockSupport);
 
         Snapshot snapshot = Snapshot.create(ByteState.of(new byte[]{1}), List.of(), 3, 1, 3, 1, new TermInfo(-1), null);
@@ -286,20 +288,20 @@ public class RaftActorTest extends AbstractActorTest {
         ReplicatedLogEntry logEntry = new SimpleReplicatedLogEntry(1, 1, new MockCommand("1", 5));
         mockRaftActor.handleRecover(logEntry);
 
-        ApplyJournalEntries applyJournalEntries = new ApplyJournalEntries(2);
+        final var applyJournalEntries = new ApplyJournalEntries(2);
         mockRaftActor.handleRecover(applyJournalEntries);
 
-        DeleteEntries deleteEntries = new DeleteEntries(1);
+        final var deleteEntries = new DeleteEntries(1);
         mockRaftActor.handleRecover(deleteEntries);
 
-        UpdateElectionTerm updateElectionTerm = new UpdateElectionTerm(5, "member2");
+        final var updateElectionTerm = new UpdateElectionTerm(5, "member2");
         mockRaftActor.handleRecover(updateElectionTerm);
 
-        verify(mockSupport).handleRecoveryMessage(any(), same(snapshotOffer));
-        verify(mockSupport).handleRecoveryMessage(any(), same(logEntry));
-        verify(mockSupport).handleRecoveryMessage(any(), same(applyJournalEntries));
-        verify(mockSupport).handleRecoveryMessage(any(), same(deleteEntries));
-        verify(mockSupport).handleRecoveryMessage(any(), same(updateElectionTerm));
+        verify(mockRecovery).handleRecoveryMessage(any(), same(snapshotOffer));
+        verify(mockRecovery).handleRecoveryMessage(any(), same(logEntry));
+        verify(mockRecovery).handleRecoveryMessage(any(), same(applyJournalEntries));
+        verify(mockRecovery).handleRecoveryMessage(any(), same(deleteEntries));
+        verify(mockRecovery).handleRecoveryMessage(any(), same(updateElectionTerm));
     }
 
     @Test
