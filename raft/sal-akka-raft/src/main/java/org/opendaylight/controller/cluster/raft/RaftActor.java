@@ -693,6 +693,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     private void submitCommand(final @Nullable Identifier identifier, final Payload command, final boolean batchHint) {
         requireNonNull(command);
         final var replLog = replicatedLog();
+        // FIXME: entry should be allocated by the log
         final var logEntry = new SimpleReplicatedLogEntry(replLog.lastIndex() + 1, context.currentTerm(), command);
         logEntry.setPersistencePending(true);
 
