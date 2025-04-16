@@ -9,10 +9,8 @@ package org.opendaylight.controller.cluster.raft.spi;
 
 import java.io.IOException;
 import org.apache.pekko.persistence.SnapshotProtocol;
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.InstallableSnapshot;
@@ -20,19 +18,8 @@ import org.opendaylight.raft.spi.InstallableSnapshot;
 /**
  * Interface to a access and manage {@link SnapshotFile}s.
  */
+@NonNullByDefault
 public interface SnapshotStore {
-    /**
-     * A simple callback interface. Guaranteed to be invoked in {@link RaftActor} confinement.
-     *
-     * @param <T> type of successful result
-     */
-    // TODO: generalize?
-    @FunctionalInterface
-    interface Callback<T> {
-
-        void invoke(Exception failure, T success);
-    }
-
     /**
      * Returns the last available snapshot.
      *
@@ -51,9 +38,8 @@ public interface SnapshotStore {
      * @param writer the writer to use
      * @param callback the callback to invoke
      */
-    @NonNullByDefault
     <T extends StateSnapshot> void streamToInstall(EntryInfo lastIncluded, T snapshot, StateSnapshot.Writer<T> writer,
-        Callback<InstallableSnapshot> callback);
+        RaftCallback<InstallableSnapshot> callback);
 
     /**
      * Saves a snapshot.
@@ -62,7 +48,7 @@ public interface SnapshotStore {
      */
     // FIXME: Callback<SnapshotFile> callback
     // FIXME: imply async deletion of all other snapshots, only the last one will be reported
-    void saveSnapshot(@NonNull Snapshot snapshot);
+    void saveSnapshot(Snapshot snapshot);
 
     //  @NonNullByDefault
     //  <T extends StateSnapshot> void storeSnapshot(T snapshot, StateSnapshot.Writer<T> writer,
@@ -82,5 +68,5 @@ public interface SnapshotStore {
      * @param response A {@link SnapshotProtocol} response
      * @return {@code true} if the response was handled
      */
-    boolean handleSnapshotResponse(SnapshotProtocol.@NonNull Response response);
+    boolean handleSnapshotResponse(SnapshotProtocol.Response response);
 }

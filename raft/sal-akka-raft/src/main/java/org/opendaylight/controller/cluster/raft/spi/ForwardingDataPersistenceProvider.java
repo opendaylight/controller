@@ -71,7 +71,7 @@ public abstract class ForwardingDataPersistenceProvider implements DataPersisten
 
     @Override
     public <T extends StateSnapshot> void streamToInstall(final EntryInfo lastIncluded, final T snapshot,
-            final StateSnapshot.Writer<T> writer, final Callback<InstallableSnapshot> callback) {
+            final StateSnapshot.Writer<T> writer, final RaftCallback<InstallableSnapshot> callback) {
         delegate().streamToInstall(lastIncluded, snapshot, writer, callback);
     }
 
