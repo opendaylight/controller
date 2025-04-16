@@ -103,7 +103,7 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog {
 
         final var ret = append(entry);
         if (ret) {
-            context.entryStore().persistAsync(entry, persisted -> invokeAsync(persisted, callback));
+            context.entryStore().startPersistEntry(entry, unused -> invokeAsync(entry, callback));
         }
         return ret;
     }

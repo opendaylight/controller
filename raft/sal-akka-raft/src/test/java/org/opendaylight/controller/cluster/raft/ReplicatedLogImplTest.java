@@ -64,7 +64,7 @@ class ReplicatedLogImplTest {
 
     private void verifyPersist(final ReplicatedLogEntry entry, final boolean async) {
         if (async) {
-            verify(mockPersistence).persistAsync(same(entry), procedureCaptor.capture());
+            verify(mockPersistence).startPersistEntry(same(entry), procedureCaptor.capture());
         } else {
             verify(mockPersistence).persistEntry(same(entry), procedureCaptor.capture());
         }

@@ -104,16 +104,11 @@ final class PersistenceControl extends ForwardingDataPersistenceProvider {
     }
 
     @Override
-    public <T> void persistAsync(final T obj, final Consumer<T> callback) {
-        // TODO: revisit this statement with EntryStore
-        //
-        //   We persist the ClusterConfig but not the ReplicatedLogEntry to avoid gaps in the journal indexes
-        //   on recovery if data persistence is later enabled.
-        if (!delegate.isRecoveryApplicable() && obj instanceof ReplicatedLogEntry entry
-            && entry.command() instanceof ClusterConfig serverConfig) {
-            enabledStorage.persistAsync(serverConfig, unused -> callback.accept(obj));
+    public void startPersistEntry(final ReplicatedLogEntry entry, final Consumer<ReplicatedLogEntry> callback) {
+        if (!delegate.isRecoveryApplicable() && entry.command() instanceof ClusterConfig serverConfig) {
+            enabledStorage.startPersistConfig(serverConfig, unused -> callback.accept(entry));
         } else {
-            delegate.persistAsync(obj, callback);
+            delegate.startPersistEntry(entry, callback);
         }
     }
 }
