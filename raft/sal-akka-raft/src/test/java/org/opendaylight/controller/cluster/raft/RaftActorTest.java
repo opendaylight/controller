@@ -1219,8 +1219,8 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals("getCommitIndex", -1, leaderLog.getCommitIndex());
 
         final var entryCaptor = ArgumentCaptor.forClass(ReplicatedLogEntry.class);
-        final var callbackCaptor = ArgumentCaptor.<Consumer<Object>>captor();
-        verify(mockPersistenceProvider).persistAsync(entryCaptor.capture(), callbackCaptor.capture());
+        final var callbackCaptor = ArgumentCaptor.<Consumer<ReplicatedLogEntry>>captor();
+        verify(mockPersistenceProvider).startPersistEntry(entryCaptor.capture(), callbackCaptor.capture());
 
         final var entry = entryCaptor.getValue();
         assertSame(storedMeta.meta(), entry);
@@ -1301,9 +1301,9 @@ public class RaftActorTest extends AbstractActorTest {
 
         leaderActor.setPersistence(new ForwardingDataPersistenceProvider() {
             @Override
-            public <T> void persistAsync(final T entry, final Consumer<T> callback) {
+            public void startPersistEntry(final ReplicatedLogEntry entry, final Consumer<ReplicatedLogEntry> callback) {
                 // needs to be executed from another thread to simulate the persistence actor calling this callback
-                super.persistAsync(entry, persisted -> executorService.submit(() -> callback.accept(persisted)));
+                super.startPersistEntry(entry, persisted -> executorService.submit(() -> callback.accept(persisted)));
             }
 
             @Override

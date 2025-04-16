@@ -38,5 +38,16 @@ public abstract non-sealed class EnabledRaftStorage extends RaftStorage {
      * @param config the configuration to persist
      * @param callback the callback when persistence is complete
      */
+    // FIXME: without callback and throwing IOException
     public abstract void persistConfig(ClusterConfig config, Consumer<ClusterConfig> callback);
+
+    /**
+     * Persists a {@link ClusterConfig} to the applicable journal synchronously. The contract is that the callback will
+     * be invoked before {@link RaftActor} sees any other message.
+     *
+     * @param config the configuration to persist
+     * @param callback the callback when persistence is complete
+     */
+    // FIXME: Callback<ReplicatedLogEntry> instead of Consumer
+    public abstract void startPersistConfig(ClusterConfig config, Consumer<ClusterConfig> callback);
 }

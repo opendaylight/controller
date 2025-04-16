@@ -40,18 +40,28 @@ public abstract class ForwardingDataPersistenceProvider implements DataPersisten
     }
 
     @Override
+    public void startPersistEntry(final ReplicatedLogEntry entry, final Consumer<ReplicatedLogEntry> callback) {
+        delegate().startPersistEntry(entry, callback);
+    }
+
+    @Override
     public void deleteEntries(final long fromIndex) {
         delegate().deleteEntries(fromIndex);
     }
 
     @Override
-    public <T> void persistAsync(final T entry, final Consumer<T> callback) {
-        delegate().persistAsync(entry, callback);
+    public void deleteMessages(final long sequenceNumber) {
+        delegate().deleteMessages(sequenceNumber);
     }
 
     @Override
-    public void markLastApplied(final long lastApplied) {
-        delegate().markLastApplied(lastApplied);
+    public long lastSequenceNumber() {
+        return delegate().lastSequenceNumber();
+    }
+
+    @Override
+    public void markLastApplied(final long lastAppliedIndex) {
+        delegate().markLastApplied(lastAppliedIndex);
     }
 
     @Override
@@ -68,16 +78,6 @@ public abstract class ForwardingDataPersistenceProvider implements DataPersisten
     @Override
     public void deleteSnapshots(final long maxTimestamp) {
         delegate().deleteSnapshots(maxTimestamp);
-    }
-
-    @Override
-    public void deleteMessages(final long sequenceNumber) {
-        delegate().deleteMessages(sequenceNumber);
-    }
-
-    @Override
-    public long lastSequenceNumber() {
-        return delegate().lastSequenceNumber();
     }
 
     @Override
