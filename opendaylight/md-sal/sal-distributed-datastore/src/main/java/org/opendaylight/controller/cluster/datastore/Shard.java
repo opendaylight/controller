@@ -283,7 +283,7 @@ public class Shard extends RaftActor {
     }
 
     @Override
-    protected final void handleRecover(final Object message) {
+    protected final void handleRecover(final Object message) throws Exception {
         LOG.debug("{}: onReceiveRecover: Received message {} from {}", memberId(), message.getClass(), getSender());
 
         super.handleRecover(message);
