@@ -14,6 +14,7 @@ import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
+import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.EntryMeta;
 import org.opendaylight.raft.api.TermInfo;
 
@@ -78,6 +79,14 @@ public final class Snapshot implements Serializable {
         return unAppliedEntries;
     }
 
+    public @NonNull EntryInfo last() {
+        return EntryInfo.of(lastIndex, lastTerm);
+    }
+
+    public long getLastIndex() {
+        return lastIndex;
+    }
+
     public long getLastTerm() {
         return lastTerm;
     }
@@ -90,8 +99,8 @@ public final class Snapshot implements Serializable {
         return lastAppliedTerm;
     }
 
-    public long getLastIndex() {
-        return lastIndex;
+    public @NonNull EntryInfo lastApplied() {
+        return EntryInfo.of(lastAppliedIndex, lastAppliedTerm);
     }
 
     public @NonNull TermInfo termInfo() {
