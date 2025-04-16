@@ -26,15 +26,9 @@ public interface EntryStore {
      * @param entry the journal entry to persist
      * @param callback the callback when persistence is complete
      */
+    // FIXME: without callback and throwing IOException
     @NonNullByDefault
     void persistEntry(ReplicatedLogEntry entry, Consumer<ReplicatedLogEntry> callback);
-
-    /**
-     * Delete entries starting from specified index.
-     *
-     * @param fromIndex the index of first entry to delete
-     */
-    void deleteEntries(long fromIndex);
 
     /**
      * Persists an entry to the applicable journal asynchronously.
@@ -43,24 +37,16 @@ public interface EntryStore {
      * @param entry the journal entry to persist
      * @param callback the callback when persistence is complete
      */
-    // FIXME: replace with:
-    //        void persistAsync(T entry, BiConsumer<? super T, ? super Throwable> callback)
-    <T> void persistAsync(@NonNull T entry, @NonNull Consumer<T> callback);
+    // FIXME: Callback<ReplicatedLogEntry> instead of Consumer
+    @NonNullByDefault
+    void startPersistEntry(ReplicatedLogEntry entry, Consumer<ReplicatedLogEntry> callback);
 
     /**
-     * Deletes journal entries up to the given sequence number.
+     * Delete entries starting from specified index.
      *
-     * @param sequenceNumber the sequence number
+     * @param fromIndex the index of first entry to delete
      */
-    // FIXME: throws IOException
-    void deleteMessages(long sequenceNumber);
-
-    /**
-     * Returns the last sequence number contained in the journal.
-     *
-     * @return the last sequence number
-     */
-    long lastSequenceNumber();
+    void deleteEntries(long fromIndex);
 
     /**
      * Record a known value of {@code lastApplied} as a recovery optimization. If we can recover this information,
@@ -76,6 +62,21 @@ public interface EntryStore {
      * @param lastApplied lastApplied index to remember
      */
     void markLastApplied(long lastApplied);
+
+    /**
+     * Deletes journal entries up to the given sequence number.
+     *
+     * @param sequenceNumber the sequence number
+     */
+    // FIXME: throws IOException
+    void deleteMessages(long sequenceNumber);
+
+    /**
+     * Returns the last sequence number contained in the journal.
+     *
+     * @return the last sequence number
+     */
+    long lastSequenceNumber();
 
     /**
      * Receive and potentially handle a {@link JournalProtocol} response.
