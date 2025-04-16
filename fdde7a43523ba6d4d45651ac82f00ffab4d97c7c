@@ -24,6 +24,30 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "55a87f7e_49f5419b",
+        "filename": "raft/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/persisted/AJE.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2025-04-16T16:33:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b39aa3b7_49d4daa6",
+      "range": {
+        "startLine": 23,
+        "startChar": 27,
+        "endLine": 23,
+        "endChar": 41
+      },
+      "revId": "fdde7a43523ba6d4d45651ac82f00ffab4d97c7c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "563ea125_c133df5a",
@@ -60,6 +84,30 @@
       "writtenOn": "2025-04-15T00:12:52Z",
       "side": 1,
       "message": "keep Serializable",
+      "range": {
+        "startLine": 19,
+        "startChar": 50,
+        "endLine": 19,
+        "endChar": 74
+      },
+      "revId": "fdde7a43523ba6d4d45651ac82f00ffab4d97c7c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5af6dafd_8261f73f",
+        "filename": "raft/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/persisted/ApplyJournalEntries.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2025-04-16T16:33:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "848cf93f_f3c33e0f",
       "range": {
         "startLine": 19,
         "startChar": 50,
