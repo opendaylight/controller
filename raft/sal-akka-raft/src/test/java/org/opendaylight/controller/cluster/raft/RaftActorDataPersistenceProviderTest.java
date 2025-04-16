@@ -13,13 +13,13 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import java.util.function.Consumer;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.spi.AbstractStateCommand;
@@ -31,8 +31,8 @@ import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
  *
  * @author Thomas Pantelis
  */
-@RunWith(MockitoJUnitRunner.StrictStubs.class)
-public class RaftActorDataPersistenceProviderTest {
+@ExtendWith(MockitoExtension.class)
+class RaftActorDataPersistenceProviderTest {
     private static final ClusterConfig PERSISTENT_PAYLOAD = new ClusterConfig();
 
     private static final Payload NON_PERSISTENT_PAYLOAD = new TestNonPersistentPayload();
@@ -52,15 +52,13 @@ public class RaftActorDataPersistenceProviderTest {
 
     private PersistenceControl provider;
 
-    @Before
-    public void setup() {
-        doReturn(PERSISTENT_PAYLOAD).when(mockPersistentLogEntry).command();
-        doReturn(NON_PERSISTENT_PAYLOAD).when(mockNonPersistentLogEntry).command();
+    @BeforeEach
+    void beforeEach() {
         provider = new PersistenceControl(mockDisabledStorage, mockEnabledStorage);
     }
 
     @Test
-    public void testPersistWithPersistenceEnabled() {
+    void testPersistWithPersistenceEnabled() {
         doReturn(true).when(mockEnabledStorage).isRecoveryApplicable();
         provider.becomePersistent();
 
@@ -72,8 +70,10 @@ public class RaftActorDataPersistenceProviderTest {
     }
 
     @Test
-    public void testPersistWithPersistenceDisabled() {
+    void testPersistWithPersistenceDisabled() {
         doReturn(false).when(mockDisabledStorage).isRecoveryApplicable();
+        doReturn(PERSISTENT_PAYLOAD).when(mockPersistentLogEntry).command();
+        doReturn(NON_PERSISTENT_PAYLOAD).when(mockNonPersistentLogEntry).command();
 
         provider.persistEntry(mockPersistentLogEntry, mockCallback);
 

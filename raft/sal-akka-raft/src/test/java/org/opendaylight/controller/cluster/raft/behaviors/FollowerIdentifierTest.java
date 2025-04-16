@@ -7,23 +7,23 @@
  */
 package org.opendaylight.controller.cluster.raft.behaviors;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 import org.apache.commons.lang3.SerializationUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for FollowerIdentifier.
  *
  * @author Thomas Pantelis
  */
-public class FollowerIdentifierTest {
+class FollowerIdentifierTest {
     @Test
-    public void testSerialization() {
+    void testSerialization() {
         final var expected = new FollowerIdentifier("follower1");
         final var bytes = SerializationUtils.serialize(expected);
         assertEquals(87, bytes.length);
-        final var cloned = (FollowerIdentifier) SerializationUtils.deserialize(bytes);
-        assertEquals("cloned", expected, cloned);
+        assertEquals(expected, assertInstanceOf(FollowerIdentifier.class, SerializationUtils.deserialize(bytes)));
     }
 }

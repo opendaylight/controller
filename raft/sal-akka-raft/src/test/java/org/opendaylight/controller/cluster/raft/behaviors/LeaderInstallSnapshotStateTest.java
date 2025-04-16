@@ -7,23 +7,23 @@
  */
 package org.opendaylight.controller.cluster.raft.behaviors;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Objects;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.raft.spi.SizedStreamSource;
 
-public class LeaderInstallSnapshotStateTest {
+class LeaderInstallSnapshotStateTest {
     // Prime number on purpose
     private static final int CHUNK_SIZE = 9_999_991;
     // More than Integer.MAX_VALUE
     private static final long SIZE = 4_294_967_294L;
 
     @Test
-    public void testSnapshotLongerThanInteger() throws IOException {
+    void testSnapshotLongerThanInteger() throws IOException {
         try (var fts = new LeaderInstallSnapshotState(CHUNK_SIZE, "test")) {
             fts.setSnapshotBytes(new MockByteSource(SIZE));
 
@@ -39,15 +39,15 @@ public class LeaderInstallSnapshotStateTest {
                 }
                 chunkIndex ++;
                 final byte[] chunk = fts.getNextChunk();
-                assertEquals("byte size not matching for chunk:", expectedChunkSize, chunk.length);
-                assertEquals("chunk index not matching", chunkIndex, fts.getChunkIndex());
+                assertEquals(expectedChunkSize, chunk.length);
+                assertEquals(chunkIndex, fts.getChunkIndex());
                 fts.markSendStatus(true);
                 if (!fts.isLastChunk(chunkIndex)) {
                     fts.incrementChunkIndex();
                 }
             }
 
-            assertEquals("totalChunks not matching", chunkIndex, fts.getTotalChunks());
+            assertEquals(chunkIndex, fts.getTotalChunks());
         }
     }
 
