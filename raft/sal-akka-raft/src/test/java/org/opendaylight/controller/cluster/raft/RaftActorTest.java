@@ -86,7 +86,7 @@ import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolic
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage.CommitSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.ForwardingDataPersistenceProvider;
-import org.opendaylight.controller.cluster.raft.spi.SnapshotStore.Callback;
+import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.RaftRole;
@@ -571,7 +571,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         final var lastIncludedCaptor = ArgumentCaptor.forClass(EntryInfo.class);
         final var snapshotCaptor = ArgumentCaptor.forClass(StateSnapshot.class);
-        final var callbackCaptor = ArgumentCaptor.<Callback<InstallableSnapshot>>captor();
+        final var callbackCaptor = ArgumentCaptor.<RaftCallback<InstallableSnapshot>>captor();
         final var writerCaptor = ArgumentCaptor.<StateSnapshot.Writer<@NonNull StateSnapshot>>captor();
         verify(dataPersistenceProvider).streamToInstall(lastIncludedCaptor.capture(), snapshotCaptor.capture(),
             writerCaptor.capture(), callbackCaptor.capture());
