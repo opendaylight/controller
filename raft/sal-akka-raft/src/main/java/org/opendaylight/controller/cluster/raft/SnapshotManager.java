@@ -21,6 +21,7 @@ import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.EntryMeta;
 import org.opendaylight.raft.spi.InstallableSnapshot;
@@ -240,6 +241,10 @@ public final class SnapshotManager {
         return context.getId();
     }
 
+    StateSnapshot.@NonNull Support<? extends Snapshot.State> stateSupport() {
+        return snapshotCohort.support();
+    }
+
     public boolean isApplying() {
         return task instanceof PersistApply;
     }
@@ -352,7 +357,7 @@ public final class SnapshotManager {
 
         final Snapshot.State snapshotState;
         try (var in = source.toPlainSource().io().openBufferedStream()) {
-            snapshotState = snapshotCohort.support().reader().readSnapshot(in);
+            snapshotState = stateSupport().reader().readSnapshot(in);
         } catch (IOException e) {
             LOG.debug("{}: failed to convert InstallSnapshot to state", memberId(), e);
             snapshot.callback().onFailure();
