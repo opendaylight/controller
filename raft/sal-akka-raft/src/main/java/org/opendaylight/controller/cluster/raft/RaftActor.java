@@ -155,6 +155,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         return persistenceId();
     }
 
+    final @NonNull LocalAccess localAccess() {
+        return localAccess;
+    }
+
     @Override
     @Deprecated(since = "11.0.0", forRemoval = true)
     public final ActorRef getSender() {
@@ -197,7 +201,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             raftRecovery = isRecoveryApplicable() ? support.recoverToPersistent() : support.recoverToTransient();
         }
 
-        boolean recoveryComplete = raftRecovery.handleRecoveryMessage(this, message);
+        boolean recoveryComplete = raftRecovery.handleRecoveryMessage(message);
         if (recoveryComplete) {
             onRecoveryComplete();
 
@@ -209,7 +213,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     @VisibleForTesting
     RaftActorRecoverySupport newRaftActorRecoverySupport() {
-        return new RaftActorRecoverySupport(localAccess, context, getRaftActorRecoveryCohort());
+        return new RaftActorRecoverySupport(this, context, getRaftActorRecoveryCohort());
     }
 
     @VisibleForTesting

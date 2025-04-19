@@ -23,6 +23,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 import java.io.ObjectInputStream;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -34,6 +35,7 @@ import org.apache.pekko.actor.Props;
 import org.apache.pekko.dispatch.Dispatchers;
 import org.apache.pekko.testkit.TestActorRef;
 import org.apache.pekko.testkit.javadsl.TestKit;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -63,8 +65,12 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
-import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage.CommitSnapshot;
+import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.FailingTermInfoStore;
+import org.opendaylight.controller.cluster.raft.spi.ForwardingDataPersistenceProvider;
+import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
+import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.RaftRole;
 import org.slf4j.Logger;
@@ -433,19 +439,19 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         MockLeaderRaftActor leaderRaftActor = leaderActor.underlyingActor();
         final RaftActorContext leaderActorContext = leaderRaftActor.getRaftActorContext();
 
-        ActorRef leaderCollectorActor = newLeaderCollectorActor(leaderRaftActor);
+        final var leaderCollectorActor = newLeaderCollectorActor(leaderRaftActor);
 
-        // Drop commit message for now to delay snapshot completion
-        leaderRaftActor.setDropMessageOfType(CommitSnapshot.class);
+        // Intercept the commit request to delay its completion
+        final var leaderPersistence = CapturingDataPersistenceProvider.installTo(leaderRaftActor);
 
         leaderActor.tell(new InitiateCaptureSnapshot(), leaderActor);
 
-        final var commitMsg = expectFirstMatching(leaderCollectorActor, CommitSnapshot.class);
+        final var capturedCallback = leaderPersistence.awaitSaveSnapshot();
 
         leaderActor.tell(new AddServer(NEW_SERVER_ID, newFollowerRaftActor.path().toString(), true), testKit.getRef());
 
-        leaderRaftActor.setDropMessageOfType(null);
-        leaderActor.tell(commitMsg, leaderActor);
+        leaderRaftActor.setPersistence(leaderPersistence.delegate());
+        capturedCallback.complete();
 
         AddServerReply addServerReply = testKit.expectMsgClass(Duration.ofSeconds(5), AddServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, addServerReply.getStatus());
@@ -482,8 +488,22 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
 
         ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setElectionTimeoutFactor(1);
 
-        // Drop commit message so the snapshot doesn't complete.
-        leaderRaftActor.setDropMessageOfType(CommitSnapshot.class);
+        // Override persistence to never complete snapshot
+        final var leaderDelegate = leaderRaftActor.persistence();
+        leaderRaftActor.setPersistence(new ForwardingDataPersistenceProvider() {
+            @Override
+            @NonNullByDefault
+            public <T extends StateSnapshot> void saveSnapshot(final RaftSnapshot raftSnapshot,
+                    final EntryInfo lastIncluded, final T snapshot, final StateSnapshot.Writer<T> writer,
+                    final RaftCallback<Instant> callback) {
+                // Never completes
+            }
+
+            @Override
+            protected DataPersistenceProvider delegate() {
+                return leaderDelegate;
+            }
+        });
 
         leaderActor.tell(new InitiateCaptureSnapshot(), leaderActor);
 
@@ -513,16 +533,14 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         RaftActorContext leaderActorContext = leaderRaftActor.getRaftActorContext();
         ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setElectionTimeoutFactor(100);
 
-        final ActorRef leaderCollectorActor = newLeaderCollectorActor(leaderRaftActor);
-
-        // Drop the commit message so the snapshot doesn't complete yet.
-        leaderRaftActor.setDropMessageOfType(CommitSnapshot.class);
+        // Override persistence to prevent snapshot from completing
+        final var leaderPersistence = CapturingDataPersistenceProvider.installTo(leaderRaftActor);
 
         leaderActor.tell(new InitiateCaptureSnapshot(), leaderActor);
 
         leaderActor.tell(new AddServer(NEW_SERVER_ID, newFollowerRaftActor.path().toString(), true), testKit.getRef());
 
-        final var commitMsg = expectFirstMatching(leaderCollectorActor, CommitSnapshot.class);
+        final var leaderSaveSnapshot = leaderPersistence.awaitSaveSnapshot();
 
         // Change the leader behavior to follower
         leaderActor.tell(new Follower(leaderActorContext), leaderActor);
@@ -536,7 +554,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         }));
 
         // Complete the prior snapshot - this should be a no-op b/c it's no longer the leader
-        leaderActor.tell(commitMsg, leaderActor);
+        leaderSaveSnapshot.complete();
 
         leaderActor.tell(new RaftActorVotingConfigSupport.ServerOperationTimeout(NEW_SERVER_ID), leaderActor);
 
