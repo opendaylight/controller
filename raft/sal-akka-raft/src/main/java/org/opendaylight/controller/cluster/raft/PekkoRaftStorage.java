@@ -29,8 +29,10 @@ import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
+import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFileFormat;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
@@ -211,8 +213,22 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
     }
 
     @Override
-    public void saveSnapshot(final Snapshot snapshot) {
-        actor.saveSnapshot(snapshot);
+    public <T extends StateSnapshot> void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
+            final T snapshot, final StateSnapshot.Writer<T> writer, final RaftCallback<Instant> callback) {
+        final var started = Instant.now();
+        try {
+            // FIXME: correct file
+            SnapshotFileFormat.latest().createNew(directory, started, lastIncluded, raftSnapshot.clusterConfig(),
+                compression, raftSnapshot.unappliedEntries(), compression, writer, snapshot);
+        } catch (IOException e) {
+            actor.executeInSelf(() -> callback.invoke(e, null));
+            return;
+        }
+
+        // FIXME: move to place
+
+        final var finished = Instant.now();
+        actor.executeInSelf(() -> callback.invoke(null, finished));
     }
 
     @Override
