@@ -226,7 +226,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         doReturn(snapshotState).when(mockCohort).takeSnapshot();
         snapshotManager.capture(lastLogEntry, -1);
 
-        verify(mockDataPersistenceProvider).saveSnapshot(snapshotCaptor.capture());
+        verify(mockDataPersistenceProvider).saveSnapshot(any(), any(), snapshotCaptor.capture(), any(), any());
 
         final var snapshot = snapshotCaptor.getValue();
 
@@ -279,7 +279,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         doReturn(ByteState.empty()).when(mockCohort).takeSnapshot();
         snapshotManager.capture(EntryInfo.of(9, 6), -1);
 
-        verify(mockDataPersistenceProvider).saveSnapshot(any(Snapshot.class));
+        verify(mockDataPersistenceProvider).saveSnapshot(any(), any(), any(), any(), any());
 
         verify(mockReplicatedLog).snapshotPreCommit(9L, 6L);
 
@@ -302,7 +302,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         doReturn(ByteState.empty()).when(mockCohort).takeSnapshot();
         snapshotManager.capture(EntryInfo.of(9, 6), replicatedToAllIndex);
 
-        verify(mockDataPersistenceProvider).saveSnapshot(any(Snapshot.class));
+        verify(mockDataPersistenceProvider).saveSnapshot(any(), any(), any(), any(), any());
 
         verify(mockReplicatedLog).snapshotPreCommit(9L, 6L);
 
@@ -339,7 +339,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         assertTrue(snapshotManager.isCapturing());
 
-        verify(mockDataPersistenceProvider).saveSnapshot(any(Snapshot.class));
+        verify(mockDataPersistenceProvider).saveSnapshot(any(), any(), any(), any(), any());
 
         verify(mockReplicatedLog).snapshotPreCommit(9L, 6L);
 
@@ -355,7 +355,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     public void testCallingPersistWithoutCaptureWillDoNothing() {
         snapshotManager.persist(ByteState.empty(), null);
 
-        verify(mockDataPersistenceProvider, never()).saveSnapshot(any(Snapshot.class));
+        verify(mockDataPersistenceProvider, never()).saveSnapshot(any(), any(), any(), any(), any());
 
         verify(mockReplicatedLog, never()).snapshotPreCommit(9L, 6L);
 
@@ -374,7 +374,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         snapshotManager.persist(ByteState.empty(), snapshot);
         snapshotManager.persist(ByteState.empty(), snapshot);
 
-        verify(mockDataPersistenceProvider).saveSnapshot(any(Snapshot.class));
+        verify(mockDataPersistenceProvider).saveSnapshot(any(), any(), any(), any(), any());
 
         verify(mockReplicatedLog).snapshotPreCommit(9L, 6L);
     }

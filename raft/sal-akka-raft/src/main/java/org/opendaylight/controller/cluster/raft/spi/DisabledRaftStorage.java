@@ -11,13 +11,14 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.Beta;
 import java.nio.file.Path;
+import java.time.Instant;
 import org.apache.pekko.actor.ActorRef;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
 
@@ -87,7 +88,8 @@ public final class DisabledRaftStorage extends RaftStorage implements ImmediateD
      * </ol>
      */
     @Override
-    public void saveSnapshot(final Snapshot object) {
+    public <T extends StateSnapshot> void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
+            final T snapshot, final StateSnapshot.Writer<T> writer, final RaftCallback<Instant> callback) {
         // Make saving Snapshot successful
         // Committing the snapshot here would end up calling commit in the creating state which would
         // be a state violation. That's why now we send a message to commit the snapshot.

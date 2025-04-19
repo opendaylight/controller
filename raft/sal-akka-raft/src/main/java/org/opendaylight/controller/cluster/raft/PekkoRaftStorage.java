@@ -29,8 +29,10 @@ import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
+import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFileFormat;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
@@ -211,7 +213,14 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
     }
 
     @Override
-    public void saveSnapshot(final Snapshot snapshot) {
+    public <T extends StateSnapshot> void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
+            final T snapshot, final StateSnapshot.Writer<T> writer, final RaftCallback<Instant> callback) {
+
+
+
+
+
+
         actor.saveSnapshot(snapshot);
     }
 

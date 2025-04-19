@@ -13,6 +13,7 @@ import java.io.Serializable;
 import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.EntryMeta;
@@ -63,6 +64,15 @@ public final class Snapshot implements Serializable {
             final TermInfo termInfo, final ClusterConfig serverConfig) {
         return new Snapshot(state, entries, lastIndex, lastTerm, lastAppliedIndex, lastAppliedTerm, termInfo,
             serverConfig);
+    }
+
+    public static @NonNull Snapshot ofRaft(final TermInfo termInfo, final RaftSnapshot raftSnapshot,
+            final EntryMeta lastIncluded, final State state) {
+        final var unapplied = raftSnapshot.unappliedEntries();
+        return new Snapshot(state, unapplied,
+            unapplied.isEmpty() ? lastIncluded.index() : unapplied.getLast().index(),
+            unapplied.isEmpty() ? lastIncluded.term() : unapplied.getLast().term(),
+            lastIncluded.index(), lastIncluded.term(), termInfo, raftSnapshot.clusterConfig());
     }
 
     public static @NonNull Snapshot ofTermLeader(final State state, final EntryMeta lastIncluded,
