@@ -31,9 +31,9 @@ import scala.concurrent.Future;
  *
  * @author Thomas Pantelis
  */
+@Deprecated(since = "11.0.0", forRemoval = true)
 public class InMemorySnapshotStore extends SnapshotStore {
-
-    static final Logger LOG = LoggerFactory.getLogger(InMemorySnapshotStore.class);
+    private static final Logger LOG = LoggerFactory.getLogger(InMemorySnapshotStore.class);
 
     private static final Map<String, CountDownLatch> SNAPSHOT_SAVED_LATCHES = new ConcurrentHashMap<>();
     private static final Map<String, CountDownLatch> SNAPSHOT_DELETED_LATCHES = new ConcurrentHashMap<>();
