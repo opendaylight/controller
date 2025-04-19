@@ -11,7 +11,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 import java.util.Map;
-import org.apache.pekko.persistence.SaveSnapshotSuccess;
 import org.apache.pekko.testkit.TestActorRef;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,7 +35,6 @@ public class RecoveryIntegrationSingleNodeTest extends AbstractRaftActorIntegrat
 
         waitUntilLeader(singleNodeActorRef);
 
-        final var singleNodeCollectorActor = singleNodeActorRef.underlyingActor().collectorActor();
         final var singleNodeContext = singleNodeActorRef.underlyingActor().getRaftActorContext();
 
         InMemoryJournal.addWriteMessagesCompleteLatch(persistenceId, 6, ApplyJournalEntries.class);
@@ -58,7 +56,7 @@ public class RecoveryIntegrationSingleNodeTest extends AbstractRaftActorIntegrat
 
 
         // Wait for snapshot complete.
-        MessageCollectorActor.expectFirstMatching(singleNodeCollectorActor, SaveSnapshotSuccess.class);
+        awaitSnapshot(singleNodeActorRef);
 
         verifyApplyIndex(singleNodeActorRef, 5);
 

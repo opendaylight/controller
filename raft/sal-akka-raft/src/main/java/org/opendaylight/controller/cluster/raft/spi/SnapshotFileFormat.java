@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft.spi;
 
 import static java.util.Objects.requireNonNull;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Instant;
@@ -32,13 +33,13 @@ public enum SnapshotFileFormat {
      */
     SNAPSHOT_V1(".v1") {
         @Override
-        public <T extends StateSnapshot> void createNew(final Path file, final Instant timestamp,
+        public <T extends StateSnapshot> Closeable createNew(final Path file, final Instant timestamp,
                 final EntryInfo lastIncluded, final @Nullable VotingConfig votingConfig,
                 final CompressionType entryCompress, final List<ReplicatedLogEntry> unappliedEntries,
                 final CompressionType stateCompress, final StateSnapshot.Writer<T> stateWriter, final T state)
                     throws IOException {
-            SnapshotFileV1.createNew(file, timestamp, lastIncluded, votingConfig, entryCompress, unappliedEntries,
-                stateCompress, stateWriter, state);
+            return SnapshotFileV1.createNew(file, timestamp, lastIncluded, votingConfig, entryCompress,
+                unappliedEntries, stateCompress, stateWriter, state);
         }
 
         @Override
@@ -99,9 +100,10 @@ public enum SnapshotFileFormat {
      * @param stateCompress the compression to apply to user state
      * @param stateWriter serialization support for the state type
      * @param state the state
+     * @param a {@link Closeable} representing the flush-and-close action
      * @throws IOException if an I/O error occurs
      */
-    public abstract <T extends StateSnapshot> void createNew(Path file, Instant timestamp, EntryInfo lastIncluded,
+    public abstract <T extends StateSnapshot> Closeable createNew(Path file, Instant timestamp, EntryInfo lastIncluded,
         @Nullable VotingConfig votingConfig, CompressionType entryCompress, List<ReplicatedLogEntry> unappliedEntries,
         CompressionType stateCompress, StateSnapshot.Writer<T> stateWriter, T state) throws IOException;
 
