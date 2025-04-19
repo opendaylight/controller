@@ -189,8 +189,11 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
     @NonNullByDefault
     public final <T extends StateSnapshot> void streamToInstall(final EntryInfo lastIncluded, final T snapshot,
             final StateSnapshot.Writer<T> writer, final RaftCallback<InstallableSnapshot> callback) {
+        submitTask(new StreamSnapshotTask<>(callback, lastIncluded, snapshot, writer));
+    }
+
+    protected final void submitTask(final @NonNull CancellableTask<?> task) {
         final var local = checkNotClosed();
-        final var task = new StreamSnapshotTask<>(callback, lastIncluded, snapshot, writer);
         tasks.add(task);
         local.execute(task);
     }
