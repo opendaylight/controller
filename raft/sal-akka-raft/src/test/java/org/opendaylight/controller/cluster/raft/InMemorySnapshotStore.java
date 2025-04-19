@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.raft;
 
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -31,9 +30,9 @@ import scala.concurrent.Future;
  *
  * @author Thomas Pantelis
  */
+@Deprecated(since = "11.0.0", forRemoval = true)
 public class InMemorySnapshotStore extends SnapshotStore {
-
-    static final Logger LOG = LoggerFactory.getLogger(InMemorySnapshotStore.class);
+    private static final Logger LOG = LoggerFactory.getLogger(InMemorySnapshotStore.class);
 
     private static final Map<String, CountDownLatch> SNAPSHOT_SAVED_LATCHES = new ConcurrentHashMap<>();
     private static final Map<String, CountDownLatch> SNAPSHOT_DELETED_LATCHES = new ConcurrentHashMap<>();
@@ -48,28 +47,21 @@ public class InMemorySnapshotStore extends SnapshotStore {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public static <T> List<T> getSnapshots(final String persistentId, final Class<T> type) {
-        List<StoredSnapshot> stored = snapshots.get(persistentId);
+        final var stored = snapshots.get(persistentId);
         if (stored == null) {
-            return Collections.emptyList();
+            return List.of();
         }
 
-        List<T> retList;
         synchronized (stored) {
-            retList = new ArrayList<>(stored.size());
-            for (StoredSnapshot s: stored) {
-                if (type.isInstance(s.data)) {
-                    retList.add((T) s.data);
+            final var ret = new ArrayList<T>(stored.size());
+            for (var snapshot : stored) {
+                if (type.isInstance(snapshot.data)) {
+                    ret.add(type.cast(snapshot.data));
                 }
             }
+            return ret;
         }
-
-        return retList;
-    }
-
-    public static void clearSnapshotsFor(final String persistenceId) {
-        snapshots.remove(persistenceId);
     }
 
     public static void clear() {

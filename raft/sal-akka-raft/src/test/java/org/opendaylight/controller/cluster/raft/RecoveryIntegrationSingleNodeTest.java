@@ -8,15 +8,14 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.List;
 import java.util.Map;
-import org.apache.pekko.persistence.SaveSnapshotSuccess;
 import org.apache.pekko.testkit.TestActorRef;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 
 /**
  * Recovery Integration Test for single node.
@@ -28,15 +27,13 @@ public class RecoveryIntegrationSingleNodeTest extends AbstractRaftActorIntegrat
     }
 
     @Test
-    public void testJournalReplayAfterSnapshotWithSingleNode() {
-
+    public void testJournalReplayAfterSnapshotWithSingleNode() throws Exception {
         String persistenceId = factory.generateActorId("singleNode");
         TestActorRef<AbstractRaftActorIntegrationTest.TestRaftActor> singleNodeActorRef =
                 newTestRaftActor(persistenceId, Map.of(), leaderConfigParams);
 
         waitUntilLeader(singleNodeActorRef);
 
-        final var singleNodeCollectorActor = singleNodeActorRef.underlyingActor().collectorActor();
         final var singleNodeContext = singleNodeActorRef.underlyingActor().getRaftActorContext();
 
         InMemoryJournal.addWriteMessagesCompleteLatch(persistenceId, 6, ApplyJournalEntries.class);
@@ -58,7 +55,7 @@ public class RecoveryIntegrationSingleNodeTest extends AbstractRaftActorIntegrat
 
 
         // Wait for snapshot complete.
-        MessageCollectorActor.expectFirstMatching(singleNodeCollectorActor, SaveSnapshotSuccess.class);
+        awaitSnapshot(singleNodeActorRef);
 
         verifyApplyIndex(singleNodeActorRef, 5);
 
@@ -73,13 +70,13 @@ public class RecoveryIntegrationSingleNodeTest extends AbstractRaftActorIntegrat
         // we get 2 log entries (4 and 5 indexes) and 3 ApplyJournalEntries (for 3, 4, and 5 indexes)
         assertEquals(5, InMemoryJournal.get(persistenceId).size());
 
-        List<Snapshot> persistedSnapshots = InMemorySnapshotStore.getSnapshots(persistenceId, Snapshot.class);
-        assertEquals(1, persistedSnapshots.size());
+        final var snapshotFile = singleNodeActorRef.underlyingActor().persistence().lastSnapshot();
+        assertNotNull(snapshotFile);
 
-        List<Object> snapshottedState = MockRaftActor.fromState(persistedSnapshots.get(0).getState());
-        assertEquals("Incorrect Snapshot", List.of(payload0, payload1, payload2, payload3), snapshottedState);
+        assertEquals(List.of(payload0, payload1, payload2, payload3), MockRaftActor.fromState(
+            snapshotFile.readSnapshot(MockSnapshotState.SUPPORT.reader())));
 
-        //recovery logic starts
+        // recovery logic starts
         killActor(singleNodeActorRef);
 
         singleNodeActorRef = newTestRaftActor(persistenceId, Map.of(), leaderConfigParams);

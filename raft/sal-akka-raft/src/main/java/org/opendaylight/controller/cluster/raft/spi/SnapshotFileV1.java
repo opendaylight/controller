@@ -12,6 +12,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
+import java.io.Closeable;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -29,6 +30,7 @@ import java.time.Instant;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.CRC32C;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -49,6 +51,26 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 final class SnapshotFileV1 implements SnapshotFile {
+    private static final class CreatedFile implements Closeable {
+        private final AtomicReference<@Nullable FileChannel> fc;
+
+        CreatedFile(final FileChannel fc) {
+            this.fc = new AtomicReference<>(requireNonNull(fc));
+        }
+
+        @Override
+        public void close() throws IOException {
+            final var local = fc.getAcquire();
+            if (local != null && fc.compareAndExchangeRelease(local, null) == local) {
+                try {
+                    local.force(true);
+                } finally {
+                    local.close();
+                }
+            }
+        }
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(SnapshotFileV1.class);
     private static final HexFormat HF = HexFormat.of().withUpperCase();
     private static final Set<OpenOption> CREATE_OPTIONS = Set.of(
@@ -112,7 +134,7 @@ final class SnapshotFileV1 implements SnapshotFile {
         stateStream = new FileStreamSource(file, sso, limit);
     }
 
-    static <T extends StateSnapshot> void createNew(final Path file, final Instant timestamp,
+    static <T extends StateSnapshot> Closeable createNew(final Path file, final Instant timestamp,
             final EntryInfo lastIncluded, final @Nullable VotingConfig votingConfig,
             final CompressionType entryCompress, final List<ReplicatedLogEntry> unappliedEntries,
             final CompressionType stateCompress, final StateSnapshot.Writer<T> stateWriter, final T state)
@@ -142,7 +164,8 @@ final class SnapshotFileV1 implements SnapshotFile {
             }
         }
 
-        try (var fc = FileChannel.open(file, CREATE_OPTIONS)) {
+        final var fc = FileChannel.open(file, CREATE_OPTIONS);
+        try {
             fc.position(HEADER_SIZE);
 
             final long sso;
@@ -205,8 +228,15 @@ final class SnapshotFileV1 implements SnapshotFile {
 
             // Write header and sync
             fc.write(header.flip(), 0);
-            fc.force(true);
+        } catch (IOException e) {
+            try {
+                fc.close();
+            } catch (IOException ce) {
+                e.addSuppressed(ce);
+            }
+            throw e;
         }
+        return new CreatedFile(fc);
     }
 
     private static byte computeFormat(final CompressionType compress, final String which) throws IOException {
