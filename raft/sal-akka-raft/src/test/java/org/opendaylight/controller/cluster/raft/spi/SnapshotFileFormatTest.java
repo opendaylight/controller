@@ -96,7 +96,7 @@ class SnapshotFileFormatTest {
 
         final var file = tempDir.resolve(fileName);
         fileFormat.createNew(file, TIMESTAMP, EntryInfo.of(-1, -1), SERVER_CONFIG, entryCompress, ENTRIES,
-            stateCompress, ByteState.SUPPORT.writer(), STATE);
+            stateCompress, ByteState.SUPPORT.writer(), STATE).close();
 
         assertTrue(Files.isRegularFile(file));
         assertEquals(expectedSize, Files.size(file));

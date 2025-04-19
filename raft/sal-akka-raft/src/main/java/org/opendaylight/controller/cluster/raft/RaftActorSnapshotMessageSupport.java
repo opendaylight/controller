@@ -9,11 +9,8 @@ package org.opendaylight.controller.cluster.raft;
 
 import static java.util.Objects.requireNonNull;
 
-import org.apache.pekko.persistence.SaveSnapshotFailure;
-import org.apache.pekko.persistence.SaveSnapshotSuccess;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.ApplyLeaderSnapshot;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.SnapshotComplete;
-import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage.CommitSnapshot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,17 +31,6 @@ class RaftActorSnapshotMessageSupport {
     boolean handleSnapshotMessage(final Object message) {
         switch (message) {
             case ApplyLeaderSnapshot msg -> snapshotManager.applyFromLeader(msg);
-            case CommitSnapshot msg -> snapshotManager.commit(-1, -1);
-            case SaveSnapshotSuccess msg -> {
-                final var sequenceNumber = msg.metadata().sequenceNr();
-                LOG.info("{}: SaveSnapshotSuccess received for snapshot, sequenceNr: {}", snapshotManager.memberId(),
-                    sequenceNumber);
-                snapshotManager.commit(sequenceNumber, msg.metadata().timestamp());
-            }
-            case SaveSnapshotFailure msg -> {
-                LOG.error("{}: SaveSnapshotFailure received for snapshot", snapshotManager.memberId(), msg.cause());
-                snapshotManager.rollback();
-            }
             case SnapshotComplete msg -> LOG.debug("{}: SnapshotComplete received", snapshotManager.memberId());
             default -> {
                 return false;
