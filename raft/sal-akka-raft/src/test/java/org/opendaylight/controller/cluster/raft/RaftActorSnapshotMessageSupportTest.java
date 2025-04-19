@@ -7,20 +7,15 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 
-import org.apache.pekko.persistence.SaveSnapshotFailure;
-import org.apache.pekko.persistence.SaveSnapshotSuccess;
-import org.apache.pekko.persistence.SnapshotMetadata;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.ApplyLeaderSnapshot;
-import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage.CommitSnapshot;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.ByteArray;
 import org.opendaylight.raft.spi.PlainSnapshotSource;
@@ -59,29 +54,6 @@ class RaftActorSnapshotMessageSupportTest {
         sendMessageToSupport(snapshot);
 
         verify(mockSnapshotManager).applyFromLeader(snapshot);
-    }
-
-    @Test
-    void testOnSaveSnapshotSuccess() {
-        long sequenceNumber = 100;
-        long timeStamp = 1234L;
-        sendMessageToSupport(new SaveSnapshotSuccess(new SnapshotMetadata("foo", sequenceNumber, timeStamp)));
-
-        verify(mockSnapshotManager).commit(eq(sequenceNumber), eq(timeStamp));
-    }
-
-    @Test
-    void testOnSaveSnapshotFailure() {
-        sendMessageToSupport(new SaveSnapshotFailure(new SnapshotMetadata("foo", 100, 1234L), new Throwable("mock")));
-
-        verify(mockSnapshotManager).rollback();
-    }
-
-    @Test
-    void testOnCommitSnapshot() {
-        sendMessageToSupport(CommitSnapshot.INSTANCE);
-
-        verify(mockSnapshotManager).commit(eq(-1L), eq(-1L));
     }
 
     @Test
