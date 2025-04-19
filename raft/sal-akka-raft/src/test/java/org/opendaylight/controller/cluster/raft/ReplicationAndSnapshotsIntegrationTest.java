@@ -173,7 +173,7 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         payload3 = sendPayloadData(leaderActor, "three");
 
         // Wait for snapshot complete.
-        MessageCollectorActor.expectFirstMatching(leaderCollectorActor, SaveSnapshotSuccess.class);
+        awaitSnapshot(leaderActor);
 
         // The snapshot index should not be advanced nor the log trimmed because replicatedToAllIndex
         // is behind due the followers not being replicated yet via AppendEntries.
