@@ -93,7 +93,7 @@ class RaftActorRecoveryTest {
         localAccess = new LocalAccess(localId, stateDir);
         context = new RaftActorContextImpl(mockActorRef, null, localAccess, Map.of(), configParams, (short) 0,
             mockPersistence, (identifier, entry) -> { }, MoreExecutors.directExecutor());
-        support = new RaftActorRecoverySupport(localAccess, context, mockCohort);
+        support = new RaftActorRecoverySupport(mockActor, context, mockCohort);
     }
 
     @AfterEach
@@ -106,7 +106,7 @@ class RaftActorRecoveryTest {
     }
 
     private void sendMessageToSupport(final Object message, final boolean expComplete) {
-        boolean complete = recovery.handleRecoveryMessage(mockActor, message);
+        boolean complete = recovery.handleRecoveryMessage(message);
         assertEquals("complete", expComplete, complete);
     }
 

@@ -8,11 +8,14 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static java.util.Objects.requireNonNull;
+import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -413,5 +416,16 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         }
 
         throw lastError;
+    }
+
+    static final void awaitSnapshot(final TestActorRef<? extends RaftActor> actorRef) {
+        final var stateDir = actorRef.underlyingActor().localAccess().stateDir();
+        await().atMost(Duration.ofSeconds(5)).untilAsserted(() -> {
+            try (var stream = Files.list(stateDir)) {
+                assertTrue(stream
+                    .map(path -> path.getFileName().toString())
+                    .anyMatch(str -> str.startsWith("snapshot-") && str.endsWith(".v1")));
+            }
+        });
     }
 }
