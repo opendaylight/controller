@@ -25,12 +25,13 @@ import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SnapshotProtocol;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
+import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFileFormat;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
@@ -43,49 +44,8 @@ import org.slf4j.LoggerFactory;
 // FIXME: remove this class once we have both Snapshots and Entries stored in files
 @NonNullByDefault
 final class PekkoRaftStorage extends EnabledRaftStorage {
-    private final class PersistSnapshotTask extends CancellableTask<SnapshotFile> {
-        private static final HexFormat HF = HexFormat.of().withUpperCase();
-
-        private final Snapshot snapshot;
-
-        PersistSnapshotTask(final Snapshot snapshot, final RaftCallback<SnapshotFile> callback) {
-            super(callback);
-            this.snapshot = requireNonNull(snapshot);
-        }
-
-        @Override
-        protected SnapshotFile compute() throws Exception {
-            final var format = SnapshotFileFormat.latest();
-            final var timestamp = Instant.now();
-            final var baseName = new StringBuilder()
-                .append(FILENAME_START_STR)
-                .append(HF.toHexDigits(timestamp.getEpochSecond()))
-                .append('-')
-                .append(HF.toHexDigits(timestamp.getNano()));
-
-            final var tmpPath = directory.resolve(baseName + ".tmp");
-            final var filePath = directory.resolve(baseName + format.extension());
-
-            LOG.debug("{}: starting snapshot writeout to {}", memberId, tmpPath);
-
-            try {
-                format.createNew(tmpPath, timestamp,
-                    new EntryInfo(snapshot.getLastAppliedIndex(), snapshot.getLastAppliedTerm()),
-                    snapshot.votingConfig(), compression, snapshot.getUnAppliedEntries(), compression, null,
-                    snapshot.getState());
-                Files.move(tmpPath,  filePath, StandardCopyOption.ATOMIC_MOVE);
-            } catch (IOException e) {
-                Files.deleteIfExists(tmpPath);
-                throw e;
-            }
-
-            LOG.debug("{}: finished snapshot writeout to {}", memberId, filePath);
-
-            return format.open(filePath);
-        }
-    }
-
     private static final Logger LOG = LoggerFactory.getLogger(PekkoRaftStorage.class);
+    private static final HexFormat HF = HexFormat.of().withUpperCase();
 
     private static final String FILENAME_START_STR = "snapshot-";
 
@@ -211,8 +171,49 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
     }
 
     @Override
-    public void saveSnapshot(final Snapshot snapshot) {
-        actor.saveSnapshot(snapshot);
+    public <T extends StateSnapshot> void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
+            final T snapshot, final StateSnapshot.Writer<T> writer, final RaftCallback<Instant> callback) {
+        requireNonNull(raftSnapshot);
+        requireNonNull(lastIncluded);
+        requireNonNull(snapshot);
+        requireNonNull(writer);
+
+        submitTask(new CancellableTask<>(callback) {
+            @Override
+            protected Instant compute() throws IOException {
+                return saveSnapshot(raftSnapshot, lastIncluded, snapshot, writer);
+            }
+        });
+    }
+
+    @Override
+    public <T extends StateSnapshot> Instant saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
+            final T snapshot, final StateSnapshot.Writer<T> writer) throws IOException {
+        final var format = SnapshotFileFormat.latest();
+        final var timestamp = Instant.now();
+        final var baseName = new StringBuilder()
+            .append(FILENAME_START_STR)
+            .append(HF.toHexDigits(timestamp.getEpochSecond()))
+            .append('-')
+            .append(HF.toHexDigits(timestamp.getNano()));
+
+        final var tmpPath = directory.resolve(baseName + ".tmp");
+        final var filePath = directory.resolve(baseName + format.extension());
+
+        LOG.debug("{}: starting snapshot writeout to {}", memberId, tmpPath);
+
+        try {
+            format.createNew(tmpPath, timestamp, lastIncluded, raftSnapshot.votingConfig(), compression,
+                raftSnapshot.unappliedEntries(), compression, writer, snapshot).close();
+            Files.move(tmpPath, filePath, StandardCopyOption.ATOMIC_MOVE);
+        } catch (IOException e) {
+            Files.deleteIfExists(tmpPath);
+            throw e;
+        }
+
+        LOG.debug("{}: finished snapshot writeout to {}", memberId, filePath);
+
+        return timestamp;
     }
 
     @Override

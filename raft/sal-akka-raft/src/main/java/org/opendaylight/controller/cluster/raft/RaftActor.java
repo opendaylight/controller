@@ -155,6 +155,11 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         return persistenceId();
     }
 
+    @VisibleForTesting
+    final @NonNull LocalAccess localAccess() {
+        return localAccess;
+    }
+
     @Override
     @Deprecated(since = "11.0.0", forRemoval = true)
     public final ActorRef getSender() {
