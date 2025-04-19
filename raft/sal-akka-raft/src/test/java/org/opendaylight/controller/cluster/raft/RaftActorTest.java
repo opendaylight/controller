@@ -36,6 +36,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -84,7 +85,6 @@ import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
-import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage.CommitSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.ForwardingDataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
@@ -297,11 +297,11 @@ public class RaftActorTest extends AbstractActorTest {
         final var updateElectionTerm = new UpdateElectionTerm(5, "member2");
         mockRaftActor.handleRecover(updateElectionTerm);
 
-        verify(mockRecovery).handleRecoveryMessage(any(), same(snapshotOffer));
-        verify(mockRecovery).handleRecoveryMessage(any(), same(logEntry));
-        verify(mockRecovery).handleRecoveryMessage(any(), same(applyJournalEntries));
-        verify(mockRecovery).handleRecoveryMessage(any(), same(deleteEntries));
-        verify(mockRecovery).handleRecoveryMessage(any(), same(updateElectionTerm));
+        verify(mockRecovery).handleRecoveryMessage(same(snapshotOffer));
+        verify(mockRecovery).handleRecoveryMessage(same(logEntry));
+        verify(mockRecovery).handleRecoveryMessage(same(applyJournalEntries));
+        verify(mockRecovery).handleRecoveryMessage(same(deleteEntries));
+        verify(mockRecovery).handleRecoveryMessage(same(updateElectionTerm));
     }
 
     @Test
@@ -337,16 +337,12 @@ public class RaftActorTest extends AbstractActorTest {
         when(mockSupport.handleSnapshotMessage(same(saveSnapshotFailure))).thenReturn(true);
         mockRaftActor.handleCommand(saveSnapshotFailure);
 
-        when(mockSupport.handleSnapshotMessage(same(CommitSnapshot.INSTANCE))).thenReturn(true);
-        mockRaftActor.handleCommand(CommitSnapshot.INSTANCE);
-
         when(mockSupport.handleSnapshotMessage(same(GetSnapshot.INSTANCE))).thenReturn(true);
         mockRaftActor.handleCommand(GetSnapshot.INSTANCE);
 
         verify(mockSupport).handleSnapshotMessage(same(applySnapshot));
         verify(mockSupport).handleSnapshotMessage(same(saveSnapshotSuccess));
         verify(mockSupport).handleSnapshotMessage(same(saveSnapshotFailure));
-        verify(mockSupport).handleSnapshotMessage(same(CommitSnapshot.INSTANCE));
         verify(mockSupport).handleSnapshotMessage(same(GetSnapshot.INSTANCE));
     }
 
@@ -1033,7 +1029,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testRestoreFromSnapshot() {
+    public void testRestoreFromSnapshot() throws Exception {
         TEST_LOG.info("testRestoreFromSnapshot starting");
 
         String persistenceId = factory.generateActorId("test-actor-");
@@ -1052,16 +1048,20 @@ public class RaftActorTest extends AbstractActorTest {
         Snapshot snapshot = Snapshot.create(snapshotState, snapshotUnappliedEntries,
                 snapshotLastIndex, 1, snapshotLastApplied, 1, new TermInfo(1, "member-1"), null);
 
-        InMemorySnapshotStore.addSnapshotSavedLatch(persistenceId);
-
         TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.builder().id(persistenceId)
             .config(config).restoreFromSnapshot(snapshot).props(stateDir())
             .withDispatcher(Dispatchers.DefaultDispatcherId()), persistenceId);
-        MockRaftActor mockRaftActor = raftActorRef.underlyingActor();
+        var mockRaftActor = raftActorRef.underlyingActor();
 
         mockRaftActor.waitForRecoveryComplete();
 
-        Snapshot savedSnapshot = InMemorySnapshotStore.waitForSavedSnapshot(persistenceId, Snapshot.class);
+        final var persistence = mockRaftActor.persistence();
+        final var snapshotFile = await().atMost(Duration.ofSeconds(2))
+            .until(() -> persistence.lastSnapshot(), Objects::nonNull);
+
+        Snapshot savedSnapshot = Snapshot.ofRaft(new TermInfo(1, "member-1"), snapshotFile.readRaftSnapshot(),
+            snapshotFile.lastIncluded(), snapshotFile.readSnapshot(MockSnapshotState.SUPPORT.reader()));
+
         assertEquals("getElectionTerm", snapshot.termInfo(), savedSnapshot.termInfo());
         assertEquals("getLastAppliedIndex", snapshot.getLastAppliedIndex(), savedSnapshot.getLastAppliedIndex());
         assertEquals("getLastAppliedTerm", snapshot.getLastAppliedTerm(), savedSnapshot.getLastAppliedTerm());
@@ -1094,11 +1094,10 @@ public class RaftActorTest extends AbstractActorTest {
         mockRaftActor = raftActorRef.underlyingActor();
 
         mockRaftActor.waitForRecoveryComplete();
-        assertTrue("snapshot committed",
-                Uninterruptibles.awaitUninterruptibly(mockRaftActor.snapshotCommitted, 5, TimeUnit.SECONDS));
 
-        context = mockRaftActor.getRaftActorContext();
-        assertEquals("Current term", new TermInfo(5, "member-1"), context.termInfo());
+        final var secondContext = mockRaftActor.getRaftActorContext();
+        await().atMost(Duration.ofSeconds(5)).untilAsserted(
+            () -> assertEquals("Current term", new TermInfo(5, "member-1"), secondContext.termInfo()));
 
         TEST_LOG.info("testRestoreFromSnapshot ending");
     }
