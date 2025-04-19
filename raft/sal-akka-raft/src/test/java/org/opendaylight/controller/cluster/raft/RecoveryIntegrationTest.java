@@ -109,7 +109,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         MessageCollectorActor.expectMatching(follower1CollectorActor, AppendEntries.class, 3);
 
         // Wait for snapshot complete.
-        MessageCollectorActor.expectFirstMatching(leaderCollectorActor, SaveSnapshotSuccess.class);
+        awaitSnapshot(leaderActor);
 
         // Now deliver the AppendEntries to the follower
         follower1Actor.underlyingActor().stopDropMessages(AppendEntries.class);
@@ -171,7 +171,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         MessageCollectorActor.expectFirstMatching(follower2CollectorActor, ApplyLeaderSnapshot.class);
 
         // Wait for the follower to persist the snapshot.
-        MessageCollectorActor.expectFirstMatching(follower2CollectorActor, SaveSnapshotSuccess.class);
+        awaitSnapshot(follower2Actor);
 
         final List<MockCommand> expFollowerState = List.of(payload0, payload1, payload2);
 
@@ -206,7 +206,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         // This should trigger a snapshot.
         sendPayloadData(leaderActor, "three");
 
-        MessageCollectorActor.expectFirstMatching(leaderCollectorActor, SaveSnapshotSuccess.class);
+        awaitSnapshot(leaderActor);
         verifyApplyIndex(leaderActor, 3);
 
         // Disconnect follower from leader

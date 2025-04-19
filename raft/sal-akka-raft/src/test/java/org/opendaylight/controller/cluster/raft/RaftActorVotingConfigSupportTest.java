@@ -63,7 +63,6 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
-import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage.CommitSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.FailingTermInfoStore;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.RaftRole;
@@ -440,7 +439,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
 
         leaderActor.tell(new InitiateCaptureSnapshot(), leaderActor);
 
-        Object commitMsg = expectFirstMatching(leaderCollectorActor, CommitSnapshot.class);
+        final var commitMsg = expectFirstMatching(leaderCollectorActor, CommitSnapshot.class);
 
         leaderActor.tell(new AddServer(NEW_SERVER_ID, newFollowerRaftActor.path().toString(), true), testKit.getRef());
 

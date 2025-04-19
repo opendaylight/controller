@@ -26,6 +26,7 @@ import org.opendaylight.controller.cluster.raft.persisted.MigratedSerializable;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
+import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
@@ -40,7 +41,7 @@ import org.slf4j.LoggerFactory;
 final class RaftActorRecovery {
     private static final Logger LOG = LoggerFactory.getLogger(RaftActorRecovery.class);
 
-    private final @NonNull LocalAccess localAccess;
+    private final @NonNull RaftActor actor;
     private final @NonNull RaftActorContext context;
     private final @NonNull RaftActorRecoveryCohort cohort;
     private final @Nullable TermInfo origTermInfo;
@@ -55,37 +56,30 @@ final class RaftActorRecovery {
     private Stopwatch recoveryTimer;
     private Stopwatch recoverySnapshotTimer;
 
-    private RaftActorRecovery(final @NonNull LocalAccess localAccess, final RaftActorContext context,
+    private RaftActorRecovery(final @NonNull RaftActor actor, final RaftActorContext context,
             final RaftActorRecoveryCohort cohort, final boolean recoveryApplicable) throws IOException {
-        this.localAccess = requireNonNull(localAccess);
+        this.actor = requireNonNull(actor);
         this.context = requireNonNull(context);
         this.cohort = requireNonNull(cohort);
         this.recoveryApplicable = recoveryApplicable;
-        origTermInfo = localAccess.termInfoStore().loadAndSetTerm();
+        origTermInfo = actor.localAccess().termInfoStore().loadAndSetTerm();
 
         final var loaded = context.snapshotStore().lastSnapshot();
         if (loaded != null) {
-            final var lastIncluded = loaded.lastIncluded();
-            final var raftSnapshot = loaded.readRaftSnapshot();
-            final var unapplied = raftSnapshot.unappliedEntries();
-
-            initializeLog(loaded.timestamp(), Snapshot.create(
-                loaded.readSnapshot(context.getSnapshotManager().stateSupport().reader()), unapplied,
-                unapplied.isEmpty() ? lastIncluded.index() : unapplied.getLast().index(),
-                unapplied.isEmpty() ? lastIncluded.term() : unapplied.getLast().term(),
-                lastIncluded.index(), lastIncluded.term(), origTermInfo, raftSnapshot.votingConfig()));
+            initializeLog(loaded.timestamp(), Snapshot.ofRaft(origTermInfo, loaded.readRaftSnapshot(),
+                loaded.lastIncluded(), loaded.readSnapshot(context.getSnapshotManager().stateSupport().reader())));
         }
         origSnapshot = loaded;
     }
 
-    static @NonNull RaftActorRecovery toPersistent(final @NonNull LocalAccess localAccess,
+    static @NonNull RaftActorRecovery toPersistent(final @NonNull RaftActor actor,
             final RaftActorContext context, final RaftActorRecoveryCohort cohort) throws IOException {
-        return new RaftActorRecovery(localAccess, context, cohort, true);
+        return new RaftActorRecovery(actor, context, cohort, true);
     }
 
-    static @NonNull RaftActorRecovery toTransient(final @NonNull LocalAccess localAccess,
+    static @NonNull RaftActorRecovery toTransient(final @NonNull RaftActor actor,
             final RaftActorContext context, final RaftActorRecoveryCohort cohort) throws IOException {
-        return new RaftActorRecovery(localAccess, context, cohort, false);
+        return new RaftActorRecovery(actor, context, cohort, false);
     }
 
     boolean handleRecoveryMessage(final RaftActor actor, final Object message) {
@@ -116,7 +110,7 @@ final class RaftActorRecovery {
     }
 
     private @NonNull String memberId() {
-        return localAccess.memberId();
+        return actor.memberId();
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
@@ -158,9 +152,25 @@ final class RaftActorRecovery {
         if (local != null) {
             LOG.warn("{}: ignoring Pekko snapshot from {} containing {} up to {} in favor of {} contained in {}",
                 memberId(), timestamp, snapshot.lastApplied(), snapshot.last(), local.lastIncluded(), local.source());
-        } else {
-            initializeLog(timestamp, snapshot);
+            return;
         }
+
+        initializeLog(timestamp, snapshot);
+
+        LOG.info("{}: migrating from Pekko persistent-snapshot taken at {}", memberId(), timestamp);
+        final var sw = Stopwatch.createStarted();
+        try {
+            context.snapshotStore().saveSnapshot(
+                new RaftSnapshot(snapshot.votingConfig(), snapshot.getUnAppliedEntries()), snapshot.lastApplied(),
+                snapshot.getState(), context.getSnapshotManager().<Snapshot.@NonNull State>stateSupport().writer(),
+                timestamp);
+        } catch (IOException e) {
+            LOG.error("{}: failed to save local snapshot", memberId(), e);
+            throw new UncheckedIOException(e);
+        }
+
+        LOG.info("{}: local snapshot saved in {}, deleting Pekko-persisted snapshots", memberId(), sw.stop());
+        actor.deleteSnapshots(timestamp.toEpochMilli());
     }
 
     private void initializeLog(final Instant timestamp, Snapshot snapshot) {
@@ -203,9 +213,8 @@ final class RaftActorRecovery {
             context.updateVotingConfig(snapshot.votingConfig());
         }
 
-        timer.stop();
         LOG.info("Recovery snapshot applied for {} in {}: snapshotIndex={}, snapshotTerm={}, journal-size={}",
-                memberId(), timer, replLog.getSnapshotIndex(), replLog.getSnapshotTerm(), replLog.size());
+                memberId(), timer.stop(), replLog.getSnapshotIndex(), replLog.getSnapshotTerm(), replLog.size());
     }
 
     private void onRecoveredJournalLogEntry(final ReplicatedLogEntry logEntry) {
@@ -347,7 +356,7 @@ final class RaftActorRecovery {
 
 
         // Populate property-based storage if needed, or roll-back any voting information leaked by recovery process
-        final var infoStore = localAccess.termInfoStore();
+        final var infoStore = actor.localAccess().termInfoStore();
         final var orig = origTermInfo;
         if (orig == null) {
             // No original info observed, seed it after recovery and trigger a snapshot
