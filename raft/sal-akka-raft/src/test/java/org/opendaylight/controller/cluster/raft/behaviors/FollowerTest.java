@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft.behaviors;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -26,6 +27,7 @@ import com.google.common.util.concurrent.Uninterruptibles;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -38,7 +40,6 @@ import org.junit.After;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.InMemoryJournal;
-import org.opendaylight.controller.cluster.raft.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.MessageCollectorActor;
 import org.opendaylight.controller.cluster.raft.MockCommand;
 import org.opendaylight.controller.cluster.raft.MockRaftActor;
@@ -66,10 +67,10 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
+import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.TermInfo;
 
 public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
@@ -1078,7 +1079,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     }
 
     @Test
-    public void testCaptureSnapshotOnLastEntryInAppendEntries() {
+    public void testCaptureSnapshotOnLastEntryInAppendEntries() throws Exception {
         String id = "testCaptureSnapshotOnLastEntryInAppendEntries";
         logStart(id);
 
@@ -1088,16 +1089,17 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         config.setSnapshotBatchCount(2);
         config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
 
-        final var followerRaftActor = new AtomicReference<MockRaftActor>();
-        final var snapshotCohort = newRaftActorSnapshotCohort(followerRaftActor);
+        final var followerRaftActorRef = new AtomicReference<MockRaftActor>();
+        final var snapshotCohort = newRaftActorSnapshotCohort(followerRaftActorRef);
         Builder builder = MockRaftActor.builder().persistent(Optional.of(Boolean.TRUE)).id(id)
                 .peerAddresses(Map.of("leader", "")).config(config).snapshotCohort(snapshotCohort);
         TestActorRef<MockRaftActor> followerActorRef = actorFactory.createTestActor(builder.props(stateDir())
                 .withDispatcher(Dispatchers.DefaultDispatcherId()), id);
-        followerRaftActor.set(followerActorRef.underlyingActor());
-        followerRaftActor.get().waitForInitializeBehaviorComplete();
 
-        InMemorySnapshotStore.addSnapshotSavedLatch(id);
+        final var followerRaftActor = followerActorRef.underlyingActor();
+        followerRaftActorRef.set(followerRaftActor);
+        followerRaftActor.waitForInitializeBehaviorComplete();
+
         InMemoryJournal.addDeleteMessagesCompleteLatch(id);
         InMemoryJournal.addWriteMessagesCompleteLatch(id, 1, ApplyJournalEntries.class);
 
@@ -1111,29 +1113,29 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
         assertTrue("isSuccess", reply.isSuccess());
 
-        final Snapshot snapshot = InMemorySnapshotStore.waitForSavedSnapshot(id, Snapshot.class);
+        final var snapshotFile = await().atMost(Duration.ofSeconds(2))
+            .until(() -> followerRaftActor.getPersistence().lastSnapshot(), Objects::nonNull);
 
         InMemoryJournal.waitForDeleteMessagesComplete(id);
         InMemoryJournal.waitForWriteMessagesComplete(id);
         // We expect the ApplyJournalEntries for index 1 to remain in the persisted log b/c it's still queued for
         // persistence by the time we initiate capture so the last persisted journal sequence number doesn't include it.
         // This is OK - on recovery it will be a no-op since index 1 has already been applied.
-        List<Object> journalEntries = InMemoryJournal.get(id, Object.class);
+        final var journalEntries = InMemoryJournal.get(id, Object.class);
         assertEquals("Persisted journal entries size: " + journalEntries, 1, journalEntries.size());
         assertEquals("Persisted journal entry type", ApplyJournalEntries.class, journalEntries.get(0).getClass());
         assertEquals("ApplyJournalEntries index", 1, ((ApplyJournalEntries)journalEntries.get(0)).getToIndex());
 
-        assertEquals("Snapshot unapplied size", 0, snapshot.getUnAppliedEntries().size());
-        assertEquals("Snapshot getLastAppliedTerm", 1, snapshot.getLastAppliedTerm());
-        assertEquals("Snapshot getLastAppliedIndex", 1, snapshot.getLastAppliedIndex());
-        assertEquals("Snapshot getLastTerm", 1, snapshot.getLastTerm());
-        assertEquals("Snapshot getLastIndex", 1, snapshot.getLastIndex());
+        final var raftSnapshot = snapshotFile.readRaftSnapshot();
+
+        assertEquals(List.of(), raftSnapshot.unappliedEntries());
+        assertEquals(EntryInfo.of(1, 1), snapshotFile.lastIncluded());
         assertEquals("Snapshot state", List.of(entries.get(0).command(), entries.get(1).command()),
-                MockRaftActor.fromState(snapshot.getState()));
+            MockRaftActor.fromState(snapshotFile.readSnapshot(MockSnapshotState.SUPPORT.reader())));
     }
 
     @Test
-    public void testCaptureSnapshotOnMiddleEntryInAppendEntries() {
+    public void testCaptureSnapshotOnMiddleEntryInAppendEntries() throws Exception {
         String id = "testCaptureSnapshotOnMiddleEntryInAppendEntries";
         logStart(id);
 
@@ -1143,16 +1145,16 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         config.setSnapshotBatchCount(2);
         config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
 
-        final var followerRaftActor = new AtomicReference<MockRaftActor>();
-        final var snapshotCohort = newRaftActorSnapshotCohort(followerRaftActor);
+        final var followerRaftActorRef = new AtomicReference<MockRaftActor>();
+        final var snapshotCohort = newRaftActorSnapshotCohort(followerRaftActorRef);
         Builder builder = MockRaftActor.builder().persistent(Optional.of(Boolean.TRUE)).id(id)
                 .peerAddresses(Map.of("leader", "")).config(config).snapshotCohort(snapshotCohort);
         TestActorRef<MockRaftActor> followerActorRef = actorFactory.createTestActor(builder.props(stateDir())
                 .withDispatcher(Dispatchers.DefaultDispatcherId()), id);
-        followerRaftActor.set(followerActorRef.underlyingActor());
-        followerRaftActor.get().waitForInitializeBehaviorComplete();
+        final var followerRaftActor = followerActorRef.underlyingActor();
+        followerRaftActorRef.set(followerRaftActor);
+        followerRaftActor.waitForInitializeBehaviorComplete();
 
-        InMemorySnapshotStore.addSnapshotSavedLatch(id);
         InMemoryJournal.addDeleteMessagesCompleteLatch(id);
         InMemoryJournal.addWriteMessagesCompleteLatch(id, 1, ApplyJournalEntries.class);
 
@@ -1167,7 +1169,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
         assertTrue("isSuccess", reply.isSuccess());
 
-        final Snapshot snapshot = InMemorySnapshotStore.waitForSavedSnapshot(id, Snapshot.class);
+        final var snapshotFile = await().atMost(Duration.ofSeconds(2))
+            .until(() -> followerRaftActor.getPersistence().lastSnapshot(), Objects::nonNull);
 
         InMemoryJournal.waitForDeleteMessagesComplete(id);
         InMemoryJournal.waitForWriteMessagesComplete(id);
@@ -1179,16 +1182,14 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertEquals("Persisted journal entry type", ApplyJournalEntries.class, journalEntries.get(0).getClass());
         assertEquals("ApplyJournalEntries index", 2, ((ApplyJournalEntries)journalEntries.get(0)).getToIndex());
 
-        assertEquals("Snapshot unapplied size", 0, snapshot.getUnAppliedEntries().size());
-        assertEquals("Snapshot getLastAppliedTerm", 1, snapshot.getLastAppliedTerm());
-        assertEquals("Snapshot getLastAppliedIndex", 2, snapshot.getLastAppliedIndex());
-        assertEquals("Snapshot getLastTerm", 1, snapshot.getLastTerm());
-        assertEquals("Snapshot getLastIndex", 2, snapshot.getLastIndex());
-        assertEquals("Snapshot state", List.of(entries.get(0).command(), entries.get(1).command(),
-                entries.get(2).command()), MockRaftActor.fromState(snapshot.getState()));
+        final var raftSnapshot = snapshotFile.readRaftSnapshot();
+        assertEquals(List.of(), raftSnapshot.unappliedEntries());
+        assertEquals(EntryInfo.of(2, 1), snapshotFile.lastIncluded());
+        assertEquals(List.of(entries.get(0).command(), entries.get(1).command(), entries.get(2).command()),
+            MockRaftActor.fromState(snapshotFile.readSnapshot(MockSnapshotState.SUPPORT.reader())));
 
-        assertEquals("Journal size", 0, followerRaftActor.get().getReplicatedLog().size());
-        assertEquals("Snapshot index", 2, followerRaftActor.get().getReplicatedLog().getSnapshotIndex());
+        assertEquals("Journal size", 0, followerRaftActorRef.get().getReplicatedLog().size());
+        assertEquals("Snapshot index", 2, followerRaftActorRef.get().getReplicatedLog().getSnapshotIndex());
 
         // Reinstate the actor from persistence
 
@@ -1196,20 +1197,20 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         followerActorRef = actorFactory.createTestActor(builder.props(stateDir())
                 .withDispatcher(Dispatchers.DefaultDispatcherId()), id);
-        followerRaftActor.set(followerActorRef.underlyingActor());
-        followerRaftActor.get().waitForInitializeBehaviorComplete();
+        followerRaftActorRef.set(followerActorRef.underlyingActor());
+        followerRaftActorRef.get().waitForInitializeBehaviorComplete();
 
-        final var followerLog = followerRaftActor.get().getReplicatedLog();
+        final var followerLog = followerRaftActorRef.get().getReplicatedLog();
         assertEquals("Journal size", 0, followerLog.size());
         assertEquals("Last index", 2, followerLog.lastIndex());
         assertEquals("Last applied index", 2, followerLog.getLastApplied());
         assertEquals("Commit index", 2, followerLog.getCommitIndex());
         assertEquals("State", List.of(entries.get(0).command(), entries.get(1).command(), entries.get(2).command()),
-            followerRaftActor.get().getState());
+            followerRaftActorRef.get().getState());
     }
 
     @Test
-    public void testCaptureSnapshotOnAppendEntriesWithUnapplied() {
+    public void testCaptureSnapshotOnAppendEntriesWithUnapplied() throws Exception {
         String id = "testCaptureSnapshotOnAppendEntriesWithUnapplied";
         logStart(id);
 
@@ -1219,16 +1220,16 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         config.setSnapshotBatchCount(1);
         config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
 
-        final var followerRaftActor = new AtomicReference<MockRaftActor>();
-        final var snapshotCohort = newRaftActorSnapshotCohort(followerRaftActor);
+        final var followerRaftActorRef = new AtomicReference<MockRaftActor>();
+        final var snapshotCohort = newRaftActorSnapshotCohort(followerRaftActorRef);
         Builder builder = MockRaftActor.builder().persistent(Optional.of(Boolean.TRUE)).id(id)
                 .peerAddresses(Map.of("leader", "")).config(config).snapshotCohort(snapshotCohort);
         TestActorRef<MockRaftActor> followerActorRef = actorFactory.createTestActor(builder.props(stateDir())
                 .withDispatcher(Dispatchers.DefaultDispatcherId()), id);
-        followerRaftActor.set(followerActorRef.underlyingActor());
-        followerRaftActor.get().waitForInitializeBehaviorComplete();
+        final var followerRaftActor = followerActorRef.underlyingActor();
+        followerRaftActorRef.set(followerRaftActor);
+        followerRaftActor.waitForInitializeBehaviorComplete();
 
-        InMemorySnapshotStore.addSnapshotSavedLatch(id);
         InMemoryJournal.addDeleteMessagesCompleteLatch(id);
         InMemoryJournal.addWriteMessagesCompleteLatch(id, 1, ApplyJournalEntries.class);
 
@@ -1243,7 +1244,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
         assertTrue("isSuccess", reply.isSuccess());
 
-        final Snapshot snapshot = InMemorySnapshotStore.waitForSavedSnapshot(id, Snapshot.class);
+        final var snapshotFile = await().atMost(Duration.ofSeconds(2))
+            .until(() -> followerRaftActor.getPersistence().lastSnapshot(), Objects::nonNull);
 
         InMemoryJournal.waitForDeleteMessagesComplete(id);
         InMemoryJournal.waitForWriteMessagesComplete(id);
@@ -1255,15 +1257,14 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertEquals("Persisted journal entry type", ApplyJournalEntries.class, journalEntries.get(0).getClass());
         assertEquals("ApplyJournalEntries index", 0, ((ApplyJournalEntries)journalEntries.get(0)).getToIndex());
 
-        assertEquals("Snapshot unapplied size", 2, snapshot.getUnAppliedEntries().size());
-        assertEquals("Snapshot unapplied entry index", 1, snapshot.getUnAppliedEntries().get(0).index());
-        assertEquals("Snapshot unapplied entry index", 2, snapshot.getUnAppliedEntries().get(1).index());
-        assertEquals("Snapshot getLastAppliedTerm", 1, snapshot.getLastAppliedTerm());
-        assertEquals("Snapshot getLastAppliedIndex", 0, snapshot.getLastAppliedIndex());
-        assertEquals("Snapshot getLastTerm", 1, snapshot.getLastTerm());
-        assertEquals("Snapshot getLastIndex", 2, snapshot.getLastIndex());
+        final var raftSnapshot = snapshotFile.readRaftSnapshot();
+
+        assertEquals("Snapshot unapplied size", 2, raftSnapshot.unappliedEntries().size());
+        assertEquals("Snapshot unapplied entry index", 1, raftSnapshot.unappliedEntries().get(0).index());
+        assertEquals("Snapshot unapplied entry index", 2, raftSnapshot.unappliedEntries().get(1).index());
+        assertEquals("Snapshot getLastAppliedTerm", EntryInfo.of(0, 1), snapshotFile.lastIncluded());
         assertEquals("Snapshot state", List.of(entries.get(0).command()),
-                MockRaftActor.fromState(snapshot.getState()));
+                MockRaftActor.fromState(snapshotFile.readSnapshot(MockSnapshotState.SUPPORT.reader())));
     }
 
     @Test
@@ -1277,8 +1278,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         follower = createBehavior(context);
 
-        follower.handleMessage(leaderActor,
-                new AppendEntries(1, "leader", -1, -1, List.of(), -1, -1, (short)0));
+        follower.handleMessage(leaderActor, new AppendEntries(1, "leader", -1, -1, List.of(), -1, -1, (short)0));
 
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
         assertTrue(reply.isNeedsLeaderAddress());

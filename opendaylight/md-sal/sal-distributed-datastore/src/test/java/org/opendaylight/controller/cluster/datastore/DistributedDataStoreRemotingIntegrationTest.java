@@ -34,11 +34,15 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.ConfigFactory;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -86,6 +90,8 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
+import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
+import org.opendaylight.controller.cluster.raft.spi.SnapshotFileFormat;
 import org.opendaylight.controller.cluster.raft.spi.UnsignedLongBitmap;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.PeopleModel;
@@ -102,6 +108,7 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionChain;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
+import org.opendaylight.raft.api.EntryMeta;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.yangtools.yang.common.Uint64;
@@ -312,10 +319,9 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         Stopwatch sw = Stopwatch.createStarted();
         boolean done = false;
         while (!done) {
-            final List<ApplyJournalEntries> entries = InMemoryJournal.get(followerCarShardName,
-                    ApplyJournalEntries.class);
-            for (ApplyJournalEntries aje: entries) {
-                if (aje.getToIndex() >= leaderLastAppliedIndex.get()) {
+            final var entries = InMemoryJournal.get(followerCarShardName, ApplyJournalEntries.class);
+            for (var entry : entries) {
+                if (entry.getToIndex() >= leaderLastAppliedIndex.get()) {
                     done = true;
                     break;
                 }
@@ -1151,19 +1157,39 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
                 List.of(), 5, 1, 5, 1, new TermInfo(1), null);
         InMemorySnapshotStore.addSnapshot(leaderCarShardName, initialSnapshot);
 
-        InMemorySnapshotStore.addSnapshotSavedLatch(leaderCarShardName);
-        InMemorySnapshotStore.addSnapshotSavedLatch(followerCarShardName);
-
         initDatastoresWithCars(testName);
 
         assertEquals(Optional.of(carsNode), leaderDistributedDataStore.newReadOnlyTransaction().read(
             CarsModel.BASE_PATH).get(5, TimeUnit.SECONDS));
 
-        verifySnapshot(InMemorySnapshotStore.waitForSavedSnapshot(leaderCarShardName, Snapshot.class),
-                initialSnapshot, snapshotRoot);
+        verifySnapshot(awaitSnapshot(leaderCarShardName), initialSnapshot, snapshotRoot);
+        verifySnapshot(awaitSnapshot(followerCarShardName), initialSnapshot, snapshotRoot);
+    }
 
-        verifySnapshot(InMemorySnapshotStore.waitForSavedSnapshot(followerCarShardName, Snapshot.class),
-                initialSnapshot, snapshotRoot);
+    private SnapshotFile awaitSnapshot(final String persistenceId) {
+        final var stateDir = stateDir().resolve(Shard.STATE_PATH).resolve(persistenceId);
+        return await().atMost(Duration.ofSeconds(5)).until(() -> {
+            if (!Files.isDirectory(stateDir)) {
+                return null;
+            }
+
+            try (var stream = Files.list(stateDir)) {
+                return stream
+                    .filter(path -> {
+                        final var str = path.getFileName().toString();
+                        return str.startsWith("snapshot-") && str.endsWith(".v1");
+                    })
+                    .map(path -> {
+                        try {
+                            return SnapshotFileFormat.SNAPSHOT_V1.open(path);
+                        } catch (IOException e) {
+                            throw new AssertionError(e);
+                        }
+                    })
+                    .findFirst()
+                    .orElse(null);
+            }
+        }, Objects::nonNull);
     }
 
     @Test
@@ -1300,23 +1326,26 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     }
 
     private static void verifySnapshot(final String persistenceId, final long lastAppliedIndex) {
-        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
-                List<Snapshot> snap = InMemorySnapshotStore.getSnapshots(persistenceId, Snapshot.class);
-                assertEquals(1, snap.size());
-                assertEquals(lastAppliedIndex, snap.get(0).getLastAppliedIndex());
-            }
-        );
+        await().atMost(Duration.ofSeconds(5)).untilAsserted(() -> {
+            final var snap = InMemorySnapshotStore.getSnapshots(persistenceId, Snapshot.class);
+            assertEquals(1, snap.size());
+            assertEquals(lastAppliedIndex, snap.get(0).getLastAppliedIndex());
+        });
     }
 
-    private static void verifySnapshot(final Snapshot actual, final Snapshot expected,
-                                       final NormalizedNode expRoot) {
-        assertEquals("Snapshot getLastAppliedTerm", expected.getLastAppliedTerm(), actual.getLastAppliedTerm());
-        assertEquals("Snapshot getLastAppliedIndex", expected.getLastAppliedIndex(), actual.getLastAppliedIndex());
-        assertEquals("Snapshot getLastTerm", expected.getLastTerm(), actual.getLastTerm());
-        assertEquals("Snapshot getLastIndex", expected.getLastIndex(), actual.getLastIndex());
-        assertEquals("Snapshot state type", ShardSnapshotState.class, actual.getState().getClass());
-        MetadataShardDataTreeSnapshot shardSnapshot =
-                (MetadataShardDataTreeSnapshot) ((ShardSnapshotState)actual.getState()).getSnapshot();
+    private static void verifySnapshot(final SnapshotFile actual, final Snapshot expected,
+                                       final NormalizedNode expRoot) throws Exception {
+        EntryMeta last = actual.lastIncluded();
+        assertEquals(expected.lastApplied(), last);
+
+        for (var entry : actual.readRaftSnapshot().unappliedEntries()) {
+            last = entry;
+        }
+        assertEquals("Snapshot getLastTerm", expected.getLastTerm(), last.term());
+        assertEquals("Snapshot getLastIndex", expected.getLastIndex(), last.index());
+
+        final var state  = actual.readSnapshot(ShardSnapshotState.SUPPORT.reader());
+        final var shardSnapshot = assertInstanceOf(MetadataShardDataTreeSnapshot.class, state.getSnapshot());
         assertEquals("Snapshot root node", expRoot, shardSnapshot.getRootNode().orElseThrow());
     }
 

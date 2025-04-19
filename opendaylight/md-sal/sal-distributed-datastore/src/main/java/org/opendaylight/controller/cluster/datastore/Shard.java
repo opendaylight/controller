@@ -137,7 +137,9 @@ public class Shard extends RaftActor {
     };
 
     private static final Logger LOG = LoggerFactory.getLogger(Shard.class);
-    private static final Path STATE_PATH = Path.of("odl.cluster.server");
+
+    @VisibleForTesting
+    static final Path STATE_PATH = Path.of("odl.cluster.server");
 
     // FIXME: shard names should be encapsulated in their own class and this should be exposed as a constant.
     public static final String DEFAULT_NAME = "default";

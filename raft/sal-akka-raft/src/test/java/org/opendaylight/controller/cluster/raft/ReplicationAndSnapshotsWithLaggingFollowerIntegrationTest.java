@@ -8,21 +8,21 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.pekko.actor.ActorRef;
-import org.apache.pekko.persistence.SaveSnapshotSuccess;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.ApplyLeaderSnapshot;
@@ -40,6 +40,7 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
+import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
 import org.opendaylight.raft.api.TermInfo;
 
 /**
@@ -121,7 +122,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         MockCommand payload1 = sendPayloadData(leaderActor, "one");
 
         // Verify the leader got consensus and applies each log entry even though follower 2 didn't respond.
-        List<ApplyState> applyStates = MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyState.class, 2);
+        var applyStates = MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyState.class, 2);
         verifyApplyState(applyStates.get(0), leaderCollectorActor, payload0.toString(), currentTerm, 0, payload0);
         verifyApplyState(applyStates.get(1), leaderCollectorActor, payload1.toString(), currentTerm, 1, payload1);
 
@@ -180,7 +181,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
      * sent by the leader.
      */
     @Test
-    public void testLeaderSnapshotWithLaggingFollowerCaughtUpViaAppendEntries() {
+    public void testLeaderSnapshotWithLaggingFollowerCaughtUpViaAppendEntries() throws Exception {
         testLog.info("testLeaderSnapshotWithLaggingFollowerCaughtUpViaAppendEntries starting");
 
         setup();
@@ -207,7 +208,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         // Send another payload - this should cause a snapshot due to snapshotBatchCount reached.
         MockCommand payload3 = sendPayloadData(leaderActor, "three");
 
-        MessageCollectorActor.expectFirstMatching(leaderCollectorActor, SaveSnapshotSuccess.class);
+        final var firstSnapshot = awaitSnapshot(leaderActor);
 
         testLog.info("testLeaderSnapshotWithLaggingFollowerCaughtUpViaAppendEntries: sending 2 more payloads");
 
@@ -216,7 +217,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         MockCommand payload5 = sendPayloadData(leaderActor, "five");
 
         // Verify the leader got consensus and applies each log entry even though follower 2 didn't respond.
-        List<ApplyState> applyStates = MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyState.class, 3);
+        var applyStates = MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyState.class, 3);
         verifyApplyState(applyStates.get(0), leaderCollectorActor, payload3.toString(), currentTerm, 3, payload3);
         verifyApplyState(applyStates.get(1), leaderCollectorActor, payload4.toString(), currentTerm, 4, payload4);
         verifyApplyState(applyStates.get(2), leaderCollectorActor, payload5.toString(), currentTerm, 5, payload5);
@@ -252,7 +253,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         verifyApplyState(applyStates.get(3), null, null, currentTerm, 5, payload5);
 
         // Verify the leader did not try to install a snapshot to catch up follower 2.
-        InstallSnapshot installSnapshot = MessageCollectorActor.getFirstMatching(follower2CollectorActor,
+        final var installSnapshot = MessageCollectorActor.getFirstMatching(follower2CollectorActor,
                 InstallSnapshot.class);
         assertNull("Follower 2 received unexpected InstallSnapshot", installSnapshot);
 
@@ -265,12 +266,10 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         verifyLeadersTrimmedLog(5);
 
         // Verify the leader's persisted snapshot.
-        List<Snapshot> persistedSnapshots = InMemorySnapshotStore.getSnapshots(leaderId, Snapshot.class);
-        assertEquals("Persisted snapshots size", 1, persistedSnapshots.size());
-        verifySnapshot("Persisted", persistedSnapshots.get(0), currentTerm, 2, currentTerm, 3);
-        List<ReplicatedLogEntry> unAppliedEntry = persistedSnapshots.get(0).getUnAppliedEntries();
-        assertEquals("Persisted Snapshot getUnAppliedEntries size", 1, unAppliedEntry.size());
-        verifyReplicatedLogEntry(unAppliedEntry.get(0), currentTerm, 3, payload3);
+        verifySnapshot("Persisted", firstSnapshot, currentTerm, 2);
+        final var unAppliedEntry = firstSnapshot.readRaftSnapshot().unappliedEntries();
+        assertEquals(1, unAppliedEntry.size());
+        verifyReplicatedLogEntry(unAppliedEntry.getFirst(), currentTerm, 3, payload3);
 
         // Verify follower 1's log and snapshot indexes.
         MessageCollectorActor.clearMessages(follower1CollectorActor);
@@ -300,7 +299,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
      * installed by the leader.
      */
     @Test
-    public void testLeaderSnapshotWithLaggingFollowerCaughtUpViaInstallSnapshot() {
+    public void testLeaderSnapshotWithLaggingFollowerCaughtUpViaInstallSnapshot() throws Exception {
         testLog.info("testLeaderSnapshotWithLaggingFollowerCaughtUpViaInstallSnapshot starting");
 
         setup();
@@ -315,16 +314,16 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
                 TimeUnit.MILLISECONDS);
 
         // Send 5 payloads - the second should cause a leader snapshot.
-        final MockCommand payload2 = sendPayloadData(leaderActor, "two");
-        final MockCommand payload3 = sendPayloadData(leaderActor, "three");
-        final MockCommand payload4 = sendPayloadData(leaderActor, "four");
-        final MockCommand payload5 = sendPayloadData(leaderActor, "five");
-        final MockCommand payload6 = sendPayloadData(leaderActor, "six");
+        final var payload2 = sendPayloadData(leaderActor, "two");
+        final var payload3 = sendPayloadData(leaderActor, "three");
+        final var payload4 = sendPayloadData(leaderActor, "four");
+        final var payload5 = sendPayloadData(leaderActor, "five");
+        final var payload6 = sendPayloadData(leaderActor, "six");
 
-        MessageCollectorActor.expectFirstMatching(leaderCollectorActor, SaveSnapshotSuccess.class);
+        final var firstSnapshot = awaitSnapshot(leaderActor);
 
         // Verify the leader got consensus and applies each log entry even though follower 2 didn't respond.
-        List<ApplyState> applyStates = MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyState.class, 5);
+        var applyStates = MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyState.class, 5);
         verifyApplyState(applyStates.get(0), leaderCollectorActor, payload2.toString(), currentTerm, 2, payload2);
         verifyApplyState(applyStates.get(2), leaderCollectorActor, payload4.toString(), currentTerm, 4, payload4);
         verifyApplyState(applyStates.get(4), leaderCollectorActor, payload6.toString(), currentTerm, 6, payload6);
@@ -337,7 +336,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         // Send another payload to trigger a second leader snapshot.
         MockCommand payload7 = sendPayloadData(leaderActor, "seven");
 
-        MessageCollectorActor.expectFirstMatching(leaderCollectorActor, SaveSnapshotSuccess.class);
+        final var secondSnapshot = awaitSnapshotNewerThan(leaderActor, firstSnapshot.timestamp());
 
         ApplyState applyState = MessageCollectorActor.expectFirstMatching(leaderCollectorActor, ApplyState.class);
         verifyApplyState(applyState, leaderCollectorActor, payload7.toString(), currentTerm, 7, payload7);
@@ -379,16 +378,15 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         verifyApplyState(applyState, null, null, currentTerm, 8, serverConfig);
 
         // Verify the leader's persisted snapshot.
-        List<Snapshot> persistedSnapshots = InMemorySnapshotStore.getSnapshots(leaderId, Snapshot.class);
-        assertEquals("Persisted snapshots size", 1, persistedSnapshots.size());
-        verifySnapshot("Persisted", persistedSnapshots.get(0), currentTerm, 6, currentTerm, 7);
-        List<ReplicatedLogEntry> unAppliedEntry = persistedSnapshots.get(0).getUnAppliedEntries();
+
+        verifySnapshot("Persisted", secondSnapshot, currentTerm, 6);
+        final var unAppliedEntry = secondSnapshot.readRaftSnapshot().unappliedEntries();
         assertEquals("Persisted Snapshot getUnAppliedEntries size", 1, unAppliedEntry.size());
-        verifyReplicatedLogEntry(unAppliedEntry.get(0), currentTerm, 7, payload7);
+        verifyReplicatedLogEntry(unAppliedEntry.getFirst(), currentTerm, 7, payload7);
 
         expSnapshotState.add(payload7);
 
-        verifyInstallSnapshotToLaggingFollower(8, serverConfig);
+        verifyInstallSnapshotToLaggingFollower(8, secondSnapshot, serverConfig);
 
         testLog.info("testLeaderSnapshotWithLaggingFollowerCaughtUpViaInstallSnapshot complete");
     }
@@ -413,16 +411,16 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
                 TimeUnit.MILLISECONDS);
 
         // Send 5 payloads - the second should cause a leader snapshot.
-        final MockCommand payload2 = sendPayloadData(leaderActor, "two");
-        final MockCommand payload3 = sendPayloadData(leaderActor, "three");
-        final MockCommand payload4 = sendPayloadData(leaderActor, "four");
-        final MockCommand payload5 = sendPayloadData(leaderActor, "five");
-        final MockCommand payload6 = sendPayloadData(leaderActor, "six");
+        final var payload2 = sendPayloadData(leaderActor, "two");
+        final var payload3 = sendPayloadData(leaderActor, "three");
+        final var payload4 = sendPayloadData(leaderActor, "four");
+        final var payload5 = sendPayloadData(leaderActor, "five");
+        final var payload6 = sendPayloadData(leaderActor, "six");
 
-        MessageCollectorActor.expectFirstMatching(leaderCollectorActor, SaveSnapshotSuccess.class);
+        final var firstSnapshot = awaitSnapshot(leaderActor);
 
         // Verify the leader got consensus and applies each log entry even though follower 2 didn't respond.
-        List<ApplyState> applyStates = MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyState.class, 5);
+        var applyStates = MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyState.class, 5);
         verifyApplyState(applyStates.get(0), leaderCollectorActor, payload2.toString(), currentTerm, 2, payload2);
         verifyApplyState(applyStates.get(2), leaderCollectorActor, payload4.toString(), currentTerm, 4, payload4);
         verifyApplyState(applyStates.get(4), leaderCollectorActor, payload6.toString(), currentTerm, 6, payload6);
@@ -435,8 +433,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         // Send another payload to trigger a second leader snapshot.
         MockCommand payload7 = sendPayloadData(leaderActor, "seven");
 
-        MessageCollectorActor.expectFirstMatching(leaderCollectorActor, SaveSnapshotSuccess.class);
-
+        final var secondSenapshot = awaitSnapshotNewerThan(leaderActor, firstSnapshot.timestamp());
 
         ApplyState applyState = MessageCollectorActor.expectFirstMatching(leaderCollectorActor, ApplyState.class);
         verifyApplyState(applyState, leaderCollectorActor, payload7.toString(), currentTerm, 7, payload7);
@@ -457,14 +454,24 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         follower2Actor.stop();
 
         // need to get rid of persistence for follower2
-        InMemorySnapshotStore.clearSnapshotsFor(follower2Id);
+        try (var stream = Files.list(stateDir().resolve(follower2Id))) {
+            stream.forEach(path -> {
+                if (path.getFileName().toString().startsWith("snapshot-")) {
+                    try {
+                        Files.delete(path);
+                    } catch (IOException e) {
+                        throw new AssertionError(e);
+                    }
+                }
+            });
+        }
 
         leaderActor.underlyingActor().stopDropMessages(InstallSnapshotReply.class);
 
         MessageCollectorActor.clearMessages(follower2CollectorActor);
         setupFollower2();
 
-        MessageCollectorActor.expectMatching(follower2CollectorActor, SaveSnapshotSuccess.class, 1);
+        awaitSnapshot(follower2Actor);
     }
 
     /**
@@ -474,7 +481,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
      * by the leader.
      */
     @Test
-    public void testLeaderSnapshotTriggeredByMemoryThresholdExceededWithLaggingFollower() {
+    public void testLeaderSnapshotTriggeredByMemoryThresholdExceededWithLaggingFollower() throws Exception {
         testLog.info("testLeaderSnapshotTriggeredByMemoryThresholdExceededWithLaggingFollower starting");
 
         snapshotBatchCount = 5;
@@ -497,7 +504,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         MockCommand payload1 = sendPayloadData(leaderActor, "one", 500);
 
         // Verify the leader got consensus and applies the first log entry even though follower 2 didn't respond.
-        List<ApplyState> applyStates = MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyState.class, 1);
+        var applyStates = MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyState.class, 1);
         verifyApplyState(applyStates.get(0), leaderCollectorActor, payload1.toString(), currentTerm, 1, payload1);
 
         // Wait for all the ReplicatedLogImplEntry and ApplyJournalEntries messages to be added to the journal
@@ -506,9 +513,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         InMemoryJournal.waitForWriteMessagesComplete(leaderId);
 
         // Verify a snapshot is not triggered.
-        // FIXME: this never happens and needs to be migrated
-        assertNull("Leader received unexpected CaptureSnapshot",
-            MessageCollectorActor.getFirstMatching(leaderCollectorActor, CaptureSnapshot.class));
+        assertNull(leaderActor.underlyingActor().persistence().lastSnapshot());
 
         expSnapshotState.add(payload1);
 
@@ -520,6 +525,9 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         // that exceeds the memory threshold (70% * 1000 = 700) - this should do a snapshot.
         MockCommand payload2 = sendPayloadData(leaderActor, "two", 201);
 
+        // A snapshot should've occurred - wait for it to complete.
+        final var snapshotFile = awaitSnapshot(leaderActor);
+
         // Verify the leader applies the last log entry.
         applyStates = MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyState.class, 2);
         verifyApplyState(applyStates.get(1), leaderCollectorActor, payload2.toString(), currentTerm, 2, payload2);
@@ -529,31 +537,27 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         verifyApplyState(applyStates.get(0), null, null, currentTerm, 1, payload1);
         verifyApplyState(applyStates.get(1), null, null, currentTerm, 2, payload2);
 
-        // A snapshot should've occurred - wait for it to complete.
-        MessageCollectorActor.expectFirstMatching(leaderCollectorActor, SaveSnapshotSuccess.class);
-
         // Because the snapshot was triggered by exceeding the memory threshold the leader should've advanced
         // the snapshot index to the last applied index and trimmed the log even though the entries weren't
         // replicated to all followers.
         verifyLeadersTrimmedLog(2, 0);
 
         // Verify the leader's persisted snapshot.
-        List<Snapshot> persistedSnapshots = InMemorySnapshotStore.getSnapshots(leaderId, Snapshot.class);
-        assertEquals("Persisted snapshots size", 1, persistedSnapshots.size());
-        verifySnapshot("Persisted", persistedSnapshots.get(0), currentTerm, 1, currentTerm, 2);
-        List<ReplicatedLogEntry> unAppliedEntry = persistedSnapshots.get(0).getUnAppliedEntries();
+        verifySnapshot("Persisted", snapshotFile, currentTerm, 1);
+        final var unAppliedEntry = snapshotFile.readRaftSnapshot().unappliedEntries();
         assertEquals("Persisted Snapshot getUnAppliedEntries size", 1, unAppliedEntry.size());
-        verifyReplicatedLogEntry(unAppliedEntry.get(0), currentTerm, 2, payload2);
+        verifyReplicatedLogEntry(unAppliedEntry.getFirst(), currentTerm, 2, payload2);
 
         expSnapshotState.add(payload2);
 
-        verifyInstallSnapshotToLaggingFollower(2L, null);
+        verifyInstallSnapshotToLaggingFollower(2, snapshotFile, null);
 
         // Sends a payload with index 3.
         verifyNoSubsequentSnapshotAfterMemoryThresholdExceededSnapshot();
 
         // Sends 3 payloads with indexes 4, 5 and 6.
-        long leadersSnapshotIndexOnRecovery = verifyReplicationsAndSnapshotWithNoLaggingAfterInstallSnapshot();
+        long leadersSnapshotIndexOnRecovery =
+            verifyReplicationsAndSnapshotWithNoLaggingAfterInstallSnapshot(snapshotFile);
 
         // Recover the leader from persistence and verify.
         long leadersLastIndexOnRecovery = 6;
@@ -610,11 +614,10 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         expSnapshotState.add(payload3);
     }
 
-    /**
-     * Resume the lagging follower 2 and verify it receives an install snapshot from the leader.
-     */
-    private void verifyInstallSnapshotToLaggingFollower(final long lastAppliedIndex,
-            final @Nullable VotingConfig expServerConfig) {
+    // Resume the lagging follower 2 and verify it receives an install snapshot from the leader.
+    @NonNullByDefault
+    private void verifyInstallSnapshotToLaggingFollower(final long lastAppliedIndex, final SnapshotFile firstSnapshot,
+            final @Nullable VotingConfig expServerConfig) throws Exception {
         testLog.info("verifyInstallSnapshotToLaggingFollower starting");
 
         MessageCollectorActor.clearMessages(leaderCollectorActor);
@@ -622,28 +625,12 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         // Now stop dropping AppendEntries in follower 2.
         follower2Actor.underlyingActor().stopDropMessages(AppendEntries.class);
 
-
-        MessageCollectorActor.expectFirstMatching(leaderCollectorActor, SaveSnapshotSuccess.class);
-
-        // Verify the leader's persisted snapshot. The previous snapshot (currently) won't be deleted from
-        // the snapshot store because the second snapshot was initiated by the follower install snapshot and
-        // not because the batch count was reached so the persisted journal sequence number wasn't advanced
-        // far enough to cause the previous snapshot to be deleted. This is because
-        // RaftActor#trimPersistentData subtracts the snapshotBatchCount from the snapshot's sequence number.
-        // This is OK - the next snapshot should delete it. In production, even if the system restarted
-        // before another snapshot, they would both get applied which wouldn't hurt anything.
-        List<Snapshot> persistedSnapshots = InMemorySnapshotStore.getSnapshots(leaderId, Snapshot.class);
-        assertFalse("Expected at least 1 persisted snapshots", persistedSnapshots.isEmpty());
-        Snapshot persistedSnapshot = persistedSnapshots.get(persistedSnapshots.size() - 1);
-        verifySnapshot("Persisted", persistedSnapshot, currentTerm, lastAppliedIndex, currentTerm, lastAppliedIndex);
-        List<ReplicatedLogEntry> unAppliedEntry = persistedSnapshot.getUnAppliedEntries();
-        assertEquals("Persisted Snapshot getUnAppliedEntries size", 0, unAppliedEntry.size());
-
-        int snapshotSize = SerializationUtils.serialize(persistedSnapshot.getState()).length;
+        int snapshotSize = SerializationUtils.serialize(firstSnapshot.readSnapshot(MockSnapshotState.SUPPORT.reader()))
+            .length;
         final int expTotalChunks = snapshotSize / MAXIMUM_MESSAGE_SLICE_SIZE
                 + (snapshotSize % MAXIMUM_MESSAGE_SLICE_SIZE > 0 ? 1 : 0);
 
-        InstallSnapshot installSnapshot = MessageCollectorActor.expectFirstMatching(follower2CollectorActor,
+        final var installSnapshot = MessageCollectorActor.expectFirstMatching(follower2CollectorActor,
                 InstallSnapshot.class);
         assertEquals("InstallSnapshot getTerm", currentTerm, installSnapshot.getTerm());
         assertEquals("InstallSnapshot getLeaderId", leaderId, installSnapshot.getLeaderId());
@@ -653,14 +640,14 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         assertEquals("InstallSnapshot getLastIncludedIndex", lastAppliedIndex, installSnapshot.getLastIncludedIndex());
         //assertArrayEquals("InstallSnapshot getData", snapshot, installSnapshot.getData().toByteArray());
 
-        List<InstallSnapshotReply> installSnapshotReplies = MessageCollectorActor.expectMatching(
-                leaderCollectorActor, InstallSnapshotReply.class, expTotalChunks);
+        final var replies = MessageCollectorActor.expectMatching(leaderCollectorActor, InstallSnapshotReply.class,
+            expTotalChunks);
         int index = 1;
-        for (InstallSnapshotReply installSnapshotReply : installSnapshotReplies) {
-            assertEquals("InstallSnapshotReply getTerm", currentTerm, installSnapshotReply.getTerm());
-            assertEquals("InstallSnapshotReply getChunkIndex", index++, installSnapshotReply.getChunkIndex());
-            assertEquals("InstallSnapshotReply getFollowerId", follower2Id, installSnapshotReply.getFollowerId());
-            assertTrue("InstallSnapshotReply isSuccess", installSnapshotReply.isSuccess());
+        for (var reply : replies) {
+            assertEquals("InstallSnapshotReply getTerm", currentTerm, reply.getTerm());
+            assertEquals("InstallSnapshotReply getChunkIndex", index++, reply.getChunkIndex());
+            assertEquals("InstallSnapshotReply getFollowerId", follower2Id, reply.getFollowerId());
+            assertTrue("InstallSnapshotReply isSuccess", reply.isSuccess());
         }
 
         // Verify follower 2 applies the snapshot.
@@ -673,13 +660,20 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
             throw new AssertionError(e);
         }
 
-        final var snapshot = Snapshot.ofTermLeader(state, applySnapshot.lastEntry(), TermInfo.INITIAL,
-            applySnapshot.serverConfig());
-        verifySnapshot("Follower 2", snapshot, currentTerm, lastAppliedIndex, currentTerm, lastAppliedIndex);
-        assertEquals("Persisted Snapshot getUnAppliedEntries size", 0, snapshot.getUnAppliedEntries().size());
+        verifySnapshot("Follower 2", Snapshot.ofTermLeader(state, applySnapshot.lastEntry(), TermInfo.INITIAL,
+            applySnapshot.serverConfig()), currentTerm, lastAppliedIndex, currentTerm, lastAppliedIndex);
 
         // Wait for the snapshot to complete.
-        MessageCollectorActor.expectFirstMatching(leaderCollectorActor, SaveSnapshotSuccess.class);
+        final var secondSnapshot = awaitSnapshotNewerThan(leaderActor, firstSnapshot.timestamp());
+
+        // Verify the leader's persisted snapshot. The previous snapshot (currently) won't be deleted from
+        // the snapshot store because the second snapshot was initiated by the follower install snapshot and
+        // not because the batch count was reached so the persisted journal sequence number wasn't advanced
+        // far enough to cause the previous snapshot to be deleted. This is because
+        // RaftActor#trimPersistentData subtracts the snapshotBatchCount from the snapshot's sequence number.
+        // This is OK - the next snapshot should delete it. In production, even if the system restarted
+        // before another snapshot, they would both get applied which wouldn't hurt anything.
+        verifySnapshot("Persisted", secondSnapshot, currentTerm, lastAppliedIndex);
 
         // Ensure there's at least 1 more heartbeat.
         MessageCollectorActor.clearMessages(leaderCollectorActor);
@@ -690,17 +684,20 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         verifyLeadersTrimmedLog(lastAppliedIndex);
 
         if (expServerConfig != null) {
-            Set<ServerInfo> expServerInfo = Set.copyOf(expServerConfig.serverInfo());
-            assertEquals("Leader snapshot server config", expServerInfo,
-                Set.copyOf(persistedSnapshot.votingConfig().serverInfo()));
+            final var raftSnapshot = secondSnapshot.readRaftSnapshot();
+            final var expServerInfo = Set.copyOf(expServerConfig.serverInfo());
+            final var leaderConfig = raftSnapshot.votingConfig();
+            assertNotNull(leaderConfig);
+            assertEquals(expServerInfo, Set.copyOf(leaderConfig.serverInfo()));
 
-            assertEquals("Follower 2 snapshot server config", expServerInfo,
-                Set.copyOf(applySnapshot.serverConfig().serverInfo()));
+            final var followerConfig = applySnapshot.serverConfig();
+            assertNotNull(followerConfig);
+            assertEquals(expServerInfo, Set.copyOf(followerConfig.serverInfo()));
 
-            VotingConfig follower2ServerConfig = follower2Context.getPeerServerInfo(true);
-            assertNotNull("Follower 2 server config is null", follower2ServerConfig);
+            final var follower2ServerConfig = follower2Context.getPeerServerInfo(true);
+            assertNotNull(follower2ServerConfig);
 
-            assertEquals("Follower 2 server config", expServerInfo, Set.copyOf(follower2ServerConfig.serverInfo()));
+            assertEquals(expServerInfo, Set.copyOf(follower2ServerConfig.serverInfo()));
         }
 
         MessageCollectorActor.clearMessages(leaderCollectorActor);
@@ -710,11 +707,10 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         testLog.info("verifyInstallSnapshotToLaggingFollower complete");
     }
 
-    /**
-     * Do another round of payloads and snapshot to verify replicatedToAllIndex gets back on track and
-     * snapshots works as expected after doing a follower snapshot. In this step we don't lag a follower.
-     */
-    private long verifyReplicationsAndSnapshotWithNoLaggingAfterInstallSnapshot() {
+    // Do another round of payloads and snapshot to verify replicatedToAllIndex gets back on track and snapshots works
+    // as expected after doing a follower snapshot. In this step we don't lag a follower.
+    private long verifyReplicationsAndSnapshotWithNoLaggingAfterInstallSnapshot(final SnapshotFile firstSnapshot)
+            throws Exception {
         testLog.info(
                 "verifyReplicationsAndSnapshotWithNoLaggingAfterInstallSnapshot starting: replicatedToAllIndex: {}",
                 leader.getReplicatedToAllIndex());
@@ -723,25 +719,23 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         MockCommand payload4 = sendPayloadData(leaderActor, "four");
 
         // Wait for the snapshot to complete.
-        MessageCollectorActor.expectFirstMatching(leaderCollectorActor, SaveSnapshotSuccess.class);
+        final var secondSnapshot = awaitSnapshotNewerThan(leaderActor, firstSnapshot.timestamp());
 
         ApplyState applyState = MessageCollectorActor.expectFirstMatching(leaderCollectorActor, ApplyState.class);
         verifyApplyState(applyState, leaderCollectorActor, payload4.toString(), currentTerm, 4, payload4);
 
         // Verify the leader's last persisted snapshot (previous ones may not be purged yet).
-        List<Snapshot> persistedSnapshots = InMemorySnapshotStore.getSnapshots(leaderId, Snapshot.class);
-        Snapshot persistedSnapshot = persistedSnapshots.get(persistedSnapshots.size() - 1);
         // The last (fourth) payload may or may not have been applied when the snapshot is captured depending on the
         // timing when the async persistence completes.
-        List<ReplicatedLogEntry> unAppliedEntry = persistedSnapshot.getUnAppliedEntries();
+        final var unAppliedEntry = secondSnapshot.readRaftSnapshot().unappliedEntries();
         long leadersSnapshotIndex;
         if (unAppliedEntry.isEmpty()) {
             leadersSnapshotIndex = 4;
             expSnapshotState.add(payload4);
-            verifySnapshot("Persisted", persistedSnapshot, currentTerm, 4, currentTerm, 4);
+            verifySnapshot("Persisted", secondSnapshot, currentTerm, 4);
         } else {
             leadersSnapshotIndex = 3;
-            verifySnapshot("Persisted", persistedSnapshot, currentTerm, 3, currentTerm, 4);
+            verifySnapshot("Persisted", secondSnapshot, currentTerm, 3);
             assertEquals("Persisted Snapshot getUnAppliedEntries size", 1, unAppliedEntry.size());
             verifyReplicatedLogEntry(unAppliedEntry.get(0), currentTerm, 4, payload4);
             expSnapshotState.add(payload4);
@@ -752,7 +746,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         MockCommand payload6 = sendPayloadData(leaderActor, "six");
 
         // Verify the leader applies the 2 log entries.
-        List<ApplyState> applyStates = MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyState.class, 3);
+        var applyStates = MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyState.class, 3);
         verifyApplyState(applyStates.get(1), leaderCollectorActor, payload5.toString(), currentTerm, 5, payload5);
         verifyApplyState(applyStates.get(2), leaderCollectorActor, payload6.toString(), currentTerm, 6, payload6);
 
@@ -776,10 +770,9 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
             new SimpleReplicatedLogEntry(6, currentTerm, payload6)));
 
         // Verify the leaders's persisted journal contains an ApplyJournalEntries for at least the last entry index.
-        List<ApplyJournalEntries> persistedApplyJournalEntries =
-                InMemoryJournal.get(leaderId, ApplyJournalEntries.class);
+        final var persistedApplyJournalEntries = InMemoryJournal.get(leaderId, ApplyJournalEntries.class);
         boolean found = false;
-        for (ApplyJournalEntries entry: persistedApplyJournalEntries) {
+        for (var entry : persistedApplyJournalEntries) {
             if (entry.getToIndex() == 6) {
                 found = true;
                 break;

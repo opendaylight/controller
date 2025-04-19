@@ -30,7 +30,6 @@ import org.opendaylight.controller.cluster.raft.client.messages.Shutdown;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.RequestLeadership;
-import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
@@ -142,7 +141,7 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
     private void createRaftActors() {
         testLog.info("createRaftActors starting");
 
-        final Snapshot snapshot = Snapshot.create(EmptyState.INSTANCE, List.of(), -1, -1, -1, -1,
+        final Snapshot snapshot = Snapshot.create(new MockSnapshotState(List.of()), List.of(), -1, -1, -1, -1,
             new TermInfo(1), new VotingConfig(
                 new ServerInfo(leaderId, true), new ServerInfo(follower1Id, true),
                 new ServerInfo(follower2Id, true), new ServerInfo(follower3Id, false)));

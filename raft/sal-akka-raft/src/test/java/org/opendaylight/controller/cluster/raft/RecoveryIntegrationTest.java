@@ -13,7 +13,6 @@ import static org.junit.Assert.assertEquals;
 import java.util.List;
 import java.util.Map;
 import org.apache.pekko.actor.ActorRef;
-import org.apache.pekko.persistence.SaveSnapshotSuccess;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.ApplyLeaderSnapshot;
@@ -49,7 +48,8 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         send2InitialPayloads();
 
         // Block these messages initially so we can control the sequence.
-        leaderActor.underlyingActor().startDropMessages(SaveSnapshotSuccess.class);
+        final var leaderPersistence = CapturingDataPersistenceProvider.installTo(leaderActor.underlyingActor());
+
         follower1Actor.underlyingActor().startDropMessages(AppendEntries.class);
 
         final MockCommand payload2 = sendPayloadData(leaderActor, "two");
@@ -67,14 +67,8 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
 
         verifyApplyIndex(leaderActor, 4);
 
-        // Now deliver the SaveSnapshotSuccess to the leader.
-        final var saveSuccess = MessageCollectorActor.expectFirstMatching(
-                leaderCollectorActor, SaveSnapshotSuccess.class);
-        leaderActor.underlyingActor().stopDropMessages(SaveSnapshotSuccess.class);
-        leaderActor.tell(saveSuccess, leaderActor);
-
-        // Wait for snapshot complete.
-        MessageCollectorActor.expectFirstMatching(leaderCollectorActor, SaveSnapshotSuccess.class);
+        // Now complete the snapshot
+        leaderPersistence.awaitSaveSnapshot().complete();
 
         reinstateLeaderActor();
 
@@ -109,7 +103,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         MessageCollectorActor.expectMatching(follower1CollectorActor, AppendEntries.class, 3);
 
         // Wait for snapshot complete.
-        MessageCollectorActor.expectFirstMatching(leaderCollectorActor, SaveSnapshotSuccess.class);
+        awaitSnapshot(leaderActor);
 
         // Now deliver the AppendEntries to the follower
         follower1Actor.underlyingActor().stopDropMessages(AppendEntries.class);
@@ -171,7 +165,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         MessageCollectorActor.expectFirstMatching(follower2CollectorActor, ApplyLeaderSnapshot.class);
 
         // Wait for the follower to persist the snapshot.
-        MessageCollectorActor.expectFirstMatching(follower2CollectorActor, SaveSnapshotSuccess.class);
+        awaitSnapshot(follower2Actor);
 
         final List<MockCommand> expFollowerState = List.of(payload0, payload1, payload2);
 
@@ -206,7 +200,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         // This should trigger a snapshot.
         sendPayloadData(leaderActor, "three");
 
-        MessageCollectorActor.expectFirstMatching(leaderCollectorActor, SaveSnapshotSuccess.class);
+        awaitSnapshot(leaderActor);
         verifyApplyIndex(leaderActor, 3);
 
         // Disconnect follower from leader
