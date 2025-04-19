@@ -29,8 +29,10 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
+import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFileFormat;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
@@ -43,18 +45,25 @@ import org.slf4j.LoggerFactory;
 // FIXME: remove this class once we have both Snapshots and Entries stored in files
 @NonNullByDefault
 final class PekkoRaftStorage extends EnabledRaftStorage {
-    private final class PersistSnapshotTask extends CancellableTask<SnapshotFile> {
+    private final class PersistSnapshotTask<T extends StateSnapshot> extends CancellableTask<Instant> {
         private static final HexFormat HF = HexFormat.of().withUpperCase();
 
-        private final Snapshot snapshot;
+        private final RaftSnapshot raftSnapshot;
+        private final EntryInfo lastIncluded;
+        private final T snapshot;
+        private final StateSnapshot.Writer<T> writer;
 
-        PersistSnapshotTask(final Snapshot snapshot, final RaftCallback<SnapshotFile> callback) {
+        PersistSnapshotTask(final RaftCallback<Instant> callback, final RaftSnapshot raftSnapshot,
+                final EntryInfo lastIncluded, final T snapshot, final StateSnapshot.Writer<T> writer) {
             super(callback);
+            this.raftSnapshot = requireNonNull(raftSnapshot);
+            this.lastIncluded = requireNonNull(lastIncluded);
             this.snapshot = requireNonNull(snapshot);
+            this.writer = requireNonNull(writer);
         }
 
         @Override
-        protected SnapshotFile compute() throws Exception {
+        protected Instant compute() throws Exception {
             final var format = SnapshotFileFormat.latest();
             final var timestamp = Instant.now();
             final var baseName = new StringBuilder()
@@ -69,11 +78,9 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
             LOG.debug("{}: starting snapshot writeout to {}", memberId, tmpPath);
 
             try {
-                format.createNew(tmpPath, timestamp,
-                    new EntryInfo(snapshot.getLastAppliedIndex(), snapshot.getLastAppliedTerm()),
-                    snapshot.votingConfig(), compression, snapshot.getUnAppliedEntries(), compression, null,
-                    snapshot.getState());
-                Files.move(tmpPath,  filePath, StandardCopyOption.ATOMIC_MOVE);
+                format.createNew(tmpPath, timestamp, lastIncluded, raftSnapshot.votingConfig(), compression,
+                    raftSnapshot.unappliedEntries(), compression, writer, snapshot);
+                Files.move(tmpPath, filePath, StandardCopyOption.ATOMIC_MOVE);
             } catch (IOException e) {
                 Files.deleteIfExists(tmpPath);
                 throw e;
@@ -81,7 +88,7 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
 
             LOG.debug("{}: finished snapshot writeout to {}", memberId, filePath);
 
-            return format.open(filePath);
+            return timestamp;
         }
     }
 
@@ -211,8 +218,9 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
     }
 
     @Override
-    public void saveSnapshot(final Snapshot snapshot) {
-        actor.saveSnapshot(snapshot);
+    public <T extends StateSnapshot> void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
+            final T snapshot, final StateSnapshot.Writer<T> writer, final RaftCallback<Instant> callback) {
+        submitTask(new PersistSnapshotTask<>(callback, raftSnapshot, lastIncluded, snapshot, writer));
     }
 
     @Override
