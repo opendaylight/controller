@@ -21,7 +21,9 @@ import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
+import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.Support;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.EntryMeta;
 import org.opendaylight.raft.spi.InstallableSnapshot;
@@ -241,8 +243,10 @@ public final class SnapshotManager {
         return context.getId();
     }
 
-    StateSnapshot.@NonNull Support<? extends Snapshot.State> stateSupport() {
-        return snapshotCohort.support();
+    @NonNullByDefault
+    @SuppressWarnings("unchecked")
+    <T extends Snapshot.State> StateSnapshot.Support<T> stateSupport() {
+        return (Support<T>) snapshotCohort.support();
     }
 
     public boolean isApplying() {
@@ -392,7 +396,23 @@ public final class SnapshotManager {
 
         task = persisting;
         LOG.debug("{}: lastSequenceNumber prior to persisting applied snapshot: {}", memberId(), lastSeq);
-        context.snapshotStore().saveSnapshot(persisting.snapshot);
+        saveSnapshot(new RaftSnapshot(snapshot.votingConfig(), snapshot.getUnAppliedEntries()), snapshot.lastApplied(),
+            snapshot.getState(), lastSeq);
+    }
+
+    @NonNullByDefault
+    private <T extends StateSnapshot> void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
+            final Snapshot.State snapshot, final long lastSeq) {
+        context.snapshotStore().saveSnapshot(raftSnapshot, lastIncluded, snapshot, stateSupport().writer(),
+            (failure, timestamp) -> {
+                if (failure != null) {
+                    LOG.error("{}: snapshot is not durable", memberId(), failure);
+                    rollback();
+                } else {
+                    LOG.info("{}: snapshot is durable as of {}", memberId(), timestamp);
+                    commit(lastSeq, timestamp.toEpochMilli());
+                }
+            });
     }
 
     /**
@@ -418,15 +438,11 @@ public final class SnapshotManager {
 
     private void persist(final long lastSeq, final CaptureSnapshot request, final Snapshot.State snapshotState) {
         // create a snapshot object from the state provided and save it when snapshot is saved async,
-        // SaveSnapshotSuccess is raised.
-        final var snapshot = Snapshot.create(snapshotState, request.getUnAppliedEntries(),
-                request.getLastIndex(), request.getLastTerm(),
-                request.getLastAppliedIndex(), request.getLastAppliedTerm(),
-                context.termInfo(), context.getPeerServerInfo(true));
 
-        context.snapshotStore().saveSnapshot(snapshot);
+        LOG.info("{}: Persising snapshot at {}/{}", memberId(), request.lastApplied(), request.lastEntry());
 
-        LOG.info("{}: Persisting of snapshot done: {}", memberId(), snapshot);
+        saveSnapshot(new RaftSnapshot(context.getPeerServerInfo(true), request.getUnAppliedEntries()),
+            request.lastApplied(), snapshotState, lastSeq);
 
         final var config = context.getConfigParams();
         final long absoluteThreshold = config.getSnapshotDataThreshold();
@@ -492,6 +508,7 @@ public final class SnapshotManager {
      * @param sequenceNumber the sequence number of the persisted snapshot
      * @param timestamp the time stamp of the persisted snapshot
      */
+    @VisibleForTesting
     void commit(final long sequenceNumber, final long timestamp) {
         if (!(task instanceof Persist persist)) {
             LOG.debug("{}: commit should not be called in state {}", memberId(), task);
@@ -560,6 +577,7 @@ public final class SnapshotManager {
     /**
      * Rolls back the snapshot on failure.
      */
+    @VisibleForTesting
     void rollback() {
         switch (task) {
             case PersistApply persist -> {

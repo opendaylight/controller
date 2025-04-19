@@ -25,11 +25,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Props;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
-import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage.CommitSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.Support;
@@ -52,7 +52,6 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     private RaftActorRecoverySupport raftActorRecoverySupport;
     private RaftActorSnapshotMessageSupport snapshotMessageSupport;
     private final Snapshot restoreFromSnapshot;
-    final CountDownLatch snapshotCommitted = new CountDownLatch(1);
     private final Function<Runnable, Void> pauseLeaderFunction;
 
     protected MockRaftActor(final Path stateDir, final AbstractBuilder<?, ?> builder) {
@@ -80,7 +79,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         pauseLeaderFunction = builder.pauseLeaderFunction;
     }
 
-    public void setRaftActorRecoverySupport(final RaftActorRecoverySupport support) {
+    void setRaftActorRecoverySupport(final RaftActorRecoverySupport support) {
         raftActorRecoverySupport = support;
     }
 
@@ -94,10 +93,6 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         if (snapshotMessageSupport == null) {
             snapshotMessageSupport = super.newRaftActorSnapshotMessageSupport();
         }
-        return snapshotMessageSupport;
-    }
-
-    public RaftActorSnapshotMessageSupport getSnapshotMessageSupport() {
         return snapshotMessageSupport;
     }
 
@@ -225,12 +220,8 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     protected void handleCommand(final Object message) {
         if (message instanceof RaftActorBehavior msg) {
             super.changeCurrentBehavior(msg);
-            return;
-        }
-
-        super.handleCommand(message);
-        if (message instanceof CommitSnapshot) {
-            snapshotCommitted.countDown();
+        } else {
+            super.handleCommand(message);
         }
     }
 
@@ -249,6 +240,10 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         }
 
         throw new IllegalStateException("Unexpected snapshot State: " + from);
+    }
+
+    public final @NonNull DataPersistenceProvider getPersistence() {
+        return persistence();
     }
 
     public ReplicatedLog getReplicatedLog() {

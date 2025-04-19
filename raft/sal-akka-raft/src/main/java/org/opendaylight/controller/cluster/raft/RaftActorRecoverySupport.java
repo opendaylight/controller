@@ -18,22 +18,22 @@ import org.eclipse.jdt.annotation.NonNull;
  * @author Thomas Pantelis
  */
 class RaftActorRecoverySupport {
-    private final @NonNull LocalAccess localAccess;
     private final @NonNull RaftActorContext context;
     private final @NonNull RaftActorRecoveryCohort cohort;
+    private final @NonNull RaftActor actor;
 
-    RaftActorRecoverySupport(final @NonNull LocalAccess localAccess, final RaftActorContext context,
+    RaftActorRecoverySupport(final @NonNull RaftActor actor, final RaftActorContext context,
             final RaftActorRecoveryCohort cohort) {
-        this.localAccess = requireNonNull(localAccess);
+        this.actor = requireNonNull(actor);
         this.context = requireNonNull(context);
         this.cohort = requireNonNull(cohort);
     }
 
     @NonNull RaftActorRecovery recoverToPersistent() throws IOException {
-        return RaftActorRecovery.toPersistent(localAccess, context, cohort);
+        return RaftActorRecovery.toPersistent(actor, context, cohort);
     }
 
     @NonNull RaftActorRecovery recoverToTransient() throws IOException {
-        return RaftActorRecovery.toTransient(localAccess, context, cohort);
+        return RaftActorRecovery.toTransient(actor, context, cohort);
     }
 }
