@@ -13,6 +13,7 @@ import static org.junit.Assert.assertNotNull;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -43,6 +44,8 @@ import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
+import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
+import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.util.AbstractStringIdentifier;
 import org.slf4j.Logger;
@@ -54,7 +57,7 @@ import scala.concurrent.Await;
  *
  * @author Thomas Pantelis
  */
-public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest {
+public abstract class AbstractRaftActorIntegrationTest extends AbstractRaftActorTest {
     private static final class MockIdentifier extends AbstractStringIdentifier<MockIdentifier> {
         @java.io.Serial
         private static final long serialVersionUID = 1L;
@@ -245,7 +248,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         factory.close();
     }
 
-    protected DefaultConfigParamsImpl newLeaderConfigParams() {
+    protected final DefaultConfigParamsImpl newLeaderConfigParams() {
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         configParams.setHeartBeatInterval(Duration.ofMillis(100));
         configParams.setElectionTimeoutFactor(4);
@@ -256,24 +259,24 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         return configParams;
     }
 
-    protected DefaultConfigParamsImpl newFollowerConfigParams() {
+    protected static final DefaultConfigParamsImpl newFollowerConfigParams() {
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         configParams.setHeartBeatInterval(Duration.ofMillis(500));
         configParams.setElectionTimeoutFactor(1000);
         return configParams;
     }
 
-    protected void waitUntilLeader(final ActorRef actorRef) {
+    protected static final void waitUntilLeader(final ActorRef actorRef) {
         RaftActorTestKit.waitUntilLeader(actorRef);
     }
 
-    protected TestActorRef<TestRaftActor> newTestRaftActor(final String id, final Map<String, String> newPeerAddresses,
-            final ConfigParams configParams) {
+    protected final TestActorRef<TestRaftActor> newTestRaftActor(final String id,
+            final Map<String, String> newPeerAddresses, final ConfigParams configParams) {
         return newTestRaftActor(id, TestRaftActor.newBuilder().peerAddresses(newPeerAddresses != null
                 ? newPeerAddresses : Map.of()).config(configParams));
     }
 
-    protected TestActorRef<TestRaftActor> newTestRaftActor(final String id, final TestRaftActor.Builder builder) {
+    protected final TestActorRef<TestRaftActor> newTestRaftActor(final String id, final TestRaftActor.Builder builder) {
         builder.collectorActor(factory.createActor(
                 MessageCollectorActor.props(), factory.generateActorId(id + "-collector"))).id(id);
 
@@ -293,7 +296,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         throw lastEx;
     }
 
-    protected void killActor(final TestActorRef<TestRaftActor> actor) {
+    protected static final void killActor(final TestActorRef<TestRaftActor> actor) {
         TestKit testkit = new TestKit(getSystem());
         testkit.watch(actor);
 
@@ -303,7 +306,25 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         testkit.unwatch(actor);
     }
 
-    protected void verifySnapshot(final String prefix, final Snapshot snapshot, final long lastAppliedTerm,
+    protected final void verifySnapshot(final String prefix, final SnapshotFile snapshotFile,
+            final long lastAppliedTerm, final long lastAppliedIndex) {
+        assertEquals(EntryInfo.of(lastAppliedIndex, lastAppliedTerm), snapshotFile.lastIncluded());
+
+        final List<Object> actualState;
+        try {
+            actualState = snapshotFile.readSnapshot(MockSnapshotState.SUPPORT.reader()).state();
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
+
+        assertEquals("%s Snapshot getState size. Expected %s: . Actual: %s".formatted(prefix, expSnapshotState,
+                actualState), expSnapshotState.size(), actualState.size());
+        for (int i = 0; i < expSnapshotState.size(); i++) {
+            assertEquals(prefix + " Snapshot state " + i, expSnapshotState.get(i), actualState.get(i));
+        }
+    }
+
+    protected final void verifySnapshot(final String prefix, final Snapshot snapshot, final long lastAppliedTerm,
             final long lastAppliedIndex, final long lastTerm, final long lastIndex) {
         assertEquals(prefix + " Snapshot getLastAppliedTerm", lastAppliedTerm, snapshot.getLastAppliedTerm());
         assertEquals(prefix + " Snapshot getLastAppliedIndex", lastAppliedIndex, snapshot.getLastAppliedIndex());
@@ -318,7 +339,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         }
     }
 
-    protected void verifyPersistedJournal(final String persistenceId,
+    protected static final void verifyPersistedJournal(final String persistenceId,
             final List<? extends ReplicatedLogEntry> expJournal) {
         final var journal = InMemoryJournal.get(persistenceId, ReplicatedLogEntry.class);
         assertEquals("Journal ReplicatedLogEntry count", expJournal.size(), journal.size());
@@ -329,11 +350,11 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         }
     }
 
-    protected MockCommand sendPayloadData(final ActorRef actor, final String data) {
+    protected static final MockCommand sendPayloadData(final ActorRef actor, final String data) {
         return sendPayloadData(actor, data, 0);
     }
 
-    protected MockCommand sendPayloadData(final ActorRef actor, final String data, final int size) {
+    protected static final MockCommand sendPayloadData(final ActorRef actor, final String data, final int size) {
         MockCommand payload;
         if (size > 0) {
             payload = new MockCommand(data, size);
@@ -345,39 +366,39 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         return payload;
     }
 
-    protected void verifyApplyState(final ApplyState applyState, final ActorRef expClientActor,
+    protected static final void verifyApplyState(final ApplyState applyState, final ActorRef expClientActor,
             final String expId, final long expTerm, final long expIndex, final Payload payload) {
         final var id = expId == null ? null : new MockIdentifier(expId);
         assertEquals("ApplyState getIdentifier", id, applyState.identifier());
         verifyReplicatedLogEntry(applyState.entry(), expTerm, expIndex, payload);
     }
 
-    protected void verifyReplicatedLogEntry(final LogEntry replicatedLogEntry, final long expTerm, final long expIndex,
-            final Payload payload) {
+    protected static final void verifyReplicatedLogEntry(final LogEntry replicatedLogEntry, final long expTerm,
+            final long expIndex, final Payload payload) {
         assertEquals(expTerm, replicatedLogEntry.term());
         assertEquals(expIndex, replicatedLogEntry.index());
         assertEquals(payload, replicatedLogEntry.command());
     }
 
-    protected String testActorPath(final String id) {
+    protected final String testActorPath(final String id) {
         return factory.createTestActorPath(id);
     }
 
-    protected void verifyLeadersTrimmedLog(final long lastIndex) {
+    protected final void verifyLeadersTrimmedLog(final long lastIndex) {
         verifyTrimmedLog("Leader", leaderActor, lastIndex, lastIndex - 1);
     }
 
-    protected void verifyLeadersTrimmedLog(final long lastIndex, final long replicatedToAllIndex) {
+    protected final void verifyLeadersTrimmedLog(final long lastIndex, final long replicatedToAllIndex) {
         verifyTrimmedLog("Leader", leaderActor, lastIndex, replicatedToAllIndex);
     }
 
-    protected void verifyFollowersTrimmedLog(final int num, final TestActorRef<TestRaftActor> actorRef,
+    protected final void verifyFollowersTrimmedLog(final int num, final TestActorRef<TestRaftActor> actorRef,
             final long lastIndex) {
         verifyTrimmedLog("Follower " + num, actorRef, lastIndex, lastIndex - 1);
     }
 
-    protected void verifyTrimmedLog(final String name, final TestActorRef<TestRaftActor> actorRef, final long lastIndex,
-            final long replicatedToAllIndex) {
+    protected final void verifyTrimmedLog(final String name, final TestActorRef<TestRaftActor> actorRef,
+            final long lastIndex, final long replicatedToAllIndex) {
         TestRaftActor actor = actorRef.underlyingActor();
         RaftActorContext context = actor.getRaftActorContext();
         final var log = context.getReplicatedLog();
@@ -393,7 +414,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    static void verifyRaftState(final ActorRef raftActor, final Consumer<OnDemandRaftState> verifier) {
+    static final void verifyRaftState(final ActorRef raftActor, final Consumer<OnDemandRaftState> verifier) {
         Timeout timeout = new Timeout(500, TimeUnit.MILLISECONDS);
         AssertionError lastError = null;
         Stopwatch sw = Stopwatch.createStarted();

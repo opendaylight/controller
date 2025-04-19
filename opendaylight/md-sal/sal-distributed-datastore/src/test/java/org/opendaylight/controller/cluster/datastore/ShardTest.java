@@ -26,6 +26,7 @@ import static org.mockito.Mockito.mock;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -40,8 +41,8 @@ import org.apache.pekko.actor.Props;
 import org.apache.pekko.actor.Status.Failure;
 import org.apache.pekko.dispatch.Dispatchers;
 import org.apache.pekko.japi.Creator;
-import org.apache.pekko.persistence.SaveSnapshotSuccess;
 import org.apache.pekko.testkit.TestActorRef;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -99,12 +100,15 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
-import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage.CommitSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.ForwardingDataPersistenceProvider;
+import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
+import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
+import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.EntryMeta;
 import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -1464,7 +1468,7 @@ public class ShardTest extends AbstractShardTest {
 
     private void testCreateSnapshot(final boolean persistent, final String shardActorName) throws Exception {
         final var latch = new AtomicReference<>(new CountDownLatch(1));
-        final var savedSnapshot = new AtomicReference<Snapshot>();
+        final var savedSnapshot = new AtomicReference<ShardSnapshotState>();
 
         dataStoreContextBuilder.persistent(persistent);
 
@@ -1475,9 +1479,17 @@ public class ShardTest extends AbstractShardTest {
                 final var delegate = persistence();
                 setPersistence(new ForwardingDataPersistenceProvider() {
                     @Override
-                    public void saveSnapshot(final Snapshot entry) {
-                        savedSnapshot.set(entry);
-                        super.saveSnapshot(entry);
+                    @NonNullByDefault
+                    public <T extends StateSnapshot> void saveSnapshot(final RaftSnapshot raftSnapshot,
+                            final EntryInfo lastIncluded, final T snapshot, final StateSnapshot.Writer<T> writer,
+                            final RaftCallback<Instant> callback) {
+                        savedSnapshot.set(assertInstanceOf(ShardSnapshotState.class, snapshot));
+                        super.saveSnapshot(raftSnapshot, lastIncluded, snapshot, writer, (failure, success) -> {
+                            callback.invoke(failure, success);
+                            if (failure == null) {
+                                latch.get().countDown();
+                            }
+                        });
                     }
 
                     @Override
@@ -1485,15 +1497,6 @@ public class ShardTest extends AbstractShardTest {
                         return delegate;
                     }
                 });
-            }
-
-            @Override
-            public void handleCommand(final Object message) {
-                super.handleCommand(message);
-
-                if (message instanceof SaveSnapshotSuccess || message instanceof CommitSnapshot) {
-                    latch.get().countDown();
-                }
             }
         }
 
@@ -1519,21 +1522,21 @@ public class ShardTest extends AbstractShardTest {
     }
 
     private static void awaitAndValidateSnapshot(final AtomicReference<CountDownLatch> latch,
-            final AtomicReference<Snapshot> savedSnapshot, final NormalizedNode expectedRoot)
+            final AtomicReference<ShardSnapshotState> savedSnapshot, final NormalizedNode expectedRoot)
                     throws InterruptedException {
         assertTrue("Snapshot saved", latch.get().await(5, TimeUnit.SECONDS));
 
-        assertTrue("Invalid saved snapshot " + savedSnapshot.get(), savedSnapshot.get() instanceof Snapshot);
+        final var snapshot = savedSnapshot.get();
+        assertNotNull(snapshot);
 
-        verifySnapshot(savedSnapshot.get(), expectedRoot);
+        verifySnapshot(snapshot, expectedRoot);
 
         latch.set(new CountDownLatch(1));
         savedSnapshot.set(null);
     }
 
-    private static void verifySnapshot(final Snapshot snapshot, final NormalizedNode expectedRoot) {
-        assertEquals("Root node", expectedRoot,
-            ((ShardSnapshotState)snapshot.getState()).getSnapshot().getRootNode().orElseThrow());
+    private static void verifySnapshot(final ShardSnapshotState snapshot, final NormalizedNode expectedRoot) {
+        assertEquals("Root node", Optional.of(expectedRoot), snapshot.getSnapshot().getRootNode());
     }
 
     /**
