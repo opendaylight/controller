@@ -8,10 +8,10 @@
 package org.opendaylight.controller.cluster.raft.spi;
 
 import java.io.IOException;
+import java.time.Instant;
 import org.apache.pekko.persistence.SnapshotProtocol;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.InstallableSnapshot;
 
@@ -44,15 +44,15 @@ public interface SnapshotStore {
     /**
      * Saves a snapshot.
      *
-     * @param snapshot the snapshot object to save
+     * @param raftSnapshot the {@link RaftSnapshot}
+     * @param lastIncluded last included index/term
+     * @param snapshot the snapshot
+     * @param writer the writer to use
+     * @param callback the callback to invoke
      */
-    // FIXME: Callback<SnapshotFile> callback
     // FIXME: imply async deletion of all other snapshots, only the last one will be reported
-    void saveSnapshot(Snapshot snapshot);
-
-    //  @NonNullByDefault
-    //  <T extends StateSnapshot> void storeSnapshot(T snapshot, StateSnapshot.Writer<T> writer,
-    //      Callback<SnapshotFile> callback);
+    <T extends StateSnapshot> void saveSnapshot(RaftSnapshot raftSnapshot, EntryInfo lastIncluded, T snapshot,
+        StateSnapshot.Writer<T> writer, RaftCallback<Instant> callback);
 
     /**
      * Deletes snapshots up to and including a time.
