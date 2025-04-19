@@ -7,17 +7,14 @@
  */
 package org.opendaylight.controller.cluster.raft.spi;
 
-import static java.util.Objects.requireNonNull;
-
 import com.google.common.annotations.Beta;
 import java.nio.file.Path;
-import org.apache.pekko.actor.ActorRef;
+import java.time.Instant;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.opendaylight.controller.cluster.raft.RaftActor;
-import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
 
@@ -42,12 +39,9 @@ public final class DisabledRaftStorage extends RaftStorage implements ImmediateD
         }
     }
 
-    private final ActorRef actorRef;
-
     public DisabledRaftStorage(final String memberId, final ExecuteInSelfActor executeInSelf, final Path directory,
-            final ActorRef actorRef, final CompressionType compression, final Configuration streamConfig) {
+            final CompressionType compression, final Configuration streamConfig) {
         super(memberId, executeInSelf, directory, compression, streamConfig);
-        this.actorRef = requireNonNull(actorRef);
     }
 
     @Override
@@ -71,26 +65,10 @@ public final class DisabledRaftStorage extends RaftStorage implements ImmediateD
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The way snapshotting works is:
-     * <ol>
-     *   <li>RaftActor calls {@link RaftActorSnapshotCohort#takeSnapshot()}</li>
-     *   <li>RaftActor calls {@code DataPersistenceProvider.streamToInstall()}</li>
-     *   <li>the storage eventually calls {@code RaftActorSnapshotCohort.serializeSnapshot()} and notifies RaftActor
-     *       and it calls this method</li>
-     *   <li>When saveSnapshot is invoked on the akka-persistence API it uses the SnapshotStore to save
-     *       the snapshot. The SnapshotStore sends SaveSnapshotSuccess or SaveSnapshotFailure. When the
-     *       RaftActor gets SaveSnapshot success it commits the snapshot to the in-memory journal. This
-     *       commitSnapshot is mimicking what is done in SaveSnapshotSuccess.</li>
-     * </ol>
-     */
     @Override
-    public void saveSnapshot(final Snapshot object) {
-        // Make saving Snapshot successful
-        // Committing the snapshot here would end up calling commit in the creating state which would
-        // be a state violation. That's why now we send a message to commit the snapshot.
-        actorRef.tell(CommitSnapshot.INSTANCE, ActorRef.noSender());
+    public <T extends StateSnapshot> void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
+            final T snapshot, final StateSnapshot.Writer<T> writer, final RaftCallback<Instant> callback) {
+        final var timestamp = Instant.now();
+        executeInSelf.executeInSelf(() -> callback.invoke(null, timestamp));
     }
 }

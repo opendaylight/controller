@@ -9,13 +9,13 @@ package org.opendaylight.controller.cluster.raft.spi;
 
 import com.google.common.base.MoreObjects;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.function.Consumer;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SnapshotProtocol;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.InstallableSnapshot;
 
@@ -65,8 +65,9 @@ public abstract class ForwardingDataPersistenceProvider implements DataPersisten
     }
 
     @Override
-    public void saveSnapshot(final Snapshot entry) {
-        delegate().saveSnapshot(entry);
+    public <T extends StateSnapshot> void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
+            final T snapshot, final StateSnapshot.Writer<T> writer, final RaftCallback<Instant> callback) {
+        delegate().saveSnapshot(raftSnapshot, lastIncluded, snapshot, writer, callback);
     }
 
     @Override

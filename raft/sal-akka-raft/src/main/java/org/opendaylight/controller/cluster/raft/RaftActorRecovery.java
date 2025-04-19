@@ -65,15 +65,8 @@ final class RaftActorRecovery {
 
         final var loaded = context.snapshotStore().lastSnapshot();
         if (loaded != null) {
-            final var lastIncluded = loaded.lastIncluded();
-            final var raftSnapshot = loaded.readRaftSnapshot();
-            final var unapplied = raftSnapshot.unappliedEntries();
-
-            initializeLog(loaded.timestamp(), Snapshot.create(
-                loaded.readSnapshot(context.getSnapshotManager().stateSupport().reader()), unapplied,
-                unapplied.isEmpty() ? lastIncluded.index() : unapplied.getLast().index(),
-                unapplied.isEmpty() ? lastIncluded.term() : unapplied.getLast().term(),
-                lastIncluded.index(), lastIncluded.term(), origTermInfo, raftSnapshot.clusterConfig()));
+            initializeLog(loaded.timestamp(), Snapshot.ofRaft(origTermInfo, loaded.readRaftSnapshot(),
+                loaded.lastIncluded(), loaded.readSnapshot(context.getSnapshotManager().stateSupport().reader())));
         }
         origSnapshot = loaded;
     }
