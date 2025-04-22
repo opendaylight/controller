@@ -43,7 +43,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
-import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
+import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
@@ -373,7 +373,7 @@ class RaftActorRecoveryTest {
         context.addToPeers(follower2, null, VotingState.VOTING);
 
         //add new Server
-        var obj = new ClusterConfig(
+        var obj = new VotingConfig(
                 new ServerInfo(localId, true),
                 new ServerInfo(follower1, true),
                 new ServerInfo(follower2, false),
@@ -394,7 +394,7 @@ class RaftActorRecoveryTest {
         verify(mockCohort, never()).appendRecoveredCommand(any());
 
         //remove existing follower1
-        obj = new ClusterConfig(
+        obj = new VotingConfig(
                 new ServerInfo(localId, true),
                 new ServerInfo("follower2", true),
                 new ServerInfo("follower3", true));
@@ -410,7 +410,7 @@ class RaftActorRecoveryTest {
     void testServerConfigurationPayloadAppliedWithPersistenceDisabled() throws Exception {
         recovery = support.recoverToTransient();
 
-        final var obj = new ClusterConfig(new ServerInfo(localId, true), new ServerInfo("follower", true));
+        final var obj = new VotingConfig(new ServerInfo(localId, true), new ServerInfo("follower", true));
 
         sendMessageToSupport(new SimpleReplicatedLogEntry(0, 1, obj));
 
@@ -424,7 +424,7 @@ class RaftActorRecoveryTest {
 
         long electionTerm = 2;
         String electionVotedFor = "member-2";
-        final var serverPayload = new ClusterConfig(
+        final var serverPayload = new VotingConfig(
                 new ServerInfo(localId, true),
                 new ServerInfo("follower1", true),
                 new ServerInfo("follower2", true));

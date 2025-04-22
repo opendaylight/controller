@@ -31,9 +31,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.zip.CRC32C;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
-import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
+import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
+import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.CompressionType;
@@ -111,7 +113,7 @@ final class SnapshotFileV1 implements SnapshotFile {
     }
 
     static <T extends StateSnapshot> void createNew(final Path file, final Instant timestamp,
-            final EntryInfo lastIncluded, final ClusterConfig serverConfig,
+            final EntryInfo lastIncluded, final @Nullable VotingConfig votingConfig,
             final CompressionType entryCompress, final List<ReplicatedLogEntry> unappliedEntries,
             final CompressionType stateCompress, final StateSnapshot.Writer<T> stateWriter, final T state)
                 throws IOException {
@@ -146,8 +148,17 @@ final class SnapshotFileV1 implements SnapshotFile {
             final long sso;
             final long limit;
             try (var dos = new DataOutputStream(new UncloseableBufferedOutputStream(Channels.newOutputStream(fc)))) {
-                // Emit server configuration
-                ClusterConfig.writer().writeCommand(serverConfig, dos);
+                // Emit server configuration if present
+                if (votingConfig != null) {
+                    final var si = votingConfig.serverInfo();
+                    dos.writeInt(si.size());
+                    for (var info : si) {
+                        dos.writeUTF(info.peerId());
+                        dos.writeBoolean(info.isVoting());
+                    }
+                } else {
+                    dos.writeInt(-1);
+                }
 
                 // Emit unapplied entries, if any
                 dos.writeInt(unappliedEntries.size());
@@ -321,15 +332,27 @@ final class SnapshotFileV1 implements SnapshotFile {
         try (var dis = serverStream.openDataInput()) {
             dis.skipNBytes(HEADER_SIZE);
 
-            // Note: we do not compress ClusterConfig on purpose, so as to ease debugging in case of any issues
-            final var clusterConfig = ClusterConfig.reader().readCommand(dis);
+            // Note: we do not compress VotingConfig on purpose, so as to ease debugging in case of any issues
+            final VotingConfig votingConfig;
+            final var siCount = dis.readInt();
+            if (siCount >= 0) {
+                final var siBuilder = ImmutableList.<ServerInfo>builderWithExpectedSize(siCount);
+                for (int i = 0; i < siCount; i++) {
+                    siBuilder.add(new ServerInfo(dis.readUTF(), dis.readBoolean()));
+                }
+                votingConfig = new VotingConfig(siBuilder.build());
+            } else if (siCount == -1) {
+                votingConfig = null;
+            } else {
+                throw new IOException("Invalid ServerInfo count " + siCount);
+            }
 
             final var uaCount = dis.readInt();
             if (uaCount < 0) {
                 throw new IOException("Invalid ReplicatedLogEntry count " + uaCount);
             }
             if (uaCount == 0) {
-                return new RaftSnapshot(clusterConfig, ImmutableList.of());
+                return new RaftSnapshot(votingConfig, ImmutableList.of());
             }
 
             final var uaBuilder = ImmutableList.<ReplicatedLogEntry>builderWithExpectedSize(uaCount);
@@ -356,7 +379,7 @@ final class SnapshotFileV1 implements SnapshotFile {
                     prevTerm = term;
                 }
             }
-            return new RaftSnapshot(clusterConfig, uaBuilder.build());
+            return new RaftSnapshot(votingConfig, uaBuilder.build());
         }
     }
 

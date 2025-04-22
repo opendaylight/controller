@@ -16,7 +16,7 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.OptionalInt;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
-import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
+import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.yangtools.concepts.WritableObjects;
 
 /**
@@ -28,7 +28,7 @@ final class IS implements Externalizable {
 
     // Flags
     private static final int LAST_CHUNK_HASHCODE = 0x10;
-    private static final int SERVER_CONFIG       = 0x20;
+    private static final int VOTING_CONFIG       = 0x20;
 
     private InstallSnapshot installSnapshot;
 
@@ -48,9 +48,9 @@ final class IS implements Externalizable {
         if (lastChunkHashCode.isPresent()) {
             flags |= LAST_CHUNK_HASHCODE;
         }
-        final var serverConfig = installSnapshot.serverConfig();
-        if (serverConfig != null) {
-            flags |= SERVER_CONFIG;
+        final var votingConfig = installSnapshot.votingConfig();
+        if (votingConfig != null) {
+            flags |= VOTING_CONFIG;
         }
 
         // FIXME: CONTROLLER-2074: propagate installSnapshot.format()
@@ -64,8 +64,8 @@ final class IS implements Externalizable {
         if (lastChunkHashCode.isPresent()) {
             out.writeInt(lastChunkHashCode.orElseThrow());
         }
-        if (serverConfig != null) {
-            out.writeObject(serverConfig);
+        if (votingConfig != null) {
+            out.writeObject(votingConfig);
         }
 
         out.writeObject(installSnapshot.getData());
@@ -87,13 +87,13 @@ final class IS implements Externalizable {
 
         OptionalInt lastChunkHashCode = getFlag(flags, LAST_CHUNK_HASHCODE) ? OptionalInt.of(in.readInt())
             : OptionalInt.empty();
-        ClusterConfig serverConfig = getFlag(flags, SERVER_CONFIG)
-                ? requireNonNull((ClusterConfig) in.readObject()) : null;
+        VotingConfig votingConfig = getFlag(flags, VOTING_CONFIG)
+                ? requireNonNull((VotingConfig) in.readObject()) : null;
 
         byte[] data = (byte[])in.readObject();
 
         installSnapshot = new InstallSnapshot(term, leaderId, lastIncludedIndex, lastIncludedTerm, data,
-                chunkIndex, totalChunks, lastChunkHashCode, serverConfig, RaftVersions.CURRENT_VERSION);
+                chunkIndex, totalChunks, lastChunkHashCode, votingConfig, RaftVersions.CURRENT_VERSION);
     }
 
     @java.io.Serial

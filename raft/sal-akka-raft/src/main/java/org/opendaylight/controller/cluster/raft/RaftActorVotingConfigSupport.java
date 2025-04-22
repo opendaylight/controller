@@ -34,7 +34,7 @@ import org.opendaylight.controller.cluster.raft.messages.ServerChangeReply;
 import org.opendaylight.controller.cluster.raft.messages.ServerChangeStatus;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.controller.cluster.raft.messages.UnInitializedFollowerSnapshotReply;
-import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
+import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.yangtools.util.AbstractUUIDIdentifier;
 import org.slf4j.Logger;
@@ -45,8 +45,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Pantelis
  */
-class RaftActorServerConfigurationSupport {
-    private static final Logger LOG = LoggerFactory.getLogger(RaftActorServerConfigurationSupport.class);
+class RaftActorVotingConfigSupport {
+    private static final Logger LOG = LoggerFactory.getLogger(RaftActorVotingConfigSupport.class);
 
     @SuppressWarnings("checkstyle:MemberName")
     private final OperationState IDLE = new Idle();
@@ -59,7 +59,7 @@ class RaftActorServerConfigurationSupport {
 
     private OperationState currentOperationState = IDLE;
 
-    RaftActorServerConfigurationSupport(final RaftActor raftActor) {
+    RaftActorVotingConfigSupport(final RaftActor raftActor) {
         this.raftActor = raftActor;
         raftContext = raftActor.getRaftActorContext();
     }
@@ -144,7 +144,7 @@ class RaftActorServerConfigurationSupport {
     }
 
     private boolean onApplyState(final ApplyState applyState) {
-        if (applyState.entry().command() instanceof ClusterConfig) {
+        if (applyState.entry().command() instanceof VotingConfig) {
             currentOperationState.onApplyState(applyState);
             return true;
         }
@@ -237,7 +237,7 @@ class RaftActorServerConfigurationSupport {
         protected void persistNewServerConfiguration(final ServerOperationContext<?> operationContext) {
             raftContext.setDynamicServerConfigurationInUse();
 
-            ClusterConfig payload = raftContext.getPeerServerInfo(
+            VotingConfig payload = raftContext.getPeerServerInfo(
                     operationContext.includeSelfInNewConfiguration(raftActor));
             LOG.debug("{}: New server configuration : {}", memberId(), payload.serverInfo());
 
@@ -265,7 +265,7 @@ class RaftActorServerConfigurationSupport {
 
             ServerOperationContext<?> nextOperation = pendingOperationsQueue.poll();
             if (nextOperation != null) {
-                RaftActorServerConfigurationSupport.this.onNewOperation(nextOperation);
+                RaftActorVotingConfigSupport.this.onNewOperation(nextOperation);
             }
         }
 
@@ -299,7 +299,7 @@ class RaftActorServerConfigurationSupport {
     private final class Idle extends OperationState {
         @Override
         public void onNewOperation(final ServerOperationContext<?> operationContext) {
-            operationContext.newInitialOperationState(RaftActorServerConfigurationSupport.this).initiate();
+            operationContext.newInitialOperationState(RaftActorVotingConfigSupport.this).initiate();
         }
 
         @Override
@@ -577,7 +577,7 @@ class RaftActorServerConfigurationSupport {
 
         abstract Object newReply(ServerChangeStatus status, String leaderId);
 
-        abstract InitialOperationState newInitialOperationState(RaftActorServerConfigurationSupport support);
+        abstract InitialOperationState newInitialOperationState(RaftActorVotingConfigSupport support);
 
         abstract String getLoggingContext();
     }
@@ -596,7 +596,7 @@ class RaftActorServerConfigurationSupport {
         }
 
         @Override
-        InitialOperationState newInitialOperationState(final RaftActorServerConfigurationSupport support) {
+        InitialOperationState newInitialOperationState(final RaftActorVotingConfigSupport support) {
             return support.new InitialAddServerState(this);
         }
 
@@ -651,7 +651,7 @@ class RaftActorServerConfigurationSupport {
         }
 
         @Override
-        InitialOperationState newInitialOperationState(final RaftActorServerConfigurationSupport support) {
+        InitialOperationState newInitialOperationState(final RaftActorVotingConfigSupport support) {
             return support.new InitialRemoveServerState(this);
         }
 
@@ -684,7 +684,7 @@ class RaftActorServerConfigurationSupport {
         }
 
         @Override
-        InitialOperationState newInitialOperationState(final RaftActorServerConfigurationSupport support) {
+        InitialOperationState newInitialOperationState(final RaftActorVotingConfigSupport support) {
             return support.new ChangeServersVotingStatusState(this, tryToElectLeader);
         }
 
@@ -764,7 +764,7 @@ class RaftActorServerConfigurationSupport {
                 return false;
             }
 
-            raftContext.updatePeerIds(new ClusterConfig(newServerInfoList));
+            raftContext.updateVotingConfig(new VotingConfig(newServerInfoList));
             if (raftActor.getCurrentBehavior() instanceof AbstractLeader leader) {
                 leader.updateMinReplicaCount();
             }
@@ -791,12 +791,12 @@ class RaftActorServerConfigurationSupport {
     }
 
     private class WaitingForLeaderElected extends OperationState {
-        private final ClusterConfig previousServerConfig;
+        private final VotingConfig previousServerConfig;
         private final ChangeServersVotingStatusContext operationContext;
         private final Cancellable timer;
 
         WaitingForLeaderElected(final ChangeServersVotingStatusContext operationContext,
-                final ClusterConfig previousServerConfig) {
+                final VotingConfig previousServerConfig) {
             this.operationContext = operationContext;
             this.previousServerConfig = previousServerConfig;
 
@@ -821,10 +821,10 @@ class RaftActorServerConfigurationSupport {
                 LOG.debug("{}: Forwarding {} to new leader", memberId(), operationContext.getOperation());
 
                 // Revert the local server config change.
-                raftContext.updatePeerIds(previousServerConfig);
+                raftContext.updateVotingConfig(previousServerConfig);
 
                 changeToIdleState();
-                RaftActorServerConfigurationSupport.this.onNewOperation(operationContext);
+                RaftActorVotingConfigSupport.this.onNewOperation(operationContext);
             }
         }
 
@@ -834,7 +834,7 @@ class RaftActorServerConfigurationSupport {
                 timeout.getLoggingContext());
 
             // Revert the local server config change.
-            raftContext.updatePeerIds(previousServerConfig);
+            raftContext.updateVotingConfig(previousServerConfig);
             raftActor.initializeBehavior();
 
             tryToForwardOperationToAnotherServer();

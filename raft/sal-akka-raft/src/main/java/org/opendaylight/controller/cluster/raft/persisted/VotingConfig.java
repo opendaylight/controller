@@ -21,13 +21,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * RAFT cluster configuration. This payload is always persisted, no matter whether or not we are persisting other data
+ * RAFT cluster configuration. This command is always persisted, no matter whether or not we are persisting other data
  * distributed via {@link ReplicatedLogEntry}.
  */
-// FIXME: rename to 'SetRaftConfiguration' or somesuch, perhaps with interface + non-serializable record
 @NonNullByDefault
-public final class ClusterConfig extends AbstractRaftCommand {
-    private static final Logger LOG = LoggerFactory.getLogger(ClusterConfig.class);
+public final class VotingConfig extends AbstractRaftCommand {
+    private static final Logger LOG = LoggerFactory.getLogger(VotingConfig.class);
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
@@ -36,42 +35,16 @@ public final class ClusterConfig extends AbstractRaftCommand {
 
     private int serializedSize = -1;
 
-    public ClusterConfig(final ServerInfo serverInfo) {
+    public VotingConfig(final ServerInfo serverInfo) {
         this.serverInfo = ImmutableList.of(serverInfo);
     }
 
-    public ClusterConfig(final ServerInfo... serverInfo) {
+    public VotingConfig(final ServerInfo... serverInfo) {
         this.serverInfo = ImmutableList.copyOf(serverInfo);
     }
 
-    public ClusterConfig(final List<ServerInfo> serverInfo) {
+    public VotingConfig(final List<ServerInfo> serverInfo) {
         this.serverInfo = ImmutableList.copyOf(serverInfo);
-    }
-
-    public static Reader<ClusterConfig> reader() {
-        return in -> {
-            final var siCount = in.readInt();
-            if (siCount < 0) {
-                throw new IOException("Invalid ServerInfo count " + siCount);
-            }
-
-            final var siBuilder = ImmutableList.<ServerInfo>builderWithExpectedSize(siCount);
-            for (int i = 0; i < siCount; i++) {
-                siBuilder.add(new ServerInfo(in.readUTF(), in.readBoolean()));
-            }
-            return new ClusterConfig(siBuilder.build());
-        };
-    }
-
-    public static Writer<ClusterConfig> writer() {
-        return (delta, out) -> {
-            final var si = delta.serverInfo();
-            out.writeInt(si.size());
-            for (var info : si) {
-                out.writeUTF(info.peerId());
-                out.writeBoolean(info.isVoting());
-            }
-        };
     }
 
     /**
@@ -91,8 +64,8 @@ public final class ClusterConfig extends AbstractRaftCommand {
     @Override
     public int serializedSize() {
         if (serializedSize < 0) {
-            try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-                try (ObjectOutputStream out = new ObjectOutputStream(bos)) {
+            try (var bos = new ByteArrayOutputStream()) {
+                try (var out = new ObjectOutputStream(bos)) {
                     out.writeObject(writeReplace());
                 }
 
@@ -113,7 +86,7 @@ public final class ClusterConfig extends AbstractRaftCommand {
 
     @Override
     public boolean equals(final @Nullable Object obj) {
-        return this == obj || obj instanceof ClusterConfig other && serverInfo.equals(other.serverInfo);
+        return this == obj || obj instanceof VotingConfig other && serverInfo.equals(other.serverInfo);
     }
 
     @Override

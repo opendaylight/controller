@@ -21,7 +21,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
-import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
+import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.spi.AbstractStateCommand;
 import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage;
 import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
@@ -33,7 +33,7 @@ import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
  */
 @ExtendWith(MockitoExtension.class)
 class RaftActorDataPersistenceProviderTest {
-    private static final ClusterConfig PERSISTENT_PAYLOAD = new ClusterConfig();
+    private static final VotingConfig PERSISTENT_PAYLOAD = new VotingConfig();
 
     private static final Payload NON_PERSISTENT_PAYLOAD = new TestNonPersistentPayload();
 
@@ -48,7 +48,7 @@ class RaftActorDataPersistenceProviderTest {
     @Mock
     private Consumer<ReplicatedLogEntry> mockCallback;
     @Captor
-    private ArgumentCaptor<Consumer<ClusterConfig>> callbackCaptor;
+    private ArgumentCaptor<Consumer<VotingConfig>> callbackCaptor;
 
     private PersistenceControl provider;
 
@@ -77,7 +77,7 @@ class RaftActorDataPersistenceProviderTest {
 
         provider.persistEntry(mockPersistentLogEntry, mockCallback);
 
-        verify(mockEnabledStorage).persistConfig(eq(PERSISTENT_PAYLOAD), callbackCaptor.capture());
+        verify(mockEnabledStorage).persistVotingConfig(eq(PERSISTENT_PAYLOAD), callbackCaptor.capture());
         verify(mockDisabledStorage, never()).persistEntry(mockNonPersistentLogEntry, mockCallback);
         callbackCaptor.getValue().accept(PERSISTENT_PAYLOAD);
         verify(mockCallback).accept(mockPersistentLogEntry);

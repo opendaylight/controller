@@ -21,18 +21,18 @@ import org.junit.jupiter.api.Test;
 class ServerConfigurationPayloadTest {
     @Test
     void testSerialization() {
-        final var expected = new ClusterConfig(new ServerInfo("1", true), new ServerInfo("2", false));
+        final var expected = new VotingConfig(new ServerInfo("1", true), new ServerInfo("2", false));
 
         final var bytes = SerializationUtils.serialize(expected);
         assertEquals(125, bytes.length);
-        final var cloned = (ClusterConfig) SerializationUtils.deserialize(bytes);
+        final var cloned = (VotingConfig) SerializationUtils.deserialize(bytes);
 
         assertEquals(expected.serverInfo(), cloned.serverInfo());
     }
 
     @Test
     void testSize() {
-        final var expected = new ClusterConfig(new ServerInfo("1", true));
+        final var expected = new VotingConfig(new ServerInfo("1", true));
         assertTrue(expected.size() > 0);
     }
 }

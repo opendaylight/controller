@@ -19,7 +19,7 @@ import java.io.ObjectOutput;
 import java.util.OptionalInt;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
-import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
+import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.raft.spi.CompressionType;
 
 /**
@@ -37,7 +37,7 @@ public final class InstallSnapshot extends RaftRPC {
     private final int totalChunks;
     @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "Handled via writeReplace()")
     private final OptionalInt lastChunkHashCode;
-    private final @Nullable ClusterConfig serverConfig;
+    private final @Nullable VotingConfig votingConfig;
     private final short recipientRaftVersion;
     private final @Nullable CompressionType compression = null;
 
@@ -47,7 +47,7 @@ public final class InstallSnapshot extends RaftRPC {
         large.""")
     public InstallSnapshot(final long term, final String leaderId, final long lastIncludedIndex,
             final long lastIncludedTerm, final byte[] data, final int chunkIndex, final int totalChunks,
-            final OptionalInt lastChunkHashCode, final @Nullable ClusterConfig serverConfig,
+            final OptionalInt lastChunkHashCode, final @Nullable VotingConfig votingConfig,
             final short recipientRaftVersion) {
         super(term);
         this.leaderId = leaderId;
@@ -57,7 +57,7 @@ public final class InstallSnapshot extends RaftRPC {
         this.chunkIndex = chunkIndex;
         this.totalChunks = totalChunks;
         this.lastChunkHashCode = lastChunkHashCode;
-        this.serverConfig = serverConfig;
+        this.votingConfig = votingConfig;
         this.recipientRaftVersion = recipientRaftVersion;
     }
 
@@ -115,8 +115,8 @@ public final class InstallSnapshot extends RaftRPC {
         return lastChunkHashCode;
     }
 
-    public @Nullable ClusterConfig serverConfig() {
-        return serverConfig;
+    public @Nullable VotingConfig votingConfig() {
+        return votingConfig;
     }
 
     @Override
@@ -128,7 +128,7 @@ public final class InstallSnapshot extends RaftRPC {
             .add("datasize", data.length)
             .add("chunk", chunkIndex + "/" + totalChunks)
             .add("lastChunkHashCode", lastChunkHashCode)
-            .add("serverConfig", serverConfig)
+            .add("votingConfig", votingConfig)
             .add("compression", compression);
     }
 
@@ -167,9 +167,9 @@ public final class InstallSnapshot extends RaftRPC {
                 out.writeInt(installSnapshot.lastChunkHashCode.orElseThrow());
             }
 
-            out.writeByte(installSnapshot.serverConfig != null ? 1 : 0);
-            if (installSnapshot.serverConfig != null) {
-                out.writeObject(installSnapshot.serverConfig);
+            out.writeByte(installSnapshot.votingConfig != null ? 1 : 0);
+            if (installSnapshot.votingConfig != null) {
+                out.writeObject(installSnapshot.votingConfig);
             }
 
             out.writeObject(installSnapshot.data);
@@ -185,7 +185,7 @@ public final class InstallSnapshot extends RaftRPC {
             int totalChunks = in.readInt();
 
             final var lastChunkHashCode = in.readByte() == 1 ? OptionalInt.of(in.readInt()) : OptionalInt.empty();
-            final var serverConfig = in.readByte() == 1 ? requireNonNull((ClusterConfig) in.readObject()) : null;
+            final var serverConfig = in.readByte() == 1 ? requireNonNull((VotingConfig) in.readObject()) : null;
             final var data = (byte[]) in.readObject();
 
             installSnapshot = new InstallSnapshot(term, leaderId, lastIncludedIndex, lastIncludedTerm, data,

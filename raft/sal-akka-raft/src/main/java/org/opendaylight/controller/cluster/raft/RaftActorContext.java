@@ -19,7 +19,7 @@ import org.apache.pekko.cluster.Cluster;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
-import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
+import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.EntryStore;
@@ -133,11 +133,11 @@ public interface RaftActorContext {
     @Nullable String getPeerAddress(String peerId);
 
     /**
-     * Updates the peers and information to match the given ClusterConfig.
+     * Updates the peers and information to match the given {@link VotingConfig}.
      *
-     * @param serverCfgPayload the ClusterConfig.
+     * @param votingConfig the {@link VotingConfig}
      */
-    void updatePeerIds(ClusterConfig serverCfgPayload);
+    void updateVotingConfig(VotingConfig votingConfig);
 
     /**
      * Returns the PeerInfo instances for each peer.
@@ -294,7 +294,7 @@ public interface RaftActorContext {
      * @param includeSelf include this peer's info.
      * @return the peer information as a ClusterConfig or null if no dynamic server configurations have been applied.
      */
-    @Nullable ClusterConfig getPeerServerInfo(boolean includeSelf);
+    @Nullable VotingConfig getPeerServerInfo(boolean includeSelf);
 
     /**
      * Determines if this peer is a voting member of the cluster.

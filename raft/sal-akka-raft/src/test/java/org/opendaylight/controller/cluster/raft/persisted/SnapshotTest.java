@@ -37,7 +37,7 @@ class SnapshotTest {
         long lastAppliedTerm = 1;
         long electionTerm = 3;
         String electionVotedFor = "member-1";
-        final var serverConfig = new ClusterConfig(new ServerInfo("1", true), new ServerInfo("2", false));
+        final var serverConfig = new VotingConfig(new ServerInfo("1", true), new ServerInfo("2", false));
 
         final var expected = Snapshot.create(ByteState.of(state), unapplied, lastIndex, lastTerm, lastAppliedIndex,
                 lastAppliedTerm, new TermInfo(electionTerm, electionVotedFor), serverConfig);
@@ -52,6 +52,6 @@ class SnapshotTest {
         assertEquals(expected.getUnAppliedEntries(), cloned.getUnAppliedEntries());
         assertEquals(expected.termInfo(), cloned.termInfo());
         assertEquals(expected.getState(), cloned.getState());
-        assertEquals(expected.getServerConfiguration().serverInfo(), cloned.getServerConfiguration().serverInfo());
+        assertEquals(expected.votingConfig().serverInfo(), cloned.votingConfig().serverInfo());
     }
 }
