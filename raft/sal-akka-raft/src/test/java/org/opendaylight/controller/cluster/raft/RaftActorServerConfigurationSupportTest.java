@@ -62,6 +62,7 @@ import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
+import org.opendaylight.controller.cluster.raft.persisted.VotingInfo;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage.CommitSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.FailingTermInfoStore;
@@ -1136,9 +1137,8 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         // via the server config. The server config will also contain 2 voting peers that are down (ie no
         // actors created).
 
-        final var persistedServerConfig = new ClusterConfig(
-                new ServerInfo(node1ID, false), new ServerInfo(node2ID, false),
-                new ServerInfo("downNode1", true), new ServerInfo("downNode2", true));
+        final var persistedServerConfig = new ClusterConfig(new VotingInfo(Map.of(
+                node1ID, false, node2ID, false, "downNode1", true, "downNode2", true)));
         SimpleReplicatedLogEntry persistedServerConfigEntry = new SimpleReplicatedLogEntry(0, 1, persistedServerConfig);
 
         InMemoryJournal.addEntry(node1ID, 1, new UpdateElectionTerm(1, "downNode1"));
@@ -1240,8 +1240,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
                 ? actorFactory.createTestActorPath(node1ID) : peerId.equals(node2ID)
                         ? actorFactory.createTestActorPath(node2ID) : null;
 
-        final var persistedServerConfig = new ClusterConfig(
-                new ServerInfo(node1ID, false), new ServerInfo(node2ID, true));
+        final var persistedServerConfig = new ClusterConfig(new VotingInfo(Map.of(node1ID, false, node2ID, true)));
         SimpleReplicatedLogEntry persistedServerConfigEntry = new SimpleReplicatedLogEntry(0, 1, persistedServerConfig);
 
         InMemoryJournal.addEntry(node1ID, 1, new UpdateElectionTerm(1, "node1"));
@@ -1306,8 +1305,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         configParams.setElectionTimeoutFactor(3);
         configParams.setPeerAddressResolver(peerAddressResolver);
 
-        final var persistedServerConfig = new ClusterConfig(
-                new ServerInfo(node1ID, false), new ServerInfo(node2ID, false));
+        final var persistedServerConfig = new ClusterConfig(new VotingInfo(Map.of(node1ID, false, node2ID, false)));
         SimpleReplicatedLogEntry persistedServerConfigEntry = new SimpleReplicatedLogEntry(0, 1, persistedServerConfig);
 
         InMemoryJournal.addEntry(node1ID, 1, new UpdateElectionTerm(1, "node1"));
@@ -1370,8 +1368,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
                 ? actorFactory.createTestActorPath(node1ID) : peerId.equals(node2ID)
                         ? actorFactory.createTestActorPath(node2ID) : null);
 
-        final var persistedServerConfig = new ClusterConfig(
-                new ServerInfo(node1ID, false), new ServerInfo(node2ID, true));
+        final var persistedServerConfig = new ClusterConfig(new VotingInfo(Map.of(node1ID, false, node2ID, true)));
         SimpleReplicatedLogEntry persistedServerConfigEntry = new SimpleReplicatedLogEntry(0, 1, persistedServerConfig);
 
         InMemoryJournal.addEntry(node1ID, 1, new UpdateElectionTerm(1, "node1"));

@@ -40,6 +40,7 @@ import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
+import org.opendaylight.controller.cluster.raft.persisted.VotingInfo;
 import org.opendaylight.raft.api.TermInfo;
 
 /**
@@ -364,10 +365,8 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
 
         // Send a server config change to test that the install snapshot includes the server config.
 
-        final var serverConfig = new ClusterConfig(
-                new ServerInfo(leaderId, true),
-                new ServerInfo(follower1Id, false),
-                new ServerInfo(follower2Id, false));
+        final var serverConfig = new ClusterConfig(new VotingInfo(Map.of(
+                leaderId, true, follower1Id, false, follower2Id, false)));
         leaderContext.updatePeerIds(serverConfig);
         ((AbstractLeader)leader).updateMinReplicaCount();
         leaderActor.tell(serverConfig, ActorRef.noSender());

@@ -8,8 +8,8 @@
 package org.opendaylight.controller.cluster.raft.persisted;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Map;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.jupiter.api.Test;
 
@@ -21,18 +21,18 @@ import org.junit.jupiter.api.Test;
 class ServerConfigurationPayloadTest {
     @Test
     void testSerialization() {
-        final var expected = new ClusterConfig(new ServerInfo("1", true), new ServerInfo("2", false));
+        final var expected = new ClusterConfig(new VotingInfo(Map.of("1", true, "2", false)));
 
         final var bytes = SerializationUtils.serialize(expected);
         assertEquals(125, bytes.length);
         final var cloned = (ClusterConfig) SerializationUtils.deserialize(bytes);
 
-        assertEquals(expected.serverInfo(), cloned.serverInfo());
+        assertEquals(expected.votingInfo(), cloned.votingInfo());
     }
 
     @Test
     void testSize() {
-        final var expected = new ClusterConfig(new ServerInfo("1", true));
-        assertTrue(expected.size() > 0);
+        final var expected = new ClusterConfig(new VotingInfo(Map.of("1", true)));
+        assertEquals(1, expected.size());
     }
 }

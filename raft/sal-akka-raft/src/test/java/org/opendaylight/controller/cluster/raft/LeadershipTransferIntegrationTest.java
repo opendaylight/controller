@@ -32,8 +32,8 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.RequestLeadership;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
-import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.persisted.VotingInfo;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.api.TermInfo;
 import scala.concurrent.Await;
@@ -142,10 +142,11 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
     private void createRaftActors() {
         testLog.info("createRaftActors starting");
 
-        final Snapshot snapshot = Snapshot.create(EmptyState.INSTANCE, List.of(), -1, -1, -1, -1,
-            new TermInfo(1), new ClusterConfig(
-                new ServerInfo(leaderId, true), new ServerInfo(follower1Id, true),
-                new ServerInfo(follower2Id, true), new ServerInfo(follower3Id, false)));
+        final var snapshot = Snapshot.create(EmptyState.INSTANCE, List.of(), -1, -1, -1, -1,
+            new TermInfo(1), new ClusterConfig(new VotingInfo(Map.of(
+                leaderId, true, follower1Id, true, follower2Id, true,
+                // Non-voting
+                follower3Id, false))));
 
         InMemorySnapshotStore.addSnapshot(leaderId, snapshot);
         InMemorySnapshotStore.addSnapshot(follower1Id, snapshot);

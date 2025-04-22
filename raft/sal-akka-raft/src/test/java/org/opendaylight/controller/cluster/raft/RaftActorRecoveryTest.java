@@ -45,10 +45,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
-import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
+import org.opendaylight.controller.cluster.raft.persisted.VotingInfo;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.raft.api.TermInfo;
@@ -373,11 +373,8 @@ class RaftActorRecoveryTest {
         context.addToPeers(follower2, null, VotingState.VOTING);
 
         //add new Server
-        var obj = new ClusterConfig(
-                new ServerInfo(localId, true),
-                new ServerInfo(follower1, true),
-                new ServerInfo(follower2, false),
-                new ServerInfo(follower3, true));
+        var obj = new ClusterConfig(new VotingInfo(Map.of(
+                localId, true, follower1, true, follower2, false, follower3, true)));
 
         sendMessageToSupport(new SimpleReplicatedLogEntry(0, 1, obj));
 
@@ -394,10 +391,7 @@ class RaftActorRecoveryTest {
         verify(mockCohort, never()).appendRecoveredCommand(any());
 
         //remove existing follower1
-        obj = new ClusterConfig(
-                new ServerInfo(localId, true),
-                new ServerInfo("follower2", true),
-                new ServerInfo("follower3", true));
+        obj = new ClusterConfig(new VotingInfo(Map.of(localId, true, "follower2", true, "follower3", true)));
 
         sendMessageToSupport(new SimpleReplicatedLogEntry(1, 1, obj));
 
@@ -410,7 +404,7 @@ class RaftActorRecoveryTest {
     void testServerConfigurationPayloadAppliedWithPersistenceDisabled() throws Exception {
         recovery = support.recoverToTransient();
 
-        final var obj = new ClusterConfig(new ServerInfo(localId, true), new ServerInfo("follower", true));
+        final var obj = new ClusterConfig(new VotingInfo(Map.of(localId, true, "follower", true)));
 
         sendMessageToSupport(new SimpleReplicatedLogEntry(0, 1, obj));
 
@@ -424,10 +418,8 @@ class RaftActorRecoveryTest {
 
         long electionTerm = 2;
         String electionVotedFor = "member-2";
-        final var serverPayload = new ClusterConfig(
-                new ServerInfo(localId, true),
-                new ServerInfo("follower1", true),
-                new ServerInfo("follower2", true));
+        final var serverPayload = new ClusterConfig(new VotingInfo(Map.of(
+                localId, true, "follower1", true, "follower2", true)));
 
         MockSnapshotState snapshotState = new MockSnapshotState(List.of(new MockCommand("1")));
         Snapshot snapshot = Snapshot.create(snapshotState, List.of(),

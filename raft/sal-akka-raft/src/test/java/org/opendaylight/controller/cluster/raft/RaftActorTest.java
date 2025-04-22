@@ -78,10 +78,10 @@ import org.opendaylight.controller.cluster.raft.persisted.ByteStateSnapshotCohor
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
-import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
+import org.opendaylight.controller.cluster.raft.persisted.VotingInfo;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage.CommitSnapshot;
@@ -1148,7 +1148,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         String persistenceId = factory.generateActorId("test-actor-");
         InMemoryJournal.addEntry(persistenceId, 1,  new SimpleReplicatedLogEntry(0, 1,
-                new ClusterConfig(new ServerInfo(persistenceId, false))));
+                new ClusterConfig(new VotingInfo(Map.of(persistenceId, false)))));
 
         TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.builder().id(persistenceId)
             .config(config).props(stateDir()).withDispatcher(Dispatchers.DefaultDispatcherId()), persistenceId);

@@ -20,6 +20,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
+import org.opendaylight.controller.cluster.raft.persisted.VotingInfo;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.EntryStore;
@@ -291,10 +292,11 @@ public interface RaftActorContext {
     /**
      * Returns the peer information as a ClusterConfig if dynamic server configurations have been applied.
      *
-     * @param includeSelf include this peer's info.
      * @return the peer information as a ClusterConfig or null if no dynamic server configurations have been applied.
      */
-    @Nullable ClusterConfig getPeerServerInfo(boolean includeSelf);
+    @Nullable VotingInfo votingInfo();
+//    @Nullable VotingInfo votingInfo();
+//    @Nullable VotingInfo getPeerServerInfo(boolean includeSelf);
 
     /**
      * Determines if this peer is a voting member of the cluster.

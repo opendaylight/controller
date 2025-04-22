@@ -11,12 +11,13 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
+import java.util.Map;
 import java.util.OptionalInt;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
-import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
+import org.opendaylight.controller.cluster.raft.persisted.VotingInfo;
 
 /**
  * Unit tests for InstallSnapshot.
@@ -43,7 +44,7 @@ class InstallSnapshotTest {
             }
         }
 
-        var serverConfig = new ClusterConfig(new ServerInfo("leader", true), new ServerInfo("follower", false));
+        var serverConfig = new ClusterConfig(new VotingInfo(Map.of("leader", true, "follower", false)));
         assertInstallSnapshot(fullSize, new InstallSnapshot(3L, "leaderId", 11L, 2L, data, 5, 6, OptionalInt.of(54321),
             serverConfig, raftVersion));
 

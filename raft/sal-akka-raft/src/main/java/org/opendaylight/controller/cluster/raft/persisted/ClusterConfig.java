@@ -13,6 +13,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.List;
+import java.util.Objects;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
@@ -31,13 +32,16 @@ public final class ClusterConfig extends AbstractRaftCommand {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
-    // FIXME: should be a Map<String, ServerInfo>, but then it really should be something like 'ElectionPolicy'
-    private final ImmutableList<ServerInfo> serverInfo;
+    private final @Nullable VotingInfo votingInfo;
 
     private int serializedSize = -1;
 
-    public ClusterConfig(final ServerInfo serverInfo) {
-        this.serverInfo = ImmutableList.of(serverInfo);
+    public ClusterConfig() {
+        votingInfo = null;
+    }
+
+    public ClusterConfig(final @Nullable VotingInfo votingInfo) {
+        this.votingInfo = votingInfo;
     }
 
     public ClusterConfig(final ServerInfo... serverInfo) {
@@ -65,22 +69,27 @@ public final class ClusterConfig extends AbstractRaftCommand {
 
     public static Writer<ClusterConfig> writer() {
         return (delta, out) -> {
-            final var si = delta.serverInfo();
-            out.writeInt(si.size());
-            for (var info : si) {
-                out.writeUTF(info.peerId());
-                out.writeBoolean(info.isVoting());
+            final var vi = delta.votingInfo;
+            if (vi != null) {
+                final var map = vi.memberToVoting();
+                out.writeInt(map.size());
+                for (var entry : map.entrySet()) {
+                    out.writeUTF(entry.getKey());
+                    out.writeBoolean(entry.getValue());
+                }
+            } else {
+                out.writeInt(0);
             }
         };
     }
 
     /**
-     * Returns known {@link ServerInfo} structures.
+     * Returns known {@link VotingInfo} structures.
      *
-     * @return known {@link ServerInfo} structures
+     * @return known {@link VotingInfo} structures
      */
-    public List<ServerInfo> serverInfo() {
-        return serverInfo;
+    public @Nullable VotingInfo votingInfo() {
+        return votingInfo;
     }
 
     @Override
@@ -108,17 +117,17 @@ public final class ClusterConfig extends AbstractRaftCommand {
 
     @Override
     public int hashCode() {
-        return serverInfo.hashCode();
+        return Objects.hash(votingInfo);
     }
 
     @Override
     public boolean equals(final @Nullable Object obj) {
-        return this == obj || obj instanceof ClusterConfig other && serverInfo.equals(other.serverInfo);
+        return this == obj || obj instanceof ClusterConfig other && votingInfo.equals(other.votingInfo);
     }
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this).add("serverInfo", serverInfo).toString();
+        return MoreObjects.toStringHelper(this).omitNullValues().add("votingInfo", votingInfo).toString();
     }
 
     @Override

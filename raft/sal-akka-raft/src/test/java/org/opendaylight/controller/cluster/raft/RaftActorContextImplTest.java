@@ -30,6 +30,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
+import org.opendaylight.controller.cluster.raft.persisted.VotingInfo;
 import org.opendaylight.controller.cluster.raft.spi.TestTermInfoStore;
 
 /**
@@ -99,8 +100,7 @@ public class RaftActorContextImplTest extends AbstractActorTest {
             Map.of("peer1", "peerAddress1"), new DefaultConfigParamsImpl(), (short) 0, new TestDataProvider(),
             (identifier, entry) -> { }, MoreExecutors.directExecutor());
 
-        context.updatePeerIds(new ClusterConfig(
-            new ServerInfo("self", false), new ServerInfo("peer2", true), new ServerInfo("peer3", false)));
+        context.updatePeerIds(new ClusterConfig(new VotingInfo(Map.of("self", false, "peer2", true, "peer3", false))));
         verifyPeerInfo(context, "peer1", null);
         verifyPeerInfo(context, "peer2", Boolean.TRUE);
         verifyPeerInfo(context, "peer3", Boolean.FALSE);

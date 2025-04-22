@@ -65,10 +65,10 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
-import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
+import org.opendaylight.controller.cluster.raft.persisted.VotingInfo;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.raft.api.TermInfo;
 
@@ -1047,7 +1047,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     @Test
     public void testFollowerSchedulesElectionIfNonVoting() {
         MockRaftActorContext context = createActorContext();
-        context.updatePeerIds(new ClusterConfig(new ServerInfo("follower", false)));
+        context.updatePeerIds(new ClusterConfig(new VotingInfo(Map.of("follower", false))));
         ((DefaultConfigParamsImpl) context.getConfigParams()).setHeartBeatInterval(Duration.ofMillis(100));
         ((DefaultConfigParamsImpl) context.getConfigParams()).setElectionTimeoutFactor(1);
 

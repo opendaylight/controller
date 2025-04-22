@@ -24,9 +24,9 @@ import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
-import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
+import org.opendaylight.controller.cluster.raft.persisted.VotingInfo;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 
 /**
@@ -302,9 +302,8 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         //
         // We also add another voting follower actor into the mix even though it shoildn't affect the
         // outcome.
-        final var persistedServerConfig = new ClusterConfig(
-                new ServerInfo(leaderId, true), new ServerInfo(follower1Id, false),
-                new ServerInfo(follower2Id, true), new ServerInfo("downPeer", false));
+        final var persistedServerConfig = new ClusterConfig(new VotingInfo(Map.of(
+                leaderId, true, follower1Id, false, follower2Id, true, "downPeer", false)));
         SimpleReplicatedLogEntry persistedServerConfigEntry = new SimpleReplicatedLogEntry(0, currentTerm,
                 persistedServerConfig);
 
@@ -410,8 +409,7 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
 
         // Set up a persisted ServerConfigurationPayload with the leader voting and the follower non-voting.
 
-        final var persistedServerConfig = new ClusterConfig(
-                new ServerInfo(leaderId, true), new ServerInfo(follower1Id, false));
+        final var persistedServerConfig = new ClusterConfig(new VotingInfo(Map.of(leaderId, true, follower1Id, false)));
         SimpleReplicatedLogEntry persistedServerConfigEntry = new SimpleReplicatedLogEntry(0, persistedTerm,
                 persistedServerConfig);
 
