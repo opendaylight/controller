@@ -277,6 +277,48 @@ public interface ReplicatedLog {
     void clear();
 
     /**
+     * Returns the actual index of the entry in replicated log for the given index or -1 if not found.
+     *
+     * @return the log entry index or -1 if not found
+     */
+    default long getLogEntryIndex(final long index) {
+        if (index == getSnapshotIndex()) {
+            return index;
+        }
+
+        final var meta = lookupMeta(index);
+        return meta != null ? meta.index() : -1;
+    }
+
+    /**
+     * Returns the actual term of the entry in the replicated log for the given index or -1 if not found.
+     *
+     * @return the log entry term or -1 if not found
+     */
+    default long getLogEntryTerm(final long index) {
+        if (index == getSnapshotIndex()) {
+            return getSnapshotTerm();
+        }
+
+        final var meta = lookupMeta(index);
+        return meta != null ? meta.term() : -1;
+    }
+
+    /**
+     * Returns the actual term of the entry in the replicated log for the given index or, if not present, returns the
+     * snapshot term if the given index is in the snapshot or -1 otherwise.
+     *
+     * @return the term or -1 otherwise
+     */
+    default long getLogEntryOrSnapshotTerm(final long index) {
+        return isInSnapshot(index) ? getSnapshotTerm() : getLogEntryTerm(index);
+    }
+
+    default boolean isLogEntryPresent(final long index) {
+        return isInSnapshot(index) || lookupMeta(index) != null;
+    }
+
+    /**
      * Clears the journal entries with startIndex (inclusive) and endIndex (exclusive).
      *
      * @param startIndex the start index (inclusive)

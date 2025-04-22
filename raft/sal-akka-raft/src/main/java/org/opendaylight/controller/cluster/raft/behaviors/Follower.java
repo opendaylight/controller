@@ -127,11 +127,6 @@ public class Follower extends RaftActorBehavior {
         lastLeaderMessageTimer.start();
     }
 
-    private boolean isLogEntryPresent(final long index) {
-        final var replLog = replicatedLog();
-        return replLog.isInSnapshot(index) || replLog.get(index) != null;
-    }
-
     private void updateInitialSyncStatus(final long currentLeaderCommit, final String newLeaderId) {
         initialSyncStatusTracker.update(newLeaderId, currentLeaderCommit, replicatedLog().getCommitIndex());
     }
@@ -257,12 +252,12 @@ public class Follower extends RaftActorBehavior {
             for (int i = 0; i < numLogEntries; i++, addEntriesFrom++) {
                 final var matchEntry = entries.get(i);
 
-                if (!isLogEntryPresent(matchEntry.index())) {
+                if (!replLog.isLogEntryPresent(matchEntry.index())) {
                     // newEntry not found in the log
                     break;
                 }
 
-                long existingEntryTerm = getLogEntryTerm(matchEntry.index());
+                long existingEntryTerm = replLog.getLogEntryTerm(matchEntry.index());
 
                 LOG.debug("{}: matchEntry {} is present: existingEntryTerm: {}", logName, matchEntry,
                         existingEntryTerm);
@@ -373,13 +368,13 @@ public class Follower extends RaftActorBehavior {
         }
 
         if (lastIndex > -1) {
-            if (isLogEntryPresent(appendEntries.getPrevLogIndex())) {
+            final var replLog = context.getReplicatedLog();
+            if (replLog.isLogEntryPresent(appendEntries.getPrevLogIndex())) {
                 final long leadersPrevLogTermInFollowersLogOrSnapshot =
-                        getLogEntryOrSnapshotTerm(appendEntries.getPrevLogIndex());
+                    replLog.getLogEntryOrSnapshotTerm(appendEntries.getPrevLogIndex());
                 if (leadersPrevLogTermInFollowersLogOrSnapshot != appendEntries.getPrevLogTerm()) {
                     // The follower's log is out of sync because the Leader's prevLogIndex entry does exist
                     // in the follower's log or snapshot but it has a different term.
-                    final var replLog = context.getReplicatedLog();
                     LOG.info("{}: The prevLogIndex {} was found in the log but the term {} is not equal to the append "
                         + "entries prevLogTerm {} - lastIndex: {}, snapshotIndex: {}, snapshotTerm: {}", logName,
                         appendEntries.getPrevLogIndex(), leadersPrevLogTermInFollowersLogOrSnapshot,
@@ -391,7 +386,6 @@ public class Follower extends RaftActorBehavior {
                 }
             } else if (appendEntries.getPrevLogIndex() != -1) {
                 // The follower's log is out of sync because the Leader's prevLogIndex entry was not found in it's log
-                final var replLog = context.getReplicatedLog();
                 LOG.info("{}: The log is not empty but the prevLogIndex {} was not found in it - lastIndex: {}, "
                         + "snapshotIndex: {}, snapshotTerm: {}", logName, appendEntries.getPrevLogIndex(), lastIndex,
                         replLog.getSnapshotIndex(), replLog.getSnapshotTerm());
@@ -403,10 +397,10 @@ public class Follower extends RaftActorBehavior {
 
         if (appendEntries.getPrevLogIndex() == -1 && appendEntries.getPrevLogTerm() == -1
                 && appendEntries.getReplicatedToAllIndex() != -1) {
-            if (!isLogEntryPresent(appendEntries.getReplicatedToAllIndex())) {
+            final var replLog = context.getReplicatedLog();
+            if (!replLog.isLogEntryPresent(appendEntries.getReplicatedToAllIndex())) {
                 // This append entry comes from a leader who has it's log aggressively trimmed and so does not have
                 // the previous entry in it's in-memory journal
-                final var replLog = context.getReplicatedLog();
                 LOG.info("{}: Cannot append entries because the replicatedToAllIndex {} does not appear to be in the "
                         + "in-memory journal - lastIndex: {}, snapshotIndex: {}, snapshotTerm: {}", logName,
                         appendEntries.getReplicatedToAllIndex(), lastIndex, replLog.getSnapshotIndex(),
@@ -417,8 +411,7 @@ public class Follower extends RaftActorBehavior {
             }
 
             final var entries = appendEntries.getEntries();
-            if (entries.size() > 0 && !isLogEntryPresent(entries.get(0).index() - 1)) {
-                final var replLog = context.getReplicatedLog();
+            if (entries.size() > 0 && !replLog.isLogEntryPresent(entries.get(0).index() - 1)) {
                 LOG.info("{}: Cannot append entries because the calculated previousIndex {} was not found in the "
                         + "in-memory journal - lastIndex: {}, snapshotIndex: {}, snapshotTerm: {}", logName,
                         entries.get(0).index() - 1, lastIndex, replLog.getSnapshotIndex(), replLog.getSnapshotTerm());

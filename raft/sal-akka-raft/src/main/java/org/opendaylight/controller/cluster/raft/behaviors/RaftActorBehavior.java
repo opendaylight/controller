@@ -312,47 +312,6 @@ public abstract class RaftActorBehavior implements AutoCloseable {
     }
 
     /**
-     * Returns the actual index of the entry in replicated log for the given index or -1 if not found.
-     *
-     * @return the log entry index or -1 if not found
-     */
-    final long getLogEntryIndex(final long index) {
-        final var replLog = replicatedLog();
-        if (index == replLog.getSnapshotIndex()) {
-            return index;
-        }
-
-        final var entry = replLog.get(index);
-        return entry != null ? entry.index() : -1;
-    }
-
-    /**
-     * Returns the actual term of the entry in the replicated log for the given index or -1 if not found.
-     *
-     * @return the log entry term or -1 if not found
-     */
-    final long getLogEntryTerm(final long index) {
-        final var replLog = replicatedLog();
-        if (index == replLog.getSnapshotIndex()) {
-            return replLog.getSnapshotTerm();
-        }
-
-        final var entry = replLog.get(index);
-        return entry != null ? entry.term() : -1;
-    }
-
-    /**
-     * Returns the actual term of the entry in the replicated log for the given index or, if not present, returns the
-     * snapshot term if the given index is in the snapshot or -1 otherwise.
-     *
-     * @return the term or -1 otherwise
-     */
-    final long getLogEntryOrSnapshotTerm(final long index) {
-        final var replLog = replicatedLog();
-        return replLog.isInSnapshot(index) ? replLog.getSnapshotTerm() : getLogEntryTerm(index);
-    }
-
-    /**
      * Applies the log entries up to the specified index that is known to be committed to the state machine.
      *
      * @param index the log index
