@@ -265,7 +265,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
 
             updated = true;
         } else if (appendEntriesReply.isSuccess()) {
-            long followersLastLogTermInLeadersLog = getLogEntryTerm(followerLastLogIndex);
+            long followersLastLogTermInLeadersLog = replLog.getLogEntryTerm(followerLastLogIndex);
             if (followerLastLogIndex >= 0 && followersLastLogTermInLeadersLog >= 0
                     && followersLastLogTermInLeadersLog != appendEntriesReply.getLogLastTerm()) {
                 // The follower's last entry is present in the leader's journal but the terms don't match so the
@@ -291,7 +291,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
                     + "snapshotTerm: {}, replicatedToAllIndex: {}", logName, appendEntriesReply,
                     replLog.getSnapshotIndex(), replLog.getSnapshotTerm(), getReplicatedToAllIndex());
 
-            long followersLastLogTermInLeadersLogOrSnapshot = getLogEntryOrSnapshotTerm(followerLastLogIndex);
+            long followersLastLogTermInLeadersLogOrSnapshot = replLog.getLogEntryOrSnapshotTerm(followerLastLogIndex);
             if (appendEntriesReply.isForceInstallSnapshot()) {
                 // Reset the followers match and next index. This is to signal that this follower has nothing
                 // in common with this Leader and so would require a snapshot to be installed
@@ -806,8 +806,8 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
             fileBackedStream = context.getFileBackedOutputStreamFactory().newSharedInstance();
 
             final var appendEntries = new AppendEntries(currentTerm(), memberId(),
-                    getLogEntryIndex(followerNextIndex - 1), getLogEntryTerm(followerNextIndex - 1), entries,
-                    replLog.getCommitIndex(), getReplicatedToAllIndex(), context.getPayloadVersion());
+                    replLog.getLogEntryIndex(followerNextIndex - 1), replLog.getLogEntryTerm(followerNextIndex - 1),
+                    entries, replLog.getCommitIndex(), getReplicatedToAllIndex(), context.getPayloadVersion());
 
             LOG.debug("{}: Serializing {} for slicing for follower {}", logName, appendEntries,
                     followerLogInfo.getId());
@@ -859,15 +859,16 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         //       need to send AppendEntries to prevent election.
         //     - if we're in the process of slicing an AppendEntries with a large log entry payload. In this case we
         //       need to send an empty AppendEntries to prevent election.
-        boolean isInstallingSnaphot = followerLogInformation.getInstallSnapshotState() != null;
-        long leaderCommitIndex = isInstallingSnaphot || followerLogInformation.isLogEntrySlicingInProgress()
-                || !followerLogInformation.isFollowerActive() ? -1 : replicatedLog().getCommitIndex();
+        final var isInstallingSnaphot = followerLogInformation.getInstallSnapshotState() != null;
+        final var replLog = replicatedLog();
+        final var leaderCommitIndex = isInstallingSnaphot || followerLogInformation.isLogEntrySlicingInProgress()
+                || !followerLogInformation.isFollowerActive() ? -1 : replLog.getCommitIndex();
 
         long followerNextIndex = followerLogInformation.getNextIndex();
         final var appendEntries = new AppendEntries(currentTerm(), memberId(),
-            getLogEntryIndex(followerNextIndex - 1), getLogEntryTerm(followerNextIndex - 1), entries, leaderCommitIndex,
-            super.getReplicatedToAllIndex(), context.getPayloadVersion(), followerLogInformation.getRaftVersion(),
-            followerLogInformation.needsLeaderAddress(memberId()));
+            replLog.getLogEntryIndex(followerNextIndex - 1), replLog.getLogEntryTerm(followerNextIndex - 1), entries,
+            leaderCommitIndex, super.getReplicatedToAllIndex(), context.getPayloadVersion(),
+            followerLogInformation.getRaftVersion(), followerLogInformation.needsLeaderAddress(memberId()));
 
         if (!entries.isEmpty() || LOG.isTraceEnabled()) {
             LOG.debug("{}: Sending AppendEntries to follower {}: {}", logName, followerLogInformation.getId(),
