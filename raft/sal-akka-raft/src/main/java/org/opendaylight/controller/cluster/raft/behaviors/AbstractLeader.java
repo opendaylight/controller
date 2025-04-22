@@ -47,7 +47,7 @@ import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.messages.UnInitializedFollowerSnapshotReply;
-import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
+import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.api.TermInfo;
@@ -999,10 +999,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
 
         final int chunkIndex = installSnapshotState.incrementChunkIndex();
         final int totalChunks = installSnapshotState.getTotalChunks();
-        ClusterConfig serverConfig = null;
-        if (chunkIndex == totalChunks) {
-            serverConfig = context.getPeerServerInfo(true);
-        }
+        final var votingConfig = chunkIndex == totalChunks ? context.getPeerServerInfo(true) : null;
 
         installSnapshotState.startChunkTimer();
         followerActor.tell(
@@ -1011,8 +1008,8 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
                 snapshot.lastIncluded().index(), snapshot.lastIncluded().term(),
                 // this chunk and its indexing info and previous hash code
                 data, chunkIndex, totalChunks, OptionalInt.of(installSnapshotState.getLastChunkHashCode()),
-                // server configuration, if present
-                serverConfig,
+                // voting configuration, if present
+                votingConfig,
                 // make sure the follower understands this message
                 followerLogInfo.getRaftVersion()),
             actor());

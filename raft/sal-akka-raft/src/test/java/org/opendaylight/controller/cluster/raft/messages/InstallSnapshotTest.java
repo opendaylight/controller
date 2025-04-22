@@ -15,7 +15,7 @@ import java.util.OptionalInt;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
-import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
+import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 
 /**
@@ -43,7 +43,7 @@ class InstallSnapshotTest {
             }
         }
 
-        var serverConfig = new ClusterConfig(new ServerInfo("leader", true), new ServerInfo("follower", false));
+        var serverConfig = new VotingConfig(new ServerInfo("leader", true), new ServerInfo("follower", false));
         assertInstallSnapshot(fullSize, new InstallSnapshot(3L, "leaderId", 11L, 2L, data, 5, 6, OptionalInt.of(54321),
             serverConfig, raftVersion));
 
@@ -68,6 +68,6 @@ class InstallSnapshotTest {
         assertArrayEquals(expected.getData(), actual.getData());
 
         assertEquals(expected.getLastChunkHashCode(), actual.getLastChunkHashCode());
-        assertEquals(expected.serverConfig(), actual.serverConfig());
+        assertEquals(expected.votingConfig(), actual.votingConfig());
     }
 }

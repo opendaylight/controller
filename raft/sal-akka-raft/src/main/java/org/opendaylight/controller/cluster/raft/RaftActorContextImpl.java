@@ -26,7 +26,7 @@ import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.cluster.Cluster;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
-import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
+import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
@@ -230,10 +230,10 @@ public class RaftActorContextImpl implements RaftActorContext {
     }
 
     @Override
-    public void updatePeerIds(final ClusterConfig serverConfig) {
+    public void updateVotingConfig(final VotingConfig votingConfig) {
         boolean newVotingMember = false;
         var currentPeers = new HashSet<>(getPeerIds());
-        for (var server : serverConfig.serverInfo()) {
+        for (var server : votingConfig.serverInfo()) {
             if (id.equals(server.peerId())) {
                 newVotingMember = server.isVoting();
             } else {
@@ -352,7 +352,7 @@ public class RaftActorContextImpl implements RaftActorContext {
     }
 
     @Override
-    public ClusterConfig getPeerServerInfo(final boolean includeSelf) {
+    public VotingConfig getPeerServerInfo(final boolean includeSelf) {
         if (!isDynamicServerConfigurationInUse()) {
             return null;
         }
@@ -366,7 +366,7 @@ public class RaftActorContextImpl implements RaftActorContext {
             newConfig.add(new ServerInfo(id, votingMember));
         }
 
-        return new ClusterConfig(newConfig.build());
+        return new VotingConfig(newConfig.build());
     }
 
     @Override

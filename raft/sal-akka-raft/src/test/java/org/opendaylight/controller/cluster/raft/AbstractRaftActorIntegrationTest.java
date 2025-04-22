@@ -40,7 +40,7 @@ import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
-import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
+import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.yangtools.concepts.Identifier;
@@ -143,7 +143,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
                 return;
             }
 
-            if (message instanceof ClusterConfig payload) {
+            if (message instanceof VotingConfig payload) {
                 submitCommand(new MockIdentifier("serverConfig"), payload);
                 return;
             }

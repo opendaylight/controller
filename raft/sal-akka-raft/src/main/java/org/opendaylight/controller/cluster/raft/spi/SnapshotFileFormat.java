@@ -16,7 +16,7 @@ import java.util.List;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
+import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.TermInfo;
@@ -33,11 +33,11 @@ public enum SnapshotFileFormat {
     SNAPSHOT_V1(".v1") {
         @Override
         public <T extends StateSnapshot> void createNew(final Path file, final Instant timestamp,
-                final EntryInfo lastIncluded, final ClusterConfig serverConfig,
+                final EntryInfo lastIncluded, final @Nullable VotingConfig votingConfig,
                 final CompressionType entryCompress, final List<ReplicatedLogEntry> unappliedEntries,
                 final CompressionType stateCompress, final StateSnapshot.Writer<T> stateWriter, final T state)
                     throws IOException {
-            SnapshotFileV1.createNew(file, timestamp, lastIncluded, serverConfig, entryCompress, unappliedEntries,
+            SnapshotFileV1.createNew(file, timestamp, lastIncluded, votingConfig, entryCompress, unappliedEntries,
                 stateCompress, stateWriter, state);
         }
 
@@ -93,7 +93,7 @@ public enum SnapshotFileFormat {
      * @param file the file to write
      * @param timestamp the timestamp
      * @param lastIncluded last journal entry included in the snapshot
-     * @param serverConfig the server configuration
+     * @param votingConfig the server configuration
      * @param entryCompress the compression to apply to unapplied entries
      * @param unappliedEntries the unapplied entries
      * @param stateCompress the compression to apply to user state
@@ -102,7 +102,7 @@ public enum SnapshotFileFormat {
      * @throws IOException if an I/O error occurs
      */
     public abstract <T extends StateSnapshot> void createNew(Path file, Instant timestamp, EntryInfo lastIncluded,
-        ClusterConfig serverConfig, CompressionType entryCompress, List<ReplicatedLogEntry> unappliedEntries,
+        @Nullable VotingConfig votingConfig, CompressionType entryCompress, List<ReplicatedLogEntry> unappliedEntries,
         CompressionType stateCompress, StateSnapshot.Writer<T> stateWriter, T state) throws IOException;
 
     /**

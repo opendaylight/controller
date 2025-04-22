@@ -33,7 +33,7 @@ import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply;
 import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
-import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
+import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.RaftRole;
@@ -343,8 +343,8 @@ public class Follower extends RaftActorBehavior {
 
             shouldCaptureSnapshot.compareAndSet(false, replLog.appendReceived(entry, callback));
 
-            if (entry.command() instanceof ClusterConfig serverConfiguration) {
-                context.updatePeerIds(serverConfiguration);
+            if (entry.command() instanceof VotingConfig serverConfiguration) {
+                context.updateVotingConfig(serverConfiguration);
             }
         }
 
@@ -678,7 +678,7 @@ public class Follower extends RaftActorBehavior {
 
         actor().tell(new ApplyLeaderSnapshot(leaderId, installSnapshot.getTerm(),
             EntryInfo.of(installSnapshot.getLastIncludedIndex(), installSnapshot.getLastIncludedTerm()),
-            createSource(snapshotBytes, tracker.compression()), installSnapshot.serverConfig(),
+            createSource(snapshotBytes, tracker.compression()), installSnapshot.votingConfig(),
             new ApplyLeaderSnapshot.Callback() {
                 @Override
                 public void onSuccess() {
