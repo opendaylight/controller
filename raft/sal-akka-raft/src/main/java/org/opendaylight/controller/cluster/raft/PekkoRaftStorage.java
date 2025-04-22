@@ -25,8 +25,8 @@ import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SnapshotProtocol;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
@@ -71,7 +71,7 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
             try {
                 format.createNew(tmpPath, timestamp,
                     new EntryInfo(snapshot.getLastAppliedIndex(), snapshot.getLastAppliedTerm()),
-                    snapshot.getServerConfiguration(), compression, snapshot.getUnAppliedEntries(), compression, null,
+                    snapshot.votingConfig(), compression, snapshot.getUnAppliedEntries(), compression, null,
                     snapshot.getState());
                 Files.move(tmpPath,  filePath, StandardCopyOption.ATOMIC_MOVE);
             } catch (IOException e) {
@@ -186,8 +186,8 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
     }
 
     @Override
-    public void persistConfig(final ClusterConfig config, final Consumer<ClusterConfig> callback) {
-        actor.persist(config, callback);
+    public void persistVotingConfig(final VotingConfig votingConfig, final Consumer<VotingConfig> callback) {
+        actor.persist(votingConfig, callback);
     }
 
     @Override
@@ -196,8 +196,8 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
     }
 
     @Override
-    public void startPersistConfig(final ClusterConfig config, final Consumer<ClusterConfig> callback) {
-        actor.persistAsync(config, callback);
+    public void startPersistVotingConfig(final VotingConfig votingConfig, final Consumer<VotingConfig> callback) {
+        actor.persistAsync(votingConfig, callback);
     }
 
     @Override

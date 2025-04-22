@@ -54,10 +54,10 @@ import org.opendaylight.controller.cluster.datastore.messages.CreateShard;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.raft.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.InMemorySnapshotStore;
-import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
+import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.AddReplicasForAllShardsInputBuilder;
@@ -758,7 +758,7 @@ class ClusterAdminRpcServiceTest {
     void testFlipMemberVotingStates() throws Exception {
         String name = "testFlipMemberVotingStates";
 
-        final var persistedServerConfig = new ClusterConfig(
+        final var persistedServerConfig = new VotingConfig(
             new ServerInfo("member-1", true), new ServerInfo("member-2", true), new ServerInfo("member-3", false));
 
         setupPersistedServerConfigPayload(persistedServerConfig, "member-1", name, "cars", "people");
@@ -848,7 +848,7 @@ class ClusterAdminRpcServiceTest {
 
         // Members 1, 2, and 3 are initially started up as non-voting. Members 4, 5, and 6 are initially
         // non-voting and simulated as down by not starting them up.
-        final var persistedServerConfig = new ClusterConfig(
+        final var persistedServerConfig = new VotingConfig(
                 new ServerInfo("member-1", false), new ServerInfo("member-2", false),
                 new ServerInfo("member-3", false), new ServerInfo("member-4", true),
                 new ServerInfo("member-5", true), new ServerInfo("member-6", true));
@@ -920,7 +920,7 @@ class ClusterAdminRpcServiceTest {
         String name = "testFlipMemberVotingStatesWithVotingMembersDown";
 
         // Members 4, 5, and 6 are initially non-voting and simulated as down by not starting them up.
-        final var persistedServerConfig = new ClusterConfig(
+        final var persistedServerConfig = new VotingConfig(
                 new ServerInfo("member-1", true), new ServerInfo("member-2", true),
                 new ServerInfo("member-3", true), new ServerInfo("member-4", false),
                 new ServerInfo("member-5", false), new ServerInfo("member-6", false));
@@ -976,13 +976,13 @@ class ClusterAdminRpcServiceTest {
         });
     }
 
-    private static void setupPersistedServerConfigPayload(final ClusterConfig serverConfig,
+    private static void setupPersistedServerConfigPayload(final VotingConfig votingConfig,
             final String member, final String datastoreTypeSuffix, final String... shards) {
         String[] datastoreTypes = { "config_", "oper_" };
         for (String type : datastoreTypes) {
             for (String shard : shards) {
-                final var newServerInfo = new ArrayList<ServerInfo>(serverConfig.serverInfo().size());
-                for (var info : serverConfig.serverInfo()) {
+                final var newServerInfo = new ArrayList<ServerInfo>(votingConfig.serverInfo().size());
+                for (var info : votingConfig.serverInfo()) {
                     newServerInfo.add(new ServerInfo(ShardIdentifier.create(shard, MemberName.forName(info.peerId()),
                             type + datastoreTypeSuffix).toString(), info.isVoting()));
                 }
@@ -991,7 +991,7 @@ class ClusterAdminRpcServiceTest {
                         type + datastoreTypeSuffix).toString();
                 InMemoryJournal.addEntry(shardID, 1, new UpdateElectionTerm(1, null));
                 InMemoryJournal.addEntry(shardID, 2,
-                    new SimpleReplicatedLogEntry(0, 1, new ClusterConfig(newServerInfo)));
+                    new SimpleReplicatedLogEntry(0, 1, new VotingConfig(newServerInfo)));
             }
         }
     }

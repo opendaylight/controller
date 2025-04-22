@@ -18,9 +18,9 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
-import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.EntryMeta;
@@ -46,7 +46,7 @@ public final class SnapshotManager {
             long term,
             EntryInfo lastEntry,
             SnapshotSource snapshot,
-            @Nullable ClusterConfig serverConfig,
+            @Nullable VotingConfig serverConfig,
             ApplyLeaderSnapshot.Callback callback) {
         public ApplyLeaderSnapshot {
             requireNonNull(leaderId);
@@ -519,9 +519,9 @@ public final class SnapshotManager {
                     //        This behavior means we report as if we voted for the leader.
                     context.setTermInfo(snapshot.termInfo());
 
-                    final var serverConfig = snapshot.getServerConfiguration();
+                    final var serverConfig = snapshot.votingConfig();
                     if (serverConfig != null) {
-                        context.updatePeerIds(serverConfig);
+                        context.updateVotingConfig(serverConfig);
                     }
 
                     final var state = snapshot.getState();

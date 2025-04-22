@@ -48,7 +48,7 @@ final class SS implements Externalizable {
         WritableObjects.writeLong(out, termInfo.term());
         out.writeObject(termInfo.votedFor());
 
-        out.writeObject(snapshot.getServerConfiguration());
+        out.writeObject(snapshot.votingConfig());
 
         final var unAppliedEntries = snapshot.getUnAppliedEntries();
         out.writeInt(unAppliedEntries.size());
@@ -71,7 +71,7 @@ final class SS implements Externalizable {
         long lastAppliedTerm = WritableObjects.readSecondLong(in, hdr);
         long electionTerm = WritableObjects.readLong(in);
         String electionVotedFor = (String) in.readObject();
-        ClusterConfig serverConfig = (ClusterConfig) in.readObject();
+        VotingConfig serverConfig = (VotingConfig) in.readObject();
 
         int size = in.readInt();
         var unAppliedEntries = ImmutableList.<ReplicatedLogEntry>builderWithExpectedSize(size);

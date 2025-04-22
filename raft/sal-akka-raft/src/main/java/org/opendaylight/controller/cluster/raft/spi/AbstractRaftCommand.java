@@ -8,15 +8,15 @@
 package org.opendaylight.controller.cluster.raft.spi;
 
 import org.opendaylight.controller.cluster.raft.messages.Payload;
-import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.NoopPayload;
 import org.opendaylight.controller.cluster.raft.persisted.ServerConfigurationPayload;
+import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 
 /**
  * Abstract base class for {@link RaftCommand} implementations.
  */
 public abstract sealed class AbstractRaftCommand extends Payload implements RaftCommand
-        permits ClusterConfig, NoopPayload, ServerConfigurationPayload {
+        permits VotingConfig, NoopPayload, ServerConfigurationPayload {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 }

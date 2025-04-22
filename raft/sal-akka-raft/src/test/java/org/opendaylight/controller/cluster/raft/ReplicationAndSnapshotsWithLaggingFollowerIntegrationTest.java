@@ -35,11 +35,11 @@ import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
-import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
+import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.raft.api.TermInfo;
 
 /**
@@ -364,11 +364,11 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
 
         // Send a server config change to test that the install snapshot includes the server config.
 
-        final var serverConfig = new ClusterConfig(
+        final var serverConfig = new VotingConfig(
                 new ServerInfo(leaderId, true),
                 new ServerInfo(follower1Id, false),
                 new ServerInfo(follower2Id, false));
-        leaderContext.updatePeerIds(serverConfig);
+        leaderContext.updateVotingConfig(serverConfig);
         ((AbstractLeader)leader).updateMinReplicaCount();
         leaderActor.tell(serverConfig, ActorRef.noSender());
 
@@ -614,7 +614,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
      * Resume the lagging follower 2 and verify it receives an install snapshot from the leader.
      */
     private void verifyInstallSnapshotToLaggingFollower(final long lastAppliedIndex,
-            final @Nullable ClusterConfig expServerConfig) {
+            final @Nullable VotingConfig expServerConfig) {
         testLog.info("verifyInstallSnapshotToLaggingFollower starting");
 
         MessageCollectorActor.clearMessages(leaderCollectorActor);
@@ -692,12 +692,12 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         if (expServerConfig != null) {
             Set<ServerInfo> expServerInfo = Set.copyOf(expServerConfig.serverInfo());
             assertEquals("Leader snapshot server config", expServerInfo,
-                Set.copyOf(persistedSnapshot.getServerConfiguration().serverInfo()));
+                Set.copyOf(persistedSnapshot.votingConfig().serverInfo()));
 
             assertEquals("Follower 2 snapshot server config", expServerInfo,
                 Set.copyOf(applySnapshot.serverConfig().serverInfo()));
 
-            ClusterConfig follower2ServerConfig = follower2Context.getPeerServerInfo(true);
+            VotingConfig follower2ServerConfig = follower2Context.getPeerServerInfo(true);
             assertNotNull("Follower 2 server config is null", follower2ServerConfig);
 
             assertEquals("Follower 2 server config", expServerInfo, Set.copyOf(follower2ServerConfig.serverInfo()));

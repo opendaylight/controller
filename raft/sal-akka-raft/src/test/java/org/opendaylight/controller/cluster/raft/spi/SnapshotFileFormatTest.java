@@ -28,10 +28,10 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.ByteState;
-import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.raft.spi.CompressionType;
@@ -49,11 +49,11 @@ class SnapshotFileFormatTest {
         —Theodore Roosevelt
         Speech at the Sorbonne, Paris, April 23, 1910""".getBytes(StandardCharsets.UTF_8));
     private static final Instant TIMESTAMP = Instant.ofEpochSecond(1743608039, 960467747);
-    private static final ClusterConfig SERVER_CONFIG = new ClusterConfig(List.of(
+    private static final VotingConfig SERVER_CONFIG = new VotingConfig(List.of(
         new ServerInfo("member-1", false), new ServerInfo("member-2", true)));
     private static final List<ReplicatedLogEntry> ENTRIES = List.of(
         new SimpleReplicatedLogEntry(0, 0, SERVER_CONFIG),
-        new SimpleReplicatedLogEntry(1, 0, new ClusterConfig(List.of(
+        new SimpleReplicatedLogEntry(1, 0, new VotingConfig(List.of(
             new ServerInfo("member-1", true), new ServerInfo("member-2", false)))));
 
     @TempDir

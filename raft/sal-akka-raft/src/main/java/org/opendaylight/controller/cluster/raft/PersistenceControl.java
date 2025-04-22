@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
+import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage;
 import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
@@ -95,9 +95,9 @@ final class PersistenceControl extends ForwardingDataPersistenceProvider {
 
     @Override
     public void persistEntry(final ReplicatedLogEntry entry, final Consumer<ReplicatedLogEntry> callback) {
-        if (!delegate.isRecoveryApplicable() && entry.command() instanceof ClusterConfig serverConfig) {
+        if (!delegate.isRecoveryApplicable() && entry.command() instanceof VotingConfig votingConfig) {
             requireNonNull(callback);
-            enabledStorage.persistConfig(serverConfig, unused -> callback.accept(entry));
+            enabledStorage.persistVotingConfig(votingConfig, unused -> callback.accept(entry));
         } else {
             delegate.persistEntry(entry, callback);
         }
@@ -105,8 +105,8 @@ final class PersistenceControl extends ForwardingDataPersistenceProvider {
 
     @Override
     public void startPersistEntry(final ReplicatedLogEntry entry, final Consumer<ReplicatedLogEntry> callback) {
-        if (!delegate.isRecoveryApplicable() && entry.command() instanceof ClusterConfig serverConfig) {
-            enabledStorage.startPersistConfig(serverConfig, unused -> callback.accept(entry));
+        if (!delegate.isRecoveryApplicable() && entry.command() instanceof VotingConfig votingConfig) {
+            enabledStorage.startPersistVotingConfig(votingConfig, unused -> callback.accept(entry));
         } else {
             delegate.startPersistEntry(entry, callback);
         }

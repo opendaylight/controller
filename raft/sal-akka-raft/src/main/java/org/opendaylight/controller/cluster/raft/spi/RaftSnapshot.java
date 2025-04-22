@@ -7,21 +7,19 @@
  */
 package org.opendaylight.controller.cluster.raft.spi;
 
-import static java.util.Objects.requireNonNull;
-
-import com.google.common.annotations.Beta;
 import java.util.List;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
+import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 
 /**
  * Atomic information retained in a snapshot file. Unapplied entries are those that have been known to have been
  * stored in the journal -- which allows for transitioning from non-persistent to persistent state.
  */
-@Beta
-public record RaftSnapshot(ClusterConfig clusterConfig, List<ReplicatedLogEntry> unappliedEntries) {
+@NonNullByDefault
+public record RaftSnapshot(@Nullable VotingConfig votingConfig, List<ReplicatedLogEntry> unappliedEntries) {
     public RaftSnapshot {
-        requireNonNull(clusterConfig);
         unappliedEntries = List.copyOf(unappliedEntries);
     }
 }

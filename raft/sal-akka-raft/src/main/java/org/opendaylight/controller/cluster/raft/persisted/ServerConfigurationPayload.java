@@ -35,7 +35,7 @@ public abstract non-sealed class ServerConfigurationPayload extends AbstractRaft
             // For Externalizable
         }
 
-        Proxy(final ClusterConfig payload) {
+        Proxy(final VotingConfig payload) {
             serverInfo = payload.serverInfo();
         }
 
@@ -63,7 +63,7 @@ public abstract non-sealed class ServerConfigurationPayload extends AbstractRaft
 
         @java.io.Serial
         private Object readResolve() {
-            return new ClusterConfig(serverInfo);
+            return new VotingConfig(serverInfo);
         }
     }
 

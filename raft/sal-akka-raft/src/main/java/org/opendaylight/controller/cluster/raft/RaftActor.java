@@ -127,7 +127,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     private RaftActorRecovery raftRecovery;
     private RaftActorSnapshotMessageSupport snapshotSupport;
-    private RaftActorServerConfigurationSupport serverConfigurationSupport;
+    private RaftActorVotingConfigSupport votingConfigSupport;
     private boolean shuttingDown;
 
     protected RaftActor(final @NonNull Path stateDir, final @NonNull String memberId,
@@ -171,7 +171,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         persistenceControl.start();
         context.getSnapshotManager().setSnapshotCohort(getRaftActorSnapshotCohort());
         snapshotSupport = newRaftActorSnapshotMessageSupport();
-        serverConfigurationSupport = new RaftActorServerConfigurationSupport(this);
+        votingConfigSupport = new RaftActorVotingConfigSupport(this);
     }
 
     @Override
@@ -255,7 +255,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     @Override
     // FIXME: make this method final once our unit tests do not need to override it
     protected void handleCommand(final Object message) {
-        if (serverConfigurationSupport.handleMessage(message, getSender())) {
+        if (votingConfigSupport.handleMessage(message, getSender())) {
             return;
         }
         if (snapshotSupport.handleSnapshotMessage(message)) {
@@ -577,7 +577,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 leadershipTransferInProgress.onNewLeader(leaderId);
             }
 
-            serverConfigurationSupport.onNewLeader(leaderId);
+            votingConfigSupport.onNewLeader(leaderId);
         }
 
         if (roleChangeNotifier != null) {

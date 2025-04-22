@@ -12,6 +12,7 @@ import static java.util.Objects.requireNonNull;
 import java.io.Serializable;
 import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 import org.opendaylight.raft.api.EntryInfo;
@@ -43,11 +44,11 @@ public final class Snapshot implements Serializable {
     private final long lastAppliedIndex;
     private final long lastAppliedTerm;
     private final @NonNull TermInfo termInfo;
-    private final ClusterConfig serverConfig;
+    private final @Nullable VotingConfig votingConfig;
 
     private Snapshot(final State state, final List<ReplicatedLogEntry> unAppliedEntries, final long lastIndex,
             final long lastTerm, final long lastAppliedIndex, final long lastAppliedTerm, final TermInfo termInfo,
-            final ClusterConfig serverConfig) {
+            final VotingConfig votingConfig) {
         this.state = requireNonNull(state);
         this.unAppliedEntries = requireNonNull(unAppliedEntries);
         this.lastIndex = lastIndex;
@@ -55,18 +56,18 @@ public final class Snapshot implements Serializable {
         this.lastAppliedIndex = lastAppliedIndex;
         this.lastAppliedTerm = lastAppliedTerm;
         this.termInfo = requireNonNull(termInfo);
-        this.serverConfig = serverConfig;
+        this.votingConfig = votingConfig;
     }
 
     public static @NonNull Snapshot create(final State state, final List<ReplicatedLogEntry> entries,
             final long lastIndex, final long lastTerm, final long lastAppliedIndex, final long lastAppliedTerm,
-            final TermInfo termInfo, final ClusterConfig serverConfig) {
+            final TermInfo termInfo, final VotingConfig serverConfig) {
         return new Snapshot(state, entries, lastIndex, lastTerm, lastAppliedIndex, lastAppliedTerm, termInfo,
             serverConfig);
     }
 
     public static @NonNull Snapshot ofTermLeader(final State state, final EntryMeta lastIncluded,
-            final TermInfo termInfo, final ClusterConfig serverConfig) {
+            final TermInfo termInfo, final VotingConfig serverConfig) {
         return new Snapshot(state, List.of(), lastIncluded.index(), lastIncluded.term(), lastIncluded.index(),
             lastIncluded.term(), termInfo, serverConfig);
     }
@@ -107,8 +108,8 @@ public final class Snapshot implements Serializable {
         return termInfo;
     }
 
-    public ClusterConfig getServerConfiguration() {
-        return serverConfig;
+    public @Nullable VotingConfig votingConfig() {
+        return votingConfig;
     }
 
     @Override
@@ -116,7 +117,7 @@ public final class Snapshot implements Serializable {
         return "Snapshot [lastIndex=" + lastIndex + ", lastTerm=" + lastTerm + ", lastAppliedIndex=" + lastAppliedIndex
                 + ", lastAppliedTerm=" + lastAppliedTerm + ", unAppliedEntries size=" + unAppliedEntries.size()
                 + ", state=" + state + ", electionTerm=" + termInfo.term() + ", electionVotedFor="
-                + termInfo.votedFor() + ", ServerConfigPayload="  + serverConfig + "]";
+                + termInfo.votedFor() + ", ServerConfigPayload=" + votingConfig + "]";
     }
 
     @java.io.Serial

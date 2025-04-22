@@ -20,12 +20,12 @@ import org.apache.pekko.persistence.SnapshotOffer;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
-import org.opendaylight.controller.cluster.raft.persisted.ClusterConfig;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
 import org.opendaylight.controller.cluster.raft.persisted.MigratedSerializable;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
+import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
@@ -73,7 +73,7 @@ final class RaftActorRecovery {
                 loaded.readSnapshot(context.getSnapshotManager().stateSupport().reader()), unapplied,
                 unapplied.isEmpty() ? lastIncluded.index() : unapplied.getLast().index(),
                 unapplied.isEmpty() ? lastIncluded.term() : unapplied.getLast().term(),
-                lastIncluded.index(), lastIncluded.term(), origTermInfo, raftSnapshot.clusterConfig()));
+                lastIncluded.index(), lastIncluded.term(), origTermInfo, raftSnapshot.votingConfig()));
         }
         origSnapshot = loaded;
     }
@@ -102,7 +102,7 @@ final class RaftActorRecovery {
             case ReplicatedLogEntry msg -> onRecoveredJournalLogEntry(msg);
             case ApplyJournalEntries msg -> onRecoveredApplyLogEntries(msg.getToIndex());
             case DeleteEntries msg -> onDeleteEntries(msg);
-            case ClusterConfig msg -> context.updatePeerIds(msg);
+            case VotingConfig msg -> context.updateVotingConfig(msg);
             case UpdateElectionTerm(var termInfo) -> context.setTermInfo(termInfo);
             case RecoveryCompleted msg -> {
                 onRecoveryCompletedMessage(actor);
@@ -178,7 +178,7 @@ final class RaftActorRecovery {
             // entries - we don't want to preserve these, only the server config and election term info.
 
             snapshot = Snapshot.create(EmptyState.INSTANCE, List.of(), -1, -1, -1, -1,
-                snapshot.termInfo(), snapshot.getServerConfiguration());
+                snapshot.termInfo(), snapshot.votingConfig());
         }
 
         // Create a replicated log with the snapshot information
@@ -199,8 +199,8 @@ final class RaftActorRecovery {
             cohort.applyRecoveredSnapshot(snapshotState);
         }
 
-        if (snapshot.getServerConfiguration() != null) {
-            context.updatePeerIds(snapshot.getServerConfiguration());
+        if (snapshot.votingConfig() != null) {
+            context.updateVotingConfig(snapshot.votingConfig());
         }
 
         timer.stop();
@@ -219,13 +219,13 @@ final class RaftActorRecovery {
             hasMigratedDataRecovered = true;
         }
 
-        if (command instanceof ClusterConfig clusterConfig) {
-            context.updatePeerIds(clusterConfig);
+        if (command instanceof VotingConfig clusterConfig) {
+            context.updateVotingConfig(clusterConfig);
         }
 
         if (recoveryApplicable) {
             replicatedLog().append(logEntry);
-        } else if (!(command instanceof ClusterConfig)) {
+        } else if (!(command instanceof VotingConfig)) {
             dataRecoveredWithPersistenceDisabled = true;
         }
     }
