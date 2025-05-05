@@ -31,7 +31,7 @@ final class SegmentedEntryWriter implements EntryWriter {
     private final SegmentedRaftJournal journal;
 
     private Segment currentSegment;
-    private JournalSegmentWriter currentWriter;
+    private SegmentWriter currentWriter;
 
     SegmentedEntryWriter(final SegmentedRaftJournal journal, final Segment currentSegment) {
         this.journal = requireNonNull(journal);

@@ -27,8 +27,8 @@ import org.opendaylight.controller.raft.journal.ToByteBufMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class JournalSegmentWriter {
-    private static final Logger LOG = LoggerFactory.getLogger(JournalSegmentWriter.class);
+final class SegmentWriter {
+    private static final Logger LOG = LoggerFactory.getLogger(SegmentWriter.class);
 
     private final FileWriter fileWriter;
     final @NonNull Segment segment;
@@ -36,7 +36,7 @@ final class JournalSegmentWriter {
 
     private int currentPosition;
 
-    JournalSegmentWriter(final FileWriter fileWriter, final Segment segment, final JournalIndex journalIndex,
+    SegmentWriter(final FileWriter fileWriter, final Segment segment, final JournalIndex journalIndex,
             final int currentPosition) {
         this.fileWriter = requireNonNull(fileWriter);
         this.segment = requireNonNull(segment);

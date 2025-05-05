@@ -30,7 +30,7 @@ sealed class SegmentedEntryReader implements EntryReader permits SegmentedCommit
     final @NonNull SegmentedRaftJournal journal;
 
     private Segment currentSegment;
-    private JournalSegmentReader currentReader;
+    private SegmentReader currentReader;
     private long nextIndex;
 
     SegmentedEntryReader(final SegmentedRaftJournal journal, final Segment segment) {

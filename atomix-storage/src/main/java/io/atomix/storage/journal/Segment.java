@@ -51,7 +51,7 @@ final class Segment {
      * Journal segment is active, i.e. there is a associated with it.
      */
     @NonNullByDefault
-    private record Active(FileAccess access, FileWriter fileWriter, JournalSegmentWriter writer) implements State {
+    private record Active(FileAccess access, FileWriter fileWriter, SegmentWriter writer) implements State {
         Active {
             requireNonNull(access);
             requireNonNull(fileWriter);
@@ -75,13 +75,13 @@ final class Segment {
             final var access = segment.file.newAccess(segment.storageLevel, segment.maxEntrySize);
             final var fileWriter = access.newFileWriter();
             return new Active(access, fileWriter,
-                new JournalSegmentWriter(fileWriter, segment, segment.journalIndex, currentPosition));
+                new SegmentWriter(fileWriter, segment, segment.journalIndex, currentPosition));
         }
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(Segment.class);
 
-    private final Set<JournalSegmentReader> readers = ConcurrentHashMap.newKeySet();
+    private final Set<SegmentReader> readers = ConcurrentHashMap.newKeySet();
     private final AtomicInteger references = new AtomicInteger();
     private final @NonNull SegmentFile file;
     private final @NonNull StorageLevel storageLevel;
@@ -183,7 +183,7 @@ final class Segment {
      * @return The segment writer
      * @throws IllegalStateException if this writer is closed
      */
-    JournalSegmentWriter acquireWriter() {
+    SegmentWriter acquireWriter() {
         checkOpen();
         return acquire().writer();
     }
@@ -201,10 +201,10 @@ final class Segment {
      * @return A new segment reader
      * @throws IllegalStateException if this writer is closed
      */
-    JournalSegmentReader createReader() {
+    SegmentReader createReader() {
         checkOpen();
 
-        final var reader = new JournalSegmentReader(this, acquire().access().newFileReader(), maxEntrySize);
+        final var reader = new SegmentReader(this, acquire().access().newFileReader(), maxEntrySize);
         reader.setPosition(JournalSegmentDescriptor.BYTES);
         readers.add(reader);
         return reader;
@@ -215,7 +215,7 @@ final class Segment {
      *
      * @param reader the closed segment reader
      */
-    void closeReader(final JournalSegmentReader reader) {
+    void closeReader(final SegmentReader reader) {
         if (readers.remove(reader)) {
             release();
         }
@@ -249,7 +249,7 @@ final class Segment {
 
         LOG.debug("Closing segment: {}", this);
         open = false;
-        readers.forEach(JournalSegmentReader::close);
+        readers.forEach(SegmentReader::close);
         if (references.get() == 0) {
             finishClose();
         }
@@ -311,7 +311,7 @@ final class Segment {
             position = JournalSegmentDescriptor.BYTES;
         }
 
-        final var reader = new JournalSegmentReader(segment, fileReader, maxEntrySize);
+        final var reader = new SegmentReader(segment, fileReader, maxEntrySize);
         reader.setPosition(position);
 
         while (nextIndex <= maxNextIndex) {

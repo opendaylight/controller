@@ -23,8 +23,8 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class JournalSegmentReader {
-    private static final Logger LOG = LoggerFactory.getLogger(JournalSegmentReader.class);
+final class SegmentReader {
+    private static final Logger LOG = LoggerFactory.getLogger(SegmentReader.class);
 
     private final Segment segment;
     private final int maxSegmentSize;
@@ -33,7 +33,7 @@ final class JournalSegmentReader {
     private FileReader fileReader;
     private int position;
 
-    JournalSegmentReader(final Segment segment, final FileReader fileReader, final int maxEntrySize) {
+    SegmentReader(final Segment segment, final FileReader fileReader, final int maxEntrySize) {
         this.segment = requireNonNull(segment);
         this.fileReader = requireNonNull(fileReader);
         maxSegmentSize = segment.file().maxSize();
