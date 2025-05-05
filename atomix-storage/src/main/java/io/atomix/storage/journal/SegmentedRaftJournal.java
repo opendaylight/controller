@@ -270,7 +270,7 @@ public final class SegmentedRaftJournal implements RaftJournal {
             .withMaxEntries(maxEntriesPerSegment)
             .withUpdated(System.currentTimeMillis())
             .build();
-        final var file = JournalSegmentFile.createNew(name, directory, allocator, descriptor);
+        final var file = SegmentFile.createNew(name, directory, allocator, descriptor);
         final var segment = new Segment(file, storageLevel, maxEntrySize, indexDensity);
         LOG.debug("Created segment: {}", segment);
         return segment;
@@ -313,10 +313,10 @@ public final class SegmentedRaftJournal implements RaftJournal {
 
             // If the file looks like a segment file, attempt to load the segment.
             final var filePath = file.toPath();
-            if (JournalSegmentFile.isSegmentFile(name, filePath)) {
-                final JournalSegmentFile segmentFile;
+            if (SegmentFile.isSegmentFile(name, filePath)) {
+                final SegmentFile segmentFile;
                 try {
-                    segmentFile = JournalSegmentFile.openExisting(filePath, allocator);
+                    segmentFile = SegmentFile.openExisting(filePath, allocator);
                 } catch (IOException e) {
                     segmentsMap.values().forEach(Segment::close);
                     throw e;

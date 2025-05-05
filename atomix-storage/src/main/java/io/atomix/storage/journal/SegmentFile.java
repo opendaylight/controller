@@ -27,11 +27,11 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * Segment file utility.
+ * An open file backing a particular {@link Segment}.
  *
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
-final class JournalSegmentFile {
+final class SegmentFile {
     private static final char PART_SEPARATOR = '-';
     private static final char EXTENSION_SEPARATOR = '.';
     private static final String EXTENSION = "log";
@@ -41,16 +41,16 @@ final class JournalSegmentFile {
     private final @NonNull RandomAccessFile file;
     private final @NonNull Path path;
 
-    private JournalSegmentFile(final Path path, final ByteBufAllocator allocator,
-            final JournalSegmentDescriptor descriptor, final RandomAccessFile file) {
+    private SegmentFile(final Path path, final ByteBufAllocator allocator, final JournalSegmentDescriptor descriptor,
+            final RandomAccessFile file) {
         this.path = requireNonNull(path);
         this.allocator = requireNonNull(allocator);
         this.descriptor = requireNonNull(descriptor);
         this.file = requireNonNull(file);
     }
 
-    static @NonNull JournalSegmentFile createNew(final String name, final Path directory,
-            final ByteBufAllocator allocator, final JournalSegmentDescriptor descriptor) throws IOException {
+    static @NonNull SegmentFile createNew(final String name, final Path directory, final ByteBufAllocator allocator,
+            final JournalSegmentDescriptor descriptor) throws IOException {
         final var file = createSegmentFile(name, directory, descriptor.id());
         final var raf = new RandomAccessFile(file.toFile(), "rw");
         try {
@@ -60,11 +60,10 @@ final class JournalSegmentFile {
             raf.close();
             throw e;
         }
-        return new JournalSegmentFile(file, allocator, descriptor, raf);
+        return new SegmentFile(file, allocator, descriptor, raf);
     }
 
-    static @NonNull JournalSegmentFile openExisting(final Path path, final ByteBufAllocator allocator)
-            throws IOException {
+    static @NonNull SegmentFile openExisting(final Path path, final ByteBufAllocator allocator) throws IOException {
         final var raf = new RandomAccessFile(path.toFile(), "rw");
         final JournalSegmentDescriptor descriptor;
         try {
@@ -74,7 +73,7 @@ final class JournalSegmentFile {
             raf.close();
             throw e;
         }
-        return new JournalSegmentFile(path, allocator, descriptor, raf);
+        return new SegmentFile(path, allocator, descriptor, raf);
     }
 
     /**
@@ -164,7 +163,7 @@ final class JournalSegmentFile {
      *
      * @throws NullPointerException if {@code file} is null
      */
-    public static boolean isSegmentFile(final String name, final Path file) {
+    static boolean isSegmentFile(final String name, final Path file) {
         return isSegmentFile(name, file.getFileName().toString());
     }
 
@@ -175,7 +174,7 @@ final class JournalSegmentFile {
      * @param fileName the name of the file to check
      * @throws NullPointerException if {@code file} is null
      */
-    public static boolean isSegmentFile(final String journalName, final String fileName) {
+    static boolean isSegmentFile(final String journalName, final String fileName) {
         requireNonNull(journalName, "journalName cannot be null");
         requireNonNull(fileName, "fileName cannot be null");
 

@@ -23,7 +23,7 @@ import io.netty.buffer.ByteBuf;
 final class MappedFileReader extends FileReader {
     private final ByteBuf buffer;
 
-    MappedFileReader(final JournalSegmentFile file, final ByteBuf buffer) {
+    MappedFileReader(final SegmentFile file, final ByteBuf buffer) {
         super(file);
         this.buffer = buffer.asReadOnly();
     }

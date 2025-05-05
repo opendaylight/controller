@@ -29,8 +29,7 @@ final class MappedFileWriter extends FileWriter {
     private final ByteBuf buffer;
     private final Flushable flush;
 
-    MappedFileWriter(final JournalSegmentFile file, final int maxEntrySize, final ByteBuf buffer,
-            final Flushable flush) {
+    MappedFileWriter(final SegmentFile file, final int maxEntrySize, final ByteBuf buffer, final Flushable flush) {
         super(file, maxEntrySize);
         this.buffer = requireNonNull(buffer);
         this.flush = requireNonNull(flush);

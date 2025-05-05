@@ -24,10 +24,10 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 abstract sealed class FileAccess implements AutoCloseable permits DiskFileAccess, MappedFileAccess {
-    final JournalSegmentFile file;
+    final SegmentFile file;
     final int maxEntrySize;
 
-    FileAccess(final JournalSegmentFile file, final int maxEntrySize) {
+    FileAccess(final SegmentFile file, final int maxEntrySize) {
         this.file = requireNonNull(file);
         this.maxEntrySize = maxEntrySize;
     }

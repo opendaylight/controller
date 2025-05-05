@@ -21,20 +21,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 
-/**
- * Journal segment file test.
- */
-class JournalSegmentFileTest {
+class SegmentFileTest {
     @Test
     void testIsSegmentFile() {
-        assertTrue(JournalSegmentFile.isSegmentFile("foo", "foo-1.log"));
-        assertFalse(JournalSegmentFile.isSegmentFile("foo", "bar-1.log"));
-        assertTrue(JournalSegmentFile.isSegmentFile("foo", "foo-1-1.log"));
+        assertTrue(SegmentFile.isSegmentFile("foo", "foo-1.log"));
+        assertFalse(SegmentFile.isSegmentFile("foo", "bar-1.log"));
+        assertTrue(SegmentFile.isSegmentFile("foo", "foo-1-1.log"));
     }
 
     @Test
     void testCreateSegmentFile() {
-        final var file = JournalSegmentFile.createSegmentFile("foo", Path.of(System.getProperty("user.dir")), 1);
-        assertTrue(JournalSegmentFile.isSegmentFile("foo", file));
+        final var file = SegmentFile.createSegmentFile("foo", Path.of(System.getProperty("user.dir")), 1);
+        assertTrue(SegmentFile.isSegmentFile("foo", file));
     }
 }

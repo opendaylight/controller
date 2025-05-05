@@ -34,7 +34,7 @@ final class DiskFileWriter extends FileWriter {
     private final FileChannel channel;
     private final ByteBuf buffer;
 
-    DiskFileWriter(final JournalSegmentFile file, final int maxEntrySize, final ByteBuf buffer) {
+    DiskFileWriter(final SegmentFile file, final int maxEntrySize, final ByteBuf buffer) {
         super(file, maxEntrySize);
         this.buffer = requireNonNull(buffer);
         channel = file.channel();

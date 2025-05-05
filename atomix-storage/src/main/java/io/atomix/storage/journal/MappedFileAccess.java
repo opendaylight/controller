@@ -27,14 +27,13 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 final class MappedFileAccess extends FileAccess {
     private MappedByteBuf mappedBuf;
 
-    private MappedFileAccess(final @NonNull JournalSegmentFile file, final int maxEntrySize,
-            final MappedByteBuf mappedBuf) {
+    private MappedFileAccess(final @NonNull SegmentFile file, final int maxEntrySize, final MappedByteBuf mappedBuf) {
         super(file, maxEntrySize);
         this.mappedBuf = requireNonNull(mappedBuf);
     }
 
     @NonNullByDefault
-    static MappedFileAccess of(final JournalSegmentFile file, final int maxEntrySize) throws IOException {
+    static MappedFileAccess of(final SegmentFile file, final int maxEntrySize) throws IOException {
         return new MappedFileAccess(file, maxEntrySize, MappedByteBuf.of(file));
     }
 

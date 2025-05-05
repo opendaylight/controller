@@ -83,7 +83,7 @@ final class Segment {
 
     private final Set<JournalSegmentReader> readers = ConcurrentHashMap.newKeySet();
     private final AtomicInteger references = new AtomicInteger();
-    private final @NonNull JournalSegmentFile file;
+    private final @NonNull SegmentFile file;
     private final @NonNull StorageLevel storageLevel;
     private final @NonNull JournalIndex journalIndex;
     private final int maxEntrySize;
@@ -91,8 +91,8 @@ final class Segment {
     private State state;
     private boolean open = true;
 
-    Segment(final JournalSegmentFile file, final StorageLevel storageLevel, final int maxEntrySize,
-            final double indexDensity) throws IOException {
+    Segment(final SegmentFile file, final StorageLevel storageLevel, final int maxEntrySize, final double indexDensity)
+            throws IOException {
         this.file = requireNonNull(file);
         this.storageLevel = requireNonNull(storageLevel);
         this.maxEntrySize = maxEntrySize;
@@ -133,7 +133,7 @@ final class Segment {
      *
      * @return The segment file.
      */
-    JournalSegmentFile file() {
+    SegmentFile file() {
         return file;
     }
 

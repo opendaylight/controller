@@ -22,12 +22,12 @@ import io.netty.buffer.ByteBuf;
 import org.eclipse.jdt.annotation.NonNull;
 
 /**
- * An abstraction over how to read a {@link JournalSegmentFile}.
+ * An abstraction over how to read a {@link SegmentFile}.
  */
 abstract sealed class FileReader permits DiskFileReader, MappedFileReader {
-    private final @NonNull JournalSegmentFile file;
+    private final @NonNull SegmentFile file;
 
-    FileReader(final JournalSegmentFile file) {
+    FileReader(final SegmentFile file) {
         this.file = requireNonNull(file);
     }
 

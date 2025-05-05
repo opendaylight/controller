@@ -28,7 +28,7 @@ final class DiskFileAccess extends FileAccess {
      */
     private static final int MIN_IO_SIZE = 8192;
 
-    DiskFileAccess(final JournalSegmentFile file, final int maxEntrySize) {
+    DiskFileAccess(final SegmentFile file, final int maxEntrySize) {
         super(file, maxEntrySize);
     }
 
@@ -47,7 +47,7 @@ final class DiskFileAccess extends FileAccess {
         // No-op
     }
 
-    private static ByteBuf allocateBuffer(final JournalSegmentFile file, final int maxEntrySize) {
+    private static ByteBuf allocateBuffer(final SegmentFile file, final int maxEntrySize) {
         final var bufferSize = chooseBufferSize(maxEntrySize, file.maxSize());
         return file.allocator().heapBuffer(bufferSize, bufferSize);
     }

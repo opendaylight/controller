@@ -22,18 +22,18 @@ import io.netty.buffer.ByteBuf;
 import java.io.IOException;
 
 /**
- * An abstraction over how to write a {@link JournalSegmentFile}.
+ * An abstraction over how to write a {@link SegmentFile}.
  */
 abstract sealed class FileWriter permits DiskFileWriter, MappedFileWriter {
-    private final JournalSegmentFile file;
+    private final SegmentFile file;
     private final int maxEntrySize;
 
-    FileWriter(final JournalSegmentFile file, final int maxEntrySize) {
+    FileWriter(final SegmentFile file, final int maxEntrySize) {
         this.file = requireNonNull(file);
         this.maxEntrySize = maxEntrySize;
     }
 
-    final JournalSegmentFile file() {
+    final SegmentFile file() {
         return file;
     }
 

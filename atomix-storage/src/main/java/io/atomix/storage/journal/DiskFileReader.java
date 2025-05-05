@@ -35,7 +35,7 @@ final class DiskFileReader extends FileReader {
     private int bufferPosition;
 
     // Note: take ownership of the buffer
-    DiskFileReader(final JournalSegmentFile file, final ByteBuf buffer) {
+    DiskFileReader(final SegmentFile file, final ByteBuf buffer) {
         super(file);
         this.buffer = requireNonNull(buffer);
         channel = file.channel();
