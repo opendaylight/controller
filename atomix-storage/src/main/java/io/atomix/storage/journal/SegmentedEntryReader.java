@@ -24,16 +24,16 @@ import org.opendaylight.controller.raft.journal.EntryReader;
 import org.opendaylight.controller.raft.journal.FromByteBufMapper;
 
 /**
- * A {@link EntryReader} implementation.
+ * An {@link EntryReader} implementation for {@link SegmentedRaftJournal}.
  */
-sealed class SegmentedByteBufReader implements EntryReader permits SegmentedCommitsByteBufReader {
-    final @NonNull SegmentedByteBufJournal journal;
+sealed class SegmentedEntryReader implements EntryReader permits SegmentedCommitsEntryReader {
+    final @NonNull SegmentedRaftJournal journal;
 
     private JournalSegment currentSegment;
     private JournalSegmentReader currentReader;
     private long nextIndex;
 
-    SegmentedByteBufReader(final SegmentedByteBufJournal journal, final JournalSegment segment) {
+    SegmentedEntryReader(final SegmentedRaftJournal journal, final JournalSegment segment) {
         this.journal = requireNonNull(journal);
         currentSegment = requireNonNull(segment);
         currentReader = segment.createReader();
@@ -113,7 +113,7 @@ sealed class SegmentedByteBufReader implements EntryReader permits SegmentedComm
      * check it for invariants. If non-null is returned, {@code nextIndex} has already been set to {@code index + 1}.
      *
      * <p>This method is shared between 'all entries' and 'committed entries only' variants. The distinction is made by
-     * an additional check in {@link SegmentedCommitsByteBufReader#tryAdvance(long)}.
+     * an additional check in {@link SegmentedCommitsEntryReader#tryAdvance(long)}.
      *
      * @param index next index
      * @return Entry bytes, or {@code null}

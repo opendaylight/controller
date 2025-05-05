@@ -12,8 +12,8 @@ import com.google.common.base.VerifyException;
 import io.atomix.storage.journal.JournalReader;
 import io.atomix.storage.journal.JournalSerdes;
 import io.atomix.storage.journal.JournalWriter;
-import io.atomix.storage.journal.SegmentedByteBufJournal;
 import io.atomix.storage.journal.SegmentedJournal;
+import io.atomix.storage.journal.SegmentedRaftJournal;
 import io.atomix.storage.journal.StorageLevel;
 import java.io.IOException;
 import java.io.Serializable;
@@ -49,7 +49,7 @@ final class DataJournalV0 extends DataJournal {
             .register(new DataJournalEntrySerdes(system), FromPersistence.class, ToPersistence.class)
             .build();
 
-        entries = new SegmentedJournal<>(SegmentedByteBufJournal.builder()
+        entries = new SegmentedJournal<>(SegmentedRaftJournal.builder()
             .withDirectory(directory)
             .withName("data")
             .withStorageLevel(storage)

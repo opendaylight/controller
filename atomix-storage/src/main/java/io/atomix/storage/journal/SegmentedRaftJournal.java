@@ -40,8 +40,8 @@ import org.slf4j.LoggerFactory;
 /**
  * A {@link RaftJournal} Implementation.
  */
-public final class SegmentedByteBufJournal implements RaftJournal {
-    private static final Logger LOG = LoggerFactory.getLogger(SegmentedByteBufJournal.class);
+public final class SegmentedRaftJournal implements RaftJournal {
+    private static final Logger LOG = LoggerFactory.getLogger(SegmentedRaftJournal.class);
     private static final int SEGMENT_BUFFER_FACTOR = 3;
 
     private final ConcurrentSkipListMap<@NonNull Long, @NonNull JournalSegment> segments;
@@ -50,7 +50,7 @@ public final class SegmentedByteBufJournal implements RaftJournal {
     private final @NonNull StorageLevel storageLevel;
     private final @NonNull Path directory;
     private final @NonNull String name;
-    private final @NonNull SegmentedByteBufWriter writer;
+    private final @NonNull SegmentedEntryWriter writer;
     private final int maxSegmentSize;
     private final int maxEntrySize;
     @Deprecated(forRemoval = true)
@@ -61,7 +61,7 @@ public final class SegmentedByteBufJournal implements RaftJournal {
     private JournalSegment currentSegment;
     private volatile long commitIndex;
 
-    SegmentedByteBufJournal(final String name, final StorageLevel storageLevel, final Path directory,
+    SegmentedRaftJournal(final String name, final StorageLevel storageLevel, final Path directory,
             final int maxSegmentSize, final int maxEntrySize, final int maxEntriesPerSegment, final double indexDensity,
             final ByteBufAllocator allocator) throws IOException {
         this.name = requireNonNull(name, "name cannot be null");
@@ -76,7 +76,7 @@ public final class SegmentedByteBufJournal implements RaftJournal {
         // Load existing log segments from disk.
         segments = loadSegments();
         currentSegment = ensureLastSegment();
-        writer = new SegmentedByteBufWriter(this, currentSegment);
+        writer = new SegmentedEntryWriter(this, currentSegment);
     }
 
     /**
@@ -110,12 +110,12 @@ public final class SegmentedByteBufJournal implements RaftJournal {
 
     @Override
     public EntryReader openReader(final long index) {
-        return openReader(index, SegmentedByteBufReader::new);
+        return openReader(index, SegmentedEntryReader::new);
     }
 
     @NonNullByDefault
     private EntryReader openReader(final long index,
-            final BiFunction<SegmentedByteBufJournal, JournalSegment, EntryReader> constructor) {
+            final BiFunction<SegmentedRaftJournal, JournalSegment, EntryReader> constructor) {
         final var reader = constructor.apply(this, segment(index));
         reader.reset(index);
         readers.add(reader);
@@ -124,7 +124,7 @@ public final class SegmentedByteBufJournal implements RaftJournal {
 
     @Override
     public EntryReader openCommitsReader(final long index) {
-        return openReader(index, SegmentedCommitsByteBufReader::new);
+        return openReader(index, SegmentedCommitsEntryReader::new);
     }
 
     /**
@@ -384,7 +384,7 @@ public final class SegmentedByteBufJournal implements RaftJournal {
         }
     }
 
-    void closeReader(final SegmentedByteBufReader reader) {
+    void closeReader(final SegmentedEntryReader reader) {
         readers.remove(reader);
     }
 
@@ -631,13 +631,13 @@ public final class SegmentedByteBufJournal implements RaftJournal {
         }
 
         /**
-         * Build the {@link SegmentedByteBufJournal}.
+         * Build the {@link SegmentedRaftJournal}.
          *
-         * @return {@link SegmentedByteBufJournal} instance built.
+         * @return {@link SegmentedRaftJournal} instance built.
          * @throws IOException when an I/O error occurs
          */
-        public SegmentedByteBufJournal build() throws IOException {
-            return new SegmentedByteBufJournal(name, storageLevel, directory, maxSegmentSize, maxEntrySize,
+        public SegmentedRaftJournal build() throws IOException {
+            return new SegmentedRaftJournal(name, storageLevel, directory, maxSegmentSize, maxEntrySize,
                 maxEntriesPerSegment, indexDensity, byteBufAllocator);
         }
     }

@@ -19,8 +19,8 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Stopwatch;
 import io.atomix.storage.journal.Indexed;
 import io.atomix.storage.journal.JournalSerdes;
-import io.atomix.storage.journal.SegmentedByteBufJournal;
 import io.atomix.storage.journal.SegmentedJournal;
+import io.atomix.storage.journal.SegmentedRaftJournal;
 import io.atomix.storage.journal.StorageLevel;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -509,9 +509,9 @@ abstract sealed class SegmentedJournalActor extends AbstractActor {
         }
 
         final var sw = Stopwatch.createStarted();
-        final SegmentedByteBufJournal deleteByteBuf;
+        final SegmentedRaftJournal deleteByteBuf;
         try {
-            deleteByteBuf = SegmentedByteBufJournal.builder()
+            deleteByteBuf = SegmentedRaftJournal.builder()
                 .withDirectory(directory)
                 .withName("delete")
                 .withMaxSegmentSize(DELETE_SEGMENT_SIZE)

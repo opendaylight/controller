@@ -76,9 +76,9 @@ public abstract class AbstractJournalTest {
     }
 
     private SegmentedJournal<TestEntry> createJournal() {
-        final SegmentedByteBufJournal byteBufJournal;
+        final SegmentedRaftJournal raftJournal;
         try {
-            byteBufJournal = SegmentedByteBufJournal.builder()
+            raftJournal = SegmentedRaftJournal.builder()
                 .withName("test")
                 .withDirectory(PATH.toFile())
                 .withStorageLevel(storageLevel)
@@ -89,7 +89,7 @@ public abstract class AbstractJournalTest {
             throw new AssertionError(e);
         }
 
-        return new SegmentedJournal<>(byteBufJournal, NAMESPACE.toReadMapper(), NAMESPACE.toWriteMapper());
+        return new SegmentedJournal<>(raftJournal, NAMESPACE.toReadMapper(), NAMESPACE.toWriteMapper());
     }
 
     @Test
