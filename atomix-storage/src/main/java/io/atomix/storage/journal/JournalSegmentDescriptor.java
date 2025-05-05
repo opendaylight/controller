@@ -23,9 +23,8 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * Stores information about a {@link JournalSegment} of the log. The segment descriptor manages metadata related to a
- * single segment of the log. Descriptors are stored within the first {@code 64} bytes of each segment in the following
- * order:
+ * Stores information about a {@link Segment} of the log. The segment descriptor manages metadata related to a single
+ * segment of the log. Descriptors are stored within the first {@code 64} bytes of each segment in the following order:
  * <ul>
  *   <li>{@code id} (64-bit signed integer) - A unique segment identifier. This is a monotonically increasing number
  *       within each log. Segments with in-sequence identifiers should contain in-sequence indexes.</li>

@@ -35,15 +35,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Log segment.
+ * A single segment in {@link SegmentedRaftJournal}.
  *
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
-final class JournalSegment {
+final class Segment {
     /**
-     * Encapsulation of a {@link JournalSegment}'s state.
+     * Encapsulation of a {@link Segment}'s state.
      */
-    sealed interface State {
+    private sealed interface State {
         // Marker interface
     }
 
@@ -70,16 +70,16 @@ final class JournalSegment {
      * Journal segment is inactive, i.e. there is no writer associated with it.
      */
     @NonNullByDefault
-    private record Inactive(int position) implements State {
-        Active activate(final JournalSegment segment) throws IOException {
+    private record Inactive(int currentPosition) implements State {
+        Active activate(final Segment segment) throws IOException {
             final var access = segment.file.newAccess(segment.storageLevel, segment.maxEntrySize);
             final var fileWriter = access.newFileWriter();
             return new Active(access, fileWriter,
-                new JournalSegmentWriter(fileWriter, segment, segment.journalIndex, position));
+                new JournalSegmentWriter(fileWriter, segment, segment.journalIndex, currentPosition));
         }
     }
 
-    private static final Logger LOG = LoggerFactory.getLogger(JournalSegment.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Segment.class);
 
     private final Set<JournalSegmentReader> readers = ConcurrentHashMap.newKeySet();
     private final AtomicInteger references = new AtomicInteger();
@@ -91,7 +91,7 @@ final class JournalSegment {
     private State state;
     private boolean open = true;
 
-    JournalSegment(final JournalSegmentFile file, final StorageLevel storageLevel, final int maxEntrySize,
+    Segment(final JournalSegmentFile file, final StorageLevel storageLevel, final int maxEntrySize,
             final double indexDensity) throws IOException {
         this.file = requireNonNull(file);
         this.storageLevel = requireNonNull(storageLevel);
@@ -285,7 +285,7 @@ final class JournalSegment {
             .toString();
     }
 
-    static int indexEntries(final FileWriter fileWriter, final JournalSegment segment, final JournalIndex journalIndex,
+    static int indexEntries(final FileWriter fileWriter, final Segment segment, final JournalIndex journalIndex,
             final long maxNextIndex, final @Nullable Position start) {
         // acquire ownership of cache and make sure reader does not see anything we've done once we're done
         final var fileReader = fileWriter.reader();
@@ -297,7 +297,7 @@ final class JournalSegment {
         }
     }
 
-    private static int indexEntries(final FileReader fileReader, final JournalSegment segment, final int maxEntrySize,
+    private static int indexEntries(final FileReader fileReader, final Segment segment, final int maxEntrySize,
             final JournalIndex journalIndex, final long maxNextIndex, final @Nullable Position start) {
         int position;
         long nextIndex;

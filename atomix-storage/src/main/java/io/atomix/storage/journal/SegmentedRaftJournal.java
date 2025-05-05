@@ -44,7 +44,7 @@ public final class SegmentedRaftJournal implements RaftJournal {
     private static final Logger LOG = LoggerFactory.getLogger(SegmentedRaftJournal.class);
     private static final int SEGMENT_BUFFER_FACTOR = 3;
 
-    private final ConcurrentSkipListMap<@NonNull Long, @NonNull JournalSegment> segments;
+    private final ConcurrentSkipListMap<@NonNull Long, @NonNull Segment> segments;
     private final Collection<EntryReader> readers = ConcurrentHashMap.newKeySet();
     private final @NonNull ByteBufAllocator allocator;
     private final @NonNull StorageLevel storageLevel;
@@ -58,7 +58,7 @@ public final class SegmentedRaftJournal implements RaftJournal {
     private final double indexDensity;
 
     // null when closed
-    private JournalSegment currentSegment;
+    private Segment currentSegment;
     private volatile long commitIndex;
 
     SegmentedRaftJournal(final String name, final StorageLevel storageLevel, final Path directory,
@@ -115,7 +115,7 @@ public final class SegmentedRaftJournal implements RaftJournal {
 
     @NonNullByDefault
     private EntryReader openReader(final long index,
-            final BiFunction<SegmentedRaftJournal, JournalSegment, EntryReader> constructor) {
+            final BiFunction<SegmentedRaftJournal, Segment, EntryReader> constructor) {
         final var reader = constructor.apply(this, segment(index));
         reader.reset(index);
         readers.add(reader);
@@ -155,7 +155,7 @@ public final class SegmentedRaftJournal implements RaftJournal {
      * @return the first segment
      * @throws IOException when an I/O error occurs
      */
-    @NonNull JournalSegment resetSegments(final long index) throws IOException {
+    @NonNull Segment resetSegments(final long index) throws IOException {
         assertOpen();
 
         // If the index already equals the first segment index, skip the reset.
@@ -164,7 +164,7 @@ public final class SegmentedRaftJournal implements RaftJournal {
             return firstSegment;
         }
 
-        segments.values().forEach(JournalSegment::delete);
+        segments.values().forEach(Segment::delete);
         segments.clear();
         final var newSegment = createInitialSegment();
         currentSegment = newSegment;
@@ -176,7 +176,7 @@ public final class SegmentedRaftJournal implements RaftJournal {
      *
      * @throws IllegalStateException if the segment manager is not open
      */
-    @NonNull JournalSegment firstSegment() {
+    @NonNull Segment firstSegment() {
         assertOpen();
         return segments.firstEntry().getValue();
     }
@@ -186,7 +186,7 @@ public final class SegmentedRaftJournal implements RaftJournal {
      *
      * @throws IllegalStateException if the segment manager is not open
      */
-    @NonNull JournalSegment lastSegment() {
+    @NonNull Segment lastSegment() {
         assertOpen();
         return segments.lastEntry().getValue();
     }
@@ -197,7 +197,7 @@ public final class SegmentedRaftJournal implements RaftJournal {
      * @param index The segment index with which to look up the next segment.
      * @return The next segment for the given index, or {@code null} if no such segment exists
      */
-    @Nullable JournalSegment tryNextSegment(final long index) {
+    @Nullable Segment tryNextSegment(final long index) {
         final var higherEntry = segments.higherEntry(index);
         return higherEntry != null ? higherEntry.getValue() : null;
     }
@@ -209,7 +209,7 @@ public final class SegmentedRaftJournal implements RaftJournal {
      * @throws IllegalStateException if the segment manager is not open
      * @throws IOException when an I/O error occurs
      */
-    synchronized @NonNull JournalSegment createNextSegment() throws IOException {
+    synchronized @NonNull Segment createNextSegment() throws IOException {
         assertOpen();
         assertDiskSpace();
 
@@ -228,7 +228,7 @@ public final class SegmentedRaftJournal implements RaftJournal {
      * @param index The index for which to return the segment.
      * @throws IllegalStateException if the segment manager is not open
      */
-    synchronized JournalSegment segment(final long index) {
+    synchronized Segment segment(final long index) {
         assertOpen();
         // Check if the current segment contains the given index first in order to prevent an unnecessary map lookup.
         if (currentSegment != null && index > currentSegment.firstIndex()) {
@@ -246,7 +246,7 @@ public final class SegmentedRaftJournal implements RaftJournal {
      * @param segment The segment to remove.
      * @throws IOException when an I/O error occurs
      */
-    synchronized void removeSegment(final JournalSegment segment) throws IOException {
+    synchronized void removeSegment(final Segment segment) throws IOException {
         segments.remove(segment.firstIndex());
         segment.delete();
 
@@ -262,7 +262,7 @@ public final class SegmentedRaftJournal implements RaftJournal {
      * @param A new segment
      * @throws IOException when an I/O error occurs
      */
-    private @NonNull JournalSegment createSegment(final long segmentId, final long firstIndex) throws IOException {
+    private @NonNull Segment createSegment(final long segmentId, final long firstIndex) throws IOException {
         final var descriptor = JournalSegmentDescriptor.builder()
             .withId(segmentId)
             .withIndex(firstIndex)
@@ -271,12 +271,12 @@ public final class SegmentedRaftJournal implements RaftJournal {
             .withUpdated(System.currentTimeMillis())
             .build();
         final var file = JournalSegmentFile.createNew(name, directory, allocator, descriptor);
-        final var segment = new JournalSegment(file, storageLevel, maxEntrySize, indexDensity);
+        final var segment = new Segment(file, storageLevel, maxEntrySize, indexDensity);
         LOG.debug("Created segment: {}", segment);
         return segment;
     }
 
-    private @NonNull JournalSegment createInitialSegment() throws IOException {
+    private @NonNull Segment createInitialSegment() throws IOException {
         final var segment = createSegment(1, 1);
         segments.put(1L, segment);
         return segment;
@@ -288,7 +288,7 @@ public final class SegmentedRaftJournal implements RaftJournal {
      * @return the last segment
      * @throws IOException when an I/O error occurs
      */
-    private @NonNull JournalSegment ensureLastSegment() throws IOException {
+    private @NonNull Segment ensureLastSegment() throws IOException {
         final var lastEntry = segments.lastEntry();
         // if there is no segment, create an initial segment starting at index 1.
         return lastEntry != null ? lastEntry.getValue() : createInitialSegment();
@@ -301,12 +301,12 @@ public final class SegmentedRaftJournal implements RaftJournal {
      * @throws IOException if an I/O error occurs
      */
     @NonNullByDefault
-    private ConcurrentSkipListMap<Long, JournalSegment> loadSegments() throws IOException {
+    private ConcurrentSkipListMap<Long, Segment> loadSegments() throws IOException {
         // Ensure log directories are created.
         final var dirFile = directory.toFile();
         dirFile.mkdirs();
 
-        final var segmentsMap = new TreeMap<Long, JournalSegment>();
+        final var segmentsMap = new TreeMap<Long, Segment>();
 
         // Iterate through all files in the log directory.
         for (var file : dirFile.listFiles(File::isFile)) {
@@ -318,7 +318,7 @@ public final class SegmentedRaftJournal implements RaftJournal {
                 try {
                     segmentFile = JournalSegmentFile.openExisting(filePath, allocator);
                 } catch (IOException e) {
-                    segmentsMap.values().forEach(JournalSegment::close);
+                    segmentsMap.values().forEach(Segment::close);
                     throw e;
                 }
 
@@ -326,12 +326,12 @@ public final class SegmentedRaftJournal implements RaftJournal {
                 LOG.debug("Loaded disk segment: {} ({})", segmentFile.segmentId(), segmentFile.path());
 
                 // Add the segment to the segments list.
-                final JournalSegment segment;
+                final Segment segment;
                 try {
-                    segment = new JournalSegment(segmentFile, storageLevel, maxEntrySize, indexDensity);
+                    segment = new Segment(segmentFile, storageLevel, maxEntrySize, indexDensity);
                 } catch (IOException e) {
                     segmentFile.close();
-                    segmentsMap.values().forEach(JournalSegment::close);
+                    segmentsMap.values().forEach(Segment::close);
                     throw e;
                 }
                 segmentsMap.put(segment.firstIndex(), segment);
@@ -339,7 +339,7 @@ public final class SegmentedRaftJournal implements RaftJournal {
         }
 
         // Verify that all the segments in the log align with one another.
-        JournalSegment previousSegment = null;
+        Segment previousSegment = null;
         boolean corrupted = false;
         for (var iterator =  segmentsMap.entrySet().iterator(); iterator.hasNext();  ) {
             final var segment = iterator.next().getValue();
@@ -417,7 +417,7 @@ public final class SegmentedRaftJournal implements RaftJournal {
             final var compactSegments = segments.headMap(firstIndex);
             if (!compactSegments.isEmpty()) {
                 LOG.debug("{} - Compacting {} segment(s)", name, compactSegments.size());
-                compactSegments.values().forEach(JournalSegment::delete);
+                compactSegments.values().forEach(Segment::delete);
                 compactSegments.clear();
                 resetHead(firstIndex);
             }
@@ -429,7 +429,7 @@ public final class SegmentedRaftJournal implements RaftJournal {
         if (currentSegment != null) {
             currentSegment = null;
             writer.close();
-            segments.values().forEach(JournalSegment::close);
+            segments.values().forEach(Segment::close);
             segments.clear();
         }
     }

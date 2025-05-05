@@ -31,12 +31,12 @@ final class JournalSegmentWriter {
     private static final Logger LOG = LoggerFactory.getLogger(JournalSegmentWriter.class);
 
     private final FileWriter fileWriter;
-    final @NonNull JournalSegment segment;
+    final @NonNull Segment segment;
     private final @NonNull JournalIndex journalIndex;
 
     private int currentPosition;
 
-    JournalSegmentWriter(final FileWriter fileWriter, final JournalSegment segment, final JournalIndex journalIndex,
+    JournalSegmentWriter(final FileWriter fileWriter, final Segment segment, final JournalIndex journalIndex,
             final int currentPosition) {
         this.fileWriter = requireNonNull(fileWriter);
         this.segment = requireNonNull(segment);
@@ -137,7 +137,7 @@ final class JournalSegmentWriter {
 
         currentPosition = index < segment.firstIndex() ? JournalSegmentDescriptor.BYTES
             // recover position and last written
-            : JournalSegment.indexEntries(fileWriter, segment, journalIndex, index, nearest);
+            : Segment.indexEntries(fileWriter, segment, journalIndex, index, nearest);
 
         // Zero the entry header at current channel position.
         fileWriter.writeEmptyHeader(currentPosition);

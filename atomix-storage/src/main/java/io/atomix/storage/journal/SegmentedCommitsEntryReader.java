@@ -21,7 +21,7 @@ import io.netty.buffer.ByteBuf;
  * A {@link SegmentedEntryReader} traversing only committed entries.
  */
 final class SegmentedCommitsEntryReader extends SegmentedEntryReader {
-    SegmentedCommitsEntryReader(final SegmentedRaftJournal journal, final JournalSegment segment) {
+    SegmentedCommitsEntryReader(final SegmentedRaftJournal journal, final Segment segment) {
         super(journal, segment);
     }
 

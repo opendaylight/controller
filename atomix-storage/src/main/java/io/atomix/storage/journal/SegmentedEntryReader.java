@@ -29,11 +29,11 @@ import org.opendaylight.controller.raft.journal.FromByteBufMapper;
 sealed class SegmentedEntryReader implements EntryReader permits SegmentedCommitsEntryReader {
     final @NonNull SegmentedRaftJournal journal;
 
-    private JournalSegment currentSegment;
+    private Segment currentSegment;
     private JournalSegmentReader currentReader;
     private long nextIndex;
 
-    SegmentedEntryReader(final SegmentedRaftJournal journal, final JournalSegment segment) {
+    SegmentedEntryReader(final SegmentedRaftJournal journal, final Segment segment) {
         this.journal = requireNonNull(journal);
         currentSegment = requireNonNull(segment);
         currentReader = segment.createReader();

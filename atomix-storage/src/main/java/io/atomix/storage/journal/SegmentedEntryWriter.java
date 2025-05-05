@@ -30,10 +30,10 @@ import org.opendaylight.controller.raft.journal.ToByteBufMapper;
 final class SegmentedEntryWriter implements EntryWriter {
     private final SegmentedRaftJournal journal;
 
-    private JournalSegment currentSegment;
+    private Segment currentSegment;
     private JournalSegmentWriter currentWriter;
 
-    SegmentedEntryWriter(final SegmentedRaftJournal journal, final JournalSegment currentSegment) {
+    SegmentedEntryWriter(final SegmentedRaftJournal journal, final Segment currentSegment) {
         this.journal = requireNonNull(journal);
         this.currentSegment = requireNonNull(currentSegment);
         currentWriter = currentSegment.acquireWriter();

@@ -20,7 +20,7 @@ import java.util.zip.CRC32;
 import org.eclipse.jdt.annotation.NonNull;
 
 /**
- * An {@link Indexed} entry read from {@link JournalSegment}.
+ * An entry read from a {@link Segment}.
  *
  * @param checksum The {@link CRC32} checksum of data
  * @param bytes Entry bytes

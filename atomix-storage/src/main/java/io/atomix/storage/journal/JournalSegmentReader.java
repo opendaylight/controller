@@ -26,14 +26,14 @@ import org.slf4j.LoggerFactory;
 final class JournalSegmentReader {
     private static final Logger LOG = LoggerFactory.getLogger(JournalSegmentReader.class);
 
-    private final JournalSegment segment;
+    private final Segment segment;
     private final int maxSegmentSize;
     private final int maxEntrySize;
 
     private FileReader fileReader;
     private int position;
 
-    JournalSegmentReader(final JournalSegment segment, final FileReader fileReader, final int maxEntrySize) {
+    JournalSegmentReader(final Segment segment, final FileReader fileReader, final int maxEntrySize) {
         this.segment = requireNonNull(segment);
         this.fileReader = requireNonNull(fileReader);
         maxSegmentSize = segment.file().maxSize();
