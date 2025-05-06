@@ -31,7 +31,7 @@ class JournalSegmentDescriptorTest {
      */
     @Test
     void testDescriptorBuilder() {
-        final var descriptor = JournalSegmentDescriptor.builder()
+        final var descriptor = SegmentDescriptor.builder()
             .withId(2)
             .withIndex(1025)
             .withMaxSegmentSize(1024 * 1024)
@@ -40,7 +40,7 @@ class JournalSegmentDescriptorTest {
             .build();
 
         assertEquals(2, descriptor.id());
-        assertEquals(JournalSegmentDescriptor.VERSION, descriptor.version());
+        assertEquals(SegmentDescriptor.VERSION, descriptor.version());
         assertEquals(1025, descriptor.index());
         assertEquals(1024 * 1024, descriptor.maxSegmentSize());
         assertEquals(2048, descriptor.maxEntries());
@@ -55,7 +55,7 @@ class JournalSegmentDescriptorTest {
         assertArrayEquals(new byte[] {
             0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 4, 1, 0, 16, 0, 0, 0, 0, 8, 0, 8, 7, 6, 5,
             4, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        }, JournalSegmentDescriptor.builder()
+        }, SegmentDescriptor.builder()
             .withId(2)
             .withIndex(1025)
             .withMaxSegmentSize(1024 * 1024)

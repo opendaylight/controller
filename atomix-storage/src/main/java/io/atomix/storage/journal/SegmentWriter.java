@@ -134,7 +134,7 @@ final class SegmentWriter {
         // Truncate the index, find nearest indexed entry
         final var nearest = journalIndex.truncate(index);
 
-        currentPosition = index < segment.firstIndex() ? JournalSegmentDescriptor.BYTES
+        currentPosition = index < segment.firstIndex() ? SegmentDescriptor.BYTES
             // recover position and last written
             : Segment.indexEntries(fileWriter, segment, journalIndex, index, nearest);
 

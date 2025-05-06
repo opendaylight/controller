@@ -36,12 +36,12 @@ final class SegmentFile {
     private static final char EXTENSION_SEPARATOR = '.';
     private static final String EXTENSION = "log";
 
-    private final @NonNull JournalSegmentDescriptor descriptor;
+    private final @NonNull SegmentDescriptor descriptor;
     private final @NonNull ByteBufAllocator allocator;
     private final @NonNull RandomAccessFile file;
     private final @NonNull Path path;
 
-    private SegmentFile(final Path path, final ByteBufAllocator allocator, final JournalSegmentDescriptor descriptor,
+    private SegmentFile(final Path path, final ByteBufAllocator allocator, final SegmentDescriptor descriptor,
             final RandomAccessFile file) {
         this.path = requireNonNull(path);
         this.allocator = requireNonNull(allocator);
@@ -50,7 +50,7 @@ final class SegmentFile {
     }
 
     static @NonNull SegmentFile createNew(final String name, final Path directory, final ByteBufAllocator allocator,
-            final JournalSegmentDescriptor descriptor) throws IOException {
+            final SegmentDescriptor descriptor) throws IOException {
         final var file = createSegmentFile(name, directory, descriptor.id());
         final var raf = new RandomAccessFile(file.toFile(), "rw");
         try {
@@ -65,10 +65,10 @@ final class SegmentFile {
 
     static @NonNull SegmentFile openExisting(final Path path, final ByteBufAllocator allocator) throws IOException {
         final var raf = new RandomAccessFile(path.toFile(), "rw");
-        final JournalSegmentDescriptor descriptor;
+        final SegmentDescriptor descriptor;
         try {
             // read the descriptor
-            descriptor = JournalSegmentDescriptor.readFrom(raf.getChannel());
+            descriptor = SegmentDescriptor.readFrom(raf.getChannel());
         } catch (IOException e) {
             raf.close();
             throw e;
