@@ -29,7 +29,7 @@ import org.apache.pekko.persistence.PersistentRepr;
 import org.apache.pekko.persistence.journal.japi.AsyncWriteJournal;
 import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.AsyncMessage;
 import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.WriteMessages;
-import org.opendaylight.controller.raft.journal.StorageLevel;
+import org.opendaylight.raft.journal.StorageLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;

@@ -20,8 +20,8 @@ import static java.util.Objects.requireNonNull;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.raft.journal.EntryReader;
-import org.opendaylight.controller.raft.journal.FromByteBufMapper;
+import org.opendaylight.raft.journal.EntryReader;
+import org.opendaylight.raft.journal.FromByteBufMapper;
 
 /**
  * A {@link JournalReader} backed by a {@link EntryReader}.

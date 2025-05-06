@@ -20,9 +20,9 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
 import org.eclipse.jdt.annotation.NonNull;
-import org.opendaylight.controller.raft.journal.FromByteBufMapper;
-import org.opendaylight.controller.raft.journal.RaftJournal;
-import org.opendaylight.controller.raft.journal.ToByteBufMapper;
+import org.opendaylight.raft.journal.FromByteBufMapper;
+import org.opendaylight.raft.journal.RaftJournal;
+import org.opendaylight.raft.journal.ToByteBufMapper;
 
 /**
  * A {@link Journal} implementation based on a {@link RaftJournal}.
