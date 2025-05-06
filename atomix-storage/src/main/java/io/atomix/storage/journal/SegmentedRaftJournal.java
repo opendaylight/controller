@@ -22,6 +22,7 @@ import static java.util.Objects.requireNonNull;
 import io.netty.buffer.ByteBufAllocator;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.TreeMap;
@@ -305,13 +306,12 @@ public final class SegmentedRaftJournal implements RaftJournal {
     @NonNullByDefault
     private ConcurrentSkipListMap<Long, Segment> loadSegments() throws IOException {
         // Ensure log directories are created.
-        final var dirFile = directory.toFile();
-        dirFile.mkdirs();
+        Files.createDirectories(directory);
 
         final var segmentsMap = new TreeMap<Long, Segment>();
 
         // Iterate through all files in the log directory.
-        for (var file : dirFile.listFiles(File::isFile)) {
+        for (var file : directory.toFile().listFiles(File::isFile)) {
 
             // If the file looks like a segment file, attempt to load the segment.
             final var filePath = file.toPath();
