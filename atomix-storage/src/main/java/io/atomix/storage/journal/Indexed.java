@@ -19,7 +19,7 @@ package io.atomix.storage.journal;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
-import io.atomix.storage.journal.index.Position;
+import io.atomix.storage.journal.Segment.Position;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**

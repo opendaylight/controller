@@ -19,12 +19,10 @@ package io.atomix.storage.journal;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
-import io.atomix.storage.journal.index.JournalIndex;
-import io.atomix.storage.journal.index.Position;
-import io.atomix.storage.journal.index.SparseJournalIndex;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -75,7 +73,24 @@ final class Segment {
             final var access = segment.file.newAccess(segment.storageLevel, segment.maxEntrySize);
             final var fileWriter = access.newFileWriter();
             return new Active(access, fileWriter,
-                new SegmentWriter(fileWriter, segment, segment.journalIndex, currentPosition));
+                new SegmentWriter(fileWriter, segment, segment.segmentIndex, currentPosition));
+        }
+    }
+
+    /**
+     * Position of an entry in a segment.
+     *
+     * @param index the entry index
+     * @param position the position of the entry header within the segment
+     */
+    @NonNullByDefault
+    record Position(long index, int position) {
+        Position(final Entry<Long, Integer> entry) {
+            this(entry.getKey(), entry.getValue());
+        }
+
+        static @Nullable Position ofNullable(final @Nullable Entry<Long, Integer> entry) {
+            return entry == null ? null : new Position(entry);
         }
     }
 
@@ -85,7 +100,7 @@ final class Segment {
     private final AtomicInteger references = new AtomicInteger();
     private final @NonNull SegmentFile file;
     private final @NonNull StorageLevel storageLevel;
-    private final @NonNull JournalIndex journalIndex;
+    private final @NonNull SegmentIndex segmentIndex;
     private final int maxEntrySize;
 
     private State state;
@@ -97,12 +112,12 @@ final class Segment {
         this.storageLevel = requireNonNull(storageLevel);
         this.maxEntrySize = maxEntrySize;
 
-        journalIndex = new SparseJournalIndex(indexDensity);
+        segmentIndex = new SparseSegmentIndex(indexDensity);
 
         try (var tmpAccess = file.newAccess(storageLevel, maxEntrySize)) {
             final var fileReader = tmpAccess.newFileReader();
             try {
-                state = new Inactive(indexEntries(fileReader, this, maxEntrySize, journalIndex, Long.MAX_VALUE, null));
+                state = new Inactive(indexEntries(fileReader, this, maxEntrySize, segmentIndex, Long.MAX_VALUE, null));
             } finally {
                 fileReader.release();
             }
@@ -124,7 +139,7 @@ final class Segment {
      * @return The last index in the segment.
      */
     long lastIndex() {
-        final var lastPosition = journalIndex.last();
+        final var lastPosition = segmentIndex.last();
         return lastPosition != null ? lastPosition.index() : firstIndex() - 1;
     }
 
@@ -144,7 +159,7 @@ final class Segment {
      * @return the position of the given index or a lesser index, or {@code null}
      */
     @Nullable Position lookup(final long index) {
-        return journalIndex.lookup(index);
+        return segmentIndex.lookup(index);
     }
 
     /**
@@ -285,7 +300,7 @@ final class Segment {
             .toString();
     }
 
-    static int indexEntries(final FileWriter fileWriter, final Segment segment, final JournalIndex journalIndex,
+    static int indexEntries(final FileWriter fileWriter, final Segment segment, final SegmentIndex journalIndex,
             final long maxNextIndex, final @Nullable Position start) {
         // acquire ownership of cache and make sure reader does not see anything we've done once we're done
         final var fileReader = fileWriter.reader();
@@ -298,7 +313,7 @@ final class Segment {
     }
 
     private static int indexEntries(final FileReader fileReader, final Segment segment, final int maxEntrySize,
-            final JournalIndex journalIndex, final long maxNextIndex, final @Nullable Position start) {
+            final SegmentIndex journalIndex, final long maxNextIndex, final @Nullable Position start) {
         int position;
         long nextIndex;
         if (start != null) {
