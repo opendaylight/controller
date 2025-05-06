@@ -14,11 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.atomix.storage.journal;
+package org.opendaylight.controller.raft.journal;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.netty.buffer.ByteBufAllocator;
 import java.io.File;
 import java.io.IOException;
@@ -32,11 +33,6 @@ import java.util.function.BiFunction;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.raft.journal.EntryReader;
-import org.opendaylight.controller.raft.journal.EntryWriter;
-import org.opendaylight.controller.raft.journal.RaftJournal;
-import org.opendaylight.controller.raft.journal.StorageExhaustedException;
-import org.opendaylight.controller.raft.journal.StorageLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +43,7 @@ public final class SegmentedRaftJournal implements RaftJournal {
     private static final Logger LOG = LoggerFactory.getLogger(SegmentedRaftJournal.class);
     private static final int SEGMENT_BUFFER_FACTOR = 3;
 
-    private final ConcurrentSkipListMap<@NonNull Long, @NonNull Segment> segments;
+    private final ConcurrentSkipListMap<@NonNull Long, org.opendaylight.controller.raft.journal.Segment> segments;
     private final Collection<EntryReader> readers = ConcurrentHashMap.newKeySet();
     private final @NonNull ByteBufAllocator allocator;
     private final @NonNull StorageLevel storageLevel;
@@ -61,6 +57,7 @@ public final class SegmentedRaftJournal implements RaftJournal {
     private final double indexDensity;
 
     // null when closed
+    @SuppressFBWarnings("IS2_INCONSISTENT_SYNC")
     private Segment currentSegment;
     private volatile long commitIndex;
 
@@ -457,6 +454,11 @@ public final class SegmentedRaftJournal implements RaftJournal {
         return commitIndex;
     }
 
+    /**
+     * Returns a new {@link Builder}.
+     *
+     * @return a new {@link Builder}
+     */
     public static Builder builder() {
         return new Builder();
     }

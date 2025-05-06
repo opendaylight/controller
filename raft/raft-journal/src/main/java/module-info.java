@@ -23,8 +23,11 @@ module org.opendaylight.controller.raft.journal {
     // TODO: ByteBuf implements ReferenceCounted and therefore netty-buffer
     //       should contain this
     requires transitive io.netty.common;
+    requires com.google.common;
+    requires org.slf4j;
 
     // Annotations
     requires static transitive org.eclipse.jdt.annotation;
+    requires static com.github.spotbugs.annotations;
     requires static org.osgi.annotation.bundle;
 }

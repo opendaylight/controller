@@ -13,7 +13,6 @@ import io.atomix.storage.journal.JournalReader;
 import io.atomix.storage.journal.JournalSerdes;
 import io.atomix.storage.journal.JournalWriter;
 import io.atomix.storage.journal.SegmentedJournal;
-import io.atomix.storage.journal.SegmentedRaftJournal;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.UncheckedIOException;
@@ -27,6 +26,7 @@ import org.opendaylight.controller.akka.segjournal.DataJournalEntry.ToPersistenc
 import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.ReplayMessages;
 import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.WriteMessages;
 import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.WrittenMessages;
+import org.opendaylight.controller.raft.journal.SegmentedRaftJournal;
 import org.opendaylight.controller.raft.journal.StorageLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
