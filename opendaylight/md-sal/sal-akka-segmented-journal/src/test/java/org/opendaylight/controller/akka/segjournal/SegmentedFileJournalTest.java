@@ -16,7 +16,6 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import io.atomix.storage.journal.StorageLevel;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Files;
@@ -44,6 +43,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.AsyncMessage;
 import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.WriteMessages;
+import org.opendaylight.controller.raft.journal.StorageLevel;
 import scala.concurrent.Future;
 
 @ExtendWith(MockitoExtension.class)

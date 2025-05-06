@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 PANTHEON.tech, s.r.o. and others.  All rights reserved.
+ * Copyright 2015-2022 Open Networking Foundation and others.  All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.atomix.storage.journal;
-
-import java.io.IOException;
+package org.opendaylight.controller.raft.journal;
 
 /**
- * Exception thrown when storage runs out of space.
+ * Storage level configuration values which control how logs are stored on disk or in memory.
  */
-public final class StorageExhaustedException extends IOException {
-    @java.io.Serial
-    private static final long serialVersionUID = 1L;
-
-    public StorageExhaustedException(final String message) {
-        super(message);
-    }
+public enum StorageLevel {
+    /**
+     * Stores data in a memory-mapped file.
+     */
+    MAPPED,
+    /**
+     * Stores data on disk.
+     */
+    DISK
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2022 Open Networking Foundation and others.  All rights reserved.
+ * Copyright (c) 2025 PANTHEON.tech, s.r.o. and others.  All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.atomix.storage.journal;
+package org.opendaylight.controller.raft.journal;
+
+import java.io.IOException;
 
 /**
- * Storage level configuration values which control how logs are stored on disk or in memory.
+ * Exception thrown when an entry being stored is too large.
  */
-public enum StorageLevel {
+public final class EntryTooLargeException extends IOException {
+    @java.io.Serial
+    private static final long serialVersionUID = 1L;
+
     /**
-     * Stores data in a memory-mapped file.
+     * Default constructor.
+     *
+     * @param message the message
+     * @param cause the exception cause
      */
-    MAPPED,
-    /**
-     * Stores data on disk.
-     */
-    DISK
+    public EntryTooLargeException(final String message, final Throwable cause) {
+        super(message, cause);
+    }
 }
