@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.atomix.storage.journal;
+package org.opendaylight.controller.raft.journal;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
-class JournalSegmentDescriptorTest {
+class SegmentDescriptorTest {
     /**
      * Tests the segment descriptor builder.
      */

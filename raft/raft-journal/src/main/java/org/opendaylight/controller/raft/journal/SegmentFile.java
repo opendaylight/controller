@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.atomix.storage.journal;
+package org.opendaylight.controller.raft.journal;
 
 import static java.util.Objects.requireNonNull;
 
@@ -25,7 +25,6 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.opendaylight.controller.raft.journal.StorageLevel;
 
 /**
  * An open file backing a particular {@link Segment}.

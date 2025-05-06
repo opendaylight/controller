@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.atomix.storage.journal;
+package org.opendaylight.controller.raft.journal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import io.atomix.storage.journal.Segment.Position;
 import org.junit.jupiter.api.Test;
+import org.opendaylight.controller.raft.journal.Segment.Position;
 
 class SparseSegmentIndexTest {
     private final SparseSegmentIndex sparseIndex = new SparseSegmentIndex(.2);
