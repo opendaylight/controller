@@ -25,6 +25,7 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.opendaylight.controller.raft.journal.StorageLevel;
 
 /**
  * An open file backing a particular {@link Segment}.

@@ -23,6 +23,7 @@ import io.netty.buffer.Unpooled;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.channels.FileChannel;
+import org.opendaylight.controller.raft.journal.StorageLevel;
 
 /**
  * A {@link StorageLevel#DISK} {@link FileWriter}.

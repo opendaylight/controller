@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.channels.FileChannel;
 import org.eclipse.jdt.annotation.NonNull;
+import org.opendaylight.controller.raft.journal.StorageLevel;
 
 /**
  * A {@link StorageLevel#DISK} implementation of {@link FileReader}. Maintains an internal buffer.
