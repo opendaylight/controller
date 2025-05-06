@@ -14,16 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.atomix.storage.journal.index;
+package io.atomix.storage.journal;
 
 import com.google.common.base.MoreObjects;
+import io.atomix.storage.journal.Segment.Position;
 import java.util.TreeMap;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * A {@link JournalIndex} maintaining target density.
+ * A {@link SegmentIndex} maintaining target density.
  */
-public final class SparseJournalIndex implements JournalIndex {
+final class SparseSegmentIndex implements SegmentIndex {
     private static final int MIN_DENSITY = 1000;
 
     private final TreeMap<Long, Integer> positions = new TreeMap<>();
@@ -32,11 +33,11 @@ public final class SparseJournalIndex implements JournalIndex {
     // Last known position. May not be accurate immediately after a truncate() or construction
     private @Nullable Position last;
 
-    public SparseJournalIndex() {
+    SparseSegmentIndex() {
         density = MIN_DENSITY;
     }
 
-    public SparseJournalIndex(final double density) {
+    SparseSegmentIndex(final double density) {
         this.density = (int) Math.ceil(MIN_DENSITY / (density * MIN_DENSITY));
     }
 

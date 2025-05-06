@@ -18,7 +18,6 @@ package io.atomix.storage.journal;
 import static io.atomix.storage.journal.SegmentEntry.HEADER_BYTES;
 import static java.util.Objects.requireNonNull;
 
-import io.atomix.storage.journal.index.JournalIndex;
 import java.io.EOFException;
 import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNull;
@@ -32,11 +31,11 @@ final class SegmentWriter {
 
     private final FileWriter fileWriter;
     final @NonNull Segment segment;
-    private final @NonNull JournalIndex journalIndex;
+    private final @NonNull SegmentIndex journalIndex;
 
     private int currentPosition;
 
-    SegmentWriter(final FileWriter fileWriter, final Segment segment, final JournalIndex journalIndex,
+    SegmentWriter(final FileWriter fileWriter, final Segment segment, final SegmentIndex journalIndex,
             final int currentPosition) {
         this.fileWriter = requireNonNull(fileWriter);
         this.segment = requireNonNull(segment);

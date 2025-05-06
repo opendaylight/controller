@@ -14,15 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.atomix.storage.journal.index;
+package io.atomix.storage.journal;
 
+import io.atomix.storage.journal.Segment.Position;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * Index of a particular JournalSegment.
+ * Index of a particular {@code Segment}.
  */
-public interface JournalIndex {
+interface SegmentIndex {
     /**
      * Adds an entry for the given index at the given position.
      *

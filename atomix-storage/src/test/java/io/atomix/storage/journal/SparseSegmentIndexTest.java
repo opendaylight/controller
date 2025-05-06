@@ -13,18 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.atomix.storage.journal.index;
+package io.atomix.storage.journal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import io.atomix.storage.journal.Segment.Position;
 import org.junit.jupiter.api.Test;
 
-/**
- * Sparse journal index test.
- */
-class SparseJournalIndexTest {
-    private final SparseJournalIndex sparseIndex = new SparseJournalIndex(.2);
+class SparseSegmentIndexTest {
+    private final SparseSegmentIndex sparseIndex = new SparseSegmentIndex(.2);
 
     @Test
     void firstTest() throws Exception {
