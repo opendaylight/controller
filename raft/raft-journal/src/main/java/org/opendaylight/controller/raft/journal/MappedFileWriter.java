@@ -13,14 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.atomix.storage.journal;
+package org.opendaylight.controller.raft.journal;
 
 import static java.util.Objects.requireNonNull;
 
 import io.netty.buffer.ByteBuf;
 import java.io.Flushable;
 import java.io.IOException;
-import org.opendaylight.controller.raft.journal.StorageLevel;
 
 /**
  * A {@link StorageLevel#MAPPED} {@link FileWriter}.

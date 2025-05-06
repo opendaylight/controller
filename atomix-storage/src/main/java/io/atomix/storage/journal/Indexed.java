@@ -19,7 +19,6 @@ package io.atomix.storage.journal;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
-import io.atomix.storage.journal.Segment.Position;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -36,10 +35,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 public record Indexed<E>(long index, E entry, int size) {
     public Indexed {
         requireNonNull(entry);
-    }
-
-    Indexed(final Position position, final E entry, final int size) {
-        this(position.index(), entry, size);
     }
 
     @Override

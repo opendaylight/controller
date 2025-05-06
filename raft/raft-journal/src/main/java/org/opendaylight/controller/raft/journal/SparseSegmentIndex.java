@@ -14,12 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.atomix.storage.journal;
+package org.opendaylight.controller.raft.journal;
 
 import com.google.common.base.MoreObjects;
-import io.atomix.storage.journal.Segment.Position;
 import java.util.TreeMap;
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.raft.journal.Segment.Position;
 
 /**
  * A {@link SegmentIndex} maintaining target density.

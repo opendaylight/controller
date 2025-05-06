@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.atomix.storage.journal;
+package org.opendaylight.controller.raft.journal;
 
 import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
@@ -48,6 +48,13 @@ import org.eclipse.jdt.annotation.Nullable;
  * </ul>
  * The remainder of the 64 segment header bytes are reserved for future metadata.
  *
+ * @param version the version
+ * @param id segment identifier
+ * @param index first index stored in this segment
+ * @param maxSegmentSize maximum size of a single segment file
+ * @param maxEntries maximum number of entries
+ * @param updated last updated, as epoch milliseconds
+ * @param locked true if the segment is locked
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
 public record SegmentDescriptor(
