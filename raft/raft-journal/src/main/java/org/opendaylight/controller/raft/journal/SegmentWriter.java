@@ -13,17 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.atomix.storage.journal;
+package org.opendaylight.controller.raft.journal;
 
-import static io.atomix.storage.journal.SegmentEntry.HEADER_BYTES;
 import static java.util.Objects.requireNonNull;
+import static org.opendaylight.controller.raft.journal.SegmentEntry.HEADER_BYTES;
 
 import java.io.EOFException;
 import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.raft.journal.EntryTooLargeException;
-import org.opendaylight.controller.raft.journal.ToByteBufMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

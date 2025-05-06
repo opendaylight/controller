@@ -14,14 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.atomix.storage.journal;
+package org.opendaylight.controller.raft.journal;
 
 import static java.util.Objects.requireNonNull;
 
 import io.netty.buffer.ByteBuf;
 import org.eclipse.jdt.annotation.NonNull;
-import org.opendaylight.controller.raft.journal.EntryReader;
-import org.opendaylight.controller.raft.journal.FromByteBufMapper;
 
 /**
  * An {@link EntryReader} implementation for {@link SegmentedRaftJournal}.

@@ -14,15 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.atomix.storage.journal;
+package org.opendaylight.controller.raft.journal;
 
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import org.opendaylight.controller.raft.journal.EntryWriter;
-import org.opendaylight.controller.raft.journal.ToByteBufMapper;
 
 /**
  * An {@link EntryWriter} implementation for {@link SegmentedRaftJournal}.
