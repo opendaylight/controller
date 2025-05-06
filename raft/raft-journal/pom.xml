@@ -29,6 +29,13 @@
     <name>${project.artifactId}</name>
     <description>RAFT Journal</description>
 
+    <licenses>
+        <license>
+            <name>Apache-2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
     <properties>
         <maven.javadoc.failOnWarnings>true</maven.javadoc.failOnWarnings>
     </properties>
