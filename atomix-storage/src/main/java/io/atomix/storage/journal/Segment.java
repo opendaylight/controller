@@ -218,7 +218,7 @@ final class Segment {
         checkOpen();
 
         final var reader = new SegmentReader(this, acquire().access().newFileReader(), maxEntrySize);
-        reader.setPosition(JournalSegmentDescriptor.BYTES);
+        reader.setPosition(SegmentDescriptor.BYTES);
         readers.add(reader);
         return reader;
     }
@@ -321,7 +321,7 @@ final class Segment {
         } else {
             // look from very beginning of the segment
             nextIndex = segment.firstIndex();
-            position = JournalSegmentDescriptor.BYTES;
+            position = SegmentDescriptor.BYTES;
         }
 
         final var reader = new SegmentReader(segment, fileReader, maxEntrySize);

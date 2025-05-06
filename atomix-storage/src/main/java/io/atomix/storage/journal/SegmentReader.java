@@ -55,8 +55,7 @@ final class SegmentReader {
      * @param position new position
      */
     void setPosition(final int position) {
-        verify(position >= JournalSegmentDescriptor.BYTES && position < maxSegmentSize,
-            "Invalid position %s", position);
+        verify(position >= SegmentDescriptor.BYTES && position < maxSegmentSize, "Invalid position %s", position);
         this.position = position;
         fileReader.invalidateCache();
     }

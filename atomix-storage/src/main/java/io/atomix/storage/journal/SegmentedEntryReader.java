@@ -75,7 +75,7 @@ sealed class SegmentedEntryReader implements EntryReader permits SegmentedCommit
             currentReader.setPosition(position.position());
         } else {
             nextIndex = currentSegment.firstIndex();
-            currentReader.setPosition(JournalSegmentDescriptor.BYTES);
+            currentReader.setPosition(SegmentDescriptor.BYTES);
         }
         forwardTo(index);
     }

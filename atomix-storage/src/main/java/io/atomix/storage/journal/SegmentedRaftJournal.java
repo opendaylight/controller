@@ -263,7 +263,7 @@ public final class SegmentedRaftJournal implements RaftJournal {
      * @throws IOException when an I/O error occurs
      */
     private @NonNull Segment createSegment(final long segmentId, final long firstIndex) throws IOException {
-        final var descriptor = JournalSegmentDescriptor.builder()
+        final var descriptor = SegmentDescriptor.builder()
             .withId(segmentId)
             .withIndex(firstIndex)
             .withMaxSegmentSize(maxSegmentSize)
@@ -556,8 +556,8 @@ public final class SegmentedRaftJournal implements RaftJournal {
          */
         @SuppressWarnings("checkstyle:hiddenField")
         public Builder withMaxSegmentSize(final int maxSegmentSize) {
-            checkArgument(maxSegmentSize > JournalSegmentDescriptor.BYTES,
-                "maxSegmentSize must be greater than " + JournalSegmentDescriptor.BYTES);
+            checkArgument(maxSegmentSize > SegmentDescriptor.BYTES,
+                "maxSegmentSize must be greater than " + SegmentDescriptor.BYTES);
             this.maxSegmentSize = maxSegmentSize;
             return this;
         }
