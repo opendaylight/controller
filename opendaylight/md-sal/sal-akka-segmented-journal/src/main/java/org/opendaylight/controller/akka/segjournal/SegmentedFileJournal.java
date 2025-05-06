@@ -12,7 +12,6 @@ import static org.apache.pekko.actor.ActorRef.noSender;
 
 import com.typesafe.config.Config;
 import io.atomix.storage.journal.SegmentedJournal;
-import io.atomix.storage.journal.StorageLevel;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -30,6 +29,7 @@ import org.apache.pekko.persistence.PersistentRepr;
 import org.apache.pekko.persistence.journal.japi.AsyncWriteJournal;
 import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.AsyncMessage;
 import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.WriteMessages;
+import org.opendaylight.controller.raft.journal.StorageLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;

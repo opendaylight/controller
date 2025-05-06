@@ -18,7 +18,6 @@ import com.google.common.base.Stopwatch;
 import com.google.common.base.Ticker;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import io.atomix.storage.journal.StorageLevel;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -29,6 +28,7 @@ import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
+import org.opendaylight.controller.raft.journal.StorageLevel;
 
 @SuppressWarnings("RegexpSinglelineJava")
 final class BenchmarkUtils {

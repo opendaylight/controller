@@ -34,6 +34,8 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.raft.journal.EntryReader;
 import org.opendaylight.controller.raft.journal.EntryWriter;
 import org.opendaylight.controller.raft.journal.RaftJournal;
+import org.opendaylight.controller.raft.journal.StorageExhaustedException;
+import org.opendaylight.controller.raft.journal.StorageLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

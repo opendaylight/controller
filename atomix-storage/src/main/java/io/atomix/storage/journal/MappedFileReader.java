@@ -16,6 +16,7 @@
 package io.atomix.storage.journal;
 
 import io.netty.buffer.ByteBuf;
+import org.opendaylight.controller.raft.journal.StorageLevel;
 
 /**
  * A {@link StorageLevel#MAPPED} implementation of {@link FileReader}. Operates on direct mapping of the entire file.

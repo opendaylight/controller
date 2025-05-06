@@ -17,6 +17,7 @@ package io.atomix.storage.journal;
 
 import io.netty.buffer.ByteBuf;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.opendaylight.controller.raft.journal.StorageLevel;
 
 /**
  * {@link FileAccess} for {@link StorageLevel#DISK}.

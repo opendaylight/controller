@@ -22,6 +22,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.raft.journal.EntryTooLargeException;
 import org.opendaylight.controller.raft.journal.ToByteBufMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
