@@ -50,7 +50,7 @@ import org.eclipse.jdt.annotation.Nullable;
  *
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
-public record JournalSegmentDescriptor(
+public record SegmentDescriptor(
         int version,
         long id,
         long index,
@@ -68,10 +68,10 @@ public record JournalSegmentDescriptor(
      * Read a JournalSegmentDescriptor from a {@link ReadableByteChannel}.
      *
      * @param channel channel to read from
-     * @return A {@link JournalSegmentDescriptor}
+     * @return A {@link SegmentDescriptor}
      * @throws IOException if an I/O error occurs or there is not enough data
      */
-    public static @NonNull JournalSegmentDescriptor readFrom(final ReadableByteChannel channel) throws IOException {
+    public static @NonNull SegmentDescriptor readFrom(final ReadableByteChannel channel) throws IOException {
         final var buffer = ByteBuffer.allocate(BYTES);
         final var read = channel.read(buffer);
         if (read != BYTES) {
@@ -79,7 +79,7 @@ public record JournalSegmentDescriptor(
         }
 
         buffer.flip();
-        return new JournalSegmentDescriptor(
+        return new SegmentDescriptor(
             buffer.getInt(),
             buffer.getLong(),
             buffer.getLong(),
@@ -271,8 +271,8 @@ public record JournalSegmentDescriptor(
          *
          * @return The built segment descriptor.
          */
-        public JournalSegmentDescriptor build() {
-            return new JournalSegmentDescriptor(version,
+        public SegmentDescriptor build() {
+            return new SegmentDescriptor(version,
                 checkSet(id, "id"),
                 checkSet(index, "index"),
                 checkSet(maxSegmentSize, "maxSegmentSize"),
