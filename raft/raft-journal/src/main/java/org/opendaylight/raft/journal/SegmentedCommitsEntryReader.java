@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2022 Open Networking Foundation and others.  All rights reserved.
+ * Copyright (c) 2024 PANTHEON.tech, s.r.o. and others.  All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.atomix.storage.journal;
+package org.opendaylight.raft.journal;
 
-import org.opendaylight.raft.journal.StorageLevel;
+import io.netty.buffer.ByteBuf;
 
 /**
- * Memory mapped journal test.
+ * A {@link SegmentedEntryReader} traversing only committed entries.
  */
-public class MappedJournalTest extends AbstractJournalTest {
-    public MappedJournalTest(final int maxSegmentSize) {
-        super(StorageLevel.MAPPED, maxSegmentSize);
+final class SegmentedCommitsEntryReader extends SegmentedEntryReader {
+    SegmentedCommitsEntryReader(final SegmentedRaftJournal journal, final Segment segment) {
+        super(journal, segment);
+    }
+
+    @Override
+    ByteBuf tryAdvance(final long index) {
+        return index <= journal.getCommitIndex() ? super.tryAdvance(index) : null;
     }
 }

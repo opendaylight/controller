@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2022 Open Networking Foundation and others.  All rights reserved.
+ * Copyright (c) 2024 PANTHEON.tech, s.r.o. and others.  All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.atomix.storage.journal;
-
-import org.opendaylight.raft.journal.StorageLevel;
-
 /**
- * Memory mapped journal test.
+ * Storage primitives for a RAFT journal.
  */
-public class MappedJournalTest extends AbstractJournalTest {
-    public MappedJournalTest(final int maxSegmentSize) {
-        super(StorageLevel.MAPPED, maxSegmentSize);
-    }
-}
+@org.osgi.annotation.bundle.Export
+package org.opendaylight.raft.journal;

@@ -43,7 +43,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.AsyncMessage;
 import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.WriteMessages;
-import org.opendaylight.controller.raft.journal.StorageLevel;
+import org.opendaylight.raft.journal.StorageLevel;
 import scala.concurrent.Future;
 
 @ExtendWith(MockitoExtension.class)
