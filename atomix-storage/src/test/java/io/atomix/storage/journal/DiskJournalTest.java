@@ -15,6 +15,8 @@
  */
 package io.atomix.storage.journal;
 
+import org.opendaylight.controller.raft.journal.StorageLevel;
+
 /**
  * Disk journal test.
  */

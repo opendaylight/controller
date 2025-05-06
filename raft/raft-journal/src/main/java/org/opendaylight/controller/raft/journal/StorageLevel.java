@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.atomix.storage.journal;
+package org.opendaylight.controller.raft.journal;
 
 /**
  * Storage level configuration values which control how logs are stored on disk or in memory.

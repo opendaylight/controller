@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.atomix.storage.journal;
+package org.opendaylight.controller.raft.journal;
 
 import java.io.IOException;
 
 /**
- * Exception thrown when storage runs out of space.
+ * Exception thrown when an entry being stored is too large.
  */
-public final class StorageExhaustedException extends IOException {
+public final class EntryTooLargeException extends IOException {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
-    public StorageExhaustedException(final String message) {
-        super(message);
+    public EntryTooLargeException(final String message, final Throwable cause) {
+        super(message, cause);
     }
 }
