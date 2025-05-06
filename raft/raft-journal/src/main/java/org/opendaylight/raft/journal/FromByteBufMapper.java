@@ -13,20 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.opendaylight.raft.journal;
+
+import io.netty.buffer.ByteBuf;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
- * Storage primitives for a RAFT journal.
+ * Interface for transforming bytes into their internal representation.
+ *
+ * @param <T> Internal representation type
  */
-module org.opendaylight.raft.journal {
-    exports org.opendaylight.raft.journal;
-
-    requires transitive io.netty.buffer;
-    // TODO: ByteBuf implements ReferenceCounted and therefore netty-buffer
-    //       should contain this
-    requires transitive io.netty.common;
-    requires com.google.common;
-    requires org.slf4j;
-
-    // Annotations
-    requires static transitive org.eclipse.jdt.annotation;
-    requires static org.osgi.annotation.bundle;
+@NonNullByDefault
+@FunctionalInterface
+public interface FromByteBufMapper<T> {
+    /**
+     * Converts the contents of a {@link ByteBuf} to an object.
+     *
+     * @param index entry index
+     * @param bytes entry bytes
+     * @return resulting object
+     */
+    T bytesToObject(long index, ByteBuf bytes);
 }

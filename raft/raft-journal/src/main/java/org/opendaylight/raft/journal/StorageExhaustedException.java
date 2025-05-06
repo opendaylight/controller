@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2022 Open Networking Foundation and others.  All rights reserved.
+ * Copyright (c) 2025 PANTHEON.tech, s.r.o. and others.  All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.atomix.storage.journal;
+package org.opendaylight.raft.journal;
 
-import org.opendaylight.raft.journal.StorageLevel;
+import java.io.IOException;
 
 /**
- * Memory mapped journal test.
+ * Exception thrown when storage runs out of space.
  */
-public class MappedJournalTest extends AbstractJournalTest {
-    public MappedJournalTest(final int maxSegmentSize) {
-        super(StorageLevel.MAPPED, maxSegmentSize);
+public final class StorageExhaustedException extends IOException {
+    @java.io.Serial
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * Default constructor.
+     *
+     * @param message the message
+     */
+    public StorageExhaustedException(final String message) {
+        super(message);
     }
 }

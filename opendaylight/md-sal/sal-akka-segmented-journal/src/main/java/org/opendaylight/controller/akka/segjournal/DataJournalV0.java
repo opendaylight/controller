@@ -26,8 +26,8 @@ import org.opendaylight.controller.akka.segjournal.DataJournalEntry.ToPersistenc
 import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.ReplayMessages;
 import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.WriteMessages;
 import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.WrittenMessages;
-import org.opendaylight.controller.raft.journal.SegmentedRaftJournal;
-import org.opendaylight.controller.raft.journal.StorageLevel;
+import org.opendaylight.raft.journal.SegmentedRaftJournal;
+import org.opendaylight.raft.journal.StorageLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.jdk.javaapi.CollectionConverters;

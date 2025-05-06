@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2022 Open Networking Foundation and others.  All rights reserved.
+ * Copyright 2015-2022 Open Networking Foundation and others.  All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.atomix.storage.journal;
-
-import org.opendaylight.raft.journal.StorageLevel;
+package org.opendaylight.raft.journal;
 
 /**
- * Memory mapped journal test.
+ * Storage level configuration values which control how logs are stored on disk or in memory.
  */
-public class MappedJournalTest extends AbstractJournalTest {
-    public MappedJournalTest(final int maxSegmentSize) {
-        super(StorageLevel.MAPPED, maxSegmentSize);
-    }
+public enum StorageLevel {
+    /**
+     * Stores data in a memory-mapped file.
+     */
+    MAPPED,
+    /**
+     * Stores data on disk.
+     */
+    DISK
 }
