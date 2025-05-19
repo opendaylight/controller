@@ -51,14 +51,14 @@ public final class DisabledRaftStorage extends RaftStorage implements ImmediateD
 
     @Override
     public <T extends StateSnapshot> void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
-            final T snapshot, final StateSnapshot.Writer<T> writer, final RaftCallback<Instant> callback) {
+            final @Nullable T snapshot, final StateSnapshot.Writer<T> writer, final RaftCallback<Instant> callback) {
         final var timestamp = Instant.now();
         executeInSelf.executeInSelf(() -> callback.invoke(null, timestamp));
     }
 
     @Override
     public <T extends StateSnapshot> void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
-            final T snapshot, final StateSnapshot.Writer<T> writer, final Instant timestamp) {
+            final @Nullable T snapshot, final StateSnapshot.Writer<T> writer, final Instant timestamp) {
         // No-op
     }
 }

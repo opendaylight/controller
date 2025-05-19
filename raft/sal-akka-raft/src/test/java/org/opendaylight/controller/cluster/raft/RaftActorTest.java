@@ -1003,7 +1003,7 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals("getLastAppliedTerm", term, replySnapshot.getLastAppliedTerm());
         assertEquals("getLastIndex", 2L, replySnapshot.getLastIndex());
         assertEquals("getLastTerm", term, replySnapshot.getLastTerm());
-        assertSame("getState", stateSnapshot, replySnapshot.getState());
+        assertSame("getState", stateSnapshot, replySnapshot.state());
         assertEquals("getUnAppliedEntries size", 1, replySnapshot.getUnAppliedEntries().size());
         assertEquals("UnApplied entry index ", 2L, replySnapshot.getUnAppliedEntries().get(0).index());
 
@@ -1022,7 +1022,7 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals("getLastAppliedTerm", -1L, replySnapshot.getLastAppliedTerm());
         assertEquals("getLastIndex", -1L, replySnapshot.getLastIndex());
         assertEquals("getLastTerm", -1L, replySnapshot.getLastTerm());
-        assertEquals("getState type", EmptyState.INSTANCE, replySnapshot.getState());
+        assertNull("getState type", replySnapshot.state());
         assertEquals("getUnAppliedEntries size", 0, replySnapshot.getUnAppliedEntries().size());
 
         TEST_LOG.info("testGetSnapshot ending");
@@ -1067,7 +1067,7 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals("getLastAppliedTerm", snapshot.getLastAppliedTerm(), savedSnapshot.getLastAppliedTerm());
         assertEquals("getLastIndex", snapshot.getLastIndex(), savedSnapshot.getLastIndex());
         assertEquals("getLastTerm", snapshot.getLastTerm(), savedSnapshot.getLastTerm());
-        assertEquals("getState", snapshot.getState(), savedSnapshot.getState());
+        assertEquals("getState", snapshot.state(), savedSnapshot.state());
         assertEquals("getUnAppliedEntries", snapshot.getUnAppliedEntries(), savedSnapshot.getUnAppliedEntries());
 
         verify(mockRaftActor.snapshotCohortDelegate, timeout(5000)).applySnapshot(any());
