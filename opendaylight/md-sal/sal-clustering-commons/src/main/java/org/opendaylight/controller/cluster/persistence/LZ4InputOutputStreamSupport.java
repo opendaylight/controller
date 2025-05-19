@@ -22,6 +22,7 @@ import org.opendaylight.raft.spi.StreamSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Deprecated(since = "11.0.0", forRemoval = true)
 final class LZ4InputOutputStreamSupport extends InputOutputStreamFactory {
     private static final Logger LOG = LoggerFactory.getLogger(LZ4InputOutputStreamSupport.class);
 

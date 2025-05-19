@@ -57,6 +57,7 @@ import scala.concurrent.Future;
  *
  * @author Thomas Pantelis
  */
+@Deprecated(since = "11.0.0", forRemoval = true)
 public final class LocalSnapshotStore extends SnapshotStore {
     private static final Logger LOG = LoggerFactory.getLogger(LocalSnapshotStore.class);
     private static final int PERSISTENCE_ID_START_INDEX = "snapshot-".length();
