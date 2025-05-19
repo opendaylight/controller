@@ -24,6 +24,7 @@ import org.scalatestplus.junit.JUnitRunner;
  * @author Thomas Pantelis
  */
 @RunWith(JUnitRunner.class)
+@Deprecated(since = "11.0.0", forRemoval = true)
 public class LocalSnapshotStoreSpecTest extends SnapshotStoreSpec {
     @java.io.Serial
     private static final long serialVersionUID = 1L;

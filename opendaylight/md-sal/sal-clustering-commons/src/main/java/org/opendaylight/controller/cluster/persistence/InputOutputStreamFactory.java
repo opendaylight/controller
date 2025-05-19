@@ -26,6 +26,7 @@ import org.opendaylight.raft.spi.StreamSource;
 /**
  * Support for opening {@link InputStream}s -- be it {@link #simple()} or {@link #lz4(Lz4BlockSize)}.
  */
+@Deprecated(since = "11.0.0", forRemoval = true)
 abstract sealed class InputOutputStreamFactory permits LZ4InputOutputStreamSupport, PlainInputOutputStreamSupport {
     InputOutputStreamFactory() {
         // Hidden on purpose

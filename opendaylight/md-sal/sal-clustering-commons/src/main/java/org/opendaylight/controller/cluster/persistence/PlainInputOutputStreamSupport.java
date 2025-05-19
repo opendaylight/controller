@@ -14,6 +14,7 @@ import java.io.OutputStream;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.raft.spi.StreamSource;
 
+@Deprecated(since = "11.0.0", forRemoval = true)
 final class PlainInputOutputStreamSupport extends InputOutputStreamFactory {
     static final @NonNull PlainInputOutputStreamSupport INSTANCE = new PlainInputOutputStreamSupport();
 

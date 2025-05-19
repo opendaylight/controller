@@ -50,6 +50,7 @@ import org.mockito.junit.MockitoJUnitRunner;
  * @author Thomas Pantelis
  */
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
+@Deprecated(since = "11.0.0", forRemoval = true)
 public class LocalSnapshotStoreTest {
     private static final String PERSISTENCE_ID = "member-1-shard-default-config";
     private static final String PREFIX_BASED_SHARD_PERSISTENCE_ID = "member-1-shard-id-ints!-config";
