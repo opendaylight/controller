@@ -1476,8 +1476,7 @@ public class ShardTest extends AbstractShardTest {
             TestShard(final Path stateDir, final AbstractBuilder<?, ?> builder) {
                 super(stateDir, builder);
 
-                final var delegate = persistence();
-                setPersistence(new ForwardingDataPersistenceProvider() {
+                overridePersistence((delegate, actor) -> new ForwardingDataPersistenceProvider() {
                     @Override
                     @NonNullByDefault
                     public <T extends StateSnapshot> void saveSnapshot(final RaftSnapshot raftSnapshot,

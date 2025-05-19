@@ -442,7 +442,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         final var leaderCollectorActor = newLeaderCollectorActor(leaderRaftActor);
 
         // Intercept the commit request to delay its completion
-        final var leaderPersistence = CapturingDataPersistenceProvider.installTo(leaderRaftActor);
+        final var leaderPersistence = leaderRaftActor.overridePersistence(CapturingDataPersistenceProvider::new);
 
         leaderActor.tell(new InitiateCaptureSnapshot(), leaderActor);
 
@@ -450,7 +450,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
 
         leaderActor.tell(new AddServer(NEW_SERVER_ID, newFollowerRaftActor.path().toString(), true), testKit.getRef());
 
-        leaderRaftActor.setPersistence(leaderPersistence.delegate());
+        leaderRaftActor.overridePersistence((persistence, actor) -> leaderPersistence.delegate());
         capturedCallback.complete();
 
         AddServerReply addServerReply = testKit.expectMsgClass(Duration.ofSeconds(5), AddServerReply.class);
@@ -489,8 +489,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setElectionTimeoutFactor(1);
 
         // Override persistence to never complete snapshot
-        final var leaderDelegate = leaderRaftActor.persistence();
-        leaderRaftActor.setPersistence(new ForwardingDataPersistenceProvider() {
+        leaderRaftActor.overridePersistence((delegate, actor) -> new ForwardingDataPersistenceProvider() {
             @Override
             @NonNullByDefault
             public <T extends StateSnapshot> void saveSnapshot(final RaftSnapshot raftSnapshot,
@@ -501,7 +500,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
 
             @Override
             protected DataPersistenceProvider delegate() {
-                return leaderDelegate;
+                return delegate;
             }
         });
 
@@ -534,7 +533,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setElectionTimeoutFactor(100);
 
         // Override persistence to prevent snapshot from completing
-        final var leaderPersistence = CapturingDataPersistenceProvider.installTo(leaderRaftActor);
+        final var leaderPersistence = leaderRaftActor.overridePersistence(CapturingDataPersistenceProvider::new);
 
         leaderActor.tell(new InitiateCaptureSnapshot(), leaderActor);
 
@@ -549,7 +548,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         // snapshot completes. This will prevent the invalid snapshot from completing and fail the isCapturing assertion
         // below.
         leaderRaftActor.setDropMessageOfType(null);
-        leaderRaftActor.setPersistence(new TestDataProvider(runnable -> {
+        leaderRaftActor.overridePersistence((delegate, actor) -> new TestDataProvider(runnable -> {
             LOG.info("Ignoring {}", runnable);
         }));
 

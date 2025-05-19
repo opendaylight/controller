@@ -55,16 +55,10 @@ final class CapturingDataPersistenceProvider extends ForwardingDataPersistencePr
     private final @NonNull DataPersistenceProvider delegate;
     private final @NonNull ExecuteInSelfActor actor;
 
-    private CapturingDataPersistenceProvider(final RaftActor actor) {
-        this.actor = requireNonNull(actor);
-        delegate = actor.persistence();
-    }
-
     @NonNullByDefault
-    static CapturingDataPersistenceProvider installTo(final RaftActor actor) {
-        final var ret = new CapturingDataPersistenceProvider(actor);
-        actor.setPersistence(ret);
-        return ret;
+    CapturingDataPersistenceProvider(final DataPersistenceProvider delegate, final ExecuteInSelfActor actor) {
+        this.delegate = requireNonNull(delegate);
+        this.actor = requireNonNull(actor);
     }
 
     @Override

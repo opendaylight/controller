@@ -67,10 +67,11 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
             snapshotCohortDelegate = builder.snapshotCohort;
         }
 
-        if (builder.dataPersistenceProvider == null) {
-            setPersistence(builder.persistent.isPresent() ? builder.persistent.orElseThrow() : true);
+        final var persistence = builder.dataPersistenceProvider;
+        if (persistence == null) {
+            setPersistence(builder.persistent.orElse(Boolean.TRUE));
         } else {
-            setPersistence(builder.dataPersistenceProvider);
+            overridePersistence((delegate, actor) -> persistence);
         }
 
         roleChangeNotifier = builder.roleChangeNotifier;

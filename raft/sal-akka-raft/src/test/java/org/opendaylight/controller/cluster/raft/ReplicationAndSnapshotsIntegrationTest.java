@@ -321,7 +321,8 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         expSnapshotState.add(payload6);
 
         // Delay the CaptureSnapshot message to the leader actor.
-        final var leaderPersistence = CapturingDataPersistenceProvider.installTo(leaderActor.underlyingActor());
+        final var leaderPersistence = leaderActor.underlyingActor()
+            .overridePersistence(CapturingDataPersistenceProvider::new);
 
         // Send the payload.
         payload7 = sendPayloadData(leaderActor, "seven");

@@ -1314,9 +1314,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         final var executorService = Executors.newSingleThreadExecutor(
             Thread.ofPlatform().name("testApplyStateRace-executor").factory());
-        final var delegate = leaderActor.persistence();
-
-        leaderActor.setPersistence(new ForwardingDataPersistenceProvider() {
+        leaderActor.overridePersistence((delegate, actor) -> new ForwardingDataPersistenceProvider() {
             @Override
             public void startPersistEntry(final ReplicatedLogEntry entry, final Consumer<ReplicatedLogEntry> callback) {
                 // needs to be executed from another thread to simulate the persistence actor calling this callback

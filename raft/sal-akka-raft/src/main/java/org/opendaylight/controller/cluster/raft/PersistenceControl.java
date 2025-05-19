@@ -88,7 +88,7 @@ final class PersistenceControl extends ForwardingDataPersistenceProvider {
         delegate = disabledStorage;
     }
 
-    @Deprecated
+    @VisibleForTesting
     void setDelegate(final DataPersistenceProvider delegate) {
         this.delegate = requireNonNull(delegate);
     }
