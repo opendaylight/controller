@@ -760,7 +760,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         actorContext.getReplicatedLog().clear();
 
         final var mockState = ByteState.of(new byte[] { 1, 2, 3 });
-        actorContext.getSnapshotManager().setSnapshotCohort((ByteStateSnapshotCohort) () -> mockState);
+        actorContext.createSnapshotManager((ByteStateSnapshotCohort) () -> mockState);
 
         leader = new Leader(actorContext);
         actorContext.setCurrentBehavior(leader);

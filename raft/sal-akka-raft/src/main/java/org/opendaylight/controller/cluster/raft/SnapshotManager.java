@@ -225,17 +225,19 @@ public final class SnapshotManager {
     private static final Logger LOG = LoggerFactory.getLogger(SnapshotManager.class);
 
     private final @NonNull RaftActorContext context;
+    private final @NonNull RaftActorSnapshotCohort<?> snapshotCohort;
 
-    private @NonNull RaftActorSnapshotCohort<?> snapshotCohort = NoopRaftActorSnapshotCohort.INSTANCE;
     private @NonNull Task task = Idle.INSTANCE;
 
     /**
      * Constructs an instance.
      *
-     * @param context the RaftActorContext
+     * @param context the {@link RaftActorContext}
+     * @param snapshotCohort the {@link RaftActorSnapshotCohort}
      */
-    SnapshotManager(final RaftActorContext context) {
+    SnapshotManager(final RaftActorContext context, final RaftActorSnapshotCohort<?> snapshotCohort) {
         this.context = requireNonNull(context);
+        this.snapshotCohort = requireNonNull(snapshotCohort);
     }
 
     @NonNull String memberId() {
@@ -648,11 +650,6 @@ public final class SnapshotManager {
             currentBehavior.setReplicatedToAllIndex(tempMin);
         }
         return -1;
-    }
-
-    @VisibleForTesting
-    public void setSnapshotCohort(final RaftActorSnapshotCohort<?> snapshotCohort) {
-        this.snapshotCohort = requireNonNull(snapshotCohort);
     }
 
     long getLastSequenceNumber() {

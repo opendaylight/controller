@@ -100,13 +100,11 @@ public class SnapshotManagerTest extends AbstractActorTest {
         doReturn(mockDataPersistenceProvider).when(mockRaftActorContext).snapshotStore();
         doReturn(mockRaftActorBehavior).when(mockRaftActorContext).getCurrentBehavior();
 
-        snapshotManager = new SnapshotManager(mockRaftActorContext);
+        snapshotManager = new SnapshotManager(mockRaftActorContext, mockCohort);
         factory = new TestActorFactory(getSystem());
 
         actorRef = factory.createActor(MessageCollectorActor.props(), factory.generateActorId("test-"));
         doReturn(actorRef).when(mockRaftActorContext).getActor();
-
-        snapshotManager.setSnapshotCohort(mockCohort);
     }
 
     @After

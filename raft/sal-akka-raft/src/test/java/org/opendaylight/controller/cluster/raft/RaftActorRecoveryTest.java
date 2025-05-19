@@ -81,7 +81,7 @@ class RaftActorRecoveryTest {
     private ActorRef mockActorRef;
     private ActorSystem mockActorSystem;
     private LocalAccess localAccess;
-    private RaftActorContext context;
+    private RaftActorContextImpl context;
 
     private RaftActorRecoverySupport support;
     private RaftActorRecovery recovery;
@@ -183,7 +183,7 @@ class RaftActorRecoveryTest {
         int recoverySnapshotInterval = 3;
         int numberOfEntries = 5;
         configParams.setRecoverySnapshotIntervalSeconds(recoverySnapshotInterval);
-        context.getSnapshotManager().setSnapshotCohort(mockSnapshotCohort);
+        context.createSnapshotManager(mockSnapshotCohort);
         doReturn(new MockSnapshotState(List.of())).when(mockSnapshotCohort).takeSnapshot();
 
         try (var executor = Executors.newSingleThreadScheduledExecutor()) {

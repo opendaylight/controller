@@ -7,9 +7,11 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.VerifyException;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.util.Collection;
@@ -295,10 +297,15 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     public SnapshotManager getSnapshotManager() {
-        if (snapshotManager == null) {
-            snapshotManager = new SnapshotManager(this);
+        return verifyNotNull(snapshotManager);
+    }
+
+    @VisibleForTesting
+    public final void createSnapshotManager(final RaftActorSnapshotCohort<?> snapshotCohort) {
+        if (snapshotManager != null) {
+            throw new VerifyException("Snapshot manager already initialized to " + snapshotManager);
         }
-        return snapshotManager;
+        snapshotManager = new SnapshotManager(this, snapshotCohort);
     }
 
     @Override

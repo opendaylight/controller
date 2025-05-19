@@ -175,7 +175,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         super.preStart();
 
         persistenceControl.start();
-        context.getSnapshotManager().setSnapshotCohort(getRaftActorSnapshotCohort());
+        context.createSnapshotManager(getRaftActorSnapshotCohort());
         snapshotSupport = newRaftActorSnapshotMessageSupport();
         votingConfigSupport = new RaftActorVotingConfigSupport(this);
     }
