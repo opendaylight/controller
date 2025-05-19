@@ -36,6 +36,7 @@ import org.apache.pekko.dispatch.Dispatchers;
 import org.apache.pekko.testkit.TestActorRef;
 import org.apache.pekko.testkit.javadsl.TestKit;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -493,7 +494,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
             @Override
             @NonNullByDefault
             public <T extends StateSnapshot> void saveSnapshot(final RaftSnapshot raftSnapshot,
-                    final EntryInfo lastIncluded, final T snapshot, final StateSnapshot.Writer<T> writer,
+                    final EntryInfo lastIncluded, final @Nullable T snapshot, final StateSnapshot.Writer<T> writer,
                     final RaftCallback<Instant> callback) {
                 // Never completes
             }

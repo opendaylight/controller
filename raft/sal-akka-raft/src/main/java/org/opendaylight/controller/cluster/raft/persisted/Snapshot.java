@@ -38,7 +38,7 @@ public final class Snapshot implements Serializable {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
-    private final State state;
+    private final @Nullable State state;
     private final List<ReplicatedLogEntry> unAppliedEntries;
     private final long lastIndex;
     private final long lastTerm;
@@ -47,10 +47,10 @@ public final class Snapshot implements Serializable {
     private final @NonNull TermInfo termInfo;
     private final @Nullable VotingConfig votingConfig;
 
-    private Snapshot(final State state, final List<ReplicatedLogEntry> unAppliedEntries, final long lastIndex,
+    private Snapshot(final @Nullable State state, final List<ReplicatedLogEntry> unAppliedEntries, final long lastIndex,
             final long lastTerm, final long lastAppliedIndex, final long lastAppliedTerm, final TermInfo termInfo,
             final VotingConfig votingConfig) {
-        this.state = requireNonNull(state);
+        this.state = state;
         this.unAppliedEntries = requireNonNull(unAppliedEntries);
         this.lastIndex = lastIndex;
         this.lastTerm = lastTerm;
@@ -60,7 +60,7 @@ public final class Snapshot implements Serializable {
         this.votingConfig = votingConfig;
     }
 
-    public static @NonNull Snapshot create(final State state, final List<ReplicatedLogEntry> entries,
+    public static @NonNull Snapshot create(final @Nullable State state, final List<ReplicatedLogEntry> entries,
             final long lastIndex, final long lastTerm, final long lastAppliedIndex, final long lastAppliedTerm,
             final TermInfo termInfo, final VotingConfig serverConfig) {
         return new Snapshot(state, entries, lastIndex, lastTerm, lastAppliedIndex, lastAppliedTerm, termInfo,
@@ -68,7 +68,7 @@ public final class Snapshot implements Serializable {
     }
 
     public static @NonNull Snapshot ofRaft(final TermInfo termInfo, final RaftSnapshot raftSnapshot,
-            final EntryMeta lastIncluded, final State state) {
+            final EntryMeta lastIncluded, final @Nullable State state) {
         final var unapplied = raftSnapshot.unappliedEntries();
         return new Snapshot(state, unapplied,
             unapplied.isEmpty() ? lastIncluded.index() : unapplied.getLast().index(),
@@ -82,7 +82,7 @@ public final class Snapshot implements Serializable {
             lastIncluded.term(), termInfo, serverConfig);
     }
 
-    public State getState() {
+    public @Nullable State state() {
         return state;
     }
 
