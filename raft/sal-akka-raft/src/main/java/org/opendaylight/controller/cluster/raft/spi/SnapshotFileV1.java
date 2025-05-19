@@ -114,7 +114,7 @@ final class SnapshotFileV1 implements SnapshotFile {
     // 0x02 reserved for serdes method
     // 0x03 reserved for serdes method
 
-    private final Path file;
+    private final Path path;
     private final EntryInfo lastIncluded;
     private final Instant timestamp;
     private final CompressionType entryCompress;
@@ -122,16 +122,16 @@ final class SnapshotFileV1 implements SnapshotFile {
     private final FileStreamSource serverStream;
     private final FileStreamSource stateStream;
 
-    SnapshotFileV1(final Path file, final EntryInfo lastIncluded, final Instant timestamp,
+    SnapshotFileV1(final Path path, final EntryInfo lastIncluded, final Instant timestamp,
             final CompressionType entryCompress, final CompressionType stateCompress,
             final long sso, final long limit) {
-        this.file = requireNonNull(file);
+        this.path = requireNonNull(path);
         this.lastIncluded = requireNonNull(lastIncluded);
         this.timestamp = requireNonNull(timestamp);
         this.entryCompress = requireNonNull(entryCompress);
         this.stateCompress = requireNonNull(stateCompress);
-        serverStream = new FileStreamSource(file, 0, sso);
-        stateStream = new FileStreamSource(file, sso, limit);
+        serverStream = new FileStreamSource(path, 0, sso);
+        stateStream = new FileStreamSource(path, sso, limit);
     }
 
     static <T extends StateSnapshot> Closeable createNew(final Path file, final Instant timestamp,
@@ -355,6 +355,11 @@ final class SnapshotFileV1 implements SnapshotFile {
     }
 
     @Override
+    public Path path() {
+        return path;
+    }
+
+    @Override
     public EntryInfo lastIncluded() {
         return lastIncluded;
     }
@@ -430,7 +435,7 @@ final class SnapshotFileV1 implements SnapshotFile {
         return MoreObjects.toStringHelper(this)
             .add("lastIncluded", lastIncluded)
             .add("timestamp", timestamp)
-            .add("file", file)
+            .add("file", path)
             .add("size", stateStream.limit())
             .add("entryCompress", entryCompress)
             .add("stateCompress", stateCompress)

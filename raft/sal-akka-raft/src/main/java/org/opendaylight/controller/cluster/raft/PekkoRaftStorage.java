@@ -216,8 +216,25 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
     }
 
     @Override
-    public void deleteSnapshots(final long maxTimestamp) {
-        actor.deleteSnapshots(maxTimestamp);
+    public void retainSnapshots(final Instant firstRetained) {
+        final List<SnapshotFile> files;
+        try {
+            files = listFiles();
+        } catch (IOException e) {
+            LOG.warn("{}: failed to list snapshots, will retry next time", memberId, e);
+            return;
+        }
+
+        for (var file : files) {
+            if (firstRetained.compareTo(file.timestamp()) > 0) {
+                try {
+                    // we should not have concurrent access, but it is okay if the file disappears independently
+                    Files.deleteIfExists(file.path());
+                } catch (IOException e) {
+                    LOG.warn("{}: failed to delete {}, will retry next time", memberId, file, e);
+                }
+            }
+        }
     }
 
     @Override

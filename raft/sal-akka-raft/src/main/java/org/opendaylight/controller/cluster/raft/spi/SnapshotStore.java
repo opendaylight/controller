@@ -70,12 +70,12 @@ public interface SnapshotStore {
         @Nullable T snapshot, StateSnapshot.Writer<T> writer, Instant timestamp) throws IOException;
 
     /**
-     * Deletes snapshots up to and including a time.
+     * Deletes all snapshots older than a timestamp.
      *
-     * @param maxTimestamp the timestamp, in Epoch milliseconds
+     * @param firstRetained the cut-off timestamp
      */
     // FIXME: integrate into saveSnapshot()
-    void deleteSnapshots(long maxTimestamp);
+    void retainSnapshots(Instant firstRetained);
 
     /**
      * Receive and potentially handle a {@link SnapshotProtocol} response.

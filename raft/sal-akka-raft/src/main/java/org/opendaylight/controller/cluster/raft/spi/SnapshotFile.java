@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft.spi;
 
 import com.google.common.annotations.Beta;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.time.Instant;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -25,6 +26,11 @@ public interface SnapshotFile extends InstallableSnapshot {
      * @return the instant this file was written
      */
     Instant timestamp();
+
+    /**
+     * {@return this file's {@link Path}}
+     */
+    Path path();
 
     /**
      * Returns the {@link RaftSnapshot} stored in this file.

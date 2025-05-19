@@ -11,6 +11,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.List;
 import org.apache.pekko.dispatch.ControlMessage;
 import org.eclipse.jdt.annotation.NonNull;
@@ -409,7 +410,7 @@ public final class SnapshotManager {
                     rollback();
                 } else {
                     LOG.info("{}: snapshot is durable as of {}", memberId(), timestamp);
-                    commit(lastSeq, timestamp.toEpochMilli());
+                    commit(lastSeq, timestamp);
                 }
             });
     }
@@ -507,8 +508,9 @@ public final class SnapshotManager {
      * @param sequenceNumber the sequence number of the persisted snapshot
      * @param timestamp the time stamp of the persisted snapshot
      */
+    @NonNullByDefault
     @VisibleForTesting
-    void commit(final long sequenceNumber, final long timestamp) {
+    void commit(final long sequenceNumber, final Instant timestamp) {
         if (!(task instanceof Persist persist)) {
             LOG.debug("{}: commit should not be called in state {}", memberId(), task);
             return;
@@ -517,7 +519,7 @@ public final class SnapshotManager {
         LOG.debug("{}: Snapshot success -  sequence number: {}", memberId(), sequenceNumber);
         final var lastSequenceNumber = commit(persist);
 
-        context.snapshotStore().deleteSnapshots(timestamp - 1);
+        context.snapshotStore().retainSnapshots(timestamp);
         context.entryStore().deleteMessages(lastSequenceNumber);
 
         snapshotComplete();

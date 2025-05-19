@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft.spi;
 import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.function.Consumer;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SnapshotProtocol;
@@ -60,7 +61,7 @@ public interface ImmediateDataPersistenceProvider extends DataPersistenceProvide
     }
 
     @Override
-    default void deleteSnapshots(final long maxTimestamp) {
+    default void retainSnapshots(final Instant firstRetained) {
         // no-op
     }
 

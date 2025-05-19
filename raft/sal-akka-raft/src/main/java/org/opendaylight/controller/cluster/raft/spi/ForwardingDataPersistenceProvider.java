@@ -84,8 +84,8 @@ public abstract class ForwardingDataPersistenceProvider implements DataPersisten
     }
 
     @Override
-    public void deleteSnapshots(final long maxTimestamp) {
-        delegate().deleteSnapshots(maxTimestamp);
+    public void retainSnapshots(final Instant firstRetained) {
+        delegate().retainSnapshots(firstRetained);
     }
 
     @Override

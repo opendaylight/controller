@@ -33,6 +33,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -600,7 +601,7 @@ public class RaftActorTest extends AbstractActorTest {
         }
 
         // The commit is needed to complete the snapshot creation process
-        leaderActor.getRaftActorContext().getSnapshotManager().commit(-1, -1);
+        leaderActor.getRaftActorContext().getSnapshotManager().commit(-1, Instant.MIN);
         assertFalse(leaderActor.getRaftActorContext().getSnapshotManager().isCapturing());
 
         // capture snapshot reply should remove the snapshotted entries only
@@ -689,7 +690,7 @@ public class RaftActorTest extends AbstractActorTest {
         assertTrue(followerActor.getRaftActorContext().getSnapshotManager().isCapturing());
 
         // The commit is needed to complete the snapshot creation process
-        followerActor.getRaftActorContext().getSnapshotManager().commit(-1, -1);
+        followerActor.getRaftActorContext().getSnapshotManager().commit(-1, Instant.MIN);
 
         // capture snapshot reply should remove the snapshotted entries only till replicatedToAllIndex
         assertEquals(3, followerActor.getReplicatedLog().size()); //indexes 5,6,7 left in the log

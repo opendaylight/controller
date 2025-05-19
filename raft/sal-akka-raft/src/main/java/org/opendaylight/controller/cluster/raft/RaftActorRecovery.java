@@ -207,7 +207,7 @@ class RaftActorRecovery {
         }
 
         LOG.info("{}: local snapshot saved in {}, deleting Pekko-persisted snapshots", memberId(), sw.stop());
-        actor.deleteSnapshots(timestamp.toEpochMilli());
+        actor.nukePekkoSnapshots();
     }
 
     private void initializeLog(final Instant timestamp, final Snapshot recovered) {

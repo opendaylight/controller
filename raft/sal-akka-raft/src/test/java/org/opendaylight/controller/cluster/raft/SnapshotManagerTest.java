@@ -23,6 +23,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
+import java.time.Instant;
 import java.util.List;
 import org.apache.pekko.actor.ActorRef;
 import org.eclipse.jdt.annotation.NonNull;
@@ -387,7 +388,8 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         assertTrue(snapshotManager.isCapturing());
 
-        snapshotManager.commit(100L, 1234L);
+        final var timestamp = Instant.ofEpochMilli(1234);
+        snapshotManager.commit(100L, timestamp);
 
         assertFalse(snapshotManager.isCapturing());
 
@@ -395,7 +397,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         verify(mockDataPersistenceProvider).deleteMessages(50L);
 
-        verify(mockDataPersistenceProvider).deleteSnapshots(1233L);
+        verify(mockDataPersistenceProvider).retainSnapshots(timestamp);
 
         MessageCollectorActor.expectFirstMatching(actorRef, SnapshotComplete.class);
     }
@@ -405,24 +407,24 @@ public class SnapshotManagerTest extends AbstractActorTest {
         // when replicatedToAllIndex = -1
         snapshotManager.captureToInstall(EntryInfo.of(9, 6), -1, "xyzzy");
 
-        snapshotManager.commit(100L, 0);
+        snapshotManager.commit(100L, Instant.EPOCH);
 
         verify(mockReplicatedLog, never()).snapshotCommit();
 
         verify(mockDataPersistenceProvider, never()).deleteMessages(100L);
 
-        verify(mockDataPersistenceProvider, never()).deleteSnapshots(anyLong());
+        verify(mockDataPersistenceProvider, never()).retainSnapshots(Instant.EPOCH);
     }
 
     @Test
     public void testCommitBeforeCapture() {
-        snapshotManager.commit(100L, 0);
+        snapshotManager.commit(100L, Instant.EPOCH);
 
         verify(mockReplicatedLog, never()).snapshotCommit();
 
         verify(mockDataPersistenceProvider, never()).deleteMessages(anyLong());
 
-        verify(mockDataPersistenceProvider, never()).deleteSnapshots(anyLong());
+        verify(mockDataPersistenceProvider, never()).retainSnapshots(Instant.EPOCH);
 
     }
 
@@ -434,15 +436,15 @@ public class SnapshotManagerTest extends AbstractActorTest {
         doReturn(ByteState.empty()).when(mockCohort).takeSnapshot();
         snapshotManager.capture(EntryInfo.of(9, 6), -1);
 
-        snapshotManager.commit(100L, 0);
+        snapshotManager.commit(100L, Instant.EPOCH);
 
-        snapshotManager.commit(100L, 0);
+        snapshotManager.commit(100L, Instant.EPOCH);
 
         verify(mockReplicatedLog, times(1)).snapshotCommit();
 
         verify(mockDataPersistenceProvider, times(1)).deleteMessages(50L);
 
-        verify(mockDataPersistenceProvider, times(1)).deleteSnapshots(anyLong());
+        verify(mockDataPersistenceProvider, times(1)).retainSnapshots(Instant.EPOCH);
     }
 
     @Test

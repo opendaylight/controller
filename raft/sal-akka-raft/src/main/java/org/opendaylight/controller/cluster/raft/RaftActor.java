@@ -1077,8 +1077,13 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         throw new UnsupportedOperationException();
     }
 
-    final void deleteSnapshots(final long maxTimestamp) {
-        super.deleteSnapshots(SnapshotSelectionCriteria.create(Long.MAX_VALUE, maxTimestamp));
+    /**
+     * Deletes all snapshots from Pekko persistence. Called only from {@link RaftActorRecovery}.
+     */
+    @Deprecated(since = "11.0.0", forRemoval = true)
+    final void nukePekkoSnapshots() {
+        // Note: no constant for criteria as this happens once on startup, hence we do not want to retain it
+        super.deleteSnapshots(SnapshotSelectionCriteria.create(Long.MAX_VALUE, Long.MAX_VALUE));
     }
 
     /**
