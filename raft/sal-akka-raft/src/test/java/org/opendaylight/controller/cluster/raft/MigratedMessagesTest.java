@@ -26,6 +26,7 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
+import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +35,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Pantelis
  */
-public class MigratedMessagesTest extends AbstractActorTest {
+public class MigratedMessagesTest extends AbstractRaftActorTest {
     static final Logger TEST_LOG = LoggerFactory.getLogger(MigratedMessagesTest.class);
 
     private TestActorFactory factory;
@@ -82,32 +83,30 @@ public class MigratedMessagesTest extends AbstractActorTest {
         TEST_LOG.info("testNoSnapshotAfterStartupWithNoMigratedMessages ending");
     }
 
-    private TestActorRef<MockRaftActor> doTestSnapshotAfterStartupWithMigratedMessage(final String id,
-            final boolean persistent, final Consumer<Snapshot> snapshotVerifier,
+    private TestActorRef<MockRaftActor> doTestSnapshotAfterStartupWithMigratedMessage(final String persistenceId,
+            final boolean persistent, final Consumer<SnapshotFile> snapshotVerifier,
             final @NonNull MockSnapshotState snapshotState) {
-        InMemorySnapshotStore.addSnapshotSavedLatch(id);
-        InMemoryJournal.addDeleteMessagesCompleteLatch(id);
+        InMemoryJournal.addDeleteMessagesCompleteLatch(persistenceId);
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
         config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
 
         TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.builder()
-            .id(id)
+            .id(persistenceId)
             .config(config)
             .snapshotCohort((MockRaftActorSnapshotCohort) () -> snapshotState)
             .persistent(Optional.of(persistent))
             .peerAddresses(Map.of("peer", ""))
             .props(stateDir())
-            .withDispatcher(Dispatchers.DefaultDispatcherId()), id);
+            .withDispatcher(Dispatchers.DefaultDispatcherId()), persistenceId);
         MockRaftActor mockRaftActor = raftActorRef.underlyingActor();
 
         mockRaftActor.waitForRecoveryComplete();
 
-        Snapshot snapshot = InMemorySnapshotStore.waitForSavedSnapshot(id, Snapshot.class);
-        snapshotVerifier.accept(snapshot);
+        snapshotVerifier.accept(awaitSnapshot(mockRaftActor));
 
-        InMemoryJournal.waitForDeleteMessagesComplete(id);
+        InMemoryJournal.waitForDeleteMessagesComplete(persistenceId);
 
-        assertEquals("InMemoryJournal size", 0, InMemoryJournal.get(id).size());
+        assertEquals("InMemoryJournal size", 0, InMemoryJournal.get(persistenceId).size());
 
         return raftActorRef;
     }
