@@ -16,16 +16,16 @@ import org.apache.pekko.testkit.TestActorRef;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
 
 abstract class AbstractRaftActorTest extends AbstractActorTest {
-    static final SnapshotFile awaitSnapshot(final RaftActor actor) {
+    static final SnapshotFile awaitSnapshot(final RaftActor<?> actor) {
         return await().atMost(Duration.ofSeconds(5))
             .until(() -> actor.persistence().lastSnapshot(), Objects::nonNull);
     }
 
-    static final SnapshotFile awaitSnapshot(final TestActorRef<? extends RaftActor> actorRef) {
+    static final SnapshotFile awaitSnapshot(final TestActorRef<? extends RaftActor<?>> actorRef) {
         return awaitSnapshot(actorRef.underlyingActor());
     }
 
-    static final SnapshotFile awaitSnapshotNewerThan(final TestActorRef<? extends RaftActor> actorRef,
+    static final SnapshotFile awaitSnapshotNewerThan(final TestActorRef<? extends RaftActor<?>> actorRef,
             final Instant timestamp) {
         return await().atMost(Duration.ofSeconds(5))
             .until(() -> awaitSnapshot(actorRef), snapshot -> timestamp.compareTo(snapshot.timestamp()) < 0);

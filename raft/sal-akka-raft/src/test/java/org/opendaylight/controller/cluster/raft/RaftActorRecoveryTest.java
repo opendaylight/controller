@@ -72,7 +72,7 @@ class RaftActorRecoveryTest {
     @Mock
     private RaftActorRecoveryCohort mockCohort;
     @Mock
-    private RaftActor mockActor;
+    private RaftActor<?> mockActor;
     @Mock
     private RaftActorSnapshotCohort<?> mockSnapshotCohort;
     @TempDir

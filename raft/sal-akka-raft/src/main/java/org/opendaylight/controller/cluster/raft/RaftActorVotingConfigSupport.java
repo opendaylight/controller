@@ -51,7 +51,7 @@ class RaftActorVotingConfigSupport {
     @SuppressWarnings("checkstyle:MemberName")
     private final OperationState IDLE = new Idle();
 
-    private final RaftActor raftActor;
+    private final RaftActor<?> raftActor;
 
     private final RaftActorContext raftContext;
 
@@ -59,7 +59,7 @@ class RaftActorVotingConfigSupport {
 
     private OperationState currentOperationState = IDLE;
 
-    RaftActorVotingConfigSupport(final RaftActor raftActor) {
+    RaftActorVotingConfigSupport(final RaftActor<?> raftActor) {
         this.raftActor = raftActor;
         raftContext = raftActor.getRaftActorContext();
     }
@@ -567,11 +567,11 @@ class RaftActorVotingConfigSupport {
             return clientRequestor;
         }
 
-        void operationComplete(final RaftActor raftActor, final boolean succeeded) {
+        void operationComplete(final RaftActor<?> raftActor, final boolean succeeded) {
             // No-op by default
         }
 
-        boolean includeSelfInNewConfiguration(final RaftActor raftActor) {
+        boolean includeSelfInNewConfiguration(final RaftActor<?> raftActor) {
             return true;
         }
 
@@ -656,7 +656,7 @@ class RaftActorVotingConfigSupport {
         }
 
         @Override
-        void operationComplete(final RaftActor raftActor, final boolean succeeded) {
+        void operationComplete(final RaftActor<?> raftActor, final boolean succeeded) {
             if (peerAddress != null) {
                 raftActor.context().actorSelection(peerAddress).tell(
                         new ServerRemoved(getOperation().getServerId()), raftActor.self());
@@ -664,7 +664,7 @@ class RaftActorVotingConfigSupport {
         }
 
         @Override
-        boolean includeSelfInNewConfiguration(final RaftActor raftActor) {
+        boolean includeSelfInNewConfiguration(final RaftActor<?> raftActor) {
             return !getOperation().getServerId().equals(raftActor.memberId());
         }
 
@@ -694,7 +694,7 @@ class RaftActorVotingConfigSupport {
         }
 
         @Override
-        void operationComplete(final RaftActor raftActor, final boolean succeeded) {
+        void operationComplete(final RaftActor<?> raftActor, final boolean succeeded) {
             // If this leader changed to non-voting we need to step down as leader so we'll try to transfer
             // leadership.
             boolean localServerChangedToNonVoting = Boolean.FALSE.equals(getOperation()

@@ -20,9 +20,9 @@ import org.eclipse.jdt.annotation.NonNull;
 class RaftActorRecoverySupport {
     private final @NonNull RaftActorContext context;
     private final @NonNull RaftActorRecoveryCohort cohort;
-    private final @NonNull RaftActor actor;
+    private final @NonNull RaftActor<?> actor;
 
-    RaftActorRecoverySupport(final @NonNull RaftActor actor, final RaftActorContext context,
+    RaftActorRecoverySupport(final @NonNull RaftActor<?> actor, final RaftActorContext context,
             final RaftActorRecoveryCohort cohort) {
         this.actor = requireNonNull(actor);
         this.context = requireNonNull(context);

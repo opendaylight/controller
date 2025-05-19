@@ -56,7 +56,7 @@ final class PersistenceControl extends ForwardingDataPersistenceProvider {
         delegate = disabledStorage;
     }
 
-    PersistenceControl(final RaftActor raftActor, final Path directory, final CompressionType compression,
+    PersistenceControl(final RaftActor<?> raftActor, final Path directory, final CompressionType compression,
             final Configuration streamConfig) {
         this(new DisabledRaftStorage(raftActor.memberId(), raftActor, directory, compression, streamConfig),
             new PekkoRaftStorage(raftActor, directory, compression, streamConfig));

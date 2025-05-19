@@ -37,12 +37,13 @@ import org.opendaylight.yangtools.concepts.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort, MockRaftActorSnapshotCohort {
+public class MockRaftActor extends RaftActor<@NonNull MockSnapshotState>
+        implements RaftActorRecoveryCohort, MockRaftActorSnapshotCohort {
     private static final Logger LOG = LoggerFactory.getLogger(MockRaftActor.class);
 
     public static final short PAYLOAD_VERSION = 5;
 
-    final RaftActor actorDelegate;
+    final RaftActor<?> actorDelegate;
     final RaftActorRecoveryCohort recoveryCohortDelegate;
     volatile MockRaftActorSnapshotCohort snapshotCohortDelegate;
     private final CountDownLatch recoveryComplete = new CountDownLatch(1);
@@ -56,7 +57,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
 
     protected MockRaftActor(final Path stateDir, final AbstractBuilder<?, ?> builder) {
         super(stateDir, builder.id, builder.peerAddresses != null ? builder.peerAddresses : Map.of(),
-            Optional.ofNullable(builder.config), PAYLOAD_VERSION);
+            Optional.ofNullable(builder.config), PAYLOAD_VERSION, MockSnapshotState.SUPPORT);
         actorDelegate = mock(RaftActor.class);
         recoveryCohortDelegate = mock(RaftActorRecoveryCohort.class);
 

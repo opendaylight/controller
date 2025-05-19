@@ -74,6 +74,7 @@ import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.controller.cluster.raft.spi.RaftCommand;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.Support;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.raft.spi.FileBackedOutputStream;
@@ -114,7 +115,7 @@ import org.slf4j.LoggerFactory;
  * <li> when a snapshot should be saved </li>
  * </ul>
  */
-public abstract class RaftActor extends AbstractUntypedPersistentActor {
+public abstract class RaftActor<S extends Snapshot.@NonNull State> extends AbstractUntypedPersistentActor {
     private static final Logger LOG = LoggerFactory.getLogger(RaftActor.class);
     private static final long APPLY_STATE_DELAY_THRESHOLD_IN_NANOS = TimeUnit.MILLISECONDS.toNanos(50);
 
@@ -134,7 +135,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     protected RaftActor(final @NonNull Path stateDir, final @NonNull String memberId,
             final Map<String, String> peerAddresses, final Optional<ConfigParams> configParams,
-            final short payloadVersion) {
+            final short payloadVersion, final @NonNull Support<S> support) {
         super(memberId);
 
         final var config = configParams.orElseGet(DefaultConfigParamsImpl::new);
@@ -841,8 +842,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     @VisibleForTesting
     @NonNullByDefault
-    protected final <T extends DataPersistenceProvider> T overridePersistence(
-            final BiFunction<DataPersistenceProvider, ExecuteInSelfActor, T> factory) {
+    protected final <P extends DataPersistenceProvider> P overridePersistence(
+            final BiFunction<DataPersistenceProvider, ExecuteInSelfActor, P> factory) {
         final var ret = verifyNotNull(factory.apply(persistence(), this));
         persistenceControl.setDelegate(ret);
         return ret;
@@ -887,7 +888,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     /**
      * Returns the RaftActorSnapshotCohort to participate in snapshot captures.
      */
-    protected abstract @NonNull RaftActorSnapshotCohort<?> getRaftActorSnapshotCohort();
+    protected abstract @NonNull RaftActorSnapshotCohort<S> getRaftActorSnapshotCohort();
 
     /**
      * This method will be called by the RaftActor when the state of the

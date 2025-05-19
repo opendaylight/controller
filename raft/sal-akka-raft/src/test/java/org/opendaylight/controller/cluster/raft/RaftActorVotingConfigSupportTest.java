@@ -1444,10 +1444,10 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     }
 
     // FIXME: use awaitility here
-    private static void verifyRaftState(final RaftRole expState, final RaftActor... raftActors) {
+    private static void verifyRaftState(final RaftRole expState, final RaftActor<?>... raftActors) {
         Stopwatch sw = Stopwatch.createStarted();
         while (sw.elapsed(TimeUnit.SECONDS) <= 5) {
-            for (RaftActor raftActor : raftActors) {
+            for (var raftActor : raftActors) {
                 if (raftActor.getRaftState() == expState) {
                     return;
                 }

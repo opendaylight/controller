@@ -55,18 +55,18 @@ public class RaftActorLeadershipTransferCohort {
 
     private final List<OnComplete> onCompleteCallbacks = new ArrayList<>();
     private final Stopwatch transferTimer = Stopwatch.createUnstarted();
-    private final RaftActor raftActor;
+    private final RaftActor<?> raftActor;
     private final String requestedFollowerId;
 
     private long newLeaderTimeoutInMillis = 2000;
     private Cancellable newLeaderTimer;
     private boolean isTransferring;
 
-    RaftActorLeadershipTransferCohort(final RaftActor raftActor) {
+    RaftActorLeadershipTransferCohort(final RaftActor<?> raftActor) {
         this(raftActor, null);
     }
 
-    RaftActorLeadershipTransferCohort(final RaftActor raftActor, final @Nullable String requestedFollowerId) {
+    RaftActorLeadershipTransferCohort(final RaftActor<?> raftActor, final @Nullable String requestedFollowerId) {
         this.raftActor = raftActor;
         this.requestedFollowerId = requestedFollowerId;
 

@@ -80,7 +80,8 @@ public abstract class AbstractActorTest {
         FileUtils.deleteDirectory(Path.of("journal").toFile());
     }
 
-    protected static final void verifyApplyIndex(final TestActorRef<? extends RaftActor> actor, final long expIndex) {
+    protected static final void verifyApplyIndex(final TestActorRef<? extends RaftActor<?>> actor,
+            final long expIndex) {
         await().atMost(Duration.ofSeconds(5)).untilAsserted(() -> {
             assertEquals(expIndex, actor.underlyingActor().getRaftActorContext().getReplicatedLog().getLastApplied());
         });

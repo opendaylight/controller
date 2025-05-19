@@ -49,9 +49,9 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
 
     private static final String FILENAME_START_STR = "snapshot-";
 
-    private final RaftActor actor;
+    private final RaftActor<?> actor;
 
-    PekkoRaftStorage(final RaftActor actor, final Path directory, final CompressionType compression,
+    PekkoRaftStorage(final RaftActor<?> actor, final Path directory, final CompressionType compression,
             final Configuration streamConfig) {
         super(actor.memberId(), actor, directory, compression, streamConfig);
         this.actor = requireNonNull(actor);

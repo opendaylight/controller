@@ -42,7 +42,7 @@ class RaftActorRecovery {
     static final class ToTransient extends RaftActorRecovery {
         private boolean dataRecoveredWithPersistenceDisabled;
 
-        ToTransient(final @NonNull RaftActor actor, final RaftActorContext context,
+        ToTransient(final @NonNull RaftActor<?> actor, final RaftActorContext context,
                 final RaftActorRecoveryCohort cohort) throws IOException {
             super(actor, context, cohort);
         }
@@ -92,7 +92,7 @@ class RaftActorRecovery {
 
     private static final Logger LOG = LoggerFactory.getLogger(RaftActorRecovery.class);
 
-    private final @NonNull RaftActor actor;
+    private final @NonNull RaftActor<?> actor;
     private final @NonNull RaftActorContext context;
     private final @NonNull RaftActorRecoveryCohort cohort;
     private final @Nullable TermInfo origTermInfo;
@@ -105,7 +105,7 @@ class RaftActorRecovery {
     private Stopwatch recoveryTimer;
     private Stopwatch recoverySnapshotTimer;
 
-    RaftActorRecovery(final @NonNull RaftActor actor, final RaftActorContext context,
+    RaftActorRecovery(final @NonNull RaftActor<?> actor, final RaftActorContext context,
             final RaftActorRecoveryCohort cohort) throws IOException {
         this.actor = requireNonNull(actor);
         this.context = requireNonNull(context);

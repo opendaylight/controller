@@ -13,13 +13,14 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.List;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 
 public record MockSnapshotState(List<Object> state) implements Snapshot.State {
     @NonNullByDefault
-    public static final StateSnapshot.Support<MockSnapshotState> SUPPORT = new Support<>() {
+    public static final StateSnapshot.@NonNull Support<MockSnapshotState> SUPPORT = new Support<>() {
         @Override
         public Class<MockSnapshotState> snapshotType() {
             return MockSnapshotState.class;
