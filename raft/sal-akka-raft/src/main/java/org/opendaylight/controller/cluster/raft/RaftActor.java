@@ -1060,10 +1060,6 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         throw new UnsupportedOperationException();
     }
 
-    final void saveSnapshot(final Snapshot snapshot) {
-        super.saveSnapshot(snapshot);
-    }
-
     @Override
     @Deprecated(since = "11.0.0", forRemoval = true)
     public final void deleteSnapshot(final long sequenceNr) {
