@@ -1060,8 +1060,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         throw new UnsupportedOperationException();
     }
 
-    final void saveSnapshot(final Snapshot snapshot) {
-        super.saveSnapshot(snapshot);
+    final void saveEmptySnapshot() throws IOException {
+        persistenceControl.saveVotingConfig(context.getPeerServerInfo(true),
+            context.getSnapshotManager().stateSupport().writer());
     }
 
     @Override

@@ -424,8 +424,11 @@ class RaftActorRecovery {
     // to disabled or a persistence backup was restored) or we recovered migrated messages. Either way, we persist
     // a snapshot and delete all the messages from the Pekko journal to clean out unwanted messages.
     final void saveEmptySnapshot() {
-        actor.saveSnapshot(Snapshot.create(null, List.of(), -1, -1, -1, -1, context.termInfo(),
-            context.getPeerServerInfo(true)));
+        try {
+            actor.saveEmptySnapshot();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
         actor.deleteMessages(actor.lastSequenceNr());
     }
 
