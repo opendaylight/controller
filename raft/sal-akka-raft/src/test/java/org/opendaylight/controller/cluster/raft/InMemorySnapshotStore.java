@@ -34,7 +34,6 @@ import scala.concurrent.Future;
 public class InMemorySnapshotStore extends SnapshotStore {
     private static final Logger LOG = LoggerFactory.getLogger(InMemorySnapshotStore.class);
 
-    private static final Map<String, CountDownLatch> SNAPSHOT_SAVED_LATCHES = new ConcurrentHashMap<>();
     private static final Map<String, CountDownLatch> SNAPSHOT_DELETED_LATCHES = new ConcurrentHashMap<>();
     private static Map<String, List<StoredSnapshot>> snapshots = new ConcurrentHashMap<>();
 
@@ -68,20 +67,8 @@ public class InMemorySnapshotStore extends SnapshotStore {
         snapshots.clear();
     }
 
-    public static void addSnapshotSavedLatch(final String persistenceId) {
-        SNAPSHOT_SAVED_LATCHES.put(persistenceId, new CountDownLatch(1));
-    }
-
     public static void addSnapshotDeletedLatch(final String persistenceId) {
         SNAPSHOT_DELETED_LATCHES.put(persistenceId, new CountDownLatch(1));
-    }
-
-    public static <T> T waitForSavedSnapshot(final String persistenceId, final Class<T> type) {
-        if (!Uninterruptibles.awaitUninterruptibly(SNAPSHOT_SAVED_LATCHES.get(persistenceId), 5, TimeUnit.SECONDS)) {
-            throw new AssertionError("Snapshot was not saved");
-        }
-
-        return getSnapshots(persistenceId, type).get(0);
     }
 
     public static void waitForDeletedSnapshot(final String persistenceId) {
@@ -129,11 +116,6 @@ public class InMemorySnapshotStore extends SnapshotStore {
         }
         synchronized (snapshotList) {
             snapshotList.add(new StoredSnapshot(snapshotMetadata, obj));
-        }
-
-        CountDownLatch latch = SNAPSHOT_SAVED_LATCHES.get(snapshotMetadata.persistenceId());
-        if (latch != null) {
-            latch.countDown();
         }
 
         return Futures.successful(null);
