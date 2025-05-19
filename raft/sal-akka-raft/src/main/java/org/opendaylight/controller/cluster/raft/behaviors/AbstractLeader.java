@@ -50,6 +50,7 @@ import org.opendaylight.controller.cluster.raft.messages.UnInitializedFollowerSn
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.api.TermInfo;
+import org.opendaylight.raft.spi.ByteArray;
 import org.opendaylight.raft.spi.InstallableSnapshot;
 import org.opendaylight.raft.spi.InstallableSnapshotSource;
 import org.opendaylight.raft.spi.PlainSnapshotSource;
@@ -953,7 +954,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
             case LZ4 -> fromStore;
             case NONE -> {
                 final var source = fromStore.source();
-                yield source instanceof PlainSnapshotSource ? fromStore
+                yield source == null || source instanceof PlainSnapshotSource ? fromStore
                     : new InstallableSnapshotSource(fromStore.lastIncluded(), source.toPlainSource());
             }
         };
@@ -980,7 +981,8 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         final byte[] data;
         try {
             // Ensure the snapshot bytes are set - this is a no-op.
-            installSnapshotState.setSnapshotBytes(snapshot.source().io());
+            final var source = snapshot.source();
+            installSnapshotState.setSnapshotBytes(source == null ? ByteArray.empty() : source.io());
 
             if (installSnapshotState.canSendNextChunk()) {
                 data = installSnapshotState.getNextChunk();

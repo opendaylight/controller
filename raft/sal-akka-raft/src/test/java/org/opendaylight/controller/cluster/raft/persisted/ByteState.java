@@ -10,6 +10,8 @@ package org.opendaylight.controller.cluster.raft.persisted;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.util.Arrays;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -32,12 +34,23 @@ public final class ByteState implements Snapshot.State {
 
         @Override
         public Reader<ByteState> reader() {
-            return in -> ByteState.of(in.readAllBytes());
+            return in -> {
+                try (var dis = new DataInputStream(in)) {
+                    final int len = dis.readInt();
+                    return ByteState.of(dis.readNBytes(len));
+                }
+            };
         }
 
         @Override
         public Writer<ByteState> writer() {
-            return (snapshot, out) -> out.write(snapshot.bytes());
+            return (snapshot, out) -> {
+                try (var dos = new DataOutputStream(out)) {
+                    final var bytes = snapshot.bytes();
+                    dos.writeInt(bytes.length);
+                    dos.write(bytes);
+                }
+            };
         }
     };
 

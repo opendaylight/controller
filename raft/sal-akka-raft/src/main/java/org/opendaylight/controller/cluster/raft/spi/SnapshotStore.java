@@ -52,7 +52,7 @@ public interface SnapshotStore {
      * @param callback the callback to invoke
      */
     // FIXME: imply async deletion of all other snapshots, only the last one will be reported
-    <T extends StateSnapshot> void saveSnapshot(RaftSnapshot raftSnapshot, EntryInfo lastIncluded, T snapshot,
+    <T extends StateSnapshot> void saveSnapshot(RaftSnapshot raftSnapshot, EntryInfo lastIncluded, @Nullable T snapshot,
         StateSnapshot.Writer<T> writer, RaftCallback<Instant> callback);
 
     /**
@@ -67,7 +67,7 @@ public interface SnapshotStore {
      * @throws IOException when an I/O error occurs
      */
     <T extends StateSnapshot> void saveSnapshot(RaftSnapshot raftSnapshot, EntryInfo lastIncluded,
-        T snapshot, StateSnapshot.Writer<T> writer, Instant timestamp) throws IOException;
+        @Nullable T snapshot, StateSnapshot.Writer<T> writer, Instant timestamp) throws IOException;
 
     /**
      * Deletes snapshots up to and including a time.
