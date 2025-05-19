@@ -18,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.pekko.persistence.RecoveryCompleted;
 import org.apache.pekko.persistence.SnapshotOffer;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
@@ -38,7 +39,59 @@ import org.slf4j.LoggerFactory;
 /**
  * A single attempt at recovery. Essentially replays Pekko persistence {@link ReplicatedLog} and {@link TermInfoStore}.
  */
-final class RaftActorRecovery {
+class RaftActorRecovery {
+    static final class ToTransient extends RaftActorRecovery {
+        private boolean dataRecoveredWithPersistenceDisabled;
+
+        ToTransient(final @NonNull RaftActor actor, final RaftActorContext context,
+                final RaftActorRecoveryCohort cohort) throws IOException {
+            super(actor, context, cohort);
+        }
+
+        @Override
+        @Deprecated(since = "11.0.0", forRemoval = true)
+        void onDeleteEntries(final DeleteEntries deleteEntries) {
+            dataRecoveredWithPersistenceDisabled = true;
+        }
+
+        @Override
+        void onRecoveredApplyLogEntries(final long toIndex) {
+            dataRecoveredWithPersistenceDisabled = true;
+        }
+
+        @Override
+        void appendRecoveredEntry(final ReplicatedLogEntry logEntry) {
+            if (!(logEntry.command() instanceof VotingConfig)) {
+                dataRecoveredWithPersistenceDisabled = true;
+            }
+        }
+
+        @Override
+        Snapshot processRecoveredSnapshot(final Snapshot snapshot) {
+            // We may have just transitioned to disabled and have a snapshot containing state data and/or log entries -
+            // we don't want to preserve these, only the server config and election term info.
+            return Snapshot.create(EmptyState.INSTANCE, List.of(), -1, -1, -1, -1, snapshot.termInfo(),
+                snapshot.votingConfig());
+        }
+
+        @Override
+        boolean completeRecovery() {
+            if (super.completeRecovery()) {
+                if (!dataRecoveredWithPersistenceDisabled) {
+                    return true;
+                }
+                LOG.info("{}: Saving snapshot after recovery due to data persistence disabled", memberId());
+                saveEmptySnapshot();
+            }
+            return false;
+        }
+
+        @Override
+        void saveRecoverySnapshot() {
+            saveEmptySnapshot();
+        }
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(RaftActorRecovery.class);
 
     private final @NonNull RaftActor actor;
@@ -46,22 +99,19 @@ final class RaftActorRecovery {
     private final @NonNull RaftActorRecoveryCohort cohort;
     private final @Nullable TermInfo origTermInfo;
     private final @Nullable SnapshotFile origSnapshot;
-    private final boolean recoveryApplicable;
 
     private int currentRecoveryBatchCount;
-    private boolean dataRecoveredWithPersistenceDisabled;
     private boolean anyDataRecovered;
     private boolean hasMigratedDataRecovered;
 
     private Stopwatch recoveryTimer;
     private Stopwatch recoverySnapshotTimer;
 
-    private RaftActorRecovery(final @NonNull RaftActor actor, final RaftActorContext context,
-            final RaftActorRecoveryCohort cohort, final boolean recoveryApplicable) throws IOException {
+    RaftActorRecovery(final @NonNull RaftActor actor, final RaftActorContext context,
+            final RaftActorRecoveryCohort cohort) throws IOException {
         this.actor = requireNonNull(actor);
         this.context = requireNonNull(context);
         this.cohort = requireNonNull(cohort);
-        this.recoveryApplicable = recoveryApplicable;
         origTermInfo = actor.localAccess().termInfoStore().loadAndSetTerm();
 
         final var loaded = context.snapshotStore().lastSnapshot();
@@ -72,17 +122,7 @@ final class RaftActorRecovery {
         origSnapshot = loaded;
     }
 
-    static @NonNull RaftActorRecovery toPersistent(final @NonNull RaftActor actor,
-            final RaftActorContext context, final RaftActorRecoveryCohort cohort) throws IOException {
-        return new RaftActorRecovery(actor, context, cohort, true);
-    }
-
-    static @NonNull RaftActorRecovery toTransient(final @NonNull RaftActor actor,
-            final RaftActorContext context, final RaftActorRecoveryCohort cohort) throws IOException {
-        return new RaftActorRecovery(actor, context, cohort, false);
-    }
-
-    boolean handleRecoveryMessage(final Object message) {
+    final boolean handleRecoveryMessage(final Object message) {
         LOG.trace("{}: handleRecoveryMessage: {}", memberId(), message);
 
         anyDataRecovered = anyDataRecovered || !(message instanceof RecoveryCompleted);
@@ -109,7 +149,7 @@ final class RaftActorRecovery {
         return false;
     }
 
-    private @NonNull String memberId() {
+    final @NonNull String memberId() {
         return actor.memberId();
     }
 
@@ -172,35 +212,29 @@ final class RaftActorRecovery {
         actor.deleteSnapshots(timestamp.toEpochMilli());
     }
 
-    private void initializeLog(final Instant timestamp, Snapshot snapshot) {
+    private void initializeLog(final Instant timestamp, final Snapshot recovered) {
         LOG.debug("{}: initializing from snapshot taken at {}", memberId(), timestamp);
         initRecoveryTimers();
 
-        for (var entry : snapshot.getUnAppliedEntries()) {
+        for (var entry : recovered.getUnAppliedEntries()) {
             if (isMigratedPayload(entry)) {
                 hasMigratedDataRecovered = true;
             }
         }
 
-        if (!recoveryApplicable) {
-            // We may have just transitioned to disabled and have a snapshot containing state data and/or log
-            // entries - we don't want to preserve these, only the server config and election term info.
-
-            snapshot = Snapshot.create(EmptyState.INSTANCE, List.of(), -1, -1, -1, -1,
-                snapshot.termInfo(), snapshot.votingConfig());
-        }
+        final var toApply = processRecoveredSnapshot(recovered);
 
         // Create a replicated log with the snapshot information
         // The replicated log can be used later on to retrieve this snapshot
         // when we need to install it on a peer
         final var replLog = replicatedLog();
-        replLog.resetToSnapshot(snapshot);
-        context.setTermInfo(snapshot.termInfo());
+        replLog.resetToSnapshot(toApply);
+        context.setTermInfo(toApply.termInfo());
 
         final var timer = Stopwatch.createStarted();
 
         // Apply the snapshot to the actors state
-        final var snapshotState = snapshot.getState();
+        final var snapshotState = toApply.getState();
         if (snapshotState.needsMigration()) {
             hasMigratedDataRecovered = true;
         }
@@ -208,12 +242,17 @@ final class RaftActorRecovery {
             cohort.applyRecoveredSnapshot(snapshotState);
         }
 
-        if (snapshot.votingConfig() != null) {
-            context.updateVotingConfig(snapshot.votingConfig());
+        if (toApply.votingConfig() != null) {
+            context.updateVotingConfig(toApply.votingConfig());
         }
 
         LOG.info("Recovery snapshot applied for {} in {}: snapshotIndex={}, snapshotTerm={}, journal-size={}",
                 memberId(), timer.stop(), replLog.getSnapshotIndex(), replLog.getSnapshotTerm(), replLog.size());
+    }
+
+    @NonNullByDefault
+    Snapshot processRecoveredSnapshot(final Snapshot recovered) {
+        return recovered;
     }
 
     private void onRecoveredJournalLogEntry(final ReplicatedLogEntry logEntry) {
@@ -231,19 +270,14 @@ final class RaftActorRecovery {
             context.updateVotingConfig(clusterConfig);
         }
 
-        if (recoveryApplicable) {
-            replicatedLog().append(logEntry);
-        } else if (!(command instanceof VotingConfig)) {
-            dataRecoveredWithPersistenceDisabled = true;
-        }
+        appendRecoveredEntry(logEntry);
     }
 
-    private void onRecoveredApplyLogEntries(final long toIndex) {
-        if (!recoveryApplicable) {
-            dataRecoveredWithPersistenceDisabled = true;
-            return;
-        }
+    void appendRecoveredEntry(final ReplicatedLogEntry logEntry) {
+        replicatedLog().append(logEntry);
+    }
 
+    void onRecoveredApplyLogEntries(final long toIndex) {
         final var replLog = replicatedLog();
         long lastUnappliedIndex = replLog.getLastApplied() + 1;
 
@@ -286,12 +320,8 @@ final class RaftActorRecovery {
     }
 
     @Deprecated(since = "11.0.0", forRemoval = true)
-    private void onDeleteEntries(final DeleteEntries deleteEntries) {
-        if (recoveryApplicable) {
-            replicatedLog().removeRecoveredEntries(deleteEntries.getFromIndex());
-        } else {
-            dataRecoveredWithPersistenceDisabled = true;
-        }
+    void onDeleteEntries(final DeleteEntries deleteEntries) {
+        replicatedLog().removeRecoveredEntries(deleteEntries.getFromIndex());
     }
 
     private void batchRecoveredCommand(final StateCommand command) {
@@ -374,28 +404,31 @@ final class RaftActorRecovery {
             infoStore.setTerm(orig);
         }
 
-        if (dataRecoveredWithPersistenceDisabled || hasMigratedDataRecovered && !recoveryApplicable) {
-            if (hasMigratedDataRecovered) {
-                LOG.info("{}: Saving snapshot after recovery due to migrated messages", memberId());
-            } else {
-                LOG.info("{}: Saving snapshot after recovery due to data persistence disabled", memberId());
-            }
-
-            // Either data persistence is disabled and we recovered some data entries (ie we must have just
-            // transitioned to disabled or a persistence backup was restored) or we recovered migrated
-            // messages. Either way, we persist a snapshot and delete all the messages from the akka journal
-            // to clean out unwanted messages.
-
-            actor.saveSnapshot(Snapshot.create(EmptyState.INSTANCE, List.of(), -1, -1, -1, -1, context.termInfo(),
-                context.getPeerServerInfo(true)));
-            actor.deleteMessages(actor.lastSequenceNr());
-        } else if (hasMigratedDataRecovered) {
-            LOG.info("{}: Snapshot capture initiated after recovery due to migrated messages", memberId());
-
-            context.getSnapshotManager().capture(replLog.lastMeta(), -1);
-        } else {
+        if (completeRecovery()) {
             possiblyRestoreFromSnapshot();
         }
+    }
+
+    boolean completeRecovery() {
+        if (hasMigratedDataRecovered) {
+            LOG.info("{}: Snapshot capture initiated after recovery due to migrated messages", memberId());
+            saveRecoverySnapshot();
+            return false;
+        }
+        return true;
+    }
+
+    void saveRecoverySnapshot() {
+        context.getSnapshotManager().capture(replicatedLog().lastMeta(), -1);
+    }
+
+    // Either data persistence is disabled and we recovered some data entries (i.e. we must have just transitioned
+    // to disabled or a persistence backup was restored) or we recovered migrated messages. Either way, we persist
+    // a snapshot and delete all the messages from the Pekko journal to clean out unwanted messages.
+    final void saveEmptySnapshot() {
+        actor.saveSnapshot(Snapshot.create(EmptyState.INSTANCE, List.of(), -1, -1, -1, -1, context.termInfo(),
+            context.getPeerServerInfo(true)));
+        actor.deleteMessages(actor.lastSequenceNr());
     }
 
     private static boolean isMigratedPayload(final ReplicatedLogEntry repLogEntry) {

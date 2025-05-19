@@ -30,10 +30,10 @@ class RaftActorRecoverySupport {
     }
 
     @NonNull RaftActorRecovery recoverToPersistent() throws IOException {
-        return RaftActorRecovery.toPersistent(actor, context, cohort);
+        return new RaftActorRecovery(actor, context, cohort);
     }
 
     @NonNull RaftActorRecovery recoverToTransient() throws IOException {
-        return RaftActorRecovery.toTransient(actor, context, cohort);
+        return new RaftActorRecovery.ToTransient(actor, context, cohort);
     }
 }
