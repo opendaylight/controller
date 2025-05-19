@@ -137,7 +137,7 @@ final class SnapshotFileV1 implements SnapshotFile {
     static <T extends StateSnapshot> Closeable createNew(final Path file, final Instant timestamp,
             final EntryInfo lastIncluded, final @Nullable VotingConfig votingConfig,
             final CompressionType entryCompress, final List<ReplicatedLogEntry> unappliedEntries,
-            final CompressionType stateCompress, final StateSnapshot.Writer<T> stateWriter, final T state)
+            final CompressionType stateCompress, final StateSnapshot.Writer<T> stateWriter, final @Nullable T state)
                 throws IOException {
         final var entryFormat = computeFormat(entryCompress, "entry");
         final var stateFormat = computeFormat(stateCompress, "state");
