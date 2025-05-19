@@ -8,6 +8,7 @@
 package org.opendaylight.raft.spi;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.raft.api.EntryInfo;
 
 /**
@@ -27,5 +28,5 @@ public interface InstallableSnapshot {
      *
      * @return the source of byte stream carrying user state snapshot
      */
-    SnapshotSource source();
+    @Nullable SnapshotSource source();
 }

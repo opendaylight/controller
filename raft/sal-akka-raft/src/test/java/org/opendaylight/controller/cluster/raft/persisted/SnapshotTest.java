@@ -51,7 +51,7 @@ class SnapshotTest {
         assertEquals(expected.getLastAppliedTerm(), cloned.getLastAppliedTerm());
         assertEquals(expected.getUnAppliedEntries(), cloned.getUnAppliedEntries());
         assertEquals(expected.termInfo(), cloned.termInfo());
-        assertEquals(expected.getState(), cloned.getState());
+        assertEquals(expected.state(), cloned.state());
         assertEquals(expected.votingConfig().serverInfo(), cloned.votingConfig().serverInfo());
     }
 }

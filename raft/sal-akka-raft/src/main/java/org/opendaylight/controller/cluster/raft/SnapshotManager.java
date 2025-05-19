@@ -18,7 +18,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
-import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
@@ -397,12 +396,12 @@ public final class SnapshotManager {
         task = persisting;
         LOG.debug("{}: lastSequenceNumber prior to persisting applied snapshot: {}", memberId(), lastSeq);
         saveSnapshot(new RaftSnapshot(snapshot.votingConfig(), snapshot.getUnAppliedEntries()), snapshot.lastApplied(),
-            snapshot.getState(), lastSeq);
+            snapshot.state(), lastSeq);
     }
 
     @NonNullByDefault
     private <T extends StateSnapshot> void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
-            final Snapshot.State snapshot, final long lastSeq) {
+            final Snapshot.@Nullable State snapshot, final long lastSeq) {
         context.snapshotStore().saveSnapshot(raftSnapshot, lastIncluded, snapshot, stateSupport().writer(),
             (failure, timestamp) -> {
                 if (failure != null) {
@@ -541,8 +540,8 @@ public final class SnapshotManager {
                         context.updateVotingConfig(serverConfig);
                     }
 
-                    final var state = snapshot.getState();
-                    if (state != null && !(state instanceof EmptyState)) {
+                    final var state = snapshot.state();
+                    if (state != null) {
                         applySnapshotState(snapshotCohort, state);
                     }
 

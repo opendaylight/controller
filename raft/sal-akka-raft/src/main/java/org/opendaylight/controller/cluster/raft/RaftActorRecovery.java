@@ -202,7 +202,7 @@ class RaftActorRecovery {
         try {
             context.snapshotStore().saveSnapshot(
                 new RaftSnapshot(snapshot.votingConfig(), snapshot.getUnAppliedEntries()), snapshot.lastApplied(),
-                snapshot.getState(), context.getSnapshotManager().stateSupport().writer(), timestamp);
+                snapshot.state(), context.getSnapshotManager().stateSupport().writer(), timestamp);
         } catch (IOException e) {
             LOG.error("{}: failed to save local snapshot", memberId(), e);
             throw new UncheckedIOException(e);
@@ -234,11 +234,11 @@ class RaftActorRecovery {
         final var timer = Stopwatch.createStarted();
 
         // Apply the snapshot to the actors state
-        final var snapshotState = toApply.getState();
-        if (snapshotState.needsMigration()) {
-            hasMigratedDataRecovered = true;
-        }
-        if (!(snapshotState instanceof EmptyState)) {
+        final var snapshotState = toApply.state();
+        if (snapshotState != null) {
+            if (snapshotState.needsMigration()) {
+                hasMigratedDataRecovered = true;
+            }
             cohort.applyRecoveredSnapshot(snapshotState);
         }
 

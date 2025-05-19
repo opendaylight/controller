@@ -36,7 +36,7 @@ public enum SnapshotFileFormat {
         public <T extends StateSnapshot> Closeable createNew(final Path file, final Instant timestamp,
                 final EntryInfo lastIncluded, final @Nullable VotingConfig votingConfig,
                 final CompressionType entryCompress, final List<ReplicatedLogEntry> unappliedEntries,
-                final CompressionType stateCompress, final StateSnapshot.Writer<T> stateWriter, final T state)
+                final CompressionType stateCompress, final StateSnapshot.Writer<T> stateWriter, final @Nullable T state)
                     throws IOException {
             return SnapshotFileV1.createNew(file, timestamp, lastIncluded, votingConfig, entryCompress,
                 unappliedEntries, stateCompress, stateWriter, state);
@@ -105,7 +105,7 @@ public enum SnapshotFileFormat {
      */
     public abstract <T extends StateSnapshot> Closeable createNew(Path file, Instant timestamp, EntryInfo lastIncluded,
         @Nullable VotingConfig votingConfig, CompressionType entryCompress, List<ReplicatedLogEntry> unappliedEntries,
-        CompressionType stateCompress, StateSnapshot.Writer<T> stateWriter, T state) throws IOException;
+        CompressionType stateCompress, StateSnapshot.Writer<T> stateWriter, @Nullable T state) throws IOException;
 
     /**
      * Open an existing file of this format.

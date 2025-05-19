@@ -953,7 +953,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
             case LZ4 -> fromStore;
             case NONE -> {
                 final var source = fromStore.source();
-                yield source instanceof PlainSnapshotSource ? fromStore
+                yield source == null || source instanceof PlainSnapshotSource ? fromStore
                     : new InstallableSnapshotSource(fromStore.lastIncluded(), source.toPlainSource());
             }
         };
@@ -980,7 +980,8 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         final byte[] data;
         try {
             // Ensure the snapshot bytes are set - this is a no-op.
-            installSnapshotState.setSnapshotBytes(snapshot.source().io());
+            final var source = snapshot.source();
+            installSnapshotState.setSnapshotBytes(source == null ? null : source.io());
 
             if (installSnapshotState.canSendNextChunk()) {
                 data = installSnapshotState.getNextChunk();
