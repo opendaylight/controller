@@ -319,7 +319,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractRaftActor
         assertEquals(prefix + " Snapshot getLastTerm", lastTerm, snapshot.getLastTerm());
         assertEquals(prefix + " Snapshot getLastIndex", lastIndex, snapshot.getLastIndex());
 
-        verifyState(prefix, (MockSnapshotState) snapshot.getState());
+        verifyState(prefix, (MockSnapshotState) snapshot.state());
     }
 
     protected final void verifyState(final String prefix, final MockSnapshotState mockState) {

@@ -58,7 +58,8 @@ final class SS implements Externalizable {
             out.writeObject(e.command().toSerialForm());
         }
 
-        out.writeObject(snapshot.getState());
+        final var state = snapshot.state();
+        out.writeObject(state != null ? state : EmptyState.INSTANCE);
     }
 
     @Override
@@ -83,10 +84,9 @@ final class SS implements Externalizable {
                 (Payload) in.readObject()));
         }
 
-        State state = (State) in.readObject();
-
-        snapshot = Snapshot.create(state, unAppliedEntries.build(), lastIndex, lastTerm, lastAppliedIndex,
-            lastAppliedTerm, new TermInfo(electionTerm, electionVotedFor), serverConfig);
+        final var state = (State) in.readObject();
+        snapshot = Snapshot.create(state instanceof EmptyState ? null : state, unAppliedEntries.build(), lastIndex,
+            lastTerm, lastAppliedIndex, lastAppliedTerm, new TermInfo(electionTerm, electionVotedFor), serverConfig);
     }
 
     @java.io.Serial

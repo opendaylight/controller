@@ -22,7 +22,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
-import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
 import org.opendaylight.controller.cluster.raft.persisted.MigratedSerializable;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
@@ -70,8 +69,7 @@ class RaftActorRecovery {
         Snapshot processRecoveredSnapshot(final Snapshot snapshot) {
             // We may have just transitioned to disabled and have a snapshot containing state data and/or log entries -
             // we don't want to preserve these, only the server config and election term info.
-            return Snapshot.create(EmptyState.INSTANCE, List.of(), -1, -1, -1, -1, snapshot.termInfo(),
-                snapshot.votingConfig());
+            return Snapshot.create(null, List.of(), -1, -1, -1, -1, snapshot.termInfo(), snapshot.votingConfig());
         }
 
         @Override
@@ -202,7 +200,7 @@ class RaftActorRecovery {
         try {
             context.snapshotStore().saveSnapshot(
                 new RaftSnapshot(snapshot.votingConfig(), snapshot.getUnAppliedEntries()), snapshot.lastApplied(),
-                snapshot.getState(), context.getSnapshotManager().stateSupport().writer(), timestamp);
+                snapshot.state(), context.getSnapshotManager().stateSupport().writer(), timestamp);
         } catch (IOException e) {
             LOG.error("{}: failed to save local snapshot", memberId(), e);
             throw new UncheckedIOException(e);
@@ -234,11 +232,11 @@ class RaftActorRecovery {
         final var timer = Stopwatch.createStarted();
 
         // Apply the snapshot to the actors state
-        final var snapshotState = toApply.getState();
-        if (snapshotState.needsMigration()) {
-            hasMigratedDataRecovered = true;
-        }
-        if (!(snapshotState instanceof EmptyState)) {
+        final var snapshotState = toApply.state();
+        if (snapshotState != null) {
+            if (snapshotState.needsMigration()) {
+                hasMigratedDataRecovered = true;
+            }
             cohort.applyRecoveredSnapshot(snapshotState);
         }
 
@@ -426,7 +424,7 @@ class RaftActorRecovery {
     // to disabled or a persistence backup was restored) or we recovered migrated messages. Either way, we persist
     // a snapshot and delete all the messages from the Pekko journal to clean out unwanted messages.
     final void saveEmptySnapshot() {
-        actor.saveSnapshot(Snapshot.create(EmptyState.INSTANCE, List.of(), -1, -1, -1, -1, context.termInfo(),
+        actor.saveSnapshot(Snapshot.create(null, List.of(), -1, -1, -1, -1, context.termInfo(),
             context.getPeerServerInfo(true)));
         actor.deleteMessages(actor.lastSequenceNr());
     }

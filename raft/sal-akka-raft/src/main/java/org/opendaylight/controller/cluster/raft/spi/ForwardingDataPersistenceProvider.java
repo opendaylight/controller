@@ -66,13 +66,14 @@ public abstract class ForwardingDataPersistenceProvider implements DataPersisten
 
     @Override
     public <T extends StateSnapshot> void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
-            final T snapshot, final StateSnapshot.Writer<T> writer, final RaftCallback<Instant> callback) {
+            final @Nullable T snapshot, final StateSnapshot.Writer<T> writer, final RaftCallback<Instant> callback) {
         delegate().saveSnapshot(raftSnapshot, lastIncluded, snapshot, writer, callback);
     }
 
     @Override
     public <T extends StateSnapshot> void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
-            final T snapshot, final StateSnapshot.Writer<T> writer,  final Instant timestamp) throws IOException {
+            final @Nullable T snapshot, final StateSnapshot.Writer<T> writer,  final Instant timestamp)
+                throws IOException {
         delegate().saveSnapshot(raftSnapshot, lastIncluded, snapshot, writer, timestamp);
     }
 

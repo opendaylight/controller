@@ -11,6 +11,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doCallRealMethod;
@@ -153,6 +154,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         verify(mockCohort).takeSnapshot();
 
         CaptureSnapshot captureSnapshot = snapshotManager.getCaptureSnapshot();
+        assertNotNull(captureSnapshot);
 
         // LastIndex and LastTerm are picked up from the lastLogEntry
         assertEquals(9L, captureSnapshot.getLastIndex());
@@ -178,6 +180,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         verify(mockCohort).takeSnapshot();
 
         CaptureSnapshot captureSnapshot = snapshotManager.getCaptureSnapshot();
+        assertNotNull(captureSnapshot);
 
         // LastIndex and LastTerm are picked up from the lastLogEntry
         assertEquals(0, captureSnapshot.getLastIndex());
@@ -341,7 +344,9 @@ public class SnapshotManagerTest extends AbstractActorTest {
         final var install = installCaptor.getValue();
         assertEquals(EntryInfo.of(9, 6), install.lastIncluded());
 
-        assertArrayEquals("state", snapshotState.bytes(), install.source().io().openStream().readAllBytes());
+        final var source = install.source();
+        assertNotNull(source);
+        assertArrayEquals("state", snapshotState.bytes(), source.io().openStream().readAllBytes());
     }
 
     @Test
