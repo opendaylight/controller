@@ -23,7 +23,6 @@ import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
-import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot.ShardSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardManagerSnapshot;
 import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshotReply;
 import org.opendaylight.controller.cluster.raft.persisted.ByteState;
@@ -73,17 +72,17 @@ public class ShardManagerGetSnapshotReplyActorTest extends AbstractActorTest {
         assertEquals("getType", "config", datastoreSnapshot.getType());
         assertEquals("getShardManagerSnapshot", shardManagerSnapshot.getShardList(),
                 datastoreSnapshot.getShardManagerSnapshot().getShardList());
-        List<ShardSnapshot> shardSnapshots = datastoreSnapshot.getShardSnapshots();
+        final var shardSnapshots = datastoreSnapshot.getShardSnapshots();
         assertEquals("ShardSnapshot size", 3, shardSnapshots.size());
         assertEquals("ShardSnapshot 1 getName", "shard1", shardSnapshots.get(0).getName());
         assertEquals("ShardSnapshot 1 getSnapshot", shard1SnapshotState,
-                shardSnapshots.get(0).getSnapshot().getState());
+                shardSnapshots.get(0).getSnapshot().state());
         assertEquals("ShardSnapshot 2 getName", "shard2", shardSnapshots.get(1).getName());
         assertEquals("ShardSnapshot 2 getSnapshot", shard2SnapshotState,
-                shardSnapshots.get(1).getSnapshot().getState());
+                shardSnapshots.get(1).getSnapshot().state());
         assertEquals("ShardSnapshot 3 getName", "shard3", shardSnapshots.get(2).getName());
         assertEquals("ShardSnapshot 3 getSnapshot", shard3SnapshotState,
-                shardSnapshots.get(2).getSnapshot().getState());
+                shardSnapshots.get(2).getSnapshot().state());
 
         kit.expectMsgClass(Terminated.class);
     }

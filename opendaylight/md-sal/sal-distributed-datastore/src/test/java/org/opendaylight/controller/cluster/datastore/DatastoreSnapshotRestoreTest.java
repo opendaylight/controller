@@ -12,6 +12,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -93,11 +94,13 @@ public class DatastoreSnapshotRestoreTest {
         assertNotNull("DatastoreSnapshot is null", actual);
         assertEquals("getType", expected.getType(), actual.getType());
 
-        if (expected.getShardManagerSnapshot() == null) {
-            assertNull("Expected null ShardManagerSnapshot", actual.getShardManagerSnapshot());
+        final var expectedSnapshot = expected.getShardManagerSnapshot();
+        final var actualSnapshot = actual.getShardManagerSnapshot();
+        if (expectedSnapshot != null) {
+            assertNotNull(actualSnapshot);
+            assertEquals(expectedSnapshot.getShardList(), actualSnapshot.getShardList());
         } else {
-            assertEquals("ShardManagerSnapshot", expected.getShardManagerSnapshot().getShardList(),
-                    actual.getShardManagerSnapshot().getShardList());
+            assertNull(actualSnapshot);
         }
 
         assertEquals("ShardSnapshots size", expected.getShardSnapshots().size(), actual.getShardSnapshots().size());
@@ -116,8 +119,11 @@ public class DatastoreSnapshotRestoreTest {
         assertEquals(prefix + " lastAppliedTerm", expected.getLastAppliedTerm(), actual.getLastAppliedTerm());
         assertEquals(prefix + " unAppliedEntries", expected.getUnAppliedEntries(), actual.getUnAppliedEntries());
         assertEquals(prefix + " electionTerm", expected.termInfo(), actual.termInfo());
-        assertEquals(prefix + " Root node", ((ShardSnapshotState)expected.getState()).getSnapshot().getRootNode(),
-                ((ShardSnapshotState)actual.getState()).getSnapshot().getRootNode());
+        assertEquals(prefix + " Root node", extractRootNode(expected), extractRootNode(actual));
+    }
+
+    private static Optional<NormalizedNode> extractRootNode(final Snapshot snapshot) {
+        return assertInstanceOf(ShardSnapshotState.class, snapshot.state()).getSnapshot().getRootNode();
     }
 
     private static ShardManagerSnapshot newShardManagerSnapshot(final String... shards) {

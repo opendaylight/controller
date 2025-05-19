@@ -65,7 +65,6 @@ import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.messages.RequestLeadership;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
-import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
 import org.opendaylight.controller.cluster.raft.persisted.NoopPayload;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
@@ -980,7 +979,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 captureSnapshot.getLastAppliedIndex(), captureSnapshot.getLastAppliedTerm(), termInfo, clusterConfig);
         }
 
-        return Snapshot.create(EmptyState.INSTANCE, List.of(), -1, -1, -1, -1, termInfo, clusterConfig);
+        return Snapshot.create(null, List.of(), -1, -1, -1, -1, termInfo, clusterConfig);
     }
 
     /**

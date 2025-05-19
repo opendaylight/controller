@@ -58,6 +58,7 @@ import org.apache.pekko.cluster.Cluster;
 import org.apache.pekko.cluster.Member;
 import org.apache.pekko.pattern.Patterns;
 import org.apache.pekko.testkit.javadsl.TestKit;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -1166,7 +1167,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         verifySnapshot(awaitSnapshot(followerCarShardName), initialSnapshot, snapshotRoot);
     }
 
-    private SnapshotFile awaitSnapshot(final String persistenceId) {
+    private @Nullable SnapshotFile awaitSnapshot(final String persistenceId) {
         final var stateDir = stateDir().resolve(Shard.STATE_PATH).resolve(persistenceId);
         return await().atMost(Duration.ofSeconds(5)).until(() -> {
             if (!Files.isDirectory(stateDir)) {
@@ -1344,7 +1345,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         assertEquals("Snapshot getLastTerm", expected.getLastTerm(), last.term());
         assertEquals("Snapshot getLastIndex", expected.getLastIndex(), last.index());
 
-        final var state  = actual.readSnapshot(ShardSnapshotState.SUPPORT.reader());
+        final var state = actual.readSnapshot(ShardSnapshotState.SUPPORT.reader());
+        assertNotNull(state);
         final var shardSnapshot = assertInstanceOf(MetadataShardDataTreeSnapshot.class, state.getSnapshot());
         assertEquals("Snapshot root node", expRoot, shardSnapshot.getRootNode().orElseThrow());
     }

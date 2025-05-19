@@ -33,7 +33,8 @@ public interface StateSnapshot extends Immutable {
     interface Reader<T extends StateSnapshot> {
         /**
          * This method is called to de-serialize snapshot data that was previously serialized via
-         * {@link Writer#writeSnapshot(StateSnapshot, OutputStream)}.
+         * {@link Writer#writeSnapshot(StateSnapshot, OutputStream)}. The stream is guaranteed to contain at least one
+         * byte.
          *
          * @param in the {@link InputStream} containing the serialized data
          * @return the converted snapshot State
@@ -45,7 +46,7 @@ public interface StateSnapshot extends Immutable {
     @FunctionalInterface
     interface Writer<T extends StateSnapshot> {
         /**
-         * Serialize a snapshot into an {@link OutputStream}.
+         * Serialize a snapshot into an {@link OutputStream}. Implementations are required to emit at least one byte.
          *
          * @param snapshot snapshot to serialize
          * @param out the {@link OutputStream}

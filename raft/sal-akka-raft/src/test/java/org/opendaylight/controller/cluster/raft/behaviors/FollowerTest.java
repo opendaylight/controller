@@ -1263,7 +1263,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertEquals("Snapshot unapplied entry index", 1, raftSnapshot.unappliedEntries().get(0).index());
         assertEquals("Snapshot unapplied entry index", 2, raftSnapshot.unappliedEntries().get(1).index());
         assertEquals("Snapshot getLastAppliedTerm", EntryInfo.of(0, 1), snapshotFile.lastIncluded());
-        assertEquals("Snapshot state", List.of(entries.get(0).command()),
+        assertEquals("Snapshot state", List.of(entries.getFirst().command()),
                 MockRaftActor.fromState(snapshotFile.readSnapshot(MockSnapshotState.SUPPORT.reader())));
     }
 
