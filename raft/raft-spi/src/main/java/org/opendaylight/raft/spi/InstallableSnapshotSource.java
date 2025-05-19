@@ -10,6 +10,7 @@ package org.opendaylight.raft.spi;
 import static java.util.Objects.requireNonNull;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.raft.api.EntryInfo;
 
 /**
@@ -19,7 +20,8 @@ import org.opendaylight.raft.api.EntryInfo;
  * @param source the {@link SnapshotSource}
  */
 @NonNullByDefault
-public record InstallableSnapshotSource(EntryInfo lastIncluded, SnapshotSource source) implements InstallableSnapshot {
+public record InstallableSnapshotSource(EntryInfo lastIncluded, @Nullable SnapshotSource source)
+        implements InstallableSnapshot {
     /**
      * Default constructor.
      *
@@ -28,7 +30,6 @@ public record InstallableSnapshotSource(EntryInfo lastIncluded, SnapshotSource s
      */
     public InstallableSnapshotSource {
         requireNonNull(lastIncluded);
-        requireNonNull(source);
     }
 
     /**

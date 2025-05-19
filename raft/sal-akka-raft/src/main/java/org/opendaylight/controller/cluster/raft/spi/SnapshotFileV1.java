@@ -99,7 +99,7 @@ final class SnapshotFileV1 implements SnapshotFile {
     //     52   u32     CRC32C of bytes [4..51]
     //     56   <var>   ClusterConfig
     //  <var>   <var>   List<ReplicatedLogEntry>
-    //  <SSO>   <var>   Snapshot.State
+    //  <SSO>   <var>   Snapshot.State, zero-sized if not present
     private static final int HEADER_SIZE       = 56;
     private static final int MAGIC_BITS        = 0xE34C80B7;
     private static final byte COMPRESS_MASK    = (byte) 0xC0;
@@ -120,7 +120,7 @@ final class SnapshotFileV1 implements SnapshotFile {
     private final CompressionType entryCompress;
     private final CompressionType stateCompress;
     private final FileStreamSource serverStream;
-    private final FileStreamSource stateStream;
+    private final @Nullable FileStreamSource stateStream;
 
     SnapshotFileV1(final Path file, final EntryInfo lastIncluded, final Instant timestamp,
             final CompressionType entryCompress, final CompressionType stateCompress,
@@ -131,13 +131,13 @@ final class SnapshotFileV1 implements SnapshotFile {
         this.entryCompress = requireNonNull(entryCompress);
         this.stateCompress = requireNonNull(stateCompress);
         serverStream = new FileStreamSource(file, 0, sso);
-        stateStream = new FileStreamSource(file, sso, limit);
+        stateStream = sso == limit ? null : new FileStreamSource(file, sso, limit);
     }
 
     static <T extends StateSnapshot> Closeable createNew(final Path file, final Instant timestamp,
             final EntryInfo lastIncluded, final @Nullable VotingConfig votingConfig,
             final CompressionType entryCompress, final List<ReplicatedLogEntry> unappliedEntries,
-            final CompressionType stateCompress, final StateSnapshot.Writer<T> stateWriter, final T state)
+            final CompressionType stateCompress, final StateSnapshot.Writer<T> stateWriter, final @Nullable T state)
                 throws IOException {
         final var entryFormat = computeFormat(entryCompress, "entry");
         final var stateFormat = computeFormat(stateCompress, "state");
@@ -198,14 +198,21 @@ final class SnapshotFileV1 implements SnapshotFile {
                 dos.flush();
                 sso = fc.position();
 
-                // emit state
-                try (var eos = stateCompress.encodeOutput(dos)) {
-                    stateWriter.writeSnapshot(state, eos);
-                }
+                if (state != null) {
+                    // emit state
+                    try (var eos = stateCompress.encodeOutput(dos)) {
+                        stateWriter.writeSnapshot(state, eos);
+                    }
 
-                // record limit
-                dos.flush();
-                limit = fc.position();
+                    // record limit
+                    dos.flush();
+                    limit = fc.position();
+                    if (limit == sso) {
+                        throw new IOException("Writer " + stateWriter + " did not emit any bytes for " + state);
+                    }
+                } else {
+                    limit = sso;
+                }
             }
 
             // Construct header
@@ -414,17 +421,22 @@ final class SnapshotFileV1 implements SnapshotFile {
     }
 
     @Override
-    public SnapshotSource source() {
-        return stateCompress.nativeSource(stateStream);
+    public @Nullable SnapshotSource source() {
+        final var local = stateStream;
+        return local == null ? null : stateCompress.nativeSource(local);
     }
 
     @Override
     public String toString() {
+        var local = stateStream;
+        if (local == null) {
+            local = serverStream;
+        }
         return MoreObjects.toStringHelper(this)
             .add("lastIncluded", lastIncluded)
             .add("timestamp", timestamp)
             .add("file", file)
-            .add("size", stateStream.limit())
+            .add("size", local.limit())
             .add("entryCompress", entryCompress)
             .add("stateCompress", stateCompress)
             .toString();

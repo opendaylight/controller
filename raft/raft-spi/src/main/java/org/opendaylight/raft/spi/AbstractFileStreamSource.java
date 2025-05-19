@@ -34,8 +34,8 @@ public abstract sealed class AbstractFileStreamSource implements SizedStreamSour
         if (limit < 0) {
             throw new IllegalArgumentException("Negative limit " + limit);
         }
-        if (position > limit) {
-            throw new IllegalArgumentException("Position " + position + " greater than limit " + limit);
+        if (position >= limit) {
+            throw new IllegalArgumentException("Position " + position + " greater than or equal to limit " + limit);
         }
         this.position = position;
         this.limit = limit;
