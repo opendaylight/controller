@@ -172,10 +172,9 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
 
     @Override
     public <T extends StateSnapshot> void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
-            final T snapshot, final StateSnapshot.Writer<T> writer, final RaftCallback<Instant> callback) {
+            final @Nullable T snapshot, final StateSnapshot.Writer<T> writer, final RaftCallback<Instant> callback) {
         requireNonNull(raftSnapshot);
         requireNonNull(lastIncluded);
-        requireNonNull(snapshot);
         requireNonNull(writer);
 
         submitTask(new CancellableTask<>(callback) {
@@ -190,7 +189,8 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
 
     @Override
     public <T extends StateSnapshot> void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
-            final T snapshot, final StateSnapshot.Writer<T> writer, final Instant timestamp) throws IOException {
+            final @Nullable T snapshot, final StateSnapshot.Writer<T> writer, final Instant timestamp)
+                throws IOException {
         final var format = SnapshotFileFormat.latest();
         final var baseName = new StringBuilder()
             .append(FILENAME_START_STR)

@@ -11,6 +11,7 @@ import com.google.common.annotations.Beta;
 import java.io.IOException;
 import java.time.Instant;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.raft.spi.InstallableSnapshot;
 
 /**
@@ -35,8 +36,9 @@ public interface SnapshotFile extends InstallableSnapshot {
     // FIXME: note: we need data dictionary to interpret ByteStream to Payload for ReplicatedLogEntry.getData()
     RaftSnapshot readRaftSnapshot() throws IOException;
 
-    default <T extends StateSnapshot> T readSnapshot(final StateSnapshot.Reader<? extends T> reader)
+    default <T extends StateSnapshot> @Nullable T readSnapshot(final StateSnapshot.Reader<? extends T> reader)
             throws IOException {
-        return reader.readSnapshot(source().toPlainSource().io().openBufferedStream());
+        final var source = source();
+        return source == null ? null : reader.readSnapshot(source.toPlainSource().io().openBufferedStream());
     }
 }
