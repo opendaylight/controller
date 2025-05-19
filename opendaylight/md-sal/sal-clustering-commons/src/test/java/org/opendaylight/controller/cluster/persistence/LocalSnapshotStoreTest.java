@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.cluster.persistence;
 
-import static java.lang.Boolean.FALSE;
-import static java.lang.Boolean.TRUE;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.opendaylight.controller.cluster.persistence.LocalSnapshotStoreSpecTest.SNAPSHOT_DIR;
 import static org.opendaylight.controller.cluster.persistence.LocalSnapshotStoreSpecTest.cleanSnapshotDir;
 import static org.opendaylight.controller.cluster.persistence.LocalSnapshotStoreSpecTest.createSnapshotDir;
@@ -25,7 +26,6 @@ import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.actor.ExtendedActorSystem;
 import org.apache.pekko.persistence.Persistence;
-import org.apache.pekko.persistence.SelectedSnapshot;
 import org.apache.pekko.persistence.SnapshotMetadata;
 import org.apache.pekko.persistence.SnapshotProtocol;
 import org.apache.pekko.persistence.SnapshotProtocol.LoadSnapshot;
@@ -42,7 +42,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-import scala.Option;
 
 /**
  * Unit tests for LocalSnapshotStore. These are in addition to LocalSnapshotStoreSpecTest to cover a few cases
@@ -102,10 +101,10 @@ public class LocalSnapshotStoreTest {
         TestKit probe = new TestKit(system);
         snapshotStore.tell(new LoadSnapshot(PERSISTENCE_ID,
                 SnapshotSelectionCriteria.latest(), Long.MAX_VALUE), probe.getRef());
-        LoadSnapshotResult result = probe.expectMsgClass(LoadSnapshotResult.class);
-        Option<SelectedSnapshot> possibleSnapshot = result.snapshot();
+        var result = probe.expectMsgClass(LoadSnapshotResult.class);
+        var possibleSnapshot = result.snapshot();
 
-        assertEquals("SelectedSnapshot present", TRUE, possibleSnapshot.nonEmpty());
+        assertTrue("SelectedSnapshot present", possibleSnapshot.nonEmpty());
         assertEquals("SelectedSnapshot metadata", metadata3, possibleSnapshot.get().metadata());
         assertEquals("SelectedSnapshot snapshot", "three", possibleSnapshot.get().snapshot());
 
@@ -116,7 +115,7 @@ public class LocalSnapshotStoreTest {
 
         SnapshotMetadata prefixBasedShardMetada3 = new SnapshotMetadata(PREFIX_BASED_SHARD_PERSISTENCE_ID, 1, 3000);
 
-        assertEquals("SelectedSnapshot present", TRUE, possibleSnapshot.nonEmpty());
+        assertTrue("SelectedSnapshot present", possibleSnapshot.nonEmpty());
         assertEquals("SelectedSnapshot metadata", prefixBasedShardMetada3, possibleSnapshot.get().metadata());
         assertEquals("SelectedSnapshot snapshot", "foobar", possibleSnapshot.get().snapshot());
     }
@@ -126,10 +125,10 @@ public class LocalSnapshotStoreTest {
         TestKit probe = new TestKit(system);
         snapshotStore.tell(new LoadSnapshot(PERSISTENCE_ID,
                 SnapshotSelectionCriteria.latest(), Long.MAX_VALUE), probe.getRef());
-        LoadSnapshotResult result = probe.expectMsgClass(LoadSnapshotResult.class);
-        Option<SelectedSnapshot> possibleSnapshot = result.snapshot();
+        final var result = probe.expectMsgClass(LoadSnapshotResult.class);
+        final var possibleSnapshot = result.snapshot();
 
-        assertEquals("SelectedSnapshot present", FALSE, possibleSnapshot.nonEmpty());
+        assertFalse("SelectedSnapshot present", possibleSnapshot.nonEmpty());
     }
 
     @Test
@@ -142,24 +141,23 @@ public class LocalSnapshotStoreTest {
         TestKit probe = new TestKit(system);
         snapshotStore.tell(new LoadSnapshot(PERSISTENCE_ID,
                 SnapshotSelectionCriteria.latest(), Long.MAX_VALUE), probe.getRef());
-        LoadSnapshotResult result = probe.expectMsgClass(LoadSnapshotResult.class);
-        Option<SelectedSnapshot> possibleSnapshot = result.snapshot();
+        final var result = probe.expectMsgClass(LoadSnapshotResult.class);
+        final var possibleSnapshot = result.snapshot();
 
-        assertEquals("SelectedSnapshot present", TRUE, possibleSnapshot.nonEmpty());
+        assertTrue("SelectedSnapshot present", possibleSnapshot.nonEmpty());
         assertEquals("SelectedSnapshot metadata", metadata, possibleSnapshot.get().metadata());
         assertEquals("SelectedSnapshot snapshot", "one", possibleSnapshot.get().snapshot());
     }
 
-    @SuppressWarnings("checkstyle:illegalThrows")
-    @Test(expected = IOException.class)
-    public void testDoLoadAsyncWithFailure() throws Throwable {
+    @Test
+    public void testDoLoadAsyncWithFailure() throws Exception {
         createSnapshotFile(PERSISTENCE_ID, null, 1, 2000);
-
         TestKit probe = new TestKit(system);
         snapshotStore.tell(new SnapshotProtocol.LoadSnapshot(PERSISTENCE_ID,
                 SnapshotSelectionCriteria.latest(), Long.MAX_VALUE), probe.getRef());
-        LoadSnapshotFailed failed = probe.expectMsgClass(LoadSnapshotFailed.class);
-        throw failed.cause();
+
+        final var failed = probe.expectMsgClass(LoadSnapshotFailed.class);
+        assertInstanceOf(IOException.class, failed.cause());
     }
 
     @Test
@@ -176,10 +174,10 @@ public class LocalSnapshotStoreTest {
         TestKit probe = new TestKit(system);
         snapshotStore.tell(new LoadSnapshot(PERSISTENCE_ID,
                 SnapshotSelectionCriteria.latest(), Long.MAX_VALUE), probe.getRef());
-        LoadSnapshotResult result = probe.expectMsgClass(LoadSnapshotResult.class);
-        Option<SelectedSnapshot> possibleSnapshot = result.snapshot();
+        final var result = probe.expectMsgClass(LoadSnapshotResult.class);
+        final var possibleSnapshot = result.snapshot();
 
-        assertEquals("SelectedSnapshot present", TRUE, possibleSnapshot.nonEmpty());
+        assertTrue("SelectedSnapshot present", possibleSnapshot.nonEmpty());
         assertEquals("SelectedSnapshot metadata", metadata, possibleSnapshot.get().metadata());
         assertEquals("SelectedSnapshot snapshot", "one", possibleSnapshot.get().snapshot());
     }
