@@ -90,11 +90,12 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
             return null;
         }
 
-        final var first = files.getFirst();
+        final var first = files.getLast();
         LOG.debug("{}: picked {} as the latest file", memberId, first);
         return first;
     }
 
+    // Ordered by ascending timestamp, i.e. oldest snapshot first
     private List<SnapshotFile> listFiles() throws IOException {
         if (!Files.exists(directory)) {
             LOG.debug("{}: directory {} does not exist", memberId, directory);
@@ -104,7 +105,7 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
         final List<SnapshotFile> ret;
         try (var paths = Files.list(directory)) {
             ret = paths.map(this::pathToFile).filter(Objects::nonNull)
-                .sorted(Comparator.comparing(SnapshotFile::timestamp).reversed())
+                .sorted(Comparator.comparing(SnapshotFile::timestamp))
                 .toList();
         }
         LOG.trace("{}: recognized files: {}", memberId, ret);
@@ -226,14 +227,20 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
         }
 
         for (var file : files) {
-            if (firstRetained.compareTo(file.timestamp()) > 0) {
-                try {
-                    // we should not have concurrent access, but it is okay if the file disappears independently
-                    Files.deleteIfExists(file.path());
-                } catch (IOException e) {
-                    LOG.warn("{}: failed to delete {}, will retry next time", memberId, file, e);
-                }
+            if (firstRetained.compareTo(file.timestamp()) <= 0) {
+                LOG.debug("{}: retaining snapshot {}", memberId, file);
+                break;
             }
+
+            try {
+                // we should not have concurrent access, but it is okay if the file disappears independently
+                Files.deleteIfExists(file.path());
+            } catch (IOException e) {
+                LOG.warn("{}: failed to delete snapshot {}, will retry next time", memberId, file, e);
+                continue;
+            }
+
+            LOG.debug("{}: deleted snapshot {}", memberId, file);
         }
     }
 
