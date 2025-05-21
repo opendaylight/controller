@@ -383,9 +383,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     }
 
     @Test
-    public void testCommit() {
-        doReturn(50L).when(mockEntryStore).lastSequenceNumber();
-
+    public void testCommit() throws Exception {
         // when replicatedToAllIndex = -1
         doReturn(ByteState.empty()).when(mockCohort).takeSnapshot();
         snapshotManager.capture(EntryInfo.of(9, 6), -1);
@@ -399,13 +397,13 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         verify(mockReplicatedLog).snapshotCommit();
 
-        verify(mockEntryStore).deleteMessages(50L);
+        verify(mockEntryStore).discardHead(50L);
 
         MessageCollectorActor.expectFirstMatching(actorRef, SnapshotComplete.class);
     }
 
     @Test
-    public void testCommitBeforePersist() {
+    public void testCommitBeforePersist() throws Exception {
         doReturn(ByteState.empty()).when(mockCohort).takeSnapshot();
 
         // when replicatedToAllIndex = -1
@@ -414,22 +412,20 @@ public class SnapshotManagerTest extends AbstractActorTest {
         snapshotManager.commit(100L, Instant.EPOCH);
 
         verify(mockReplicatedLog, never()).snapshotCommit();
-        verify(mockEntryStore, never()).deleteMessages(100L);
+        verify(mockEntryStore, never()).discardHead(100L);
     }
 
     @Test
-    public void testCommitBeforeCapture() {
+    public void testCommitBeforeCapture() throws Exception {
         snapshotManager.commit(100L, Instant.EPOCH);
 
         verify(mockReplicatedLog, never()).snapshotCommit();
-        verify(mockEntryStore, never()).deleteMessages(anyLong());
+        verify(mockEntryStore, never()).discardHead(anyLong());
 
     }
 
     @Test
-    public void testCallingCommitMultipleTimesCausesNoHarm() {
-        doReturn(50L).when(mockEntryStore).lastSequenceNumber();
-
+    public void testCallingCommitMultipleTimesCausesNoHarm() throws Exception {
         // when replicatedToAllIndex = -1
         doReturn(ByteState.empty()).when(mockCohort).takeSnapshot();
         snapshotManager.capture(EntryInfo.of(9, 6), -1);
@@ -439,7 +435,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         snapshotManager.commit(100L, Instant.EPOCH);
 
         verify(mockReplicatedLog, times(1)).snapshotCommit();
-        verify(mockEntryStore, times(1)).deleteMessages(50L);
+        verify(mockEntryStore, times(1)).discardHead(50L);
     }
 
     @Test
