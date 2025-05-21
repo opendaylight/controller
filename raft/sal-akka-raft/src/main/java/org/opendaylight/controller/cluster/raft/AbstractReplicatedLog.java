@@ -37,6 +37,7 @@ public abstract class AbstractReplicatedLog<T extends ReplicatedLogEntry> implem
     // We define this as ArrayList so we can use ensureCapacity.
     private ArrayList<@NonNull T> journal = new ArrayList<>();
 
+    private long firstJournalIndex = 1;
     private long snapshotIndex = -1;
     private long snapshotTerm = -1;
     private long commitIndex = -1;
@@ -44,6 +45,7 @@ public abstract class AbstractReplicatedLog<T extends ReplicatedLogEntry> implem
 
     // to be used for rollback during save snapshot failure
     private ArrayList<T> snapshottedJournal;
+    private long previousFirstJournalIndex = 1;
     private long previousSnapshotIndex = -1;
     private long previousSnapshotTerm = -1;
     private int dataSize = 0;
@@ -69,6 +71,7 @@ public abstract class AbstractReplicatedLog<T extends ReplicatedLogEntry> implem
     public final void resetToLog(final ReplicatedLog prev) {
         clearRollback();
 
+        firstJournalIndex = prev.firstJournalIndex();
         snapshotIndex = prev.getSnapshotIndex();
         snapshotTerm = prev.getSnapshotTerm();
         commitIndex = prev.getCommitIndex();
@@ -147,6 +150,11 @@ public abstract class AbstractReplicatedLog<T extends ReplicatedLogEntry> implem
         LOG.debug("{}: Moving last applied index from {} to {}", memberId, this.lastApplied, lastApplied,
             LOG.isTraceEnabled() ? new Throwable() : null);
         this.lastApplied = lastApplied;
+    }
+
+    @Override
+    public final long lastAppliedJournalIndex() {
+        return adjustedIndex(getLastApplied()) + firstJournalIndex();
     }
 
     /**
@@ -276,6 +284,16 @@ public abstract class AbstractReplicatedLog<T extends ReplicatedLogEntry> implem
     }
 
     @Override
+    public final long firstJournalIndex() {
+        return firstJournalIndex;
+    }
+
+    @Override
+    public final void setFirstJournalIndex(long newFirstJournalIndex) {
+        firstJournalIndex = newFirstJournalIndex;
+    }
+
+    @Override
     public final long getSnapshotIndex() {
         return snapshotIndex;
     }
@@ -315,10 +333,14 @@ public abstract class AbstractReplicatedLog<T extends ReplicatedLogEntry> implem
 
         snapshottedJournal = new ArrayList<>(journal.size());
 
-        final var snapshotJournalEntries = journal.subList(0, (int) (snapshotCapturedIndex - snapshotIndex));
+        final var delta = (int) (snapshotCapturedIndex - snapshotIndex);
+        final var snapshotJournalEntries = journal.subList(0, delta);
 
         snapshottedJournal.addAll(snapshotJournalEntries);
         snapshotJournalEntries.clear();
+
+        previousFirstJournalIndex = firstJournalIndex;
+        firstJournalIndex += delta;
 
         previousSnapshotIndex = snapshotIndex;
         setSnapshotIndex(snapshotCapturedIndex);
@@ -330,6 +352,7 @@ public abstract class AbstractReplicatedLog<T extends ReplicatedLogEntry> implem
     @Override
     public final void snapshotCommit(final boolean updateDataSize) {
         snapshottedJournal = null;
+        previousFirstJournalIndex = 1;
         previousSnapshotIndex = -1;
         previousSnapshotTerm = -1;
 
@@ -349,6 +372,9 @@ public abstract class AbstractReplicatedLog<T extends ReplicatedLogEntry> implem
         snapshottedJournal.addAll(journal);
         journal = snapshottedJournal;
         snapshottedJournal = null;
+
+        firstJournalIndex = previousFirstJournalIndex;
+        previousFirstJournalIndex = 1;
 
         snapshotIndex = previousSnapshotIndex;
         previousSnapshotIndex = -1;
