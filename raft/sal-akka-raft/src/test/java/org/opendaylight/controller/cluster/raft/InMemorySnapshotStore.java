@@ -38,7 +38,7 @@ public class InMemorySnapshotStore extends SnapshotStore {
     private static Map<String, List<StoredSnapshot>> snapshots = new ConcurrentHashMap<>();
 
     public static void addSnapshot(final String persistentId, final Object snapshot) {
-        List<StoredSnapshot> snapshotList = snapshots.computeIfAbsent(persistentId, k -> new ArrayList<>());
+        final var snapshotList = snapshots.computeIfAbsent(persistentId, k -> new ArrayList<>());
 
         synchronized (snapshotList) {
             snapshotList.add(new StoredSnapshot(new SnapshotMetadata(persistentId, snapshotList.size(),
@@ -105,15 +105,11 @@ public class InMemorySnapshotStore extends SnapshotStore {
 
     @Override
     public Future<Void> doSaveAsync(final SnapshotMetadata snapshotMetadata, final Object obj) {
-        List<StoredSnapshot> snapshotList = snapshots.get(snapshotMetadata.persistenceId());
-
+        final var snapshotList = snapshots.computeIfAbsent(snapshotMetadata.persistenceId(),
+            unused -> new ArrayList<>());
         LOG.trace("doSaveAsync: persistentId {}: sequenceNr: {}: timestamp {}: {}", snapshotMetadata.persistenceId(),
                 snapshotMetadata.sequenceNr(), snapshotMetadata.timestamp(), obj);
 
-        if (snapshotList == null) {
-            snapshotList = new ArrayList<>();
-            snapshots.put(snapshotMetadata.persistenceId(), snapshotList);
-        }
         synchronized (snapshotList) {
             snapshotList.add(new StoredSnapshot(snapshotMetadata, obj));
         }
