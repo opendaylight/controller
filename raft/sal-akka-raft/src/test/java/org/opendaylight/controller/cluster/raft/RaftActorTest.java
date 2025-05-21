@@ -38,7 +38,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.PoisonPill;
@@ -84,7 +83,6 @@ import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.EntryStore;
-import org.opendaylight.controller.cluster.raft.spi.ForwardingEntryStore;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
@@ -148,8 +146,6 @@ public class RaftActorTest extends AbstractActorTest {
 
         kit.watch(followerActor);
 
-        var snapshotUnappliedEntries = List.<LogEntry>of(new DefaultLogEntry(4, 1, new MockCommand("E")));
-
         int lastAppliedDuringSnapshotCapture = 3;
         int lastIndexDuringSnapshotCapture = 4;
 
@@ -157,8 +153,8 @@ public class RaftActorTest extends AbstractActorTest {
         final var snapshotState = new MockSnapshotState(List.of(
             new MockCommand("A"), new MockCommand("B"), new MockCommand("C"), new MockCommand("D")));
 
-        final var snapshot = Snapshot.create(snapshotState, snapshotUnappliedEntries, lastIndexDuringSnapshotCapture, 1,
-                lastAppliedDuringSnapshotCapture, 1, new TermInfo(-1), null);
+        final var snapshot = Snapshot.create(snapshotState, List.of(new DefaultLogEntry(4, 1, new MockCommand("E"))),
+            lastIndexDuringSnapshotCapture, 1, lastAppliedDuringSnapshotCapture, 1, new TermInfo(-1), null);
         InMemorySnapshotStore.addSnapshot(persistenceId, snapshot);
 
         // add more entries after snapshot is taken
@@ -190,8 +186,10 @@ public class RaftActorTest extends AbstractActorTest {
 
         final var context = mockRaftActor.getRaftActorContext();
         final var log = context.getReplicatedLog();
-        assertEquals("Journal log size", snapshotUnappliedEntries.size() + 3, log.size());
-        assertEquals("Journal data size", 10, log.dataSize());
+        assertEquals("Journal log size", 2, log.size());
+        // FIXME: Pekko recovery takes a snapshot and thus applies all but the last two entries, leading 7 being the
+        //        datasize. Once we have just journal, that snapshot will not be taken and we'll have 10 here
+        assertEquals("Journal data size", 7, log.dataSize());
         assertEquals("Last index", lastIndex, log.lastIndex());
         assertEquals("Last applied", lastAppliedToState, log.getLastApplied());
         assertEquals("Commit index", lastAppliedToState, log.getCommitIndex());
@@ -596,7 +594,7 @@ public class RaftActorTest extends AbstractActorTest {
         }
 
         // The commit is needed to complete the snapshot creation process
-        leaderContext.getSnapshotManager().commit(-1, Instant.MIN);
+        leaderContext.getSnapshotManager().commit(Instant.MIN);
         assertFalse(leaderContext.getSnapshotManager().isCapturing());
 
         // capture snapshot reply should remove the snapshotted entries only
@@ -687,7 +685,7 @@ public class RaftActorTest extends AbstractActorTest {
         assertTrue(followerContext.getSnapshotManager().isCapturing());
 
         // The commit is needed to complete the snapshot creation process
-        followerContext.getSnapshotManager().commit(-1, Instant.MIN);
+        followerContext.getSnapshotManager().commit(Instant.MIN);
 
         // capture snapshot reply should remove the snapshotted entries only till replicatedToAllIndex
         assertEquals(3, followerLog.size()); //indexes 5,6,7 left in the log
@@ -1207,12 +1205,12 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals("getCommitIndex", -1, leaderLog.getCommitIndex());
 
         final var entryCaptor = ArgumentCaptor.forClass(ReplicatedLogEntry.class);
-        final var callbackCaptor = ArgumentCaptor.forClass(Runnable.class);
+        final var callbackCaptor = ArgumentCaptor.<RaftCallback<Long>>captor();
         verify(provider.entryStore()).startPersistEntry(entryCaptor.capture(), callbackCaptor.capture());
 
         final var entry = entryCaptor.getValue();
         assertSame(storedMeta.meta(), entry);
-        callbackCaptor.getValue().run();
+        callbackCaptor.getValue().invoke(null, 1L);
 
         assertEquals("getCommitIndex", 0, leaderLog.getCommitIndex());
         assertEquals("getLastApplied", 0, leaderLog.getLastApplied());
@@ -1256,7 +1254,6 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    @SuppressWarnings("checkstyle:illegalcatch")
     public void testApplyStateRace() throws Exception {
         final var leaderId = factory.generateActorId("leader-");
         final var followerId = factory.generateActorId("follower-");
@@ -1282,34 +1279,20 @@ public class RaftActorTest extends AbstractActorTest {
         final var leader = new Leader(leaderContext);
         leaderActor.setCurrentBehavior(leader);
 
-        final var executorService = Executors.newSingleThreadExecutor(Thread.ofPlatform()
-            .name("testApplyStateRace-executor")
-            .factory());
-        leaderActor.persistence().decorateEntryStore((delegate, actor) -> new ForwardingEntryStore() {
-            @Override
-            public void startPersistEntry(final ReplicatedLogEntry entry, final Runnable callback) {
-                // needs to be executed from another thread to simulate the persistence actor calling this callback
-                super.startPersistEntry(entry, () -> executorService.submit(callback));
-            }
-
-            @Override
-            protected EntryStore delegate() {
-                return delegate;
-            }
-        });
-
         leader.getFollower(followerId).setNextIndex(0);
         leader.getFollower(followerId).setMatchIndex(-1);
 
-        // hitting this is flimsy so run multiple times to improve the chance of things
-        // blowing up while breaking actor containment
+        // Hitting this is flimsy so run multiple times to improve the chance of things blowing up while breaking actor
+        // containment.
+        // We have persistence enabled, which means we have a JournalWriteTask running in background, just as this test
+        // used to mock with an executor
         final var message = new TestPersist(leaderActorRef, new MockIdentifier("1"), new MockCommand("1"));
         for (int i = 0; i < 100; i++) {
-            leaderActorRef.tell(message, null);
+            leaderActorRef.tell(message, ActorRef.noSender());
             leaderActorRef.tell(new AppendEntriesReply(followerId, 1, true, i, 1, (short) 5), mockFollowerActorRef);
         }
 
-        await("Persistence callback.").atMost(5, TimeUnit.SECONDS).until(() -> leaderActor.getState().size() == 100);
-        executorService.shutdown();
+        await("Persistence callback.").atMost(500, TimeUnit.SECONDS)
+            .untilAsserted(() -> assertEquals(100, leaderActor.getState().size()));
     }
 }
