@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.cluster.raft.spi;
 
-import org.apache.pekko.persistence.JournalProtocol;
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
@@ -17,19 +15,19 @@ import org.opendaylight.raft.api.EntryMeta;
 /**
  * Interface to a access and manage {@link StateMachineCommand}-bearing entries with {@link EntryMeta}.
  */
+@NonNullByDefault
 public interface EntryStore {
     /**
      * A {@link RaftCallback} reporting the {@code journalIndex} on success.
      */
-    @NonNullByDefault
     abstract class PersistCallback extends RaftCallback<Long> {
         // Nothing else
     }
 
     /**
-     * {@return the {@code EntryStoreCompleter}}
+     * {@return the {@code RaftStorageCompleter}}
      */
-    @NonNull RaftStorageCompleter completer();
+    RaftStorageCompleter completer();
 
     /**
      * Persists an entry to the applicable journal synchronously. The contract is that the callback will be invoked
@@ -38,9 +36,7 @@ public interface EntryStore {
      * @param entry the journal entry to persist
      * @param callback the callback when persistence is complete
      */
-    // FIXME: without callback and throwing IOException
-    @NonNullByDefault
-    void persistEntry(ReplicatedLogEntry entry, Runnable callback);
+    void persistEntry(ReplicatedLogEntry entry, PersistCallback callback);
 
     /**
      * Persists an entry to the applicable journal asynchronously.
@@ -48,16 +44,15 @@ public interface EntryStore {
      * @param entry the journal entry to persist
      * @param callback the callback when persistence is complete
      */
-    // FIXME: Callback<ReplicatedLogEntry> instead of Consumer
-    @NonNullByDefault
-    void startPersistEntry(ReplicatedLogEntry entry, Runnable callback);
+    // FIXME: really just a boolean 'async' flag, really
+    void startPersistEntry(ReplicatedLogEntry entry, PersistCallback callback);
 
     /**
      * Delete entries starting from specified index.
      *
      * @param fromIndex the index of first entry to delete
      */
-    void deleteEntries(long fromIndex);
+    void discardTail(long fromIndex);
 
     /**
      * Record a known value of {@code lastApplied} as a recovery optimization. If we can recover this information,
@@ -79,21 +74,5 @@ public interface EntryStore {
      *
      * @param sequenceNumber the sequence number
      */
-    // FIXME: throws IOException
-    void deleteMessages(long sequenceNumber);
-
-    /**
-     * Returns the last sequence number contained in the journal.
-     *
-     * @return the last sequence number
-     */
-    long lastSequenceNumber();
-
-    /**
-     * Receive and potentially handle a {@link JournalProtocol} response.
-     *
-     * @param response A {@link JournalProtocol} response
-     * @return {@code true} if the response was handled
-     */
-    boolean handleJournalResponse(JournalProtocol.@NonNull Response response);
+    void discardHead(long sequenceNumber);
 }
