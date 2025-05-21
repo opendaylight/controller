@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.raft.spi;
 
 import com.google.common.base.MoreObjects;
-import org.apache.pekko.persistence.JournalProtocol;
+import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 
@@ -18,12 +18,17 @@ public abstract class ForwardingEntryStore implements EntryStore {
     protected abstract EntryStore delegate();
 
     @Override
-    public void persistEntry(final ReplicatedLogEntry entry, final Runnable callback) {
-        delegate().persistEntry(entry, callback);
+    public EntryLoader openLoader() {
+        return delegate().openLoader();
     }
 
     @Override
-    public void startPersistEntry(final ReplicatedLogEntry entry, final Runnable callback) {
+    public long persistEntry(final ReplicatedLogEntry entry) throws IOException {
+        return delegate().persistEntry(entry);
+    }
+
+    @Override
+    public void startPersistEntry(final ReplicatedLogEntry entry, final RaftCallback<Long> callback) {
         delegate().startPersistEntry(entry, callback);
     }
 
@@ -33,7 +38,7 @@ public abstract class ForwardingEntryStore implements EntryStore {
     }
 
     @Override
-    public void deleteMessages(final long sequenceNumber) {
+    public void deleteMessages(final long sequenceNumber) throws IOException {
         delegate().deleteMessages(sequenceNumber);
     }
 
@@ -45,11 +50,6 @@ public abstract class ForwardingEntryStore implements EntryStore {
     @Override
     public void markLastApplied(final long lastAppliedIndex) {
         delegate().markLastApplied(lastAppliedIndex);
-    }
-
-    @Override
-    public boolean handleJournalResponse(final JournalProtocol.Response response) {
-        return delegate().handleJournalResponse(response);
     }
 
     @Override

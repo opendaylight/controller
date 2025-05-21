@@ -7,8 +7,10 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static com.google.common.base.Verify.verify;
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects;
 import java.util.Objects;
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -19,23 +21,38 @@ import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 /**
  * A {@link ReplicatedLogEntry} implementation used by {@link ReplicatedLogImpl}.
  */
+@Beta
 @NonNullByDefault
-final class JournaledLogEntry implements ReplicatedLogEntry {
+public final class JournaledLogEntry implements ReplicatedLogEntry {
     private final long index;
     private final long term;
     private final Payload command;
 
     private boolean persistencePending;
+    private long journalIndex;
 
-    JournaledLogEntry(final long index, final long term, final Payload command) {
+    public JournaledLogEntry(final long index, final long term, final Payload command) {
         this.index = index;
         this.term = term;
         this.command = requireNonNull(command);
+        journalIndex = -1;
+        persistencePending = true;
+    }
+
+    public JournaledLogEntry(final long index, final long term, final Payload command, long journalIndex) {
+        this.index = index;
+        this.term = term;
+        this.command = requireNonNull(command);
+        this.journalIndex = journalIndex;
     }
 
     static JournaledLogEntry of(final LogEntry entry) {
-        return entry instanceof JournaledLogEntry simple && !simple.isPersistencePending() ? simple
-            : new JournaledLogEntry(entry.index(), entry.term(), entry.command().toSerialForm());
+        if (entry instanceof JournaledLogEntry simple && !simple.isPersistencePending()) {
+            return simple;
+        }
+        final var ret = new JournaledLogEntry(entry.index(), entry.term(), entry.command().toSerialForm());
+        ret.persistencePending = false;
+        return ret;
     }
 
     @Override
@@ -74,8 +91,15 @@ final class JournaledLogEntry implements ReplicatedLogEntry {
      *
      * @param pending the new setting.
      */
-    void setPersistencePending(final boolean pending) {
-        persistencePending = pending;
+    void completePersistence(final long newJournalIndex) {
+        verify(persistencePending);
+        journalIndex = newJournalIndex;
+        persistencePending = false;
+    }
+
+    long getJournalIndex() {
+        verify(!persistencePending);
+        return journalIndex;
     }
 
     @Override

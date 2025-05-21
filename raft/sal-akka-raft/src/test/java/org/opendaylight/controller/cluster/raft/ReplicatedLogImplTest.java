@@ -16,9 +16,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import com.google.common.util.concurrent.MoreExecutors;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.LongConsumer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,7 +52,7 @@ class ReplicatedLogImplTest {
     @Mock
     private Consumer<ReplicatedLogEntry> callback;
     @Captor
-    private ArgumentCaptor<Runnable> procedureCaptor;
+    private ArgumentCaptor<LongConsumer> procedureCaptor;
     @TempDir
     private Path stateDir;
 
@@ -178,7 +180,7 @@ class ReplicatedLogImplTest {
         log.append(new DefaultLogEntry(0, 1, new MockCommand("0")));
         final int dataSizeAfterFirstPayload = log.dataSize();
 
-        log.snapshotPreCommit(0,1);
+        log.snapshotPreCommit(0, 1);
         log.snapshotCommit(false);
 
         assertEquals(0, log.size());
@@ -198,9 +200,13 @@ class ReplicatedLogImplTest {
         final var logEntry = JournaledLogEntry.of(entry);
         if (async) {
             verify(entryStore).startPersistEntry(eq(logEntry), procedureCaptor.capture());
+            procedureCaptor.getValue().accept(1);
         } else {
-            verify(entryStore).persistEntry(eq(logEntry), procedureCaptor.capture());
+            try {
+                verify(entryStore).persistEntry(eq(logEntry));
+            } catch (IOException e) {
+                throw new AssertionError(e);
+            }
         }
-        procedureCaptor.getValue().run();
     }
 }
