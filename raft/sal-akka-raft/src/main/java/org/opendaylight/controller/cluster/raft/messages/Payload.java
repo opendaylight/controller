@@ -68,7 +68,7 @@ public abstract sealed class Payload implements StateMachineCommand, Serializabl
     public abstract int serializedSize();
 
     @Override
-    public final Serializable toSerialForm() {
+    public final Payload toSerialForm() {
         return this;
     }
 

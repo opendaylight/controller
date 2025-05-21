@@ -26,6 +26,8 @@ import org.opendaylight.controller.cluster.raft.persisted.MigratedSerializable;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
+import org.opendaylight.controller.cluster.raft.spi.EntryLoader.LoadedLastApplied;
+import org.opendaylight.controller.cluster.raft.spi.EntryLoader.LoadedLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
@@ -124,6 +126,19 @@ class RaftActorRecovery {
                 loaded.lastIncluded(), loaded.readSnapshot(context.getSnapshotManager().stateSupport().reader())));
         }
         origSnapshot = loaded;
+
+        try (var loader = context.entryStore().openLoader()) {
+            for (var entry = loader.loadNext(); entry != null; entry = loader.loadNext()) {
+                switch (entry) {
+                    case LoadedLastApplied lastApplied -> {
+
+                    }
+                    case LoadedLogEntry logEntry -> {
+
+                    }
+                }
+            }
+        }
     }
 
     final boolean handleRecoveryMessage(final Object message) {
