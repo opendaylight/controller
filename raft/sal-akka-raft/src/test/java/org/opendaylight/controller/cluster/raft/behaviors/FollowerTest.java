@@ -64,7 +64,6 @@ import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply;
 import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
-import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
@@ -1096,37 +1095,34 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         followerRaftActorRef.set(followerRaftActor);
         followerRaftActor.waitForInitializeBehaviorComplete();
 
-        InMemoryJournal.addDeleteMessagesCompleteLatch(id);
-        InMemoryJournal.addWriteMessagesCompleteLatch(id, 1, ApplyJournalEntries.class);
-
         final var entries = List.of(newLogEntry(1, 0, "one"), newLogEntry(1, 1, "two"));
 
         AppendEntries appendEntries = new AppendEntries(1, "leader", -1, -1, entries, 1, -1, (short)0);
 
         followerActorRef.tell(appendEntries, leaderActor);
 
-        AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
-        assertTrue("isSuccess", reply.isSuccess());
-
         final var snapshotFile = await().atMost(Duration.ofSeconds(2))
             .until(() -> followerRaftActor.lastSnapshot(), Objects::nonNull);
 
-        InMemoryJournal.waitForDeleteMessagesComplete(id);
-        InMemoryJournal.waitForWriteMessagesComplete(id);
-        // We expect the ApplyJournalEntries for index 1 to remain in the persisted log b/c it's still queued for
-        // persistence by the time we initiate capture so the last persisted journal sequence number doesn't include it.
-        // This is OK - on recovery it will be a no-op since index 1 has already been applied.
-        final var journalEntries = InMemoryJournal.get(id, Object.class);
-        assertEquals("Persisted journal entries size: " + journalEntries, 1, journalEntries.size());
-        assertEquals("Persisted journal entry type", ApplyJournalEntries.class, journalEntries.get(0).getClass());
-        assertEquals("ApplyJournalEntries index", 1, ((ApplyJournalEntries)journalEntries.get(0)).getToIndex());
-
         final var raftSnapshot = snapshotFile.readRaftSnapshot();
-
         assertEquals(List.of(), raftSnapshot.unappliedEntries());
         assertEquals(EntryInfo.of(1, 1), snapshotFile.lastIncluded());
         assertEquals("Snapshot state", List.of(entries.get(0).command(), entries.get(1).command()),
             MockRaftActor.fromState(snapshotFile.readSnapshot(MockSnapshotState.SUPPORT.reader())));
+
+        AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
+        assertTrue("isSuccess", reply.isSuccess());
+
+        // TODO: do we need a sync here?
+        final var journal = followerRaftActor.entryJournal();
+        assertNotNull(journal);
+        // Apply including the second entry ...
+        assertEquals(2, journal.applyToJournalIndex());
+        // ... but the journal is empty, as everything is included in the snapshot
+        try (var reader = journal.openReader()) {
+            assertEquals(3, reader.nextJournalIndex());
+            assertNull(reader.nextEntry());
+        }
     }
 
     @Test
@@ -1150,9 +1146,6 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         followerRaftActorRef.set(followerRaftActor);
         followerRaftActor.waitForInitializeBehaviorComplete();
 
-        InMemoryJournal.addDeleteMessagesCompleteLatch(id);
-        InMemoryJournal.addWriteMessagesCompleteLatch(id, 1, ApplyJournalEntries.class);
-
         final var entries = List.of(newLogEntry(1, 0, "one"), newLogEntry(1, 1, "two"), newLogEntry(1, 2, "three"));
 
         AppendEntries appendEntries = new AppendEntries(1, "leader", -1, -1, entries, 2, -1, (short)0);
@@ -1164,22 +1157,21 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         final var snapshotFile = await().atMost(Duration.ofSeconds(2))
             .until(() -> followerRaftActor.lastSnapshot(), Objects::nonNull);
-
-        InMemoryJournal.waitForDeleteMessagesComplete(id);
-        InMemoryJournal.waitForWriteMessagesComplete(id);
-        // We expect the ApplyJournalEntries for index 2 to remain in the persisted log b/c it's still queued for
-        // persistence by the time we initiate capture so the last persisted journal sequence number doesn't include it.
-        // This is OK - on recovery it will be a no-op since index 2 has already been applied.
-        final var journalEntries = InMemoryJournal.get(id, Object.class);
-        assertEquals("Persisted journal entries size: " + journalEntries, 1, journalEntries.size());
-        assertEquals("Persisted journal entry type", ApplyJournalEntries.class, journalEntries.get(0).getClass());
-        assertEquals("ApplyJournalEntries index", 2, ((ApplyJournalEntries)journalEntries.get(0)).getToIndex());
-
         final var raftSnapshot = snapshotFile.readRaftSnapshot();
         assertEquals(List.of(), raftSnapshot.unappliedEntries());
         assertEquals(EntryInfo.of(2, 1), snapshotFile.lastIncluded());
         assertEquals(List.of(entries.get(0).command(), entries.get(1).command(), entries.get(2).command()),
             MockRaftActor.fromState(snapshotFile.readSnapshot(MockSnapshotState.SUPPORT.reader())));
+
+        // TODO: do we need a sync here?
+        final var journal = followerRaftActor.entryJournal();
+        assertNotNull(journal);
+
+        assertEquals(3, journal.applyToJournalIndex());
+        try (var reader = journal.openReader()) {
+            assertEquals(4, reader.nextJournalIndex());
+            assertNull(reader.nextEntry());
+        }
 
         var followerLog = followerRaftActorRef.get().getRaftActorContext().getReplicatedLog();
         assertEquals("Journal size", 0, followerLog.size());
@@ -1224,39 +1216,45 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         followerRaftActorRef.set(followerRaftActor);
         followerRaftActor.waitForInitializeBehaviorComplete();
 
-        InMemoryJournal.addDeleteMessagesCompleteLatch(id);
-        InMemoryJournal.addWriteMessagesCompleteLatch(id, 1, ApplyJournalEntries.class);
-
         final var entries = List.of(newLogEntry(1, 0, "one"), newLogEntry(1, 1, "two"), newLogEntry(1, 2, "three"));
 
-        AppendEntries appendEntries = new AppendEntries(1, "leader", -1, -1, entries, 0, -1, (short)0);
+        final var appendEntries = new AppendEntries(1, "leader", -1, -1, entries, 0, -1, (short)0);
 
         followerActorRef.tell(appendEntries, leaderActor);
 
-        AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
+        final var reply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
         assertTrue("isSuccess", reply.isSuccess());
 
         final var snapshotFile = await().atMost(Duration.ofSeconds(2))
             .until(() -> followerRaftActor.lastSnapshot(), Objects::nonNull);
-
-        InMemoryJournal.waitForDeleteMessagesComplete(id);
-        InMemoryJournal.waitForWriteMessagesComplete(id);
-        // We expect the ApplyJournalEntries for index 0 to remain in the persisted log b/c it's still queued for
-        // persistence by the time we initiate capture so the last persisted journal sequence number doesn't include it.
-        // This is OK - on recovery it will be a no-op since index 0 has already been applied.
-        final var journalEntries = InMemoryJournal.get(id, Object.class);
-        assertEquals("Persisted journal entries size: " + journalEntries, 1, journalEntries.size());
-        assertEquals("Persisted journal entry type", ApplyJournalEntries.class, journalEntries.get(0).getClass());
-        assertEquals("ApplyJournalEntries index", 0, ((ApplyJournalEntries)journalEntries.get(0)).getToIndex());
-
         final var raftSnapshot = snapshotFile.readRaftSnapshot();
 
-        assertEquals("Snapshot unapplied size", 2, raftSnapshot.unappliedEntries().size());
-        assertEquals("Snapshot unapplied entry index", 1, raftSnapshot.unappliedEntries().get(0).index());
-        assertEquals("Snapshot unapplied entry index", 2, raftSnapshot.unappliedEntries().get(1).index());
+        assertEquals(List.of(), raftSnapshot.unappliedEntries());
         assertEquals("Snapshot getLastAppliedTerm", EntryInfo.of(0, 1), snapshotFile.lastIncluded());
         assertEquals("Snapshot state", List.of(entries.getFirst().command()),
                 MockRaftActor.fromState(snapshotFile.readSnapshot(MockSnapshotState.SUPPORT.reader())));
+
+        // TODO: do we need a sync here?
+        final var journal = followerActorRef.underlyingActor().entryJournal();
+        assertNotNull(journal);
+        assertEquals(1, journal.applyToJournalIndex());
+
+        try (var reader = journal.openReader()) {
+            assertEquals(2, reader.nextJournalIndex());
+            final var first = reader.nextEntry();
+            assertNotNull(first);
+            assertEquals(1, first.index());
+            assertEquals(1, first.term());
+
+            assertEquals(3, reader.nextJournalIndex());
+            final var second = reader.nextEntry();
+            assertNotNull(second);
+            assertEquals(2, second.index());
+            assertEquals(1, second.term());
+
+            assertEquals(4, reader.nextJournalIndex());
+            assertNull(reader.nextEntry());
+        }
     }
 
     @Test
@@ -1344,7 +1342,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
             final ActorRef actorRef, final RaftRPC rpc) {
         super.assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(actorContext, actorRef, rpc);
 
-        String expVotedFor = rpc instanceof RequestVote ? ((RequestVote)rpc).getCandidateId() : null;
+        final var expVotedFor = rpc instanceof RequestVote rv ? rv.getCandidateId() : null;
         assertEquals("New votedFor", expVotedFor, actorContext.termInfo().votedFor());
     }
 
