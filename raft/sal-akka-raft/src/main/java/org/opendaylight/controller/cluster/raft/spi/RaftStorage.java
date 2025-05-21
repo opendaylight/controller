@@ -132,7 +132,7 @@ public abstract sealed class RaftStorage implements EntryStore, SnapshotStore
         this.streamConfig = requireNonNull(streamConfig);
     }
 
-    private String memberId() {
+    protected final String memberId() {
         return completer.memberId();
     }
 
