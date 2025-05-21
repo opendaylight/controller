@@ -30,6 +30,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
+import org.opendaylight.controller.cluster.raft.spi.EntryJournal;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
@@ -247,6 +249,10 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
 
     public final @Nullable SnapshotFile lastSnapshot() throws IOException {
         return persistence().snapshotStore().lastSnapshot();
+    }
+
+    public final @Nullable EntryJournal entryJournal() {
+        return persistence().entryStore() instanceof EnabledRaftStorage enabled ? enabled.journal() : null;
     }
 
     @Override
