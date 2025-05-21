@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.raft.spi;
 
 import static java.util.Objects.requireNonNull;
 
-import org.apache.pekko.persistence.JournalProtocol;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 
@@ -19,41 +18,33 @@ import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
  */
 @NonNullByDefault
 public interface ImmediateEntryStore extends EntryStore {
-
     @Override
-    default void persistEntry(final ReplicatedLogEntry entry, final Runnable callback) {
+    default void persistEntry(final ReplicatedLogEntry entry, final PersistCallback callback) {
         requireNonNull(entry);
-        callback.run();
+        final var completer = completer();
+        final var cb = completer.syncWithCurrentMessage(callback);
+        completer.enqueueCompletion(() -> cb.invoke(null, 0L));
     }
 
     @Override
-    default void deleteEntries(final long fromIndex) {
-        // No-op
-    }
-
-    @Override
-    default void startPersistEntry(final ReplicatedLogEntry entry, final Runnable callback) {
+    default void startPersistEntry(final ReplicatedLogEntry entry, final PersistCallback callback) {
         requireNonNull(entry);
-        completer().enqueueCompletion(callback);
+        requireNonNull(callback);
+        completer().enqueueCompletion(() -> callback.invoke(null, 0L));
     }
 
     @Override
-    default void markLastApplied(final long lastApplied) {
-        // No-op
-    }
-
-    @Override
-    default void deleteMessages(final long sequenceNumber) {
+    default void discardHead(final long firstRetainedIndex) {
         // no-op
     }
 
     @Override
-    default long lastSequenceNumber() {
-        return -1;
+    default void discardTail(final long firstRemovedIndex) {
+        // No-op
     }
 
     @Override
-    default boolean handleJournalResponse(final JournalProtocol.Response response) {
-        return false;
+    default void checkpointLastApplied(final long commitJournalIndex) {
+        // No-op
     }
 }
