@@ -18,6 +18,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage.LoadedEntry;
 
 /**
  * An immediate {@link DataPersistenceProvider}. Offloads asynchronous persist responses via {@link ExecuteInSelfActor}
@@ -39,8 +40,23 @@ public interface ImmediateDataPersistenceProvider extends DataPersistenceProvide
     }
 
     @Override
-    default void persistEntry(final ReplicatedLogEntry entry, final Consumer<ReplicatedLogEntry> callback) {
-        callback.accept(requireNonNull(entry));
+    default EntryLoader openLoader() {
+        return new EntryLoader() {
+            @Override
+            public @Nullable LoadedEntry loadNext() {
+                return null;
+            }
+
+            @Override
+            public void close() {
+                // no-op
+            }
+        };
+    }
+
+    @Override
+    default void persistEntry(final ReplicatedLogEntry entry) throws IOException {
+        requireNonNull(entry);
     }
 
     @Override

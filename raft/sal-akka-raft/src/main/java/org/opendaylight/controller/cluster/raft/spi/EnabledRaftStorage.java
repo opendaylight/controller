@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.raft.spi;
 
+import static java.util.Objects.requireNonNull;
+
 import java.nio.file.Path;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
@@ -19,6 +21,31 @@ import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
  */
 @NonNullByDefault
 public abstract non-sealed class EnabledRaftStorage extends RaftStorage {
+    /**
+     * An entry loaded from an {@link EntryStore}.
+     */
+    public sealed interface LoadedEntry {
+
+        long journalIndex();
+    }
+
+    /**
+     * An update to {@code lastApplied} index loaded from an {@link EntryStore}.
+     */
+    public record LoadedLastApplied(long journalIndex, long lastApplied) implements LoadedEntry {
+        // Nothing else
+    }
+
+    /**
+     * A {@link LogEntry} loaded from an {@link EntryStore}.
+     */
+    public record LoadedLogEntry(long journalIndex, long index, long term, StateMachineCommand command)
+            implements LoadedEntry, LogEntry {
+        public LoadedLogEntry {
+            requireNonNull(command);
+        }
+    }
+
     protected EnabledRaftStorage(final String memberId, final ExecuteInSelfActor executeInSelf, final Path directory,
             final CompressionType compression, final Configuration streamConfig) {
         super(memberId, executeInSelf, directory, compression, streamConfig);
