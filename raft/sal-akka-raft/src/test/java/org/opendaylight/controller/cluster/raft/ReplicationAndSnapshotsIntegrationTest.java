@@ -101,7 +101,7 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
      * Verify the expected leader is elected as the leader and verify initial syncing of the followers
      * from the leader's persistence recovery.
      */
-    void verifyLeaderRecoveryAndInitialization() {
+    private void verifyLeaderRecoveryAndInitialization() {
         testLog.info("verifyLeaderRecoveryAndInitialization starting");
 
         waitUntilLeader(leaderActor);
