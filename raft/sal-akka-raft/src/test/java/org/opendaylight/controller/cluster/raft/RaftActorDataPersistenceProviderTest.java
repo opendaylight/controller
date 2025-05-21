@@ -58,32 +58,30 @@ class RaftActorDataPersistenceProviderTest {
     }
 
     @Test
-    void testPersistWithPersistenceEnabled() {
+    void testPersistWithPersistenceEnabled() throws Exception {
         doReturn(true).when(mockEnabledStorage).isRecoveryApplicable();
         provider.becomePersistent();
 
-        provider.persistEntry(mockPersistentLogEntry, mockCallback);
-        verify(mockEnabledStorage).persistEntry(mockPersistentLogEntry, mockCallback);
+        provider.persistEntry(mockPersistentLogEntry);
+        verify(mockEnabledStorage).persistEntry(mockPersistentLogEntry);
 
-        provider.persistEntry(mockNonPersistentLogEntry, mockCallback);
-        verify(mockEnabledStorage).persistEntry(mockNonPersistentLogEntry, mockCallback);
+        provider.persistEntry(mockNonPersistentLogEntry);
+        verify(mockEnabledStorage).persistEntry(mockNonPersistentLogEntry);
     }
 
     @Test
-    void testPersistWithPersistenceDisabled() {
+    void testPersistWithPersistenceDisabled() throws Exception {
         doReturn(false).when(mockDisabledStorage).isRecoveryApplicable();
         doReturn(PERSISTENT_PAYLOAD).when(mockPersistentLogEntry).command();
         doReturn(NON_PERSISTENT_PAYLOAD).when(mockNonPersistentLogEntry).command();
 
-        provider.persistEntry(mockPersistentLogEntry, mockCallback);
+        provider.persistEntry(mockPersistentLogEntry);
 
-        verify(mockEnabledStorage).persistVotingConfig(eq(PERSISTENT_PAYLOAD), callbackCaptor.capture());
-        verify(mockDisabledStorage, never()).persistEntry(mockNonPersistentLogEntry, mockCallback);
-        callbackCaptor.getValue().accept(PERSISTENT_PAYLOAD);
-        verify(mockCallback).accept(mockPersistentLogEntry);
+        verify(mockEnabledStorage).persistVotingConfig(eq(PERSISTENT_PAYLOAD));
+        verify(mockDisabledStorage, never()).persistEntry(mockNonPersistentLogEntry);
 
-        provider.persistEntry(mockNonPersistentLogEntry, mockCallback);
-        verify(mockDisabledStorage).persistEntry(mockNonPersistentLogEntry, mockCallback);
+        provider.persistEntry(mockNonPersistentLogEntry);
+        verify(mockDisabledStorage).persistEntry(mockNonPersistentLogEntry);
     }
 
     static class TestNonPersistentPayload extends AbstractStateCommand {
