@@ -16,6 +16,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import com.google.common.util.concurrent.MoreExecutors;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -30,6 +31,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.EntryStore;
+import org.opendaylight.controller.cluster.raft.spi.EntryStore.PersistCallback;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 
 /**
@@ -50,7 +52,7 @@ class ReplicatedLogImplTest {
     @Mock
     private Consumer<ReplicatedLogEntry> callback;
     @Captor
-    private ArgumentCaptor<Runnable> procedureCaptor;
+    private ArgumentCaptor<PersistCallback> procedureCaptor;
     @TempDir
     private Path stateDir;
 
@@ -69,7 +71,7 @@ class ReplicatedLogImplTest {
 
         final var logEntry1 = new DefaultLogEntry(1, 1, new MockCommand("1"));
 
-        log.appendSubmitted(logEntry1.index(), logEntry1.term(), logEntry1.command().toSerialForm(), null);
+        log.appendSubmitted(logEntry1.index(), logEntry1.term(), logEntry1.command().toSerialForm(), callback);
 
         assertPersist(logEntry1);
 
@@ -118,12 +120,12 @@ class ReplicatedLogImplTest {
         final var logEntry1 = new DefaultLogEntry(2, 1, new MockCommand("2"));
         final var logEntry2 = new DefaultLogEntry(3, 1, new MockCommand("3"));
 
-        log.appendSubmitted(logEntry1.index(), logEntry1.term(), logEntry1.command().toSerialForm(), null);
+        log.appendSubmitted(logEntry1.index(), logEntry1.term(), logEntry1.command().toSerialForm(), callback);
         assertPersist(logEntry1);
 
         reset(entryStore);
 
-        log.appendSubmitted(logEntry2.index(), logEntry2.term(), logEntry2.command().toSerialForm(), null);
+        log.appendSubmitted(logEntry2.index(), logEntry2.term(), logEntry2.command().toSerialForm(), callback);
         assertPersist(logEntry2);
 
         assertEquals(2, log.size());
@@ -139,14 +141,14 @@ class ReplicatedLogImplTest {
         int dataSize = 600;
         var logEntry = new DefaultLogEntry(2, 1, new MockCommand("2", dataSize));
 
-        log.appendSubmitted(logEntry.index(), logEntry.term(), logEntry.command().toSerialForm(), null);
+        log.appendSubmitted(logEntry.index(), logEntry.term(), logEntry.command().toSerialForm(), callback);
         assertPersist(logEntry);
 
         reset(entryStore);
 
         logEntry = new DefaultLogEntry(3, 1, new MockCommand("3", 5));
 
-        log.appendSubmitted(logEntry.index(), logEntry.term(), logEntry.command().toSerialForm(), null);
+        log.appendSubmitted(logEntry.index(), logEntry.term(), logEntry.command().toSerialForm(), callback);
         assertPersist(logEntry);
 
         assertEquals(2, log.size());
@@ -178,7 +180,7 @@ class ReplicatedLogImplTest {
         log.append(new DefaultLogEntry(0, 1, new MockCommand("0")));
         final int dataSizeAfterFirstPayload = log.dataSize();
 
-        log.snapshotPreCommit(0,1);
+        log.snapshotPreCommit(0, 1);
         log.snapshotCommit(false);
 
         assertEquals(0, log.size());
@@ -198,9 +200,13 @@ class ReplicatedLogImplTest {
         final var logEntry = JournaledLogEntry.of(entry);
         if (async) {
             verify(entryStore).startPersistEntry(eq(logEntry), procedureCaptor.capture());
+            procedureCaptor.getValue().invoke(null, 1L);
         } else {
-            verify(entryStore).persistEntry(eq(logEntry), procedureCaptor.capture());
+            try {
+                verify(entryStore).persistEntry(eq(logEntry));
+            } catch (IOException e) {
+                throw new AssertionError(e);
+            }
         }
-        procedureCaptor.getValue().run();
     }
 }

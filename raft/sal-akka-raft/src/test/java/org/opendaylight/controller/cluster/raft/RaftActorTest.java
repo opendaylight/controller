@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static java.util.Objects.requireNonNull;
 import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -84,6 +85,7 @@ import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.EntryStore;
+import org.opendaylight.controller.cluster.raft.spi.EntryStore.PersistCallback;
 import org.opendaylight.controller.cluster.raft.spi.ForwardingEntryStore;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
@@ -1207,12 +1209,12 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals("getCommitIndex", -1, leaderLog.getCommitIndex());
 
         final var entryCaptor = ArgumentCaptor.forClass(ReplicatedLogEntry.class);
-        final var callbackCaptor = ArgumentCaptor.forClass(Runnable.class);
+        final var callbackCaptor = ArgumentCaptor.forClass(PersistCallback.class);
         verify(provider.entryStore()).startPersistEntry(entryCaptor.capture(), callbackCaptor.capture());
 
         final var entry = entryCaptor.getValue();
         assertSame(storedMeta.meta(), entry);
-        callbackCaptor.getValue().run();
+        callbackCaptor.getValue().invoke(null, 1L);
 
         assertEquals("getCommitIndex", 0, leaderLog.getCommitIndex());
         assertEquals("getLastApplied", 0, leaderLog.getLastApplied());
@@ -1287,9 +1289,11 @@ public class RaftActorTest extends AbstractActorTest {
             .factory());
         leaderActor.persistence().decorateEntryStore((delegate, actor) -> new ForwardingEntryStore() {
             @Override
-            public void startPersistEntry(final ReplicatedLogEntry entry, final Runnable callback) {
+            public void startPersistEntry(final ReplicatedLogEntry entry, final PersistCallback callback) {
                 // needs to be executed from another thread to simulate the persistence actor calling this callback
-                super.startPersistEntry(entry, () -> executorService.submit(callback));
+                requireNonNull(callback);
+                super.startPersistEntry(entry,
+                    (failure, success) -> executorService.submit(() -> callback.invoke(failure, success)));
             }
 
             @Override

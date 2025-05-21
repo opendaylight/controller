@@ -23,4 +23,9 @@ public abstract non-sealed class EnabledRaftStorage extends RaftStorage {
             final CompressionType compression, final Configuration streamConfig) {
         super(memberId, executeInSelf, directory, compression, streamConfig);
     }
+
+    /**
+     * {@return the underlying EntryJournal}
+     */
+    public abstract EntryJournal journal();
 }
