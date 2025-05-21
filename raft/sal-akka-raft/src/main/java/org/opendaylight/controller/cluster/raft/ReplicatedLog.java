@@ -197,10 +197,10 @@ public interface ReplicatedLog {
      * @param index the index
      * @param term the term
      * @param command the command
-     * @param callback the callback to be notified when persistence is complete (optional).
-     * @return {@code true} if the entry was successfully appended, false otherwise.
+     * @param callback the callback to be notified when persistence is complete
+     * @return {@code true} if the entry was successfully appended, false otherwise
      */
-    boolean appendSubmitted(long index, long term, Payload command, @Nullable Consumer<ReplicatedLogEntry> callback);
+    boolean appendSubmitted(long index, long term, Payload command, Consumer<ReplicatedLogEntry> callback);
 
     /**
      * Returns a list of log entries starting from the given index to the end of the log.
@@ -244,6 +244,18 @@ public interface ReplicatedLog {
      *         be present in the replicated log
      */
     boolean isInSnapshot(long index);
+
+    /**
+     * {@return the journal index corresponding to the first entry in the journal}
+     */
+    long firstJournalIndex();
+
+    /**
+     * Sets the {@link #firstJournalIndex()} value.
+     *
+     * @param newFirstJournalIndex the new value of {@link #firstJournalIndex()}.
+     */
+    void setFirstJournalIndex(long newFirstJournalIndex);
 
     /**
      * Returns the index of the snapshot.
