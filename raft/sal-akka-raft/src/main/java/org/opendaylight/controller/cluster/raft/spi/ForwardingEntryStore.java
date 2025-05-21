@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.raft.spi;
 
 import com.google.common.base.MoreObjects;
-import org.apache.pekko.persistence.JournalProtocol;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 
@@ -23,38 +22,28 @@ public abstract class ForwardingEntryStore implements EntryStore {
     }
 
     @Override
-    public void persistEntry(final ReplicatedLogEntry entry, final Runnable callback) {
+    public void persistEntry(final ReplicatedLogEntry entry, final PersistCallback callback) {
         delegate().persistEntry(entry, callback);
     }
 
     @Override
-    public void startPersistEntry(final ReplicatedLogEntry entry, final Runnable callback) {
+    public void startPersistEntry(final ReplicatedLogEntry entry, final PersistCallback callback) {
         delegate().startPersistEntry(entry, callback);
     }
 
     @Override
-    public void deleteEntries(final long fromIndex) {
-        delegate().deleteEntries(fromIndex);
+    public void discardHead(final long firstRetainedIndex) {
+        delegate().discardHead(firstRetainedIndex);
     }
 
     @Override
-    public void deleteMessages(final long sequenceNumber) {
-        delegate().deleteMessages(sequenceNumber);
-    }
-
-    @Override
-    public long lastSequenceNumber() {
-        return delegate().lastSequenceNumber();
+    public void discardTail(final long firstRemovedIndex) {
+        delegate().discardTail(firstRemovedIndex);
     }
 
     @Override
     public void markLastApplied(final long lastAppliedIndex) {
         delegate().markLastApplied(lastAppliedIndex);
-    }
-
-    @Override
-    public boolean handleJournalResponse(final JournalProtocol.Response response) {
-        return delegate().handleJournalResponse(response);
     }
 
     @Override
