@@ -20,6 +20,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage;
 import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
+import org.opendaylight.controller.cluster.raft.spi.EntryJournal;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.RaftStorage;
 import org.opendaylight.controller.cluster.raft.spi.RaftStorageCompleter;
@@ -33,6 +34,9 @@ import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
  */
 @NonNullByDefault
 final class PersistenceControl extends PersistenceProvider {
+    // FIXME: Allow this to be configured, end-to-end. May require restart to deal with journal lifecycle.
+    private static final boolean DEFAULT_JOURNAL_MAPPED = true;
+
     private final DisabledRaftStorage disabledStorage;
     private final EnabledRaftStorage enabledStorage;
 
@@ -49,7 +53,7 @@ final class PersistenceControl extends PersistenceProvider {
     PersistenceControl(final RaftActor raftActor, final RaftStorageCompleter completer, final Path directory,
             final CompressionType compression, final Configuration streamConfig) {
         this(new DisabledRaftStorage(completer, directory, compression, streamConfig),
-            new PekkoRaftStorage(completer, raftActor, directory, compression, streamConfig));
+            new PekkoRaftStorage(completer, directory, compression, streamConfig, DEFAULT_JOURNAL_MAPPED));
     }
 
     void start() throws IOException {
@@ -69,6 +73,13 @@ final class PersistenceControl extends PersistenceProvider {
 
     boolean isRecoveryApplicable() {
         return storage instanceof EnabledRaftStorage;
+    }
+
+    /**
+     * {@return the underlying EntryJournal, if available}
+     */
+    @Nullable EntryJournal journal() {
+        return storage instanceof EnabledRaftStorage enabled ? enabled.journal() : null;
     }
 
     @Override
