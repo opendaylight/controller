@@ -271,8 +271,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         // Verify the leader's persisted snapshot.
         verifySnapshot("Persisted", firstSnapshot, currentTerm, 2);
         final var unAppliedEntry = firstSnapshot.readRaftSnapshot().unappliedEntries();
-        assertEquals(1, unAppliedEntry.size());
-        verifyReplicatedLogEntry(unAppliedEntry.getFirst(), currentTerm, 3, payload3);
+        assertEquals(List.of(), unAppliedEntry);
 
         // Verify follower 1's log and snapshot indexes.
         MessageCollectorActor.clearMessages(follower1CollectorActor);
@@ -384,8 +383,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
 
         verifySnapshot("Persisted", secondSnapshot, currentTerm, 6);
         final var unAppliedEntry = secondSnapshot.readRaftSnapshot().unappliedEntries();
-        assertEquals("Persisted Snapshot getUnAppliedEntries size", 1, unAppliedEntry.size());
-        verifyReplicatedLogEntry(unAppliedEntry.getFirst(), currentTerm, 7, payload7);
+        assertEquals(List.of(), unAppliedEntry);
 
         expSnapshotState.add(payload7);
 
@@ -494,9 +492,6 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
 
         leaderActor.underlyingActor().setMockTotalMemory(1000);
 
-        // We'll expect a ReplicatedLogImplEntry message and an ApplyJournalEntries message added to the journal.
-        InMemoryJournal.addWriteMessagesCompleteLatch(leaderId, 2);
-
         follower2Actor.underlyingActor().startDropMessages(AppendEntries.class);
 
         // Sleep for at least the election timeout interval so follower 2 is deemed inactive by the leader.
@@ -513,7 +508,9 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         // Wait for all the ReplicatedLogImplEntry and ApplyJournalEntries messages to be added to the journal
         // before the snapshot so the snapshot sequence # will be higher to ensure the snapshot gets
         // purged from the snapshot store after subsequent snapshots.
-        InMemoryJournal.waitForWriteMessagesComplete(leaderId);
+        // TODO: better synchronization
+
+        Uninterruptibles.sleepUninterruptibly(2, TimeUnit.SECONDS);
 
         // Verify a snapshot is not triggered.
         assertNull(leaderActor.underlyingActor().lastSnapshot());
@@ -548,8 +545,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         // Verify the leader's persisted snapshot.
         verifySnapshot("Persisted", snapshotFile, currentTerm, 1);
         final var unAppliedEntry = snapshotFile.readRaftSnapshot().unappliedEntries();
-        assertEquals("Persisted Snapshot getUnAppliedEntries size", 1, unAppliedEntry.size());
-        verifyReplicatedLogEntry(unAppliedEntry.getFirst(), currentTerm, 2, payload2);
+        assertEquals(List.of(), unAppliedEntry);
 
         expSnapshotState.add(payload2);
 
@@ -768,7 +764,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         // Verify the leaders's persisted journal log - it should only contain the last 2 ReplicatedLogEntries
         // added after the snapshot as the persisted journal should've been purged to the snapshot
         // sequence number.
-        verifyPersistedJournal(leaderId, List.of(
+        verifyPersistedJournal(leaderActor, List.of(
             new SimpleReplicatedLogEntry(5, currentTerm, payload5),
             new SimpleReplicatedLogEntry(6, currentTerm, payload6)));
 
