@@ -7,10 +7,16 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static java.util.Objects.requireNonNull;
+
+import com.google.common.base.Throwables;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
+import org.opendaylight.controller.cluster.raft.spi.EntryStore.PersistCallback;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.raft.api.EntryMeta;
 import org.slf4j.Logger;
@@ -20,6 +26,31 @@ import org.slf4j.LoggerFactory;
  * Implementation of ReplicatedLog used by the RaftActor.
  */
 final class ReplicatedLogImpl extends AbstractReplicatedLog<JournaledLogEntry> {
+    /**
+     * A simplified {@link PersistCallback} implementation rethrowing any errors as unchecked exceptions.
+     */
+    @NonNullByDefault
+    private interface UncheckedPersistCallback extends PersistCallback {
+        @Override
+        default void invoke(final @Nullable Exception failure, final Long success) {
+            if (failure == null) {
+                invoke(success);
+                return;
+            }
+
+            Throwables.throwIfUnchecked(failure);
+            throw failure instanceof IOException e ? new UncheckedIOException("Failed to store entry", e)
+                : new IllegalStateException("Failed to store entry", failure);
+        }
+
+        /**
+         * Invoke the callback.
+         *
+         * @param journalIndex the {@code journalIndex} at which the entry is stored.
+         */
+        void invoke(long journalIndex);
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(ReplicatedLogImpl.class);
 
     private static final int DATA_SIZE_DIVIDER = 5;
@@ -37,7 +68,7 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog<JournaledLogEntry> {
     public boolean trimToReceive(final long fromIndex) {
         long adjustedIndex = removeFrom(fromIndex);
         if (adjustedIndex >= 0) {
-            context.entryStore().deleteEntries(fromIndex);
+            context.entryStore().discardTail(adjustedIndex + firstJournalIndex());
             return true;
         }
         return false;
@@ -81,21 +112,22 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog<JournaledLogEntry> {
             // the real size of data by the DATA_SIZE_DIVIDER so that we do not snapshot as often
             // as if we were maintaining a real snapshot
             return dataSizeSinceLastSnapshot / DATA_SIZE_DIVIDER;
-        } else {
-            return dataSize();
         }
+        return dataSize();
     }
 
     @Override
     public boolean appendReceived(final LogEntry entry, final Consumer<LogEntry> callback) {
+        requireNonNull(callback);
         LOG.debug("{}: Append log entry and persist {} ", memberId, entry);
 
         // FIXME: When can 'false' happen? Wouldn't that be an indication that Follower.handleAppendEntries() is doing
         //        something wrong?
         final var adopted = adoptEntry(entry);
+
         if (appendImpl(adopted)) {
-            context.entryStore().persistEntry(adopted, () -> invokeSync(adopted,
-                callback == null ? null : () -> callback.accept(entry)));
+            context.entryStore().persistEntry(adopted,
+                (UncheckedPersistCallback) journalIndex -> invokeSync(adopted, () -> callback.accept(adopted)));
         }
         return shouldCaptureSnapshot(adopted.index());
     }
@@ -103,22 +135,19 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog<JournaledLogEntry> {
     @Override
     public boolean appendSubmitted(final long index, final long term, final Payload command,
             final Consumer<ReplicatedLogEntry> callback)  {
+        requireNonNull(callback);
         final var entry = JournaledLogEntry.pendingOf(index, term, command);
         LOG.debug("{}: Append log entry and persist {} ", memberId, entry);
 
         final var ret = appendImpl(entry);
         if (ret) {
-            context.entryStore().startPersistEntry(entry, () -> {
-                entry.clearPersistencePending();
-                invokeAsync(entry, callback == null ? null : () -> callback.accept(entry));
-            });
+            context.entryStore().startPersistEntry(entry,
+                (UncheckedPersistCallback) journalIndex -> invokeSync(entry, () -> {
+                    entry.clearPersistencePending();
+                    callback.accept(entry);
+                }));
         }
         return ret;
-    }
-
-    @NonNullByDefault
-    private void invokeAsync(final ReplicatedLogEntry entry, final @Nullable Runnable callback) {
-        context.getExecutor().execute(() -> invokeSync(entry, callback));
     }
 
     @NonNullByDefault
@@ -134,7 +163,7 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog<JournaledLogEntry> {
 
     @Override
     public void markLastApplied() {
-        context.entryStore().markLastApplied(getLastApplied());
+        context.entryStore().markLastApplied(adjustedIndex(getLastApplied()) + firstJournalIndex());
     }
 
     @Override
