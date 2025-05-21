@@ -17,6 +17,7 @@ import org.eclipse.jdt.annotation.NonNull;
  *
  * @author Thomas Pantelis
  */
+// FIXME: 12.0.0: not Serializable
 public final class ShardManagerSnapshot implements Serializable {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
