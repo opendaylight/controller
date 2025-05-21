@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft.spi;
 
 import com.google.common.base.MoreObjects;
+import java.io.IOException;
 import java.util.function.Consumer;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -19,8 +20,13 @@ public abstract class ForwardingEntryStore implements EntryStore {
     protected abstract EntryStore delegate();
 
     @Override
-    public void persistEntry(final ReplicatedLogEntry entry, final Consumer<ReplicatedLogEntry> callback) {
-        delegate().persistEntry(entry, callback);
+    public EntryLoader openLoader() {
+        return delegate().openLoader();
+    }
+
+    @Override
+    public void persistEntry(final ReplicatedLogEntry entry) throws IOException {
+        delegate().persistEntry(entry);
     }
 
     @Override
@@ -34,7 +40,7 @@ public abstract class ForwardingEntryStore implements EntryStore {
     }
 
     @Override
-    public void deleteMessages(final long sequenceNumber) {
+    public void deleteMessages(final long sequenceNumber) throws IOException {
         delegate().deleteMessages(sequenceNumber);
     }
 
