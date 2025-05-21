@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft.spi;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Throwables;
@@ -148,6 +149,11 @@ public final class JournalWriterTask implements Runnable {
         return journal.memberId();
     }
 
+    @Beta
+    public EntryJournal journal() {
+        return journal;
+    }
+
     public void appendEntry(final LogEntry entry, final RaftCallback<Long> callback) throws InterruptedException {
         enqueueAndWait(new JournalAppendEntry(ticker.read(), entry, callback));
     }
@@ -209,7 +215,7 @@ public final class JournalWriterTask implements Runnable {
         }
 
         // FIXME: add delay capping
-
+        LOG.trace("{}: waiting {}ns", memberId(), delay);
         TimeUnit.NANOSECONDS.sleep(delay);
     }
 
@@ -252,7 +258,7 @@ public final class JournalWriterTask implements Runnable {
             keepRunning = runBatch(batch);
 
             LOG.debug("{}: persisted {} entries in {}", memberId(), batchSize, sw.stop());
-            sw.reset();
+            sw.reset().start();
         } while (keepRunning);
 
         LOG.debug("{}: task {} stopped", memberId(), this);
