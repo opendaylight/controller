@@ -153,6 +153,11 @@ public abstract class AbstractReplicatedLog<T extends ReplicatedLogEntry> implem
         this.lastApplied = lastApplied;
     }
 
+    @Override
+    public final long lastAppliedJournalIndex() {
+        return adjustedIndex(getLastApplied()) + firstJournalIndex();
+    }
+
     /**
      * Removes entries from the in-memory log starting at the given index.
      *
