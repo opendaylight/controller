@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft.spi;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Throwables;
@@ -170,6 +171,10 @@ public final class JournalWriteTask implements Runnable {
         return completer.memberId();
     }
 
+    @Beta
+    public EntryJournal journal() {
+        return journal;
+    }
 
     /**
      * Append a log entry to the journal.
