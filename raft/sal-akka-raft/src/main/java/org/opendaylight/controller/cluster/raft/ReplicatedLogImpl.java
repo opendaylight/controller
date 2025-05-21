@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -95,8 +97,12 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog<SimpleReplicatedLogE
         //        something wrong?
         final var adopted = adoptEntry(entry);
         if (appendImpl(adopted)) {
-            context.entryStore().persistEntry(adopted, () -> invokeSync(adopted,
-                callback == null ? null : () -> callback.accept(entry)));
+            try {
+                context.entryStore().persistEntry(adopted);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+            invokeSync(adopted, callback == null ? null : () -> callback.accept(entry));
         }
         return shouldCaptureSnapshot(adopted.index());
     }

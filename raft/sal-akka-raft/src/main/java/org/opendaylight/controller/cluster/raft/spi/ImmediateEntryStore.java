@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft.spi;
 
 import static java.util.Objects.requireNonNull;
 
+import java.io.IOException;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
@@ -24,9 +25,13 @@ public interface ImmediateEntryStore extends EntryStore {
     ExecuteInSelfActor actor();
 
     @Override
-    default void persistEntry(final ReplicatedLogEntry entry, final Runnable callback) {
+    default EntryLoader openLoader() {
+        return EmptyEntryLoader.INSTANCE;
+    }
+
+    @Override
+    default void persistEntry(final ReplicatedLogEntry entry) throws IOException {
         requireNonNull(entry);
-        callback.run();
     }
 
     @Override
