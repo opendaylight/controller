@@ -713,7 +713,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     private void onRecoveryCompleted() {
-        LOG.info("Recovery complete : {}", logName());
+        LOG.info("{}: Recovery complete", logName());
 
         if (currentSnapshot == null && restoreFromSnapshot != null
                 && restoreFromSnapshot.getShardManagerSnapshot() != null) {
