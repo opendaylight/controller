@@ -22,9 +22,13 @@ import static org.opendaylight.controller.cluster.datastore.MemberNode.verifyNoS
 import static org.opendaylight.controller.cluster.datastore.MemberNode.verifyRaftPeersPresent;
 import static org.opendaylight.controller.cluster.datastore.MemberNode.verifyRaftState;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -450,6 +454,18 @@ class ClusterAdminRpcServiceTest {
 
         Cluster.get(leaderNode1.kit().getSystem()).down(Cluster.get(replicaNode2.kit().getSystem()).selfAddress());
         replicaNode2.cleanup();
+
+        // Wipe all member-2-shard- state
+        try (var stream = Files.list(stateDir.resolve("odl.cluster.server").resolve("shards"))) {
+            stream .filter(path -> path.getFileName().toString().startsWith("member-2-shard-"))
+                .forEach(dir -> {
+                    try (var paths = Files.walk(dir)) {
+                        paths.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+                    } catch (IOException e) {
+                        throw new UncheckedIOException(e);
+                    }
+                });
+        }
 
         final var newPeplicaNode2 = MemberNode.builder(stateDir, memberNodes).akkaConfig("Member2").testName(name)
                 .moduleShardsConfig(moduleShardsConfig).build();

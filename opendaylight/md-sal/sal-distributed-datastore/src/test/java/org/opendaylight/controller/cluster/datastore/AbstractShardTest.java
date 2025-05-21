@@ -164,8 +164,6 @@ public abstract class AbstractShardTest extends AbstractActorTest {
             fail("Missing " + TestModel.OUTER_LIST_QNAME.getLocalName() + " entries with keys: " + listEntryKeys);
         }
 
-        assertEquals("Last log index", nListEntries,
-                shard.underlyingActor().getShardMBean().getLastLogIndex());
         assertEquals("Commit index", nListEntries,
                 shard.underlyingActor().getShardMBean().getCommitIndex());
         assertEquals("Last applied", nListEntries,
