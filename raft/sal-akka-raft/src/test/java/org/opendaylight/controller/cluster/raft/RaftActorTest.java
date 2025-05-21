@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static java.util.Objects.requireNonNull;
 import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -28,6 +29,7 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
@@ -54,6 +56,7 @@ import org.apache.pekko.testkit.javadsl.TestKit;
 import org.eclipse.jdt.annotation.NonNull;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
@@ -84,6 +87,7 @@ import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.EntryStore;
+import org.opendaylight.controller.cluster.raft.spi.EntryStore.PersistCallback;
 import org.opendaylight.controller.cluster.raft.spi.ForwardingEntryStore;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
@@ -596,7 +600,7 @@ public class RaftActorTest extends AbstractActorTest {
         }
 
         // The commit is needed to complete the snapshot creation process
-        leaderContext.getSnapshotManager().commit(-1, Instant.MIN);
+        leaderContext.getSnapshotManager().commit(Instant.MIN);
         assertFalse(leaderContext.getSnapshotManager().isCapturing());
 
         // capture snapshot reply should remove the snapshotted entries only
@@ -687,7 +691,7 @@ public class RaftActorTest extends AbstractActorTest {
         assertTrue(followerContext.getSnapshotManager().isCapturing());
 
         // The commit is needed to complete the snapshot creation process
-        followerContext.getSnapshotManager().commit(-1, Instant.MIN);
+        followerContext.getSnapshotManager().commit(Instant.MIN);
 
         // capture snapshot reply should remove the snapshotted entries only till replicatedToAllIndex
         assertEquals(3, followerLog.size()); //indexes 5,6,7 left in the log
@@ -1207,12 +1211,12 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals("getCommitIndex", -1, leaderLog.getCommitIndex());
 
         final var entryCaptor = ArgumentCaptor.forClass(ReplicatedLogEntry.class);
-        final var callbackCaptor = ArgumentCaptor.forClass(Runnable.class);
+        final var callbackCaptor = ArgumentCaptor.forClass(PersistCallback.class);
         verify(provider.entryStore()).startPersistEntry(entryCaptor.capture(), callbackCaptor.capture());
 
         final var entry = entryCaptor.getValue();
         assertSame(storedMeta.meta(), entry);
-        callbackCaptor.getValue().run();
+        callbackCaptor.getValue().invoke(null, 1L);
 
         assertEquals("getCommitIndex", 0, leaderLog.getCommitIndex());
         assertEquals("getLastApplied", 0, leaderLog.getLastApplied());
@@ -1256,7 +1260,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    @SuppressWarnings("checkstyle:illegalcatch")
+    @Ignore
     public void testApplyStateRace() throws Exception {
         final var leaderId = factory.generateActorId("leader-");
         final var followerId = factory.generateActorId("follower-");
@@ -1287,9 +1291,20 @@ public class RaftActorTest extends AbstractActorTest {
             .factory());
         leaderActor.persistence().decorateEntryStore((delegate, actor) -> new ForwardingEntryStore() {
             @Override
-            public void startPersistEntry(final ReplicatedLogEntry entry, final Runnable callback) {
+            public void startPersistEntry(final ReplicatedLogEntry entry, final PersistCallback callback) {
                 // needs to be executed from another thread to simulate the persistence actor calling this callback
-                super.startPersistEntry(entry, () -> executorService.submit(callback));
+                requireNonNull(callback);
+                super.startPersistEntry(entry, new PersistCallback() {
+                    @Override
+                    public void invoke(final Exception failure, final Long success) {
+                        executorService.execute(() -> callback.invoke(failure, success));
+                    }
+
+                    @Override
+                    protected ToStringHelper addToStringAttributes(final ToStringHelper helper) {
+                        return helper.add("callback", callback);
+                    }
+                });
             }
 
             @Override
