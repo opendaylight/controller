@@ -11,6 +11,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.time.Instant;
 import java.util.List;
 import org.apache.pekko.dispatch.ControlMessage;
@@ -282,7 +283,8 @@ public final class SnapshotManager {
         final var request = newCaptureSnapshot(lastLogEntry, replicatedToAllIndex, false);
         LOG.info("{}: Initiating snapshot capture {} to install on {}", memberId(), request, targetFollower);
 
-        final var lastSeq = context.entryStore().lastSequenceNumber();
+        final var replLog = context.getReplicatedLog();
+        final long lastSeq = replLog.firstJournalIndex() + replLog.getLastApplied() - replLog.getSnapshotIndex();
         LOG.debug("{}: lastSequenceNumber prior to capture: {}", memberId(), lastSeq);
 
         task = new Capture(lastSeq, request);
@@ -338,7 +340,8 @@ public final class SnapshotManager {
 
     private boolean capture(final @NonNull CaptureSnapshot request) {
         LOG.info("{}: Initiating snapshot capture {}", memberId(), request);
-        final var lastSeq = context.entryStore().lastSequenceNumber();
+        final var replLog = context.getReplicatedLog();
+        final long lastSeq = replLog.firstJournalIndex() + replLog.getLastApplied() - replLog.getSnapshotIndex();
         final var snapshotState = snapshotCohort.takeSnapshot();
         LOG.debug("{}: captured snapshot at lastSequenceNumber: {}", memberId(), lastSeq);
         persist(lastSeq, request, snapshotState);
@@ -382,7 +385,8 @@ public final class SnapshotManager {
         final var snapshot = Snapshot.ofTermLeader(snapshotState, leaderSnapshot.lastEntry(), context.termInfo(),
             leaderSnapshot.serverConfig());
         final var callback = leaderSnapshot.callback;
-        final var lastSeq = context.entryStore().lastSequenceNumber();
+        final var replLog = context.getReplicatedLog();
+        final var lastSeq = replLog.firstJournalIndex() + replLog.size();
         task = new PersistApply(lastSeq, snapshot, callback);
         LOG.debug("{}: lastSequenceNumber prior to persisting applied snapshot: {}", memberId(), lastSeq);
         saveSnapshot(new RaftSnapshot(snapshot.votingConfig(), snapshot.getUnAppliedEntries()), snapshot.lastApplied(),
@@ -506,7 +510,9 @@ public final class SnapshotManager {
         }
 
         LOG.debug("{}: Snapshot success -  sequence number: {}", memberId(), sequenceNumber);
-        context.entryStore().deleteMessages(commit(persist));
+        final var lastSequenceNumber = commit(persist);
+
+        context.entryStore().discardHead(lastSequenceNumber);
 
         snapshotComplete();
     }
