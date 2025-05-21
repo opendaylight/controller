@@ -25,6 +25,7 @@ import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.spi.AbstractStateCommand;
 import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage;
 import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
+import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
 
 /**
  * Unit tests for RaftActorDelegatingPersistentDataProvider.
@@ -63,7 +64,7 @@ class PersistenceControlTest {
     @Mock
     private EnabledRaftStorage enabledStorage;
     @Mock
-    private Runnable callback;
+    private RaftCallback<Long> callback;
 
     private PersistenceControl provider;
 
@@ -93,6 +94,6 @@ class PersistenceControlTest {
 
         doReturn(NON_PERSISTENT_PAYLOAD).when(nonPersistentLogEntry).command();
         disabledStorage.persistEntry(nonPersistentLogEntry, callback);
-        verify(disabledStorage).persistEntry(nonPersistentLogEntry, callback);
+        verify(disabledStorage).persistEntry(same(nonPersistentLogEntry), any());
     }
 }
