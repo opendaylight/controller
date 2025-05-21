@@ -7,8 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft.spi;
 
-import org.apache.pekko.persistence.JournalProtocol;
-import org.eclipse.jdt.annotation.NonNull;
+import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
@@ -17,17 +16,17 @@ import org.opendaylight.raft.api.EntryMeta;
 /**
  * Interface to a access and manage {@link StateMachineCommand}-bearing entries with {@link EntryMeta}.
  */
+@NonNullByDefault
 public interface EntryStore {
     /**
      * Persists an entry to the applicable journal synchronously. The contract is that the callback will be invoked
      * before {@link RaftActor} sees any other message.
      *
      * @param entry the journal entry to persist
-     * @param callback the callback when persistence is complete
+     * @return the journal index at which the entry was persisted, or {@code 0} if entries are not being persisted
+     * @throws IOException when an I/O error occurs
      */
-    // FIXME: without callback and throwing IOException
-    @NonNullByDefault
-    void persistEntry(ReplicatedLogEntry entry, Runnable callback);
+    long persistEntry(ReplicatedLogEntry entry) throws IOException;
 
     /**
      * Persists an entry to the applicable journal asynchronously.
@@ -35,9 +34,7 @@ public interface EntryStore {
      * @param entry the journal entry to persist
      * @param callback the callback when persistence is complete
      */
-    // FIXME: Callback<ReplicatedLogEntry> instead of Consumer
-    @NonNullByDefault
-    void startPersistEntry(ReplicatedLogEntry entry, Runnable callback);
+    void startPersistEntry(ReplicatedLogEntry entry, RaftCallback<Long> callback);
 
     /**
      * Delete entries starting from specified index.
@@ -66,8 +63,7 @@ public interface EntryStore {
      *
      * @param sequenceNumber the sequence number
      */
-    // FIXME: throws IOException
-    void deleteMessages(long sequenceNumber);
+    void deleteMessages(long sequenceNumber) throws IOException;
 
     /**
      * Returns the last sequence number contained in the journal.
@@ -75,12 +71,4 @@ public interface EntryStore {
      * @return the last sequence number
      */
     long lastSequenceNumber();
-
-    /**
-     * Receive and potentially handle a {@link JournalProtocol} response.
-     *
-     * @param response A {@link JournalProtocol} response
-     * @return {@code true} if the response was handled
-     */
-    boolean handleJournalResponse(JournalProtocol.@NonNull Response response);
 }
