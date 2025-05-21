@@ -314,6 +314,7 @@ public class Follower extends RaftActorBehavior {
         //       and the last entry, with this callback.
         //       Furthermore the correctness of this relies on the fact that the callback is invoked asynchronously,
         //       i.e. in the next RaftActor processing cycle.
+        // FIXME: refactor to not use identity
         final Consumer<LogEntry> callback = logEntry -> {
             if (shouldCaptureSnapshot.get() && logEntry == entries.getLast()) {
                 context.getSnapshotManager().capture(replLog.lastMeta(), getReplicatedToAllIndex());
