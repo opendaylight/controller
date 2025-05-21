@@ -7,24 +7,21 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.same;
-import static org.mockito.Mockito.doCallRealMethod;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.verify;
 
+import java.nio.file.Path;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
-import org.opendaylight.controller.cluster.raft.spi.AbstractStateCommand;
 import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage;
 import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
+import org.opendaylight.controller.cluster.raft.spi.RaftStorageCompleter;
+import org.opendaylight.raft.spi.CompressionType;
+import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
 
 /**
  * Unit tests for RaftActorDelegatingPersistentDataProvider.
@@ -33,66 +30,30 @@ import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
  */
 @ExtendWith(MockitoExtension.class)
 class PersistenceControlTest {
-    private static final VotingConfig PERSISTENT_PAYLOAD = new VotingConfig();
-    private static final AbstractStateCommand NON_PERSISTENT_PAYLOAD = new AbstractStateCommand() {
-        @java.io.Serial
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        public int size() {
-            return 0;
-        }
-
-        @Override
-        public int serializedSize() {
-            return 0;
-        }
-
-        @Override
-        protected Object writeReplace() {
-            throw new UnsupportedOperationException();
-        }
-    };
-
+    @TempDir
+    private Path directory;
     @Mock
-    private ReplicatedLogEntry persistentLogEntry;
-    @Mock
-    private ReplicatedLogEntry nonPersistentLogEntry;
-    @Mock
-    private DisabledRaftStorage disabledStorage;
-    @Mock
-    private EnabledRaftStorage enabledStorage;
-    @Mock
-    private Runnable callback;
+    private RaftActor raftActor;
 
-    private PersistenceControl provider;
+    private PersistenceControl control;
 
     @BeforeEach
     void beforeEach() {
-        provider = new PersistenceControl(disabledStorage, enabledStorage);
-        // we should start off as DisabledRaftStorage
-        assertSame(disabledStorage, provider.entryStore());
-        assertSame(disabledStorage, provider.snapshotStore());
+        control = new PersistenceControl(raftActor, new RaftStorageCompleter("test", Runnable::run), directory,
+            CompressionType.NONE, new Configuration(0, directory));
+    }
+
+    @Test
+    void defaultIsDisabledStorage() {
+        assertInstanceOf(DisabledRaftStorage.class, control.entryStore());
+        assertInstanceOf(DisabledRaftStorage.class, control.snapshotStore());
     }
 
     @Test
     void becomePersistentMeansEnabledStorage() {
-        assertTrue(provider.becomePersistent());
+        assertTrue(control.becomePersistent());
         // we should become EnabledRaftStorage
-        assertSame(enabledStorage, provider.entryStore());
-        assertSame(enabledStorage, provider.snapshotStore());
-    }
-
-    @Test
-    void testPersistWithPersistenceDisabled() throws Exception {
-        doReturn(PERSISTENT_PAYLOAD).when(persistentLogEntry).command();
-
-        doNothing().when(disabledStorage).saveVotingConfig(same(PERSISTENT_PAYLOAD), any());
-        doCallRealMethod().when(disabledStorage).persistEntry(any(), any());
-        disabledStorage.persistEntry(persistentLogEntry, callback);
-
-        doReturn(NON_PERSISTENT_PAYLOAD).when(nonPersistentLogEntry).command();
-        disabledStorage.persistEntry(nonPersistentLogEntry, callback);
-        verify(disabledStorage).persistEntry(nonPersistentLogEntry, callback);
+        assertInstanceOf(EnabledRaftStorage.class, control.entryStore());
+        assertInstanceOf(EnabledRaftStorage.class, control.snapshotStore());
     }
 }
