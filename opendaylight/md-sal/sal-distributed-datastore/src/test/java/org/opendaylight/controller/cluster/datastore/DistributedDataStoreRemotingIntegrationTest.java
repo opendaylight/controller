@@ -7,12 +7,12 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
@@ -23,7 +23,6 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapNodeBuilder;
 
-import com.google.common.base.Stopwatch;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.FutureCallback;
@@ -263,8 +262,6 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         final String testName = "testWriteTransactionWithSingleShard";
         initDatastoresWithCars(testName);
 
-        final String followerCarShardName = "member-2-shard-cars-" + testName;
-
         DOMStoreWriteTransaction writeTx = followerDistributedDataStore.newWriteOnlyTransaction();
         assertNotNull("newWriteOnlyTransaction returned null", writeTx);
 
@@ -314,22 +311,10 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         // tell-based persists additional payloads which could be replicated and applied in a batch resulting in
         // either 2 or 3 ApplyJournalEntries. To handle this we read the follower's persisted ApplyJournalEntries
         // until we find the one that encompasses the leader's lastAppliedIndex.
-        Stopwatch sw = Stopwatch.createStarted();
-        boolean done = false;
-        while (!done) {
-            final var entries = InMemoryJournal.get(followerCarShardName, ApplyJournalEntries.class);
-            for (var entry : entries) {
-                if (entry.getToIndex() >= leaderLastAppliedIndex.get()) {
-                    done = true;
-                    break;
-                }
-            }
 
-            assertTrue("Follower did not persist ApplyJournalEntries containing leader's lastAppliedIndex "
-                    + leaderLastAppliedIndex + ". Entries persisted: " + entries, sw.elapsed(TimeUnit.SECONDS) <= 5);
-
-            Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
-        }
+        IntegrationTestKit.verifyShardState(followerDistributedDataStore, CARS[0], state -> {
+            assertThat(state.getLastApplied()).isGreaterThanOrEqualTo(leaderLastAppliedIndex.get());
+        });
 
         TestKit.shutdownActorSystem(leaderSystem, true);
         TestKit.shutdownActorSystem(followerSystem, true);
