@@ -10,8 +10,12 @@ package org.opendaylight.controller.cluster.raft;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
+import java.nio.file.Files;
 import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -28,6 +32,7 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
+import org.opendaylight.raft.api.EntryInfo;
 
 /**
  * Integration test for various scenarios involving non-voting followers.
@@ -45,7 +50,7 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
      * data in memory. The leader must force an install snapshot to re-sync the follower's state.
      */
     @Test
-    public void testFollowerResyncWithEmptyLeaderLogAfterNonPersistentLeaderRestart() {
+    public void testFollowerResyncWithEmptyLeaderLogAfterNonPersistentLeaderRestart() throws Exception {
         testLog.info("testFollowerResyncWithEmptyLeaderLogAfterNonPersistentLeaderRestart starting");
 
         setupLeaderAndNonVotingFollower();
@@ -69,7 +74,14 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         assertEquals("Follower applied state", expSnapshotState, followerInstance.getState());
 
         // Persisted journal should only contain the ServerConfigurationPayload and the original UpdateElectionTerm
-        assertEquals("Leader persisted journal size", 2, InMemoryJournal.get(leaderId).size());
+        final var leaderSnapshot = leaderInstance.lastSnapshot();
+        assertNotNull(leaderSnapshot);
+        assertEquals(EntryInfo.of(-1, -1), leaderSnapshot.lastIncluded());
+        assertNull(leaderSnapshot.source());
+        final var leaderRaftSnapshot = leaderSnapshot.readRaftSnapshot();
+        assertEquals(List.of(), leaderRaftSnapshot.unappliedEntries());
+        assertEquals(new VotingConfig(new ServerInfo(follower1Id, false), new ServerInfo(leaderId, true)),
+            leaderRaftSnapshot.votingConfig());
 
         // Restart the leader
 
@@ -258,7 +270,8 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
      * Eventually the follower should force the leader to install snapshot to re-sync its state.
      */
     @Test
-    public void testFollowerResyncWithMoreLeaderLogEntriesAndDownPeerAfterNonPersistentLeaderRestart() {
+    public void testFollowerResyncWithMoreLeaderLogEntriesAndDownPeerAfterNonPersistentLeaderRestart()
+            throws Exception {
         testLog.info("testFollowerResyncWithMoreLeaderLogEntriesAndDownPeerAfterNonPersistentLeaderRestart starting");
 
         setupLeaderAndNonVotingFollower();
@@ -287,6 +300,8 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         assertEquals("Follower journal size", 1, leaderLog.size());
 
         // Restart the leader
+        final var leaderSnapshot = leaderInstance.lastSnapshot();
+        assertNotNull(leaderSnapshot);
 
         killActor(leaderActor);
         MessageCollectorActor.clearMessages(follower1CollectorActor);
@@ -308,9 +323,11 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         SimpleReplicatedLogEntry persistedServerConfigEntry = new SimpleReplicatedLogEntry(0, currentTerm,
                 persistedServerConfig);
 
+        // Leader operates in non-persistent mode, hence serverConfig is stored in a snapshot. Delete the snapshot,
+        // so the leader picks up the configuration.
+        Files.delete(leaderSnapshot.path());
         InMemoryJournal.clear();
-        InMemoryJournal.addEntry(leaderId, 1, new UpdateElectionTerm(currentTerm, leaderId));
-        InMemoryJournal.addEntry(leaderId, 2, persistedServerConfigEntry);
+        InMemoryJournal.addEntry(leaderId, 1, persistedServerConfigEntry);
         InMemoryJournal.addEntry(follower2Id, 1, persistedServerConfigEntry);
 
         DefaultConfigParamsImpl follower2ConfigParams = newFollowerConfigParams();
@@ -440,6 +457,7 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         follower1Context = followerInstance.getRaftActorContext();
 
         waitUntilLeader(leaderActor);
+        assertEquals("Leader persisted journal size", 0, InMemoryJournal.get(leaderId).size());
 
         // Verify leader's context after startup
 

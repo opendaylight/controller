@@ -29,6 +29,8 @@ import org.awaitility.core.ConditionFactory;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
+import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
+import org.opendaylight.controller.cluster.raft.spi.EntryJournal;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,6 +77,14 @@ public class RaftActorTestKit extends TestKit {
         }
 
         throw new AssertionError("Leader not found for actorRef " + actorRef.path());
+    }
+
+    public static final @NonNull EntryJournal assertJournal(final RaftActor actor) {
+        return assertInstanceOf(EnabledRaftStorage.class, actor.persistence().entryStore()).journal();
+    }
+
+    public static final @NonNull EntryJournal assertJournal(final TestActorRef<? extends RaftActor> actor) {
+        return assertJournal(actor.underlyingActor());
     }
 
     public static final void awaitLastApplied(final RaftActor actor, final long lastApplied) {

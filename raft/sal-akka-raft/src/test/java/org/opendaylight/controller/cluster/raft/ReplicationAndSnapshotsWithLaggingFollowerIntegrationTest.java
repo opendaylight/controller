@@ -11,6 +11,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.opendaylight.controller.cluster.raft.RaftActorTestKit.assertJournal;
 import static org.opendaylight.controller.cluster.raft.RaftActorTestKit.awaitLastApplied;
 import static org.opendaylight.controller.cluster.raft.RaftActorTestKit.awaitSnapshot;
 import static org.opendaylight.controller.cluster.raft.RaftActorTestKit.awaitSnapshotNewerThan;
@@ -37,7 +38,6 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
-import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
@@ -271,8 +271,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         // Verify the leader's persisted snapshot.
         verifySnapshot("Persisted", firstSnapshot, currentTerm, 2);
         final var unAppliedEntry = firstSnapshot.readRaftSnapshot().unappliedEntries();
-        assertEquals(1, unAppliedEntry.size());
-        verifyReplicatedLogEntry(unAppliedEntry.getFirst(), currentTerm, 3, payload3);
+        assertEquals(List.of(), unAppliedEntry);
 
         // Verify follower 1's log and snapshot indexes.
         MessageCollectorActor.clearMessages(follower1CollectorActor);
@@ -384,8 +383,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
 
         verifySnapshot("Persisted", secondSnapshot, currentTerm, 6);
         final var unAppliedEntry = secondSnapshot.readRaftSnapshot().unappliedEntries();
-        assertEquals("Persisted Snapshot getUnAppliedEntries size", 1, unAppliedEntry.size());
-        verifyReplicatedLogEntry(unAppliedEntry.getFirst(), currentTerm, 7, payload7);
+        assertEquals(List.of(), unAppliedEntry);
 
         expSnapshotState.add(payload7);
 
@@ -490,12 +488,12 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         snapshotBatchCount = 5;
         setup();
 
+        final var leaderRecoverySnapshot = leaderActor.underlyingActor().lastSnapshot();
+        assertNotNull(leaderRecoverySnapshot);
+
         sendInitialPayloadsReplicatedToAllFollowers("zero");
 
         leaderActor.underlyingActor().setMockTotalMemory(1000);
-
-        // We'll expect a ReplicatedLogImplEntry message and an ApplyJournalEntries message added to the journal.
-        InMemoryJournal.addWriteMessagesCompleteLatch(leaderId, 2);
 
         follower2Actor.underlyingActor().startDropMessages(AppendEntries.class);
 
@@ -513,10 +511,12 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         // Wait for all the ReplicatedLogImplEntry and ApplyJournalEntries messages to be added to the journal
         // before the snapshot so the snapshot sequence # will be higher to ensure the snapshot gets
         // purged from the snapshot store after subsequent snapshots.
-        InMemoryJournal.waitForWriteMessagesComplete(leaderId);
+        // TODO: better synchronization
+
+        Uninterruptibles.sleepUninterruptibly(2, TimeUnit.SECONDS);
 
         // Verify a snapshot is not triggered.
-        assertNull(leaderActor.underlyingActor().lastSnapshot());
+        assertEquals(leaderRecoverySnapshot.timestamp(), leaderActor.underlyingActor().lastSnapshot().timestamp());
 
         expSnapshotState.add(payload1);
 
@@ -529,7 +529,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         MockCommand payload2 = sendPayloadData(leaderActor, "two", 201);
 
         // A snapshot should've occurred - wait for it to complete.
-        final var snapshotFile = awaitSnapshot(leaderActor);
+        final var snapshotFile = awaitSnapshotNewerThan(leaderActor, leaderRecoverySnapshot.timestamp());
 
         // Verify the leader applies the last log entry.
         applyStates = MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyState.class, 2);
@@ -548,8 +548,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         // Verify the leader's persisted snapshot.
         verifySnapshot("Persisted", snapshotFile, currentTerm, 1);
         final var unAppliedEntry = snapshotFile.readRaftSnapshot().unappliedEntries();
-        assertEquals("Persisted Snapshot getUnAppliedEntries size", 1, unAppliedEntry.size());
-        verifyReplicatedLogEntry(unAppliedEntry.getFirst(), currentTerm, 2, payload2);
+        assertEquals(List.of(), unAppliedEntry);
 
         expSnapshotState.add(payload2);
 
@@ -731,18 +730,10 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         // The last (fourth) payload may or may not have been applied when the snapshot is captured depending on the
         // timing when the async persistence completes.
         final var unAppliedEntry = secondSnapshot.readRaftSnapshot().unappliedEntries();
-        long leadersSnapshotIndex;
-        if (unAppliedEntry.isEmpty()) {
-            leadersSnapshotIndex = 4;
-            expSnapshotState.add(payload4);
-            verifySnapshot("Persisted", secondSnapshot, currentTerm, 4);
-        } else {
-            leadersSnapshotIndex = 3;
-            verifySnapshot("Persisted", secondSnapshot, currentTerm, 3);
-            assertEquals("Persisted Snapshot getUnAppliedEntries size", 1, unAppliedEntry.size());
-            verifyReplicatedLogEntry(unAppliedEntry.get(0), currentTerm, 4, payload4);
-            expSnapshotState.add(payload4);
-        }
+        long leadersSnapshotIndex = 3;
+        verifySnapshot("Persisted", secondSnapshot, currentTerm, 3);
+        assertEquals(List.of(), unAppliedEntry);
+        expSnapshotState.add(payload4);
 
         // Send a couple more payloads.
         MockCommand payload5 = sendPayloadData(leaderActor, "five");
@@ -768,21 +759,13 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         // Verify the leaders's persisted journal log - it should only contain the last 2 ReplicatedLogEntries
         // added after the snapshot as the persisted journal should've been purged to the snapshot
         // sequence number.
-        verifyPersistedJournal(leaderId, List.of(
+        verifyPersistedJournal(leaderActor, List.of(
+            new SimpleReplicatedLogEntry(4, currentTerm, payload4),
             new SimpleReplicatedLogEntry(5, currentTerm, payload5),
             new SimpleReplicatedLogEntry(6, currentTerm, payload6)));
 
         // Verify the leaders's persisted journal contains an ApplyJournalEntries for at least the last entry index.
-        final var persistedApplyJournalEntries = InMemoryJournal.get(leaderId, ApplyJournalEntries.class);
-        boolean found = false;
-        for (var entry : persistedApplyJournalEntries) {
-            if (entry.getToIndex() == 6) {
-                found = true;
-                break;
-            }
-        }
-
-        assertTrue("ApplyJournalEntries with index 6 not found in leader's persisted journal", found);
+        assertEquals(7, assertJournal(leaderActor).applyToJournalIndex());
 
         // Verify follower 1 applies the 3 log entries.
         applyStates = MessageCollectorActor.expectMatching(follower1CollectorActor, ApplyState.class, 3);
