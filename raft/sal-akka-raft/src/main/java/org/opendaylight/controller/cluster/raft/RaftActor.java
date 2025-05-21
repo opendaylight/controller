@@ -63,8 +63,6 @@ import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftStat
 import org.opendaylight.controller.cluster.raft.client.messages.Shutdown;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.messages.RequestLeadership;
-import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
-import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.persisted.NoopPayload;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
@@ -1022,14 +1020,6 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         super.persist(entry, callback::accept);
     }
 
-    // FIXME: CONTROLLER-2137: remove this method
-    @Deprecated(forRemoval = true)
-    final void deleteEntries(final long fromIndex) {
-        super.persist(new DeleteEntries(fromIndex), deleteEntries -> {
-            // No-op
-        });
-    }
-
     @Override
     @Deprecated(since = "11.0.0", forRemoval = true)
     public final <A> void persistAsync(final A entry, final Procedure<A> callback) {
@@ -1038,13 +1028,6 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     final <A> void persistAsync(final A entry, final Consumer<A> callback) {
         super.persistAsync(entry, callback::accept);
-    }
-
-    final void markLastApplied(final long lastApplied) {
-        LOG.debug("{}: Persisting ApplyJournalEntries with index={}", memberId(), lastApplied);
-        super.persistAsync(new ApplyJournalEntries(lastApplied), unused -> {
-            // No-op
-        });
     }
 
     @Override

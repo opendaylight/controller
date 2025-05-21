@@ -14,6 +14,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import com.google.common.util.concurrent.MoreExecutors;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -66,7 +67,11 @@ class ReplicatedLogImplTest {
         if (async) {
             verify(mockPersistence).startPersistEntry(same(entry), procedureCaptor.capture());
         } else {
-            verify(mockPersistence).persistEntry(same(entry), procedureCaptor.capture());
+            try {
+                verify(mockPersistence).persistEntry(same(entry));
+            } catch (IOException e) {
+                throw new AssertionError(e);
+            }
         }
         procedureCaptor.getValue().accept(entry);
     }
