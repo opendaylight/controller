@@ -7,29 +7,105 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import static java.util.Objects.requireNonNull;
-
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufOutputStream;
+import java.io.DataOutput;
+import java.io.DataOutputStream;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.function.Consumer;
 import org.apache.pekko.persistence.DeleteMessagesSuccess;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
+import org.opendaylight.controller.cluster.raft.spi.EntryLoader;
+import org.opendaylight.controller.cluster.raft.spi.LogEntry;
+import org.opendaylight.raft.journal.SegmentedRaftJournal;
+import org.opendaylight.raft.journal.StorageLevel;
 import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
+import org.opendaylight.yangtools.concepts.WritableObjects;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An {@link EnabledRaftStorage} backed by Pekko Persistence of an {@link RaftActor}.
  */
 // FIXME: remove this class once we have both Snapshots and Entries stored in files
-@NonNullByDefault
 final class PekkoRaftStorage extends EnabledRaftStorage {
-    private final RaftActor actor;
+    private static final Logger LOG = LoggerFactory.getLogger(PekkoRaftStorage.class);
 
+    private static final String JOURNAL_NAME = "entries-v1";
+
+    // 256KiB, which leads to reasonable heap buffers
+    private static final int INLINE_ENTRY_SIZE = 256 * 1024;
+    // 128MiB, which leads to reasonable file sizes
+    private static final int SEGMENT_SIZE = INLINE_ENTRY_SIZE * 512;
+
+    // A few bits indicating type, disposition and compression of a particular stored entry. The idea here is that we
+    // read the first inline byte of a stored entry and interpret it in one of two ways based on whether or not
+    // the topmost is set:
+
+    /**
+     * A {@link LogEntry} to be appended to {@link ReplicatedLog}. The other 7 bits should be interpreted as disposition
+     * and compression. The leading byte is followed by 1-17 bytes encoding the index and term on the entry, via
+     * {@link WritableObjects#writeLongs(DataOutput, long, long)}.
+     */
+    static final byte TYPE_LOG_ENTRY     = (byte) 0x00;
+    /**
+     * A change in {@code lastApplied} index, to be propagated to {@link ReplicatedLog#setLastApplied(long)}. The next
+     * top-most 3 bits are reserved: they should be set to 0 on writeout and ignored on read. The bottom-most 4 bits are
+     * the header produced by {@link WritableObjects#writeLong(DataOutput, long, int)}, followed by 0-8 bytes containing
+     * the actual index.
+     */
+    static final byte TYPE_LAST_APPLIED  = (byte) 0x80;
+    static final byte TYPE_MASK          = TYPE_LAST_APPLIED;
+
+    /**
+     * The entry's command is serialized inline, following the index/term data.
+     */
+    static final byte DISPOSITION_INLINE = (byte) 0x00;
+    /**
+     * The entry's command is serialized in a separate file.
+     */
+    static final byte DISPOSITION_FILE   = (byte) 0x40;
+    static final byte DISPOSITION_MASK   = DISPOSITION_FILE;
+
+    /**
+     * The entry's command is serialized without compression.
+     */
+    static final byte COMPRESSION_NONE   = (byte) 0x00;
+    /**
+     * The entry's command is serialized with LZ4 compression.
+     */
+    static final byte COMPRESSION_LZ4    = (byte) 0x20;
+    static final byte COMPRESSION_MASK   = COMPRESSION_LZ4;
+
+    // TODO: We have 0x1F, i.e. 5 bits, left in TYPE_LOG_ENTRY encoding. We should make use of them to:
+    //       - guide stateful encoding:
+    //         - one bit indicates contiguous index (= prevEntry.index + 1), acting as control to
+    //           WritableObjects.readLong()
+    //         - one bit indicates same term (= prevEntry.term), acting as control to WritableObjects.readLong()
+    //       - carry (at least part of) the command type: in our default application we need about 10 possible values
+
+    // Pre-computed header values for writeout
+    private static final byte HDR_LE_IU = (byte) (TYPE_LOG_ENTRY | DISPOSITION_INLINE | COMPRESSION_NONE);
+    private static final byte HDR_LE_IC = (byte) (TYPE_LOG_ENTRY | DISPOSITION_INLINE | COMPRESSION_LZ4);
+    private static final byte HDR_LE_FU = (byte) (TYPE_LOG_ENTRY | DISPOSITION_FILE   | COMPRESSION_NONE);
+    private static final byte HDR_LE_FC = (byte) (TYPE_LOG_ENTRY | DISPOSITION_FILE   | COMPRESSION_LZ4);
+
+    private final boolean mapped;
+
+    private SegmentedRaftJournal journal;
+
+    @NonNullByDefault
     PekkoRaftStorage(final RaftActor actor, final Path directory, final CompressionType compression,
-            final Configuration streamConfig) {
+            final Configuration streamConfig, final boolean mapped) {
         super(actor.memberId(), actor, directory, compression, streamConfig);
-        this.actor = requireNonNull(actor);
+        this.mapped = mapped;
     }
 
     // TODO: at least
@@ -40,8 +116,15 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
     //     - determine nextSequence
 
     @Override
-    protected void postStart() {
-        // No-op
+    protected void postStart() throws IOException {
+        journal = SegmentedRaftJournal.builder()
+            .withDirectory(directory)
+            .withName(JOURNAL_NAME)
+            .withMaxEntrySize(INLINE_ENTRY_SIZE)
+            .withMaxSegmentSize(SEGMENT_SIZE)
+            .withStorageLevel(mapped ? StorageLevel.MAPPED : StorageLevel.DISK)
+            .build();
+        LOG.info("{}: journal open: firstIndex={} lastIndex={}", memberId, journal.firstIndex(), journal.lastIndex());
     }
 
     // FIXME:  and more: more things:
@@ -54,41 +137,103 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
 
     @Override
     protected void preStop() {
-        // No-op
+        journal.close();
+        journal = null;
+        LOG.info("{}: journal closed", memberId);
     }
 
     @Override
-    public void persistEntry(final ReplicatedLogEntry entry, final Consumer<ReplicatedLogEntry> callback) {
-        actor.persist(entry, callback);
+    public EntryLoader openLoader() {
+        return new JournalEntryLoader(directory, journal.openReader(-1));
+    }
+
+    @Override
+    public void persistEntry(final ReplicatedLogEntry entry) throws IOException {
+        journal.writer().append(this::writeLogEntry, entry);
     }
 
     @Override
     public void startPersistEntry(final ReplicatedLogEntry entry, final Consumer<ReplicatedLogEntry> callback) {
-        actor.persistAsync(entry, callback);
+        // FIXME: asynchronous
+        try {
+            persistEntry(entry);
+        } catch (IOException e) {
+            LOG.error("{}: to persist entry", memberId, e);
+            throw new UncheckedIOException(e);
+        }
+        executeInSelf.executeInSelf(() -> callback.accept(entry));
     }
 
     @Override
     public void deleteEntries(final long fromIndex) {
-        actor.deleteEntries(fromIndex);
+        journal.writer().reset(fromIndex);
     }
 
     @Override
     public void markLastApplied(final long lastApplied) {
-        actor.markLastApplied(lastApplied);
+        try {
+            journal.writer().append(PekkoRaftStorage::writeLastApplied, lastApplied);
+        } catch (IOException e) {
+            LOG.error("{}: failed to mark last applied index", memberId, e);
+            throw new UncheckedIOException(e);
+        }
+        LOG.debug("{}: update commit-index to {}", memberId, lastApplied);
     }
 
     @Override
     public void deleteMessages(final long sequenceNumber) {
-        actor.deleteMessages(sequenceNumber);
+        journal.writer().commit(sequenceNumber);
+        journal.compact(sequenceNumber);
     }
 
     @Override
     public long lastSequenceNumber() {
-        return actor.lastSequenceNr();
+        return journal.lastIndex();
     }
 
     @Override
     public boolean handleJournalResponse(final JournalProtocol.Response response) {
         return response instanceof DeleteMessagesSuccess;
+    }
+
+    private static void writeLastApplied(final Long lastApplied, final ByteBuf buf) throws IOException {
+        try (var out = new ByteBufOutputStream(buf)) {
+            WritableObjects.writeLong(out, lastApplied, TYPE_LAST_APPLIED);
+        }
+    }
+
+    private void writeLogEntry(final LogEntry entry, final ByteBuf buf) throws IOException {
+        // Let's keep things simple: require 256KiB to be
+        final var writable = buf.maxWritableBytes();
+        if (writable < INLINE_ENTRY_SIZE) {
+            throw new EOFException("Require at least " + INLINE_ENTRY_SIZE + " bytes, " + writable + " provided");
+        }
+
+        final var startIndex = buf.writerIndex();
+        try (var out = new BufThenFileOutputStream(directory, 0L, Long::toHexString, buf, INLINE_ENTRY_SIZE)) {
+            try (var dos = new DataOutputStream(compression.encodeOutput(out))) {
+                dos.writeByte(switch (compression) {
+                    case LZ4 -> HDR_LE_IC;
+                    case NONE -> HDR_LE_IU;
+                });
+
+                WritableObjects.writeLongs(dos, entry.index(), entry.term());
+                try (var oos = new ObjectOutputStream(dos)) {
+                    oos.writeObject(entry.command().toSerialForm());
+                }
+            }
+
+            final var file = out.file();
+            if (file != null) {
+                buf.setByte(startIndex, switch (compression) {
+                    case LZ4 -> HDR_LE_FC;
+                    case NONE -> HDR_LE_FU;
+                });
+            }
+        } catch (IndexOutOfBoundsException e) {
+            final var eof = new EOFException();
+            eof.initCause(e);
+            throw eof;
+        }
     }
 }
