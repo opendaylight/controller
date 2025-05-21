@@ -264,8 +264,8 @@ public final class ShardInformation {
         return schemaContextProvider.modelContext();
     }
 
-    void setSchemaContext(final EffectiveModelContext schemaContext) {
-        schemaContextProvider.set(requireNonNull(schemaContext));
+    void setModelContext(final EffectiveModelContext modelContext) {
+        schemaContextProvider.set(requireNonNull(modelContext));
     }
 
     @VisibleForTesting

@@ -42,7 +42,7 @@ public class TestShardManager extends ShardManager {
         final var newInfo = new ShardInformation(stateDir, shardName, shardId, getPeerAddresses(info.getShardName()),
             info.getDatastoreContext(),
             TestShard.builder().restoreFromSnapshot(info.getBuilder().getRestoreFromSnapshot()), peerAddressResolver);
-        newInfo.setSchemaContext(info.getSchemaContext());
+        newInfo.setModelContext(info.getSchemaContext());
         newInfo.setActiveMember(info.isActiveMember());
 
         localShards.put(shardName, info);

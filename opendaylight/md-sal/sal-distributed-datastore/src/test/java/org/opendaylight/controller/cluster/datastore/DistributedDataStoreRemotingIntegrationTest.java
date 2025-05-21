@@ -1168,7 +1168,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     }
 
     private @Nullable SnapshotFile awaitSnapshot(final String persistenceId) {
-        final var stateDir = stateDir().resolve(Shard.STATE_PATH).resolve(persistenceId);
+        // Note: first entry needs to mach ShardManager.ODL_CLUSTER_SERVER
+        final var stateDir = stateDir().resolve("odl.cluster.server").resolve(Shard.STATE_PATH).resolve(persistenceId);
         return await().atMost(Duration.ofSeconds(5)).until(() -> {
             if (!Files.isDirectory(stateDir)) {
                 return null;

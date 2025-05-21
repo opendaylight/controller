@@ -7,10 +7,20 @@
  */
 package org.opendaylight.controller.cluster.datastore.shardmanager;
 
+import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static java.nio.file.StandardOpenOption.SYNC;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.SettableFuture;
+import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -41,12 +51,11 @@ import org.apache.pekko.pattern.Patterns;
 import org.apache.pekko.persistence.DeleteSnapshotsFailure;
 import org.apache.pekko.persistence.DeleteSnapshotsSuccess;
 import org.apache.pekko.persistence.RecoveryCompleted;
-import org.apache.pekko.persistence.SaveSnapshotFailure;
-import org.apache.pekko.persistence.SaveSnapshotSuccess;
 import org.apache.pekko.persistence.SnapshotOffer;
 import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.apache.pekko.util.Timeout;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActorWithMetering;
@@ -120,6 +129,8 @@ import scala.concurrent.duration.FiniteDuration;
  */
 class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     private static final Logger LOG = LoggerFactory.getLogger(ShardManager.class);
+    @VisibleForTesting
+    static final Path ODL_CLUSTER_SERVER = Path.of("odl.cluster.server");
 
     // Stores a mapping between a shard name and it's corresponding information
     // Shard names look like inventory, topology etc and are as specified in
@@ -142,28 +153,23 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     private final Map<String, CompositeOnComplete<Boolean>> shardActorsStopping = new HashMap<>();
     private final Set<Consumer<String>> shardAvailabilityCallbacks = new HashSet<>();
     private final ShardManagerInfo shardManagerMBean;
-
-    private DatastoreContextFactory datastoreContextFactory;
-
     private final SettableFuture<Empty> readinessFuture;
     private final PrimaryShardInfoFutureCache primaryShardInfoCache;
 
     @VisibleForTesting
     final ShardPeerAddressResolver peerAddressResolver;
 
+    private DatastoreContextFactory datastoreContextFactory;
     private EffectiveModelContext modelContext;
-
     private DatastoreSnapshot restoreFromSnapshot;
-
     private ShardManagerSnapshot currentSnapshot;
-
 
     private ShardManager(final Path stateDir, final String possiblePersistenceId,
             final AbstractShardManagerCreator<?> builder) {
         super(possiblePersistenceId != null ? possiblePersistenceId
             : "shard-manager-" + builder.getDatastoreContextFactory().getBaseDatastoreContext().getDataStoreName());
 
-        this.stateDir = requireNonNull(stateDir);
+        this.stateDir = stateDir.resolve(ODL_CLUSTER_SERVER);
 
         cluster = builder.getCluster();
         configuration = builder.getConfiguration();
@@ -191,7 +197,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             builder);
     }
 
-    private String logName() {
+    private String name() {
         return persistenceId();
     }
 
@@ -202,13 +208,18 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     }
 
     @Override
-    public void preStart() {
-        LOG.info("Starting ShardManager {}", logName());
+    public void preStart() throws IOException {
+        LOG.info("Starting ShardManager {}", name());
+        Files.createDirectories(stateDir);
+        final var snapshot = loadSnapshot();
+        if (snapshot != null) {
+            applyShardManagerSnapshot(snapshot);
+        }
     }
 
     @Override
     public void postStop() {
-        LOG.info("Stopping ShardManager {}", logName());
+        LOG.info("Stopping ShardManager {}", name());
         shardManagerMBean.unregisterMBean();
     }
 
@@ -243,26 +254,23 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             case ServerRemoved msg -> onShardReplicaRemoved(msg);
             case ChangeShardMembersVotingStatus msg -> onChangeShardServersVotingStatus(msg);
             case FlipShardMembersVotingStatus msg -> onFlipShardMembersVotingStatus(msg);
-            case SaveSnapshotSuccess msg -> onSaveSnapshotSuccess(msg);
-            case SaveSnapshotFailure msg ->
-                LOG.error("{}: SaveSnapshotFailure received for saving snapshot of shards", logName(), msg.cause());
             case Shutdown msg -> onShutDown();
             case GetLocalShardIds msg -> onGetLocalShardIds();
             case GetShardRole msg -> onGetShardRole(msg);
             case RunnableMessage msg -> msg.run();
             case RegisterForShardAvailabilityChanges msg -> onRegisterForShardAvailabilityChanges(msg);
-            case DeleteSnapshotsFailure msg -> LOG.warn("{}: Failed to delete prior snapshots", logName(), msg.cause());
-            case DeleteSnapshotsSuccess msg -> LOG.debug("{}: Successfully deleted prior snapshots", logName());
+            case DeleteSnapshotsFailure msg -> LOG.warn("{}: Failed to delete prior snapshots", name(), msg.cause());
+            case DeleteSnapshotsSuccess msg -> LOG.debug("{}: Successfully deleted prior snapshots", name());
             case RegisterRoleChangeListenerReply msg ->
-                LOG.trace("{}: Received RegisterRoleChangeListenerReply", logName());
+                LOG.trace("{}: Received RegisterRoleChangeListenerReply", name());
             case ClusterEvent.MemberEvent msg ->
-                LOG.trace("{}: Received other ClusterEvent.MemberEvent: {}", logName(), msg);
+                LOG.trace("{}: Received other ClusterEvent.MemberEvent: {}", name(), msg);
             default -> unknownMessage(message);
         }
     }
 
     private void onRegisterForShardAvailabilityChanges(final RegisterForShardAvailabilityChanges message) {
-        LOG.debug("{}: onRegisterForShardAvailabilityChanges: {}", logName(), message);
+        LOG.debug("{}: onRegisterForShardAvailabilityChanges: {}", name(), message);
 
         final var callback = message.getCallback();
         shardAvailabilityCallbacks.add(callback);
@@ -272,14 +280,14 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     }
 
     private void onGetShardRole(final GetShardRole message) {
-        LOG.debug("{}: onGetShardRole for shard: {}", logName(), message.getName());
+        LOG.debug("{}: onGetShardRole for shard: {}", name(), message.getName());
 
         final String name = message.getName();
 
         final ShardInformation shardInformation = localShards.get(name);
 
         if (shardInformation == null) {
-            LOG.info("{}: no shard information for {} found", logName(), name);
+            LOG.info("{}: no shard information for {} found", name(), name);
             getSender().tell(new Status.Failure(
                     new IllegalArgumentException("Shard with name " + name + " not present.")), ActorRef.noSender());
             return;
@@ -292,26 +300,26 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         final var stopFutures = new ArrayList<Future<Boolean>>(localShards.size());
         for (var info : localShards.values()) {
             if (info.getActor() != null) {
-                LOG.debug("{}: Issuing gracefulStop to shard {}", logName(), info.getShardId());
+                LOG.debug("{}: Issuing gracefulStop to shard {}", name(), info.getShardId());
                 stopFutures.add(Patterns.gracefulStop(info.getActor(), FiniteDuration.fromNanos(
                     info.getDatastoreContext().getShardRaftConfig().getElectionTimeOutInterval().toNanos()).$times(2),
                     Shutdown.INSTANCE));
             }
         }
 
-        LOG.info("Shutting down ShardManager {} - waiting on {} shards", logName(), stopFutures.size());
+        LOG.info("Shutting down ShardManager {} - waiting on {} shards", name(), stopFutures.size());
 
         final var dispatcher = new Dispatchers(context().system().dispatchers())
                 .getDispatcher(Dispatchers.DispatcherType.Client);
         Futures.sequence(stopFutures, dispatcher).onComplete(new OnComplete<Iterable<Boolean>>() {
             @Override
             public void onComplete(final Throwable failure, final Iterable<Boolean> results) {
-                LOG.debug("{}: All shards shutdown - sending PoisonPill to self", logName());
+                LOG.debug("{}: All shards shutdown - sending PoisonPill to self", name());
 
                 self().tell(PoisonPill.getInstance(), self());
 
                 if (failure != null) {
-                    LOG.warn("{}: An error occurred attempting to shut down the shards", logName(), failure);
+                    LOG.warn("{}: An error occurred attempting to shut down the shards", name(), failure);
                     return;
                 }
 
@@ -323,7 +331,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 }
 
                 if (nfailed > 0) {
-                    LOG.warn("{}: {} shards did not shut down gracefully", logName(), nfailed);
+                    LOG.warn("{}: {} shards did not shut down gracefully", name(), nfailed);
                 }
             }
         }, dispatcher);
@@ -339,15 +347,15 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             final RemoveServerReply replyMsg, final String leaderPath) {
         shardReplicaOperationsInProgress.remove(shardId.getShardName());
 
-        LOG.debug("{}: Received {} for shard {}", logName(), replyMsg, shardId.getShardName());
+        LOG.debug("{}: Received {} for shard {}", name(), replyMsg, shardId.getShardName());
 
         if (replyMsg.getStatus() == ServerChangeStatus.OK) {
-            LOG.debug("{}: Leader shard successfully removed the replica shard {}", logName(),
+            LOG.debug("{}: Leader shard successfully removed the replica shard {}", name(),
                     shardId.getShardName());
             originalSender.tell(new Status.Success(null), self());
         } else {
             LOG.warn("{}: Leader failed to remove shard replica {} with status {}",
-                    logName(), shardId, replyMsg.getStatus());
+                    name(), shardId, replyMsg.getStatus());
 
             Exception failure = getServerChangeException(RemoveServer.class, replyMsg.getStatus(), leaderPath, shardId);
             originalSender.tell(new Status.Failure(failure), self());
@@ -367,7 +375,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         final DatastoreContext datastoreContext = newShardDatastoreContextBuilder(shardName).build();
 
         //inform ShardLeader to remove this shard as a replica by sending an RemoveServer message
-        LOG.debug("{}: Sending RemoveServer message to peer {} for shard {}", logName(),
+        LOG.debug("{}: Sending RemoveServer message to peer {} for shard {}", name(),
                 primaryPath, shardId);
 
         Timeout removeServerTimeout = new Timeout(datastoreContext.getShardLeaderElectionTimeout().duration());
@@ -379,7 +387,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             public void onComplete(final Throwable failure, final Object response) {
                 if (failure != null) {
                     shardReplicaOperationsInProgress.remove(shardName);
-                    LOG.debug("{}: RemoveServer request to leader {} for shard {} failed", logName(), primaryPath,
+                    LOG.debug("{}: RemoveServer request to leader {} for shard {} failed", name(), primaryPath,
                         shardName, failure);
 
                     // FAILURE
@@ -403,7 +411,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         final String shardName = shardId.getShardName();
         final ShardInformation shardInformation = localShards.remove(shardName);
         if (shardInformation == null) {
-            LOG.debug("{} : Shard replica {} is not present in list", logName(), shardId.toString());
+            LOG.debug("{} : Shard replica {} is not present in list", name(), shardId.toString());
             return;
         }
 
@@ -412,7 +420,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             long timeoutInMS = Math.max(shardInformation.getDatastoreContext().getShardRaftConfig()
                     .getElectionTimeOutInterval().multipliedBy(3).toMillis(), 10000);
 
-            LOG.debug("{} : Sending Shutdown to Shard actor {} with {} ms timeout", logName(), shardActor,
+            LOG.debug("{} : Sending Shutdown to Shard actor {} with {} ms timeout", name(), shardActor,
                     timeoutInMS);
 
             final var stopFuture = Patterns.gracefulStop(shardActor, Duration.ofMillis(timeoutInMS), Shutdown.INSTANCE);
@@ -421,9 +429,9 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 @Override
                 public void accept(final Boolean result, final Throwable failure) {
                     if (failure == null) {
-                        LOG.debug("{} : Successfully shut down Shard actor {}", logName(), shardActor);
+                        LOG.debug("{} : Successfully shut down Shard actor {}", name(), shardActor);
                     } else {
-                        LOG.warn("{}: Failed to shut down Shard actor {}", logName(), shardActor, failure);
+                        LOG.warn("{}: Failed to shut down Shard actor {}", name(), shardActor, failure);
                     }
 
                     self().tell((RunnableMessage) () -> {
@@ -441,12 +449,12 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                     .getDispatcher(Dispatchers.DispatcherType.Client));
         }
 
-        LOG.debug("{} : Local Shard replica for shard {} has been removed", logName(), shardName);
+        LOG.debug("{} : Local Shard replica for shard {} has been removed", name(), shardName);
         persistShardList();
     }
 
     private void onGetSnapshot(final GetSnapshot getSnapshot) {
-        LOG.debug("{}: onGetSnapshot", logName());
+        LOG.debug("{}: onGetSnapshot", name());
 
         List<String> notInitialized = null;
         for (var shardInfo : localShards.values()) {
@@ -466,7 +474,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         }
 
         ActorRef replyActor = getContext().actorOf(ShardManagerGetSnapshotReplyActor.props(
-                new ArrayList<>(localShards.keySet()), type, currentSnapshot , getSender(), logName(),
+                new ArrayList<>(localShards.keySet()), type, currentSnapshot , getSender(), name(),
                 datastoreContextFactory.getBaseDatastoreContext().getShardInitializationTimeout().duration()));
 
         for (var shardInfo : localShards.values()) {
@@ -476,20 +484,20 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     private void onCreateShard(final CreateShard createShard) {
-        LOG.debug("{}: onCreateShard: {}", logName(), createShard);
+        LOG.debug("{}: onCreateShard: {}", name(), createShard);
 
         Object reply;
         try {
             String shardName = createShard.getModuleShardConfig().getShardName();
             if (localShards.containsKey(shardName)) {
-                LOG.debug("{}: Shard {} already exists", logName(), shardName);
+                LOG.debug("{}: Shard {} already exists", name(), shardName);
                 reply = new Status.Success(String.format("Shard with name %s already exists", shardName));
             } else {
                 doCreateShard(createShard);
                 reply = new Status.Success(null);
             }
         } catch (Exception e) {
-            LOG.error("{}: onCreateShard failed", logName(), e);
+            LOG.error("{}: onCreateShard failed", name(), e);
             reply = new Status.Failure(e);
         }
 
@@ -504,11 +512,11 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             return false;
         }
 
-        LOG.debug("{} : Stop is in progress for shard {} - adding OnComplete callback to defer {}", logName(),
+        LOG.debug("{} : Stop is in progress for shard {} - adding OnComplete callback to defer {}", name(),
                 shardName, messageToDefer);
         final ActorRef sender = getSender();
         stopOnComplete.addOnComplete((result, failure) -> {
-            LOG.debug("{} : Stop complete for shard {} - re-queing {}", logName(), shardName, messageToDefer);
+            LOG.debug("{} : Stop complete for shard {} - re-queing {}", name(), shardName, messageToDefer);
             self().tell(messageToDefer, sender);
         });
 
@@ -552,7 +560,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         }
 
         LOG.debug("{} doCreateShard: shardId: {}, memberNames: {}, peerAddresses: {}, isActiveMember: {}",
-                logName(), shardId, moduleShardConfig.getShardMemberNames(), peerAddresses, isActiveMember);
+                name(), shardId, moduleShardConfig.getShardMemberNames(), peerAddresses, isActiveMember);
 
         ShardInformation info = new ShardInformation(stateDir, shardName, shardId, peerAddresses,
                 shardDatastoreContext, createShard.getShardBuilder(), peerAddressResolver);
@@ -560,7 +568,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         localShards.put(info.getShardName(), info);
 
         if (modelContext != null) {
-            info.setSchemaContext(modelContext);
+            info.setModelContext(modelContext);
             info.setActor(newShardActor(info));
         }
     }
@@ -576,13 +584,13 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     private void checkReady() {
         if (isReadyWithLeaderId()) {
-            LOG.info("{}: All Shards are ready - data store {} is ready", logName(), type);
+            LOG.info("{}: All Shards are ready - data store {} is ready", name(), type);
             readinessFuture.set(Empty.value());
         }
     }
 
     private void onLeaderStateChanged(final ShardLeaderStateChanged leaderStateChanged) {
-        LOG.info("{}: Received LeaderStateChanged message: {}", logName(), leaderStateChanged);
+        LOG.info("{}: Received LeaderStateChanged message: {}", name(), leaderStateChanged);
 
         ShardInformation shardInformation = findShardInformation(leaderStateChanged.memberId());
         if (shardInformation != null) {
@@ -607,22 +615,22 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     private void onShardNotInitializedTimeout(final ShardNotInitializedTimeout message) {
         ShardInformation shardInfo = message.getShardInfo();
 
-        LOG.debug("{}: Received ShardNotInitializedTimeout message for shard {}", logName(),
+        LOG.debug("{}: Received ShardNotInitializedTimeout message for shard {}", name(),
                 shardInfo.getShardName());
 
         shardInfo.removeOnShardInitialized(message.getOnShardInitialized());
 
         if (!shardInfo.isShardInitialized()) {
-            LOG.debug("{}: Returning NotInitializedException for shard {}", logName(), shardInfo.getShardName());
+            LOG.debug("{}: Returning NotInitializedException for shard {}", name(), shardInfo.getShardName());
             message.getSender().tell(createNotInitializedException(shardInfo.getShardId()), self());
         } else {
-            LOG.debug("{}: Returning NoShardLeaderException for shard {}", logName(), shardInfo.getShardName());
+            LOG.debug("{}: Returning NoShardLeaderException for shard {}", name(), shardInfo.getShardName());
             message.getSender().tell(new NoShardLeaderException(shardInfo.getShardId()), self());
         }
     }
 
     private void onFollowerInitialSyncStatus(final FollowerInitialSyncUpStatus status) {
-        LOG.info("{} Received follower initial sync status for {} status sync done {}", logName(), status.memberId(),
+        LOG.info("{} Received follower initial sync status for {} status sync done {}", name(), status.memberId(),
             status.initialSyncDone());
 
         final var shardInformation = findShardInformation(status.memberId());
@@ -633,7 +641,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     }
 
     private void onRoleChangeNotification(final RoleChangeNotification roleChanged) {
-        LOG.info("{}: Received role changed for {} from {} to {}", logName(), roleChanged.memberId(),
+        LOG.info("{}: Received role changed for {} from {} to {}", name(), roleChanged.memberId(),
             roleChanged.oldRole(), roleChanged.newRole());
 
         ShardInformation shardInformation = findShardInformation(roleChanged.memberId());
@@ -684,7 +692,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         try {
             shardId = ShardIdentifier.fromShardIdString(actorName);
         } catch (IllegalArgumentException e) {
-            LOG.debug("{}: ignoring actor {}", logName(), actorName, e);
+            LOG.debug("{}: ignoring actor {}", name(), actorName, e);
             return;
         }
 
@@ -692,7 +700,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     }
 
     private void markShardAsInitialized(final String shardName) {
-        LOG.debug("{}: Initializing shard [{}]", logName(), shardName);
+        LOG.debug("{}: Initializing shard [{}]", name(), shardName);
 
         ShardInformation shardInformation = localShards.get(shardName);
         if (shardInformation != null) {
@@ -704,22 +712,33 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     @Override
     protected void handleRecover(final Object message) throws Exception {
-        if (message instanceof RecoveryCompleted) {
-            onRecoveryCompleted();
-        } else if (message instanceof SnapshotOffer msg) {
-            applyShardManagerSnapshot((ShardManagerSnapshot) msg.snapshot());
+        switch (message) {
+            case RecoveryCompleted msg -> onRecoveryCompleted();
+            case SnapshotOffer msg -> {
+                if (currentSnapshot == null) {
+                    final var snapshot = (ShardManagerSnapshot) msg.snapshot();
+                    applyShardManagerSnapshot(snapshot);
+                    saveSnapshot(snapshot);
+                    LOG.info("{}: migrated ShardManager snapshot to local persistence", name());
+                }
+                LOG.info("{}: deleting ShardManager snapshots from Pekko persistence", name());
+                deleteSnapshots(SnapshotSelectionCriteria.create(Long.MAX_VALUE, Long.MAX_VALUE));
+            }
+            default -> {
+                LOG.debug("{}: ignored recovery message {}", name(), message);
+            }
         }
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     private void onRecoveryCompleted() {
-        LOG.info("{}: Recovery complete", logName());
+        LOG.info("{}: Recovery complete", name());
 
         if (currentSnapshot == null && restoreFromSnapshot != null
                 && restoreFromSnapshot.getShardManagerSnapshot() != null) {
             ShardManagerSnapshot snapshot = restoreFromSnapshot.getShardManagerSnapshot();
 
-            LOG.debug("{}: Restoring from ShardManagerSnapshot: {}", logName(), snapshot);
+            LOG.debug("{}: Restoring from ShardManagerSnapshot: {}", name(), snapshot);
 
             applyShardManagerSnapshot(snapshot);
         }
@@ -751,7 +770,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                     timeout = shardInformation.getDatastoreContext().getShardInitializationTimeout().duration();
                 }
 
-                LOG.debug("{}: Scheduling {} ms timer to wait for shard {}", logName(), timeout.toMillis(),
+                LOG.debug("{}: Scheduling {} ms timer to wait for shard {}", name(), timeout.toMillis(),
                         shardInformation);
 
                 final var timeoutSchedule = getContext().system().scheduler().scheduleOnce(
@@ -762,11 +781,11 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 onShardInitialized.setTimeoutSchedule(timeoutSchedule);
 
             } else if (!shardInformation.isShardInitialized()) {
-                LOG.debug("{}: Returning NotInitializedException for shard {}", logName(),
+                LOG.debug("{}: Returning NotInitializedException for shard {}", name(),
                         shardInformation.getShardName());
                 getSender().tell(createNotInitializedException(shardInformation.getShardId()), self());
             } else {
-                LOG.debug("{}: Returning NoShardLeaderException for shard {}", logName(),
+                LOG.debug("{}: Returning NoShardLeaderException for shard {}", name(),
                         shardInformation.getShardName());
                 getSender().tell(new NoShardLeaderException(shardInformation.getShardId()), self());
             }
@@ -790,7 +809,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     private void memberRemoved(final ClusterEvent.MemberRemoved message) {
         MemberName memberName = memberToName(message.member());
 
-        LOG.info("{}: Received MemberRemoved: memberName: {}, address: {}", logName(), memberName,
+        LOG.info("{}: Received MemberRemoved: memberName: {}, address: {}", name(), memberName,
                 message.member().address());
 
         peerAddressResolver.removePeerAddress(memberName);
@@ -799,7 +818,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     private void memberExited(final ClusterEvent.MemberExited message) {
         MemberName memberName = memberToName(message.member());
 
-        LOG.info("{}: Received MemberExited: memberName: {}, address: {}", logName(), memberName,
+        LOG.info("{}: Received MemberExited: memberName: {}, address: {}", name(), memberName,
                 message.member().address());
 
         peerAddressResolver.removePeerAddress(memberName);
@@ -808,7 +827,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     private void memberUp(final ClusterEvent.MemberUp message) {
         MemberName memberName = memberToName(message.member());
 
-        LOG.info("{}: Received MemberUp: memberName: {}, address: {}", logName(), memberName,
+        LOG.info("{}: Received MemberUp: memberName: {}, address: {}", name(), memberName,
                 message.member().address());
 
         memberUp(memberName, message.member().address());
@@ -822,7 +841,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     private void memberWeaklyUp(final MemberWeaklyUp message) {
         MemberName memberName = memberToName(message.member());
 
-        LOG.info("{}: Received MemberWeaklyUp: memberName: {}, address: {}", logName(), memberName,
+        LOG.info("{}: Received MemberWeaklyUp: memberName: {}, address: {}", name(), memberName,
                 message.member().address());
 
         memberUp(memberName, message.member().address());
@@ -935,24 +954,25 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
         LOG.debug("Got updated SchemaContext: # of modules {}", modelContext.getModules().size());
 
-        for (ShardInformation info : localShards.values()) {
-            info.setSchemaContext(modelContext);
+        for (var info : localShards.values()) {
+            info.setModelContext(modelContext);
+            final var actor = info.getActor();
+            if (actor != null) {
+                actor.tell(message, self());
+                continue;
+            }
 
-            if (info.getActor() == null) {
-                LOG.debug("Creating Shard {}", info.getShardId());
-                info.setActor(newShardActor(info));
-                // Update peer address for every existing peer memeber to avoid missing sending
-                // PeerAddressResolved and PeerUp to this shard while UpdateSchemaContext comes after MemberUp.
-                String shardName = info.getShardName();
-                for (MemberName memberName : peerAddressResolver.getPeerMembers()) {
-                    String peerId = getShardIdentifier(memberName, shardName).toString() ;
-                    String peerAddress = peerAddressResolver.getShardActorAddress(shardName, memberName);
-                    info.updatePeerAddress(peerId, peerAddress, self());
-                    LOG.debug("{}: updated peer {} on member {} with address {} on shard {} whose actor address is {}",
-                            logName(), peerId, memberName, peerAddress, info.getShardId(), info.getActor());
-                }
-            } else {
-                info.getActor().tell(message, self());
+            LOG.debug("Creating Shard {}", info.getShardId());
+            info.setActor(newShardActor(info));
+            // Update peer address for every existing peer memeber to avoid missing sending
+            // PeerAddressResolved and PeerUp to this shard while UpdateSchemaContext comes after MemberUp.
+            String shardName = info.getShardName();
+            for (var memberName : peerAddressResolver.getPeerMembers()) {
+                String peerId = getShardIdentifier(memberName, shardName).toString() ;
+                String peerAddress = peerAddressResolver.getShardActorAddress(shardName, memberName);
+                info.updatePeerAddress(peerId, peerAddress, self());
+                LOG.debug("{}: updated peer {} on member {} with address {} on shard {} whose actor address is {}",
+                    name(), peerId, memberName, peerAddress, info.getShardId(), info.getActor());
             }
         }
     }
@@ -969,13 +989,13 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     }
 
     private void findPrimary(final FindPrimary message) {
-        LOG.debug("{}: In findPrimary: {}", logName(), message);
+        LOG.debug("{}: In findPrimary: {}", name(), message);
 
         final String shardName = message.getShardName();
         final boolean canReturnLocalShardState = !(message instanceof RemoteFindPrimary);
 
         // First see if the there is a local replica for the shard
-        final ShardInformation info = localShards.get(shardName);
+        final var info = localShards.get(shardName);
         if (info != null && info.isActiveMember()) {
             sendResponse(info, message.isWaitUntilReady(), true, () -> {
                 String primaryPath = info.getSerializedLeaderActor();
@@ -983,36 +1003,32 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                         ? new LocalPrimaryShardFound(primaryPath, info.getLocalShardDataTree().orElseThrow()) :
                             new RemotePrimaryShardFound(primaryPath, info.getLeaderVersion());
 
-                LOG.debug("{}: Found primary for {}: {}", logName(), shardName, found);
+                LOG.debug("{}: Found primary for {}: {}", name(), shardName, found);
                 return found;
             });
 
             return;
         }
 
-        final Collection<String> visitedAddresses;
-        if (message instanceof RemoteFindPrimary msg) {
-            visitedAddresses = msg.getVisitedAddresses();
-        } else {
-            visitedAddresses = new ArrayList<>(1);
-        }
+        final var visitedAddresses = message instanceof RemoteFindPrimary msg ? msg.getVisitedAddresses()
+            : new ArrayList<String>(1);
 
         visitedAddresses.add(peerAddressResolver.getShardManagerActorPathBuilder(cluster.getSelfAddress()).toString());
 
-        for (String address: peerAddressResolver.getShardManagerPeerActorAddresses()) {
+        for (var address : peerAddressResolver.getShardManagerPeerActorAddresses()) {
             if (visitedAddresses.contains(address)) {
                 continue;
             }
 
             LOG.debug("{}: findPrimary for {} forwarding to remote ShardManager {}, visitedAddresses: {}",
-                    logName(), shardName, address, visitedAddresses);
+                    name(), shardName, address, visitedAddresses);
 
             getContext().actorSelection(address).forward(new RemoteFindPrimary(shardName,
                     message.isWaitUntilReady(), visitedAddresses), getContext());
             return;
         }
 
-        LOG.debug("{}: No shard found for {}", logName(), shardName);
+        LOG.debug("{}: No shard found for {}", name(), shardName);
 
         getSender().tell(new PrimaryNotFoundException(
                 String.format("No primary shard found for %s.", shardName)), self());
@@ -1056,11 +1072,11 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
      */
     private void createLocalShards() {
         MemberName memberName = cluster.getCurrentMemberName();
-        Collection<String> memberShardNames = configuration.getMemberShardNames(memberName);
+        final var memberShardNames = configuration.getMemberShardNames(memberName);
 
-        Map<String, DatastoreSnapshot.ShardSnapshot> shardSnapshots = new HashMap<>();
+        final var shardSnapshots = new HashMap<String, DatastoreSnapshot.ShardSnapshot>();
         if (restoreFromSnapshot != null) {
-            for (DatastoreSnapshot.ShardSnapshot snapshot: restoreFromSnapshot.getShardSnapshots()) {
+            for (var snapshot : restoreFromSnapshot.getShardSnapshots()) {
                 shardSnapshots.put(snapshot.getName(), snapshot);
             }
         }
@@ -1068,12 +1084,11 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         // null out to GC
         restoreFromSnapshot = null;
 
-        for (String shardName : memberShardNames) {
-            ShardIdentifier shardId = getShardIdentifier(memberName, shardName);
+        for (var shardName : memberShardNames) {
+            final var shardId = getShardIdentifier(memberName, shardName);
+            LOG.debug("{}: Creating local shard: {}", name(), shardId);
 
-            LOG.debug("{}: Creating local shard: {}", logName(), shardId);
-
-            Map<String, String> peerAddresses = getPeerAddresses(shardName);
+            final var peerAddresses = getPeerAddresses(shardName);
             localShards.put(shardName, createShardInfoFor(shardName, shardId, peerAddresses,
                     newShardDatastoreContext(shardName), shardSnapshots));
         }
@@ -1095,18 +1110,17 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
      * @param shardName the shard name
      */
     Map<String, String> getPeerAddresses(final String shardName) {
-        final Collection<MemberName> members = configuration.getMembersFromShardName(shardName);
-        return getPeerAddresses(shardName, members);
+        return getPeerAddresses(shardName, configuration.getMembersFromShardName(shardName));
     }
 
     private Map<String, String> getPeerAddresses(final String shardName, final Collection<MemberName> members) {
-        Map<String, String> peerAddresses = new HashMap<>();
-        MemberName currentMemberName = cluster.getCurrentMemberName();
+        final var peerAddresses = new HashMap<String, String>();
+        final var currentMemberName = cluster.getCurrentMemberName();
 
-        for (MemberName memberName : members) {
+        for (var memberName : members) {
             if (!currentMemberName.equals(memberName)) {
-                ShardIdentifier shardId = getShardIdentifier(memberName, shardName);
-                String address = peerAddressResolver.getShardActorAddress(shardName, memberName);
+                final var shardId = getShardIdentifier(memberName, shardName);
+                final var address = peerAddressResolver.getShardActorAddress(shardName, memberName);
                 peerAddresses.put(shardId.toString(), address);
             }
         }
@@ -1128,7 +1142,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     private boolean isShardReplicaOperationInProgress(final String shardName, final ActorRef sender) {
         if (shardReplicaOperationsInProgress.contains(shardName)) {
-            LOG.debug("{}: A shard replica operation for {} is already in progress", logName(), shardName);
+            LOG.debug("{}: A shard replica operation for {} is already in progress", name(), shardName);
             sender.tell(new Status.Failure(new IllegalStateException(
                 String.format("A shard replica operation for %s is already in progress", shardName))), self());
             return true;
@@ -1140,11 +1154,11 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     private void onAddShardReplica(final AddShardReplica shardReplicaMsg) {
         final String shardName = shardReplicaMsg.getShardName();
 
-        LOG.debug("{}: onAddShardReplica: {}", logName(), shardReplicaMsg);
+        LOG.debug("{}: onAddShardReplica: {}", name(), shardReplicaMsg);
 
         // verify the shard with the specified name is present in the cluster configuration
         if (!configuration.isShardConfigured(shardName)) {
-            LOG.debug("{}: No module configuration exists for shard {}", logName(), shardName);
+            LOG.debug("{}: No module configuration exists for shard {}", name(), shardName);
             getSender().tell(new Status.Failure(new IllegalArgumentException(
                 "No module configuration exists for shard " + shardName)), self());
             return;
@@ -1153,13 +1167,13 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         // Create the localShard
         if (modelContext == null) {
             LOG.debug("{}: No SchemaContext is available in order to create a local shard instance for {}",
-                logName(), shardName);
+                name(), shardName);
             getSender().tell(new Status.Failure(new IllegalStateException(
                 "No SchemaContext is available in order to create a local shard instance for " + shardName)), self());
             return;
         }
 
-        findPrimary(shardName, new AutoFindPrimaryFailureResponseHandler(getSender(), shardName, logName(),
+        findPrimary(shardName, new AutoFindPrimaryFailureResponseHandler(getSender(), shardName, name(),
                 self()) {
             @Override
             public void onRemotePrimaryShardFound(final RemotePrimaryShardFound response) {
@@ -1177,7 +1191,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     }
 
     private void sendLocalReplicaAlreadyExistsReply(final String shardName, final ActorRef sender) {
-        LOG.debug("{}: Local shard {} already exists", logName(), shardName);
+        LOG.debug("{}: Local shard {} already exists", name(), shardName);
         sender.tell(new Status.Failure(new AlreadyExistsException(
             String.format("Local shard %s already exists", shardName))), self());
     }
@@ -1202,7 +1216,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             shardInfo = new ShardInformation(stateDir, shardName, shardId, getPeerAddresses(shardName),
                 datastoreContext, Shard.builder(), peerAddressResolver);
             shardInfo.setActiveMember(false);
-            shardInfo.setSchemaContext(modelContext);
+            shardInfo.setModelContext(modelContext);
             localShards.put(shardName, shardInfo);
             shardInfo.setActor(newShardActor(shardInfo));
         } else {
@@ -1223,7 +1237,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 peerAddressResolver.getShardActorAddress(shardName, cluster.getCurrentMemberName());
 
         //inform ShardLeader to add this shard as a replica by sending an AddServer message
-        LOG.debug("{}: Sending AddServer message to peer {} for shard {}", logName(),
+        LOG.debug("{}: Sending AddServer message to peer {} for shard {}", name(),
                 response.getPrimaryPath(), shardInfo.getShardId());
 
         final Timeout addServerTimeout = new Timeout(shardInfo.getDatastoreContext()
@@ -1235,7 +1249,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             @Override
             public void onComplete(final Throwable failure, final Object addServerResponse) {
                 if (failure != null) {
-                    LOG.debug("{}: AddServer request to {} for {} failed", logName(),
+                    LOG.debug("{}: AddServer request to {} for {} failed", name(),
                             response.getPrimaryPath(), shardName, failure);
 
                     final String msg = String.format("AddServer request to leader %s for shard %s failed",
@@ -1269,10 +1283,10 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         String shardName = shardInfo.getShardName();
         shardReplicaOperationsInProgress.remove(shardName);
 
-        LOG.debug("{}: Received {} for shard {} from leader {}", logName(), replyMsg, shardName, leaderPath);
+        LOG.debug("{}: Received {} for shard {} from leader {}", name(), replyMsg, shardName, leaderPath);
 
         if (replyMsg.getStatus() == ServerChangeStatus.OK) {
-            LOG.debug("{}: Leader shard successfully added the replica shard {}", logName(), shardName);
+            LOG.debug("{}: Leader shard successfully added the replica shard {}", name(), shardName);
 
             // Make the local shard voting capable
             shardInfo.setDatastoreContext(newShardDatastoreContext(shardName), self());
@@ -1284,7 +1298,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             sendLocalReplicaAlreadyExistsReply(shardName, sender);
         } else {
             LOG.warn("{}: Leader failed to add shard replica {} with status {}",
-                    logName(), shardName, replyMsg.getStatus());
+                    name(), shardName, replyMsg.getStatus());
 
             Exception failure = getServerChangeException(AddServer.class, replyMsg.getStatus(), leaderPath,
                     shardInfo.getShardId());
@@ -1310,10 +1324,10 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     }
 
     private void onRemoveShardReplica(final RemoveShardReplica shardReplicaMsg) {
-        LOG.debug("{}: onRemoveShardReplica: {}", logName(), shardReplicaMsg);
+        LOG.debug("{}: onRemoveShardReplica: {}", name(), shardReplicaMsg);
 
         findPrimary(shardReplicaMsg.getShardName(), new AutoFindPrimaryFailureResponseHandler(getSender(),
-                shardReplicaMsg.getShardName(), logName(), self()) {
+                shardReplicaMsg.getShardName(), name(), self()) {
             @Override
             public void onRemotePrimaryShardFound(final RemotePrimaryShardFound response) {
                 doRemoveShardReplicaAsync(response.getPrimaryPath());
@@ -1332,53 +1346,83 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     }
 
     private void persistShardList() {
-        List<String> shardList = new ArrayList<>(localShards.keySet());
-        for (ShardInformation shardInfo : localShards.values()) {
+        final var shardList = new ArrayList<>(localShards.keySet());
+        for (var shardInfo : localShards.values()) {
             if (!shardInfo.isActiveMember()) {
                 shardList.remove(shardInfo.getShardName());
             }
         }
-        LOG.debug("{}: persisting the shard list {}", logName(), shardList);
-        saveSnapshot(updateShardManagerSnapshot(shardList));
+        LOG.debug("{}: persisting the shard list {}", name(), shardList);
+        updateSnapshot(new ShardManagerSnapshot(shardList));
     }
 
-    private ShardManagerSnapshot updateShardManagerSnapshot(final List<String> shardList) {
-        currentSnapshot = new ShardManagerSnapshot(shardList);
-        return currentSnapshot;
+    @NonNullByDefault
+    private void updateSnapshot(final ShardManagerSnapshot newSnapshot) {
+        currentSnapshot = newSnapshot;
+        try {
+            saveSnapshot(newSnapshot);
+        } catch (IOException e) {
+            LOG.error("{}: SaveSnapshotFailure received for saving snapshot of shards", name(), e);
+        }
+    }
+
+    private Path snapshotFile() {
+        return stateDir.resolve(name());
+    }
+
+    @VisibleForTesting
+    @Nullable ShardManagerSnapshot loadSnapshot() throws IOException {
+        try (var dis = new DataInputStream(Files.newInputStream(snapshotFile()))) {
+            final var size = dis.readInt();
+            final var builder = ImmutableList.<String>builderWithExpectedSize(size);
+            for (int i = 0; i < size; ++i) {
+                builder.add(dis.readUTF());
+            }
+            return new ShardManagerSnapshot(builder.build());
+        } catch (NoSuchFileException e) {
+            LOG.debug("{}: snapshot not present", name(), e);
+            return null;
+        }
+    }
+
+    private void saveSnapshot(final ShardManagerSnapshot snapshot) throws IOException {
+        final var fileName = name();
+        final var tmp = Files.createTempFile(stateDir, fileName, null);
+        try (var dos = new DataOutputStream(new BufferedOutputStream(Files.newOutputStream(tmp, SYNC)))) {
+            final var shardList = snapshot.getShardList();
+            dos.writeInt(shardList.size());
+            for (var shard : shardList) {
+                dos.writeUTF(shard);
+            }
+        }
+
+        Files.move(tmp, snapshotFile(), ATOMIC_MOVE, REPLACE_EXISTING);
     }
 
     private void applyShardManagerSnapshot(final ShardManagerSnapshot snapshot) {
-        currentSnapshot = snapshot;
+        currentSnapshot = requireNonNull(snapshot);
+        LOG.debug("{}: applying snapshot  {}", name(), snapshot);
 
-        LOG.debug("{}: onSnapshotOffer: {}", logName(), currentSnapshot);
-
-        final MemberName currentMember = cluster.getCurrentMemberName();
-        Set<String> configuredShardList =
-            new HashSet<>(configuration.getMemberShardNames(currentMember));
-        for (String shard : currentSnapshot.getShardList()) {
+        final var currentMember = cluster.getCurrentMemberName();
+        final var configuredShardList = new HashSet<>(configuration.getMemberShardNames(currentMember));
+        for (var shard : currentSnapshot.getShardList()) {
             if (!configuredShardList.contains(shard)) {
                 // add the current member as a replica for the shard
-                LOG.debug("{}: adding shard {}", logName(), shard);
+                LOG.debug("{}: adding shard {}", name(), shard);
                 configuration.addMemberReplicaForShard(shard, currentMember);
             } else {
                 configuredShardList.remove(shard);
             }
         }
-        for (String shard : configuredShardList) {
+        for (var shard : configuredShardList) {
             // remove the member as a replica for the shard
-            LOG.debug("{}: removing shard {}", logName(), shard);
+            LOG.debug("{}: removing shard {}", name(), shard);
             configuration.removeMemberReplicaForShard(shard, currentMember);
         }
     }
 
-    private void onSaveSnapshotSuccess(final SaveSnapshotSuccess successMessage) {
-        LOG.debug("{} saved ShardManager snapshot successfully. Deleting the prev snapshot if available", logName());
-        deleteSnapshots(new SnapshotSelectionCriteria(scala.Long.MaxValue(), successMessage.metadata().timestamp() - 1,
-            0, 0));
-    }
-
     private void onChangeShardServersVotingStatus(final ChangeShardMembersVotingStatus changeMembersVotingStatus) {
-        LOG.debug("{}: onChangeShardServersVotingStatus: {}", logName(), changeMembersVotingStatus);
+        LOG.debug("{}: onChangeShardServersVotingStatus: {}", name(), changeMembersVotingStatus);
 
         String shardName = changeMembersVotingStatus.getShardName();
         Map<String, Boolean> serverVotingStatusMap = new HashMap<>();
@@ -1395,7 +1439,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     }
 
     private void onFlipShardMembersVotingStatus(final FlipShardMembersVotingStatus flipMembersVotingStatus) {
-        LOG.debug("{}: onFlipShardMembersVotingStatus: {}", logName(), flipMembersVotingStatus);
+        LOG.debug("{}: onFlipShardMembersVotingStatus: {}", name(), flipMembersVotingStatus);
 
         ActorRef sender = getSender();
         final String shardName = flipMembersVotingStatus.getShardName();
@@ -1426,17 +1470,16 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 }
             }, new Dispatchers(context().system().dispatchers()).getDispatcher(Dispatchers.DispatcherType.Client));
         });
-
     }
 
     private void findLocalShard(final FindLocalShard message) {
-        LOG.debug("{}: findLocalShard : {}", logName(), message.getShardName());
+        LOG.debug("{}: findLocalShard : {}", name(), message.getShardName());
 
         final ShardInformation shardInformation = localShards.get(message.getShardName());
 
         if (shardInformation == null) {
             LOG.debug("{}: Local shard {} not found - shards present: {}",
-                    logName(), message.getShardName(), localShards.keySet());
+                    name(), message.getShardName(), localShards.keySet());
 
             getSender().tell(new LocalShardNotFound(message.getShardName()), self());
             return;
@@ -1456,7 +1499,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             @Override
             public void onComplete(final Throwable failure, final Object response) {
                 if (failure != null) {
-                    LOG.debug("{}: Received failure from FindLocalShard for shard {}", logName(), shardName,
+                    LOG.debug("{}: Received failure from FindLocalShard for shard {}", name(), shardName,
                         failure);
                     sender.tell(new Status.Failure(new RuntimeException(
                         String.format("Failed to find local shard %s", shardName), failure)), self());
@@ -1467,12 +1510,12 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                     case LocalShardFound msg ->
                         self().tell((RunnableMessage) () -> onLocalShardFound.accept(msg), sender);
                     case LocalShardNotFound msg -> {
-                        LOG.debug("{}: Local shard {} does not exist", logName(), shardName);
+                        LOG.debug("{}: Local shard {} does not exist", name(), shardName);
                         sender.tell(new Status.Failure(new IllegalArgumentException(
                             String.format("Local shard %s does not exist", shardName))), self());
                     }
                     default -> {
-                        LOG.debug("{}: Failed to find local shard {}: received response: {}", logName(), shardName,
+                        LOG.debug("{}: Failed to find local shard {}: received response: {}", name(), shardName,
                             response);
                         sender.tell(new Status.Failure(response instanceof Throwable throwable ? throwable
                             : new RuntimeException(String.format("Failed to find local shard %s: received response: %s",
@@ -1494,7 +1537,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         DatastoreContext datastoreContext = newShardDatastoreContextBuilder(shardName).build();
         final var shardId = getShardIdentifier(cluster.getCurrentMemberName(), shardName);
 
-        LOG.debug("{}: Sending ChangeServersVotingStatus message {} to local shard {}", logName(),
+        LOG.debug("{}: Sending ChangeServersVotingStatus message {} to local shard {}", name(),
             changeServersVotingStatus, shardActorRef.path());
 
         Patterns.ask(shardActorRef, changeServersVotingStatus,
@@ -1504,7 +1547,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 public void onComplete(final Throwable failure, final Object response) {
                     shardReplicaOperationsInProgress.remove(shardName);
                     if (failure != null) {
-                        LOG.debug("{}: ChangeServersVotingStatus request to local shard {} failed", logName(),
+                        LOG.debug("{}: ChangeServersVotingStatus request to local shard {} failed", name(),
                             shardActorRef.path(), failure);
                         sender.tell(new Status.Failure(new RuntimeException(
                             String.format("ChangeServersVotingStatus request to local shard %s failed",
@@ -1512,11 +1555,11 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                         return;
                     }
 
-                    LOG.debug("{}: Received {} from local shard {}", logName(), response, shardActorRef.path());
+                    LOG.debug("{}: Received {} from local shard {}", name(), response, shardActorRef.path());
 
                     final var replyMsg = (ServerChangeReply) response;
                     if (replyMsg.getStatus() == ServerChangeStatus.OK) {
-                        LOG.debug("{}: ChangeServersVotingStatus succeeded for shard {}", logName(), shardName);
+                        LOG.debug("{}: ChangeServersVotingStatus succeeded for shard {}", name(), shardName);
                         sender.tell(new Status.Success(null), self());
                     } else if (replyMsg.getStatus() == ServerChangeStatus.INVALID_REQUEST) {
                         sender.tell(new Status.Failure(new IllegalArgumentException(String.format(
@@ -1524,7 +1567,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                                 + "must be voting", shardId.getShardName()))), self());
                     } else {
                         LOG.warn("{}: ChangeServersVotingStatus failed for shard {} with status {}",
-                            logName(), shardName, replyMsg.getStatus());
+                            name(), shardName, replyMsg.getStatus());
 
                         Exception error = getServerChangeException(ChangeServersVotingStatus.class,
                             replyMsg.getStatus(), shardActorRef.path().toString(), shardId);
@@ -1731,6 +1774,3 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         }
     }
 }
-
-
-
