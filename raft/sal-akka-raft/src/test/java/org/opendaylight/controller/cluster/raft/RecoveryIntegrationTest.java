@@ -11,6 +11,10 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 import static org.opendaylight.controller.cluster.raft.RaftActorTestKit.awaitSnapshot;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import org.apache.pekko.actor.ActorRef;
@@ -127,7 +131,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
     }
 
     @Test
-    public void testFollowerRecoveryAfterInstallSnapshot() {
+    public void testFollowerRecoveryAfterInstallSnapshot() throws Exception {
 
         send2InitialPayloads();
 
@@ -151,9 +155,12 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         assertEquals("Leader snapshot index", 1, leaderLog.getSnapshotIndex());
         assertEquals("Leader replicatedToAllIndex", 1, leader.getReplicatedToAllIndex());
 
+        // Kill the actor and wipe its journal
+        final var follower2Dir = follower2Actor.underlyingActor().localAccess().stateDir();
         killActor(follower2Actor);
-
-        InMemoryJournal.clear();
+        try (var paths = Files.walk(follower2Dir)) {
+            paths.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+        }
 
         follower2Actor = newTestRaftActor(follower2Id,
                 Map.of(leaderId, testActorPath(leaderId)), newFollowerConfigParams());

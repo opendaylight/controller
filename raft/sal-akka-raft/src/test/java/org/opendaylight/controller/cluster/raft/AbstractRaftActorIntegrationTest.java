@@ -13,6 +13,7 @@ import static org.junit.Assert.assertNotNull;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -44,6 +45,7 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
+import org.opendaylight.controller.cluster.raft.spi.StateMachineCommand;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.util.AbstractStringIdentifier;
@@ -324,13 +326,28 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         }
     }
 
-    protected static final void verifyPersistedJournal(final String persistenceId,
-            final List<? extends ReplicatedLogEntry> expJournal) {
-        final var journal = InMemoryJournal.get(persistenceId, ReplicatedLogEntry.class);
-        assertEquals("Journal ReplicatedLogEntry count", expJournal.size(), journal.size());
+    protected static final void verifyPersistedJournal(final TestActorRef<TestRaftActor> actor,
+            final List<? extends LogEntry> expJournal) {
+        final var journal = actor.underlyingActor().entryJournal();
+        assertNotNull(journal);
+
+        final var actorJournal = new ArrayList<LogEntry>();
+        try (var reader = journal.openReader()) {
+            while (true) {
+                final var entry = reader.nextEntry();
+                if (entry == null) {
+                    break;
+                }
+                actorJournal.add(entry.toLogEntry());
+            }
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
+
+        assertEquals("Journal ReplicatedLogEntry count", expJournal.size(), actorJournal.size());
         for (int i = 0; i < expJournal.size(); i++) {
             final var expected = expJournal.get(i);
-            final var actual = journal.get(i);
+            final var actual = actorJournal.get(i);
             verifyReplicatedLogEntry(expected, actual.term(), actual.index(), actual.command());
         }
     }
@@ -359,7 +376,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
     }
 
     protected static final void verifyReplicatedLogEntry(final LogEntry replicatedLogEntry, final long expTerm,
-            final long expIndex, final Payload payload) {
+            final long expIndex, final StateMachineCommand payload) {
         assertEquals(expTerm, replicatedLogEntry.term());
         assertEquals(expIndex, replicatedLogEntry.index());
         assertEquals(payload, replicatedLogEntry.command());
