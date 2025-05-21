@@ -12,7 +12,6 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.List;
@@ -33,19 +32,18 @@ import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
 @NonNullByDefault
 public final class DisabledRaftStorage extends RaftStorage implements ImmediateEntryStore {
     private static final class PersistEntryCallback extends RaftCallback<Instant> {
-        private final Runnable callback;
+        private final PersistCallback callback;
 
-        PersistEntryCallback(final Runnable callback) {
+        PersistEntryCallback(final PersistCallback callback) {
             this.callback = requireNonNull(callback);
         }
 
         @Override
         public void invoke(final @Nullable Exception failure, final @Nullable Instant success) {
-            switch (failure) {
-                case null -> callback.run();
-                case IOException e -> throw new UncheckedIOException(e);
-                case RuntimeException e -> throw e;
-                default -> throw new RuntimeException(failure);
+            if (failure == null) {
+                callback.invoke(null, 0L);
+            } else {
+                callback.invoke(failure, null);
             }
         }
 
@@ -71,20 +69,21 @@ public final class DisabledRaftStorage extends RaftStorage implements ImmediateE
     }
 
     @Override
-    public void persistEntry(final ReplicatedLogEntry entry, final Runnable callback) {
-        requireNonNull(callback);
+    public void persistEntry(final ReplicatedLogEntry entry, final PersistCallback callback) {
+        final var cb = requireNonNull(callback);
         if (entry.command() instanceof VotingConfig votingConfig) {
             try {
                 saveVotingConfig(votingConfig, Instant.now());
             } catch (IOException e) {
-                throw new UncheckedIOException(e);
+                cb.invoke(e, null);
+                return;
             }
         }
-        callback.run();
+        cb.invoke(null, 0L);
     }
 
     @Override
-    public void startPersistEntry(final ReplicatedLogEntry entry, final Runnable callback) {
+    public void startPersistEntry(final ReplicatedLogEntry entry, final PersistCallback callback) {
         if (entry.command() instanceof VotingConfig votingConfig) {
             saveSnapshot(new RaftSnapshot(votingConfig, List.of()), EntryInfo.of(-1, -1), null,
                 new PersistEntryCallback(callback));
