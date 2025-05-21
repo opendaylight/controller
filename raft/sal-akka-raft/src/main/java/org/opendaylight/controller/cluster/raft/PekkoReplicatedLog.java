@@ -52,7 +52,7 @@ final class PekkoReplicatedLog extends AbstractReplicatedLog<SimpleReplicatedLog
 
     @Override
     public boolean appendSubmitted(final long index, final long term, final Payload command,
-            final @Nullable Consumer<ReplicatedLogEntry> callback) {
+            final Consumer<ReplicatedLogEntry> callback) {
         throw new UnsupportedOperationException();
     }
 
