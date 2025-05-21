@@ -16,6 +16,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import com.google.common.util.concurrent.MoreExecutors;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -31,6 +32,7 @@ import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.EntryStore;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
+import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
 
 /**
  * Unit tests for ReplicatedLogImpl.
@@ -50,7 +52,7 @@ class ReplicatedLogImplTest {
     @Mock
     private Consumer<ReplicatedLogEntry> callback;
     @Captor
-    private ArgumentCaptor<Runnable> procedureCaptor;
+    private ArgumentCaptor<RaftCallback<Long>> procedureCaptor;
     @TempDir
     private Path stateDir;
 
@@ -178,7 +180,7 @@ class ReplicatedLogImplTest {
         log.append(new DefaultLogEntry(0, 1, new MockCommand("0")));
         final int dataSizeAfterFirstPayload = log.dataSize();
 
-        log.snapshotPreCommit(0,1);
+        log.snapshotPreCommit(0, 1);
         log.snapshotCommit(false);
 
         assertEquals(0, log.size());
@@ -198,9 +200,13 @@ class ReplicatedLogImplTest {
         final var logEntry = JournaledLogEntry.of(entry);
         if (async) {
             verify(entryStore).startPersistEntry(eq(logEntry), procedureCaptor.capture());
+            procedureCaptor.getValue().invoke(null, 1L);
         } else {
-            verify(entryStore).persistEntry(eq(logEntry), procedureCaptor.capture());
+            try {
+                verify(entryStore).persistEntry(eq(logEntry));
+            } catch (IOException e) {
+                throw new AssertionError(e);
+            }
         }
-        procedureCaptor.getValue().run();
     }
 }

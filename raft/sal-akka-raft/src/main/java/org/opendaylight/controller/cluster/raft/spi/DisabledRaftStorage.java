@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.cluster.raft.spi;
 
-import static java.util.Objects.requireNonNull;
-
 import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -48,8 +46,7 @@ public final class DisabledRaftStorage extends RaftStorage implements ImmediateE
     }
 
     @Override
-    public void persistEntry(final ReplicatedLogEntry entry, final Runnable callback) {
-        requireNonNull(callback);
+    public long persistEntry(final ReplicatedLogEntry entry) throws IOException {
         if (entry.command() instanceof VotingConfig votingConfig) {
             try {
                 saveVotingConfig(votingConfig, Instant.now());
@@ -57,18 +54,17 @@ public final class DisabledRaftStorage extends RaftStorage implements ImmediateE
                 throw new UncheckedIOException(e);
             }
         }
-        callback.run();
+        return 0;
     }
 
     @Override
-    public void startPersistEntry(final ReplicatedLogEntry entry, final Runnable callback) {
+    public void startPersistEntry(final ReplicatedLogEntry entry, final RaftCallback<Long> callback) {
         if (entry.command() instanceof VotingConfig votingConfig) {
             saveSnapshot(new RaftSnapshot(votingConfig, List.of()), EntryInfo.of(-1, -1), null, (failure, success) -> {
-                switch (failure) {
-                    case null -> callback.run();
-                    case IOException e -> throw new UncheckedIOException(e);
-                    case RuntimeException e -> throw e;
-                    default -> throw new RuntimeException(failure);
+                if (failure == null) {
+                    callback.invoke(null, 0L);
+                } else {
+                    callback.invoke(failure, null);
                 }
             });
         } else {
