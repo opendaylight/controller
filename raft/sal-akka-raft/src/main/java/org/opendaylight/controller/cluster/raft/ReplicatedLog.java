@@ -217,10 +217,10 @@ public interface ReplicatedLog {
      * @param index the index
      * @param term the term
      * @param command the command
-     * @param callback the callback to be notified when persistence is complete (optional).
-     * @return {@code true} if the entry was successfully appended, false otherwise.
+     * @param callback the callback to be notified when persistence is complete
+     * @return {@code true} if the entry was successfully appended, false otherwise
      */
-    boolean appendSubmitted(long index, long term, Payload command, @Nullable Consumer<ReplicatedLogEntry> callback);
+    boolean appendSubmitted(long index, long term, Payload command, Consumer<ReplicatedLogEntry> callback);
 
     /**
      * Returns a list of log entries starting from the given index to the end of the log.
