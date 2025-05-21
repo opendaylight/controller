@@ -7,12 +7,16 @@
  */
 package org.opendaylight.controller.cluster.raft.spi;
 
+import static java.util.Objects.requireNonNull;
+
+import java.io.IOException;
 import java.util.function.Consumer;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.raft.api.EntryMeta;
 
 /**
@@ -20,15 +24,47 @@ import org.opendaylight.raft.api.EntryMeta;
  */
 public interface EntryStore {
     /**
+     * An entry loaded from an {@link EntryStore}.
+     */
+    sealed interface LoadedEntry {
+        // Marker interface
+    }
+
+    /**
+     * An update to {@code lastApplied} index loaded from an {@link EntryStore}.
+     */
+    record LoadedLastApplied(long lastApplied) implements LoadedEntry {
+        // Nothing else
+    }
+
+    /**
+     * A {@link LogEntry} loaded from an {@link EntryStore}.
+     */
+    @NonNullByDefault
+    record LoadedLogEntry(long index, long term, StateMachineCommand command) implements LoadedEntry, LogEntry {
+        public LoadedLogEntry {
+            requireNonNull(command);
+        }
+    }
+
+    /**
+     * A
+     */
+    @NonNullByDefault
+    record LoadedVotingConfig(VotingConfig votingConfig) implements LoadedEntry {
+        public LoadedVotingConfig {
+            requireNonNull(votingConfig);
+        }
+    }
+
+    /**
      * Persists an entry to the applicable journal synchronously. The contract is that the callback will be invoked
      * before {@link RaftActor} sees any other message.
      *
      * @param entry the journal entry to persist
-     * @param callback the callback when persistence is complete
      */
-    // FIXME: without callback and throwing IOException
     @NonNullByDefault
-    void persistEntry(ReplicatedLogEntry entry, Consumer<ReplicatedLogEntry> callback);
+    void persistEntry(ReplicatedLogEntry entry) throws IOException;
 
     /**
      * Persists an entry to the applicable journal asynchronously.
@@ -36,7 +72,6 @@ public interface EntryStore {
      * @param entry the journal entry to persist
      * @param callback the callback when persistence is complete
      */
-    // FIXME: Callback<ReplicatedLogEntry> instead of Consumer
     @NonNullByDefault
     void startPersistEntry(ReplicatedLogEntry entry, Consumer<ReplicatedLogEntry> callback);
 
