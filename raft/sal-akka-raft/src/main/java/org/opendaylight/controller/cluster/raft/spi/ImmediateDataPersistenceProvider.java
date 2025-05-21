@@ -38,8 +38,13 @@ public interface ImmediateDataPersistenceProvider extends DataPersistenceProvide
     }
 
     @Override
-    default void persistEntry(final ReplicatedLogEntry entry, final Consumer<ReplicatedLogEntry> callback) {
-        callback.accept(requireNonNull(entry));
+    default EntryLoader openLoader() {
+        return EmptyEntryLoader.INSTANCE;
+    }
+
+    @Override
+    default void persistEntry(final ReplicatedLogEntry entry) throws IOException {
+        requireNonNull(entry);
     }
 
     @Override
