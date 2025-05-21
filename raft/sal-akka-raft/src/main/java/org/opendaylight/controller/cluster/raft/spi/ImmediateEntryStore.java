@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.raft.spi;
 
 import static java.util.Objects.requireNonNull;
 
-import org.apache.pekko.persistence.JournalProtocol;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 
@@ -21,9 +20,9 @@ import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 public interface ImmediateEntryStore extends EntryStore {
 
     @Override
-    default void persistEntry(final ReplicatedLogEntry entry, final Runnable callback) {
+    default void persistEntry(final ReplicatedLogEntry entry, final PersistCallback callback) {
         requireNonNull(entry);
-        callback.run();
+        callback.invoke(null, 0L);
     }
 
     @Override
@@ -32,9 +31,10 @@ public interface ImmediateEntryStore extends EntryStore {
     }
 
     @Override
-    default void startPersistEntry(final ReplicatedLogEntry entry, final Runnable callback) {
+    default void startPersistEntry(final ReplicatedLogEntry entry, final PersistCallback callback) {
         requireNonNull(entry);
-        completer().enqueueCompletion(callback);
+        requireNonNull(callback);
+        completer().enqueueCompletion(() -> callback.invoke(null, 0L));
     }
 
     @Override
@@ -50,10 +50,5 @@ public interface ImmediateEntryStore extends EntryStore {
     @Override
     default long lastSequenceNumber() {
         return -1;
-    }
-
-    @Override
-    default boolean handleJournalResponse(final JournalProtocol.Response response) {
-        return false;
     }
 }
