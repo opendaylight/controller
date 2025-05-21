@@ -9,27 +9,38 @@ package org.opendaylight.controller.cluster.raft;
 
 import static java.util.Objects.requireNonNull;
 
+import java.io.IOException;
 import java.nio.file.Path;
-import org.apache.pekko.persistence.DeleteMessagesSuccess;
-import org.apache.pekko.persistence.JournalProtocol;
+import java.util.concurrent.atomic.AtomicLong;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
+import org.opendaylight.controller.cluster.raft.spi.EntryJournal;
+import org.opendaylight.controller.cluster.raft.spi.EntryJournalV1;
 import org.opendaylight.controller.cluster.raft.spi.EntryStoreCompleter;
+import org.opendaylight.controller.cluster.raft.spi.JournalWriteTask;
 import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An {@link EnabledRaftStorage} backed by Pekko Persistence of an {@link RaftActor}.
  */
 // FIXME: remove this class once we have both Snapshots and Entries stored in files
-@NonNullByDefault
 final class PekkoRaftStorage extends EnabledRaftStorage {
-    private final RaftActor actor;
+    private static final Logger LOG = LoggerFactory.getLogger(PekkoRaftStorage.class);
+    private static final AtomicLong WRITER_COUNTER = new AtomicLong();
 
-    PekkoRaftStorage(final EntryStoreCompleter completer, final RaftActor actor, final Path directory,
-            final CompressionType compression, final Configuration streamConfig) {
+    // FIXME: we should have a queue push timeout, similar to Pekko circuit breaker to deal with queue waits
+    private JournalWriteTask task;
+    private Thread thread;
+    private final boolean mapped;
+
+    @NonNullByDefault
+    PekkoRaftStorage(final EntryStoreCompleter completer, final Path directory, final CompressionType compression,
+            final Configuration streamConfig, final boolean mapped) {
         super(completer, directory, compression, streamConfig);
-        this.actor = requireNonNull(actor);
+        this.mapped = mapped;
     }
 
     // TODO: at least
@@ -40,8 +51,11 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
     //     - determine nextSequence
 
     @Override
-    protected void postStart() {
-        // No-op
+    protected void postStart() throws IOException {
+        final var journal = new EntryJournalV1(memberId(), directory, compression, mapped);
+        LOG.info("{}: journal open: applyTo={}", memberId(), journal.applyToJournalIndex());
+        task = new JournalWriteTask(completer(), journal, 2048);
+        thread = Thread.ofVirtual().name(memberId() + "-writer-" + WRITER_COUNTER.incrementAndGet()).start(task);
     }
 
     // FIXME:  and more: more things:
@@ -54,41 +68,81 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
 
     @Override
     protected void preStop() {
-        // No-op
+        LOG.debug("{}: terminating thread {}", memberId(), thread);
+        var journal = task.processAndTerminate();
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            LOG.warn("{}: interrupted while waiting for writer to complete, forcing cancellation", memberId(), e);
+            thread.interrupt();
+            task.cancelAndTerminate();
+            return;
+        } finally {
+            task = null;
+            thread = null;
+        }
+
+        journal.close();
+        LOG.info("{}: journal closed", memberId());
     }
 
     @Override
-    public void persistEntry(final ReplicatedLogEntry entry, final Runnable callback) {
-        actor.persist(entry, callback);
+    public void persistEntry(final ReplicatedLogEntry entry, final PersistCallback callback) {
+        startPersistEntry(entry, completer().deferCallback(callback));
     }
 
     @Override
-    public void startPersistEntry(final ReplicatedLogEntry entry, final Runnable callback) {
-        actor.persistAsync(entry, callback);
+    @NonNullByDefault
+    public void startPersistEntry(final ReplicatedLogEntry entry, final PersistCallback callback) {
+        requireNonNull(callback);
+        try {
+            task.appendEntry(entry, callback);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Failed to start persist", e);
+        }
     }
 
     @Override
     public void deleteEntries(final long fromIndex) {
-        actor.deleteEntries(fromIndex);
-    }
-
-    @Override
-    public void markLastApplied(final long lastApplied) {
-        actor.markLastApplied(lastApplied);
+        try {
+            // FIXME: journalIndex
+            task.discardTail(fromIndex);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Failed to delete tail entries", e);
+        }
     }
 
     @Override
     public void deleteMessages(final long sequenceNumber) {
-        actor.deleteMessages(sequenceNumber);
+        try {
+            // FIXME: journalIndex
+            task.discardHead(sequenceNumber);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Failed to delete head entries", e);
+        }
+    }
+
+    @Override
+    public void markLastApplied(final long lastApplied) {
+        try {
+            // FIXME: journalIndex
+            task.setApplyTo(lastApplied);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Failed to update last applied index", e);
+        }
     }
 
     @Override
     public long lastSequenceNumber() {
-        return actor.lastSequenceNr();
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean handleJournalResponse(final JournalProtocol.Response response) {
-        return response instanceof DeleteMessagesSuccess;
+    public EntryJournal journal() {
+        return task.journal();
     }
 }
