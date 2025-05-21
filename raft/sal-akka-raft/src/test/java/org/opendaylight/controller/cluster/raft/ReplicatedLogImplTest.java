@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
@@ -31,6 +32,7 @@ import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.EntryStore;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
+import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
 
 /**
  * Unit tests for ReplicatedLogImpl.
@@ -50,7 +52,7 @@ class ReplicatedLogImplTest {
     @Mock
     private Consumer<ReplicatedLogEntry> callback;
     @Captor
-    private ArgumentCaptor<Runnable> procedureCaptor;
+    private ArgumentCaptor<RaftCallback<Long>> procedureCaptor;
     @TempDir
     private Path stateDir;
 
@@ -69,7 +71,7 @@ class ReplicatedLogImplTest {
 
         final var logEntry1 = new DefaultLogEntry(1, 1, new MockCommand("1"));
 
-        log.appendSubmitted(logEntry1.index(), logEntry1.term(), logEntry1.command().toSerialForm(), null);
+        log.appendSubmitted(logEntry1.index(), logEntry1.term(), logEntry1.command().toSerialForm(), callback);
 
         assertPersist(logEntry1);
 
@@ -118,12 +120,12 @@ class ReplicatedLogImplTest {
         final var logEntry1 = new DefaultLogEntry(2, 1, new MockCommand("2"));
         final var logEntry2 = new DefaultLogEntry(3, 1, new MockCommand("3"));
 
-        log.appendSubmitted(logEntry1.index(), logEntry1.term(), logEntry1.command().toSerialForm(), null);
+        log.appendSubmitted(logEntry1.index(), logEntry1.term(), logEntry1.command().toSerialForm(), callback);
         assertPersist(logEntry1);
 
         reset(entryStore);
 
-        log.appendSubmitted(logEntry2.index(), logEntry2.term(), logEntry2.command().toSerialForm(), null);
+        log.appendSubmitted(logEntry2.index(), logEntry2.term(), logEntry2.command().toSerialForm(), callback);
         assertPersist(logEntry2);
 
         assertEquals(2, log.size());
@@ -139,14 +141,14 @@ class ReplicatedLogImplTest {
         int dataSize = 600;
         var logEntry = new DefaultLogEntry(2, 1, new MockCommand("2", dataSize));
 
-        log.appendSubmitted(logEntry.index(), logEntry.term(), logEntry.command().toSerialForm(), null);
+        log.appendSubmitted(logEntry.index(), logEntry.term(), logEntry.command().toSerialForm(), callback);
         assertPersist(logEntry);
 
         reset(entryStore);
 
         logEntry = new DefaultLogEntry(3, 1, new MockCommand("3", 5));
 
-        log.appendSubmitted(logEntry.index(), logEntry.term(), logEntry.command().toSerialForm(), null);
+        log.appendSubmitted(logEntry.index(), logEntry.term(), logEntry.command().toSerialForm(), callback);
         assertPersist(logEntry);
 
         assertEquals(2, log.size());
@@ -163,7 +165,7 @@ class ReplicatedLogImplTest {
 
         log.trimToReceive(1);
         assertEquals(1, log.size());
-        verify(entryStore).deleteEntries(1);
+        verify(entryStore).discardTail(2);
 
         // already trimmed, hence no-op
         log.trimToReceive(1);
@@ -178,7 +180,7 @@ class ReplicatedLogImplTest {
         log.append(new DefaultLogEntry(0, 1, new MockCommand("0")));
         final int dataSizeAfterFirstPayload = log.dataSize();
 
-        log.snapshotPreCommit(0,1);
+        log.snapshotPreCommit(0, 1);
         log.snapshotCommit(false);
 
         assertEquals(0, log.size());
@@ -198,9 +200,9 @@ class ReplicatedLogImplTest {
         final var logEntry = JournaledLogEntry.of(entry);
         if (async) {
             verify(entryStore).startPersistEntry(eq(logEntry), procedureCaptor.capture());
+            procedureCaptor.getValue().invoke(null, 1L);
         } else {
-            verify(entryStore).persistEntry(eq(logEntry), procedureCaptor.capture());
+            verify(entryStore).persistEntry(eq(logEntry), any());
         }
-        procedureCaptor.getValue().run();
     }
 }
