@@ -383,9 +383,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     }
 
     @Test
-    public void testCommit() {
-        doReturn(50L).when(mockEntryStore).lastSequenceNumber();
-
+    public void testCommit() throws Exception {
         // when replicatedToAllIndex = -1
         doReturn(ByteState.empty()).when(mockCohort).takeSnapshot();
         snapshotManager.capture(EntryInfo.of(9, 6), -1);
@@ -393,53 +391,51 @@ public class SnapshotManagerTest extends AbstractActorTest {
         assertTrue(snapshotManager.isCapturing());
 
         final var timestamp = Instant.ofEpochMilli(1234);
-        snapshotManager.commit(100L, timestamp);
+        snapshotManager.commit(timestamp);
 
         assertFalse(snapshotManager.isCapturing());
 
         verify(mockReplicatedLog).snapshotCommit();
 
-        verify(mockEntryStore).deleteMessages(50L);
+        verify(mockEntryStore).discardHead(1L);
 
         MessageCollectorActor.expectFirstMatching(actorRef, SnapshotComplete.class);
     }
 
     @Test
-    public void testCommitBeforePersist() {
+    public void testCommitBeforePersist() throws Exception {
         doReturn(ByteState.empty()).when(mockCohort).takeSnapshot();
 
         // when replicatedToAllIndex = -1
         snapshotManager.captureToInstall(EntryInfo.of(9, 6), -1, "xyzzy");
 
-        snapshotManager.commit(100L, Instant.EPOCH);
+        snapshotManager.commit(Instant.EPOCH);
 
         verify(mockReplicatedLog, never()).snapshotCommit();
-        verify(mockEntryStore, never()).deleteMessages(100L);
+        verify(mockEntryStore, never()).discardHead(100L);
     }
 
     @Test
-    public void testCommitBeforeCapture() {
-        snapshotManager.commit(100L, Instant.EPOCH);
+    public void testCommitBeforeCapture() throws Exception {
+        snapshotManager.commit(Instant.EPOCH);
 
         verify(mockReplicatedLog, never()).snapshotCommit();
-        verify(mockEntryStore, never()).deleteMessages(anyLong());
+        verify(mockEntryStore, never()).discardHead(anyLong());
 
     }
 
     @Test
-    public void testCallingCommitMultipleTimesCausesNoHarm() {
-        doReturn(50L).when(mockEntryStore).lastSequenceNumber();
-
+    public void testCallingCommitMultipleTimesCausesNoHarm() throws Exception {
         // when replicatedToAllIndex = -1
         doReturn(ByteState.empty()).when(mockCohort).takeSnapshot();
         snapshotManager.capture(EntryInfo.of(9, 6), -1);
 
-        snapshotManager.commit(100L, Instant.EPOCH);
+        snapshotManager.commit(Instant.EPOCH);
 
-        snapshotManager.commit(100L, Instant.EPOCH);
+        snapshotManager.commit(Instant.EPOCH);
 
         verify(mockReplicatedLog, times(1)).snapshotCommit();
-        verify(mockEntryStore, times(1)).deleteMessages(50L);
+        verify(mockEntryStore, times(1)).discardHead(1L);
     }
 
     @Test
