@@ -59,10 +59,7 @@ import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftStat
 import org.opendaylight.controller.cluster.raft.client.messages.Shutdown;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.messages.RequestLeadership;
-import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
-import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.persisted.NoopPayload;
-import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.AbstractRaftCommand;
 import org.opendaylight.controller.cluster.raft.spi.AbstractStateCommand;
@@ -211,18 +208,37 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         if (recoveredLog != null) {
             LOG.debug("{}: Pekko recovery completed with {}", memberId(), recoveredLog);
             pekkoRecovery = null;
-            replicatedLog().resetToLog(overrideRecoveredLog(recoveredLog));
-
-            onRecoveryComplete();
-
-            initializeBehavior();
+            replicatedLog().resetToLog(recoverJournal(overridePekkoRecoveredLog(recoveredLog)));
+            finishRecovery();
         }
     }
 
     @NonNullByDefault
     @VisibleForTesting
-    protected ReplicatedLog overrideRecoveredLog(final ReplicatedLog recoveredLog) {
+    protected ReplicatedLog overridePekkoRecoveredLog(final ReplicatedLog recoveredLog) {
         return recoveredLog;
+    }
+
+    @NonNullByDefault
+    private ReplicatedLog recoverJournal(final ReplicatedLog recoveredLog) {
+        final var journal = persistenceControl.journal();
+        if (journal == null) {
+            return recoveredLog;
+        }
+
+        final var recovery = new JournalRecovery<>(this, getRaftActorSnapshotCohort(), getRaftActorRecoveryCohort(),
+            context.getConfigParams(), journal);
+        try {
+            return recovery.recoverJournal(recoveredLog);
+        } catch (IOException e) {
+            throw new UncheckedIOException("Journal recovery failed", e);
+        }
+    }
+
+    @NonNullByDefault
+    private void finishRecovery() {
+        onRecoveryComplete();
+        initializeBehavior();
     }
 
     @VisibleForTesting
@@ -319,11 +335,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             case RequestLeadership msg -> onRequestLeadership(msg);
             default -> {
                 if (!possiblyHandleBehaviorMessage(message)) {
-                    if (message instanceof JournalProtocol.Response response
-                        && persistenceControl.entryStore().handleJournalResponse(response)) {
-                        LOG.debug("{}: handled a journal response", memberId());
-                    } else if (message instanceof SnapshotProtocol.Response response) {
-                        LOG.debug("{}: ignoring {}", memberId(), response);
+                    if (message instanceof JournalProtocol.Response || message instanceof SnapshotProtocol.Response) {
+                        LOG.debug("{}: ignoring {}", memberId(), message);
                     } else {
                         handleNonRaftCommand(message);
                     }
@@ -712,21 +725,21 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         final var entryTerm = context.currentTerm();
 
         LOG.debug("{}: Persist data index={} term={} command={}", memberId(), entryIndex, entryTerm, command);
-        boolean wasAppended = replLog.appendSubmitted(entryIndex, entryTerm, command, persistedEntry -> {
+        boolean wasAppended = replLog.appendSubmitted(entryIndex, entryTerm, command, entry -> {
             final var currentLog = replicatedLog();
 
             if (!hasFollowers()) {
                 // Increment the Commit Index and the Last Applied values
-                currentLog.setCommitIndex(persistedEntry.index());
-                currentLog.setLastApplied(persistedEntry.index());
+                currentLog.setCommitIndex(entry.index());
+                currentLog.setLastApplied(entry.index());
 
                 // Apply the state immediately.
-                applyCommand(identifier, persistedEntry);
+                applyCommand(identifier, entry);
 
                 // We have finished applying the command, tell ReplicatedLog about that
                 currentLog.markLastApplied();
             } else {
-                currentLog.captureSnapshotIfReady(persistedEntry);
+                currentLog.captureSnapshotIfReady(entry);
 
                 // Local persistence is complete so send the CheckConsensusReached message to the behavior (which
                 // normally should still be the leader) to check if consensus has now been reached in conjunction with
@@ -1013,35 +1026,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         throw new UnsupportedOperationException();
     }
 
-    @NonNullByDefault
-    final void persist(final LogEntry entry, final Runnable callback) {
-        super.persist(SimpleReplicatedLogEntry.of(entry), unused -> callback.run());
-    }
-
-    // FIXME: CONTROLLER-2137: remove this method
-    @Deprecated(forRemoval = true)
-    final void deleteEntries(final long fromIndex) {
-        super.persist(new DeleteEntries(fromIndex), deleteEntries -> {
-            // No-op
-        });
-    }
-
     @Override
     @Deprecated(since = "11.0.0", forRemoval = true)
     public final <A> void persistAsync(final A entry, final Procedure<A> callback) {
         throw new UnsupportedOperationException();
-    }
-
-    @NonNullByDefault
-    final void persistAsync(final LogEntry entry, final Runnable callback) {
-        super.persistAsync(SimpleReplicatedLogEntry.of(entry), unused -> callback.run());
-    }
-
-    final void markLastApplied(final long lastApplied) {
-        LOG.debug("{}: Persisting ApplyJournalEntries with index={}", memberId(), lastApplied);
-        super.persistAsync(new ApplyJournalEntries(lastApplied), unused -> {
-            // No-op
-        });
     }
 
     @Override
