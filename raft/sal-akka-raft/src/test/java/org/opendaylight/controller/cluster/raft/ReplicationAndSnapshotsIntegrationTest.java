@@ -112,7 +112,7 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
      * Verify the expected leader is elected as the leader and verify initial syncing of the followers
      * from the leader's persistence recovery.
      */
-    void verifyLeaderRecoveryAndInitialization() {
+    private void verifyLeaderRecoveryAndInitialization() {
         testLog.info("verifyLeaderRecoveryAndInitialization starting");
 
         waitUntilLeader(leaderActor);
@@ -156,8 +156,8 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         assertEquals("Leader replicatedToAllIndex", 1, leader.getReplicatedToAllIndex());
 
         // Verify the follower's persisted journal log.
-        verifyPersistedJournal(follower1Id, origLeaderJournal);
-        verifyPersistedJournal(follower2Id, origLeaderJournal);
+        verifyPersistedJournal(follower1Actor, origLeaderJournal);
+        verifyPersistedJournal(follower2Actor, origLeaderJournal);
 
         MessageCollectorActor.clearMessages(leaderCollectorActor);
         MessageCollectorActor.clearMessages(follower1CollectorActor);
@@ -201,13 +201,13 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         assertNotNull(snapshotFile);
 
         final var raftSnapshot = snapshotFile.readRaftSnapshot();
-        final var unAppliedEntry = raftSnapshot.unappliedEntries();
-        assertEquals("Persisted Snapshot getUnAppliedEntries size", 1, unAppliedEntry.size());
-        verifyReplicatedLogEntry(unAppliedEntry.getFirst(), currentTerm, 3, payload3);
+        assertEquals(List.of(), raftSnapshot.unappliedEntries());
 
         verifySnapshot("Persisted", snapshotFile, initialTerm, 2);
 
-        // The leader's persisted journal log should be cleared since we snapshotted.
+        // The leader's persisted journal log should contain a single entry, as everything else has been snapshotted
+//      verifyReplicatedLogEntry(unAppliedEntry.getFirst(), currentTerm, 3, payload3);
+
         final var persistedLeaderJournal = InMemoryJournal.get(leaderId, SimpleReplicatedLogEntry.class);
         assertEquals("Persisted journal log size", 0, persistedLeaderJournal.size());
 

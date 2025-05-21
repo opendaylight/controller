@@ -1589,7 +1589,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         }
 
         @Override
-        protected ReplicatedLog overrideRecoveredLog(final ReplicatedLog recoveredLog) {
+        protected ReplicatedLog overridePekkoRecoveredLog(final ReplicatedLog recoveredLog) {
             return fromLog;
         }
 
