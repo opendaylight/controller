@@ -132,7 +132,13 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
             case VotingConfig msg -> actor.peerInfos().updateVotingConfig(msg);
             case UpdateElectionTerm(var termInfo) -> termInfoStore().setTerm(termInfo);
             case RecoveryCompleted msg -> {
-                onRecoveryCompletedMessage();
+                // FIXME: move this to JournalRecovery and RaftActor
+                if (onRecoveryCompletedMessage()) {
+                    final var snapshot = recoveryCohort.getRestoreFromSnapshot();
+                    if (snapshot != null) {
+                        restoreFrom(snapshot);
+                    }
+                }
                 return recoveryLog;
             }
             default -> {
@@ -289,7 +295,7 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
         actor.deleteMessages(actor.lastSequenceNr());
     }
 
-    private void onRecoveryCompletedMessage() {
+    private boolean onRecoveryCompletedMessage() {
         applyRecoveredCommands();
 
         final var recoveryTime = stopRecoveryTimers();
@@ -321,12 +327,7 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
             infoStore.setTerm(orig);
         }
 
-        if (completeRecovery()) {
-            final var snapshot = recoveryCohort.getRestoreFromSnapshot();
-            if (snapshot != null) {
-                restoreFrom(snapshot);
-            }
-        }
+        return completeRecovery();
     }
 
     boolean completeRecovery() {
