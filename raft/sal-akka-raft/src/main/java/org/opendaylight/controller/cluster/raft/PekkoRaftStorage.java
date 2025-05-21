@@ -9,7 +9,13 @@ package org.opendaylight.controller.cluster.raft;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.collect.ImmutableList;
+import io.netty.buffer.ByteBufInputStream;
+import io.netty.buffer.ByteBufOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -23,18 +29,27 @@ import org.apache.pekko.persistence.DeleteMessagesSuccess;
 import org.apache.pekko.persistence.DeleteSnapshotsSuccess;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SnapshotProtocol;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
+import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFileFormat;
+import org.opendaylight.controller.cluster.raft.spi.StateMachineCommand;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 import org.opendaylight.raft.api.EntryInfo;
+import org.opendaylight.raft.journal.FromByteBufMapper;
+import org.opendaylight.raft.journal.SegmentedRaftJournal;
+import org.opendaylight.raft.journal.StorageLevel;
+import org.opendaylight.raft.journal.ToByteBufMapper;
 import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
+import org.opendaylight.yangtools.concepts.WritableObjects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,19 +57,110 @@ import org.slf4j.LoggerFactory;
  * An {@link EnabledRaftStorage} backed by Pekko Persistence of an {@link RaftActor}.
  */
 // FIXME: remove this class once we have both Snapshots and Entries stored in files
-@NonNullByDefault
 final class PekkoRaftStorage extends EnabledRaftStorage {
     private static final Logger LOG = LoggerFactory.getLogger(PekkoRaftStorage.class);
     private static final HexFormat HF = HexFormat.of().withUpperCase();
 
+    private static final String JOURNAL_NAME = "entries-v1";
     private static final String FILENAME_START_STR = "snapshot-";
 
-    private final RaftActor actor;
+    // 256KiB, which leads to reasonable buffers
+    private static final int INLINE_ENTRY_SIZE = 256 * 1024;
+    // We need to be able to store two entries and a descriptor
+    //  private static final long MIN_TARGET_SIZE = INLINE_ENTRY_SIZE * 2 + SegmentDescriptor.BYTES;
 
+    // Allocation of two bits, indicating the type of stored entry. These are top two bits, so as to allow combined use
+    // with WritableObjects.writeLong(). This allows us to read the header byte and determine the dispatch accordingly.
+    private static final byte TYPE_ENTRY         = (byte) 0x00;
+    private static final byte TYPE_ENTRY_FILE    = (byte) 0x40;
+    private static final byte TYPE_LAST_APPLIED  = (byte) 0x80;
+    private static final byte TYPE_VOTING_CONFIG = (byte) 0xC0;
+    private static final byte TYPE_MASK          = (byte) 0xC0;
+
+    @NonNullByDefault
+    private static final FromByteBufMapper<LoadedEntry> FROMBUF = (index, bytes) -> {
+        try (var in = new ByteBufInputStream(bytes)) {
+            final var header = in.readByte();
+            final var type = header & TYPE_MASK;
+            switch (type) {
+                case TYPE_ENTRY -> {
+                    final var hdr = WritableObjects.readLongHeader(in);
+                    final var entryIndex = WritableObjects.readFirstLong(in, hdr);
+                    final var entryTerm = WritableObjects.readSecondLong(in, hdr);
+
+                    final StateMachineCommand command;
+                    try (var ois = new ObjectInputStream(in)) {
+                        try {
+                            command = (StateMachineCommand) ois.readObject();
+                        } catch (ClassNotFoundException e) {
+                            throw new IOException("Cannot read command", e);
+                        }
+                    }
+                    return new LoadedLogEntry(entryIndex, entryTerm, command);
+                }
+                case TYPE_LAST_APPLIED -> {
+                    return new LoadedLastApplied(WritableObjects.readLongBody(in, header));
+                }
+                case TYPE_VOTING_CONFIG -> {
+                    final var size = in.readInt();
+                    final var builder = ImmutableList.<ServerInfo>builderWithExpectedSize(size);
+                    for (int i = 0; i < size; ++i) {
+                        builder.add(new ServerInfo(in.readUTF(), in.readBoolean()));
+                    }
+                    return new LoadedVotingConfig(new VotingConfig(builder.build()));
+                }
+                default -> {
+                    throw new IllegalArgumentException("Unhandled type " + type);
+                }
+            }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    };
+
+    @NonNullByDefault
+    private static final @NonNull ToByteBufMapper<LogEntry> TOBUF_ENTRY = (obj, buf) -> {
+        try (var out = new ByteBufOutputStream(buf)) {
+            out.writeByte(TYPE_ENTRY);
+            WritableObjects.writeLongs(out, obj.index(), obj.term());
+            try (var oos = new ObjectOutputStream(out)) {
+                oos.writeObject(obj.command().toSerialForm());
+            }
+        }
+    };
+
+    private static final @NonNull ToByteBufMapper<Long> TOBUF_LAST_APPLIED = (obj, buf) -> {
+        try (var out = new ByteBufOutputStream(buf)) {
+            WritableObjects.writeLong(out, obj, TYPE_LAST_APPLIED);
+        }
+    };
+
+    @NonNullByDefault
+    private static final @NonNull ToByteBufMapper<VotingConfig> TOBUF_VOTING_CONFIG = (obj, buf) -> {
+        try (var out = new ByteBufOutputStream(buf)) {
+            out.writeByte(TYPE_VOTING_CONFIG);
+            final var si = obj.serverInfo();
+            out.writeInt(si.size());
+            for (var info : si) {
+                out.writeUTF(info.peerId());
+                out.writeBoolean(info.isVoting());
+            }
+        }
+    };
+
+    private final @NonNull RaftActor actor;
+    private final @NonNull StorageLevel journalLevel;
+    private final int journalSegmentSize;
+
+    private SegmentedRaftJournal journal;
+
+    @NonNullByDefault
     PekkoRaftStorage(final RaftActor actor, final Path directory, final CompressionType compression,
             final Configuration streamConfig) {
         super(actor.memberId(), actor, directory, compression, streamConfig);
         this.actor = requireNonNull(actor);
+        journalSegmentSize = 128 * 1024 * 1024;
+        journalLevel = StorageLevel.MAPPED;
     }
 
     // TODO: at least
@@ -65,8 +171,15 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
     //     - determine nextSequence
 
     @Override
-    protected void postStart() {
-        // No-op
+    protected void postStart() throws IOException {
+        journal = SegmentedRaftJournal.builder()
+            .withDirectory(directory)
+            .withName(JOURNAL_NAME)
+            .withMaxEntrySize(INLINE_ENTRY_SIZE)
+            .withMaxSegmentSize(journalSegmentSize)
+            .withStorageLevel(journalLevel)
+            .build();
+        LOG.info("{}: journal open: firstIndex={} lastIndex={}", memberId, journal.firstIndex(), journal.lastIndex());
     }
 
     // FIXME:  and more: more things:
@@ -79,11 +192,13 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
 
     @Override
     protected void preStop() {
-        // No-op
+        journal.close();
+        journal = null;
+        LOG.info("{}: journal closed", memberId);
     }
 
     @Override
-    public @Nullable SnapshotFile lastSnapshot() throws IOException {
+    public SnapshotFile lastSnapshot() throws IOException {
         final var files = listFiles();
         if (files.isEmpty()) {
             LOG.debug("{}: no eligible files found", memberId);
@@ -96,6 +211,7 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
     }
 
     // Ordered by ascending timestamp, i.e. oldest snapshot first
+    @NonNullByDefault
     private List<SnapshotFile> listFiles() throws IOException {
         if (!Files.exists(directory)) {
             LOG.debug("{}: directory {} does not exist", memberId, directory);
@@ -112,7 +228,7 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
         return ret;
     }
 
-    private @Nullable SnapshotFile pathToFile(final Path path) {
+    private @Nullable SnapshotFile pathToFile(final @NonNull Path path) {
         if (!Files.isRegularFile(path)) {
             LOG.debug("{}: skipping non-file {}", memberId, path);
             return null;
@@ -142,13 +258,13 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
     }
 
     @Override
-    public void persistEntry(final ReplicatedLogEntry entry, final Consumer<ReplicatedLogEntry> callback) {
-        actor.persist(entry, callback);
+    public void persistEntry(final ReplicatedLogEntry entry) throws IOException {
+        journal.writer().append(TOBUF_ENTRY, entry);
     }
 
     @Override
-    public void persistVotingConfig(final VotingConfig votingConfig, final Consumer<VotingConfig> callback) {
-        actor.persist(votingConfig, callback);
+    public void persistVotingConfig(final VotingConfig votingConfig) throws IOException {
+        journal.writer().append(TOBUF_VOTING_CONFIG, votingConfig);
     }
 
     @Override
@@ -163,15 +279,22 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
 
     @Override
     public void deleteEntries(final long fromIndex) {
-        actor.deleteEntries(fromIndex);
+        journal.writer().reset(fromIndex);
     }
 
     @Override
     public void markLastApplied(final long lastApplied) {
-        actor.markLastApplied(lastApplied);
+        try {
+            journal.writer().append(TOBUF_LAST_APPLIED, lastApplied);
+        } catch (IOException e) {
+            LOG.error("{}: failed to mark last applied index", memberId, e);
+            throw new UncheckedIOException(e);
+        }
+        LOG.debug("{}: update commit-index to {}", memberId, lastApplied);
     }
 
     @Override
+    @NonNullByDefault
     public <T extends StateSnapshot> void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
             final @Nullable T snapshot, final StateSnapshot.Writer<T> writer, final RaftCallback<Instant> callback) {
         requireNonNull(raftSnapshot);
@@ -189,6 +312,7 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
     }
 
     @Override
+    @NonNullByDefault
     public <T extends StateSnapshot> void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
             final @Nullable T snapshot, final StateSnapshot.Writer<T> writer, final Instant timestamp)
                 throws IOException {
@@ -251,7 +375,7 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
 
     @Override
     public long lastSequenceNumber() {
-        return actor.lastSequenceNr();
+        return journal.lastIndex();
     }
 
     @Override

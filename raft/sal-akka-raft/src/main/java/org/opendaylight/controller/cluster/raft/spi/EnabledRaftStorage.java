@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft.spi;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -36,10 +37,9 @@ public abstract non-sealed class EnabledRaftStorage extends RaftStorage {
      * be invoked before {@link RaftActor} sees any other message.
      *
      * @param votingConfig the configuration to persist
-     * @param callback the callback when persistence is complete
+     * @throws IOException when an I/O error occurs
      */
-    // FIXME: without callback and throwing IOException
-    public abstract void persistVotingConfig(VotingConfig votingConfig, Consumer<VotingConfig> callback);
+    public abstract void persistVotingConfig(VotingConfig votingConfig) throws IOException;
 
     /**
      * Persists a {@link VotingConfig} to the applicable journal synchronously. The contract is that the callback will
