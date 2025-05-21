@@ -60,27 +60,26 @@ class RaftActorDataPersistenceProviderTest {
     }
 
     @Test
-    void testPersistWithPersistenceEnabled() {
+    void testPersistWithPersistenceEnabled() throws Exception {
         provider.becomePersistent();
 
-        provider.persistEntry(mockPersistentLogEntry, mockCallback);
-        verify(mockEnabledStorage).persistEntry(mockPersistentLogEntry, mockCallback);
+        provider.persistEntry(mockPersistentLogEntry);
+        verify(mockEnabledStorage).persistEntry(mockPersistentLogEntry);
 
-        provider.persistEntry(mockNonPersistentLogEntry, mockCallback);
-        verify(mockEnabledStorage).persistEntry(mockNonPersistentLogEntry, mockCallback);
+        provider.persistEntry(mockNonPersistentLogEntry);
+        verify(mockEnabledStorage).persistEntry(mockNonPersistentLogEntry);
     }
 
     @Test
     void testPersistWithPersistenceDisabled() throws Exception {
-//        doReturn(false).when(mockDisabledStorage).isRecoveryApplicable();
         doReturn(PERSISTENT_PAYLOAD).when(mockPersistentLogEntry).command();
 
         doNothing().when(mockDisabledStorage).saveVotingConfig(same(PERSISTENT_PAYLOAD), any());
         doCallRealMethod().when(mockDisabledStorage).persistEntry(any(), any());
-        provider.persistEntry(mockPersistentLogEntry, mockCallback);
+        provider.persistEntry(mockPersistentLogEntry);
 
         doReturn(NON_PERSISTENT_PAYLOAD).when(mockNonPersistentLogEntry).command();
-        provider.persistEntry(mockNonPersistentLogEntry, mockCallback);
+        provider.persistEntry(mockNonPersistentLogEntry);
         verify(mockDisabledStorage).persistEntry(mockNonPersistentLogEntry, mockCallback);
     }
 

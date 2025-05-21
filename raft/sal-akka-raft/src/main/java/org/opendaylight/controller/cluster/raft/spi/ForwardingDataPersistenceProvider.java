@@ -36,8 +36,8 @@ public abstract class ForwardingDataPersistenceProvider implements DataPersisten
     }
 
     @Override
-    public void persistEntry(final ReplicatedLogEntry entry, final Consumer<ReplicatedLogEntry> callback) {
-        delegate().persistEntry(entry, callback);
+    public void persistEntry(final ReplicatedLogEntry entry) throws IOException {
+        delegate().persistEntry(entry);
     }
 
     @Override
@@ -51,7 +51,7 @@ public abstract class ForwardingDataPersistenceProvider implements DataPersisten
     }
 
     @Override
-    public void deleteMessages(final long sequenceNumber) {
+    public void deleteMessages(final long sequenceNumber) throws IOException {
         delegate().deleteMessages(sequenceNumber);
     }
 

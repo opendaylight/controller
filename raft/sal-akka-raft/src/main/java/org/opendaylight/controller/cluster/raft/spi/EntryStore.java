@@ -7,12 +7,14 @@
  */
 package org.opendaylight.controller.cluster.raft.spi;
 
+import java.io.IOException;
 import java.util.function.Consumer;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage.EntryLoader;
 import org.opendaylight.raft.api.EntryMeta;
 
 /**
@@ -24,11 +26,9 @@ public interface EntryStore {
      * before {@link RaftActor} sees any other message.
      *
      * @param entry the journal entry to persist
-     * @param callback the callback when persistence is complete
      */
-    // FIXME: without callback and throwing IOException
     @NonNullByDefault
-    void persistEntry(ReplicatedLogEntry entry, Consumer<ReplicatedLogEntry> callback);
+    void persistEntry(ReplicatedLogEntry entry) throws IOException;
 
     /**
      * Persists an entry to the applicable journal asynchronously.
@@ -36,7 +36,6 @@ public interface EntryStore {
      * @param entry the journal entry to persist
      * @param callback the callback when persistence is complete
      */
-    // FIXME: Callback<ReplicatedLogEntry> instead of Consumer
     @NonNullByDefault
     void startPersistEntry(ReplicatedLogEntry entry, Consumer<ReplicatedLogEntry> callback);
 
@@ -67,8 +66,7 @@ public interface EntryStore {
      *
      * @param sequenceNumber the sequence number
      */
-    // FIXME: throws IOException
-    void deleteMessages(long sequenceNumber);
+    void deleteMessages(long sequenceNumber) throws IOException;
 
     /**
      * Returns the last sequence number contained in the journal.
@@ -84,4 +82,6 @@ public interface EntryStore {
      * @return {@code true} if the response was handled
      */
     boolean handleJournalResponse(JournalProtocol.@NonNull Response response);
+
+    EntryLoader openLoader();
 }
