@@ -177,9 +177,10 @@ public final class SnapshotManager {
      * entries.
      */
     @NonNullByDefault
-    private record Capture(long lastSequenceNumber, CaptureSnapshot request) implements Task {
+    private record Capture(long nextReplayFrom, CaptureSnapshot request) implements Task {
         Capture {
             requireNonNull(request);
+            Persist.checkReplayFrom(nextReplayFrom);
         }
     }
 
@@ -192,37 +193,40 @@ public final class SnapshotManager {
     }
 
     /**
-     * This instance is talking to persistence for some reason. We have started talking to persistence when it was
-     * at {@linkplain #lastSequenceNumber}.
+     * This instance is talking to persistence for some reason.
      */
     private sealed interface Persist extends Task {
         /**
-         * Returns the last sequence number reported by persistence when this task started.
-         *
-         * @return persistence last sequence number
+         * {@return the next value of journal's {@code replayFrom} index.
          */
-        long lastSequenceNumber();
+        long nextReplayFrom();
+
+        static void checkReplayFrom(final long replayFrom) {
+            if (replayFrom < 0) {
+                throw new IllegalArgumentException("Bad replayFrom " + replayFrom);
+            }
+        }
     }
 
     /**
      * This instance is persisting an {@link ApplyLeaderSnapshot}.
      */
     @NonNullByDefault
-    private record PersistApply(
-            long lastSequenceNumber,
-            Snapshot snapshot,
-            ApplyLeaderSnapshot.@Nullable Callback callback) implements Persist {
+    private record PersistApply(long nextReplayFrom, Snapshot snapshot, ApplyLeaderSnapshot.@Nullable Callback callback)
+            implements Persist {
         PersistApply {
             requireNonNull(snapshot);
+            Persist.checkReplayFrom(nextReplayFrom);
         }
     }
 
     /**
      * This instance is persisting a previously {@link Capture}d snapshot.
      */
-    private record PersistCapture(long lastSequenceNumber, CaptureSnapshot request) implements Persist {
+    private record PersistCapture(long nextReplayFrom, CaptureSnapshot request) implements Persist {
         PersistCapture {
             requireNonNull(request);
+            Persist.checkReplayFrom(nextReplayFrom);
         }
     }
 
@@ -254,12 +258,6 @@ public final class SnapshotManager {
 
     @NonNullByDefault
     private final class SaveSnapshotCallback extends RaftCallback<Instant> {
-        private final long lastSeq;
-
-        SaveSnapshotCallback(final long lastSeq) {
-            this.lastSeq = lastSeq;
-        }
-
         @Override
         public void invoke(final @Nullable Exception failure, final Instant success) {
             if (failure != null) {
@@ -267,13 +265,13 @@ public final class SnapshotManager {
                 rollback();
             } else {
                 LOG.info("{}: snapshot is durable as of {}", memberId(), success);
-                commit(lastSeq, success);
+                commit(success);
             }
         }
 
         @Override
-        protected ToStringHelper addToStringAttributes(ToStringHelper helper) {
-            return helper.add("lastSeq", lastSeq);
+        protected ToStringHelper addToStringAttributes(final ToStringHelper helper) {
+            return helper.add("memberId", memberId());
         }
     }
 
@@ -335,10 +333,10 @@ public final class SnapshotManager {
         final var request = newCaptureSnapshot(lastLogEntry, replicatedToAllIndex, false);
         LOG.info("{}: Initiating snapshot capture {} to install on {}", memberId(), request, targetFollower);
 
-        final var lastSeq = context.entryStore().lastSequenceNumber();
-        LOG.debug("{}: lastSequenceNumber prior to capture: {}", memberId(), lastSeq);
+        LOG.debug("{}: lastSequenceNumber prior to capture: {}", memberId(),
+            context.getReplicatedLog().lastAppliedJournalIndex());
 
-        task = new Capture(lastSeq, request);
+        task = new Capture(request);
         return captureToInstall(snapshotCohort, request);
     }
 
@@ -383,10 +381,10 @@ public final class SnapshotManager {
 
     private boolean capture(final @NonNull CaptureSnapshot request) {
         LOG.info("{}: Initiating snapshot capture {}", memberId(), request);
-        final var lastSeq = context.entryStore().lastSequenceNumber();
         final var snapshotState = snapshotCohort.takeSnapshot();
-        LOG.debug("{}: captured snapshot at lastSequenceNumber: {}", memberId(), lastSeq);
-        persist(lastSeq, request, snapshotState);
+        LOG.debug("{}: captured snapshot at lastSequenceNumber: {}", memberId(),
+            context.getReplicatedLog().lastAppliedJournalIndex());
+        persist(request, snapshotState);
         return true;
     }
 
@@ -427,18 +425,16 @@ public final class SnapshotManager {
         final var snapshot = Snapshot.ofTermLeader(snapshotState, leaderSnapshot.lastEntry(), context.termInfo(),
             leaderSnapshot.serverConfig());
         final var callback = leaderSnapshot.callback;
-        final var lastSeq = context.entryStore().lastSequenceNumber();
-        task = new PersistApply(lastSeq, snapshot, callback);
-        LOG.debug("{}: lastSequenceNumber prior to persisting applied snapshot: {}", memberId(), lastSeq);
-        saveSnapshot(new RaftSnapshot(snapshot.votingConfig(), snapshot.getUnAppliedEntries()), snapshot.lastApplied(),
-            snapshot.state(), lastSeq);
+
+        task = new PersistApply(snapshot, callback);
+        saveSnapshot(new RaftSnapshot(snapshot.votingConfig(), List.of()), snapshot.lastApplied(), snapshot.state());
     }
 
     @NonNullByDefault
     private <T extends StateSnapshot> void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
-            final Snapshot.@Nullable State snapshot, final long lastSeq) {
+            final Snapshot.@Nullable State snapshot) {
         context.snapshotStore().saveSnapshot(raftSnapshot, lastIncluded,
-            ToStorage.ofNullable(snapshotCohort().support().writer(), snapshot), new SaveSnapshotCallback(lastSeq));
+            ToStorage.ofNullable(snapshotCohort().support().writer(), snapshot), new SaveSnapshotCallback());
     }
 
     /**
@@ -450,25 +446,26 @@ public final class SnapshotManager {
     @NonNullByDefault
     @VisibleForTesting
     public void persist(final Snapshot.State snapshotState, final InstallableSnapshot installable) {
-        if (!(task instanceof Capture(var lastSeq, var request))) {
+        if (!(task instanceof Capture(var request))) {
             LOG.debug("{}: persist should not be called in state {}", memberId(), task);
             return;
         }
 
-        persist(lastSeq, request, snapshotState);
+        persist(request, snapshotState);
 
         if (context.getCurrentBehavior() instanceof AbstractLeader leader) {
             leader.sendInstallSnapshot(installable);
         }
     }
 
-    private void persist(final long lastSeq, final CaptureSnapshot request, final Snapshot.State snapshotState) {
+    private void persist(final CaptureSnapshot request, final Snapshot.State snapshotState) {
         // create a snapshot object from the state provided and save it when snapshot is saved async,
 
         LOG.info("{}: Persising snapshot at {}/{}", memberId(), request.lastApplied(), request.lastEntry());
 
-        saveSnapshot(new RaftSnapshot(context.getPeerServerInfo(true), request.getUnAppliedEntries()),
-            request.lastApplied(), snapshotState, lastSeq);
+        // Note: we ignore unapplied entries, as that is not what we want to trim
+        saveSnapshot(new RaftSnapshot(context.getPeerServerInfo(true), List.of()), request.lastApplied(),
+            snapshotState);
 
         final var config = context.getConfigParams();
         final long absoluteThreshold = config.getSnapshotDataThreshold();
@@ -525,33 +522,34 @@ public final class SnapshotManager {
         LOG.info("{}: Removed in-memory snapshotted entries, adjusted snaphsotIndex: {} and term: {}", memberId(),
             replLog.getSnapshotIndex(), replLog.getSnapshotTerm());
 
-        task = new PersistCapture(lastSeq, request);
+        task = new PersistCapture(request);
     }
 
     /**
      * Commit the snapshot by trimming the log.
      *
-     * @param sequenceNumber the sequence number of the persisted snapshot
      * @param timestamp the time stamp of the persisted snapshot
      */
     @NonNullByDefault
     @VisibleForTesting
-    void commit(final long sequenceNumber, final Instant timestamp) {
+    void commit(final Instant timestamp) {
         if (!(task instanceof Persist persist)) {
             LOG.debug("{}: commit should not be called in state {}", memberId(), task);
             return;
         }
 
-        LOG.debug("{}: Snapshot success -  sequence number: {}", memberId(), sequenceNumber);
-        context.entryStore().deleteMessages(commit(persist));
+        commit(persist);
+        final var firstJournalIndex = context.getReplicatedLog().firstJournalIndex();
+        LOG.debug("{}: Snapshot success with first journal index {}", memberId(), firstJournalIndex);
+        context.entryStore().discardHead(firstJournalIndex);
 
         snapshotComplete();
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private long commit(final Persist persist) {
-        return switch (persist) {
-            case PersistApply(var lastSeq, var snapshot, var callback) -> {
+    private void commit(final Persist persist) {
+        switch (persist) {
+            case PersistApply(var snapshot, var callback) -> {
                 try {
                     // clears the followers log, sets the snapshot index to ensure adjusted-index works
                     context.getReplicatedLog().resetToSnapshot(snapshot);
@@ -572,13 +570,11 @@ public final class SnapshotManager {
                 } catch (Exception e) {
                     LOG.error("{}: Error applying snapshot", memberId(), e);
                 }
-                yield lastSeq;
             }
             case PersistCapture capture -> {
                 context.getReplicatedLog().snapshotCommit();
-                yield capture.lastSequenceNumber;
             }
-        };
+        }
     }
 
     @NonNullByDefault
