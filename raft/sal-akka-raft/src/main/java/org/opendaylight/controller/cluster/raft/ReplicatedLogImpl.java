@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -92,7 +94,12 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog {
         // FIXME: When can 'false' happen? Wouldn't that be an indication that Follower.handleAppendEntries() is doing
         //        something wrong?
         if (append(entry)) {
-            context.entryStore().persistEntry(entry, persisted -> invokeSync(persisted, callback));
+            try {
+                context.entryStore().persistEntry(entry);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+            invokeSync(entry, callback);
         }
         return shouldCaptureSnapshot(entry.index());
     }

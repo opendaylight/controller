@@ -100,12 +100,11 @@ final class PersistenceControl extends ForwardingDataPersistenceProvider {
     }
 
     @Override
-    public void persistEntry(final ReplicatedLogEntry entry, final Consumer<ReplicatedLogEntry> callback) {
+    public void persistEntry(final ReplicatedLogEntry entry) throws IOException {
         if (!delegate.isRecoveryApplicable() && entry.command() instanceof VotingConfig votingConfig) {
-            requireNonNull(callback);
-            enabledStorage.persistVotingConfig(votingConfig, unused -> callback.accept(entry));
+            enabledStorage.persistVotingConfig(votingConfig);
         } else {
-            delegate.persistEntry(entry, callback);
+            delegate.persistEntry(entry);
         }
     }
 
