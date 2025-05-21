@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static com.google.common.base.Verify.verify;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
@@ -25,7 +26,8 @@ final class JournaledLogEntry implements ReplicatedLogEntry {
     private final long term;
     private final Payload command;
 
-    private boolean persistencePending;
+    private boolean persistencePending = true;
+    private long journalIndex = -1;
 
     JournaledLogEntry(final long index, final long term, final Payload command) {
         this.index = index;
@@ -34,8 +36,12 @@ final class JournaledLogEntry implements ReplicatedLogEntry {
     }
 
     static JournaledLogEntry of(final LogEntry entry) {
-        return entry instanceof JournaledLogEntry simple && !simple.isPersistencePending() ? simple
-            : new JournaledLogEntry(entry.index(), entry.term(), entry.command().toSerialForm());
+        if (entry instanceof JournaledLogEntry simple && !simple.isPersistencePending()) {
+            return simple;
+        }
+        final var ret = new JournaledLogEntry(entry.index(), entry.term(), entry.command().toSerialForm());
+        ret.persistencePending = false;
+        return ret;
     }
 
     @Override
@@ -74,8 +80,15 @@ final class JournaledLogEntry implements ReplicatedLogEntry {
      *
      * @param pending the new setting.
      */
-    void setPersistencePending(final boolean pending) {
-        persistencePending = pending;
+    void completePersistence(final long newJournalIndex) {
+        verify(persistencePending);
+        journalIndex = newJournalIndex;
+        persistencePending = false;
+    }
+
+    long getJournalIndex() {
+        verify(!persistencePending);
+        return journalIndex;
     }
 
     @Override
