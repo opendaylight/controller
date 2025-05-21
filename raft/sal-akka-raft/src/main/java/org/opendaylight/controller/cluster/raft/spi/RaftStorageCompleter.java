@@ -225,7 +225,7 @@ public final class RaftStorageCompleter {
      */
     // FIXME: only allow this to happen when we have indicated willingness to wait for these, enforcing actor
     //        containment
-    <T> RaftCallback<T> syncWithCurrentMessage(final RaftCallback<T> callback) {
+    public <T> RaftCallback<T> syncWithCurrentMessage(final RaftCallback<T> callback) {
         final var bound = new SyncRaftCallback<>(callback);
         verify(syncCallbacks.add(bound));
         return bound;
