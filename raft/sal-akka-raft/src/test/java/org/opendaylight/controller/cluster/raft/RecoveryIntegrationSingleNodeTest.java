@@ -7,15 +7,17 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.List;
 import java.util.Map;
 import org.apache.pekko.testkit.TestActorRef;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
+import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
 
 /**
  * Recovery Integration Test for single node.
@@ -35,8 +37,6 @@ public class RecoveryIntegrationSingleNodeTest extends AbstractRaftActorIntegrat
         waitUntilLeader(singleNodeActorRef);
 
         final var singleNodeContext = singleNodeActorRef.underlyingActor().getRaftActorContext();
-
-        InMemoryJournal.addWriteMessagesCompleteLatch(persistenceId, 6, ApplyJournalEntries.class);
 
         final MockCommand payload0 = sendPayloadData(singleNodeActorRef, "zero");
         final MockCommand payload1 = sendPayloadData(singleNodeActorRef, "one");
@@ -59,16 +59,35 @@ public class RecoveryIntegrationSingleNodeTest extends AbstractRaftActorIntegrat
 
         verifyApplyIndex(singleNodeActorRef, 5);
 
-        assertEquals("Last applied", 5, singleNodeContext.getReplicatedLog().getLastApplied());
+        assertEquals(5, singleNodeContext.getReplicatedLog().getLastApplied());
 
-        assertEquals("Incorrect State after snapshot success is received ",
+        assertEquals(
                 List.of(payload0, payload1, payload2, payload3, payload4, payload5),
                 singleNodeActorRef.underlyingActor().getState());
 
-        InMemoryJournal.waitForWriteMessagesComplete(persistenceId);
+        final var journal = assertInstanceOf(EnabledRaftStorage.class, singleNodeContext.entryStore()).journal();
+        assertEquals(6, journal.applyToJournalIndex());
 
-        // we get 2 log entries (4 and 5 indexes) and 3 ApplyJournalEntries (for 3, 4, and 5 indexes)
-        assertEquals(5, InMemoryJournal.get(persistenceId).size());
+        try (var reader = journal.openReader()) {
+            assertEquals(5, reader.nextJournalIndex());
+            var journalEntry = reader.nextEntry();
+            assertNotNull(journalEntry);
+            var logEntry = journalEntry.toLogEntry();
+            assertEquals(4, logEntry.index());
+            assertEquals(1, logEntry.term());
+            assertEquals(payload4, logEntry.command());
+
+            assertEquals(6, reader.nextJournalIndex());
+            journalEntry = reader.nextEntry();
+            assertNotNull(journalEntry);
+            logEntry = journalEntry.toLogEntry();
+            assertEquals(5, logEntry.index());
+            assertEquals(1, logEntry.term());
+            assertEquals(payload5, logEntry.command());
+
+            assertEquals(7, reader.nextJournalIndex());
+            assertNull(reader.nextEntry());
+        }
 
         final var snapshotFile = singleNodeActorRef.underlyingActor().lastSnapshot();
         assertNotNull(snapshotFile);
@@ -83,8 +102,7 @@ public class RecoveryIntegrationSingleNodeTest extends AbstractRaftActorIntegrat
 
         singleNodeActorRef.underlyingActor().waitForRecoveryComplete();
 
-        assertEquals("Incorrect State after Recovery ",
-                List.of(payload0, payload1, payload2, payload3, payload4, payload5),
+        assertEquals(List.of(payload0, payload1, payload2, payload3, payload4, payload5),
                 singleNodeActorRef.underlyingActor().getState());
     }
 }
