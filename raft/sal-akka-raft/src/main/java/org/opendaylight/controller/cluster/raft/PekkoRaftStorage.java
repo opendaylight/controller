@@ -9,26 +9,40 @@ package org.opendaylight.controller.cluster.raft;
 
 import static java.util.Objects.requireNonNull;
 
+import java.io.IOException;
 import java.nio.file.Path;
-import org.apache.pekko.persistence.DeleteMessagesSuccess;
-import org.apache.pekko.persistence.JournalProtocol;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicLong;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
+import org.opendaylight.controller.cluster.raft.spi.EntryJournalV1;
+import org.opendaylight.controller.cluster.raft.spi.JournalWriterTask;
+import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
 import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An {@link EnabledRaftStorage} backed by Pekko Persistence of an {@link RaftActor}.
  */
 // FIXME: remove this class once we have both Snapshots and Entries stored in files
-@NonNullByDefault
 final class PekkoRaftStorage extends EnabledRaftStorage {
-    private final RaftActor actor;
+    private static final Logger LOG = LoggerFactory.getLogger(PekkoRaftStorage.class);
+    private static final AtomicLong WRITER_COUNTER = new AtomicLong();
 
+    private final boolean mapped;
+
+    // FIXME: we should have a queue push timeout, similar to Pekko circuit breaker to deal with queue waits
+    private JournalWriterTask task;
+    private Thread thread;
+
+    @NonNullByDefault
     PekkoRaftStorage(final RaftActor actor, final Path directory, final CompressionType compression,
-            final Configuration streamConfig) {
+            final Configuration streamConfig, final boolean mapped) {
         super(actor.memberId(), actor, directory, compression, streamConfig);
-        this.actor = requireNonNull(actor);
+        this.mapped = mapped;
     }
 
     // TODO: at least
@@ -39,8 +53,11 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
     //     - determine nextSequence
 
     @Override
-    protected void postStart() {
-        // No-op
+    protected void postStart() throws IOException {
+        final var journal = new EntryJournalV1(memberId, directory, compression, mapped);
+        LOG.info("{}: journal open: applyTo={}", memberId, journal.applyTo());
+        task = new JournalWriterTask(actor, journal, 2048);
+        thread = Thread.ofVirtual().name(memberId + "-writer-" + WRITER_COUNTER.incrementAndGet()).start(task);
     }
 
     // FIXME:  and more: more things:
@@ -53,41 +70,89 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
 
     @Override
     protected void preStop() {
-        // No-op
+        LOG.debug("{}: terminating thread {}", memberId, thread);
+        var journal = task.processAndTerminate();
+        task = null;
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            LOG.warn("{}: interrupted while waiting for writer to complete, forcing cancellation", e);
+            thread.interrupt();
+            task.cancelAndTerminate();
+            return;
+        } finally {
+            thread = null;
+        }
+
+        journal.close();
+        LOG.info("{}: journal closed", memberId);
     }
 
     @Override
-    public void persistEntry(final ReplicatedLogEntry entry, final Runnable callback) {
-        actor.persist(entry, callback);
+    public long persistEntry(final ReplicatedLogEntry entry) throws IOException {
+        final var future = new CompletableFuture<Long>();
+        startPersistEntry(entry, (failure, success) -> {
+            if (failure != null) {
+                future.completeExceptionally(failure);
+            } else {
+                future.complete(success);
+            }
+        });
+
+        try {
+            return future.get();
+        } catch (ExecutionException | InterruptedException e) {
+            throw new IOException("Failed to persist entry " + entry, e);
+        }
     }
 
     @Override
-    public void startPersistEntry(final ReplicatedLogEntry entry, final Runnable callback) {
-        actor.persistAsync(entry, callback);
+    @NonNullByDefault
+    public void startPersistEntry(final ReplicatedLogEntry entry, final RaftCallback<Long> callback) {
+        requireNonNull(callback);
+        try {
+            task.appendEntry(entry, callback);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Failed to start persist", e);
+        }
     }
 
     @Override
     public void deleteEntries(final long fromIndex) {
-        actor.deleteEntries(fromIndex);
-    }
-
-    @Override
-    public void markLastApplied(final long lastApplied) {
-        actor.markLastApplied(lastApplied);
+        try {
+            // FIXME: journalIndex
+            task.discardTail(fromIndex);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Failed to delete tail entries", e);
+        }
     }
 
     @Override
     public void deleteMessages(final long sequenceNumber) {
-        actor.deleteMessages(sequenceNumber);
+        try {
+            // FIXME: journalIndex
+            task.discardHead(sequenceNumber);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Failed to delete head entries", e);
+        }
+    }
+
+    @Override
+    public void markLastApplied(final long lastApplied) {
+        try {
+            // FIXME: journalIndex
+            task.setApplyTo(lastApplied);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Failed to update last applied index", e);
+        }
     }
 
     @Override
     public long lastSequenceNumber() {
-        return actor.lastSequenceNr();
-    }
-
-    @Override
-    public boolean handleJournalResponse(final JournalProtocol.Response response) {
-        return response instanceof DeleteMessagesSuccess;
+        throw new UnsupportedOperationException();
     }
 }
