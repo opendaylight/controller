@@ -383,7 +383,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     }
 
     @Test
-    public void testCommit() {
+    public void testCommit() throws Exception {
         doReturn(50L).when(mockEntryStore).lastSequenceNumber();
 
         // when replicatedToAllIndex = -1
@@ -407,7 +407,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     }
 
     @Test
-    public void testCommitBeforePersist() {
+    public void testCommitBeforePersist() throws Exception {
         doReturn(ByteState.empty()).when(mockCohort).takeSnapshot();
 
         // when replicatedToAllIndex = -1
@@ -423,7 +423,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     }
 
     @Test
-    public void testCommitBeforeCapture() {
+    public void testCommitBeforeCapture() throws Exception {
         snapshotManager.commit(100L, Instant.EPOCH);
 
         verify(mockReplicatedLog, never()).snapshotCommit();
@@ -435,7 +435,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     }
 
     @Test
-    public void testCallingCommitMultipleTimesCausesNoHarm() {
+    public void testCallingCommitMultipleTimesCausesNoHarm() throws Exception {
         doReturn(50L).when(mockEntryStore).lastSequenceNumber();
 
         // when replicatedToAllIndex = -1
