@@ -35,7 +35,8 @@ final class JournalRecovery<T extends State> extends Recovery<T> {
         this.journal = requireNonNull(journal);
     }
 
-    RecoveryLog recoverJournal(final RecoveryLog pekkoLog) throws IOException {
+    // FIXME: require RecoveryLog here
+    RecoveryLog recoverJournal(final ReplicatedLog pekkoLog) throws IOException {
         startRecoveryTimers();
 
         // First up: reconcile recoveryLog state w.r.t. recoveryCohort. We must always prove continuity of
@@ -57,7 +58,8 @@ final class JournalRecovery<T extends State> extends Recovery<T> {
         return recoveryLog;
     }
 
-    private void reconcileAndRecover(final RecoveryLog pekkoLog) throws IOException {
+    // FIXME: require RecoveryLog here
+    private void reconcileAndRecover(final ReplicatedLog pekkoLog) throws IOException {
         try (var reader = journal.openReader()) {
             // If pekkoLog contains any entries, it has come from Pekko persistence and we need to do some more work to
             // ensure migrate those entries into the EntryJournal. This can occur during multiple recoveries, as we may
