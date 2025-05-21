@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static java.util.Objects.requireNonNull;
 import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -40,6 +41,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.function.LongConsumer;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.PoisonPill;
 import org.apache.pekko.actor.Terminated;
@@ -1207,12 +1209,12 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals("getCommitIndex", -1, leaderLog.getCommitIndex());
 
         final var entryCaptor = ArgumentCaptor.forClass(ReplicatedLogEntry.class);
-        final var callbackCaptor = ArgumentCaptor.forClass(Runnable.class);
+        final var callbackCaptor = ArgumentCaptor.forClass(LongConsumer.class);
         verify(provider.entryStore()).startPersistEntry(entryCaptor.capture(), callbackCaptor.capture());
 
         final var entry = entryCaptor.getValue();
         assertSame(storedMeta.meta(), entry);
-        callbackCaptor.getValue().run();
+        callbackCaptor.getValue().accept(1);
 
         assertEquals("getCommitIndex", 0, leaderLog.getCommitIndex());
         assertEquals("getLastApplied", 0, leaderLog.getLastApplied());
@@ -1287,9 +1289,11 @@ public class RaftActorTest extends AbstractActorTest {
             .factory());
         leaderActor.persistence().decorateEntryStore((delegate, actor) -> new ForwardingEntryStore() {
             @Override
-            public void startPersistEntry(final ReplicatedLogEntry entry, final Runnable callback) {
+            public void startPersistEntry(final ReplicatedLogEntry entry, final LongConsumer callback) {
                 // needs to be executed from another thread to simulate the persistence actor calling this callback
-                super.startPersistEntry(entry, () -> executorService.submit(callback));
+                requireNonNull(callback);
+                super.startPersistEntry(entry,
+                    journalIndex -> executorService.submit(() -> callback.accept(journalIndex)));
             }
 
             @Override
