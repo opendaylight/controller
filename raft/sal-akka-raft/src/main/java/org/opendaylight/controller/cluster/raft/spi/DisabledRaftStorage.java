@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.cluster.raft.spi;
 
-import static java.util.Objects.requireNonNull;
-
 import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -54,8 +52,7 @@ public final class DisabledRaftStorage extends RaftStorage implements ImmediateD
     }
 
     @Override
-    public void persistEntry(final ReplicatedLogEntry entry, final Consumer<ReplicatedLogEntry> callback) {
-        requireNonNull(callback);
+    public void persistEntry(final ReplicatedLogEntry entry) throws IOException {
         if (entry.command() instanceof VotingConfig votingConfig) {
             try {
                 saveVotingConfig(votingConfig, Instant.now());
@@ -63,7 +60,6 @@ public final class DisabledRaftStorage extends RaftStorage implements ImmediateD
                 throw new UncheckedIOException(e);
             }
         }
-        callback.accept(entry);
     }
 
     @Override
