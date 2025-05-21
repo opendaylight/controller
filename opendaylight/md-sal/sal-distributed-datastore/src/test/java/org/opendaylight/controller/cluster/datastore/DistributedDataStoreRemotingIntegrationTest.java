@@ -7,12 +7,12 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
@@ -21,9 +21,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
-import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapNodeBuilder;
 
-import com.google.common.base.Stopwatch;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.FutureCallback;
@@ -85,7 +83,6 @@ import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftStat
 import org.opendaylight.controller.cluster.raft.client.messages.Shutdown;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
-import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
@@ -243,9 +240,10 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
     private static void verifyCars(final DOMStoreReadTransaction readTx, final MapEntryNode... entries)
             throws Exception {
-        assertEquals("Car list node",
-            Optional.of(mapNodeBuilder(CarsModel.CAR_QNAME).withValue(Arrays.asList(entries)).build()),
-            readTx.read(CarsModel.CAR_LIST_PATH).get(5, TimeUnit.SECONDS));
+        assertEquals("Car list node", Optional.of(ImmutableNodes.newSystemMapBuilder()
+            .withNodeIdentifier(new NodeIdentifier(CarsModel.CAR_QNAME))
+            .withValue(Arrays.asList(entries))
+            .build()), readTx.read(CarsModel.CAR_LIST_PATH).get(5, TimeUnit.SECONDS));
     }
 
     private static void verifyNode(final DOMStoreReadTransaction readTx, final YangInstanceIdentifier path,
@@ -262,8 +260,6 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     public void testWriteTransactionWithSingleShard() throws Exception {
         final String testName = "testWriteTransactionWithSingleShard";
         initDatastoresWithCars(testName);
-
-        final String followerCarShardName = "member-2-shard-cars-" + testName;
 
         DOMStoreWriteTransaction writeTx = followerDistributedDataStore.newWriteOnlyTransaction();
         assertNotNull("newWriteOnlyTransaction returned null", writeTx);
@@ -314,22 +310,10 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         // tell-based persists additional payloads which could be replicated and applied in a batch resulting in
         // either 2 or 3 ApplyJournalEntries. To handle this we read the follower's persisted ApplyJournalEntries
         // until we find the one that encompasses the leader's lastAppliedIndex.
-        Stopwatch sw = Stopwatch.createStarted();
-        boolean done = false;
-        while (!done) {
-            final var entries = InMemoryJournal.get(followerCarShardName, ApplyJournalEntries.class);
-            for (var entry : entries) {
-                if (entry.getToIndex() >= leaderLastAppliedIndex.get()) {
-                    done = true;
-                    break;
-                }
-            }
 
-            assertTrue("Follower did not persist ApplyJournalEntries containing leader's lastAppliedIndex "
-                    + leaderLastAppliedIndex + ". Entries persisted: " + entries, sw.elapsed(TimeUnit.SECONDS) <= 5);
-
-            Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
-        }
+        IntegrationTestKit.verifyShardState(followerDistributedDataStore, CARS[0], state -> {
+            assertThat(state.getLastApplied()).isGreaterThanOrEqualTo(leaderLastAppliedIndex.get());
+        });
 
         TestKit.shutdownActorSystem(leaderSystem, true);
         TestKit.shutdownActorSystem(followerSystem, true);
@@ -666,9 +650,6 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         final String testName = "testSingleShardTransactionsWithLeaderChanges";
         initDatastoresWithCars(testName);
 
-        final String followerCarShardName = "member-2-shard-cars-" + testName;
-        InMemoryJournal.addWriteMessagesCompleteLatch(followerCarShardName, 1, ApplyJournalEntries.class);
-
         // Write top-level car container from the follower so it uses a remote Tx.
 
         DOMStoreWriteTransaction writeTx = followerDistributedDataStore.newWriteOnlyTransaction();
@@ -678,7 +659,9 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         followerTestKit.doCommit(writeTx.ready());
 
-        InMemoryJournal.waitForWriteMessagesComplete(followerCarShardName);
+        IntegrationTestKit.verifyShardState(followerDistributedDataStore, CARS[0], state -> {
+            assertThat(state.getLastApplied()).isEqualTo(1);
+        });
 
         // Switch the leader to the follower
 
@@ -761,8 +744,10 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         cars.add(CarsModel.newCarEntry("car" + carIndex, Uint64.valueOf(carIndex)));
         writeTx2.write(CarsModel.newCarPath("car" + carIndex), cars.getLast());
         carIndex++;
-        NormalizedNode people = mapNodeBuilder(PeopleModel.PERSON_QNAME)
-                .withChild(PeopleModel.newPersonEntry("Dude")).build();
+        final var people = ImmutableNodes.newSystemMapBuilder()
+            .withNodeIdentifier(new NodeIdentifier(PeopleModel.PERSON_QNAME))
+            .withChild(PeopleModel.newPersonEntry("Dude"))
+            .build();
         writeTx2.write(PeopleModel.PERSON_LIST_PATH, people);
         final DOMStoreThreePhaseCommitCohort writeTx2Cohort = writeTx2.ready();
 
