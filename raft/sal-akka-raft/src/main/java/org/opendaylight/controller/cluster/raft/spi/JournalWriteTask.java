@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft.spi;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Throwables;
@@ -168,6 +169,11 @@ public final class JournalWriteTask implements Runnable {
 
     private String memberId() {
         return completer.memberId();
+    }
+
+    @Beta
+    public EntryJournal journal() {
+        return journal;
     }
 
     public void appendEntry(final LogEntry entry, final RaftCallback<Long> callback) throws InterruptedException {
