@@ -16,9 +16,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import com.google.common.util.concurrent.MoreExecutors;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.LongConsumer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,7 +52,7 @@ class ReplicatedLogImplTest {
     @Mock
     private Consumer<ReplicatedLogEntry> callback;
     @Captor
-    private ArgumentCaptor<Runnable> procedureCaptor;
+    private ArgumentCaptor<LongConsumer> procedureCaptor;
     @TempDir
     private Path stateDir;
 
@@ -197,9 +199,13 @@ class ReplicatedLogImplTest {
     private void assertPersist(final ReplicatedLogEntry entry, final boolean async) {
         if (async) {
             verify(entryStore).startPersistEntry(eq(entry), procedureCaptor.capture());
+            procedureCaptor.getValue().run();
         } else {
-            verify(entryStore).persistEntry(eq(entry), procedureCaptor.capture());
+            try {
+                verify(entryStore).persistEntry(eq(entry));
+            } catch (IOException e) {
+                throw new AssertionError(e);
+            }
         }
-        procedureCaptor.getValue().run();
     }
 }

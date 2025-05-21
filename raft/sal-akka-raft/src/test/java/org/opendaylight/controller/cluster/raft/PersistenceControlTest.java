@@ -88,11 +88,11 @@ class PersistenceControlTest {
         doReturn(PERSISTENT_PAYLOAD).when(persistentLogEntry).command();
 
         doNothing().when(disabledStorage).saveVotingConfig(same(PERSISTENT_PAYLOAD), any());
-        doCallRealMethod().when(disabledStorage).persistEntry(any(), any());
-        disabledStorage.persistEntry(persistentLogEntry, callback);
+        doCallRealMethod().when(disabledStorage).persistEntry(any());
+        disabledStorage.persistEntry(persistentLogEntry);
 
         doReturn(NON_PERSISTENT_PAYLOAD).when(nonPersistentLogEntry).command();
-        disabledStorage.persistEntry(nonPersistentLogEntry, callback);
-        verify(disabledStorage).persistEntry(nonPersistentLogEntry, callback);
+        disabledStorage.persistEntry(nonPersistentLogEntry);
+        verify(disabledStorage).persistEntry(nonPersistentLogEntry);
     }
 }
