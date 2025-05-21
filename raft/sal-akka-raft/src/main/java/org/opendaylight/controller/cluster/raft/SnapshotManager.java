@@ -11,6 +11,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.time.Instant;
 import java.util.List;
 import org.apache.pekko.dispatch.ControlMessage;
@@ -527,7 +528,11 @@ public final class SnapshotManager {
         final var lastSequenceNumber = commit(persist);
 
         context.snapshotStore().retainSnapshots(timestamp);
-        context.entryStore().deleteMessages(lastSequenceNumber);
+        try {
+            context.entryStore().deleteMessages(lastSequenceNumber);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
 
         snapshotComplete();
     }
