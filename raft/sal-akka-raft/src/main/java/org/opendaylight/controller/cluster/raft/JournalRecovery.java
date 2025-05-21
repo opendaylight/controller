@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft;
 import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.List;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
@@ -35,7 +36,7 @@ final class JournalRecovery<T extends State> extends Recovery<T> {
         this.journal = requireNonNull(journal);
     }
 
-    RecoveryLog recoverJournal(final RecoveryLog pekkoLog) throws IOException {
+    RecoveryLog recoverJournal(final ReplicatedLog pekkoLog) throws IOException {
         startRecoveryTimers();
 
         // First up: reconcile recoveryLog state w.r.t. recoveryCohort. We must always prove continuity of
@@ -46,14 +47,15 @@ final class JournalRecovery<T extends State> extends Recovery<T> {
         recoveryLog.setLastApplied(pekkoLog.getLastApplied());
 
         // Next up: reconcile the contents of pekkoLog with journal
-        final var journalIndex = reconcileAndRecover(pekkoLog);
+        reconcileAndRecover(pekkoLog);
 
         final var recoveryTime = stopRecoveryTimers();
-        LOG.debug("{}: journal recovery completed{} with journalIndex={}", memberId(), recoveryTime, journalIndex);
+        LOG.debug("{}: journal recovery completed{} with journalIndex={}", memberId(), recoveryTime,
+            recoveryLog.firstJournalIndex());
         return recoveryLog;
     }
 
-    private long reconcileAndRecover(final RecoveryLog pekkoLog) throws IOException {
+    private void reconcileAndRecover(final ReplicatedLog pekkoLog) throws IOException {
         try (var reader = journal.openReader()) {
             // If pekkoLog contains any entries, it has come from Pekko persistence and we need to do some more work to
             // ensure migrate those entries into the EntryJournal. This can occur during multiple recoveries, as we may
@@ -66,6 +68,7 @@ final class JournalRecovery<T extends State> extends Recovery<T> {
             // initialize the journal to the entries contained in prevPekkoLog. We also defensively initialize
             // applyToJournalIndex to 0.
             final var firstIndex = reader.nextJournalIndex();
+            recoveryLog.setFirstJournalIndex(firstIndex);
 
             var journalIndex = firstIndex;
             var journalEntry = reader.nextEntry();
@@ -77,7 +80,7 @@ final class JournalRecovery<T extends State> extends Recovery<T> {
                     writeEntry(entry);
                     recoverEntry(entry);
                 }
-                return 1;
+                return;
             }
 
             // Iterate over both pekkoLog and reader to ensure any entries match.
@@ -121,8 +124,6 @@ final class JournalRecovery<T extends State> extends Recovery<T> {
                 journalIndex = reader.nextJournalIndex();
                 journalEntry = reader.nextEntry();
             }
-
-            return firstIndex;
         }
     }
 
@@ -144,7 +145,10 @@ final class JournalRecovery<T extends State> extends Recovery<T> {
 
     @Override
     void onSnapshotSaved() {
-        // FIXME: implement this
-        // journal.discardHead(recoveryLog.firstJournalIndex());
+        try {
+            journal.discardHead(recoveryLog.firstJournalIndex());
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 }
