@@ -84,7 +84,6 @@ import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotStat
 import org.opendaylight.controller.cluster.datastore.utils.MockDataTreeChangeListener;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListener;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListenerReply;
-import org.opendaylight.controller.cluster.raft.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.MessageCollectorActor;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
@@ -95,11 +94,11 @@ import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftS
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
-import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
-import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DecoratingRaftCallback;
+import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
+import org.opendaylight.controller.cluster.raft.spi.EntryJournalV1;
 import org.opendaylight.controller.cluster.raft.spi.ForwardingSnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
@@ -112,6 +111,7 @@ import org.opendaylight.mdsal.common.api.TransactionCommitFailedException;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.EntryMeta;
 import org.opendaylight.raft.api.TermInfo;
+import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
@@ -126,9 +126,6 @@ import org.opendaylight.yangtools.yang.data.tree.api.SchemaValidationFailedExcep
 import org.opendaylight.yangtools.yang.data.tree.impl.di.InMemoryDataTreeFactory;
 
 public class ShardTest extends AbstractShardTest {
-    private static final String DUMMY_DATA = "Dummy data as snapshot sequence number is set to 0 in "
-            + "InMemorySnapshotStore and journal recovery seq number will start from 1";
-
     @Test
     public void testRegisterDataTreeChangeListener() throws Exception {
         final ShardTestKit testKit = new ShardTestKit(getSystem());
@@ -297,35 +294,38 @@ public class ShardTest extends AbstractShardTest {
 
     @Test
     public void testDataTreeCandidateRecovery() throws Exception {
+        final var memberId = shardID.toString();
+        final var listEntryKeys = new HashSet<Integer>();
+        final var path = stateDir().resolve("shards").resolve(memberId);
+
         // Set up the InMemorySnapshotStore.
         final DataTree source = setupInMemorySnapshotStore();
 
-        final DataTreeModification writeMod = source.takeSnapshot().newModification();
-        writeMod.write(TestModel.OUTER_LIST_PATH, TestModel.EMPTY_OUTER_LIST);
-        writeMod.ready();
-        InMemoryJournal.addEntry(shardID.toString(), 0, DUMMY_DATA);
+        // Set up the segmented journal
+        try (var journal = new EntryJournalV1(memberId, path, CompressionType.NONE, true)) {
+            final DataTreeModification writeMod = source.takeSnapshot().newModification();
+            writeMod.write(TestModel.OUTER_LIST_PATH, TestModel.EMPTY_OUTER_LIST);
+            writeMod.ready();
 
-        // Set up the InMemoryJournal.
-        InMemoryJournal.addEntry(shardID.toString(), 1, new SimpleReplicatedLogEntry(0, 1,
-            payloadForModification(source, writeMod, nextTransactionId())));
+            journal.appendEntry(new DefaultLogEntry(0, 1,
+                payloadForModification(source, writeMod, nextTransactionId())));
 
-        final int nListEntries = 16;
-        final var listEntryKeys = new HashSet<Integer>();
+            final int nListEntries = 16;
 
-        // Add some ModificationPayload entries
-        for (int i = 1; i <= nListEntries; i++) {
-            listEntryKeys.add(i);
+            // Add some ModificationPayload entries
+            for (int i = 1; i <= nListEntries; i++) {
+                listEntryKeys.add(i);
 
-            final var mod = source.takeSnapshot().newModification();
-            mod.merge(TestModel.outerEntryPath(i), TestModel.outerEntry(i));
-            mod.ready();
+                final var mod = source.takeSnapshot().newModification();
+                mod.merge(TestModel.outerEntryPath(i), TestModel.outerEntry(i));
+                mod.ready();
 
-            InMemoryJournal.addEntry(shardID.toString(), i + 1, new SimpleReplicatedLogEntry(i, 1,
-                payloadForModification(source, mod, nextTransactionId())));
+                journal.appendEntry(new DefaultLogEntry(i, 1,
+                    payloadForModification(source, mod, nextTransactionId())));
+            }
+
+            journal.setApplyTo(nListEntries + 1);
         }
-
-        InMemoryJournal.addEntry(shardID.toString(), nListEntries + 2,
-            new ApplyJournalEntries(nListEntries));
 
         testRecovery(listEntryKeys, true);
     }
