@@ -116,7 +116,6 @@ public abstract sealed class RaftStorage implements EntryStore, SnapshotStore
     private static final HexFormat HF = HexFormat.of().withUpperCase();
     private static final String FILENAME_START_STR = "snapshot-";
 
-
     protected final @NonNull ExecuteInSelfActor actor;
     protected final @NonNull CompressionType compression;
     protected final @NonNull String memberId;
