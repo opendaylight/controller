@@ -21,6 +21,7 @@ import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage;
 import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
+import org.opendaylight.controller.cluster.raft.spi.EntryJournal;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.RaftStorage;
 import org.opendaylight.raft.api.EntryInfo;
@@ -49,7 +50,7 @@ final class PersistenceControl extends PersistenceProvider {
     PersistenceControl(final RaftActor raftActor, final Path directory, final CompressionType compression,
             final Configuration streamConfig) {
         this(new DisabledRaftStorage(raftActor.memberId(), raftActor, directory, compression, streamConfig),
-            new PekkoRaftStorage(raftActor, directory, compression, streamConfig));
+            new PekkoRaftStorage(raftActor, directory, compression, streamConfig, false));
     }
 
     void start() throws IOException {
@@ -69,6 +70,13 @@ final class PersistenceControl extends PersistenceProvider {
 
     boolean isRecoveryApplicable() {
         return storage instanceof EnabledRaftStorage;
+    }
+
+    /**
+     * {@return the underlying EntryJournal, if available}
+     */
+    @Nullable EntryJournal journal() {
+        return storage instanceof EnabledRaftStorage enabled ? enabled.journal() : null;
     }
 
     @Override
