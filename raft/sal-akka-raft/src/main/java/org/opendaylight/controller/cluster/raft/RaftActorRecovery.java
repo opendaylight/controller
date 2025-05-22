@@ -97,11 +97,12 @@ class RaftActorRecovery {
     private final @NonNull RaftActorRecoveryCohort cohort;
     private final @Nullable TermInfo origTermInfo;
     private final @Nullable SnapshotFile origSnapshot;
+    private final int snapshotInterval;
+    private final int batchSize;
 
     private int currentRecoveryBatchCount;
     private boolean anyDataRecovered;
     private boolean hasMigratedDataRecovered;
-
     private Stopwatch recoveryTimer;
     private Stopwatch recoverySnapshotTimer;
 
@@ -111,6 +112,10 @@ class RaftActorRecovery {
         this.context = requireNonNull(context);
         this.cohort = requireNonNull(cohort);
         origTermInfo = actor.localAccess().termInfoStore().loadAndSetTerm();
+
+        final var configParams = context.getConfigParams();
+        snapshotInterval = configParams.getRecoverySnapshotIntervalSeconds();
+        batchSize = configParams.getJournalRecoveryLogBatchSize();
 
         final var loaded = context.snapshotStore().lastSnapshot();
         if (loaded != null) {
@@ -177,7 +182,7 @@ class RaftActorRecovery {
         if (recoveryTimer == null) {
             recoveryTimer = Stopwatch.createStarted();
         }
-        if (recoverySnapshotTimer == null && context.getConfigParams().getRecoverySnapshotIntervalSeconds() > 0) {
+        if (recoverySnapshotTimer == null && snapshotInterval > 0) {
             recoverySnapshotTimer = Stopwatch.createStarted();
         }
     }
@@ -323,7 +328,6 @@ class RaftActorRecovery {
     }
 
     private void batchRecoveredCommand(final StateCommand command) {
-        int batchSize = context.getConfigParams().getJournalRecoveryLogBatchSize();
         if (currentRecoveryBatchCount == 0) {
             cohort.startLogRecoveryBatch(batchSize);
         }
@@ -348,8 +352,7 @@ class RaftActorRecovery {
     }
 
     private boolean shouldTakeRecoverySnapshot() {
-        return recoverySnapshotTimer != null && recoverySnapshotTimer.elapsed(TimeUnit.SECONDS)
-            >= context.getConfigParams().getRecoverySnapshotIntervalSeconds();
+        return recoverySnapshotTimer != null && recoverySnapshotTimer.elapsed(TimeUnit.SECONDS) >= snapshotInterval;
     }
 
     private void endCurrentLogRecoveryBatch() {
