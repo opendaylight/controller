@@ -15,6 +15,7 @@ import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.cluster.raft.SnapshotManager.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.EntryMeta;
@@ -343,6 +344,39 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
 
         snapshotTerm = previousSnapshotTerm;
         previousSnapshotTerm = -1;
+    }
+
+    @Override
+    public final @NonNull CaptureSnapshot newCaptureSnapshot(final EntryMeta lastLogEntry,
+            final long replicatedToAllIndex, final boolean mandatoryTrim, final boolean hasFollowers) {
+        final var lastAppliedEntry = AbstractReplicatedLog.computeLastAppliedEntry(this, getLastApplied(), lastLogEntry,
+            hasFollowers);
+
+        final var entry = get(replicatedToAllIndex);
+        final var replicatedToAllEntry = entry != null ? entry : EntryInfo.of(-1, -1);
+
+        long lastAppliedIndex = lastAppliedEntry.index();
+        long lastAppliedTerm = lastAppliedEntry.term();
+
+        final var unAppliedEntries = getFrom(lastAppliedIndex + 1);
+
+        final long lastLogEntryIndex;
+        final long lastLogEntryTerm;
+        if (lastLogEntry == null) {
+            // When we don't have journal present, for example two captureSnapshots executed right after another with no
+            // new journal we still want to preserve the index and term in the snapshot.
+            lastAppliedIndex = lastLogEntryIndex = getSnapshotIndex();
+            lastAppliedTerm = lastLogEntryTerm = getSnapshotTerm();
+
+            LOG.debug("{}: Capturing Snapshot : lastLogEntry is null. Using snapshot values lastAppliedIndex {} and "
+                + "lastAppliedTerm {} instead.", memberId, lastAppliedIndex, lastAppliedTerm);
+        } else {
+            lastLogEntryIndex = lastLogEntry.index();
+            lastLogEntryTerm = lastLogEntry.term();
+        }
+
+        return new CaptureSnapshot(lastLogEntryIndex, lastLogEntryTerm, lastAppliedIndex, lastAppliedTerm,
+            replicatedToAllEntry.index(), replicatedToAllEntry.term(), unAppliedEntries, mandatoryTrim);
     }
 
     @VisibleForTesting

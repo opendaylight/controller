@@ -15,6 +15,7 @@ import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.cluster.raft.SnapshotManager.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.raft.api.EntryMeta;
@@ -385,4 +386,14 @@ public interface ReplicatedLog {
      * @param snapshot snapshot to reset to
      */
     void resetToSnapshot(@NonNull Snapshot snapshot);
+
+    /**
+     * Constructs a CaptureSnapshot instance.
+     *
+     * @param lastLogEntry the last log entry for the snapshot.
+     * @param replicatedToAllIndex the index of the last entry replicated to all followers.
+     * @return a new CaptureSnapshot instance.
+     */
+    @NonNull CaptureSnapshot newCaptureSnapshot(EntryMeta lastLogEntry, long replicatedToAllIndex,
+        boolean mandatoryTrim, boolean hasFollowers);
 }
