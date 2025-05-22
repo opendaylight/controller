@@ -12,6 +12,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doReturn;
@@ -64,7 +65,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     @Mock
     private ConfigParams mockConfigParams;
     @Mock
-    private ReplicatedLog mockReplicatedLog;
+    private AbstractReplicatedLog mockReplicatedLog;
     @Mock
     private DataPersistenceProvider mockDataPersistenceProvider;
     @Mock
@@ -100,6 +101,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         doReturn(mockDataPersistenceProvider).when(mockRaftActorContext).entryStore();
         doReturn(mockDataPersistenceProvider).when(mockRaftActorContext).snapshotStore();
         doReturn(mockRaftActorBehavior).when(mockRaftActorContext).getCurrentBehavior();
+        doCallRealMethod().when(mockReplicatedLog).newCaptureSnapshot(any(), anyLong(), anyBoolean(), anyBoolean());
 
         snapshotManager = new SnapshotManager(mockRaftActorContext);
         factory = new TestActorFactory(getSystem());

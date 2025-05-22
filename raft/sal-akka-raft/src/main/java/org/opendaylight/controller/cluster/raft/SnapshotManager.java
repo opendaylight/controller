@@ -344,6 +344,12 @@ public final class SnapshotManager {
         return true;
     }
 
+    private @NonNull CaptureSnapshot newCaptureSnapshot(final EntryMeta lastLogEntry, final long replicatedToAllIndex,
+            final boolean mandatoryTrim) {
+        return context.getReplicatedLog().newCaptureSnapshot(lastLogEntry, replicatedToAllIndex, mandatoryTrim,
+            context.hasFollowers());
+    }
+
     /**
      * Applies a snapshot on a follower that was installed by the leader.
      *
@@ -668,45 +674,5 @@ public final class SnapshotManager {
             case PersistCapture persist -> persist.request;
             default -> null;
         };
-    }
-
-    /**
-     * Constructs a CaptureSnapshot instance.
-     *
-     * @param lastLogEntry the last log entry for the snapshot.
-     * @param replicatedToAllIndex the index of the last entry replicated to all followers.
-     * @return a new CaptureSnapshot instance.
-     */
-    @NonNull CaptureSnapshot newCaptureSnapshot(final EntryMeta lastLogEntry, final long replicatedToAllIndex,
-            final boolean mandatoryTrim) {
-        final var replLog = context.getReplicatedLog();
-        final var lastAppliedEntry = AbstractReplicatedLog.computeLastAppliedEntry(replLog, replLog.getLastApplied(),
-            lastLogEntry, context.hasFollowers());
-
-        final var entry = replLog.get(replicatedToAllIndex);
-        final var replicatedToAllEntry = entry != null ? entry : EntryInfo.of(-1, -1);
-
-        long lastAppliedIndex = lastAppliedEntry.index();
-        long lastAppliedTerm = lastAppliedEntry.term();
-
-        final var unAppliedEntries = replLog.getFrom(lastAppliedIndex + 1);
-
-        final long lastLogEntryIndex;
-        final long lastLogEntryTerm;
-        if (lastLogEntry == null) {
-            // When we don't have journal present, for example two captureSnapshots executed right after another with no
-            // new journal we still want to preserve the index and term in the snapshot.
-            lastAppliedIndex = lastLogEntryIndex = replLog.getSnapshotIndex();
-            lastAppliedTerm = lastLogEntryTerm = replLog.getSnapshotTerm();
-
-            LOG.debug("{}: Capturing Snapshot : lastLogEntry is null. Using snapshot values lastAppliedIndex {} and "
-                    + "lastAppliedTerm {} instead.", memberId(), lastAppliedIndex, lastAppliedTerm);
-        } else {
-            lastLogEntryIndex = lastLogEntry.index();
-            lastLogEntryTerm = lastLogEntry.term();
-        }
-
-        return new CaptureSnapshot(lastLogEntryIndex, lastLogEntryTerm, lastAppliedIndex, lastAppliedTerm,
-            replicatedToAllEntry.index(), replicatedToAllEntry.term(), unAppliedEntries, mandatoryTrim);
     }
 }
