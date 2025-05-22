@@ -131,9 +131,9 @@ class RaftActorRecoveryTest {
 
     @Test
     void testOnApplyJournalEntries() throws Exception {
-        recovery = support.recoverToPersistent();
-
         configParams.setJournalRecoveryLogBatchSize(5);
+
+        recovery = support.recoverToPersistent();
 
         final var replicatedLog = context.getReplicatedLog();
         replicatedLog.append(new SimpleReplicatedLogEntry(0, 1, new MockCommand("0")));
@@ -177,12 +177,14 @@ class RaftActorRecoveryTest {
     }
 
     @Test
+    // FIXME: inject a Ticker and eliminate explicit sleeps
     void testIncrementalRecovery() throws Exception {
+        int recoverySnapshotInterval = 3;
+        configParams.setRecoverySnapshotIntervalSeconds(recoverySnapshotInterval);
+
         recovery = support.recoverToPersistent();
 
-        int recoverySnapshotInterval = 3;
         int numberOfEntries = 5;
-        configParams.setRecoverySnapshotIntervalSeconds(recoverySnapshotInterval);
         context.getSnapshotManager().setSnapshotCohort(mockSnapshotCohort);
         doReturn(new MockSnapshotState(List.of())).when(mockSnapshotCohort).takeSnapshot();
 
