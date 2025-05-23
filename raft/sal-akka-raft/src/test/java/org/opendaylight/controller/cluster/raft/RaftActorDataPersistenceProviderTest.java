@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -77,7 +76,7 @@ class RaftActorDataPersistenceProviderTest {
 
         provider.persistEntry(mockPersistentLogEntry, mockCallback);
 
-        verify(mockEnabledStorage).persistVotingConfig(eq(PERSISTENT_PAYLOAD), callbackCaptor.capture());
+//        verify(mockEnabledStorage).persistVotingConfig(eq(PERSISTENT_PAYLOAD), callbackCaptor.capture());
         verify(mockDisabledStorage, never()).persistEntry(mockNonPersistentLogEntry, mockCallback);
         callbackCaptor.getValue().accept(PERSISTENT_PAYLOAD);
         verify(mockCallback).accept(mockPersistentLogEntry);

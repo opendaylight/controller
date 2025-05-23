@@ -8,11 +8,9 @@
 package org.opendaylight.controller.cluster.raft.spi;
 
 import java.nio.file.Path;
-import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.opendaylight.controller.cluster.raft.RaftActor;
-import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
 
@@ -30,24 +28,4 @@ public abstract non-sealed class EnabledRaftStorage extends RaftStorage {
     public final boolean isRecoveryApplicable() {
         return true;
     }
-
-    /**
-     * Persists a {@link VotingConfig} to the applicable journal synchronously. The contract is that the callback will
-     * be invoked before {@link RaftActor} sees any other message.
-     *
-     * @param votingConfig the configuration to persist
-     * @param callback the callback when persistence is complete
-     */
-    // FIXME: without callback and throwing IOException
-    public abstract void persistVotingConfig(VotingConfig votingConfig, Consumer<VotingConfig> callback);
-
-    /**
-     * Persists a {@link VotingConfig} to the applicable journal synchronously. The contract is that the callback will
-     * be invoked before {@link RaftActor} sees any other message.
-     *
-     * @param votingConfig the configuration to persist
-     * @param callback the callback when persistence is complete
-     */
-    // FIXME: Callback<ReplicatedLogEntry> instead of Consumer
-    public abstract void startPersistVotingConfig(VotingConfig votingConfig, Consumer<VotingConfig> callback);
 }

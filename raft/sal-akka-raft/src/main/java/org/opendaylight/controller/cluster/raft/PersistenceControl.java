@@ -98,25 +98,6 @@ final class PersistenceControl extends ForwardingDataPersistenceProvider {
         this.delegate = requireNonNull(delegate);
     }
 
-    @Override
-    public void persistEntry(final ReplicatedLogEntry entry, final Consumer<ReplicatedLogEntry> callback) {
-        if (!delegate.isRecoveryApplicable() && entry.command() instanceof VotingConfig votingConfig) {
-            requireNonNull(callback);
-            enabledStorage.persistVotingConfig(votingConfig, unused -> callback.accept(entry));
-        } else {
-            delegate.persistEntry(entry, callback);
-        }
-    }
-
-    @Override
-    public void startPersistEntry(final ReplicatedLogEntry entry, final Consumer<ReplicatedLogEntry> callback) {
-        if (!delegate.isRecoveryApplicable() && entry.command() instanceof VotingConfig votingConfig) {
-            enabledStorage.startPersistVotingConfig(votingConfig, unused -> callback.accept(entry));
-        } else {
-            delegate.startPersistEntry(entry, callback);
-        }
-    }
-
     void saveVotingConfig(final @Nullable VotingConfig votingConfig) throws IOException {
         enabledStorage.saveSnapshot(new RaftSnapshot(votingConfig, List.of()), EntryInfo.of(-1, -1), null,
             Instant.now());
