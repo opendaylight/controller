@@ -42,7 +42,6 @@ import org.apache.pekko.actor.Status.Failure;
 import org.apache.pekko.dispatch.Dispatchers;
 import org.apache.pekko.japi.Creator;
 import org.apache.pekko.testkit.TestActorRef;
-import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -103,7 +102,7 @@ import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.ForwardingDataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
-import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
@@ -1478,12 +1477,10 @@ public class ShardTest extends AbstractShardTest {
 
                 overridePersistence((delegate, actor) -> new ForwardingDataPersistenceProvider() {
                     @Override
-                    @NonNullByDefault
-                    public <T extends StateSnapshot> void saveSnapshot(final RaftSnapshot raftSnapshot,
-                            final EntryInfo lastIncluded, final T snapshot, final StateSnapshot.Writer<T> writer,
-                            final RaftCallback<Instant> callback) {
-                        savedSnapshot.set(assertInstanceOf(ShardSnapshotState.class, snapshot));
-                        super.saveSnapshot(raftSnapshot, lastIncluded, snapshot, writer, (failure, success) -> {
+                    public void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
+                            final ToStorage<?> snapshot, final RaftCallback<Instant> callback) {
+                        savedSnapshot.set(assertInstanceOf(ShardSnapshotState.class, snapshot.snapshot()));
+                        super.saveSnapshot(raftSnapshot, lastIncluded, snapshot, (failure, success) -> {
                             callback.invoke(failure, success);
                             if (failure == null) {
                                 latch.get().countDown();
