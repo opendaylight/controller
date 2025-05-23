@@ -19,7 +19,7 @@ import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.opendaylight.controller.cluster.raft.spi.ImmediateDataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
-import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.ByteArray;
 import org.opendaylight.raft.spi.InstallableSnapshot;
@@ -45,23 +45,23 @@ public final class TestDataProvider implements ImmediateDataPersistenceProvider 
     }
 
     @Override
-    public <T extends StateSnapshot> void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
-            final @Nullable T snapshot, final StateSnapshot.Writer<T> writer, final RaftCallback<Instant> callback) {
+    public void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
+            final @Nullable ToStorage<?> snapshot, final RaftCallback<Instant> callback) {
         // no-op
     }
 
     @Override
-    public <T extends StateSnapshot> void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
-            final @Nullable T snapshot, final StateSnapshot.Writer<T> writer, final Instant timestamp) {
+    public void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
+            final @Nullable ToStorage<?> snapshot, final Instant timestamp) {
         // no-op
     }
 
     @Override
-    public <T extends StateSnapshot> void streamToInstall(final EntryInfo lastIncluded, final T snapshot,
-            final StateSnapshot.Writer<T> writer, final RaftCallback<InstallableSnapshot> callback) {
+    public void streamToInstall(final EntryInfo lastIncluded, final ToStorage<?> snapshot,
+            final RaftCallback<InstallableSnapshot> callback) {
         final byte[] bytes;
         try (var baos = new ByteArrayOutputStream()) {
-            writer.writeSnapshot(snapshot, baos);
+            snapshot.writeTo(baos);
             bytes = baos.toByteArray();
         } catch (IOException e) {
             actor.executeInSelf(() -> callback.invoke(e, null));

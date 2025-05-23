@@ -39,6 +39,7 @@ import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.FileStreamSource;
@@ -137,8 +138,7 @@ final class SnapshotFileV1 implements SnapshotFile {
     static <T extends StateSnapshot> Closeable createNew(final Path file, final Instant timestamp,
             final EntryInfo lastIncluded, final @Nullable VotingConfig votingConfig,
             final CompressionType entryCompress, final List<ReplicatedLogEntry> unappliedEntries,
-            final CompressionType stateCompress, final StateSnapshot.Writer<T> stateWriter, final @Nullable T state)
-                throws IOException {
+            final CompressionType stateCompress, final @Nullable ToStorage<?> state) throws IOException {
         final var entryFormat = computeFormat(entryCompress, "entry");
         final var stateFormat = computeFormat(stateCompress, "state");
 
@@ -201,14 +201,14 @@ final class SnapshotFileV1 implements SnapshotFile {
                 if (state != null) {
                     // emit state
                     try (var eos = stateCompress.encodeOutput(dos)) {
-                        stateWriter.writeSnapshot(state, eos);
+                        state.writeTo(eos);
                     }
 
                     // record limit
                     dos.flush();
                     limit = fc.position();
                     if (limit == sso) {
-                        throw new IOException("Writer " + stateWriter + " did not emit any bytes for " + state);
+                        throw new IOException(state + " did not emit any bytes");
                     }
                 } else {
                     limit = sso;

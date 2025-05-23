@@ -16,6 +16,7 @@ import org.apache.pekko.persistence.SnapshotProtocol;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.InstallableSnapshot;
 
@@ -65,22 +66,21 @@ public abstract class ForwardingDataPersistenceProvider implements DataPersisten
     }
 
     @Override
-    public <T extends StateSnapshot> void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
-            final @Nullable T snapshot, final StateSnapshot.Writer<T> writer, final RaftCallback<Instant> callback) {
-        delegate().saveSnapshot(raftSnapshot, lastIncluded, snapshot, writer, callback);
+    public void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
+            final @Nullable ToStorage<?> snapshot, final RaftCallback<Instant> callback) {
+        delegate().saveSnapshot(raftSnapshot, lastIncluded, snapshot, callback);
     }
 
     @Override
-    public <T extends StateSnapshot> void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
-            final @Nullable T snapshot, final StateSnapshot.Writer<T> writer,  final Instant timestamp)
-                throws IOException {
-        delegate().saveSnapshot(raftSnapshot, lastIncluded, snapshot, writer, timestamp);
+    public void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
+            final @Nullable ToStorage<?> snapshot, final Instant timestamp) throws IOException {
+        delegate().saveSnapshot(raftSnapshot, lastIncluded, snapshot, timestamp);
     }
 
     @Override
-    public <T extends StateSnapshot> void streamToInstall(final EntryInfo lastIncluded, final T snapshot,
-            final StateSnapshot.Writer<T> writer, final RaftCallback<InstallableSnapshot> callback) {
-        delegate().streamToInstall(lastIncluded, snapshot, writer, callback);
+    public void streamToInstall(final EntryInfo lastIncluded, final ToStorage<?> snapshot,
+            final RaftCallback<InstallableSnapshot> callback) {
+        delegate().streamToInstall(lastIncluded, snapshot, callback);
     }
 
     @Override

@@ -24,6 +24,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.FileBackedOutputStream;
@@ -83,24 +84,22 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
     }
 
     @NonNullByDefault
-    private final class StreamSnapshotTask<S extends StateSnapshot> extends CancellableTask<InstallableSnapshot> {
-        private final StateSnapshot.Writer<S> writer;
+    private final class StreamSnapshotTask extends CancellableTask<InstallableSnapshot> {
         private final EntryInfo lastIncluded;
-        private final S snapshot;
+        private final ToStorage<?> snapshot;
 
         StreamSnapshotTask(final RaftCallback<InstallableSnapshot> callback, final EntryInfo lastIncluded,
-                final S snapshot, final StateSnapshot.Writer<S> writer) {
+                final ToStorage<?> snapshot) {
             super(callback);
             this.lastIncluded = requireNonNull(lastIncluded);
             this.snapshot = requireNonNull(snapshot);
-            this.writer = requireNonNull(writer);
         }
 
         @Override
         protected InstallableSnapshot compute() throws IOException {
             try (var outer = new FileBackedOutputStream(streamConfig)) {
                 try (var inner = compression.encodeOutput(outer)) {
-                    writer.writeSnapshot(snapshot, inner);
+                    snapshot.writeTo(inner);
                 }
                 return new InstallableSnapshotSource(lastIncluded, compression.nativeSource(outer.toStreamSource()));
             }
@@ -187,9 +186,9 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
 
     @Override
     @NonNullByDefault
-    public final <T extends StateSnapshot> void streamToInstall(final EntryInfo lastIncluded, final T snapshot,
-            final StateSnapshot.Writer<T> writer, final RaftCallback<InstallableSnapshot> callback) {
-        submitTask(new StreamSnapshotTask<>(callback, lastIncluded, snapshot, writer));
+    public final void streamToInstall(final EntryInfo lastIncluded, final ToStorage<?> snapshot,
+            final RaftCallback<InstallableSnapshot> callback) {
+        submitTask(new StreamSnapshotTask(callback, lastIncluded, snapshot));
     }
 
     protected final void submitTask(final @NonNull CancellableTask<?> task) {

@@ -23,7 +23,6 @@ import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage;
 import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
 import org.opendaylight.controller.cluster.raft.spi.ForwardingDataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
-import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
@@ -118,9 +117,8 @@ final class PersistenceControl extends ForwardingDataPersistenceProvider {
         }
     }
 
-    void saveVotingConfig(final @Nullable VotingConfig votingConfig, final StateSnapshot.Writer<?> writer)
-            throws IOException {
-        enabledStorage.saveSnapshot(new RaftSnapshot(votingConfig, List.of()), EntryInfo.of(-1, -1), null, writer,
+    void saveVotingConfig(final @Nullable VotingConfig votingConfig) throws IOException {
+        enabledStorage.saveSnapshot(new RaftSnapshot(votingConfig, List.of()), EntryInfo.of(-1, -1), null,
             Instant.now());
     }
 }
