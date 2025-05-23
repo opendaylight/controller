@@ -13,6 +13,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.opendaylight.controller.cluster.raft.MessageCollectorActor.assertNoneMatching;
 import static org.opendaylight.controller.cluster.raft.MessageCollectorActor.clearMessages;
 import static org.opendaylight.controller.cluster.raft.MessageCollectorActor.expectFirstMatching;
@@ -141,7 +142,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     }
 
     @Test
-    public void testAddServerWithExistingFollower() {
+    public void testAddServerWithExistingFollower() throws Exception {
         LOG.info("testAddServerWithExistingFollower starting");
         setupNewFollower();
         final var followerActorContext = newFollowerContext(FOLLOWER_ID, followerActor);
@@ -217,15 +218,26 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         assertEquals("New follower commit index", 3, newFollowerLog.getCommitIndex());
         assertEquals("New follower last applied index", 3, newFollowerLog.getLastApplied());
 
-        assertEquals("Leader persisted ReplicatedLogImplEntry entries", 0,
-                InMemoryJournal.get(LEADER_ID, SimpleReplicatedLogEntry.class).size());
-        assertEquals("Leader persisted ServerConfigurationPayload entries", 1,
-                InMemoryJournal.get(LEADER_ID, VotingConfig.class).size());
+        assertEquals("Leader persisted ReplicatedLogImplEntry entries", List.of(),
+                InMemoryJournal.get(LEADER_ID, SimpleReplicatedLogEntry.class));
+        assertEquals("Leader persisted ServerConfigurationPayload entries", List.of(),
+                InMemoryJournal.get(LEADER_ID, VotingConfig.class));
 
-        assertEquals("New follower persisted ReplicatedLogImplEntry entries", 0,
-                InMemoryJournal.get(NEW_SERVER_ID, SimpleReplicatedLogEntry.class).size());
-        assertEquals("New follower persisted ServerConfigurationPayload entries", 1,
-                InMemoryJournal.get(NEW_SERVER_ID, VotingConfig.class).size());
+        final var lastLeaderSnapshot = leaderRaftActor.persistence().lastSnapshot();
+        assertNotNull(lastLeaderSnapshot);
+        assertEquals(new VotingConfig(votingServer(FOLLOWER_ID), votingServer(NEW_SERVER_ID), votingServer(LEADER_ID)),
+            lastLeaderSnapshot.readRaftSnapshot().votingConfig());
+
+        assertEquals("New follower persisted ReplicatedLogImplEntry entries", List.of(),
+                InMemoryJournal.get(NEW_SERVER_ID, SimpleReplicatedLogEntry.class));
+        assertEquals("New follower persisted ServerConfigurationPayload entries", List.of(),
+                InMemoryJournal.get(NEW_SERVER_ID, VotingConfig.class));
+
+        final var lastNewFollowerSnapshot = newFollowerRaftActor.underlyingActor().persistence().lastSnapshot();
+        assertNotNull(lastNewFollowerSnapshot);
+
+        assertEquals(new VotingConfig(votingServer(FOLLOWER_ID), votingServer(NEW_SERVER_ID), votingServer(LEADER_ID)),
+            lastNewFollowerSnapshot.readRaftSnapshot().votingConfig());
 
         LOG.info("testAddServerWithExistingFollower ending");
     }

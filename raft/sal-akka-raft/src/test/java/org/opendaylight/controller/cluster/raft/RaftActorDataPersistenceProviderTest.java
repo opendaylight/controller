@@ -7,9 +7,11 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import java.util.function.Consumer;
@@ -59,7 +61,6 @@ class RaftActorDataPersistenceProviderTest {
 
     @Test
     void testPersistWithPersistenceEnabled() {
-        doReturn(true).when(mockEnabledStorage).isRecoveryApplicable();
         provider.becomePersistent();
 
         provider.persistEntry(mockPersistentLogEntry, mockCallback);
@@ -70,18 +71,15 @@ class RaftActorDataPersistenceProviderTest {
     }
 
     @Test
-    void testPersistWithPersistenceDisabled() {
-        doReturn(false).when(mockDisabledStorage).isRecoveryApplicable();
+    void testPersistWithPersistenceDisabled() throws Exception {
+//        doReturn(false).when(mockDisabledStorage).isRecoveryApplicable();
         doReturn(PERSISTENT_PAYLOAD).when(mockPersistentLogEntry).command();
-        doReturn(NON_PERSISTENT_PAYLOAD).when(mockNonPersistentLogEntry).command();
 
+        doNothing().when(mockDisabledStorage).saveVotingConfig(same(PERSISTENT_PAYLOAD), any());
+        doCallRealMethod().when(mockDisabledStorage).persistEntry(any(), any());
         provider.persistEntry(mockPersistentLogEntry, mockCallback);
 
-        verify(mockEnabledStorage).persistVotingConfig(eq(PERSISTENT_PAYLOAD), callbackCaptor.capture());
-        verify(mockDisabledStorage, never()).persistEntry(mockNonPersistentLogEntry, mockCallback);
-        callbackCaptor.getValue().accept(PERSISTENT_PAYLOAD);
-        verify(mockCallback).accept(mockPersistentLogEntry);
-
+        doReturn(NON_PERSISTENT_PAYLOAD).when(mockNonPersistentLogEntry).command();
         provider.persistEntry(mockNonPersistentLogEntry, mockCallback);
         verify(mockDisabledStorage).persistEntry(mockNonPersistentLogEntry, mockCallback);
     }

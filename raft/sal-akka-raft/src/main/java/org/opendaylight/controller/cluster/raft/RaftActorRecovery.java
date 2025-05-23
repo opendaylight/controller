@@ -444,5 +444,4 @@ class RaftActorRecovery {
     private static boolean isMigratedSerializable(final Object message) {
         return message instanceof MigratedSerializable migrated && migrated.isMigrated();
     }
-
 }

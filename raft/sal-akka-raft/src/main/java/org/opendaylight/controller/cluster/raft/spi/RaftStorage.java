@@ -14,6 +14,12 @@ import com.google.common.base.MoreObjects.ToStringHelper;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.time.Instant;
+import java.util.Comparator;
+import java.util.HexFormat;
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -107,6 +113,9 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(RaftStorage.class);
+    private static final HexFormat HF = HexFormat.of().withUpperCase();
+    private static final String FILENAME_START_STR = "snapshot-";
+
 
     protected final @NonNull ExecuteInSelfActor executeInSelf;
     protected final @NonNull CompressionType compression;
@@ -184,11 +193,98 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
 
     protected abstract void preStop();
 
+
+    @Override
+    public final @Nullable SnapshotFile lastSnapshot() throws IOException {
+        final var files = listFiles();
+        if (files.isEmpty()) {
+            LOG.debug("{}: no eligible files found", memberId);
+            return null;
+        }
+
+        final var first = files.getLast();
+        LOG.debug("{}: picked {} as the latest file", memberId, first);
+        return first;
+    }
+
     @Override
     @NonNullByDefault
     public final void streamToInstall(final EntryInfo lastIncluded, final ToStorage<?> snapshot,
             final RaftCallback<InstallableSnapshot> callback) {
         submitTask(new StreamSnapshotTask(callback, lastIncluded, snapshot));
+    }
+
+    @Override
+    public final void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
+            final @Nullable ToStorage<?> snapshot, final RaftCallback<Instant> callback) {
+        requireNonNull(raftSnapshot);
+        requireNonNull(lastIncluded);
+
+        // Allocate before enqueuing to allow multiple snapshots to work concurrently and still get the right results
+        final var timestamp = Instant.now();
+
+        submitTask(new CancellableTask<>(callback) {
+            @Override
+            protected Instant compute() throws IOException {
+                saveSnapshot(raftSnapshot, lastIncluded, snapshot, timestamp);
+                return timestamp;
+            }
+        });
+    }
+
+    @Override
+    public void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
+            final @Nullable ToStorage<?> snapshot, final Instant timestamp) throws IOException {
+        final var format = SnapshotFileFormat.latest();
+        final var baseName = new StringBuilder()
+            .append(FILENAME_START_STR)
+            .append(HF.toHexDigits(timestamp.getEpochSecond()))
+            .append('-')
+            .append(HF.toHexDigits(timestamp.getNano()));
+
+        final var tmpPath = directory.resolve(baseName + ".tmp");
+        final var filePath = directory.resolve(baseName + format.extension());
+
+        LOG.debug("{}: starting snapshot writeout to {}", memberId, tmpPath);
+
+        try {
+            format.createNew(tmpPath, timestamp, lastIncluded, raftSnapshot.votingConfig(), compression,
+                raftSnapshot.unappliedEntries(), compression, snapshot).close();
+            Files.move(tmpPath, filePath, StandardCopyOption.ATOMIC_MOVE);
+        } catch (IOException e) {
+            Files.deleteIfExists(tmpPath);
+            throw e;
+        }
+
+        LOG.debug("{}: finished snapshot writeout to {}", memberId, filePath);
+    }
+
+    @Override
+    public final void retainSnapshots(final Instant firstRetained) {
+        final List<SnapshotFile> files;
+        try {
+            files = listFiles();
+        } catch (IOException e) {
+            LOG.warn("{}: failed to list snapshots, will retry next time", memberId, e);
+            return;
+        }
+
+        for (var file : files) {
+            if (firstRetained.compareTo(file.timestamp()) <= 0) {
+                LOG.debug("{}: retaining snapshot {}", memberId, file);
+                break;
+            }
+
+            try {
+                // we should not have concurrent access, but it is okay if the file disappears independently
+                Files.deleteIfExists(file.path());
+            } catch (IOException e) {
+                LOG.warn("{}: failed to delete snapshot {}, will retry next time", memberId, file, e);
+                continue;
+            }
+
+            LOG.debug("{}: deleted snapshot {}", memberId, file);
+        }
     }
 
     protected final void submitTask(final @NonNull CancellableTask<?> task) {
@@ -216,5 +312,51 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
             throw new IllegalStateException("Storage " + memberId + " already stopped");
         }
         return local;
+    }
+
+    // Ordered by ascending timestamp, i.e. oldest snapshot first
+    private List<SnapshotFile> listFiles() throws IOException {
+        if (!Files.exists(directory)) {
+            LOG.debug("{}: directory {} does not exist", memberId, directory);
+            return List.of();
+        }
+
+        final List<SnapshotFile> ret;
+        try (var paths = Files.list(directory)) {
+            ret = paths.map(this::pathToFile).filter(Objects::nonNull)
+                .sorted(Comparator.comparing(SnapshotFile::timestamp))
+                .toList();
+        }
+        LOG.trace("{}: recognized files: {}", memberId, ret);
+        return ret;
+    }
+
+    private @Nullable SnapshotFile pathToFile(final Path path) {
+        if (!Files.isRegularFile(path)) {
+            LOG.debug("{}: skipping non-file {}", memberId, path);
+            return null;
+        }
+        if (!Files.isReadable(path)) {
+            LOG.debug("{}: skipping unreadable file {}", memberId, path);
+            return null;
+        }
+        final var name = path.getFileName().toString();
+        if (!name.startsWith(FILENAME_START_STR)) {
+            LOG.debug("{}: skipping unrecognized file {}", memberId, path);
+            return null;
+        }
+        final var format = SnapshotFileFormat.forFileName(name);
+        if (format == null) {
+            LOG.debug("{}: skipping unhandled file {}", memberId, path);
+            return null;
+        }
+        LOG.debug("{}: selected {} to handle file {}", memberId, format, path);
+
+        try {
+            return format.open(path);
+        } catch (IOException e) {
+            LOG.warn("{}: cannot open {}, skipping", memberId, path, e);
+            return null;
+        }
     }
 }
