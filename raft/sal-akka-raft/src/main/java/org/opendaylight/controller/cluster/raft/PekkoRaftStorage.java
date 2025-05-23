@@ -31,7 +31,7 @@ import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFileFormat;
-import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
@@ -172,26 +172,24 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
     }
 
     @Override
-    public <T extends StateSnapshot> void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
-            final @Nullable T snapshot, final StateSnapshot.Writer<T> writer, final RaftCallback<Instant> callback) {
+    public void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
+            final @Nullable ToStorage<?> snapshot, final RaftCallback<Instant> callback) {
         requireNonNull(raftSnapshot);
         requireNonNull(lastIncluded);
-        requireNonNull(writer);
 
         submitTask(new CancellableTask<>(callback) {
             @Override
             protected Instant compute() throws IOException {
                 final var timestamp = Instant.now();
-                saveSnapshot(raftSnapshot, lastIncluded, snapshot, writer, timestamp);
+                saveSnapshot(raftSnapshot, lastIncluded, snapshot, timestamp);
                 return timestamp;
             }
         });
     }
 
     @Override
-    public <T extends StateSnapshot> void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
-            final @Nullable T snapshot, final StateSnapshot.Writer<T> writer, final Instant timestamp)
-                throws IOException {
+    public void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
+            final @Nullable ToStorage<?> snapshot, final Instant timestamp) throws IOException {
         final var format = SnapshotFileFormat.latest();
         final var baseName = new StringBuilder()
             .append(FILENAME_START_STR)
@@ -206,7 +204,7 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
 
         try {
             format.createNew(tmpPath, timestamp, lastIncluded, raftSnapshot.votingConfig(), compression,
-                raftSnapshot.unappliedEntries(), compression, writer, snapshot).close();
+                raftSnapshot.unappliedEntries(), compression, snapshot).close();
             Files.move(tmpPath, filePath, StandardCopyOption.ATOMIC_MOVE);
         } catch (IOException e) {
             Files.deleteIfExists(tmpPath);

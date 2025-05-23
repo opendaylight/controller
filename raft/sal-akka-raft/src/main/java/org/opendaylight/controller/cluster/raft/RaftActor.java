@@ -1061,8 +1061,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     final void saveEmptySnapshot() throws IOException {
-        persistenceControl.saveVotingConfig(context.getPeerServerInfo(true),
-            context.getSnapshotManager().stateSupport().writer());
+        persistenceControl.saveVotingConfig(context.getPeerServerInfo(true));
     }
 
     @Override
