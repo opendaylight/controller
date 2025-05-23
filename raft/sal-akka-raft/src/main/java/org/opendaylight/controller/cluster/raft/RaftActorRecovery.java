@@ -29,6 +29,7 @@ import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
 import org.opendaylight.raft.api.EntryMeta;
 import org.opendaylight.raft.api.TermInfo;
@@ -205,7 +206,8 @@ class RaftActorRecovery {
         try {
             context.snapshotStore().saveSnapshot(
                 new RaftSnapshot(snapshot.votingConfig(), snapshot.getUnAppliedEntries()), snapshot.lastApplied(),
-                snapshot.state(), context.getSnapshotManager().stateSupport().writer(), timestamp);
+                ToStorage.ofNullable(context.getSnapshotManager().stateSupport().writer(), snapshot.state()),
+                timestamp);
         } catch (IOException e) {
             LOG.error("{}: failed to save local snapshot", memberId(), e);
             throw new UncheckedIOException(e);
