@@ -9,34 +9,16 @@ package org.opendaylight.controller.cluster.raft;
 
 import static java.util.Objects.requireNonNull;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.time.Instant;
-import java.util.Comparator;
-import java.util.HexFormat;
-import java.util.List;
-import java.util.Objects;
 import java.util.function.Consumer;
 import org.apache.pekko.persistence.DeleteMessagesSuccess;
 import org.apache.pekko.persistence.DeleteSnapshotsSuccess;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SnapshotProtocol;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
-import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
-import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
-import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
-import org.opendaylight.controller.cluster.raft.spi.SnapshotFileFormat;
-import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
-import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * An {@link EnabledRaftStorage} backed by Pekko Persistence of an {@link RaftActor}.
@@ -44,11 +26,6 @@ import org.slf4j.LoggerFactory;
 // FIXME: remove this class once we have both Snapshots and Entries stored in files
 @NonNullByDefault
 final class PekkoRaftStorage extends EnabledRaftStorage {
-    private static final Logger LOG = LoggerFactory.getLogger(PekkoRaftStorage.class);
-    private static final HexFormat HF = HexFormat.of().withUpperCase();
-
-    private static final String FILENAME_START_STR = "snapshot-";
-
     private final RaftActor actor;
 
     PekkoRaftStorage(final RaftActor actor, final Path directory, final CompressionType compression,
@@ -83,82 +60,13 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
     }
 
     @Override
-    public @Nullable SnapshotFile lastSnapshot() throws IOException {
-        final var files = listFiles();
-        if (files.isEmpty()) {
-            LOG.debug("{}: no eligible files found", memberId);
-            return null;
-        }
-
-        final var first = files.getLast();
-        LOG.debug("{}: picked {} as the latest file", memberId, first);
-        return first;
-    }
-
-    // Ordered by ascending timestamp, i.e. oldest snapshot first
-    private List<SnapshotFile> listFiles() throws IOException {
-        if (!Files.exists(directory)) {
-            LOG.debug("{}: directory {} does not exist", memberId, directory);
-            return List.of();
-        }
-
-        final List<SnapshotFile> ret;
-        try (var paths = Files.list(directory)) {
-            ret = paths.map(this::pathToFile).filter(Objects::nonNull)
-                .sorted(Comparator.comparing(SnapshotFile::timestamp))
-                .toList();
-        }
-        LOG.trace("{}: recognized files: {}", memberId, ret);
-        return ret;
-    }
-
-    private @Nullable SnapshotFile pathToFile(final Path path) {
-        if (!Files.isRegularFile(path)) {
-            LOG.debug("{}: skipping non-file {}", memberId, path);
-            return null;
-        }
-        if (!Files.isReadable(path)) {
-            LOG.debug("{}: skipping unreadable file {}", memberId, path);
-            return null;
-        }
-        final var name = path.getFileName().toString();
-        if (!name.startsWith(FILENAME_START_STR)) {
-            LOG.debug("{}: skipping unrecognized file {}", memberId, path);
-            return null;
-        }
-        final var format = SnapshotFileFormat.forFileName(name);
-        if (format == null) {
-            LOG.debug("{}: skipping unhandled file {}", memberId, path);
-            return null;
-        }
-        LOG.debug("{}: selected {} to handle file {}", memberId, format, path);
-
-        try {
-            return format.open(path);
-        } catch (IOException e) {
-            LOG.warn("{}: cannot open {}, skipping", memberId, path, e);
-            return null;
-        }
-    }
-
-    @Override
     public void persistEntry(final ReplicatedLogEntry entry, final Consumer<ReplicatedLogEntry> callback) {
         actor.persist(entry, callback);
     }
 
     @Override
-    public void persistVotingConfig(final VotingConfig votingConfig, final Consumer<VotingConfig> callback) {
-        actor.persist(votingConfig, callback);
-    }
-
-    @Override
     public void startPersistEntry(final ReplicatedLogEntry entry, final Consumer<ReplicatedLogEntry> callback) {
         actor.persistAsync(entry, callback);
-    }
-
-    @Override
-    public void startPersistVotingConfig(final VotingConfig votingConfig, final Consumer<VotingConfig> callback) {
-        actor.persistAsync(votingConfig, callback);
     }
 
     @Override
@@ -169,77 +77,6 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
     @Override
     public void markLastApplied(final long lastApplied) {
         actor.markLastApplied(lastApplied);
-    }
-
-    @Override
-    public void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
-            final @Nullable ToStorage<?> snapshot, final RaftCallback<Instant> callback) {
-        requireNonNull(raftSnapshot);
-        requireNonNull(lastIncluded);
-
-        submitTask(new CancellableTask<>(callback) {
-            @Override
-            protected Instant compute() throws IOException {
-                final var timestamp = Instant.now();
-                saveSnapshot(raftSnapshot, lastIncluded, snapshot, timestamp);
-                return timestamp;
-            }
-        });
-    }
-
-    @Override
-    public void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
-            final @Nullable ToStorage<?> snapshot, final Instant timestamp) throws IOException {
-        final var format = SnapshotFileFormat.latest();
-        final var baseName = new StringBuilder()
-            .append(FILENAME_START_STR)
-            .append(HF.toHexDigits(timestamp.getEpochSecond()))
-            .append('-')
-            .append(HF.toHexDigits(timestamp.getNano()));
-
-        final var tmpPath = directory.resolve(baseName + ".tmp");
-        final var filePath = directory.resolve(baseName + format.extension());
-
-        LOG.debug("{}: starting snapshot writeout to {}", memberId, tmpPath);
-
-        try {
-            format.createNew(tmpPath, timestamp, lastIncluded, raftSnapshot.votingConfig(), compression,
-                raftSnapshot.unappliedEntries(), compression, snapshot).close();
-            Files.move(tmpPath, filePath, StandardCopyOption.ATOMIC_MOVE);
-        } catch (IOException e) {
-            Files.deleteIfExists(tmpPath);
-            throw e;
-        }
-
-        LOG.debug("{}: finished snapshot writeout to {}", memberId, filePath);
-    }
-
-    @Override
-    public void retainSnapshots(final Instant firstRetained) {
-        final List<SnapshotFile> files;
-        try {
-            files = listFiles();
-        } catch (IOException e) {
-            LOG.warn("{}: failed to list snapshots, will retry next time", memberId, e);
-            return;
-        }
-
-        for (var file : files) {
-            if (firstRetained.compareTo(file.timestamp()) <= 0) {
-                LOG.debug("{}: retaining snapshot {}", memberId, file);
-                break;
-            }
-
-            try {
-                // we should not have concurrent access, but it is okay if the file disappears independently
-                Files.deleteIfExists(file.path());
-            } catch (IOException e) {
-                LOG.warn("{}: failed to delete snapshot {}, will retry next time", memberId, file, e);
-                continue;
-            }
-
-            LOG.debug("{}: deleted snapshot {}", memberId, file);
-        }
     }
 
     @Override

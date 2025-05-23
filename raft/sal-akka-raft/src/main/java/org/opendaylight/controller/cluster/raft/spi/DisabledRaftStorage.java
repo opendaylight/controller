@@ -7,12 +7,20 @@
  */
 package org.opendaylight.controller.cluster.raft.spi;
 
+import static java.util.Objects.requireNonNull;
+
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.List;
+import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.opendaylight.controller.cluster.raft.RaftActor;
+import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.CompressionType;
@@ -45,21 +53,43 @@ public final class DisabledRaftStorage extends RaftStorage implements ImmediateD
     }
 
     @Override
-    public @Nullable SnapshotFile lastSnapshot() {
-        // TODO: cache last encountered snapshot along with its lifecycle
-        return null;
+    public void persistEntry(final ReplicatedLogEntry entry, final Consumer<ReplicatedLogEntry> callback) {
+        requireNonNull(callback);
+        if (entry.command() instanceof VotingConfig votingConfig) {
+            try {
+                saveVotingConfig(votingConfig, Instant.now());
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
+        callback.accept(entry);
+    }
+
+    @Override
+    public void startPersistEntry(final ReplicatedLogEntry entry, final Consumer<ReplicatedLogEntry> callback) {
+        if (entry.command() instanceof VotingConfig votingConfig) {
+            saveSnapshot(new RaftSnapshot(votingConfig, List.of()), EntryInfo.of(-1, -1), null, (failure, success) -> {
+                switch (failure) {
+                    case null -> callback.accept(entry);
+                    case IOException e -> throw new UncheckedIOException(e);
+                    case RuntimeException e -> throw e;
+                    default -> throw new RuntimeException(failure);
+                }
+            });
+        } else {
+            ImmediateDataPersistenceProvider.super.startPersistEntry(entry, callback);
+        }
     }
 
     @Override
     public void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
-            final @Nullable ToStorage<?> snapshot, final RaftCallback<Instant> callback) {
-        final var timestamp = Instant.now();
-        executeInSelf.executeInSelf(() -> callback.invoke(null, timestamp));
+            final @Nullable ToStorage<?> snapshot, final Instant timestamp) throws IOException {
+        saveVotingConfig(raftSnapshot.votingConfig(), timestamp);
     }
 
-    @Override
-    public void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
-            final @Nullable ToStorage<?> snapshot, final Instant timestamp) {
-        // No-op
+    private void saveVotingConfig(final @Nullable VotingConfig votingConfig, final Instant timestamp)
+            throws IOException {
+        // We always persist an empty snapshot
+        super.saveSnapshot(new RaftSnapshot(votingConfig, List.of()), EntryInfo.of(-1, -1), null, timestamp);
     }
 }
