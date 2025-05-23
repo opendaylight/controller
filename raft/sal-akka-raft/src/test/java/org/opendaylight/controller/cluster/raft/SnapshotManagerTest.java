@@ -26,7 +26,6 @@ import java.io.OutputStream;
 import java.time.Instant;
 import java.util.List;
 import org.apache.pekko.actor.ActorRef;
-import org.eclipse.jdt.annotation.NonNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -47,7 +46,7 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
-import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.ByteArray;
 import org.opendaylight.raft.spi.InstallableSnapshot;
@@ -76,7 +75,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     @Captor
     private ArgumentCaptor<OutputStream> outputStreamCaptor;
     @Captor
-    private ArgumentCaptor<StateSnapshot> snapshotCaptor;
+    private ArgumentCaptor<ToStorage<?>> snapshotCaptor;
     @Captor
     private ArgumentCaptor<EntryInfo> entryInfoCaptor;
     @Captor
@@ -230,7 +229,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         snapshotManager.capture(lastLogEntry, -1);
 
         verify(mockDataPersistenceProvider).saveSnapshot(raftSnapshotCaptor.capture(), entryInfoCaptor.capture(),
-            snapshotCaptor.capture(), any(), any(RaftCallback.class));
+            snapshotCaptor.capture(), any(RaftCallback.class));
 
         final var raftSnapshot = raftSnapshotCaptor.getValue();
         assertEquals(List.of(lastLogEntry), raftSnapshot.unappliedEntries());
@@ -256,7 +255,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         snapshotManager.capture(EntryInfo.of(9, 6), 9);
 
         verify(mockDataPersistenceProvider).saveSnapshot(raftSnapshotCaptor.capture(), entryInfoCaptor.capture(),
-            snapshotCaptor.capture(), any(), any(RaftCallback.class));
+            snapshotCaptor.capture(), any(RaftCallback.class));
 
         assertEquals(List.of(), raftSnapshotCaptor.getValue().unappliedEntries());
         assertEquals(EntryInfo.of(9, 6), entryInfoCaptor.getValue());
@@ -275,7 +274,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         doReturn(ByteState.empty()).when(mockCohort).takeSnapshot();
         snapshotManager.capture(EntryInfo.of(9, 6), -1);
 
-        verify(mockDataPersistenceProvider).saveSnapshot(any(), any(), any(), any(), any(RaftCallback.class));
+        verify(mockDataPersistenceProvider).saveSnapshot(any(), any(), any(), any(RaftCallback.class));
 
         verify(mockReplicatedLog).snapshotPreCommit(9L, 6L);
 
@@ -298,7 +297,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         doReturn(ByteState.empty()).when(mockCohort).takeSnapshot();
         snapshotManager.capture(EntryInfo.of(9, 6), replicatedToAllIndex);
 
-        verify(mockDataPersistenceProvider).saveSnapshot(any(), any(), any(), any(), any(RaftCallback.class));
+        verify(mockDataPersistenceProvider).saveSnapshot(any(), any(), any(), any(RaftCallback.class));
 
         verify(mockReplicatedLog).snapshotPreCommit(9L, 6L);
 
@@ -320,14 +319,13 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         verify(mockCohort).takeSnapshot();
 
-        final var stateSnapshotCaptor = ArgumentCaptor.forClass(StateSnapshot.class);
+        final var toStorageCaptor = ArgumentCaptor.<ToStorage<?>>captor();
         final var lastIncludedCaptor = ArgumentCaptor.forClass(EntryInfo.class);
-        final var writerCaptor = ArgumentCaptor.<StateSnapshot.Writer<@NonNull StateSnapshot>>captor();
-        verify(mockDataPersistenceProvider).streamToInstall(lastIncludedCaptor.capture(), stateSnapshotCaptor.capture(),
-            writerCaptor.capture(), callbackCaptor.capture());
+        verify(mockDataPersistenceProvider).streamToInstall(lastIncludedCaptor.capture(), toStorageCaptor.capture(),
+            callbackCaptor.capture());
 
         final var baos = new ByteArrayOutputStream();
-        writerCaptor.getValue().writeSnapshot(stateSnapshotCaptor.getValue(), baos);
+        toStorageCaptor.getValue().writeTo(baos);
         final var result = ByteArray.wrap(baos.toByteArray());
 
         callbackCaptor.getValue().invoke(null, new InstallableSnapshotSource(lastIncludedCaptor.getValue(),
@@ -335,7 +333,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         assertTrue(snapshotManager.isCapturing());
 
-        verify(mockDataPersistenceProvider).saveSnapshot(any(), any(), any(), any(), any(RaftCallback.class));
+        verify(mockDataPersistenceProvider).saveSnapshot(any(), any(), any(), any(RaftCallback.class));
 
         verify(mockReplicatedLog).snapshotPreCommit(9L, 6L);
 
@@ -354,7 +352,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     public void testCallingPersistWithoutCaptureWillDoNothing() {
         snapshotManager.persist(ByteState.empty(), null);
 
-        verify(mockDataPersistenceProvider, never()).saveSnapshot(any(), any(), any(), any(), any(RaftCallback.class));
+        verify(mockDataPersistenceProvider, never()).saveSnapshot(any(), any(), any(), any(RaftCallback.class));
 
         verify(mockReplicatedLog, never()).snapshotPreCommit(9L, 6L);
 
@@ -373,7 +371,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         snapshotManager.persist(ByteState.empty(), snapshot);
         snapshotManager.persist(ByteState.empty(), snapshot);
 
-        verify(mockDataPersistenceProvider).saveSnapshot(any(), any(), any(), any(), any(RaftCallback.class));
+        verify(mockDataPersistenceProvider).saveSnapshot(any(), any(), any(), any(RaftCallback.class));
 
         verify(mockReplicatedLog).snapshotPreCommit(9L, 6L);
     }

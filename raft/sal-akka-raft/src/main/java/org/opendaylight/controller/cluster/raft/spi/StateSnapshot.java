@@ -7,10 +7,14 @@
  */
 package org.opendaylight.controller.cluster.raft.spi;
 
+import static java.util.Objects.requireNonNull;
+
+import com.google.common.base.MoreObjects;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.yangtools.concepts.Immutable;
 
 /**
@@ -82,5 +86,38 @@ public interface StateSnapshot extends Immutable {
          * @return the writer
          */
         Writer<T> writer();
+    }
+
+    /**
+     * A {@link StateSnapshot} on its way to storage.
+     *
+     * @param <T> the type of {@link StateSnapshot}
+     */
+    final class ToStorage<T extends StateSnapshot> {
+        private final Writer<T> writer;
+        private final T snapshot;
+
+        private ToStorage(final Writer<T> writer, final T snapshot) {
+            this.writer = requireNonNull(writer);
+            this.snapshot = requireNonNull(snapshot);
+        }
+
+        public static <T extends StateSnapshot> ToStorage<T> of(final Writer<T> writer, final T snapshot) {
+            return new ToStorage<>(writer, snapshot);
+        }
+
+        public static <T extends StateSnapshot> @Nullable ToStorage<T> ofNullable(final Writer<T> writer,
+                final @Nullable T snapshot) {
+            return snapshot == null ? null : of(writer, snapshot);
+        }
+
+        public void writeTo(final OutputStream out) throws IOException {
+            writer.writeSnapshot(snapshot, out);
+        }
+
+        @Override
+        public String toString() {
+            return MoreObjects.toStringHelper(this).add("writer", writer).add("snapshot", snapshot).toString();
+        }
     }
 }

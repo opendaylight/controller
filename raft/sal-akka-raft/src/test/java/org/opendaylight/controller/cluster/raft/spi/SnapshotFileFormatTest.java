@@ -32,6 +32,7 @@ import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.raft.spi.CompressionType;
@@ -96,7 +97,7 @@ class SnapshotFileFormatTest {
 
         final var file = tempDir.resolve(fileName);
         fileFormat.createNew(file, TIMESTAMP, EntryInfo.of(-1, -1), SERVER_CONFIG, entryCompress, ENTRIES,
-            stateCompress, ByteState.SUPPORT.writer(), STATE).close();
+            stateCompress, ToStorage.of(ByteState.SUPPORT.writer(), STATE)).close();
 
         assertTrue(Files.isRegularFile(file));
         assertEquals(expectedSize, Files.size(file));
