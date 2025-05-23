@@ -71,7 +71,7 @@ import org.opendaylight.controller.cluster.raft.spi.FailingTermInfoStore;
 import org.opendaylight.controller.cluster.raft.spi.ForwardingDataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
-import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.RaftRole;
 import org.slf4j.Logger;
@@ -493,9 +493,8 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         leaderRaftActor.overridePersistence((delegate, actor) -> new ForwardingDataPersistenceProvider() {
             @Override
             @NonNullByDefault
-            public <T extends StateSnapshot> void saveSnapshot(final RaftSnapshot raftSnapshot,
-                    final EntryInfo lastIncluded, final @Nullable T snapshot, final StateSnapshot.Writer<T> writer,
-                    final RaftCallback<Instant> callback) {
+            public void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
+                    final @Nullable ToStorage<?> snapshot, final RaftCallback<Instant> callback) {
                 // Never completes
             }
 

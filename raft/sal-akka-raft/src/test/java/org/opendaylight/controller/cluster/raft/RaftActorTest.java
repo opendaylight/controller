@@ -53,7 +53,6 @@ import org.apache.pekko.persistence.SnapshotOffer;
 import org.apache.pekko.protobuf.ByteString;
 import org.apache.pekko.testkit.TestActorRef;
 import org.apache.pekko.testkit.javadsl.TestKit;
-import org.eclipse.jdt.annotation.NonNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -88,7 +87,7 @@ import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolic
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.ForwardingDataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
-import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.api.TermInfo;
@@ -564,16 +563,15 @@ public class RaftActorTest extends AbstractActorTest {
             new MockCommand("foo-4")));
 
         doReturn(snapshotState).when(leaderActor.snapshotCohortDelegate).takeSnapshot();
-        doNothing().when(dataPersistenceProvider).streamToInstall(any(), any(), any(), any());
+        doNothing().when(dataPersistenceProvider).streamToInstall(any(), any(), any());
         leaderActor.getRaftActorContext().getSnapshotManager().captureToInstall(EntryInfo.of(6, 1), 4, "xyzzy");
         verify(leaderActor.snapshotCohortDelegate).takeSnapshot();
 
         final var lastIncludedCaptor = ArgumentCaptor.forClass(EntryInfo.class);
-        final var snapshotCaptor = ArgumentCaptor.forClass(StateSnapshot.class);
+        final var snapshotCaptor = ArgumentCaptor.<ToStorage<?>>captor();
         final var callbackCaptor = ArgumentCaptor.<RaftCallback<InstallableSnapshot>>captor();
-        final var writerCaptor = ArgumentCaptor.<StateSnapshot.Writer<@NonNull StateSnapshot>>captor();
         verify(dataPersistenceProvider).streamToInstall(lastIncludedCaptor.capture(), snapshotCaptor.capture(),
-            writerCaptor.capture(), callbackCaptor.capture());
+            callbackCaptor.capture());
         assertTrue(leaderActor.getRaftActorContext().getSnapshotManager().isCapturing());
 
         assertEquals(8, leaderActor.getReplicatedLog().size());
@@ -595,7 +593,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         // Finish snapshot commit
         try (var baos = new ByteArrayOutputStream()) {
-            writerCaptor.getValue().writeSnapshot(snapshotCaptor.getValue(), baos);
+            snapshotCaptor.getValue().writeTo(baos);
             callbackCaptor.getValue().invoke(null, new InstallableSnapshotSource(lastIncludedCaptor.getValue(),
                 new PlainSnapshotSource(ByteArray.wrap(baos.toByteArray()))));
         }
