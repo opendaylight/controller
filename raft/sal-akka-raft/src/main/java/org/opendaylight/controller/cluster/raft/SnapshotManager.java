@@ -24,6 +24,7 @@ import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.Support;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.EntryMeta;
 import org.opendaylight.raft.spi.InstallableSnapshot;
@@ -292,8 +293,8 @@ public final class SnapshotManager {
     private <T extends Snapshot.State> boolean captureToInstall(final RaftActorSnapshotCohort<T> typedCohort,
             final CaptureSnapshot request) {
         final var snapshot = typedCohort.takeSnapshot();
-        context.snapshotStore().streamToInstall(request.lastApplied(), snapshot, typedCohort.support().writer(),
-            (cause, installable) -> {
+        context.snapshotStore().streamToInstall(request.lastApplied(),
+            ToStorage.of(typedCohort.support().writer(), snapshot), (cause, installable) -> {
                 if (cause != null) {
                     task = Idle.INSTANCE;
                     LOG.error("{}: Error creating snapshot", memberId(), cause);
@@ -409,8 +410,8 @@ public final class SnapshotManager {
     @NonNullByDefault
     private <T extends StateSnapshot> void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
             final Snapshot.@Nullable State snapshot, final long lastSeq) {
-        context.snapshotStore().saveSnapshot(raftSnapshot, lastIncluded, snapshot, stateSupport().writer(),
-            (failure, timestamp) -> {
+        context.snapshotStore().saveSnapshot(raftSnapshot, lastIncluded,
+            StateSnapshot.ToStorage.ofNullable(stateSupport().writer(), snapshot), (failure, timestamp) -> {
                 if (failure != null) {
                     LOG.error("{}: snapshot is not durable", memberId(), failure);
                     rollback();

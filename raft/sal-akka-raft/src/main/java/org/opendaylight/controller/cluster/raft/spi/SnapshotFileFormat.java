@@ -19,6 +19,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.raft.spi.CompressionType;
@@ -33,13 +34,12 @@ public enum SnapshotFileFormat {
      */
     SNAPSHOT_V1(".v1") {
         @Override
-        public <T extends StateSnapshot> Closeable createNew(final Path file, final Instant timestamp,
-                final EntryInfo lastIncluded, final @Nullable VotingConfig votingConfig,
-                final CompressionType entryCompress, final List<ReplicatedLogEntry> unappliedEntries,
-                final CompressionType stateCompress, final StateSnapshot.Writer<T> stateWriter, final @Nullable T state)
-                    throws IOException {
+        public Closeable createNew(final Path file, final Instant timestamp, final EntryInfo lastIncluded,
+                final @Nullable VotingConfig votingConfig, final CompressionType entryCompress,
+                final List<ReplicatedLogEntry> unappliedEntries, final CompressionType stateCompress,
+                final @Nullable ToStorage<?> state) throws IOException {
             return SnapshotFileV1.createNew(file, timestamp, lastIncluded, votingConfig, entryCompress,
-                unappliedEntries, stateCompress, stateWriter, state);
+                unappliedEntries, stateCompress, state);
         }
 
         @Override
@@ -98,14 +98,13 @@ public enum SnapshotFileFormat {
      * @param entryCompress the compression to apply to unapplied entries
      * @param unappliedEntries the unapplied entries
      * @param stateCompress the compression to apply to user state
-     * @param stateWriter serialization support for the state type
      * @param state the state
      * @return a {@link Closeable} representing the flush-and-close action
      * @throws IOException if an I/O error occurs
      */
-    public abstract <T extends StateSnapshot> Closeable createNew(Path file, Instant timestamp, EntryInfo lastIncluded,
+    public abstract Closeable createNew(Path file, Instant timestamp, EntryInfo lastIncluded,
         @Nullable VotingConfig votingConfig, CompressionType entryCompress, List<ReplicatedLogEntry> unappliedEntries,
-        CompressionType stateCompress, StateSnapshot.Writer<T> stateWriter, @Nullable T state) throws IOException;
+        CompressionType stateCompress, @Nullable ToStorage<?> state) throws IOException;
 
     /**
      * Open an existing file of this format.
