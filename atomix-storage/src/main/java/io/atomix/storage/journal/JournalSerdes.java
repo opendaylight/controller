@@ -131,14 +131,15 @@ public interface JournalSerdes {
      */
     default <T> ToByteBufMapper<T> toWriteMapper() {
         return (obj, buf) -> {
-            final var nio = buf.nioBuffer();
+            final var widx = buf.writerIndex();
+            final var nio = buf.nioBuffer(widx, buf.writableBytes());
             try {
                 serialize(obj, nio);
             } catch (KryoException e) {
                 throw newIOException(e);
             } finally {
-                // adjust writerIndex so that readableBytes() the bytes written
-                buf.writerIndex(buf.readerIndex() + nio.position());
+                // update writerIndex to reflect the bytes written
+                buf.writerIndex(widx + nio.position());
             }
         };
     }

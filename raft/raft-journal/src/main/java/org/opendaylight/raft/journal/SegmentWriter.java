@@ -85,8 +85,8 @@ final class SegmentWriter {
 
         // Allocate entry space
         final var diskEntry = fileWriter.startWrite(position, writeLimit + HEADER_BYTES);
-        // Create a ByteBuf covering the bytes
-        final var bytes = diskEntry.slice(HEADER_BYTES, writeLimit);
+        // Create a ByteBuf covering the bytes and set writerIndex to the start
+        final var bytes = diskEntry.slice(HEADER_BYTES, writeLimit).writerIndex(0);
         try {
             mapper.objectToBytes(entry, bytes);
         } catch (EOFException e) {
