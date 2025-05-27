@@ -28,9 +28,8 @@ public final class EntryTooLargeException extends IOException {
      * Default constructor.
      *
      * @param message the message
-     * @param cause the exception cause
      */
-    public EntryTooLargeException(final String message, final Throwable cause) {
-        super(message, cause);
+    public EntryTooLargeException(final String message) {
+        super(message);
     }
 }

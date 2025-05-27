@@ -16,7 +16,6 @@
 package org.opendaylight.raft.journal;
 
 import io.netty.buffer.ByteBuf;
-import java.io.EOFException;
 import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
@@ -33,8 +32,8 @@ public interface ToByteBufMapper<T> {
      *
      * @param obj the object
      * @param buf target buffer
-     * @throws EOFException if the buffer does not have sufficient capacity
-     * @throws IOException if some other I/O error occurs
+     * @return {@code true} if the writeout completed, {@code false} if the buffer has insufficient capacity
+     * @throws IOException if an I/O error occurs
      */
-    void objectToBytes(T obj, ByteBuf buf) throws IOException;
+    boolean objectToBytes(T obj, ByteBuf buf) throws IOException;
 }

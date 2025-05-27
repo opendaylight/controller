@@ -20,11 +20,11 @@ import com.esotericsoftware.kryo.KryoException;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import io.atomix.utils.serializer.KryoJournalSerdesBuilder;
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.raft.journal.FromByteBufMapper;
 import org.opendaylight.raft.journal.ToByteBufMapper;
 
@@ -136,15 +136,20 @@ public interface JournalSerdes {
             try {
                 serialize(obj, nio);
             } catch (KryoException e) {
-                throw newIOException(e);
+                final var ioe = newIOException(e);
+                if (ioe == null) {
+                    return false;
+                }
+                throw ioe;
             } finally {
                 // update writerIndex to reflect the bytes written
                 buf.writerIndex(widx + nio.position());
             }
+            return true;
         };
     }
 
-    private static IOException newIOException(final KryoException cause) {
+    private static @Nullable IOException newIOException(final KryoException cause) {
         // We may have multiple nested KryoExceptions, intertwined with others, like IOExceptions. Let's find
         // the deepest one.
         var rootKryo = cause;
@@ -155,9 +160,7 @@ public interface JournalSerdes {
         }
         // It would be nice to have a better way of discerning these, but alas it is what it is.
         if (rootKryo.getMessage().startsWith("Buffer overflow.")) {
-            final var ex = new EOFException();
-            ex.initCause(cause);
-            return ex;
+            return null;
         }
         return new IOException(rootKryo);
     }
