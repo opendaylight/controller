@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.function.Consumer;
 import org.apache.pekko.persistence.JournalProtocol;
-import org.apache.pekko.persistence.SnapshotProtocol;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
@@ -77,11 +76,6 @@ public interface ImmediateDataPersistenceProvider extends DataPersistenceProvide
 
     @Override
     default boolean handleJournalResponse(final JournalProtocol.Response response) {
-        return false;
-    }
-
-    @Override
-    default boolean handleSnapshotResponse(final SnapshotProtocol.Response response) {
         return false;
     }
 }

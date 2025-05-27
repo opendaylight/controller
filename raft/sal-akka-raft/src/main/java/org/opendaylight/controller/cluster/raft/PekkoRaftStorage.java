@@ -12,9 +12,7 @@ import static java.util.Objects.requireNonNull;
 import java.nio.file.Path;
 import java.util.function.Consumer;
 import org.apache.pekko.persistence.DeleteMessagesSuccess;
-import org.apache.pekko.persistence.DeleteSnapshotsSuccess;
 import org.apache.pekko.persistence.JournalProtocol;
-import org.apache.pekko.persistence.SnapshotProtocol;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
 import org.opendaylight.raft.spi.CompressionType;
@@ -92,10 +90,5 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
     @Override
     public boolean handleJournalResponse(final JournalProtocol.Response response) {
         return response instanceof DeleteMessagesSuccess;
-    }
-
-    @Override
-    public boolean handleSnapshotResponse(final SnapshotProtocol.Response response) {
-        return response instanceof DeleteSnapshotsSuccess;
     }
 }

@@ -305,9 +305,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             if (message instanceof JournalProtocol.Response response
                 && persistenceControl.handleJournalResponse(response)) {
                 LOG.debug("{}: handled a journal response", memberId());
-            } else if (message instanceof SnapshotProtocol.Response response
-                && persistenceControl.handleSnapshotResponse(response)) {
-                LOG.debug("{}: handled a snapshot response", memberId());
+            } else if (message instanceof SnapshotProtocol.Response response) {
+                LOG.debug("{}: ignoring {}", memberId(), response);
             } else {
                 handleNonRaftCommand(message);
             }

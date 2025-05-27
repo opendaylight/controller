@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.function.Consumer;
 import org.apache.pekko.persistence.JournalProtocol;
-import org.apache.pekko.persistence.SnapshotProtocol;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
@@ -91,11 +90,6 @@ public abstract class ForwardingDataPersistenceProvider implements DataPersisten
     @Override
     public boolean handleJournalResponse(final JournalProtocol.Response response) {
         return delegate().handleJournalResponse(response);
-    }
-
-    @Override
-    public boolean handleSnapshotResponse(final SnapshotProtocol.Response response) {
-        return delegate().handleSnapshotResponse(response);
     }
 
     @Override

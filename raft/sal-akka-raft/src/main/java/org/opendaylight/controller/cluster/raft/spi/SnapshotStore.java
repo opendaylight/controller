@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.raft.spi;
 
 import java.io.IOException;
 import java.time.Instant;
-import org.apache.pekko.persistence.SnapshotProtocol;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
@@ -70,12 +69,4 @@ public interface SnapshotStore {
      */
     // FIXME: integrate into saveSnapshot()
     void retainSnapshots(Instant firstRetained);
-
-    /**
-     * Receive and potentially handle a {@link SnapshotProtocol} response.
-     *
-     * @param response A {@link SnapshotProtocol} response
-     * @return {@code true} if the response was handled
-     */
-    boolean handleSnapshotResponse(SnapshotProtocol.Response response);
 }
