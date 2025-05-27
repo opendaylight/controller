@@ -18,7 +18,6 @@ package org.opendaylight.raft.journal;
 import static java.util.Objects.requireNonNull;
 import static org.opendaylight.raft.journal.SegmentEntry.HEADER_BYTES;
 
-import java.io.EOFException;
 import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -87,19 +86,18 @@ final class SegmentWriter {
         final var diskEntry = fileWriter.startWrite(position, writeLimit + HEADER_BYTES);
         // Create a ByteBuf covering the bytes and set writerIndex to the start
         final var bytes = diskEntry.slice(HEADER_BYTES, writeLimit).writerIndex(0);
-        try {
-            mapper.objectToBytes(entry, bytes);
-        } catch (EOFException e) {
+
+        if (!mapper.objectToBytes(entry, bytes)) {
             // We ran out of buffer space: let's decide who's fault it is:
             if (writeLimit == maxEntrySize) {
                 // - it is the entry and/or mapper. This is not exactly accurate, as there may be other serialization
                 //   fault. This is as good as it gets.
                 throw new EntryTooLargeException(
-                    "Serialized entry size exceeds maximum allowed bytes (" + maxEntrySize + ")", e);
+                    "Serialized entry size exceeds maximum allowed bytes (" + maxEntrySize + ")");
             }
 
             // - it is us, as we do not have the capacity to hold maxEntrySize bytes
-            LOG.trace("Tail serialization with {} bytes available failed", writeLimit, e);
+            LOG.trace("Tail serialization with {} bytes available failed", writeLimit);
             return null;
         }
 
