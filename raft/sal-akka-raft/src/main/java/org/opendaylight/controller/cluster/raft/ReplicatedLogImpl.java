@@ -10,6 +10,8 @@ package org.opendaylight.controller.cluster.raft;
 import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.cluster.raft.messages.Payload;
+import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.raft.api.EntryMeta;
 import org.slf4j.Logger;
@@ -98,12 +100,18 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog {
     }
 
     @Override
-    public <T extends ReplicatedLogEntry> boolean appendSubmitted(final T entry, final Consumer<T> callback)  {
+    public boolean appendSubmitted(final long index, final long term, final Payload command,
+            final Consumer<ReplicatedLogEntry> callback)  {
+        final var entry = new SimpleReplicatedLogEntry(index, term, command);
+        entry.setPersistencePending(true);
         LOG.debug("{}: Append log entry and persist {} ", memberId, entry);
 
         final var ret = append(entry);
         if (ret) {
-            context.entryStore().startPersistEntry(entry, unused -> invokeAsync(entry, callback));
+            context.entryStore().startPersistEntry(entry, unused -> {
+                entry.setPersistencePending(false);
+                invokeAsync(entry, callback);
+            });
         }
         return ret;
     }
