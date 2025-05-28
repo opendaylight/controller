@@ -349,8 +349,7 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
     @Override
     public final @NonNull CaptureSnapshot newCaptureSnapshot(final EntryMeta lastLogEntry,
             final long replicatedToAllIndex, final boolean mandatoryTrim, final boolean hasFollowers) {
-        final var lastAppliedEntry = AbstractReplicatedLog.computeLastAppliedEntry(this, getLastApplied(), lastLogEntry,
-            hasFollowers);
+        final var lastAppliedEntry = computeLastAppliedEntry(this, getLastApplied(), lastLogEntry, hasFollowers);
 
         final var entry = get(replicatedToAllIndex);
         final var replicatedToAllEntry = entry != null ? entry : EntryInfo.of(-1, -1);
@@ -384,6 +383,7 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
         return journal.get(index);
     }
 
+    @VisibleForTesting
     @NonNullByDefault
     static final EntryMeta computeLastAppliedEntry(final ReplicatedLog log, final long originalIndex,
             final @Nullable EntryMeta lastLogEntry, final boolean hasFollowers) {

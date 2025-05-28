@@ -23,7 +23,6 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
-import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.Support;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.EntryMeta;
@@ -246,8 +245,8 @@ public final class SnapshotManager {
 
     @NonNullByDefault
     @SuppressWarnings("unchecked")
-    <T extends Snapshot.State> StateSnapshot.Support<T> stateSupport() {
-        return (Support<T>) snapshotCohort.support();
+    <T extends Snapshot.State> RaftActorSnapshotCohort<T> snapshotCohort() {
+        return (RaftActorSnapshotCohort<T>) snapshotCohort;
     }
 
     public boolean isApplying() {
@@ -368,7 +367,7 @@ public final class SnapshotManager {
 
         final Snapshot.State snapshotState;
         try (var in = source.toPlainSource().io().openBufferedStream()) {
-            snapshotState = stateSupport().reader().readSnapshot(in);
+            snapshotState = snapshotCohort().support().reader().readSnapshot(in);
         } catch (IOException e) {
             LOG.debug("{}: failed to convert InstallSnapshot to state", memberId(), e);
             snapshot.callback().onFailure();
@@ -411,7 +410,7 @@ public final class SnapshotManager {
     private <T extends StateSnapshot> void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
             final Snapshot.@Nullable State snapshot, final long lastSeq) {
         context.snapshotStore().saveSnapshot(raftSnapshot, lastIncluded,
-            StateSnapshot.ToStorage.ofNullable(stateSupport().writer(), snapshot), (failure, timestamp) -> {
+            ToStorage.ofNullable(snapshotCohort().support().writer(), snapshot), (failure, timestamp) -> {
                 if (failure != null) {
                     LOG.error("{}: snapshot is not durable", memberId(), failure);
                     rollback();

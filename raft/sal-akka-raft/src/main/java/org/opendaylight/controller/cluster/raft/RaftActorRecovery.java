@@ -24,6 +24,7 @@ import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.persisted.MigratedSerializable;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
@@ -96,6 +97,7 @@ class RaftActorRecovery {
     private final @NonNull RaftActor actor;
     private final @NonNull RaftActorContext context;
     private final @NonNull RaftActorRecoveryCohort cohort;
+    private final @NonNull RaftActorSnapshotCohort<@NonNull State> snapshotCohort;
     private final @Nullable TermInfo origTermInfo;
     private final @Nullable SnapshotFile origSnapshot;
     private final int snapshotInterval;
@@ -105,13 +107,15 @@ class RaftActorRecovery {
     private boolean anyDataRecovered;
     private boolean hasMigratedDataRecovered;
     private Stopwatch recoveryTimer;
-    private Stopwatch recoverySnapshotTimer;
+    private Stopwatch snapshotTimer;
 
     RaftActorRecovery(final @NonNull RaftActor actor, final RaftActorContext context,
             final RaftActorRecoveryCohort cohort) throws IOException {
         this.actor = requireNonNull(actor);
         this.context = requireNonNull(context);
         this.cohort = requireNonNull(cohort);
+
+        snapshotCohort = context.getSnapshotManager().snapshotCohort();
         origTermInfo = actor.localAccess().termInfoStore().loadAndSetTerm();
 
         final var configParams = context.getConfigParams();
@@ -121,7 +125,7 @@ class RaftActorRecovery {
         final var loaded = context.snapshotStore().lastSnapshot();
         if (loaded != null) {
             initializeLog(loaded.timestamp(), Snapshot.ofRaft(origTermInfo, loaded.readRaftSnapshot(),
-                loaded.lastIncluded(), loaded.readSnapshot(context.getSnapshotManager().stateSupport().reader())));
+                loaded.lastIncluded(), loaded.readSnapshot(snapshotCohort.support().reader())));
         }
         origSnapshot = loaded;
     }
@@ -172,6 +176,7 @@ class RaftActorRecovery {
 
         LOG.debug("{}: Restore snapshot: {}", memberId(), restoreFromSnapshot);
 
+        // FIXME: do not use SnapshotManager here, but rather share code with takeRecoverySnapshot()
         context.getSnapshotManager().applyFromRecovery(restoreFromSnapshot);
     }
 
@@ -183,8 +188,8 @@ class RaftActorRecovery {
         if (recoveryTimer == null) {
             recoveryTimer = Stopwatch.createStarted();
         }
-        if (recoverySnapshotTimer == null && snapshotInterval > 0) {
-            recoverySnapshotTimer = Stopwatch.createStarted();
+        if (snapshotTimer == null && snapshotInterval > 0) {
+            snapshotTimer = Stopwatch.createStarted();
         }
     }
 
@@ -206,7 +211,7 @@ class RaftActorRecovery {
         try {
             context.snapshotStore().saveSnapshot(
                 new RaftSnapshot(snapshot.votingConfig(), snapshot.getUnAppliedEntries()), snapshot.lastApplied(),
-                ToStorage.ofNullable(context.getSnapshotManager().stateSupport().writer(), snapshot.state()),
+                ToStorage.ofNullable(snapshotCohort.support().writer(), snapshot.state()),
                 timestamp);
         } catch (IOException e) {
             LOG.error("{}: failed to save local snapshot", memberId(), e);
@@ -296,27 +301,27 @@ class RaftActorRecovery {
         long lastApplied = lastUnappliedIndex - 1;
         for (long i = lastUnappliedIndex; i <= toIndex; i++) {
             final var logEntry = replicatedLog().get(i);
-            if (logEntry != null) {
-                lastApplied++;
-                initRecoveryTimers();
-
-                // We deal with RaftCommands separately
-                if (logEntry.command() instanceof StateCommand command) {
-                    batchRecoveredCommand(command);
-                }
-
-                if (shouldTakeRecoverySnapshot() && !context.getSnapshotManager().isCapturing()) {
-                    if (currentRecoveryBatchCount > 0) {
-                        endCurrentLogRecoveryBatch();
-                    }
-                    replLog.setLastApplied(lastApplied);
-                    replLog.setCommitIndex(lastApplied);
-                    takeRecoverySnapshot(logEntry);
-                }
-            } else {
+            if (logEntry == null) {
                 // Shouldn't happen but cover it anyway.
                 LOG.error("{}: Log entry not found for index {}", memberId(), i);
                 break;
+            }
+
+            lastApplied++;
+            initRecoveryTimers();
+
+            // We deal with RaftCommands separately
+            if (logEntry.command() instanceof StateCommand command) {
+                batchRecoveredCommand(command);
+            }
+
+            if (snapshotTimer != null && snapshotTimer.elapsed(TimeUnit.SECONDS) >= snapshotInterval) {
+                if (currentRecoveryBatchCount > 0) {
+                    endCurrentLogRecoveryBatch();
+                }
+                replLog.setLastApplied(lastApplied);
+                replLog.setCommitIndex(lastApplied);
+                takeRecoverySnapshot(logEntry);
             }
         }
 
@@ -341,20 +346,48 @@ class RaftActorRecovery {
         }
     }
 
+    // Take an intermediate snapshot. This serves two functions:
+    //   - trim the replicated log to last applied entry, ensuring minimal memory footprint
+    //   - transfer Pekko-persisted messages to SnapshotStore
+    // The second point is important, because we want to complete evacuating Pekko persistence completely before we
+    // instantiate EntryStore.
+    //
+    // While it would seem we can use SnapshotManager to achieve this, that is not what we want here because:
+    //   - recovery really should happen before we ever instantiate SnapshotManager
+    //   - we want this to happen synchronously, without giving Pekko a chance to flood us with subsequent messages
+    //   - SnapshotManager can only access EntryStore, whereas we have access to RaftActor's persistence directly
+    //   - once we have migrated EntryStore to not use Pekko, we'll have explicit control over stored entries, and we
+    //     do not want to be shifting entries from EntryStore to SnapshotStore.
     private void takeRecoverySnapshot(final EntryMeta logEntry) {
-        LOG.info("Time for recovery snapshot on entry with index {}", logEntry.index());
-        final var snapshotManager = context.getSnapshotManager();
-        if (snapshotManager.capture(logEntry, -1)) {
-            LOG.info("Capturing snapshot, resetting timer for the next recovery snapshot interval.");
-            recoverySnapshotTimer.reset().start();
-        } else {
-            LOG.info("SnapshotManager is not able to capture snapshot at this time. It will be retried "
-                + "again with the next recovered entry.");
-        }
-    }
+        LOG.info("{}: Time for recovery snapshot on entry with index {}", memberId(), logEntry.index());
 
-    private boolean shouldTakeRecoverySnapshot() {
-        return recoverySnapshotTimer != null && recoverySnapshotTimer.elapsed(TimeUnit.SECONDS) >= snapshotInterval;
+        final var sw = Stopwatch.createStarted();
+        final var replLog = context.getReplicatedLog();
+        // FIXME: We really do not have followers at this point, but information from VotingConfig may indicate we do.
+        //        We should inline newCaptureSnapshot() logic here with the appropriate specialization.
+        final var request = replLog.newCaptureSnapshot(logEntry, -1, false, context.hasFollowers());
+        final var lastSeq = actor.lastSequenceNr();
+        final var snapshotState = snapshotCohort.takeSnapshot();
+        final var timestamp = Instant.now();
+
+        final var snapshotStore = context.snapshotStore();
+        try {
+            snapshotStore.saveSnapshot(
+                new RaftSnapshot(context.getPeerServerInfo(true), request.getUnAppliedEntries()), request.lastApplied(),
+                ToStorage.ofNullable(snapshotCohort.support().writer(), snapshotState), timestamp);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+
+        snapshotStore.retainSnapshots(timestamp);
+        actor.deleteMessages(lastSeq);
+
+        replLog.snapshotPreCommit(request.getLastAppliedIndex(), request.getLastAppliedTerm());
+        replLog.snapshotCommit();
+
+        LOG.info("{}: recovery snapshot completed in {}, resetting timer for the next recovery snapshot", memberId(),
+            sw.stop());
+        snapshotTimer.reset().start();
     }
 
     private void endCurrentLogRecoveryBatch() {
@@ -375,9 +408,9 @@ class RaftActorRecovery {
             recoveryTime = "";
         }
 
-        if (recoverySnapshotTimer != null) {
-            recoverySnapshotTimer.stop();
-            recoverySnapshotTimer = null;
+        if (snapshotTimer != null) {
+            snapshotTimer.stop();
+            snapshotTimer = null;
         }
 
         final var replLog = replicatedLog();
@@ -422,6 +455,7 @@ class RaftActorRecovery {
     }
 
     void saveRecoverySnapshot() {
+        // FIXME: do not use SnapshotManager here, but rather share code with takeRecoverySnapshot()
         context.getSnapshotManager().capture(replicatedLog().lastMeta(), -1);
     }
 

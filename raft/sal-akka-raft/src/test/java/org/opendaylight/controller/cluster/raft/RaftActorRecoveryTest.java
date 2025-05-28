@@ -181,11 +181,11 @@ class RaftActorRecoveryTest {
     void testIncrementalRecovery() throws Exception {
         int recoverySnapshotInterval = 3;
         configParams.setRecoverySnapshotIntervalSeconds(recoverySnapshotInterval);
+        context.getSnapshotManager().setSnapshotCohort(mockSnapshotCohort);
 
         recovery = support.recoverToPersistent();
 
         int numberOfEntries = 5;
-        context.getSnapshotManager().setSnapshotCohort(mockSnapshotCohort);
         doReturn(new MockSnapshotState(List.of())).when(mockSnapshotCohort).takeSnapshot();
 
         try (var executor = Executors.newSingleThreadScheduledExecutor()) {
