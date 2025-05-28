@@ -247,10 +247,6 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         return persistence();
     }
 
-    public ReplicatedLog getReplicatedLog() {
-        return getRaftActorContext().getReplicatedLog();
-    }
-
     @Override
     public Snapshot getRestoreFromSnapshot() {
         return restoreFromSnapshot;

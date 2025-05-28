@@ -176,12 +176,6 @@ public class RaftActorContextImpl implements RaftActorContext {
         termInformation.storeAndSetTerm(newElectionInfo);
     }
 
-    @Override
-    @Deprecated(forRemoval = true)
-    public final void setReplicatedLog(final ReplicatedLog replicatedLog) {
-        resetReplicatedLog(replicatedLog);
-    }
-
     @Deprecated(forRemoval = true)
     public final void resetReplicatedLog(final @NonNull ReplicatedLog newState) {
         replicatedLog = requireNonNull(newState);

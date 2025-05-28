@@ -216,7 +216,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         });
 
         // Remove entries started from 4 index
-        leaderActor.underlyingActor().getReplicatedLog().trimToReceive(4);
+        leaderActor.underlyingActor().getRaftActorContext().getReplicatedLog().trimToReceive(4);
 
         verifyRaftState(leaderActor, raftState -> {
             assertEquals("leader journal last index", 3, leaderContext.getReplicatedLog().lastIndex());
@@ -237,7 +237,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
 
         reinstateLeaderActor();
 
-        final var log = leaderActor.underlyingActor().getReplicatedLog();
+        final var log = leaderActor.underlyingActor().getRaftActorContext().getReplicatedLog();
         assertEquals("Leader last index", 5, log.lastIndex());
         assertEquals(List.of(payload4, payload5), List.of(log.get(4).command(), log.get(5).command()));
     }
