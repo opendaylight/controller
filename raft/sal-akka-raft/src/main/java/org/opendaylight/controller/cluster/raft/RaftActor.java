@@ -66,7 +66,6 @@ import org.opendaylight.controller.cluster.raft.messages.RequestLeadership;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.persisted.NoopPayload;
-import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.AbstractRaftCommand;
 import org.opendaylight.controller.cluster.raft.spi.AbstractStateCommand;
@@ -689,16 +688,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     private void submitCommand(final @Nullable Identifier identifier, final Payload command, final boolean batchHint) {
         requireNonNull(command);
         final var replLog = replicatedLog();
-        // FIXME: entry should be allocated by the log
-        final var logEntry = new SimpleReplicatedLogEntry(replLog.lastIndex() + 1, context.currentTerm(), command);
-        logEntry.setPersistencePending(true);
+        final var entryIndex = replLog.lastIndex() + 1;
 
-        LOG.debug("{}: Persist data {}", memberId(), logEntry);
-
-        boolean wasAppended = replLog.appendSubmitted(logEntry, persistedEntry -> {
-            // Clear the persistence pending flag in the log entry.
-            persistedEntry.setPersistencePending(false);
-
+        LOG.debug("{}: Persist data {} {}", memberId(), entryIndex, command);
+        boolean wasAppended = replLog.appendSubmitted(entryIndex, context.currentTerm(), command, persistedEntry -> {
             final var currentLog = replicatedLog();
 
             if (!hasFollowers()) {
@@ -725,8 +718,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         if (wasAppended && hasFollowers()) {
             // Send log entry for replication.
-            getCurrentBehavior().handleMessage(self(),
-                new Replicate(logEntry.index(), !batchHint, identifier));
+            getCurrentBehavior().handleMessage(self(), new Replicate(entryIndex, !batchHint, identifier));
         }
     }
 

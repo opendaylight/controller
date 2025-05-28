@@ -16,6 +16,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.CaptureSnapshot;
+import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.raft.api.EntryMeta;
@@ -190,12 +191,14 @@ public interface ReplicatedLog {
     /**
      * Appends an entry submitted on the leader to the in-memory log and persists it as well.
      *
-     * @param <T> entry type
-     * @param entry the entry to append
+     * @param index the index
+     * @param term the term
+     * @param command the command
      * @param callback the callback to be notified when persistence is complete (optional).
      * @return {@code true} if the entry was successfully appended, false otherwise.
      */
-    <T extends ReplicatedLogEntry> boolean appendSubmitted(@NonNull T entry, @Nullable Consumer<T> callback);
+    @NonNullByDefault
+    boolean appendSubmitted(long index, long term, Payload command, @Nullable Consumer<ReplicatedLogEntry> callback);
 
     /**
      * Returns a list of log entries starting from the given index to the end of the log.

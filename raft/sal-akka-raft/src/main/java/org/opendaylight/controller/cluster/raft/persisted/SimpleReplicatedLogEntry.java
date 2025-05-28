@@ -29,6 +29,7 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Seria
     private final long index;
     private final long term;
     private final @NonNull Payload payload;
+
     private boolean persistencePending;
 
     /**
