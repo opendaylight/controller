@@ -18,6 +18,7 @@ import org.apache.pekko.actor.ActorSystem;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
+import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
@@ -135,7 +136,9 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         }
 
         @Override
-        public <T extends ReplicatedLogEntry> boolean appendSubmitted(final T entry, final Consumer<T> callback) {
+        public boolean appendSubmitted(final long index, final long term, final Payload command,
+                final Consumer<ReplicatedLogEntry> callback) {
+            final var entry = new SimpleReplicatedLogEntry(index, term, command);
             // FIXME: do not ignore return value here: we should be returning that instead of 'true'
             append(entry);
             if (callback != null) {
