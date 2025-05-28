@@ -53,6 +53,7 @@ import org.apache.pekko.persistence.SnapshotOffer;
 import org.apache.pekko.protobuf.ByteString;
 import org.apache.pekko.testkit.TestActorRef;
 import org.apache.pekko.testkit.javadsl.TestKit;
+import org.eclipse.jdt.annotation.NonNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -545,15 +546,13 @@ public class RaftActorTest extends AbstractActorTest {
 
         // create 8 entries in the log - 0 to 4 are applied and will get picked up as part of the capture snapshot
 
-        Leader leader = new Leader(leaderActor.getRaftActorContext());
+        Leader leader = new Leader(leaderContext);
         leaderActor.setCurrentBehavior(leader);
         assertSame(leader, leaderActor.getCurrentBehavior());
 
-        leaderActor.getRaftActorContext().setReplicatedLog(new MockRaftActorContext.Builder()
-            .createEntries(0, 8, 1)
-            .build());
+        leaderLog.resetToSnapshot(createSnapshot(0, 8, 1));
 
-        assertEquals(8, leaderActor.getReplicatedLog().size());
+        assertEquals(8, leaderLog.size());
 
         final var snapshotState = new MockSnapshotState(List.of(
             new MockCommand("foo-0"),
@@ -564,7 +563,8 @@ public class RaftActorTest extends AbstractActorTest {
 
         doReturn(snapshotState).when(leaderActor.snapshotCohortDelegate).takeSnapshot();
         doNothing().when(dataPersistenceProvider).streamToInstall(any(), any(), any());
-        leaderActor.getRaftActorContext().getSnapshotManager().captureToInstall(EntryInfo.of(6, 1), 4, "xyzzy");
+
+        leaderContext.getSnapshotManager().captureToInstall(EntryInfo.of(6, 1), 4, "xyzzy");
         verify(leaderActor.snapshotCohortDelegate).takeSnapshot();
 
         final var lastIncludedCaptor = ArgumentCaptor.forClass(EntryInfo.class);
@@ -572,24 +572,24 @@ public class RaftActorTest extends AbstractActorTest {
         final var callbackCaptor = ArgumentCaptor.<RaftCallback<InstallableSnapshot>>captor();
         verify(dataPersistenceProvider).streamToInstall(lastIncludedCaptor.capture(), snapshotCaptor.capture(),
             callbackCaptor.capture());
-        assertTrue(leaderActor.getRaftActorContext().getSnapshotManager().isCapturing());
+        assertTrue(leaderContext.getSnapshotManager().isCapturing());
 
-        assertEquals(8, leaderActor.getReplicatedLog().size());
+        assertEquals(8, leaderLog.size());
 
         assertSame(leader, leaderActor.getCurrentBehavior());
         //fake snapshot on index 5
         leaderActor.handleCommand(new AppendEntriesReply(follower1Id, 1, true, 5, 1, (short)0));
 
-        assertEquals(8, leaderActor.getReplicatedLog().size());
+        assertEquals(8, leaderLog.size());
 
         //fake snapshot on index 6
         assertSame(leader, leaderActor.getCurrentBehavior());
         leaderActor.handleCommand(new AppendEntriesReply(follower1Id, 1, true, 6, 1, (short)0));
-        assertEquals(8, leaderActor.getReplicatedLog().size());
+        assertEquals(8, leaderLog.size());
 
         assertSame(leader, leaderActor.getCurrentBehavior());
 
-        assertEquals(8, leaderActor.getReplicatedLog().size());
+        assertEquals(8, leaderLog.size());
 
         // Finish snapshot commit
         try (var baos = new ByteArrayOutputStream()) {
@@ -599,21 +599,28 @@ public class RaftActorTest extends AbstractActorTest {
         }
 
         // The commit is needed to complete the snapshot creation process
-        leaderActor.getRaftActorContext().getSnapshotManager().commit(-1, Instant.MIN);
-        assertFalse(leaderActor.getRaftActorContext().getSnapshotManager().isCapturing());
+        leaderContext.getSnapshotManager().commit(-1, Instant.MIN);
+        assertFalse(leaderContext.getSnapshotManager().isCapturing());
 
         // capture snapshot reply should remove the snapshotted entries only
-        assertEquals(3, leaderActor.getReplicatedLog().size());
-        assertEquals(7, leaderActor.getReplicatedLog().lastIndex());
+        assertEquals(3, leaderLog.size());
+        assertEquals(7, leaderLog.lastIndex());
 
         // add another non-replicated entry
-        leaderActor.getReplicatedLog().append(
-                new SimpleReplicatedLogEntry(8, 1, new MockCommand("foo-8")));
+        leaderLog.append(new SimpleReplicatedLogEntry(8, 1, new MockCommand("foo-8")));
 
         //fake snapshot on index 7, since lastApplied = 7 , we would keep the last applied
         leaderActor.handleCommand(new AppendEntriesReply(follower1Id, 1, true, 7, 1, (short)0));
-        assertEquals(2, leaderActor.getReplicatedLog().size());
-        assertEquals(8, leaderActor.getReplicatedLog().lastIndex());
+        assertEquals(2, leaderLog.size());
+        assertEquals(8, leaderLog.lastIndex());
+    }
+
+    private static @NonNull Snapshot createSnapshot(final int start, final int end, final int term) {
+        final var entries = new ArrayList<ReplicatedLogEntry>();
+        for (int i = start; i < end; i++) {
+            entries.add(new SimpleReplicatedLogEntry(i, term, new MockCommand(Integer.toString(i))));
+        }
+        return Snapshot.create(null, entries, end - 1, term, -1, -1, TermInfo.INITIAL, null);
     }
 
     @Test
@@ -644,16 +651,15 @@ public class RaftActorTest extends AbstractActorTest {
 
         followerActor.waitForInitializeBehaviorComplete();
 
-        Follower follower = new Follower(followerActor.getRaftActorContext());
+        Follower follower = new Follower(followerContext);
         followerActor.setCurrentBehavior(follower);
         assertSame(follower, followerActor.getCurrentBehavior());
 
         // create 6 entries in the log - 0 to 4 are applied and will get picked up as part of the capture snapshot
-        MockRaftActorContext.Builder logBuilder = new MockRaftActorContext.Builder();
-        followerActor.getRaftActorContext().setReplicatedLog(logBuilder.createEntries(0, 6, 1).build());
+        followerLog.resetToSnapshot(createSnapshot(0, 6, 1));
 
         // log has indices 0-5
-        assertEquals(6, followerActor.getReplicatedLog().size());
+        assertEquals(6, followerLog.size());
 
         //snapshot on 4
         doReturn(new MockSnapshotState(List.of(
@@ -664,42 +670,42 @@ public class RaftActorTest extends AbstractActorTest {
             new MockCommand("foo-4")))).when(followerActor.snapshotCohortDelegate).takeSnapshot();
         final var runnables = new ArrayList<Runnable>();
         dataPersistenceProvider.setActor(runnables::add);
-        followerActor.getRaftActorContext().getSnapshotManager().captureToInstall(EntryInfo.of(5, 1), 4, "xyzzy");
+        followerContext.getSnapshotManager().captureToInstall(EntryInfo.of(5, 1), 4, "xyzzy");
 
-        assertEquals(6, followerActor.getReplicatedLog().size());
+        assertEquals(6, followerLog.size());
         assertEquals(1, runnables.size());
         dataPersistenceProvider.setActor(Runnable::run);
 
         //fake snapshot on index 6
         List<ReplicatedLogEntry> entries = List.of(new SimpleReplicatedLogEntry(6, 1, new MockCommand("foo-6")));
         followerActor.handleCommand(new AppendEntries(1, leaderId, 5, 1, entries, 5, 5, (short)0));
-        assertEquals(7, followerActor.getReplicatedLog().size());
+        assertEquals(7, followerLog.size());
 
         //fake snapshot on index 7
         assertInstanceOf(Follower.class, followerActor.getCurrentBehavior());
 
         entries = List.of(new SimpleReplicatedLogEntry(7, 1, new MockCommand("foo-7")));
         followerActor.handleCommand(new AppendEntries(1, leaderId, 6, 1, entries, 6, 6, (short) 0));
-        assertEquals(8, followerActor.getReplicatedLog().size());
+        assertEquals(8, followerLog.size());
 
         assertInstanceOf(Follower.class, followerActor.getCurrentBehavior());
 
         runnables.getLast().run();
-        assertTrue(followerActor.getRaftActorContext().getSnapshotManager().isCapturing());
+        assertTrue(followerContext.getSnapshotManager().isCapturing());
 
         // The commit is needed to complete the snapshot creation process
-        followerActor.getRaftActorContext().getSnapshotManager().commit(-1, Instant.MIN);
+        followerContext.getSnapshotManager().commit(-1, Instant.MIN);
 
         // capture snapshot reply should remove the snapshotted entries only till replicatedToAllIndex
-        assertEquals(3, followerActor.getReplicatedLog().size()); //indexes 5,6,7 left in the log
-        assertEquals(7, followerActor.getReplicatedLog().lastIndex());
+        assertEquals(3, followerLog.size()); //indexes 5,6,7 left in the log
+        assertEquals(7, followerLog.lastIndex());
 
         entries = List.of(new SimpleReplicatedLogEntry(8, 1, new MockCommand("foo-7")));
         // send an additional entry 8 with leaderCommit = 7
         followerActor.handleCommand(new AppendEntries(1, leaderId, 7, 1, entries, 7, 7, (short) 0));
 
         // 7 and 8, as lastapplied is 7
-        assertEquals(2, followerActor.getReplicatedLog().size());
+        assertEquals(2, followerLog.size());
     }
 
     @Test
@@ -734,24 +740,22 @@ public class RaftActorTest extends AbstractActorTest {
 
         leaderActor.waitForInitializeBehaviorComplete();
 
-        Leader leader = new Leader(leaderActor.getRaftActorContext());
+        Leader leader = new Leader(leaderContext);
         leaderActor.setCurrentBehavior(leader);
         assertSame(leader, leaderActor.getCurrentBehavior());
 
         // create 5 entries in the log
-        leaderActor.getRaftActorContext().setReplicatedLog(new MockRaftActorContext.Builder()
-            .createEntries(5, 10, 1)
-            .build());
+        leaderLog.resetToSnapshot(createSnapshot(5, 10, 1));
 
         //set the snapshot index to 4 , 0 to 4 are snapshotted
-        leaderActor.getRaftActorContext().getReplicatedLog().setSnapshotIndex(4);
+        leaderLog.setSnapshotIndex(4);
         //setting replicatedToAllIndex = 9, for the log to clear
         leader.setReplicatedToAllIndex(9);
-        assertEquals(5, leaderActor.getReplicatedLog().size());
+        assertEquals(5, leaderLog.size());
         assertSame(leader, leaderActor.getCurrentBehavior());
 
         leaderActor.handleCommand(new AppendEntriesReply(follower1Id, 1, true, 9, 1, (short) 0));
-        assertEquals(5, leaderActor.getReplicatedLog().size());
+        assertEquals(5, leaderLog.size());
         assertSame(leader, leaderActor.getCurrentBehavior());
 
         doReturn(new MockSnapshotState(List.of(
@@ -765,31 +769,29 @@ public class RaftActorTest extends AbstractActorTest {
         dataPersistenceProvider.setActor(runnables::add);
 
         // set the 2nd follower nextIndex to 1 which has been snapshotted
-        leaderActor.handleCommand(new AppendEntriesReply(follower2Id, 1, true, 0, 1, (short)0));
-        assertEquals(5, leaderActor.getReplicatedLog().size());
+        leaderActor.handleCommand(new AppendEntriesReply(follower2Id, 1, true, 0, 1, (short) 0));
+        assertEquals(5, leaderLog.size());
         assertSame(leader, leaderActor.getCurrentBehavior());
         assertEquals(1, runnables.size());
         dataPersistenceProvider.setActor(Runnable::run);
 
         // simulate a real snapshot
         leaderActor.handleCommand(SendHeartBeat.INSTANCE);
-        assertEquals(5, leaderActor.getReplicatedLog().size());
+        assertEquals(5, leaderLog.size());
         assertSame(leader, leaderActor.getCurrentBehavior());
 
         //reply from a slow follower does not initiate a fake snapshot
-        leaderActor.handleCommand(new AppendEntriesReply(follower2Id, 1, true, 9, 1, (short)0));
-        assertEquals("Fake snapshot should not happen when Initiate is in progress", 5,
-                leaderActor.getReplicatedLog().size());
+        leaderActor.handleCommand(new AppendEntriesReply(follower2Id, 1, true, 9, 1, (short) 0));
+        assertEquals("Fake snapshot should not happen when Initiate is in progress", 5, leaderLog.size());
 
         runnables.getFirst().run();
-        assertTrue(leaderActor.getRaftActorContext().getSnapshotManager().isCapturing());
+        assertTrue(leaderContext.getSnapshotManager().isCapturing());
 
-        assertEquals("Real snapshot didn't clear the log till replicatedToAllIndex", 0,
-                leaderActor.getReplicatedLog().size());
+        assertEquals("Real snapshot didn't clear the log till replicatedToAllIndex", 0, leaderLog.size());
 
         //reply from a slow follower after should not raise errors
         leaderActor.handleCommand(new AppendEntriesReply(follower2Id, 1, true, 5, 1, (short) 0));
-        assertEquals(0, leaderActor.getReplicatedLog().size());
+        assertEquals(0, leaderLog.size());
     }
 
     @Test
@@ -826,8 +828,7 @@ public class RaftActorTest extends AbstractActorTest {
         final var mockState = ByteState.of(fromObject("foo").toByteArray());
         leaderContext.getSnapshotManager().setSnapshotCohort((ByteStateSnapshotCohort) () -> mockState);
 
-        leaderContext.getSnapshotManager().captureToInstall(
-                leaderActor.getReplicatedLog().lastMeta(), -1, "member1");
+        leaderContext.getSnapshotManager().captureToInstall(leaderLog.lastMeta(), -1, "member1");
 
         // Trimming log in this scenario is a no-op
         assertEquals(-1, leaderLog.getSnapshotIndex());
@@ -1220,12 +1221,12 @@ public class RaftActorTest extends AbstractActorTest {
         final var leaderContext = leaderActor.getRaftActorContext();
         leaderContext.setTermInfo(new TermInfo(1, leaderId));
 
-        Leader leader = new Leader(leaderActor.getRaftActorContext());
+        Leader leader = new Leader(leaderContext);
         leaderActor.setCurrentBehavior(leader);
 
         leaderActor.submitCommand(new MockIdentifier("1"), new MockCommand("1"), false);
 
-        final var leaderLog = leaderActor.getReplicatedLog();
+        final var leaderLog = leaderContext.getReplicatedLog();
         final var storedMeta = leaderLog.lookupStoredMeta(0);
         assertNotNull(storedMeta);
         assertFalse(storedMeta.durable());
@@ -1263,9 +1264,10 @@ public class RaftActorTest extends AbstractActorTest {
         MockRaftActor leaderActor = leaderActorRef.underlyingActor();
         leaderActor.waitForInitializeBehaviorComplete();
 
-        leaderActor.getRaftActorContext().setTermInfo(new TermInfo(1, leaderId));
+        final var leaderContext = leaderActor.getRaftActorContext();
+        leaderContext.setTermInfo(new TermInfo(1, leaderId));
 
-        Leader leader = new Leader(leaderActor.getRaftActorContext());
+        Leader leader = new Leader(leaderContext);
         leaderActor.setCurrentBehavior(leader);
 
         MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
@@ -1307,8 +1309,9 @@ public class RaftActorTest extends AbstractActorTest {
         MockRaftActor leaderActor = leaderActorRef.underlyingActor();
         leaderActor.waitForInitializeBehaviorComplete();
 
-        leaderActor.getRaftActorContext().setTermInfo(new TermInfo(1, leaderId));
-        Leader leader = new Leader(leaderActor.getRaftActorContext());
+        final var leaderContext = leaderActor.getRaftActorContext();
+        leaderContext.setTermInfo(new TermInfo(1, leaderId));
+        Leader leader = new Leader(leaderContext);
         leaderActor.setCurrentBehavior(leader);
 
         final var executorService = Executors.newSingleThreadExecutor(

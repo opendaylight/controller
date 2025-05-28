@@ -1188,8 +1188,9 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertEquals(List.of(entries.get(0).command(), entries.get(1).command(), entries.get(2).command()),
             MockRaftActor.fromState(snapshotFile.readSnapshot(MockSnapshotState.SUPPORT.reader())));
 
-        assertEquals("Journal size", 0, followerRaftActorRef.get().getReplicatedLog().size());
-        assertEquals("Snapshot index", 2, followerRaftActorRef.get().getReplicatedLog().getSnapshotIndex());
+        var followerLog = followerRaftActorRef.get().getRaftActorContext().getReplicatedLog();
+        assertEquals("Journal size", 0, followerLog.size());
+        assertEquals("Snapshot index", 2, followerLog.getSnapshotIndex());
 
         // Reinstate the actor from persistence
 
@@ -1200,7 +1201,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         followerRaftActorRef.set(followerActorRef.underlyingActor());
         followerRaftActorRef.get().waitForInitializeBehaviorComplete();
 
-        final var followerLog = followerRaftActorRef.get().getReplicatedLog();
+        followerLog = followerRaftActorRef.get().getRaftActorContext().getReplicatedLog();
         assertEquals("Journal size", 0, followerLog.size());
         assertEquals("Last index", 2, followerLog.lastIndex());
         assertEquals("Last applied index", 2, followerLog.getLastApplied());

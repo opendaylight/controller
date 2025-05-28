@@ -102,15 +102,6 @@ public interface RaftActorContext {
     void persistTermInfo(@NonNull TermInfo termInfo) throws IOException;
 
     /**
-     * Sets the ReplicatedLog instance.
-     *
-     * @param replicatedLog the ReplicatedLog instance.
-     */
-    @VisibleForTesting
-    @Deprecated(forRemoval = true)
-    void setReplicatedLog(@NonNull ReplicatedLog replicatedLog);
-
-    /**
      * Returns the ReplicatedLog instance.
      *
      * @return the ReplicatedLog instance.
