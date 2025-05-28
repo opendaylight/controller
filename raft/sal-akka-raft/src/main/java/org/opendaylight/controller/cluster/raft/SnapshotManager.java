@@ -664,10 +664,6 @@ public final class SnapshotManager {
         this.snapshotCohort = requireNonNull(snapshotCohort);
     }
 
-    long getLastSequenceNumber() {
-        return task instanceof Persist persist ? persist.lastSequenceNumber() : -1;
-    }
-
     @VisibleForTesting
     public @Nullable CaptureSnapshot getCaptureSnapshot() {
         return switch (task) {

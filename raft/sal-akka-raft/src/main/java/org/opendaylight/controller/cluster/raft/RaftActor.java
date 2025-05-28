@@ -651,16 +651,6 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         return change;
     }
 
-    @Override
-    public long snapshotSequenceNr() {
-        // When we do a snapshot capture, we also capture and save the sequence-number of the persistent journal,
-        // so that we can delete the persistent journal based on the saved sequence-number.
-        // However, when Akka replays the journal during recovery, it replays it from the sequence number when the
-        // snapshot was saved and not the number we saved. We would want to override it, by asking Akka to use the
-        // last-sequence number known to us.
-        return context.getSnapshotManager().getLastSequenceNumber();
-    }
-
     /**
      * Request a {@link RaftCommand} to be applied to the finite state machine. Once consensus is reached,
      * {@link #applyCommand(ApplyState)} will be called with matching arguments.
