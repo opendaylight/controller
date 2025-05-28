@@ -8,6 +8,8 @@
 package org.opendaylight.controller.cluster.raft;
 
 import java.util.function.Consumer;
+import org.opendaylight.controller.cluster.raft.messages.Payload;
+import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.raft.api.EntryMeta;
 
@@ -30,9 +32,10 @@ final class MockReplicatedLog extends AbstractReplicatedLog {
     }
 
     @Override
-    public <T extends ReplicatedLogEntry> boolean appendSubmitted(final T entry, final Consumer<T> callback) {
+    public boolean appendSubmitted(final long index, final long term, final Payload command,
+            final Consumer<ReplicatedLogEntry> callback) {
         if (callback != null) {
-            callback.accept(entry);
+            callback.accept(new SimpleReplicatedLogEntry(index, term, command));
         }
         return true;
     }
