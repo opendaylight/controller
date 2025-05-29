@@ -48,8 +48,8 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         send2InitialPayloads();
 
         // Block these messages initially so we can control the sequence.
-        final var leaderPersistence = leaderActor.underlyingActor()
-            .overridePersistence(CapturingDataPersistenceProvider::new);
+        final var leaderPersistence = leaderActor.underlyingActor().persistence()
+            .decorateSnapshotStore(CapturingSnapshotStore::new);
 
         follower1Actor.underlyingActor().startDropMessages(AppendEntries.class);
 
