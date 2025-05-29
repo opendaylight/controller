@@ -13,11 +13,5 @@ package org.opendaylight.controller.cluster.raft.spi;
 // FIXME: find a better name for this interface. It is heavily influenced by Pekko Persistence, most notably the weird
 //        API around snapshots and message deletion -- which assumes the entity requesting it is the subclass itself.
 public interface DataPersistenceProvider extends EntryStore, SnapshotStore {
-    /**
-     * Returns whether or not persistence recovery is applicable/enabled.
-     *
-     * @return {@code true} if recovery is applicable, otherwise false, in which case the provider is not persistent and
-     *         may not have anything to be recovered
-     */
-    boolean isRecoveryApplicable();
+    // Nothing else
 }

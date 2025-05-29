@@ -14,6 +14,7 @@ import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.mock;
 
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,11 +26,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Props;
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
+import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.Support;
@@ -67,11 +69,12 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
             snapshotCohortDelegate = builder.snapshotCohort;
         }
 
-        final var persistence = builder.dataPersistenceProvider;
-        if (persistence == null) {
+        final var provider = builder.dataPersistenceProvider;
+        if (provider == null) {
             setPersistence(builder.persistent.orElse(Boolean.TRUE));
         } else {
-            overridePersistence((delegate, actor) -> persistence);
+            persistence().decorateEntryStore((delegate, actor) -> provider);
+            persistence().decorateSnapshotStore((delegate, actor) -> provider);
         }
 
         roleChangeNotifier = builder.roleChangeNotifier;
@@ -243,8 +246,8 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         throw new IllegalStateException("Unexpected snapshot State: " + from);
     }
 
-    public final @NonNull DataPersistenceProvider getPersistence() {
-        return persistence();
+    public final @Nullable SnapshotFile lastSnapshot() throws IOException {
+        return persistence().snapshotStore().lastSnapshot();
     }
 
     @Override

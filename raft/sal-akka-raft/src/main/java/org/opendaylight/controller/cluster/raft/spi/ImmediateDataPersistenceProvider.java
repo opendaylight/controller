@@ -28,11 +28,6 @@ public interface ImmediateDataPersistenceProvider extends DataPersistenceProvide
     ExecuteInSelfActor actor();
 
     @Override
-    default boolean isRecoveryApplicable() {
-        return false;
-    }
-
-    @Override
     default @Nullable SnapshotFile lastSnapshot() throws IOException {
         return null;
     }

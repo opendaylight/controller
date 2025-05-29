@@ -23,9 +23,4 @@ public abstract non-sealed class EnabledRaftStorage extends RaftStorage {
             final CompressionType compression, final Configuration streamConfig) {
         super(memberId, executeInSelf, directory, compression, streamConfig);
     }
-
-    @Override
-    public final boolean isRecoveryApplicable() {
-        return true;
-    }
 }
