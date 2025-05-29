@@ -21,7 +21,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
-import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.EntryStore;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
@@ -205,7 +204,7 @@ public interface RaftActorContext {
      */
     @Deprecated(since = "11.0.0", forRemoval = true)
     @VisibleForTesting
-    @NonNull DataPersistenceProvider getPersistenceProvider();
+    @NonNull PersistenceProvider getPersistenceProvider();
 
     /**
      * Returns the {@link EntryStore}.

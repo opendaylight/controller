@@ -23,7 +23,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
-import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage;
 import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
 import org.opendaylight.controller.cluster.raft.spi.EntryStore;
@@ -43,7 +42,7 @@ import org.opendaylight.raft.spi.InstallableSnapshot;
  * persistent and non-persistent mode of operation.
  */
 @NonNullByDefault
-final class PersistenceControl implements DataPersistenceProvider, TestablePersistence {
+final class PersistenceControl implements PersistenceProvider, TestablePersistence {
     private final DisabledRaftStorage disabledStorage;
     private final EnabledRaftStorage enabledStorage;
 

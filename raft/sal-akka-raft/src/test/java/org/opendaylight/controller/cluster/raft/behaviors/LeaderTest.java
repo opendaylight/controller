@@ -55,7 +55,7 @@ import org.opendaylight.controller.cluster.raft.RaftActorLeadershipTransferCohor
 import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.CaptureSnapshot;
-import org.opendaylight.controller.cluster.raft.TestDataProvider;
+import org.opendaylight.controller.cluster.raft.TestPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.VotingState;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
@@ -783,7 +783,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leader.markFollowerActive(FOLLOWER_ID);
 
         final var runnables = new ArrayList<Runnable>();
-        final var persistence = assertInstanceOf(TestDataProvider.class, actorContext.getPersistenceProvider());
+        final var persistence = assertInstanceOf(TestPersistenceProvider.class, actorContext.getPersistenceProvider());
         persistence.setActor(runnables::add);
 
         // Sending this AppendEntriesReply forces the Leader to capture a snapshot, which subsequently gets

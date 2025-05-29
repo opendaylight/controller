@@ -30,7 +30,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
-import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
@@ -261,7 +260,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     public static Props props(final String id, final Path stateDir, final Map<String, String> peerAddresses,
-            final ConfigParams config, final DataPersistenceProvider dataPersistenceProvider) {
+            final ConfigParams config, final PersistenceProvider dataPersistenceProvider) {
         return builder().id(id).peerAddresses(peerAddresses).config(config)
                 .dataPersistenceProvider(dataPersistenceProvider).props(stateDir);
     }
@@ -275,7 +274,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         private Map<String, String> peerAddresses = Map.of();
         private String id;
         private ConfigParams config;
-        private DataPersistenceProvider dataPersistenceProvider;
+        private PersistenceProvider dataPersistenceProvider;
         private ActorRef roleChangeNotifier;
         private RaftActorSnapshotMessageSupport snapshotMessageSupport;
         private Snapshot restoreFromSnapshot;
@@ -307,7 +306,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
             return self();
         }
 
-        public T dataPersistenceProvider(final DataPersistenceProvider newDataPersistenceProvider) {
+        public T dataPersistenceProvider(final PersistenceProvider newDataPersistenceProvider) {
             dataPersistenceProvider = newDataPersistenceProvider;
             return self();
         }

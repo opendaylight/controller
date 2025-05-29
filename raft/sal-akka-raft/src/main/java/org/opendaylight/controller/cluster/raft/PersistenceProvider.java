@@ -5,13 +5,16 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.raft.spi;
+package org.opendaylight.controller.cluster.raft;
+
+import com.google.common.annotations.VisibleForTesting;
+import org.opendaylight.controller.cluster.raft.spi.EntryStore;
+import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
 
 /**
  * This interface provides methods to persist data and is an abstraction of the akka-persistence persistence API.
  */
-// FIXME: find a better name for this interface. It is heavily influenced by Pekko Persistence, most notably the weird
-//        API around snapshots and message deletion -- which assumes the entity requesting it is the subclass itself.
-public interface DataPersistenceProvider extends EntryStore, SnapshotStore {
+@VisibleForTesting
+public interface PersistenceProvider extends EntryStore, SnapshotStore {
     // Nothing else
 }

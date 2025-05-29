@@ -559,7 +559,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         // below.
         leaderRaftActor.setDropMessageOfType(null);
 
-        final var dropCallbacks = new TestDataProvider(runnable -> {
+        final var dropCallbacks = new TestPersistenceProvider(runnable -> {
             LOG.info("Ignoring {}", runnable);
         });
         leaderRaftActor.persistence().decorateEntryStore((delegate, actor) -> dropCallbacks);
@@ -1502,7 +1502,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
 
         return new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
             new LocalAccess(id, stateDir(), new FailingTermInfoStore(1, LEADER_ID)), Map.of(LEADER_ID, ""),
-            configParams, (short) 0, new TestDataProvider(),
+            configParams, (short) 0, new TestPersistenceProvider(),
             (identifier, entry) -> actor.tell(new ApplyState(identifier, entry), actor),
             MoreExecutors.directExecutor());
     }

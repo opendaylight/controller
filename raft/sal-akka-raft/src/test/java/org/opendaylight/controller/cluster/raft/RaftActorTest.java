@@ -85,7 +85,6 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
-import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.EntryStore;
 import org.opendaylight.controller.cluster.raft.spi.ForwardingEntryStore;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
@@ -216,7 +215,7 @@ public class RaftActorTest extends AbstractActorTest {
         config.setHeartBeatInterval(ONE_DAY);
 
         TestActorRef<MockRaftActor> ref = factory.createTestActor(MockRaftActor.props(persistenceId, stateDir(),
-                Map.of("member1", "address"), config, new TestDataProvider()), persistenceId);
+                Map.of("member1", "address"), config, new TestPersistenceProvider()), persistenceId);
 
         MockRaftActor mockRaftActor = ref.underlyingActor();
 
@@ -236,7 +235,7 @@ public class RaftActorTest extends AbstractActorTest {
         config.setElectionTimeoutFactor(1);
 
         TestActorRef<MockRaftActor> ref = factory.createTestActor(MockRaftActor.props(persistenceId, stateDir(),
-                Map.of("member1", "address"), config, new TestDataProvider())
+                Map.of("member1", "address"), config, new TestPersistenceProvider())
                 .withDispatcher(Dispatchers.DefaultDispatcherId()), persistenceId);
         ref.underlyingActor().waitForRecoveryComplete();
 
@@ -249,7 +248,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         config.setHeartBeatInterval(ONE_DAY);
         ref = factory.createTestActor(MockRaftActor.props(persistenceId, stateDir(), Map.of("member1", "address"),
-                config, new TestDataProvider()).withDispatcher(Dispatchers.DefaultDispatcherId()),
+                config, new TestPersistenceProvider()).withDispatcher(Dispatchers.DefaultDispatcherId()),
                 factory.generateActorId("follower-"));
 
         MockRaftActor actor = ref.underlyingActor();
@@ -353,7 +352,7 @@ public class RaftActorTest extends AbstractActorTest {
         final var persistenceId = factory.generateActorId("leader-");
         final var config = new DefaultConfigParamsImpl();
         config.setHeartBeatInterval(ONE_DAY);
-        final var dataPersistenceProvider = mock(DataPersistenceProvider.class);
+        final var dataPersistenceProvider = mock(PersistenceProvider.class);
         final var mockRaftActor = factory.<MockRaftActor>createTestActor(MockRaftActor.props(persistenceId, stateDir(),
             Map.of(), config, dataPersistenceProvider), persistenceId)
             .underlyingActor();
@@ -372,7 +371,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         config.setHeartBeatInterval(ONE_DAY);
 
-        DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
+        PersistenceProvider dataPersistenceProvider = mock(PersistenceProvider.class);
 
         TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(MockRaftActor.props(persistenceId,
             stateDir(), Map.of(), config, dataPersistenceProvider), persistenceId);
@@ -403,7 +402,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         final TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.builder()
                 .id(persistenceId).config(config).roleChangeNotifier(notifierActor)
-                .dataPersistenceProvider(new TestDataProvider()).props(stateDir())
+                .dataPersistenceProvider(new TestPersistenceProvider()).props(stateDir())
                 .withDispatcher(Dispatchers.DefaultDispatcherId()),
                 persistenceId);
 
@@ -527,7 +526,7 @@ public class RaftActorTest extends AbstractActorTest {
         config.setHeartBeatInterval(ONE_DAY);
         config.setIsolatedLeaderCheckInterval(ONE_DAY);
 
-        final var dataPersistenceProvider = mock(DataPersistenceProvider.class);
+        final var dataPersistenceProvider = mock(PersistenceProvider.class);
 
         Map<String, String> peerAddresses = Map.of(follower1Id, followerActor1.path().toString());
 
@@ -635,7 +634,7 @@ public class RaftActorTest extends AbstractActorTest {
         config.setHeartBeatInterval(ONE_DAY);
         config.setIsolatedLeaderCheckInterval(ONE_DAY);
 
-        final var dataPersistenceProvider = new TestDataProvider();
+        final var dataPersistenceProvider = new TestPersistenceProvider();
 
         Map<String, String> peerAddresses = Map.of(leaderId, leaderActor1.path().toString());
 
@@ -722,7 +721,7 @@ public class RaftActorTest extends AbstractActorTest {
         config.setHeartBeatInterval(ONE_DAY);
         config.setIsolatedLeaderCheckInterval(ONE_DAY);
 
-        final var dataPersistenceProvider = new TestDataProvider();
+        final var dataPersistenceProvider = new TestPersistenceProvider();
 
         final var peerAddresses = Map.of(
             follower1Id, followerActor1.path().toString(),
@@ -806,7 +805,7 @@ public class RaftActorTest extends AbstractActorTest {
         final var peerAddresses = Map.of("member1", "address");
 
         TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(
-                MockRaftActor.props(persistenceId, stateDir(), peerAddresses, config, new TestDataProvider()),
+                MockRaftActor.props(persistenceId, stateDir(), peerAddresses, config, new TestPersistenceProvider()),
                 persistenceId);
 
         MockRaftActor leaderActor = mockActorRef.underlyingActor();
@@ -848,7 +847,7 @@ public class RaftActorTest extends AbstractActorTest {
         final var peerAddresses = Map.of("member1", "address");
 
         TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(
-                MockRaftActor.props(persistenceId, stateDir(), peerAddresses, config, new TestDataProvider()),
+                MockRaftActor.props(persistenceId, stateDir(), peerAddresses, config, new TestPersistenceProvider()),
                 persistenceId);
 
         MockRaftActor leaderActor = mockActorRef.underlyingActor();
@@ -886,7 +885,7 @@ public class RaftActorTest extends AbstractActorTest {
         config.setSnapshotBatchCount(5);
 
         TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(
-                MockRaftActor.props(persistenceId, stateDir(), Map.of(), config, new TestDataProvider()),
+                MockRaftActor.props(persistenceId, stateDir(), Map.of(), config, new TestPersistenceProvider()),
                 persistenceId);
 
         MockRaftActor leaderActor = mockActorRef.underlyingActor();
@@ -929,7 +928,7 @@ public class RaftActorTest extends AbstractActorTest {
         final var emptyConfig = new DefaultConfigParamsImpl();
         final var persistenceId = factory.generateActorId("follower-");
         final var peerAddresses = Map.of("member1", "address");
-        final var dataPersistenceProvider = mock(DataPersistenceProvider.class);
+        final var dataPersistenceProvider = mock(PersistenceProvider.class);
 
         TestActorRef<MockRaftActor> actorRef = factory.createTestActor(
                 MockRaftActor.props(persistenceId, stateDir(), peerAddresses, emptyConfig, dataPersistenceProvider),
@@ -1210,7 +1209,7 @@ public class RaftActorTest extends AbstractActorTest {
         config.setHeartBeatInterval(ONE_DAY);
         config.setIsolatedLeaderCheckInterval(ONE_DAY);
 
-        final var mockPersistenceProvider = mock(DataPersistenceProvider.class);
+        final var mockPersistenceProvider = mock(PersistenceProvider.class);
 
         TestActorRef<MockRaftActor> leaderActorRef = factory.createTestActor(
                 MockRaftActor.props(leaderId, stateDir(), Map.of(followerId, followerActor.path().toString()), config,

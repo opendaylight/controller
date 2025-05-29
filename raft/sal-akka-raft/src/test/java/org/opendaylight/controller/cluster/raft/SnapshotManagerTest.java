@@ -44,7 +44,6 @@ import org.opendaylight.controller.cluster.raft.behaviors.Leader;
 import org.opendaylight.controller.cluster.raft.persisted.ByteState;
 import org.opendaylight.controller.cluster.raft.persisted.ByteStateSnapshotCohort;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
@@ -66,7 +65,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     @Mock
     private AbstractReplicatedLog mockReplicatedLog;
     @Mock
-    private DataPersistenceProvider mockDataPersistenceProvider;
+    private PersistenceProvider mockDataPersistenceProvider;
     @Mock
     private Leader mockRaftActorBehavior;
     @Mock(answer = Answers.CALLS_REAL_METHODS)

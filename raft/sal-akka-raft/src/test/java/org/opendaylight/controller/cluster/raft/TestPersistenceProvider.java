@@ -16,7 +16,6 @@ import java.time.Instant;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
-import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.ImmediateEntryStore;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
@@ -31,14 +30,14 @@ import org.opendaylight.raft.spi.PlainSnapshotSource;
 
 @VisibleForTesting
 @NonNullByDefault
-public final class TestDataProvider implements DataPersistenceProvider, ImmediateEntryStore, SnapshotStore {
+public final class TestPersistenceProvider implements PersistenceProvider, ImmediateEntryStore, SnapshotStore {
     private ExecuteInSelfActor actor;
 
-    public TestDataProvider() {
+    TestPersistenceProvider() {
         this(Runnable::run);
     }
 
-    public TestDataProvider(final ExecuteInSelfActor actor) {
+    TestPersistenceProvider(final ExecuteInSelfActor actor) {
         this.actor = requireNonNull(actor);
     }
 
