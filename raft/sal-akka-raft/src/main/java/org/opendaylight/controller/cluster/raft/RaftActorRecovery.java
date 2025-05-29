@@ -316,12 +316,15 @@ class RaftActorRecovery {
             }
 
             if (snapshotTimer != null && snapshotTimer.elapsed(TimeUnit.SECONDS) >= snapshotInterval) {
+                LOG.info("{}: Time for recovery snapshot", memberId());
                 if (currentRecoveryBatchCount > 0) {
                     endCurrentLogRecoveryBatch();
                 }
                 replLog.setLastApplied(lastApplied);
                 replLog.setCommitIndex(lastApplied);
-                takeRecoverySnapshot(logEntry);
+                takeSnapshot(logEntry);
+                LOG.info("{}: Resetting timer for the next recovery snapshot", memberId());
+                snapshotTimer.reset().start();
             }
         }
 
@@ -358,8 +361,8 @@ class RaftActorRecovery {
     //   - SnapshotManager can only access EntryStore, whereas we have access to RaftActor's persistence directly
     //   - once we have migrated EntryStore to not use Pekko, we'll have explicit control over stored entries, and we
     //     do not want to be shifting entries from EntryStore to SnapshotStore.
-    private void takeRecoverySnapshot(final EntryMeta logEntry) {
-        LOG.info("{}: Time for recovery snapshot on entry with index {}", memberId(), logEntry.index());
+    private void takeSnapshot(final EntryMeta logEntry) {
+        LOG.info("{}: Taking snapshot on entry with index {}", memberId(), logEntry.index());
 
         final var sw = Stopwatch.createStarted();
         final var replLog = context.getReplicatedLog();
@@ -385,9 +388,7 @@ class RaftActorRecovery {
         replLog.snapshotPreCommit(request.getLastAppliedIndex(), request.getLastAppliedTerm());
         replLog.snapshotCommit();
 
-        LOG.info("{}: recovery snapshot completed in {}, resetting timer for the next recovery snapshot", memberId(),
-            sw.stop());
-        snapshotTimer.reset().start();
+        LOG.info("{}: Snapshot completed in {}, resetting timer for the next recovery snapshot", memberId(), sw.stop());
     }
 
     private void endCurrentLogRecoveryBatch() {
@@ -455,8 +456,7 @@ class RaftActorRecovery {
     }
 
     void saveRecoverySnapshot() {
-        // FIXME: do not use SnapshotManager here, but rather share code with takeRecoverySnapshot()
-        context.getSnapshotManager().capture(replicatedLog().lastMeta(), -1);
+        takeSnapshot(replicatedLog().lastMeta());
     }
 
     // Either data persistence is disabled and we recovered some data entries (i.e. we must have just transitioned
