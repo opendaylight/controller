@@ -16,9 +16,12 @@ import java.time.Instant;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
-import org.opendaylight.controller.cluster.raft.spi.ImmediateDataPersistenceProvider;
+import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
+import org.opendaylight.controller.cluster.raft.spi.ImmediateEntryStore;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
+import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
+import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.ByteArray;
@@ -28,7 +31,7 @@ import org.opendaylight.raft.spi.PlainSnapshotSource;
 
 @VisibleForTesting
 @NonNullByDefault
-public final class TestDataProvider implements ImmediateDataPersistenceProvider {
+public final class TestDataProvider implements DataPersistenceProvider, ImmediateEntryStore, SnapshotStore {
     private ExecuteInSelfActor actor;
 
     public TestDataProvider() {
@@ -42,6 +45,16 @@ public final class TestDataProvider implements ImmediateDataPersistenceProvider 
     @Override
     public ExecuteInSelfActor actor() {
         return actor;
+    }
+
+    @Override
+    public @Nullable SnapshotFile lastSnapshot() throws IOException {
+        return null;
+    }
+
+    @Override
+    public void retainSnapshots(final Instant firstRetained) {
+        // no-op
     }
 
     @Override

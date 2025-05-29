@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Internal interface towards storage entities.
  */
-public abstract sealed class RaftStorage implements DataPersistenceProvider
+public abstract sealed class RaftStorage implements EntryStore, SnapshotStore
         permits DisabledRaftStorage, EnabledRaftStorage {
     @NonNullByDefault
     protected abstract class CancellableTask<T> implements Runnable {

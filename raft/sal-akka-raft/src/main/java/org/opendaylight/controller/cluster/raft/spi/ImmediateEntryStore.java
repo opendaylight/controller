@@ -9,28 +9,20 @@ package org.opendaylight.controller.cluster.raft.spi;
 
 import static java.util.Objects.requireNonNull;
 
-import java.io.IOException;
-import java.time.Instant;
 import java.util.function.Consumer;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 
 /**
- * An immediate {@link DataPersistenceProvider}. Offloads asynchronous persist responses via {@link ExecuteInSelfActor}
- * exposed by {@link #actor()}.
+ * An immediate {@link EntryStore}. Offloads asynchronous persist responses via {@link ExecuteInSelfActor}
+ * exposed via {@link #actor()}.
  */
 @NonNullByDefault
-public interface ImmediateDataPersistenceProvider extends DataPersistenceProvider {
+public interface ImmediateEntryStore extends EntryStore {
 
     ExecuteInSelfActor actor();
-
-    @Override
-    default @Nullable SnapshotFile lastSnapshot() throws IOException {
-        return null;
-    }
 
     @Override
     default void persistEntry(final ReplicatedLogEntry entry, final Consumer<ReplicatedLogEntry> callback) {
@@ -52,11 +44,6 @@ public interface ImmediateDataPersistenceProvider extends DataPersistenceProvide
     @Override
     default void markLastApplied(final long lastApplied) {
         // No-op
-    }
-
-    @Override
-    default void retainSnapshots(final Instant firstRetained) {
-        // no-op
     }
 
     @Override

@@ -32,7 +32,7 @@ import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
  * provide {@link ExecuteInSelfActor} services.
  */
 @NonNullByDefault
-public final class DisabledRaftStorage extends RaftStorage implements ImmediateDataPersistenceProvider {
+public final class DisabledRaftStorage extends RaftStorage implements ImmediateEntryStore {
     public DisabledRaftStorage(final String memberId, final ExecuteInSelfActor executeInSelf, final Path directory,
             final CompressionType compression, final Configuration streamConfig) {
         super(memberId, executeInSelf, directory, compression, streamConfig);
@@ -73,7 +73,7 @@ public final class DisabledRaftStorage extends RaftStorage implements ImmediateD
                 }
             });
         } else {
-            ImmediateDataPersistenceProvider.super.startPersistEntry(entry, callback);
+            ImmediateEntryStore.super.startPersistEntry(entry, callback);
         }
     }
 

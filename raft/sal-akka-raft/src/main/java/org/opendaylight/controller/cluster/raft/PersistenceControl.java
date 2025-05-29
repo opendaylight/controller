@@ -44,16 +44,6 @@ import org.opendaylight.raft.spi.InstallableSnapshot;
  */
 @NonNullByDefault
 final class PersistenceControl implements DataPersistenceProvider, TestablePersistence {
-    /**
-     * A bridge for dispatching to either {@link DataPersistenceProvider#persist(Object, Consumer)} or
-     * {@link DataPersistenceProvider#persistAsync(Object, Consumer)}.
-     */
-    @FunctionalInterface
-    private interface PersistMethod {
-
-        <T> void invoke(DataPersistenceProvider provider, T entry, Consumer<T> callback);
-    }
-
     private final DisabledRaftStorage disabledStorage;
     private final EnabledRaftStorage enabledStorage;
 
