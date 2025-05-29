@@ -208,14 +208,6 @@ public interface RaftActorContext {
     @NonNull DataPersistenceProvider getPersistenceProvider();
 
     /**
-     * Returns whether or not persistence recovery is applicable/enabled.
-     *
-     * @return {@code true} if recovery is applicable, otherwise false, in which case the provider is not persistent and
-     *         may not have anything to be recovered
-     */
-    boolean isRecoveryApplicable();
-
-    /**
      * Returns the {@link EntryStore}.
      *
      * @return the {@link EntryStore}

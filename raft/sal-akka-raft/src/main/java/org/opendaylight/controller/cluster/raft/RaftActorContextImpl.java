@@ -317,11 +317,6 @@ public class RaftActorContextImpl implements RaftActorContext {
     }
 
     @Override
-    public boolean isRecoveryApplicable() {
-        return persistenceProvider.isRecoveryApplicable();
-    }
-
-    @Override
     public EntryStore entryStore() {
         return persistenceProvider;
     }
