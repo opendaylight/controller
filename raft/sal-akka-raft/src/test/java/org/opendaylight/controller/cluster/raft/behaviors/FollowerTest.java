@@ -1114,7 +1114,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertTrue("isSuccess", reply.isSuccess());
 
         final var snapshotFile = await().atMost(Duration.ofSeconds(2))
-            .until(() -> followerRaftActor.getPersistence().lastSnapshot(), Objects::nonNull);
+            .until(() -> followerRaftActor.lastSnapshot(), Objects::nonNull);
 
         InMemoryJournal.waitForDeleteMessagesComplete(id);
         InMemoryJournal.waitForWriteMessagesComplete(id);
@@ -1170,7 +1170,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertTrue("isSuccess", reply.isSuccess());
 
         final var snapshotFile = await().atMost(Duration.ofSeconds(2))
-            .until(() -> followerRaftActor.getPersistence().lastSnapshot(), Objects::nonNull);
+            .until(() -> followerRaftActor.lastSnapshot(), Objects::nonNull);
 
         InMemoryJournal.waitForDeleteMessagesComplete(id);
         InMemoryJournal.waitForWriteMessagesComplete(id);
@@ -1246,7 +1246,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertTrue("isSuccess", reply.isSuccess());
 
         final var snapshotFile = await().atMost(Duration.ofSeconds(2))
-            .until(() -> followerRaftActor.getPersistence().lastSnapshot(), Objects::nonNull);
+            .until(() -> followerRaftActor.lastSnapshot(), Objects::nonNull);
 
         InMemoryJournal.waitForDeleteMessagesComplete(id);
         InMemoryJournal.waitForWriteMessagesComplete(id);

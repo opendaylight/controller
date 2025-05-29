@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -14,15 +15,19 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage;
 import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
-import org.opendaylight.controller.cluster.raft.spi.ForwardingDataPersistenceProvider;
+import org.opendaylight.controller.cluster.raft.spi.EntryStore;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
+import org.opendaylight.controller.cluster.raft.spi.RaftStorage;
+import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
@@ -32,7 +37,7 @@ import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
  * persistent and non-persistent mode of operation.
  */
 @NonNullByDefault
-final class PersistenceControl extends ForwardingDataPersistenceProvider {
+final class PersistenceControl implements DataPersistenceProvider, TestablePersistence {
     /**
      * A bridge for dispatching to either {@link DataPersistenceProvider#persist(Object, Consumer)} or
      * {@link DataPersistenceProvider#persistAsync(Object, Consumer)}.
@@ -46,13 +51,17 @@ final class PersistenceControl extends ForwardingDataPersistenceProvider {
     private final DisabledRaftStorage disabledStorage;
     private final EnabledRaftStorage enabledStorage;
 
-    private DataPersistenceProvider delegate;
+    private SnapshotStore snapshotStore;
+    private EntryStore entryStore;
+    private RaftStorage storage;
 
     @VisibleForTesting
     PersistenceControl(final DisabledRaftStorage disabledStorage, final EnabledRaftStorage enabledStorage) {
         this.enabledStorage = requireNonNull(enabledStorage);
         this.disabledStorage = requireNonNull(disabledStorage);
-        delegate = disabledStorage;
+        storage = disabledStorage;
+        entryStore = disabledStorage;
+        snapshotStore = disabledStorage;
     }
 
     PersistenceControl(final RaftActor raftActor, final Path directory, final CompressionType compression,
@@ -77,25 +86,53 @@ final class PersistenceControl extends ForwardingDataPersistenceProvider {
     }
 
     @Override
-    protected DataPersistenceProvider delegate() {
-        return delegate;
+    public EntryStore entryStore() {
+        return entryStore;
+    }
+
+    @Override
+    public SnapshotStore snapshotStore() {
+        return snapshotStore;
+    }
+
+    @Override
+    public <T extends SnapshotStore> T decorateSnapshotStore(
+            final BiFunction<SnapshotStore, ExecuteInSelfActor, T> factory) {
+        final var ret = verifyNotNull(factory.apply(snapshotStore, storage.actor()));
+        snapshotStore = ret;
+        return ret;
+    }
+
+    @Override
+    public <T extends EntryStore> T decorateEntryStore(final BiFunction<EntryStore, ExecuteInSelfActor, T> factory) {
+        final var ret = verifyNotNull(factory.apply(entryStore, storage.actor()));
+        entryStore = ret;
+        return ret;
     }
 
     boolean becomePersistent() {
-        if (delegate.isRecoveryApplicable()) {
-            return false;
-        }
-        delegate = enabledStorage;
-        return true;
+        return switch (storage) {
+            case DisabledRaftStorage disabled -> {
+                setStorage(enabledStorage);
+                yield true;
+            }
+            case EnabledRaftStorage enabled -> false;
+        };
     }
 
     void becomeTransient() {
-        delegate = disabledStorage;
+        switch (storage) {
+            case DisabledRaftStorage disabled -> {
+                // no-op
+            }
+            case EnabledRaftStorage enabled -> setStorage(disabledStorage);
+        }
     }
 
-    @VisibleForTesting
-    void setDelegate(final DataPersistenceProvider delegate) {
-        this.delegate = requireNonNull(delegate);
+    private void setStorage(final RaftStorage newStorage) {
+        storage = disabledStorage;
+        entryStore = disabledStorage;
+        snapshotStore = disabledStorage;
     }
 
     void saveVotingConfig(final @Nullable VotingConfig votingConfig) throws IOException {
