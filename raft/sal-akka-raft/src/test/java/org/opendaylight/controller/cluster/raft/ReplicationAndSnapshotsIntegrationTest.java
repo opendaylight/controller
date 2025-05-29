@@ -186,7 +186,7 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
 
         // Verify the persisted snapshot in the leader. This should reflect the advanced snapshot index as
         // the last applied log entry (2) even though the leader hasn't yet advanced its cached snapshot index.
-        var snapshotFile = leaderActor.underlyingActor().persistence().lastSnapshot();
+        var snapshotFile = leaderActor.underlyingActor().snapshots().lastSnapshot();
         assertNotNull(snapshotFile);
 
         final var raftSnapshot = snapshotFile.readRaftSnapshot();
@@ -233,7 +233,7 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
 
         // The followers should also snapshot so verify.
         snapshotFile = await().atMost(Duration.ofSeconds(2))
-            .until(() -> follower1Actor.underlyingActor().persistence().lastSnapshot(), Objects::nonNull);
+            .until(() -> follower1Actor.underlyingActor().snapshots().lastSnapshot(), Objects::nonNull);
 
         // The last applied index in the snapshot may or may not be the last log entry depending on
         // timing so to avoid intermittent test failures, we'll just verify the snapshot's last term/index.
@@ -246,7 +246,7 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         assertEquals("Follower1 Snapshot getLastIndex", 3, last.index());
 
         await().atMost(Duration.ofSeconds(2))
-            .until(() -> follower2Actor.underlyingActor().persistence().lastSnapshot(), Objects::nonNull);
+            .until(() -> follower2Actor.underlyingActor().snapshots().lastSnapshot(), Objects::nonNull);
 
         MessageCollectorActor.clearMessages(leaderCollectorActor);
         MessageCollectorActor.clearMessages(follower1CollectorActor);
@@ -321,8 +321,8 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         expSnapshotState.add(payload6);
 
         // Delay the CaptureSnapshot message to the leader actor.
-        final var leaderPersistence = leaderActor.underlyingActor()
-            .overridePersistence(CapturingDataPersistenceProvider::new);
+        final var leaderPersistence = leaderActor.underlyingActor().persistence()
+            .decorateSnapshotStore(CapturingSnapshotStore::new);
 
         // Send the payload.
         payload7 = sendPayloadData(leaderActor, "seven");
@@ -368,7 +368,7 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         // log entry (7) and shouldn't contain any unapplied entries as we capture persisted the snapshot data
         // when the snapshot is created (ie when the CaptureSnapshot is processed).
 
-        final var snapshotFile = leaderActor.underlyingActor().persistence().lastSnapshot();
+        final var snapshotFile = leaderActor.underlyingActor().snapshots().lastSnapshot();
         assertNotNull(snapshotFile);
 
         verifySnapshot("Persisted",snapshotFile, currentTerm, 6);

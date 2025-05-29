@@ -513,7 +513,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         InMemoryJournal.waitForWriteMessagesComplete(leaderId);
 
         // Verify a snapshot is not triggered.
-        assertNull(leaderActor.underlyingActor().persistence().lastSnapshot());
+        assertNull(leaderActor.underlyingActor().snapshots().lastSnapshot());
 
         expSnapshotState.add(payload1);
 

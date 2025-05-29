@@ -29,7 +29,6 @@ import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
-import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.EntryStore;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
@@ -74,7 +73,7 @@ public class RaftActorContextImpl implements RaftActorContext {
     // be passed to it in the constructor
     private SnapshotManager snapshotManager;
 
-    private final DataPersistenceProvider persistenceProvider;
+    private final TestablePersistence persistence;
 
     private final short payloadVersion;
 
@@ -94,7 +93,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     public RaftActorContextImpl(final ActorRef actor, final ActorContext context, final @NonNull LocalAccess localStore,
             final @NonNull Map<String, String> peerAddresses, final @NonNull ConfigParams configParams,
-            final short payloadVersion, final @NonNull DataPersistenceProvider persistenceProvider,
+            final short payloadVersion, final @NonNull TestablePersistence persistence,
             final @NonNull ApplyEntryMethod applyEntryMethod, final @NonNull Executor executor) {
         this.actor = actor;
         this.context = context;
@@ -103,7 +102,7 @@ public class RaftActorContextImpl implements RaftActorContext {
         this.executor = requireNonNull(executor);
         this.configParams = requireNonNull(configParams);
         this.payloadVersion = payloadVersion;
-        this.persistenceProvider = requireNonNull(persistenceProvider);
+        this.persistence = requireNonNull(persistence);
         this.applyEntryMethod = requireNonNull(applyEntryMethod);
 
         fileBackedOutputStreamFactory = new FileBackedOutputStreamFactory(
@@ -312,23 +311,18 @@ public class RaftActorContextImpl implements RaftActorContext {
     }
 
     @Override
-    public DataPersistenceProvider getPersistenceProvider() {
-        return persistenceProvider;
-    }
-
-    @Override
     public boolean isRecoveryApplicable() {
         return persistenceProvider.isRecoveryApplicable();
     }
 
     @Override
     public EntryStore entryStore() {
-        return persistenceProvider;
+        return persistence.entryStore();
     }
 
     @Override
     public SnapshotStore snapshotStore() {
-        return persistenceProvider;
+        return persistence.snapshotStore();
     }
 
     @Override

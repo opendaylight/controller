@@ -23,7 +23,7 @@ import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
  * exposed by {@link #actor()}.
  */
 @NonNullByDefault
-public interface ImmediateDataPersistenceProvider extends DataPersistenceProvider {
+public interface ImmediateDataPersistenceProvider extends DataPersistenceProvider, EntryStore, SnapshotStore {
 
     ExecuteInSelfActor actor();
 

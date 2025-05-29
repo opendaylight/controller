@@ -86,8 +86,10 @@ import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
-import org.opendaylight.controller.cluster.raft.spi.ForwardingDataPersistenceProvider;
+import org.opendaylight.controller.cluster.raft.spi.EntryStore;
+import org.opendaylight.controller.cluster.raft.spi.ForwardingEntryStore;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
+import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.RaftRole;
@@ -352,9 +354,9 @@ public class RaftActorTest extends AbstractActorTest {
         final var persistenceId = factory.generateActorId("leader-");
         final var config = new DefaultConfigParamsImpl();
         config.setHeartBeatInterval(ONE_DAY);
-        final var dataPersistenceProvider = mock(DataPersistenceProvider.class);
+        final var entryStore = mock(EntryStore.class);
         final var mockRaftActor = factory.<MockRaftActor>createTestActor(MockRaftActor.props(persistenceId, stateDir(),
-            Map.of(), config, dataPersistenceProvider), persistenceId)
+            Map.of(), config, entryStore), persistenceId)
             .underlyingActor();
         mockRaftActor.waitForInitializeBehaviorComplete();
         mockRaftActor.waitUntilLeader();
@@ -526,12 +528,12 @@ public class RaftActorTest extends AbstractActorTest {
         config.setHeartBeatInterval(ONE_DAY);
         config.setIsolatedLeaderCheckInterval(ONE_DAY);
 
-        final var dataPersistenceProvider = mock(DataPersistenceProvider.class);
+        final var snapshotStore = mock(SnapshotStore.class);
 
         Map<String, String> peerAddresses = Map.of(follower1Id, followerActor1.path().toString());
 
         TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(
-                MockRaftActor.props(persistenceId, stateDir(), peerAddresses, config, dataPersistenceProvider),
+                MockRaftActor.props(persistenceId, stateDir(), peerAddresses, config, snapshotStore),
                 persistenceId);
 
         MockRaftActor leaderActor = mockActorRef.underlyingActor();
@@ -562,7 +564,7 @@ public class RaftActorTest extends AbstractActorTest {
             new MockCommand("foo-4")));
 
         doReturn(snapshotState).when(leaderActor.snapshotCohortDelegate).takeSnapshot();
-        doNothing().when(dataPersistenceProvider).streamToInstall(any(), any(), any());
+        doNothing().when(snapshotStore).streamToInstall(any(), any(), any());
 
         leaderContext.getSnapshotManager().captureToInstall(EntryInfo.of(6, 1), 4, "xyzzy");
         verify(leaderActor.snapshotCohortDelegate).takeSnapshot();
@@ -570,7 +572,7 @@ public class RaftActorTest extends AbstractActorTest {
         final var lastIncludedCaptor = ArgumentCaptor.forClass(EntryInfo.class);
         final var snapshotCaptor = ArgumentCaptor.<ToStorage<?>>captor();
         final var callbackCaptor = ArgumentCaptor.<RaftCallback<InstallableSnapshot>>captor();
-        verify(dataPersistenceProvider).streamToInstall(lastIncludedCaptor.capture(), snapshotCaptor.capture(),
+        verify(snapshotStore).streamToInstall(lastIncludedCaptor.capture(), snapshotCaptor.capture(),
             callbackCaptor.capture());
         assertTrue(leaderContext.getSnapshotManager().isCapturing());
 
@@ -1055,9 +1057,9 @@ public class RaftActorTest extends AbstractActorTest {
 
         mockRaftActor.waitForRecoveryComplete();
 
-        final var persistence = mockRaftActor.persistence();
+        final var snapshotStore = mockRaftActor.snapshots();
         final var snapshotFile = await().atMost(Duration.ofSeconds(2))
-            .until(() -> persistence.lastSnapshot(), Objects::nonNull);
+            .until(() -> snapshotStore.lastSnapshot(), Objects::nonNull);
 
         Snapshot savedSnapshot = Snapshot.ofRaft(new TermInfo(1, "member-1"), snapshotFile.readRaftSnapshot(),
             snapshotFile.lastIncluded(), snapshotFile.readSnapshot(MockSnapshotState.SUPPORT.reader()));
@@ -1316,7 +1318,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         final var executorService = Executors.newSingleThreadExecutor(
             Thread.ofPlatform().name("testApplyStateRace-executor").factory());
-        leaderActor.overridePersistence((delegate, actor) -> new ForwardingDataPersistenceProvider() {
+        leaderActor.persistence().decorateEntryStore((delegate, actor) -> new ForwardingEntryStore() {
             @Override
             public void startPersistEntry(final ReplicatedLogEntry entry, final Consumer<ReplicatedLogEntry> callback) {
                 // needs to be executed from another thread to simulate the persistence actor calling this callback
@@ -1324,7 +1326,7 @@ public class RaftActorTest extends AbstractActorTest {
             }
 
             @Override
-            protected DataPersistenceProvider delegate() {
+            protected EntryStore delegate() {
                 return delegate;
             }
         });

@@ -49,7 +49,6 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
-import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.raft.api.TermInfo;
 import org.slf4j.Logger;
@@ -68,7 +67,7 @@ class RaftActorRecoveryTest {
     private final String localId = "leader";
 
     @Mock
-    private DataPersistenceProvider mockPersistence;
+    private TestablePersistence mockPersistence;
     @Mock
     private RaftActorRecoveryCohort mockCohort;
     @Mock

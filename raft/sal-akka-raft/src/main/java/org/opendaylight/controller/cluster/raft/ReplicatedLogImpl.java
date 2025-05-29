@@ -134,6 +134,6 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog {
 
     @Override
     public void markLastApplied() {
-        context.getPersistenceProvider().markLastApplied(getLastApplied());
+        context.entryStore().markLastApplied(getLastApplied());
     }
 }

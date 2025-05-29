@@ -29,7 +29,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
+import org.opendaylight.controller.cluster.raft.spi.EntryStore;
 
 /**
  * Unit tests for ReplicatedLogImpl.
@@ -39,7 +39,7 @@ import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 @ExtendWith(MockitoExtension.class)
 class ReplicatedLogImplTest {
     @Mock
-    private DataPersistenceProvider mockPersistence;
+    private TestablePersistence mockPersistence;
     @Mock
     private RaftActorBehavior mockBehavior;
     @Mock

@@ -62,11 +62,10 @@ class RaftActorDataPersistenceProviderTest {
     @Test
     void testPersistWithPersistenceEnabled() {
         provider.becomePersistent();
-
-        provider.persistEntry(mockPersistentLogEntry, mockCallback);
+        provider.entryStore().persistEntry(mockPersistentLogEntry, mockCallback);
         verify(mockEnabledStorage).persistEntry(mockPersistentLogEntry, mockCallback);
 
-        provider.persistEntry(mockNonPersistentLogEntry, mockCallback);
+        provider.entryStore().persistEntry(mockNonPersistentLogEntry, mockCallback);
         verify(mockEnabledStorage).persistEntry(mockNonPersistentLogEntry, mockCallback);
     }
 
@@ -77,10 +76,10 @@ class RaftActorDataPersistenceProviderTest {
 
         doNothing().when(mockDisabledStorage).saveVotingConfig(same(PERSISTENT_PAYLOAD), any());
         doCallRealMethod().when(mockDisabledStorage).persistEntry(any(), any());
-        provider.persistEntry(mockPersistentLogEntry, mockCallback);
+        provider.entryStore().persistEntry(mockPersistentLogEntry, mockCallback);
 
         doReturn(NON_PERSISTENT_PAYLOAD).when(mockNonPersistentLogEntry).command();
-        provider.persistEntry(mockNonPersistentLogEntry, mockCallback);
+        provider.entryStore().persistEntry(mockNonPersistentLogEntry, mockCallback);
         verify(mockDisabledStorage).persistEntry(mockNonPersistentLogEntry, mockCallback);
     }
 

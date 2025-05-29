@@ -9,7 +9,6 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static com.google.common.base.Verify.verify;
-import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -24,7 +23,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import org.apache.pekko.actor.ActorRef;
@@ -39,7 +37,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActor;
-import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.opendaylight.controller.cluster.mgmt.api.FollowerInfo;
 import org.opendaylight.controller.cluster.notifications.DefaultLeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
@@ -69,7 +66,6 @@ import org.opendaylight.controller.cluster.raft.persisted.NoopPayload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.AbstractRaftCommand;
 import org.opendaylight.controller.cluster.raft.spi.AbstractStateCommand;
-import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.controller.cluster.raft.spi.RaftCommand;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
@@ -302,7 +298,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             onRequestLeadership(requestLeadership);
         } else if (!possiblyHandleBehaviorMessage(message)) {
             if (message instanceof JournalProtocol.Response response
-                && persistenceControl.handleJournalResponse(response)) {
+                && persistenceControl.entryStore().handleJournalResponse(response)) {
                 LOG.debug("{}: handled a journal response", memberId());
             } else if (message instanceof SnapshotProtocol.Response response) {
                 LOG.debug("{}: ignoring {}", memberId(), response);
@@ -817,19 +813,6 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         return persistence().isRecoveryApplicable();
     }
 
-    protected final @NonNull DataPersistenceProvider persistence() {
-        return persistenceControl.delegate();
-    }
-
-    @VisibleForTesting
-    @NonNullByDefault
-    protected final <T extends DataPersistenceProvider> T overridePersistence(
-            final BiFunction<DataPersistenceProvider, ExecuteInSelfActor, T> factory) {
-        final var ret = verifyNotNull(factory.apply(persistence(), this));
-        persistenceControl.setDelegate(ret);
-        return ret;
-    }
-
     protected final void setPersistence(final boolean persistent) {
         if (persistent) {
             if (persistenceControl.becomePersistent() && getCurrentBehavior() != null) {
@@ -839,6 +822,11 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         } else {
             persistenceControl.becomeTransient();
         }
+    }
+
+    @VisibleForTesting
+    public final TestablePersistence persistence() {
+        return persistenceControl;
     }
 
     /**

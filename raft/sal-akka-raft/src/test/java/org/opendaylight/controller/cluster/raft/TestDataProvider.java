@@ -12,13 +12,10 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.annotations.VisibleForTesting;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.time.Instant;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.opendaylight.controller.cluster.raft.spi.ImmediateDataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
-import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.ByteArray;
@@ -42,18 +39,6 @@ public final class TestDataProvider implements ImmediateDataPersistenceProvider 
     @Override
     public ExecuteInSelfActor actor() {
         return actor;
-    }
-
-    @Override
-    public void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
-            final @Nullable ToStorage<?> snapshot, final RaftCallback<Instant> callback) {
-        // no-op
-    }
-
-    @Override
-    public void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
-            final @Nullable ToStorage<?> snapshot, final Instant timestamp) {
-        // no-op
     }
 
     @Override

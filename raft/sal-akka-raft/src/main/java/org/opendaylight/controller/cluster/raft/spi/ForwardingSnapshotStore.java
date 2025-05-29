@@ -10,58 +10,20 @@ package org.opendaylight.controller.cluster.raft.spi;
 import com.google.common.base.MoreObjects;
 import java.io.IOException;
 import java.time.Instant;
-import java.util.function.Consumer;
-import org.apache.pekko.persistence.JournalProtocol;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.InstallableSnapshot;
 
 @NonNullByDefault
-public abstract class ForwardingDataPersistenceProvider implements DataPersistenceProvider {
+public abstract class ForwardingSnapshotStore implements SnapshotStore {
 
-    protected abstract DataPersistenceProvider delegate();
-
-    @Override
-    public boolean isRecoveryApplicable() {
-        return delegate().isRecoveryApplicable();
-    }
+    protected abstract SnapshotStore delegate();
 
     @Override
     public @Nullable SnapshotFile lastSnapshot() throws IOException {
         return delegate().lastSnapshot();
-    }
-
-    @Override
-    public void persistEntry(final ReplicatedLogEntry entry, final Consumer<ReplicatedLogEntry> callback) {
-        delegate().persistEntry(entry, callback);
-    }
-
-    @Override
-    public void startPersistEntry(final ReplicatedLogEntry entry, final Consumer<ReplicatedLogEntry> callback) {
-        delegate().startPersistEntry(entry, callback);
-    }
-
-    @Override
-    public void deleteEntries(final long fromIndex) {
-        delegate().deleteEntries(fromIndex);
-    }
-
-    @Override
-    public void deleteMessages(final long sequenceNumber) {
-        delegate().deleteMessages(sequenceNumber);
-    }
-
-    @Override
-    public long lastSequenceNumber() {
-        return delegate().lastSequenceNumber();
-    }
-
-    @Override
-    public void markLastApplied(final long lastAppliedIndex) {
-        delegate().markLastApplied(lastAppliedIndex);
     }
 
     @Override
@@ -85,11 +47,6 @@ public abstract class ForwardingDataPersistenceProvider implements DataPersisten
     @Override
     public void retainSnapshots(final Instant firstRetained) {
         delegate().retainSnapshots(firstRetained);
-    }
-
-    @Override
-    public boolean handleJournalResponse(final JournalProtocol.Response response) {
-        return delegate().handleJournalResponse(response);
     }
 
     @Override

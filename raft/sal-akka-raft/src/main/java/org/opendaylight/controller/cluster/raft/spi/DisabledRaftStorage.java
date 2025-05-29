@@ -49,11 +49,6 @@ public final class DisabledRaftStorage extends RaftStorage implements ImmediateD
     }
 
     @Override
-    public ExecuteInSelfActor actor() {
-        return executeInSelf;
-    }
-
-    @Override
     public void persistEntry(final ReplicatedLogEntry entry, final Consumer<ReplicatedLogEntry> callback) {
         requireNonNull(callback);
         if (entry.command() instanceof VotingConfig votingConfig) {
@@ -78,7 +73,7 @@ public final class DisabledRaftStorage extends RaftStorage implements ImmediateD
                 }
             });
         } else {
-            ImmediateDataPersistenceProvider.super.startPersistEntry(entry, callback);
+            entryStore().startPersistEntry(entry, callback);
         }
     }
 

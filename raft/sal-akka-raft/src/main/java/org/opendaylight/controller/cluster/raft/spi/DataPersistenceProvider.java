@@ -7,12 +7,15 @@
  */
 package org.opendaylight.controller.cluster.raft.spi;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * This interface provides methods to persist data and is an abstraction of the akka-persistence persistence API.
  */
 // FIXME: find a better name for this interface. It is heavily influenced by Pekko Persistence, most notably the weird
 //        API around snapshots and message deletion -- which assumes the entity requesting it is the subclass itself.
-public interface DataPersistenceProvider extends EntryStore, SnapshotStore {
+@NonNullByDefault
+public interface DataPersistenceProvider {
     /**
      * Returns whether or not persistence recovery is applicable/enabled.
      *
