@@ -18,7 +18,7 @@ import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
 abstract class AbstractRaftActorTest extends AbstractActorTest {
     static final SnapshotFile awaitSnapshot(final RaftActor actor) {
         return await().atMost(Duration.ofSeconds(5))
-            .until(() -> actor.persistence().lastSnapshot(), Objects::nonNull);
+            .until(() -> actor.persistence().snapshotStore().lastSnapshot(), Objects::nonNull);
     }
 
     static final SnapshotFile awaitSnapshot(final TestActorRef<? extends RaftActor> actorRef) {

@@ -86,7 +86,8 @@ import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
-import org.opendaylight.controller.cluster.raft.spi.ForwardingDataPersistenceProvider;
+import org.opendaylight.controller.cluster.raft.spi.EntryStore;
+import org.opendaylight.controller.cluster.raft.spi.ForwardingEntryStore;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.raft.api.EntryInfo;
@@ -1057,7 +1058,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         final var persistence = mockRaftActor.persistence();
         final var snapshotFile = await().atMost(Duration.ofSeconds(2))
-            .until(() -> persistence.lastSnapshot(), Objects::nonNull);
+            .until(() -> persistence.snapshotStore().lastSnapshot(), Objects::nonNull);
 
         Snapshot savedSnapshot = Snapshot.ofRaft(new TermInfo(1, "member-1"), snapshotFile.readRaftSnapshot(),
             snapshotFile.lastIncluded(), snapshotFile.readSnapshot(MockSnapshotState.SUPPORT.reader()));
@@ -1316,7 +1317,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         final var executorService = Executors.newSingleThreadExecutor(
             Thread.ofPlatform().name("testApplyStateRace-executor").factory());
-        leaderActor.overridePersistence((delegate, actor) -> new ForwardingDataPersistenceProvider() {
+        leaderActor.persistence().decorateEntryStore((delegate, actor) -> new ForwardingEntryStore() {
             @Override
             public void startPersistEntry(final ReplicatedLogEntry entry, final Consumer<ReplicatedLogEntry> callback) {
                 // needs to be executed from another thread to simulate the persistence actor calling this callback
@@ -1324,7 +1325,7 @@ public class RaftActorTest extends AbstractActorTest {
             }
 
             @Override
-            protected DataPersistenceProvider delegate() {
+            protected EntryStore delegate() {
                 return delegate;
             }
         });

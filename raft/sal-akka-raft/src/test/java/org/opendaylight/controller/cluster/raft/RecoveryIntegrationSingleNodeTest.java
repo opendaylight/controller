@@ -70,7 +70,7 @@ public class RecoveryIntegrationSingleNodeTest extends AbstractRaftActorIntegrat
         // we get 2 log entries (4 and 5 indexes) and 3 ApplyJournalEntries (for 3, 4, and 5 indexes)
         assertEquals(5, InMemoryJournal.get(persistenceId).size());
 
-        final var snapshotFile = singleNodeActorRef.underlyingActor().persistence().lastSnapshot();
+        final var snapshotFile = singleNodeActorRef.underlyingActor().lastSnapshot();
         assertNotNull(snapshotFile);
 
         assertEquals(List.of(payload0, payload1, payload2, payload3), MockRaftActor.fromState(
