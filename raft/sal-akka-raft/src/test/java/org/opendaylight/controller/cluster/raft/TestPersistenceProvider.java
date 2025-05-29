@@ -10,81 +10,41 @@ package org.opendaylight.controller.cluster.raft;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.time.Instant;
+import com.google.common.base.MoreObjects.ToStringHelper;
+import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.opendaylight.controller.cluster.raft.spi.ImmediateEntryStore;
-import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
-import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
-import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
-import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
-import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
-import org.opendaylight.raft.api.EntryInfo;
-import org.opendaylight.raft.spi.ByteArray;
-import org.opendaylight.raft.spi.InstallableSnapshot;
-import org.opendaylight.raft.spi.InstallableSnapshotSource;
-import org.opendaylight.raft.spi.PlainSnapshotSource;
 
 @VisibleForTesting
 @NonNullByDefault
-public final class TestPersistenceProvider implements PersistenceProvider, ImmediateEntryStore, SnapshotStore {
-    private ExecuteInSelfActor actor;
+public final class TestPersistenceProvider extends PersistenceProvider {
+    private final AtomicReference<ExecuteInSelfActor> actor;
+
+    private TestPersistenceProvider(final AtomicReference<ExecuteInSelfActor> actor) {
+        super((ImmediateEntryStore) actor::get, (ImmediateSnapshotStore) actor::get);
+        this.actor = requireNonNull(actor);
+    }
 
     TestPersistenceProvider() {
         this(Runnable::run);
     }
 
     TestPersistenceProvider(final ExecuteInSelfActor actor) {
-        this.actor = requireNonNull(actor);
+        this(new AtomicReference<>(requireNonNull(actor)));
     }
 
     @Override
-    public ExecuteInSelfActor actor() {
-        return actor;
+    ExecuteInSelfActor actor() {
+        return actor.get();
+    }
+
+    public void setActor(final ExecuteInSelfActor newActor) {
+        actor.set(requireNonNull(newActor));
     }
 
     @Override
-    public @Nullable SnapshotFile lastSnapshot() throws IOException {
-        return null;
-    }
-
-    @Override
-    public void retainSnapshots(final Instant firstRetained) {
-        // no-op
-    }
-
-    @Override
-    public void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
-            final @Nullable ToStorage<?> snapshot, final RaftCallback<Instant> callback) {
-        // no-op
-    }
-
-    @Override
-    public void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
-            final @Nullable ToStorage<?> snapshot, final Instant timestamp) {
-        // no-op
-    }
-
-    @Override
-    public void streamToInstall(final EntryInfo lastIncluded, final ToStorage<?> snapshot,
-            final RaftCallback<InstallableSnapshot> callback) {
-        final byte[] bytes;
-        try (var baos = new ByteArrayOutputStream()) {
-            snapshot.writeTo(baos);
-            bytes = baos.toByteArray();
-        } catch (IOException e) {
-            actor.executeInSelf(() -> callback.invoke(e, null));
-            return;
-        }
-
-        final var result = new InstallableSnapshotSource(lastIncluded, new PlainSnapshotSource(ByteArray.wrap(bytes)));
-        actor.executeInSelf(() -> callback.invoke(null, result));
-    }
-
-    public void setActor(final ExecuteInSelfActor actor) {
-        this.actor = requireNonNull(actor);
+    ToStringHelper addToStringAttributes(final ToStringHelper helper) {
+        return helper.add("actor", actor());
     }
 }

@@ -38,7 +38,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
-import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -49,6 +48,7 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
+import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.raft.api.TermInfo;
 import org.slf4j.Logger;
@@ -67,13 +67,15 @@ class RaftActorRecoveryTest {
     private final String localId = "leader";
 
     @Mock
-    private PersistenceProvider mockPersistence;
+    private SnapshotStore snapshotStore;
     @Mock
-    private RaftActorRecoveryCohort mockCohort;
+    private PersistenceProvider persistence;
     @Mock
-    private RaftActor mockActor;
+    private RaftActor raftActor;
     @Mock
-    private RaftActorSnapshotCohort<?> mockSnapshotCohort;
+    private RaftActorRecoveryCohort recoveryCohort;
+    @Mock
+    private RaftActorSnapshotCohort<?> snapshotCohort;
     @TempDir
     private Path stateDir;
 
@@ -87,13 +89,17 @@ class RaftActorRecoveryTest {
 
     @BeforeEach
     void setup() {
+        localAccess = new LocalAccess(localId, stateDir);
+        doReturn(localAccess).when(raftActor).localAccess();
+
         mockActorSystem = ActorSystem.create();
         mockActorRef = mockActorSystem.actorOf(Props.create(DoNothingActor.class));
-        localAccess = new LocalAccess(localId, stateDir);
+
+        doReturn(snapshotStore).when(persistence).snapshotStore();
         context = new RaftActorContextImpl(mockActorRef, null, localAccess, Map.of(), configParams, (short) 0,
-            mockPersistence, (identifier, entry) -> { }, MoreExecutors.directExecutor());
-        support = new RaftActorRecoverySupport(mockActor, context, mockCohort);
-        doReturn(localAccess).when(mockActor).localAccess();
+            persistence, (identifier, entry) -> { }, MoreExecutors.directExecutor());
+
+        support = new RaftActorRecoverySupport(raftActor, context, recoveryCohort);
     }
 
     @AfterEach
@@ -160,16 +166,16 @@ class RaftActorRecoveryTest {
         assertEquals("Snapshot term", -1, replicatedLog.getSnapshotTerm());
         assertEquals("Snapshot index", -1, replicatedLog.getSnapshotIndex());
 
-        final var inOrder = Mockito.inOrder(mockCohort);
-        inOrder.verify(mockCohort).startLogRecoveryBatch(5);
+        final var inOrder = Mockito.inOrder(recoveryCohort);
+        inOrder.verify(recoveryCohort).startLogRecoveryBatch(5);
 
         for (int i = 0; i < replicatedLog.size() - 1; i++) {
-            inOrder.verify(mockCohort).appendRecoveredCommand((StateCommand) replicatedLog.get(i).command());
+            inOrder.verify(recoveryCohort).appendRecoveredCommand((StateCommand) replicatedLog.get(i).command());
         }
 
-        inOrder.verify(mockCohort).applyCurrentLogRecoveryBatch();
-        inOrder.verify(mockCohort).startLogRecoveryBatch(5);
-        inOrder.verify(mockCohort).appendRecoveredCommand(
+        inOrder.verify(recoveryCohort).applyCurrentLogRecoveryBatch();
+        inOrder.verify(recoveryCohort).startLogRecoveryBatch(5);
+        inOrder.verify(recoveryCohort).appendRecoveredCommand(
             (StateCommand) replicatedLog.get(replicatedLog.size() - 1).command());
 
         inOrder.verifyNoMoreInteractions();
@@ -180,12 +186,12 @@ class RaftActorRecoveryTest {
     void testIncrementalRecovery() throws Exception {
         int recoverySnapshotInterval = 3;
         configParams.setRecoverySnapshotIntervalSeconds(recoverySnapshotInterval);
-        context.getSnapshotManager().setSnapshotCohort(mockSnapshotCohort);
+        context.getSnapshotManager().setSnapshotCohort(snapshotCohort);
 
         recovery = support.recoverToPersistent();
 
         int numberOfEntries = 5;
-        doReturn(new MockSnapshotState(List.of())).when(mockSnapshotCohort).takeSnapshot();
+        doReturn(new MockSnapshotState(List.of())).when(snapshotCohort).takeSnapshot();
 
         try (var executor = Executors.newSingleThreadScheduledExecutor()) {
             final var replicatedLog = context.getReplicatedLog();
@@ -204,7 +210,7 @@ class RaftActorRecoveryTest {
 
             executor.schedule(() -> applyEntriesFuture.cancel(false), numberOfEntries, TimeUnit.SECONDS).get();
 
-            verify(mockSnapshotCohort, times(1)).takeSnapshot();
+            verify(snapshotCohort, times(1)).takeSnapshot();
         }
     }
 
@@ -245,7 +251,7 @@ class RaftActorRecoveryTest {
         assertEquals("Election term", new TermInfo(electionTerm, electionVotedFor), context.termInfo());
         assertFalse("Dynamic server configuration", context.isDynamicServerConfigurationInUse());
 
-        verify(mockCohort).applyRecoveredSnapshot(snapshotState);
+        verify(recoveryCohort).applyRecoveredSnapshot(snapshotState);
     }
 
     @Test
@@ -263,15 +269,15 @@ class RaftActorRecoveryTest {
         assertEquals("Last applied", 1, replicatedLog.getLastApplied());
         assertEquals("Commit index", 1, replicatedLog.getCommitIndex());
 
-        InOrder inOrder = Mockito.inOrder(mockCohort);
-        inOrder.verify(mockCohort).startLogRecoveryBatch(anyInt());
+        final var inOrder = Mockito.inOrder(recoveryCohort);
+        inOrder.verify(recoveryCohort).startLogRecoveryBatch(anyInt());
 
         for (int i = 0; i < replicatedLog.size(); i++) {
-            inOrder.verify(mockCohort).appendRecoveredCommand((StateCommand) replicatedLog.get(i).command());
+            inOrder.verify(recoveryCohort).appendRecoveredCommand((StateCommand) replicatedLog.get(i).command());
         }
 
-        inOrder.verify(mockCohort).applyCurrentLogRecoveryBatch();
-        inOrder.verify(mockCohort).getRestoreFromSnapshot();
+        inOrder.verify(recoveryCohort).applyCurrentLogRecoveryBatch();
+        inOrder.verify(recoveryCohort).getRestoreFromSnapshot();
         inOrder.verifyNoMoreInteractions();
     }
 
@@ -281,15 +287,15 @@ class RaftActorRecoveryTest {
 
         sendMessageToSupport(RecoveryCompleted.getInstance(), true);
 
-        verify(mockCohort).getRestoreFromSnapshot();
-        verifyNoMoreInteractions(mockCohort);
+        verify(recoveryCohort).getRestoreFromSnapshot();
+        verifyNoMoreInteractions(recoveryCohort);
     }
 
     @Test
     void testOnDeleteEntries() throws Exception {
         recovery = support.recoverToPersistent();
 
-        ReplicatedLog replicatedLog = context.getReplicatedLog();
+        final var replicatedLog = context.getReplicatedLog();
         replicatedLog.append(new SimpleReplicatedLogEntry(0, 1, new MockCommand("0")));
         replicatedLog.append(new SimpleReplicatedLogEntry(1, 1, new MockCommand("1")));
         replicatedLog.append(new SimpleReplicatedLogEntry(2, 1, new MockCommand("2")));
@@ -313,11 +319,11 @@ class RaftActorRecoveryTest {
     void testDataRecoveredWithPersistenceDisabled() throws Exception {
         recovery = support.recoverToTransient();
 
-        doReturn(10L).when(mockActor).lastSequenceNr();
+        doReturn(10L).when(raftActor).lastSequenceNr();
 
-        Snapshot snapshot = Snapshot.create(new MockSnapshotState(List.of(new MockCommand("1"))),
+        final var snapshot = Snapshot.create(new MockSnapshotState(List.of(new MockCommand("1"))),
                 List.of(), 3, 1, 3, 1, new TermInfo(-1), null);
-        SnapshotOffer snapshotOffer = new SnapshotOffer(new SnapshotMetadata("test", 6, 12345), snapshot);
+        final var snapshotOffer = new SnapshotOffer(new SnapshotMetadata("test", 6, 12345), snapshot);
 
         sendMessageToSupport(snapshotOffer);
 
@@ -342,9 +348,9 @@ class RaftActorRecoveryTest {
 
         sendMessageToSupport(RecoveryCompleted.getInstance(), true);
 
-        verify(mockCohort, never()).applyRecoveredSnapshot(any());
-        verify(mockCohort, never()).getRestoreFromSnapshot();
-        verifyNoMoreInteractions(mockCohort);
+        verify(recoveryCohort, never()).applyRecoveredSnapshot(any());
+        verify(recoveryCohort, never()).getRestoreFromSnapshot();
+        verifyNoMoreInteractions(recoveryCohort);
 
 //        verify(mockPersistentProvider).deleteMessages(10L);
     }
@@ -359,31 +365,29 @@ class RaftActorRecoveryTest {
 
         sendMessageToSupport(RecoveryCompleted.getInstance(), true);
 
-        verify(mockCohort).getRestoreFromSnapshot();
-        verifyNoMoreInteractions(mockCohort);
+        verify(recoveryCohort).getRestoreFromSnapshot();
+        verifyNoMoreInteractions(recoveryCohort);
     }
 
     @Test
     void testServerConfigurationPayloadApplied() throws Exception {
         recovery = support.recoverToPersistent();
 
-        String follower1 = "follower1";
-        String follower2 = "follower2";
-        String follower3 = "follower3";
+        final var follower1 = "follower1";
+        final var follower2 = "follower2";
+        final var follower3 = "follower3";
 
         context.addToPeers(follower1, null, VotingState.VOTING);
         context.addToPeers(follower2, null, VotingState.VOTING);
 
-        //add new Server
-        var obj = new VotingConfig(
-                new ServerInfo(localId, true),
-                new ServerInfo(follower1, true),
-                new ServerInfo(follower2, false),
-                new ServerInfo(follower3, true));
+        // add new Server
+        sendMessageToSupport(new SimpleReplicatedLogEntry(0, 1, new VotingConfig(
+            new ServerInfo(localId, true),
+            new ServerInfo(follower1, true),
+            new ServerInfo(follower2, false),
+            new ServerInfo(follower3, true))));
 
-        sendMessageToSupport(new SimpleReplicatedLogEntry(0, 1, obj));
-
-        //verify new peers
+        // verify new peers
         assertTrue("Dynamic server configuration", context.isDynamicServerConfigurationInUse());
         assertEquals("New peer Ids", Set.of(follower1, follower2, follower3), Set.copyOf(context.getPeerIds()));
         assertTrue("follower1 isVoting", context.getPeerInfo(follower1).isVoting());
@@ -392,16 +396,14 @@ class RaftActorRecoveryTest {
 
         sendMessageToSupport(new ApplyJournalEntries(0));
 
-        verify(mockCohort, never()).startLogRecoveryBatch(anyInt());
-        verify(mockCohort, never()).appendRecoveredCommand(any());
+        verify(recoveryCohort, never()).startLogRecoveryBatch(anyInt());
+        verify(recoveryCohort, never()).appendRecoveredCommand(any());
 
-        //remove existing follower1
-        obj = new VotingConfig(
-                new ServerInfo(localId, true),
-                new ServerInfo("follower2", true),
-                new ServerInfo("follower3", true));
-
-        sendMessageToSupport(new SimpleReplicatedLogEntry(1, 1, obj));
+        // remove existing follower1
+        sendMessageToSupport(new SimpleReplicatedLogEntry(1, 1, new VotingConfig(
+            new ServerInfo(localId, true),
+            new ServerInfo("follower2", true),
+            new ServerInfo("follower3", true))));
 
         //verify new peers
         assertTrue("Dynamic server configuration", context.isDynamicServerConfigurationInUse());
@@ -424,19 +426,19 @@ class RaftActorRecoveryTest {
     void testOnSnapshotOfferWithServerConfiguration() throws Exception {
         recovery = support.recoverToPersistent();
 
-        long electionTerm = 2;
-        String electionVotedFor = "member-2";
+        final var electionTerm = 2;
+        final var electionVotedFor = "member-2";
         final var serverPayload = new VotingConfig(
                 new ServerInfo(localId, true),
                 new ServerInfo("follower1", true),
                 new ServerInfo("follower2", true));
 
-        MockSnapshotState snapshotState = new MockSnapshotState(List.of(new MockCommand("1")));
-        Snapshot snapshot = Snapshot.create(snapshotState, List.of(),
-                -1, -1, -1, -1, new TermInfo(electionTerm, electionVotedFor), serverPayload);
+        final var snapshotState = new MockSnapshotState(List.of(new MockCommand("1")));
+        final var snapshot = Snapshot.create(snapshotState, List.of(), -1, -1, -1, -1, new TermInfo(electionTerm,
+            electionVotedFor), serverPayload);
 
-        SnapshotMetadata metadata = new SnapshotMetadata("test", 6, 12345);
-        SnapshotOffer snapshotOffer = new SnapshotOffer(metadata, snapshot);
+        final var metadata = new SnapshotMetadata("test", 6, 12345);
+        final var snapshotOffer = new SnapshotOffer(metadata, snapshot);
 
         sendMessageToSupport(snapshotOffer);
 

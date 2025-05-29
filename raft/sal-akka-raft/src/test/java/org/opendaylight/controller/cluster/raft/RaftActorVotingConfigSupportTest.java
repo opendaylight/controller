@@ -40,6 +40,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.ApplyLeaderSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.InitiateCaptureSnapshot;
@@ -68,6 +69,7 @@ import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.FailingTermInfoStore;
 import org.opendaylight.controller.cluster.raft.spi.ForwardingSnapshotStore;
+import org.opendaylight.controller.cluster.raft.spi.ImmediateEntryStore;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
@@ -559,11 +561,11 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         // below.
         leaderRaftActor.setDropMessageOfType(null);
 
-        final var dropCallbacks = new TestPersistenceProvider(runnable -> {
+        final ExecuteInSelfActor ignore = runnable -> {
             LOG.info("Ignoring {}", runnable);
-        });
-        leaderRaftActor.persistence().decorateEntryStore((delegate, actor) -> dropCallbacks);
-        leaderRaftActor.persistence().decorateSnapshotStore((delegate, actor) -> dropCallbacks);
+        };
+        leaderRaftActor.persistence().decorateEntryStore((delegate, actor) -> (ImmediateEntryStore) () -> ignore);
+        leaderRaftActor.persistence().decorateSnapshotStore((delegate, actor) -> (ImmediateSnapshotStore) () -> ignore);
 
         // Complete the prior snapshot - this should be a no-op b/c it's no longer the leader
         leaderSaveSnapshot.complete();

@@ -88,6 +88,7 @@ import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolic
 import org.opendaylight.controller.cluster.raft.spi.EntryStore;
 import org.opendaylight.controller.cluster.raft.spi.ForwardingEntryStore;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
+import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.RaftRole;
@@ -132,19 +133,19 @@ public class RaftActorTest extends AbstractActorTest {
     public void testRaftActorRecoveryWithPersistenceEnabled() {
         TEST_LOG.info("testRaftActorRecoveryWithPersistenceEnabled starting");
 
-        TestKit kit = new TestKit(getSystem());
-        String persistenceId = factory.generateActorId("follower-");
+        final var kit = new TestKit(getSystem());
+        final var persistenceId = factory.generateActorId("follower-");
 
-        DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+        final var config = new DefaultConfigParamsImpl();
 
         // Set the heartbeat interval high to essentially disable election otherwise the test
         // may fail if the actor is switched to Leader and the commitIndex is set to the last
         // log entry.
         config.setHeartBeatInterval(ONE_DAY);
 
-        Map<String, String> peerAddresses = Map.of("member1", "address");
-        ActorRef followerActor = factory.createActor(MockRaftActor.props(persistenceId, stateDir(),
-                peerAddresses, config), persistenceId);
+        final var peerAddresses = Map.of("member1", "address");
+        final var followerActor = factory.createActor(
+            MockRaftActor.props(persistenceId, stateDir(), peerAddresses, config), persistenceId);
 
         kit.watch(followerActor);
 
@@ -155,17 +156,17 @@ public class RaftActorTest extends AbstractActorTest {
         int lastIndexDuringSnapshotCapture = 4;
 
         // 4 messages as part of snapshot, which are applied to state
-        MockSnapshotState snapshotState = new MockSnapshotState(List.of(
+        final var snapshotState = new MockSnapshotState(List.of(
             new MockCommand("A"), new MockCommand("B"), new MockCommand("C"), new MockCommand("D")));
 
-        Snapshot snapshot = Snapshot.create(snapshotState, snapshotUnappliedEntries, lastIndexDuringSnapshotCapture, 1,
+        final var snapshot = Snapshot.create(snapshotState, snapshotUnappliedEntries, lastIndexDuringSnapshotCapture, 1,
                 lastAppliedDuringSnapshotCapture, 1, new TermInfo(-1), null);
         InMemorySnapshotStore.addSnapshot(persistenceId, snapshot);
 
         // add more entries after snapshot is taken
-        ReplicatedLogEntry entry2 = new SimpleReplicatedLogEntry(5, 1, new MockCommand("F", 2));
-        ReplicatedLogEntry entry3 = new SimpleReplicatedLogEntry(6, 1, new MockCommand("G", 3));
-        ReplicatedLogEntry entry4 = new SimpleReplicatedLogEntry(7, 1, new MockCommand("H", 4));
+        final var entry2 = new SimpleReplicatedLogEntry(5, 1, new MockCommand("F", 2));
+        final var entry3 = new SimpleReplicatedLogEntry(6, 1, new MockCommand("G", 3));
+        final var entry4 = new SimpleReplicatedLogEntry(7, 1, new MockCommand("H", 4));
 
         final int lastAppliedToState = 5;
         final int lastIndex = 7;
@@ -183,11 +184,10 @@ public class RaftActorTest extends AbstractActorTest {
         kit.unwatch(followerActor);
 
         //reinstate the actor
-        TestActorRef<MockRaftActor> ref = factory.createTestActor(
-                MockRaftActor.props(persistenceId, stateDir(), peerAddresses, config));
+        final var ref = factory.<MockRaftActor>createTestActor(MockRaftActor.props(persistenceId, stateDir(),
+            peerAddresses, config));
 
-        MockRaftActor mockRaftActor = ref.underlyingActor();
-
+        final var mockRaftActor = ref.underlyingActor();
         mockRaftActor.waitForRecoveryComplete();
 
         final var context = mockRaftActor.getRaftActorContext();
@@ -352,55 +352,54 @@ public class RaftActorTest extends AbstractActorTest {
         final var persistenceId = factory.generateActorId("leader-");
         final var config = new DefaultConfigParamsImpl();
         config.setHeartBeatInterval(ONE_DAY);
-        final var dataPersistenceProvider = mock(PersistenceProvider.class);
         final var mockRaftActor = factory.<MockRaftActor>createTestActor(MockRaftActor.props(persistenceId, stateDir(),
-            Map.of(), config, dataPersistenceProvider), persistenceId)
+            Map.of(), config, mockProvider()), persistenceId)
             .underlyingActor();
         mockRaftActor.waitForInitializeBehaviorComplete();
         mockRaftActor.waitUntilLeader();
 
         mockRaftActor.getRaftActorContext().getReplicatedLog().markLastApplied();
-        verify(dataPersistenceProvider).markLastApplied(-1);
     }
 
     @Test
     public void testApplyState() {
-        String persistenceId = factory.generateActorId("leader-");
-
-        DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
-
+        final var persistenceId = factory.generateActorId("leader-");
+        final var config = new DefaultConfigParamsImpl();
         config.setHeartBeatInterval(ONE_DAY);
 
-        PersistenceProvider dataPersistenceProvider = mock(PersistenceProvider.class);
+        final var mockActorRef = factory.<MockRaftActor>createTestActor(MockRaftActor.props(persistenceId,
+            stateDir(), Map.of(), config, mockProvider()), persistenceId);
 
-        TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(MockRaftActor.props(persistenceId,
-            stateDir(), Map.of(), config, dataPersistenceProvider), persistenceId);
-
-        MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
-
+        final var mockRaftActor = mockActorRef.underlyingActor();
         mockRaftActor.waitForInitializeBehaviorComplete();
 
         final var entry = new SimpleReplicatedLogEntry(5, 1, new MockCommand("F"));
-
         final var id = new MockIdentifier("apply-state");
         mockRaftActor.getRaftActorContext().applyEntryMethod().applyEntry(id, entry);
 
         verify(mockRaftActor.actorDelegate).applyCommand(eq(id), any());
     }
 
+    private static PersistenceProvider mockProvider() {
+        final var provider = mock(PersistenceProvider.class);
+        doReturn(mock(EntryStore.class)).when(provider).entryStore();
+        doReturn(mock(SnapshotStore.class)).when(provider).snapshotStore();
+        return provider;
+    }
+
     @Test
     public void testRaftRoleChangeNotifierWhenRaftActorHasNoPeers() throws Exception {
-        ActorRef notifierActor = factory.createActor(MessageCollectorActor.props());
+        final var notifierActor = factory.createActor(MessageCollectorActor.props());
         MessageCollectorActor.waitUntilReady(notifierActor);
 
-        DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
-        long heartBeatInterval = 100;
+        final var config = new DefaultConfigParamsImpl();
+        final var heartBeatInterval = 100L;
         config.setHeartBeatInterval(Duration.ofMillis(heartBeatInterval));
         config.setElectionTimeoutFactor(20);
 
-        String persistenceId = factory.generateActorId("notifier-");
+        final var persistenceId = factory.generateActorId("notifier-");
 
-        final TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.builder()
+        final var raftActorRef = factory.<MockRaftActor>createTestActor(MockRaftActor.builder()
                 .id(persistenceId).config(config).roleChangeNotifier(notifierActor)
                 .dataPersistenceProvider(new TestPersistenceProvider()).props(stateDir())
                 .withDispatcher(Dispatchers.DefaultDispatcherId()),
@@ -409,7 +408,7 @@ public class RaftActorTest extends AbstractActorTest {
         final var matches =  MessageCollectorActor.expectMatching(notifierActor, RoleChanged.class, 3);
 
         // check if the notifier got a role change from null to Follower
-        RoleChanged raftRoleChanged = matches.get(0);
+        var raftRoleChanged = matches.get(0);
         assertEquals(persistenceId, raftRoleChanged.memberId());
         assertNull(raftRoleChanged.oldRole());
         assertEquals(RaftRole.Follower, raftRoleChanged.newRole());
@@ -426,18 +425,17 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals(RaftRole.Candidate, raftRoleChanged.oldRole());
         assertEquals(RaftRole.Leader, raftRoleChanged.newRole());
 
-        LeaderStateChanged leaderStateChange = MessageCollectorActor.expectFirstMatching(
-                notifierActor, LeaderStateChanged.class);
+        var leaderStateChange = MessageCollectorActor.expectFirstMatching(notifierActor, LeaderStateChanged.class);
 
         assertEquals(raftRoleChanged.memberId(), leaderStateChange.leaderId());
         assertEquals(MockRaftActor.PAYLOAD_VERSION, leaderStateChange.leaderPayloadVersion());
 
         MessageCollectorActor.clearMessages(notifierActor);
 
-        MockRaftActor raftActor = raftActorRef.underlyingActor();
-        final String newLeaderId = "new-leader";
+        final var raftActor = raftActorRef.underlyingActor();
+        final var newLeaderId = "new-leader";
         final short newLeaderVersion = 6;
-        Follower follower = new Follower(raftActor.getRaftActorContext()) {
+        var follower = new Follower(raftActor.getRaftActorContext()) {
             @Override
             public RaftActorBehavior handleMessage(final ActorRef sender, final Object message) {
                 setLeaderId(newLeaderId);
@@ -476,18 +474,22 @@ public class RaftActorTest extends AbstractActorTest {
 
     @Test
     public void testRaftRoleChangeNotifierWhenRaftActorHasPeers() throws Exception {
-        ActorRef notifierActor = factory.createActor(MessageCollectorActor.props());
+        final var notifierActor = factory.createActor(MessageCollectorActor.props());
         MessageCollectorActor.waitUntilReady(notifierActor);
 
-        DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
-        long heartBeatInterval = 100;
+        final var config = new DefaultConfigParamsImpl();
+        final var heartBeatInterval = 100L;
         config.setHeartBeatInterval(Duration.ofMillis(heartBeatInterval));
         config.setElectionTimeoutFactor(1);
 
-        String persistenceId = factory.generateActorId("notifier-");
+        final var persistenceId = factory.generateActorId("notifier-");
 
-        factory.createActor(MockRaftActor.builder().id(persistenceId).peerAddresses(Map.of("leader", "fake/path"))
-                .config(config).roleChangeNotifier(notifierActor).props(stateDir()));
+        factory.createActor(MockRaftActor.builder()
+            .id(persistenceId)
+            .peerAddresses(Map.of("leader", "fake/path"))
+            .config(config)
+            .roleChangeNotifier(notifierActor)
+            .props(stateDir()));
 
         List<RoleChanged> matches =  null;
         for (int i = 0; i < 5000 / heartBeatInterval; i++) {
@@ -503,7 +505,7 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals(2, matches.size());
 
         // check if the notifier got a role change from null to Follower
-        RoleChanged raftRoleChanged = matches.get(0);
+        var raftRoleChanged = matches.get(0);
         assertEquals(persistenceId, raftRoleChanged.memberId());
         assertNull(raftRoleChanged.oldRole());
         assertEquals(RaftRole.Follower, raftRoleChanged.newRole());
@@ -517,25 +519,20 @@ public class RaftActorTest extends AbstractActorTest {
 
     @Test
     public void testFakeSnapshotsForLeaderWithInRealSnapshots() throws Exception {
-        final String persistenceId = factory.generateActorId("leader-");
-        final String follower1Id = factory.generateActorId("follower-");
+        final var persistenceId = factory.generateActorId("leader-");
+        final var follower1Id = factory.generateActorId("follower-");
 
-        ActorRef followerActor1 = factory.createActor(MessageCollectorActor.props());
+        final var followerActor1 = factory.createActor(MessageCollectorActor.props());
 
-        DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+        final var config = new DefaultConfigParamsImpl();
         config.setHeartBeatInterval(ONE_DAY);
         config.setIsolatedLeaderCheckInterval(ONE_DAY);
 
-        final var dataPersistenceProvider = mock(PersistenceProvider.class);
+        final var provider = mockProvider();
+        final var mockActorRef = factory.<MockRaftActor>createTestActor(MockRaftActor.props(persistenceId, stateDir(),
+            Map.of(follower1Id, followerActor1.path().toString()), config, provider), persistenceId);
 
-        Map<String, String> peerAddresses = Map.of(follower1Id, followerActor1.path().toString());
-
-        TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(
-                MockRaftActor.props(persistenceId, stateDir(), peerAddresses, config, dataPersistenceProvider),
-                persistenceId);
-
-        MockRaftActor leaderActor = mockActorRef.underlyingActor();
-
+        final var leaderActor = mockActorRef.underlyingActor();
         final var leaderContext = leaderActor.getRaftActorContext();
         final var leaderLog = leaderContext.getReplicatedLog();
         leaderLog.setCommitIndex(4);
@@ -546,7 +543,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         // create 8 entries in the log - 0 to 4 are applied and will get picked up as part of the capture snapshot
 
-        Leader leader = new Leader(leaderContext);
+        final var leader = new Leader(leaderContext);
         leaderActor.setCurrentBehavior(leader);
         assertSame(leader, leaderActor.getCurrentBehavior());
 
@@ -562,7 +559,9 @@ public class RaftActorTest extends AbstractActorTest {
             new MockCommand("foo-4")));
 
         doReturn(snapshotState).when(leaderActor.snapshotCohortDelegate).takeSnapshot();
-        doNothing().when(dataPersistenceProvider).streamToInstall(any(), any(), any());
+
+        final var snapshotStore = provider.snapshotStore();
+        doNothing().when(snapshotStore).streamToInstall(any(), any(), any());
 
         leaderContext.getSnapshotManager().captureToInstall(EntryInfo.of(6, 1), 4, "xyzzy");
         verify(leaderActor.snapshotCohortDelegate).takeSnapshot();
@@ -570,7 +569,7 @@ public class RaftActorTest extends AbstractActorTest {
         final var lastIncludedCaptor = ArgumentCaptor.forClass(EntryInfo.class);
         final var snapshotCaptor = ArgumentCaptor.<ToStorage<?>>captor();
         final var callbackCaptor = ArgumentCaptor.<RaftCallback<InstallableSnapshot>>captor();
-        verify(dataPersistenceProvider).streamToInstall(lastIncludedCaptor.capture(), snapshotCaptor.capture(),
+        verify(snapshotStore).streamToInstall(lastIncludedCaptor.capture(), snapshotCaptor.capture(),
             callbackCaptor.capture());
         assertTrue(leaderContext.getSnapshotManager().isCapturing());
 
@@ -625,22 +624,18 @@ public class RaftActorTest extends AbstractActorTest {
 
     @Test
     public void testFakeSnapshotsForFollowerWithInRealSnapshots() throws Exception {
-        final String persistenceId = factory.generateActorId("follower-");
-        final String leaderId = factory.generateActorId("leader-");
+        final var persistenceId = factory.generateActorId("follower-");
+        final var leaderId = factory.generateActorId("leader-");
 
-        ActorRef leaderActor1 = factory.createActor(MessageCollectorActor.props());
+        final var leaderActor1 = factory.createActor(MessageCollectorActor.props());
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
         config.setHeartBeatInterval(ONE_DAY);
         config.setIsolatedLeaderCheckInterval(ONE_DAY);
 
         final var dataPersistenceProvider = new TestPersistenceProvider();
-
-        Map<String, String> peerAddresses = Map.of(leaderId, leaderActor1.path().toString());
-
-        TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(
-            MockRaftActor.props(persistenceId, stateDir(), peerAddresses, config, dataPersistenceProvider),
-            persistenceId);
+        final var mockActorRef = factory.<MockRaftActor>createTestActor(MockRaftActor.props(persistenceId, stateDir(),
+            Map.of(leaderId, leaderActor1.path().toString()), config, dataPersistenceProvider), persistenceId);
 
         final var followerActor = mockActorRef.underlyingActor();
         final var followerContext = followerActor.getRaftActorContext();
@@ -710,26 +705,23 @@ public class RaftActorTest extends AbstractActorTest {
 
     @Test
     public void testFakeSnapshotsForLeaderWithInInitiateSnapshots() throws Exception {
-        final String persistenceId = factory.generateActorId("leader-");
-        final String follower1Id = factory.generateActorId("follower-");
-        final String follower2Id = factory.generateActorId("follower-");
+        final var persistenceId = factory.generateActorId("leader-");
+        final var follower1Id = factory.generateActorId("follower-");
+        final var follower2Id = factory.generateActorId("follower-");
 
-        final ActorRef followerActor1 = factory.createActor(MessageCollectorActor.props(), follower1Id);
-        final ActorRef followerActor2 = factory.createActor(MessageCollectorActor.props(), follower2Id);
+        final var followerActor1 = factory.createActor(MessageCollectorActor.props(), follower1Id);
+        final var followerActor2 = factory.createActor(MessageCollectorActor.props(), follower2Id);
 
-        DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+        final var config = new DefaultConfigParamsImpl();
         config.setHeartBeatInterval(ONE_DAY);
         config.setIsolatedLeaderCheckInterval(ONE_DAY);
 
         final var dataPersistenceProvider = new TestPersistenceProvider();
-
-        final var peerAddresses = Map.of(
-            follower1Id, followerActor1.path().toString(),
-            follower2Id, followerActor2.path().toString());
-
-        TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(
-                MockRaftActor.props(persistenceId, stateDir(), peerAddresses, config, dataPersistenceProvider),
-                persistenceId);
+        final var mockActorRef = factory.<MockRaftActor>createTestActor(MockRaftActor.props(persistenceId, stateDir(),
+            Map.of(
+                follower1Id, followerActor1.path().toString(),
+                follower2Id, followerActor2.path().toString()),
+            config, dataPersistenceProvider), persistenceId);
 
         final var leaderActor = mockActorRef.underlyingActor();
         final var leaderContext = leaderActor.getRaftActorContext();
@@ -740,7 +732,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         leaderActor.waitForInitializeBehaviorComplete();
 
-        Leader leader = new Leader(leaderContext);
+        final var leader = new Leader(leaderContext);
         leaderActor.setCurrentBehavior(leader);
         assertSame(leader, leaderActor.getCurrentBehavior());
 
@@ -796,19 +788,15 @@ public class RaftActorTest extends AbstractActorTest {
 
     @Test
     public void testRealSnapshotWhenReplicatedToAllIndexMinusOne() throws Exception {
-        String persistenceId = factory.generateActorId("leader-");
-        DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+        final var persistenceId = factory.generateActorId("leader-");
+        final var config = new DefaultConfigParamsImpl();
         config.setHeartBeatInterval(ONE_DAY);
         config.setIsolatedLeaderCheckInterval(ONE_DAY);
         config.setSnapshotBatchCount(5);
 
-        final var peerAddresses = Map.of("member1", "address");
-
-        TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(
-                MockRaftActor.props(persistenceId, stateDir(), peerAddresses, config, new TestPersistenceProvider()),
-                persistenceId);
-
-        MockRaftActor leaderActor = mockActorRef.underlyingActor();
+        final var mockActorRef = factory.<MockRaftActor>createTestActor(MockRaftActor.props(persistenceId, stateDir(),
+            Map.of("member1", "address"), config, new TestPersistenceProvider()), persistenceId);
+        final var leaderActor = mockActorRef.underlyingActor();
         final var leaderContext = leaderActor.getRaftActorContext();
         final var leaderLog = leaderContext.getReplicatedLog();
         leaderLog.setCommitIndex(3);
@@ -838,19 +826,16 @@ public class RaftActorTest extends AbstractActorTest {
 
     @Test
     public void testRealSnapshotWhenReplicatedToAllIndexNotInReplicatedLog() throws Exception {
-        String persistenceId = factory.generateActorId("leader-");
-        DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+        final var persistenceId = factory.generateActorId("leader-");
+        final var config = new DefaultConfigParamsImpl();
         config.setHeartBeatInterval(ONE_DAY);
         config.setIsolatedLeaderCheckInterval(ONE_DAY);
         config.setSnapshotBatchCount(5);
 
-        final var peerAddresses = Map.of("member1", "address");
+        final var mockActorRef = factory.<MockRaftActor>createTestActor(MockRaftActor.props(persistenceId, stateDir(),
+            Map.of("member1", "address"), config, new TestPersistenceProvider()), persistenceId);
 
-        TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(
-                MockRaftActor.props(persistenceId, stateDir(), peerAddresses, config, new TestPersistenceProvider()),
-                persistenceId);
-
-        MockRaftActor leaderActor = mockActorRef.underlyingActor();
+        final var leaderActor = mockActorRef.underlyingActor();
         final var leaderContext = leaderActor.getRaftActorContext();
         final var leaderLog = leaderContext.getReplicatedLog();
         leaderLog.setCommitIndex(3);
@@ -859,7 +844,7 @@ public class RaftActorTest extends AbstractActorTest {
         leaderLog.setSnapshotIndex(3);
 
         leaderActor.waitForInitializeBehaviorComplete();
-        Leader leader = new Leader(leaderActor.getRaftActorContext());
+        final var leader = new Leader(leaderActor.getRaftActorContext());
         leaderActor.setCurrentBehavior(leader);
         leader.setReplicatedToAllIndex(3);
         assertInstanceOf(Leader.class, leaderActor.getCurrentBehavior());
@@ -877,18 +862,17 @@ public class RaftActorTest extends AbstractActorTest {
 
     @Test
     public void testSwitchBehavior() {
-        String persistenceId = factory.generateActorId("leader-");
-        DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+        final var persistenceId = factory.generateActorId("leader-");
+        final var config = new DefaultConfigParamsImpl();
         config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
         config.setHeartBeatInterval(ONE_DAY);
         config.setIsolatedLeaderCheckInterval(ONE_DAY);
         config.setSnapshotBatchCount(5);
 
-        TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(
-                MockRaftActor.props(persistenceId, stateDir(), Map.of(), config, new TestPersistenceProvider()),
-                persistenceId);
+        final var mockActorRef = factory.<MockRaftActor>createTestActor(MockRaftActor.props(persistenceId, stateDir(),
+            Map.of(), config, new TestPersistenceProvider()), persistenceId);
 
-        MockRaftActor leaderActor = mockActorRef.underlyingActor();
+        final var leaderActor = mockActorRef.underlyingActor();
 
         leaderActor.waitForRecoveryComplete();
 
@@ -927,13 +911,9 @@ public class RaftActorTest extends AbstractActorTest {
     public void testUpdateConfigParam() {
         final var emptyConfig = new DefaultConfigParamsImpl();
         final var persistenceId = factory.generateActorId("follower-");
-        final var peerAddresses = Map.of("member1", "address");
-        final var dataPersistenceProvider = mock(PersistenceProvider.class);
-
-        TestActorRef<MockRaftActor> actorRef = factory.createTestActor(
-                MockRaftActor.props(persistenceId, stateDir(), peerAddresses, emptyConfig, dataPersistenceProvider),
-                persistenceId);
-        MockRaftActor mockRaftActor = actorRef.underlyingActor();
+        final var actorRef = factory.<MockRaftActor>createTestActor(MockRaftActor.props(persistenceId, stateDir(),
+            Map.of("member1", "address"), emptyConfig, mockProvider()), persistenceId);
+        final var mockRaftActor = actorRef.underlyingActor();
         mockRaftActor.waitForInitializeBehaviorComplete();
 
         var behavior = assertInstanceOf(Follower.class, mockRaftActor.getCurrentBehavior());
@@ -965,10 +945,10 @@ public class RaftActorTest extends AbstractActorTest {
     public void testGetSnapshot() {
         TEST_LOG.info("testGetSnapshot starting");
 
-        final TestKit kit = new TestKit(getSystem());
+        final var kit = new TestKit(getSystem());
 
-        String persistenceId = factory.generateActorId("test-actor-");
-        DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+        final var persistenceId = factory.generateActorId("test-actor-");
+        final var config = new DefaultConfigParamsImpl();
         config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
 
         long term = 3;
@@ -994,7 +974,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         verify(mockRaftActor.snapshotCohortDelegate, timeout(5000)).takeSnapshot();
 
-        GetSnapshotReply reply = kit.expectMsgClass(GetSnapshotReply.class);
+        var reply = kit.expectMsgClass(GetSnapshotReply.class);
 
         assertEquals("getId", persistenceId, reply.id());
         var replySnapshot = reply.snapshot();
@@ -1032,8 +1012,8 @@ public class RaftActorTest extends AbstractActorTest {
     public void testRestoreFromSnapshot() throws Exception {
         TEST_LOG.info("testRestoreFromSnapshot starting");
 
-        String persistenceId = factory.generateActorId("test-actor-");
-        DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+        var persistenceId = factory.generateActorId("test-actor-");
+        final var config = new DefaultConfigParamsImpl();
         config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
 
         List<ReplicatedLogEntry> snapshotUnappliedEntries = List.of(
@@ -1042,13 +1022,13 @@ public class RaftActorTest extends AbstractActorTest {
         int snapshotLastApplied = 3;
         int snapshotLastIndex = 4;
 
-        MockSnapshotState snapshotState = new MockSnapshotState(List.of(
+        final var snapshotState = new MockSnapshotState(List.of(
             new MockCommand("A"), new MockCommand("B"), new MockCommand("C"), new MockCommand("D")));
 
-        Snapshot snapshot = Snapshot.create(snapshotState, snapshotUnappliedEntries,
+        var snapshot = Snapshot.create(snapshotState, snapshotUnappliedEntries,
                 snapshotLastIndex, 1, snapshotLastApplied, 1, new TermInfo(1, "member-1"), null);
 
-        TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.builder().id(persistenceId)
+        var raftActorRef = factory.<MockRaftActor>createTestActor(MockRaftActor.builder().id(persistenceId)
             .config(config).restoreFromSnapshot(snapshot).props(stateDir())
             .withDispatcher(Dispatchers.DefaultDispatcherId()), persistenceId);
         var mockRaftActor = raftActorRef.underlyingActor();
@@ -1059,7 +1039,7 @@ public class RaftActorTest extends AbstractActorTest {
         final var snapshotFile = await().atMost(Duration.ofSeconds(2))
             .until(() -> persistence.snapshotStore().lastSnapshot(), Objects::nonNull);
 
-        Snapshot savedSnapshot = Snapshot.ofRaft(new TermInfo(1, "member-1"), snapshotFile.readRaftSnapshot(),
+        final var savedSnapshot = Snapshot.ofRaft(new TermInfo(1, "member-1"), snapshotFile.readRaftSnapshot(),
             snapshotFile.lastIncluded(), snapshotFile.readSnapshot(MockSnapshotState.SUPPORT.reader()));
 
         assertEquals("getElectionTerm", snapshot.termInfo(), savedSnapshot.termInfo());
@@ -1106,27 +1086,27 @@ public class RaftActorTest extends AbstractActorTest {
     public void testRestoreFromSnapshotWithRecoveredData() throws Exception {
         TEST_LOG.info("testRestoreFromSnapshotWithRecoveredData starting");
 
-        String persistenceId = factory.generateActorId("test-actor-");
-        DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+        final var persistenceId = factory.generateActorId("test-actor-");
+        final var config = new DefaultConfigParamsImpl();
         config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
 
         final var state = List.of(new MockCommand("A"));
-        Snapshot snapshot = Snapshot.create(ByteState.of(fromObject(state).toByteArray()),
+        final var snapshot = Snapshot.create(ByteState.of(fromObject(state).toByteArray()),
                 List.of(), 5, 2, 5, 2, new TermInfo(2, "member-1"), null);
 
         InMemoryJournal.addEntry(persistenceId, 1, new SimpleReplicatedLogEntry(0, 1, new MockCommand("B")));
 
-        TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.builder().id(persistenceId)
+        final var raftActorRef = factory.<MockRaftActor>createTestActor(MockRaftActor.builder().id(persistenceId)
             .config(config).restoreFromSnapshot(snapshot).props(stateDir())
-                    .withDispatcher(Dispatchers.DefaultDispatcherId()), persistenceId);
-        MockRaftActor mockRaftActor = raftActorRef.underlyingActor();
+            .withDispatcher(Dispatchers.DefaultDispatcherId()), persistenceId);
+        final var mockRaftActor = raftActorRef.underlyingActor();
 
         mockRaftActor.waitForRecoveryComplete();
 
         Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
         verify(mockRaftActor.snapshotCohortDelegate, never()).applySnapshot(any());
 
-        RaftActorContext context = mockRaftActor.getRaftActorContext();
+        final var context = mockRaftActor.getRaftActorContext();
         final var log = context.getReplicatedLog();
         assertEquals("Journal log size", 1, log.size());
         assertEquals("Last index", 0, log.lastIndex());
@@ -1141,17 +1121,17 @@ public class RaftActorTest extends AbstractActorTest {
     public void testNonVotingOnRecovery() {
         TEST_LOG.info("testNonVotingOnRecovery starting");
 
-        DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+        final var config = new DefaultConfigParamsImpl();
         config.setElectionTimeoutFactor(1);
         config.setHeartBeatInterval(Duration.ofMillis(1));
 
-        String persistenceId = factory.generateActorId("test-actor-");
+        final var persistenceId = factory.generateActorId("test-actor-");
         InMemoryJournal.addEntry(persistenceId, 1,  new SimpleReplicatedLogEntry(0, 1,
                 new VotingConfig(new ServerInfo(persistenceId, false))));
 
-        TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.builder().id(persistenceId)
+        final var raftActorRef = factory.<MockRaftActor>createTestActor(MockRaftActor.builder().id(persistenceId)
             .config(config).props(stateDir()).withDispatcher(Dispatchers.DefaultDispatcherId()), persistenceId);
-        MockRaftActor mockRaftActor = raftActorRef.underlyingActor();
+        final var mockRaftActor = raftActorRef.underlyingActor();
 
         mockRaftActor.waitForInitializeBehaviorComplete();
 
@@ -1167,24 +1147,22 @@ public class RaftActorTest extends AbstractActorTest {
     public void testLeaderTransitioning() {
         TEST_LOG.info("testLeaderTransitioning starting");
 
-        ActorRef notifierActor = factory.createActor(MessageCollectorActor.props());
+        final var notifierActor = factory.createActor(MessageCollectorActor.props());
 
-        DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+        final var config = new DefaultConfigParamsImpl();
         config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
 
-        String persistenceId = factory.generateActorId("test-actor-");
+        final var persistenceId = factory.generateActorId("test-actor-");
 
-        TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.builder().id(persistenceId)
+        final var raftActorRef = factory.<MockRaftActor>createTestActor(MockRaftActor.builder().id(persistenceId)
             .config(config).roleChangeNotifier(notifierActor).props(stateDir())
             .withDispatcher(Dispatchers.DefaultDispatcherId()), persistenceId);
-        MockRaftActor mockRaftActor = raftActorRef.underlyingActor();
+        final var mockRaftActor = raftActorRef.underlyingActor();
 
         mockRaftActor.waitForInitializeBehaviorComplete();
 
-        raftActorRef.tell(new AppendEntries(1L, "leader", 0L, 1L, List.of(),
-                0L, -1L, (short)1), ActorRef.noSender());
-        LeaderStateChanged leaderStateChange = MessageCollectorActor.expectFirstMatching(
-                notifierActor, LeaderStateChanged.class);
+        raftActorRef.tell(new AppendEntries(1L, "leader", 0L, 1L, List.of(), 0L, -1L, (short)1), ActorRef.noSender());
+        var leaderStateChange = MessageCollectorActor.expectFirstMatching(notifierActor, LeaderStateChanged.class);
         assertEquals("leaderId", "leader", leaderStateChange.leaderId());
 
         MessageCollectorActor.clearMessages(notifierActor);
@@ -1200,27 +1178,25 @@ public class RaftActorTest extends AbstractActorTest {
 
     @Test
     public void testReplicateWithPersistencePending() throws Exception {
-        final String leaderId = factory.generateActorId("leader-");
-        final String followerId = factory.generateActorId("follower-");
+        final var leaderId = factory.generateActorId("leader-");
+        final var followerId = factory.generateActorId("follower-");
 
-        final ActorRef followerActor = factory.createActor(MessageCollectorActor.props());
+        final var followerActor = factory.createActor(MessageCollectorActor.props());
 
-        DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+        final var config = new DefaultConfigParamsImpl();
         config.setHeartBeatInterval(ONE_DAY);
         config.setIsolatedLeaderCheckInterval(ONE_DAY);
 
-        final var mockPersistenceProvider = mock(PersistenceProvider.class);
-
-        TestActorRef<MockRaftActor> leaderActorRef = factory.createTestActor(
-                MockRaftActor.props(leaderId, stateDir(), Map.of(followerId, followerActor.path().toString()), config,
-                        mockPersistenceProvider), leaderId);
-        MockRaftActor leaderActor = leaderActorRef.underlyingActor();
+        final var provider = mockProvider();
+        final var leaderActorRef = factory.<MockRaftActor>createTestActor(MockRaftActor.props(leaderId, stateDir(),
+            Map.of(followerId, followerActor.path().toString()), config, provider), leaderId);
+        final var leaderActor = leaderActorRef.underlyingActor();
         leaderActor.waitForInitializeBehaviorComplete();
 
         final var leaderContext = leaderActor.getRaftActorContext();
         leaderContext.setTermInfo(new TermInfo(1, leaderId));
 
-        Leader leader = new Leader(leaderContext);
+        final var leader = new Leader(leaderContext);
         leaderActor.setCurrentBehavior(leader);
 
         leaderActor.submitCommand(new MockIdentifier("1"), new MockCommand("1"), false);
@@ -1236,7 +1212,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         final var entryCaptor = ArgumentCaptor.forClass(ReplicatedLogEntry.class);
         final var callbackCaptor = ArgumentCaptor.<Consumer<ReplicatedLogEntry>>captor();
-        verify(mockPersistenceProvider).startPersistEntry(entryCaptor.capture(), callbackCaptor.capture());
+        verify(provider.entryStore()).startPersistEntry(entryCaptor.capture(), callbackCaptor.capture());
 
         final var entry = entryCaptor.getValue();
         assertSame(storedMeta.meta(), entry);
@@ -1248,25 +1224,23 @@ public class RaftActorTest extends AbstractActorTest {
 
     @Test
     public void testReplicateWithBatchHint() throws Exception {
-        final String leaderId = factory.generateActorId("leader-");
-        final String followerId = factory.generateActorId("follower-");
+        final var leaderId = factory.generateActorId("leader-");
+        final var followerId = factory.generateActorId("follower-");
+        final var followerActor = factory.createActor(MessageCollectorActor.props());
 
-        final ActorRef followerActor = factory.createActor(MessageCollectorActor.props());
-
-        DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+        final var config = new DefaultConfigParamsImpl();
         config.setHeartBeatInterval(ONE_DAY);
         config.setIsolatedLeaderCheckInterval(ONE_DAY);
 
-        TestActorRef<MockRaftActor> leaderActorRef = factory.createTestActor(
-                MockRaftActor.props(leaderId, stateDir(), Map.of(followerId, followerActor.path().toString()), config),
-                    leaderId);
-        MockRaftActor leaderActor = leaderActorRef.underlyingActor();
+        final var leaderActorRef = factory.<MockRaftActor>createTestActor(MockRaftActor.props(leaderId, stateDir(),
+            Map.of(followerId, followerActor.path().toString()), config), leaderId);
+        final var leaderActor = leaderActorRef.underlyingActor();
         leaderActor.waitForInitializeBehaviorComplete();
 
         final var leaderContext = leaderActor.getRaftActorContext();
         leaderContext.setTermInfo(new TermInfo(1, leaderId));
 
-        Leader leader = new Leader(leaderContext);
+        final var leader = new Leader(leaderContext);
         leaderActor.setCurrentBehavior(leader);
 
         MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
@@ -1288,33 +1262,33 @@ public class RaftActorTest extends AbstractActorTest {
     @Test
     @SuppressWarnings("checkstyle:illegalcatch")
     public void testApplyStateRace() throws Exception {
-        final String leaderId = factory.generateActorId("leader-");
-        final String followerId = factory.generateActorId("follower-");
-
-        DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+        final var leaderId = factory.generateActorId("leader-");
+        final var followerId = factory.generateActorId("follower-");
+        final var config = new DefaultConfigParamsImpl();
         config.setIsolatedLeaderCheckInterval(ONE_DAY);
         config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
 
-        ActorRef mockFollowerActorRef = factory.createActor(MessageCollectorActor.props());
+        final var mockFollowerActorRef = factory.createActor(MessageCollectorActor.props());
 
-        TestRaftActor.Builder builder = TestRaftActor.newBuilder()
-                .id(leaderId)
-                .peerAddresses(Map.of(followerId, mockFollowerActorRef.path().toString()))
-                .config(config)
-                .collectorActor(factory.createActor(
-                        MessageCollectorActor.props(), factory.generateActorId(leaderId + "-collector")));
+        final var builder = TestRaftActor.newBuilder()
+            .id(leaderId)
+            .peerAddresses(Map.of(followerId, mockFollowerActorRef.path().toString()))
+            .config(config)
+            .collectorActor(factory.createActor(MessageCollectorActor.props(),
+                factory.generateActorId(leaderId + "-collector")));
 
-        TestActorRef<MockRaftActor> leaderActorRef = factory.createTestActor(builder.props(stateDir()), leaderId);
-        MockRaftActor leaderActor = leaderActorRef.underlyingActor();
+        final var leaderActorRef = factory.<MockRaftActor>createTestActor(builder.props(stateDir()), leaderId);
+        final var leaderActor = leaderActorRef.underlyingActor();
         leaderActor.waitForInitializeBehaviorComplete();
 
         final var leaderContext = leaderActor.getRaftActorContext();
         leaderContext.setTermInfo(new TermInfo(1, leaderId));
-        Leader leader = new Leader(leaderContext);
+        final var leader = new Leader(leaderContext);
         leaderActor.setCurrentBehavior(leader);
 
-        final var executorService = Executors.newSingleThreadExecutor(
-            Thread.ofPlatform().name("testApplyStateRace-executor").factory());
+        final var executorService = Executors.newSingleThreadExecutor(Thread.ofPlatform()
+            .name("testApplyStateRace-executor")
+            .factory());
         leaderActor.persistence().decorateEntryStore((delegate, actor) -> new ForwardingEntryStore() {
             @Override
             public void startPersistEntry(final ReplicatedLogEntry entry, final Consumer<ReplicatedLogEntry> callback) {
@@ -1333,14 +1307,10 @@ public class RaftActorTest extends AbstractActorTest {
 
         // hitting this is flimsy so run multiple times to improve the chance of things
         // blowing up while breaking actor containment
-        final TestPersist message =
-                new TestPersist(leaderActorRef, new MockIdentifier("1"), new MockCommand("1"));
+        final var message = new TestPersist(leaderActorRef, new MockIdentifier("1"), new MockCommand("1"));
         for (int i = 0; i < 100; i++) {
             leaderActorRef.tell(message, null);
-
-            AppendEntriesReply reply =
-                    new AppendEntriesReply(followerId, 1, true, i, 1, (short) 5);
-            leaderActorRef.tell(reply, mockFollowerActorRef);
+            leaderActorRef.tell(new AppendEntriesReply(followerId, 1, true, i, 1, (short) 5), mockFollowerActorRef);
         }
 
         await("Persistence callback.").atMost(5, TimeUnit.SECONDS).until(() -> leaderActor.getState().size() == 100);

@@ -18,7 +18,6 @@ import java.util.concurrent.TimeUnit;
 import org.apache.pekko.actor.Actor;
 import org.apache.pekko.actor.ActorIdentity;
 import org.apache.pekko.actor.ActorRef;
-import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.actor.Identify;
 import org.apache.pekko.actor.InvalidActorNameException;
@@ -31,7 +30,6 @@ import org.apache.pekko.util.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
-import scala.concurrent.Future;
 
 /**
  * TestActorFactory provides methods to create both normal and test actors and to kill them when the factory is closed
@@ -145,14 +143,14 @@ public class TestActorFactory implements AutoCloseable {
         // actorSelection so, to alleviate it, we use an actorSelection and send an Identify message with
         // retries to ensure it's ready.
 
-        Timeout timeout = new Timeout(100, TimeUnit.MILLISECONDS);
+        final var timeout = new Timeout(100, TimeUnit.MILLISECONDS);
         Throwable lastError = null;
-        Stopwatch sw = Stopwatch.createStarted();
+        final var sw = Stopwatch.createStarted();
         while (sw.elapsed(TimeUnit.SECONDS) <= 10) {
             try {
-                ActorSelection actorSelection = system.actorSelection(actorRef.path().toString());
-                Future<Object> future = Patterns.ask(actorSelection, new Identify(""), timeout);
-                ActorIdentity reply = (ActorIdentity)Await.result(future, timeout.duration());
+                final var reply = (ActorIdentity) Await.result(Patterns.ask(
+                    system.actorSelection(actorRef.path().toString()), new Identify(""), timeout),
+                    timeout.duration());
                 assertTrue("Identify returned non-present", reply.getActorRef().isPresent());
                 return;
             } catch (Exception | AssertionError e) {

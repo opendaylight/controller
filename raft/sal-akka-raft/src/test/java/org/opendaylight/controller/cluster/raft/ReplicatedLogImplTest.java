@@ -9,6 +9,8 @@ package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -22,13 +24,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatcher;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
-import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.spi.EntryStore;
 
 /**
  * Unit tests for ReplicatedLogImpl.
@@ -37,106 +38,99 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
  */
 @ExtendWith(MockitoExtension.class)
 class ReplicatedLogImplTest {
+    private final DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
+
     @Mock
-    private PersistenceProvider mockPersistence;
+    private EntryStore entryStore;
     @Mock
-    private RaftActorBehavior mockBehavior;
+    private PersistenceProvider persistence;
     @Mock
-    private Consumer<ReplicatedLogEntry> mockCallback;
+    private RaftActorBehavior behavior;
+    @Mock
+    private Consumer<ReplicatedLogEntry> callback;
     @Captor
     private ArgumentCaptor<Consumer<ReplicatedLogEntry>> procedureCaptor;
     @TempDir
     private Path stateDir;
 
     private RaftActorContext context;
-    private final DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
 
     @BeforeEach
     public void setup() {
         context = new RaftActorContextImpl(null, null, new LocalAccess("test", stateDir), Map.of(), configParams,
-            (short) 0, mockPersistence, (identifier, entry) -> { }, MoreExecutors.directExecutor());
-    }
-
-    private void verifyPersist(final ReplicatedLogEntry entry) {
-        verifyPersist(entry, true);
-    }
-
-    private void verifyPersist(final ReplicatedLogEntry entry, final boolean async) {
-        if (async) {
-            verify(mockPersistence).startPersistEntry(eq(entry), procedureCaptor.capture());
-        } else {
-            verify(mockPersistence).persistEntry(eq(entry), procedureCaptor.capture());
-        }
-        procedureCaptor.getValue().accept(entry);
+            (short) 0, persistence, (identifier, entry) -> { }, MoreExecutors.directExecutor());
     }
 
     @Test
     void testAppendAndPersistExpectingNoCapture() {
+        mockEntryStore();
         final var log = new ReplicatedLogImpl(context);
 
         final var logEntry1 = new SimpleReplicatedLogEntry(1, 1, new MockCommand("1"));
 
         log.appendSubmitted(logEntry1.index(), logEntry1.term(), logEntry1.command(), null);
 
-        verifyPersist(logEntry1);
+        assertPersist(logEntry1);
 
         assertEquals(1, log.size());
 
-        reset(mockPersistence);
+        reset(entryStore);
 
         final var logEntry2 = new SimpleReplicatedLogEntry(2, 1, new MockCommand("2"));
-        log.appendSubmitted(logEntry2.index(), logEntry2.term(), logEntry2.command(), mockCallback);
+        log.appendSubmitted(logEntry2.index(), logEntry2.term(), logEntry2.command(), callback);
 
-        verifyPersist(logEntry2);
+        assertPersist(logEntry2);
 
-        verify(mockCallback).accept(eq(logEntry2));
+        verify(callback).accept(eq(logEntry2));
 
         assertEquals(2, log.size());
     }
 
     @Test
     void testAppendAndPersisWithDuplicateEntry() {
-        final var log = new ReplicatedLogImpl(context);
+        mockEntryStore();
 
+        final var log = new ReplicatedLogImpl(context);
         final var logEntry = new SimpleReplicatedLogEntry(1, 1, new MockCommand("1"));
 
-        log.appendSubmitted(logEntry.index(), logEntry.term(), logEntry.command(), mockCallback);
+        log.appendSubmitted(logEntry.index(), logEntry.term(), logEntry.command(), callback);
 
-        verifyPersist(logEntry);
+        assertPersist(logEntry);
 
         assertEquals(1, log.size());
 
-        reset(mockPersistence, mockCallback);
+        reset(persistence, callback);
 
-        log.appendSubmitted(logEntry.index(), logEntry.term(), logEntry.command(), mockCallback);
+        log.appendSubmitted(logEntry.index(), logEntry.term(), logEntry.command(), callback);
 
-        verifyNoMoreInteractions(mockPersistence, mockCallback);
+        verifyNoMoreInteractions(persistence, callback);
 
         assertEquals(1, log.size());
     }
 
     @Test
     void testAppendAndPersistExpectingCaptureDueToJournalCount() {
+        mockEntryStore();
         configParams.setSnapshotBatchCount(2);
 
         final var log = new ReplicatedLogImpl(context);
-
         final var logEntry1 = new SimpleReplicatedLogEntry(2, 1, new MockCommand("2"));
         final var logEntry2 = new SimpleReplicatedLogEntry(3, 1, new MockCommand("3"));
 
         log.appendSubmitted(logEntry1.index(), logEntry1.term(), logEntry1.command(), null);
-        verifyPersist(logEntry1);
+        assertPersist(logEntry1);
 
-        reset(mockPersistence);
+        reset(entryStore);
 
         log.appendSubmitted(logEntry2.index(), logEntry2.term(), logEntry2.command(), null);
-        verifyPersist(logEntry2);
+        assertPersist(logEntry2);
 
         assertEquals(2, log.size());
     }
 
     @Test
     void testAppendAndPersistExpectingCaptureDueToDataSize() {
+        mockEntryStore();
         context.setTotalMemoryRetriever(() -> 100);
 
         final var log = new ReplicatedLogImpl(context);
@@ -145,20 +139,21 @@ class ReplicatedLogImplTest {
         var logEntry = new SimpleReplicatedLogEntry(2, 1, new MockCommand("2", dataSize));
 
         log.appendSubmitted(logEntry.index(), logEntry.term(), logEntry.command(), null);
-        verifyPersist(logEntry);
+        assertPersist(logEntry);
 
-        reset(mockPersistence);
+        reset(entryStore);
 
         logEntry = new SimpleReplicatedLogEntry(3, 1, new MockCommand("3", 5));
 
         log.appendSubmitted(logEntry.index(), logEntry.term(), logEntry.command(), null);
-        verifyPersist(logEntry);
+        assertPersist(logEntry);
 
         assertEquals(2, log.size());
     }
 
     @Test
     void testRemoveFromAndPersist() {
+        mockEntryStore();
         final var log = new ReplicatedLogImpl(context);
 
         log.append(new SimpleReplicatedLogEntry(0, 1, new MockCommand("0")));
@@ -167,12 +162,12 @@ class ReplicatedLogImplTest {
 
         log.trimToReceive(1);
         assertEquals(1, log.size());
-        verify(mockPersistence).deleteEntries(1);
+        verify(entryStore).deleteEntries(1);
 
         // already trimmed, hence no-op
         log.trimToReceive(1);
         assertEquals(1, log.size());
-        verifyNoMoreInteractions(mockPersistence);
+        verifyNoMoreInteractions(persistence);
     }
 
     @Test
@@ -187,9 +182,23 @@ class ReplicatedLogImplTest {
 
         assertEquals(0, log.size());
         assertEquals(dataSizeAfterFirstPayload, log.dataSize());
+        verify(persistence, never()).entryStore();
     }
 
-    private static ArgumentMatcher<DeleteEntries> match(final DeleteEntries actual) {
-        return other -> actual.getFromIndex() == other.getFromIndex();
+    private void mockEntryStore() {
+        doReturn(entryStore).when(persistence).entryStore();
+    }
+
+    private void assertPersist(final ReplicatedLogEntry entry) {
+        assertPersist(entry, true);
+    }
+
+    private void assertPersist(final ReplicatedLogEntry entry, final boolean async) {
+        if (async) {
+            verify(entryStore).startPersistEntry(eq(entry), procedureCaptor.capture());
+        } else {
+            verify(entryStore).persistEntry(eq(entry), procedureCaptor.capture());
+        }
+        procedureCaptor.getValue().accept(entry);
     }
 }

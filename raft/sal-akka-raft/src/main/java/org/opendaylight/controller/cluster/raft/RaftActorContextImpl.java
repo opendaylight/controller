@@ -73,7 +73,7 @@ public class RaftActorContextImpl implements RaftActorContext {
     // be passed to it in the constructor
     private SnapshotManager snapshotManager;
 
-    private final PersistenceProvider persistenceProvider;
+    private final @NonNull PersistenceProvider persistenceProvider;
 
     private final short payloadVersion;
 
@@ -311,18 +311,19 @@ public class RaftActorContextImpl implements RaftActorContext {
     }
 
     @Override
+    @Deprecated(since = "11.0.0", forRemoval = true)
     public PersistenceProvider getPersistenceProvider() {
         return persistenceProvider;
     }
 
     @Override
     public EntryStore entryStore() {
-        return persistenceProvider;
+        return persistenceProvider.entryStore();
     }
 
     @Override
     public SnapshotStore snapshotStore() {
-        return persistenceProvider;
+        return persistenceProvider.snapshotStore();
     }
 
     @Override

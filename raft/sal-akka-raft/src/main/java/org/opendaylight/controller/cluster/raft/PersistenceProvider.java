@@ -7,14 +7,67 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static com.google.common.base.Verify.verifyNotNull;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.MoreObjects;
+import com.google.common.base.MoreObjects.ToStringHelper;
+import java.util.function.BiFunction;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.opendaylight.controller.cluster.raft.spi.EntryStore;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
 
 /**
  * This interface provides methods to persist data and is an abstraction of the akka-persistence persistence API.
  */
+@NonNullByDefault
 @VisibleForTesting
-public interface PersistenceProvider extends EntryStore, SnapshotStore {
-    // Nothing else
+public abstract class PersistenceProvider {
+    private SnapshotStore snapshotStore;
+    private EntryStore entryStore;
+
+    PersistenceProvider(final EntryStore entryStore, final SnapshotStore snapshotStore) {
+        this.entryStore = requireNonNull(entryStore);
+        this.snapshotStore = requireNonNull(snapshotStore);
+    }
+
+    public final EntryStore entryStore() {
+        return entryStore;
+    }
+
+    public final SnapshotStore snapshotStore() {
+        return snapshotStore;
+    }
+
+    @VisibleForTesting
+    public final <T extends SnapshotStore> T decorateSnapshotStore(
+            final BiFunction<SnapshotStore, ExecuteInSelfActor, T> factory) {
+        final var ret = verifyNotNull(factory.apply(snapshotStore, actor()));
+        snapshotStore = ret;
+        return ret;
+    }
+
+    @VisibleForTesting
+    public final <T extends EntryStore> T decorateEntryStore(
+            final BiFunction<EntryStore, ExecuteInSelfActor, T> factory) {
+        final var ret = verifyNotNull(factory.apply(entryStore, actor()));
+        entryStore = ret;
+        return ret;
+    }
+
+    abstract ExecuteInSelfActor actor();
+
+    final void setStorage(final EntryStore newEntryStore, final SnapshotStore newSnapshotStore) {
+        entryStore = requireNonNull(newEntryStore);
+        snapshotStore = requireNonNull(newSnapshotStore);
+    }
+
+    @Override
+    public final String toString() {
+        return addToStringAttributes(MoreObjects.toStringHelper(this)).toString();
+    }
+
+    abstract ToStringHelper addToStringAttributes(ToStringHelper helper);
 }

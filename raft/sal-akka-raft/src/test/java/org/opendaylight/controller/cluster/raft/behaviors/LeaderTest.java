@@ -1550,13 +1550,12 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leaderLog.setLastApplied(leaderCommitIndex);
         leaderActorContext.resetReplicatedLog(leaderLog);
 
-        final ReplicatedLogEntry leadersFirstLogEntry = leaderActorContext.getReplicatedLog().get(0);
-        final ReplicatedLogEntry leadersSecondLogEntry = leaderActorContext.getReplicatedLog().get(1);
+        final var leadersFirstLogEntry = leaderActorContext.getReplicatedLog().get(0);
+        final var leadersSecondLogEntry = leaderActorContext.getReplicatedLog().get(1);
 
         MockRaftActorContext followerActorContext = createFollowerActorContextWithLeader();
 
-        followerActorContext.resetReplicatedLog(
-                new MockRaftActorContext.Builder().createEntries(0, 1, 1).build());
+        followerActorContext.resetReplicatedLog(new MockRaftActorContext.Builder().createEntries(0, 1, 1).build());
 
         Follower follower = new Follower(followerActorContext);
         followerActor.underlyingActor().setBehavior(follower);
@@ -1565,8 +1564,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leader = new Leader(leaderActorContext);
 
         AppendEntries appendEntries = MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
-        final AppendEntriesReply appendEntriesReply = MessageCollectorActor.expectFirstMatching(leaderActor,
-                AppendEntriesReply.class);
+        final var appendEntriesReply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
 
         MessageCollectorActor.clearMessages(followerActor);
         MessageCollectorActor.clearMessages(leaderActor);
