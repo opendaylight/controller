@@ -98,10 +98,10 @@ import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
-import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
-import org.opendaylight.controller.cluster.raft.spi.ForwardingDataPersistenceProvider;
+import org.opendaylight.controller.cluster.raft.spi.ForwardingSnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
+import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
@@ -1475,7 +1475,7 @@ public class ShardTest extends AbstractShardTest {
             TestShard(final Path stateDir, final AbstractBuilder<?, ?> builder) {
                 super(stateDir, builder);
 
-                overridePersistence((delegate, actor) -> new ForwardingDataPersistenceProvider() {
+                persistence().decorateSnapshotStore((delegate, actor) -> new ForwardingSnapshotStore() {
                     @Override
                     public void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
                             final ToStorage<?> snapshot, final RaftCallback<Instant> callback) {
@@ -1489,7 +1489,7 @@ public class ShardTest extends AbstractShardTest {
                     }
 
                     @Override
-                    protected DataPersistenceProvider delegate() {
+                    protected SnapshotStore delegate() {
                         return delegate;
                     }
                 });

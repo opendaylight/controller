@@ -36,7 +36,6 @@ import org.apache.pekko.actor.Props;
 import org.apache.pekko.dispatch.Dispatchers;
 import org.apache.pekko.testkit.TestActorRef;
 import org.apache.pekko.testkit.javadsl.TestKit;
-import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.After;
 import org.junit.Before;
@@ -67,11 +66,11 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
-import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.spi.FailingTermInfoStore;
-import org.opendaylight.controller.cluster.raft.spi.ForwardingDataPersistenceProvider;
+import org.opendaylight.controller.cluster.raft.spi.ForwardingSnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
+import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.RaftRole;
@@ -223,7 +222,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         assertEquals("Leader persisted ServerConfigurationPayload entries", List.of(),
                 InMemoryJournal.get(LEADER_ID, VotingConfig.class));
 
-        final var lastLeaderSnapshot = leaderRaftActor.persistence().lastSnapshot();
+        final var lastLeaderSnapshot = leaderRaftActor.lastSnapshot();
         assertNotNull(lastLeaderSnapshot);
         assertEquals(new VotingConfig(votingServer(FOLLOWER_ID), votingServer(NEW_SERVER_ID), votingServer(LEADER_ID)),
             lastLeaderSnapshot.readRaftSnapshot().votingConfig());
@@ -233,7 +232,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         assertEquals("New follower persisted ServerConfigurationPayload entries", List.of(),
                 InMemoryJournal.get(NEW_SERVER_ID, VotingConfig.class));
 
-        final var lastNewFollowerSnapshot = newFollowerRaftActor.underlyingActor().persistence().lastSnapshot();
+        final var lastNewFollowerSnapshot = newFollowerRaftActor.underlyingActor().lastSnapshot();
         assertNotNull(lastNewFollowerSnapshot);
 
         assertEquals(new VotingConfig(votingServer(FOLLOWER_ID), votingServer(NEW_SERVER_ID), votingServer(LEADER_ID)),
@@ -455,7 +454,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         final var leaderCollectorActor = newLeaderCollectorActor(leaderRaftActor);
 
         // Intercept the commit request to delay its completion
-        final var leaderPersistence = leaderRaftActor.overridePersistence(CapturingDataPersistenceProvider::new);
+        final var leaderPersistence = leaderRaftActor.persistence().decorateSnapshotStore(CapturingSnapshotStore::new);
 
         leaderActor.tell(new InitiateCaptureSnapshot(), leaderActor);
 
@@ -463,7 +462,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
 
         leaderActor.tell(new AddServer(NEW_SERVER_ID, newFollowerRaftActor.path().toString(), true), testKit.getRef());
 
-        leaderRaftActor.overridePersistence((persistence, actor) -> leaderPersistence.delegate());
+        leaderRaftActor.persistence().decorateSnapshotStore((persistence, actor) -> leaderPersistence.delegate());
         capturedCallback.complete();
 
         AddServerReply addServerReply = testKit.expectMsgClass(Duration.ofSeconds(5), AddServerReply.class);
@@ -502,16 +501,15 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setElectionTimeoutFactor(1);
 
         // Override persistence to never complete snapshot
-        leaderRaftActor.overridePersistence((delegate, actor) -> new ForwardingDataPersistenceProvider() {
+        leaderRaftActor.persistence().decorateSnapshotStore((delegate, actor) -> new ForwardingSnapshotStore() {
             @Override
-            @NonNullByDefault
             public void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
                     final @Nullable ToStorage<?> snapshot, final RaftCallback<Instant> callback) {
                 // Never completes
             }
 
             @Override
-            protected DataPersistenceProvider delegate() {
+            protected SnapshotStore delegate() {
                 return delegate;
             }
         });
@@ -545,7 +543,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setElectionTimeoutFactor(100);
 
         // Override persistence to prevent snapshot from completing
-        final var leaderPersistence = leaderRaftActor.overridePersistence(CapturingDataPersistenceProvider::new);
+        final var leaderPersistence = leaderRaftActor.persistence().decorateSnapshotStore(CapturingSnapshotStore::new);
 
         leaderActor.tell(new InitiateCaptureSnapshot(), leaderActor);
 
@@ -560,9 +558,12 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         // snapshot completes. This will prevent the invalid snapshot from completing and fail the isCapturing assertion
         // below.
         leaderRaftActor.setDropMessageOfType(null);
-        leaderRaftActor.overridePersistence((delegate, actor) -> new TestDataProvider(runnable -> {
+
+        final var dropCallbacks = new TestDataProvider(runnable -> {
             LOG.info("Ignoring {}", runnable);
-        }));
+        });
+        leaderRaftActor.persistence().decorateEntryStore((delegate, actor) -> dropCallbacks);
+        leaderRaftActor.persistence().decorateSnapshotStore((delegate, actor) -> dropCallbacks);
 
         // Complete the prior snapshot - this should be a no-op b/c it's no longer the leader
         leaderSaveSnapshot.complete();

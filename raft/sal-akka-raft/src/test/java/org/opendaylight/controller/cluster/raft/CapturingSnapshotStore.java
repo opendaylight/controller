@@ -19,14 +19,14 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
-import org.opendaylight.controller.cluster.raft.spi.DataPersistenceProvider;
-import org.opendaylight.controller.cluster.raft.spi.ForwardingDataPersistenceProvider;
+import org.opendaylight.controller.cluster.raft.spi.ForwardingSnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
+import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.raft.api.EntryInfo;
 
-final class CapturingDataPersistenceProvider extends ForwardingDataPersistenceProvider {
+final class CapturingSnapshotStore extends ForwardingSnapshotStore {
     final class CapturedCallback {
         private final RaftCallback<Instant> callback;
         private final Exception failure;
@@ -53,11 +53,11 @@ final class CapturingDataPersistenceProvider extends ForwardingDataPersistencePr
     }
 
     private final AtomicReference<CapturedCallback> capture = new AtomicReference<>();
-    private final @NonNull DataPersistenceProvider delegate;
+    private final @NonNull SnapshotStore delegate;
     private final @NonNull ExecuteInSelfActor actor;
 
     @NonNullByDefault
-    CapturingDataPersistenceProvider(final DataPersistenceProvider delegate, final ExecuteInSelfActor actor) {
+    CapturingSnapshotStore(final SnapshotStore delegate, final ExecuteInSelfActor actor) {
         this.delegate = requireNonNull(delegate);
         this.actor = requireNonNull(actor);
     }
@@ -71,7 +71,7 @@ final class CapturingDataPersistenceProvider extends ForwardingDataPersistencePr
     }
 
     @Override
-    protected DataPersistenceProvider delegate() {
+    protected SnapshotStore delegate() {
         return delegate;
     }
 

@@ -85,7 +85,7 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
         }
 
         private void complete(final @Nullable Exception failure, final @Nullable T success) {
-            executeInSelf.executeInSelf(() -> callback.invoke(failure, success));
+            actor.executeInSelf(() -> callback.invoke(failure, success));
         }
     }
 
@@ -117,7 +117,7 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
     private static final String FILENAME_START_STR = "snapshot-";
 
 
-    protected final @NonNull ExecuteInSelfActor executeInSelf;
+    protected final @NonNull ExecuteInSelfActor actor;
     protected final @NonNull CompressionType compression;
     protected final @NonNull String memberId;
     protected final @NonNull Path directory;
@@ -127,10 +127,10 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
 
     private ExecutorService executor;
 
-    protected RaftStorage(final String memberId, final ExecuteInSelfActor executeInSelf, final Path directory,
+    protected RaftStorage(final String memberId, final ExecuteInSelfActor actor, final Path directory,
             final CompressionType compression, final Configuration streamConfig) {
         this.memberId = requireNonNull(memberId);
-        this.executeInSelf = requireNonNull(executeInSelf);
+        this.actor = requireNonNull(actor);
         this.directory = requireNonNull(directory);
         this.compression = requireNonNull(compression);
         this.streamConfig = requireNonNull(streamConfig);
@@ -193,6 +193,9 @@ public abstract sealed class RaftStorage implements DataPersistenceProvider
 
     protected abstract void preStop();
 
+    public final @NonNull ExecuteInSelfActor actor() {
+        return actor;
+    }
 
     @Override
     public final @Nullable SnapshotFile lastSnapshot() throws IOException {
