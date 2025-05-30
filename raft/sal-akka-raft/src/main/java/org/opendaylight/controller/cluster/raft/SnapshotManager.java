@@ -504,10 +504,7 @@ public final class SnapshotManager {
         }
 
         LOG.debug("{}: Snapshot success -  sequence number: {}", memberId(), sequenceNumber);
-        final var lastSequenceNumber = commit(persist);
-
-        context.snapshotStore().retainSnapshots(timestamp);
-        context.entryStore().deleteMessages(lastSequenceNumber);
+        context.entryStore().deleteMessages(commit(persist));
 
         snapshotComplete();
     }

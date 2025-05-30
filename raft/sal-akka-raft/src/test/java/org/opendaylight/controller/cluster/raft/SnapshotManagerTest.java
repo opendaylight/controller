@@ -401,8 +401,6 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         verify(mockEntryStore).deleteMessages(50L);
 
-        verify(mockSnapshotStore).retainSnapshots(timestamp);
-
         MessageCollectorActor.expectFirstMatching(actorRef, SnapshotComplete.class);
     }
 
@@ -416,10 +414,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         snapshotManager.commit(100L, Instant.EPOCH);
 
         verify(mockReplicatedLog, never()).snapshotCommit();
-
         verify(mockEntryStore, never()).deleteMessages(100L);
-
-        verify(mockSnapshotStore, never()).retainSnapshots(Instant.EPOCH);
     }
 
     @Test
@@ -427,10 +422,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         snapshotManager.commit(100L, Instant.EPOCH);
 
         verify(mockReplicatedLog, never()).snapshotCommit();
-
         verify(mockEntryStore, never()).deleteMessages(anyLong());
-
-        verify(mockSnapshotStore, never()).retainSnapshots(Instant.EPOCH);
 
     }
 
@@ -447,10 +439,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         snapshotManager.commit(100L, Instant.EPOCH);
 
         verify(mockReplicatedLog, times(1)).snapshotCommit();
-
         verify(mockEntryStore, times(1)).deleteMessages(50L);
-
-        verify(mockSnapshotStore, times(1)).retainSnapshots(Instant.EPOCH);
     }
 
     @Test

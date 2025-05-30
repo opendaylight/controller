@@ -39,11 +39,6 @@ interface ImmediateSnapshotStore extends SnapshotStore {
     }
 
     @Override
-    default void retainSnapshots(final Instant firstRetained) {
-        // no-op
-    }
-
-    @Override
     default void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
             final @Nullable ToStorage<?> snapshot, final RaftCallback<Instant> callback) {
         // no-op
