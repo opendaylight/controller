@@ -31,6 +31,7 @@ import org.opendaylight.controller.akka.segjournal.DataJournalEntry.ToPersistenc
  * around a {@link PersistentRepr}, while {@link #read(EntryInput)} produces an {@link FromPersistence}, which
  * needs further processing to reconstruct a {@link PersistentRepr}.
  */
+@Deprecated(since = "11.0.0", forRemoval = true)
 final class DataJournalEntrySerdes implements EntrySerdes<DataJournalEntry> {
     private final ExtendedActorSystem actorSystem;
 

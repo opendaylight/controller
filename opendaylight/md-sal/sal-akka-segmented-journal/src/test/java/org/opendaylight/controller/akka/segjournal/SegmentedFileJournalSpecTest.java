@@ -15,6 +15,7 @@ import org.junit.runner.RunWith;
 import org.scalatestplus.junit.JUnitRunner;
 
 @RunWith(JUnitRunner.class)
+@Deprecated(since = "11.0.0", forRemoval = true)
 public class SegmentedFileJournalSpecTest extends JavaJournalSpec {
     private static final long serialVersionUID = 1L;
 

@@ -39,6 +39,7 @@ import scala.concurrent.Future;
  * of multiple journals and performs a receptionist job between Pekko and invidual per-persistenceId actors. See
  * {@link SegmentedJournalActor} for details on how the persistence works.
  */
+@Deprecated(since = "11.0.0", forRemoval = true)
 public class SegmentedFileJournal extends AsyncWriteJournal {
     public static final String STORAGE_ROOT_DIRECTORY = "root-directory";
     public static final String STORAGE_MAX_ENTRY_SIZE = "max-entry-size";

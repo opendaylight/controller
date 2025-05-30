@@ -47,6 +47,7 @@ import org.opendaylight.raft.journal.StorageLevel;
 import scala.concurrent.Future;
 
 @ExtendWith(MockitoExtension.class)
+@Deprecated(since = "11.0.0", forRemoval = true)
 class SegmentedFileJournalTest {
     private static final Path DIRECTORY = Path.of("target", "sfj-test");
     private static final int SEGMENT_SIZE = 1024 * 1024;

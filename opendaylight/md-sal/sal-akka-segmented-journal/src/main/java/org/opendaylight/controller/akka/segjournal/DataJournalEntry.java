@@ -16,6 +16,7 @@ import org.apache.pekko.persistence.PersistentRepr;
  * journal-invariant, nor do we store {@code sequenceNr}, as that information is maintained by a particular journal
  * segment's index.
  */
+@Deprecated(since = "11.0.0", forRemoval = true)
 abstract sealed class DataJournalEntry {
     /**
      * A single data journal entry on its way to the backing file.

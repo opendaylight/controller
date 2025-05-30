@@ -19,6 +19,7 @@ import org.opendaylight.controller.akka.segjournal.SegmentedJournalActor.Written
  * Abstraction of a data journal. This provides a unified interface towards {@link SegmentedJournalActor}, allowing
  * specialization for various formats.
  */
+@Deprecated(since = "11.0.0", forRemoval = true)
 abstract class DataJournal {
     // Mirrors fields from associated actor
     final @NonNull String persistenceId;

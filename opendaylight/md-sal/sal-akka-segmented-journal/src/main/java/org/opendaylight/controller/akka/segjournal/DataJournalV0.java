@@ -35,6 +35,7 @@ import scala.jdk.javaapi.CollectionConverters;
 /**
  * Version 0 data journal, where every journal entry maps to exactly one segmented file entry.
  */
+@Deprecated(since = "11.0.0", forRemoval = true)
 final class DataJournalV0 extends DataJournal {
     private static final Logger LOG = LoggerFactory.getLogger(DataJournalV0.class);
 

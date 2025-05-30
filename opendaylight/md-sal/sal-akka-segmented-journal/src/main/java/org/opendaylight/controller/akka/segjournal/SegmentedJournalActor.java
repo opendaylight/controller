@@ -66,6 +66,7 @@ import scala.concurrent.Promise;
  * explicit mapping information. The only additional information we need to maintain is the last deleted sequence
  * number.
  */
+@Deprecated(since = "11.0.0", forRemoval = true)
 abstract sealed class SegmentedJournalActor extends AbstractActor {
     abstract static sealed class AsyncMessage<T> {
         final Promise<T> promise = Promise.apply();

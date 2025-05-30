@@ -12,6 +12,7 @@ import io.atomix.storage.journal.JournalSerdes.EntryOutput;
 import io.atomix.storage.journal.JournalSerdes.EntrySerdes;
 import java.io.IOException;
 
+@Deprecated(since = "11.0.0", forRemoval = true)
 enum LongEntrySerdes implements EntrySerdes<Long> {
     LONG_ENTRY_SERDES {
         @Override
