@@ -32,6 +32,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 // FIXME: it seems 'index' has to be non-zero, we should enforce that if that really is the case
 // FIXME: it seems 'size' has not be non-zero, we should enforce that if that really is the case
 @NonNullByDefault
+@Deprecated(since = "11.0.0", forRemoval = true)
 public record Indexed<E>(long index, E entry, int size) {
     public Indexed {
         requireNonNull(entry);

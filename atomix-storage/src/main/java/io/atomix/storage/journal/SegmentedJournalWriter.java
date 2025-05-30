@@ -27,6 +27,7 @@ import org.opendaylight.raft.journal.ToByteBufMapper;
  * A {@link JournalWriter} backed by a {@link EntryWriter}.
  */
 @NonNullByDefault
+@Deprecated(since = "11.0.0", forRemoval = true)
 final class SegmentedJournalWriter<E> implements JournalWriter<E> {
     private final ToByteBufMapper<E> mapper;
     private final EntryWriter writer;

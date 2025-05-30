@@ -24,6 +24,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
 @NonNullByDefault
+@Deprecated(since = "11.0.0", forRemoval = true)
 public interface JournalReader<E> extends AutoCloseable {
     /**
      * Raft log reader mode.

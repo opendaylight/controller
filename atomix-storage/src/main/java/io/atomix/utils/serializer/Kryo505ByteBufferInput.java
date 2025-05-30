@@ -33,6 +33,7 @@ import java.nio.ByteBuffer;
  * @author Robert Varga
  */
 @SuppressWarnings("all")
+@Deprecated(since = "11.0.0", forRemoval = true)
 public final class Kryo505ByteBufferInput extends ByteBufferInput {
 	Kryo505ByteBufferInput (ByteBuffer buffer) {
 		super(buffer);

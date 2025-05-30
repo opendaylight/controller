@@ -23,6 +23,7 @@ import org.eclipse.jdt.annotation.NonNull;
  *
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
+@Deprecated(since = "11.0.0", forRemoval = true)
 public interface JournalWriter<E> {
     /**
      * Returns the next index to be written.

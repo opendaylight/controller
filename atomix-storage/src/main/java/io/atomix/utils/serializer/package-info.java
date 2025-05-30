@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * Provides classes and interfaces for binary serialization.
  */
+@Deprecated(since = "11.0.0", forRemoval = true)
 package io.atomix.utils.serializer;

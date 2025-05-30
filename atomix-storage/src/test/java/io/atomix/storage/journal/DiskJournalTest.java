@@ -20,6 +20,7 @@ import org.opendaylight.raft.journal.StorageLevel;
 /**
  * Disk journal test.
  */
+@Deprecated(since = "11.0.0", forRemoval = true)
 public class DiskJournalTest extends AbstractJournalTest {
     public DiskJournalTest(final int maxSegmentSize) {
         super(StorageLevel.DISK, maxSegmentSize);
