@@ -355,16 +355,14 @@ class RaftActorRecovery {
         final var snapshotState = snapshotCohort.takeSnapshot();
         final var timestamp = Instant.now();
 
-        final var snapshotStore = context.snapshotStore();
         try {
-            snapshotStore.saveSnapshot(
+            context.snapshotStore().saveSnapshot(
                 new RaftSnapshot(context.getPeerServerInfo(true), request.getUnAppliedEntries()), request.lastApplied(),
                 ToStorage.ofNullable(snapshotCohort.support().writer(), snapshotState), timestamp);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
 
-        snapshotStore.retainSnapshots(timestamp);
         actor.deleteMessages(lastSeq);
 
         replLog.snapshotPreCommit(request.getLastAppliedIndex(), request.getLastAppliedTerm());

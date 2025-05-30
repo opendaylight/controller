@@ -39,19 +39,19 @@ public interface SnapshotStore {
     void streamToInstall(EntryInfo lastIncluded, ToStorage<?> snapshot, RaftCallback<InstallableSnapshot> callback);
 
     /**
-     * Saves a snapshot asynchronously.
+     * Saves a snapshot asynchronously and delete any previous snapshots.
      *
      * @param raftSnapshot the {@link RaftSnapshot}, receiving the snapshot timestamp
      * @param lastIncluded last included index/term
      * @param snapshot the snapshot, or {@code null} if not applicable
      * @param callback the callback to invoke
      */
-    // FIXME: imply async deletion of all other snapshots, only the last one will be reported
     void saveSnapshot(RaftSnapshot raftSnapshot, EntryInfo lastIncluded, @Nullable ToStorage<?> snapshot,
         RaftCallback<Instant> callback);
 
     /**
-     * Saves a snapshot synchronously. This method should only be called during recovery.
+     * Saves a snapshot synchronously and delete any previous snapshots. This method should only be called during
+     * recovery.
      *
      * @param raftSnapshot the {@link RaftSnapshot}
      * @param lastIncluded last included index/term
@@ -61,12 +61,4 @@ public interface SnapshotStore {
      */
     void saveSnapshot(RaftSnapshot raftSnapshot, EntryInfo lastIncluded, @Nullable ToStorage<?> snapshot,
         Instant timestamp) throws IOException;
-
-    /**
-     * Deletes all snapshots older than a timestamp.
-     *
-     * @param firstRetained the cut-off timestamp
-     */
-    // FIXME: integrate into saveSnapshot()
-    void retainSnapshots(Instant firstRetained);
 }
