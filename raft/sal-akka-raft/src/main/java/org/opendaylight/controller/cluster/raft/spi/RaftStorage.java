@@ -260,10 +260,10 @@ public abstract sealed class RaftStorage implements EntryStore, SnapshotStore
         }
 
         LOG.debug("{}: finished snapshot writeout to {}", memberId, filePath);
+        retainSnapshots(timestamp);
     }
 
-    @Override
-    public final void retainSnapshots(final Instant firstRetained) {
+    private void retainSnapshots(final Instant firstRetained) {
         final List<SnapshotFile> files;
         try {
             files = listFiles();

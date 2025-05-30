@@ -45,11 +45,6 @@ public abstract class ForwardingSnapshotStore implements SnapshotStore {
     }
 
     @Override
-    public void retainSnapshots(final Instant firstRetained) {
-        delegate().retainSnapshots(firstRetained);
-    }
-
-    @Override
     public final String toString() {
         return MoreObjects.toStringHelper(this).add("delegate", delegate()).toString();
     }
