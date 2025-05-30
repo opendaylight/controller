@@ -27,6 +27,7 @@ import org.opendaylight.raft.journal.ToByteBufMapper;
 /**
  * A {@link Journal} implementation based on a {@link RaftJournal}.
  */
+@Deprecated(since = "11.0.0", forRemoval = true)
 public final class SegmentedJournal<E> implements Journal<E> {
     private final @NonNull SegmentedJournalWriter<E> writer;
     private final @NonNull FromByteBufMapper<E> readMapper;

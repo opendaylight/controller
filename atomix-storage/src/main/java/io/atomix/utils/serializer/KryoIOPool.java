@@ -19,6 +19,7 @@ import java.lang.ref.SoftReference;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Function;
 
+@Deprecated(since = "11.0.0", forRemoval = true)
 abstract class KryoIOPool<T> {
     private final ConcurrentLinkedQueue<SoftReference<T>> queue = new ConcurrentLinkedQueue<>();
 

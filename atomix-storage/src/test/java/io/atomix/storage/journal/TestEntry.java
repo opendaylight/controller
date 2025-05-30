@@ -24,6 +24,7 @@ import java.util.Arrays;
  *
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
+@Deprecated(since = "11.0.0", forRemoval = true)
 public class TestEntry {
     private final byte[] bytes;
 

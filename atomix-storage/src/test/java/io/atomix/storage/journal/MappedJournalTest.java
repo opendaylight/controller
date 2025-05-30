@@ -20,6 +20,7 @@ import org.opendaylight.raft.journal.StorageLevel;
 /**
  * Memory mapped journal test.
  */
+@Deprecated(since = "11.0.0", forRemoval = true)
 public class MappedJournalTest extends AbstractJournalTest {
     public MappedJournalTest(final int maxSegmentSize) {
         super(StorageLevel.MAPPED, maxSegmentSize);
