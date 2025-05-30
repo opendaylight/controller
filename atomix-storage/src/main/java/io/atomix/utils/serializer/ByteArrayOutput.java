@@ -20,6 +20,7 @@ import com.esotericsoftware.kryo.io.Output;
 /**
  * Convenience class to avoid extra object allocation and casting.
  */
+@Deprecated(since = "11.0.0", forRemoval = true)
 final class ByteArrayOutput extends Output {
     private final BufferAwareByteArrayOutputStream stream;
 

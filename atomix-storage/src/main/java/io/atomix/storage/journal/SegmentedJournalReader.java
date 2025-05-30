@@ -27,6 +27,7 @@ import org.opendaylight.raft.journal.FromByteBufMapper;
  * A {@link JournalReader} backed by a {@link EntryReader}.
  */
 @NonNullByDefault
+@Deprecated(since = "11.0.0", forRemoval = true)
 final class SegmentedJournalReader<E> implements JournalReader<E> {
     private final FromByteBufMapper<E> mapper;
     private final EntryReader reader;

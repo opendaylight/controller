@@ -22,6 +22,7 @@ import io.atomix.storage.journal.JournalReader.Mode;
  *
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
+@Deprecated(since = "11.0.0", forRemoval = true)
 public interface Journal<E> extends AutoCloseable {
     /**
      * Return the index of the first entry in the journal.

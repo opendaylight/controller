@@ -17,4 +17,5 @@
 /**
  * Provides a low-level journal abstraction for appending to logs and managing segmented logs.
  */
+@Deprecated(since = "11.0.0", forRemoval = true)
 package io.atomix.storage.journal;

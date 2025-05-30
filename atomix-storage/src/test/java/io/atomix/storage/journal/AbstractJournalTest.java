@@ -45,6 +45,7 @@ import org.opendaylight.raft.journal.StorageLevel;
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
 @RunWith(Parameterized.class)
+@Deprecated(since = "11.0.0", forRemoval = true)
 public abstract class AbstractJournalTest {
     @Deprecated(forRemoval = true, since = "9.0.3")
     private static final JournalSerdes NAMESPACE = JournalSerdes.builder()

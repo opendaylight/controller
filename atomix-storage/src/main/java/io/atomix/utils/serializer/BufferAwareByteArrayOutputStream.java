@@ -20,6 +20,7 @@ import java.io.ByteArrayOutputStream;
 /**
  * Exposes protected byte array length in {@link ByteArrayOutputStream}.
  */
+@Deprecated(since = "11.0.0", forRemoval = true)
 final class BufferAwareByteArrayOutputStream extends ByteArrayOutputStream {
     BufferAwareByteArrayOutputStream(final int size) {
         super(size);

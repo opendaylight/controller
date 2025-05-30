@@ -33,8 +33,9 @@ import java.nio.ByteBuffer;
  * @author Robert Varga
  */
 @SuppressWarnings("all")
+@Deprecated(since = "11.0.0", forRemoval = true)
 public final class Kryo505ByteBufferInput extends ByteBufferInput {
-	Kryo505ByteBufferInput (ByteBuffer buffer) {
+	Kryo505ByteBufferInput (final ByteBuffer buffer) {
 		super(buffer);
 	}
 
@@ -44,7 +45,9 @@ public final class Kryo505ByteBufferInput extends ByteBufferInput {
 		int available = require(1);
 		position++;
 		int b = niobuffer.get();
-		if ((b & 0x80) == 0) return readAscii(); // ASCII.
+		if ((b & 0x80) == 0) {
+            return readAscii(); // ASCII.
+        }
 		// Null, empty, or UTF8.
 		int charCount = available >= 5 ? readUtf8Length(b) : readUtf8Length_slow(b);
 		switch (charCount) {
@@ -54,7 +57,9 @@ public final class Kryo505ByteBufferInput extends ByteBufferInput {
 			return "";
 		}
 		charCount--;
-		if (chars.length < charCount) chars = new char[charCount];
+		if (chars.length < charCount) {
+            chars = new char[charCount];
+        }
 		readUtf8(charCount);
 		return new String(chars, 0, charCount);
 	}
@@ -113,7 +118,7 @@ public final class Kryo505ByteBufferInput extends ByteBufferInput {
 		return result;
 	}
 
-	private void readUtf8 (int charCount) {
+	private void readUtf8 (final int charCount) {
 		char[] chars = this.chars;
 		// Try to read 7 bit ASCII chars.
 		int charIndex = 0;
@@ -137,10 +142,12 @@ public final class Kryo505ByteBufferInput extends ByteBufferInput {
 		}
 	}
 
-	private void readUtf8_slow (int charCount, int charIndex) {
+	private void readUtf8_slow (final int charCount, int charIndex) {
 		char[] chars = this.chars;
 		while (charIndex < charCount) {
-			if (position == limit) require(1);
+			if (position == limit) {
+                require(1);
+            }
 			position++;
 			int b = niobuffer.get() & 0xFF;
 			switch (b >> 4) {
@@ -156,7 +163,9 @@ public final class Kryo505ByteBufferInput extends ByteBufferInput {
 				break;
 			case 12:
 			case 13:
-				if (position == limit) require(1);
+				if (position == limit) {
+                    require(1);
+                }
 				position++;
 				chars[charIndex] = (char)((b & 0x1F) << 6 | niobuffer.get() & 0x3F);
 				break;
@@ -178,7 +187,9 @@ public final class Kryo505ByteBufferInput extends ByteBufferInput {
 		int limit = this.limit;
 		int b;
 		do {
-			if (end == limit) return readAscii_slow();
+			if (end == limit) {
+                return readAscii_slow();
+            }
 			end++;
 			b = niobuffer.get();
 		} while ((b & 0x80) == 0);
@@ -197,10 +208,13 @@ public final class Kryo505ByteBufferInput extends ByteBufferInput {
 		position--; // Re-read the first byte.
 		// Copy chars currently in buffer.
 		int charCount = limit - position;
-		if (charCount > chars.length) chars = new char[charCount * 2];
+		if (charCount > chars.length) {
+            chars = new char[charCount * 2];
+        }
 		char[] chars = this.chars;
-		for (int i = position, ii = 0, n = limit; i < n; i++, ii++)
-			chars[ii] = (char)niobuffer.get(i);
+		for (int i = position, ii = 0, n = limit; i < n; i++, ii++) {
+            chars[ii] = (char)niobuffer.get(i);
+        }
 		position = limit;
 		// Copy additional chars one by one.
 		while (true) {
@@ -228,7 +242,9 @@ public final class Kryo505ByteBufferInput extends ByteBufferInput {
 		int available = require(1);
 		position++;
 		int b = niobuffer.get();
-		if ((b & 0x80) == 0) return new StringBuilder(readAscii()); // ASCII.
+		if ((b & 0x80) == 0) {
+            return new StringBuilder(readAscii()); // ASCII.
+        }
 		// Null, empty, or UTF8.
 		int charCount = available >= 5 ? readUtf8Length(b) : readUtf8Length_slow(b);
 		switch (charCount) {
@@ -238,7 +254,9 @@ public final class Kryo505ByteBufferInput extends ByteBufferInput {
 			return new StringBuilder("");
 		}
 		charCount--;
-		if (chars.length < charCount) chars = new char[charCount];
+		if (chars.length < charCount) {
+            chars = new char[charCount];
+        }
 		readUtf8(charCount);
 		StringBuilder builder = new StringBuilder(charCount);
 		builder.append(chars, 0, charCount);
