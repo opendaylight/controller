@@ -39,6 +39,7 @@ import scala.jdk.javaapi.CollectionConverters;
  *
  * @author Thomas Pantelis
  */
+@Deprecated(since = "11.0.0", forRemoval = true)
 public class InMemoryJournal extends AsyncWriteJournal {
     private record WriteMessagesComplete<T>(@NonNull CountDownLatch latch, @Nullable Class<T> ofType) {
         WriteMessagesComplete {
