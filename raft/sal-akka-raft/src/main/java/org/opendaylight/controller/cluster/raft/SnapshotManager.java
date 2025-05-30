@@ -353,16 +353,16 @@ public final class SnapshotManager {
     /**
      * Applies a snapshot on a follower that was installed by the leader.
      *
-     * @param snapshot the {@link ApplyLeaderSnapshot} to apply.
+     * @param leaderSnapshot the {@link ApplyLeaderSnapshot} to apply.
      */
     @NonNullByDefault
-    void applyFromLeader(final ApplyLeaderSnapshot snapshot) {
+    void applyFromLeader(final ApplyLeaderSnapshot leaderSnapshot) {
         if (!(task instanceof Idle)) {
             LOG.debug("{}: applySnapshot should not be called in state {}", memberId(), task);
             return;
         }
 
-        final var source = snapshot.snapshot();
+        final var source = leaderSnapshot.snapshot();
         LOG.info("{}: Applying snapshot on follower: {}", memberId(), source);
 
         final Snapshot.State snapshotState;
@@ -370,37 +370,18 @@ public final class SnapshotManager {
             snapshotState = snapshotCohort().support().reader().readSnapshot(in);
         } catch (IOException e) {
             LOG.debug("{}: failed to convert InstallSnapshot to state", memberId(), e);
-            snapshot.callback().onFailure();
+            leaderSnapshot.callback().onFailure();
             return;
         }
 
-        LOG.debug("{}: Converted InstallSnapshot from leader: {} to state{}", memberId(), snapshot.leaderId(),
+        LOG.debug("{}: Converted InstallSnapshot from leader: {} to state{}", memberId(), leaderSnapshot.leaderId(),
             snapshotState.needsMigration() ? " (needs migration)" : "");
-        persistSnapshot(
-            Snapshot.ofTermLeader(snapshotState, snapshot.lastEntry(), context.termInfo(), snapshot.serverConfig()),
-            snapshot.callback());
-    }
 
-    /**
-     * Applies a snapshot from recovery.
-     *
-     * @param snapshot the {@link Snapshot} to apply.
-     */
-    @NonNullByDefault
-    public void applyFromRecovery(final Snapshot snapshot) {
-        if (task instanceof Idle) {
-            persistSnapshot(requireNonNull(snapshot), null);
-        } else {
-            LOG.debug("{}: apply should not be called in state {}", memberId(), task);
-        }
-    }
-
-    @NonNullByDefault
-    private void persistSnapshot(final Snapshot snapshot, final ApplyLeaderSnapshot.@Nullable Callback callback) {
+        final var snapshot = Snapshot.ofTermLeader(snapshotState, leaderSnapshot.lastEntry(), context.termInfo(),
+            leaderSnapshot.serverConfig());
+        final var callback = leaderSnapshot.callback;
         final var lastSeq = context.entryStore().lastSequenceNumber();
-        final var persisting = new PersistApply(lastSeq, snapshot, callback);
-
-        task = persisting;
+        task = new PersistApply(lastSeq, snapshot, callback);
         LOG.debug("{}: lastSequenceNumber prior to persisting applied snapshot: {}", memberId(), lastSeq);
         saveSnapshot(new RaftSnapshot(snapshot.votingConfig(), snapshot.getUnAppliedEntries()), snapshot.lastApplied(),
             snapshot.state(), lastSeq);
@@ -538,10 +519,6 @@ public final class SnapshotManager {
                 try {
                     // clears the followers log, sets the snapshot index to ensure adjusted-index works
                     context.getReplicatedLog().resetToSnapshot(snapshot);
-                    // FIXME: This may be coming from the leader: we do not want to pollute our TermInfo if it is for
-                    //        this term: we may need to know who we voted for in the next elections.
-                    //        This behavior means we report as if we voted for the leader.
-                    context.setTermInfo(snapshot.termInfo());
 
                     final var serverConfig = snapshot.votingConfig();
                     if (serverConfig != null) {

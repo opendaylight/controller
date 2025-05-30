@@ -78,6 +78,7 @@ import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeCh
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeNotificationListenerReply;
 import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderStateChanged;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
+import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot.ShardSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
 import org.opendaylight.controller.cluster.datastore.utils.MockDataTreeChangeListener;
@@ -247,32 +248,29 @@ public class ShardTest extends AbstractShardTest {
 
     @Test
     public void testApplySnapshot() throws Exception {
-
-        final TestActorRef<Shard> shard = actorFactory.createTestActor(newShardProps()
-                .withDispatcher(Dispatchers.DefaultDispatcherId()), "testApplySnapshot");
-
-        ShardTestKit.waitUntilLeader(shard);
-
-        final DataTree store = new InMemoryDataTreeFactory().create(DataTreeConfiguration.DEFAULT_OPERATIONAL,
+        final var store = new InMemoryDataTreeFactory().create(DataTreeConfiguration.DEFAULT_OPERATIONAL,
             SCHEMA_CONTEXT);
 
-        final ContainerNode container = ImmutableNodes.newContainerBuilder()
+        final var container = ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(TestModel.TEST_QNAME))
             .withChild(TestModel.outerNode(1))
             .build();
 
         writeToStore(store, TestModel.TEST_PATH, container);
 
-        final YangInstanceIdentifier root = YangInstanceIdentifier.of();
-        final NormalizedNode expected = readStore(store, root);
+        final var root = YangInstanceIdentifier.of();
+        final var expected = readStore(store, root);
 
-        final Snapshot snapshot = Snapshot.create(new ShardSnapshotState(new MetadataShardDataTreeSnapshot(expected)),
-                List.of(), 1, 2, 3, 4, new TermInfo(-1), null);
+        final var shard = actorFactory.<Shard>createTestActor(newShardBuilder()
+            .restoreFromSnapshot(new ShardSnapshot("inventory", Snapshot.create(
+                new ShardSnapshotState(new MetadataShardDataTreeSnapshot(expected)), List.of(), 1, 2, 3, 4,
+                new TermInfo(-1), null)))
+            .props(stateDir())
+            .withDispatcher(Dispatchers.DefaultDispatcherId()), "testApplySnapshot");
 
-        shard.underlyingActor().getRaftActorContext().getSnapshotManager().applyFromRecovery(snapshot);
+        ShardTestKit.waitUntilLeader(shard);
 
-        await().atMost(Duration.ofSeconds(5)).pollDelay(Duration.ofMillis(75))
-            .untilAsserted(() -> assertEquals("Root node", expected, readStore(shard, root)));
+        assertEquals("Root node", expected, readStore(shard, root));
     }
 
     @Test
