@@ -161,25 +161,6 @@ class RaftActorRecovery {
         return actor.memberId();
     }
 
-    @SuppressWarnings("checkstyle:IllegalCatch")
-    private void possiblyRestoreFromSnapshot() {
-        final var restoreFromSnapshot = cohort.getRestoreFromSnapshot();
-        if (restoreFromSnapshot == null) {
-            return;
-        }
-
-        if (anyDataRecovered) {
-            LOG.warn("{}: The provided restore snapshot was not applied because the persistence store is not empty",
-                    memberId());
-            return;
-        }
-
-        LOG.debug("{}: Restore snapshot: {}", memberId(), restoreFromSnapshot);
-
-        // FIXME: do not use SnapshotManager here, but rather share code with takeRecoverySnapshot()
-        context.getSnapshotManager().applyFromRecovery(restoreFromSnapshot);
-    }
-
     private ReplicatedLog replicatedLog() {
         return context.getReplicatedLog();
     }
@@ -225,6 +206,7 @@ class RaftActorRecovery {
     private void initializeLog(final Instant timestamp, final Snapshot recovered) {
         LOG.debug("{}: initializing from snapshot taken at {}", memberId(), timestamp);
         initRecoveryTimers();
+        anyDataRecovered = true;
 
         for (var entry : recovered.getUnAppliedEntries()) {
             if (isMigratedPayload(entry)) {
@@ -442,7 +424,10 @@ class RaftActorRecovery {
         }
 
         if (completeRecovery()) {
-            possiblyRestoreFromSnapshot();
+            final var snapshot = cohort.getRestoreFromSnapshot();
+            if (snapshot != null) {
+                restoreFrom(snapshot);
+            }
         }
     }
 
@@ -453,6 +438,19 @@ class RaftActorRecovery {
             return false;
         }
         return true;
+    }
+
+    @NonNullByDefault
+    private void restoreFrom(final Snapshot snapshot) {
+        if (anyDataRecovered) {
+            LOG.warn("{}: The provided restore snapshot was not applied because the persistence store is not empty",
+                memberId());
+            return;
+        }
+
+        LOG.debug("{}: Restoring snapshot: {}", memberId(), snapshot);
+        initializeLog(Instant.now(), snapshot);
+        takeSnapshot(replicatedLog().lastMeta());
     }
 
     void saveRecoverySnapshot() {
