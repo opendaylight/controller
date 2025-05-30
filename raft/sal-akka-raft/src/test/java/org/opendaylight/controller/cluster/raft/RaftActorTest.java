@@ -37,7 +37,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -1035,9 +1034,8 @@ public class RaftActorTest extends AbstractActorTest {
 
         mockRaftActor.waitForRecoveryComplete();
 
-        final var persistence = mockRaftActor.persistence();
-        final var snapshotFile = await().atMost(Duration.ofSeconds(2))
-            .until(() -> persistence.snapshotStore().lastSnapshot(), Objects::nonNull);
+        final var snapshotFile = mockRaftActor.lastSnapshot();
+        assertNotNull(snapshotFile);
 
         final var savedSnapshot = Snapshot.ofRaft(new TermInfo(1, "member-1"), snapshotFile.readRaftSnapshot(),
             snapshotFile.lastIncluded(), snapshotFile.readSnapshot(MockSnapshotState.SUPPORT.reader()));
