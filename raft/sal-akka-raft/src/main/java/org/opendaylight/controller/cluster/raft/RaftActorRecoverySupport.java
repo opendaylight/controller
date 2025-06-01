@@ -11,29 +11,41 @@ import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
+import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
 
 /**
  * Support class that handles persistence recovery for a RaftActor.
  *
  * @author Thomas Pantelis
  */
-class RaftActorRecoverySupport {
-    private final @NonNull RaftActorContext context;
-    private final @NonNull RaftActorRecoveryCohort cohort;
+class RaftActorRecoverySupport<T extends @NonNull State> {
     private final @NonNull RaftActor actor;
+    private final @NonNull SnapshotStore snapshotStore;
+    private final @NonNull RaftActorRecoveryCohort recoveryCohort;
+    private final @NonNull RaftActorSnapshotCohort<T> snapshotCohort;
+    private final @NonNull ReplicatedLog log;
+    private final @NonNull ConfigParams configParams;
 
-    RaftActorRecoverySupport(final @NonNull RaftActor actor, final RaftActorContext context,
-            final RaftActorRecoveryCohort cohort) {
+    @NonNullByDefault
+    RaftActorRecoverySupport(final RaftActor actor, final SnapshotStore snapshotStore,
+            final RaftActorSnapshotCohort<T> snapshotCohort, final RaftActorRecoveryCohort recoveryCohort,
+            final ReplicatedLog log, final ConfigParams configParams) {
         this.actor = requireNonNull(actor);
-        this.context = requireNonNull(context);
-        this.cohort = requireNonNull(cohort);
+        this.snapshotStore = requireNonNull(snapshotStore);
+        this.snapshotCohort = requireNonNull(snapshotCohort);
+        this.recoveryCohort = requireNonNull(recoveryCohort);
+        this.log = requireNonNull(log);
+        this.configParams = requireNonNull(configParams);
     }
 
-    @NonNull RaftActorRecovery recoverToPersistent() throws IOException {
-        return new RaftActorRecovery(actor, context, cohort);
+    @NonNull RaftActorRecovery<T> recoverToPersistent() throws IOException {
+        return new RaftActorRecovery<>(actor, snapshotStore, snapshotCohort, recoveryCohort, log, configParams);
     }
 
-    @NonNull RaftActorRecovery recoverToTransient() throws IOException {
-        return new RaftActorRecovery.ToTransient(actor, context, cohort);
+    @NonNull RaftActorRecovery<T> recoverToTransient() throws IOException {
+        return new RaftActorRecovery.ToTransient<>(actor, snapshotStore, snapshotCohort, recoveryCohort, log,
+            configParams);
     }
 }

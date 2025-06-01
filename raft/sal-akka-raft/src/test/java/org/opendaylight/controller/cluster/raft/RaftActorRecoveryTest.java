@@ -83,10 +83,12 @@ class RaftActorRecoveryTest {
     private ActorRef mockActorRef;
     private ActorSystem mockActorSystem;
     private LocalAccess localAccess;
-    private RaftActorContext context;
 
-    private RaftActorRecoverySupport support;
-    private RaftActorRecovery recovery;
+    private RaftActorContext context;
+    private PeerInfos peerInfos;
+
+    private RaftActorRecoverySupport<?> support;
+    private RaftActorRecovery<?> recovery;
 
     @BeforeEach
     void setup() {
@@ -96,11 +98,13 @@ class RaftActorRecoveryTest {
         mockActorSystem = ActorSystem.create();
         mockActorRef = mockActorSystem.actorOf(Props.create(DoNothingActor.class));
 
-        doReturn(snapshotStore).when(persistence).snapshotStore();
-        context = new RaftActorContextImpl(mockActorRef, null, localAccess, Map.of(), configParams, (short) 0,
+        peerInfos = new PeerInfos(localId, Map.of());
+
+        context = new RaftActorContextImpl(mockActorRef, null, localAccess, peerInfos, configParams, (short) 0,
             persistence, (identifier, entry) -> { }, MoreExecutors.directExecutor());
 
-        support = new RaftActorRecoverySupport(raftActor, context, recoveryCohort);
+        support = new RaftActorRecoverySupport<>(raftActor, snapshotStore, snapshotCohort, recoveryCohort,
+            context.getReplicatedLog(), configParams);
     }
 
     @AfterEach
@@ -187,7 +191,8 @@ class RaftActorRecoveryTest {
     void testIncrementalRecovery() throws Exception {
         int recoverySnapshotInterval = 3;
         configParams.setRecoverySnapshotIntervalSeconds(recoverySnapshotInterval);
-        context.getSnapshotManager().setSnapshotCohort(snapshotCohort);
+        doReturn(peerInfos).when(raftActor).peerInfos();
+        doReturn(MockSnapshotState.SUPPORT).when(snapshotCohort).support();
 
         recovery = support.recoverToPersistent();
 
@@ -216,6 +221,7 @@ class RaftActorRecoveryTest {
 
     @Test
     void testOnSnapshotOffer() throws Exception {
+        doReturn(MockSnapshotState.SUPPORT).when(snapshotCohort).support();
         recovery = support.recoverToPersistent();
 
         var replicatedLog = context.getReplicatedLog();
@@ -317,6 +323,7 @@ class RaftActorRecoveryTest {
 
     @Test
     void testDataRecoveredWithPersistenceDisabled() throws Exception {
+        doReturn(MockSnapshotState.SUPPORT).when(snapshotCohort).support();
         recovery = support.recoverToTransient();
 
         doReturn(10L).when(raftActor).lastSequenceNr();
@@ -371,6 +378,7 @@ class RaftActorRecoveryTest {
 
     @Test
     void testServerConfigurationPayloadApplied() throws Exception {
+        doReturn(peerInfos).when(raftActor).peerInfos();
         recovery = support.recoverToPersistent();
 
         final var follower1 = "follower1";
@@ -412,6 +420,7 @@ class RaftActorRecoveryTest {
 
     @Test
     void testServerConfigurationPayloadAppliedWithPersistenceDisabled() throws Exception {
+        doReturn(peerInfos).when(raftActor).peerInfos();
         recovery = support.recoverToTransient();
 
         final var obj = new VotingConfig(new ServerInfo(localId, true), new ServerInfo("follower", true));
@@ -424,6 +433,8 @@ class RaftActorRecoveryTest {
 
     @Test
     void testOnSnapshotOfferWithServerConfiguration() throws Exception {
+        doReturn(peerInfos).when(raftActor).peerInfos();
+        doReturn(MockSnapshotState.SUPPORT).when(snapshotCohort).support();
         recovery = support.recoverToPersistent();
 
         final var electionTerm = 2;
