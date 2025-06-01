@@ -76,7 +76,6 @@ import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ByteState;
 import org.opendaylight.controller.cluster.raft.persisted.ByteStateSnapshotCohort;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
-import org.opendaylight.controller.cluster.raft.persisted.EmptyState;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
@@ -1058,7 +1057,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         // Test with data persistence disabled
 
-        snapshot = Snapshot.create(EmptyState.INSTANCE, List.of(), -1, -1, -1, -1, new TermInfo(5, "member-1"), null);
+        snapshot = Snapshot.create(null, List.of(), -1, -1, -1, -1, new TermInfo(5, "member-1"), null);
 
         persistenceId = factory.generateActorId("test-actor-");
 

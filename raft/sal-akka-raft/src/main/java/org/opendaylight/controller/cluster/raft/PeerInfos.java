@@ -45,6 +45,10 @@ final class PeerInfos {
             .collect(Collectors.toMap(PeerInfo::getId, Function.identity()));
     }
 
+    boolean isEmpty() {
+        return peerInfoMap.isEmpty();
+    }
+
     Set<String> peerIds() {
         return peerInfoMap.keySet();
     }
