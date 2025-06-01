@@ -417,8 +417,8 @@ class RaftActorVotingConfigSupport {
                 return;
             }
 
-            VotingState votingState = addServer.isVotingMember() ? VotingState.VOTING_NOT_INITIALIZED :
-                    VotingState.NON_VOTING;
+            final var votingState = addServer.isVotingMember() ? VotingState.VOTING_NOT_INITIALIZED
+                : VotingState.NON_VOTING;
             raftContext.addToPeers(addServer.getNewServerId(), addServer.getNewServerAddress(), votingState);
 
             leader.addFollower(addServer.getNewServerId());

@@ -13,8 +13,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -60,7 +58,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     private ReplicatedLog replicatedLog;
 
-    private final Map<String, PeerInfo> peerInfoMap = new HashMap<>();
+    private final @NonNull PeerInfos peers;
 
     private ConfigParams configParams;
 
@@ -80,8 +78,6 @@ public class RaftActorContextImpl implements RaftActorContext {
     private boolean votingMember = true;
 
     private RaftActorBehavior currentBehavior;
-
-    private int numVotingPeers = -1;
 
     private Optional<Cluster> cluster;
 
@@ -108,10 +104,7 @@ public class RaftActorContextImpl implements RaftActorContext {
         fileBackedOutputStreamFactory = new FileBackedOutputStreamFactory(
                 configParams.getFileBackedStreamingThreshold(), configParams.getTempFileDirectory());
 
-        for (Map.Entry<String, String> e : requireNonNull(peerAddresses).entrySet()) {
-            peerInfoMap.put(e.getKey(), new PeerInfo(e.getKey(), e.getValue(), VotingState.VOTING));
-        }
-
+        peers = PeerInfos.ofMembers(id, peerAddresses);
         replicatedLog = new ReplicatedLogImpl(this);
     }
 
@@ -193,60 +186,40 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     public Collection<String> getPeerIds() {
-        return peerInfoMap.keySet();
+        return peers.peerIds();
     }
 
     @Override
     public Collection<PeerInfo> getPeers() {
-        return peerInfoMap.values();
+        return peers.peerInfos();
     }
 
     @Override
     public PeerInfo getPeerInfo(final String peerId) {
-        return peerInfoMap.get(peerId);
+        return peers.lookupPeerInfo(peerId);
     }
 
     @Override
     public String getPeerAddress(final String peerId) {
-        String peerAddress;
-        PeerInfo peerInfo = peerInfoMap.get(peerId);
-        if (peerInfo != null) {
-            peerAddress = peerInfo.getAddress();
-            if (peerAddress == null) {
-                peerAddress = configParams.getPeerAddressResolver().resolve(peerId);
-                peerInfo.setAddress(peerAddress);
-            }
-        } else {
-            peerAddress = configParams.getPeerAddressResolver().resolve(peerId);
+        final var peerInfo = getPeerInfo(peerId);
+        if (peerInfo == null) {
+            return configParams.getPeerAddressResolver().resolve(peerId);
         }
 
-        return peerAddress;
+        final var existing = peerInfo.getAddress();
+        if (existing != null) {
+            return existing;
+        }
+
+        final var resolved = configParams.getPeerAddressResolver().resolve(peerId);
+        peerInfo.setAddress(resolved);
+        return resolved;
     }
 
     @Override
     public void updateVotingConfig(final VotingConfig votingConfig) {
-        boolean newVotingMember = false;
-        var currentPeers = new HashSet<>(getPeerIds());
-        for (var server : votingConfig.serverInfo()) {
-            if (id.equals(server.peerId())) {
-                newVotingMember = server.isVoting();
-            } else {
-                final var votingState = server.isVoting() ? VotingState.VOTING : VotingState.NON_VOTING;
-                if (currentPeers.contains(server.peerId())) {
-                    getPeerInfo(server.peerId()).setVotingState(votingState);
-                    currentPeers.remove(server.peerId());
-                } else {
-                    addToPeers(server.peerId(), null, votingState);
-                }
-            }
-        }
-
-        for (String peerIdToRemove : currentPeers) {
-            removePeer(peerIdToRemove);
-        }
-
-        votingMember = newVotingMember;
-        LOG.debug("{}: Updated server config: isVoting: {}, peers: {}", id, votingMember, peerInfoMap.values());
+        votingMember = peers.applyVotingConfig(votingConfig.serverInfo());
+        LOG.debug("{}: Updated server config: isVoting: {}, peers: {}", id, votingMember, peers.peerInfos());
 
         setDynamicServerConfigurationInUse();
     }
@@ -258,8 +231,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     public void addToPeers(final String peerId, final String address, final VotingState votingState) {
-        peerInfoMap.put(peerId, new PeerInfo(peerId, address, votingState));
-        numVotingPeers = -1;
+        peers.setPeerInfo(peerId, address, votingState);
     }
 
     @Override
@@ -267,8 +239,7 @@ public class RaftActorContextImpl implements RaftActorContext {
         if (id.equals(name)) {
             votingMember = false;
         } else {
-            peerInfoMap.remove(name);
-            numVotingPeers = -1;
+            peers.removePeerInfo(name);
         }
     }
 
@@ -280,7 +251,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     public void setPeerAddress(final String peerId, final String peerAddress) {
-        final var peerInfo = peerInfoMap.get(peerId);
+        final var peerInfo = peers.lookupPeerInfo(peerId);
         if (peerInfo != null) {
             LOG.info("{}: Peer address for peer {} set to {}", id, peerId, peerAddress);
             peerInfo.setAddress(peerAddress);
@@ -307,7 +278,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     public boolean hasFollowers() {
-        return !getPeerIds().isEmpty();
+        return !peers.isEmpty();
     }
 
     @Override
@@ -366,16 +337,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     public boolean anyVotingPeers() {
-        if (numVotingPeers < 0) {
-            numVotingPeers = 0;
-            for (PeerInfo info: getPeers()) {
-                if (info.isVoting()) {
-                    numVotingPeers++;
-                }
-            }
-        }
-
-        return numVotingPeers > 0;
+        return peers.anyVotingPeers();
     }
 
     @Override

@@ -17,6 +17,7 @@ import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.cluster.Cluster;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
@@ -158,7 +159,8 @@ public interface RaftActorContext {
      * @param address the address of the new peer.
      * @param votingState the VotingState of the new peer.
      */
-    void addToPeers(String id, String address, VotingState votingState);
+    @NonNullByDefault
+    void addToPeers(String id, @Nullable String address, VotingState votingState);
 
     /**
      * Removes a peer.
@@ -181,6 +183,7 @@ public interface RaftActorContext {
      * @param peerId the id of the peer.
      * @param peerAddress the address of the peer.
      */
+    @NonNullByDefault
     void setPeerAddress(String peerId, String peerAddress);
 
     /**

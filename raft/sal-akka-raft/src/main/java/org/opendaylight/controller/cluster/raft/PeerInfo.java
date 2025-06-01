@@ -7,15 +7,22 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static java.util.Objects.requireNonNull;
+
+import com.google.common.base.MoreObjects;
+import edu.umd.cs.findbugs.annotations.Nullable;
+import org.eclipse.jdt.annotation.NonNull;
+
 /**
  * Stores information about a raft peer.
  *
  * @author Thomas Pantelis
  */
-public class PeerInfo {
-    private final String id;
-    private String address;
-    private VotingState votingState;
+public final class PeerInfo {
+    private final @NonNull String id;
+
+    private @NonNull VotingState votingState;
+    private @Nullable String address;
 
     /**
      * Constructs an instance.
@@ -24,21 +31,21 @@ public class PeerInfo {
      * @param address the address of the peer.
      * @param votingState the VotingState of the peer.
      */
-    public PeerInfo(String id, String address, VotingState votingState) {
-        this.id = id;
+    public PeerInfo(final String id, final String address, final VotingState votingState) {
+        this.id = requireNonNull(id);
         this.address = address;
-        this.votingState = votingState;
+        this.votingState = requireNonNull(votingState);
     }
 
-    public String getId() {
+    public @NonNull String getId() {
         return id;
     }
 
-    public String getAddress() {
+    public @Nullable String getAddress() {
         return address;
     }
 
-    public VotingState getVotingState() {
+    public @NonNull VotingState getVotingState() {
         return votingState;
     }
 
@@ -46,16 +53,20 @@ public class PeerInfo {
         return votingState == VotingState.VOTING;
     }
 
-    public void setAddress(String address) {
+    public void setAddress(final @Nullable String address) {
         this.address = address;
     }
 
-    public void setVotingState(VotingState votingState) {
-        this.votingState = votingState;
+    public void setVotingState(final VotingState newVotingState) {
+        votingState = requireNonNull(newVotingState);
     }
 
     @Override
     public String toString() {
-        return "PeerInfo [id=" + id + ", address=" + address + ", votingState=" + votingState + "]";
+        return MoreObjects.toStringHelper(this).omitNullValues()
+            .add("id", id)
+            .add("address", address)
+            .add("votingState", votingState)
+            .toString();
     }
 }
