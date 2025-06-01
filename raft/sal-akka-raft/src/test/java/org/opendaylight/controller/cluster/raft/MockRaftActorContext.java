@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.google.common.util.concurrent.MoreExecutors;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -101,7 +103,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         this.raftPolicy = raftPolicy;
     }
 
-    public static class SimpleReplicatedLog extends AbstractReplicatedLog {
+    public static class SimpleReplicatedLog extends AbstractReplicatedLog<ReplicatedLogEntry> {
         public SimpleReplicatedLog() {
             super("");
         }
@@ -112,7 +114,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         }
 
         @Override
-        public void captureSnapshotIfReady(final EntryMeta replicatedLogEntry) {
+        public void captureSnapshotIfReady(final EntryMeta entry) {
             // No-op
         }
 
@@ -127,9 +129,8 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         }
 
         @Override
-        public boolean appendReceived(final ReplicatedLogEntry entry, final Consumer<LogEntry> callback) {
-            // FIXME: assertion here?
-            append(entry);
+        public boolean appendReceived(final LogEntry entry, final Consumer<LogEntry> callback) {
+            assertTrue(append(entry));
             if (callback != null) {
                 callback.accept(entry);
             }
@@ -141,7 +142,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
                 final Consumer<ReplicatedLogEntry> callback) {
             final var entry = new SimpleReplicatedLogEntry(index, term, command);
             // FIXME: do not ignore return value here: we should be returning that instead of 'true'
-            append(entry);
+            appendImpl(entry);
             if (callback != null) {
                 callback.accept(entry);
             }
@@ -151,6 +152,11 @@ public class MockRaftActorContext extends RaftActorContextImpl {
         @Override
         public void markLastApplied() {
             // No-op
+        }
+
+        @Override
+        protected ReplicatedLogEntry adoptEntry(final LogEntry entry) {
+            return SimpleReplicatedLogEntry.of(entry);
         }
     }
 

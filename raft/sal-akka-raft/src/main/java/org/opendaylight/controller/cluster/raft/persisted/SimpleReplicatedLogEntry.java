@@ -11,15 +11,18 @@ import static java.util.Objects.requireNonNull;
 
 import java.io.Serializable;
 import org.apache.commons.lang3.SerializationUtils;
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
+import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 
 /**
  * A {@link ReplicatedLogEntry} implementation.
  *
  * @author Thomas Pantelis
  */
+@NonNullByDefault
 public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Serializable {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
@@ -28,7 +31,7 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Seria
 
     private final long index;
     private final long term;
-    private final @NonNull Payload payload;
+    private final Payload payload;
 
     private boolean persistencePending;
 
@@ -43,6 +46,11 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Seria
         this.index = index;
         this.term = term;
         this.payload = requireNonNull(payload);
+    }
+
+    public static SimpleReplicatedLogEntry of(final LogEntry entry) {
+        return entry instanceof SimpleReplicatedLogEntry simple && !simple.isPersistencePending() ? simple
+            : new SimpleReplicatedLogEntry(entry.index(), entry.term(), entry.command().toSerialForm());
     }
 
     @Override
@@ -95,7 +103,7 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Seria
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(final @Nullable Object obj) {
         return this == obj || obj instanceof SimpleReplicatedLogEntry other && index == other.index
             && term == other.term && payload.equals(other.payload);
     }

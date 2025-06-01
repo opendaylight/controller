@@ -17,6 +17,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.EntryMeta;
 import org.slf4j.Logger;
@@ -26,13 +27,13 @@ import org.slf4j.LoggerFactory;
  * Abstract class handling the mapping of
  * logical LogEntry Index and the physical list index.
  */
-public abstract class AbstractReplicatedLog implements ReplicatedLog {
+public abstract class AbstractReplicatedLog<T extends ReplicatedLogEntry> implements ReplicatedLog {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractReplicatedLog.class);
 
     final @NonNull String memberId;
 
     // We define this as ArrayList so we can use ensureCapacity.
-    private ArrayList<ReplicatedLogEntry> journal = new ArrayList<>();
+    private ArrayList<@NonNull T> journal = new ArrayList<>();
 
     private long snapshotIndex = -1;
     private long snapshotTerm = -1;
@@ -40,7 +41,7 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
     private long lastApplied = -1;
 
     // to be used for rollback during save snapshot failure
-    private ArrayList<ReplicatedLogEntry> snapshottedJournal;
+    private ArrayList<T> snapshottedJournal;
     private long previousSnapshotIndex = -1;
     private long previousSnapshotTerm = -1;
     private int dataSize = 0;
@@ -74,7 +75,7 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
     }
 
     @Override
-    public final ReplicatedLogEntry get(final long logEntryIndex) {
+    public final T get(final long logEntryIndex) {
         int adjustedIndex = adjustedIndex(logEntryIndex);
 
         if (adjustedIndex < 0 || adjustedIndex >= journal.size()) {
@@ -92,12 +93,8 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
     }
 
     @Override
-    public final ReplicatedLogEntry last() {
-        if (journal.isEmpty()) {
-            return null;
-        }
-        // get the last entry directly from the physical index
-        return journal.get(journal.size() - 1);
+    public final T last() {
+        return journal.isEmpty() ? null : journal.getLast();
     }
 
     @Override
@@ -173,12 +170,16 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
     }
 
     @Override
-    public final boolean append(final ReplicatedLogEntry replicatedLogEntry) {
-        final var entryIndex = replicatedLogEntry.index();
+    public final boolean append(final LogEntry entry) {
+        return appendImpl(adoptEntry(requireNonNull(entry)));
+    }
+
+    protected final boolean appendImpl(final @NonNull T entry) {
+        final var entryIndex = entry.index();
         final var lastIndex = lastIndex();
         if (entryIndex > lastIndex) {
-            journal.add(replicatedLogEntry);
-            dataSize += replicatedLogEntry.size();
+            journal.add(entry);
+            dataSize += entry.size();
             return true;
         }
 
@@ -186,6 +187,9 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
             entryIndex, lastIndex, new Exception("stack trace"));
         return false;
     }
+
+    @NonNullByDefault
+    protected abstract @NonNull T adoptEntry(LogEntry entry);
 
     @Override
     public final void increaseJournalLogCapacity(final int amount) {
@@ -325,7 +329,7 @@ public abstract class AbstractReplicatedLog implements ReplicatedLog {
         if (updateDataSize) {
             // need to recalc the datasize based on the entries left after precommit.
             int newDataSize = 0;
-            for (ReplicatedLogEntry logEntry : journal) {
+            for (var logEntry : journal) {
                 newDataSize += logEntry.size();
             }
             LOG.trace("{}: Updated dataSize from {} to {}", memberId, dataSize, newDataSize);

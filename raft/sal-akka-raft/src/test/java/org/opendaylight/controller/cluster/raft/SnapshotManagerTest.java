@@ -65,7 +65,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     @Mock
     private ConfigParams mockConfigParams;
     @Mock
-    private AbstractReplicatedLog mockReplicatedLog;
+    private AbstractReplicatedLog<ReplicatedLogEntry> mockReplicatedLog;
     @Mock
     private EntryStore mockEntryStore;
     @Mock

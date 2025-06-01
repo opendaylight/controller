@@ -1491,7 +1491,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     }
 
     private static void verifyServerConfigurationPayloadEntry(final ReplicatedLog log, final ServerInfo... expected) {
-        ReplicatedLogEntry logEntry = log.get(log.lastIndex());
+        final var logEntry = log.get(log.lastIndex());
         final var payload = assertInstanceOf(VotingConfig.class, logEntry.command());
         assertEquals("Server config", Set.of(expected), Set.copyOf(payload.serverInfo()));
     }

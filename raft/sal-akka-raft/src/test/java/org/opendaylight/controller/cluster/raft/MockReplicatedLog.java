@@ -13,7 +13,7 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.raft.api.EntryMeta;
 
-final class MockReplicatedLog extends AbstractReplicatedLog {
+final class MockReplicatedLog extends AbstractReplicatedLog<ReplicatedLogEntry> {
     MockReplicatedLog() {
         super("");
     }
@@ -24,7 +24,7 @@ final class MockReplicatedLog extends AbstractReplicatedLog {
     }
 
     @Override
-    public boolean appendReceived(final ReplicatedLogEntry entry, final Consumer<LogEntry> callback) {
+    public boolean appendReceived(final LogEntry entry, final Consumer<LogEntry> callback) {
         if (callback != null) {
             callback.accept(entry);
         }
@@ -46,12 +46,17 @@ final class MockReplicatedLog extends AbstractReplicatedLog {
     }
 
     @Override
-    public void captureSnapshotIfReady(final EntryMeta replicatedLogEntry) {
+    public void captureSnapshotIfReady(final EntryMeta lastEntry) {
         // No-op
     }
 
     @Override
     public boolean shouldCaptureSnapshot(final long logIndex) {
         return false;
+    }
+
+    @Override
+    protected ReplicatedLogEntry adoptEntry(final LogEntry entry) {
+        return SimpleReplicatedLogEntry.of(entry);
     }
 }
