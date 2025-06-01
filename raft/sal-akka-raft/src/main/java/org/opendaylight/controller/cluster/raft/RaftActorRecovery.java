@@ -29,6 +29,7 @@ import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
+import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
@@ -40,13 +41,15 @@ import org.slf4j.LoggerFactory;
 /**
  * A single attempt at recovery. Essentially replays Pekko persistence {@link ReplicatedLog} and {@link TermInfoStore}.
  */
-class RaftActorRecovery {
-    static final class ToTransient extends RaftActorRecovery {
+class RaftActorRecovery<T extends @NonNull State> {
+    static final class ToTransient<T extends @NonNull State> extends RaftActorRecovery<T> {
         private boolean dataRecoveredWithPersistenceDisabled;
 
-        ToTransient(final @NonNull RaftActor actor, final RaftActorContext context,
-                final RaftActorRecoveryCohort cohort) throws IOException {
-            super(actor, context, cohort);
+        @NonNullByDefault
+        ToTransient(final RaftActor actor, final SnapshotStore snapshotStore,
+                final RaftActorSnapshotCohort<T> snapshotCohort, final RaftActorRecoveryCohort recoveryCohort,
+                final ReplicatedLog log, final ConfigParams configParams) throws IOException {
+            super(actor, snapshotStore, snapshotCohort, recoveryCohort, log, configParams);
         }
 
         @Override
@@ -95,9 +98,10 @@ class RaftActorRecovery {
     private static final Logger LOG = LoggerFactory.getLogger(RaftActorRecovery.class);
 
     private final @NonNull RaftActor actor;
-    private final @NonNull RaftActorContext context;
-    private final @NonNull RaftActorRecoveryCohort cohort;
-    private final @NonNull RaftActorSnapshotCohort<@NonNull State> snapshotCohort;
+    private final @NonNull SnapshotStore snapshotStore;
+    private final @NonNull RaftActorRecoveryCohort recoveryCohort;
+    private final @NonNull RaftActorSnapshotCohort<T> snapshotCohort;
+    private final @NonNull ReplicatedLog log;
     private final @Nullable TermInfo origTermInfo;
     private final @Nullable SnapshotFile origSnapshot;
     private final int snapshotInterval;
@@ -108,21 +112,25 @@ class RaftActorRecovery {
     private boolean hasMigratedDataRecovered;
     private Stopwatch recoveryTimer;
     private Stopwatch snapshotTimer;
+    private VotingConfig votingConfig;
+    private TermInfo termInfo;
 
-    RaftActorRecovery(final @NonNull RaftActor actor, final RaftActorContext context,
-            final RaftActorRecoveryCohort cohort) throws IOException {
+    @NonNullByDefault
+    RaftActorRecovery(final RaftActor actor, final SnapshotStore snapshotStore,
+            final RaftActorSnapshotCohort<T> snapshotCohort, final RaftActorRecoveryCohort recoveryCohort,
+            final ReplicatedLog log, final ConfigParams configParams) throws IOException {
         this.actor = requireNonNull(actor);
-        this.context = requireNonNull(context);
-        this.cohort = requireNonNull(cohort);
+        this.snapshotStore = requireNonNull(snapshotStore);
+        this.snapshotCohort = requireNonNull(snapshotCohort);
+        this.recoveryCohort = requireNonNull(recoveryCohort);
+        this.log = requireNonNull(log);
 
-        snapshotCohort = context.getSnapshotManager().snapshotCohort();
-        origTermInfo = actor.localAccess().termInfoStore().loadAndSetTerm();
+        termInfo = origTermInfo = actor.localAccess().termInfoStore().loadAndSetTerm();
 
-        final var configParams = context.getConfigParams();
         snapshotInterval = configParams.getRecoverySnapshotIntervalSeconds();
         batchSize = configParams.getJournalRecoveryLogBatchSize();
 
-        final var loaded = context.snapshotStore().lastSnapshot();
+        final var loaded = snapshotStore.lastSnapshot();
         if (loaded != null) {
             initializeLog(loaded.timestamp(), Snapshot.ofRaft(origTermInfo, loaded.readRaftSnapshot(),
                 loaded.lastIncluded(), loaded.readSnapshot(snapshotCohort.support().reader())));
@@ -144,8 +152,8 @@ class RaftActorRecovery {
             case ReplicatedLogEntry msg -> onRecoveredJournalLogEntry(msg);
             case ApplyJournalEntries msg -> onRecoveredApplyLogEntries(msg.getToIndex());
             case DeleteEntries msg -> onDeleteEntries(msg);
-            case VotingConfig msg -> context.updateVotingConfig(msg);
-            case UpdateElectionTerm(var termInfo) -> context.setTermInfo(termInfo);
+            case VotingConfig msg -> votingConfig = msg;
+            case UpdateElectionTerm(var newTermInfo) -> termInfo = newTermInfo;
             case RecoveryCompleted msg -> {
                 onRecoveryCompletedMessage();
                 return true;
@@ -159,10 +167,6 @@ class RaftActorRecovery {
 
     final @NonNull String memberId() {
         return actor.memberId();
-    }
-
-    private ReplicatedLog replicatedLog() {
-        return context.getReplicatedLog();
     }
 
     private void initRecoveryTimers() {
@@ -190,7 +194,7 @@ class RaftActorRecovery {
         LOG.info("{}: migrating from Pekko persistent-snapshot taken at {}", memberId(), timestamp);
         final var sw = Stopwatch.createStarted();
         try {
-            context.snapshotStore().saveSnapshot(
+            snapshotStore.saveSnapshot(
                 new RaftSnapshot(snapshot.votingConfig(), snapshot.getUnAppliedEntries()), snapshot.lastApplied(),
                 ToStorage.ofNullable(snapshotCohort.support().writer(), snapshot.state()),
                 timestamp);
@@ -219,9 +223,9 @@ class RaftActorRecovery {
         // Create a replicated log with the snapshot information
         // The replicated log can be used later on to retrieve this snapshot
         // when we need to install it on a peer
-        final var replLog = replicatedLog();
-        replLog.resetToSnapshot(toApply);
-        context.setTermInfo(toApply.termInfo());
+        log.resetToSnapshot(toApply);
+        termInfo = toApply.termInfo();
+        votingConfig = toApply.votingConfig();
 
         final var timer = Stopwatch.createStarted();
 
@@ -231,15 +235,11 @@ class RaftActorRecovery {
             if (snapshotState.needsMigration()) {
                 hasMigratedDataRecovered = true;
             }
-            cohort.applyRecoveredSnapshot(snapshotState);
-        }
-
-        if (toApply.votingConfig() != null) {
-            context.updateVotingConfig(toApply.votingConfig());
+            recoveryCohort.applyRecoveredSnapshot(snapshotState);
         }
 
         LOG.info("Recovery snapshot applied for {} in {}: snapshotIndex={}, snapshotTerm={}, journal-size={}",
-                memberId(), timer.stop(), replLog.getSnapshotIndex(), replLog.getSnapshotTerm(), replLog.size());
+                memberId(), timer.stop(), log.getSnapshotIndex(), log.getSnapshotTerm(), log.size());
     }
 
     @NonNullByDefault
@@ -258,20 +258,19 @@ class RaftActorRecovery {
             hasMigratedDataRecovered = true;
         }
 
-        if (command instanceof VotingConfig clusterConfig) {
-            context.updateVotingConfig(clusterConfig);
+        if (command instanceof VotingConfig newVotingConfig) {
+            votingConfig = newVotingConfig;
         }
 
         appendRecoveredEntry(logEntry);
     }
 
     void appendRecoveredEntry(final ReplicatedLogEntry logEntry) {
-        replicatedLog().append(logEntry);
+        log.append(logEntry);
     }
 
     void onRecoveredApplyLogEntries(final long toIndex) {
-        final var replLog = replicatedLog();
-        long lastUnappliedIndex = replLog.getLastApplied() + 1;
+        long lastUnappliedIndex = log.getLastApplied() + 1;
 
         if (LOG.isDebugEnabled()) {
             // it can happen that lastUnappliedIndex > toIndex, if the AJE is in the persistent journal
@@ -282,7 +281,7 @@ class RaftActorRecovery {
 
         long lastApplied = lastUnappliedIndex - 1;
         for (long i = lastUnappliedIndex; i <= toIndex; i++) {
-            final var logEntry = replicatedLog().get(i);
+            final var logEntry = log.get(i);
             if (logEntry == null) {
                 // Shouldn't happen but cover it anyway.
                 LOG.error("{}: Log entry not found for index {}", memberId(), i);
@@ -302,29 +301,29 @@ class RaftActorRecovery {
                 if (currentRecoveryBatchCount > 0) {
                     endCurrentLogRecoveryBatch();
                 }
-                replLog.setLastApplied(lastApplied);
-                replLog.setCommitIndex(lastApplied);
+                log.setLastApplied(lastApplied);
+                log.setCommitIndex(lastApplied);
                 takeSnapshot(logEntry);
                 LOG.info("{}: Resetting timer for the next recovery snapshot", memberId());
                 snapshotTimer.reset().start();
             }
         }
 
-        replLog.setLastApplied(lastApplied);
-        replLog.setCommitIndex(lastApplied);
+        log.setLastApplied(lastApplied);
+        log.setCommitIndex(lastApplied);
     }
 
     @Deprecated(since = "11.0.0", forRemoval = true)
     void onDeleteEntries(final DeleteEntries deleteEntries) {
-        replicatedLog().removeRecoveredEntries(deleteEntries.getFromIndex());
+        log.removeRecoveredEntries(deleteEntries.getFromIndex());
     }
 
     private void batchRecoveredCommand(final StateCommand command) {
         if (currentRecoveryBatchCount == 0) {
-            cohort.startLogRecoveryBatch(batchSize);
+            recoveryCohort.startLogRecoveryBatch(batchSize);
         }
 
-        cohort.appendRecoveredCommand(command);
+        recoveryCohort.appendRecoveredCommand(command);
 
         if (++currentRecoveryBatchCount >= batchSize) {
             endCurrentLogRecoveryBatch();
@@ -347,15 +346,13 @@ class RaftActorRecovery {
         LOG.info("{}: Taking snapshot on entry with index {}", memberId(), logEntry.index());
 
         final var sw = Stopwatch.createStarted();
-        final var replLog = context.getReplicatedLog();
         // FIXME: We really do not have followers at this point, but information from VotingConfig may indicate we do.
         //        We should inline newCaptureSnapshot() logic here with the appropriate specialization.
-        final var request = replLog.newCaptureSnapshot(logEntry, -1, false, context.hasFollowers());
+        final var request = log.newCaptureSnapshot(logEntry, -1, false, context.hasFollowers());
         final var lastSeq = actor.lastSequenceNr();
         final var snapshotState = snapshotCohort.takeSnapshot();
         final var timestamp = Instant.now();
 
-        final var snapshotStore = context.snapshotStore();
         try {
             snapshotStore.saveSnapshot(
                 new RaftSnapshot(context.getPeerServerInfo(true), request.getUnAppliedEntries()), request.lastApplied(),
@@ -367,14 +364,14 @@ class RaftActorRecovery {
         snapshotStore.retainSnapshots(timestamp);
         actor.deleteMessages(lastSeq);
 
-        replLog.snapshotPreCommit(request.getLastAppliedIndex(), request.getLastAppliedTerm());
-        replLog.snapshotCommit();
+        log.snapshotPreCommit(request.getLastAppliedIndex(), request.getLastAppliedTerm());
+        log.snapshotCommit();
 
         LOG.info("{}: Snapshot completed in {}, resetting timer for the next recovery snapshot", memberId(), sw.stop());
     }
 
     private void endCurrentLogRecoveryBatch() {
-        cohort.applyCurrentLogRecoveryBatch();
+        recoveryCohort.applyCurrentLogRecoveryBatch();
         currentRecoveryBatchCount = 0;
     }
 
@@ -396,11 +393,9 @@ class RaftActorRecovery {
             snapshotTimer = null;
         }
 
-        final var replLog = replicatedLog();
         LOG.info("{}: Recovery completed {} - Switching actor to Follower - last log index = {}, last log term = {}, "
-                + "snapshot index = {}, snapshot term = {}, journal size = {}", memberId(), recoveryTime,
-                replLog.lastIndex(), replLog.lastTerm(), replLog.getSnapshotIndex(), replLog.getSnapshotTerm(),
-                replLog.size());
+            + "snapshot index = {}, snapshot term = {}, journal size = {}", memberId(), recoveryTime,
+            log.lastIndex(), log.lastTerm(), log.getSnapshotIndex(), log.getSnapshotTerm(), log.size());
 
 
         // Populate property-based storage if needed, or roll-back any voting information leaked by recovery process
@@ -424,7 +419,7 @@ class RaftActorRecovery {
         }
 
         if (completeRecovery()) {
-            final var snapshot = cohort.getRestoreFromSnapshot();
+            final var snapshot = recoveryCohort.getRestoreFromSnapshot();
             if (snapshot != null) {
                 restoreFrom(snapshot);
             }
@@ -453,7 +448,7 @@ class RaftActorRecovery {
         initializeLog(timestamp, snapshot);
 
         try {
-            context.snapshotStore().saveSnapshot(
+            snapshotStore.saveSnapshot(
                 new RaftSnapshot(context.getPeerServerInfo(true), snapshot.getUnAppliedEntries()),
                 snapshot.lastApplied(), ToStorage.ofNullable(snapshotCohort.support().writer(), snapshot.state()),
                 timestamp);
@@ -463,7 +458,7 @@ class RaftActorRecovery {
     }
 
     void saveRecoverySnapshot() {
-        takeSnapshot(replicatedLog().lastMeta());
+        takeSnapshot(log.lastMeta());
     }
 
     // Either data persistence is disabled and we recovered some data entries (i.e. we must have just transitioned

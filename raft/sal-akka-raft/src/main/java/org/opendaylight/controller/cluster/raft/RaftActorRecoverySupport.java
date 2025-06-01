@@ -29,11 +29,11 @@ class RaftActorRecoverySupport {
         this.cohort = requireNonNull(cohort);
     }
 
-    @NonNull RaftActorRecovery recoverToPersistent() throws IOException {
+    @NonNull RaftActorRecovery<?> recoverToPersistent() throws IOException {
         return new RaftActorRecovery(actor, context, cohort);
     }
 
-    @NonNull RaftActorRecovery recoverToTransient() throws IOException {
+    @NonNull RaftActorRecovery<?> recoverToTransient() throws IOException {
         return new RaftActorRecovery.ToTransient(actor, context, cohort);
     }
 }
