@@ -91,5 +91,5 @@ public sealed interface StateMachineCommand extends Immutable permits RaftComman
      */
     @Beta
     // FIXME: CONTROLLER-2044: this should be handled by separate serialization support/protocol
-    Serializable toSerialForm();
+    Payload toSerialForm();
 }

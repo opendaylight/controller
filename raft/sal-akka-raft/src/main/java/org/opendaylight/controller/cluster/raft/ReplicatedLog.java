@@ -12,7 +12,6 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.List;
 import java.util.function.Consumer;
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.CaptureSnapshot;
@@ -24,6 +23,7 @@ import org.opendaylight.raft.api.EntryMeta;
 /**
  * Represents the ReplicatedLog that needs to be kept in sync by the RaftActor.
  */
+@NonNullByDefault
 public interface ReplicatedLog {
     /**
      * A combination of {@link EntryMeta} and indicator of whether the entry is stable.
@@ -31,7 +31,6 @@ public interface ReplicatedLog {
      * @param meta the {@link EntryMeta}
      * @param durable {@code true} if the entry is known to be durable
      */
-    @NonNullByDefault
     record StoredEntryMeta(EntryMeta meta, boolean durable) {
         /**
          * Default constructor.
@@ -54,7 +53,7 @@ public interface ReplicatedLog {
      * @return the ReplicatedLogEntry if found, otherwise null if the adjusted index less than 0 or greater than the
      *         size of the in-memory journal
      */
-    @Nullable ReplicatedLogEntry get(long index);
+    @Nullable LogEntry get(long index);
 
     /**
      * Return metadata about a replicated entry.
@@ -81,7 +80,7 @@ public interface ReplicatedLog {
      *
      * @return the last replicated log entry in the log or null of not found.
      */
-    @Nullable ReplicatedLogEntry last();
+    @Nullable LogEntry last();
 
     /**
      * Return the last replicated log entry in the log or null of not found.
@@ -162,13 +161,12 @@ public interface ReplicatedLog {
     boolean trimToReceive(long nextIndex);
 
     /**
-     * Appends an entry to the log.
+     * Appends an entry to the log if its index is already included in the log.
      *
-     * @param replicatedLogEntry the entry to append
-     * @return true if the entry was successfully appended, false otherwise. An entry can fail to append if
-     *         the index is already included in the log.
+     * @param entry the entry to append
+     * @return {@code true} if the entry was successfully appended, {@code false} otherwise.
      */
-    boolean append(ReplicatedLogEntry replicatedLogEntry);
+    boolean append(LogEntry entry);
 
     /**
      * Optimization method to increase the capacity of the journal log prior to appending entries.
@@ -185,8 +183,7 @@ public interface ReplicatedLog {
      * @param callback optional callback to be notified when persistence is complete
      * @return {@code true} if the journal requires trimming and a snapshot needs to be taken
      */
-    @NonNullByDefault
-    boolean appendReceived(ReplicatedLogEntry entry, @Nullable Consumer<LogEntry> callback);
+    boolean appendReceived(LogEntry entry, @Nullable Consumer<LogEntry> callback);
 
     /**
      * Appends an entry submitted on the leader to the in-memory log and persists it as well.
@@ -197,7 +194,6 @@ public interface ReplicatedLog {
      * @param callback the callback to be notified when persistence is complete (optional).
      * @return {@code true} if the entry was successfully appended, false otherwise.
      */
-    @NonNullByDefault
     boolean appendSubmitted(long index, long term, Payload command, @Nullable Consumer<ReplicatedLogEntry> callback);
 
     /**
@@ -206,7 +202,7 @@ public interface ReplicatedLog {
      * @param index the index of the first log entry to get.
      * @return the List of entries
      */
-    @NonNull List<ReplicatedLogEntry> getFrom(long index);
+    List<ReplicatedLogEntry> getFrom(long index);
 
     /**
      * Returns a list of log entries starting from the given index up to the given maximum of entries or
@@ -217,7 +213,7 @@ public interface ReplicatedLog {
      * @param maxDataSize the maximum accumulated size of the log entries to get
      * @return the List of entries meeting the criteria.
      */
-    @NonNull List<ReplicatedLogEntry> getFrom(long index, int maxEntries, long maxDataSize);
+    List<ReplicatedLogEntry> getFrom(long index, int maxEntries, long maxDataSize);
 
     /**
      * Returns the number of entries in the journal.
@@ -371,9 +367,9 @@ public interface ReplicatedLog {
     /**
      * Determines if a snapshot needs to be captured based on the count/memory consumed and initiates the capture.
      *
-     * @param replicatedLogEntry the last log entry.
+     * @param lastEntry the last log entry.
      */
-    void captureSnapshotIfReady(EntryMeta replicatedLogEntry);
+    void captureSnapshotIfReady(EntryMeta lastEntry);
 
     /**
      * Determines if a snapshot should be captured based on the count/memory consumed.
@@ -388,7 +384,7 @@ public interface ReplicatedLog {
      *
      * @param snapshot snapshot to reset to
      */
-    void resetToSnapshot(@NonNull Snapshot snapshot);
+    void resetToSnapshot(Snapshot snapshot);
 
     /**
      * Constructs a CaptureSnapshot instance.
@@ -397,6 +393,6 @@ public interface ReplicatedLog {
      * @param replicatedToAllIndex the index of the last entry replicated to all followers.
      * @return a new CaptureSnapshot instance.
      */
-    @NonNull CaptureSnapshot newCaptureSnapshot(EntryMeta lastLogEntry, long replicatedToAllIndex,
+    CaptureSnapshot newCaptureSnapshot(@Nullable EntryMeta lastLogEntry, long replicatedToAllIndex,
         boolean mandatoryTrim, boolean hasFollowers);
 }

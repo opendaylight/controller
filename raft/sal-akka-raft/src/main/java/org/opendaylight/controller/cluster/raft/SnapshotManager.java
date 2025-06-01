@@ -344,7 +344,8 @@ public final class SnapshotManager {
         return true;
     }
 
-    private @NonNull CaptureSnapshot newCaptureSnapshot(final EntryMeta lastLogEntry, final long replicatedToAllIndex,
+    @NonNullByDefault
+    private CaptureSnapshot newCaptureSnapshot(final @Nullable EntryMeta lastLogEntry, final long replicatedToAllIndex,
             final boolean mandatoryTrim) {
         return context.getReplicatedLog().newCaptureSnapshot(lastLogEntry, replicatedToAllIndex, mandatoryTrim,
             context.hasFollowers());
