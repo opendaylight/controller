@@ -100,7 +100,8 @@ class RaftActorRecoveryTest {
         context = new RaftActorContextImpl(mockActorRef, null, localAccess, Map.of(), configParams, (short) 0,
             persistence, (identifier, entry) -> { }, MoreExecutors.directExecutor());
 
-        support = new RaftActorRecoverySupport(raftActor, context, recoveryCohort);
+        support = new RaftActorRecoverySupport<>(raftActor, snapshotStore, snapshotCohort, recoveryCohort,
+            context.getReplicatedLog(), configParams);
     }
 
     @AfterEach
