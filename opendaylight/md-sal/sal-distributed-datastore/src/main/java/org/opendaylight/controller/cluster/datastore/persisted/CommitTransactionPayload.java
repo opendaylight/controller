@@ -27,6 +27,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.raft.messages.IdentifiablePayload;
+import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.raft.spi.ByteArray;
 import org.opendaylight.raft.spi.ChunkedOutputStream;
@@ -75,7 +76,7 @@ public final class CommitTransactionPayload extends IdentifiablePayload<Transact
         }
 
         @Override
-        public Serializable toSerialForm() {
+        public Payload toSerialForm() {
             try {
                 return CommitTransactionPayload.create(transactionId, candidate);
             } catch (IOException e) {

@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Implementation of ReplicatedLog used by the RaftActor.
  */
-final class ReplicatedLogImpl extends AbstractReplicatedLog {
+final class ReplicatedLogImpl extends AbstractReplicatedLog<SimpleReplicatedLogEntry> {
     private static final Logger LOG = LoggerFactory.getLogger(ReplicatedLogImpl.class);
 
     private static final int DATA_SIZE_DIVIDER = 5;
@@ -46,7 +46,7 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog {
 
     @Override
     public boolean shouldCaptureSnapshot(final long logIndex) {
-        final ConfigParams config = context.getConfigParams();
+        final var config = context.getConfigParams();
         if ((logIndex + 1) % config.getSnapshotBatchCount() == 0) {
             return true;
         }
@@ -58,9 +58,9 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog {
     }
 
     @Override
-    public void captureSnapshotIfReady(final EntryMeta replicatedLogEntry) {
-        if (shouldCaptureSnapshot(replicatedLogEntry.index())) {
-            boolean started = context.getSnapshotManager().capture(replicatedLogEntry,
+    public void captureSnapshotIfReady(final EntryMeta lastEntry) {
+        if (shouldCaptureSnapshot(lastEntry.index())) {
+            boolean started = context.getSnapshotManager().capture(lastEntry,
                     context.getCurrentBehavior().getReplicatedToAllIndex());
             if (started && !context.hasFollowers()) {
                 dataSizeSinceLastSnapshot = 0;
@@ -88,15 +88,16 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog {
     }
 
     @Override
-    public boolean appendReceived(final ReplicatedLogEntry entry, final Consumer<LogEntry> callback) {
+    public boolean appendReceived(final LogEntry entry, final Consumer<LogEntry> callback) {
         LOG.debug("{}: Append log entry and persist {} ", memberId, entry);
 
         // FIXME: When can 'false' happen? Wouldn't that be an indication that Follower.handleAppendEntries() is doing
         //        something wrong?
-        if (append(entry)) {
-            context.entryStore().persistEntry(entry, persisted -> invokeSync(persisted, callback));
+        final var adopted = adoptEntry(entry);
+        if (appendImpl(adopted)) {
+            context.entryStore().persistEntry(adopted, persisted -> invokeSync(persisted, callback));
         }
-        return shouldCaptureSnapshot(entry.index());
+        return shouldCaptureSnapshot(adopted.index());
     }
 
     @Override
@@ -106,7 +107,7 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog {
         entry.setPersistencePending(true);
         LOG.debug("{}: Append log entry and persist {} ", memberId, entry);
 
-        final var ret = append(entry);
+        final var ret = appendImpl(entry);
         if (ret) {
             context.entryStore().startPersistEntry(entry, unused -> {
                 entry.setPersistencePending(false);
@@ -135,5 +136,10 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog {
     @Override
     public void markLastApplied() {
         context.entryStore().markLastApplied(getLastApplied());
+    }
+
+    @Override
+    protected SimpleReplicatedLogEntry adoptEntry(final LogEntry entry) {
+        return SimpleReplicatedLogEntry.of(entry);
     }
 }
