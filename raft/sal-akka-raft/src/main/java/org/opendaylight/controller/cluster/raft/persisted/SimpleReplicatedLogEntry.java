@@ -33,8 +33,6 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Seria
     private final long term;
     private final Payload payload;
 
-    private boolean persistencePending;
-
     /**
      * Constructs an instance.
      *
@@ -80,16 +78,7 @@ public final class SimpleReplicatedLogEntry implements ReplicatedLogEntry, Seria
 
     @Override
     public boolean isPersistencePending() {
-        return persistencePending;
-    }
-
-    /**
-     * Sets whether or not persistence is pending for this entry.
-     *
-     * @param pending the new setting.
-     */
-    public void setPersistencePending(final boolean pending) {
-        persistencePending = pending;
+        return false;
     }
 
     @Override
