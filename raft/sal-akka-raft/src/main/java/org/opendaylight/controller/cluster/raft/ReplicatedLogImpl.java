@@ -11,7 +11,6 @@ import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
-import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.raft.api.EntryMeta;
 import org.slf4j.Logger;
@@ -20,7 +19,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Implementation of ReplicatedLog used by the RaftActor.
  */
-final class ReplicatedLogImpl extends AbstractReplicatedLog<SimpleReplicatedLogEntry> {
+final class ReplicatedLogImpl extends AbstractReplicatedLog<JournaledLogEntry> {
     private static final Logger LOG = LoggerFactory.getLogger(ReplicatedLogImpl.class);
 
     private static final int DATA_SIZE_DIVIDER = 5;
@@ -104,7 +103,7 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog<SimpleReplicatedLogE
     @Override
     public boolean appendSubmitted(final long index, final long term, final Payload command,
             final Consumer<ReplicatedLogEntry> callback)  {
-        final var entry = new SimpleReplicatedLogEntry(index, term, command);
+        final var entry = new JournaledLogEntry(index, term, command);
         entry.setPersistencePending(true);
         LOG.debug("{}: Append log entry and persist {} ", memberId, entry);
 
@@ -140,7 +139,7 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog<SimpleReplicatedLogE
     }
 
     @Override
-    protected SimpleReplicatedLogEntry adoptEntry(final LogEntry entry) {
-        return SimpleReplicatedLogEntry.of(entry);
+    protected JournaledLogEntry adoptEntry(final LogEntry entry) {
+        return JournaledLogEntry.of(entry);
     }
 }
