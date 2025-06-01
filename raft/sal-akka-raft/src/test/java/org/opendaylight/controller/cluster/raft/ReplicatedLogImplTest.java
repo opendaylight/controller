@@ -28,9 +28,9 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
-import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.EntryStore;
+import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 
 /**
  * Unit tests for ReplicatedLogImpl.
@@ -67,9 +67,9 @@ class ReplicatedLogImplTest {
         mockEntryStore();
         final var log = new ReplicatedLogImpl(context);
 
-        final var logEntry1 = new SimpleReplicatedLogEntry(1, 1, new MockCommand("1"));
+        final var logEntry1 = new DefaultLogEntry(1, 1, new MockCommand("1"));
 
-        log.appendSubmitted(logEntry1.index(), logEntry1.term(), logEntry1.command(), null);
+        log.appendSubmitted(logEntry1.index(), logEntry1.term(), logEntry1.command().toSerialForm(), null);
 
         assertPersist(logEntry1);
 
@@ -77,12 +77,12 @@ class ReplicatedLogImplTest {
 
         reset(entryStore);
 
-        final var logEntry2 = new SimpleReplicatedLogEntry(2, 1, new MockCommand("2"));
-        log.appendSubmitted(logEntry2.index(), logEntry2.term(), logEntry2.command(), callback);
+        final var logEntry2 = new DefaultLogEntry(2, 1, new MockCommand("2"));
+        log.appendSubmitted(logEntry2.index(), logEntry2.term(), logEntry2.command().toSerialForm(), callback);
 
         assertPersist(logEntry2);
 
-        verify(callback).accept(eq(logEntry2));
+        verify(callback).accept(eq(JournaledLogEntry.of(logEntry2)));
 
         assertEquals(2, log.size());
     }
@@ -92,9 +92,9 @@ class ReplicatedLogImplTest {
         mockEntryStore();
 
         final var log = new ReplicatedLogImpl(context);
-        final var logEntry = new SimpleReplicatedLogEntry(1, 1, new MockCommand("1"));
+        final var logEntry = new DefaultLogEntry(1, 1, new MockCommand("1"));
 
-        log.appendSubmitted(logEntry.index(), logEntry.term(), logEntry.command(), callback);
+        log.appendSubmitted(logEntry.index(), logEntry.term(), logEntry.command().toSerialForm(), callback);
 
         assertPersist(logEntry);
 
@@ -102,7 +102,7 @@ class ReplicatedLogImplTest {
 
         reset(persistence, callback);
 
-        log.appendSubmitted(logEntry.index(), logEntry.term(), logEntry.command(), callback);
+        log.appendSubmitted(logEntry.index(), logEntry.term(), logEntry.command().toSerialForm(), callback);
 
         verifyNoMoreInteractions(persistence, callback);
 
@@ -115,15 +115,15 @@ class ReplicatedLogImplTest {
         configParams.setSnapshotBatchCount(2);
 
         final var log = new ReplicatedLogImpl(context);
-        final var logEntry1 = new SimpleReplicatedLogEntry(2, 1, new MockCommand("2"));
-        final var logEntry2 = new SimpleReplicatedLogEntry(3, 1, new MockCommand("3"));
+        final var logEntry1 = new DefaultLogEntry(2, 1, new MockCommand("2"));
+        final var logEntry2 = new DefaultLogEntry(3, 1, new MockCommand("3"));
 
-        log.appendSubmitted(logEntry1.index(), logEntry1.term(), logEntry1.command(), null);
+        log.appendSubmitted(logEntry1.index(), logEntry1.term(), logEntry1.command().toSerialForm(), null);
         assertPersist(logEntry1);
 
         reset(entryStore);
 
-        log.appendSubmitted(logEntry2.index(), logEntry2.term(), logEntry2.command(), null);
+        log.appendSubmitted(logEntry2.index(), logEntry2.term(), logEntry2.command().toSerialForm(), null);
         assertPersist(logEntry2);
 
         assertEquals(2, log.size());
@@ -137,16 +137,16 @@ class ReplicatedLogImplTest {
         final var log = new ReplicatedLogImpl(context);
 
         int dataSize = 600;
-        var logEntry = new SimpleReplicatedLogEntry(2, 1, new MockCommand("2", dataSize));
+        var logEntry = new DefaultLogEntry(2, 1, new MockCommand("2", dataSize));
 
-        log.appendSubmitted(logEntry.index(), logEntry.term(), logEntry.command(), null);
+        log.appendSubmitted(logEntry.index(), logEntry.term(), logEntry.command().toSerialForm(), null);
         assertPersist(logEntry);
 
         reset(entryStore);
 
-        logEntry = new SimpleReplicatedLogEntry(3, 1, new MockCommand("3", 5));
+        logEntry = new DefaultLogEntry(3, 1, new MockCommand("3", 5));
 
-        log.appendSubmitted(logEntry.index(), logEntry.term(), logEntry.command(), null);
+        log.appendSubmitted(logEntry.index(), logEntry.term(), logEntry.command().toSerialForm(), null);
         assertPersist(logEntry);
 
         assertEquals(2, log.size());
@@ -190,15 +190,16 @@ class ReplicatedLogImplTest {
         doReturn(entryStore).when(persistence).entryStore();
     }
 
-    private void assertPersist(final ReplicatedLogEntry entry) {
+    private void assertPersist(final LogEntry entry) {
         assertPersist(entry, true);
     }
 
-    private void assertPersist(final ReplicatedLogEntry entry, final boolean async) {
+    private void assertPersist(final LogEntry entry, final boolean async) {
+        final var logEntry = JournaledLogEntry.of(entry);
         if (async) {
-            verify(entryStore).startPersistEntry(eq(entry), procedureCaptor.capture());
+            verify(entryStore).startPersistEntry(eq(logEntry), procedureCaptor.capture());
         } else {
-            verify(entryStore).persistEntry(eq(entry), procedureCaptor.capture());
+            verify(entryStore).persistEntry(eq(logEntry), procedureCaptor.capture());
         }
         procedureCaptor.getValue().run();
     }
