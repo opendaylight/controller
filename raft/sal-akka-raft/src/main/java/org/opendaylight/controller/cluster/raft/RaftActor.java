@@ -158,6 +158,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         return localAccess;
     }
 
+    final @NonNull PeerInfos peerInfos() {
+        return peerInfos;
+    }
+
     @Override
     @Deprecated(since = "11.0.0", forRemoval = true)
     public final ActorRef getSender() {
@@ -211,8 +215,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     @VisibleForTesting
-    RaftActorRecoverySupport newRaftActorRecoverySupport() {
-        return new RaftActorRecoverySupport(this, context, getRaftActorRecoveryCohort());
+    RaftActorRecoverySupport<?> newRaftActorRecoverySupport() {
+        return new RaftActorRecoverySupport<>(this, persistenceControl.snapshotStore(),
+            context.getSnapshotManager().snapshotCohort(), getRaftActorRecoveryCohort(), replicatedLog(),
+            context.getConfigParams());
     }
 
     @VisibleForTesting
