@@ -265,6 +265,7 @@ class RaftActorRecovery {
         appendRecoveredEntry(logEntry);
     }
 
+    @NonNullByDefault
     void appendRecoveredEntry(final ReplicatedLogEntry logEntry) {
         replicatedLog().append(logEntry);
     }
