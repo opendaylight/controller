@@ -412,8 +412,7 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
 
         final var persistedServerConfig = new VotingConfig(
                 new ServerInfo(leaderId, true), new ServerInfo(follower1Id, false));
-        SimpleReplicatedLogEntry persistedServerConfigEntry = new SimpleReplicatedLogEntry(0, persistedTerm,
-                persistedServerConfig);
+        final var persistedServerConfigEntry = new SimpleReplicatedLogEntry(0, persistedTerm, persistedServerConfig);
 
         InMemoryJournal.addEntry(leaderId, 1, new UpdateElectionTerm(persistedTerm, leaderId));
         InMemoryJournal.addEntry(leaderId, 2, persistedServerConfigEntry);

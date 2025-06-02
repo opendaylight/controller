@@ -7,12 +7,13 @@
  */
 package org.opendaylight.controller.cluster.raft.behaviors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -46,6 +47,8 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
+import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
+import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.raft.api.TermInfo;
 import org.slf4j.LoggerFactory;
 
@@ -116,8 +119,8 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
 
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(behaviorActor, AppendEntriesReply.class);
 
-        assertFalse("isSuccess", reply.isSuccess());
-        assertEquals("getPayloadVersion", 5, reply.getPayloadVersion());
+        assertFalse(reply.isSuccess());
+        assertEquals(5, reply.getPayloadVersion());
     }
 
     @Test
@@ -137,7 +140,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
 
         behavior = createBehavior(context);
 
-        assertFalse("This test should be overridden when testing Candidate", behavior instanceof Candidate);
+        assertFalse(behavior instanceof Candidate);
 
         // Check that the behavior does not handle unknown message
         assertNull(behavior.handleMessage(behaviorActor, "unknown"));
@@ -150,8 +153,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
     }
 
     protected void handleAppendEntriesAddSameEntryToLogReply(final ActorRef replyActor) {
-        AppendEntriesReply reply = MessageCollectorActor.getFirstMatching(replyActor, AppendEntriesReply.class);
-        assertNull("Expected no AppendEntriesReply", reply);
+        assertNull(MessageCollectorActor.getFirstMatching(replyActor, AppendEntriesReply.class));
     }
 
     /**
@@ -170,7 +172,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         behavior.handleMessage(behaviorActor, new RequestVote(context.currentTerm(), "test", 10000, 999));
 
         RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(behaviorActor, RequestVoteReply.class);
-        assertTrue("isVoteGranted", reply.isVoteGranted());
+        assertTrue(reply.isVoteGranted());
     }
 
     /**
@@ -193,7 +195,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
             new RequestVote(context.currentTerm(), "test", index - 1, context.currentTerm()));
 
         RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(behaviorActor, RequestVoteReply.class);
-        assertFalse("isVoteGranted", reply.isVoteGranted());
+        assertFalse(reply.isVoteGranted());
     }
 
     /**
@@ -212,7 +214,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         behavior.handleMessage(behaviorActor, new RequestVote(999, "test", 10000, 999));
 
         RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(behaviorActor, RequestVoteReply.class);
-        assertFalse("isVoteGranted", reply.isVoteGranted());
+        assertFalse(reply.isVoteGranted());
     }
 
     @Test
@@ -286,11 +288,11 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
 
     protected static final @NonNull SimpleReplicatedLog setLastLogEntry(final MockRaftActorContext actorContext,
             final long term, final long index, final Payload data) {
-        return setLastLogEntry(actorContext, new SimpleReplicatedLogEntry(index, term, data));
+        return setLastLogEntry(actorContext, new DefaultLogEntry(index, term, data));
     }
 
     protected static final @NonNull SimpleReplicatedLog setLastLogEntry(final MockRaftActorContext actorContext,
-            final ReplicatedLogEntry logEntry) {
+            final LogEntry logEntry) {
         final var log = new SimpleReplicatedLog();
         log.append(logEntry);
         actorContext.resetReplicatedLog(log);
@@ -368,5 +370,12 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
                 return applyModificationToStateBeforeConsensus;
             }
         };
+    }
+
+    protected static final void assertLogEntry(final @NonNull LogEntry expected, final LogEntry actual) {
+        assertNotNull(actual);
+        assertEquals(expected.index(), actual.index());
+        assertEquals(expected.term(), actual.term());
+        assertEquals(expected.command(), actual.command());
     }
 }

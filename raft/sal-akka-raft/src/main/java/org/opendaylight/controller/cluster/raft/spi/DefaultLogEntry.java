@@ -25,6 +25,11 @@ public record DefaultLogEntry(long index, long term, StateMachineCommand command
         requireNonNull(command);
     }
 
+    public static DefaultLogEntry of(final LogEntry entry) {
+        return entry instanceof DefaultLogEntry dle ? dle
+            : new DefaultLogEntry(entry.index(), entry.term(), entry.command());
+    }
+
     public static DefaultLogEntry readFrom(final ObjectInput in) throws IOException, ClassNotFoundException {
         final var hdr = WritableObjects.readLongHeader(in);
         return new DefaultLogEntry(WritableObjects.readFirstLong(in, hdr),

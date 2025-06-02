@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.raft;
 
 import java.util.function.Consumer;
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
@@ -95,7 +95,8 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog<SimpleReplicatedLogE
         //        something wrong?
         final var adopted = adoptEntry(entry);
         if (appendImpl(adopted)) {
-            context.entryStore().persistEntry(adopted, () -> invokeSync(adopted, callback));
+            context.entryStore().persistEntry(adopted, () -> invokeSync(adopted,
+                callback == null ? null : () -> callback.accept(entry)));
         }
         return shouldCaptureSnapshot(adopted.index());
     }
@@ -111,25 +112,25 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog<SimpleReplicatedLogE
         if (ret) {
             context.entryStore().startPersistEntry(entry, () -> {
                 entry.setPersistencePending(false);
-                invokeAsync(entry, callback);
+                invokeAsync(entry, callback == null ? null : () -> callback.accept(entry));
             });
         }
         return ret;
     }
 
-    private <T extends ReplicatedLogEntry> void invokeAsync(final @NonNull T entry,
-            final @Nullable Consumer<T> callback) {
+    @NonNullByDefault
+    private void invokeAsync(final ReplicatedLogEntry entry, final @Nullable Runnable callback) {
         context.getExecutor().execute(() -> invokeSync(entry, callback));
     }
 
-    private <T extends ReplicatedLogEntry> void invokeSync(final @NonNull T entry,
-            final @Nullable Consumer<? super T> callback) {
+    @NonNullByDefault
+    private void invokeSync(final ReplicatedLogEntry entry, final @Nullable Runnable callback) {
         LOG.debug("{}: persist complete {}", memberId, entry);
 
         dataSizeSinceLastSnapshot += entry.size();
 
         if (callback != null) {
-            callback.accept(entry);
+            callback.run();
         }
     }
 
