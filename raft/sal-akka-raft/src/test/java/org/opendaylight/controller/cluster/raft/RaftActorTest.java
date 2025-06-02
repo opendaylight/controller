@@ -40,7 +40,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.PoisonPill;
 import org.apache.pekko.actor.Terminated;
@@ -1207,12 +1206,12 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals("getCommitIndex", -1, leaderLog.getCommitIndex());
 
         final var entryCaptor = ArgumentCaptor.forClass(ReplicatedLogEntry.class);
-        final var callbackCaptor = ArgumentCaptor.<Consumer<ReplicatedLogEntry>>captor();
+        final var callbackCaptor = ArgumentCaptor.forClass(Runnable.class);
         verify(provider.entryStore()).startPersistEntry(entryCaptor.capture(), callbackCaptor.capture());
 
         final var entry = entryCaptor.getValue();
         assertSame(storedMeta.meta(), entry);
-        callbackCaptor.getValue().accept(entry);
+        callbackCaptor.getValue().run();
 
         assertEquals("getCommitIndex", 0, leaderLog.getCommitIndex());
         assertEquals("getLastApplied", 0, leaderLog.getLastApplied());
@@ -1287,9 +1286,9 @@ public class RaftActorTest extends AbstractActorTest {
             .factory());
         leaderActor.persistence().decorateEntryStore((delegate, actor) -> new ForwardingEntryStore() {
             @Override
-            public void startPersistEntry(final ReplicatedLogEntry entry, final Consumer<ReplicatedLogEntry> callback) {
+            public void startPersistEntry(final ReplicatedLogEntry entry, final Runnable callback) {
                 // needs to be executed from another thread to simulate the persistence actor calling this callback
-                super.startPersistEntry(entry, persisted -> executorService.submit(() -> callback.accept(persisted)));
+                super.startPersistEntry(entry, () -> executorService.submit(callback));
             }
 
             @Override

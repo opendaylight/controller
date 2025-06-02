@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
@@ -63,6 +62,7 @@ import org.opendaylight.controller.cluster.raft.messages.RequestLeadership;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.persisted.NoopPayload;
+import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.AbstractRaftCommand;
 import org.opendaylight.controller.cluster.raft.spi.AbstractStateCommand;
@@ -991,8 +991,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         throw new UnsupportedOperationException();
     }
 
-    final <E extends LogEntry> void persist(final E entry, final Consumer<E> callback) {
-        super.persist(entry, callback::accept);
+    @NonNullByDefault
+    final void persist(final LogEntry entry, final Runnable callback) {
+        super.persist(SimpleReplicatedLogEntry.of(entry), unused -> callback.run());
     }
 
     // FIXME: CONTROLLER-2137: remove this method
@@ -1009,8 +1010,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         throw new UnsupportedOperationException();
     }
 
-    final <E extends LogEntry> void persistAsync(final E entry, final Consumer<E> callback) {
-        super.persistAsync(entry, callback::accept);
+    @NonNullByDefault
+    final void persistAsync(final LogEntry entry, final Runnable callback) {
+        super.persistAsync(SimpleReplicatedLogEntry.of(entry), unused -> callback.run());
     }
 
     final void markLastApplied(final long lastApplied) {

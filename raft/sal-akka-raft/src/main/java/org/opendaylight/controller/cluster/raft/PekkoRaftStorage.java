@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.raft;
 import static java.util.Objects.requireNonNull;
 
 import java.nio.file.Path;
-import java.util.function.Consumer;
 import org.apache.pekko.persistence.DeleteMessagesSuccess;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -58,12 +57,12 @@ final class PekkoRaftStorage extends EnabledRaftStorage {
     }
 
     @Override
-    public void persistEntry(final ReplicatedLogEntry entry, final Consumer<ReplicatedLogEntry> callback) {
+    public void persistEntry(final ReplicatedLogEntry entry, final Runnable callback) {
         actor.persist(entry, callback);
     }
 
     @Override
-    public void startPersistEntry(final ReplicatedLogEntry entry, final Consumer<ReplicatedLogEntry> callback) {
+    public void startPersistEntry(final ReplicatedLogEntry entry, final Runnable callback) {
         actor.persistAsync(entry, callback);
     }
 
