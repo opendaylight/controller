@@ -7,14 +7,21 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static java.util.Objects.requireNonNull;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * Stores information about a raft peer.
  *
  * @author Thomas Pantelis
  */
-public class PeerInfo {
+@NonNullByDefault
+public final class PeerInfo {
     private final String id;
-    private String address;
+
+    private @Nullable String address;
     private VotingState votingState;
 
     /**
@@ -24,17 +31,17 @@ public class PeerInfo {
      * @param address the address of the peer.
      * @param votingState the VotingState of the peer.
      */
-    public PeerInfo(String id, String address, VotingState votingState) {
-        this.id = id;
+    public PeerInfo(final String id, final @Nullable String address, final VotingState votingState) {
+        this.id = requireNonNull(id);
         this.address = address;
-        this.votingState = votingState;
+        this.votingState = requireNonNull(votingState);
     }
 
     public String getId() {
         return id;
     }
 
-    public String getAddress() {
+    public @Nullable String getAddress() {
         return address;
     }
 
@@ -46,12 +53,12 @@ public class PeerInfo {
         return votingState == VotingState.VOTING;
     }
 
-    public void setAddress(String address) {
+    public void setAddress(final @Nullable String address) {
         this.address = address;
     }
 
-    public void setVotingState(VotingState votingState) {
-        this.votingState = votingState;
+    public void setVotingState(final VotingState votingState) {
+        this.votingState = requireNonNull(votingState);
     }
 
     @Override

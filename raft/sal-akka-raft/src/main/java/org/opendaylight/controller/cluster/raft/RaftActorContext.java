@@ -17,6 +17,7 @@ import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.cluster.Cluster;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
@@ -120,6 +121,7 @@ public interface RaftActorContext {
      * @param peerId the id of the peer.
      * @return the address of the peer or null if the address has not yet been resolved.
      */
+    @NonNullByDefault
     @Nullable String getPeerAddress(String peerId);
 
     /**
@@ -127,6 +129,7 @@ public interface RaftActorContext {
      *
      * @param votingConfig the {@link VotingConfig}
      */
+    @NonNullByDefault
     void updateVotingConfig(VotingConfig votingConfig);
 
     /**
@@ -134,14 +137,16 @@ public interface RaftActorContext {
      *
      * @return list of PeerInfo
      */
-    @NonNull Collection<PeerInfo> getPeers();
+    @NonNullByDefault
+    Collection<PeerInfo> getPeers();
 
     /**
      * Returns the id's for each peer.
      *
      * @return the list of peer id's.
      */
-    @NonNull Collection<String> getPeerIds();
+    @NonNullByDefault
+    Collection<String> getPeerIds();
 
     /**
      * Returns the PeerInfo for the given peer.
@@ -149,23 +154,26 @@ public interface RaftActorContext {
      * @param peerId the id of the peer
      * @return the PeerInfo or null if not found
      */
+    @NonNullByDefault
     @Nullable PeerInfo getPeerInfo(String peerId);
 
     /**
      * Adds a new peer.
      *
-     * @param id the id of the new peer.
+     * @param peerId the id of the new peer.
      * @param address the address of the new peer.
      * @param votingState the VotingState of the new peer.
      */
-    void addToPeers(String id, String address, VotingState votingState);
+    @NonNullByDefault
+    void addToPeers(String peerId, @Nullable String address, VotingState votingState);
 
     /**
      * Removes a peer.
      *
-     * @param id the id of the peer to remove.
+     * @param peerId the id of the peer to remove.
      */
-    void removePeer(String id);
+    @NonNullByDefault
+    void removePeer(String peerId);
 
     /**
      * Returns an ActorSelection for a peer.
