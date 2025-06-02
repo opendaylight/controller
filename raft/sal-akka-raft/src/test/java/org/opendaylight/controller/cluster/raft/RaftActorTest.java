@@ -84,6 +84,7 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
+import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.EntryStore;
 import org.opendaylight.controller.cluster.raft.spi.ForwardingEntryStore;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
@@ -605,7 +606,7 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals(7, leaderLog.lastIndex());
 
         // add another non-replicated entry
-        leaderLog.append(new SimpleReplicatedLogEntry(8, 1, new MockCommand("foo-8")));
+        leaderLog.append(new DefaultLogEntry(8, 1, new MockCommand("foo-8")));
 
         //fake snapshot on index 7, since lastApplied = 7 , we would keep the last applied
         leaderActor.handleCommand(new AppendEntriesReply(follower1Id, 1, true, 7, 1, (short)0));
@@ -804,7 +805,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         leaderActor.waitForInitializeBehaviorComplete();
         for (int i = 0; i < 4; i++) {
-            leaderLog.append(new SimpleReplicatedLogEntry(i, 1, new MockCommand("A")));
+            leaderLog.append(new DefaultLogEntry(i, 1, new MockCommand("A")));
         }
 
         final var leader = new Leader(leaderContext);
