@@ -212,7 +212,8 @@ public class InMemoryJournal extends AsyncWriteJournal {
 
                     final var complete = WRITE_MESSAGES_COMPLETE.get(repr.persistenceId());
                     if (complete != null) {
-                        if (complete.ofType == null || complete.ofType.equals(repr.payload().getClass())) {
+                        final var type = complete.ofType;
+                        if (type == null || type.equals(repr.payload().getClass())) {
                             complete.latch.countDown();
                         }
                     }
