@@ -15,9 +15,9 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
+import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
+import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.yangtools.concepts.WritableObjects;
 
@@ -76,12 +76,9 @@ final class SS implements Externalizable {
         VotingConfig serverConfig = (VotingConfig) in.readObject();
 
         int size = in.readInt();
-        var unAppliedEntries = ImmutableList.<ReplicatedLogEntry>builderWithExpectedSize(size);
+        var unAppliedEntries = ImmutableList.<LogEntry>builderWithExpectedSize(size);
         for (int i = 0; i < size; i++) {
-            hdr = WritableObjects.readLongHeader(in);
-            unAppliedEntries.add(new SimpleReplicatedLogEntry(
-                WritableObjects.readFirstLong(in, hdr), WritableObjects.readSecondLong(in, hdr),
-                (Payload) in.readObject()));
+            unAppliedEntries.add(DefaultLogEntry.readFrom(in));
         }
 
         final var state = (State) in.readObject();

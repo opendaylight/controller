@@ -27,6 +27,7 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
+import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
@@ -478,8 +479,9 @@ class RaftActorRecovery {
         actor.deleteMessages(actor.lastSequenceNr());
     }
 
-    private static boolean isMigratedPayload(final ReplicatedLogEntry repLogEntry) {
-        return isMigratedSerializable(repLogEntry.command());
+    @NonNullByDefault
+    private static boolean isMigratedPayload(final LogEntry logEntry) {
+        return isMigratedSerializable(logEntry.command().toSerialForm());
     }
 
     private static boolean isMigratedSerializable(final Object message) {
