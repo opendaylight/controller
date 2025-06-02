@@ -991,7 +991,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         throw new UnsupportedOperationException();
     }
 
-    final <A> void persist(final A entry, final Consumer<A> callback) {
+    final <E extends LogEntry> void persist(final E entry, final Consumer<E> callback) {
         super.persist(entry, callback::accept);
     }
 
@@ -1009,7 +1009,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         throw new UnsupportedOperationException();
     }
 
-    final <A> void persistAsync(final A entry, final Consumer<A> callback) {
+    final <E extends LogEntry> void persistAsync(final E entry, final Consumer<E> callback) {
         super.persistAsync(entry, callback::accept);
     }
 
