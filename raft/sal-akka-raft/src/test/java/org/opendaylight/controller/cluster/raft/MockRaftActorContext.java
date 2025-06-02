@@ -23,6 +23,7 @@ import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
+import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.controller.cluster.raft.spi.TestTermInfoStore;
 import org.opendaylight.raft.api.EntryMeta;
@@ -67,8 +68,8 @@ public class MockRaftActorContext extends RaftActorContextImpl {
     public void initReplicatedLog() {
         final var replicatedLog = new SimpleReplicatedLog();
         long term = currentTerm();
-        replicatedLog.append(new SimpleReplicatedLogEntry(0, term, new MockCommand("1")));
-        replicatedLog.append(new SimpleReplicatedLogEntry(1, term, new MockCommand("2")));
+        replicatedLog.append(new DefaultLogEntry(0, term, new MockCommand("1")));
+        replicatedLog.append(new DefaultLogEntry(1, term, new MockCommand("2")));
         resetReplicatedLog(replicatedLog);
         replicatedLog.setCommitIndex(replicatedLog.lastIndex());
         replicatedLog.setLastApplied(replicatedLog.lastIndex());
@@ -165,13 +166,13 @@ public class MockRaftActorContext extends RaftActorContextImpl {
 
         public Builder createEntries(final int start, final int end, final int term) {
             for (int i = start; i < end; i++) {
-                mockLog.append(new SimpleReplicatedLogEntry(i, term, new MockCommand(Integer.toString(i))));
+                mockLog.append(new DefaultLogEntry(i, term, new MockCommand(Integer.toString(i))));
             }
             return this;
         }
 
         public Builder addEntry(final int index, final int term, final MockCommand payload) {
-            mockLog.append(new SimpleReplicatedLogEntry(index, term, payload));
+            mockLog.append(new DefaultLogEntry(index, term, payload));
             return this;
         }
 

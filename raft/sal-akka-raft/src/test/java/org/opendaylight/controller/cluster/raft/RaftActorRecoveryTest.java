@@ -48,6 +48,7 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
+import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.raft.api.TermInfo;
@@ -141,12 +142,12 @@ class RaftActorRecoveryTest {
         recovery = support.recoverToPersistent();
 
         final var replicatedLog = context.getReplicatedLog();
-        replicatedLog.append(new SimpleReplicatedLogEntry(0, 1, new MockCommand("0")));
-        replicatedLog.append(new SimpleReplicatedLogEntry(1, 1, new MockCommand("1")));
-        replicatedLog.append(new SimpleReplicatedLogEntry(2, 1, new MockCommand("2")));
-        replicatedLog.append(new SimpleReplicatedLogEntry(3, 1, new MockCommand("3")));
-        replicatedLog.append(new SimpleReplicatedLogEntry(4, 1, new MockCommand("4")));
-        replicatedLog.append(new SimpleReplicatedLogEntry(5, 1, new MockCommand("5")));
+        replicatedLog.append(new DefaultLogEntry(0, 1, new MockCommand("0")));
+        replicatedLog.append(new DefaultLogEntry(1, 1, new MockCommand("1")));
+        replicatedLog.append(new DefaultLogEntry(2, 1, new MockCommand("2")));
+        replicatedLog.append(new DefaultLogEntry(3, 1, new MockCommand("3")));
+        replicatedLog.append(new DefaultLogEntry(4, 1, new MockCommand("4")));
+        replicatedLog.append(new DefaultLogEntry(5, 1, new MockCommand("5")));
 
         sendMessageToSupport(new ApplyJournalEntries(2));
 
@@ -197,8 +198,7 @@ class RaftActorRecoveryTest {
             final var replicatedLog = context.getReplicatedLog();
 
             for (int i = 0; i <= numberOfEntries; i++) {
-                replicatedLog.append(new SimpleReplicatedLogEntry(i, 1,
-                    new MockCommand(String.valueOf(i))));
+                replicatedLog.append(new DefaultLogEntry(i, 1, new MockCommand(String.valueOf(i))));
             }
 
             final var entryCount = new AtomicInteger();
@@ -219,9 +219,9 @@ class RaftActorRecoveryTest {
         recovery = support.recoverToPersistent();
 
         var replicatedLog = context.getReplicatedLog();
-        replicatedLog.append(new SimpleReplicatedLogEntry(1, 1, new MockCommand("1")));
-        replicatedLog.append(new SimpleReplicatedLogEntry(2, 1, new MockCommand("2")));
-        replicatedLog.append(new SimpleReplicatedLogEntry(3, 1, new MockCommand("3")));
+        replicatedLog.append(new DefaultLogEntry(1, 1, new MockCommand("1")));
+        replicatedLog.append(new DefaultLogEntry(2, 1, new MockCommand("2")));
+        replicatedLog.append(new DefaultLogEntry(3, 1, new MockCommand("3")));
 
         final var unAppliedEntry1 = new SimpleReplicatedLogEntry(4, 1, new MockCommand("4", 4));
         final var unAppliedEntry2 = new SimpleReplicatedLogEntry(5, 1, new MockCommand("5", 5));
@@ -259,8 +259,8 @@ class RaftActorRecoveryTest {
         recovery = support.recoverToPersistent();
 
         final var replicatedLog = context.getReplicatedLog();
-        replicatedLog.append(new SimpleReplicatedLogEntry(0, 1, new MockCommand("0")));
-        replicatedLog.append(new SimpleReplicatedLogEntry(1, 1, new MockCommand("1")));
+        replicatedLog.append(new DefaultLogEntry(0, 1, new MockCommand("0")));
+        replicatedLog.append(new DefaultLogEntry(1, 1, new MockCommand("1")));
 
         sendMessageToSupport(new ApplyJournalEntries(1));
 
@@ -296,9 +296,9 @@ class RaftActorRecoveryTest {
         recovery = support.recoverToPersistent();
 
         final var replicatedLog = context.getReplicatedLog();
-        replicatedLog.append(new SimpleReplicatedLogEntry(0, 1, new MockCommand("0")));
-        replicatedLog.append(new SimpleReplicatedLogEntry(1, 1, new MockCommand("1")));
-        replicatedLog.append(new SimpleReplicatedLogEntry(2, 1, new MockCommand("2")));
+        replicatedLog.append(new DefaultLogEntry(0, 1, new MockCommand("0")));
+        replicatedLog.append(new DefaultLogEntry(1, 1, new MockCommand("1")));
+        replicatedLog.append(new DefaultLogEntry(2, 1, new MockCommand("2")));
 
         sendMessageToSupport(new DeleteEntries(1));
 

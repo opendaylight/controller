@@ -21,7 +21,7 @@ import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
-import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.controller.cluster.raft.spi.StateMachineCommand;
 
@@ -203,8 +203,7 @@ public final class AppendEntries extends RaftRPC {
             int size = in.readInt();
             var entries = ImmutableList.<LogEntry>builderWithExpectedSize(size);
             for (int i = 0; i < size; i++) {
-                entries.add(new SimpleReplicatedLogEntry(in.readLong(), in.readLong(),
-                    ((StateMachineCommand) in.readObject()).toSerialForm()));
+                entries.add(new DefaultLogEntry(in.readLong(), in.readLong(), (StateMachineCommand) in.readObject()));
             }
 
             String leaderAddress = (String)in.readObject();
