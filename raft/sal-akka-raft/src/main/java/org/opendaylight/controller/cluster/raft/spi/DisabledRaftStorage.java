@@ -15,7 +15,6 @@ import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.List;
-import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
@@ -49,7 +48,7 @@ public final class DisabledRaftStorage extends RaftStorage implements ImmediateE
     }
 
     @Override
-    public void persistEntry(final ReplicatedLogEntry entry, final Consumer<ReplicatedLogEntry> callback) {
+    public void persistEntry(final ReplicatedLogEntry entry, final Runnable callback) {
         requireNonNull(callback);
         if (entry.command() instanceof VotingConfig votingConfig) {
             try {
@@ -58,15 +57,15 @@ public final class DisabledRaftStorage extends RaftStorage implements ImmediateE
                 throw new UncheckedIOException(e);
             }
         }
-        callback.accept(entry);
+        callback.run();
     }
 
     @Override
-    public void startPersistEntry(final ReplicatedLogEntry entry, final Consumer<ReplicatedLogEntry> callback) {
+    public void startPersistEntry(final ReplicatedLogEntry entry, final Runnable callback) {
         if (entry.command() instanceof VotingConfig votingConfig) {
             saveSnapshot(new RaftSnapshot(votingConfig, List.of()), EntryInfo.of(-1, -1), null, (failure, success) -> {
                 switch (failure) {
-                    case null -> callback.accept(entry);
+                    case null -> callback.run();
                     case IOException e -> throw new UncheckedIOException(e);
                     case RuntimeException e -> throw e;
                     default -> throw new RuntimeException(failure);
