@@ -34,10 +34,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.CRC32C;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
-import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.raft.api.EntryInfo;
@@ -137,7 +134,7 @@ final class SnapshotFileV1 implements SnapshotFile {
 
     static Closeable createNew(final Path file, final Instant timestamp, final EntryInfo lastIncluded,
             final @Nullable VotingConfig votingConfig, final CompressionType entryCompress,
-            final List<ReplicatedLogEntry> unappliedEntries, final CompressionType stateCompress,
+            final List<LogEntry> unappliedEntries, final CompressionType stateCompress,
             final @Nullable ToStorage<?> state) throws IOException {
         final var entryFormat = computeFormat(entryCompress, "entry");
         final var stateFormat = computeFormat(stateCompress, "state");
@@ -397,7 +394,7 @@ final class SnapshotFileV1 implements SnapshotFile {
                 return new RaftSnapshot(votingConfig, ImmutableList.of());
             }
 
-            final var uaBuilder = ImmutableList.<ReplicatedLogEntry>builderWithExpectedSize(uaCount);
+            final var uaBuilder = ImmutableList.<LogEntry>builderWithExpectedSize(uaCount);
             try (var ois = new ObjectInputStream(entryCompress.decodeInput(dis))) {
                 long prevIndex = lastIncluded.index();
                 long prevTerm = lastIncluded.term();
@@ -408,16 +405,16 @@ final class SnapshotFileV1 implements SnapshotFile {
                             "Unexpected term " + HF.toHexDigits(term) + " after " + HF.toHexDigits(prevTerm));
                     }
 
-                    final Payload payload;
+                    final StateMachineCommand command;
                     try {
-                        payload = (Payload) ois.readObject();
+                        command = (StateMachineCommand) ois.readObject();
                     } catch (ClassCastException | ClassNotFoundException e) {
                         throw new IOException("Cannot deserialize payload in entry " + i, e);
                     }
-                    if (payload == null) {
+                    if (command == null) {
                         throw new IOException("Unexpected null payload in entry " + i);
                     }
-                    uaBuilder.add(new SimpleReplicatedLogEntry(++prevIndex, term, payload));
+                    uaBuilder.add(new DefaultLogEntry(++prevIndex, term, command));
                     prevTerm = term;
                 }
             }
