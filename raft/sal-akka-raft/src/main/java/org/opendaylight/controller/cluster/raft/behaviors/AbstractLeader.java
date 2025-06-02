@@ -26,6 +26,7 @@ import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.Cancellable;
 import org.apache.pekko.dispatch.ControlMessage;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.messaging.MessageSlicer;
@@ -35,7 +36,6 @@ import org.opendaylight.controller.cluster.raft.FollowerLogInformation;
 import org.opendaylight.controller.cluster.raft.PeerInfo;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
-import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.VotingState;
 import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
@@ -696,7 +696,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
             long followerNextIndex = followerLogInformation.getNextIndex();
             boolean isFollowerActive = followerLogInformation.isFollowerActive();
             boolean sendAppendEntries = false;
-            var entries = List.<ReplicatedLogEntry>of();
+            @NonNull List<@NonNull LogEntry> entries = List.of();
 
             LeaderInstallSnapshotState installSnapshotState = followerLogInformation.getInstallSnapshotState();
             if (installSnapshotState != null) {
@@ -776,7 +776,8 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         }
     }
 
-    private List<ReplicatedLogEntry> getEntriesToSend(final FollowerLogInformation followerLogInfo,
+    @NonNullByDefault
+    private List<LogEntry> getEntriesToSend(final FollowerLogInformation followerLogInfo,
             final ActorSelection followerActor) {
         // Try to get all the entries in the journal but not exceeding the max data size for a single AppendEntries
         // message.
@@ -791,7 +792,7 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         // that is the case, then we need to slice it into smaller chunks.
         if (entries.size() != 1 || entries.getFirst().command().serializedSize() <= maxDataSize) {
             // Don't need to slice.
-            return entries;
+            return List.copyOf(entries);
         }
 
         final var firstEntry = entries.getFirst();
@@ -848,7 +849,8 @@ public abstract sealed class AbstractLeader extends RaftActorBehavior permits Is
         return List.of();
     }
 
-    private void sendAppendEntriesToFollower(final ActorSelection followerActor, final List<ReplicatedLogEntry> entries,
+    @NonNullByDefault
+    private void sendAppendEntriesToFollower(final ActorSelection followerActor, final List<? extends LogEntry> entries,
             final FollowerLogInformation followerLogInformation) {
         // In certain cases outlined below we don't want to send the actual commit index to prevent the follower from
         // possibly committing and applying conflicting entries (those with same index, different term) from a prior

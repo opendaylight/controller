@@ -13,7 +13,6 @@ import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Props;
 import org.apache.pekko.actor.UntypedAbstractActor;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
-import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
@@ -84,7 +83,7 @@ public class DummyShard extends UntypedAbstractActor {
 
         long lastIndex = req.getLeaderCommit();
         if (req.getEntries().size() > 0) {
-            for (ReplicatedLogEntry entry : req.getEntries()) {
+            for (var entry : req.getEntries()) {
                 lastIndex = entry.index();
             }
         }
