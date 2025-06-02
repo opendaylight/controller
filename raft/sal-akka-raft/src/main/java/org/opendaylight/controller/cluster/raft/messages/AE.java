@@ -16,8 +16,9 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
-import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.spi.LogEntry;
+import org.opendaylight.controller.cluster.raft.spi.StateMachineCommand;
 import org.opendaylight.yangtools.concepts.WritableObjects;
 
 /**
@@ -75,14 +76,14 @@ final class AE implements Externalizable {
         short payloadVersion = in.readShort();
 
         int size = in.readInt();
-        var entries = ImmutableList.<ReplicatedLogEntry>builderWithExpectedSize(size);
+        var entries = ImmutableList.<LogEntry>builderWithExpectedSize(size);
         for (int i = 0; i < size; i++) {
             hdr = WritableObjects.readLongHeader(in);
             entries.add(new SimpleReplicatedLogEntry(WritableObjects.readFirstLong(in, hdr),
-                WritableObjects.readSecondLong(in, hdr), (Payload) in.readObject()));
+                WritableObjects.readSecondLong(in, hdr), ((StateMachineCommand) in.readObject()).toSerialForm()));
         }
 
-        String leaderAddress = (String)in.readObject();
+        final var leaderAddress = (String)in.readObject();
 
         appendEntries = new AppendEntries(term, leaderId, prevLogIndex, prevLogTerm, entries.build(), leaderCommit,
                 replicatedToAllIndex, payloadVersion, RaftVersions.CURRENT_VERSION, leaderRaftVersion,
