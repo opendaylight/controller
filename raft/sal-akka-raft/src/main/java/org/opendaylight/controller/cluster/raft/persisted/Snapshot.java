@@ -9,11 +9,13 @@ package org.opendaylight.controller.cluster.raft.persisted;
 
 import static java.util.Objects.requireNonNull;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.Serializable;
 import java.util.List;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 import org.opendaylight.raft.api.EntryInfo;
@@ -39,7 +41,8 @@ public final class Snapshot implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final @Nullable State state;
-    private final List<ReplicatedLogEntry> unAppliedEntries;
+    @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "Handled through serialization proxy")
+    private final @NonNull List<@NonNull LogEntry> unAppliedEntries;
     private final long lastIndex;
     private final long lastTerm;
     private final long lastAppliedIndex;
@@ -47,9 +50,10 @@ public final class Snapshot implements Serializable {
     private final @NonNull TermInfo termInfo;
     private final @Nullable VotingConfig votingConfig;
 
-    private Snapshot(final @Nullable State state, final List<ReplicatedLogEntry> unAppliedEntries, final long lastIndex,
-            final long lastTerm, final long lastAppliedIndex, final long lastAppliedTerm, final TermInfo termInfo,
-            final VotingConfig votingConfig) {
+    @NonNullByDefault
+    private Snapshot(final @Nullable State state, final List<LogEntry> unAppliedEntries,
+            final long lastIndex, final long lastTerm, final long lastAppliedIndex, final long lastAppliedTerm,
+            final TermInfo termInfo, final @Nullable VotingConfig votingConfig) {
         this.state = state;
         this.unAppliedEntries = requireNonNull(unAppliedEntries);
         this.lastIndex = lastIndex;
@@ -60,14 +64,16 @@ public final class Snapshot implements Serializable {
         this.votingConfig = votingConfig;
     }
 
-    public static @NonNull Snapshot create(final @Nullable State state, final List<ReplicatedLogEntry> entries,
+    @NonNullByDefault
+    public static Snapshot create(final @Nullable State state, final List<LogEntry> entries,
             final long lastIndex, final long lastTerm, final long lastAppliedIndex, final long lastAppliedTerm,
-            final TermInfo termInfo, final VotingConfig serverConfig) {
+            final TermInfo termInfo, final @Nullable VotingConfig serverConfig) {
         return new Snapshot(state, entries, lastIndex, lastTerm, lastAppliedIndex, lastAppliedTerm, termInfo,
             serverConfig);
     }
 
-    public static @NonNull Snapshot ofRaft(final TermInfo termInfo, final RaftSnapshot raftSnapshot,
+    @NonNullByDefault
+    public static Snapshot ofRaft(final TermInfo termInfo, final RaftSnapshot raftSnapshot,
             final EntryMeta lastIncluded, final @Nullable State state) {
         final var unapplied = raftSnapshot.unappliedEntries();
         return new Snapshot(state, unapplied,
@@ -76,8 +82,9 @@ public final class Snapshot implements Serializable {
             lastIncluded.index(), lastIncluded.term(), termInfo, raftSnapshot.votingConfig());
     }
 
-    public static @NonNull Snapshot ofTermLeader(final State state, final EntryMeta lastIncluded,
-            final TermInfo termInfo, final VotingConfig serverConfig) {
+    @NonNullByDefault
+    public static Snapshot ofTermLeader(final @Nullable State state, final EntryMeta lastIncluded,
+            final TermInfo termInfo, final @Nullable VotingConfig serverConfig) {
         return new Snapshot(state, List.of(), lastIncluded.index(), lastIncluded.term(), lastIncluded.index(),
             lastIncluded.term(), termInfo, serverConfig);
     }
@@ -86,7 +93,8 @@ public final class Snapshot implements Serializable {
         return state;
     }
 
-    public List<ReplicatedLogEntry> getUnAppliedEntries() {
+    @NonNullByDefault
+    public List<LogEntry> getUnAppliedEntries() {
         return unAppliedEntries;
     }
 

@@ -13,7 +13,8 @@ import java.util.List;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.raft.MockCommand;
-import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
+import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.raft.api.TermInfo;
 
 /**
@@ -25,11 +26,11 @@ class SnapshotTest {
     @Test
     void testSerialization() {
         testSerialization(new byte[] { 1, 2, 3, 4, 5, 6, 7 },
-            List.of(new SimpleReplicatedLogEntry(6, 2, new MockCommand("payload"))), 470);
+            List.of(new DefaultLogEntry(6, 2, new MockCommand("payload"))), 470);
         testSerialization(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, List.of(), 345);
     }
 
-    private static void testSerialization(final byte[] state, final List<ReplicatedLogEntry> unapplied,
+    private static void testSerialization(final byte[] state, final List<LogEntry> unapplied,
             final int expectedSize) {
         long lastIndex = 6;
         long lastTerm = 2;

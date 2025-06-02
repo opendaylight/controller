@@ -21,6 +21,7 @@ import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
+import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
@@ -74,12 +75,12 @@ public final class SnapshotManager {
         private final long lastTerm;
         private final long replicatedToAllIndex;
         private final long replicatedToAllTerm;
-        private final List<ReplicatedLogEntry> unAppliedEntries;
+        private final List<@NonNull LogEntry> unAppliedEntries;
         private final boolean mandatoryTrim;
 
         CaptureSnapshot(final long lastIndex, final long lastTerm, final long lastAppliedIndex,
                 final long lastAppliedTerm, final long replicatedToAllIndex, final long replicatedToAllTerm,
-                final List<ReplicatedLogEntry> unAppliedEntries, final boolean mandatoryTrim) {
+                final List<? extends @NonNull LogEntry> unAppliedEntries, final boolean mandatoryTrim) {
             this.lastIndex = lastIndex;
             this.lastTerm = lastTerm;
             this.lastAppliedIndex = lastAppliedIndex;
@@ -126,7 +127,7 @@ public final class SnapshotManager {
             return EntryInfo.of(replicatedToAllIndex, replicatedToAllTerm);
         }
 
-        List<ReplicatedLogEntry> getUnAppliedEntries() {
+        List<LogEntry> getUnAppliedEntries() {
             return unAppliedEntries;
         }
 
