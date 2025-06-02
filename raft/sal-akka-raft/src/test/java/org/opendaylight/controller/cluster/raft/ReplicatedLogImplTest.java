@@ -29,6 +29,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.EntryStore;
 
 /**
@@ -156,9 +157,9 @@ class ReplicatedLogImplTest {
         mockEntryStore();
         final var log = new ReplicatedLogImpl(context);
 
-        log.append(new SimpleReplicatedLogEntry(0, 1, new MockCommand("0")));
-        log.append(new SimpleReplicatedLogEntry(1, 1, new MockCommand("1")));
-        log.append(new SimpleReplicatedLogEntry(2, 1, new MockCommand("2")));
+        log.append(new DefaultLogEntry(0, 1, new MockCommand("0")));
+        log.append(new DefaultLogEntry(1, 1, new MockCommand("1")));
+        log.append(new DefaultLogEntry(2, 1, new MockCommand("2")));
 
         log.trimToReceive(1);
         assertEquals(1, log.size());
@@ -174,7 +175,7 @@ class ReplicatedLogImplTest {
     void testCommitFakeSnapshot() {
         final var log = new ReplicatedLogImpl(context);
 
-        log.append(new SimpleReplicatedLogEntry(0, 1, new MockCommand("0")));
+        log.append(new DefaultLogEntry(0, 1, new MockCommand("0")));
         final int dataSizeAfterFirstPayload = log.dataSize();
 
         log.snapshotPreCommit(0,1);
