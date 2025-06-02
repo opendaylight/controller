@@ -54,7 +54,7 @@ public class RaftActorContextImpl implements RaftActorContext {
     private final @NonNull String id;
     private final @NonNull TermInfoStore termInformation;
 
-    private final PeerInfos peerInfos;
+    private final @NonNull PeerInfos peerInfos;
 
     private ReplicatedLog replicatedLog;
 
@@ -81,10 +81,10 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     private RaftActorLeadershipTransferCohort leadershipTransferCohort;
 
-    public RaftActorContextImpl(final ActorRef actor, final ActorContext context, final @NonNull LocalAccess localStore,
-            final @NonNull Map<String, String> peerAddresses, final @NonNull ConfigParams configParams,
-            final short payloadVersion, final @NonNull PersistenceProvider persistenceProvider,
-            final @NonNull ApplyEntryMethod applyEntryMethod, final @NonNull Executor executor) {
+    RaftActorContextImpl(final ActorRef actor, final ActorContext context, final @NonNull LocalAccess localStore,
+            final @NonNull PeerInfos peerInfos, final @NonNull ConfigParams configParams, final short payloadVersion,
+            final @NonNull PersistenceProvider persistenceProvider, final @NonNull ApplyEntryMethod applyEntryMethod,
+            final @NonNull Executor executor) {
         this.actor = actor;
         this.context = context;
         id = localStore.memberId();
@@ -94,12 +94,21 @@ public class RaftActorContextImpl implements RaftActorContext {
         this.payloadVersion = payloadVersion;
         this.persistenceProvider = requireNonNull(persistenceProvider);
         this.applyEntryMethod = requireNonNull(applyEntryMethod);
+        this.peerInfos = requireNonNull(peerInfos);
 
         fileBackedOutputStreamFactory = new FileBackedOutputStreamFactory(
                 configParams.getFileBackedStreamingThreshold(), configParams.getTempFileDirectory());
 
-        peerInfos = new PeerInfos(id, peerAddresses);
         replicatedLog = new ReplicatedLogImpl(this);
+    }
+
+    @VisibleForTesting
+    public RaftActorContextImpl(final ActorRef actor, final ActorContext context, final @NonNull LocalAccess localStore,
+            final @NonNull Map<String, String> peerAddresses, final @NonNull ConfigParams configParams,
+            final short payloadVersion, final @NonNull PersistenceProvider persistenceProvider,
+            final @NonNull ApplyEntryMethod applyEntryMethod, final @NonNull Executor executor) {
+        this(actor, context, localStore, new PeerInfos(localStore.memberId(), peerAddresses), configParams,
+            payloadVersion, persistenceProvider, applyEntryMethod, executor);
     }
 
     @Override

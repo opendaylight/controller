@@ -118,6 +118,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     private final @NonNull LocalAccess localAccess;
     private final @NonNull PersistenceControl persistenceControl;
     private final @NonNull BehaviorStateTracker behaviorStateTracker = new BehaviorStateTracker();
+    private final @NonNull PeerInfos peerInfos;
 
     // FIXME: should be valid only after recovery
     private final @NonNull RaftActorContextImpl context;
@@ -131,6 +132,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             final Map<String, String> peerAddresses, final Optional<ConfigParams> configParams,
             final short payloadVersion) {
         super(memberId);
+        peerInfos = new PeerInfos(memberId, peerAddresses);
 
         final var config = configParams.orElseGet(DefaultConfigParamsImpl::new);
         localAccess = new LocalAccess(memberId, stateDir.resolve(memberId));
@@ -139,7 +141,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         persistenceControl = new PersistenceControl(this, localAccess.stateDir(), config.getPreferredCompression(),
             streamConfig);
 
-        context = new RaftActorContextImpl(self(), getContext(), localAccess, peerAddresses, config, payloadVersion,
+        context = new RaftActorContextImpl(self(), getContext(), localAccess, peerInfos, config, payloadVersion,
             persistenceControl, this::applyCommand, this::executeInSelf);
     }
 
