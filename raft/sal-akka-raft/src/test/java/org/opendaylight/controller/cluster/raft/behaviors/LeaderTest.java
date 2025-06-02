@@ -70,9 +70,9 @@ import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.ByteState;
 import org.opendaylight.controller.cluster.raft.persisted.ByteStateSnapshotCohort;
-import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.policy.DefaultRaftPolicy;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
+import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
 import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.raft.spi.ByteArray;
 import org.opendaylight.raft.spi.InstallableSnapshot;
@@ -169,7 +169,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
     private RaftActorBehavior sendReplicate(final MockRaftActorContext actorContext, final long term, final long index,
             final Payload payload) {
-        actorContext.getReplicatedLog().append(new SimpleReplicatedLogEntry(index, term, payload));
+        actorContext.getReplicatedLog().append(new DefaultLogEntry(index, term, payload));
         return leader.handleMessage(leaderActor, new Replicate(index, true, null));
     }
 
@@ -554,7 +554,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         final long term = actorContext.currentTerm();
         final var data = new MockCommand("foo");
 
-        log.append(new SimpleReplicatedLogEntry(newLogIndex, term, data));
+        log.append(new DefaultLogEntry(newLogIndex, term, data));
 
         final var identifier = new MockIdentifier("state-id");
         // State should not change
@@ -668,8 +668,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
 
         // new entry
-        actorContext.getReplicatedLog().append(
-            new SimpleReplicatedLogEntry(newEntryIndex, currentTerm, new MockCommand("D")));
+        actorContext.getReplicatedLog().append(new DefaultLogEntry(newEntryIndex, currentTerm, new MockCommand("D")));
 
         //update follower timestamp
         leader.markFollowerActive(FOLLOWER_ID);
@@ -714,8 +713,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leader.clearSnapshot();
 
         // new entry
-        log.append(
-            new SimpleReplicatedLogEntry(newEntryIndex, currentTerm, new MockCommand("D")));
+        log.append(new DefaultLogEntry(newEntryIndex, currentTerm, new MockCommand("D")));
 
         //update follower timestamp
         leader.markFollowerActive(FOLLOWER_ID);
@@ -771,12 +769,11 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leader.clearSnapshot();
 
         for (int i = 0; i < 4; i++) {
-            log.append(new SimpleReplicatedLogEntry(i, 1, new MockCommand("X" + i)));
+            log.append(new DefaultLogEntry(i, 1, new MockCommand("X" + i)));
         }
 
         // new entry
-        log.append(
-            new SimpleReplicatedLogEntry(newEntryIndex, currentTerm, new MockCommand("D")));
+        log.append(new DefaultLogEntry(newEntryIndex, currentTerm, new MockCommand("D")));
 
         //update follower timestamp
         leader.markFollowerActive(FOLLOWER_ID);
@@ -2188,7 +2185,7 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         logStart("testReplicationWithPayloadSizeThatExceedsThreshold");
 
         final int serializedSize = SerializationUtils.serialize(new AppendEntries(1, LEADER_ID, -1, -1,
-                List.of(new SimpleReplicatedLogEntry(0, 1, new MockCommand("large"))), 0, -1, (short)0)).length;
+                List.of(new DefaultLogEntry(0, 1, new MockCommand("large"))), 0, -1, (short)0)).length;
         final MockCommand largePayload = new MockCommand("large", serializedSize);
 
         MockRaftActorContext leaderActorContext = createActorContextWithFollower();

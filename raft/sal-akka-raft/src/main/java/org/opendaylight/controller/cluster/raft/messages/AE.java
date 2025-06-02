@@ -16,9 +16,8 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
-import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
-import org.opendaylight.controller.cluster.raft.spi.StateMachineCommand;
 import org.opendaylight.yangtools.concepts.WritableObjects;
 
 /**
@@ -52,9 +51,8 @@ final class AE implements Externalizable {
 
         final var entries = appendEntries.getEntries();
         out.writeInt(entries.size());
-        for (var e : entries) {
-            WritableObjects.writeLongs(out, e.index(), e.term());
-            out.writeObject(e.command().toSerialForm());
+        for (var entry : entries) {
+            DefaultLogEntry.writeTo(entry, out);
         }
 
         out.writeObject(appendEntries.leaderAddress());
@@ -78,9 +76,7 @@ final class AE implements Externalizable {
         int size = in.readInt();
         var entries = ImmutableList.<LogEntry>builderWithExpectedSize(size);
         for (int i = 0; i < size; i++) {
-            hdr = WritableObjects.readLongHeader(in);
-            entries.add(new SimpleReplicatedLogEntry(WritableObjects.readFirstLong(in, hdr),
-                WritableObjects.readSecondLong(in, hdr), ((StateMachineCommand) in.readObject()).toSerialForm()));
+            entries.add(DefaultLogEntry.readFrom(in));
         }
 
         final var leaderAddress = (String)in.readObject();
