@@ -53,7 +53,6 @@ import org.opendaylight.controller.cluster.raft.MockRaftActorContext.Builder;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorLeadershipTransferCohort;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
-import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.TestPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.VotingState;
@@ -410,12 +409,12 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
     private static void assertRequestEntry(final long lastIndex, final List<AppendEntries> allMessages,
             final int messageNr) {
-        final AppendEntries req = allMessages.get(2 * messageNr);
+        final var req = allMessages.get(2 * messageNr);
         assertEquals(lastIndex + messageNr, req.getLeaderCommit());
 
-        final List<ReplicatedLogEntry> entries = req.getEntries();
+        final var entries = req.getEntries();
         assertEquals(1, entries.size());
-        assertEquals(messageNr + 2, entries.get(0).index());
+        assertEquals(messageNr + 2, entries.getFirst().index());
     }
 
     @Test
