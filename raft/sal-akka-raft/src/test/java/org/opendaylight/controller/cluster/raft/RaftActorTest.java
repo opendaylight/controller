@@ -86,6 +86,7 @@ import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolic
 import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.EntryStore;
 import org.opendaylight.controller.cluster.raft.spi.ForwardingEntryStore;
+import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
@@ -148,8 +149,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         kit.watch(followerActor);
 
-        List<ReplicatedLogEntry> snapshotUnappliedEntries = List.of(
-            new SimpleReplicatedLogEntry(4, 1, new MockCommand("E")));
+        var snapshotUnappliedEntries = List.<LogEntry>of(new DefaultLogEntry(4, 1, new MockCommand("E")));
 
         int lastAppliedDuringSnapshotCapture = 3;
         int lastIndexDuringSnapshotCapture = 4;
@@ -372,7 +372,7 @@ public class RaftActorTest extends AbstractActorTest {
         final var mockRaftActor = mockActorRef.underlyingActor();
         mockRaftActor.waitForInitializeBehaviorComplete();
 
-        final var entry = new SimpleReplicatedLogEntry(5, 1, new MockCommand("F"));
+        final var entry = new DefaultLogEntry(5, 1, new MockCommand("F"));
         final var id = new MockIdentifier("apply-state");
         mockRaftActor.getRaftActorContext().applyEntryMethod().applyEntry(id, entry);
 
@@ -614,9 +614,9 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     private static @NonNull Snapshot createSnapshot(final int start, final int end, final int term) {
-        final var entries = new ArrayList<ReplicatedLogEntry>();
+        final var entries = new ArrayList<LogEntry>();
         for (int i = start; i < end; i++) {
-            entries.add(new SimpleReplicatedLogEntry(i, term, new MockCommand(Integer.toString(i))));
+            entries.add(new DefaultLogEntry(i, term, new MockCommand(Integer.toString(i))));
         }
         return Snapshot.create(null, entries, end - 1, term, -1, -1, TermInfo.INITIAL, null);
     }
@@ -671,14 +671,14 @@ public class RaftActorTest extends AbstractActorTest {
         dataPersistenceProvider.setActor(Runnable::run);
 
         //fake snapshot on index 6
-        List<ReplicatedLogEntry> entries = List.of(new SimpleReplicatedLogEntry(6, 1, new MockCommand("foo-6")));
+        var entries = List.<LogEntry>of(new DefaultLogEntry(6, 1, new MockCommand("foo-6")));
         followerActor.handleCommand(new AppendEntries(1, leaderId, 5, 1, entries, 5, 5, (short)0));
         assertEquals(7, followerLog.size());
 
         //fake snapshot on index 7
         assertInstanceOf(Follower.class, followerActor.getCurrentBehavior());
 
-        entries = List.of(new SimpleReplicatedLogEntry(7, 1, new MockCommand("foo-7")));
+        entries = List.of(new DefaultLogEntry(7, 1, new MockCommand("foo-7")));
         followerActor.handleCommand(new AppendEntries(1, leaderId, 6, 1, entries, 6, 6, (short) 0));
         assertEquals(8, followerLog.size());
 
@@ -694,7 +694,7 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals(3, followerLog.size()); //indexes 5,6,7 left in the log
         assertEquals(7, followerLog.lastIndex());
 
-        entries = List.of(new SimpleReplicatedLogEntry(8, 1, new MockCommand("foo-7")));
+        entries = List.of(new DefaultLogEntry(8, 1, new MockCommand("foo-7")));
         // send an additional entry 8 with leaderCommit = 7
         followerActor.handleCommand(new AppendEntries(1, leaderId, 7, 1, entries, 7, 7, (short) 0));
 
@@ -1015,8 +1015,7 @@ public class RaftActorTest extends AbstractActorTest {
         final var config = new DefaultConfigParamsImpl();
         config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
 
-        List<ReplicatedLogEntry> snapshotUnappliedEntries = List.of(
-            new SimpleReplicatedLogEntry(4, 1, new MockCommand("E")));
+        var snapshotUnappliedEntries = List.<LogEntry>of(new DefaultLogEntry(4, 1, new MockCommand("E")));
 
         int snapshotLastApplied = 3;
         int snapshotLastIndex = 4;

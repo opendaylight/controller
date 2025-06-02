@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.raft.spi;
 import java.util.List;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 
 /**
@@ -18,7 +17,7 @@ import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
  * stored in the journal -- which allows for transitioning from non-persistent to persistent state.
  */
 @NonNullByDefault
-public record RaftSnapshot(@Nullable VotingConfig votingConfig, List<ReplicatedLogEntry> unappliedEntries) {
+public record RaftSnapshot(@Nullable VotingConfig votingConfig, List<LogEntry> unappliedEntries) {
     public RaftSnapshot {
         unappliedEntries = List.copyOf(unappliedEntries);
     }

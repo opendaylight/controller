@@ -46,6 +46,8 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
+import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
+import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.raft.api.TermInfo;
 import org.slf4j.LoggerFactory;
 
@@ -286,11 +288,11 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
 
     protected static final @NonNull SimpleReplicatedLog setLastLogEntry(final MockRaftActorContext actorContext,
             final long term, final long index, final Payload data) {
-        return setLastLogEntry(actorContext, new SimpleReplicatedLogEntry(index, term, data));
+        return setLastLogEntry(actorContext, new DefaultLogEntry(index, term, data));
     }
 
     protected static final @NonNull SimpleReplicatedLog setLastLogEntry(final MockRaftActorContext actorContext,
-            final ReplicatedLogEntry logEntry) {
+            final LogEntry logEntry) {
         final var log = new SimpleReplicatedLog();
         log.append(logEntry);
         actorContext.resetReplicatedLog(log);
