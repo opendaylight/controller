@@ -12,11 +12,12 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 import java.util.List;
 import org.apache.commons.lang3.SerializationUtils;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.raft.MockCommand;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
-import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 
 /**
  * Unit tests for AppendEntries.
@@ -75,7 +76,8 @@ class AppendEntriesTest {
         assertEquals(RaftVersions.CURRENT_VERSION, actual.getLeaderRaftVersion());
     }
 
-    private static void assertReplicatedLogEntry(final ReplicatedLogEntry expected, final ReplicatedLogEntry actual) {
+    @NonNullByDefault
+    private static void assertReplicatedLogEntry(final LogEntry expected, final LogEntry actual) {
         assertEquals(expected.index(), actual.index());
         assertEquals(expected.term(), actual.term());
         assertEquals(expected.command().toString(), actual.command().toString());
