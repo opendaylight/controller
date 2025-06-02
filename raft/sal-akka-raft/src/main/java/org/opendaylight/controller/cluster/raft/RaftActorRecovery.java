@@ -234,8 +234,9 @@ class RaftActorRecovery {
             cohort.applyRecoveredSnapshot(snapshotState);
         }
 
-        if (toApply.votingConfig() != null) {
-            context.updateVotingConfig(toApply.votingConfig());
+        final var votingConfig = toApply.votingConfig();
+        if (votingConfig != null) {
+            context.updateVotingConfig(votingConfig);
         }
 
         LOG.info("Recovery snapshot applied for {} in {}: snapshotIndex={}, snapshotTerm={}, journal-size={}",

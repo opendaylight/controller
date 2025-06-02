@@ -10,11 +10,8 @@ package org.opendaylight.controller.cluster.raft;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -26,7 +23,6 @@ import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.cluster.Cluster;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
-import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.EntryStore;
@@ -58,13 +54,11 @@ public class RaftActorContextImpl implements RaftActorContext {
     private final @NonNull String id;
     private final @NonNull TermInfoStore termInformation;
 
+    private final PeerInfos peerInfos;
+
     private ReplicatedLog replicatedLog;
 
-    private final Map<String, PeerInfo> peerInfoMap = new HashMap<>();
-
     private ConfigParams configParams;
-
-    private boolean dynamicServerConfiguration = false;
 
     @VisibleForTesting
     private LongSupplier totalMemoryRetriever = JVM_MEMORY_RETRIEVER;
@@ -77,11 +71,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     private final short payloadVersion;
 
-    private boolean votingMember = true;
-
     private RaftActorBehavior currentBehavior;
-
-    private int numVotingPeers = -1;
 
     private Optional<Cluster> cluster;
 
@@ -108,10 +98,7 @@ public class RaftActorContextImpl implements RaftActorContext {
         fileBackedOutputStreamFactory = new FileBackedOutputStreamFactory(
                 configParams.getFileBackedStreamingThreshold(), configParams.getTempFileDirectory());
 
-        for (Map.Entry<String, String> e : requireNonNull(peerAddresses).entrySet()) {
-            peerInfoMap.put(e.getKey(), new PeerInfo(e.getKey(), e.getValue(), VotingState.VOTING));
-        }
-
+        peerInfos = new PeerInfos(id, peerAddresses);
         replicatedLog = new ReplicatedLogImpl(this);
     }
 
@@ -193,23 +180,23 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     public Collection<String> getPeerIds() {
-        return peerInfoMap.keySet();
+        return peerInfos.peerIds();
     }
 
     @Override
     public Collection<PeerInfo> getPeers() {
-        return peerInfoMap.values();
+        return peerInfos.peerInfos();
     }
 
     @Override
     public PeerInfo getPeerInfo(final String peerId) {
-        return peerInfoMap.get(peerId);
+        return peerInfos.lookupPeerInfo(peerId);
     }
 
     @Override
     public String getPeerAddress(final String peerId) {
         String peerAddress;
-        PeerInfo peerInfo = peerInfoMap.get(peerId);
+        PeerInfo peerInfo = peerInfos.lookupPeerInfo(peerId);
         if (peerInfo != null) {
             peerAddress = peerInfo.getAddress();
             if (peerAddress == null) {
@@ -225,29 +212,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     public void updateVotingConfig(final VotingConfig votingConfig) {
-        boolean newVotingMember = false;
-        var currentPeers = new HashSet<>(getPeerIds());
-        for (var server : votingConfig.serverInfo()) {
-            if (id.equals(server.peerId())) {
-                newVotingMember = server.isVoting();
-            } else {
-                final var votingState = server.isVoting() ? VotingState.VOTING : VotingState.NON_VOTING;
-                if (currentPeers.contains(server.peerId())) {
-                    getPeerInfo(server.peerId()).setVotingState(votingState);
-                    currentPeers.remove(server.peerId());
-                } else {
-                    addToPeers(server.peerId(), null, votingState);
-                }
-            }
-        }
-
-        for (String peerIdToRemove : currentPeers) {
-            removePeer(peerIdToRemove);
-        }
-
-        votingMember = newVotingMember;
-        LOG.debug("{}: Updated server config: isVoting: {}, peers: {}", id, votingMember, peerInfoMap.values());
-
+        peerInfos.updateVotingConfig(votingConfig);
         setDynamicServerConfigurationInUse();
     }
 
@@ -258,18 +223,12 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     public void addToPeers(final String peerId, final String address, final VotingState votingState) {
-        peerInfoMap.put(peerId, new PeerInfo(peerId, address, votingState));
-        numVotingPeers = -1;
+        peerInfos.addPeer(peerId, address, votingState);
     }
 
     @Override
     public void removePeer(final String name) {
-        if (id.equals(name)) {
-            votingMember = false;
-        } else {
-            peerInfoMap.remove(name);
-            numVotingPeers = -1;
-        }
+        peerInfos.removePeer(name);
     }
 
     @Override
@@ -280,11 +239,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     public void setPeerAddress(final String peerId, final String peerAddress) {
-        final var peerInfo = peerInfoMap.get(peerId);
-        if (peerInfo != null) {
-            LOG.info("{}: Peer address for peer {} set to {}", id, peerId, peerAddress);
-            peerInfo.setAddress(peerAddress);
-        }
+        peerInfos.setPeerAddress(peerId, peerAddress);
     }
 
     @Override
@@ -333,49 +288,27 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     public boolean isDynamicServerConfigurationInUse() {
-        return dynamicServerConfiguration;
+        return peerInfos.dynamicServerConfiguration();
     }
 
     @Override
     public void setDynamicServerConfigurationInUse() {
-        dynamicServerConfiguration = true;
+        peerInfos.setDynamicServerConfiguration();
     }
 
     @Override
     public VotingConfig getPeerServerInfo(final boolean includeSelf) {
-        if (!isDynamicServerConfigurationInUse()) {
-            return null;
-        }
-        final var peers = getPeers();
-        final var newConfig = ImmutableList.<ServerInfo>builderWithExpectedSize(peers.size() + (includeSelf ? 1 : 0));
-        for (var peer : peers) {
-            newConfig.add(new ServerInfo(peer.getId(), peer.isVoting()));
-        }
-
-        if (includeSelf) {
-            newConfig.add(new ServerInfo(id, votingMember));
-        }
-
-        return new VotingConfig(newConfig.build());
+        return peerInfos.votingConfig(includeSelf);
     }
 
     @Override
     public boolean isVotingMember() {
-        return votingMember;
+        return peerInfos.votingMember();
     }
 
     @Override
     public boolean anyVotingPeers() {
-        if (numVotingPeers < 0) {
-            numVotingPeers = 0;
-            for (PeerInfo info: getPeers()) {
-                if (info.isVoting()) {
-                    numVotingPeers++;
-                }
-            }
-        }
-
-        return numVotingPeers > 0;
+        return peerInfos.anyVotingPeers();
     }
 
     @Override
