@@ -26,10 +26,8 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.ByteState;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
-import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
@@ -52,9 +50,9 @@ class SnapshotFileFormatTest {
     private static final Instant TIMESTAMP = Instant.ofEpochSecond(1743608039, 960467747);
     private static final VotingConfig SERVER_CONFIG = new VotingConfig(List.of(
         new ServerInfo("member-1", false), new ServerInfo("member-2", true)));
-    private static final List<ReplicatedLogEntry> ENTRIES = List.of(
-        new SimpleReplicatedLogEntry(0, 0, SERVER_CONFIG),
-        new SimpleReplicatedLogEntry(1, 0, new VotingConfig(List.of(
+    private static final List<LogEntry> ENTRIES = List.of(
+        new DefaultLogEntry(0, 0, SERVER_CONFIG),
+        new DefaultLogEntry(1, 0, new VotingConfig(List.of(
             new ServerInfo("member-1", true), new ServerInfo("member-2", false)))));
 
     @TempDir

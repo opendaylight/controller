@@ -16,7 +16,6 @@ import java.time.Instant;
 import java.util.List;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
@@ -36,7 +35,7 @@ public enum SnapshotFileFormat {
         @Override
         public Closeable createNew(final Path file, final Instant timestamp, final EntryInfo lastIncluded,
                 final @Nullable VotingConfig votingConfig, final CompressionType entryCompress,
-                final List<ReplicatedLogEntry> unappliedEntries, final CompressionType stateCompress,
+                final List<LogEntry> unappliedEntries, final CompressionType stateCompress,
                 final @Nullable ToStorage<?> state) throws IOException {
             return SnapshotFileV1.createNew(file, timestamp, lastIncluded, votingConfig, entryCompress,
                 unappliedEntries, stateCompress, state);
@@ -102,7 +101,7 @@ public enum SnapshotFileFormat {
      * @throws IOException if an I/O error occurs
      */
     public abstract Closeable createNew(Path file, Instant timestamp, EntryInfo lastIncluded,
-        @Nullable VotingConfig votingConfig, CompressionType entryCompress, List<ReplicatedLogEntry> unappliedEntries,
+        @Nullable VotingConfig votingConfig, CompressionType entryCompress, List<LogEntry> unappliedEntries,
         CompressionType stateCompress, @Nullable ToStorage<?> state) throws IOException;
 
     /**
