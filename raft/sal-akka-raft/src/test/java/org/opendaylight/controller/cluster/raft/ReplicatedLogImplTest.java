@@ -49,7 +49,7 @@ class ReplicatedLogImplTest {
     @Mock
     private Consumer<ReplicatedLogEntry> callback;
     @Captor
-    private ArgumentCaptor<Consumer<ReplicatedLogEntry>> procedureCaptor;
+    private ArgumentCaptor<Runnable> procedureCaptor;
     @TempDir
     private Path stateDir;
 
@@ -199,6 +199,6 @@ class ReplicatedLogImplTest {
         } else {
             verify(entryStore).persistEntry(eq(entry), procedureCaptor.capture());
         }
-        procedureCaptor.getValue().accept(entry);
+        procedureCaptor.getValue().run();
     }
 }

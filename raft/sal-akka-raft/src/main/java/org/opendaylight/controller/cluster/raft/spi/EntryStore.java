@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.raft.spi;
 
-import java.util.function.Consumer;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -28,7 +27,7 @@ public interface EntryStore {
      */
     // FIXME: without callback and throwing IOException
     @NonNullByDefault
-    void persistEntry(ReplicatedLogEntry entry, Consumer<ReplicatedLogEntry> callback);
+    void persistEntry(ReplicatedLogEntry entry, Runnable callback);
 
     /**
      * Persists an entry to the applicable journal asynchronously.
@@ -38,7 +37,7 @@ public interface EntryStore {
      */
     // FIXME: Callback<ReplicatedLogEntry> instead of Consumer
     @NonNullByDefault
-    void startPersistEntry(ReplicatedLogEntry entry, Consumer<ReplicatedLogEntry> callback);
+    void startPersistEntry(ReplicatedLogEntry entry, Runnable callback);
 
     /**
      * Delete entries starting from specified index.

@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.raft.spi;
 
 import com.google.common.base.MoreObjects;
-import java.util.function.Consumer;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
@@ -19,12 +18,12 @@ public abstract class ForwardingEntryStore implements EntryStore {
     protected abstract EntryStore delegate();
 
     @Override
-    public void persistEntry(final ReplicatedLogEntry entry, final Consumer<ReplicatedLogEntry> callback) {
+    public void persistEntry(final ReplicatedLogEntry entry, final Runnable callback) {
         delegate().persistEntry(entry, callback);
     }
 
     @Override
-    public void startPersistEntry(final ReplicatedLogEntry entry, final Consumer<ReplicatedLogEntry> callback) {
+    public void startPersistEntry(final ReplicatedLogEntry entry, final Runnable callback) {
         delegate().startPersistEntry(entry, callback);
     }
 

@@ -95,7 +95,7 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog<SimpleReplicatedLogE
         //        something wrong?
         final var adopted = adoptEntry(entry);
         if (appendImpl(adopted)) {
-            context.entryStore().persistEntry(adopted, persisted -> invokeSync(persisted, callback));
+            context.entryStore().persistEntry(adopted, () -> invokeSync(adopted, callback));
         }
         return shouldCaptureSnapshot(adopted.index());
     }
@@ -109,7 +109,7 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog<SimpleReplicatedLogE
 
         final var ret = appendImpl(entry);
         if (ret) {
-            context.entryStore().startPersistEntry(entry, unused -> {
+            context.entryStore().startPersistEntry(entry, () -> {
                 entry.setPersistencePending(false);
                 invokeAsync(entry, callback);
             });

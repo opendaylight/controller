@@ -16,12 +16,9 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
-import java.util.function.Consumer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
@@ -66,9 +63,7 @@ class PersistenceControlTest {
     @Mock
     private EnabledRaftStorage enabledStorage;
     @Mock
-    private Consumer<ReplicatedLogEntry> callback;
-    @Captor
-    private ArgumentCaptor<Consumer<VotingConfig>> callbackCaptor;
+    private Runnable callback;
 
     private PersistenceControl provider;
 
