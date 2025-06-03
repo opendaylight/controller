@@ -198,7 +198,7 @@ public abstract class AbstractReplicatedLog<T extends ReplicatedLogEntry> implem
 
     @Override
     public final List<ReplicatedLogEntry> getFrom(final long logEntryIndex) {
-        return getFrom(logEntryIndex, journal.size(), NO_MAX_SIZE);
+        return getFrom(logEntryIndex, journal.size(), -1);
     }
 
     @Override
@@ -216,7 +216,7 @@ public abstract class AbstractReplicatedLog<T extends ReplicatedLogEntry> implem
             maxIndex = size;
         }
 
-        return maxDataSize == NO_MAX_SIZE ? new ArrayList<>(journal.subList(adjustedIndex, maxIndex))
+        return maxDataSize < 0 ? new ArrayList<>(journal.subList(adjustedIndex, maxIndex))
             : copyJournalEntries(adjustedIndex, maxIndex, maxDataSize);
     }
 

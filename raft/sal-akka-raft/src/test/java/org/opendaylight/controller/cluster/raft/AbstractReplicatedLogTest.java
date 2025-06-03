@@ -49,7 +49,7 @@ class AbstractReplicatedLogTest {
         assertNull(replicatedLogImpl.get(0));
         assertNull(replicatedLogImpl.last());
 
-        assertEquals(List.of(), replicatedLogImpl.getFrom(0, 1, ReplicatedLog.NO_MAX_SIZE));
+        assertEquals(List.of(), replicatedLogImpl.getFrom(0, 1, -1));
 
         assertEquals(-1, replicatedLogImpl.removeFrom(1));
 
@@ -128,11 +128,11 @@ class AbstractReplicatedLogTest {
 
     @Test
     void testGetFromWithMax() {
-        var from = replicatedLogImpl.getFrom(0, 1, ReplicatedLog.NO_MAX_SIZE);
+        var from = replicatedLogImpl.getFrom(0, 1, -1);
         assertEquals(1, from.size());
         assertEquals("A", from.get(0).command().toString());
 
-        from = replicatedLogImpl.getFrom(0, 20, ReplicatedLog.NO_MAX_SIZE);
+        from = replicatedLogImpl.getFrom(0, 20, -1);
         assertEquals(4, from.size());
         assertEquals("A", from.get(0).command().toString());
         assertEquals("B", from.get(1).command().toString());
@@ -144,7 +144,7 @@ class AbstractReplicatedLogTest {
         final int sizeC = from.get(2).serializedSize();
         final int sizeD = from.get(3).serializedSize();
 
-        from = replicatedLogImpl.getFrom(1, 2, ReplicatedLog.NO_MAX_SIZE);
+        from = replicatedLogImpl.getFrom(1, 2, -1);
         assertEquals(2, from.size());
         assertEquals("B", from.get(0).command().toString());
         assertEquals("C", from.get(1).command().toString());

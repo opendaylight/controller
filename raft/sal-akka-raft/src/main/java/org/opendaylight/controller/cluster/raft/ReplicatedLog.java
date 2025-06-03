@@ -43,9 +43,6 @@ public interface ReplicatedLog {
         }
     }
 
-    // FIXME: document this constant
-    long NO_MAX_SIZE = -1;
-
     /**
      * Return the replicated log entry at the specified index.
      *
@@ -210,7 +207,7 @@ public interface ReplicatedLog {
      *
      * @param index the index of the first log entry to get
      * @param maxEntries the maximum number of entries to get
-     * @param maxDataSize the maximum accumulated size of the log entries to get
+     * @param maxDataSize the maximum accumulated size of the log entries to get, negative means no limit
      * @return the List of entries meeting the criteria.
      */
     List<ReplicatedLogEntry> getFrom(long index, int maxEntries, long maxDataSize);
