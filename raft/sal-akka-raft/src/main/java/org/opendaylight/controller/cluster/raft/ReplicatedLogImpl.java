@@ -28,9 +28,16 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog<JournaledLogEntry> {
 
     private long dataSizeSinceLastSnapshot = 0L;
 
+    @NonNullByDefault
     ReplicatedLogImpl(final RaftActorContext context) {
         super(context.getId());
         this.context = context;
+    }
+
+    @NonNullByDefault
+    ReplicatedLogImpl(final RaftActorContext context, final ReplicatedLog prev) {
+        this(context);
+        resetToLog(prev);
     }
 
     @Override
