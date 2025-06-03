@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static com.google.common.base.Verify.verify;
+import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -118,12 +119,16 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     private final @NonNull LocalAccess localAccess;
     private final @NonNull PersistenceControl persistenceControl;
     private final @NonNull BehaviorStateTracker behaviorStateTracker = new BehaviorStateTracker();
+
+    private final @NonNull ConfigParams initialConfig;
     private final @NonNull PeerInfos peerInfos;
+    private final short payloadVersion;
 
     // FIXME: should be valid only after recovery
-    private final @NonNull RaftActorContextImpl context;
 
     private PekkoRecovery<?> pekkoRecovery;
+    // Only valid after recovery
+    private RaftActorContextImpl context;
     private RaftActorSnapshotMessageSupport snapshotSupport;
     private RaftActorVotingConfigSupport votingConfigSupport;
     private boolean shuttingDown;
@@ -132,17 +137,15 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     protected RaftActor(final Path stateDir, final String memberId, final Map<String, String> peerAddresses,
             final Optional<ConfigParams> configParams, final short payloadVersion) {
         super(memberId);
+        this.payloadVersion = payloadVersion;
         peerInfos = new PeerInfos(memberId, peerAddresses);
 
-        final var config = configParams.orElseGet(DefaultConfigParamsImpl::new);
+        initialConfig = configParams.orElseGet(DefaultConfigParamsImpl::new);
         localAccess = new LocalAccess(memberId, stateDir.resolve(memberId));
-        final var streamConfig = new FileBackedOutputStream.Configuration(config.getFileBackedStreamingThreshold(),
-            config.getTempFileDirectory());
-        persistenceControl = new PersistenceControl(this, localAccess.stateDir(), config.getPreferredCompression(),
-            streamConfig);
-
-        context = new RaftActorContextImpl(self(), getContext(), localAccess, peerInfos, config, payloadVersion,
-            persistenceControl, this::applyCommand, this::executeInSelf);
+        final var streamConfig = new FileBackedOutputStream.Configuration(
+            initialConfig.getFileBackedStreamingThreshold(), initialConfig.getTempFileDirectory());
+        persistenceControl = new PersistenceControl(this, localAccess.stateDir(),
+            initialConfig.getPreferredCompression(), streamConfig);
     }
 
     /**
@@ -171,14 +174,11 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     @Override
     public void preStart() throws Exception {
         LOG.info("{}: Starting recovery with journal batch size {}", memberId(),
-            context.getConfigParams().getJournalRecoveryLogBatchSize());
+            initialConfig.getJournalRecoveryLogBatchSize());
 
         super.preStart();
 
         persistenceControl.start();
-        context.getSnapshotManager().setSnapshotCohort(getRaftActorSnapshotCohort());
-        snapshotSupport = newRaftActorSnapshotMessageSupport();
-        votingConfigSupport = new RaftActorVotingConfigSupport(this);
     }
 
     @Override
@@ -204,20 +204,27 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             pekkoRecovery = isRecoveryApplicable() ? support.recoverToPersistent() : support.recoverToTransient();
         }
 
-        boolean recoveryComplete = pekkoRecovery.handleRecoveryMessage(message);
-        if (recoveryComplete) {
+        final var recoveredLog = pekkoRecovery.handleRecoveryMessage(message);
+        if (recoveredLog != null) {
+            LOG.debug("{}: Pekko recovery completed with {}", memberId(), recoveredLog);
+            pekkoRecovery = null;
+
+            votingConfigSupport = new RaftActorVotingConfigSupport(this);
+            context = new RaftActorContextImpl(self(), getContext(), localAccess, peerInfos, initialConfig,
+                payloadVersion, persistenceControl, this::applyCommand, this::executeInSelf, recoveredLog);
+            context.getSnapshotManager().setSnapshotCohort(getRaftActorSnapshotCohort());
+            snapshotSupport = newRaftActorSnapshotMessageSupport();
+
             onRecoveryComplete();
 
             initializeBehavior();
-
-            pekkoRecovery = null;
         }
     }
 
     @VisibleForTesting
     PekkoRecoverySupport<?> newRaftActorRecoverySupport() {
-        return new PekkoRecoverySupport<>(this, context.getSnapshotManager().snapshotCohort(),
-            getRaftActorRecoveryCohort(), replicatedLog(), context.getConfigParams());
+        return new PekkoRecoverySupport<>(this, getRaftActorSnapshotCohort(), getRaftActorRecoveryCohort(),
+            initialConfig);
     }
 
     @VisibleForTesting
@@ -788,8 +795,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         return getCurrentBehavior().raftRole();
     }
 
-    public final RaftActorContext getRaftActorContext() {
-        return context;
+    public final @NonNull RaftActorContext getRaftActorContext() {
+        return verifyNotNull(context);
     }
 
     protected void updateConfigParams(final ConfigParams configParams) {
@@ -828,7 +835,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     protected final void setPersistence(final boolean persistent) {
         if (persistent) {
-            if (persistenceControl.becomePersistent() && getCurrentBehavior() != null) {
+            if (persistenceControl.becomePersistent() && context != null && context.getCurrentBehavior() != null) {
                 LOG.info("{}: Persistence has been enabled - capturing snapshot", memberId());
                 captureSnapshot();
             }
