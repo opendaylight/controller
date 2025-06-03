@@ -50,7 +50,7 @@ public interface ReplicatedLog {
      * @return the ReplicatedLogEntry if found, otherwise null if the adjusted index less than 0 or greater than the
      *         size of the in-memory journal
      */
-    @Nullable LogEntry get(long index);
+    @Nullable LogEntry lookup(long index);
 
     /**
      * Return metadata about a replicated entry.
@@ -60,7 +60,7 @@ public interface ReplicatedLog {
      *         of the in-memory journal
      */
     default @Nullable EntryMeta lookupMeta(final long index) {
-        return get(index);
+        return lookup(index);
     }
 
     /**

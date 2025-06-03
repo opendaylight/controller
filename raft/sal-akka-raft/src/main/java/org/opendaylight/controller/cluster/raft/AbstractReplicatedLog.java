@@ -75,8 +75,8 @@ public abstract class AbstractReplicatedLog<T extends ReplicatedLogEntry> implem
     }
 
     @Override
-    public final T get(final long logEntryIndex) {
-        int adjustedIndex = adjustedIndex(logEntryIndex);
+    public final T lookup(final long logEntryIndex) {
+        final int adjustedIndex = adjustedIndex(logEntryIndex);
 
         if (adjustedIndex < 0 || adjustedIndex >= journal.size()) {
             // physical index should be less than list size and >= 0
@@ -88,7 +88,7 @@ public abstract class AbstractReplicatedLog<T extends ReplicatedLogEntry> implem
 
     @Override
     public final StoredEntryMeta lookupStoredMeta(final long index) {
-        final var entry = get(index);
+        final var entry = lookup(index);
         return entry == null ? null : new StoredEntryMeta(entry, !entry.isPersistencePending());
     }
 
@@ -259,8 +259,7 @@ public abstract class AbstractReplicatedLog<T extends ReplicatedLogEntry> implem
             // if the request logical index is less than the last present in the list
             return false;
         }
-        int adjustedIndex = adjustedIndex(logEntryIndex);
-        return adjustedIndex >= 0;
+        return adjustedIndex(logEntryIndex) >= 0;
     }
 
     @Override
@@ -355,7 +354,7 @@ public abstract class AbstractReplicatedLog<T extends ReplicatedLogEntry> implem
             final long replicatedToAllIndex, final boolean mandatoryTrim, final boolean hasFollowers) {
         final var lastAppliedEntry = computeLastAppliedEntry(this, getLastApplied(), lastLogEntry, hasFollowers);
 
-        final var entry = get(replicatedToAllIndex);
+        final var entry = lookup(replicatedToAllIndex);
         final var replicatedToAllEntry = entry != null ? entry : EntryInfo.of(-1, -1);
 
         long lastAppliedIndex = lastAppliedEntry.index();

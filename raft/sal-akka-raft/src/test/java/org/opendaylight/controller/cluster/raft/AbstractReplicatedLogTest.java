@@ -46,7 +46,7 @@ class AbstractReplicatedLogTest {
         assertEquals(-1, replicatedLogImpl.lastTerm());
         assertFalse(replicatedLogImpl.isPresent(0));
         assertFalse(replicatedLogImpl.isInSnapshot(0));
-        assertNull(replicatedLogImpl.get(0));
+        assertNull(replicatedLogImpl.lookup(0));
         assertNull(replicatedLogImpl.last());
 
         assertEquals(List.of(), replicatedLogImpl.getFrom(0, 1, -1));
@@ -65,7 +65,7 @@ class AbstractReplicatedLogTest {
     @Test
     void testIndexOperations() {
         // check if the values returned are correct, with snapshotIndex = -1
-        assertEquals("B", replicatedLogImpl.get(1).command().toString());
+        assertEquals("B", replicatedLogImpl.lookup(1).command().toString());
         assertEquals("D", replicatedLogImpl.last().command().toString());
         assertEquals(3, replicatedLogImpl.lastIndex());
         assertEquals(2, replicatedLogImpl.lastTerm());
@@ -83,9 +83,9 @@ class AbstractReplicatedLogTest {
         // check the values after the snapshot.
         // each index value passed in the test is the logical index (log entry index)
         // which gets mapped to the list's physical index
-        assertEquals("D", replicatedLogImpl.get(3).command().toString());
+        assertEquals("D", replicatedLogImpl.lookup(3).command().toString());
         assertEquals("D", replicatedLogImpl.last().command().toString());
-        assertNull(replicatedLogImpl.get(1));
+        assertNull(replicatedLogImpl.lookup(1));
         assertEquals(3, replicatedLogImpl.lastIndex());
         assertEquals(2, replicatedLogImpl.lastTerm());
         assertEquals(0, replicatedLogImpl.getFrom(2).size());
@@ -103,8 +103,8 @@ class AbstractReplicatedLogTest {
 
         // check their values as well
         assertEquals(5, replicatedLogImpl.size());
-        assertEquals("D", replicatedLogImpl.get(3).command().toString());
-        assertEquals("E", replicatedLogImpl.get(4).command().toString());
+        assertEquals("D", replicatedLogImpl.lookup(3).command().toString());
+        assertEquals("E", replicatedLogImpl.lookup(4).command().toString());
         assertEquals("H", replicatedLogImpl.last().command().toString());
         assertEquals(3, replicatedLogImpl.lastTerm());
         assertEquals(7, replicatedLogImpl.lastIndex());
@@ -118,8 +118,8 @@ class AbstractReplicatedLogTest {
 
         assertEquals(0, replicatedLogImpl.size());
         assertNull(replicatedLogImpl.last());
-        assertNull(replicatedLogImpl.get(7));
-        assertNull(replicatedLogImpl.get(1));
+        assertNull(replicatedLogImpl.lookup(7));
+        assertNull(replicatedLogImpl.lookup(1));
         assertFalse(replicatedLogImpl.isPresent(7));
         assertTrue(replicatedLogImpl.isInSnapshot(7));
         assertEquals(0, replicatedLogImpl.getFrom(7).size());
@@ -219,10 +219,10 @@ class AbstractReplicatedLogTest {
         assertEquals(3, replicatedLogImpl.lastIndex());
         assertEquals(2, replicatedLogImpl.lastTerm());
 
-        assertNull(replicatedLogImpl.get(0));
-        assertNull(replicatedLogImpl.get(1));
-        assertNotNull(replicatedLogImpl.get(2));
-        assertNotNull(replicatedLogImpl.get(3));
+        assertNull(replicatedLogImpl.lookup(0));
+        assertNull(replicatedLogImpl.lookup(1));
+        assertNotNull(replicatedLogImpl.lookup(2));
+        assertNotNull(replicatedLogImpl.lookup(3));
     }
 
     @Test
@@ -239,8 +239,8 @@ class AbstractReplicatedLogTest {
         assertEquals(4, replicatedLogImpl.dataSize());
         assertEquals(-1, replicatedLogImpl.getSnapshotIndex());
         assertEquals(-1, replicatedLogImpl.getSnapshotTerm());
-        assertNotNull(replicatedLogImpl.get(0));
-        assertNotNull(replicatedLogImpl.get(3));
+        assertNotNull(replicatedLogImpl.lookup(0));
+        assertNotNull(replicatedLogImpl.lookup(3));
     }
 
     @Test

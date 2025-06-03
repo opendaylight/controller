@@ -239,7 +239,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
 
         final var log = leaderActor.underlyingActor().getRaftActorContext().getReplicatedLog();
         assertEquals("Leader last index", 5, log.lastIndex());
-        assertEquals(List.of(payload4, payload5), List.of(log.get(4).command(), log.get(5).command()));
+        assertEquals(List.of(payload4, payload5), List.of(log.lookup(4).command(), log.lookup(5).command()));
     }
 
     private void reinstateLeaderActor() {
