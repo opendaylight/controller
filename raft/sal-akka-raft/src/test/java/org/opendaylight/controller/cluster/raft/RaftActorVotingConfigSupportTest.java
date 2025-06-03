@@ -1564,8 +1564,8 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
             final var fromLog = fromContext.getReplicatedLog();
             final var toLog = context.getReplicatedLog();
 
-            for (int i = 0; i < fromLog.size(); i++) {
-                final var entry = fromLog.lookup(i);
+            for (long i = 0, size = fromLog.size(); i < size; i++) {
+                final var entry = fromLog.entryAt(i);
                 getState().add(entry.command());
                 toLog.append(entry);
             }
