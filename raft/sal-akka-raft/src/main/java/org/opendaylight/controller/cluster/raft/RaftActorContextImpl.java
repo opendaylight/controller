@@ -22,6 +22,7 @@ import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.cluster.Cluster;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
@@ -84,7 +85,7 @@ public class RaftActorContextImpl implements RaftActorContext {
     RaftActorContextImpl(final ActorRef actor, final ActorContext context, final @NonNull LocalAccess localStore,
             final @NonNull PeerInfos peerInfos, final @NonNull ConfigParams configParams, final short payloadVersion,
             final @NonNull PersistenceProvider persistenceProvider, final @NonNull ApplyEntryMethod applyEntryMethod,
-            final @NonNull Executor executor) {
+            final @NonNull Executor executor, final @Nullable ReplicatedLog recoveredLog) {
         this.actor = actor;
         this.context = context;
         id = localStore.memberId();
@@ -99,7 +100,7 @@ public class RaftActorContextImpl implements RaftActorContext {
         fileBackedOutputStreamFactory = new FileBackedOutputStreamFactory(
                 configParams.getFileBackedStreamingThreshold(), configParams.getTempFileDirectory());
 
-        replicatedLog = new ReplicatedLogImpl(this);
+        replicatedLog = recoveredLog == null ? new ReplicatedLogImpl(this) : new ReplicatedLogImpl(this, recoveredLog);
     }
 
     @VisibleForTesting
@@ -108,7 +109,7 @@ public class RaftActorContextImpl implements RaftActorContext {
             final short payloadVersion, final @NonNull PersistenceProvider persistenceProvider,
             final @NonNull ApplyEntryMethod applyEntryMethod, final @NonNull Executor executor) {
         this(actor, context, localStore, new PeerInfos(localStore.memberId(), peerAddresses), configParams,
-            payloadVersion, persistenceProvider, applyEntryMethod, executor);
+            payloadVersion, persistenceProvider, applyEntryMethod, executor, null);
     }
 
     @Override
