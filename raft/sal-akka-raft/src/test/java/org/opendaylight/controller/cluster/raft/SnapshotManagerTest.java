@@ -44,6 +44,7 @@ import org.opendaylight.controller.cluster.raft.behaviors.Leader;
 import org.opendaylight.controller.cluster.raft.persisted.ByteState;
 import org.opendaylight.controller.cluster.raft.persisted.ByteStateSnapshotCohort;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.spi.AbstractBaseLog;
 import org.opendaylight.controller.cluster.raft.spi.EntryStore;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
@@ -103,7 +104,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         doReturn(mockEntryStore).when(mockRaftActorContext).entryStore();
         doReturn(mockSnapshotStore).when(mockRaftActorContext).snapshotStore();
         doReturn(mockRaftActorBehavior).when(mockRaftActorContext).getCurrentBehavior();
-        doCallRealMethod().when(mockReplicatedLog).newCaptureSnapshot(any(), anyLong(), anyBoolean(), anyBoolean());
+        doCallRealMethod().when(mockReplicatedLog).startCapture(any(), anyLong(), anyBoolean(), anyBoolean());
 
         snapshotManager = new SnapshotManager(mockRaftActorContext);
         factory = new TestActorFactory(getSystem());
@@ -585,30 +586,30 @@ public class SnapshotManagerTest extends AbstractActorTest {
         final var lastLogEntry = EntryInfo.of(9, 6);
 
         // No followers and valid lastLogEntry
-        var reader = AbstractReplicatedLog.computeLastAppliedEntry(mockReplicatedLog, 1L, lastLogEntry, false);
+        var reader = AbstractBaseLog.computeLastAppliedEntry(mockReplicatedLog, 1L, lastLogEntry, false);
         assertEquals("getTerm", 6L, reader.term());
         assertEquals("getIndex", 9L, reader.index());
 
         // No followers and null lastLogEntry
-        reader = AbstractReplicatedLog.computeLastAppliedEntry(mockReplicatedLog, 1L, null, false);
+        reader = AbstractBaseLog.computeLastAppliedEntry(mockReplicatedLog, 1L, null, false);
         assertEquals("getTerm", -1L, reader.term());
         assertEquals("getIndex", -1L, reader.index());
 
         // Followers and valid originalIndex entry
         doReturn(new SimpleReplicatedLogEntry(8L, 5L, new MockCommand("")))
             .when(mockReplicatedLog).lookup(8L);
-        reader = AbstractReplicatedLog.computeLastAppliedEntry(mockReplicatedLog, 8L, lastLogEntry, true);
+        reader = AbstractBaseLog.computeLastAppliedEntry(mockReplicatedLog, 8L, lastLogEntry, true);
         assertEquals("getTerm", 5L, reader.term());
         assertEquals("getIndex", 8L, reader.index());
 
         // Followers and null originalIndex entry and valid snapshot index
-        reader = AbstractReplicatedLog.computeLastAppliedEntry(mockReplicatedLog, 7L, lastLogEntry, true);
+        reader = AbstractBaseLog.computeLastAppliedEntry(mockReplicatedLog, 7L, lastLogEntry, true);
         assertEquals("getTerm", 4L, reader.term());
         assertEquals("getIndex", 7L, reader.index());
 
         // Followers and null originalIndex entry and invalid snapshot index
         doReturn(-1L).when(mockReplicatedLog).getSnapshotIndex();
-        reader = AbstractReplicatedLog.computeLastAppliedEntry(mockReplicatedLog, 7L, lastLogEntry, true);
+        reader = AbstractBaseLog.computeLastAppliedEntry(mockReplicatedLog, 7L, lastLogEntry, true);
         assertEquals("getTerm", -1L, reader.term());
         assertEquals("getIndex", -1L, reader.index());
     }

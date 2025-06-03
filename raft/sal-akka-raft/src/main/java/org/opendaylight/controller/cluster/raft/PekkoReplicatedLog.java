@@ -7,19 +7,16 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.spi.AbstractBaseLog;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
-import org.opendaylight.raft.api.EntryMeta;
 
 /**
  * A {@link ReplicatedLog} used during {@link PekkoRecovery}.
  */
 @NonNullByDefault
-final class PekkoReplicatedLog extends AbstractReplicatedLog<SimpleReplicatedLogEntry> {
+final class PekkoReplicatedLog extends AbstractBaseLog<SimpleReplicatedLogEntry> {
     PekkoReplicatedLog(final String memberId) {
         super(memberId);
     }
@@ -33,37 +30,6 @@ final class PekkoReplicatedLog extends AbstractReplicatedLog<SimpleReplicatedLog
      */
     long removeRecoveredEntries(final long fromIndex) {
         return removeFrom(fromIndex);
-    }
-
-    @Override
-    public void markLastApplied() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean trimToReceive(final long nextIndex) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean appendReceived(final LogEntry entry, final @Nullable Consumer<LogEntry> callback) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean appendSubmitted(final long index, final long term, final Payload command,
-            final @Nullable Consumer<ReplicatedLogEntry> callback) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void captureSnapshotIfReady(final EntryMeta lastEntry) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean shouldCaptureSnapshot(final long logIndex) {
-        throw new UnsupportedOperationException();
     }
 
     @Override

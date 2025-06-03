@@ -11,6 +11,7 @@ import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
+import org.opendaylight.controller.cluster.raft.spi.BaseLog;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.raft.api.EntryMeta;
 import org.slf4j.Logger;
@@ -35,7 +36,7 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog<JournaledLogEntry> {
     }
 
     @NonNullByDefault
-    ReplicatedLogImpl(final RaftActorContext context, final ReplicatedLog prev) {
+    ReplicatedLogImpl(final RaftActorContext context, final BaseLog prev) {
         this(context);
         resetToLog(prev);
     }
