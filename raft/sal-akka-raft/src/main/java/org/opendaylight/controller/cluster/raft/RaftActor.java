@@ -123,14 +123,14 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     // FIXME: should be valid only after recovery
     private final @NonNull RaftActorContextImpl context;
 
-    private RaftActorRecovery raftRecovery;
+    private PekkoRecovery<?> pekkoRecovery;
     private RaftActorSnapshotMessageSupport snapshotSupport;
     private RaftActorVotingConfigSupport votingConfigSupport;
     private boolean shuttingDown;
 
-    protected RaftActor(final @NonNull Path stateDir, final @NonNull String memberId,
-            final Map<String, String> peerAddresses, final Optional<ConfigParams> configParams,
-            final short payloadVersion) {
+    @NonNullByDefault
+    protected RaftActor(final Path stateDir, final String memberId, final Map<String, String> peerAddresses,
+            final Optional<ConfigParams> configParams, final short payloadVersion) {
         super(memberId);
         peerInfos = new PeerInfos(memberId, peerAddresses);
 
@@ -199,24 +199,24 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     @Override
     protected void handleRecover(final Object message) throws Exception {
-        if (raftRecovery == null) {
+        if (pekkoRecovery == null) {
             final var support = newRaftActorRecoverySupport();
-            raftRecovery = isRecoveryApplicable() ? support.recoverToPersistent() : support.recoverToTransient();
+            pekkoRecovery = isRecoveryApplicable() ? support.recoverToPersistent() : support.recoverToTransient();
         }
 
-        boolean recoveryComplete = raftRecovery.handleRecoveryMessage(message);
+        boolean recoveryComplete = pekkoRecovery.handleRecoveryMessage(message);
         if (recoveryComplete) {
             onRecoveryComplete();
 
             initializeBehavior();
 
-            raftRecovery = null;
+            pekkoRecovery = null;
         }
     }
 
     @VisibleForTesting
-    RaftActorRecoverySupport<?> newRaftActorRecoverySupport() {
-        return new RaftActorRecoverySupport<>(this, context.getSnapshotManager().snapshotCohort(),
+    PekkoRecoverySupport<?> newRaftActorRecoverySupport() {
+        return new PekkoRecoverySupport<>(this, context.getSnapshotManager().snapshotCohort(),
             getRaftActorRecoveryCohort(), replicatedLog(), context.getConfigParams());
     }
 
@@ -1057,7 +1057,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     /**
-     * Deletes all snapshots from Pekko persistence. Called only from {@link RaftActorRecovery}.
+     * Deletes all snapshots from Pekko persistence. Called only from {@link PekkoRecovery}.
      */
     @Deprecated(since = "11.0.0", forRemoval = true)
     final void nukePekkoSnapshots() {
