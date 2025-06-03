@@ -275,8 +275,8 @@ public class RaftActorTest extends AbstractActorTest {
         // Wait for akka's recovery to complete so it doesn't interfere.
         mockRaftActor.waitForRecoveryComplete();
 
-        final var mockSupport = mock(RaftActorRecoverySupport.class);
-        final var mockRecovery = mock(RaftActorRecovery.class);
+        final var mockSupport = mock(PekkoRecoverySupport.class);
+        final var mockRecovery = mock(PekkoRecovery.class);
         doReturn(mockRecovery).when(mockSupport).recoverToPersistent();
         mockRaftActor.setRaftActorRecoverySupport(mockSupport);
 

@@ -40,10 +40,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A single attempt at recovery. Essentially replays Pekko persistence {@link ReplicatedLog} and {@link TermInfoStore}.
+ * A single attempt at recovering Pekko state. Essentially replays Pekko persistence into backing {@link SnapshotStore},
+ * {@link TermInfoStore} and a {@link ReplicatedLog}.
  */
-class RaftActorRecovery<T extends @NonNull State> {
-    static final class ToTransient<T extends @NonNull State> extends RaftActorRecovery<T> {
+// non-sealed for testing
+class PekkoRecovery<T extends @NonNull State> {
+    static final class ToTransient<T extends @NonNull State> extends PekkoRecovery<T> {
         private boolean dataRecoveredWithPersistenceDisabled;
 
         @NonNullByDefault
@@ -96,7 +98,7 @@ class RaftActorRecovery<T extends @NonNull State> {
         }
     }
 
-    private static final Logger LOG = LoggerFactory.getLogger(RaftActorRecovery.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PekkoRecovery.class);
 
     private final @NonNull RaftActor actor;
     private final @NonNull RaftActorRecoveryCohort recoveryCohort;
@@ -114,7 +116,7 @@ class RaftActorRecovery<T extends @NonNull State> {
     private Stopwatch snapshotTimer;
 
     @NonNullByDefault
-    RaftActorRecovery(final RaftActor actor, final RaftActorSnapshotCohort<T> snapshotCohort,
+    PekkoRecovery(final RaftActor actor, final RaftActorSnapshotCohort<T> snapshotCohort,
             final RaftActorRecoveryCohort recoveryCohort, final ReplicatedLog log, final ConfigParams configParams)
                 throws IOException {
         this.actor = requireNonNull(actor);

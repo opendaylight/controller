@@ -50,7 +50,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     private final List<Object> state = Collections.synchronizedList(new ArrayList<>());
     private final ActorRef roleChangeNotifier;
     protected final CountDownLatch initializeBehaviorComplete = new CountDownLatch(1);
-    private RaftActorRecoverySupport raftActorRecoverySupport;
+    private PekkoRecoverySupport<?> raftActorRecoverySupport;
     private RaftActorSnapshotMessageSupport snapshotMessageSupport;
     private final Snapshot restoreFromSnapshot;
     private final Function<Runnable, Void> pauseLeaderFunction;
@@ -82,12 +82,12 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         pauseLeaderFunction = builder.pauseLeaderFunction;
     }
 
-    void setRaftActorRecoverySupport(final RaftActorRecoverySupport support) {
+    void setRaftActorRecoverySupport(final PekkoRecoverySupport<?> support) {
         raftActorRecoverySupport = support;
     }
 
     @Override
-    RaftActorRecoverySupport newRaftActorRecoverySupport() {
+    PekkoRecoverySupport<?> newRaftActorRecoverySupport() {
         return raftActorRecoverySupport != null ? raftActorRecoverySupport : super.newRaftActorRecoverySupport();
     }
 
