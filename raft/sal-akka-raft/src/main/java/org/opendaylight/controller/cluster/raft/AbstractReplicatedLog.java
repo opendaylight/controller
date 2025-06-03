@@ -98,22 +98,6 @@ public abstract class AbstractReplicatedLog<T extends ReplicatedLogEntry> implem
     }
 
     @Override
-    public final long lastIndex() {
-        final var last = lastMeta();
-        // it can happen that after snapshot, all the entries of the journal are trimmed till lastApplied,
-        // so lastIndex = snapshotIndex
-        return last != null ? last.index() : snapshotIndex;
-    }
-
-    @Override
-    public final long lastTerm() {
-        final var last = lastMeta();
-        // it can happen that after snapshot, all the entries of the journal are trimmed till lastApplied,
-        // so lastTerm = snapshotTerm
-        return last != null ? last.term() : snapshotTerm;
-    }
-
-    @Override
     public final long getCommitIndex() {
         return commitIndex;
     }
