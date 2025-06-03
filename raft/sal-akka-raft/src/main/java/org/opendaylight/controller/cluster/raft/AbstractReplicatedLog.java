@@ -60,10 +60,33 @@ public abstract class AbstractReplicatedLog<T extends ReplicatedLogEntry> implem
         return (int) (logEntryIndex - (snapshotIndex + 1));
     }
 
-    @Override
-    public final void resetToSnapshot(final Snapshot snapshot) {
+    private void clearRollback() {
         previousSnapshotTerm = previousSnapshotIndex = -1;
         snapshottedJournal = null;
+    }
+
+    @Override
+    public final void resetToLog(final ReplicatedLog prev) {
+        clearRollback();
+
+        snapshotIndex = prev.getSnapshotIndex();
+        snapshotTerm = prev.getSnapshotTerm();
+        commitIndex = prev.getCommitIndex();
+        lastApplied = prev.getLastApplied();
+
+        dataSize = 0;
+        final var prevSize = prev.size();
+        journal = new ArrayList<>((int) Objects.checkIndex(prevSize, Integer.MAX_VALUE));
+        for (long i = 0; i < prevSize; ++i) {
+            final var entry = adoptEntry(prev.entryAt(i));
+            journal.add(entry);
+            dataSize += entry.size();
+        }
+    }
+
+    @Override
+    public final void resetToSnapshot(final Snapshot snapshot) {
+        clearRollback();
 
         snapshotIndex = commitIndex = lastApplied = snapshot.getLastAppliedIndex();
         snapshotTerm = snapshot.getLastAppliedTerm();
@@ -124,12 +147,6 @@ public abstract class AbstractReplicatedLog<T extends ReplicatedLogEntry> implem
         LOG.debug("{}: Moving last applied index from {} to {}", memberId, this.lastApplied, lastApplied,
             LOG.isTraceEnabled() ? new Throwable() : null);
         this.lastApplied = lastApplied;
-    }
-
-    @Override
-    @Deprecated(since = "11.0.0", forRemoval = true)
-    public final long removeRecoveredEntries(final long fromIndex) {
-        return removeFrom(fromIndex);
     }
 
     /**

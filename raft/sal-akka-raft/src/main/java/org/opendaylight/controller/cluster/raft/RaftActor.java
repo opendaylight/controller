@@ -204,20 +204,28 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             pekkoRecovery = isRecoveryApplicable() ? support.recoverToPersistent() : support.recoverToTransient();
         }
 
-        boolean recoveryComplete = pekkoRecovery.handleRecoveryMessage(message);
-        if (recoveryComplete) {
+        final var recoveredLog = pekkoRecovery.handleRecoveryMessage(message);
+        if (recoveredLog != null) {
+            LOG.debug("{}: Pekko recovery completed with {}", memberId(), recoveredLog);
+            pekkoRecovery = null;
+            replicatedLog().resetToLog(overrideRecoveredLog(recoveredLog));
+
             onRecoveryComplete();
 
             initializeBehavior();
-
-            pekkoRecovery = null;
         }
+    }
+
+    @NonNullByDefault
+    @VisibleForTesting
+    protected ReplicatedLog overrideRecoveredLog(final ReplicatedLog recoveredLog) {
+        return recoveredLog;
     }
 
     @VisibleForTesting
     PekkoRecoverySupport<?> newRaftActorRecoverySupport() {
-        return new PekkoRecoverySupport<>(this, context.getSnapshotManager().snapshotCohort(),
-            getRaftActorRecoveryCohort(), replicatedLog(), context.getConfigParams());
+        return new PekkoRecoverySupport<>(this, getRaftActorSnapshotCohort(), getRaftActorRecoveryCohort(),
+            context.getConfigParams());
     }
 
     @VisibleForTesting

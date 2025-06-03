@@ -155,16 +155,6 @@ public interface ReplicatedLog {
     void markLastApplied();
 
     /**
-     * Removes entries from the in-memory log starting at the given index. This method exists only to deal with the
-     * effects of {@link #trimToReceive(long)} with Pekko Persistence.
-     *
-     * @param fromIndex the index of the first log entry to remove
-     * @return the adjusted index of the first log entry removed or -1 if the log entry is not found.
-     */
-    @Deprecated(since = "11.0.0", forRemoval = true)
-    long removeRecoveredEntries(long fromIndex);
-
-    /**
      * Removes entries all entries from the log starting at the given index, resetting {@link #lastIndex()} to
      * {@code nextIndex - 1}.
      *
@@ -394,6 +384,13 @@ public interface ReplicatedLog {
      * @return true if a snapshot should be captured, false otherwise
      */
     boolean shouldCaptureSnapshot(long logIndex);
+
+    /**
+     * Reset interal state to match specified {@link ReplicatedLog}.
+     *
+     * @param prev the log to reset to
+     */
+    void resetToLog(ReplicatedLog prev);
 
     /**
      * Reset internal state to specified {@link Snapshot}.

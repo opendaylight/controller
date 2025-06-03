@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -50,9 +51,8 @@ class PekkoRecovery<T extends @NonNull State> {
 
         @NonNullByDefault
         ToTransient(final RaftActor actor, final RaftActorSnapshotCohort<T> snapshotCohort,
-                final RaftActorRecoveryCohort recoveryCohort, final ReplicatedLog log, final ConfigParams configParams)
-                    throws IOException {
-            super(actor, snapshotCohort, recoveryCohort, log, configParams);
+                final RaftActorRecoveryCohort recoveryCohort, final ConfigParams configParams) throws IOException {
+            super(actor, snapshotCohort, recoveryCohort, configParams);
         }
 
         @Override
@@ -103,7 +103,7 @@ class PekkoRecovery<T extends @NonNull State> {
     private final @NonNull RaftActor actor;
     private final @NonNull RaftActorRecoveryCohort recoveryCohort;
     private final @NonNull RaftActorSnapshotCohort<T> snapshotCohort;
-    private final @NonNull ReplicatedLog log;
+    private final @NonNull PekkoReplicatedLog pekkoLog;
     private final @Nullable TermInfo origTermInfo;
     private final @Nullable SnapshotFile origSnapshot;
     private final int snapshotInterval;
@@ -117,14 +117,16 @@ class PekkoRecovery<T extends @NonNull State> {
 
     @NonNullByDefault
     PekkoRecovery(final RaftActor actor, final RaftActorSnapshotCohort<T> snapshotCohort,
-            final RaftActorRecoveryCohort recoveryCohort, final ReplicatedLog log, final ConfigParams configParams)
+            final RaftActorRecoveryCohort recoveryCohort, final ConfigParams configParams)
                 throws IOException {
         this.actor = requireNonNull(actor);
         this.snapshotCohort = requireNonNull(snapshotCohort);
         this.recoveryCohort = requireNonNull(recoveryCohort);
-        this.log = requireNonNull(log);
 
-        origTermInfo = actor.localAccess().termInfoStore().loadAndSetTerm();
+        final var localAccess = actor.localAccess();
+        pekkoLog = new PekkoReplicatedLog(localAccess.memberId());
+        origTermInfo = localAccess.termInfoStore().loadAndSetTerm();
+
         snapshotInterval = configParams.getRecoverySnapshotIntervalSeconds();
         batchSize = configParams.getJournalRecoveryLogBatchSize();
 
@@ -136,11 +138,16 @@ class PekkoRecovery<T extends @NonNull State> {
         origSnapshot = loaded;
     }
 
+    @VisibleForTesting
+    final @NonNull PekkoReplicatedLog pekkoLog() {
+        return pekkoLog;
+    }
+
     private @NonNull SnapshotStore snapshotStore() {
         return actor.persistence().snapshotStore();
     }
 
-    final boolean handleRecoveryMessage(final Object message) {
+    final @Nullable PekkoReplicatedLog handleRecoveryMessage(final Object message) {
         LOG.trace("{}: handleRecoveryMessage: {}", memberId(), message);
 
         anyDataRecovered = anyDataRecovered || !(message instanceof RecoveryCompleted);
@@ -158,13 +165,13 @@ class PekkoRecovery<T extends @NonNull State> {
             case UpdateElectionTerm(var termInfo) ->  setTermInfo(termInfo);
             case RecoveryCompleted msg -> {
                 onRecoveryCompletedMessage();
-                return true;
+                return pekkoLog;
             }
             default -> {
                 // No-op
             }
         }
-        return false;
+        return null;
     }
 
     final @NonNull String memberId() {
@@ -233,7 +240,7 @@ class PekkoRecovery<T extends @NonNull State> {
         // Create a replicated log with the snapshot information
         // The replicated log can be used later on to retrieve this snapshot
         // when we need to install it on a peer
-        log.resetToSnapshot(toApply);
+        pekkoLog.resetToSnapshot(toApply);
         setTermInfo(toApply.termInfo());
 
         final var votingConfig = toApply.votingConfig();
@@ -253,7 +260,7 @@ class PekkoRecovery<T extends @NonNull State> {
         }
 
         LOG.info("Recovery snapshot applied for {} in {}: snapshotIndex={}, snapshotTerm={}, journal-size={}",
-                memberId(), timer.stop(), log.getSnapshotIndex(), log.getSnapshotTerm(), log.size());
+            memberId(), timer.stop(), pekkoLog.getSnapshotIndex(), pekkoLog.getSnapshotTerm(), pekkoLog.size());
     }
 
     @NonNullByDefault
@@ -264,7 +271,7 @@ class PekkoRecovery<T extends @NonNull State> {
     private void onRecoveredJournalLogEntry(final ReplicatedLogEntry logEntry) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("{}: Received ReplicatedLogEntry for recovery: index: {}, size: {}", memberId(),
-                    logEntry.index(), logEntry.size());
+                logEntry.index(), logEntry.size());
         }
 
         final var command = logEntry.command();
@@ -281,11 +288,11 @@ class PekkoRecovery<T extends @NonNull State> {
 
     @NonNullByDefault
     void appendRecoveredEntry(final ReplicatedLogEntry logEntry) {
-        log.append(logEntry);
+        pekkoLog.append(logEntry);
     }
 
     void onRecoveredApplyLogEntries(final long toIndex) {
-        long lastUnappliedIndex = log.getLastApplied() + 1;
+        long lastUnappliedIndex = pekkoLog.getLastApplied() + 1;
 
         if (LOG.isDebugEnabled()) {
             // it can happen that lastUnappliedIndex > toIndex, if the AJE is in the persistent journal
@@ -296,7 +303,7 @@ class PekkoRecovery<T extends @NonNull State> {
 
         long lastApplied = lastUnappliedIndex - 1;
         for (long i = lastUnappliedIndex; i <= toIndex; i++) {
-            final var logEntry = log.lookup(i);
+            final var logEntry = pekkoLog.lookup(i);
             if (logEntry == null) {
                 // Shouldn't happen but cover it anyway.
                 LOG.error("{}: Log entry not found for index {}", memberId(), i);
@@ -316,21 +323,21 @@ class PekkoRecovery<T extends @NonNull State> {
                 if (currentRecoveryBatchCount > 0) {
                     endCurrentLogRecoveryBatch();
                 }
-                log.setLastApplied(lastApplied);
-                log.setCommitIndex(lastApplied);
+                pekkoLog.setLastApplied(lastApplied);
+                pekkoLog.setCommitIndex(lastApplied);
                 takeSnapshot(logEntry);
                 LOG.info("{}: Resetting timer for the next recovery snapshot", memberId());
                 snapshotTimer.reset().start();
             }
         }
 
-        log.setLastApplied(lastApplied);
-        log.setCommitIndex(lastApplied);
+        pekkoLog.setLastApplied(lastApplied);
+        pekkoLog.setCommitIndex(lastApplied);
     }
 
     @Deprecated(since = "11.0.0", forRemoval = true)
     void onDeleteEntries(final DeleteEntries deleteEntries) {
-        log.removeRecoveredEntries(deleteEntries.getFromIndex());
+        pekkoLog.removeRecoveredEntries(deleteEntries.getFromIndex());
     }
 
     private void batchRecoveredCommand(final StateCommand command) {
@@ -364,7 +371,7 @@ class PekkoRecovery<T extends @NonNull State> {
         // FIXME: We really do not have followers at this point, but information from VotingConfig may indicate we do.
         //        We should inline newCaptureSnapshot() logic here with the appropriate specialization.
         final var peerInfos = actor.peerInfos();
-        final var request = log.newCaptureSnapshot(logEntry, -1, false, !peerInfos.isEmpty());
+        final var request = pekkoLog.newCaptureSnapshot(logEntry, -1, false, !peerInfos.isEmpty());
         final var lastSeq = actor.lastSequenceNr();
         final var snapshotState = snapshotCohort.takeSnapshot();
         final var timestamp = Instant.now();
@@ -379,8 +386,8 @@ class PekkoRecovery<T extends @NonNull State> {
 
         actor.deleteMessages(lastSeq);
 
-        log.snapshotPreCommit(request.getLastAppliedIndex(), request.getLastAppliedTerm());
-        log.snapshotCommit();
+        pekkoLog.snapshotPreCommit(request.getLastAppliedIndex(), request.getLastAppliedTerm());
+        pekkoLog.snapshotCommit();
 
         LOG.info("{}: Snapshot completed in {}, resetting timer for the next recovery snapshot", memberId(), sw.stop());
     }
@@ -410,7 +417,8 @@ class PekkoRecovery<T extends @NonNull State> {
 
         LOG.info("{}: Recovery completed {} - Switching actor to Follower - last log index = {}, last log term = {}, "
             + "snapshot index = {}, snapshot term = {}, journal size = {}", memberId(), recoveryTime,
-            log.lastIndex(), log.lastTerm(), log.getSnapshotIndex(), log.getSnapshotTerm(), log.size());
+            pekkoLog.lastIndex(), pekkoLog.lastTerm(), pekkoLog.getSnapshotIndex(), pekkoLog.getSnapshotTerm(),
+            pekkoLog.size());
 
 
         // Populate property-based storage if needed, or roll-back any voting information leaked by recovery process
@@ -472,7 +480,7 @@ class PekkoRecovery<T extends @NonNull State> {
     }
 
     void saveRecoverySnapshot() {
-        takeSnapshot(log.lastMeta());
+        takeSnapshot(pekkoLog.lastMeta());
     }
 
     // Either data persistence is disabled and we recovered some data entries (i.e. we must have just transitioned

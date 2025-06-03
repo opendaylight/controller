@@ -10,6 +10,8 @@ package org.opendaylight.controller.cluster.raft;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
@@ -84,7 +86,6 @@ class RaftActorRecoveryTest {
     private ActorSystem mockActorSystem;
     private LocalAccess localAccess;
 
-    private RaftActorContext context;
     private PeerInfos peerInfos;
 
     private PekkoRecoverySupport<?> support;
@@ -102,11 +103,14 @@ class RaftActorRecoveryTest {
 
         peerInfos = new PeerInfos(localId, Map.of());
 
-        context = new RaftActorContextImpl(mockActorRef, null, localAccess, peerInfos, configParams, (short) 0,
-            persistence, (identifier, entry) -> { }, MoreExecutors.directExecutor());
+        support = new PekkoRecoverySupport<>(raftActor, snapshotCohort, recoveryCohort, configParams);
+    }
 
-        support = new PekkoRecoverySupport<>(raftActor, snapshotCohort, recoveryCohort, context.getReplicatedLog(),
-            configParams);
+    private RaftActorContext createContext() {
+        final var ret = new RaftActorContextImpl(mockActorRef, null, localAccess, peerInfos, configParams, (short) 0,
+            persistence, (identifier, entry) -> { }, MoreExecutors.directExecutor());
+        ret.getReplicatedLog().resetToLog(recovery.pekkoLog());
+        return ret;
     }
 
     @AfterEach
@@ -119,8 +123,12 @@ class RaftActorRecoveryTest {
     }
 
     private void sendMessageToSupport(final Object message, final boolean expComplete) {
-        boolean complete = recovery.handleRecoveryMessage(message);
-        assertEquals("complete", expComplete, complete);
+        final var recoveredLog = recovery.handleRecoveryMessage(message);
+        if (expComplete) {
+            assertNotNull(recoveredLog);
+        } else {
+            assertNull(recoveredLog);
+        }
     }
 
     @Test
@@ -131,7 +139,7 @@ class RaftActorRecoveryTest {
 
         sendMessageToSupport(logEntry);
 
-        final var log = context.getReplicatedLog();
+        final var log = recovery.pekkoLog();
         assertEquals("Journal log size", 1, log.size());
         assertEquals("Journal data size", 5, log.dataSize());
         assertEquals("Last index", 1, log.lastIndex());
@@ -147,7 +155,7 @@ class RaftActorRecoveryTest {
 
         recovery = support.recoverToPersistent();
 
-        final var replicatedLog = context.getReplicatedLog();
+        final var replicatedLog = recovery.pekkoLog();
         replicatedLog.append(new DefaultLogEntry(0, 1, new MockCommand("0")));
         replicatedLog.append(new DefaultLogEntry(1, 1, new MockCommand("1")));
         replicatedLog.append(new DefaultLogEntry(2, 1, new MockCommand("2")));
@@ -197,13 +205,12 @@ class RaftActorRecoveryTest {
         doReturn(MockSnapshotState.SUPPORT).when(snapshotCohort).support();
 
         recovery = support.recoverToPersistent();
+        final var replicatedLog = recovery.pekkoLog();
 
         int numberOfEntries = 5;
         doReturn(new MockSnapshotState(List.of())).when(snapshotCohort).takeSnapshot();
 
         try (var executor = Executors.newSingleThreadScheduledExecutor()) {
-            final var replicatedLog = context.getReplicatedLog();
-
             for (int i = 0; i <= numberOfEntries; i++) {
                 replicatedLog.append(new DefaultLogEntry(i, 1, new MockCommand(String.valueOf(i))));
             }
@@ -226,7 +233,7 @@ class RaftActorRecoveryTest {
         doReturn(MockSnapshotState.SUPPORT).when(snapshotCohort).support();
         recovery = support.recoverToPersistent();
 
-        var replicatedLog = context.getReplicatedLog();
+        var replicatedLog = recovery.pekkoLog();
         replicatedLog.append(new DefaultLogEntry(1, 1, new MockCommand("1")));
         replicatedLog.append(new DefaultLogEntry(2, 1, new MockCommand("2")));
         replicatedLog.append(new DefaultLogEntry(3, 1, new MockCommand("3")));
@@ -256,6 +263,8 @@ class RaftActorRecoveryTest {
         assertEquals("Commit index", lastAppliedDuringSnapshotCapture, replicatedLog.getCommitIndex());
         assertEquals("Snapshot term", 1, replicatedLog.getSnapshotTerm());
         assertEquals("Snapshot index", lastAppliedDuringSnapshotCapture, replicatedLog.getSnapshotIndex());
+
+        final var context = createContext();
         assertEquals("Election term", new TermInfo(electionTerm, electionVotedFor), context.termInfo());
         assertFalse("Dynamic server configuration", context.isDynamicServerConfigurationInUse());
 
@@ -266,7 +275,7 @@ class RaftActorRecoveryTest {
     void testOnRecoveryCompletedWithRemainingBatch() throws Exception {
         recovery = support.recoverToPersistent();
 
-        final var replicatedLog = context.getReplicatedLog();
+        final var replicatedLog = recovery.pekkoLog();
         replicatedLog.append(new DefaultLogEntry(0, 1, new MockCommand("0")));
         replicatedLog.append(new DefaultLogEntry(1, 1, new MockCommand("1")));
 
@@ -303,15 +312,15 @@ class RaftActorRecoveryTest {
     void testOnDeleteEntries() throws Exception {
         recovery = support.recoverToPersistent();
 
-        final var replicatedLog = context.getReplicatedLog();
+        final var replicatedLog = recovery.pekkoLog();
         replicatedLog.append(new DefaultLogEntry(0, 1, new MockCommand("0")));
         replicatedLog.append(new DefaultLogEntry(1, 1, new MockCommand("1")));
         replicatedLog.append(new DefaultLogEntry(2, 1, new MockCommand("2")));
 
         sendMessageToSupport(new DeleteEntries(1));
 
-        assertEquals("Journal log size", 1, context.getReplicatedLog().size());
-        assertEquals("Last index", 0, context.getReplicatedLog().lastIndex());
+        assertEquals("Journal log size", 1, replicatedLog.size());
+        assertEquals("Last index", 0, replicatedLog.lastIndex());
     }
 
     @Test
@@ -320,7 +329,7 @@ class RaftActorRecoveryTest {
 
         sendMessageToSupport(new UpdateElectionTerm(5, "member2"));
 
-        assertEquals("Current term", new TermInfo(5, "member2"), context.termInfo());
+        assertEquals("Current term", new TermInfo(5, "member2"), createContext().termInfo());
     }
 
     @Test
@@ -345,7 +354,7 @@ class RaftActorRecoveryTest {
 
         sendMessageToSupport(new DeleteEntries(5));
 
-        final var log = context.getReplicatedLog();
+        final var log = recovery.pekkoLog();
         assertEquals("Journal log size", 0, log.size());
         assertEquals("Last index", -1, log.lastIndex());
         assertEquals("Last applied", -1, log.getLastApplied());
@@ -353,7 +362,7 @@ class RaftActorRecoveryTest {
         assertEquals("Snapshot term", -1, log.getSnapshotTerm());
         assertEquals("Snapshot index", -1, log.getSnapshotIndex());
 
-        assertEquals("Current term", new TermInfo(5, "member2"), context.termInfo());
+        assertEquals("Current term", new TermInfo(5, "member2"), createContext().termInfo());
 
         sendMessageToSupport(RecoveryCompleted.getInstance(), true);
 
@@ -370,7 +379,7 @@ class RaftActorRecoveryTest {
 
         sendMessageToSupport(new UpdateElectionTerm(5, "member2"));
 
-        assertEquals("Current term", new TermInfo(5, "member2"), context.termInfo());
+        assertEquals("Current term", new TermInfo(5, "member2"), localAccess.termInfoStore().currentTerm());
 
         sendMessageToSupport(RecoveryCompleted.getInstance(), true);
 
@@ -380,15 +389,14 @@ class RaftActorRecoveryTest {
 
     @Test
     void testServerConfigurationPayloadApplied() throws Exception {
-        doReturn(peerInfos).when(raftActor).peerInfos();
-        recovery = support.recoverToPersistent();
-
         final var follower1 = "follower1";
         final var follower2 = "follower2";
         final var follower3 = "follower3";
 
-        context.addToPeers(follower1, null, VotingState.VOTING);
-        context.addToPeers(follower2, null, VotingState.VOTING);
+        peerInfos.addPeer(follower1, null, VotingState.VOTING);
+        peerInfos.addPeer(follower2, null, VotingState.VOTING);
+        doReturn(peerInfos).when(raftActor).peerInfos();
+        recovery = support.recoverToPersistent();
 
         // add new Server
         sendMessageToSupport(new SimpleReplicatedLogEntry(0, 1, new VotingConfig(
@@ -398,11 +406,11 @@ class RaftActorRecoveryTest {
             new ServerInfo(follower3, true))));
 
         // verify new peers
-        assertTrue("Dynamic server configuration", context.isDynamicServerConfigurationInUse());
-        assertEquals("New peer Ids", Set.of(follower1, follower2, follower3), Set.copyOf(context.getPeerIds()));
-        assertTrue("follower1 isVoting", context.getPeerInfo(follower1).isVoting());
-        assertFalse("follower2 isVoting", context.getPeerInfo(follower2).isVoting());
-        assertTrue("follower3 isVoting", context.getPeerInfo(follower3).isVoting());
+        assertTrue("Dynamic server configuration", peerInfos.dynamicServerConfiguration());
+        assertEquals("New peer Ids", Set.of(follower1, follower2, follower3), peerInfos.peerIds());
+        assertTrue("follower1 isVoting", peerInfos.lookupPeerInfo(follower1).isVoting());
+        assertFalse("follower2 isVoting", peerInfos.lookupPeerInfo(follower2).isVoting());
+        assertTrue("follower3 isVoting", peerInfos.lookupPeerInfo(follower3).isVoting());
 
         sendMessageToSupport(new ApplyJournalEntries(0));
 
@@ -416,8 +424,8 @@ class RaftActorRecoveryTest {
             new ServerInfo("follower3", true))));
 
         //verify new peers
-        assertTrue("Dynamic server configuration", context.isDynamicServerConfigurationInUse());
-        assertEquals("New peer Ids", Set.of(follower2, follower3), Set.copyOf(context.getPeerIds()));
+        assertTrue("Dynamic server configuration", peerInfos.dynamicServerConfiguration());
+        assertEquals("New peer Ids", Set.of(follower2, follower3), peerInfos.peerIds());
     }
 
     @Test
@@ -430,7 +438,7 @@ class RaftActorRecoveryTest {
         sendMessageToSupport(new SimpleReplicatedLogEntry(0, 1, obj));
 
         //verify new peers
-        assertEquals("New peer Ids", Set.of("follower"), Set.copyOf(context.getPeerIds()));
+        assertEquals("New peer Ids", Set.of("follower"), peerInfos.peerIds());
     }
 
     @Test
@@ -455,9 +463,10 @@ class RaftActorRecoveryTest {
 
         sendMessageToSupport(snapshotOffer);
 
-        assertEquals("Journal log size", 0, context.getReplicatedLog().size());
-        assertEquals("Election term", new TermInfo(electionTerm, electionVotedFor), context.termInfo());
-        assertTrue("Dynamic server configuration", context.isDynamicServerConfigurationInUse());
-        assertEquals("Peer List", Set.of("follower1", "follower2"), Set.copyOf(context.getPeerIds()));
+        assertEquals("Journal log size", 0, recovery.pekkoLog().size());
+        assertEquals("Election term", new TermInfo(electionTerm, electionVotedFor),
+            localAccess.termInfoStore().currentTerm());
+        assertTrue("Dynamic server configuration", peerInfos.dynamicServerConfiguration());
+        assertEquals("Peer List", Set.of("follower1", "follower2"), peerInfos.peerIds());
     }
 }
