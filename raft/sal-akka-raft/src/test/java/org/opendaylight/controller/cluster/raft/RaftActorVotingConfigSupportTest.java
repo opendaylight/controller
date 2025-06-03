@@ -67,6 +67,7 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
+import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.FailingTermInfoStore;
 import org.opendaylight.controller.cluster.raft.spi.ForwardingSnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.ImmediateEntryStore;
@@ -147,10 +148,12 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         LOG.info("testAddServerWithExistingFollower starting");
         setupNewFollower();
         final var followerActorContext = newFollowerContext(FOLLOWER_ID, followerActor);
-        var followerLog = new MockRaftActorContext.Builder().createEntries(0, 3, 1).build();
+        var followerLog = followerActorContext.getReplicatedLog();
+        followerLog.append(new DefaultLogEntry(0, 1, new MockCommand("0")));
+        followerLog.append(new DefaultLogEntry(1, 1, new MockCommand("1")));
+        followerLog.append(new DefaultLogEntry(2, 1, new MockCommand("2")));
         followerLog.setCommitIndex(2);
         followerLog.setLastApplied(2);
-        followerActorContext.resetReplicatedLog(followerLog);
 
         Follower follower = new Follower(followerActorContext);
         followerActor.underlyingActor().setBehavior(follower);
@@ -249,10 +252,11 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
 
         setupNewFollower();
         final var initialActorContext = new MockRaftActorContext(stateDir());
-        final var initialLog = new MockRaftActorContext.Builder().createEntries(0, 2, 1).build();
+        final var initialLog = initialActorContext.getReplicatedLog();
+        initialLog.append(new DefaultLogEntry(0, 1, new MockCommand("0")));
+        initialLog.append(new DefaultLogEntry(1, 1, new MockCommand("1")));
         initialLog.setCommitIndex(1);
         initialLog.setLastApplied(1);
-        initialActorContext.resetReplicatedLog(initialLog);
 
         TestActorRef<MockLeaderRaftActor> leaderActor = actorFactory.createTestActor(
                 MockLeaderRaftActor.props(stateDir(), Map.of(), initialActorContext)
