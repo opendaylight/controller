@@ -7,11 +7,13 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -72,6 +74,11 @@ public abstract class AbstractReplicatedLog<T extends ReplicatedLogEntry> implem
         final var unapplied = snapshot.getUnAppliedEntries();
         journal.ensureCapacity(unapplied.size());
         unapplied.forEach(this::append);
+    }
+
+    @Override
+    public final LogEntry entryAt(final long offset) {
+        return verifyNotNull(journal.get((int) Objects.checkIndex(offset, size())));
     }
 
     @Override
