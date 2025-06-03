@@ -293,12 +293,12 @@ class AbstractReplicatedLogTest {
 
     // create a snapshot for test
     private Map<Long, String> takeSnapshot(final int numEntries) {
-        final var map = new HashMap<Long, String>(numEntries);
+        final var map = HashMap.<Long, String>newHashMap(numEntries);
 
         long lastIndex = 0;
         long lastTerm = 0;
         for (int i = 0; i < numEntries; i++) {
-            final var entry = replicatedLogImpl.getAtPhysicalIndex(i);
+            final var entry = replicatedLogImpl.entryAt(i);
             map.put(entry.index(), entry.command().toString());
             lastIndex = entry.index();
             lastTerm = entry.term();
