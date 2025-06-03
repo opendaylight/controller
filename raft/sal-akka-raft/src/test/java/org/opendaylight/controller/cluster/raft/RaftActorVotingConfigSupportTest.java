@@ -123,10 +123,12 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
                 configParams, newFollowerCollectorActor).withDispatcher(Dispatchers.DefaultDispatcherId()),
                 actorFactory.generateActorId(NEW_SERVER_ID));
 
+        final var raftActor = newFollowerRaftActor.underlyingActor();
+        raftActor.waitForRecoveryComplete();
         try {
-            newFollowerActorContext = newFollowerRaftActor.underlyingActor().getRaftActorContext();
+            newFollowerActorContext = raftActor.getRaftActorContext();
         } catch (Exception e) {
-            newFollowerActorContext = newFollowerRaftActor.underlyingActor().getRaftActorContext();
+            newFollowerActorContext = raftActor.getRaftActorContext();
         }
     }
 
@@ -1559,24 +1561,20 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     }
 
     public static class MockLeaderRaftActor extends AbstractMockRaftActor {
+        private final ReplicatedLog fromLog;
+
         public MockLeaderRaftActor(final Path stateDir, final Map<String, String> peerAddresses,
                 final ConfigParams config, final RaftActorContext fromContext) {
             super(stateDir, LEADER_ID, peerAddresses, Optional.of(config), NO_PERSISTENCE, null);
+            fromLog = fromContext.getReplicatedLog();
+
             setPersistence(false);
+            getRaftActorContext().setTermInfo(fromContext.termInfo());
+        }
 
-            final var context = getRaftActorContext();
-            final var fromLog = fromContext.getReplicatedLog();
-            final var toLog = context.getReplicatedLog();
-
-            for (long i = 0, size = fromLog.size(); i < size; i++) {
-                final var entry = fromLog.entryAt(i);
-                getState().add(entry.command());
-                toLog.append(entry);
-            }
-
-            toLog.setCommitIndex(fromLog.getCommitIndex());
-            toLog.setLastApplied(fromLog.getLastApplied());
-            context.setTermInfo(fromContext.termInfo());
+        @Override
+        protected void applyRecoveredLog(final ReplicatedLog recoveredLog) {
+            getRaftActorContext().getReplicatedLog().resetToLog(fromLog);
         }
 
         @Override

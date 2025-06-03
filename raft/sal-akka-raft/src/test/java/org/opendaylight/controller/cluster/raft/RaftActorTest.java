@@ -834,6 +834,8 @@ public class RaftActorTest extends AbstractActorTest {
             Map.of("member1", "address"), config, new TestPersistenceProvider()), persistenceId);
 
         final var leaderActor = mockActorRef.underlyingActor();
+        leaderActor.waitForRecoveryComplete();
+
         final var leaderContext = leaderActor.getRaftActorContext();
         final var leaderLog = leaderContext.getReplicatedLog();
         leaderLog.setCommitIndex(3);
