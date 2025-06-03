@@ -26,6 +26,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
+import org.opendaylight.controller.cluster.raft.spi.BaseLog;
 import org.opendaylight.controller.cluster.raft.spi.EntryStore;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
@@ -85,7 +86,7 @@ public class RaftActorContextImpl implements RaftActorContext {
     RaftActorContextImpl(final ActorRef actor, final ActorContext context, final @NonNull LocalAccess localStore,
             final @NonNull PeerInfos peerInfos, final @NonNull ConfigParams configParams, final short payloadVersion,
             final @NonNull PersistenceProvider persistenceProvider, final @NonNull ApplyEntryMethod applyEntryMethod,
-            final @NonNull Executor executor, final @Nullable ReplicatedLog recoveredLog) {
+            final @NonNull Executor executor, final @Nullable BaseLog recoveredLog) {
         this.actor = actor;
         this.context = context;
         id = localStore.memberId();

@@ -14,9 +14,9 @@ import java.util.List;
 import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.raft.SnapshotManager.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.spi.BaseLog;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.raft.api.EntryMeta;
 
@@ -24,7 +24,7 @@ import org.opendaylight.raft.api.EntryMeta;
  * Represents the ReplicatedLog that needs to be kept in sync by the RaftActor.
  */
 @NonNullByDefault
-public interface ReplicatedLog {
+public interface ReplicatedLog extends BaseLog {
     /**
      * A combination of {@link EntryMeta} and indicator of whether the entry is stable.
      *
@@ -44,35 +44,6 @@ public interface ReplicatedLog {
     }
 
     /**
-     * Returns the entry and specified offset.
-     *
-     * @param offset the offset
-     * @return the {@link LogEntry}
-     * @throws IndexOutOfBoundsException if the offset is out of range ({@code offset < 0 || offset >= size()})
-     */
-    LogEntry entryAt(long offset);
-
-    /**
-     * Return the replicated log entry at the specified index.
-     *
-     * @param index the index of the log entry
-     * @return the ReplicatedLogEntry if found, otherwise null if the adjusted index less than 0 or greater than the
-     *         size of the in-memory journal
-     */
-    @Nullable LogEntry lookup(long index);
-
-    /**
-     * Return metadata about a replicated entry.
-     *
-     * @param index the index of the log entry
-     * @return the {@link EntryMeta} if found, otherwise null if the adjusted index less than 0 or greater than the size
-     *         of the in-memory journal
-     */
-    default @Nullable EntryMeta lookupMeta(final long index) {
-        return lookup(index);
-    }
-
-    /**
      * Return {@link StoredEntryMeta} a replicated entry.
      *
      * @param index the index of the log entry
@@ -80,74 +51,6 @@ public interface ReplicatedLog {
      *         the size of the in-memory journal
      */
     @Nullable StoredEntryMeta lookupStoredMeta(long index);
-
-    /**
-     * Return the last replicated log entry in the log or null of not found.
-     *
-     * @return the last replicated log entry in the log or null of not found.
-     */
-    @Nullable LogEntry last();
-
-    /**
-     * Return the last replicated log entry in the log or null of not found.
-     *
-     * @return the last replicated log entry in the log or null of not found.
-     */
-    default @Nullable EntryMeta lastMeta() {
-        return last();
-    }
-
-    /**
-     * Return the index of the last entry in the log or -1 if the log is empty.
-     *
-     * @return the index of the last entry in the log or -1 if the log is empty.
-     */
-    default long lastIndex() {
-        final var last = lastMeta();
-        // it can happen that after snapshot, all the entries of the journal are trimmed till lastApplied,
-        // so lastIndex = snapshotIndex
-        return last != null ? last.index() : getSnapshotIndex();
-    }
-
-    /**
-     * Return the term of the last entry in the log or -1 if the log is empty.
-     *
-     * @return the term of the last entry in the log or -1 if the log is empty.
-     */
-    default long lastTerm() {
-        final var last = lastMeta();
-        // it can happen that after snapshot, all the entries of the journal are trimmed till lastApplied,
-        // so lastTerm = snapshotTerm
-        return last != null ? last.term() : getSnapshotTerm();
-    }
-
-    /**
-     * Returns the index of highest log entry known to be committed.
-     *
-     * @return index of highest log entry known to be committed.
-     */
-    long getCommitIndex();
-
-    /**
-     * Sets the index of highest log entry known to be committed.
-     *
-     * @param commitIndex new commit index
-     */
-    void setCommitIndex(long commitIndex);
-
-    /**
-     * Returns index of highest log entry applied to state machine.
-     *
-     * @return index of highest log entry applied to state machine.
-     */
-    long getLastApplied();
-
-    /**
-     * Sets index of highest log entry applied to state machine.
-     *
-     * @param lastApplied the new applied index.
-     */
-    void setLastApplied(long lastApplied);
 
     /**
      * Mark the current value {@link #getLastApplied()} for recovery purposes.
@@ -165,14 +68,6 @@ public interface ReplicatedLog {
     //       to Follower (i.e. invoke some .toFollower() which will give out FollowerReplicatedLog with this method.
     // FIXME: CONTROLLER-2044: change to appendEntries(List<ReplicatedLogEntry>)
     boolean trimToReceive(long nextIndex);
-
-    /**
-     * Appends an entry to the log if its index is already included in the log.
-     *
-     * @param entry the entry to append
-     * @return {@code true} if the entry was successfully appended, {@code false} otherwise.
-     */
-    boolean append(LogEntry entry);
 
     /**
      * Optimization method to increase the capacity of the journal log prior to appending entries.
@@ -222,13 +117,6 @@ public interface ReplicatedLog {
     List<ReplicatedLogEntry> getFrom(long index, int maxEntries, long maxDataSize);
 
     /**
-     * Returns the number of entries in the journal.
-     *
-     * @return the number of entries
-     */
-    long size();
-
-    /**
      * Checks if the entry at the specified index is present or not.
      *
      * @param index the index of the log entry
@@ -244,34 +132,6 @@ public interface ReplicatedLog {
      *         be present in the replicated log
      */
     boolean isInSnapshot(long index);
-
-    /**
-     * Returns the index of the snapshot.
-     *
-     * @return the index from which the snapshot was created. -1 otherwise.
-     */
-    long getSnapshotIndex();
-
-    /**
-     * Returns the term of the snapshot.
-     *
-     * @return the term of the index from which the snapshot was created. -1 otherwise
-     */
-    long getSnapshotTerm();
-
-    /**
-     * Sets the snapshot index in the replicated log.
-     *
-     * @param snapshotIndex the index to set
-     */
-    void setSnapshotIndex(long snapshotIndex);
-
-    /**
-     * Sets snapshot term.
-     *
-     * @param snapshotTerm the term to set
-     */
-    void setSnapshotTerm(long snapshotTerm);
 
     /**
      * Returns the actual index of the entry in replicated log for the given index or -1 if not found.
@@ -384,21 +244,4 @@ public interface ReplicatedLog {
      * @return true if a snapshot should be captured, false otherwise
      */
     boolean shouldCaptureSnapshot(long logIndex);
-
-    /**
-     * Reset internal state to specified {@link Snapshot}.
-     *
-     * @param snapshot snapshot to reset to
-     */
-    void resetToSnapshot(Snapshot snapshot);
-
-    /**
-     * Constructs a CaptureSnapshot instance.
-     *
-     * @param lastLogEntry the last log entry for the snapshot.
-     * @param replicatedToAllIndex the index of the last entry replicated to all followers.
-     * @return a new CaptureSnapshot instance.
-     */
-    CaptureSnapshot newCaptureSnapshot(@Nullable EntryMeta lastLogEntry, long replicatedToAllIndex,
-        boolean mandatoryTrim, boolean hasFollowers);
 }

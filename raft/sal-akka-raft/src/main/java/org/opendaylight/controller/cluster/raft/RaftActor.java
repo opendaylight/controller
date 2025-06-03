@@ -957,7 +957,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         final var clusterConfig = context.getPeerServerInfo(true);
         if (isRecoveryApplicable()) {
             final var replLog = replicatedLog();
-            final var captureSnapshot = replLog.newCaptureSnapshot(replLog.lastMeta(), -1, true, hasFollowers());
+            final var captureSnapshot = replLog.startCapture(replLog.lastMeta(), -1, true, hasFollowers());
 
             return Snapshot.create(getRaftActorSnapshotCohort().takeSnapshot(), captureSnapshot.getUnAppliedEntries(),
                 captureSnapshot.getLastIndex(), captureSnapshot.getLastTerm(),
