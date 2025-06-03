@@ -44,6 +44,15 @@ public interface ReplicatedLog {
     }
 
     /**
+     * Returns the entry and specified offset.
+     *
+     * @param offset the offset
+     * @return the {@link LogEntry
+     * @throws IndexOutOfBoundsException if the offset is out of range ({@code offset < 0 || offset >= size()})
+     */
+    LogEntry entryAt(long offset);
+
+    /**
      * Return the replicated log entry at the specified index.
      *
      * @param index the index of the log entry
