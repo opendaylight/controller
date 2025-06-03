@@ -28,6 +28,7 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
+import org.opendaylight.controller.cluster.raft.spi.BaseLog;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
@@ -147,7 +148,7 @@ class PekkoRecovery<T extends @NonNull State> {
         return actor.persistence().snapshotStore();
     }
 
-    final @Nullable PekkoReplicatedLog handleRecoveryMessage(final Object message) {
+    final @Nullable BaseLog handleRecoveryMessage(final Object message) {
         LOG.trace("{}: handleRecoveryMessage: {}", memberId(), message);
 
         anyDataRecovered = anyDataRecovered || !(message instanceof RecoveryCompleted);
@@ -371,7 +372,7 @@ class PekkoRecovery<T extends @NonNull State> {
         // FIXME: We really do not have followers at this point, but information from VotingConfig may indicate we do.
         //        We should inline newCaptureSnapshot() logic here with the appropriate specialization.
         final var peerInfos = actor.peerInfos();
-        final var request = pekkoLog.newCaptureSnapshot(logEntry, -1, false, !peerInfos.isEmpty());
+        final var request = pekkoLog.startCapture(logEntry, -1, false, !peerInfos.isEmpty());
         final var lastSeq = actor.lastSequenceNr();
         final var snapshotState = snapshotCohort.takeSnapshot();
         final var timestamp = Instant.now();
