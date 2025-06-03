@@ -123,10 +123,12 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
                 configParams, newFollowerCollectorActor).withDispatcher(Dispatchers.DefaultDispatcherId()),
                 actorFactory.generateActorId(NEW_SERVER_ID));
 
+        final var raftActor = newFollowerRaftActor.underlyingActor();
+        raftActor.waitForRecoveryComplete();
         try {
-            newFollowerActorContext = newFollowerRaftActor.underlyingActor().getRaftActorContext();
+            newFollowerActorContext = raftActor.getRaftActorContext();
         } catch (Exception e) {
-            newFollowerActorContext = newFollowerRaftActor.underlyingActor().getRaftActorContext();
+            newFollowerActorContext = raftActor.getRaftActorContext();
         }
     }
 
