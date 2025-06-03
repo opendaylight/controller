@@ -94,7 +94,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         assertEquals("Follower 1 journal last term", currentTerm, follower1log.lastTerm());
         assertEquals("Follower 1 journal last index", 2, follower1log.lastIndex());
         assertEquals("Follower 1 commit index", 2, follower1log.getCommitIndex());
-        verifyReplicatedLogEntry(follower1log.get(2), currentTerm, 2, newLeaderPayload2);
+        verifyReplicatedLogEntry(follower1log.lookup(2), currentTerm, 2, newLeaderPayload2);
 
         assertEquals("Follower 1 state", List.of(payload0, payload1, newLeaderPayload2),
                 follower1Actor.underlyingActor().getState());
@@ -115,7 +115,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         assertEquals("Prior leader journal last term", currentTerm, leaderLog.lastTerm());
         assertEquals("Prior leader journal last index", 2, leaderLog.lastIndex());
         assertEquals("Prior leader commit index", 2, leaderLog.getCommitIndex());
-        verifyReplicatedLogEntry(leaderLog.get(2), currentTerm, 2, newLeaderPayload2);
+        verifyReplicatedLogEntry(leaderLog.lookup(2), currentTerm, 2, newLeaderPayload2);
 
         assertEquals("Prior leader state", List.of(payload0, payload1, newLeaderPayload2),
                 leaderActor.underlyingActor().getState());
@@ -201,7 +201,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         assertEquals("Follower 1 journal last term", currentTerm, follower1log.lastTerm());
         assertEquals("Follower 1 journal last index", 3, follower1log.lastIndex());
         assertEquals("Follower 1 commit index", 3, follower1log.getCommitIndex());
-        verifyReplicatedLogEntry(follower1log.get(3), currentTerm, 3, newLeaderPayload2);
+        verifyReplicatedLogEntry(follower1log.lookup(3), currentTerm, 3, newLeaderPayload2);
 
         assertEquals("Follower 1 state", List.of(payload0, payload1, newLeaderPayload2),
                 follower1Actor.underlyingActor().getState());
@@ -329,7 +329,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         assertEquals("Follower 1 journal last term", currentTerm, follower1log.lastTerm());
         assertEquals("Follower 1 journal last index", 5, follower1log.lastIndex());
         assertEquals("Follower 1 commit index", 5, follower1log.getCommitIndex());
-        verifyReplicatedLogEntry(follower1Context.getReplicatedLog().get(5), currentTerm, 5, newLeaderPayload4);
+        verifyReplicatedLogEntry(follower1Context.getReplicatedLog().lookup(5), currentTerm, 5, newLeaderPayload4);
 
         assertEquals("Follower 1 state", List.of(payload0, payload1, newLeaderPayload2, newLeaderPayload3,
                 newLeaderPayload4), follower1Actor.underlyingActor().getState());

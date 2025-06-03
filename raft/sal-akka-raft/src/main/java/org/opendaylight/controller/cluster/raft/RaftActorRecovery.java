@@ -294,7 +294,7 @@ class RaftActorRecovery<T extends @NonNull State> {
 
         long lastApplied = lastUnappliedIndex - 1;
         for (long i = lastUnappliedIndex; i <= toIndex; i++) {
-            final var logEntry = log.get(i);
+            final var logEntry = log.lookup(i);
             if (logEntry == null) {
                 // Shouldn't happen but cover it anyway.
                 LOG.error("{}: Log entry not found for index {}", memberId(), i);

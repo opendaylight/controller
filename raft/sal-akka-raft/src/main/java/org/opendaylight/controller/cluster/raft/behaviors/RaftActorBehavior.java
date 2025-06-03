@@ -322,7 +322,7 @@ public abstract class RaftActorBehavior implements AutoCloseable {
 
         for (long i = replLog.getLastApplied() + 1; i < index + 1; i++) {
 
-            final var replicatedLogEntry = replLog.get(i);
+            final var replicatedLogEntry = replLog.lookup(i);
             if (replicatedLogEntry != null) {
                 // Send a local message to the local RaftActor (it's derived class to be
                 // specific to apply the log to it's index)

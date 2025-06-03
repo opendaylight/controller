@@ -1392,8 +1392,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leaderLog.setLastApplied(leaderCommitIndex);
         leaderActorContext.resetReplicatedLog(leaderLog);
 
-        final var leadersSecondLogEntry = leaderActorContext.getReplicatedLog().get(1);
-        final var leadersThirdLogEntry = leaderActorContext.getReplicatedLog().get(2);
+        final var leadersSecondLogEntry = leaderActorContext.getReplicatedLog().lookup(1);
+        final var leadersThirdLogEntry = leaderActorContext.getReplicatedLog().lookup(2);
 
         MockRaftActorContext followerActorContext = createFollowerActorContextWithLeader();
 
@@ -1465,8 +1465,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
 
         final long leaderCommitIndex = 1;
         final var leaderLog = new MockRaftActorContext.Builder().createEntries(0, 2, 1).build();
-        final var leadersFirstLogEntry = leaderLog.get(0);
-        final var leadersSecondLogEntry = leaderLog.get(1);
+        final var leadersFirstLogEntry = leaderLog.lookup(0);
+        final var leadersSecondLogEntry = leaderLog.lookup(1);
         leaderLog.setCommitIndex(leaderCommitIndex);
         leaderLog.setLastApplied(leaderCommitIndex);
         leaderActorContext.resetReplicatedLog(leaderLog);
@@ -1546,8 +1546,8 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leaderLog.setLastApplied(leaderCommitIndex);
         leaderActorContext.resetReplicatedLog(leaderLog);
 
-        final var leadersFirstLogEntry = leaderActorContext.getReplicatedLog().get(0);
-        final var leadersSecondLogEntry = leaderActorContext.getReplicatedLog().get(1);
+        final var leadersFirstLogEntry = leaderActorContext.getReplicatedLog().lookup(0);
+        final var leadersSecondLogEntry = leaderActorContext.getReplicatedLog().lookup(1);
 
         MockRaftActorContext followerActorContext = createFollowerActorContextWithLeader();
 
@@ -1729,10 +1729,10 @@ public class LeaderTest extends AbstractLeaderTest<Leader> {
         leaderLog.setLastApplied(leaderCommitIndex);
         leaderActorContext.resetReplicatedLog(leaderLog);
 
-        final var leadersFirstLogEntry = leaderLog.get(0);
-        final var leadersSecondLogEntry = leaderLog.get(1);
-        final var leadersThirdLogEntry = leaderLog.get(2);
-        final var leadersFourthLogEntry = leaderLog.get(3);
+        final var leadersFirstLogEntry = leaderLog.lookup(0);
+        final var leadersSecondLogEntry = leaderLog.lookup(1);
+        final var leadersThirdLogEntry = leaderLog.lookup(2);
+        final var leadersFourthLogEntry = leaderLog.lookup(3);
 
         MockRaftActorContext followerActorContext = createFollowerActorContextWithLeader();
 

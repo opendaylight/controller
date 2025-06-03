@@ -584,8 +584,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertSame(follower, follower.handleMessage(leaderActor, appendEntries));
 
         assertEquals(4, log.lastIndex());
-        assertLogEntry(entries.get(0), log.get(3));
-        assertLogEntry(entries.get(1), log.get(4));
+        assertLogEntry(entries.get(0), log.lookup(3));
+        assertLogEntry(entries.get(1), log.lookup(4));
 
         assertEquals(leaderPayloadVersion, follower.getLeaderPayloadVersion());
         assertEquals(leaderId, follower.getLeaderId());
@@ -637,12 +637,12 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertEquals("Next index", 3, log.lastIndex());
         //assertEquals("Entry 2", entries.get(0), log.get(2));
 
-        assertEquals("Entry 1 data", "one", log.get(1).command().toString());
+        assertEquals("Entry 1 data", "one", log.lookup(1).command().toString());
 
         // Check that the entry at index 2 has the new data
-        assertLogEntry(entries.get(0), log.get(2));
+        assertLogEntry(entries.get(0), log.lookup(2));
 
-        assertLogEntry(entries.get(1), log.get(3));
+        assertLogEntry(entries.get(1), log.lookup(3));
 
         expectAndVerifyAppendEntriesReply(2, true, "follower", 2, 3);
     }
@@ -734,7 +734,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         follower.handleMessage(leaderActor, new AppendEntries(1, "leader", 0, 1, entries, 1, -1, (short)0));
 
         assertEquals(1, log.lastIndex());
-        assertLogEntry(entries.getFirst(), log.get(1));
+        assertLogEntry(entries.getFirst(), log.lookup(1));
 
         expectAndVerifyAppendEntriesReply(1, true, "follower", 1, 1);
 
@@ -746,8 +746,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         follower.handleMessage(leaderActor, new AppendEntries(1, "leader", 0, 1, entries, 2, -1, (short)0));
 
         assertEquals(3, log.last().index() + 1);
-        assertLogEntry(entries.get(0), log.get(1));
-        assertLogEntry(entries.get(1), log.get(2));
+        assertLogEntry(entries.get(0), log.lookup(1));
+        assertLogEntry(entries.get(1), log.lookup(2));
 
         expectAndVerifyAppendEntriesReply(1, true, "follower", 1, 2);
     }

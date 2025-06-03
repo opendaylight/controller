@@ -836,7 +836,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         assertEquals("Leader last applied", lastIndex, leaderLog.getLastApplied());
 
         for (long i = firstJournalEntryIndex; i < expSnapshotState.size(); i++) {
-            verifyReplicatedLogEntry(leaderLog.get(i), currentTerm, i, expSnapshotState.get((int) i));
+            verifyReplicatedLogEntry(leaderLog.lookup(i), currentTerm, i, expSnapshotState.get((int) i));
         }
 
         assertEquals("Leader applied state", expSnapshotState, testRaftActor.getState());

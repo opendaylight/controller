@@ -1491,7 +1491,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     }
 
     private static void verifyServerConfigurationPayloadEntry(final ReplicatedLog log, final ServerInfo... expected) {
-        final var logEntry = log.get(log.lastIndex());
+        final var logEntry = log.lookup(log.lastIndex());
         final var payload = assertInstanceOf(VotingConfig.class, logEntry.command());
         assertEquals("Server config", Set.of(expected), Set.copyOf(payload.serverInfo()));
     }
@@ -1565,7 +1565,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
             final var toLog = context.getReplicatedLog();
 
             for (int i = 0; i < fromLog.size(); i++) {
-                final var entry = fromLog.get(i);
+                final var entry = fromLog.lookup(i);
                 getState().add(entry.command());
                 toLog.append(entry);
             }

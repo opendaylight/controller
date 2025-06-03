@@ -615,7 +615,7 @@ public final class SnapshotManager {
                 LOG.debug("{}: fakeSnapshot purging log to {} for term {}", memberId(), tempMin, context.currentTerm());
 
                 //use the term of the temp-min, since we check for isPresent, entry will not be null
-                final var entry = replLog.get(tempMin);
+                final var entry = replLog.lookupMeta(tempMin);
                 replLog.snapshotPreCommit(tempMin, entry.term());
                 replLog.snapshotCommit(false);
                 return tempMin;

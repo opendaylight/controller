@@ -177,13 +177,13 @@ class RaftActorRecoveryTest {
         inOrder.verify(recoveryCohort).startLogRecoveryBatch(5);
 
         for (int i = 0; i < replicatedLog.size() - 1; i++) {
-            inOrder.verify(recoveryCohort).appendRecoveredCommand((StateCommand) replicatedLog.get(i).command());
+            inOrder.verify(recoveryCohort).appendRecoveredCommand((StateCommand) replicatedLog.lookup(i).command());
         }
 
         inOrder.verify(recoveryCohort).applyCurrentLogRecoveryBatch();
         inOrder.verify(recoveryCohort).startLogRecoveryBatch(5);
         inOrder.verify(recoveryCohort).appendRecoveredCommand(
-            (StateCommand) replicatedLog.get(replicatedLog.size() - 1).command());
+            (StateCommand) replicatedLog.lookup(replicatedLog.size() - 1).command());
 
         inOrder.verifyNoMoreInteractions();
     }
@@ -281,7 +281,7 @@ class RaftActorRecoveryTest {
         inOrder.verify(recoveryCohort).startLogRecoveryBatch(anyInt());
 
         for (int i = 0; i < replicatedLog.size(); i++) {
-            inOrder.verify(recoveryCohort).appendRecoveredCommand((StateCommand) replicatedLog.get(i).command());
+            inOrder.verify(recoveryCohort).appendRecoveredCommand((StateCommand) replicatedLog.lookup(i).command());
         }
 
         inOrder.verify(recoveryCohort).applyCurrentLogRecoveryBatch();
