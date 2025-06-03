@@ -87,8 +87,8 @@ class RaftActorRecoveryTest {
     private RaftActorContext context;
     private PeerInfos peerInfos;
 
-    private RaftActorRecoverySupport<?> support;
-    private RaftActorRecovery<?> recovery;
+    private PekkoRecoverySupport<?> support;
+    private PekkoRecovery<?> recovery;
 
     @BeforeEach
     void setup() {
@@ -105,7 +105,7 @@ class RaftActorRecoveryTest {
         context = new RaftActorContextImpl(mockActorRef, null, localAccess, peerInfos, configParams, (short) 0,
             persistence, (identifier, entry) -> { }, MoreExecutors.directExecutor());
 
-        support = new RaftActorRecoverySupport<>(raftActor, snapshotCohort, recoveryCohort, context.getReplicatedLog(),
+        support = new PekkoRecoverySupport<>(raftActor, snapshotCohort, recoveryCohort, context.getReplicatedLog(),
             configParams);
     }
 

@@ -19,7 +19,7 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
  *
  * @author Thomas Pantelis
  */
-class RaftActorRecoverySupport<T extends @NonNull State> {
+class PekkoRecoverySupport<T extends @NonNull State> {
     private final @NonNull RaftActor actor;
     private final @NonNull RaftActorRecoveryCohort recoveryCohort;
     private final @NonNull RaftActorSnapshotCohort<T> snapshotCohort;
@@ -27,7 +27,7 @@ class RaftActorRecoverySupport<T extends @NonNull State> {
     private final @NonNull ConfigParams configParams;
 
     @NonNullByDefault
-    RaftActorRecoverySupport(final RaftActor actor, final RaftActorSnapshotCohort<T> snapshotCohort,
+    PekkoRecoverySupport(final RaftActor actor, final RaftActorSnapshotCohort<T> snapshotCohort,
             final RaftActorRecoveryCohort recoveryCohort, final ReplicatedLog log, final ConfigParams configParams) {
         this.actor = requireNonNull(actor);
         this.snapshotCohort = requireNonNull(snapshotCohort);
@@ -36,11 +36,11 @@ class RaftActorRecoverySupport<T extends @NonNull State> {
         this.configParams = requireNonNull(configParams);
     }
 
-    @NonNull RaftActorRecovery<T> recoverToPersistent() throws IOException {
-        return new RaftActorRecovery<>(actor, snapshotCohort, recoveryCohort, log, configParams);
+    @NonNull PekkoRecovery<T> recoverToPersistent() throws IOException {
+        return new PekkoRecovery<>(actor, snapshotCohort, recoveryCohort, log, configParams);
     }
 
-    @NonNull RaftActorRecovery<T> recoverToTransient() throws IOException {
-        return new RaftActorRecovery.ToTransient<>(actor, snapshotCohort, recoveryCohort, log, configParams);
+    @NonNull PekkoRecovery<T> recoverToTransient() throws IOException {
+        return new PekkoRecovery.ToTransient<>(actor, snapshotCohort, recoveryCohort, log, configParams);
     }
 }
