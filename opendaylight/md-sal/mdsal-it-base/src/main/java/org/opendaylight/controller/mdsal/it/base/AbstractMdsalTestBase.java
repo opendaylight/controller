@@ -27,6 +27,7 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.OptionUtils;
 import org.ops4j.pax.exam.karaf.options.KarafDistributionOption;
 import org.ops4j.pax.exam.karaf.options.LogLevelOption.LogLevel;
+import org.ops4j.pax.exam.options.BootDelegationOption;
 import org.ops4j.pax.exam.options.MavenUrlReference;
 import org.ops4j.pax.exam.options.extra.VMOption;
 import org.ops4j.pax.exam.util.Filter;
@@ -123,20 +124,24 @@ public abstract class AbstractMdsalTestBase {
     @Configuration
     public Option[] config() {
         Option[] options = new Option[] {
-                when(Boolean.getBoolean(KARAF_DEBUG_PROP))
-                        .useOptions(KarafDistributionOption.debugConfiguration(KARAF_DEBUG_PORT, true)),
-                karafDistributionConfiguration().frameworkUrl(getKarafDistro())
-                        .unpackDirectory(PAX_EXAM_UNPACK_DIRECTORY).useDeployFolder(false),
-                when(Boolean.getBoolean(KEEP_UNPACK_DIRECTORY_PROP)).useOptions(keepRuntimeFolder()),
-                features(getFeatureRepo(), getFeatureName()),
-                mvnLocalRepoOption(),
+            when(Boolean.getBoolean(KARAF_DEBUG_PROP))
+                .useOptions(KarafDistributionOption.debugConfiguration(KARAF_DEBUG_PORT, true)),
+            karafDistributionConfiguration().frameworkUrl(getKarafDistro())
+                .unpackDirectory(PAX_EXAM_UNPACK_DIRECTORY).useDeployFolder(false),
+            when(Boolean.getBoolean(KEEP_UNPACK_DIRECTORY_PROP)).useOptions(keepRuntimeFolder()),
+            features(getFeatureRepo(), getFeatureName()),
+            mvnLocalRepoOption(),
 
-                // Make sure karaf's default repository is consulted before anything else
-                editConfigurationFilePut(ETC_ORG_OPS4J_PAX_URL_MVN_CFG, "org.ops4j.pax.url.mvn.defaultRepositories",
-                        "file:${karaf.home}/${karaf.default.repository}@id=system.repository"),
+            // Make sure karaf's default repository is consulted before anything else
+            editConfigurationFilePut(ETC_ORG_OPS4J_PAX_URL_MVN_CFG, "org.ops4j.pax.url.mvn.defaultRepositories",
+                "file:${karaf.home}/${karaf.default.repository}@id=system.repository"),
 
-                configureConsole().ignoreLocalConsole().ignoreRemoteShell(),
-                editConfigurationFilePut(ETC_ORG_OPS4J_PAX_LOGGING_CFG, "log4j2.rootLogger.level", "INFO") };
+            configureConsole().ignoreLocalConsole().ignoreRemoteShell(),
+            editConfigurationFilePut(ETC_ORG_OPS4J_PAX_LOGGING_CFG, "log4j2.rootLogger.level", "INFO"),
+
+            // Mockito/OSGi support: see https://github.com/mockito/mockito/issues/2203#issuecomment-1706112164
+            new BootDelegationOption("org.mockito.internal.creation.bytebuddy.inject"),
+        };
 
         final String karafVersion = MavenUtils.getArtifactVersion("org.apache.karaf.features",
                 "org.apache.karaf.features.core");
