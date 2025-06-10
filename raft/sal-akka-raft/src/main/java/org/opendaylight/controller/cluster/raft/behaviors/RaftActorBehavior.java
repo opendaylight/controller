@@ -16,6 +16,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Cancellable;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.ReplicatedLog;
@@ -128,7 +129,7 @@ public abstract class RaftActorBehavior implements AutoCloseable {
      * @param appendEntries  The AppendEntries message
      * @return a new behavior if it was changed or the current behavior
      */
-    abstract RaftActorBehavior handleAppendEntries(ActorRef sender, AppendEntries appendEntries);
+    abstract @NonNull RaftActorBehavior handleAppendEntries(ActorRef sender, @NonNull AppendEntries appendEntries);
 
     /**
      * Handles the common logic for the AppendEntries message and delegates handling to the derived class.
@@ -137,7 +138,7 @@ public abstract class RaftActorBehavior implements AutoCloseable {
      * @param appendEntries the message
      * @return a new behavior if it was changed or the current behavior
      */
-    final RaftActorBehavior appendEntries(final ActorRef sender, final AppendEntries appendEntries) {
+    final @NonNull RaftActorBehavior appendEntries(final ActorRef sender, final @NonNull AppendEntries appendEntries) {
         // 1. Reply false if term < currentTerm (§5.1)
         final var term = appendEntries.getTerm();
         final var current = currentTerm();
@@ -161,7 +162,8 @@ public abstract class RaftActorBehavior implements AutoCloseable {
      * @param appendEntriesReply The AppendEntriesReply message
      * @return a new behavior if it was changed or the current behavior
      */
-    abstract RaftActorBehavior handleAppendEntriesReply(ActorRef sender, AppendEntriesReply appendEntriesReply);
+    abstract @NonNull RaftActorBehavior handleAppendEntriesReply(ActorRef sender,
+        @NonNull AppendEntriesReply appendEntriesReply);
 
     /**
      * Handles the logic for the RequestVote message that is common for all behaviors.
@@ -170,7 +172,7 @@ public abstract class RaftActorBehavior implements AutoCloseable {
      * @param requestVote the message
      * @return a new behavior if it was changed or the current behavior
      */
-    final RaftActorBehavior requestVote(final ActorRef sender, final RequestVote requestVote) {
+    final @NonNull RaftActorBehavior requestVote(final ActorRef sender, final @NonNull RequestVote requestVote) {
         LOG.debug("{}: In requestVote: {} - currentTerm: {}, votedFor: {}, lastIndex: {}, lastTerm: {}", logName,
                 requestVote, currentTerm(), votedFor(), lastIndex(), lastTerm());
 
@@ -190,6 +192,7 @@ public abstract class RaftActorBehavior implements AutoCloseable {
         return this;
     }
 
+    @NonNullByDefault
     final boolean canGrantVote(final RequestVote requestVote) {
         //  Reply false if term < currentTerm (§5.1)
         if (requestVote.getTerm() < currentTerm()) {
@@ -227,7 +230,8 @@ public abstract class RaftActorBehavior implements AutoCloseable {
      * @param requestVoteReply The RequestVoteReply message
      * @return a new behavior if it was changed or the current behavior
      */
-    abstract RaftActorBehavior handleRequestVoteReply(ActorRef sender, RequestVoteReply requestVoteReply);
+    abstract @NonNull RaftActorBehavior handleRequestVoteReply(ActorRef sender,
+        @NonNull RequestVoteReply requestVoteReply);
 
     /**
      * Returns a duration for election with an additional variance for randomness.
@@ -280,7 +284,7 @@ public abstract class RaftActorBehavior implements AutoCloseable {
      *
      * @return the candidate for whom we voted in the current term
      */
-    final String votedFor() {
+    final @Nullable String votedFor() {
         return context.termInfo().votedFor();
     }
 
@@ -385,6 +389,7 @@ public abstract class RaftActorBehavior implements AutoCloseable {
      * @param behavior the new behavior to switch to
      * @return the new behavior
      */
+    @NonNullByDefault
     @SuppressWarnings("checkstyle:IllegalCatch")
     final RaftActorBehavior switchBehavior(final RaftActorBehavior newBehavior) {
         if (!context.getRaftPolicy().automaticElectionsEnabled()) {
