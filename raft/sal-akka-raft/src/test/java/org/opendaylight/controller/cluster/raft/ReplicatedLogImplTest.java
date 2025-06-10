@@ -82,7 +82,7 @@ class ReplicatedLogImplTest {
 
         assertPersist(logEntry2);
 
-        verify(callback).accept(eq(JournaledLogEntry.of(logEntry2)));
+        verify(callback).accept(eq(JournaledLogEntry.persistedOf(logEntry2)));
 
         assertEquals(2, log.size());
     }
@@ -195,7 +195,7 @@ class ReplicatedLogImplTest {
     }
 
     private void assertPersist(final LogEntry entry, final boolean async) {
-        final var logEntry = JournaledLogEntry.of(entry);
+        final var logEntry = JournaledLogEntry.persistedOf(entry);
         if (async) {
             verify(entryStore).startPersistEntry(eq(logEntry), procedureCaptor.capture());
         } else {

@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.base.VerifyException;
 import java.util.Objects;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -27,15 +28,20 @@ final class JournaledLogEntry implements ReplicatedLogEntry {
 
     private boolean persistencePending;
 
-    JournaledLogEntry(final long index, final long term, final Payload command) {
+    private JournaledLogEntry(final long index, final long term, final Payload command, boolean persistencePending) {
         this.index = index;
         this.term = term;
         this.command = requireNonNull(command);
+        this.persistencePending = persistencePending;
     }
 
-    static JournaledLogEntry of(final LogEntry entry) {
+    static JournaledLogEntry pendingOf(final long index, final long term, final Payload command) {
+        return new JournaledLogEntry(index, term, command, true);
+    }
+
+    static JournaledLogEntry persistedOf(final LogEntry entry) {
         return entry instanceof JournaledLogEntry simple && !simple.isPersistencePending() ? simple
-            : new JournaledLogEntry(entry.index(), entry.term(), entry.command().toSerialForm());
+            : new JournaledLogEntry(entry.index(), entry.term(), entry.command().toSerialForm(), false);
     }
 
     @Override
@@ -70,12 +76,14 @@ final class JournaledLogEntry implements ReplicatedLogEntry {
     }
 
     /**
-     * Sets whether or not persistence is pending for this entry.
-     *
-     * @param pending the new setting.
+     * Clears pending persistence.
      */
-    void setPersistencePending(final boolean pending) {
-        persistencePending = pending;
+    void clearPersistencePending() {
+        if (persistencePending) {
+            persistencePending = false;
+        } else {
+            throw new VerifyException(this + " is not pending");
+        }
     }
 
     @Override
@@ -95,6 +103,7 @@ final class JournaledLogEntry implements ReplicatedLogEntry {
             .add("index", index)
             .add("term", term)
             .add("command", command)
+            .add("pending", persistencePending)
             .toString();
     }
 }

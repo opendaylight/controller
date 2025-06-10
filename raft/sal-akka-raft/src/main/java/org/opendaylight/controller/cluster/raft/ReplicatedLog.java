@@ -18,6 +18,7 @@ import org.opendaylight.controller.cluster.raft.SnapshotManager.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
+import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.EntryMeta;
 
 /**
@@ -41,6 +42,25 @@ public interface ReplicatedLog {
         public StoredEntryMeta {
             requireNonNull(meta);
         }
+    }
+
+    interface RecoveringPosition {
+
+        RecoveringApplied recoverPosition(long journalIndex, EntryInfo snapshotEntry);
+    }
+
+    interface RecoveringApplied {
+
+        void recoverAppliedEntry(LogEntry entry);
+
+        RecoveringUnapplied finish();
+    }
+
+    interface RecoveringUnapplied {
+
+        void recoverUnappliedEntry(LogEntry entry);
+
+        void finish();
     }
 
     /**

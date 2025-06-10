@@ -103,14 +103,13 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog<JournaledLogEntry> {
     @Override
     public boolean appendSubmitted(final long index, final long term, final Payload command,
             final Consumer<ReplicatedLogEntry> callback)  {
-        final var entry = new JournaledLogEntry(index, term, command);
-        entry.setPersistencePending(true);
+        final var entry = JournaledLogEntry.pendingOf(index, term, command);
         LOG.debug("{}: Append log entry and persist {} ", memberId, entry);
 
         final var ret = appendImpl(entry);
         if (ret) {
             context.entryStore().startPersistEntry(entry, () -> {
-                entry.setPersistencePending(false);
+                entry.clearPersistencePending();
                 invokeAsync(entry, callback == null ? null : () -> callback.accept(entry));
             });
         }
@@ -140,6 +139,6 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog<JournaledLogEntry> {
 
     @Override
     protected JournaledLogEntry adoptEntry(final LogEntry entry) {
-        return JournaledLogEntry.of(entry);
+        return JournaledLogEntry.persistedOf(entry);
     }
 }
