@@ -18,6 +18,7 @@ import org.opendaylight.controller.cluster.raft.SnapshotManager.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
+import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.EntryMeta;
 
 /**
@@ -41,6 +42,35 @@ public interface ReplicatedLog {
         public StoredEntryMeta {
             requireNonNull(meta);
         }
+    }
+
+    /**
+     * First stage of recovery: we need the {@code journalIndex} of the first entry and the information about the last
+     * entry contained in the snapshot.
+     */
+    interface RecoveringPosition {
+
+        RecoveringApplied recoverPosition(long journalIndex, EntryInfo snapshotEntry);
+    }
+
+    /**
+     * Second stage of recovery: we need all entries which need to be immediately applied.
+     */
+    interface RecoveringApplied {
+
+        void recoverAppliedEntry(LogEntry entry);
+
+        RecoveringUnapplied finishApplied();
+    }
+
+    /**
+     * Third stage of recovery: we need all entries which need to be immediately applied.
+     */
+    interface RecoveringUnapplied {
+
+        void recoverUnappliedEntry(LogEntry entry);
+
+        void finishUnapplied();
     }
 
     /**
