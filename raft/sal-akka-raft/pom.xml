@@ -30,6 +30,10 @@
             <artifactId>guava</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-buffer</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
@@ -44,6 +48,10 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>raft-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>raft-journal</artifactId>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
