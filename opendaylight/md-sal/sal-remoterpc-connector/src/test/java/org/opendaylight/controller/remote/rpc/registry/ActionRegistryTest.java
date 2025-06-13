@@ -17,11 +17,10 @@ import static org.opendaylight.controller.remote.rpc.registry.gossip.BucketStore
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.ConfigFactory;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -34,13 +33,12 @@ import org.apache.pekko.cluster.Cluster;
 import org.apache.pekko.cluster.MemberStatus;
 import org.apache.pekko.cluster.UniqueAddress;
 import org.apache.pekko.testkit.javadsl.TestKit;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.opendaylight.controller.cluster.common.actor.AkkaConfigurationReader;
 import org.opendaylight.controller.remote.rpc.RemoteOpsProviderConfig;
 import org.opendaylight.controller.remote.rpc.registry.ActionRegistry.RemoteActionEndpoint;
@@ -55,15 +53,15 @@ import org.opendaylight.yangtools.yang.model.api.stmt.SchemaNodeIdentifier.Absol
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ActionRegistryTest {
+class ActionRegistryTest {
     private static final Logger LOG = LoggerFactory.getLogger(ActionRegistryTest.class);
 
     private static ActorSystem node1;
     private static ActorSystem node2;
     private static ActorSystem node3;
 
-    @Rule
-    public TemporaryFolder folder = TemporaryFolder.builder().assureDeletion().build();
+    @TempDir
+    private Path directory;
 
     private TestKit invoker1;
     private TestKit invoker2;
@@ -77,8 +75,8 @@ public class ActionRegistryTest {
 
     private int routeIdCounter = 1;
 
-    @BeforeClass
-    public static void staticSetup() {
+    @BeforeAll
+    static void beforeAll() {
         AkkaConfigurationReader reader = ConfigFactory::load;
 
         RemoteOpsProviderConfig config1 = new RemoteOpsProviderConfig.Builder("memberA").gossipTickInterval("200ms")
@@ -115,18 +113,17 @@ public class ActionRegistryTest {
         fail("Member(s) " + otherMembersSet + " are not Up");
     }
 
-    @AfterClass
-    public static void staticTeardown() {
+    @AfterAll
+    static void afterAll() {
         TestKit.shutdownActorSystem(node1);
         TestKit.shutdownActorSystem(node2);
         TestKit.shutdownActorSystem(node3);
     }
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void beforeEach() {
         invoker1 = new TestKit(node1);
         registrar1 = new TestKit(node1);
-        final var directory = folder.getRoot().toPath();
         registry1 = node1.actorOf(ActionRegistry.props(config(node1), directory, invoker1.getRef(),
             registrar1.getRef()));
         invoker2 = new TestKit(node2);
@@ -143,8 +140,8 @@ public class ActionRegistryTest {
         return new RemoteOpsProviderConfig(node.settings().config());
     }
 
-    @After
-    public void teardown() {
+    @AfterEach
+    void afterEach() {
         if (registry1 != null) {
             node1.stop(registry1);
         }
@@ -181,7 +178,7 @@ public class ActionRegistryTest {
      * deleted
      */
     @Test
-    public void testAddRemoveActionOnSameNode() {
+    void testAddRemoveActionOnSameNode() {
         LOG.info("testAddRemoveActionOnSameNode starting");
 
         Address nodeAddress = node1.provider().getDefaultAddress();
@@ -190,8 +187,7 @@ public class ActionRegistryTest {
 
         List<DOMActionInstance> addedRouteIds = createRouteIds();
 
-        registry1.tell(new ActionRegistry.UpdateActions(addedRouteIds,
-                Collections.emptyList()), ActorRef.noSender());
+        registry1.tell(new ActionRegistry.UpdateActions(addedRouteIds, List.of()), ActorRef.noSender());
 
         // Bucket store should get an update bucket message. Updated bucket contains added action.
         final TestKit testKit = new TestKit(node1);
@@ -204,14 +200,13 @@ public class ActionRegistryTest {
                 versions.get(nodeAddress));
 
         // Now remove action
-        registry1.tell(new UpdateActions(Collections.emptyList(),addedRouteIds), ActorRef.noSender());
+        registry1.tell(new UpdateActions(List.of(),addedRouteIds), ActorRef.noSender());
 
         // Bucket store should get an update bucket message. Action is removed in the updated bucket
 
         verifyEmptyBucket(testKit, registry1, nodeAddress);
 
         LOG.info("testAddRemoveActionOnSameNode ending");
-
     }
 
     /**
@@ -219,8 +214,7 @@ public class ActionRegistryTest {
      * 1 node, ensure 2nd node gets updated
      */
     @Test
-    public void testActionAddRemoveInCluster() {
-
+    void testActionAddRemoveInCluster() {
         LOG.info("testActionAddRemoveInCluster starting");
 
         List<DOMActionInstance> addedRouteIds = createRouteIds();
@@ -228,7 +222,7 @@ public class ActionRegistryTest {
         Address node1Address = node1.provider().getDefaultAddress();
 
         // Add action on node 1
-        registry1.tell(new UpdateActions(addedRouteIds, Collections.emptyList()), ActorRef.noSender());
+        registry1.tell(new UpdateActions(addedRouteIds, List.of()), ActorRef.noSender());
 
         // Bucket store on node2 should get a message to update its local copy of remote buckets
         final TestKit testKit = new TestKit(node2);
@@ -237,7 +231,7 @@ public class ActionRegistryTest {
         verifyBucket(buckets.get(node1Address), addedRouteIds);
 
         // Now remove
-        registry1.tell(new UpdateActions(Collections.emptyList(), addedRouteIds), ActorRef.noSender());
+        registry1.tell(new UpdateActions(List.of(), addedRouteIds), ActorRef.noSender());
 
         // Bucket store on node2 should get a message to update its local copy of remote buckets.
         // Wait for the bucket for node1 to be empty.
@@ -255,7 +249,7 @@ public class ActionRegistryTest {
             buckets = retrieveBuckets(registry1, testKit, address);
 
             try {
-                verifyBucket(buckets.get(address), Collections.emptyList());
+                verifyBucket(buckets.get(address), List.of());
                 break;
             } catch (AssertionError e) {
                 if (++numTries >= 50) {
@@ -271,19 +265,19 @@ public class ActionRegistryTest {
      * Three node cluster. Register action on 2 nodes. Ensure 3rd gets updated.
      */
     @Test
-    public void testActionAddedOnMultiNodes() {
+    void testActionAddedOnMultiNodes() {
         final TestKit testKit = new TestKit(node3);
 
         // Add action on node 1
         List<DOMActionInstance> addedRouteIds1 = createRouteIds();
-        registry1.tell(new UpdateActions(addedRouteIds1, Collections.emptyList()), ActorRef.noSender());
+        registry1.tell(new UpdateActions(addedRouteIds1, List.of()), ActorRef.noSender());
 
         final UpdateRemoteActionEndpoints req1 = registrar3.expectMsgClass(Duration.ofSeconds(3),
                 UpdateRemoteActionEndpoints.class);
 
         // Add action on node 2
         List<DOMActionInstance> addedRouteIds2 = createRouteIds();
-        registry2.tell(new UpdateActions(addedRouteIds2, Collections.emptyList()), ActorRef.noSender());
+        registry2.tell(new UpdateActions(addedRouteIds2, List.of()), ActorRef.noSender());
 
         final UpdateRemoteActionEndpoints req2 = registrar3.expectMsgClass(Duration.ofSeconds(3),
                 UpdateRemoteActionEndpoints.class);
@@ -347,6 +341,7 @@ public class ActionRegistryTest {
 
     private static Map<Address, Bucket<ActionRoutingTable>> retrieveBuckets(
             final ActorRef bucketStore, final TestKit testKit, final Address... addresses) {
+        // FIXME: use awaitility here
         int numTries = 0;
         while (true) {
             bucketStore.tell(GET_ALL_BUCKETS, testKit.getRef());
@@ -377,11 +372,11 @@ public class ActionRegistryTest {
     }
 
     @Test
-    public void testAddRoutesConcurrency() {
+    void testAddRoutesConcurrency() {
         final TestKit testKit = new TestKit(node1);
 
         final int nRoutes = 500;
-        final Collection<DOMActionInstance> added = new ArrayList<>(nRoutes);
+        final List<DOMActionInstance> added = new ArrayList<>(nRoutes);
         for (int i = 0; i < nRoutes; i++) {
             QName type = QName.create("/mockaction", "mockaction" + routeIdCounter++);
             final DOMActionInstance routeId = DOMActionInstance.of(Absolute.of(type), LogicalDatastoreType.OPERATIONAL,
@@ -389,8 +384,7 @@ public class ActionRegistryTest {
             added.add(routeId);
 
             //Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
-            registry1.tell(new UpdateActions(Arrays.asList(routeId), Collections.emptyList()),
-                    ActorRef.noSender());
+            registry1.tell(new UpdateActions(List.of(routeId), List.of()), ActorRef.noSender());
         }
 
         int numTries = 0;
