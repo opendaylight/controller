@@ -9,6 +9,7 @@ package org.opendaylight.controller.remote.rpc.registry.gossip;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Verify.verify;
+import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 import static org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreAccess.Singletons.GET_ALL_BUCKETS;
 import static org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreAccess.Singletons.GET_BUCKET_VERSIONS;
@@ -208,14 +209,24 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
 
     private void onRecoveryCompleted(final RecoveryCompleted msg) {
         final var prev = incarnation;
-        final var current = prev != null ? incarnation + 1 : 0;
+        final var current = prev != null ? prev + 1 : 0;
         localBucket = new LocalBucket<>(current, initialData);
         incarnation = current;
         initialData = null;
+        persistIncarnation();
+    }
 
-        log().debug("{}: persisting new incarnation {}", persistenceId(), incarnation);
+    private void persistIncarnation() {
+        final var snapshot = verifyNotNull(incarnation);
+        log().debug("{}: persisting new incarnation {}", persistenceId(), snapshot);
         persisting = true;
-        saveSnapshot(incarnation);
+        super.saveSnapshot(snapshot);
+    }
+
+    @Override
+    @Deprecated(since = "11.0.0", forRemoval = true)
+    public final void saveSnapshot(final Object snapshot) {
+        throw new UnsupportedOperationException();
     }
 
     private void onSnapshotOffer(final SnapshotOffer msg) {
@@ -237,9 +248,7 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
 
             verify(incarnation < Integer.MAX_VALUE, "Ran out of incarnations, cannot continue");
             incarnation = incarnation + 1;
-
-            persisting = true;
-            saveSnapshot(incarnation);
+            persistIncarnation();
         }
     }
 
