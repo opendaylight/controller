@@ -7,7 +7,10 @@
  */
 package org.opendaylight.controller.remote.rpc.registry.gossip;
 
-import com.google.common.collect.ImmutableMap;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.typesafe.config.ConfigFactory;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,148 +21,43 @@ import org.apache.pekko.actor.Address;
 import org.apache.pekko.actor.Props;
 import org.apache.pekko.testkit.TestActorRef;
 import org.apache.pekko.testkit.javadsl.TestKit;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.remote.rpc.RemoteOpsProviderConfig;
 import org.opendaylight.controller.remote.rpc.TerminationMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BucketStoreTest {
+class BucketStoreTest {
     /**
      * Dummy class to eliminate rawtype warnings.
      *
      * @author gwu
      */
-    private static final class T implements BucketData<T> {
+    private static final class TestBucketData implements BucketData<TestBucketData> {
         @Override
         public Optional<ActorRef> getWatchActor() {
             return Optional.empty();
         }
     }
 
-    private static ActorSystem system;
-
-    @BeforeClass
-    public static void setup() {
-        system = ActorSystem.create("opendaylight-rpc", ConfigFactory.load().getConfig("unit-test"));
-        system.actorOf(Props.create(TerminationMonitor.class), "termination-monitor");
-    }
-
-    @AfterClass
-    public static void teardown() {
-        TestKit.shutdownActorSystem(system);
-    }
-
-    /**
-     * Given remote buckets, should merge with local copy of remote buckets.
-     */
-    @Test
-    public void testReceiveUpdateRemoteBuckets() {
-
-        final BucketStoreActor<T> store = createStore();
-
-        Address localAddress = system.provider().getDefaultAddress();
-        Bucket<T> localBucket = new BucketImpl<>(0L, new T());
-
-        final Address a1 = new Address("tcp", "system1");
-        final Address a2 = new Address("tcp", "system2");
-        final Address a3 = new Address("tcp", "system3");
-
-        final Bucket<T> b1 = new BucketImpl<>(0L, new T());
-        final Bucket<T> b2 = new BucketImpl<>(0L, new T());
-        final Bucket<T> b3 = new BucketImpl<>(0L, new T());
-
-        //Given remote buckets
-        store.updateRemoteBuckets(ImmutableMap.of(a1, b1, a2, b2, localAddress, localBucket));
-
-        //Should NOT contain local bucket
-        //Should contain ONLY 3 entries i.e a1, a2
-        Map<Address, Bucket<T>> remoteBucketsInStore = store.getRemoteBuckets();
-        Assert.assertFalse("remote buckets contains local bucket", remoteBucketsInStore.containsKey(localAddress));
-        Assert.assertTrue(remoteBucketsInStore.size() == 2);
-
-        //Add a new remote bucket
-        Address a4 = new Address("tcp", "system4");
-        Bucket<T> b4 = new BucketImpl<>(0L, new T());
-        store.updateRemoteBuckets(ImmutableMap.of(a4, b4));
-
-        //Should contain a4
-        //Should contain 4 entries now i.e a1, a2, a4
-        remoteBucketsInStore = store.getRemoteBuckets();
-        Assert.assertTrue("Does not contain a4", remoteBucketsInStore.containsKey(a4));
-        Assert.assertTrue(remoteBucketsInStore.size() == 3);
-
-        //Update a bucket
-        Bucket<T> b3New = new BucketImpl<>(0L, new T());
-        Map<Address, Bucket<?>> remoteBuckets = new HashMap<>(3);
-        remoteBuckets.put(a3, b3New);
-        remoteBuckets.put(a1, null);
-        remoteBuckets.put(a2, null);
-        store.updateRemoteBuckets(remoteBuckets);
-
-        //Should only update a3
-        remoteBucketsInStore = store.getRemoteBuckets();
-        Bucket<T> b3InStore = remoteBucketsInStore.get(a3);
-        Assert.assertEquals(b3New.getVersion(), b3InStore.getVersion());
-
-        //Should NOT update a1 and a2
-        Bucket<T> b1InStore = remoteBucketsInStore.get(a1);
-        Bucket<T> b2InStore = remoteBucketsInStore.get(a2);
-        Assert.assertEquals(b1.getVersion(), b1InStore.getVersion());
-        Assert.assertEquals(b2.getVersion(), b2InStore.getVersion());
-        Assert.assertTrue(remoteBucketsInStore.size() == 4);
-
-        //Should update versions map
-        //versions map contains versions for all remote buckets (4).
-        Map<Address, Long> versionsInStore = store.getVersions();
-        Assert.assertEquals(4, versionsInStore.size());
-        Assert.assertEquals((Long)b1.getVersion(), versionsInStore.get(a1));
-        Assert.assertEquals((Long)b2.getVersion(), versionsInStore.get(a2));
-        Assert.assertEquals((Long)b3New.getVersion(), versionsInStore.get(a3));
-        Assert.assertEquals((Long)b4.getVersion(), versionsInStore.get(a4));
-
-        //Send older version of bucket
-        remoteBuckets.clear();
-        remoteBuckets.put(a3, b3);
-        store.updateRemoteBuckets(remoteBuckets);
-
-        //Should NOT update a3
-        remoteBucketsInStore = store.getRemoteBuckets();
-        b3InStore = remoteBucketsInStore.get(a3);
-        Assert.assertEquals(b3InStore.getVersion(), b3New.getVersion());
-
-    }
-
-    /**
-     * Create BucketStore actor and returns the underlying instance of BucketStore class.
-     *
-     * @return instance of BucketStore class
-     */
-    private static BucketStoreActor<T> createStore() {
-        final Props props = Props.create(TestingBucketStoreActor.class,
-                new RemoteOpsProviderConfig(system.settings().config()), "testing-store",new T());
-        return TestActorRef.<BucketStoreActor<T>>create(system, props, "testStore").underlyingActor();
-    }
-
-    private static final class TestingBucketStoreActor extends BucketStoreActor<T> {
+    private static final class TestingBucketStoreActor extends BucketStoreActor<TestBucketData> {
         private static final Logger LOG = LoggerFactory.getLogger(TestingBucketStoreActor.class);
 
-        protected TestingBucketStoreActor(final RemoteOpsProviderConfig config,
-                                          final String persistenceId,
-                                          final T initialData) {
+        TestingBucketStoreActor(final RemoteOpsProviderConfig config, final String persistenceId,
+                final TestBucketData initialData) {
             super(config, persistenceId, initialData);
         }
 
         @Override
-        protected void onBucketRemoved(final Address address, final Bucket<T> bucket) {
+        protected void onBucketRemoved(final Address address, final Bucket<TestBucketData> bucket) {
             // No-op
         }
 
         @Override
-        protected void onBucketsUpdated(final Map<Address, Bucket<T>> newBuckets) {
+        protected void onBucketsUpdated(final Map<Address, Bucket<TestBucketData>> newBuckets) {
             // No-op
         }
 
@@ -167,5 +65,103 @@ public class BucketStoreTest {
         protected Logger log() {
             return LOG;
         }
+    }
+
+    private static ActorSystem system;
+
+    private BucketStoreActor<TestBucketData> store;
+
+    @BeforeAll
+    static void beforeAll() {
+        system = ActorSystem.create("opendaylight-rpc", ConfigFactory.load().getConfig("unit-test"));
+        system.actorOf(Props.create(TerminationMonitor.class), "termination-monitor");
+    }
+
+    @AfterAll
+    static void afterAll() {
+        TestKit.shutdownActorSystem(system);
+    }
+
+    @BeforeEach
+    void before() {
+        final var props = Props.create(TestingBucketStoreActor.class,
+            new RemoteOpsProviderConfig(system.settings().config()),
+            "testing-store", new TestBucketData());
+        store = TestActorRef.<BucketStoreActor<TestBucketData>>create(system, props, "testStore").underlyingActor();
+    }
+
+    /**
+     * Given remote buckets, should merge with local copy of remote buckets.
+     */
+    @Test
+    void testReceiveUpdateRemoteBuckets() {
+        final var localAddress = system.provider().getDefaultAddress();
+        final var localBucket = new BucketImpl<>(0L, new TestBucketData());
+
+        final var a1 = new Address("tcp", "system1");
+        final var a2 = new Address("tcp", "system2");
+        final var a3 = new Address("tcp", "system3");
+
+        final var b1 = new BucketImpl<>(0L, new TestBucketData());
+        final var b2 = new BucketImpl<>(0L, new TestBucketData());
+        final var b3 = new BucketImpl<>(0L, new TestBucketData());
+
+        //Given remote buckets
+        store.updateRemoteBuckets(Map.of(a1, b1, a2, b2, localAddress, localBucket));
+
+        //Should NOT contain local bucket
+        //Should contain ONLY 3 entries i.e a1, a2
+        var remoteBucketsInStore = store.getRemoteBuckets();
+        assertFalse(remoteBucketsInStore.containsKey(localAddress), "remote buckets contains local bucket");
+        assertEquals(2, remoteBucketsInStore.size());
+
+        //Add a new remote bucket
+        final var a4 = new Address("tcp", "system4");
+        final var b4 = new BucketImpl<>(0L, new TestBucketData());
+        store.updateRemoteBuckets(Map.of(a4, b4));
+
+        //Should contain a4
+        //Should contain 4 entries now i.e a1, a2, a4
+        remoteBucketsInStore = store.getRemoteBuckets();
+        assertTrue(remoteBucketsInStore.containsKey(a4), "Does not contain a4");
+        assertEquals(3, remoteBucketsInStore.size());
+
+        //Update a bucket
+        final var b3New = new BucketImpl<>(0L, new TestBucketData());
+        // Note: includes nulls on purpose
+        final var remoteBuckets = HashMap.<Address, Bucket<?>>newHashMap(3);
+        remoteBuckets.put(a3, b3New);
+        remoteBuckets.put(a1, null);
+        remoteBuckets.put(a2, null);
+        store.updateRemoteBuckets(remoteBuckets);
+
+        //Should only update a3
+        remoteBucketsInStore = store.getRemoteBuckets();
+        var b3InStore = remoteBucketsInStore.get(a3);
+        assertEquals(b3New.getVersion(), b3InStore.getVersion());
+
+        //Should NOT update a1 and a2
+        final var b1InStore = remoteBucketsInStore.get(a1);
+        final var b2InStore = remoteBucketsInStore.get(a2);
+        assertEquals(b1.getVersion(), b1InStore.getVersion());
+        assertEquals(b2.getVersion(), b2InStore.getVersion());
+        assertEquals(4, remoteBucketsInStore.size());
+
+        //Should update versions map
+        //versions map contains versions for all remote buckets (4).
+        final var versionsInStore = store.getVersions();
+        assertEquals(4, versionsInStore.size());
+        assertEquals(b1.getVersion(), versionsInStore.get(a1));
+        assertEquals(b2.getVersion(), versionsInStore.get(a2));
+        assertEquals(b3New.getVersion(), versionsInStore.get(a3));
+        assertEquals(b4.getVersion(), versionsInStore.get(a4));
+
+        //Send older version of bucket
+        store.updateRemoteBuckets(Map.of(a3, b3));
+
+        //Should NOT update a3
+        remoteBucketsInStore = store.getRemoteBuckets();
+        b3InStore = remoteBucketsInStore.get(a3);
+        assertEquals(b3InStore.getVersion(), b3New.getVersion());
     }
 }
