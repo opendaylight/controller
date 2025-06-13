@@ -28,7 +28,9 @@ import org.apache.pekko.testkit.TestActorRef;
 import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.opendaylight.controller.remote.rpc.RemoteOpsProviderConfig;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry;
 import org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreAccess;
@@ -39,6 +41,9 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 public class RemoteRpcRegistryMXBeanImplTest {
     private static final QName LOCAL_QNAME = QName.create("base", "local");
     private static final QName REMOTE_QNAME = QName.create("base", "remote");
+
+    @Rule
+    public TemporaryFolder folder = TemporaryFolder.builder().assureDeletion().build();
 
     private ActorSystem system;
     private TestActorRef<RpcRegistry> testActor;
@@ -60,7 +65,7 @@ public class RemoteRpcRegistryMXBeanImplTest {
         final TestKit invoker = new TestKit(system);
         final TestKit registrar = new TestKit(system);
         final TestKit supervisor = new TestKit(system);
-        final Props props = RpcRegistry.props(config, invoker.getRef(), registrar.getRef())
+        final Props props = RpcRegistry.props(config, folder.getRoot().toPath(), invoker.getRef(), registrar.getRef())
                 .withDispatcher(Dispatchers.DefaultDispatcherId());
         testActor = new TestActorRef<>(system, props, supervisor.getRef(), "testActor");
 

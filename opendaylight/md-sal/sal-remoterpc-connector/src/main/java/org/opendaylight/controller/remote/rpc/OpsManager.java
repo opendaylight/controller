@@ -10,11 +10,15 @@ package org.opendaylight.controller.remote.rpc;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.annotations.VisibleForTesting;
+import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.OneForOneStrategy;
 import org.apache.pekko.actor.Props;
 import org.apache.pekko.actor.SupervisorStrategy;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.controller.remote.rpc.registry.ActionRegistry;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry;
@@ -30,11 +34,14 @@ import scala.concurrent.duration.FiniteDuration;
  * {@link OpsListener} with the local {@link DOMRpcService}.
  */
 public class OpsManager extends AbstractUntypedActor {
-    private final DOMRpcProviderService rpcProvisionRegistry;
-    private final RemoteOpsProviderConfig config;
-    private final DOMRpcService rpcServices;
-    private final DOMActionProviderService actionProvisionRegistry;
-    private final DOMActionService actionService;
+    private static final @NonNull Path STATE_DIR = Path.of("state", "odl.cluster.remoterpc");
+
+    private final @NonNull Path directory;
+    private final @NonNull DOMRpcProviderService rpcProvisionRegistry;
+    private final @NonNull RemoteOpsProviderConfig config;
+    private final @NonNull DOMRpcService rpcServices;
+    private final @NonNull DOMActionProviderService actionProvisionRegistry;
+    private final @NonNull DOMActionService actionService;
 
     private Registration listenerReg;
     private ActorRef opsInvoker;
@@ -42,9 +49,10 @@ public class OpsManager extends AbstractUntypedActor {
     private ActorRef rpcRegistry;
     private ActorRef opsRegistrar;
 
-    OpsManager(final DOMRpcProviderService rpcProvisionRegistry, final DOMRpcService rpcServices,
+    OpsManager(final Path directory, final DOMRpcProviderService rpcProvisionRegistry, final DOMRpcService rpcServices,
                final RemoteOpsProviderConfig config, final DOMActionProviderService actionProviderService,
                final DOMActionService actionService) {
+        this.directory = requireNonNull(directory);
         this.rpcProvisionRegistry = requireNonNull(rpcProvisionRegistry);
         this.rpcServices = requireNonNull(rpcServices);
         this.config = requireNonNull(config);
@@ -52,17 +60,26 @@ public class OpsManager extends AbstractUntypedActor {
         this.actionService = requireNonNull(actionService);
     }
 
+    @NonNullByDefault
+    @VisibleForTesting
+    public static Props props(final Path directory, final DOMRpcProviderService rpcProvisionRegistry,
+            final DOMRpcService rpcServices, final RemoteOpsProviderConfig config,
+            final DOMActionProviderService actionProviderService, final DOMActionService actionService) {
+        return Props.create(OpsManager.class,
+            requireNonNull(directory, "directory can not be null!"),
+            requireNonNull(rpcProvisionRegistry, "RpcProviderService can not be null!"),
+            requireNonNull(rpcServices, "RpcService can not be null!"),
+            requireNonNull(config, "RemoteOpsProviderConfig can not be null!"),
+            requireNonNull(actionProviderService, "ActionProviderService can not be null!"),
+            requireNonNull(actionService, "ActionService can not be null!"));
+    }
+
+    @NonNullByDefault
     public static Props props(final DOMRpcProviderService rpcProvisionRegistry, final DOMRpcService rpcServices,
                               final RemoteOpsProviderConfig config,
                               final DOMActionProviderService actionProviderService,
                               final DOMActionService actionService) {
-        requireNonNull(rpcProvisionRegistry, "RpcProviderService can not be null!");
-        requireNonNull(rpcServices, "RpcService can not be null!");
-        requireNonNull(config, "RemoteOpsProviderConfig can not be null!");
-        requireNonNull(actionProviderService, "ActionProviderService can not be null!");
-        requireNonNull(actionService, "ActionService can not be null!");
-        return Props.create(OpsManager.class, rpcProvisionRegistry, rpcServices, config,
-                actionProviderService, actionService);
+        return props(STATE_DIR, rpcProvisionRegistry, rpcServices, config, actionProviderService, actionService);
     }
 
     @Override
@@ -77,11 +94,11 @@ public class OpsManager extends AbstractUntypedActor {
                 .withMailbox(config.getMailBoxName()), config.getRpcRegistrarName());
         LOG.debug("Registering remote RPCs with {}", opsRegistrar);
 
-        rpcRegistry = getContext().actorOf(RpcRegistry.props(config, opsInvoker, opsRegistrar)
+        rpcRegistry = getContext().actorOf(RpcRegistry.props(config, directory, opsInvoker, opsRegistrar)
                 .withMailbox(config.getMailBoxName()), config.getRpcRegistryName());
         LOG.debug("Propagating RPC information with {}", rpcRegistry);
 
-        actionRegistry = getContext().actorOf(ActionRegistry.props(config, opsInvoker, opsRegistrar)
+        actionRegistry = getContext().actorOf(ActionRegistry.props(config, directory, opsInvoker, opsRegistrar)
                 .withMailbox(config.getMailBoxName()), config.getActionRegistryName());
         LOG.debug("Propagating action information with {}", actionRegistry);
 

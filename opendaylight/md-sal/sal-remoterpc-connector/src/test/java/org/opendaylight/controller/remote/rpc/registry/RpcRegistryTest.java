@@ -41,7 +41,9 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.opendaylight.controller.cluster.common.actor.AkkaConfigurationReader;
 import org.opendaylight.controller.remote.rpc.RemoteOpsProviderConfig;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.AddOrUpdateRoutes;
@@ -60,6 +62,9 @@ public class RpcRegistryTest {
     private static ActorSystem node1;
     private static ActorSystem node2;
     private static ActorSystem node3;
+
+    @Rule
+    public TemporaryFolder folder = TemporaryFolder.builder().assureDeletion().build();
 
     private TestKit invoker1;
     private TestKit invoker2;
@@ -120,13 +125,14 @@ public class RpcRegistryTest {
     public void setup() {
         invoker1 = new TestKit(node1);
         registrar1 = new TestKit(node1);
-        registry1 = node1.actorOf(RpcRegistry.props(config(node1), invoker1.getRef(), registrar1.getRef()));
+        final var directory = folder.getRoot().toPath();
+        registry1 = node1.actorOf(RpcRegistry.props(config(node1), directory, invoker1.getRef(), registrar1.getRef()));
         invoker2 = new TestKit(node2);
         registrar2 = new TestKit(node2);
-        registry2 = node2.actorOf(RpcRegistry.props(config(node2), invoker2.getRef(), registrar2.getRef()));
+        registry2 = node2.actorOf(RpcRegistry.props(config(node2), directory, invoker2.getRef(), registrar2.getRef()));
         invoker3 = new TestKit(node3);
         registrar3 = new TestKit(node3);
-        registry3 = node3.actorOf(RpcRegistry.props(config(node3), invoker3.getRef(), registrar3.getRef()));
+        registry3 = node3.actorOf(RpcRegistry.props(config(node3), directory, invoker3.getRef(), registrar3.getRef()));
     }
 
     private static RemoteOpsProviderConfig config(final ActorSystem node) {
