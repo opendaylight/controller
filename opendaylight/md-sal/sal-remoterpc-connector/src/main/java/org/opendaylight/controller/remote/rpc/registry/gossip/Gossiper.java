@@ -18,8 +18,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorRefProvider;
@@ -30,7 +28,13 @@ import org.apache.pekko.actor.Props;
 import org.apache.pekko.cluster.Cluster;
 import org.apache.pekko.cluster.ClusterActorRefProvider;
 import org.apache.pekko.cluster.ClusterEvent;
+import org.apache.pekko.cluster.ClusterEvent.MemberEvent;
+import org.apache.pekko.cluster.ClusterEvent.MemberRemoved;
+import org.apache.pekko.cluster.ClusterEvent.MemberUp;
+import org.apache.pekko.cluster.ClusterEvent.ReachableMember;
+import org.apache.pekko.cluster.ClusterEvent.UnreachableMember;
 import org.apache.pekko.cluster.Member;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActorWithMetering;
 import org.opendaylight.controller.remote.rpc.RemoteOpsProviderConfig;
 
@@ -50,12 +54,15 @@ import org.opendaylight.controller.remote.rpc.RemoteOpsProviderConfig;
  * for update.
  */
 public class Gossiper extends AbstractUntypedActorWithMetering {
-    private static final Object GOSSIP_TICK = new Object() {
+    @NonNullByDefault
+    private static final class GossipTick {
+        static final GossipTick INSTANCE = new GossipTick();
+
         @Override
         public String toString() {
-            return "gossip tick";
+            return "GossipTick";
         }
-    };
+    }
 
     private final boolean autoStartGossipTicks;
     private final RemoteOpsProviderConfig config;
@@ -113,11 +120,8 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
 
         if (provider instanceof ClusterActorRefProvider) {
             cluster = Cluster.get(getContext().system());
-            cluster.subscribe(self(),
-                ClusterEvent.initialStateAsEvents(),
-                ClusterEvent.MemberEvent.class,
-                ClusterEvent.ReachableMember.class,
-                ClusterEvent.UnreachableMember.class);
+            cluster.subscribe(self(), ClusterEvent.initialStateAsEvents(),
+                MemberEvent.class, ReachableMember.class, UnreachableMember.class);
         }
 
         if (autoStartGossipTicks) {
@@ -129,7 +133,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
                 // target
                 self(),
                 // message
-                GOSSIP_TICK,
+                GossipTick.INSTANCE,
                 // execution context
                 getContext().dispatcher(),
                 // sender
@@ -149,32 +153,27 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
 
     @Override
     protected void handleReceive(final Object message) {
-        //Usually sent by self via gossip task defined above. But its not enforced.
-        //These ticks can be sent by another actor as well which is esp. useful while testing
-        if (GOSSIP_TICK.equals(message)) {
-            receiveGossipTick();
-        } else if (message instanceof GossipStatus status) {
-            // Message from remote gossiper with its bucket versions
-            receiveGossipStatus(status);
-        } else if (message instanceof GossipEnvelope envelope) {
-            // Message from remote gossiper with buckets. This is usually in response to GossipStatus
-            // message. The contained buckets are newer as determined by the remote gossiper by
-            // comparing the GossipStatus message with its local versions.
-            receiveGossip(envelope);
-        } else if (message instanceof ClusterEvent.MemberUp memberUp) {
-            receiveMemberUpOrReachable(memberUp.member());
-
-        } else if (message instanceof ClusterEvent.ReachableMember reachableMember) {
-            receiveMemberUpOrReachable(reachableMember.member());
-
-        } else if (message instanceof ClusterEvent.MemberRemoved memberRemoved) {
-            receiveMemberRemoveOrUnreachable(memberRemoved.member());
-
-        } else if (message instanceof ClusterEvent.UnreachableMember unreachableMember) {
-            receiveMemberRemoveOrUnreachable(unreachableMember.member());
-
-        } else {
-            unhandled(message);
+        switch (message) {
+            case GossipTick msg -> {
+                // Usually sent by self via gossip task defined above. But its not enforced.
+                // These ticks can be sent by another actor as well which is esp. useful while testing
+                receiveGossipTick();
+            }
+            case GossipStatus msg -> {
+                // Message from remote gossiper with its bucket versions
+                receiveGossipStatus(msg);
+            }
+            case GossipEnvelope msg -> {
+                // Message from remote gossiper with buckets. This is usually in response to GossipStatus
+                // message. The contained buckets are newer as determined by the remote gossiper by
+                // comparing the GossipStatus message with its local versions.
+                receiveGossip(msg);
+            }
+            case MemberUp msg -> receiveMemberUpOrReachable(msg.member());
+            case ReachableMember msg -> receiveMemberUpOrReachable(msg.member());
+            case MemberRemoved msg -> receiveMemberRemoveOrUnreachable(msg.member());
+            case UnreachableMember msg -> receiveMemberRemoveOrUnreachable(msg.member());
+            default -> unhandled(message);
         }
     }
 
@@ -238,16 +237,16 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
     void receiveGossipTick() {
         final Address address;
         switch (clusterMembers.size()) {
-            case 0:
-                //no members to send gossip status to
+            case 0 -> {
+                // no members to send gossip status to
                 return;
-            case 1:
+            }
+            case 1 ->
                 address = clusterMembers.get(0);
-                break;
-            default:
+            default -> {
                 final int randomIndex = ThreadLocalRandom.current().nextInt(0, clusterMembers.size());
                 address = clusterMembers.get(randomIndex);
-                break;
+            }
         }
 
         LOG.trace("Gossiping to [{}]", address);
@@ -272,28 +271,28 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
         // Don't accept messages from non-members
         if (peers.containsKey(status.from())) {
             // FIXME: sender should be part of GossipStatus
-            final ActorRef sender = getSender();
-            bucketStore.getBucketVersions(versions ->  processRemoteStatus(sender, status, versions));
+            final var sender = getSender();
+            bucketStore.getBucketVersions(versions -> processRemoteStatus(sender, status, versions));
         }
     }
 
     private void processRemoteStatus(final ActorRef remote, final GossipStatus status,
             final Map<Address, Long> localVersions) {
-        final Map<Address, Long> remoteVersions = status.versions();
+        final var remoteVersions = status.versions();
 
         //diff between remote list and local
-        final Set<Address> localIsOlder = new HashSet<>(remoteVersions.keySet());
+        final var localIsOlder = new HashSet<>(remoteVersions.keySet());
         localIsOlder.removeAll(localVersions.keySet());
 
         //diff between local list and remote
-        final Set<Address> localIsNewer = new HashSet<>(localVersions.keySet());
+        final var localIsNewer = new HashSet<>(localVersions.keySet());
         localIsNewer.removeAll(remoteVersions.keySet());
 
 
-        for (Entry<Address, Long> entry : remoteVersions.entrySet()) {
-            Address address = entry.getKey();
-            Long remoteVersion = entry.getValue();
-            Long localVersion = localVersions.get(address);
+        for (var entry : remoteVersions.entrySet()) {
+            final var address = entry.getKey();
+            final var remoteVersion = entry.getValue();
+            final var localVersion = localVersions.get(address);
             if (localVersion == null || remoteVersion == null) {
                 //this condition is taken care of by above diffs
                 continue;
@@ -372,7 +371,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
         clusterMembers.clear();
         peers.clear();
 
-        for (Address addr : members) {
+        for (var addr : members) {
             addPeer(addr);
         }
     }
