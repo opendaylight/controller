@@ -15,14 +15,15 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
-import org.apache.pekko.actor.Props;
 import org.apache.pekko.dispatch.Dispatchers;
 import org.apache.pekko.testkit.TestActorRef;
 import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.opendaylight.controller.remote.rpc.RemoteOpsProviderConfig;
 import org.opendaylight.controller.remote.rpc.registry.ActionRegistry;
 import org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreAccess;
@@ -33,11 +34,13 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.stmt.SchemaNodeIdentifier.Absolute;
 
 public class RemoteActionRegistryMXBeanImplTest {
-
     private static final QName LOCAL_QNAME = QName.create("base", "local");
     private static final QName REMOTE_QNAME = QName.create("base", "local");
     private static final Absolute LOCAL_SCHEMA_PATH = Absolute.of(LOCAL_QNAME);
     private static final Absolute REMOTE_SCHEMA_PATH = Absolute.of(REMOTE_QNAME);
+
+    @Rule
+    public TemporaryFolder folder = TemporaryFolder.builder().assureDeletion().build();
 
     private ActorSystem system;
     private TestActorRef<ActionRegistry> testActor;
@@ -59,7 +62,7 @@ public class RemoteActionRegistryMXBeanImplTest {
         final TestKit invoker = new TestKit(system);
         final TestKit registrar = new TestKit(system);
         final TestKit supervisor = new TestKit(system);
-        final Props props = ActionRegistry.props(config, invoker.getRef(), registrar.getRef())
+        final var props = ActionRegistry.props(config, folder.getRoot().toPath(), invoker.getRef(), registrar.getRef())
                 .withDispatcher(Dispatchers.DefaultDispatcherId());
         testActor = new TestActorRef<>(system, props, supervisor.getRef(), "testActor");
 

@@ -15,7 +15,6 @@ import static org.opendaylight.controller.remote.rpc.registry.gossip.BucketStore
 import static org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreAccess.Singletons.GET_BUCKET_VERSIONS;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.ConfigFactory;
 import java.time.Duration;
@@ -23,17 +22,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.actor.Address;
 import org.apache.pekko.cluster.Cluster;
-import org.apache.pekko.cluster.ClusterEvent.CurrentClusterState;
-import org.apache.pekko.cluster.Member;
 import org.apache.pekko.cluster.MemberStatus;
 import org.apache.pekko.cluster.UniqueAddress;
 import org.apache.pekko.testkit.javadsl.TestKit;
@@ -41,7 +38,9 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.opendaylight.controller.cluster.common.actor.AkkaConfigurationReader;
 import org.opendaylight.controller.remote.rpc.RemoteOpsProviderConfig;
 import org.opendaylight.controller.remote.rpc.registry.ActionRegistry.RemoteActionEndpoint;
@@ -62,6 +61,9 @@ public class ActionRegistryTest {
     private static ActorSystem node1;
     private static ActorSystem node2;
     private static ActorSystem node3;
+
+    @Rule
+    public TemporaryFolder folder = TemporaryFolder.builder().assureDeletion().build();
 
     private TestKit invoker1;
     private TestKit invoker2;
@@ -94,12 +96,14 @@ public class ActionRegistryTest {
     }
 
     static void waitForMembersUp(final ActorSystem node, final UniqueAddress... addresses) {
-        Set<UniqueAddress> otherMembersSet = Sets.newHashSet(addresses);
-        Stopwatch sw = Stopwatch.createStarted();
+        final var otherMembersSet = new HashSet<>(List.of(addresses));
+
+        // FIXME: use awaitility instead
+        final var sw = Stopwatch.createStarted();
         while (sw.elapsed(TimeUnit.SECONDS) <= 10) {
-            CurrentClusterState state = Cluster.get(node).state();
-            for (Member m : state.getMembers()) {
-                if (m.status() == MemberStatus.up() && otherMembersSet.remove(m.uniqueAddress())
+            final var state = Cluster.get(node).state();
+            for (var member : state.getMembers()) {
+                if (member.status() == MemberStatus.up() && otherMembersSet.remove(member.uniqueAddress())
                         && otherMembersSet.isEmpty()) {
                     return;
                 }
@@ -122,13 +126,17 @@ public class ActionRegistryTest {
     public void setup() {
         invoker1 = new TestKit(node1);
         registrar1 = new TestKit(node1);
-        registry1 = node1.actorOf(ActionRegistry.props(config(node1), invoker1.getRef(), registrar1.getRef()));
+        final var directory = folder.getRoot().toPath();
+        registry1 = node1.actorOf(ActionRegistry.props(config(node1), directory, invoker1.getRef(),
+            registrar1.getRef()));
         invoker2 = new TestKit(node2);
         registrar2 = new TestKit(node2);
-        registry2 = node2.actorOf(ActionRegistry.props(config(node2), invoker2.getRef(), registrar2.getRef()));
+        registry2 = node2.actorOf(ActionRegistry.props(config(node2), directory, invoker2.getRef(),
+            registrar2.getRef()));
         invoker3 = new TestKit(node3);
         registrar3 = new TestKit(node3);
-        registry3 = node3.actorOf(ActionRegistry.props(config(node3), invoker3.getRef(), registrar3.getRef()));
+        registry3 = node3.actorOf(ActionRegistry.props(config(node3), directory, invoker3.getRef(),
+            registrar3.getRef()));
     }
 
     private static RemoteOpsProviderConfig config(final ActorSystem node) {

@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.typesafe.config.ConfigFactory;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -25,6 +26,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.opendaylight.controller.remote.rpc.RemoteOpsProviderConfig;
 import org.opendaylight.controller.remote.rpc.TerminationMonitor;
 import org.slf4j.Logger;
@@ -46,9 +48,9 @@ class BucketStoreTest {
     private static final class TestingBucketStoreActor extends BucketStoreActor<TestBucketData> {
         private static final Logger LOG = LoggerFactory.getLogger(TestingBucketStoreActor.class);
 
-        TestingBucketStoreActor(final RemoteOpsProviderConfig config, final String persistenceId,
+        TestingBucketStoreActor(final RemoteOpsProviderConfig config, final Path directory, final String persistenceId,
                 final TestBucketData initialData) {
-            super(config, persistenceId, initialData);
+            super(config, directory, persistenceId, initialData);
         }
 
         @Override
@@ -69,6 +71,8 @@ class BucketStoreTest {
 
     private static ActorSystem system;
 
+    @TempDir
+    private Path directory;
     private BucketStoreActor<TestBucketData> store;
 
     @BeforeAll
@@ -86,7 +90,7 @@ class BucketStoreTest {
     void before() {
         final var props = Props.create(TestingBucketStoreActor.class,
             new RemoteOpsProviderConfig(system.settings().config()),
-            "testing-store", new TestBucketData());
+            directory, "testing-store", new TestBucketData());
         store = TestActorRef.<BucketStoreActor<TestBucketData>>create(system, props, "testStore").underlyingActor();
     }
 

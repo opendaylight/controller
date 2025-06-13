@@ -10,34 +10,42 @@ package org.opendaylight.controller.remote.rpc.registry.gossip;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Verify.verify;
 import static com.google.common.base.Verify.verifyNotNull;
+import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static java.nio.file.StandardOpenOption.SYNC;
+import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
+import static java.nio.file.StandardOpenOption.WRITE;
 import static java.util.Objects.requireNonNull;
-import static org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreAccess.Singletons.GET_ALL_BUCKETS;
-import static org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreAccess.Singletons.GET_BUCKET_VERSIONS;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.SetMultimap;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.pekko.actor.ActorRef;
-import org.apache.pekko.actor.ActorRefProvider;
 import org.apache.pekko.actor.Address;
-import org.apache.pekko.actor.PoisonPill;
 import org.apache.pekko.actor.Terminated;
 import org.apache.pekko.cluster.ClusterActorRefProvider;
 import org.apache.pekko.persistence.DeleteSnapshotsFailure;
 import org.apache.pekko.persistence.DeleteSnapshotsSuccess;
 import org.apache.pekko.persistence.RecoveryCompleted;
-import org.apache.pekko.persistence.SaveSnapshotFailure;
-import org.apache.pekko.persistence.SaveSnapshotSuccess;
 import org.apache.pekko.persistence.SnapshotOffer;
 import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActorWithMetering;
 import org.opendaylight.controller.remote.rpc.RemoteOpsProviderConfig;
+import org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreAccess.Singletons;
 import org.slf4j.Logger;
 
 /**
@@ -57,6 +65,8 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
         void accept(@NonNull BucketStoreActor<?> actor);
     }
 
+    private static final @NonNull Path INCARNATION_FILE = Path.of("incarnation-v1");
+
     /**
      * Buckets owned by other known nodes in the cluster.
      */
@@ -73,7 +83,8 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
      */
     private final SetMultimap<ActorRef, Address> watchedActors = HashMultimap.create(1, 1);
 
-    private final RemoteOpsProviderConfig config;
+    private final @NonNull RemoteOpsProviderConfig config;
+    private final @NonNull Path directory;
 
     /**
      * Cluster address for this node.
@@ -86,11 +97,13 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
     private LocalBucket<T> localBucket;
     private T initialData;
     private Integer incarnation;
-    private boolean persisting;
 
-    protected BucketStoreActor(final RemoteOpsProviderConfig config, final String persistenceId, final T initialData) {
+    @NonNullByDefault
+    protected BucketStoreActor(final RemoteOpsProviderConfig config, final Path directory, final String persistenceId,
+            final T initialData) {
         super(persistenceId);
         this.config = requireNonNull(config);
+        this.directory = directory.resolve(Path.of(persistenceId));
         this.initialData = requireNonNull(initialData);
     }
 
@@ -135,8 +148,16 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
     }
 
     @Override
-    public void preStart() {
-        ActorRefProvider provider = getContext().provider();
+    public void preStart() throws IOException {
+        // Ensure directory and try to load the incarnation
+        Files.createDirectories(directory);
+        try (var dis = new DataInputStream(Files.newInputStream(directory.resolve(INCARNATION_FILE)))) {
+            incarnation = dis.readInt();
+        } catch (NoSuchFileException e) {
+            log().debug("{}: no incarnation file found", persistenceId(), e);
+        }
+
+        final var provider = getContext().provider();
         selfAddress = provider.getDefaultAddress();
 
         if (provider instanceof ClusterActorRefProvider) {
@@ -146,24 +167,20 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
 
     @Override
     protected void handleCommand(final Object message) throws Exception {
-        if (GET_ALL_BUCKETS == message) {
-            // GetAllBuckets is used only in testing
-            getSender().tell(getAllBuckets(), self());
-            return;
-        }
-
-        if (persisting) {
-            handleSnapshotMessage(message);
-            return;
-        }
-
-        if (GET_BUCKET_VERSIONS == message) {
-            // FIXME: do we need to send ourselves?
-            getSender().tell(ImmutableMap.copyOf(versions), self());
-            return;
-        }
-
         switch (message) {
+            // FIXME: we should use direct values, but that translates to duplicate instanceof cases, which SpotBugs
+            //        does not like
+            case Singletons singletons -> {
+                switch (singletons) {
+                    case null -> throw new NullPointerException();
+                    case GET_ALL_BUCKETS ->
+                        // GetAllBuckets is used only in testing
+                        getSender().tell(getAllBuckets(), self());
+                    case GET_BUCKET_VERSIONS ->
+                        // FIXME: do we need to send ourselves?
+                        getSender().tell(ImmutableMap.copyOf(versions), self());
+                }
+            }
             case ExecuteInActor execute -> execute.accept(this);
             case Terminated terminated -> actorTerminated(terminated);
             case DeleteSnapshotsSuccess deleteSuccess ->
@@ -177,61 +194,51 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
         }
     }
 
-    private void handleSnapshotMessage(final Object message) {
-        switch (message) {
-            case SaveSnapshotFailure saveFailure -> {
-                log().error("{}: failed to persist state", persistenceId(), saveFailure.cause());
-                persisting = false;
-                self().tell(PoisonPill.getInstance(), ActorRef.noSender());
-            }
-            case SaveSnapshotSuccess saveSuccess -> {
-                log().debug("{}: got command: {}", persistenceId(), saveSuccess);
-                deleteSnapshots(new SnapshotSelectionCriteria(scala.Long.MaxValue(),
-                    saveSuccess.metadata().timestamp() - 1, 0L, 0L));
-                persisting = false;
-                unstash();
-            }
-            default -> {
-                log().debug("{}: stashing command {}", persistenceId(), message);
-                stash();
-            }
-        }
-    }
-
     @Override
-    protected final void handleRecover(final Object message) {
+    protected final void handleRecover(final Object message) throws IOException {
         switch (message) {
-            case RecoveryCompleted msg -> onRecoveryCompleted(msg);
-            case SnapshotOffer msg -> onSnapshotOffer(msg);
+            case RecoveryCompleted msg -> {
+                final var prev = incarnation;
+                final var current = prev != null ? prev + 1 : 0;
+                localBucket = new LocalBucket<>(current, initialData);
+                incarnation = current;
+                initialData = null;
+                persistIncarnation();
+                deleteSnapshots(SnapshotSelectionCriteria.create(Long.MAX_VALUE, Long.MAX_VALUE));
+            }
+            case SnapshotOffer msg -> {
+                incarnation = (Integer) msg.snapshot();
+                log().debug("{}: recovered Pekko incarnation {}", persistenceId(), incarnation);
+            }
             default -> log().warn("{}: ignoring recovery message {}", persistenceId(), message);
         }
     }
 
-    private void onRecoveryCompleted(final RecoveryCompleted msg) {
-        final var prev = incarnation;
-        final var current = prev != null ? prev + 1 : 0;
-        localBucket = new LocalBucket<>(current, initialData);
-        incarnation = current;
-        initialData = null;
-        persistIncarnation();
-    }
-
-    private void persistIncarnation() {
+    private void persistIncarnation() throws IOException {
         final var snapshot = verifyNotNull(incarnation);
         log().debug("{}: persisting new incarnation {}", persistenceId(), snapshot);
-        persisting = true;
-        super.saveSnapshot(snapshot);
+
+        final var tmpFile = Files.createTempFile(directory, INCARNATION_FILE.toString(), null);
+        try {
+            try (var dos = new DataOutputStream(Files.newOutputStream(tmpFile, SYNC, TRUNCATE_EXISTING, WRITE))) {
+                dos.writeInt(snapshot);
+            }
+            Files.move(tmpFile, directory.resolve(INCARNATION_FILE), ATOMIC_MOVE, REPLACE_EXISTING);
+        } finally {
+            try {
+                Files.deleteIfExists(tmpFile);
+            } catch (IOException e) {
+                log().warn("{}: failed to delete {}", persistenceId(), tmpFile);
+            }
+        }
+
+        log().debug("{}: new incarnation {} persisted", persistenceId(), snapshot);
     }
 
     @Override
     @Deprecated(since = "11.0.0", forRemoval = true)
     public final void saveSnapshot(final Object snapshot) {
         throw new UnsupportedOperationException();
-    }
-
-    private void onSnapshotOffer(final SnapshotOffer msg) {
-        incarnation = (Integer) msg.snapshot();
-        log().debug("{}: recovered incarnation {}", persistenceId(), incarnation);
     }
 
     protected final RemoteOpsProviderConfig getConfig() {
@@ -244,11 +251,15 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
         versions.put(selfAddress, local.getVersion());
 
         if (bumpIncarnation) {
-            log().debug("Version wrapped. incrementing incarnation");
+            log().debug("{}: Version wrapped. incrementing incarnation", persistenceId());
 
             verify(incarnation < Integer.MAX_VALUE, "Ran out of incarnations, cannot continue");
             incarnation = incarnation + 1;
-            persistIncarnation();
+            try {
+                persistIncarnation();
+            } catch (IOException e) {
+                throw new UncheckedIOException("Failed to persist incarnation", e);
+            }
         }
     }
 
@@ -401,11 +412,6 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
                 onBucketRemoved(addr, bucket);
             }
         }
-    }
-
-    @VisibleForTesting
-    protected boolean isPersisting() {
-        return persisting;
     }
 
     private LocalBucket<T> getLocalBucket() {

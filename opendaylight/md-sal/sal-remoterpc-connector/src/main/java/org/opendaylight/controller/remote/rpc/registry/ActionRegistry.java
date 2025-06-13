@@ -13,6 +13,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -43,9 +45,10 @@ public class ActionRegistry extends BucketStoreActor<ActionRoutingTable> {
 
     private RemoteActionRegistryMXBeanImpl mxBean;
 
-    public ActionRegistry(final RemoteOpsProviderConfig config, final ActorRef rpcInvoker,
+    public ActionRegistry(final RemoteOpsProviderConfig config, final Path directory, final ActorRef rpcInvoker,
                           final ActorRef rpcRegistrar) {
-        super(config, config.getActionRegistryPersistenceId(), new ActionRoutingTable(rpcInvoker, ImmutableSet.of()));
+        super(config, directory, config.getActionRegistryPersistenceId(),
+            new ActionRoutingTable(rpcInvoker, ImmutableSet.of()));
         this.rpcRegistrar = requireNonNull(rpcRegistrar);
     }
 
@@ -53,13 +56,14 @@ public class ActionRegistry extends BucketStoreActor<ActionRoutingTable> {
      * Create a new props instance for instantiating an ActionRegistry actor.
      *
      * @param config Provider configuration
+     * @param directory Persistence directory
      * @param opsRegistrar Local RPC provider interface, used to register routers to remote nodes
      * @param opsInvoker Actor handling RPC invocation requests from remote nodes
      * @return A new {@link Props} instance
      */
-    public static Props props(final RemoteOpsProviderConfig config, final ActorRef opsInvoker,
+    public static Props props(final RemoteOpsProviderConfig config, final Path directory, final ActorRef opsInvoker,
                               final ActorRef opsRegistrar) {
-        return Props.create(ActionRegistry.class, config, opsInvoker, opsRegistrar);
+        return Props.create(ActionRegistry.class, config, directory, opsInvoker, opsRegistrar);
     }
 
     @Override
@@ -68,7 +72,7 @@ public class ActionRegistry extends BucketStoreActor<ActionRoutingTable> {
     }
 
     @Override
-    public void preStart() {
+    public void preStart() throws IOException {
         super.preStart();
         mxBean = new RemoteActionRegistryMXBeanImpl(new BucketStoreAccess(self(), getContext().dispatcher(),
             getConfig().getAskDuration()), getConfig().getAskDuration());
