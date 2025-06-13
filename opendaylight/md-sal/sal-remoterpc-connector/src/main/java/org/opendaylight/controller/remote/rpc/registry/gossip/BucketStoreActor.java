@@ -18,12 +18,14 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.SetMultimap;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.pekko.actor.ActorRef;
-import org.apache.pekko.actor.ActorRefProvider;
 import org.apache.pekko.actor.Address;
 import org.apache.pekko.actor.PoisonPill;
 import org.apache.pekko.actor.Terminated;
@@ -36,6 +38,7 @@ import org.apache.pekko.persistence.SaveSnapshotSuccess;
 import org.apache.pekko.persistence.SnapshotOffer;
 import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActorWithMetering;
 import org.opendaylight.controller.remote.rpc.RemoteOpsProviderConfig;
 import org.slf4j.Logger;
@@ -73,7 +76,8 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
      */
     private final SetMultimap<ActorRef, Address> watchedActors = HashMultimap.create(1, 1);
 
-    private final RemoteOpsProviderConfig config;
+    private final @NonNull RemoteOpsProviderConfig config;
+    private final @NonNull Path directory;
 
     /**
      * Cluster address for this node.
@@ -88,9 +92,12 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
     private Integer incarnation;
     private boolean persisting;
 
-    protected BucketStoreActor(final RemoteOpsProviderConfig config, final String persistenceId, final T initialData) {
+    @NonNullByDefault
+    protected BucketStoreActor(final RemoteOpsProviderConfig config, final Path directory, final String persistenceId,
+            final T initialData) {
         super(persistenceId);
         this.config = requireNonNull(config);
+        this.directory = directory.resolve(Path.of(persistenceId));
         this.initialData = requireNonNull(initialData);
     }
 
@@ -135,8 +142,10 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
     }
 
     @Override
-    public void preStart() {
-        ActorRefProvider provider = getContext().provider();
+    public void preStart() throws IOException {
+        Files.createDirectories(directory);
+
+        final var provider = getContext().provider();
         selfAddress = provider.getDefaultAddress();
 
         if (provider instanceof ClusterActorRefProvider) {

@@ -14,6 +14,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -44,8 +46,9 @@ public class RpcRegistry extends BucketStoreActor<RoutingTable> {
     private final ActorRef rpcRegistrar;
     private RemoteRpcRegistryMXBeanImpl mxBean;
 
-    public RpcRegistry(final RemoteOpsProviderConfig config, final ActorRef rpcInvoker, final ActorRef rpcRegistrar) {
-        super(config, config.getRpcRegistryPersistenceId(), new RoutingTable(rpcInvoker, ImmutableSet.of()));
+    public RpcRegistry(final RemoteOpsProviderConfig config, final Path directory, final ActorRef rpcInvoker,
+            final ActorRef rpcRegistrar) {
+        super(config, directory, config.getRpcRegistryPersistenceId(), new RoutingTable(rpcInvoker, ImmutableSet.of()));
         this.rpcRegistrar = requireNonNull(rpcRegistrar);
     }
 
@@ -53,13 +56,14 @@ public class RpcRegistry extends BucketStoreActor<RoutingTable> {
      * Create a new props instance for instantiating an RpcRegistry actor.
      *
      * @param config Provider configuration
+     * @param directory Persistence directory
      * @param rpcRegistrar Local RPC provider interface, used to register routers to remote nodes
      * @param rpcInvoker Actor handling RPC invocation requests from remote nodes
      * @return A new {@link Props} instance
      */
-    public static Props props(final RemoteOpsProviderConfig config, final ActorRef rpcInvoker,
+    public static Props props(final RemoteOpsProviderConfig config, final Path directory, final ActorRef rpcInvoker,
                               final ActorRef rpcRegistrar) {
-        return Props.create(RpcRegistry.class, config, rpcInvoker, rpcRegistrar);
+        return Props.create(RpcRegistry.class, config, directory, rpcInvoker, rpcRegistrar);
     }
 
     @Override
@@ -68,7 +72,7 @@ public class RpcRegistry extends BucketStoreActor<RoutingTable> {
     }
 
     @Override
-    public void preStart() {
+    public void preStart() throws IOException {
         super.preStart();
         mxBean = new RemoteRpcRegistryMXBeanImpl(new BucketStoreAccess(self(), getContext().dispatcher(),
             getConfig().getAskDuration()), getConfig().getAskDuration());
