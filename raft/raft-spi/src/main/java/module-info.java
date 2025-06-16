@@ -11,6 +11,7 @@
 module org.opendaylight.raft.spi {
     exports org.opendaylight.raft.spi;
 
+    requires transitive io.netty.buffer;
     requires transitive org.opendaylight.raft.api;
     requires com.google.common;
     requires org.lz4.java;
