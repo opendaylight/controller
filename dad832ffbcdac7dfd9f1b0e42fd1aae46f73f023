@@ -16,6 +16,24 @@
       "message": "inherit the definition from bundle-parent instead",
       "revId": "dad832ffbcdac7dfd9f1b0e42fd1aae46f73f023",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c13ea6af_b178ac17",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2025-06-17T13:48:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba862a68_bde1c074",
+      "revId": "dad832ffbcdac7dfd9f1b0e42fd1aae46f73f023",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
