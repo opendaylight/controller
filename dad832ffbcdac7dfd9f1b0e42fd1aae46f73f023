@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ba862a68_bde1c074",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2025-06-17T11:09:43Z",
+      "side": 1,
+      "message": "inherit the definition from bundle-parent instead",
+      "revId": "dad832ffbcdac7dfd9f1b0e42fd1aae46f73f023",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
