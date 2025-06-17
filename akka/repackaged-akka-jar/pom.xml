@@ -11,16 +11,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.opendaylight.odlparent</groupId>
-        <artifactId>odlparent</artifactId>
-        <version>14.0.8</version>
-        <relativePath/>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>bundle-parent</artifactId>
+        <version>10.0.10-SNAPSHOT</version>
+        <relativePath>../../bundle-parent</relativePath>
     </parent>
 
-    <groupId>org.opendaylight.controller</groupId>
     <artifactId>repackaged-akka-jar</artifactId>
     <packaging>jar</packaging>
-    <version>10.0.10-SNAPSHOT</version>
     <name>${project.artifactId}</name>
 
     <properties>
