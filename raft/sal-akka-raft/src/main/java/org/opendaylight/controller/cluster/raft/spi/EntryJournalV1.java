@@ -28,6 +28,8 @@ import java.util.function.LongFunction;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.RaftActor;
+import org.opendaylight.controller.cluster.raft.ReplicatedLog.Recovery;
+import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.journal.FromByteBufMapper;
 import org.opendaylight.raft.journal.RaftJournal;
 import org.opendaylight.raft.journal.SegmentedRaftJournal;
@@ -436,6 +438,32 @@ public final class EntryJournalV1 implements EntryJournal, AutoCloseable {
     public void close() {
         entryJournal.close();
         metaJournal.close();
+    }
+
+    public void recoverTo(final Recovery recovery, final EntryInfo snapshotEntry) throws IOException {
+        final var mapper = new LogEntryReader(directory);
+        final var reader = entryJournal.openReader(replayFrom);
+
+        recovery.initiallizedPosition(snapshotEntry, replayFrom, applyTo);
+        var expectedIndex = snapshotEntry.index() + 1;
+
+        while (true) {
+            final var journalIndex = reader.nextIndex();
+            final var journalEntry = reader.tryNext(mapper);
+            if (journalEntry == null) {
+                recovery.finishRecovery();
+                return;
+            }
+            final var logEntry = journalEntry.toLogEntry();
+            final var entryIndex = logEntry.index();
+            if (entryIndex != expectedIndex) {
+                throw new IOException("Mismatched entry index=%s expecting %s at journalIndex=%s".formatted(
+                    entryIndex, expectedIndex, journalIndex));
+            }
+
+            recovery.recoverEntry(logEntry.term(), logEntry.command());
+            expectedIndex++;
+        }
     }
 
     /**
