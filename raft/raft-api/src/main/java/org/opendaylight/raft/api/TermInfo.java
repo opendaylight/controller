@@ -9,7 +9,6 @@ package org.opendaylight.raft.api;
 
 import java.io.ObjectStreamException;
 import java.io.Serializable;
-import javax.management.ConstructorParameters;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -34,7 +33,6 @@ public record TermInfo(long term, @Nullable String votedFor) implements Serializ
      * @param term election term
      * @param votedFor the member we have voted for, {@code null} if we have not voted for anyone
      */
-    @ConstructorParameters({"term", "votedFor"})
     public TermInfo {
         // Nothing else
     }

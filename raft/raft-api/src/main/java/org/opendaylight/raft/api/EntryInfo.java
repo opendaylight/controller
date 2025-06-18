@@ -9,7 +9,6 @@ package org.opendaylight.raft.api;
 
 import java.io.ObjectStreamException;
 import java.io.Serializable;
-import javax.management.ConstructorParameters;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -28,7 +27,6 @@ public record EntryInfo(long index, long term) implements EntryMeta, Serializabl
      * @param index log entry index
      * @param term log entry term
      */
-    @ConstructorParameters({"index", "term"})
     public EntryInfo {
         // Nothing else
     }
