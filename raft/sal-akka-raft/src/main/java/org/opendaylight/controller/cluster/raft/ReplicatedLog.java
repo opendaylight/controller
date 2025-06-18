@@ -17,7 +17,12 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.spi.EntryJournalV1;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
+import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
+import org.opendaylight.controller.cluster.raft.spi.StateMachineCommand;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
+import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.EntryMeta;
 
 /**
@@ -41,6 +46,72 @@ public interface ReplicatedLog {
         public StoredEntryMeta {
             requireNonNull(meta);
         }
+    }
+
+    /**
+     * Recovery bootstrap of a {@link ReplicatedLog}. This interface follows the builder pattern, but only very roughly:
+     * the order of invocation should match the definition order, as documented in the individual methods. The following
+     * is true when an instance is created:
+     * <ul>
+     *   <li>{@code commitIndex} is set to {@code -1}</li>
+     *   <li>{@code snapshotEntry} is set to {@code EntryInfo.of(commitIndex, -1)}</li>
+     *   <li>{@code journalIndex} is set to {@code 1}</li>
+     * </ul>
+     *
+     * <p>See {@link EntryJournalV1} for current {@code journalIndex} definition.
+     */
+    // FIXME: this interface should be used to instantiate ReplicatedLog and should be named 'Builder'
+    interface Recovery {
+        /**
+         * Initialize the log position. This consists of three things:
+         * <ol>
+         *   <li>the recovered snapshot position, i.e. the last entry included in recovered snapshot. This establishes
+         *       the first {@code commitIndex} we can roll back to without nuking persistence, as the corresponding
+         *       {@link StateSnapshot} is expected to be recovered from {@link SnapshotStore}</li>
+         *   <li>the {@code snapshotIndex} of the first journal entry. This corresponds to
+         *       {@code lastIncluded.index() + 1} and implementatiosn of this method are expected to track this
+         *       relationship, for purposes of {@link #recoverEntry(long, StateMachineCommand)}. The entries reported by
+         *       those methods have a linear relationship to the values set here</li>
+         *   <li>the {@code applyIndex}, which is the {@code journalIndex} of the last entry known to have been implied
+         *       to have {@code index <= commitIndex} and has successfully been applied to state. This is guaranteed to
+         *       be at least {@code journalIndex - 1}.
+         * </ol>
+         *
+         * <p>The implication of this method is that the first entry reported by
+         * {@link #recoverEntry(long, StateMachineCommand)} has:
+         * <ul>
+         *   <li>{@code index == lastIncluded.index() + 1}</li>
+         *   <li>{@code term >= lastIncluded.term()}</li>
+         *   <li>{@code journalIndex} correspoding to the value reported to this method</li>
+         * </ul>
+         *
+         * @param lastIncluded last entry included in the snapshot
+         * @param journalIndex the journal index of the first entry included in the journal, greater than zero.
+         */
+        // FIXME: RaftActorSnapshotCohort should be subservient to the ReplicatedLog implementation -- which probably
+        //        means this information should be provided along wiith StateSnapshot to the method producint a Recovery
+        //        instance
+        void initiallizedPosition(EntryInfo lastIncluded, long journalIndex, long applyIndex);
+
+        /**
+         * Recover a journaled entry. This consists of a RAFT term and the corresponding {@link StateMachineCommand}.
+         * Other metadata is derived from the invocation sequence of this method since last
+         * {@link #initiallizedPosition(EntryInfo, long, long)} invocation. {@code LogEntryMeta#index} starts at
+         * {@code lastIncluded.index + 1} and {@code journalIndex} is post-incremented after each invocation -- which is
+         * to say the first invocation implies the same {@code journalIndex} as the last
+         * {@link #initiallizedPosition(EntryInfo, long, long)} invocation.
+         *
+         * @param term the {@link LogEntry#term()}
+         * @param command the {@link LogEntry#command()}
+         */
+        // FIXME: provide (something like?) StreamSource instead of StateMachineCommand
+        void recoverEntry(long term, StateMachineCommand command);
+
+        /**
+         * Finish recovery.
+         */
+        // FIXME: rename to build() and return a ReplicatedLog
+        void finishRecovery();
     }
 
     /**

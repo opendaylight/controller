@@ -8,21 +8,61 @@
 package org.opendaylight.controller.cluster.raft.spi;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.opendaylight.controller.cluster.raft.MockCommand;
+import org.opendaylight.controller.cluster.raft.ReplicatedLog.Recovery;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.CompressionType;
 
 class EntryJournalTest {
+    private static final class TestRecovery implements Recovery {
+        List<LogEntry> entries = new ArrayList<>();
+        long recoveredIndex;
+        long recoveredApplyIndex;
+        EntryInfo recoveredSnapshot;
+        boolean initialized;
+        boolean finished;
+
+        private long nextIndex;
+
+        @Override
+        public void initiallizedPosition(EntryInfo lastIncluded, long journalIndex, long applyIndex) {
+            assertFalse(initialized);
+            assertFalse(finished);
+            assertNotNull(lastIncluded);
+            recoveredIndex = journalIndex;
+            recoveredSnapshot = lastIncluded;
+            recoveredApplyIndex = applyIndex;
+            nextIndex = lastIncluded.index() + 1;
+            initialized = true;
+        }
+
+        @Override
+        public void recoverEntry(long term, StateMachineCommand command) {
+            assertTrue(initialized);
+            assertFalse(finished);
+            entries.add(new DefaultLogEntry(nextIndex++, term, command));
+        }
+
+        @Override
+        public void finishRecovery() {
+            assertTrue(initialized);
+            assertFalse(finished);
+            finished = true;
+        }
+    }
 
     @TempDir
     private Path directory;
