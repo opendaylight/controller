@@ -26,12 +26,12 @@ import org.opendaylight.yangtools.concepts.Immutable;
  * Interface for RAFT log entry persistence implementations. This is rather opinionated take with {@link RaftJournal}
  * acting as the backing implementation.
  */
-public interface EntryJournal {
+@NonNullByDefault
+public interface EntryJournal extends AutoCloseable {
     /**
      * A handle to a {@link LogEntry} stored in the journal. It exposes the entry's {@link EntryMeta} information and
      * provides access to the serialized form of {@link LogEntry#command()} via {@link #openCommandStream()}.
      */
-    @NonNullByDefault
     abstract class JournalEntry implements EntryMeta, Immutable {
         private final long index;
         private final long term;
@@ -129,4 +129,35 @@ public interface EntryJournal {
      * {@return a new {@link Reader}}
      */
     Reader openReader();
+
+    /**
+     * Append an entry at the current {@code journalIndex}.
+     *
+     * @param entry the journal entry to append
+     * @return the {@code journalIndex} of the appended entry
+     * @throws IOException if an I/O error occurs
+     */
+    long appendEntry(LogEntry entry) throws IOException;
+
+    /**
+     * Discard all entries starting from the beginning of journal up to, but excluding, {@code firstRetainedIndex}. The
+     * journal will be updated such that the next {@link #openReader()} invocation will result in the reader reporting
+     * {@code firstRetainedIndex} as the initial {@link Reader#nextJournalIndex()}.
+     *
+     * @param firstRetainedIndex the index of the first entry to retain
+     * @throws IOException if an I/O error occurs
+     */
+    void discardHead(long firstRetainedIndex) throws IOException;
+
+    /**
+     * Discard all entries starting from {@code firstRemovedIndex}. The journal will be positioned such that the next
+     * {@link #appendEntry(LogEntry)} will return {@code firstRemovedIndex}.
+     *
+     * @param firstRemovedIndex the index of the first entry to remove
+     * @throws IOException if an I/O error occurs
+     */
+    void discardTail(long firstRemovedIndex) throws IOException;
+
+    @Override
+    void close();
 }
