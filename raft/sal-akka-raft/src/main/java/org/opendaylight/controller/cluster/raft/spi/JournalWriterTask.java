@@ -18,12 +18,14 @@ import java.io.UncheckedIOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Queue;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReentrantLock;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
+import org.opendaylight.raft.spi.AveragingProgressTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,10 +85,17 @@ public final class JournalWriterTask implements Runnable {
     private static final Logger LOG = LoggerFactory.getLogger(JournalWriterTask.class);
 
     private final AtomicReference<@Nullable CancellationException> aborted = new AtomicReference<>();
-    private final ArrayBlockingQueue<Action> queue;
     private final ExecuteInSelfActor actor;
-    private final EntryJournalV1 journal;
     private final Stopwatch sw;
+
+    // Journal and its locking
+    private final ReentrantLock journalLock = new ReentrantLock();
+    private final EntryJournalV1 journal;
+
+    // Incoming queue and its locking/accounding
+    private final ReentrantLock queueLock = new ReentrantLock();
+    private final ArrayDeque<Action> queue = new ArrayDeque<>();
+    private final AveragingProgressTracker tracker;
 
     // TODO: also maintain the following metrics to provide SegmentedJournalActor parity
     //    // Tracks the time it took us to write a batch of messages
@@ -109,10 +118,10 @@ public final class JournalWriterTask implements Runnable {
     @VisibleForTesting
     public JournalWriterTask(final Ticker ticker, final ExecuteInSelfActor actor, final EntryJournalV1 journal,
             final int queueCapacity) {
+        sw = Stopwatch.createUnstarted(ticker);
         this.actor = requireNonNull(actor);
         this.journal = requireNonNull(journal);
-        queue = new ArrayBlockingQueue<>(queueCapacity);
-        sw = Stopwatch.createUnstarted(ticker);
+        tracker = new AveragingProgressTracker(queueCapacity);
     }
 
     private String memberId() {
@@ -120,23 +129,50 @@ public final class JournalWriterTask implements Runnable {
     }
 
     public void appendEntry(final LogEntry entry, final RaftCallback<Long> callback) throws InterruptedException {
-        queue.put(new JournalAppendEntry(entry, callback));
+        queueLock.lock();
+        try {
+            queue.put(new JournalAppendEntry(entry, callback));
+        } finally {
+            queueLock.unlock();
+        }
+
     }
 
     public void discardHead(final long journalIndex) throws InterruptedException {
-        queue.put(new JournalDiscardHead(journalIndex));
+        equeueAndWait(new JournalDiscardHead(journalIndex));
     }
 
     public void discardTail(final long journalIndex) throws InterruptedException {
-        queue.put(new JournalDiscardTail(journalIndex));
+        equeueAndWait(new JournalDiscardTail(journalIndex));
     }
 
     public void setApplyTo(final long journalIndex) throws InterruptedException {
-        queue.put(new JournalSetApplyTo(journalIndex));
+        equeueAndWait(new JournalSetApplyTo(journalIndex));
     }
 
-    public void terminate() throws InterruptedException {
-        queue.put(TerminateAction.INSTANCE);
+    public void terminate() {
+        queueLock.lock();
+        try {
+            queue.add(TerminateAction.INSTANCE);
+        } finally {
+            queueLock.unlock();
+        }
+    }
+
+    private void equeueAndWait(final JournalAction<?> action) throws InterruptedException {
+        final var now = System.nanoTime();
+        final long delay;
+        queueLock.lock();
+        try {
+            queue.add(action);
+            delay = tracker.openTask(now);
+        } finally {
+            queueLock.unlock();
+        }
+
+        // FIXME: add delay capping
+
+        TimeUnit.NANOSECONDS.sleep(delay);
     }
 
     @Override
@@ -151,7 +187,14 @@ public final class JournalWriterTask implements Runnable {
             sw.start();
 
             // Attempt to drain all elements first
-            queue.drainTo(batch);
+            queueLock.lock();
+            try {
+                batch.addAll(queue);
+                queue.clear();
+            } finally {
+                queueLock.unlock();
+            }
+
             if (batch.isEmpty()) {
                 // Nothing to do: wait for some work to show up
                 LOG.debug("{}: waiting for ", memberId());
