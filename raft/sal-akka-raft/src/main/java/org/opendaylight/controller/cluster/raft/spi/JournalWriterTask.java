@@ -18,12 +18,15 @@ import java.io.UncheckedIOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Queue;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
+import org.opendaylight.raft.spi.AveragingProgressTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +42,8 @@ public final class JournalWriterTask implements Runnable {
     }
 
     private sealed interface JournalAction<T> extends Action {
+
+        long enqueued();
 
         RaftCallback<T> callback();
     }
@@ -61,32 +66,45 @@ public final class JournalWriterTask implements Runnable {
         }
     }
 
-    private record JournalAppendEntry(LogEntry entry, RaftCallback<Long> callback) implements JournalAction<Long> {
+    private record JournalAppendEntry(long enqueued, LogEntry entry, RaftCallback<Long> callback)
+            implements JournalAction<Long> {
         JournalAppendEntry {
             requireNonNull(entry);
             requireNonNull(callback);
         }
     }
 
-    private record JournalDiscardHead(long journalIndex) implements UncheckedJournalAction {
+    private record JournalDiscardHead(long enqueued, long journalIndex) implements UncheckedJournalAction {
         // Nothing else
     }
 
-    private record JournalDiscardTail(long journalIndex) implements UncheckedJournalAction {
+    private record JournalDiscardTail(long enqueued, long journalIndex) implements UncheckedJournalAction {
         // Nothing else
     }
 
-    private record JournalSetApplyTo(long journalIndex) implements UncheckedJournalAction {
+    private record JournalSetApplyTo(long enqueued, long journalIndex) implements UncheckedJournalAction {
+        // Nothing else
+    }
+
+    private record ClosedTask(long enqueuedTicks, long execNanos) {
         // Nothing else
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(JournalWriterTask.class);
 
     private final AtomicReference<@Nullable CancellationException> aborted = new AtomicReference<>();
-    private final ArrayBlockingQueue<Action> queue;
     private final ExecuteInSelfActor actor;
-    private final EntryJournalV1 journal;
     private final Ticker ticker;
+
+    // Journal and its locking
+    private final ReentrantLock journalLock = new ReentrantLock();
+    private final EntryJournalV1 journal;
+
+    // Incoming queue and its locking/accounding
+    private final ReentrantLock queueLock = new ReentrantLock();
+    private final Condition notEmpty = queueLock.newCondition();
+    private final ArrayDeque<Action> queue = new ArrayDeque<>();
+    private final AveragingProgressTracker tracker;
 
     // TODO: also maintain the following metrics to provide SegmentedJournalActor parity
     //    // Tracks the time it took us to write a batch of messages
@@ -112,7 +130,18 @@ public final class JournalWriterTask implements Runnable {
         this.ticker = requireNonNull(ticker);
         this.actor = requireNonNull(actor);
         this.journal = requireNonNull(journal);
-        queue = new ArrayBlockingQueue<>(queueCapacity);
+        tracker = new AveragingProgressTracker(queueCapacity);
+
+        // TODO: the equivalent of:
+        //        final var registry = MetricsReporter.getInstance(MeteringBehavior.DOMAIN).getMetricsRegistry();
+        //        final var actorName = self().path().parent().toStringWithoutAddress() + '/' + directory.getFileName();
+        //
+        //        batchWriteTime = registry.timer(MetricRegistry.name(actorName, "batchWriteTime"));
+        //        messageWriteCount = registry.meter(MetricRegistry.name(actorName, "messageWriteCount"));
+        //        messageSize = registry.histogram(MetricRegistry.name(actorName, "messageSize"));
+        //        flushBytes = registry.histogram(MetricRegistry.name(actorName, "flushBytes"));
+        //        flushMessages = registry.histogram(MetricRegistry.name(actorName, "flushMessages"));
+        //        flushTime = registry.timer(MetricRegistry.name(actorName, "flushTime"));
     }
 
     private String memberId() {
@@ -120,23 +149,59 @@ public final class JournalWriterTask implements Runnable {
     }
 
     public void appendEntry(final LogEntry entry, final RaftCallback<Long> callback) throws InterruptedException {
-        queue.put(new JournalAppendEntry(entry, callback));
+        enqueueAndWait(new JournalAppendEntry(ticker.read(), entry, callback));
     }
 
     public void discardHead(final long journalIndex) throws InterruptedException {
-        queue.put(new JournalDiscardHead(journalIndex));
+        enqueueAndWait(new JournalDiscardHead(ticker.read(), journalIndex));
     }
 
     public void discardTail(final long journalIndex) throws InterruptedException {
-        queue.put(new JournalDiscardTail(journalIndex));
+        enqueueAndWait(new JournalDiscardTail(ticker.read(), journalIndex));
     }
 
     public void setApplyTo(final long journalIndex) throws InterruptedException {
-        queue.put(new JournalSetApplyTo(journalIndex));
+        enqueueAndWait(new JournalSetApplyTo(ticker.read(), journalIndex));
     }
 
-    public void terminate() throws InterruptedException {
-        queue.put(TerminateAction.INSTANCE);
+    public void cancelAndTerminate() {
+        // Interject into processing first and defer to processAndTerminate
+        terminate();
+        processAndTerminate();
+    }
+
+    public void processAndTerminate() {
+        queueLock.lock();
+        try {
+            enqueue(TerminateAction.INSTANCE);
+        } finally {
+            queueLock.unlock();
+        }
+    }
+
+    // Called with queueLock held
+    private void enqueue(final Action action) {
+        final var signalNotEmpty = queue.isEmpty();
+        queue.addLast(action);
+        if (signalNotEmpty) {
+            // There is always at most one waiter
+            notEmpty.signal();
+        }
+    }
+
+    private void enqueueAndWait(final JournalAction<?> action) throws InterruptedException {
+        final long delay;
+        queueLock.lock();
+        try {
+            enqueue(action);
+            delay = tracker.openTask(action.enqueued());
+        } finally {
+            queueLock.unlock();
+        }
+
+        // FIXME: add delay capping
+
+        TimeUnit.NANOSECONDS.sleep(delay);
     }
 
     @Override
@@ -145,27 +210,30 @@ public final class JournalWriterTask implements Runnable {
 
         // Reused between loops
         final var batch = new ArrayDeque<Action>();
-        final var sw = Stopwatch.createUnstarted(ticker);
+        final var sw = Stopwatch.createStarted(ticker);
 
         boolean keepRunning;
         do {
-            sw.start();
-
             // Attempt to drain all elements first
-            queue.drainTo(batch);
-            if (batch.isEmpty()) {
-                // Nothing to do: wait for some work to show up
-                LOG.debug("{}: waiting for ", memberId());
-                final Action first;
-                try {
-                    first = queue.take();
-                } catch (InterruptedException e) {
-                    // Should never happen, really
-                    throw new IllegalStateException("interrupted while waiting, waiting for next command", e);
-                }
+            queueLock.lock();
+            try {
+                while (true) {
+                    if (!queue.isEmpty()) {
+                        batch.addAll(queue);
+                        queue.clear();
+                        break;
+                    }
 
-                // We have an entry, let's process it
-                batch.add(first);
+                    LOG.debug("{}: waiting for ", memberId());
+                    try {
+                        notEmpty.await();
+                    } catch (InterruptedException e) {
+                        // Should never happen, really
+                        throw new IllegalStateException("interrupted while waiting, waiting for next command", e);
+                    }
+                }
+            } finally {
+                queueLock.unlock();
             }
 
             final var batchSize = batch.size();
@@ -183,6 +251,8 @@ public final class JournalWriterTask implements Runnable {
 
     @VisibleForTesting
     boolean runBatch(final Queue<Action> actions) {
+        final var transmitTicks = ticker.read();
+        final var closedTasks = new ArrayList<ClosedTask>(actions.size());
         final var completions = new ArrayList<Runnable>();
         boolean keepRunning = true;
 
@@ -193,38 +263,59 @@ public final class JournalWriterTask implements Runnable {
         //        - a TerminateAction should cancel all remaining entries
         // FIXME: separately, the batch should have a mass 'flush()' operation
 
-        // Not iteration as we want to free entries as soon as possible
-        for (var nextAction = actions.poll(); nextAction != null; nextAction = actions.poll()) {
-            switch (nextAction) {
-                case JournalAction<?> action -> {
-                    // propagate cancellation if set
-                    final var cancellation = aborted.get();
-                    if (cancellation != null) {
-                        completions.add(failAction(action, cancellation));
-                        continue;
-                    }
-
-                    try {
-                        switch (action) {
-                            case JournalAppendEntry(var entry, var callback) -> {
-                                final long journalIndex = journal.nextToWrite();
-                                // FIXME: record returned size to messageSize, which really is 'serialized command size'
-                                journal.appendEntry(entry);
-                                completions.add(() -> callback.invoke(null, journalIndex));
-                            }
-                            case JournalDiscardHead(var journalIndex) -> journal.discardHead(journalIndex);
-                            case JournalDiscardTail(var journalIndex) -> journal.discardTail(journalIndex);
-                            case JournalSetApplyTo(var journalIndex) -> journal.setApplyTo(journalIndex);
+        journalLock.lock();
+        try {
+            // Not iteration as we want to free entries as soon as possible
+            for (var nextAction = actions.poll(); nextAction != null; nextAction = actions.poll()) {
+                switch (nextAction) {
+                    case JournalAction<?> action -> {
+                        // propagate cancellation if set
+                        final var cancellation = aborted.get();
+                        if (cancellation != null) {
+                            completions.add(failAction(action, cancellation));
+                            closedTasks.add(new ClosedTask(action.enqueued(), 0));
+                            continue;
                         }
-                    } catch (IOException e) {
-                        completions.add(abortAndFailAction(action, e));
+
+                        final var execStarted = ticker.read();
+                        try {
+                            switch (action) {
+                                case JournalAppendEntry appendEntry -> {
+                                    final long journalIndex = journal.nextToWrite();
+                                    // FIXME: record returned size to messageSize, which really is
+                                    // 'serialized command size'
+                                    journal.appendEntry(appendEntry.entry);
+                                    completions.add(() -> appendEntry.callback.invoke(null, journalIndex));
+                                }
+                                case JournalDiscardHead discardHead -> journal.discardHead(discardHead.journalIndex);
+                                case JournalDiscardTail discardTail -> journal.discardTail(discardTail.journalIndex);
+                                case JournalSetApplyTo setApplyTo -> journal.setApplyTo(setApplyTo.journalIndex);
+                            }
+                        } catch (IOException e) {
+                            completions.add(abortAndFailAction(action, e));
+                        }
+
+                        closedTasks.add(new ClosedTask(action.enqueued(), ticker.read() - execStarted));
                     }
-                }
-                case TerminateAction action -> {
-                    aborted.compareAndSet(null, new CancellationException("No further operations allowed"));
-                    keepRunning = false;
+                    case TerminateAction action -> {
+                        terminate();
+                        keepRunning = false;
+                    }
                 }
             }
+        } finally {
+            journalLock.unlock();
+        }
+
+        // Update tasks statistics: note we do a bulk update
+        final var finished = ticker.read();
+        queueLock.lock();
+        try {
+            for (var closed : closedTasks) {
+                tracker.closeTask(finished, closed.enqueuedTicks, transmitTicks, closed.execNanos);
+            }
+        } finally {
+            queueLock.unlock();
         }
 
         if (!completions.isEmpty()) {
@@ -234,12 +325,19 @@ public final class JournalWriterTask implements Runnable {
         return keepRunning;
     }
 
-    private void abort() {
-        aborted.compareAndSet(null, new CancellationException("Previous operation failed"));
+    /**
+     * Terminates all further processing with immediate effect a side-effect of this task being terminated.
+     */
+    private void terminate() {
+        abort(new CancellationException("No further operations allowed"));
+    }
+
+    private void abort(final CancellationException cause) {
+        aborted.compareAndSet(null, requireNonNull(cause));
     }
 
     private Runnable abortAndFailAction(final JournalAction<?> action, final Exception cause) {
-        abort();
+        abort(new CancellationException("Previous operation failed"));
         return failAction(action, cause);
     }
 

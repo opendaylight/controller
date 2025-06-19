@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.nio.file.Path;
@@ -55,9 +56,8 @@ class JournalWriterTaskTest {
     }
 
     @Test
-    void terminateCausesSubsequentCancellation() throws Exception {
-        task.terminate();
-
+    void processAndTerminateCausesSubsequentCancellation() throws Exception {
+        task.processAndTerminate();
         task.appendEntry(new DefaultLogEntry(1, 1, new MockCommand("")), longCallback);
         task.run();
 
@@ -69,12 +69,40 @@ class JournalWriterTaskTest {
 
     @Test
     @Timeout(value = 1)
-    void terminateExitsThread() throws Exception {
+    void processAndTerminateExitsThread() throws Exception {
         final var thread = Thread.ofVirtual().start(task);
-        task.terminate();
+        task.processAndTerminate();
         thread.join();
         assertFalse(thread.isAlive());
     }
+
+    @Test
+    void cancelAndTerminateCausesImmediateCancellation() throws Exception {
+        task.appendEntry(new DefaultLogEntry(1, 1, new MockCommand("first")), longCallback);
+        task.cancelAndTerminate();
+        task.appendEntry(new DefaultLogEntry(2, 1, new MockCommand("second")), longCallback);
+        task.run();
+
+        assertEquals(2, runActor());
+        verify(longCallback, times(2)).invoke(exCaptor.capture(), isNull());
+        exCaptor.getAllValues().forEach(ex -> {
+            assertInstanceOf(CancellationException.class, ex);
+            assertEquals("No further operations allowed", ex.getMessage());
+        });
+    }
+
+    @Test
+    @Timeout(value = 1)
+    void cancelAndTerminateExitsThread() throws Exception {
+        final var thread = Thread.ofVirtual().start(task);
+        task.processAndTerminate();
+        thread.join();
+        assertFalse(thread.isAlive());
+    }
+
+
+
+
 
     private int runActor() {
         final var ret = actorMessages.size();
