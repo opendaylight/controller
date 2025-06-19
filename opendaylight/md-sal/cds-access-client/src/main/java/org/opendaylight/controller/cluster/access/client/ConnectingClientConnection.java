@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.access.client;
 
 import java.util.Optional;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
+import org.opendaylight.raft.spi.AveragingProgressTracker;
 
 public final class ConnectingClientConnection<T extends BackendInfo> extends AbstractClientConnection<T> {
     /**

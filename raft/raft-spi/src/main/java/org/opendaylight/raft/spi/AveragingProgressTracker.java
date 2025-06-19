@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.access.client;
+package org.opendaylight.raft.spi;
 
 import java.util.concurrent.TimeUnit;
 
@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Vratko Polak
  */
-final class AveragingProgressTracker extends ProgressTracker {
+public final class AveragingProgressTracker extends ProgressTracker {
     private static final long DEFAULT_TICKS_PER_TASK = TimeUnit.MILLISECONDS.toNanos(500);
 
     /**
@@ -56,7 +56,7 @@ final class AveragingProgressTracker extends ProgressTracker {
      *
      * @param limit of open tasks to avoid exceeding
      */
-    AveragingProgressTracker(final long limit) {
+    public AveragingProgressTracker(final long limit) {
         this(limit, DEFAULT_TICKS_PER_TASK);
     }
 
@@ -69,7 +69,7 @@ final class AveragingProgressTracker extends ProgressTracker {
      * @param limit of open tasks to avoid exceeding
      * @param now tick number corresponding to caller's present
      */
-    AveragingProgressTracker(final ProgressTracker oldTracker, final long limit, final long now) {
+    public AveragingProgressTracker(final ProgressTracker oldTracker, final long limit, final long now) {
         super(oldTracker, now);
         tasksOpenLimit = limit;
         noDelayThreshold = limit / 2;
@@ -83,7 +83,7 @@ final class AveragingProgressTracker extends ProgressTracker {
      * @param oldTracker the tracker used for the previously used backend
      * @param now tick number corresponding to caller's present
      */
-    AveragingProgressTracker(final AveragingProgressTracker oldTracker, final long now) {
+    public AveragingProgressTracker(final AveragingProgressTracker oldTracker, final long now) {
         this(oldTracker, oldTracker.tasksOpenLimit, now);
     }
 

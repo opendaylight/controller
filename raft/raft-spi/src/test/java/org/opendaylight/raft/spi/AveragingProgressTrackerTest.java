@@ -5,33 +5,24 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.access.client;
+package org.opendaylight.raft.spi;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.common.testing.FakeTicker;
 import java.util.concurrent.TimeUnit;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class AveragingProgressTrackerTest {
+class AveragingProgressTrackerTest {
     private static final long CHECKER = TimeUnit.MILLISECONDS.toNanos(500);
     private static final long TICKER_STEP = 100;
 
-    private FakeTicker ticker;
-
-    private AveragingProgressTracker averagingProgressTracker;
-
-    @Before
-    public void setUp() {
-        ticker = new FakeTicker();
-        ticker.setAutoIncrementStep(TICKER_STEP, TimeUnit.MILLISECONDS);
-        averagingProgressTracker = new AveragingProgressTracker(3);
-    }
+    private final FakeTicker ticker = new FakeTicker().setAutoIncrementStep(TICKER_STEP, TimeUnit.MILLISECONDS);
+    private final AveragingProgressTracker averagingProgressTracker = new AveragingProgressTracker(3);
 
     @Test
-    public void estimateIsolatedDelayTest() {
+    void estimateIsolatedDelayTest() {
         long time = ticker.read();
         assertEquals(0, averagingProgressTracker.estimateIsolatedDelay(time));
 
@@ -62,5 +53,4 @@ public class AveragingProgressTrackerTest {
 
         assertEquals(0, averagingProgressTracker.estimateIsolatedDelay(ticker.read()));
     }
-
 }
