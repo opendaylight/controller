@@ -92,13 +92,25 @@ public final class EntryJournalV1 implements EntryJournal, AutoCloseable {
         static final WriteResult INSTANCE = new NoResult();
     }
 
-    private static final class InlineResult implements WriteResult {
-        static final WriteResult INSTANCE = new InlineResult();
+    private sealed interface DoneResult extends WriteResult {
+
+        long bodySize();
     }
 
-    private record FileResult(TransientFile file) implements WriteResult {
+    private record InlineResult(long bodySize) implements DoneResult {
+        InlineResult {
+            if (bodySize < 0) {
+                throw new IllegalArgumentException("Bad body size" + bodySize);
+            }
+        }
+    }
+
+    private record FileResult(TransientFile file, long bodySize) implements DoneResult {
         FileResult {
             requireNonNull(file);
+            if (bodySize < 0) {
+                throw new IllegalArgumentException("Bad body size" + bodySize);
+            }
         }
     }
 
@@ -227,12 +239,14 @@ public final class EntryJournalV1 implements EntryJournal, AutoCloseable {
 
             // Write the body out
             final TransientFile bodyFile;
+            final long bodySize;
             try (var out = new BufThenFileOutputStream(directory, buf, JOURNAL_INLINE_ENTRY_SIZE - headerSize)) {
                 try (var oos = new ObjectOutputStream(compression.encodeOutput(out))) {
                     oos.writeObject(obj.command().toSerialForm());
                 }
 
                 bodyFile = out.file();
+                bodySize = out.size();
             }
 
             if (bodyFile != null) {
@@ -240,9 +254,9 @@ public final class EntryJournalV1 implements EntryJournal, AutoCloseable {
                     case LZ4 -> HDR_FC;
                     case NONE -> HDR_FU;
                 });
-                result = new FileResult(bodyFile);
+                result = new FileResult(bodyFile, bodySize);
             } else {
-                result = InlineResult.INSTANCE;
+                result = new InlineResult(bodySize);
             }
             return true;
         }
@@ -445,6 +459,10 @@ public final class EntryJournalV1 implements EntryJournal, AutoCloseable {
         };
     }
 
+    public long nextToWrite() {
+        return entryJournal.writer().nextIndex();
+    }
+
     @Override
     public long appendEntry(final LogEntry entry) throws IOException {
         final var writer = entryJournal.writer();
@@ -452,11 +470,9 @@ public final class EntryJournalV1 implements EntryJournal, AutoCloseable {
         final var mapper = new LogEntryWriter();
         writer.append(mapper, entry);
 
-        switch (mapper.result) {
-            case InlineResult inline -> {
-                // No-op
-            }
-            case FileResult(var file) -> {
+        final var ret = switch (mapper.result) {
+            case InlineResult(var bodySize) -> bodySize;
+            case FileResult(var file, var bodySize) -> {
                 try {
                     Files.move(file.path(), directory.resolve(ENTRY_FILE_NAME.apply(journalIndex)),
                         ATOMIC_MOVE, REPLACE_EXISTING);
@@ -464,14 +480,15 @@ public final class EntryJournalV1 implements EntryJournal, AutoCloseable {
                     file.delete();
                 }
                 fileEntries.add(journalIndex);
+                yield bodySize;
             }
             // Internal error, modeled for non-nullness
             case NoResult no -> throw new IOException("Failed to write entry");
-        }
+        };
 
         // FIXME: defer flush
         writer.flush();
-        return journalIndex;
+        return ret;
     }
 
     @Override

@@ -134,7 +134,7 @@ public interface EntryJournal extends AutoCloseable {
      * Append an entry at the current {@code journalIndex}.
      *
      * @param entry the journal entry to append
-     * @return the {@code journalIndex} of the appended entry
+     * @return the serialized size of {@link LogEntry#command()}
      * @throws IOException if an I/O error occurs
      */
     long appendEntry(LogEntry entry) throws IOException;
