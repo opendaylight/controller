@@ -11,6 +11,7 @@ import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
@@ -29,7 +30,6 @@ import java.util.function.LongFunction;
 import java.util.function.LongPredicate;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.raft.journal.FromByteBufMapper;
 import org.opendaylight.raft.journal.RaftJournal;
 import org.opendaylight.raft.journal.SegmentedRaftJournal;
@@ -79,7 +79,7 @@ public final class EntryJournalV1 implements EntryJournal, AutoCloseable {
                 throw new IllegalArgumentException("replayFrom needs to be positive, not " + replayFrom);
             }
             if (applyTo < 0) {
-                throw new IllegalArgumentException("replayFrom needs to be non-negative, not " + replayFrom);
+                throw new IllegalArgumentException("applyTo needs to be non-negative, not " + replayFrom);
             }
         }
     }
@@ -377,7 +377,7 @@ public final class EntryJournalV1 implements EntryJournal, AutoCloseable {
             .withStorageLevel(mapped ? StorageLevel.MAPPED : StorageLevel.DISK)
             .build();
 
-        try (var reader = openReader(directory, journal, replayFrom)) {
+        try (var reader = openReader(journal)) {
             while (true) {
                 final var journalIndex = reader.nextJournalIndex();
                 final var journalEntry = reader.nextEntry();
@@ -404,16 +404,26 @@ public final class EntryJournalV1 implements EntryJournal, AutoCloseable {
         return memberId;
     }
 
+    // FIXME: commitJournalIndex()
     public long applyTo() {
         return applyTo;
     }
 
-    @Override
-    public Reader openReader() {
-        return openReader(directory, entryJournal, replayFrom);
+    public void setApplyTo(final long newApplyTo) throws IOException {
+        if (newApplyTo < 0) {
+            throw new IOException("Bad applyTo index " + newApplyTo);
+        }
+        applyTo = newApplyTo;
+        persistMeta();
     }
 
-    private static Reader openReader(final Path directory, final RaftJournal journal, final long replayFrom) {
+    @Override
+    public Reader openReader() {
+        return openReader(entryJournal);
+    }
+
+    // Split out for reuse during initialization
+    private Reader openReader(final RaftJournal journal) {
         final var mapper = new LogEntryReader(directory);
         final var reader = journal.openReader(replayFrom);
 
@@ -436,18 +446,7 @@ public final class EntryJournalV1 implements EntryJournal, AutoCloseable {
     }
 
     @Override
-    public void close() {
-        entryJournal.close();
-        metaJournal.close();
-    }
-
-    /**
-     * Persists an entry to the applicable journal synchronously. The contract is that the callback will be invoked
-     * before {@link RaftActor} sees any other message.
-     *
-     * @param entry the journal entry to persist
-     */
-    public long persistEntry(final LogEntry entry) throws IOException {
+    public long appendEntry(final LogEntry entry) throws IOException {
         final var writer = entryJournal.writer();
         final var journalIndex = writer.nextIndex();
         final var mapper = new LogEntryWriter();
@@ -475,52 +474,56 @@ public final class EntryJournalV1 implements EntryJournal, AutoCloseable {
         return journalIndex;
     }
 
-    /**
-     * Discard all entries starting from {@code newJournalIndex}. The journal will be positioned such that the next
-     * {@link #persistEntry(LogEntry)} will return {@code newJournalIndex}.
-     *
-     * @param newJournalIndex the new journalIndex
-     * @throws IOException if an I/O error occurs
-     */
-    public void resetTo(long newJournalIndex) throws IOException {
-        if (newJournalIndex < 1) {
-            throw new IllegalArgumentException("Bad journal index " + newJournalIndex);
+    @Override
+    public void discardHead(final long firstRetainedIndex) throws IOException {
+        if (firstRetainedIndex < 1) {
+            throw new IOException("Bad journal index " + firstRetainedIndex);
         }
-        if (replayFrom > newJournalIndex) {
-            throw new IllegalArgumentException(
-                "Journal index " + newJournalIndex + " violates replayFrom=" + replayFrom);
+        if (firstRetainedIndex <= replayFrom) {
+            LOG.debug("{}: first entry {} already includes {}", memberId, replayFrom, firstRetainedIndex);
+            return;
+        }
+
+        replayFrom = firstRetainedIndex;
+        persistMeta();
+        entryJournal.writer().commit(firstRetainedIndex);
+        entryJournal.compact(firstRetainedIndex);
+        removeFiles(fileEntries.iterator(), idx -> idx >= firstRetainedIndex);
+    }
+
+    @Override
+    public void discardTail(long firstRemovedIndex) throws IOException {
+        if (firstRemovedIndex < 1) {
+            throw new IOException("Bad journal index " + firstRemovedIndex);
+        }
+        if (firstRemovedIndex < replayFrom) {
+            throw new IOException("First available entry is " + replayFrom + ", cannot discard tail starting at "
+                + firstRemovedIndex);
         }
 
         // Trim the journal
-        entryJournal.writer().reset(newJournalIndex);
+        entryJournal.writer().reset(firstRemovedIndex);
 
         // Trim applyTo if needed
-        if (applyTo >= newJournalIndex) {
-            applyTo = newJournalIndex - 1;
+        if (applyTo >= firstRemovedIndex) {
+            applyTo = firstRemovedIndex - 1;
             persistMeta();
         }
 
         // Remove any files
-        removeFiles(fileEntries.descendingIterator(), idx -> idx < newJournalIndex);
+        removeFiles(fileEntries.descendingIterator(), idx -> idx < firstRemovedIndex);
     }
 
-    public void setApplyTo(final long newApplyTo) throws IOException {
-        if (newApplyTo < 0) {
-            throw new IllegalArgumentException("Bad applyTo index " + newApplyTo);
-        }
-        applyTo = newApplyTo;
-        persistMeta();
+    @Override
+    public void close() {
+        entryJournal.close();
+        metaJournal.close();
+        LOG.debug("{}: journal closed", memberId);
     }
 
-    public void setReplayFrom(final long newReplayFrom) throws IOException {
-        if (replayFrom > newReplayFrom) {
-            throw new IllegalArgumentException("Cannot move replayFrom from " + replayFrom + " to " + newReplayFrom);
-        }
-        replayFrom = newReplayFrom;
-        persistMeta();
-        entryJournal.writer().commit(newReplayFrom);
-        entryJournal.compact(newReplayFrom);
-        removeFiles(fileEntries.iterator(), idx -> idx >= newReplayFrom);
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this).add("memberId", memberId).toString();
     }
 
     private void persistMeta() throws IOException {

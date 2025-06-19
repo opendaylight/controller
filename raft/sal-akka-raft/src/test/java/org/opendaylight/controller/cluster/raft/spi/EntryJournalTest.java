@@ -51,12 +51,12 @@ class EntryJournalTest {
         final var entry1 = new DefaultLogEntry(3, 3, new MockCommand(""));
         final var entry2 = new DefaultLogEntry(4, 3, new MockCommand("CAFEBABE".repeat(256 * 1024)));
 
-        assertEquals(1, journal.persistEntry(entry1));
-        assertEquals(2, journal.persistEntry(entry2));
+        assertEquals(1, journal.appendEntry(entry1));
+        assertEquals(2, journal.appendEntry(entry2));
 
         journal.setApplyTo(2);
         assertEquals(2, journal.applyTo());
-        journal.setReplayFrom(1);
+        journal.discardHead(1);
         journal.close();
 
         assertTrue(Files.notExists(directory.resolve("entry-v1-0000000000000001")));
@@ -87,7 +87,7 @@ class EntryJournalTest {
         journal = new EntryJournalV1("test", directory, CompressionType.LZ4, false);
 
         final var entry = new DefaultLogEntry(4, 3, new MockCommand("CAFEBABE".repeat(256 * 1024)));
-        assertEquals(1, journal.persistEntry(entry));
+        assertEquals(1, journal.appendEntry(entry));
 
         assertTrue(Files.notExists(directory.resolve("entry-v1-0000000000000001")));
 
