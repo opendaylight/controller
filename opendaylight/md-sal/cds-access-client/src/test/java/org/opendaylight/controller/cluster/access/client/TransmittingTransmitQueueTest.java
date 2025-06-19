@@ -25,15 +25,15 @@ import static org.opendaylight.controller.cluster.access.client.ConnectionEntryM
 
 import com.google.common.base.Ticker;
 import com.google.common.collect.Collections2;
-import com.google.common.collect.ImmutableList;
 import com.google.common.testing.FakeTicker;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 import org.junit.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.commands.ModifyTransactionRequestBuilder;
 import org.opendaylight.controller.cluster.access.commands.TransactionPurgeRequest;
@@ -42,35 +42,35 @@ import org.opendaylight.controller.cluster.access.concepts.FailureEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.RequestEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
-import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.SuccessEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.messaging.MessageSlicer;
 import org.opendaylight.controller.cluster.messaging.SliceOptions;
 
-public class TransmittingTransmitQueueTest extends AbstractTransmitQueueTest<TransmitQueue.Transmitting> {
+@ExtendWith(MockitoExtension.class)
+class TransmittingTransmitQueueTest extends AbstractTransmitQueueTest<TransmitQueue.Transmitting> {
+    @Mock
+    private MessageSlicer mockMessageSlicer;
 
     private BackendInfo backendInfo;
-    private final MessageSlicer mockMessageSlicer = mock(MessageSlicer.class);
 
     private static long now() {
         return Ticker.systemTicker().read();
     }
 
     @Override
-    protected int getMaxInFlightMessages() {
+    int getMaxInFlightMessages() {
         return backendInfo.getMaxMessages();
     }
 
     @Override
-    protected TransmitQueue.Transmitting createQueue() {
-        doReturn(false).when(mockMessageSlicer).slice(any());
+    TransmitQueue.Transmitting createQueue() {
         backendInfo = new BackendInfo(probe.ref(), "test", 0L, ABIVersion.current(), 3);
         return new TransmitQueue.Transmitting(new TransmitQueue.Halted(0), 0, backendInfo, now(), mockMessageSlicer);
     }
 
     @Test
-    public void testComplete() {
+    void testComplete() {
         final long sequence1 = 0L;
         final long sequence2 = 1L;
         final var request1 = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, sequence1, probe.ref());
@@ -102,19 +102,19 @@ public class TransmittingTransmitQueueTest extends AbstractTransmitQueueTest<Tra
     }
 
     @Test
-    public void testEnqueueCanTransmit() {
-        final Request<?, ?> request = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 0L, probe.ref());
-        final Consumer<Response<?, ?>> callback = createConsumerMock();
+    void testEnqueueCanTransmit() {
+        final var request = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 0L, probe.ref());
+        final var callback = createConsumerMock();
         final long now = now();
         queue.enqueueOrForward(new ConnectionEntry(request, callback, now), now);
-        final RequestEnvelope requestEnvelope = probe.expectMsgClass(RequestEnvelope.class);
+        final var requestEnvelope = probe.expectMsgClass(RequestEnvelope.class);
         assertEquals(request, requestEnvelope.getMessage());
     }
 
     @Test
-    public void testEnqueueBackendFull() {
-        final Request<?, ?> request = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 0L, probe.ref());
-        final Consumer<Response<?, ?>> callback = createConsumerMock();
+    void testEnqueueBackendFull() {
+        final var request = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 0L, probe.ref());
+        final var callback = createConsumerMock();
         final long now = now();
         final int sentMessages = getMaxInFlightMessages() + 1;
         for (int i = 0; i < sentMessages; i++) {
@@ -124,21 +124,21 @@ public class TransmittingTransmitQueueTest extends AbstractTransmitQueueTest<Tra
             probe.expectMsgClass(RequestEnvelope.class);
         }
         probe.expectNoMessage();
-        final Collection<ConnectionEntry> entries = queue.drain();
+        final var entries = queue.drain();
         assertEquals(sentMessages, entries.size());
         assertThat(entries, everyItem(entryWithRequest(request)));
     }
 
     @Test
     @Override
-    public void testCanTransmitCount() {
+    void testCanTransmitCount() {
         assertTrue(queue.canTransmitCount(getMaxInFlightMessages() - 1) > 0);
         assertFalse(queue.canTransmitCount(getMaxInFlightMessages()) > 0);
     }
 
     @Test
     @Override
-    public void testTransmit() {
+    void testTransmit() {
         final var request1 = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 0L, probe.ref());
         final var callback = createConsumerMock();
         final long now = now();
@@ -160,12 +160,12 @@ public class TransmittingTransmitQueueTest extends AbstractTransmitQueueTest<Tra
     }
 
     @Test
-    public void testSetForwarder() {
+    void testSetForwarder() {
         final var ticker = new FakeTicker().setAutoIncrementStep(1, TimeUnit.MICROSECONDS);
-        final Request<?, ?> request = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 0L, probe.ref());
-        final Consumer<Response<?, ?>> callback = createConsumerMock();
-        final ConnectionEntry entry = new ConnectionEntry(request, callback, ticker.read());
-        final ReconnectForwarder forwarder = mock(ReconnectForwarder.class);
+        final var request = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 0L, probe.ref());
+        final var callback = createConsumerMock();
+        final var entry = new ConnectionEntry(request, callback, ticker.read());
+        final var forwarder = mock(ReconnectForwarder.class);
         queue.setForwarder(forwarder, ticker.read());
         final long secondEnqueueNow = ticker.read();
         queue.enqueueOrForward(entry, secondEnqueueNow);
@@ -173,15 +173,15 @@ public class TransmittingTransmitQueueTest extends AbstractTransmitQueueTest<Tra
     }
 
     @Test
-    public void testCompleteOrdering() {
-        final Request<?, ?> req0 = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 0L, probe.ref());
-        final Request<?, ?> req1 = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 1L, probe.ref());
-        final Request<?, ?> req2 = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 2L, probe.ref());
-        final Request<?, ?> req3 = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 3L, probe.ref());
-        final Request<?, ?> req4 = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 4L, probe.ref());
-        final Request<?, ?> req5 = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 5L, probe.ref());
-        final Request<?, ?> req6 = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 6L, probe.ref());
-        final Consumer<Response<?, ?>> callback = createConsumerMock();
+    void testCompleteOrdering() {
+        final var req0 = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 0L, probe.ref());
+        final var req1 = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 1L, probe.ref());
+        final var req2 = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 2L, probe.ref());
+        final var req3 = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 3L, probe.ref());
+        final var req4 = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 4L, probe.ref());
+        final var req5 = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 5L, probe.ref());
+        final var req6 = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 6L, probe.ref());
+        final var callback = createConsumerMock();
 
         // Fill the queue up to capacity + 1
         queue.enqueueOrForward(new ConnectionEntry(req0, callback, 0), 0);
@@ -223,7 +223,7 @@ public class TransmittingTransmitQueueTest extends AbstractTransmitQueueTest<Tra
     }
 
     @Test
-    public void testRequestSlicingOnTransmit() {
+    void testRequestSlicingOnTransmit() {
         doReturn(true).when(mockMessageSlicer).slice(any());
 
         final var request = new ModifyTransactionRequestBuilder(TRANSACTION_IDENTIFIER, probe.ref())
@@ -244,7 +244,7 @@ public class TransmittingTransmitQueueTest extends AbstractTransmitQueueTest<Tra
     }
 
     @Test
-    public void testSlicingFailureOnTransmit() {
+    void testSlicingFailureOnTransmit() {
         doAnswer(invocation -> {
             invocation.<SliceOptions>getArgument(0).getOnFailureCallback().accept(new Exception("mock"));
             return Boolean.FALSE;
@@ -262,45 +262,39 @@ public class TransmittingTransmitQueueTest extends AbstractTransmitQueueTest<Tra
     }
 
     @Test
-    public void testSlicedRequestOnComplete() {
+    void testSlicedRequestOnComplete() {
         doReturn(true).when(mockMessageSlicer).slice(any());
 
-        ModifyTransactionRequestBuilder reqBuilder = new ModifyTransactionRequestBuilder(
-                TRANSACTION_IDENTIFIER, probe.ref());
-        reqBuilder.setSequence(0L);
-        final Request<?, ?> request = reqBuilder.build();
+        final var request = new ModifyTransactionRequestBuilder(TRANSACTION_IDENTIFIER, probe.ref())
+            .setSequence(0L)
+            .build();
 
         final long now = now();
-        final Consumer<Response<?, ?>> mockConsumer = createConsumerMock();
+        final var mockConsumer = createConsumerMock();
         queue.enqueueOrForward(new ConnectionEntry(request, mockConsumer, now), now);
 
-        ArgumentCaptor<SliceOptions> sliceOptions = ArgumentCaptor.forClass(SliceOptions.class);
+        final var sliceOptions = ArgumentCaptor.forClass(SliceOptions.class);
         verify(mockMessageSlicer).slice(sliceOptions.capture());
-        assertTrue(sliceOptions.getValue().getMessage() instanceof RequestEnvelope);
+        final var requestEnvelope = assertInstanceOf(RequestEnvelope.class, sliceOptions.getValue().getMessage());
 
-        final Request<?, ?> request2 = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 1L, probe.ref());
+        final var request2 = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 1L, probe.ref());
         queue.enqueueOrForward(new ConnectionEntry(request2, mockConsumer, now), now);
         verifyNoMoreInteractions(mockMessageSlicer);
         probe.expectNoMessage();
 
-        RequestEnvelope requestEnvelope = (RequestEnvelope) sliceOptions.getValue().getMessage();
         queue.complete(new FailureEnvelope(request.toRequestFailure(mock(RequestException.class)),
                 requestEnvelope.getSessionId(), requestEnvelope.getTxSequence(), 0), 0);
 
-        requestEnvelope = probe.expectMsgClass(RequestEnvelope.class);
-        assertEquals(request2, requestEnvelope.getMessage());
+        assertEquals(request2, probe.expectMsgClass(RequestEnvelope.class).getMessage());
 
-        final Request<?, ?> request3 = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 3L, probe.ref());
+        final var request3 = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 3L, probe.ref());
         queue.enqueueOrForward(new ConnectionEntry(request3, mockConsumer, now), now);
 
-        requestEnvelope = probe.expectMsgClass(RequestEnvelope.class);
-        assertEquals(request3, requestEnvelope.getMessage());
+        assertEquals(request3, probe.expectMsgClass(RequestEnvelope.class).getMessage());
     }
 
     private static void assertEqualRequests(final Collection<? extends ConnectionEntry> queue,
             final Request<?, ?>... requests) {
-        final List<Request<?, ?>> queued = ImmutableList.copyOf(Collections2.transform(queue,
-            ConnectionEntry::getRequest));
-        assertEquals(Arrays.asList(requests), queued);
+        assertEquals(List.of(requests), List.copyOf(Collections2.transform(queue, ConnectionEntry::getRequest)));
     }
 }

@@ -9,22 +9,21 @@ package org.opendaylight.controller.cluster.access.client;
 
 import static org.hamcrest.CoreMatchers.everyItem;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.opendaylight.controller.cluster.access.client.ConnectionEntryMatcher.entryWithRequest;
 
 import com.google.common.base.Ticker;
-import java.util.Collection;
 import java.util.function.Consumer;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.testkit.TestProbe;
 import org.apache.pekko.testkit.javadsl.TestKit;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.access.commands.TransactionPurgeRequest;
 import org.opendaylight.controller.cluster.access.commands.TransactionPurgeResponse;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
@@ -37,61 +36,62 @@ import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.SuccessEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
-public abstract class AbstractTransmitQueueTest<T extends TransmitQueue> {
-
+abstract class AbstractTransmitQueueTest<T extends TransmitQueue> {
     private static final FrontendIdentifier FRONTEND =
             FrontendIdentifier.create(MemberName.forName("test"), FrontendType.forName("type-1"));
     private static final ClientIdentifier CLIENT = ClientIdentifier.create(FRONTEND, 0);
-    protected static final LocalHistoryIdentifier HISTORY = new LocalHistoryIdentifier(CLIENT, 0);
-    protected static final TransactionIdentifier TRANSACTION_IDENTIFIER = new TransactionIdentifier(HISTORY, 0);
-    protected T queue;
-    protected ActorSystem system;
-    protected TestProbe probe;
 
-    protected abstract int getMaxInFlightMessages();
+    static final LocalHistoryIdentifier HISTORY = new LocalHistoryIdentifier(CLIENT, 0);
+    static final TransactionIdentifier TRANSACTION_IDENTIFIER = new TransactionIdentifier(HISTORY, 0);
 
-    protected abstract T createQueue();
+    T queue;
+    ActorSystem system;
+    TestProbe probe;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    final void beforeEach() {
         system = ActorSystem.apply();
         probe = new TestProbe(system);
         queue = createQueue();
     }
 
-    @After
-    public void tearDown() {
+    abstract int getMaxInFlightMessages();
+
+    abstract T createQueue();
+
+    @AfterEach
+    final void afterEach() {
         TestKit.shutdownActorSystem(system);
     }
 
     @Test
-    public abstract void testCanTransmitCount();
-
-    @Test(expected = UnsupportedOperationException.class)
-    public abstract void testTransmit();
+    abstract void testCanTransmitCount();
 
     @Test
-    public void testAsIterable() {
-        final Request<?, ?> request = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 0L, probe.ref());
-        final Consumer<Response<?, ?>> callback = createConsumerMock();
+    abstract void testTransmit();
+
+    @Test
+    final void testAsIterable() {
+        final var request = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 0L, probe.ref());
+        final var callback = createConsumerMock();
         final long now = Ticker.systemTicker().read();
         final int sentMessages = getMaxInFlightMessages() + 1;
         for (int i = 0; i < sentMessages; i++) {
             queue.enqueueOrForward(new ConnectionEntry(request, callback, now), now);
         }
-        final Collection<ConnectionEntry> entries = queue.drain();
+        final var entries = queue.drain();
         assertEquals(sentMessages, entries.size());
         assertThat(entries, everyItem(entryWithRequest(request)));
     }
 
     @Test
-    public void testTicksStalling() {
+    final void testTicksStalling() {
         final long now = Ticker.systemTicker().read();
         assertEquals(0, queue.ticksStalling(now));
     }
 
     @Test
-    public void testCompleteReponseNotMatchingRequest() {
+    final void testCompleteReponseNotMatchingRequest() {
         final long requestSequence = 0L;
         final long txSequence = 0L;
         final long sessionId = 0L;
@@ -121,7 +121,7 @@ public abstract class AbstractTransmitQueueTest<T extends TransmitQueue> {
     }
 
     @Test
-    public void testIsEmpty() {
+    final void testIsEmpty() {
         assertTrue(queue.isEmpty());
         final Request<?, ?> request = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 0L, probe.ref());
         final Consumer<Response<?, ?>> callback = createConsumerMock();
@@ -131,7 +131,7 @@ public abstract class AbstractTransmitQueueTest<T extends TransmitQueue> {
     }
 
     @Test
-    public void testPeek() {
+    final void testPeek() {
         final Request<?, ?> request1 = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 0L, probe.ref());
         final Request<?, ?> request2 = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 1L, probe.ref());
         final Consumer<Response<?, ?>> callback = createConsumerMock();
@@ -144,7 +144,7 @@ public abstract class AbstractTransmitQueueTest<T extends TransmitQueue> {
     }
 
     @Test
-    public void testPoison() {
+    final  void testPoison() {
         final Request<?, ?> request = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 0L, probe.ref());
         final Consumer<Response<?, ?>> callback = createConsumerMock();
         final long now = Ticker.systemTicker().read();
@@ -153,7 +153,7 @@ public abstract class AbstractTransmitQueueTest<T extends TransmitQueue> {
     }
 
     @SuppressWarnings("unchecked")
-    protected static Consumer<Response<?, ?>> createConsumerMock() {
+    static final Consumer<Response<?, ?>> createConsumerMock() {
         return mock(Consumer.class);
     }
 }

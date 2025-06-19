@@ -7,40 +7,37 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import com.google.common.base.Ticker;
-import java.util.function.Consumer;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.access.commands.TransactionPurgeRequest;
-import org.opendaylight.controller.cluster.access.concepts.Request;
-import org.opendaylight.controller.cluster.access.concepts.Response;
 
-public class HaltedTransmitQueueTest extends AbstractTransmitQueueTest<TransmitQueue.Halted> {
-
+class HaltedTransmitQueueTest extends AbstractTransmitQueueTest<TransmitQueue.Halted> {
     @Override
-    protected int getMaxInFlightMessages() {
+    int getMaxInFlightMessages() {
         return 0;
     }
 
     @Override
-    protected TransmitQueue.Halted createQueue() {
+    TransmitQueue.Halted createQueue() {
         return new TransmitQueue.Halted(0);
     }
 
     @Test
     @Override
-    public void testCanTransmitCount() {
-        Assert.assertFalse(queue.canTransmitCount(0) > 0);
+    void testCanTransmitCount() {
+        assertThat(queue.canTransmitCount(0)).isNotPositive();
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test
     @Override
-    public void testTransmit() {
-        final Request<?, ?> request = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 0L, probe.ref());
-        final Consumer<Response<?, ?>> callback = createConsumerMock();
+    void testTransmit() {
+        final var request = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 0L, probe.ref());
+        final var callback = createConsumerMock();
         final long now = Ticker.systemTicker().read();
-        final ConnectionEntry entry = new ConnectionEntry(request, callback, now);
-        queue.transmit(entry, now);
+        final var entry = new ConnectionEntry(request, callback, now);
+        assertThrows(UnsupportedOperationException.class, () -> queue.transmit(entry, now));
     }
-
 }
