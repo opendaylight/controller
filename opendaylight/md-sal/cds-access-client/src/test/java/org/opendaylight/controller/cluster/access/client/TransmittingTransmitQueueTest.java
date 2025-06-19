@@ -9,9 +9,12 @@ package org.opendaylight.controller.cluster.access.client;
 
 import static org.hamcrest.CoreMatchers.everyItem;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
@@ -27,7 +30,6 @@ import com.google.common.testing.FakeTicker;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import org.junit.Test;
@@ -40,7 +42,6 @@ import org.opendaylight.controller.cluster.access.concepts.FailureEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.RequestEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
-import org.opendaylight.controller.cluster.access.concepts.RequestSuccess;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.SuccessEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -72,30 +73,29 @@ public class TransmittingTransmitQueueTest extends AbstractTransmitQueueTest<Tra
     public void testComplete() {
         final long sequence1 = 0L;
         final long sequence2 = 1L;
-        final Request<?, ?> request1 = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, sequence1, probe.ref());
-        final TransactionIdentifier transactionIdentifier2 = new TransactionIdentifier(HISTORY, 1L);
-        final Request<?, ?> request2 = new TransactionPurgeRequest(transactionIdentifier2, sequence2, probe.ref());
-        final Consumer<Response<?, ?>> callback1 = createConsumerMock();
-        final Consumer<Response<?, ?>> callback2 = createConsumerMock();
+        final var request1 = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, sequence1, probe.ref());
+        final var transactionIdentifier2 = new TransactionIdentifier(HISTORY, 1L);
+        final var request2 = new TransactionPurgeRequest(transactionIdentifier2, sequence2, probe.ref());
+        final var callback1 = createConsumerMock();
+        final var callback2 = createConsumerMock();
         final long now1 = now();
         final long now2 = now();
         //enqueue 2 entries
         queue.enqueueOrForward(new ConnectionEntry(request1, callback1, now1), now1);
         queue.enqueueOrForward(new ConnectionEntry(request2, callback2, now2), now2);
-        final RequestSuccess<?, ?> success1 = new TransactionPurgeResponse(TRANSACTION_IDENTIFIER, sequence1);
-        final RequestSuccess<?, ?> success2 = new TransactionPurgeResponse(transactionIdentifier2, sequence2);
+        final var success1 = new TransactionPurgeResponse(TRANSACTION_IDENTIFIER, sequence1);
+        final var success2 = new TransactionPurgeResponse(transactionIdentifier2, sequence2);
         //complete entries in different order
-        final Optional<TransmittedConnectionEntry> completed2 =
-                queue.complete(new SuccessEnvelope(success2, 0L, sequence2, 1L), now2);
-        final Optional<TransmittedConnectionEntry> completed1 =
-                queue.complete(new SuccessEnvelope(success1, 0L, sequence1, 1L), now1);
+        final var transmittedEntry2 = queue.complete(new SuccessEnvelope(success2, 0L, sequence2, 1L), now2);
+        assertNotNull(transmittedEntry2);
+        final var transmittedEntry1 = queue.complete(new SuccessEnvelope(success1, 0L, sequence1, 1L), now1);
+        assertNotNull(transmittedEntry1);
+
         //check first entry
-        final TransmittedConnectionEntry transmittedEntry1 = completed1.orElseThrow(AssertionError::new);
         assertEquals(transmittedEntry1.getRequest(), request1);
         assertEquals(transmittedEntry1.getTxSequence(), sequence1);
         assertEquals(transmittedEntry1.getCallback(), callback1);
         //check second entry
-        final TransmittedConnectionEntry transmittedEntry2 = completed2.orElseThrow(AssertionError::new);
         assertEquals(transmittedEntry2.getRequest(), request2);
         assertEquals(transmittedEntry2.getTxSequence(), sequence2);
         assertEquals(transmittedEntry2.getCallback(), callback2);
@@ -139,28 +139,29 @@ public class TransmittingTransmitQueueTest extends AbstractTransmitQueueTest<Tra
     @Test
     @Override
     public void testTransmit() {
-        final Request<?, ?> request = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 0L, probe.ref());
-        final Consumer<Response<?, ?>> callback = createConsumerMock();
+        final var request1 = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 0L, probe.ref());
+        final var callback = createConsumerMock();
         final long now = now();
-        final ConnectionEntry entry = new ConnectionEntry(request, callback, now);
+        final var entry = new ConnectionEntry(request1, callback, now);
 
-        Optional<TransmittedConnectionEntry> transmitted = queue.transmit(entry, now);
-        assertTrue(transmitted.isPresent());
-        assertEquals(request, transmitted.orElseThrow().getRequest());
-        assertEquals(callback, transmitted.orElseThrow().getCallback());
+        var transmitted = queue.transmit(entry, now);
+        assertNotNull(transmitted);
+        assertEquals(request1, transmitted.getRequest());
+        assertEquals(callback, transmitted.getCallback());
 
-        final RequestEnvelope requestEnvelope = probe.expectMsgClass(RequestEnvelope.class);
-        assertEquals(request, requestEnvelope.getMessage());
+        final var requestEnvelope = probe.expectMsgClass(RequestEnvelope.class);
+        assertEquals(request1, requestEnvelope.getMessage());
 
-        transmitted = queue.transmit(new ConnectionEntry(new TransactionPurgeRequest(
-                TRANSACTION_IDENTIFIER, 1L, probe.ref()), callback, now), now);
-        assertTrue(transmitted.isPresent());
+        final var request2 = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 1L, probe.ref());
+        transmitted = queue.transmit(new ConnectionEntry(request2, callback, now), now);
+        assertNotNull(transmitted);
+        assertEquals(request2, transmitted.getRequest());
+        assertEquals(callback, transmitted.getCallback());
     }
 
     @Test
     public void testSetForwarder() {
-        final FakeTicker ticker = new FakeTicker();
-        ticker.setAutoIncrementStep(1, TimeUnit.MICROSECONDS);
+        final var ticker = new FakeTicker().setAutoIncrementStep(1, TimeUnit.MICROSECONDS);
         final Request<?, ?> request = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 0L, probe.ref());
         final Consumer<Response<?, ?>> callback = createConsumerMock();
         final ConnectionEntry entry = new ConnectionEntry(request, callback, ticker.read());
@@ -225,26 +226,21 @@ public class TransmittingTransmitQueueTest extends AbstractTransmitQueueTest<Tra
     public void testRequestSlicingOnTransmit() {
         doReturn(true).when(mockMessageSlicer).slice(any());
 
-        ModifyTransactionRequestBuilder reqBuilder = new ModifyTransactionRequestBuilder(
-                TRANSACTION_IDENTIFIER, probe.ref());
-        reqBuilder.setSequence(0L);
-        final Request<?, ?> request = reqBuilder.build();
+        final var request = new ModifyTransactionRequestBuilder(TRANSACTION_IDENTIFIER, probe.ref())
+            .setSequence(0L)
+            .build();
 
         final long now = now();
-        final Consumer<Response<?, ?>> mockConsumer = createConsumerMock();
-        Optional<TransmittedConnectionEntry> transmitted =
-                queue.transmit(new ConnectionEntry(request, mockConsumer, now), now);
-        assertTrue(transmitted.isPresent());
+        final var mockConsumer = createConsumerMock();
+        assertNotNull(queue.transmit(new ConnectionEntry(request, mockConsumer, now), now));
 
-        ArgumentCaptor<SliceOptions> sliceOptions = ArgumentCaptor.forClass(SliceOptions.class);
+        final var sliceOptions = ArgumentCaptor.forClass(SliceOptions.class);
         verify(mockMessageSlicer).slice(sliceOptions.capture());
-        assertTrue(sliceOptions.getValue().getMessage() instanceof RequestEnvelope);
-        RequestEnvelope requestEnvelope = (RequestEnvelope) sliceOptions.getValue().getMessage();
+        final var requestEnvelope = assertInstanceOf(RequestEnvelope.class, sliceOptions.getValue().getMessage());
         assertEquals(request, requestEnvelope.getMessage());
 
-        final Request<?, ?> request2 = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 1L, probe.ref());
-        transmitted = queue.transmit(new ConnectionEntry(request2, mockConsumer, now), now);
-        assertFalse(transmitted.isPresent());
+        final var request2 = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, 1L, probe.ref());
+        assertNull(queue.transmit(new ConnectionEntry(request2, mockConsumer, now), now));
     }
 
     @Test
@@ -254,14 +250,11 @@ public class TransmittingTransmitQueueTest extends AbstractTransmitQueueTest<Tra
             return Boolean.FALSE;
         }).when(mockMessageSlicer).slice(any());
 
-        ModifyTransactionRequestBuilder reqBuilder = new ModifyTransactionRequestBuilder(
-                TRANSACTION_IDENTIFIER, probe.ref());
-        reqBuilder.setSequence(0L);
+        final var reqBuilder = new ModifyTransactionRequestBuilder(TRANSACTION_IDENTIFIER, probe.ref())
+            .setSequence(0L);
 
         final long now = now();
-        Optional<TransmittedConnectionEntry> transmitted =
-                queue.transmit(new ConnectionEntry(reqBuilder.build(), createConsumerMock(), now), now);
-        assertTrue(transmitted.isPresent());
+        assertNotNull(queue.transmit(new ConnectionEntry(reqBuilder.build(), createConsumerMock(), now), now));
 
         verify(mockMessageSlicer).slice(any());
 

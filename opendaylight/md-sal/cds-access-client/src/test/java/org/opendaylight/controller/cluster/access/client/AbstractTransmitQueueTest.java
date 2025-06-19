@@ -12,12 +12,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.opendaylight.controller.cluster.access.client.ConnectionEntryMatcher.entryWithRequest;
 
 import com.google.common.base.Ticker;
 import java.util.Collection;
-import java.util.Optional;
 import java.util.function.Consumer;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.testkit.TestProbe;
@@ -33,7 +33,6 @@ import org.opendaylight.controller.cluster.access.concepts.FrontendType;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.access.concepts.Request;
-import org.opendaylight.controller.cluster.access.concepts.RequestSuccess;
 import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.SuccessEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -96,37 +95,29 @@ public abstract class AbstractTransmitQueueTest<T extends TransmitQueue> {
         final long requestSequence = 0L;
         final long txSequence = 0L;
         final long sessionId = 0L;
-        final Request<?, ?> request = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, requestSequence, probe.ref());
-        final Consumer<Response<?, ?>> callback = createConsumerMock();
+        final var request = new TransactionPurgeRequest(TRANSACTION_IDENTIFIER, requestSequence, probe.ref());
+        final var callback = createConsumerMock();
         final long now = Ticker.systemTicker().read();
         queue.enqueueOrForward(new ConnectionEntry(request, callback, now), now);
         //different transaction id
-        final TransactionIdentifier anotherTxId = new TransactionIdentifier(HISTORY, 1L);
-        final RequestSuccess<?, ?> success1 = new TransactionPurgeResponse(anotherTxId, requestSequence);
-        final Optional<TransmittedConnectionEntry> completed1 =
-                queue.complete(new SuccessEnvelope(success1, sessionId, txSequence, 1L), now);
-        assertFalse(completed1.isPresent());
+        final var anotherTxId = new TransactionIdentifier(HISTORY, 1L);
+        final var success1 = new TransactionPurgeResponse(anotherTxId, requestSequence);
+        assertNull(queue.complete(new SuccessEnvelope(success1, sessionId, txSequence, 1L), now));
+
         //different response sequence
         final long differentResponseSequence = 1L;
-        final RequestSuccess<?, ?> success2 =
-                new TransactionPurgeResponse(TRANSACTION_IDENTIFIER, differentResponseSequence);
-        final Optional<TransmittedConnectionEntry> completed2 =
-                queue.complete(new SuccessEnvelope(success2, sessionId, txSequence, 1L), now);
-        assertFalse(completed2.isPresent());
+        final var success2 = new TransactionPurgeResponse(TRANSACTION_IDENTIFIER, differentResponseSequence);
+        assertNull(queue.complete(new SuccessEnvelope(success2, sessionId, txSequence, 1L), now));
+
         //different tx sequence
         final long differentTxSequence = 1L;
-        final RequestSuccess<?, ?> success3 =
-                new TransactionPurgeResponse(TRANSACTION_IDENTIFIER, requestSequence);
-        final Optional<TransmittedConnectionEntry> completed3 =
-                queue.complete(new SuccessEnvelope(success3, sessionId, differentTxSequence, 1L), now);
-        assertFalse(completed3.isPresent());
+        final var success3 = new TransactionPurgeResponse(TRANSACTION_IDENTIFIER, requestSequence);
+        assertNull(queue.complete(new SuccessEnvelope(success3, sessionId, differentTxSequence, 1L), now));
+
         //different session id
         final long differentSessionId = 1L;
-        final RequestSuccess<?, ?> success4 =
-                new TransactionPurgeResponse(TRANSACTION_IDENTIFIER, requestSequence);
-        final Optional<TransmittedConnectionEntry> completed4 =
-                queue.complete(new SuccessEnvelope(success4, differentSessionId, differentTxSequence, 1L), now);
-        assertFalse(completed4.isPresent());
+        final var success4 = new TransactionPurgeResponse(TRANSACTION_IDENTIFIER, requestSequence);
+        assertNull(queue.complete(new SuccessEnvelope(success4, differentSessionId, differentTxSequence, 1L), now));
     }
 
     @Test

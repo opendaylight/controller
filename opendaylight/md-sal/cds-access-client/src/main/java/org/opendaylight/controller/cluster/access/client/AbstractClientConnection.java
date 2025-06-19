@@ -27,6 +27,7 @@ import org.apache.pekko.actor.ActorRef;
 import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.checkerframework.checker.lock.qual.Holding;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.Response;
@@ -478,16 +479,15 @@ public abstract sealed class AbstractClientConnection<T extends BackendInfo>
         final long now = currentTime();
         lastReceivedTicks = now;
 
-        final Optional<TransmittedConnectionEntry> maybeEntry;
+        final @Nullable TransmittedConnectionEntry entry;
         lock.lock();
         try {
-            maybeEntry = queue.complete(envelope, now);
+            entry = queue.complete(envelope, now);
         } finally {
             lock.unlock();
         }
 
-        if (maybeEntry.isPresent()) {
-            final TransmittedConnectionEntry entry = maybeEntry.orElseThrow();
+        if (entry != null) {
             LOG.debug("Completing {} with {}", entry, envelope);
             entry.complete(envelope.getMessage());
         }

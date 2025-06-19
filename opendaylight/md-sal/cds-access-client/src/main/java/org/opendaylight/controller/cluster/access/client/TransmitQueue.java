@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
 import org.apache.pekko.actor.ActorRef;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.RequestEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.Response;
@@ -69,7 +70,7 @@ abstract sealed class TransmitQueue {
         }
 
         @Override
-        Optional<TransmittedConnectionEntry> transmit(final ConnectionEntry entry, final long now) {
+        TransmittedConnectionEntry transmit(final ConnectionEntry entry, final long now) {
             throw new UnsupportedOperationException("Attempted to transmit on a halted queue");
         }
 
@@ -100,17 +101,17 @@ abstract sealed class TransmitQueue {
         }
 
         @Override
-        Optional<TransmittedConnectionEntry> transmit(final ConnectionEntry entry, final long now) {
+        TransmittedConnectionEntry transmit(final ConnectionEntry entry, final long now) {
             // If we're currently slicing a message we can't send any subsequent requests until slicing completes to
-            // avoid an out-of-sequence request envelope failure on the backend. In this case we return an empty
-            // Optional to indicate the request was not transmitted.
+            // avoid an out-of-sequence request envelope failure on the backend. In this case we return null to indicate
+            // the request was not transmitted.
             if (currentSlicedEnvSequenceId >= 0) {
-                return Optional.empty();
+                return null;
             }
 
-            final Request<?, ?> request = entry.getRequest();
-            final RequestEnvelope env = new RequestEnvelope(request.toVersion(backend.getVersion()),
-                backend.getSessionId(), nextTxSequence++);
+            final var request = entry.getRequest();
+            final var env = new RequestEnvelope(request.toVersion(backend.getVersion()), backend.getSessionId(),
+                nextTxSequence++);
 
             if (request instanceof SliceableMessage) {
                 if (messageSlicer.slice(SliceOptions.builder().identifier(request.getTarget())
@@ -125,8 +126,7 @@ abstract sealed class TransmitQueue {
                 backend.getActor().tell(env, ActorRef.noSender());
             }
 
-            return Optional.of(new TransmittedConnectionEntry(entry, env.getSessionId(),
-                    env.getTxSequence(), now));
+            return new TransmittedConnectionEntry(entry, env.getSessionId(), env.getTxSequence(), now);
         }
 
         @Override
@@ -200,27 +200,27 @@ abstract sealed class TransmitQueue {
     }
 
     // If a matching request was found, this will track a task was closed.
-    final Optional<TransmittedConnectionEntry> complete(final ResponseEnvelope<?> envelope, final long now) {
+    final @Nullable TransmittedConnectionEntry complete(final ResponseEnvelope<?> envelope, final long now) {
         preComplete(envelope);
 
-        Optional<TransmittedConnectionEntry> maybeEntry = findMatchingEntry(inflight, envelope);
+        var maybeEntry = findMatchingEntry(inflight, envelope);
         if (maybeEntry == null) {
             LOG.debug("Request for {} not found in inflight queue, checking pending queue", envelope);
             maybeEntry = findMatchingEntry(pending, envelope);
         }
 
-        if (maybeEntry == null || !maybeEntry.isPresent()) {
+        if (maybeEntry == null || maybeEntry.isEmpty()) {
             LOG.warn("No request matching {} found, ignoring response", envelope);
-            return Optional.empty();
+            return null;
         }
 
-        final TransmittedConnectionEntry entry = maybeEntry.orElseThrow();
+        final var entry = maybeEntry.orElseThrow();
         tracker.closeTask(now, entry.getEnqueuedTicks(), entry.getTxTicks(), envelope.getExecutionTimeNanos());
 
         // We have freed up a slot, try to transmit something
         tryTransmit(now);
 
-        return Optional.of(entry);
+        return entry;
     }
 
     final void tryTransmit(final long now) {
@@ -247,12 +247,12 @@ abstract sealed class TransmitQueue {
         // We are not thread-safe and are supposed to be externally-guarded,
         // hence send-before-record should be fine.
         // This needs to be revisited if the external guards are lowered.
-        final Optional<TransmittedConnectionEntry> maybeTransmitted = transmit(entry, now);
-        if (!maybeTransmitted.isPresent()) {
+        final var maybeTransmitted = transmit(entry, now);
+        if (maybeTransmitted == null) {
             return false;
         }
 
-        inflight.addLast(maybeTransmitted.orElseThrow());
+        inflight.addLast(maybeTransmitted);
         return true;
     }
 
@@ -317,7 +317,7 @@ abstract sealed class TransmitQueue {
      */
     abstract int canTransmitCount(int inflightSize);
 
-    abstract Optional<TransmittedConnectionEntry> transmit(ConnectionEntry entry, long now);
+    abstract @Nullable TransmittedConnectionEntry transmit(ConnectionEntry entry, long now);
 
     abstract void preComplete(ResponseEnvelope<?> envelope);
 
