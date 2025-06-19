@@ -11,20 +11,16 @@ import static com.google.common.base.Verify.verify;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 import java.util.Queue;
 import org.apache.pekko.actor.ActorRef;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.access.concepts.Request;
 import org.opendaylight.controller.cluster.access.concepts.RequestEnvelope;
-import org.opendaylight.controller.cluster.access.concepts.Response;
 import org.opendaylight.controller.cluster.access.concepts.ResponseEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestException;
 import org.opendaylight.controller.cluster.access.concepts.SliceableMessage;
@@ -139,6 +135,21 @@ abstract sealed class TransmitQueue {
         }
     }
 
+    @NonNullByDefault
+    private sealed interface MatchingEntry {
+        // Nothing else
+    }
+
+    private record FoundEntry(TransmittedConnectionEntry entry) implements MatchingEntry {
+        public FoundEntry {
+            requireNonNull(entry);
+        }
+    }
+
+    private static final class NotPresentEntry implements MatchingEntry {
+        static final NotPresentEntry INSTANCE = new NotPresentEntry();
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(TransmitQueue.class);
 
     private final Deque<TransmittedConnectionEntry> inflight = new ArrayDeque<>();
@@ -183,7 +194,7 @@ abstract sealed class TransmitQueue {
      * @return Collection of entries present in the queue.
      */
     final Collection<ConnectionEntry> drain() {
-        final Collection<ConnectionEntry> ret = new ArrayDeque<>(inflight.size() + pending.size());
+        final var ret = new ArrayDeque<ConnectionEntry>(inflight.size() + pending.size());
         ret.addAll(inflight);
         ret.addAll(pending);
         inflight.clear();
@@ -203,24 +214,23 @@ abstract sealed class TransmitQueue {
     final @Nullable TransmittedConnectionEntry complete(final ResponseEnvelope<?> envelope, final long now) {
         preComplete(envelope);
 
-        var maybeEntry = findMatchingEntry(inflight, envelope);
-        if (maybeEntry == null) {
+        var matchingEntry = findMatchingEntry(inflight, envelope);
+        if (matchingEntry == null) {
             LOG.debug("Request for {} not found in inflight queue, checking pending queue", envelope);
-            maybeEntry = findMatchingEntry(pending, envelope);
+            matchingEntry = findMatchingEntry(pending, envelope);
         }
 
-        if (maybeEntry == null || maybeEntry.isEmpty()) {
-            LOG.warn("No request matching {} found, ignoring response", envelope);
-            return null;
+        if (matchingEntry instanceof FoundEntry(var entry)) {
+            tracker.closeTask(now, entry.getEnqueuedTicks(), entry.getTxTicks(), envelope.getExecutionTimeNanos());
+
+            // We have freed up a slot, try to transmit something
+            tryTransmit(now);
+
+            return entry;
         }
 
-        final var entry = maybeEntry.orElseThrow();
-        tracker.closeTask(now, entry.getEnqueuedTicks(), entry.getTxTicks(), envelope.getExecutionTimeNanos());
-
-        // We have freed up a slot, try to transmit something
-        tryTransmit(now);
-
-        return entry;
+        LOG.warn("No request matching {} found, ignoring response", envelope);
+        return null;
     }
 
     final void tryTransmit(final long now) {
@@ -232,8 +242,8 @@ abstract sealed class TransmitQueue {
 
     private void transmitEntries(final int maxTransmit, final long now) {
         for (int i = 0; i < maxTransmit; ++i) {
-            final ConnectionEntry e = pending.poll();
-            if (e == null || !transmitEntry(e, now)) {
+            final var entry = pending.poll();
+            if (entry == null || !transmitEntry(entry, now)) {
                 LOG.debug("Queue {} transmitted {} requests", this, i);
                 return;
             }
@@ -372,9 +382,9 @@ abstract sealed class TransmitQueue {
     }
 
     final void remove(final long now) {
-        final TransmittedConnectionEntry txe = inflight.poll();
+        final var txe = inflight.poll();
         if (txe == null) {
-            final ConnectionEntry entry = pending.pop();
+            final var entry = pending.pop();
             tracker.closeTask(now, entry.getEnqueuedTicks(), 0, 0);
         } else {
             tracker.closeTask(now, txe.getEnqueuedTicks(), txe.getTxTicks(), 0);
@@ -393,21 +403,20 @@ abstract sealed class TransmitQueue {
 
     /*
      * We are using tri-state return here to indicate one of three conditions:
-     * - if a matching entry is found, return an Optional containing it
+     * - if a matching entry is found, return an MatchingEntry.Found containing it
      * - if a matching entry is not found, but it makes sense to keep looking at other queues, return null
-     * - if a conflicting entry is encountered, indicating we should ignore this request, return an empty Optional
+     * - if a conflicting entry is encountered, indicating we should ignore this request,
+     *   return MatchingEntry.NotPresent
      */
-    @SuppressFBWarnings(value = "NP_OPTIONAL_RETURN_NULL",
-            justification = "Returning null Optional is documented in the API contract.")
-    private static Optional<TransmittedConnectionEntry> findMatchingEntry(final Queue<? extends ConnectionEntry> queue,
+    private static @Nullable MatchingEntry findMatchingEntry(final Queue<? extends ConnectionEntry> queue,
             final ResponseEnvelope<?> envelope) {
         // Try to find the request in a queue. Responses may legally come back in a different order, hence we need
         // to use an iterator
-        final Iterator<? extends ConnectionEntry> it = queue.iterator();
+        final var it = queue.iterator();
         while (it.hasNext()) {
-            final ConnectionEntry e = it.next();
-            final Request<?, ?> request = e.getRequest();
-            final Response<?, ?> response = envelope.getMessage();
+            final var ce = it.next();
+            final var request = ce.getRequest();
+            final var response = envelope.getMessage();
 
             // First check for matching target, or move to next entry
             if (!request.getTarget().equals(response.getTarget())) {
@@ -417,27 +426,27 @@ abstract sealed class TransmitQueue {
             // Sanity-check logical sequence, ignore any out-of-order messages
             if (request.getSequence() != response.getSequence()) {
                 LOG.debug("Expecting sequence {}, ignoring response {}", request.getSequence(), envelope);
-                return Optional.empty();
+                return NotPresentEntry.INSTANCE;
             }
 
             // Check if the entry has (ever) been transmitted
-            if (!(e instanceof TransmittedConnectionEntry te)) {
-                return Optional.empty();
+            if (!(ce instanceof TransmittedConnectionEntry tce)) {
+                return NotPresentEntry.INSTANCE;
             }
 
             // Now check session match
-            if (envelope.getSessionId() != te.getSessionId()) {
-                LOG.debug("Expecting session {}, ignoring response {}", te.getSessionId(), envelope);
-                return Optional.empty();
+            if (envelope.getSessionId() != tce.getSessionId()) {
+                LOG.debug("Expecting session {}, ignoring response {}", tce.getSessionId(), envelope);
+                return NotPresentEntry.INSTANCE;
             }
-            if (envelope.getTxSequence() != te.getTxSequence()) {
-                LOG.warn("Expecting txSequence {}, ignoring response {}", te.getTxSequence(), envelope);
-                return Optional.empty();
+            if (envelope.getTxSequence() != tce.getTxSequence()) {
+                LOG.warn("Expecting txSequence {}, ignoring response {}", tce.getTxSequence(), envelope);
+                return NotPresentEntry.INSTANCE;
             }
 
             LOG.debug("Completing request {} with {}", request, envelope);
             it.remove();
-            return Optional.of(te);
+            return new FoundEntry(tce);
         }
 
         return null;
