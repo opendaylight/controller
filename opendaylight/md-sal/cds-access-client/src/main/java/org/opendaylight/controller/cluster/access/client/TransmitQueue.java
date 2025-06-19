@@ -29,6 +29,7 @@ import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestExcepti
 import org.opendaylight.controller.cluster.access.concepts.SliceableMessage;
 import org.opendaylight.controller.cluster.messaging.MessageSlicer;
 import org.opendaylight.controller.cluster.messaging.SliceOptions;
+import org.opendaylight.raft.spi.AveragingProgressTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

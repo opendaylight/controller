@@ -52,6 +52,12 @@
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>raft-api</artifactId>
         </dependency>
+
+        <!-- Testing dependencies -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava-testlib</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

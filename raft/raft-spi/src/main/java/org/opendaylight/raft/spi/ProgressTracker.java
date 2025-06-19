@@ -6,7 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.cluster.access.client;
+package org.opendaylight.raft.spi;
 
 import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
  * @author Vratko Polak
  */
 // TODO: Would bulk methods be less taxing than a loop of single task calls?
-abstract class ProgressTracker {
+public abstract class ProgressTracker {
     private static final Logger LOG = LoggerFactory.getLogger(ProgressTracker.class);
 
     /**
@@ -176,7 +176,7 @@ abstract class ProgressTracker {
      * @param now tick number corresponding to caller's present
      * @return number of ticks backend is neither idle nor responding
      */
-    final long ticksStalling(final long now) {
+    public final long ticksStalling(final long now) {
         return isIdle() ? 0 : Math.max(now, lastClosed) - lastClosed;
     }
 
@@ -240,7 +240,8 @@ abstract class ProgressTracker {
      * @param transmitTicks see TransitQueue#recordCompletion
      * @param execNanos see TransitQueue#recordCompletion
      */
-    final void closeTask(final long now, final long enqueuedTicks, final long transmitTicks, final long execNanos) {
+    public final void closeTask(final long now, final long enqueuedTicks, final long transmitTicks,
+            final long execNanos) {
         if (isIdle()) {
             LOG.info("Attempted to close a task while no tasks are open");
         } else {
@@ -254,7 +255,7 @@ abstract class ProgressTracker {
      * @param now tick number corresponding to caller's present
      * @return number of ticks (nanos) the caller thread should wait before opening another task
      */
-    final long openTask(final long now) {
+    public final long openTask(final long now) {
         openTaskWithoutThrottle(now);
         return reserveDelay(now);
     }
@@ -270,7 +271,7 @@ abstract class ProgressTracker {
      *
      * @param now tick number corresponding to caller's present
      */
-    final void cancelDebt(final long now) {
+    public final void cancelDebt(final long now) {
         nearestAllowed = now;
     }
 

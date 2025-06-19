@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.access.client;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import java.util.Optional;
 import org.opendaylight.controller.cluster.access.concepts.ResponseEnvelope;
+import org.opendaylight.raft.spi.AveragingProgressTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
