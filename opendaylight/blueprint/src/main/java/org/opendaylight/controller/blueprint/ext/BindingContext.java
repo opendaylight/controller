@@ -7,31 +7,25 @@
  */
 package org.opendaylight.controller.blueprint.ext;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
-import com.google.common.base.Strings;
-import com.google.common.collect.Iterables;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
-import java.util.Set;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.dom.DOMSource;
 import org.opendaylight.yangtools.binding.ChildOf;
 import org.opendaylight.yangtools.binding.DataObject;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.binding.DataRoot;
 import org.opendaylight.yangtools.binding.EntryObject;
 import org.opendaylight.yangtools.binding.Key;
 import org.opendaylight.yangtools.binding.contract.Naming;
 import org.opendaylight.yangtools.binding.reflect.BindingReflections;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.codec.xml.XmlParserStream;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.impl.schema.NormalizationResultHolder;
@@ -41,7 +35,6 @@ import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaTreeInference;
 import org.opendaylight.yangtools.yang.model.api.stmt.KeyEffectiveStatement;
-import org.opendaylight.yangtools.yang.model.api.stmt.SchemaTreeEffectiveStatement;
 import org.osgi.service.blueprint.container.ComponentDefinitionException;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -56,7 +49,8 @@ public abstract class BindingContext {
             final String appConfigListKeyValue) {
         if (EntryObject.class.isAssignableFrom(klass)) {
             // The binding class corresponds to a yang list.
-            if (Strings.isNullOrEmpty(appConfigListKeyValue)) {
+            // FIXME: support empty keys?
+            if (appConfigListKeyValue == null || appConfigListKeyValue.isEmpty()) {
                 throw new ComponentDefinitionException(String.format(
                         "%s: App config binding class %s represents a yang list therefore \"%s\" must be specified",
                         logName, klass.getName(), DataStoreAppConfigMetadata.LIST_KEY_VALUE));
@@ -76,12 +70,12 @@ public abstract class BindingContext {
         }
     }
 
-    public final InstanceIdentifier<DataObject> appConfigPath;
+    public final DataObjectIdentifier<DataObject> appConfigPath;
     public final Class<?> appConfigBindingClass;
     public final Class<? extends DataSchemaNode> schemaType;
     public final QName bindingQName;
 
-    private BindingContext(final Class<?> appConfigBindingClass, final InstanceIdentifier<DataObject> appConfigPath,
+    private BindingContext(final Class<?> appConfigBindingClass, final DataObjectIdentifier<DataObject> appConfigPath,
             final Class<? extends DataSchemaNode> schemaType) {
         this.appConfigBindingClass = appConfigBindingClass;
         this.appConfigPath = appConfigPath;
@@ -92,12 +86,12 @@ public abstract class BindingContext {
 
     public NormalizedNode parseDataElement(final Element element, final SchemaTreeInference dataSchema)
             throws XMLStreamException, IOException, SAXException, URISyntaxException {
-        final NormalizationResultHolder resultHolder = new NormalizationResultHolder();
-        final NormalizedNodeStreamWriter writer = ImmutableNormalizedNodeStreamWriter.from(resultHolder);
-        final XmlParserStream xmlParser = XmlParserStream.create(writer, dataSchema);
+        final var resultHolder = new NormalizationResultHolder();
+        final var writer = ImmutableNormalizedNodeStreamWriter.from(resultHolder);
+        final var xmlParser = XmlParserStream.create(writer, dataSchema);
         xmlParser.traverse(new DOMSource(element));
 
-        final NormalizedNode result = resultHolder.getResult().data();
+        final var result = resultHolder.getResult().data();
         return result instanceof MapNode mapNode ? mapNode.body().iterator().next() : result;
     }
 
@@ -109,7 +103,7 @@ public abstract class BindingContext {
     private static class ContainerBindingContext extends BindingContext {
         @SuppressWarnings("unchecked")
         ContainerBindingContext(final Class<? extends DataObject> appConfigBindingClass) {
-            super(appConfigBindingClass, InstanceIdentifier.create((Class) appConfigBindingClass),
+            super(appConfigBindingClass, DataObjectIdentifier.builder((Class) appConfigBindingClass).build(),
                 ContainerSchemaNode.class);
         }
 
@@ -127,33 +121,35 @@ public abstract class BindingContext {
 
         @SuppressWarnings("unchecked")
         ListBindingContext(final Class<? extends DataObject> appConfigBindingClass,
-                final InstanceIdentifier<? extends DataObject> appConfigPath, final String appConfigListKeyValue) {
-            super((Class<DataObject>) appConfigBindingClass, (InstanceIdentifier<DataObject>) appConfigPath,
+                final DataObjectIdentifier<?> appConfigPath, final String appConfigListKeyValue) {
+            super((Class<DataObject>) appConfigBindingClass, (DataObjectIdentifier<DataObject>) appConfigPath,
                     ListSchemaNode.class);
             this.appConfigListKeyValue = appConfigListKeyValue;
         }
 
-        @SuppressWarnings({ "rawtypes", "unchecked" })
         static <T extends EntryObject<T, K> & ChildOf<? extends DataRoot<?>>, K extends Key<T>>
                 ListBindingContext newInstance(final Class<T> bindingClass, final String listKeyValue)
                     throws InstantiationException, IllegalAccessException, IllegalArgumentException,
                            InvocationTargetException, NoSuchMethodException, SecurityException {
-            // We assume the yang list key type is string.
-            final K keyInstance = (K) bindingClass.getMethod(Naming.KEY_AWARE_KEY_NAME)
+            // We assume the YANG list key type is string.
+            @SuppressWarnings("unchecked")
+            final var keyInstance = (K) bindingClass.getMethod(Naming.KEY_AWARE_KEY_NAME)
                 .getReturnType().getConstructor(String.class).newInstance(listKeyValue);
-            InstanceIdentifier appConfigPath = InstanceIdentifier.builder(bindingClass, keyInstance).build();
-            return new ListBindingContext(bindingClass, appConfigPath, listKeyValue);
+
+            return new ListBindingContext(bindingClass, DataObjectIdentifier.builder(bindingClass, keyInstance).build(),
+                listKeyValue);
         }
 
         @Override
         public NormalizedNode newDefaultNode(final SchemaTreeInference dataSchema) {
-            final SchemaTreeEffectiveStatement<?> stmt = Iterables.getLast(dataSchema.statementPath());
+            final var stmt = dataSchema.statementPath().getLast();
 
             // We assume there's only one key for the list.
-            final Set<QName> keys = stmt.findFirstEffectiveSubstatementArgument(KeyEffectiveStatement.class)
-                .orElseThrow();
+            final var keys = stmt.findFirstEffectiveSubstatementArgument(KeyEffectiveStatement.class).orElseThrow();
+            if (keys.size() != 1) {
+                throw new IllegalArgumentException("Expected only 1 key for list " + appConfigBindingClass);
+            }
 
-            checkArgument(keys.size() == 1, "Expected only 1 key for list %s", appConfigBindingClass);
             QName listKeyQName = keys.iterator().next();
             return ImmutableNodes.newMapEntryBuilder()
                 .withNodeIdentifier(NodeIdentifierWithPredicates.of(bindingQName, listKeyQName, appConfigListKeyValue))
