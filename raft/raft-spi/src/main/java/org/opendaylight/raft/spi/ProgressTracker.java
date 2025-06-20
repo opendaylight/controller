@@ -7,6 +7,9 @@
  */
 package org.opendaylight.raft.spi;
 
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
+import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,6 +58,16 @@ public abstract class ProgressTracker {
      */
     private final long defaultTicksPerTask;
 
+    // FIXME: re-formulate in terms of JFR events
+
+    // Tracks the time took to execute the task's effect
+    private final Timer taskExecutionTime;
+    // Tracks the time it took to pick up a task from the queue
+    private final Timer queueLatency;
+    // Tracks the time it took to completely execute a task, e.g. from the time it was enqueued to the time it was
+    // determined to be complete
+    private final Timer taskLatency;
+
     /**
      * Number of tasks closed so far.
      */
@@ -92,11 +105,15 @@ public abstract class ProgressTracker {
      *
      * @param ticksPerTask value to use as default
      */
-    ProgressTracker(final long ticksPerTask) {
+    ProgressTracker(final MetricRegistry registry, final long ticksPerTask) {
         if (ticksPerTask < 0) {
             throw new IllegalArgumentException("negative ticksPerTask");
         }
         defaultTicksPerTask = ticksPerTask;
+
+        queueLatency = registry.timer("queue-delay");
+        taskExecutionTime = registry.timer("task-execution-time");
+        taskLatency = registry.timer("task-latency");
     }
 
     /**
@@ -125,6 +142,10 @@ public abstract class ProgressTracker {
         nearestAllowed = oldTracker.nearestAllowed;
         lastIdle = oldTracker.lastIdle;
         elapsedBeforeIdle = oldTracker.elapsedBeforeIdle;
+        queueLatency = oldTracker.queueLatency;
+        taskLatency = oldTracker.taskLatency;
+        taskExecutionTime = oldTracker.taskExecutionTime;
+
         if (!oldTracker.isIdle()) {
             transitToIdle(now);
         }
@@ -236,16 +257,17 @@ public abstract class ProgressTracker {
      * Track a task is being closed.
      *
      * @param now tick number corresponding to caller's present
-     * @param enqueuedTicks see TransitQueue#recordCompletion
-     * @param transmitTicks see TransitQueue#recordCompletion
-     * @param execNanos see TransitQueue#recordCompletion
+     * @param enqueuedTicks tick number corresponding to when the task was enqueued
+     * @param transmitTicks tick number corresponding to when the task was dequeued and transmitted
+     * @param executionNanos nanoseconds the entry was being processed
      */
     public final void closeTask(final long now, final long enqueuedTicks, final long transmitTicks,
-            final long execNanos) {
+            final long executionNanos) {
         if (isIdle()) {
+            // FIXME: promote to a warning?
             LOG.info("Attempted to close a task while no tasks are open");
         } else {
-            unsafeCloseTask(now, enqueuedTicks, transmitTicks, execNanos);
+            unsafeCloseTask(now, enqueuedTicks, transmitTicks, executionNanos);
         }
     }
 
@@ -303,6 +325,10 @@ public abstract class ProgressTracker {
                 final long execNanos) {
         tasksClosed++;
         lastClosed = now;
+        queueLatency.update(transmitTicks - enqueuedTicks, TimeUnit.NANOSECONDS);
+        taskLatency.update(now - enqueuedTicks, TimeUnit.NANOSECONDS);
+        taskExecutionTime.update(execNanos, TimeUnit.NANOSECONDS);
+
         if (isIdle()) {
             transitToIdle(now);
         }
