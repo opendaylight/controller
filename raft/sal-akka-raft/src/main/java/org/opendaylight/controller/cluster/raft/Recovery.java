@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  *
  * @param <T> {@link State} type
  */
-abstract sealed class Recovery<T extends @NonNull State> permits PekkoRecovery {
+abstract sealed class Recovery<T extends @NonNull State> permits JournalRecovery, PekkoRecovery {
     private static final Logger LOG = LoggerFactory.getLogger(Recovery.class);
 
     final @NonNull RaftActor actor;
