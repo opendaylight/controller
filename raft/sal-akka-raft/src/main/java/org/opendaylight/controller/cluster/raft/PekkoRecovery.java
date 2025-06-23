@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import static java.util.Objects.requireNonNull;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
 import java.io.IOException;
@@ -23,12 +21,10 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
-import org.opendaylight.controller.cluster.raft.persisted.MigratedSerializable;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
-import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
@@ -43,9 +39,11 @@ import org.slf4j.LoggerFactory;
 /**
  * A single attempt at recovering Pekko state. Essentially replays Pekko persistence into backing {@link SnapshotStore},
  * {@link TermInfoStore} and a {@link ReplicatedLog}.
+ *
+ * @param <T> {@link State} type
  */
 // non-sealed for testing
-class PekkoRecovery<T extends @NonNull State> {
+non-sealed class PekkoRecovery<T extends @NonNull State> extends AbstractRecovery<T> {
     static final class ToTransient<T extends @NonNull State> extends PekkoRecovery<T> {
         private boolean dataRecoveredWithPersistenceDisabled;
 
@@ -100,35 +98,22 @@ class PekkoRecovery<T extends @NonNull State> {
 
     private static final Logger LOG = LoggerFactory.getLogger(PekkoRecovery.class);
 
-    private final @NonNull RaftActor actor;
-    private final @NonNull RaftActorRecoveryCohort recoveryCohort;
-    private final @NonNull RaftActorSnapshotCohort<T> snapshotCohort;
     private final @NonNull PekkoReplicatedLog pekkoLog;
     private final @Nullable TermInfo origTermInfo;
     private final @Nullable SnapshotFile origSnapshot;
-    private final int snapshotInterval;
-    private final int batchSize;
 
     private int currentRecoveryBatchCount;
     private boolean anyDataRecovered;
     private boolean hasMigratedDataRecovered;
-    private Stopwatch recoveryTimer;
-    private Stopwatch snapshotTimer;
 
     @NonNullByDefault
     PekkoRecovery(final RaftActor actor, final RaftActorSnapshotCohort<T> snapshotCohort,
-            final RaftActorRecoveryCohort recoveryCohort, final ConfigParams configParams)
-                throws IOException {
-        this.actor = requireNonNull(actor);
-        this.snapshotCohort = requireNonNull(snapshotCohort);
-        this.recoveryCohort = requireNonNull(recoveryCohort);
+            final RaftActorRecoveryCohort recoveryCohort, final ConfigParams configParams) throws IOException {
+        super(actor, snapshotCohort, recoveryCohort, configParams);
 
         final var localAccess = actor.localAccess();
         pekkoLog = new PekkoReplicatedLog(localAccess.memberId());
         origTermInfo = localAccess.termInfoStore().loadAndSetTerm();
-
-        snapshotInterval = configParams.getRecoverySnapshotIntervalSeconds();
-        batchSize = configParams.getJournalRecoveryLogBatchSize();
 
         final var loaded = snapshotStore().lastSnapshot();
         if (loaded != null) {
@@ -141,10 +126,6 @@ class PekkoRecovery<T extends @NonNull State> {
     @VisibleForTesting
     final @NonNull PekkoReplicatedLog pekkoLog() {
         return pekkoLog;
-    }
-
-    private @NonNull SnapshotStore snapshotStore() {
-        return actor.persistence().snapshotStore();
     }
 
     final @Nullable PekkoReplicatedLog handleRecoveryMessage(final Object message) {
@@ -172,19 +153,6 @@ class PekkoRecovery<T extends @NonNull State> {
             }
         }
         return null;
-    }
-
-    final @NonNull String memberId() {
-        return actor.memberId();
-    }
-
-    private void initRecoveryTimers() {
-        if (recoveryTimer == null) {
-            recoveryTimer = Stopwatch.createStarted();
-        }
-        if (snapshotTimer == null && snapshotInterval > 0) {
-            snapshotTimer = Stopwatch.createStarted();
-        }
     }
 
     @NonNullByDefault
@@ -226,7 +194,7 @@ class PekkoRecovery<T extends @NonNull State> {
 
     private void initializeLog(final Instant timestamp, final Snapshot recovered) {
         LOG.debug("{}: initializing from snapshot taken at {}", memberId(), timestamp);
-        initRecoveryTimers();
+        startRecoveryTimers();
         anyDataRecovered = true;
 
         for (var entry : recovered.getUnAppliedEntries()) {
@@ -311,7 +279,7 @@ class PekkoRecovery<T extends @NonNull State> {
             }
 
             lastApplied++;
-            initRecoveryTimers();
+            startRecoveryTimers();
 
             // We deal with RaftCommands separately
             if (logEntry.command() instanceof StateCommand command) {
@@ -402,18 +370,7 @@ class PekkoRecovery<T extends @NonNull State> {
             endCurrentLogRecoveryBatch();
         }
 
-        final String recoveryTime;
-        if (recoveryTimer != null) {
-            recoveryTime = " in " + recoveryTimer.stop();
-            recoveryTimer = null;
-        } else {
-            recoveryTime = "";
-        }
-
-        if (snapshotTimer != null) {
-            snapshotTimer.stop();
-            snapshotTimer = null;
-        }
+        final var recoveryTime = stopRecoveryTimers();
 
         LOG.info("{}: Recovery completed {} - Switching actor to Follower - last log index = {}, last log term = {}, "
             + "snapshot index = {}, snapshot term = {}, journal size = {}", memberId(), recoveryTime,
@@ -493,14 +450,5 @@ class PekkoRecovery<T extends @NonNull State> {
             throw new UncheckedIOException(e);
         }
         actor.deleteMessages(actor.lastSequenceNr());
-    }
-
-    @NonNullByDefault
-    private static boolean isMigratedPayload(final LogEntry logEntry) {
-        return isMigratedSerializable(logEntry.command().toSerialForm());
-    }
-
-    private static boolean isMigratedSerializable(final Object message) {
-        return message instanceof MigratedSerializable migrated && migrated.isMigrated();
     }
 }
