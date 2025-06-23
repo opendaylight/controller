@@ -23,7 +23,7 @@ import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
  *
  * @param <T> {@link State} type
  */
-abstract sealed class Recovery<T extends @NonNull State> permits PekkoRecovery {
+abstract sealed class Recovery<T extends @NonNull State> permits JournalRecovery, PekkoRecovery {
     final @NonNull RaftActor actor;
     final @NonNull RaftActorSnapshotCohort<T> snapshotCohort;
     final @NonNull RaftActorRecoveryCohort recoveryCohort;
