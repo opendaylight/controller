@@ -419,10 +419,12 @@ public final class EntryJournalV1 implements EntryJournal, AutoCloseable {
     }
 
     // FIXME: commitJournalIndex()
+    @Override
     public long applyToJournalIndex() {
         return applyTo;
     }
 
+    @Override
     public void setApplyToJournalIndex(final long newApplyTo) throws IOException {
         if (newApplyTo < 0) {
             throw new IOException("Bad applyTo index " + newApplyTo);
@@ -449,12 +451,21 @@ public final class EntryJournalV1 implements EntryJournal, AutoCloseable {
 
             @Override
             public @Nullable JournalEntry nextEntry() throws IOException {
+                reader.reset(COMPRESSION_LZ4);
                 return reader.tryNext(mapper);
             }
 
             @Override
             public void close() {
                 reader.close();
+            }
+
+            @Override
+            public void resetToRead(long nextJournalIndex) throws IOException {
+                if (nextJournalIndex < 1) {
+                    throw new IOException("newJournalIndex needs to be positive, not " + nextJournalIndex);
+                }
+                reader.reset(nextJournalIndex);
             }
         };
     }
