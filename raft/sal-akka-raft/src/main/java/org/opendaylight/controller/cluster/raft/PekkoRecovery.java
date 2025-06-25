@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.time.Instant;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import org.apache.pekko.persistence.RecoveryCompleted;
 import org.apache.pekko.persistence.SnapshotOffer;
 import org.eclipse.jdt.annotation.NonNull;
@@ -276,15 +275,7 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
                 recoverCommand(command);
             }
 
-            if (snapshotTimer != null && snapshotTimer.elapsed(TimeUnit.SECONDS) >= snapshotInterval) {
-                LOG.info("{}: Time for recovery snapshot", memberId());
-                applyRecoveredCommands();
-                recoveryLog.setLastApplied(lastApplied);
-                recoveryLog.setCommitIndex(lastApplied);
-                takeSnapshot(logEntry);
-                LOG.info("{}: Resetting timer for the next recovery snapshot", memberId());
-                snapshotTimer.reset().start();
-            }
+            snapshotIfNeeded(logEntry);
         }
 
         recoveryLog.setLastApplied(lastApplied);
@@ -296,19 +287,8 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
         recoveryLog.removeRecoveredEntries(deleteEntries.getFromIndex());
     }
 
-    // Take an intermediate snapshot. This serves two functions:
-    //   - trim the replicated log to last applied entry, ensuring minimal memory footprint
-    //   - transfer Pekko-persisted messages to SnapshotStore
-    // The second point is important, because we want to complete evacuating Pekko persistence completely before we
-    // instantiate EntryStore.
-    //
-    // While it would seem we can use SnapshotManager to achieve this, that is not what we want here because:
-    //   - recovery really should happen before we ever instantiate SnapshotManager
-    //   - we want this to happen synchronously, without giving Pekko a chance to flood us with subsequent messages
-    //   - SnapshotManager can only access EntryStore, whereas we have access to RaftActor's persistence directly
-    //   - once we have migrated EntryStore to not use Pekko, we'll have explicit control over stored entries, and we
-    //     do not want to be shifting entries from EntryStore to SnapshotStore.
-    private void takeSnapshot(final EntryMeta logEntry) {
+    @Override
+    void takeSnapshot(final EntryMeta logEntry) {
         LOG.info("{}: Taking snapshot on entry with index {}", memberId(), logEntry.index());
 
         final var sw = Stopwatch.createStarted();
