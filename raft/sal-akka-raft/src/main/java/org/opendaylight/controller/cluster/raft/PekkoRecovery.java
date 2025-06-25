@@ -100,7 +100,6 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
     private final @Nullable TermInfo origTermInfo;
     private final @Nullable SnapshotFile origSnapshot;
 
-    private int currentRecoveryBatchCount;
     private boolean anyDataRecovered;
     private boolean hasMigratedDataRecovered;
 
@@ -274,14 +273,12 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
 
             // We deal with RaftCommands separately
             if (logEntry.command() instanceof StateCommand command) {
-                batchRecoveredCommand(command);
+                recoverCommand(command);
             }
 
             if (snapshotTimer != null && snapshotTimer.elapsed(TimeUnit.SECONDS) >= snapshotInterval) {
                 LOG.info("{}: Time for recovery snapshot", memberId());
-                if (currentRecoveryBatchCount > 0) {
-                    endCurrentLogRecoveryBatch();
-                }
+                applyRecoveredCommands();
                 recoveryLog.setLastApplied(lastApplied);
                 recoveryLog.setCommitIndex(lastApplied);
                 takeSnapshot(logEntry);
@@ -297,18 +294,6 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
     @Deprecated(since = "11.0.0", forRemoval = true)
     void onDeleteEntries(final DeleteEntries deleteEntries) {
         recoveryLog.removeRecoveredEntries(deleteEntries.getFromIndex());
-    }
-
-    private void batchRecoveredCommand(final StateCommand command) {
-        if (currentRecoveryBatchCount == 0) {
-            recoveryCohort.startLogRecoveryBatch(batchSize);
-        }
-
-        recoveryCohort.appendRecoveredCommand(command);
-
-        if (++currentRecoveryBatchCount >= batchSize) {
-            endCurrentLogRecoveryBatch();
-        }
     }
 
     // Take an intermediate snapshot. This serves two functions:
@@ -351,15 +336,8 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
         LOG.info("{}: Snapshot completed in {}, resetting timer for the next recovery snapshot", memberId(), sw.stop());
     }
 
-    private void endCurrentLogRecoveryBatch() {
-        recoveryCohort.applyCurrentLogRecoveryBatch();
-        currentRecoveryBatchCount = 0;
-    }
-
     private void onRecoveryCompletedMessage() {
-        if (currentRecoveryBatchCount > 0) {
-            endCurrentLogRecoveryBatch();
-        }
+        applyRecoveredCommands();
 
         final var recoveryTime = stopRecoveryTimers();
 
