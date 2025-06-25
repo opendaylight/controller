@@ -118,8 +118,17 @@ public interface EntryJournal extends AutoCloseable {
 
         /**
          * {@return the next {@link JournalEntry}, or {@code null}}
+         * @throws IOException if an I/O error occurs
          */
         @Nullable JournalEntry nextEntry() throws IOException;
+
+        /**
+         * Reset this reader so it attempts to read the entry at specified {@code journalIndex}.
+         *
+         * @param nextJournalIndex the next {@link journalIndex} to read, must be positive.
+         * @throws IOException if an I/O error occurs
+         */
+        void resetToRead(long nextJournalIndex) throws IOException;
 
         @Override
         void close();
@@ -128,6 +137,7 @@ public interface EntryJournal extends AutoCloseable {
     /**
      * {@return the {@code journalIndex} of the last entry which is to be applied}
      */
+    // FIXME: commitJournalIndex()?
     long applyToJournalIndex();
 
     /**
