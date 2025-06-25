@@ -126,6 +126,11 @@ public interface EntryJournal extends AutoCloseable {
     }
 
     /**
+     * {@return the {@code journalIndex} of the last entry which is to be applied}
+     */
+    long applyToJournalIndex();
+
+    /**
      * {@return a new {@link Reader}}
      */
     Reader openReader();
@@ -157,6 +162,14 @@ public interface EntryJournal extends AutoCloseable {
      * @throws IOException if an I/O error occurs
      */
     void discardTail(long firstRemovedIndex) throws IOException;
+
+    /**
+     * Update the {@code journalIndex} to report from {@link #applyToJournalIndex()}.
+     *
+     * @param newApplyTo the new {@code journalIndex} to return
+     * @throws IOException if an I/O error occurs
+     */
+    void setApplyToJournalIndex(long newApplyTo) throws IOException;
 
     @Override
     void close();

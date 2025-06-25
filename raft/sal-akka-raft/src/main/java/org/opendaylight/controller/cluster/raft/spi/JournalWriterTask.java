@@ -298,7 +298,8 @@ public final class JournalWriterTask implements Runnable {
                                 }
                                 case JournalDiscardHead discardHead -> journal.discardHead(discardHead.journalIndex);
                                 case JournalDiscardTail discardTail -> journal.discardTail(discardTail.journalIndex);
-                                case JournalSetApplyTo setApplyTo -> journal.setApplyTo(setApplyTo.journalIndex);
+                                case JournalSetApplyTo setApplyTo ->
+                                    journal.setApplyToJournalIndex(setApplyTo.journalIndex);
                             }
                         } catch (IOException e) {
                             completions.add(abortAndFailAction(action, e));

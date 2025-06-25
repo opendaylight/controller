@@ -39,7 +39,7 @@ class EntryJournalTest {
 
     @Test
     void emptyReplay() throws Exception {
-        assertEquals(0, journal.applyTo());
+        assertEquals(0, journal.applyToJournalIndex());
         try (var reader = journal.openReader()) {
             assertEquals(1, reader.nextJournalIndex());
             assertNull(reader.nextEntry());
@@ -56,8 +56,8 @@ class EntryJournalTest {
         assertEquals(2, journal.nextToWrite());
         assertEquals(2_097_279, journal.appendEntry(entry2));
 
-        journal.setApplyTo(2);
-        assertEquals(2, journal.applyTo());
+        journal.setApplyToJournalIndex(2);
+        assertEquals(2, journal.applyToJournalIndex());
         journal.discardHead(1);
         journal.close();
 
@@ -65,7 +65,7 @@ class EntryJournalTest {
         assertEquals(2_097_279, Files.size(directory.resolve("entry-v1-0000000000000002")));
 
         journal = new EntryJournalV1("test", directory, CompressionType.NONE, false);
-        assertEquals(2, journal.applyTo());
+        assertEquals(2, journal.applyToJournalIndex());
 
         try (var reader = journal.openReader()) {
             assertEquals(1, reader.nextJournalIndex());
