@@ -69,7 +69,7 @@ abstract sealed class Recovery<T extends @NonNull State> permits PekkoRecovery {
     final String stopRecoveryTimers() {
         final String recoveryTime;
         if (recoveryTimer != null) {
-            recoveryTime = " in " + recoveryTimer.stop();
+            recoveryTime = "in " + recoveryTimer.stop();
             recoveryTimer = null;
         } else {
             recoveryTime = "";
