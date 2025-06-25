@@ -11,6 +11,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Stopwatch;
+import java.util.concurrent.TimeUnit;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.persisted.MigratedSerializable;
@@ -18,6 +19,9 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
+import org.opendaylight.raft.api.EntryMeta;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Base class for recovery implementations.
@@ -25,16 +29,18 @@ import org.opendaylight.controller.cluster.raft.spi.StateCommand;
  * @param <T> {@link State} type
  */
 abstract sealed class Recovery<T extends @NonNull State> permits PekkoRecovery {
+    private static final Logger LOG = LoggerFactory.getLogger(Recovery.class);
+
     final @NonNull RaftActor actor;
     final @NonNull RaftActorSnapshotCohort<T> snapshotCohort;
     final @NonNull RaftActorRecoveryCohort recoveryCohort;
     final @NonNull RecoveryLog recoveryLog;
-    final int snapshotInterval;
+    private final int snapshotInterval;
     private final int maxBatchSize;
 
+    // our timers
     private Stopwatch recoveryTimer;
-    // FIXME: hide this field
-    Stopwatch snapshotTimer;
+    private Stopwatch snapshotTimer;
 
     // the number of commands we have submitted to recoveryCohort
     private int currentBatchSize;
@@ -108,6 +114,43 @@ abstract sealed class Recovery<T extends @NonNull State> permits PekkoRecovery {
         recoveryCohort.applyCurrentLogRecoveryBatch();
         currentBatchSize = 0;
     }
+
+    @NonNullByDefault
+    final void snapshotIfNeeded(final long lastApplied, final EntryMeta logEntry) {
+        if (snapshotTimer != null && snapshotTimer.elapsed(TimeUnit.SECONDS) >= snapshotInterval) {
+            LOG.info("{}: Time for recovery snapshot", memberId());
+            applyRecoveredCommands();
+            recoveryLog.setLastApplied(lastApplied);
+            recoveryLog.setCommitIndex(lastApplied);
+            takeSnapshot(logEntry);
+            LOG.info("{}: Resetting timer for the next recovery snapshot", memberId());
+            snapshotTimer.reset().start();
+        }
+    }
+
+    /**
+     * Take an intermediate recovery snapshot. This serves two functions:
+     * <ol>
+     *   <li>trim the replicated log to last applied entry, ensuring minimal memory footprint</li>
+     *   <li>transfer Pekko-persisted messages to SnapshotStore</li>
+     * </ol>
+     * The second point is important, because we want to complete evacuating Pekko persistence completely before we
+     * instantiate EntryStore.
+     *
+     * <p>While it would seem we can use SnapshotManager to achieve this, that is not what we want here because:
+     * <ul>
+     *  <li>recovery really should happen before we ever instantiate SnapshotManager</li>
+     *  <li>we want this to happen synchronously, without giving Pekko a chance to flood us with subsequent messages
+     *  </li>
+     *  <li>SnapshotManager can only access EntryStore, whereas we have access to RaftActor's persistence directly</li>
+     *  <li>once we have migrated EntryStore to not use Pekko, we'll have explicit control over stored entries, and we
+     *       do not want to be shifting entries from EntryStore to SnapshotStore<li>
+     * </ul>
+     *
+     * @param logEntry the last log entry for the snapshot
+     */
+    @NonNullByDefault
+    abstract void takeSnapshot(EntryMeta logEntry);
 
     @Override
     public final String toString() {
