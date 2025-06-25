@@ -363,6 +363,7 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
 
         final var recoveryTime = stopRecoveryTimers();
 
+        // FIXME: not 'switching', move that log somewhere else
         LOG.info("{}: Recovery completed {} - Switching actor to Follower - last log index = {}, last log term = {}, "
             + "snapshot index = {}, snapshot term = {}, journal size = {}", memberId(), recoveryTime,
             recoveryLog.lastIndex(), recoveryLog.lastTerm(), recoveryLog.getSnapshotIndex(),
