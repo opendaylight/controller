@@ -249,21 +249,19 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
     }
 
     void onRecoveredApplyLogEntries(final long toIndex) {
-        long lastUnappliedIndex = recoveryLog.getLastApplied() + 1;
+        long lastApplied = recoveryLog.getLastApplied();
+        long lastUnapplied = lastApplied + 1;
 
-        if (LOG.isDebugEnabled()) {
-            // it can happen that lastUnappliedIndex > toIndex, if the AJE is in the persistent journal
-            // but the entry itself has made it to that state and recovered via the snapshot
-            LOG.debug("{}: Received apply journal entries for recovery, applying to state: {} to {}", memberId(),
-                lastUnappliedIndex, toIndex);
-        }
+        // it can happen that lastUnappliedIndex > toIndex, if the AJE is in the persistent journal but the entry itself
+        // has made it to that state and recovered via the snapshot
+        LOG.debug("{}: Received apply journal entries for recovery, applying to state: {} to {}", memberId(),
+            lastUnapplied, toIndex);
 
-        long lastApplied = lastUnappliedIndex - 1;
-        for (long i = lastUnappliedIndex; i <= toIndex; i++) {
-            final var logEntry = recoveryLog.lookup(i);
+        while (lastUnapplied <= toIndex) {
+            final var logEntry = recoveryLog.lookup(lastUnapplied);
             if (logEntry == null) {
                 // Shouldn't happen but cover it anyway.
-                LOG.error("{}: Log entry not found for index {}", memberId(), i);
+                LOG.error("{}: Log entry not found for index {}", memberId(), lastUnapplied);
                 break;
             }
 
@@ -276,6 +274,7 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
             }
 
             snapshotIfNeeded(logEntry);
+            lastUnapplied++;
         }
 
         recoveryLog.setLastApplied(lastApplied);
