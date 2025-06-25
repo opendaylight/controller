@@ -56,7 +56,7 @@ public interface RaftActorRecoveryCohort {
 
     /**
      * This method is called during recovery at the end of a batch to apply the current batched commands. This method is
-     * called after {@link #appendRecoveredCommand}.
+     * called after {@link #appendRecoveredCommand(StateCommand)}.
      */
     void applyCurrentLogRecoveryBatch();
 
