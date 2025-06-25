@@ -19,8 +19,8 @@ import org.opendaylight.raft.api.EntryMeta;
  * A {@link ReplicatedLog} used during {@link PekkoRecovery}.
  */
 @NonNullByDefault
-final class PekkoReplicatedLog extends AbstractReplicatedLog<SimpleReplicatedLogEntry> {
-    PekkoReplicatedLog(final String memberId) {
+final class RecoveryLog extends AbstractReplicatedLog<SimpleReplicatedLogEntry> {
+    RecoveryLog(final String memberId) {
         super(memberId);
     }
 
