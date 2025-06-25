@@ -17,6 +17,7 @@ import org.opendaylight.controller.cluster.raft.persisted.MigratedSerializable;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
+import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 
 /**
  * Base class for recovery implementations.
@@ -29,11 +30,14 @@ abstract sealed class Recovery<T extends @NonNull State> permits PekkoRecovery {
     final @NonNull RaftActorRecoveryCohort recoveryCohort;
     final @NonNull RecoveryLog recoveryLog;
     final int snapshotInterval;
-    final int batchSize;
+    private final int maxBatchSize;
 
     private Stopwatch recoveryTimer;
     // FIXME: hide this field
     Stopwatch snapshotTimer;
+
+    // the number of commands we have submitted to recoveryCohort
+    private int currentBatchSize;
 
     @NonNullByDefault
     Recovery(final RaftActor actor, final RaftActorSnapshotCohort<T> snapshotCohort,
@@ -42,7 +46,7 @@ abstract sealed class Recovery<T extends @NonNull State> permits PekkoRecovery {
         this.snapshotCohort = requireNonNull(snapshotCohort);
         this.recoveryCohort = requireNonNull(recoveryCohort);
         snapshotInterval = configParams.getRecoverySnapshotIntervalSeconds();
-        batchSize = configParams.getJournalRecoveryLogBatchSize();
+        maxBatchSize = configParams.getJournalRecoveryLogBatchSize();
         recoveryLog = new RecoveryLog(actor.memberId());
     }
 
@@ -80,6 +84,29 @@ abstract sealed class Recovery<T extends @NonNull State> permits PekkoRecovery {
             snapshotTimer = null;
         }
         return recoveryTime;
+    }
+
+    final void recoverCommand(final StateCommand command) {
+        if (currentBatchSize == 0) {
+            recoveryCohort.startLogRecoveryBatch(maxBatchSize);
+        }
+
+        recoveryCohort.appendRecoveredCommand(command);
+
+        if (++currentBatchSize >= maxBatchSize) {
+            applyRecoveryBatch();
+        }
+    }
+
+    final void applyRecoveredCommands() {
+        if (currentBatchSize > 0) {
+            applyRecoveryBatch();
+        }
+    }
+
+    private void applyRecoveryBatch() {
+        recoveryCohort.applyCurrentLogRecoveryBatch();
+        currentBatchSize = 0;
     }
 
     @Override
