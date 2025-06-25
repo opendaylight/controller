@@ -92,31 +92,21 @@ abstract sealed class Recovery<T extends @NonNull State> permits PekkoRecovery {
         return recoveryTime;
     }
 
-    final void recoverCommand(final StateCommand command) {
-        if (currentBatchSize == 0) {
-            recoveryCohort.startLogRecoveryBatch(maxBatchSize);
-        }
-
-        recoveryCohort.appendRecoveredCommand(command);
-
-        if (++currentBatchSize >= maxBatchSize) {
-            applyRecoveryBatch();
-        }
-    }
-
-    final void applyRecoveredCommands() {
-        if (currentBatchSize > 0) {
-            applyRecoveryBatch();
-        }
-    }
-
-    private void applyRecoveryBatch() {
-        recoveryCohort.applyCurrentLogRecoveryBatch();
-        currentBatchSize = 0;
-    }
-
     @NonNullByDefault
-    final void snapshotIfNeeded(final EntryMeta logEntry) {
+    final void applyEntry(final LogEntry logEntry) {
+        // We deal with RaftCommands separately
+        if (logEntry.command() instanceof StateCommand command) {
+            if (currentBatchSize == 0) {
+                recoveryCohort.startLogRecoveryBatch(maxBatchSize);
+            }
+
+            recoveryCohort.appendRecoveredCommand(command);
+
+            if (++currentBatchSize >= maxBatchSize) {
+                applyRecoveryBatch();
+            }
+        }
+
         if (snapshotTimer != null && snapshotTimer.elapsed(TimeUnit.SECONDS) >= snapshotInterval) {
             final var lastApplied = logEntry.index();
 
@@ -128,6 +118,17 @@ abstract sealed class Recovery<T extends @NonNull State> permits PekkoRecovery {
             LOG.info("{}: Resetting timer for the next recovery snapshot", memberId());
             snapshotTimer.reset().start();
         }
+   }
+
+    final void applyRecoveredCommands() {
+        if (currentBatchSize > 0) {
+            applyRecoveryBatch();
+        }
+    }
+
+    private void applyRecoveryBatch() {
+        recoveryCohort.applyCurrentLogRecoveryBatch();
+        currentBatchSize = 0;
     }
 
     /**
