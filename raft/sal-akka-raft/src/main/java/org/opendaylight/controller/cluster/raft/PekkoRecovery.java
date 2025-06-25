@@ -26,7 +26,6 @@ import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
-import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
 import org.opendaylight.raft.api.EntryMeta;
@@ -267,13 +266,7 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
 
             lastApplied++;
             startRecoveryTimers();
-
-            // We deal with RaftCommands separately
-            if (logEntry.command() instanceof StateCommand command) {
-                recoverCommand(command);
-            }
-
-            snapshotIfNeeded(logEntry);
+            applyEntry(logEntry);
             lastUnapplied++;
         }
 
