@@ -21,6 +21,7 @@ import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage;
 import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
+import org.opendaylight.controller.cluster.raft.spi.EntryStoreCompleter;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.RaftStorage;
 import org.opendaylight.raft.api.EntryInfo;
@@ -72,8 +73,8 @@ final class PersistenceControl extends PersistenceProvider {
     }
 
     @Override
-    ExecuteInSelfActor actor() {
-        return storage.actor();
+    EntryStoreCompleter completer() {
+        return storage.completer();
     }
 
     boolean becomePersistent() {

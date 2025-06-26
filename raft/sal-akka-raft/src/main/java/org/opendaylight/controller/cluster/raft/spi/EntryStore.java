@@ -29,6 +29,8 @@ public interface EntryStore {
         void invoke(@Nullable Exception failure, Long success);
     }
 
+    @NonNull EntryStoreCompleter completer();
+
     /**
      * Persists an entry to the applicable journal synchronously. The contract is that the callback will be invoked
      * before {@link RaftActor} sees any other message.
