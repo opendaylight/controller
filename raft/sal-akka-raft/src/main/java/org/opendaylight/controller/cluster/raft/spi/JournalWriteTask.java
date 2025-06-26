@@ -93,7 +93,7 @@ public final class JournalWriteTask implements Runnable {
     private static final Logger LOG = LoggerFactory.getLogger(JournalWriteTask.class);
 
     private final AtomicReference<@Nullable CancellationException> aborted = new AtomicReference<>();
-    private final ExecuteInSelfActor actor;
+    private final JournalWriteCompleter completer;
     private final Ticker ticker;
 
     // Journal and its locking
@@ -128,9 +128,9 @@ public final class JournalWriteTask implements Runnable {
     public JournalWriteTask(final Ticker ticker, final ExecuteInSelfActor actor, final EntryJournalV1 journal,
             final int queueCapacity) {
         this.ticker = requireNonNull(ticker);
-        this.actor = requireNonNull(actor);
         this.journal = requireNonNull(journal);
         tracker = new AveragingProgressTracker(queueCapacity);
+        completer = new JournalWriteCompleter(journal.memberId(), actor);
 
         // TODO: the equivalent of:
         //        final var registry = MetricsReporter.getInstance(MeteringBehavior.DOMAIN).getMetricsRegistry();
@@ -144,8 +144,15 @@ public final class JournalWriteTask implements Runnable {
         //        flushTime = registry.timer(MetricRegistry.name(actorName, "flushTime"));
     }
 
+    /**
+     * {@return this task's JournalWriteCompleter}
+     */
+    public JournalWriteCompleter completer() {
+        return completer;
+    }
+
     private String memberId() {
-        return journal.memberId();
+        return completer.memberId();
     }
 
     public void appendEntry(final LogEntry entry, final RaftCallback<Long> callback) throws InterruptedException {
@@ -330,10 +337,8 @@ public final class JournalWriteTask implements Runnable {
             queueLock.unlock();
         }
 
-        // Invoke callbacks as needed
-        if (!completions.isEmpty()) {
-            actor.executeInSelf(() -> completions.forEach(Runnable::run));
-        }
+        // Enqueue completions
+        completer.enqueueCompletions(completions);
 
         return keepRunning;
     }

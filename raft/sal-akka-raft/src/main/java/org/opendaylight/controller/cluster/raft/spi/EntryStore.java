@@ -7,9 +7,13 @@
  */
 package org.opendaylight.controller.cluster.raft.spi;
 
+import com.google.common.base.Throwables;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.raft.api.EntryMeta;
@@ -18,6 +22,24 @@ import org.opendaylight.raft.api.EntryMeta;
  * Interface to a access and manage {@link StateMachineCommand}-bearing entries with {@link EntryMeta}.
  */
 public interface EntryStore {
+    /**
+     * A {@link RaftCallback} reporting the {@code journalIndex} on success.
+     */
+    @NonNullByDefault
+    @FunctionalInterface
+    interface PersistCallback extends RaftCallback<Long> {
+        default void invoke(final @Nullable Exception failure, final Long success) {
+            if (failure != null) {
+                Throwables.throwIfUnchecked(failure);
+                throw failure instanceof IOException e ? new UncheckedIOException(e)
+                    : new IllegalStateException("Failed to store entry", failure);
+            }
+            invoke();
+        }
+
+        void invoke();
+    }
+
     /**
      * Persists an entry to the applicable journal synchronously. The contract is that the callback will be invoked
      * before {@link RaftActor} sees any other message.
