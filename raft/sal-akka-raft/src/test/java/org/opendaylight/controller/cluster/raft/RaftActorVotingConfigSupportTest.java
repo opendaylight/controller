@@ -69,6 +69,7 @@ import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
+import org.opendaylight.controller.cluster.raft.spi.EntryStoreCompleter;
 import org.opendaylight.controller.cluster.raft.spi.FailingTermInfoStore;
 import org.opendaylight.controller.cluster.raft.spi.ForwardingSnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.ImmediateEntryStore;
@@ -571,7 +572,10 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         final ExecuteInSelfActor ignore = runnable -> {
             LOG.info("Ignoring {}", runnable);
         };
-        leaderRaftActor.persistence().decorateEntryStore((delegate, actor) -> (ImmediateEntryStore) () -> ignore);
+        leaderRaftActor.persistence().decorateEntryStore((delegate, actor) -> {
+            final var completer = new EntryStoreCompleter("ignore", ignore);
+            return (ImmediateEntryStore) () -> completer;
+        });
         leaderRaftActor.persistence().decorateSnapshotStore((delegate, actor) -> (ImmediateSnapshotStore) () -> ignore);
 
         // Complete the prior snapshot - this should be a no-op b/c it's no longer the leader
