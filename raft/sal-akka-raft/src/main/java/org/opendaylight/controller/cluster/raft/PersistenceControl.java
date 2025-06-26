@@ -17,10 +17,10 @@ import java.time.Instant;
 import java.util.List;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage;
 import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
+import org.opendaylight.controller.cluster.raft.spi.EntryStoreCompleter;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.RaftStorage;
 import org.opendaylight.raft.api.EntryInfo;
@@ -46,10 +46,10 @@ final class PersistenceControl extends PersistenceProvider {
         storage = disabledStorage;
     }
 
-    PersistenceControl(final RaftActor raftActor, final Path directory, final CompressionType compression,
-            final Configuration streamConfig) {
-        this(new DisabledRaftStorage(raftActor.memberId(), raftActor, directory, compression, streamConfig),
-            new PekkoRaftStorage(raftActor, directory, compression, streamConfig));
+    PersistenceControl(final RaftActor raftActor, final EntryStoreCompleter completer, final Path directory,
+            final CompressionType compression, final Configuration streamConfig) {
+        this(new DisabledRaftStorage(completer, directory, compression, streamConfig),
+            new PekkoRaftStorage(completer, raftActor, directory, compression, streamConfig));
     }
 
     void start() throws IOException {
@@ -72,8 +72,8 @@ final class PersistenceControl extends PersistenceProvider {
     }
 
     @Override
-    ExecuteInSelfActor actor() {
-        return storage.actor();
+    EntryStoreCompleter completer() {
+        return storage.completer();
     }
 
     boolean becomePersistent() {

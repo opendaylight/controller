@@ -18,6 +18,11 @@ public abstract class ForwardingEntryStore implements EntryStore {
     protected abstract EntryStore delegate();
 
     @Override
+    public EntryStoreCompleter completer() {
+        return delegate().completer();
+    }
+
+    @Override
     public void persistEntry(final ReplicatedLogEntry entry, final Runnable callback) {
         delegate().persistEntry(entry, callback);
     }
