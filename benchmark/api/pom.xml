@@ -12,7 +12,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>mdsal-parent</artifactId>
     <version>11.0.0-SNAPSHOT</version>
-    <relativePath>../../opendaylight/md-sal/parent</relativePath>
+    <relativePath>../../opendaylight/md-sal/parent/pom.xml</relativePath>
   </parent>
 
   <artifactId>benchmark-api</artifactId>

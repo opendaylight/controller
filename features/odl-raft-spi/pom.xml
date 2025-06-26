@@ -13,7 +13,7 @@
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>feature-parent</artifactId>
         <version>11.0.0-SNAPSHOT</version>
-        <relativePath>../parent</relativePath>
+        <relativePath>../parent/pom.xml</relativePath>
     </parent>
 
     <artifactId>odl-raft-spi</artifactId>

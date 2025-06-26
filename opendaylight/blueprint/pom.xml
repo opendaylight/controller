@@ -13,7 +13,7 @@
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>bnd-parent</artifactId>
     <version>11.0.0-SNAPSHOT</version>
-    <relativePath>../../bnd-parent</relativePath>
+    <relativePath>../../bnd-parent/pom.xml</relativePath>
   </parent>
 
   <artifactId>blueprint</artifactId>
