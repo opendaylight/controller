@@ -29,7 +29,6 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.CompressionType;
@@ -58,7 +57,7 @@ public abstract sealed class RaftStorage implements EntryStore, SnapshotStore
             if (tasks.remove(this)) {
                 runImpl();
             } else {
-                LOG.debug("{}: not executing task {}", memberId, this);
+                LOG.debug("{}: not executing task {}", memberId(), this);
             }
         }
 
@@ -80,12 +79,12 @@ public abstract sealed class RaftStorage implements EntryStore, SnapshotStore
             if (tasks.remove(this)) {
                 complete(cause, null);
             } else {
-                LOG.debug("{}: not cancelling task {}", memberId, this);
+                LOG.debug("{}: not cancelling task {}", memberId(), this);
             }
         }
 
         private void complete(final @Nullable Exception failure, final @Nullable T success) {
-            actor.executeInSelf(() -> callback.invoke(failure, success));
+            completer.enqueueCompletion(() -> callback.invoke(failure, success));
         }
     }
 
@@ -116,10 +115,8 @@ public abstract sealed class RaftStorage implements EntryStore, SnapshotStore
     private static final HexFormat HF = HexFormat.of().withUpperCase();
     private static final String FILENAME_START_STR = "snapshot-";
 
-
-    protected final @NonNull ExecuteInSelfActor actor;
+    protected final @NonNull EntryStoreCompleter completer;
     protected final @NonNull CompressionType compression;
-    protected final @NonNull String memberId;
     protected final @NonNull Path directory;
 
     private final Set<CancellableTask<?>> tasks = ConcurrentHashMap.newKeySet();
@@ -127,13 +124,16 @@ public abstract sealed class RaftStorage implements EntryStore, SnapshotStore
 
     private ExecutorService executor;
 
-    protected RaftStorage(final String memberId, final ExecuteInSelfActor actor, final Path directory,
+    protected RaftStorage(final EntryStoreCompleter completer, final Path directory,
             final CompressionType compression, final Configuration streamConfig) {
-        this.memberId = requireNonNull(memberId);
-        this.actor = requireNonNull(actor);
+        this.completer = requireNonNull(completer);
         this.directory = requireNonNull(directory);
         this.compression = requireNonNull(compression);
         this.streamConfig = requireNonNull(streamConfig);
+    }
+
+    private String memberId() {
+        return completer.memberId();
     }
 
     // FIXME: this class should also be tracking the last snapshot bytes -- i.e. what AbstractLeader.SnapshotHolder.
@@ -145,16 +145,16 @@ public abstract sealed class RaftStorage implements EntryStore, SnapshotStore
 
     public final void start() throws IOException {
         if (executor != null) {
-            throw new IllegalStateException("Storage " + memberId + " already started");
+            throw new IllegalStateException("Storage " + memberId() + " already started");
         }
 
         Files.createDirectories(directory);
 
         final var local = Executors.newThreadPerTaskExecutor(Thread.ofVirtual()
-            .name(memberId + "-%d", ThreadLocalRandom.current().nextInt(0, 1_000_000))
+            .name(memberId() + "-%d", ThreadLocalRandom.current().nextInt(0, 1_000_000))
             .factory());
         executor = local;
-        LOG.debug("{}: started executor", memberId);
+        LOG.debug("{}: started executor", memberId());
 
         try {
             postStart();
@@ -166,7 +166,7 @@ public abstract sealed class RaftStorage implements EntryStore, SnapshotStore
     }
 
     private void stopExecutor(final ExecutorService service) {
-        LOG.debug("{}: stopped executor with {} remaining tasks", memberId, service.shutdownNow().size());
+        LOG.debug("{}: stopped executor with {} remaining tasks", memberId(), service.shutdownNow().size());
     }
 
     protected abstract void postStart() throws IOException;
@@ -174,7 +174,7 @@ public abstract sealed class RaftStorage implements EntryStore, SnapshotStore
     public final void stop() {
         final var local = executor;
         if (local == null) {
-            throw new IllegalStateException("Storage " + memberId + " already stopped");
+            throw new IllegalStateException("Storage " + memberId() + " already stopped");
         }
 
         try {
@@ -193,20 +193,20 @@ public abstract sealed class RaftStorage implements EntryStore, SnapshotStore
 
     protected abstract void preStop();
 
-    public final @NonNull ExecuteInSelfActor actor() {
-        return actor;
+    public final @NonNull EntryStoreCompleter completer() {
+        return completer;
     }
 
     @Override
     public final @Nullable SnapshotFile lastSnapshot() throws IOException {
         final var files = listFiles();
         if (files.isEmpty()) {
-            LOG.debug("{}: no eligible files found", memberId);
+            LOG.debug("{}: no eligible files found", memberId());
             return null;
         }
 
         final var first = files.getLast();
-        LOG.debug("{}: picked {} as the latest file", memberId, first);
+        LOG.debug("{}: picked {} as the latest file", memberId(), first);
         return first;
     }
 
@@ -248,7 +248,7 @@ public abstract sealed class RaftStorage implements EntryStore, SnapshotStore
         final var tmpPath = directory.resolve(baseName + ".tmp");
         final var filePath = directory.resolve(baseName + format.extension());
 
-        LOG.debug("{}: starting snapshot writeout to {}", memberId, tmpPath);
+        LOG.debug("{}: starting snapshot writeout to {}", memberId(), tmpPath);
 
         try {
             format.createNew(tmpPath, timestamp, lastIncluded, raftSnapshot.votingConfig(), compression,
@@ -259,7 +259,7 @@ public abstract sealed class RaftStorage implements EntryStore, SnapshotStore
             throw e;
         }
 
-        LOG.debug("{}: finished snapshot writeout to {}", memberId, filePath);
+        LOG.debug("{}: finished snapshot writeout to {}", memberId(), filePath);
         retainSnapshots(timestamp);
     }
 
@@ -268,13 +268,13 @@ public abstract sealed class RaftStorage implements EntryStore, SnapshotStore
         try {
             files = listFiles();
         } catch (IOException e) {
-            LOG.warn("{}: failed to list snapshots, will retry next time", memberId, e);
+            LOG.warn("{}: failed to list snapshots, will retry next time", memberId(), e);
             return;
         }
 
         for (var file : files) {
             if (firstRetained.compareTo(file.timestamp()) <= 0) {
-                LOG.debug("{}: retaining snapshot {}", memberId, file);
+                LOG.debug("{}: retaining snapshot {}", memberId(), file);
                 break;
             }
 
@@ -282,11 +282,11 @@ public abstract sealed class RaftStorage implements EntryStore, SnapshotStore
                 // we should not have concurrent access, but it is okay if the file disappears independently
                 Files.deleteIfExists(file.path());
             } catch (IOException e) {
-                LOG.warn("{}: failed to delete snapshot {}, will retry next time", memberId, file, e);
+                LOG.warn("{}: failed to delete snapshot {}, will retry next time", memberId(), file, e);
                 continue;
             }
 
-            LOG.debug("{}: deleted snapshot {}", memberId, file);
+            LOG.debug("{}: deleted snapshot {}", memberId(), file);
         }
     }
 
@@ -303,16 +303,16 @@ public abstract sealed class RaftStorage implements EntryStore, SnapshotStore
 
     protected ToStringHelper addToStringAtrributes(final ToStringHelper helper) {
         return helper
-            .add("memberId", memberId)
             .add("directory", directory)
             .add("compression", compression)
-            .add("streams", streamConfig);
+            .add("streams", streamConfig)
+            .add("completer", completer);
     }
 
     private ExecutorService checkNotClosed() {
         final var local = executor;
         if (local == null) {
-            throw new IllegalStateException("Storage " + memberId + " already stopped");
+            throw new IllegalStateException("Storage " + memberId() + " already stopped");
         }
         return local;
     }
@@ -320,7 +320,7 @@ public abstract sealed class RaftStorage implements EntryStore, SnapshotStore
     // Ordered by ascending timestamp, i.e. oldest snapshot first
     private List<SnapshotFile> listFiles() throws IOException {
         if (!Files.exists(directory)) {
-            LOG.debug("{}: directory {} does not exist", memberId, directory);
+            LOG.debug("{}: directory {} does not exist", memberId(), directory);
             return List.of();
         }
 
@@ -330,35 +330,35 @@ public abstract sealed class RaftStorage implements EntryStore, SnapshotStore
                 .sorted(Comparator.comparing(SnapshotFile::timestamp))
                 .toList();
         }
-        LOG.trace("{}: recognized files: {}", memberId, ret);
+        LOG.trace("{}: recognized files: {}", memberId(), ret);
         return ret;
     }
 
     private @Nullable SnapshotFile pathToFile(final Path path) {
         if (!Files.isRegularFile(path)) {
-            LOG.debug("{}: skipping non-file {}", memberId, path);
+            LOG.debug("{}: skipping non-file {}", memberId(), path);
             return null;
         }
         if (!Files.isReadable(path)) {
-            LOG.debug("{}: skipping unreadable file {}", memberId, path);
+            LOG.debug("{}: skipping unreadable file {}", memberId(), path);
             return null;
         }
         final var name = path.getFileName().toString();
         if (!name.startsWith(FILENAME_START_STR)) {
-            LOG.debug("{}: skipping unrecognized file {}", memberId, path);
+            LOG.debug("{}: skipping unrecognized file {}", memberId(), path);
             return null;
         }
         final var format = SnapshotFileFormat.forFileName(name);
         if (format == null) {
-            LOG.debug("{}: skipping unhandled file {}", memberId, path);
+            LOG.debug("{}: skipping unhandled file {}", memberId(), path);
             return null;
         }
-        LOG.debug("{}: selected {} to handle file {}", memberId, format, path);
+        LOG.debug("{}: selected {} to handle file {}", memberId(), format, path);
 
         try {
             return format.open(path);
         } catch (IOException e) {
-            LOG.warn("{}: cannot open {}, skipping", memberId, path, e);
+            LOG.warn("{}: cannot open {}, skipping", memberId(), path, e);
             return null;
         }
     }

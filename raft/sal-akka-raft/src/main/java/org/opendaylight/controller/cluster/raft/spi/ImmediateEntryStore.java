@@ -21,7 +21,7 @@ import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 @NonNullByDefault
 public interface ImmediateEntryStore extends EntryStore {
 
-    ExecuteInSelfActor actor();
+    EntryStoreCompleter completer();
 
     @Override
     default void persistEntry(final ReplicatedLogEntry entry, final Runnable callback) {
@@ -37,7 +37,7 @@ public interface ImmediateEntryStore extends EntryStore {
     @Override
     default void startPersistEntry(final ReplicatedLogEntry entry, final Runnable callback) {
         requireNonNull(entry);
-        actor().executeInSelf(requireNonNull(callback));
+        completer().enqueueCompletion(callback);
     }
 
     @Override
