@@ -252,7 +252,7 @@ public final class JournalWriterTask implements Runnable {
             keepRunning = runBatch(batch);
 
             LOG.debug("{}: persisted {} entries in {}", memberId(), batchSize, sw.stop());
-            sw.reset();
+            sw.reset().start();
         } while (keepRunning);
 
         LOG.debug("{}: task {} stopped", memberId(), this);
