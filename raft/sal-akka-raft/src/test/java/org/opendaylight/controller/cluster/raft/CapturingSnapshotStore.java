@@ -18,7 +18,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
+import org.opendaylight.controller.cluster.raft.CapturingSnapshotStore.CapturedCallback;
+import org.opendaylight.controller.cluster.raft.spi.EntryStoreCompleter;
 import org.opendaylight.controller.cluster.raft.spi.ForwardingSnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
@@ -40,7 +41,7 @@ final class CapturingSnapshotStore extends ForwardingSnapshotStore {
 
         void complete() {
             final var latch = new CountDownLatch(1);
-            actor.executeInSelf(() -> {
+            completer.enqueueCompletion(() -> {
                 callback.invoke(failure, success);
                 latch.countDown();
             });
@@ -54,12 +55,12 @@ final class CapturingSnapshotStore extends ForwardingSnapshotStore {
 
     private final AtomicReference<CapturedCallback> capture = new AtomicReference<>();
     private final @NonNull SnapshotStore delegate;
-    private final @NonNull ExecuteInSelfActor actor;
+    private final @NonNull EntryStoreCompleter completer;
 
     @NonNullByDefault
-    CapturingSnapshotStore(final SnapshotStore delegate, final ExecuteInSelfActor actor) {
+    CapturingSnapshotStore(final SnapshotStore delegate, final EntryStoreCompleter completer) {
         this.delegate = requireNonNull(delegate);
-        this.actor = requireNonNull(actor);
+        this.completer = requireNonNull(completer);
     }
 
     @Override

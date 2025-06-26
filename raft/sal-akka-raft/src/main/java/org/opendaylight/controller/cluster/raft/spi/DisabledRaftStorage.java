@@ -32,9 +32,9 @@ import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
  */
 @NonNullByDefault
 public final class DisabledRaftStorage extends RaftStorage implements ImmediateEntryStore {
-    public DisabledRaftStorage(final String memberId, final ExecuteInSelfActor executeInSelf, final Path directory,
+    public DisabledRaftStorage(final EntryStoreCompleter completer, final Path directory,
             final CompressionType compression, final Configuration streamConfig) {
-        super(memberId, executeInSelf, directory, compression, streamConfig);
+        super(completer, directory, compression, streamConfig);
     }
 
     @Override
