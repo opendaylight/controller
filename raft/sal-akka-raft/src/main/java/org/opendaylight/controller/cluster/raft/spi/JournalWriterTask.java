@@ -208,9 +208,11 @@ public final class JournalWriterTask implements Runnable {
             queueLock.unlock();
         }
 
-        // FIXME: add delay capping
-
-        TimeUnit.NANOSECONDS.sleep(delay);
+        if (delay != 0) {
+            // FIXME: add delay capping
+            LOG.trace("{}: applying backpressure of {}ns", memberId(), delay);
+            TimeUnit.NANOSECONDS.sleep(delay);
+        }
     }
 
     @Override
