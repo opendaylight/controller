@@ -31,7 +31,7 @@ import org.opendaylight.controller.cluster.raft.MockCommand;
 import org.opendaylight.raft.spi.CompressionType;
 
 @ExtendWith(MockitoExtension.class)
-class JournalWriterTaskTest {
+class JournalWriteTaskTest {
     private final ArrayList<Runnable> actorMessages = new ArrayList<>();
 
     @TempDir
@@ -42,12 +42,12 @@ class JournalWriterTaskTest {
     private ArgumentCaptor<Exception> exCaptor;
 
     private EntryJournalV1 journal;
-    private JournalWriterTask task;
+    private JournalWriteTask task;
 
     @BeforeEach
     void beforeEach() throws Exception {
         journal = new EntryJournalV1("test", directory, CompressionType.NONE, false);
-        task = new JournalWriterTask(actorMessages::add, journal, 32);
+        task = new JournalWriteTask(actorMessages::add, journal, 32);
     }
 
     @AfterEach

@@ -31,7 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @NonNullByDefault
-public final class JournalWriterTask implements Runnable {
+public final class JournalWriteTask implements Runnable {
 
     private sealed interface Action {
         // Nothing else
@@ -90,7 +90,7 @@ public final class JournalWriterTask implements Runnable {
         // Nothing else
     }
 
-    private static final Logger LOG = LoggerFactory.getLogger(JournalWriterTask.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JournalWriteTask.class);
 
     private final AtomicReference<@Nullable CancellationException> aborted = new AtomicReference<>();
     private final ExecuteInSelfActor actor;
@@ -120,12 +120,12 @@ public final class JournalWriterTask implements Runnable {
     //    // Tracks the duration of flush operations
     //    private Timer flushTime;
 
-    public JournalWriterTask(final ExecuteInSelfActor actor, final EntryJournalV1 journal, final int queueCapacity) {
+    public JournalWriteTask(final ExecuteInSelfActor actor, final EntryJournalV1 journal, final int queueCapacity) {
         this(Ticker.systemTicker(), actor, journal, queueCapacity);
     }
 
     @VisibleForTesting
-    public JournalWriterTask(final Ticker ticker, final ExecuteInSelfActor actor, final EntryJournalV1 journal,
+    public JournalWriteTask(final Ticker ticker, final ExecuteInSelfActor actor, final EntryJournalV1 journal,
             final int queueCapacity) {
         this.ticker = requireNonNull(ticker);
         this.actor = requireNonNull(actor);
