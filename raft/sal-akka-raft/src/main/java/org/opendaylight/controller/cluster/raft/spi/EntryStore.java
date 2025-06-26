@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft.spi;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.raft.api.EntryMeta;
@@ -18,6 +19,20 @@ import org.opendaylight.raft.api.EntryMeta;
  * Interface to a access and manage {@link StateMachineCommand}-bearing entries with {@link EntryMeta}.
  */
 public interface EntryStore {
+    /**
+     * A {@link RaftCallback} reporting the {@code journalIndex} on success.
+     */
+    @NonNullByDefault
+    @FunctionalInterface
+    interface PersistCallback extends RaftCallback<Long> {
+        /**
+         * {@inheritDoc}
+         *
+         * {@code success} is the {@code journalIndex} of the entry
+         */
+        void invoke(@Nullable Exception failure, Long success);
+    }
+
     /**
      * Persists an entry to the applicable journal synchronously. The contract is that the callback will be invoked
      * before {@link RaftActor} sees any other message.
