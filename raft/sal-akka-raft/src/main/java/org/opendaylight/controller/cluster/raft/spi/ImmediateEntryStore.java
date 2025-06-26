@@ -11,17 +11,14 @@ import static java.util.Objects.requireNonNull;
 
 import org.apache.pekko.persistence.JournalProtocol;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 
 /**
- * An immediate {@link EntryStore}. Offloads asynchronous persist responses via {@link ExecuteInSelfActor}
- * exposed via {@link #actor()}.
+ * An immediate {@link EntryStore}. Offloads asynchronous persist responses via {@link EntryStoreCompleter}
+ * exposed via {@link #completer()}.
  */
 @NonNullByDefault
 public interface ImmediateEntryStore extends EntryStore {
-
-    ExecuteInSelfActor actor();
 
     @Override
     default void persistEntry(final ReplicatedLogEntry entry, final Runnable callback) {
@@ -37,7 +34,7 @@ public interface ImmediateEntryStore extends EntryStore {
     @Override
     default void startPersistEntry(final ReplicatedLogEntry entry, final Runnable callback) {
         requireNonNull(entry);
-        actor().executeInSelf(requireNonNull(callback));
+        completer().enqueueCompletion(callback);
     }
 
     @Override

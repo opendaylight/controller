@@ -14,37 +14,42 @@ import com.google.common.base.MoreObjects.ToStringHelper;
 import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
+import org.opendaylight.controller.cluster.raft.spi.EntryStoreCompleter;
 import org.opendaylight.controller.cluster.raft.spi.ImmediateEntryStore;
 
 @VisibleForTesting
 @NonNullByDefault
 public final class TestPersistenceProvider extends PersistenceProvider {
-    private final AtomicReference<ExecuteInSelfActor> actor;
+    private final AtomicReference<EntryStoreCompleter> completer;
 
-    private TestPersistenceProvider(final AtomicReference<ExecuteInSelfActor> actor) {
-        super((ImmediateEntryStore) actor::get, (ImmediateSnapshotStore) actor::get);
-        this.actor = requireNonNull(actor);
+    private TestPersistenceProvider(final AtomicReference<EntryStoreCompleter> completer) {
+        super((ImmediateEntryStore) completer::get, (ImmediateSnapshotStore) () -> completer.get()::enqueueCompletion);
+        this.completer = requireNonNull(completer);
     }
 
     TestPersistenceProvider() {
-        this(Runnable::run);
+        this(new EntryStoreCompleter("test", Runnable::run));
     }
 
-    TestPersistenceProvider(final ExecuteInSelfActor actor) {
+    TestPersistenceProvider(final EntryStoreCompleter actor) {
         this(new AtomicReference<>(requireNonNull(actor)));
     }
 
     @Override
-    ExecuteInSelfActor actor() {
-        return actor.get();
+    EntryStoreCompleter completer() {
+        return completer.get();
     }
 
-    public void setActor(final ExecuteInSelfActor newActor) {
-        actor.set(requireNonNull(newActor));
+    public void setActor(final ExecuteInSelfActor actor) {
+        setCompleter(new EntryStoreCompleter(completer().memberId(), actor));
+    }
+
+    public void setCompleter(final EntryStoreCompleter newCompleter) {
+        completer.set(requireNonNull(newCompleter));
     }
 
     @Override
     ToStringHelper addToStringAttributes(final ToStringHelper helper) {
-        return helper.add("actor", actor());
+        return helper.add("completer", completer());
     }
 }
