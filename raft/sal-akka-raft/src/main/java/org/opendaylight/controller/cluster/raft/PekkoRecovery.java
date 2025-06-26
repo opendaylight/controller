@@ -23,12 +23,12 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
+import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
-import org.opendaylight.raft.api.EntryMeta;
 import org.opendaylight.raft.api.TermInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -174,8 +174,8 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
         actor.nukePekkoSnapshots();
     }
 
-    private @Nullable ToStorage<?> toStorage(final @Nullable State state) {
-        final var support = snapshotCohort.support();
+    private @Nullable ToStorage<T> toStorage(final @Nullable State state) {
+        final var support = support();
         return ToStorage.ofNullable(support.writer(), support.snapshotType().cast(state));
     }
 
@@ -280,32 +280,13 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
     }
 
     @Override
-    void takeSnapshot(final EntryMeta logEntry) {
-        LOG.info("{}: Taking snapshot on entry with index {}", memberId(), logEntry.index());
+    final List<LogEntry> filterSnapshotUnappliedEntries(List<LogEntry> unappliedEntries) {
+        return unappliedEntries;
+    }
 
-        final var sw = Stopwatch.createStarted();
-        // FIXME: We really do not have followers at this point, but information from VotingConfig may indicate we do.
-        //        We should inline newCaptureSnapshot() logic here with the appropriate specialization.
-        final var peerInfos = actor.peerInfos();
-        final var request = recoveryLog.newCaptureSnapshot(logEntry, -1, false, !peerInfos.isEmpty());
-        final var lastSeq = actor.lastSequenceNr();
-        final var snapshotState = snapshotCohort.takeSnapshot();
-        final var timestamp = Instant.now();
-
-        try {
-            snapshotStore().saveSnapshot(
-                new RaftSnapshot(peerInfos.votingConfig(true), request.getUnAppliedEntries()), request.lastApplied(),
-                ToStorage.ofNullable(snapshotCohort.support().writer(), snapshotState), timestamp);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-
-        actor.deleteMessages(lastSeq);
-
-        recoveryLog.snapshotPreCommit(request.getLastAppliedIndex(), request.getLastAppliedTerm());
-        recoveryLog.snapshotCommit();
-
-        LOG.info("{}: Snapshot completed in {}, resetting timer for the next recovery snapshot", memberId(), sw.stop());
+    @Override
+    final void onSnapshotSaved() {
+        actor.deleteMessages(actor.lastSequenceNr());
     }
 
     private void onRecoveryCompletedMessage() {
@@ -376,10 +357,6 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-    }
-
-    void saveRecoverySnapshot() {
-        takeSnapshot(recoveryLog.lastMeta());
     }
 
     // Either data persistence is disabled and we recovered some data entries (i.e. we must have just transitioned

@@ -11,14 +11,21 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Stopwatch;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.time.Instant;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.persisted.MigratedSerializable;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
+import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.Support;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.raft.api.EntryMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,10 +38,10 @@ import org.slf4j.LoggerFactory;
 abstract sealed class Recovery<T extends @NonNull State> permits PekkoRecovery {
     private static final Logger LOG = LoggerFactory.getLogger(Recovery.class);
 
-    final @NonNull RaftActor actor;
-    final @NonNull RaftActorSnapshotCohort<T> snapshotCohort;
     final @NonNull RaftActorRecoveryCohort recoveryCohort;
     final @NonNull RecoveryLog recoveryLog;
+    final @NonNull RaftActor actor;
+    private final @NonNull RaftActorSnapshotCohort<T> snapshotCohort;
     private final int snapshotInterval;
     private final int maxBatchSize;
 
@@ -64,6 +71,11 @@ abstract sealed class Recovery<T extends @NonNull State> permits PekkoRecovery {
     @NonNullByDefault
     final SnapshotStore snapshotStore() {
         return actor.persistence().snapshotStore();
+    }
+
+    @NonNullByDefault
+    final Support<T> support() {
+        return snapshotCohort.support();
     }
 
     final void startRecoveryTimers() {
@@ -131,6 +143,10 @@ abstract sealed class Recovery<T extends @NonNull State> permits PekkoRecovery {
         currentBatchSize = 0;
     }
 
+    void saveRecoverySnapshot() {
+        takeSnapshot(recoveryLog.lastMeta());
+    }
+
     /**
      * Take an intermediate recovery snapshot. This serves two functions:
      * <ol>
@@ -153,7 +169,37 @@ abstract sealed class Recovery<T extends @NonNull State> permits PekkoRecovery {
      * @param logEntry the last log entry for the snapshot
      */
     @NonNullByDefault
-    abstract void takeSnapshot(EntryMeta logEntry);
+    private void takeSnapshot(final EntryMeta logEntry) {
+        LOG.info("{}: Taking snapshot on entry with index {}", memberId(), logEntry.index());
+
+        final var sw = Stopwatch.createStarted();
+        // FIXME: We really do not have followers at this point, but information from VotingConfig may indicate we do.
+        //        We should inline newCaptureSnapshot() logic here with the appropriate specialization.
+        final var peerInfos = actor.peerInfos();
+        final var request = recoveryLog.newCaptureSnapshot(logEntry, -1, false, !peerInfos.isEmpty());
+        final var snapshotState = snapshotCohort.takeSnapshot();
+
+        try {
+            snapshotStore().saveSnapshot(
+                new RaftSnapshot(peerInfos.votingConfig(true),
+                    filterSnapshotUnappliedEntries(request.getUnAppliedEntries())), request.lastApplied(),
+                ToStorage.ofNullable(snapshotCohort.support().writer(), snapshotState), Instant.now());
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+
+        recoveryLog.snapshotPreCommit(request.getLastAppliedIndex(), request.getLastAppliedTerm());
+        recoveryLog.snapshotCommit();
+
+        onSnapshotSaved();
+
+        LOG.info("{}: Snapshot completed in {}, resetting timer for the next recovery snapshot", memberId(), sw.stop());
+    }
+
+    @NonNullByDefault
+    abstract List<LogEntry> filterSnapshotUnappliedEntries(List<LogEntry> unappliedEntries);
+
+    abstract void onSnapshotSaved();
 
     @Override
     public final String toString() {
