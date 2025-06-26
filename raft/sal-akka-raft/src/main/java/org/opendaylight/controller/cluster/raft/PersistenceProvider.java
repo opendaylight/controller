@@ -15,8 +15,8 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import java.util.function.BiFunction;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.opendaylight.controller.cluster.raft.spi.EntryStore;
+import org.opendaylight.controller.cluster.raft.spi.EntryStoreCompleter;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
 
 /**
@@ -43,21 +43,21 @@ public abstract class PersistenceProvider {
 
     @VisibleForTesting
     public final <T extends SnapshotStore> T decorateSnapshotStore(
-            final BiFunction<SnapshotStore, ExecuteInSelfActor, T> factory) {
-        final var ret = verifyNotNull(factory.apply(snapshotStore, actor()));
+            final BiFunction<SnapshotStore, EntryStoreCompleter, T> factory) {
+        final var ret = verifyNotNull(factory.apply(snapshotStore, completer()));
         snapshotStore = ret;
         return ret;
     }
 
     @VisibleForTesting
     public final <T extends EntryStore> T decorateEntryStore(
-            final BiFunction<EntryStore, ExecuteInSelfActor, T> factory) {
-        final var ret = verifyNotNull(factory.apply(entryStore, actor()));
+            final BiFunction<EntryStore, EntryStoreCompleter, T> factory) {
+        final var ret = verifyNotNull(factory.apply(entryStore, completer()));
         entryStore = ret;
         return ret;
     }
 
-    abstract ExecuteInSelfActor actor();
+    abstract EntryStoreCompleter completer();
 
     final void setStorage(final EntryStore newEntryStore, final SnapshotStore newSnapshotStore) {
         entryStore = requireNonNull(newEntryStore);
