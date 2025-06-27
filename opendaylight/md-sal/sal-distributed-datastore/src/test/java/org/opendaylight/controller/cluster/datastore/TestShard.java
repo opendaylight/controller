@@ -66,7 +66,7 @@ public class TestShard extends Shard {
     }
 
     @Override
-    protected void handleCommand(final Object message) {
+    protected void handleCommandImpl(final Object message) {
         switch (message) {
             case StartDropMessages<?> msg -> startDropMessages(msg.getMsgClass());
             case StopDropMessages<?> msg -> stopDropMessages(msg.getMsgClass());
@@ -78,7 +78,7 @@ public class TestShard extends Shard {
         @SuppressWarnings("unchecked")
         final var drop = (Predicate<Object>) dropMessages.get(message.getClass());
         if (drop == null || !drop.test(message)) {
-            super.handleCommand(message);
+            super.handleCommandImpl(message);
         }
     }
 

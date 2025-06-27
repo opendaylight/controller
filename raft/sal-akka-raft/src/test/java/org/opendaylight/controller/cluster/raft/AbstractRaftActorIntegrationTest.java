@@ -139,7 +139,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractRaftActor
         @Override
         @Deprecated
         @SuppressWarnings("checkstyle:IllegalCatch")
-        public void handleCommand(final Object message) {
+        protected void handleCommandImpl(final Object message) {
             if (message instanceof MockCommand payload) {
                 submitCommand(new MockIdentifier(payload.toString()), payload, false);
                 return;
@@ -164,7 +164,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractRaftActor
                 @SuppressWarnings({ "rawtypes", "unchecked" })
                 final Predicate<Object> drop = (Predicate) dropMessages.get(message.getClass());
                 if (drop == null || !drop.test(message)) {
-                    super.handleCommand(message);
+                    super.handleCommandImpl(message);
                 }
             } finally {
                 if (!(message instanceof SendHeartBeat)) {
