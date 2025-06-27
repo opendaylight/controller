@@ -178,21 +178,25 @@ public final class EntryStoreCompleter {
             return;
         }
 
+        final boolean becameNonEmpty;
         lock.lock();
         try {
-            final var signal = pending.isEmpty();
+            becameNonEmpty = pending.isEmpty();
             verify(pending.addAll(completions));
-            if (signal) {
+            if (becameNonEmpty) {
                 LOG.debug("{}: {} completion(s) pending", memberId, size);
                 // unblock any waiters first
                 notEmpty.signal();
-                // schedule a flush
-                actor.executeInSelf(this::completeWhilePending);
             } else {
                 LOG.debug("{}: {} more completion(s) pending", memberId, size);
             }
         } finally {
             lock.unlock();
+        }
+
+        // schedule a flush without holding the lock
+        if (becameNonEmpty) {
+            actor.executeInSelf(this::completeWhilePending);
         }
     }
 
