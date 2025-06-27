@@ -122,7 +122,7 @@ public final class EntryStoreCompleter {
             lock.lock();
             try {
                 if (pending.isEmpty()) {
-                    LOG.debug("{}: no completions pending", memberId);
+                    LOG.trace("{}: no completions pending", memberId);
                     return;
                 }
 
@@ -140,7 +140,7 @@ public final class EntryStoreCompleter {
         while (true) {
             final var size = deferred.size();
             if (size == 0) {
-                LOG.debug("{}: no deferred callbacks", memberId);
+                LOG.trace("{}: no deferred callbacks", memberId);
                 return;
             }
 

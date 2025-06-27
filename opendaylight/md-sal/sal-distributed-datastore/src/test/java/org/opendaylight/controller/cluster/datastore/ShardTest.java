@@ -182,7 +182,7 @@ public class ShardTest extends AbstractShardTest {
             public Shard create() {
                 return new Shard(stateDir(), newShardBuilder()) {
                     @Override
-                    public void handleCommand(final Object message) {
+                    protected void handleCommandImpl(final Object message) {
                         if (message instanceof ElectionTimeout && firstElectionTimeout) {
                             firstElectionTimeout = false;
                             final ActorRef self = self();
@@ -193,7 +193,7 @@ public class ShardTest extends AbstractShardTest {
 
                             onFirstElectionTimeout.countDown();
                         } else {
-                            super.handleCommand(message);
+                            super.handleCommandImpl(message);
                         }
                     }
                 };
