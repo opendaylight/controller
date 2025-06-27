@@ -66,6 +66,7 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.AbstractRaftCommand;
 import org.opendaylight.controller.cluster.raft.spi.AbstractStateCommand;
+import org.opendaylight.controller.cluster.raft.spi.EntryStoreCompleter;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.controller.cluster.raft.spi.RaftCommand;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
@@ -113,11 +114,12 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     private static final Logger LOG = LoggerFactory.getLogger(RaftActor.class);
     private static final long APPLY_STATE_DELAY_THRESHOLD_IN_NANOS = TimeUnit.MILLISECONDS.toNanos(50);
 
+    private final @NonNull BehaviorStateTracker behaviorStateTracker = new BehaviorStateTracker();
+    private final @NonNull PersistenceControl persistenceControl;
+    private final @NonNull EntryStoreCompleter completer;
     // This context should NOT be passed directly to any other actor it is  only to be consumed
     // by the RaftActorBehaviors.
     private final @NonNull LocalAccess localAccess;
-    private final @NonNull PersistenceControl persistenceControl;
-    private final @NonNull BehaviorStateTracker behaviorStateTracker = new BehaviorStateTracker();
     private final @NonNull PeerInfos peerInfos;
 
     // FIXME: should be valid only after recovery
@@ -132,6 +134,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     protected RaftActor(final Path stateDir, final String memberId, final Map<String, String> peerAddresses,
             final Optional<ConfigParams> configParams, final short payloadVersion) {
         super(memberId);
+        completer = new EntryStoreCompleter(memberId, this);
         peerInfos = new PeerInfos(memberId, peerAddresses);
 
         final var config = configParams.orElseGet(DefaultConfigParamsImpl::new);
@@ -261,6 +264,16 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         unhandled(message);
     }
 
+    @Override
+    protected final void handleCommand(final Object message) throws InterruptedException {
+        // dispatch any pending completions first ...
+        completer.completeWhilePending();
+        // ... then handle the message ...
+        handleCommandImpl(requireNonNull(message));
+        // ... and finally wait for deferred tasks
+        completer.completeWhileDeferred();
+    }
+
     /**
      * Handles a message.
      *
@@ -268,9 +281,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
      *             {@link #handleNonRaftCommand(Object)} instead.
      */
     @Deprecated
-    @Override
+    @VisibleForTesting
     // FIXME: make this method final once our unit tests do not need to override it
-    protected void handleCommand(final Object message) {
+    protected void handleCommandImpl(final @NonNull Object message) {
         if (votingConfigSupport.handleMessage(message, getSender())) {
             return;
         }

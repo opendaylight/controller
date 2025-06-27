@@ -220,11 +220,11 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
 
     @Override
     @Deprecated
-    protected void handleCommand(final Object message) {
+    protected void handleCommandImpl(final Object message) {
         if (message instanceof RaftActorBehavior msg) {
             super.changeCurrentBehavior(msg);
         } else {
-            super.handleCommand(message);
+            super.handleCommandImpl(message);
         }
     }
 
