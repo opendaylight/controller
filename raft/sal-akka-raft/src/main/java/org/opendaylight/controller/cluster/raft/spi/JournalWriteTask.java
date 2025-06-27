@@ -296,7 +296,10 @@ public final class JournalWriteTask implements Runnable {
                                     // FIXME: record returned size to messageSize, which really is
                                     // 'serialized command size'
                                     journal.appendEntry(appendEntry.entry);
-                                    completions.add(() -> appendEntry.callback.invoke(null, journalIndex));
+
+                                    // Do not retain entry for callback purposes
+                                    final var cb = appendEntry.callback;
+                                    completions.add(() -> cb.invoke(null, journalIndex));
                                 }
                                 case JournalDiscardHead discardHead -> journal.discardHead(discardHead.journalIndex);
                                 case JournalDiscardTail discardTail -> journal.discardTail(discardTail.journalIndex);
