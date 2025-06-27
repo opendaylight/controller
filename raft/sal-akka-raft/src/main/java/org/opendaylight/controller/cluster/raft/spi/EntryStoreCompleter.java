@@ -122,7 +122,7 @@ public final class EntryStoreCompleter {
             lock.lock();
             try {
                 if (pending.isEmpty()) {
-                    LOG.debug("{}: no completions pending", memberId);
+                    LOG.trace("{}: no completions pending", memberId);
                     return;
                 }
 
@@ -140,7 +140,7 @@ public final class EntryStoreCompleter {
         while (true) {
             final var size = deferred.size();
             if (size == 0) {
-                LOG.debug("{}: no deferred callbacks", memberId);
+                LOG.trace("{}: no deferred callbacks", memberId);
                 return;
             }
 
@@ -148,7 +148,8 @@ public final class EntryStoreCompleter {
             lock.lock();
             try {
                 while (pending.isEmpty()) {
-                    LOG.debug("{}: awaiting more completions to resolve {} deferred callbacks", memberId, size);
+                    LOG.debug("{}: awaiting more completions to resolve {} deferred callback{}", memberId, size,
+                        plural(size));
                     notEmpty.await();
                 }
 
@@ -163,7 +164,8 @@ public final class EntryStoreCompleter {
     }
 
     private void runCompletions(final List<Runnable> completions) {
-        LOG.debug("{}: running {} completions", memberId, completions.size());
+        final var size = completions.size();
+        LOG.debug("{}: running {} completion{}", memberId, size, plural(size));
         completions.forEach(Runnable::run);
     }
 
@@ -183,17 +185,21 @@ public final class EntryStoreCompleter {
             final var signal = pending.isEmpty();
             verify(pending.addAll(completions));
             if (signal) {
-                LOG.debug("{}: {} completions pending", memberId, size);
+                LOG.debug("{}: {} completion{} pending", memberId, size, plural(size));
                 // unblock any waiters first
                 notEmpty.signal();
                 // schedule a flush
                 actor.executeInSelf(this::completeWhilePending);
             } else {
-                LOG.debug("{}: {} more completions pending", memberId, size);
+                LOG.debug("{}: {} more completion{} pending", memberId, size, plural(size));
             }
         } finally {
             lock.unlock();
         }
+    }
+
+    private static String plural(final int size) {
+        return size == 1 ? "" : "s";
     }
 
     @Override

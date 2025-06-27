@@ -304,7 +304,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testRaftActorForwardsToRaftActorSnapshotMessageSupport() {
+    public void testRaftActorForwardsToRaftActorSnapshotMessageSupport() throws Exception {
         String persistenceId = factory.generateActorId("leader-");
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
@@ -861,7 +861,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testSwitchBehavior() {
+    public void testSwitchBehavior() throws Exception {
         final var persistenceId = factory.generateActorId("leader-");
         final var config = new DefaultConfigParamsImpl();
         config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
