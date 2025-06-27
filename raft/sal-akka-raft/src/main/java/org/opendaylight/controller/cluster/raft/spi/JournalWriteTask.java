@@ -31,22 +31,40 @@ import org.slf4j.LoggerFactory;
 
 @NonNullByDefault
 public final class JournalWriteTask implements Runnable {
-
+    /**
+     * A queue entry. e.g. an action the task needs to take.
+     */
     private sealed interface Action {
         // Nothing else
     }
 
+    /**
+     * Terminate the task.
+     */
     private static final class TerminateAction implements Action {
         static final TerminateAction INSTANCE = new TerminateAction();
     }
 
+    /**
+     * An action on the journal, completing a {@link RaftCallback}.
+     *
+     * @param <T> result type
+     */
     private sealed interface JournalAction<T> extends Action {
-
+        /**
+         * {@return the timer ticks when this action was enqueued}
+         */
         long enqueued();
 
+        /**
+         * {@return the callback to complete}
+         */
         RaftCallback<T> callback();
     }
 
+    /**
+     * Common utility causing an unchecked exception to be thrown on failure.
+     */
     private sealed interface UncheckedJournalAction extends JournalAction<Void> {
         @Override
         default RaftCallback<Void> callback() {
