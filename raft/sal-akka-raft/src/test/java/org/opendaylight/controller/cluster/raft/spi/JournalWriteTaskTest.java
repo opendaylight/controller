@@ -64,7 +64,7 @@ class JournalWriteTaskTest {
         assertEquals(1, runActor());
         verify(longCallback).invoke(exCaptor.capture(), isNull());
         final var ex = assertInstanceOf(CancellationException.class, exCaptor.getValue());
-        assertEquals("No further operations allowed", ex.getMessage());
+        assertEquals("Graceful termination", ex.getMessage());
     }
 
     @Test
@@ -87,7 +87,7 @@ class JournalWriteTaskTest {
         verify(longCallback, times(2)).invoke(exCaptor.capture(), isNull());
         exCaptor.getAllValues().forEach(ex -> {
             assertInstanceOf(CancellationException.class, ex);
-            assertEquals("No further operations allowed", ex.getMessage());
+            assertEquals("Abrupt termination", ex.getMessage());
         });
     }
 
