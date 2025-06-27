@@ -73,7 +73,9 @@ final class JournalRecovery<T extends State> extends Recovery<T> {
                 reader.close();
                 journal.setApplyToJournalIndex(0);
                 for (long i = 0; i < pekkoSize; ++i) {
-                    writeEntry(pekkoLog.entryAt(i));
+                    final var entry = pekkoLog.entryAt(i);
+                    writeEntry(entry);
+                    recoverEntry(entry);
                 }
                 return 1;
             }
