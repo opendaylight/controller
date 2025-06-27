@@ -45,9 +45,9 @@ public final class EntryStoreCompleter {
                 delegate.invoke(failure, success);
             } finally {
                 if (deferred.remove(this)) {
-                    LOG.debug("{}: completed deferred callback {}", memberId, this);
+                    LOG.debug("{}: completed deferred callback {}", memberId, delegate);
                 } else {
-                    LOG.warn("{}: remove failed to find deferred callback, perhaps we already ran {}", memberId, this);
+                    LOG.warn("{}: remove failed to find deferred callback for {}", memberId, delegate);
                 }
             }
         }
