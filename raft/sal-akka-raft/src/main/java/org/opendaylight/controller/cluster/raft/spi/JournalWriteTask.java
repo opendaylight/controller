@@ -235,7 +235,7 @@ public final class JournalWriteTask implements Runnable {
                         break;
                     }
 
-                    LOG.debug("{}: waiting for ", memberId());
+                    LOG.debug("{}: waiting for more work", memberId());
                     try {
                         notEmpty.await();
                     } catch (InterruptedException e) {
