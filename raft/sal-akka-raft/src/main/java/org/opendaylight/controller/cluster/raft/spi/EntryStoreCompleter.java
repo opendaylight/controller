@@ -122,7 +122,7 @@ public final class EntryStoreCompleter {
             lock.lock();
             try {
                 if (pending.isEmpty()) {
-                    LOG.debug("{}: no completions pending", memberId);
+                    LOG.trace("{}: no completions pending", memberId);
                     return;
                 }
 
@@ -140,7 +140,7 @@ public final class EntryStoreCompleter {
         while (true) {
             final var size = deferred.size();
             if (size == 0) {
-                LOG.debug("{}: no deferred callbacks", memberId);
+                LOG.trace("{}: no deferred callbacks", memberId);
                 return;
             }
 
@@ -148,7 +148,7 @@ public final class EntryStoreCompleter {
             lock.lock();
             try {
                 while (pending.isEmpty()) {
-                    LOG.debug("{}: awaiting more completions to resolve {} deferred callbacks", memberId, size);
+                    LOG.debug("{}: awaiting more completions to resolve {} deferred callback(s)", memberId, size);
                     notEmpty.await();
                 }
 
@@ -163,7 +163,7 @@ public final class EntryStoreCompleter {
     }
 
     private void runCompletions(final List<Runnable> completions) {
-        LOG.debug("{}: running {} completions", memberId, completions.size());
+        LOG.debug("{}: running {} completion(s)", memberId, completions.size());
         completions.forEach(Runnable::run);
     }
 
@@ -183,13 +183,13 @@ public final class EntryStoreCompleter {
             final var signal = pending.isEmpty();
             verify(pending.addAll(completions));
             if (signal) {
-                LOG.debug("{}: {} completions pending", memberId, size);
+                LOG.debug("{}: {} completion(s) pending", memberId, size, size);
                 // unblock any waiters first
                 notEmpty.signal();
                 // schedule a flush
                 actor.executeInSelf(this::completeWhilePending);
             } else {
-                LOG.debug("{}: {} more completions pending", memberId, size);
+                LOG.debug("{}: {} more completion(s) pending", memberId, size);
             }
         } finally {
             lock.unlock();
