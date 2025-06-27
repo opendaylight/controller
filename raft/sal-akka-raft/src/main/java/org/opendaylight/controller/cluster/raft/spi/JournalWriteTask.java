@@ -25,7 +25,6 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.opendaylight.raft.spi.AveragingProgressTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -120,17 +119,18 @@ public final class JournalWriteTask implements Runnable {
     //    // Tracks the duration of flush operations
     //    private Timer flushTime;
 
-    public JournalWriteTask(final ExecuteInSelfActor actor, final EntryJournalV1 journal, final int queueCapacity) {
-        this(Ticker.systemTicker(), actor, journal, queueCapacity);
+    public JournalWriteTask(final EntryStoreCompleter completer, final EntryJournalV1 journal,
+            final int queueCapacity) {
+        this(Ticker.systemTicker(), completer, journal, queueCapacity);
     }
 
     @VisibleForTesting
-    public JournalWriteTask(final Ticker ticker, final ExecuteInSelfActor actor, final EntryJournalV1 journal,
+    public JournalWriteTask(final Ticker ticker, final EntryStoreCompleter completer, final EntryJournalV1 journal,
             final int queueCapacity) {
         this.ticker = requireNonNull(ticker);
+        this.completer = requireNonNull(completer);
         this.journal = requireNonNull(journal);
         tracker = new AveragingProgressTracker(queueCapacity);
-        completer = new EntryStoreCompleter(journal.memberId(), actor);
 
         // TODO: the equivalent of:
         //        final var registry = MetricsReporter.getInstance(MeteringBehavior.DOMAIN).getMetricsRegistry();
@@ -142,13 +142,6 @@ public final class JournalWriteTask implements Runnable {
         //        flushBytes = registry.histogram(MetricRegistry.name(actorName, "flushBytes"));
         //        flushMessages = registry.histogram(MetricRegistry.name(actorName, "flushMessages"));
         //        flushTime = registry.timer(MetricRegistry.name(actorName, "flushTime"));
-    }
-
-    /**
-     * {@return this task's JournalWriteCompleter}
-     */
-    public EntryStoreCompleter completer() {
-        return completer;
     }
 
     private String memberId() {
