@@ -39,13 +39,6 @@ public final class JournalWriteTask implements Runnable {
     }
 
     /**
-     * Terminate the task.
-     */
-    private static final class TerminateAction implements Action {
-        static final TerminateAction INSTANCE = new TerminateAction();
-    }
-
-    /**
      * An action on the journal, completing a {@link RaftCallback}.
      *
      * @param <T> result type
@@ -105,6 +98,17 @@ public final class JournalWriteTask implements Runnable {
 
     private record ClosedTask(long enqueuedTicks, long execNanos) {
         // Nothing else
+    }
+
+    /**
+     * Terminate the task.
+     *
+     * @param cause termination cause
+     */
+    private record TerminateAction(CancellationException cause) implements Action {
+        TerminateAction {
+            requireNonNull(cause);
+        }
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(JournalWriteTask.class);
@@ -183,31 +187,27 @@ public final class JournalWriteTask implements Runnable {
     }
 
     public void cancelAndTerminate() {
+        final var cause = new CancellationException("Abrupt termination");
         // Interject into processing ...
-        terminate();
-        // ... defer to processAndTerminate ...
-        final var toClose = processAndTerminate();
+        abort(cause);
+        // .. take the lock and enqueue ...
+        enqueueTermination(cause);
         // .. and ensure noone is accessing the journal before closing it
         journalLock.lock();
         try {
-            toClose.close();
+            journal.close();
         } finally {
             journalLock.unlock();
         }
     }
 
     public EntryJournal processAndTerminate() {
-        queueLock.lock();
-        try {
-            enqueue(TerminateAction.INSTANCE);
-        } finally {
-            queueLock.unlock();
-        }
+        enqueueTermination(new CancellationException("Graceful termination"));
         return journal;
     }
 
     // Called with queueLock held
-    private void enqueue(final Action action) {
+    private void lockedEnqueue(final Action action) {
         final var signalNotEmpty = queue.isEmpty();
         queue.addLast(action);
         if (signalNotEmpty) {
@@ -216,11 +216,20 @@ public final class JournalWriteTask implements Runnable {
         }
     }
 
+    private void enqueue(final Action action) {
+        queueLock.lock();
+        try {
+            lockedEnqueue(action);
+        } finally {
+            queueLock.unlock();
+        }
+    }
+
     private void enqueueAndWait(final JournalAction<?> action) throws InterruptedException {
         final long delay;
         queueLock.lock();
         try {
-            enqueue(action);
+            lockedEnqueue(action);
             delay = tracker.openTask(action.enqueued());
         } finally {
             queueLock.unlock();
@@ -233,49 +242,63 @@ public final class JournalWriteTask implements Runnable {
         }
     }
 
+    private void enqueueTermination(final CancellationException cause) {
+        enqueue(new TerminateAction(cause));
+    }
+
     @Override
     public void run() {
-        LOG.debug("{}: task {} started", memberId(), this);
+        LOG.debug("{}: journal writer started", memberId());
 
         // Reused between loops
         final var batch = new ArrayDeque<Action>();
-        final var sw = Stopwatch.createStarted(ticker);
 
         boolean keepRunning;
         do {
             // Attempt to drain all elements first
-            queueLock.lock();
-            try {
-                while (true) {
-                    if (!queue.isEmpty()) {
-                        batch.addAll(queue);
-                        queue.clear();
-                        break;
-                    }
-
-                    LOG.debug("{}: waiting for more work", memberId());
-                    try {
-                        notEmpty.await();
-                    } catch (InterruptedException e) {
-                        // Should never happen, really
-                        throw new IllegalStateException("interrupted while waiting, waiting for next command", e);
-                    }
-                }
-            } finally {
-                queueLock.unlock();
-            }
-
-            final var batchSize = batch.size();
-            LOG.debug("{}: received {} entries in {}", memberId(), batchSize, sw.stop());
-            sw.reset().start();
-
+            final int batchSize = fillBatch(batch);
+            final var sw = Stopwatch.createStarted(ticker);
             keepRunning = runBatch(batch);
-
-            LOG.debug("{}: persisted {} entries in {}", memberId(), batchSize, sw.stop());
-            sw.reset().start();
+            LOG.debug("{}: completed {} commands in {}", memberId(), batchSize, sw.stop());
         } while (keepRunning);
 
-        LOG.debug("{}: task {} stopped", memberId(), this);
+        LOG.debug("{}: journal writer stopped", memberId());
+    }
+
+    private int fillBatch(final ArrayDeque<Action> batch) {
+        final var sw = Stopwatch.createStarted(ticker);
+
+        final int batchSize;
+        queueLock.lock();
+        try {
+            batchSize = lockedFillBatch(batch);
+        } catch (InterruptedException e) {
+            // Should never happen, really. If it does, we just pretend we got a terminate command and let it play out.
+            LOG.error("{}: interrupted while waiting to receive commands, terminating", memberId(), e);
+            Thread.currentThread().interrupt();
+            batch.add(new TerminateAction(newCancellationWithCause("Thread interrupted", e)));
+            return 1;
+        } finally {
+            queueLock.unlock();
+        }
+
+        LOG.debug("{}: received {} commands after {}", memberId(), batchSize, sw.stop());
+        return batchSize;
+    }
+
+    // Called with with ququeLock held
+    private int lockedFillBatch(final ArrayDeque<Action> batch) throws InterruptedException {
+        int queueSize = queue.size();
+        if (queueSize == 0) {
+            LOG.debug("{}: waiting to receive commands", memberId());
+            do {
+                notEmpty.await();
+            } while ((queueSize = queue.size()) == 0);
+        }
+
+        batch.addAll(queue);
+        queue.clear();
+        return queueSize;
     }
 
     @VisibleForTesting
@@ -330,8 +353,8 @@ public final class JournalWriteTask implements Runnable {
 
                         closedTasks.add(new ClosedTask(action.enqueued(), ticker.read() - execStarted));
                     }
-                    case TerminateAction action -> {
-                        terminate();
+                    case TerminateAction(var cause) -> {
+                        abort(cause);
                         keepRunning = false;
                     }
                 }
@@ -357,24 +380,23 @@ public final class JournalWriteTask implements Runnable {
         return keepRunning;
     }
 
-    /**
-     * Terminates all further processing with immediate effect a side-effect of this task being terminated.
-     */
-    private void terminate() {
-        abort(new CancellationException("No further operations allowed"));
-    }
-
     private void abort(final CancellationException cause) {
         aborted.compareAndSet(null, requireNonNull(cause));
     }
 
     private Runnable abortAndFailAction(final JournalAction<?> action, final Exception cause) {
-        abort(new CancellationException("Previous operation failed"));
+        abort(newCancellationWithCause("Previous action failed", cause));
         return failAction(action, cause);
     }
 
     private static Runnable failAction(final JournalAction<?> action, final Exception cause) {
         final var cb = action.callback();
         return () -> cb.invoke(cause, null);
+    }
+
+    private static CancellationException newCancellationWithCause(final String message, final Exception cause) {
+        final var ret = new CancellationException(message);
+        ret.initCause(cause);
+        return ret;
     }
 }
