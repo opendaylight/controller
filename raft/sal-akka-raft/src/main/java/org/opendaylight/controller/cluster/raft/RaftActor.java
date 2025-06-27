@@ -290,48 +290,44 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         if (snapshotSupport.handleSnapshotMessage(message)) {
             return;
         }
-        if (message instanceof ApplyState applyState) {
-            if (!hasFollowers()) {
-                // for single node, the capture should happen after the apply state
-                // as we delete messages from the persistent journal which have made it to the snapshot
-                // capturing the snapshot before applying makes the persistent journal and snapshot out of sync
-                // and recovery shows data missing
-                replicatedLog().captureSnapshotIfReady(applyState.entry());
+        switch (message) {
+            case ApplyState msg -> {
+                if (!hasFollowers()) {
+                    // for single node, the capture should happen after the apply state
+                    // as we delete messages from the persistent journal which have made it to the snapshot
+                    // capturing the snapshot before applying makes the persistent journal and snapshot out of sync
+                    // and recovery shows data missing
+                    replicatedLog().captureSnapshotIfReady(msg.entry());
 
-                context.getSnapshotManager().trimLog(replicatedLog().getLastApplied());
+                    context.getSnapshotManager().trimLog(replicatedLog().getLastApplied());
+                }
+
+                possiblyHandleBehaviorMessage(msg);
             }
-
-            possiblyHandleBehaviorMessage(applyState);
-        } else if (message instanceof FindLeader) {
-            getSender().tell(new FindLeaderReply(getLeaderAddress()), self());
-        } else if (message instanceof GetOnDemandRaftState) {
-            getSender().tell(getOnDemandRaftState(), self());
-        } else if (message instanceof GetSnapshot) {
-            getSender().tell(new GetSnapshotReply(memberId(), getSnapshot()), ActorRef.noSender());
-        } else if (message instanceof InitiateCaptureSnapshot) {
-            captureSnapshot();
-        } else if (message instanceof BecomeFollower(var newTerm)) {
-            switchBehavior(Follower::new, newTerm);
-        } else if (message instanceof BecomeLeader(var newTerm)) {
-            switchBehavior(Leader::new, newTerm);
-        } else if (message instanceof LeaderTransitioning leaderTransitioning) {
-            onLeaderTransitioning(leaderTransitioning);
-        } else if (message instanceof Shutdown) {
-            onShutDown();
-        } else if (message instanceof Runnable runnable) {
-            runnable.run();
-        } else if (message instanceof NoopPayload noopPayload) {
-            submitCommand(null, noopPayload);
-        } else if (message instanceof RequestLeadership requestLeadership) {
-            onRequestLeadership(requestLeadership);
-        } else if (!possiblyHandleBehaviorMessage(message)) {
-            if (message instanceof JournalProtocol.Response response
-                && persistenceControl.entryStore().handleJournalResponse(response)) {
-                LOG.debug("{}: handled a journal response", memberId());
-            } else if (message instanceof SnapshotProtocol.Response response) {
-                LOG.debug("{}: ignoring {}", memberId(), response);
-            } else {
-                handleNonRaftCommand(message);
+            case FindLeader msg -> getSender().tell(new FindLeaderReply(getLeaderAddress()), self());
+            case GetOnDemandRaftState msg -> getSender().tell(getOnDemandRaftState(), self());
+            case GetSnapshot msg ->
+                getSender().tell(new GetSnapshotReply(memberId(), getSnapshot()), ActorRef.noSender());
+            case InitiateCaptureSnapshot msg -> captureSnapshot();
+            case BecomeFollower(var newTerm) -> switchBehavior(Follower::new, newTerm);
+            case BecomeLeader(var newTerm) -> switchBehavior(Leader::new, newTerm);
+            case LeaderTransitioning leaderTransitioning -> onLeaderTransitioning(leaderTransitioning);
+            case Shutdown msg -> onShutDown();
+            // FIXME: remove this as it should be either an explicit command or executeInSelf()
+            case Runnable runnable -> runnable.run();
+            case NoopPayload noopPayload -> submitCommand(null, noopPayload);
+            case RequestLeadership msg -> onRequestLeadership(msg);
+            default -> {
+                if (!possiblyHandleBehaviorMessage(message)) {
+                    if (message instanceof JournalProtocol.Response response
+                        && persistenceControl.entryStore().handleJournalResponse(response)) {
+                        LOG.debug("{}: handled a journal response", memberId());
+                    } else if (message instanceof SnapshotProtocol.Response response) {
+                        LOG.debug("{}: ignoring {}", memberId(), response);
+                    } else {
+                        handleNonRaftCommand(message);
+                    }
+                }
             }
         }
     }
