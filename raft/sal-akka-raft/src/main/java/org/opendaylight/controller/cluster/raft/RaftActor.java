@@ -313,8 +313,6 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             case BecomeLeader(var newTerm) -> switchBehavior(Leader::new, newTerm);
             case LeaderTransitioning leaderTransitioning -> onLeaderTransitioning(leaderTransitioning);
             case Shutdown msg -> onShutDown();
-            // FIXME: remove this as it should be either an explicit command or executeInSelf()
-            case Runnable runnable -> runnable.run();
             case NoopPayload noopPayload -> submitCommand(null, noopPayload);
             case RequestLeadership msg -> onRequestLeadership(msg);
             default -> {
