@@ -58,7 +58,7 @@ class JournalWriteTaskTest {
     @Test
     void processAndTerminateCausesSubsequentCancellation() throws Exception {
         task.processAndTerminate();
-        task.appendEntry(new DefaultLogEntry(1, 1, new MockCommand("")), longCallback);
+        task.appendEntry(new DefaultLogEntry(1, 1, new MockCommand("")), longCallback, false);
         task.run();
 
         assertEquals(1, runActor());
@@ -78,9 +78,9 @@ class JournalWriteTaskTest {
 
     @Test
     void cancelAndTerminateCausesImmediateCancellation() throws Exception {
-        task.appendEntry(new DefaultLogEntry(1, 1, new MockCommand("first")), longCallback);
+        task.appendEntry(new DefaultLogEntry(1, 1, new MockCommand("first")), longCallback, false);
         task.cancelAndTerminate();
-        task.appendEntry(new DefaultLogEntry(2, 1, new MockCommand("second")), longCallback);
+        task.appendEntry(new DefaultLogEntry(2, 1, new MockCommand("second")), longCallback, false);
         task.run();
 
         assertEquals(1, runActor());

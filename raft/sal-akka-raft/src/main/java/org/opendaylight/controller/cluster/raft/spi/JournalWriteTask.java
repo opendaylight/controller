@@ -63,14 +63,14 @@ public final class JournalWriteTask implements Runnable {
         }
     }
 
-    private record JournalDiscardHead(long enqueued, long journalIndex, RaftCallback<Void> callback)
+    private record JournalDiscardHead(long enqueued, long firstRetainedIndex, RaftCallback<Void> callback)
             implements JournalAction<Void> {
         JournalDiscardHead {
             requireNonNull(callback);
         }
     }
 
-    private record JournalDiscardTail(long enqueued, long journalIndex, RaftCallback<Void> callback)
+    private record JournalDiscardTail(long enqueued, long firstRemovedIndex, RaftCallback<Void> callback)
             implements JournalAction<Void> {
         JournalDiscardTail {
             requireNonNull(callback);
@@ -170,17 +170,41 @@ public final class JournalWriteTask implements Runnable {
         return completer.memberId();
     }
 
-    public void appendEntry(final LogEntry entry, final RaftCallback<Long> callback) throws InterruptedException {
-        enqueueAndWait(new JournalAppendEntry(ticker.read(), entry, callback));
+
+    /**
+     * Append a log entry to the journal.
+     *
+     * @param entry the entry to append
+     * @param callback the callback to invoke
+     * @param sync {@code true} if the callback needs to complete before any other command
+     * @throws InterruptedException if interrupted while waiting
+     */
+    public void appendEntry(final LogEntry entry, final RaftCallback<Long> callback, boolean sync)
+            throws InterruptedException {
+        final var cb = sync ? callback : completer.syncWithCurrentMessage(callback);
+        enqueueAndWait(new JournalAppendEntry(ticker.read(), entry, cb));
     }
 
-    public void discardHead(final long journalIndex) throws InterruptedException {
-        enqueueAndWait(new JournalDiscardHead(ticker.read(), journalIndex, UNCHECKED_CALLBACK));
+    /**
+     * Discard entries from the head of the journal.
+     *
+     * @param firstRetainedIndex the index of the first entry to retain
+     * @throws InterruptedException if interrupted while waiting
+     */
+    public void discardHead(final long firstRetainedIndex) throws InterruptedException {
+        enqueueAndWait(new JournalDiscardHead(ticker.read(), firstRetainedIndex, UNCHECKED_CALLBACK));
     }
 
-    public void discardTail(final long journalIndex) throws InterruptedException {
-        // FIXME: CONTROLLER-2137: deferrred
-        enqueueAndWait(new JournalDiscardTail(ticker.read(), journalIndex, UNCHECKED_CALLBACK));
+    /**
+     * Discard entries from the head of the journal. The callback is guaranteed to be invoked before any another message
+     * is processed,
+     *
+     * @param firstRemovedIndex the journal index of the first entry to remove
+     * @throws InterruptedException if interrupted while waiting
+     */
+    public void syncDiscardTail(final long firstRemovedIndex) throws InterruptedException {
+        enqueueAndWait(new JournalDiscardTail(ticker.read(), firstRemovedIndex,
+            completer.syncWithCurrentMessage(UNCHECKED_CALLBACK)));
     }
 
     public void setApplyTo(final long journalIndex) throws InterruptedException {
@@ -343,8 +367,10 @@ public final class JournalWriteTask implements Runnable {
                                     final var cb = appendEntry.callback;
                                     completions.add(() -> cb.invoke(null, journalIndex));
                                 }
-                                case JournalDiscardHead discardHead -> journal.discardHead(discardHead.journalIndex);
-                                case JournalDiscardTail discardTail -> journal.discardTail(discardTail.journalIndex);
+                                case JournalDiscardHead discardHead ->
+                                    journal.discardHead(discardHead.firstRetainedIndex);
+                                case JournalDiscardTail discardTail ->
+                                    journal.discardTail(discardTail.firstRemovedIndex);
                                 case JournalSetApplyTo setApplyTo ->
                                     journal.setApplyToJournalIndex(setApplyTo.journalIndex);
                             }
