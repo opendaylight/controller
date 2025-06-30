@@ -14,7 +14,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 
 /**
- * An immediate {@link EntryStore}. Offloads asynchronous persist responses via {@link EntryStoreCompleter}
+ * An immediate {@link EntryStore}. Offloads asynchronous persist responses via {@link RaftStorageCompleter}
  * exposed via {@link #completer()}.
  */
 @NonNullByDefault

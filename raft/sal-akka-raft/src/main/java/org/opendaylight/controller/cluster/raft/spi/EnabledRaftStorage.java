@@ -18,7 +18,7 @@ import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
  */
 @NonNullByDefault
 public abstract non-sealed class EnabledRaftStorage extends RaftStorage {
-    protected EnabledRaftStorage(final EntryStoreCompleter completer, final Path directory,
+    protected EnabledRaftStorage(final RaftStorageCompleter completer, final Path directory,
             final CompressionType compression, final Configuration streamConfig) {
         super(completer, directory, compression, streamConfig);
     }

@@ -47,7 +47,7 @@ class JournalWriteTaskTest {
     @BeforeEach
     void beforeEach() throws Exception {
         journal = new EntryJournalV1("test", directory, CompressionType.NONE, false);
-        task = new JournalWriteTask(new EntryStoreCompleter("test", actorMessages::add), journal, 32);
+        task = new JournalWriteTask(new RaftStorageCompleter("test", actorMessages::add), journal, 32);
     }
 
     @AfterEach

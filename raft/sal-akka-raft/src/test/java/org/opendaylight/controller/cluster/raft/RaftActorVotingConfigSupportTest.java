@@ -69,12 +69,12 @@ import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
-import org.opendaylight.controller.cluster.raft.spi.EntryStoreCompleter;
 import org.opendaylight.controller.cluster.raft.spi.FailingTermInfoStore;
 import org.opendaylight.controller.cluster.raft.spi.ForwardingSnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.ImmediateEntryStore;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
+import org.opendaylight.controller.cluster.raft.spi.RaftStorageCompleter;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.raft.api.EntryInfo;
@@ -573,7 +573,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
             LOG.info("Ignoring {}", runnable);
         };
         leaderRaftActor.persistence().decorateEntryStore((delegate, actor) -> {
-            final var completer = new EntryStoreCompleter("ignore", ignore);
+            final var completer = new RaftStorageCompleter("ignore", ignore);
             return (ImmediateEntryStore) () -> completer;
         });
         leaderRaftActor.persistence().decorateSnapshotStore((delegate, actor) -> (ImmediateSnapshotStore) () -> ignore);

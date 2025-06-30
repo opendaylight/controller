@@ -13,6 +13,7 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.base.MoreObjects;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Condition;
@@ -21,33 +22,42 @@ import org.apache.pekko.dispatch.ControlMessage;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
-import org.opendaylight.controller.cluster.raft.spi.EntryStore.PersistCallback;
+import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Meeting point for dispatching completions of {@link JournalWriteTask} callbacks in the context of an actor. While
- * {@link ExecuteInSelfActor} is sufficient for purely-asynchronous tasks, {@link EntryStore} has a method which has
- * a deferred-but-bounded callback contract.
+ * Meeting point for dispatching completions from {@link RaftStorage} callbacks in the context of an actor. While
+ * {@link ExecuteInSelfActor} is sufficient for purely-asynchronous tasks, {@link EntryStore} has at least two method
+ * which require the callback to resolve before we process any other messages.
+ *
+ * <p>This acts as a replacement for Pekko Persistence's synchronous operations, supported by {@code stash()} mechanics.
+ * Rather than relying on Pekko semantics, we have this completer and its queue and trackers. {@link RaftActor} calls
+ * {@link #completeUntilSynchronized()} before it starts processing the next message, ensuring any completions are
+ * observed before we process any message. {@link RaftActor} also calls {@link #completeUntilSynchronized()} after it
+ * has handled a message and before in returns control back to Pekko.
+ *
+ * <p>At the end of the day, this acknowledges the special relationship {@link RaftActor} has with {@link RaftStorage}:
+ * storage operations' completions take precedence over whatever is delivered to the actor via its mailbox.
  */
 @NonNullByDefault
-public final class EntryStoreCompleter {
-    private final class DeferredPersistCallback implements PersistCallback {
-        private final PersistCallback delegate;
+public final class RaftStorageCompleter {
+    private final class SyncRaftCallback<T> implements RaftCallback<T> {
+        private final RaftCallback<T> delegate;
 
-        DeferredPersistCallback(final PersistCallback delegate) {
+        SyncRaftCallback(final RaftCallback<T> delegate) {
             this.delegate = requireNonNull(delegate);
         }
 
         @Override
-        public void invoke(@Nullable Exception failure, Long success) {
+        public void invoke(@Nullable Exception failure, T success) {
             try {
                 delegate.invoke(failure, success);
             } finally {
-                if (deferred.remove(this)) {
-                    LOG.debug("{}: completed deferred callback {}", memberId, delegate);
+                if (syncCallbacks.remove(this)) {
+                    LOG.debug("{}: completed synchronized callback {}", memberId, delegate);
                 } else {
-                    LOG.warn("{}: remove failed to find deferred callback for {}", memberId, delegate);
+                    LOG.warn("{}: remove failed to find synchronized callback for {}", memberId, delegate);
                 }
             }
         }
@@ -58,9 +68,9 @@ public final class EntryStoreCompleter {
         }
     }
 
-    private static final Logger LOG = LoggerFactory.getLogger(EntryStoreCompleter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RaftStorageCompleter.class);
 
-    private final Set<DeferredPersistCallback> deferred = ConcurrentHashMap.newKeySet();
+    private final Set<SyncRaftCallback<?>> syncCallbacks = ConcurrentHashMap.newKeySet();
     private final ArrayList<Runnable> pending = new ArrayList<>();
     // We expect there to be one producer (via enqueueCompletions) and one logical consumer thread and they are
     // cooperating. Let's be unfair for now and reap the throughput between the two.
@@ -75,7 +85,7 @@ public final class EntryStoreCompleter {
      * @param memberId the memberId
      * @param actor the actor servicing this completer
      */
-    public EntryStoreCompleter(final String memberId, final ExecuteInSelfActor actor) {
+    public RaftStorageCompleter(final String memberId, final ExecuteInSelfActor actor) {
         this.memberId = requireNonNull(memberId);
         this.actor = requireNonNull(actor);
     }
@@ -85,20 +95,6 @@ public final class EntryStoreCompleter {
      */
     public String memberId() {
         return memberId;
-    }
-
-    /**
-     * Register a {@link RaftCallback} as deferred.
-     *
-     * @param callback the completion
-     * @return a wrapping {@link Runnable} to be used in its stead
-     */
-    // FIXME: only allow this to happen when we have indicated willingness to wait for these, enforcing actor
-    //        containment
-    public PersistCallback deferCallback(final PersistCallback callback) {
-        final var bound = new DeferredPersistCallback(callback);
-        verify(deferred.add(bound));
-        return bound;
     }
 
     /**
@@ -116,7 +112,7 @@ public final class EntryStoreCompleter {
      */
     // FIXME: symmetric to above, but capture current thread and then we have something to compare to
     // FIXME: we should also in
-    public void completeWhilePending() {
+    public void completeUntilEmpty() {
         while (true) {
             final List<Runnable> completions;
             lock.lock();
@@ -136,11 +132,17 @@ public final class EntryStoreCompleter {
         }
     }
 
-    public void completeWhileDeferred() throws InterruptedException {
+    /**
+     * Run all enqueued completions until all callbacks registered with {@link #syncWithCurrentMessage(RaftCallback)}
+     * have completed. If there are no such callbacks, this method does nothing.
+     *
+     * @throws InterruptedException if the thread is interrupted
+     */
+    public void completeUntilSynchronized() throws InterruptedException {
         while (true) {
-            final var size = deferred.size();
+            final var size = syncCallbacks.size();
             if (size == 0) {
-                LOG.trace("{}: no deferred callbacks", memberId);
+                LOG.trace("{}: no synchronized callbacks", memberId);
                 return;
             }
 
@@ -148,7 +150,7 @@ public final class EntryStoreCompleter {
             lock.lock();
             try {
                 while (pending.isEmpty()) {
-                    LOG.debug("{}: awaiting more completions to resolve {} deferred callback(s)", memberId, size);
+                    LOG.debug("{}: awaiting more completions to resolve {} synchronized callback(s)", memberId, size);
                     notEmpty.await();
                 }
 
@@ -167,12 +169,26 @@ public final class EntryStoreCompleter {
         completions.forEach(Runnable::run);
     }
 
+    /**
+     * Enqueue a single {@link Runnable} completion.
+     *
+     * @param completion the completion
+     */
     public void enqueueCompletion(final Runnable completion) {
-        enqueueCompletions(List.of(completion));
+        enqueueCompletionsImpl(List.of(completion));
     }
 
-    // package-protected on purpose, visible for JournalWriteTask, whom we trust to not give us nulls
-    void enqueueCompletions(final List<Runnable> completions) {
+    /**
+     * Enqueue a multiple {@link Runnable} completions.
+     *
+     * @param completions the completion
+     */
+    public void enqueueCompletions(final List<Runnable> completions) {
+        completions.forEach(Objects::requireNonNull);
+        enqueueCompletionsImpl(completions);
+    }
+
+    private void enqueueCompletionsImpl(final List<Runnable> completions) {
         final var size = completions.size();
         if (size == 0) {
             return;
@@ -196,15 +212,30 @@ public final class EntryStoreCompleter {
 
         // schedule a flush without holding the lock
         if (becameNonEmpty) {
-            actor.executeInSelf(this::completeWhilePending);
+            actor.executeInSelf(this::completeUntilEmpty);
         }
+    }
+
+    /**
+     * Register a {@link RaftCallback} as synchronous with current message processing. {@link RaftActor} will not return
+     * back from message handler back to Pekko before this callback is invoked.
+     *
+     * @param callback the completion
+     * @return a wrapping {@link Runnable} to be used in its stead
+     */
+    // FIXME: only allow this to happen when we have indicated willingness to wait for these, enforcing actor
+    //        containment
+    <T> RaftCallback<T> syncWithCurrentMessage(final RaftCallback<T> callback) {
+        final var bound = new SyncRaftCallback<>(callback);
+        verify(syncCallbacks.add(bound));
+        return bound;
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
             .add("memberId", memberId)
-            .add("deferred", deferred.size())
+            .add("syncCallbacks", syncCallbacks.size())
             .add("actor", actor)
             .toString();
     }

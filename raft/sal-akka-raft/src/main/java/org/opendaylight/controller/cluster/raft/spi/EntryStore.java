@@ -32,7 +32,7 @@ public interface EntryStore {
     /**
      * {@return the {@code EntryStoreCompleter}}
      */
-    @NonNull EntryStoreCompleter completer();
+    @NonNull RaftStorageCompleter completer();
 
     /**
      * Persists an entry to the applicable journal synchronously. The contract is that the callback will be invoked

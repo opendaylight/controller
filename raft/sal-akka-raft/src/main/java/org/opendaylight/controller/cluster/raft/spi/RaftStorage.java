@@ -115,7 +115,7 @@ public abstract sealed class RaftStorage implements EntryStore, SnapshotStore
     private static final HexFormat HF = HexFormat.of().withUpperCase();
     private static final String FILENAME_START_STR = "snapshot-";
 
-    protected final @NonNull EntryStoreCompleter completer;
+    protected final @NonNull RaftStorageCompleter completer;
     protected final @NonNull CompressionType compression;
     protected final @NonNull Path directory;
 
@@ -124,7 +124,7 @@ public abstract sealed class RaftStorage implements EntryStore, SnapshotStore
 
     private ExecutorService executor;
 
-    protected RaftStorage(final EntryStoreCompleter completer, final Path directory,
+    protected RaftStorage(final RaftStorageCompleter completer, final Path directory,
             final CompressionType compression, final Configuration streamConfig) {
         this.completer = requireNonNull(completer);
         this.directory = requireNonNull(directory);
@@ -193,7 +193,7 @@ public abstract sealed class RaftStorage implements EntryStore, SnapshotStore
 
     protected abstract void preStop();
 
-    public final @NonNull EntryStoreCompleter completer() {
+    public final @NonNull RaftStorageCompleter completer() {
         return completer;
     }
 
