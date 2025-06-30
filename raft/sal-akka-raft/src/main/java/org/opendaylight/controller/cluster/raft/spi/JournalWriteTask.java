@@ -55,27 +55,6 @@ public final class JournalWriteTask implements Runnable {
         RaftCallback<T> callback();
     }
 
-    /**
-     * Common utility causing an unchecked exception to be thrown on failure.
-     */
-    private sealed interface UncheckedJournalAction extends JournalAction<Void> {
-        @Override
-        default RaftCallback<Void> callback() {
-            return (failure, success) -> {
-                switch (failure) {
-                    case null -> {
-                        // No-op
-                    }
-                    case IOException ex -> throw new UncheckedIOException(ex);
-                    default -> {
-                        Throwables.throwIfUnchecked(failure);
-                        throw new IllegalStateException("Unexpected failure", failure);
-                    }
-                }
-            };
-        }
-    }
-
     private record JournalAppendEntry(long enqueued, LogEntry entry, RaftCallback<Long> callback)
             implements JournalAction<Long> {
         JournalAppendEntry {
@@ -84,16 +63,25 @@ public final class JournalWriteTask implements Runnable {
         }
     }
 
-    private record JournalDiscardHead(long enqueued, long journalIndex) implements UncheckedJournalAction {
-        // Nothing else
+    private record JournalDiscardHead(long enqueued, long journalIndex, RaftCallback<Void> callback)
+            implements JournalAction<Void> {
+        JournalDiscardHead {
+            requireNonNull(callback);
+        }
     }
 
-    private record JournalDiscardTail(long enqueued, long journalIndex) implements UncheckedJournalAction {
-        // Nothing else
+    private record JournalDiscardTail(long enqueued, long journalIndex, RaftCallback<Void> callback)
+            implements JournalAction<Void> {
+        JournalDiscardTail {
+            requireNonNull(callback);
+        }
     }
 
-    private record JournalSetApplyTo(long enqueued, long journalIndex) implements UncheckedJournalAction {
-        // Nothing else
+    private record JournalSetApplyTo(long enqueued, long journalIndex, RaftCallback<Void> callback)
+            implements JournalAction<Void> {
+        JournalSetApplyTo {
+            requireNonNull(callback);
+        }
     }
 
     private record ClosedTask(long enqueuedTicks, long execNanos) {
@@ -112,6 +100,18 @@ public final class JournalWriteTask implements Runnable {
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(JournalWriteTask.class);
+    private static final RaftCallback<Void> UNCHECKED_CALLBACK = (failure, success) -> {
+        switch (failure) {
+            case null -> {
+                // No-op
+            }
+            case IOException ex -> throw new UncheckedIOException(ex);
+            default -> {
+                Throwables.throwIfUnchecked(failure);
+                throw new IllegalStateException("Unexpected failure", failure);
+            }
+        }
+    };
 
     private final AtomicReference<@Nullable CancellationException> aborted = new AtomicReference<>();
     private final EntryStoreCompleter completer;
@@ -175,15 +175,16 @@ public final class JournalWriteTask implements Runnable {
     }
 
     public void discardHead(final long journalIndex) throws InterruptedException {
-        enqueueAndWait(new JournalDiscardHead(ticker.read(), journalIndex));
+        enqueueAndWait(new JournalDiscardHead(ticker.read(), journalIndex, UNCHECKED_CALLBACK));
     }
 
     public void discardTail(final long journalIndex) throws InterruptedException {
-        enqueueAndWait(new JournalDiscardTail(ticker.read(), journalIndex));
+        // FIXME: CONTROLLER-2137: deferrred
+        enqueueAndWait(new JournalDiscardTail(ticker.read(), journalIndex, UNCHECKED_CALLBACK));
     }
 
     public void setApplyTo(final long journalIndex) throws InterruptedException {
-        enqueueAndWait(new JournalSetApplyTo(ticker.read(), journalIndex));
+        enqueueAndWait(new JournalSetApplyTo(ticker.read(), journalIndex, UNCHECKED_CALLBACK));
     }
 
     public void cancelAndTerminate() {
