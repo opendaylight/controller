@@ -66,9 +66,9 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.AbstractRaftCommand;
 import org.opendaylight.controller.cluster.raft.spi.AbstractStateCommand;
-import org.opendaylight.controller.cluster.raft.spi.EntryStoreCompleter;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.controller.cluster.raft.spi.RaftCommand;
+import org.opendaylight.controller.cluster.raft.spi.RaftStorageCompleter;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.api.TermInfo;
@@ -116,7 +116,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     private final @NonNull BehaviorStateTracker behaviorStateTracker = new BehaviorStateTracker();
     private final @NonNull PersistenceControl persistenceControl;
-    private final @NonNull EntryStoreCompleter completer;
+    private final @NonNull RaftStorageCompleter completer;
     // This context should NOT be passed directly to any other actor it is  only to be consumed
     // by the RaftActorBehaviors.
     private final @NonNull LocalAccess localAccess;
@@ -134,7 +134,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     protected RaftActor(final Path stateDir, final String memberId, final Map<String, String> peerAddresses,
             final Optional<ConfigParams> configParams, final short payloadVersion) {
         super(memberId);
-        completer = new EntryStoreCompleter(memberId, this);
+        completer = new RaftStorageCompleter(memberId, this);
         peerInfos = new PeerInfos(memberId, peerAddresses);
 
         final var config = configParams.orElseGet(DefaultConfigParamsImpl::new);
@@ -267,11 +267,11 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     @Override
     protected final void handleCommand(final Object message) throws InterruptedException {
         // dispatch any pending completions first ...
-        completer.completeWhilePending();
+        completer.completeUntilEmpty();
         // ... then handle the message ...
         handleCommandImpl(requireNonNull(message));
         // ... and finally wait for deferred tasks
-        completer.completeWhileDeferred();
+        completer.completeUntilSynchronized();
     }
 
     /**

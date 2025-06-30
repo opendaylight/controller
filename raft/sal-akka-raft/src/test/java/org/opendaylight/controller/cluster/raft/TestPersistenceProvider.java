@@ -14,37 +14,37 @@ import com.google.common.base.MoreObjects.ToStringHelper;
 import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
-import org.opendaylight.controller.cluster.raft.spi.EntryStoreCompleter;
 import org.opendaylight.controller.cluster.raft.spi.ImmediateEntryStore;
+import org.opendaylight.controller.cluster.raft.spi.RaftStorageCompleter;
 
 @VisibleForTesting
 @NonNullByDefault
 public final class TestPersistenceProvider extends PersistenceProvider {
-    private final AtomicReference<EntryStoreCompleter> completer;
+    private final AtomicReference<RaftStorageCompleter> completer;
 
-    private TestPersistenceProvider(final AtomicReference<EntryStoreCompleter> completer) {
+    private TestPersistenceProvider(final AtomicReference<RaftStorageCompleter> completer) {
         super((ImmediateEntryStore) completer::get, (ImmediateSnapshotStore) () -> completer.get()::enqueueCompletion);
         this.completer = requireNonNull(completer);
     }
 
     TestPersistenceProvider() {
-        this(new EntryStoreCompleter("test", Runnable::run));
+        this(new RaftStorageCompleter("test", Runnable::run));
     }
 
-    TestPersistenceProvider(final EntryStoreCompleter actor) {
+    TestPersistenceProvider(final RaftStorageCompleter actor) {
         this(new AtomicReference<>(requireNonNull(actor)));
     }
 
     @Override
-    EntryStoreCompleter completer() {
+    RaftStorageCompleter completer() {
         return completer.get();
     }
 
     public void setActor(final ExecuteInSelfActor actor) {
-        setCompleter(new EntryStoreCompleter(completer().memberId(), actor));
+        setCompleter(new RaftStorageCompleter(completer().memberId(), actor));
     }
 
-    public void setCompleter(final EntryStoreCompleter newCompleter) {
+    public void setCompleter(final RaftStorageCompleter newCompleter) {
         completer.set(requireNonNull(newCompleter));
     }
 

@@ -18,10 +18,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.raft.spi.EntryStoreCompleter;
 import org.opendaylight.controller.cluster.raft.spi.ForwardingSnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
+import org.opendaylight.controller.cluster.raft.spi.RaftStorageCompleter;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.raft.api.EntryInfo;
@@ -54,10 +54,10 @@ final class CapturingSnapshotStore extends ForwardingSnapshotStore {
 
     private final AtomicReference<CapturedCallback> capture = new AtomicReference<>();
     private final @NonNull SnapshotStore delegate;
-    private final @NonNull EntryStoreCompleter completer;
+    private final @NonNull RaftStorageCompleter completer;
 
     @NonNullByDefault
-    CapturingSnapshotStore(final SnapshotStore delegate, final EntryStoreCompleter completer) {
+    CapturingSnapshotStore(final SnapshotStore delegate, final RaftStorageCompleter completer) {
         this.delegate = requireNonNull(delegate);
         this.completer = requireNonNull(completer);
     }

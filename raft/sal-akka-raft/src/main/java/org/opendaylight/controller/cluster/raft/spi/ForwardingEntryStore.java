@@ -18,7 +18,7 @@ public abstract class ForwardingEntryStore implements EntryStore {
     protected abstract EntryStore delegate();
 
     @Override
-    public EntryStoreCompleter completer() {
+    public RaftStorageCompleter completer() {
         return delegate().completer();
     }
 

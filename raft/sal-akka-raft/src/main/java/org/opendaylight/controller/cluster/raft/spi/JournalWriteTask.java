@@ -114,7 +114,7 @@ public final class JournalWriteTask implements Runnable {
     };
 
     private final AtomicReference<@Nullable CancellationException> aborted = new AtomicReference<>();
-    private final EntryStoreCompleter completer;
+    private final RaftStorageCompleter completer;
     private final Ticker ticker;
 
     // Journal and its locking
@@ -141,13 +141,13 @@ public final class JournalWriteTask implements Runnable {
     //    // Tracks the duration of flush operations
     //    private Timer flushTime;
 
-    public JournalWriteTask(final EntryStoreCompleter completer, final EntryJournalV1 journal,
+    public JournalWriteTask(final RaftStorageCompleter completer, final EntryJournalV1 journal,
             final int queueCapacity) {
         this(Ticker.systemTicker(), completer, journal, queueCapacity);
     }
 
     @VisibleForTesting
-    public JournalWriteTask(final Ticker ticker, final EntryStoreCompleter completer, final EntryJournalV1 journal,
+    public JournalWriteTask(final Ticker ticker, final RaftStorageCompleter completer, final EntryJournalV1 journal,
             final int queueCapacity) {
         this.ticker = requireNonNull(ticker);
         this.completer = requireNonNull(completer);

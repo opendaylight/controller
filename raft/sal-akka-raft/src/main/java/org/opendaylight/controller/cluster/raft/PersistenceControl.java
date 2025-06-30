@@ -20,9 +20,9 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.spi.DisabledRaftStorage;
 import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
-import org.opendaylight.controller.cluster.raft.spi.EntryStoreCompleter;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.RaftStorage;
+import org.opendaylight.controller.cluster.raft.spi.RaftStorageCompleter;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
@@ -46,7 +46,7 @@ final class PersistenceControl extends PersistenceProvider {
         storage = disabledStorage;
     }
 
-    PersistenceControl(final RaftActor raftActor, final EntryStoreCompleter completer, final Path directory,
+    PersistenceControl(final RaftActor raftActor, final RaftStorageCompleter completer, final Path directory,
             final CompressionType compression, final Configuration streamConfig) {
         this(new DisabledRaftStorage(completer, directory, compression, streamConfig),
             new PekkoRaftStorage(completer, raftActor, directory, compression, streamConfig));
@@ -72,7 +72,7 @@ final class PersistenceControl extends PersistenceProvider {
     }
 
     @Override
-    EntryStoreCompleter completer() {
+    RaftStorageCompleter completer() {
         return storage.completer();
     }
 
