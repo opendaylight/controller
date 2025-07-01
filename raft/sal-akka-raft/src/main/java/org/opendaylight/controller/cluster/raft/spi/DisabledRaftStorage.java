@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft.spi;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.MoreObjects.ToStringHelper;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
@@ -32,6 +33,29 @@ import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
  */
 @NonNullByDefault
 public final class DisabledRaftStorage extends RaftStorage implements ImmediateEntryStore {
+    private static final class PersistEntryCallback extends RaftCallback<Instant> {
+        private final Runnable callback;
+
+        PersistEntryCallback(final Runnable callback) {
+            this.callback = requireNonNull(callback);
+        }
+
+        @Override
+        public void invoke(final @Nullable Exception failure, final @Nullable Instant success) {
+            switch (failure) {
+                case null -> callback.run();
+                case IOException e -> throw new UncheckedIOException(e);
+                case RuntimeException e -> throw e;
+                default -> throw new RuntimeException(failure);
+            }
+        }
+
+        @Override
+        protected ToStringHelper addToStringAttributes(final ToStringHelper helper) {
+            return helper.add("callback", callback);
+        }
+    }
+
     public DisabledRaftStorage(final RaftStorageCompleter completer, final Path directory,
             final CompressionType compression, final Configuration streamConfig) {
         super(completer, directory, compression, streamConfig);
@@ -63,14 +87,8 @@ public final class DisabledRaftStorage extends RaftStorage implements ImmediateE
     @Override
     public void startPersistEntry(final ReplicatedLogEntry entry, final Runnable callback) {
         if (entry.command() instanceof VotingConfig votingConfig) {
-            saveSnapshot(new RaftSnapshot(votingConfig, List.of()), EntryInfo.of(-1, -1), null, (failure, success) -> {
-                switch (failure) {
-                    case null -> callback.run();
-                    case IOException e -> throw new UncheckedIOException(e);
-                    case RuntimeException e -> throw e;
-                    default -> throw new RuntimeException(failure);
-                }
-            });
+            saveSnapshot(new RaftSnapshot(votingConfig, List.of()), EntryInfo.of(-1, -1), null,
+                new PersistEntryCallback(callback));
         } else {
             ImmediateEntryStore.super.startPersistEntry(entry, callback);
         }

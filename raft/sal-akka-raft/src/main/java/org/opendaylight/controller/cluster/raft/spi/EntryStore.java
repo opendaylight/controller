@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.raft.spi;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.raft.api.EntryMeta;
@@ -23,10 +22,8 @@ public interface EntryStore {
      * A {@link RaftCallback} reporting the {@code journalIndex} on success.
      */
     @NonNullByDefault
-    @FunctionalInterface
-    interface PersistCallback extends RaftCallback<Long> {
-        @Override
-        void invoke(@Nullable Exception failure, Long success);
+    abstract class PersistCallback extends RaftCallback<Long> {
+        // Nothing else
     }
 
     /**

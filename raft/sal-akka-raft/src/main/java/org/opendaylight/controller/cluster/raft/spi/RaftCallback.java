@@ -7,6 +7,9 @@
  */
 package org.opendaylight.controller.cluster.raft.spi;
 
+import com.google.common.base.MoreObjects;
+import com.google.common.base.MoreObjects.ToStringHelper;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.RaftActor;
 
@@ -15,13 +18,26 @@ import org.opendaylight.controller.cluster.raft.RaftActor;
  *
  * @param <T> type of successful result
  */
-@FunctionalInterface
-public interface RaftCallback<T> {
+public abstract class RaftCallback<T> {
     /**
      * Invoke the callback.
      *
      * @param failure failure cause, {@code null} if successful
      * @param success successful result, only valid if {@code failure == null}
      */
-    void invoke(@Nullable Exception failure, T success);
+    public abstract void invoke(@Nullable Exception failure, T success);
+
+    /**
+     * Enrich a {@link ToStringHelper} with class-specific attributes.
+     *
+     * @param helper the helper
+     * @return the helper
+     */
+    @NonNullByDefault
+    protected abstract ToStringHelper addToStringAttributes(ToStringHelper helper);
+
+    @Override
+    public final String toString() {
+        return addToStringAttributes(MoreObjects.toStringHelper(this)).toString();
+    }
 }

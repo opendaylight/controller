@@ -42,11 +42,9 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 public final class RaftStorageCompleter {
-    private final class SyncRaftCallback<T> implements RaftCallback<T> {
-        private final RaftCallback<T> delegate;
-
+    private final class SyncRaftCallback<T> extends DecoratedRaftCallback<T> {
         SyncRaftCallback(final RaftCallback<T> delegate) {
-            this.delegate = requireNonNull(delegate);
+            super(delegate);
         }
 
         @Override
@@ -60,11 +58,6 @@ public final class RaftStorageCompleter {
                     LOG.warn("{}: remove failed to find synchronized callback for {}", memberId, delegate);
                 }
             }
-        }
-
-        @Override
-        public String toString() {
-            return MoreObjects.toStringHelper(this).add("delegate", delegate).toString();
         }
     }
 
