@@ -327,6 +327,7 @@ public final class JournalWriteTask implements Runnable {
     }
 
     @VisibleForTesting
+    @SuppressWarnings("checkstyle:illegalCatch")
     boolean runBatch(final Queue<Action> actions) {
         final var transmitTicks = ticker.read();
         final var closedTasks = new ArrayList<ClosedTask>(actions.size());
@@ -355,28 +356,33 @@ public final class JournalWriteTask implements Runnable {
                         }
 
                         final var execStarted = ticker.read();
+                        Runnable completion;
                         try {
-                            switch (action) {
+                            completion = switch (action) {
                                 case JournalAppendEntry appendEntry -> {
                                     final long journalIndex = journal.nextToWrite();
                                     // FIXME: record returned size to messageSize, which really is
                                     // 'serialized command size'
                                     journal.appendEntry(appendEntry.entry);
-
-                                    // Do not retain entry for callback purposes
-                                    final var cb = appendEntry.callback;
-                                    completions.add(() -> cb.invoke(null, journalIndex));
+                                    yield completeAction(appendEntry, journalIndex);
                                 }
-                                case JournalDiscardHead discardHead ->
+                                case JournalDiscardHead discardHead -> {
                                     journal.discardHead(discardHead.firstRetainedIndex);
-                                case JournalDiscardTail discardTail ->
+                                    yield completeAction(discardHead);
+                                }
+                                case JournalDiscardTail discardTail -> {
                                     journal.discardTail(discardTail.firstRemovedIndex);
-                                case JournalSetApplyTo setApplyTo ->
+                                    yield completeAction(discardTail);
+                                }
+                                case JournalSetApplyTo setApplyTo -> {
                                     journal.setApplyToJournalIndex(setApplyTo.journalIndex);
-                            }
-                        } catch (IOException e) {
-                            completions.add(abortAndFailAction(action, e));
+                                    yield completeAction(setApplyTo);
+                                }
+                            };
+                        } catch (IOException | RuntimeException e) {
+                            completion = abortAndFailAction(action, e);
                         }
+                        completions.add(completion);
 
                         closedTasks.add(new ClosedTask(action.enqueued(), ticker.read() - execStarted));
                     }
@@ -419,6 +425,15 @@ public final class JournalWriteTask implements Runnable {
     private static Runnable failAction(final JournalAction<?> action, final Exception cause) {
         final var cb = action.callback();
         return () -> cb.invoke(cause, null);
+    }
+
+    private static Runnable completeAction(final JournalAction<Void> action) {
+        return completeAction(action, null);
+    }
+
+    private static <T> Runnable completeAction(final JournalAction<T> action, final T result) {
+        final var cb = action.callback();
+        return () -> cb.invoke(null, result);
     }
 
     private static CancellationException newCancellationWithCause(final String message, final Exception cause) {
