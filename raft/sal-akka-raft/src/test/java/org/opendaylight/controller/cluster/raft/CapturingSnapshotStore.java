@@ -18,6 +18,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.opendaylight.controller.cluster.raft.spi.DecoratedRaftCallback;
 import org.opendaylight.controller.cluster.raft.spi.ForwardingSnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
@@ -52,6 +53,18 @@ final class CapturingSnapshotStore extends ForwardingSnapshotStore {
         }
     }
 
+    @NonNullByDefault
+    private final class CaptureSaveSnapshot extends DecoratedRaftCallback<Instant> {
+        CaptureSaveSnapshot(final RaftCallback<Instant> delegate) {
+            super(delegate);
+        }
+
+        @Override
+        public void invoke(final @Nullable Exception failure, final Instant success) {
+            capture.set(new CapturedCallback(delegate, failure, success));
+        }
+    }
+
     private final AtomicReference<CapturedCallback> capture = new AtomicReference<>();
     private final @NonNull SnapshotStore delegate;
     private final @NonNull RaftStorageCompleter completer;
@@ -66,8 +79,7 @@ final class CapturingSnapshotStore extends ForwardingSnapshotStore {
     @NonNullByDefault
     public void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
             final @Nullable ToStorage<?> snapshot, final RaftCallback<Instant> callback) {
-        super.saveSnapshot(raftSnapshot, lastIncluded, snapshot,
-            (failure, success) -> capture.set(new CapturedCallback(callback, failure, success)));
+        super.saveSnapshot(raftSnapshot, lastIncluded, snapshot, new CaptureSaveSnapshot(callback));
     }
 
     @Override
