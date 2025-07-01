@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.raft.spi;
 
+import com.google.common.base.MoreObjects;
+import com.google.common.base.MoreObjects.ToStringHelper;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -23,10 +25,24 @@ public interface EntryStore {
      * A {@link RaftCallback} reporting the {@code journalIndex} on success.
      */
     @NonNullByDefault
-    @FunctionalInterface
-    interface PersistCallback extends RaftCallback<Long> {
+    abstract class PersistCallback implements RaftCallback<Long> {
         @Override
-        void invoke(@Nullable Exception failure, Long success);
+        public abstract void invoke(@Nullable Exception failure, Long success);
+
+        /**
+         * Enrich a {@link ToStringHelper} with class-specific attributes.
+         *
+         * @param helper the helper
+         * @return the helper
+         */
+        protected ToStringHelper addToStringAttributes(final ToStringHelper helper) {
+            return helper;
+        }
+
+        @Override
+        public final String toString() {
+            return addToStringAttributes(MoreObjects.toStringHelper(this)).toString();
+        }
     }
 
     /**
