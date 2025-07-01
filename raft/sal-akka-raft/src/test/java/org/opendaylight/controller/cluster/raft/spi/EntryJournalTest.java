@@ -56,7 +56,7 @@ class EntryJournalTest {
         assertEquals(2, journal.nextToWrite());
         assertEquals(2_097_279, journal.appendEntry(entry2));
 
-        journal.setApplyToJournalIndex(2);
+        journal.setApplyTo(2);
         assertEquals(2, journal.applyToJournalIndex());
         journal.discardHead(1);
         journal.close();

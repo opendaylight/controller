@@ -375,7 +375,7 @@ public final class JournalWriteTask implements Runnable {
                                     yield completeAction(discardTail);
                                 }
                                 case JournalSetApplyTo setApplyTo -> {
-                                    journal.setApplyToJournalIndex(setApplyTo.journalIndex);
+                                    journal.setApplyTo(setApplyTo.journalIndex);
                                     yield completeAction(setApplyTo);
                                 }
                             };

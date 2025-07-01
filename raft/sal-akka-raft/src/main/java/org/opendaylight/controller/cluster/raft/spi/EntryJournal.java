@@ -179,7 +179,7 @@ public interface EntryJournal extends AutoCloseable {
      * @param newApplyTo the new {@code journalIndex} to return
      * @throws IOException if an I/O error occurs
      */
-    void setApplyToJournalIndex(long newApplyTo) throws IOException;
+    void setApplyTo(long newApplyTo) throws IOException;
 
     @Override
     void close();

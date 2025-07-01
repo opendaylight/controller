@@ -424,7 +424,7 @@ public final class EntryJournalV1 implements EntryJournal, AutoCloseable {
     }
 
     @Override
-    public void setApplyToJournalIndex(final long newApplyTo) throws IOException {
+    public void setApplyTo(final long newApplyTo) throws IOException {
         if (newApplyTo < 0) {
             throw new IOException("Bad applyTo index " + newApplyTo);
         }

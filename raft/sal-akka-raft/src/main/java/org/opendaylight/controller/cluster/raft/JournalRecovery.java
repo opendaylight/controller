@@ -48,6 +48,9 @@ final class JournalRecovery<T extends State> extends Recovery<T> {
         // Next up: reconcile the contents of pekkoLog with journal
         final var journalIndex = reconcileAndRecover(pekkoLog);
 
+        // Finally: flush everything we recovered
+        applyRecoveredCommands();
+
         final var recoveryTime = stopRecoveryTimers();
         LOG.debug("{}: journal recovery completed{} with journalIndex={}", memberId(), recoveryTime, journalIndex);
         return recoveryLog;
@@ -70,8 +73,9 @@ final class JournalRecovery<T extends State> extends Recovery<T> {
             var journalIndex = firstIndex;
             var journalEntry = reader.nextEntry();
             if (journalIndex == 1 && journalEntry == null) {
+                LOG.debug("{}: empty journal: appending {} entries", memberId(), pekkoSize);
                 reader.close();
-                journal.setApplyToJournalIndex(0);
+                journal.setApplyTo(0);
                 for (long i = 0; i < pekkoSize; ++i) {
                     final var entry = pekkoLog.entryAt(i);
                     writeEntry(entry);
@@ -87,15 +91,19 @@ final class JournalRecovery<T extends State> extends Recovery<T> {
                     // present in both: check index/term equality, but do not compare commands, e.g. trust them same
                     // serialization to save CPU/memory of deserializing a potentially large object.
                     if (journalEntry.index() != pekkoEntry.index() || journalEntry.term() != pekkoEntry.term()) {
-                        LOG.info("{}: Mismatch between journal {} and {}, trimming journal", memberId(), journalEntry,
+                        LOG.info("{}: mismatch between journal {} and {}, trimming journal", memberId(), journalEntry,
                             pekkoEntry);
                         journal.discardTail(journalIndex);
                         writeEntry(pekkoEntry);
                         reader.resetToRead(journalIndex + 1);
                     }
                 } else {
-                    // not in the journal: append
+                    // not in the journal: write and possibly adjust applyTo index
+                    LOG.debug("{}: writing entry {} to {}", memberId(), pekkoEntry, journalIndex);
                     writeEntry(pekkoEntry);
+                    if (recoveryLog.getLastApplied() >= pekkoEntry.index()) {
+                        journal.setApplyTo(journalIndex);
+                    }
                 }
 
                 recoverEntry(pekkoEntry);
@@ -104,11 +112,12 @@ final class JournalRecovery<T extends State> extends Recovery<T> {
             }
 
             // Journal's idea on how far we can go in applying entries.
-            // FIXME: check against commitIndex/lastApplied.
             final var applyToIndex = journal.applyToJournalIndex();
+            LOG.debug("{}: applying entries up to {}", memberId(), applyToIndex);
 
             // Process everything in the journal, being mindful of snapshot intervals. We should not be touching
             // pekkoLog past this point.
+            var lastApplied = recoveryLog.getLastApplied();
             while (journalEntry != null) {
                 final var logEntry = journalEntry.toLogEntry();
                 LOG.debug("{}: recovered journal {}", memberId(), logEntry);
@@ -116,12 +125,32 @@ final class JournalRecovery<T extends State> extends Recovery<T> {
 
                 if (journalIndex <= applyToIndex) {
                     applyEntry(logEntry);
+                    lastApplied = logEntry.index();
                 }
 
                 journalIndex = reader.nextJournalIndex();
                 journalEntry = reader.nextEntry();
             }
 
+            // We should have processed entries at least to applyToIndex
+            if (journalIndex <= applyToIndex) {
+                throw new IOException("Incomplete journal: expected to apply entries up to " + applyToIndex
+                    + ", encountered entries only to " + (journalIndex - 1));
+            }
+
+            // Guard against time travel w.r.t. Pekko-recovered state
+            final var pekkoCommitIndex = pekkoLog.getCommitIndex();
+            if (pekkoCommitIndex > lastApplied) {
+                throw new IOException("Cannot move commitIndex from " + pekkoCommitIndex + " to " + lastApplied);
+            }
+            final var pekkoLastApplied = pekkoLog.getLastApplied();
+            if (pekkoLastApplied > lastApplied) {
+                throw new IOException("Cannot move lastApplied from " + pekkoLastApplied + " to " + lastApplied);
+            }
+
+            // Recover commitIndex is implied to be at least, we will discover the actual value as part of RAFT join
+            recoveryLog.setCommitIndex(lastApplied);
+            recoveryLog.setLastApplied(lastApplied);
             return firstIndex;
         }
     }
