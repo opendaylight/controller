@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.MoreObjects.ToStringHelper;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
@@ -22,6 +23,7 @@ import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
+import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
@@ -224,6 +226,57 @@ public final class SnapshotManager {
         }
     }
 
+    @NonNullByDefault
+    private final class CaptureToInstallCallback<T extends Snapshot.State> extends RaftCallback<InstallableSnapshot> {
+        private final T snapshotState;
+
+        CaptureToInstallCallback(final T snapshotState) {
+            this.snapshotState = requireNonNull(snapshotState);
+        }
+
+        @Override
+        public void invoke(final @Nullable Exception failure, final InstallableSnapshot success) {
+            if (failure != null) {
+                task = Idle.INSTANCE;
+                LOG.error("{}: Error creating snapshot", memberId(), failure);
+                // FIXME: somehow route to leader, or something ...
+            } else {
+                persist(snapshotState, success);
+            }
+        }
+
+        @Override
+        protected ToStringHelper addToStringAttributes(final ToStringHelper helper) {
+            return helper.add("state", snapshotState);
+        }
+    }
+
+
+    @NonNullByDefault
+    private final class SaveSnapshotCallback extends RaftCallback<Instant> {
+        private final long lastSeq;
+
+        SaveSnapshotCallback(final long lastSeq) {
+            this.lastSeq = lastSeq;
+        }
+
+        @Override
+        public void invoke(final @Nullable Exception failure, final Instant success) {
+            if (failure != null) {
+                LOG.error("{}: snapshot is not durable", memberId(), failure);
+                rollback();
+            } else {
+                LOG.info("{}: snapshot is durable as of {}", memberId(), success);
+                commit(lastSeq, success);
+            }
+        }
+
+        @Override
+        protected ToStringHelper addToStringAttributes(ToStringHelper helper) {
+            return helper.add("lastSeq", lastSeq);
+        }
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(SnapshotManager.class);
 
     private final @NonNull RaftActorContext context;
@@ -294,15 +347,7 @@ public final class SnapshotManager {
             final CaptureSnapshot request) {
         final var snapshot = typedCohort.takeSnapshot();
         context.snapshotStore().streamToInstall(request.lastApplied(),
-            ToStorage.of(typedCohort.support().writer(), snapshot), (cause, installable) -> {
-                if (cause != null) {
-                    task = Idle.INSTANCE;
-                    LOG.error("{}: Error creating snapshot", memberId(), cause);
-                    // FIXME: somehow route to leader, or something ...
-                } else {
-                    persist(snapshot, installable);
-                }
-            });
+            ToStorage.of(typedCohort.support().writer(), snapshot), new CaptureToInstallCallback<>(snapshot));
         return true;
     }
 
@@ -393,15 +438,7 @@ public final class SnapshotManager {
     private <T extends StateSnapshot> void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
             final Snapshot.@Nullable State snapshot, final long lastSeq) {
         context.snapshotStore().saveSnapshot(raftSnapshot, lastIncluded,
-            ToStorage.ofNullable(snapshotCohort().support().writer(), snapshot), (failure, timestamp) -> {
-                if (failure != null) {
-                    LOG.error("{}: snapshot is not durable", memberId(), failure);
-                    rollback();
-                } else {
-                    LOG.info("{}: snapshot is durable as of {}", memberId(), timestamp);
-                    commit(lastSeq, timestamp);
-                }
-            });
+            ToStorage.ofNullable(snapshotCohort().support().writer(), snapshot), new SaveSnapshotCallback(lastSeq));
     }
 
     /**

@@ -99,6 +99,7 @@ import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
+import org.opendaylight.controller.cluster.raft.spi.DecoratingRaftCallback;
 import org.opendaylight.controller.cluster.raft.spi.ForwardingSnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
@@ -1478,12 +1479,16 @@ public class ShardTest extends AbstractShardTest {
                     public void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
                             final ToStorage<?> snapshot, final RaftCallback<Instant> callback) {
                         savedSnapshot.set(assertInstanceOf(ShardSnapshotState.class, snapshot.snapshot()));
-                        super.saveSnapshot(raftSnapshot, lastIncluded, snapshot, (failure, success) -> {
-                            callback.invoke(failure, success);
-                            if (failure == null) {
-                                latch.get().countDown();
-                            }
-                        });
+                        super.saveSnapshot(raftSnapshot, lastIncluded, snapshot,
+                            new DecoratingRaftCallback<>(callback) {
+                                @Override
+                                public void invoke(final Exception failure, final Instant success) {
+                                    delegate.invoke(failure, success);
+                                    if (failure == null) {
+                                        latch.get().countDown();
+                                    }
+                                }
+                            });
                     }
 
                     @Override
