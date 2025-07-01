@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft.spi;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Throwables;
 import com.google.common.base.Ticker;
@@ -99,19 +100,35 @@ public final class JournalWriteTask implements Runnable {
         }
     }
 
-    private static final Logger LOG = LoggerFactory.getLogger(JournalWriteTask.class);
-    private static final RaftCallback<Void> UNCHECKED_CALLBACK = (failure, success) -> {
-        switch (failure) {
-            case null -> {
-                // No-op
-            }
-            case IOException ex -> throw new UncheckedIOException(ex);
-            default -> {
-                Throwables.throwIfUnchecked(failure);
-                throw new IllegalStateException("Unexpected failure", failure);
+    private static final class UncheckNoopCallback extends RaftCallback<Void> {
+        static final UncheckNoopCallback INSTANCE = new UncheckNoopCallback();
+
+        private UncheckNoopCallback() {
+            // Hidden on purpose
+        }
+
+        @Override
+        public void invoke(final @Nullable Exception failure, Void success) {
+            switch (failure) {
+                case null -> {
+                    // No-op
+                }
+                case IOException ex -> throw new UncheckedIOException(ex);
+                default -> {
+                    Throwables.throwIfUnchecked(failure);
+                    throw new IllegalStateException("Unexpected failure", failure);
+                }
             }
         }
-    };
+
+        @Override
+        protected ToStringHelper addToStringAttributes(final ToStringHelper helper) {
+            return helper;
+        }
+    }
+
+
+    private static final Logger LOG = LoggerFactory.getLogger(JournalWriteTask.class);
 
     private final AtomicReference<@Nullable CancellationException> aborted = new AtomicReference<>();
     private final RaftStorageCompleter completer;
@@ -192,7 +209,7 @@ public final class JournalWriteTask implements Runnable {
      * @throws InterruptedException if interrupted while waiting
      */
     public void discardHead(final long firstRetainedIndex) throws InterruptedException {
-        enqueueAndWait(new JournalDiscardHead(ticker.read(), firstRetainedIndex, UNCHECKED_CALLBACK));
+        enqueueAndWait(new JournalDiscardHead(ticker.read(), firstRetainedIndex, UncheckNoopCallback.INSTANCE));
     }
 
     /**
@@ -204,11 +221,11 @@ public final class JournalWriteTask implements Runnable {
      */
     public void syncDiscardTail(final long firstRemovedIndex) throws InterruptedException {
         enqueueAndWait(new JournalDiscardTail(ticker.read(), firstRemovedIndex,
-            completer.syncWithCurrentMessage(UNCHECKED_CALLBACK)));
+            completer.syncWithCurrentMessage(UncheckNoopCallback.INSTANCE)));
     }
 
     public void setApplyTo(final long journalIndex) throws InterruptedException {
-        enqueueAndWait(new JournalSetApplyTo(ticker.read(), journalIndex, UNCHECKED_CALLBACK));
+        enqueueAndWait(new JournalSetApplyTo(ticker.read(), journalIndex, UncheckNoopCallback.INSTANCE));
     }
 
     public void cancelAndTerminate() {
