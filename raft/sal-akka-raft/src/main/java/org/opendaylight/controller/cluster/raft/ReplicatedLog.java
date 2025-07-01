@@ -246,6 +246,18 @@ public interface ReplicatedLog {
     boolean isInSnapshot(long index);
 
     /**
+     * {@return the journal index corresponding to the first entry in the journal}
+     */
+    long firstJournalIndex();
+
+    /**
+     * Sets the {@link #firstJournalIndex()} value.
+     *
+     * @param newFirstJournalIndex the new value of {@link #firstJournalIndex()}.
+     */
+    void setFirstJournalIndex(long newFirstJournalIndex);
+
+    /**
      * Returns the index of the snapshot.
      *
      * @return the index from which the snapshot was created. -1 otherwise.

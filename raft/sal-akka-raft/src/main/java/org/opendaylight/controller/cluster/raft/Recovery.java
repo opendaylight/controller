@@ -191,7 +191,11 @@ abstract sealed class Recovery<T extends @NonNull State> permits JournalRecovery
         recoveryLog.snapshotPreCommit(request.getLastAppliedIndex(), request.getLastAppliedTerm());
         recoveryLog.snapshotCommit();
 
-        onSnapshotSaved();
+        try {
+            discardSnapshottedEntries();
+        } catch (IOException e) {
+            throw new UncheckedIOException("Failed to discard journal head", e);
+        }
 
         LOG.info("{}: Snapshot completed in {}, resetting timer for the next recovery snapshot", memberId(), sw.stop());
     }
@@ -199,7 +203,7 @@ abstract sealed class Recovery<T extends @NonNull State> permits JournalRecovery
     @NonNullByDefault
     abstract List<LogEntry> filterSnapshotUnappliedEntries(List<LogEntry> unappliedEntries);
 
-    abstract void onSnapshotSaved();
+    abstract void discardSnapshottedEntries() throws IOException;
 
     @Override
     public final String toString() {

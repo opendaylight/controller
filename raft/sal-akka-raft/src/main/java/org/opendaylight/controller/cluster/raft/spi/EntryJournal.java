@@ -135,6 +135,11 @@ public interface EntryJournal extends AutoCloseable {
     }
 
     /**
+     * A friendly constant to centralize the places where we assume counting from 1.
+     */
+    int FIRST_JOURNAL_INDEX = 1;
+
+    /**
      * {@return the {@code journalIndex} of the last entry which is to be applied}
      */
     // FIXME: commitJournalIndex()?

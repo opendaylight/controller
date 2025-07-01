@@ -46,17 +46,18 @@ final class JournalRecovery<T extends State> extends Recovery<T> {
         recoveryLog.setLastApplied(pekkoLog.getLastApplied());
 
         // Next up: reconcile the contents of pekkoLog with journal
-        final var journalIndex = reconcileAndRecover(pekkoLog);
+        reconcileAndRecover(pekkoLog);
 
         // Finally: flush everything we recovered
         applyRecoveredCommands();
 
         final var recoveryTime = stopRecoveryTimers();
-        LOG.debug("{}: journal recovery completed{} with journalIndex={}", memberId(), recoveryTime, journalIndex);
+        LOG.debug("{}: journal recovery completed{} with journalIndex={}", memberId(), recoveryTime,
+            recoveryLog.firstJournalIndex());
         return recoveryLog;
     }
 
-    private long reconcileAndRecover(final RecoveryLog pekkoLog) throws IOException {
+    private void reconcileAndRecover(final RecoveryLog pekkoLog) throws IOException {
         try (var reader = journal.openReader()) {
             // If pekkoLog contains any entries, it has come from Pekko persistence and we need to do some more work to
             // ensure migrate those entries into the EntryJournal. This can occur during multiple recoveries, as we may
@@ -69,6 +70,7 @@ final class JournalRecovery<T extends State> extends Recovery<T> {
             // initialize the journal to the entries contained in prevPekkoLog. We also defensively initialize
             // applyToJournalIndex to 0.
             final var firstIndex = reader.nextJournalIndex();
+            recoveryLog.setFirstJournalIndex(firstIndex);
 
             var journalIndex = firstIndex;
             var journalEntry = reader.nextEntry();
@@ -81,7 +83,7 @@ final class JournalRecovery<T extends State> extends Recovery<T> {
                     writeEntry(entry);
                     recoverEntry(entry);
                 }
-                return 1;
+                return;
             }
 
             // Iterate over both pekkoLog and reader to ensure any entries match.
@@ -151,7 +153,6 @@ final class JournalRecovery<T extends State> extends Recovery<T> {
             // Recover commitIndex is implied to be at least, we will discover the actual value as part of RAFT join
             recoveryLog.setCommitIndex(lastApplied);
             recoveryLog.setLastApplied(lastApplied);
-            return firstIndex;
         }
     }
 
@@ -172,8 +173,7 @@ final class JournalRecovery<T extends State> extends Recovery<T> {
     }
 
     @Override
-    void onSnapshotSaved() {
-        // FIXME: implement this
-        // journal.discardHead(recoveryLog.firstJournalIndex());
+    void discardSnapshottedEntries() throws IOException {
+        journal.discardHead(recoveryLog.firstJournalIndex());
     }
 }

@@ -285,7 +285,7 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
     }
 
     @Override
-    final void onSnapshotSaved() {
+    final void discardSnapshottedEntries() {
         actor.deleteMessages(actor.lastSequenceNr());
     }
 

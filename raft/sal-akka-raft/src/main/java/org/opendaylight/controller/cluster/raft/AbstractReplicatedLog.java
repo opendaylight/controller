@@ -19,6 +19,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.spi.EntryJournal;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.EntryMeta;
@@ -37,6 +38,7 @@ public abstract class AbstractReplicatedLog<T extends ReplicatedLogEntry> implem
     // We define this as ArrayList so we can use ensureCapacity.
     private ArrayList<@NonNull T> journal = new ArrayList<>();
 
+    private long firstJournalIndex = EntryJournal.FIRST_JOURNAL_INDEX;
     private long snapshotIndex = -1;
     private long snapshotTerm = -1;
     private long commitIndex = -1;
@@ -44,6 +46,7 @@ public abstract class AbstractReplicatedLog<T extends ReplicatedLogEntry> implem
 
     // to be used for rollback during save snapshot failure
     private ArrayList<T> snapshottedJournal;
+    private long previousFirstJournalIndex = EntryJournal.FIRST_JOURNAL_INDEX;
     private long previousSnapshotIndex = -1;
     private long previousSnapshotTerm = -1;
     private int dataSize = 0;
@@ -69,6 +72,7 @@ public abstract class AbstractReplicatedLog<T extends ReplicatedLogEntry> implem
     public final void resetToLog(final ReplicatedLog prev) {
         clearRollback();
 
+        firstJournalIndex = prev.firstJournalIndex();
         snapshotIndex = prev.getSnapshotIndex();
         snapshotTerm = prev.getSnapshotTerm();
         commitIndex = prev.getCommitIndex();
@@ -276,6 +280,16 @@ public abstract class AbstractReplicatedLog<T extends ReplicatedLogEntry> implem
     }
 
     @Override
+    public final long firstJournalIndex() {
+        return firstJournalIndex;
+    }
+
+    @Override
+    public final void setFirstJournalIndex(long newFirstJournalIndex) {
+        firstJournalIndex = newFirstJournalIndex;
+    }
+
+    @Override
     public final long getSnapshotIndex() {
         return snapshotIndex;
     }
@@ -309,16 +323,25 @@ public abstract class AbstractReplicatedLog<T extends ReplicatedLogEntry> implem
 
     @Override
     public final void snapshotPreCommit(final long snapshotCapturedIndex, final long snapshotCapturedTerm) {
-        if (snapshotCapturedIndex < snapshotIndex) {
+        final var trimCount = snapshotCapturedIndex - snapshotIndex;
+        if (trimCount < 0) {
             throw new IllegalArgumentException("snapshotCapturedIndex must be greater than or equal to snapshotIndex");
         }
+        // we cannot hold more than MAX_VALUE elements in a collection, this mirrors what List.subList() would report
+        if (trimCount > Integer.MAX_VALUE) {
+            throw new IndexOutOfBoundsException("trimCount=" + trimCount);
+        }
 
-        snapshottedJournal = new ArrayList<>(journal.size());
+        final var trimSize = (int) trimCount;
+        snapshottedJournal = new ArrayList<>(trimSize);
+        if (trimSize != 0) {
+            final var toTrim = journal.subList(0, trimSize);
+            snapshottedJournal.addAll(toTrim);
+            toTrim.clear();
+        }
 
-        final var snapshotJournalEntries = journal.subList(0, (int) (snapshotCapturedIndex - snapshotIndex));
-
-        snapshottedJournal.addAll(snapshotJournalEntries);
-        snapshotJournalEntries.clear();
+        previousFirstJournalIndex = firstJournalIndex;
+        firstJournalIndex += trimSize;
 
         previousSnapshotIndex = snapshotIndex;
         setSnapshotIndex(snapshotCapturedIndex);
@@ -330,6 +353,7 @@ public abstract class AbstractReplicatedLog<T extends ReplicatedLogEntry> implem
     @Override
     public final void snapshotCommit(final boolean updateDataSize) {
         snapshottedJournal = null;
+        previousFirstJournalIndex = EntryJournal.FIRST_JOURNAL_INDEX;
         previousSnapshotIndex = -1;
         previousSnapshotTerm = -1;
 
@@ -349,6 +373,9 @@ public abstract class AbstractReplicatedLog<T extends ReplicatedLogEntry> implem
         snapshottedJournal.addAll(journal);
         journal = snapshottedJournal;
         snapshottedJournal = null;
+
+        firstJournalIndex = previousFirstJournalIndex;
+        previousFirstJournalIndex = EntryJournal.FIRST_JOURNAL_INDEX;
 
         snapshotIndex = previousSnapshotIndex;
         previousSnapshotIndex = -1;

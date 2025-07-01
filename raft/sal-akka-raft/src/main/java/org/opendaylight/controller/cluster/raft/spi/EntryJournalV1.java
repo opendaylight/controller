@@ -75,7 +75,7 @@ public final class EntryJournalV1 implements EntryJournal, AutoCloseable {
      */
     private record JournalMeta(long replayFrom, long applyTo) {
         JournalMeta {
-            if (replayFrom < 1) {
+            if (replayFrom < FIRST_JOURNAL_INDEX) {
                 throw new IllegalArgumentException("replayFrom needs to be positive, not " + replayFrom);
             }
             if (applyTo < 0) {
@@ -332,7 +332,7 @@ public final class EntryJournalV1 implements EntryJournal, AutoCloseable {
     private final SegmentedRaftJournal metaJournal;
     private final SegmentedRaftJournal entryJournal;
 
-    private long replayFrom = 1;
+    private long replayFrom = FIRST_JOURNAL_INDEX;
     private long applyTo = 0;
 
     public EntryJournalV1(final String memberId, final Path directory, final CompressionType compression,
@@ -502,7 +502,7 @@ public final class EntryJournalV1 implements EntryJournal, AutoCloseable {
 
     @Override
     public void discardHead(final long firstRetainedIndex) throws IOException {
-        if (firstRetainedIndex < 1) {
+        if (firstRetainedIndex < FIRST_JOURNAL_INDEX) {
             throw new IOException("Bad journal index " + firstRetainedIndex);
         }
         if (firstRetainedIndex <= replayFrom) {
@@ -519,7 +519,7 @@ public final class EntryJournalV1 implements EntryJournal, AutoCloseable {
 
     @Override
     public void discardTail(long firstRemovedIndex) throws IOException {
-        if (firstRemovedIndex < 1) {
+        if (firstRemovedIndex < FIRST_JOURNAL_INDEX) {
             throw new IOException("Bad journal index " + firstRemovedIndex);
         }
         if (firstRemovedIndex < replayFrom) {
