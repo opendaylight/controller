@@ -553,11 +553,13 @@ public final class EntryJournalV1 implements EntryJournal, AutoCloseable {
     }
 
     private void persistMeta() throws IOException {
+        final var meta = new JournalMeta(replayFrom, applyTo);
         final var writer = metaJournal.writer();
         final var metaIndex = writer.nextIndex();
-        writer.append(META_ENTRY_WRITER, new JournalMeta(replayFrom, applyTo));
+        writer.append(META_ENTRY_WRITER, meta);
         writer.commit(metaIndex);
         entryJournal.compact(metaIndex);
+        LOG.debug("{}: updated meta to {}", memberId, meta);
     }
 
     private void removeFiles(final Iterator<Long> it, final LongPredicate stopPredicate) throws IOException {
