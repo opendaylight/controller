@@ -258,16 +258,17 @@ public interface ReplicatedLog {
     void setFirstJournalIndex(long newFirstJournalIndex);
 
     /**
-     * Returns the index of the snapshot.
-     *
-     * @return the index from which the snapshot was created. -1 otherwise.
+     * {@return the {@code journalIndex} corresponding to {@link #getLastApplied()}}
+     */
+    long lastAppliedJournalIndex();
+
+    /**
+     * {@return the index from which the snapshot was created, {@code -1} otherwise}
      */
     long getSnapshotIndex();
 
     /**
-     * Returns the term of the snapshot.
-     *
-     * @return the term of the index from which the snapshot was created. -1 otherwise
+     * {@return the term of the index from which the snapshot was created, -1 otherwise}
      */
     long getSnapshotTerm();
 
@@ -412,7 +413,7 @@ public interface ReplicatedLog {
     void resetToSnapshot(Snapshot snapshot);
 
     /**
-     * Constructs a CaptureSnapshot instance.
+     * Constructs a {@link CaptureSnapshot} instance.
      *
      * @param lastLogEntry the last log entry for the snapshot.
      * @param replicatedToAllIndex the index of the last entry replicated to all followers.

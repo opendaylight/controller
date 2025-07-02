@@ -285,6 +285,11 @@ public abstract class AbstractReplicatedLog<T extends ReplicatedLogEntry> implem
     }
 
     @Override
+    public final long lastAppliedJournalIndex() {
+        return adjustedIndex(getLastApplied()) + firstJournalIndex();
+    }
+
+    @Override
     public final void setFirstJournalIndex(long newFirstJournalIndex) {
         firstJournalIndex = newFirstJournalIndex;
     }
