@@ -71,6 +71,30 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "3de16dc1_80f6c67d",
+        "filename": "raft/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/PekkoRaftStorage.java",
+        "patchSetId": 118
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2025-07-02T17:57:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0705413d_1911ebb1",
+      "range": {
+        "startLine": 111,
+        "startChar": 39,
+        "endLine": 111,
+        "endChar": 48
+      },
+      "revId": "ce6232fcc921cd83e35ba3119b89e483832a4880",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "b29416e2_11cc120a",
@@ -84,6 +108,30 @@
       "writtenOn": "2025-07-02T15:36:30Z",
       "side": 1,
       "message": "rename argument",
+      "range": {
+        "startLine": 121,
+        "startChar": 39,
+        "endLine": 121,
+        "endChar": 53
+      },
+      "revId": "ce6232fcc921cd83e35ba3119b89e483832a4880",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "061a2b69_80c1885e",
+        "filename": "raft/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/PekkoRaftStorage.java",
+        "patchSetId": 118
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2025-07-02T17:57:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b29416e2_11cc120a",
       "range": {
         "startLine": 121,
         "startChar": 39,
