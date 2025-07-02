@@ -188,6 +188,30 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "5d3aba83_48c923cb",
+        "filename": "raft/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/PersistenceControl.java",
+        "patchSetId": 118
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2025-07-02T18:19:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f4c8e4b0_bda4fced",
+      "range": {
+        "startLine": 53,
+        "startChar": 82,
+        "endLine": 53,
+        "endChar": 87
+      },
+      "revId": "ce6232fcc921cd83e35ba3119b89e483832a4880",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "245c120f_c9dc298c",
