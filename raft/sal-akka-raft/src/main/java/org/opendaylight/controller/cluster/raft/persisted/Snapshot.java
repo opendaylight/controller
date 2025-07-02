@@ -47,6 +47,7 @@ public final class Snapshot implements Serializable {
     private final long lastTerm;
     private final long lastAppliedIndex;
     private final long lastAppliedTerm;
+    @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "Handled through serialization proxy")
     private final @NonNull TermInfo termInfo;
     private final @Nullable VotingConfig votingConfig;
 

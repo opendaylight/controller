@@ -7,8 +7,6 @@
  */
 package org.opendaylight.raft.api;
 
-import java.io.ObjectStreamException;
-import java.io.Serializable;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -20,7 +18,7 @@ import org.eclipse.jdt.annotation.Nullable;
  */
 // FIXME: term is currently defined as signed, not unsigned as it could be
 @NonNullByDefault
-public record TermInfo(long term, @Nullable String votedFor) implements Serializable {
+public record TermInfo(long term, @Nullable String votedFor) {
     /**
      * Initial {#link TermInfo}. Equivalent to {@code new TermInfo(0)}, e.g. we know there is a first term and we have
      * not voted in it, as far as we can remember.
@@ -54,16 +52,5 @@ public record TermInfo(long term, @Nullable String votedFor) implements Serializ
             sb.append(", votedFor=").append(local);
         }
         return sb.append('}').toString();
-    }
-
-    /**
-     * Return the serialization proxy.
-     *
-     * @return the serialization proxy
-     * @throws ObjectStreamException never
-     */
-    @java.io.Serial
-    private Object writeReplace() throws ObjectStreamException {
-        return new TIv1(term, votedFor);
     }
 }
