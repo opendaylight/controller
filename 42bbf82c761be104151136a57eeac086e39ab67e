@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "22987955_a1632135",
+        "filename": "raft/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 108
+      },
+      "lineNbr": 529,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2025-07-02T07:30:25Z",
+      "side": 1,
+      "message": "this works only if we trim",
+      "range": {
+        "startLine": 529,
+        "startChar": 18,
+        "endLine": 529,
+        "endChar": 85
+      },
+      "revId": "42bbf82c761be104151136a57eeac086e39ab67e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
