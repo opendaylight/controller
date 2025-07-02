@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "400e4a9f_3dd4f3e7",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2025-07-02T17:45:51Z",
+      "side": 1,
+      "message": "we need to make a decision here: it would be much better to just use JFR events instead of direct histograms.\n\ndeployments can then use JFR analytics to get the equivalent into",
+      "revId": "e1b67dac209e55340a08027ffd15709d2476f130",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
