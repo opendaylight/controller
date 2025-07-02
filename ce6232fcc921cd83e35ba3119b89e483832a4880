@@ -24,6 +24,30 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "c8147c8a_3d47462b",
+        "filename": "raft/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/AbstractReplicatedLog.java",
+        "patchSetId": 118
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2025-07-02T17:44:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2e6c905c_2e801aee",
+      "range": {
+        "startLine": 157,
+        "startChar": 22,
+        "endLine": 157,
+        "endChar": 45
+      },
+      "revId": "ce6232fcc921cd83e35ba3119b89e483832a4880",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "0705413d_1911ebb1",
