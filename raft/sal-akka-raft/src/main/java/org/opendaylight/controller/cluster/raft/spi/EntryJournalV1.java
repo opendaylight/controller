@@ -512,9 +512,12 @@ public final class EntryJournalV1 implements EntryJournal, AutoCloseable {
 
         replayFrom = firstRetainedIndex;
         persistMeta();
-        entryJournal.writer().commit(firstRetainedIndex);
-        entryJournal.compact(firstRetainedIndex);
-        removeFiles(fileEntries.iterator(), idx -> idx >= firstRetainedIndex);
+
+        final var commitIndex = firstRetainedIndex - 1;
+        entryJournal.writer().commit(commitIndex);
+        entryJournal.compact(commitIndex);
+        removeFiles(fileEntries.iterator(), idx -> idx > commitIndex);
+        LOG.debug("{}: discarded entries up to (and including) {}", memberId(), commitIndex);
     }
 
     @Override
