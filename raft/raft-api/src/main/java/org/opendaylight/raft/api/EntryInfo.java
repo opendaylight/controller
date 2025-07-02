@@ -7,8 +7,6 @@
  */
 package org.opendaylight.raft.api;
 
-import java.io.ObjectStreamException;
-import java.io.Serializable;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -20,7 +18,7 @@ import org.eclipse.jdt.annotation.Nullable;
  */
 // TODO: dedicated type for index/term to ensure unsigned without paying the memory cost (JEP-401)
 @NonNullByDefault
-public record EntryInfo(long index, long term) implements EntryMeta, Serializable {
+public record EntryInfo(long index, long term) implements EntryMeta {
     /**
      * Default constructor.
      *
@@ -60,15 +58,5 @@ public record EntryInfo(long index, long term) implements EntryMeta, Serializabl
      */
     public static @Nullable EntryInfo ofNullable(final @Nullable EntryMeta meta) {
         return meta != null ? of(meta) : null;
-    }
-
-    /**
-     * Return the serialization proxy.
-     * @return the serialization proxy
-     * @throws ObjectStreamException never
-     */
-    @java.io.Serial
-    private Object writeReplace() throws ObjectStreamException {
-        return new EIv1(index, term);
     }
 }
