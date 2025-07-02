@@ -12,9 +12,9 @@ import java.io.IOException;
 import java.time.Instant;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
+import org.opendaylight.controller.cluster.raft.spi.RaftStorageCompleter;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
@@ -25,13 +25,13 @@ import org.opendaylight.raft.spi.InstallableSnapshotSource;
 import org.opendaylight.raft.spi.PlainSnapshotSource;
 
 /**
- * An immediate {@link SnapshotStore}. Offloads asynchronous persist responses via {@link ExecuteInSelfActor}
- * exposed via {@link #actor()}.
+ * An immediate {@link SnapshotStore}. Offloads asynchronous persist responses via {@link RaftStorageCompleter}
+ * exposed via {@link #completer()}.
  */
 @NonNullByDefault
 interface ImmediateSnapshotStore extends SnapshotStore {
 
-    ExecuteInSelfActor actor();
+    RaftStorageCompleter completer();
 
     @Override
     default @Nullable SnapshotFile lastSnapshot() throws IOException {
@@ -58,11 +58,11 @@ interface ImmediateSnapshotStore extends SnapshotStore {
             snapshot.writeTo(baos);
             bytes = baos.toByteArray();
         } catch (IOException e) {
-            actor().executeInSelf(() -> callback.invoke(e, null));
+            completer().enqueueCompletion(() -> callback.invoke(e, null));
             return;
         }
 
         final var result = new InstallableSnapshotSource(lastIncluded, new PlainSnapshotSource(ByteArray.wrap(bytes)));
-        actor().executeInSelf(() -> callback.invoke(null, result));
+        completer().enqueueCompletion(() -> callback.invoke(null, result));
     }
 }

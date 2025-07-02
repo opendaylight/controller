@@ -41,7 +41,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.ApplyLeaderSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.InitiateCaptureSnapshot;
@@ -569,14 +568,14 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         // below.
         leaderRaftActor.setDropMessageOfType(null);
 
-        final ExecuteInSelfActor ignore = runnable -> {
+        final var completer = new RaftStorageCompleter("ignore", runnable -> {
             LOG.info("Ignoring {}", runnable);
-        };
-        leaderRaftActor.persistence().decorateEntryStore((delegate, actor) -> {
-            final var completer = new RaftStorageCompleter("ignore", ignore);
-            return (ImmediateEntryStore) () -> completer;
         });
-        leaderRaftActor.persistence().decorateSnapshotStore((delegate, actor) -> (ImmediateSnapshotStore) () -> ignore);
+
+        leaderRaftActor.persistence().decorateEntryStore(
+            (delegate, actor) -> ((ImmediateEntryStore) () -> completer));
+        leaderRaftActor.persistence().decorateSnapshotStore(
+            (delegate, actor) -> (ImmediateSnapshotStore) () -> completer);
 
         // Complete the prior snapshot - this should be a no-op b/c it's no longer the leader
         leaderSaveSnapshot.complete();

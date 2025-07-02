@@ -23,7 +23,7 @@ public final class TestPersistenceProvider extends PersistenceProvider {
     private final AtomicReference<RaftStorageCompleter> completer;
 
     private TestPersistenceProvider(final AtomicReference<RaftStorageCompleter> completer) {
-        super((ImmediateEntryStore) completer::get, (ImmediateSnapshotStore) () -> completer.get()::enqueueCompletion);
+        super((ImmediateEntryStore) completer::get, (ImmediateSnapshotStore) completer::get);
         this.completer = requireNonNull(completer);
     }
 

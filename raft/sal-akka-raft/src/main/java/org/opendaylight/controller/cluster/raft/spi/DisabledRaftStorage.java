@@ -18,7 +18,6 @@ import java.time.Instant;
 import java.util.List;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.common.actor.ExecuteInSelfActor;
 import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
@@ -29,7 +28,7 @@ import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
 
 /**
  * A {@link RaftStorage} backing non-persistent mode of {@link RaftActor} operation. It works with any actor which can
- * provide {@link ExecuteInSelfActor} services.
+ * provide a {@link RaftStorageCompleter}.
  */
 @NonNullByDefault
 public final class DisabledRaftStorage extends RaftStorage implements ImmediateEntryStore {
