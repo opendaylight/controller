@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7c9433cf_8571614b",
+        "filename": "raft/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/spi/DisabledRaftStorage.java",
+        "patchSetId": 118
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2025-07-02T15:36:30Z",
+      "side": 0,
+      "message": "retain this",
+      "range": {
+        "startLine": 75,
+        "startChar": 8,
+        "endLine": 75,
+        "endChar": 33
+      },
+      "revId": "17c56987b09593a70e337a5127f320eb88dd8f5a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9326b12a_d08557ba",
+        "filename": "raft/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/SnapshotManagerTest.java",
+        "patchSetId": 118
+      },
+      "lineNbr": 387,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2025-07-02T15:36:30Z",
+      "side": 0,
+      "message": "retain this?",
+      "range": {
+        "startLine": 387,
+        "startChar": 8,
+        "endLine": 387,
+        "endChar": 64
+      },
+      "revId": "17c56987b09593a70e337a5127f320eb88dd8f5a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a36a0947_1fa78557",
+        "filename": "raft/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/FollowerTest.java",
+        "patchSetId": 118
+      },
+      "lineNbr": 1118,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2025-07-02T15:36:30Z",
+      "side": 0,
+      "message": "this needs an equivalent test for JournalRecovery, which has:\n- snapshot already containing the applied entry\n- but the journal still does replays it\ne.g. a situation we encounter if snapshot is written, but the JVM dies before corresponding discardHead() is completed",
+      "range": {
+        "startLine": 1118,
+        "startChar": 11,
+        "endLine": 1118,
+        "endChar": 94
+      },
+      "revId": "17c56987b09593a70e337a5127f320eb88dd8f5a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
