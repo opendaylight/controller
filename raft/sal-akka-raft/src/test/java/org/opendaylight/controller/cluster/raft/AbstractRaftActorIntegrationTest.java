@@ -140,38 +140,30 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractRaftActor
         @Deprecated
         @SuppressWarnings("checkstyle:IllegalCatch")
         protected void handleCommandImpl(final Object message) {
-            if (message instanceof MockCommand payload) {
-                submitCommand(new MockIdentifier(payload.toString()), payload, false);
-                return;
-            }
-
-            if (message instanceof VotingConfig payload) {
-                submitCommand(new MockIdentifier("serverConfig"), payload);
-                return;
-            }
-
-            if (message instanceof SetPeerAddress setPeerAddress) {
-                setPeerAddress(setPeerAddress.getPeerId(), setPeerAddress.getPeerAddress());
-                return;
-            }
-
-            if (message instanceof TestPersist testPersist) {
-                submitCommand(testPersist.getIdentifier(), testPersist.getPayload(), false);
-                return;
-            }
-
-            try {
-                @SuppressWarnings({ "rawtypes", "unchecked" })
-                final Predicate<Object> drop = (Predicate) dropMessages.get(message.getClass());
-                if (drop == null || !drop.test(message)) {
-                    super.handleCommandImpl(message);
-                }
-            } finally {
-                if (!(message instanceof SendHeartBeat)) {
+            switch (message) {
+                case MockCommand payload ->
+                    submitCommand(new MockIdentifier(payload.toString()), payload, false);
+                case VotingConfig payload ->
+                    submitCommand(new MockIdentifier("serverConfig"), payload);
+                case SetPeerAddress setPeerAddress ->
+                    setPeerAddress(setPeerAddress.getPeerId(), setPeerAddress.getPeerAddress());
+                case TestPersist testPersist ->
+                    submitCommand(testPersist.getIdentifier(), testPersist.getPayload(), false);
+                default -> {
                     try {
-                        collectorActor.tell(message, ActorRef.noSender());
-                    } catch (Exception e) {
-                        throw new AssertionError(e);
+                        @SuppressWarnings({ "rawtypes", "unchecked" })
+                        final Predicate<Object> drop = (Predicate) dropMessages.get(message.getClass());
+                        if (drop == null || !drop.test(message)) {
+                            super.handleCommandImpl(message);
+                        }
+                    } finally {
+                        if (!(message instanceof SendHeartBeat)) {
+                            try {
+                                collectorActor.tell(message, ActorRef.noSender());
+                            } catch (Exception e) {
+                                throw new AssertionError(e);
+                            }
+                        }
                     }
                 }
             }
@@ -271,8 +263,9 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractRaftActor
 
     protected final TestActorRef<TestRaftActor> newTestRaftActor(final String id,
             final Map<String, String> newPeerAddresses, final ConfigParams configParams) {
-        return newTestRaftActor(id, TestRaftActor.newBuilder().peerAddresses(newPeerAddresses != null
-                ? newPeerAddresses : Map.of()).config(configParams));
+        return newTestRaftActor(id, TestRaftActor.newBuilder()
+            .peerAddresses(newPeerAddresses != null ? newPeerAddresses : Map.of())
+            .config(configParams));
     }
 
     protected final TestActorRef<TestRaftActor> newTestRaftActor(final String id, final TestRaftActor.Builder builder) {
