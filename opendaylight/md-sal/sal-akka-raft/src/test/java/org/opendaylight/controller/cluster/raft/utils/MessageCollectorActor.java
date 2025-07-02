@@ -189,7 +189,7 @@ public class MessageCollectorActor extends UntypedAbstractActor {
             try {
                 T message = getFirstMatching(actor, clazz);
                 if (message != null) {
-                    Assert.fail("Unexpected message received" +  message.toString());
+                    Assert.fail("Unexpected message received " + message);
                     return;
                 }
 
