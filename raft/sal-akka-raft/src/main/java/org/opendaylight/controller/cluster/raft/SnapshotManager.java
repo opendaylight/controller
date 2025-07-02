@@ -522,7 +522,7 @@ public final class SnapshotManager {
             replLog.snapshotPreCommit(replLog.getSnapshotIndex(), replLog.getSnapshotTerm());
         }
 
-        LOG.info("{}: Removed in-memory snapshotted entries, adjusted snaphsotIndex: {} and term: {}", memberId(),
+        LOG.info("{}: Removed in-memory snapshotted entries, adjusted snapshotIndex: {} and term: {}", memberId(),
             replLog.getSnapshotIndex(), replLog.getSnapshotTerm());
 
         task = new PersistCapture(lastSeq, request);
