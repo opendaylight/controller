@@ -11,11 +11,13 @@ import static com.google.common.base.Verify.verify;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Stopwatch;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.pekko.dispatch.ControlMessage;
@@ -132,19 +134,29 @@ public final class RaftStorageCompleter {
      * @throws InterruptedException if the thread is interrupted
      */
     public void completeUntilSynchronized() throws InterruptedException {
-        while (true) {
-            final var size = syncCallbacks.size();
-            if (size == 0) {
-                LOG.trace("{}: no synchronized callbacks", memberId);
-                return;
-            }
+        // Fast path first
+        var size = syncCallbacks.size();
+        if (size == 0) {
+            LOG.trace("{}: no synchronized callbacks", memberId);
+            return;
+        }
 
+        // Slow path: we have observed to have need at least one completion
+        final var sw = Stopwatch.createStarted();
+        for (; size != 0; size = syncCallbacks.size()) {
             final List<Runnable> completions;
+
             lock.lock();
             try {
-                while (pending.isEmpty()) {
+                if (pending.isEmpty()) {
                     LOG.debug("{}: awaiting more completions to resolve {} synchronized callback(s)", memberId, size);
-                    notEmpty.await();
+                    // Wait 0.9-1.1s
+                    final var remaining = notEmpty.awaitNanos(900_000_000
+                        + ThreadLocalRandom.current().nextLong(200_000_000));
+                    if (remaining <= 0) {
+                        LOG.debug("{}: no completions signalled for a second, have been waiting for {}", memberId, sw);
+                        continue;
+                    }
                 }
 
                 completions = List.copyOf(pending);
@@ -155,6 +167,8 @@ public final class RaftStorageCompleter {
 
             runCompletions(completions);
         }
+
+        LOG.debug("{}: synchronized callbacks after {}", memberId, sw);
     }
 
     private void runCompletions(final List<Runnable> completions) {
