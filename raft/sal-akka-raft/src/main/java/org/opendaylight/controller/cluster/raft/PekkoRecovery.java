@@ -115,7 +115,7 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
         origSnapshot = loaded;
     }
 
-    final @Nullable RecoveryLog handleRecoveryMessage(final Object message) {
+    final @Nullable PekkoRecoveryResult handleRecoveryMessage(final Object message) {
         LOG.trace("{}: handleRecoveryMessage: {}", memberId(), message);
 
         anyDataRecovered = anyDataRecovered || !(message instanceof RecoveryCompleted);
@@ -132,12 +132,17 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
             case VotingConfig msg -> actor.peerInfos().updateVotingConfig(msg);
             case UpdateElectionTerm(var termInfo) -> termInfoStore().setTerm(termInfo);
             case RecoveryCompleted msg -> {
-                onRecoveryCompletedMessage();
-                return recoveryLog;
+                final var canRecoverFromSnapshot = onRecoveryCompletedMessage();
+                if (canRecoverFromSnapshot) {
+                    // FIXME: move this to JournalRecovery and RaftActor
+                    final var snapshot = recoveryCohort.getRestoreFromSnapshot();
+                    if (snapshot != null) {
+                        restoreFrom(snapshot);
+                    }
+                }
+                return new PekkoRecoveryResult(recoveryLog, canRecoverFromSnapshot);
             }
-            default -> {
-                // No-op
-            }
+            default -> LOG.debug("{}: ignoring unhandled message {}", memberId(), message);
         }
         return null;
     }
@@ -289,7 +294,7 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
         actor.deleteMessages(actor.lastSequenceNr());
     }
 
-    private void onRecoveryCompletedMessage() {
+    private boolean onRecoveryCompletedMessage() {
         applyRecoveredCommands();
 
         final var recoveryTime = stopRecoveryTimers();
@@ -321,12 +326,7 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
             infoStore.setTerm(orig);
         }
 
-        if (completeRecovery()) {
-            final var snapshot = recoveryCohort.getRestoreFromSnapshot();
-            if (snapshot != null) {
-                restoreFrom(snapshot);
-            }
-        }
+        return completeRecovery();
     }
 
     boolean completeRecovery() {
