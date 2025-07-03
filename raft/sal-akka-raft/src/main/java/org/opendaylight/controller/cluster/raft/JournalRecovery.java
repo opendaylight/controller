@@ -114,7 +114,7 @@ final class JournalRecovery<T extends State> extends Recovery<T> {
             }
 
             // Journal's idea on how far we can go in applying entries.
-            final var applyToIndex = journal.applyToJournalIndex();
+            var applyToIndex = journal.applyToJournalIndex();
             LOG.debug("{}: applying entries up to {}", memberId(), applyToIndex);
 
             // Process everything in the journal, being mindful of snapshot intervals. We should not be touching
@@ -122,12 +122,22 @@ final class JournalRecovery<T extends State> extends Recovery<T> {
             var lastApplied = recoveryLog.getLastApplied();
             while (journalEntry != null) {
                 final var logEntry = journalEntry.toLogEntry();
-                LOG.debug("{}: recovered journal {}", memberId(), logEntry);
-                recoverEntry(logEntry);
 
-                if (journalIndex <= applyToIndex) {
-                    applyEntry(logEntry);
-                    lastApplied = logEntry.index();
+                if (recoveryLog.isInSnapshot(logEntry.index())) {
+                    LOG.debug("{}: entry {} implied by snapshot, adjusting replayFrom/applyTo to at least {}",
+                        memberId(), logEntry, journalIndex);
+                    journal.discardHead(journalIndex + 1);
+                    if (applyToIndex < journalIndex) {
+                        journal.setApplyTo(journalIndex);
+                    }
+                } else {
+                    LOG.debug("{}: recovered journal {}", memberId(), logEntry);
+                    recoverEntry(logEntry);
+
+                    if (journalIndex <= applyToIndex) {
+                        applyEntry(logEntry);
+                        lastApplied = logEntry.index();
+                    }
                 }
 
                 journalIndex = reader.nextJournalIndex();
