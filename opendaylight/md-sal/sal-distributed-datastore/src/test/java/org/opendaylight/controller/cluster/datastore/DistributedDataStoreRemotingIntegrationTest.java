@@ -8,9 +8,6 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -654,9 +651,8 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
                 .withChild(ImmutableNodes.leafNode(TestModel.JUNK_QNAME, "junk"))
                 .build());
 
-            final var ex = assertThrows(ExecutionException.class, () -> writeTx.commit().get(5, TimeUnit.SECONDS))
-                .getCause();
-            assertThat(ex, instanceOf(TransactionCommitFailedException.class));
+            final var ex = assertThrows(ExecutionException.class, () -> writeTx.commit().get(5, TimeUnit.SECONDS));
+            assertInstanceOf(TransactionCommitFailedException.class, ex.getCause());
 
             verify(listener, timeout(5000)).onFailure(any());
 
@@ -970,13 +966,10 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         leaderTestKit.doCommit(successTxCohort);
 
         // continuation of canCommit(): readied transaction will complete commit, but will report an OLFE
-        final var ex = assertThrows(ExecutionException.class,
-            () -> canCommit.get(commitTimeout, TimeUnit.SECONDS)).getCause();
-        assertThat(ex, instanceOf(OptimisticLockFailedException.class));
-        assertEquals("Optimistic lock failed for path " + CarsModel.BASE_PATH, ex.getMessage());
-        final var cause = ex.getCause();
-        assertThat(cause, instanceOf(ConflictingModificationAppliedException.class));
-        final var cmae = (ConflictingModificationAppliedException) cause;
+        final var ex = assertThrows(ExecutionException.class, () -> canCommit.get(commitTimeout, TimeUnit.SECONDS));
+        final var olfe = assertInstanceOf(OptimisticLockFailedException.class, ex.getCause());
+        assertEquals("Optimistic lock failed for path " + CarsModel.BASE_PATH, olfe.getMessage());
+        final var cmae = assertInstanceOf(ConflictingModificationAppliedException.class, olfe.getCause());
         assertEquals("Node was created by other transaction.", cmae.getMessage());
         assertEquals(CarsModel.BASE_PATH, cmae.getPath());
     }
@@ -1004,8 +997,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         rwTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
 
         final var ex = assertThrows(ExecutionException.class, () -> followerTestKit.doCommit(rwTx.ready()));
-        assertThat("Unexpected exception: " + Throwables.getStackTraceAsString(ex.getCause()),
-            Throwables.getRootCause(ex), instanceOf(RequestTimeoutException.class));
+        assertInstanceOf(RequestTimeoutException.class, Throwables.getRootCause(ex));
     }
 
     @Test
@@ -1034,8 +1026,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         rwTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
 
         final var ex = assertThrows(ExecutionException.class, () -> followerTestKit.doCommit(rwTx.ready()));
-        assertThat("Unexpected exception: " + Throwables.getStackTraceAsString(ex.getCause()),
-            Throwables.getRootCause(ex), instanceOf(RequestTimeoutException.class));
+        assertInstanceOf(RequestTimeoutException.class, Throwables.getRootCause(ex));
     }
 
     @Test
@@ -1264,9 +1255,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
             member2Cars.tell(new StopDropMessages<>(AppendEntries.class), null);
             member3Cars.tell(new StopDropMessages<>(AppendEntries.class), null);
 
-            await("Is tx stuck in COMMIT_PENDING")
-                    .atMost(10, TimeUnit.SECONDS).untilAtomic(submitDone, equalTo(Boolean.TRUE));
-
+            await("Is tx stuck in COMMIT_PENDING").atMost(10, TimeUnit.SECONDS).untilTrue(submitDone);
         }
 
         executor.shutdownNow();
