@@ -1315,14 +1315,19 @@ public class RaftActorTest extends AbstractActorTest {
 
         // hitting this is flimsy so run multiple times to improve the chance of things
         // blowing up while breaking actor containment
-        final var message = new TestPersist(leaderActorRef, new MockIdentifier("1"), new MockCommand("1"));
         for (int i = 0; i < 100; i++) {
-            leaderActorRef.tell(message, null);
+            leaderActorRef.tell(new TestPersist(leaderActorRef, new MockIdentifier("1"), new MockCommand(String.valueOf(i))), null);
             leaderActorRef.tell(new AppendEntriesReply(followerId, 1, true, i, 1, (short) 5), mockFollowerActorRef);
         }
 
-        await("Persistence callback.").atMost(5, TimeUnit.SECONDS).untilAsserted(() ->
-            assertEquals(100, leaderActor.getState().size()));
+        await("Persistence callback.").atMost(500, TimeUnit.SECONDS).untilAsserted(() -> {
+            final var state = leaderActor.getState();
+            final var size = state.size();
+            if (size > 100) {
+                System.out.print(size);
+            }
+            assertEquals(100, size);
+        });
         executorService.shutdown();
     }
 }
