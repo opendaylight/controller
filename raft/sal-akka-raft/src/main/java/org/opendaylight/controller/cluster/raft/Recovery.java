@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
@@ -26,6 +27,7 @@ import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.Support;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
+import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.EntryMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -143,8 +145,19 @@ abstract sealed class Recovery<T extends @NonNull State> permits JournalRecovery
         currentBatchSize = 0;
     }
 
+    // Called after we have applied an entry: lastMeta cannot return null and it matches lastApplied
     void saveRecoverySnapshot() {
-        takeSnapshot(recoveryLog.lastMeta());
+        takeSnapshot(verifyNotNull(recoveryLog.lastMeta()));
+    }
+
+    // Called after recovery has been completed to clean out persistence: there may not be any entries in the log at all
+    void saveFinalSnapshot() {
+        var lastApplied = recoveryLog.lookupMeta(recoveryLog.getLastApplied());
+        if (lastApplied == null) {
+            lastApplied = EntryInfo.of(recoveryLog.getSnapshotIndex(), recoveryLog.getSnapshotTerm());
+            LOG.debug("{}: no applied entries in recovery log, re-snapshotting {}", memberId(), lastApplied);
+        }
+        takeSnapshot(lastApplied);
     }
 
     /**
