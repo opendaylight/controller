@@ -22,6 +22,30 @@
       },
       "revId": "c08d4e35000e409e99cfbf607d62cfb1eb731992",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "31310f94_923833f0",
+        "filename": "raft/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/spi/RaftStorageCompleter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2025-07-04T04:40:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "46aa2bb6_4bf2a8b5",
+      "range": {
+        "startLine": 153,
+        "startChar": 62,
+        "endLine": 153,
+        "endChar": 75
+      },
+      "revId": "c08d4e35000e409e99cfbf607d62cfb1eb731992",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
