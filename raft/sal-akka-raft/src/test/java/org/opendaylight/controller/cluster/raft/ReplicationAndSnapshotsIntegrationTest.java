@@ -19,10 +19,11 @@ import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
-import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
+import org.opendaylight.controller.cluster.raft.spi.EntryJournalV1;
 import org.opendaylight.raft.api.EntryMeta;
+import org.opendaylight.raft.api.TermInfo;
+import org.opendaylight.raft.spi.CompressionType;
 
 /**
  * Tests replication and snapshots end-to-end using real RaftActors and behavior communication.
@@ -48,17 +49,26 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
 
         // Setup the persistent journal for the leader. We'll start up with 3 journal log entries (one less
         // than the snapshotBatchCount).
-        long seqId = 1;
-        InMemoryJournal.addEntry(leaderId, seqId++, new UpdateElectionTerm(initialTerm, leaderId));
-        recoveredPayload0 = new MockCommand("zero");
-        InMemoryJournal.addEntry(leaderId, seqId++, new SimpleReplicatedLogEntry(0, initialTerm, recoveredPayload0));
-        recoveredPayload1 = new MockCommand("one");
-        InMemoryJournal.addEntry(leaderId, seqId++, new SimpleReplicatedLogEntry(1, initialTerm, recoveredPayload1));
-        recoveredPayload2 = new MockCommand("two");
-        InMemoryJournal.addEntry(leaderId, seqId++, new SimpleReplicatedLogEntry(2, initialTerm, recoveredPayload2));
-        InMemoryJournal.addEntry(leaderId, seqId++, new ApplyJournalEntries(2));
 
-        origLeaderJournal = InMemoryJournal.get(leaderId, SimpleReplicatedLogEntry.class);
+        final var leaderDir = stateDir().resolve(leaderId);
+        final var leaderAccess = new LocalAccess(leaderId, leaderDir);
+        leaderAccess.termInfoStore().storeAndSetTerm(new TermInfo(initialTerm, leaderId));
+
+        recoveredPayload0 = new MockCommand("zero");
+        recoveredPayload1 = new MockCommand("one");
+        recoveredPayload2 = new MockCommand("two");
+
+        origLeaderJournal = List.of(
+            new SimpleReplicatedLogEntry(0, initialTerm, recoveredPayload0),
+            new SimpleReplicatedLogEntry(1, initialTerm, recoveredPayload1),
+            new SimpleReplicatedLogEntry(2, initialTerm, recoveredPayload2));
+
+        try (var journal = new EntryJournalV1(leaderId, leaderDir, CompressionType.NONE, true)) {
+            for (var entry : origLeaderJournal) {
+                journal.appendEntry(entry);
+            }
+            journal.setApplyTo(origLeaderJournal.size());
+        }
 
         // Create the leader and 2 follower actors and verify initial syncing of the followers after leader
         // persistence recovery.
