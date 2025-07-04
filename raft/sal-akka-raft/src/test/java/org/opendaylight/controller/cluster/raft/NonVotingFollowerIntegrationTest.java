@@ -10,8 +10,11 @@ package org.opendaylight.controller.cluster.raft;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -28,6 +31,7 @@ import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEnt
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
+import org.opendaylight.raft.api.EntryInfo;
 
 /**
  * Integration test for various scenarios involving non-voting followers.
@@ -45,7 +49,7 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
      * data in memory. The leader must force an install snapshot to re-sync the follower's state.
      */
     @Test
-    public void testFollowerResyncWithEmptyLeaderLogAfterNonPersistentLeaderRestart() {
+    public void testFollowerResyncWithEmptyLeaderLogAfterNonPersistentLeaderRestart() throws Exception {
         testLog.info("testFollowerResyncWithEmptyLeaderLogAfterNonPersistentLeaderRestart starting");
 
         setupLeaderAndNonVotingFollower();
@@ -69,7 +73,14 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         assertEquals("Follower applied state", expSnapshotState, followerInstance.getState());
 
         // Persisted journal should only contain the ServerConfigurationPayload and the original UpdateElectionTerm
-        assertEquals("Leader persisted journal size", 2, InMemoryJournal.get(leaderId).size());
+        final var leaderSnapshot = leaderInstance.lastSnapshot();
+        assertNotNull(leaderSnapshot);
+        assertEquals(EntryInfo.of(-1, -1), leaderSnapshot.lastIncluded());
+        assertNull(leaderSnapshot.source());
+        final var leaderRaftSnapshot = leaderSnapshot.readRaftSnapshot();
+        assertEquals(List.of(), leaderRaftSnapshot.unappliedEntries());
+        assertEquals(new VotingConfig(new ServerInfo(follower1Id, false), new ServerInfo(leaderId, true)),
+            leaderRaftSnapshot.votingConfig());
 
         // Restart the leader
 
@@ -440,6 +451,7 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         follower1Context = followerInstance.getRaftActorContext();
 
         waitUntilLeader(leaderActor);
+        assertEquals("Leader persisted journal size", 0, InMemoryJournal.get(leaderId).size());
 
         // Verify leader's context after startup
 
