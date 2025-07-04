@@ -115,8 +115,8 @@ public class RaftActorTestKit extends TestKit {
     }
 
     // Wait for 5 seconds mostly due to slow build machines (like Vexxhost or on a single-threaded control group.
-    // Other operations execute on a similar or smaller scale, so let's keep this unified.
+    // Other operations execute on a similar or smaller scale, so let's keep this unified and poll at every millisecond.
     private static ConditionFactory defaultAwait() {
-        return await().atMost(Duration.ofSeconds(5));
+        return await().atMost(Duration.ofSeconds(5)).pollDelay(Duration.ofMillis(1));
     }
 }
