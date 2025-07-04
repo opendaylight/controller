@@ -19,14 +19,6 @@ import org.opendaylight.raft.api.EntryMeta;
  */
 public interface EntryStore {
     /**
-     * A {@link RaftCallback} reporting the {@code journalIndex} on success.
-     */
-    @NonNullByDefault
-    abstract class PersistCallback extends RaftCallback<Long> {
-        // Nothing else
-    }
-
-    /**
      * {@return the {@code EntryStoreCompleter}}
      */
     @NonNull RaftStorageCompleter completer();
