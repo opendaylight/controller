@@ -58,7 +58,7 @@ import scala.concurrent.Await;
  *
  * @author Thomas Pantelis
  */
-public abstract class AbstractRaftActorIntegrationTest extends AbstractRaftActorTest {
+public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest {
     private static final class MockIdentifier extends AbstractStringIdentifier<MockIdentifier> {
         @java.io.Serial
         private static final long serialVersionUID = 1L;
