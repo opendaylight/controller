@@ -198,8 +198,8 @@ public final class JournalWriteTask implements Runnable {
      */
     public void appendEntry(final LogEntry entry, final RaftCallback<Long> callback, boolean sync)
             throws InterruptedException {
-        final var cb = sync ? callback : completer.syncWithCurrentMessage(callback);
-        enqueueAndWait(new JournalAppendEntry(ticker.read(), entry, cb));
+        enqueueAndWait(new JournalAppendEntry(ticker.read(), entry,
+            sync ? completer.syncWithCurrentMessage(callback) : callback));
     }
 
     /**
