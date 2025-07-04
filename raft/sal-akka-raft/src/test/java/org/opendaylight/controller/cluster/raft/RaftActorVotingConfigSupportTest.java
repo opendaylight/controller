@@ -1208,16 +1208,24 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         node2RaftActor.waitForInitializeBehaviorComplete();
 
         // Verify the intended server config was loaded and applied.
-        verifyServerConfigurationPayloadEntry(node1RaftActor.getRaftActorContext().getReplicatedLog(),
-                nonVotingServer(node1ID), nonVotingServer(node2ID), votingServer("downNode1"),
-                votingServer("downNode2"));
+        // FIXME: this should be accurate once we do not have PekkoRecovery, which moves this information to snapshot.
+        //        verifyServerConfigurationPayloadEntry(node1RaftActor.getRaftActorContext().getReplicatedLog(),
+        //                nonVotingServer(node1ID), nonVotingServer(node2ID), votingServer("downNode1"),
+        //                votingServer("downNode2"));
+        assertVotingConfig(node1RaftActor.getRaftActorContext().getPeerServerInfo(true),
+            nonVotingServer(node1ID), nonVotingServer(node2ID), votingServer("downNode1"), votingServer("downNode2"));
+
         assertFalse("isVotingMember", node1RaftActor.getRaftActorContext().isVotingMember());
         assertEquals("getRaftState", RaftRole.Follower, node1RaftActor.getRaftState());
         assertEquals("getLeaderId", null, node1RaftActor.getLeaderId());
 
-        verifyServerConfigurationPayloadEntry(node2RaftActor.getRaftActorContext().getReplicatedLog(),
-                nonVotingServer(node1ID), nonVotingServer(node2ID), votingServer("downNode1"),
-                votingServer("downNode2"));
+        // FIXME: this should be accurate once we do not have PekkoRecovery, which moves this information to snapshot.
+        //        verifyServerConfigurationPayloadEntry(node2RaftActor.getRaftActorContext().getReplicatedLog(),
+        //                nonVotingServer(node1ID), nonVotingServer(node2ID), votingServer("downNode1"),
+        //                votingServer("downNode2"));
+        assertVotingConfig(node2RaftActor.getRaftActorContext().getPeerServerInfo(true),
+            nonVotingServer(node1ID), nonVotingServer(node2ID), votingServer("downNode1"), votingServer("downNode2"));
+
         assertFalse("isVotingMember", node2RaftActor.getRaftActorContext().isVotingMember());
 
         // For the test, we send a ChangeServersVotingStatus message to node1 to flip the voting states for
@@ -1503,8 +1511,11 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     private static void verifyServerConfigurationPayloadEntry(final ReplicatedLog log, final ServerInfo... expected) {
         final var logEntry = log.lookup(log.lastIndex());
         assertNotNull(logEntry);
-        final var payload = assertInstanceOf(VotingConfig.class, logEntry.command());
-        assertEquals("Server config", Set.of(expected), Set.copyOf(payload.serverInfo()));
+        assertVotingConfig(assertInstanceOf(VotingConfig.class, logEntry.command()), expected);
+    }
+
+    private static void assertVotingConfig(final VotingConfig config, final ServerInfo... expected) {
+        assertEquals("Server config", Set.of(expected), Set.copyOf(config.serverInfo()));
     }
 
     private RaftActorContextImpl newFollowerContext(final String id,
