@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
+import static org.opendaylight.controller.cluster.raft.RaftActorTestKit.awaitSnapshot;
 
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.List;
@@ -35,7 +36,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Pantelis
  */
-public class MigratedMessagesTest extends AbstractRaftActorTest {
+public class MigratedMessagesTest extends AbstractActorTest {
     static final Logger TEST_LOG = LoggerFactory.getLogger(MigratedMessagesTest.class);
 
     private TestActorFactory factory;

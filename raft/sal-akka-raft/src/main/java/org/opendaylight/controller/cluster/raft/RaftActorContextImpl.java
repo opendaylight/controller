@@ -204,18 +204,16 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     public String getPeerAddress(final String peerId) {
-        String peerAddress;
-        PeerInfo peerInfo = peerInfos.lookupPeerInfo(peerId);
-        if (peerInfo != null) {
-            peerAddress = peerInfo.getAddress();
-            if (peerAddress == null) {
-                peerAddress = configParams.getPeerAddressResolver().resolve(peerId);
-                peerInfo.setAddress(peerAddress);
-            }
-        } else {
-            peerAddress = configParams.getPeerAddressResolver().resolve(peerId);
+        final var peerInfo = peerInfos.lookupPeerInfo(peerId);
+        if (peerInfo == null) {
+            return configParams.getPeerAddressResolver().resolve(peerId);
         }
 
+        var peerAddress = peerInfo.getAddress();
+        if (peerAddress != null) {
+            peerAddress = configParams.getPeerAddressResolver().resolve(peerId);
+            peerInfo.setAddress(peerAddress);
+        }
         return peerAddress;
     }
 

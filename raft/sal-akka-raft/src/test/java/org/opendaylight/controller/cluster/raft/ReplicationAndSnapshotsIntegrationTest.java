@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft;
 import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.opendaylight.controller.cluster.raft.RaftActorTestKit.awaitSnapshot;
 
 import java.time.Duration;
 import java.util.List;
@@ -242,8 +243,7 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         assertEquals("Leader replicatedToAllIndex", 2, leader.getReplicatedToAllIndex());
 
         // The followers should also snapshot so verify.
-        snapshotFile = await().atMost(Duration.ofSeconds(2))
-            .until(() -> follower1Actor.underlyingActor().lastSnapshot(), Objects::nonNull);
+        snapshotFile = awaitSnapshot(follower1Actor);
 
         // The last applied index in the snapshot may or may not be the last log entry depending on
         // timing so to avoid intermittent test failures, we'll just verify the snapshot's last term/index.
