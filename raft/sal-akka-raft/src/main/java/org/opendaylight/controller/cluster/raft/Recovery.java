@@ -26,6 +26,7 @@ import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.Support;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
+import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.EntryMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -144,7 +145,12 @@ abstract sealed class Recovery<T extends @NonNull State> permits JournalRecovery
     }
 
     void saveRecoverySnapshot() {
-        takeSnapshot(recoveryLog.lastMeta());
+        var lastEntry = recoveryLog.lastMeta();
+        if (lastEntry == null) {
+            lastEntry = EntryInfo.of(recoveryLog.getSnapshotIndex(), recoveryLog.getSnapshotTerm());
+            LOG.debug("{}: no entries in recovery log, re-snapshotting {}", memberId(), lastEntry);
+        }
+        takeSnapshot(lastEntry);
     }
 
     /**
