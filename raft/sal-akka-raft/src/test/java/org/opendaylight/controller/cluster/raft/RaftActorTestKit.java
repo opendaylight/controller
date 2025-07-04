@@ -24,6 +24,7 @@ import org.apache.pekko.pattern.Patterns;
 import org.apache.pekko.testkit.TestActorRef;
 import org.apache.pekko.testkit.javadsl.TestKit;
 import org.apache.pekko.util.Timeout;
+import org.awaitility.core.ConditionFactory;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
@@ -75,7 +76,7 @@ public class RaftActorTestKit extends TestKit {
     }
 
     public static final @NonNull SnapshotFile awaitSnapshot(final RaftActor actor) {
-        final var snapshot = await().atMost(Duration.ofSeconds(5))
+        final var snapshot = defaultSnapshotAwait()
             .until(() -> actor.persistence().snapshotStore().lastSnapshot(), Objects::nonNull);
         assertNotNull(snapshot);
         return snapshot;
@@ -87,7 +88,14 @@ public class RaftActorTestKit extends TestKit {
 
     public static final @NonNull SnapshotFile awaitSnapshotNewerThan(final TestActorRef<? extends RaftActor> actorRef,
             final Instant timestamp) {
-        return await().atMost(Duration.ofSeconds(5))
+        return defaultSnapshotAwait()
             .until(() -> awaitSnapshot(actorRef), snapshot -> timestamp.compareTo(snapshot.timestamp()) < 0);
     }
+
+    private static ConditionFactory defaultSnapshotAwait() {
+        // Wait for 5 seconds mostly due to slow build machines (like Vexxhost or on a single-threaded control group,
+        // but these complete within micro-or-milliseconds, so probe aggressively to minimize test execution time.
+        return await().atMost(Duration.ofSeconds(5)).pollDelay(Duration.ofMillis(1));
+    }
+
 }
