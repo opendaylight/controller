@@ -100,6 +100,7 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
 
     private boolean anyDataRecovered;
     private boolean hasMigratedDataRecovered;
+    private long lastDeletedSequenceNr;
 
     @NonNullByDefault
     PekkoRecovery(final RaftActor actor, final RaftActorSnapshotCohort<T> snapshotCohort,
@@ -140,6 +141,13 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
                         restoreFrom(snapshot);
                     }
                 }
+
+                final var lastSeq = actor.lastSequenceNr();
+                if (lastSeq > lastDeletedSequenceNr) {
+                    LOG.info("{}: taking snapshot to clear Pekko persistence to {}", memberId(), lastSeq);
+                    saveRecoverySnapshot();
+                }
+
                 return new PekkoRecoveryResult(recoveryLog, canRecoverFromSnapshot);
             }
             default -> LOG.debug("{}: ignoring unhandled message {}", memberId(), message);
@@ -291,7 +299,8 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
 
     @Override
     final void discardSnapshottedEntries() {
-        actor.deleteMessages(actor.lastSequenceNr());
+        lastDeletedSequenceNr = actor.lastSequenceNr();
+        actor.deleteMessages(lastDeletedSequenceNr);
     }
 
     private boolean onRecoveryCompletedMessage() {
