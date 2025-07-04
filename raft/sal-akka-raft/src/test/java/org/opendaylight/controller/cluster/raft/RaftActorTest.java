@@ -148,8 +148,6 @@ public class RaftActorTest extends AbstractActorTest {
 
         kit.watch(followerActor);
 
-        var snapshotUnappliedEntries = List.<LogEntry>of(new DefaultLogEntry(4, 1, new MockCommand("E")));
-
         int lastAppliedDuringSnapshotCapture = 3;
         int lastIndexDuringSnapshotCapture = 4;
 
@@ -157,8 +155,8 @@ public class RaftActorTest extends AbstractActorTest {
         final var snapshotState = new MockSnapshotState(List.of(
             new MockCommand("A"), new MockCommand("B"), new MockCommand("C"), new MockCommand("D")));
 
-        final var snapshot = Snapshot.create(snapshotState, snapshotUnappliedEntries, lastIndexDuringSnapshotCapture, 1,
-                lastAppliedDuringSnapshotCapture, 1, new TermInfo(-1), null);
+        final var snapshot = Snapshot.create(snapshotState, List.of(new DefaultLogEntry(4, 1, new MockCommand("E"))),
+            lastIndexDuringSnapshotCapture, 1, lastAppliedDuringSnapshotCapture, 1, new TermInfo(-1), null);
         InMemorySnapshotStore.addSnapshot(persistenceId, snapshot);
 
         // add more entries after snapshot is taken
@@ -190,7 +188,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         final var context = mockRaftActor.getRaftActorContext();
         final var log = context.getReplicatedLog();
-        assertEquals("Journal log size", snapshotUnappliedEntries.size() + 3, log.size());
+        assertEquals("Journal log size", 2, log.size());
         assertEquals("Journal data size", 10, log.dataSize());
         assertEquals("Last index", lastIndex, log.lastIndex());
         assertEquals("Last applied", lastAppliedToState, log.getLastApplied());
