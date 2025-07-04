@@ -7,43 +7,47 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import static org.junit.Assert.fail;
+import static com.google.common.base.Verify.verifyNotNull;
+import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.nio.file.Path;
-import java.util.Optional;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.pattern.Patterns;
-import org.apache.pekko.testkit.javadsl.EventFilter;
+import org.apache.pekko.testkit.TestActorRef;
 import org.apache.pekko.testkit.javadsl.TestKit;
 import org.apache.pekko.util.Timeout;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
+import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
-import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
 
+// FIXME: document this class
 public class RaftActorTestKit extends TestKit {
     private static final Logger LOG = LoggerFactory.getLogger(RaftActorTestKit.class);
-    private final ActorRef raftActor;
+
+    private final @NonNull ActorRef raftActor;
 
     public RaftActorTestKit(final Path stateDir, final ActorSystem actorSystem, final String actorName) {
         super(actorSystem);
-        raftActor = getSystem().actorOf(MockRaftActor.builder().id(actorName).props(stateDir), actorName);
+        raftActor = verifyNotNull(getSystem().actorOf(MockRaftActor.builder()
+            .id(actorName)
+            .props(stateDir), actorName));
     }
 
-    public ActorRef getRaftActor() {
+    public final @NonNull ActorRef getRaftActor() {
         return raftActor;
-    }
-
-    public boolean waitForLogMessage(final Class<?> logEventClass, final String message) {
-        // Wait for a specific log message to show up
-        return new EventFilter(logEventClass, getSystem()).from(raftActor.path().toString()).message(message)
-                .occurrences(1).intercept(() -> Boolean.TRUE);
     }
 
     protected void waitUntilLeader() {
@@ -51,13 +55,13 @@ public class RaftActorTestKit extends TestKit {
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public static void waitUntilLeader(final ActorRef actorRef) {
-        FiniteDuration duration = FiniteDuration.create(100, TimeUnit.MILLISECONDS);
+    public static final void waitUntilLeader(final ActorRef actorRef) {
+        final var duration = FiniteDuration.create(100, TimeUnit.MILLISECONDS);
         for (int i = 0; i < 20 * 5; i++) {
-            Future<Object> future = Patterns.ask(actorRef, FindLeader.INSTANCE, new Timeout(duration));
+            final var future = Patterns.ask(actorRef, FindLeader.INSTANCE, new Timeout(duration));
             try {
-                final Optional<String> maybeLeader = ((FindLeaderReply)Await.result(future, duration)).getLeaderActor();
-                if (maybeLeader.isPresent()) {
+                final var reply = assertInstanceOf(FindLeaderReply.class, Await.result(future, duration));
+                if (reply.leaderActorPath() != null) {
                     return;
                 }
             } catch (Exception e) {
@@ -67,6 +71,23 @@ public class RaftActorTestKit extends TestKit {
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
         }
 
-        fail("Leader not found for actorRef " + actorRef.path());
+        throw new AssertionError("Leader not found for actorRef " + actorRef.path());
+    }
+
+    public static final @NonNull SnapshotFile awaitSnapshot(final RaftActor actor) {
+        final var snapshot = await().atMost(Duration.ofSeconds(5))
+            .until(() -> actor.persistence().snapshotStore().lastSnapshot(), Objects::nonNull);
+        assertNotNull(snapshot);
+        return snapshot;
+    }
+
+    public static final @NonNull SnapshotFile awaitSnapshot(final TestActorRef<? extends RaftActor> actorRef) {
+        return awaitSnapshot(actorRef.underlyingActor());
+    }
+
+    public static final @NonNull SnapshotFile awaitSnapshotNewerThan(final TestActorRef<? extends RaftActor> actorRef,
+            final Instant timestamp) {
+        return await().atMost(Duration.ofSeconds(5))
+            .until(() -> awaitSnapshot(actorRef), snapshot -> timestamp.compareTo(snapshot.timestamp()) < 0);
     }
 }

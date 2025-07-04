@@ -11,6 +11,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.opendaylight.controller.cluster.raft.RaftActorTestKit.awaitSnapshot;
+import static org.opendaylight.controller.cluster.raft.RaftActorTestKit.awaitSnapshotNewerThan;
 
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.IOException;
