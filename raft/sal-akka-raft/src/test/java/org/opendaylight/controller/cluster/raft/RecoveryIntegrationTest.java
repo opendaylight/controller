@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft;
 
 import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
+import static org.opendaylight.controller.cluster.raft.RaftActorTestKit.awaitSnapshot;
 
 import java.util.List;
 import java.util.Map;
