@@ -8,18 +8,14 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static java.util.Objects.requireNonNull;
-import static org.awaitility.Awaitility.await;
-import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.util.Comparator;
 import org.apache.commons.io.FileUtils;
 import org.apache.pekko.actor.ActorSystem;
-import org.apache.pekko.testkit.TestActorRef;
 import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -78,11 +74,5 @@ public abstract class AbstractActorTest {
 
     protected static void deleteJournal() throws IOException {
         FileUtils.deleteDirectory(Path.of("journal").toFile());
-    }
-
-    protected static final void verifyApplyIndex(final TestActorRef<? extends RaftActor> actor, final long expIndex) {
-        await().atMost(Duration.ofSeconds(5)).untilAsserted(() -> {
-            assertEquals(expIndex, actor.underlyingActor().getRaftActorContext().getReplicatedLog().getLastApplied());
-        });
     }
 }

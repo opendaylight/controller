@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft;
 
 import static com.google.common.base.Verify.verifyNotNull;
 import static org.awaitility.Awaitility.await;
+import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -76,8 +77,18 @@ public class RaftActorTestKit extends TestKit {
         throw new AssertionError("Leader not found for actorRef " + actorRef.path());
     }
 
+    public static final void awaitLastApplied(final RaftActor actor, final long lastApplied) {
+        defaultAwait().untilAsserted(() -> {
+            assertEquals(lastApplied, actor.getRaftActorContext().getReplicatedLog().getLastApplied());
+        });
+    }
+
+    public static final void awaitLastApplied(final TestActorRef<? extends RaftActor> actor, final long lastApplied) {
+        awaitLastApplied(actor.underlyingActor(), lastApplied);
+    }
+
     public static final @NonNull SnapshotFile awaitSnapshot(final RaftActor actor) {
-        final var snapshot = defaultSnapshotAwait()
+        final var snapshot = defaultAwait()
             .until(() -> actor.persistence().snapshotStore().lastSnapshot(), Objects::nonNull);
         assertNotNull(snapshot);
         return snapshot;
@@ -89,12 +100,13 @@ public class RaftActorTestKit extends TestKit {
 
     public static final @NonNull SnapshotFile awaitSnapshotNewerThan(final TestActorRef<? extends RaftActor> actorRef,
             final Instant timestamp) {
-        return defaultSnapshotAwait()
+        return defaultAwait()
             .until(() -> awaitSnapshot(actorRef), snapshot -> timestamp.compareTo(snapshot.timestamp()) < 0);
     }
 
-    private static ConditionFactory defaultSnapshotAwait() {
-        // Wait for 5 seconds mostly due to slow build machines (like Vexxhost or on a single-threaded control group.
+    // Wait for 5 seconds mostly due to slow build machines (like Vexxhost or on a single-threaded control group.
+    // Other operations execute on a similar or smaller scale, so let's keep this unified.
+    private static ConditionFactory defaultAwait() {
         return await().atMost(Duration.ofSeconds(5));
     }
 }
