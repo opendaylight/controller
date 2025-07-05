@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.opendaylight.controller.cluster.raft.RaftActorTestKit.awaitLastApplied;
 import static org.opendaylight.controller.cluster.raft.RaftActorTestKit.awaitSnapshot;
 
 import java.util.List;
@@ -43,12 +44,12 @@ public class RecoveryIntegrationSingleNodeTest extends AbstractRaftActorIntegrat
         final MockCommand payload1 = sendPayloadData(singleNodeActorRef, "one");
         final MockCommand payload2 = sendPayloadData(singleNodeActorRef, "two");
 
-        verifyApplyIndex(singleNodeActorRef, 2);
+        awaitLastApplied(singleNodeActorRef, 2);
 
         // this should trigger a snapshot
         final MockCommand payload3 = sendPayloadData(singleNodeActorRef, "three");
 
-        verifyApplyIndex(singleNodeActorRef, 3);
+        awaitLastApplied(singleNodeActorRef, 3);
 
         //add 2 more
         final MockCommand payload4 = sendPayloadData(singleNodeActorRef, "four");
@@ -58,7 +59,7 @@ public class RecoveryIntegrationSingleNodeTest extends AbstractRaftActorIntegrat
         // Wait for snapshot complete.
         awaitSnapshot(singleNodeActorRef);
 
-        verifyApplyIndex(singleNodeActorRef, 5);
+        awaitLastApplied(singleNodeActorRef, 5);
 
         assertEquals("Last applied", 5, singleNodeContext.getReplicatedLog().getLastApplied());
 
