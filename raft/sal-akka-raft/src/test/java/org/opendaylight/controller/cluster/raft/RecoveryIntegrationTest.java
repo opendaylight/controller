@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft;
 
 import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
+import static org.opendaylight.controller.cluster.raft.RaftActorTestKit.awaitLastApplied;
 import static org.opendaylight.controller.cluster.raft.RaftActorTestKit.awaitSnapshot;
 
 import java.util.List;
@@ -67,7 +68,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         // Now deliver the AppendEntries to the follower
         follower1Actor.underlyingActor().stopDropMessages(AppendEntries.class);
 
-        verifyApplyIndex(leaderActor, 4);
+        awaitLastApplied(leaderActor, 4);
 
         // Now complete the snapshot
         leaderPersistence.awaitSaveSnapshot().complete();
@@ -110,7 +111,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         // Now deliver the AppendEntries to the follower
         follower1Actor.underlyingActor().stopDropMessages(AppendEntries.class);
 
-        verifyApplyIndex(leaderActor, 4);
+        awaitLastApplied(leaderActor, 4);
 
         reinstateLeaderActor();
 
@@ -142,8 +143,8 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         final MockCommand payload2 = sendPayloadData(leaderActor, "two");
 
         // Verify the leader applies the 3rd payload state.
-        verifyApplyIndex(leaderActor, 2);
-        verifyApplyIndex(follower2Actor, 2);
+        awaitLastApplied(leaderActor, 2);
+        awaitLastApplied(follower2Actor, 2);
 
         final var leaderLog = leaderContext.getReplicatedLog();
         assertEquals("Leader commit index", 2, leaderLog.getCommitIndex());
@@ -203,7 +204,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         sendPayloadData(leaderActor, "three");
 
         awaitSnapshot(leaderActor);
-        verifyApplyIndex(leaderActor, 3);
+        awaitLastApplied(leaderActor, 3);
 
         // Disconnect follower from leader
         killActor(follower1Actor);
@@ -259,12 +260,12 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
 
         payload0 = sendPayloadData(leaderActor, "zero");
 
-        verifyApplyIndex(leaderActor, 0);
+        awaitLastApplied(leaderActor, 0);
 
         payload1 = sendPayloadData(leaderActor, "one");
 
         // Verify the leader applies the states.
-        verifyApplyIndex(leaderActor, 1);
+        awaitLastApplied(leaderActor, 1);
 
         assertEquals("Leader last applied", 1, leaderContext.getReplicatedLog().getLastApplied());
 
