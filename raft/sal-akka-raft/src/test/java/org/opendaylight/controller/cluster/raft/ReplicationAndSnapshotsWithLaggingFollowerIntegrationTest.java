@@ -11,6 +11,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.opendaylight.controller.cluster.raft.RaftActorTestKit.awaitLastApplied;
 import static org.opendaylight.controller.cluster.raft.RaftActorTestKit.awaitSnapshot;
 import static org.opendaylight.controller.cluster.raft.RaftActorTestKit.awaitSnapshotNewerThan;
 
@@ -753,7 +754,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         verifyApplyState(applyStates.get(2), leaderCollectorActor, payload6.toString(), currentTerm, 6, payload6);
 
         // Verify the leader applies a log entry for at least the last entry index.
-        verifyApplyIndex(leaderActor, 6);
+        awaitLastApplied(leaderActor, 6);
 
         // Ensure there's at least 1 more heartbeat to trim the log.
         MessageCollectorActor.clearMessages(leaderCollectorActor);
