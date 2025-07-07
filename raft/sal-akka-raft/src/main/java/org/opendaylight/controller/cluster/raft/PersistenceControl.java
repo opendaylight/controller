@@ -51,7 +51,7 @@ final class PersistenceControl extends PersistenceProvider {
     PersistenceControl(final RaftActor raftActor, final RaftStorageCompleter completer, final Path directory,
             final CompressionType compression, final Configuration streamConfig) {
         this(new DisabledRaftStorage(completer, directory, compression, streamConfig),
-            new PekkoRaftStorage(completer, directory, compression, streamConfig, DEFAULT_JOURNAL_MAPPED));
+            new EnabledRaftStorage(completer, directory, compression, streamConfig, DEFAULT_JOURNAL_MAPPED));
     }
 
     void start() throws IOException {

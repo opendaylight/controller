@@ -54,7 +54,7 @@ class PekkoRecoveryTest {
     @BeforeEach
     void beforeEach() throws Exception {
         localAccess = new LocalAccess("test", stateDir);
-        raftStorage = new PekkoRaftStorage(new RaftStorageCompleter("test", Runnable::run), stateDir,
+        raftStorage = new EnabledRaftStorage(new RaftStorageCompleter("test", Runnable::run), stateDir,
             CompressionType.NONE, new Configuration(0, stateDir), true);
 
         doReturn("test").when(raftActor).memberId();
