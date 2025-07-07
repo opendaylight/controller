@@ -22,11 +22,10 @@ public class TestShardManager extends ShardManager {
     }
 
     @Override
-    public void handleCommand(final Object message) throws Exception {
-        if (GetLocalShards.INSTANCE.equals(message)) {
-            getSender().tell(new GetLocalShardsReply(localShards), null);
-        } else {
-            super.handleCommand(message);
+    protected void handleReceive(final Object message) {
+        switch (message) {
+            case GetLocalShards msg -> getSender().tell(new GetLocalShardsReply(localShards), null);
+            default -> super.handleReceive(message);
         }
     }
 
