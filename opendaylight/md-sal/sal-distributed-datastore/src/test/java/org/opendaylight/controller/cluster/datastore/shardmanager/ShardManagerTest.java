@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.AbstractMap;
@@ -60,7 +61,6 @@ import org.apache.pekko.dispatch.Dispatchers;
 import org.apache.pekko.dispatch.OnComplete;
 import org.apache.pekko.japi.Creator;
 import org.apache.pekko.pattern.Patterns;
-import org.apache.pekko.persistence.RecoveryCompleted;
 import org.apache.pekko.serialization.Serialization;
 import org.apache.pekko.testkit.TestActorRef;
 import org.apache.pekko.testkit.javadsl.TestKit;
@@ -113,7 +113,6 @@ import org.opendaylight.controller.cluster.datastore.utils.PrimaryShardInfoFutur
 import org.opendaylight.controller.cluster.notifications.DefaultLeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListener;
 import org.opendaylight.controller.cluster.notifications.RoleChangeNotification;
-import org.opendaylight.controller.cluster.raft.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.MessageCollectorActor;
 import org.opendaylight.controller.cluster.raft.TestActorFactory;
@@ -179,9 +178,6 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
     public void setUp() {
         ready = SettableFuture.create();
 
-        InMemoryJournal.clear();
-        InMemorySnapshotStore.clear();
-
         if (mockShardActor == null) {
             mockShardName = ShardIdentifier.create(Shard.DEFAULT_NAME, MEMBER_1, "config");
             mockShardActor = getSystem().actorOf(MessageCollectorActor.props(), mockShardName.toString());
@@ -192,9 +188,6 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
 
     @After
     public void tearDown() {
-        InMemoryJournal.clear();
-        InMemorySnapshotStore.clear();
-
         mockShardActor.tell(PoisonPill.getInstance(), ActorRef.noSender());
         await().atMost(Duration.ofSeconds(10)).until(mockShardActor::isTerminated);
         mockShardActor = null;
@@ -1078,57 +1071,56 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
     }
 
     @Test
-    public void testRoleChangeNotificationAndShardLeaderStateChangedReleaseReady() throws Exception {
+    public void testRoleChangeNotificationAndShardLeaderStateChangedReleaseReady() {
         TestShardManager shardManager = newTestShardManager();
 
         String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
-        shardManager.handleCommand(new RoleChangeNotification(memberId, RaftRole.Leader, RaftRole.Candidate));
+        shardManager.handleReceive(new RoleChangeNotification(memberId, RaftRole.Leader, RaftRole.Candidate));
         assertFalse(ready.isDone());
 
-        shardManager.handleCommand(new ShardLeaderStateChanged(memberId, memberId,
+        shardManager.handleReceive(new ShardLeaderStateChanged(memberId, memberId,
                 mock(DataTree.class), DataStoreVersions.CURRENT_VERSION));
         assertTrue(ready.isDone());
     }
 
     @Test
-    public void testRoleChangeNotificationToFollowerWithShardLeaderStateChangedReleaseReady() throws Exception {
+    public void testRoleChangeNotificationToFollowerWithShardLeaderStateChangedReleaseReady() {
         final TestKit kit = new TestKit(getSystem());
         TestShardManager shardManager = newTestShardManager();
 
         String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
-        shardManager.handleCommand(new RoleChangeNotification(memberId, RaftRole.Follower));
+        shardManager.handleReceive(new RoleChangeNotification(memberId, RaftRole.Follower));
         assertFalse(ready.isDone());
 
-        shardManager.handleCommand(MockClusterWrapper.createMemberUp("member-2", kit.getRef().path().toString()));
+        shardManager.handleReceive(MockClusterWrapper.createMemberUp("member-2", kit.getRef().path().toString()));
 
-        shardManager.handleCommand(
-            new ShardLeaderStateChanged(memberId, "member-2-shard-default-" + shardMrgIDSuffix,
+        shardManager.handleReceive(new ShardLeaderStateChanged(memberId, "member-2-shard-default-" + shardMrgIDSuffix,
                 mock(DataTree.class), DataStoreVersions.CURRENT_VERSION));
         assertTrue(ready.isDone());
     }
 
     @Test
-    public void testReadyCountDownForMemberUpAfterLeaderStateChanged() throws Exception {
+    public void testReadyCountDownForMemberUpAfterLeaderStateChanged() {
         final TestKit kit = new TestKit(getSystem());
         TestShardManager shardManager = newTestShardManager();
 
         String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
-        shardManager.handleCommand(new RoleChangeNotification(memberId, RaftRole.Follower));
+        shardManager.handleReceive(new RoleChangeNotification(memberId, RaftRole.Follower));
         assertFalse(ready.isDone());
 
-        shardManager.handleCommand(
+        shardManager.handleReceive(
             new ShardLeaderStateChanged(memberId, "member-2-shard-default-" + shardMrgIDSuffix,
                 mock(DataTree.class), DataStoreVersions.CURRENT_VERSION));
 
-        shardManager.handleCommand(MockClusterWrapper.createMemberUp("member-2", kit.getRef().path().toString()));
+        shardManager.handleReceive(MockClusterWrapper.createMemberUp("member-2", kit.getRef().path().toString()));
         assertTrue(ready.isDone());
     }
 
     @Test
-    public void testRoleChangeNotificationDoNothingForUnknownShard() throws Exception {
+    public void testRoleChangeNotificationDoNothingForUnknownShard() {
         TestShardManager shardManager = newTestShardManager();
 
-        shardManager.handleCommand(new RoleChangeNotification("unknown", RaftRole.Leader, RaftRole.Candidate));
+        shardManager.handleReceive(new RoleChangeNotification("unknown", RaftRole.Leader, RaftRole.Candidate));
         assertFalse(ready.isDone());
     }
 
@@ -1140,53 +1132,53 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
     }
 
     @Test
-    public void testWhenShardIsLeaderSyncStatusIsTrue() throws Exception {
+    public void testWhenShardIsLeaderSyncStatusIsTrue() {
         TestShardManager shardManager = newTestShardManager();
 
-        shardManager.handleCommand(new RoleChangeNotification("member-1-shard-default-" + shardMrgIDSuffix,
+        shardManager.handleReceive(new RoleChangeNotification("member-1-shard-default-" + shardMrgIDSuffix,
             RaftRole.Leader, RaftRole.Follower));
 
         assertTrue(shardManager.getMBean().getSyncStatus());
     }
 
     @Test
-    public void testWhenShardIsCandidateSyncStatusIsFalse() throws Exception {
+    public void testWhenShardIsCandidateSyncStatusIsFalse() {
         TestShardManager shardManager = newTestShardManager();
 
         String shardId = "member-1-shard-default-" + shardMrgIDSuffix;
-        shardManager.handleCommand(new RoleChangeNotification(shardId, RaftRole.Candidate, RaftRole.Follower));
+        shardManager.handleReceive(new RoleChangeNotification(shardId, RaftRole.Candidate, RaftRole.Follower));
 
         assertFalse(shardManager.getMBean().getSyncStatus());
 
         // Send a FollowerInitialSyncStatus with status = true for the replica whose current state is candidate
-        shardManager.handleCommand(new FollowerInitialSyncUpStatus(shardId, true));
+        shardManager.handleReceive(new FollowerInitialSyncUpStatus(shardId, true));
 
         assertFalse(shardManager.getMBean().getSyncStatus());
     }
 
     @Test
-    public void testWhenShardIsFollowerSyncStatusDependsOnFollowerInitialSyncStatus() throws Exception {
+    public void testWhenShardIsFollowerSyncStatusDependsOnFollowerInitialSyncStatus() {
         TestShardManager shardManager = newTestShardManager();
 
         String shardId = "member-1-shard-default-" + shardMrgIDSuffix;
-        shardManager.handleCommand(new RoleChangeNotification(shardId, RaftRole.Follower, RaftRole.Candidate));
+        shardManager.handleReceive(new RoleChangeNotification(shardId, RaftRole.Follower, RaftRole.Candidate));
 
         // Initially will be false
         assertFalse(shardManager.getMBean().getSyncStatus());
 
         // Send status true will make sync status true
-        shardManager.handleCommand(new FollowerInitialSyncUpStatus(shardId, true));
+        shardManager.handleReceive(new FollowerInitialSyncUpStatus(shardId, true));
 
         assertTrue(shardManager.getMBean().getSyncStatus());
 
         // Send status false will make sync status false
-        shardManager.handleCommand(new FollowerInitialSyncUpStatus(shardId, false));
+        shardManager.handleReceive(new FollowerInitialSyncUpStatus(shardId, false));
 
         assertFalse(shardManager.getMBean().getSyncStatus());
     }
 
     @Test
-    public void testWhenMultipleShardsPresentSyncStatusMustBeTrueForAllShards() throws Exception {
+    public void testWhenMultipleShardsPresentSyncStatusMustBeTrueForAllShards() {
         LOG.info("testWhenMultipleShardsPresentSyncStatusMustBeTrueForAllShards starting");
         TestShardManager shardManager = newTestShardManager(newShardMgrProps(new MockConfiguration() {
             @Override
@@ -1200,26 +1192,26 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
 
         // Make default shard leader
         String defaultShardId = "member-1-shard-default-" + shardMrgIDSuffix;
-        shardManager.handleCommand(new RoleChangeNotification(defaultShardId, RaftRole.Leader, RaftRole.Follower));
+        shardManager.handleReceive(new RoleChangeNotification(defaultShardId, RaftRole.Leader, RaftRole.Follower));
 
         // default = Leader, astronauts is unknown so sync status remains false
         assertFalse(shardManager.getMBean().getSyncStatus());
 
         // Make astronauts shard leader as well
         String astronautsShardId = "member-1-shard-astronauts-" + shardMrgIDSuffix;
-        shardManager.handleCommand(new RoleChangeNotification(astronautsShardId, RaftRole.Leader, RaftRole.Follower));
+        shardManager.handleReceive(new RoleChangeNotification(astronautsShardId, RaftRole.Leader, RaftRole.Follower));
 
         // Now sync status should be true
         assertTrue(shardManager.getMBean().getSyncStatus());
 
         // Make astronauts a Follower
-        shardManager.handleCommand(new RoleChangeNotification(astronautsShardId, RaftRole.Follower, RaftRole.Leader));
+        shardManager.handleReceive(new RoleChangeNotification(astronautsShardId, RaftRole.Follower, RaftRole.Leader));
 
         // Sync status is not true
         assertFalse(shardManager.getMBean().getSyncStatus());
 
         // Make the astronauts follower sync status true
-        shardManager.handleCommand(new FollowerInitialSyncUpStatus(astronautsShardId, true));
+        shardManager.handleReceive(new FollowerInitialSyncUpStatus(astronautsShardId, true));
 
         // Sync status is now true
         assertTrue(shardManager.getMBean().getSyncStatus());
@@ -1933,15 +1925,15 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
             .build());
 
         final var shardManagerID = "shard-manager-" + shardMrgIDSuffix;
+
+        // FIXME: seed the snapshot directly
         InMemorySnapshotStore.addSnapshot(shardManagerID, new ShardManagerSnapshot(List.of("default", "astronauts")));
-        InMemorySnapshotStore.addSnapshotDeletedLatch(shardManagerID);
 
         // create shardManager to come up with restored data
         TestActorRef<TestShardManager> newRestoredShardManager = actorFactory.createTestActor(
             newShardMgrProps(mockConfig).withDispatcher(Dispatchers.DefaultDispatcherId()));
 
         newRestoredShardManager.underlyingActor().waitForRecoveryComplete();
-        InMemorySnapshotStore.waitForDeletedSnapshot(shardManagerID);
 
         newRestoredShardManager.tell(new FindLocalShard("people", false), kit.getRef());
         LocalShardNotFound notFound = kit.expectMsgClass(Duration.ofSeconds(5), LocalShardNotFound.class);
@@ -2127,14 +2119,9 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         }
 
         @Override
-        protected void handleRecover(final Object message) throws Exception {
-            try {
-                super.handleRecover(message);
-            } finally {
-                if (message instanceof RecoveryCompleted) {
-                    recoveryComplete.countDown();
-                }
-            }
+        public void preStart() throws IOException {
+            super.preStart();
+            recoveryComplete.countDown();
         }
 
         private void countDownIfOther(final Member member, final CountDownLatch latch) {
@@ -2144,24 +2131,24 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         }
 
         @Override
-        public void handleCommand(final Object message) throws Exception {
+        protected void handleReceive(final Object message) {
             try {
                 if (messageInterceptor != null && messageInterceptor.canIntercept(message)) {
                     getSender().tell(messageInterceptor.apply(message), self());
                 } else {
-                    super.handleCommand(message);
+                    super.handleReceive(message);
                 }
             } finally {
-                if (message instanceof FindPrimary) {
-                    findPrimaryMessageReceived.countDown();
-                } else if (message instanceof ClusterEvent.MemberUp msg) {
-                    countDownIfOther(msg.member(), memberUpReceived);
-                } else if (message instanceof ClusterEvent.MemberRemoved msg) {
-                    countDownIfOther(msg.member(), memberRemovedReceived);
-                } else if (message instanceof ClusterEvent.UnreachableMember msg) {
-                    countDownIfOther(msg.member(), memberUnreachableReceived);
-                } else if (message instanceof ClusterEvent.ReachableMember msg) {
-                    countDownIfOther(msg.member(), memberReachableReceived);
+                switch (message) {
+                    case FindPrimary msg -> findPrimaryMessageReceived.countDown();
+                    case ClusterEvent.MemberUp msg -> countDownIfOther(msg.member(), memberUpReceived);
+                    case ClusterEvent.MemberRemoved msg -> countDownIfOther(msg.member(), memberRemovedReceived);
+                    case ClusterEvent.ReachableMember msg -> countDownIfOther(msg.member(), memberReachableReceived);
+                    case ClusterEvent.UnreachableMember msg ->
+                        countDownIfOther(msg.member(), memberUnreachableReceived);
+                    default -> {
+                        // No-op
+                    }
                 }
             }
         }
@@ -2227,11 +2214,6 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
                 shardActors.put(shardName, actorRef);
                 return this;
             }
-        }
-
-        @Override
-        public void saveSnapshot(final Object obj) {
-            throw new UnsupportedOperationException();
         }
 
         void verifySnapshotPersisted(final Set<String> shardList) {
