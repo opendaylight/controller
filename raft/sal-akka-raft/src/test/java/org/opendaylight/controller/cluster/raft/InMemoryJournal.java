@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import static java.util.Objects.requireNonNull;
-
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -26,8 +24,6 @@ import org.apache.pekko.persistence.AtomicWrite;
 import org.apache.pekko.persistence.PersistentImpl;
 import org.apache.pekko.persistence.PersistentRepr;
 import org.apache.pekko.persistence.journal.japi.AsyncWriteJournal;
-import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.Option;
@@ -41,21 +37,9 @@ import scala.jdk.javaapi.CollectionConverters;
  */
 @Deprecated(since = "11.0.0", forRemoval = true)
 public class InMemoryJournal extends AsyncWriteJournal {
-    private record WriteMessagesComplete<T>(@NonNull CountDownLatch latch, @Nullable Class<T> ofType) {
-        WriteMessagesComplete {
-            requireNonNull(latch);
-        }
-
-        WriteMessagesComplete(final int count, final Class<T> ofType) {
-            this(new CountDownLatch(count), ofType);
-        }
-    }
-
     private static final Logger LOG = LoggerFactory.getLogger(InMemoryJournal.class);
     private static final ConcurrentHashMap<String, Map<Long, Object>> JOURNALS = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<String, CountDownLatch> DELETE_MESSAGES_COMPLETE_LATCHES =
-        new ConcurrentHashMap<>();
-    private static final ConcurrentHashMap<String, WriteMessagesComplete<?>> WRITE_MESSAGES_COMPLETE =
         new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<String, CountDownLatch> BLOCK_READ_MESSAGES_LATCHES =
         new ConcurrentHashMap<>();
@@ -76,7 +60,6 @@ public class InMemoryJournal extends AsyncWriteJournal {
     public static void clear() {
         JOURNALS.clear();
         DELETE_MESSAGES_COMPLETE_LATCHES.clear();
-        WRITE_MESSAGES_COMPLETE.clear();
         BLOCK_READ_MESSAGES_LATCHES.clear();
     }
 
@@ -124,24 +107,8 @@ public class InMemoryJournal extends AsyncWriteJournal {
         }
     }
 
-    public static void waitForWriteMessagesComplete(final String persistenceId) {
-        if (!Uninterruptibles.awaitUninterruptibly(WRITE_MESSAGES_COMPLETE.get(persistenceId).latch,
-                5, TimeUnit.SECONDS)) {
-            throw new AssertionError("Journal write messages did not complete");
-        }
-    }
-
     public static void addDeleteMessagesCompleteLatch(final String persistenceId) {
         DELETE_MESSAGES_COMPLETE_LATCHES.put(persistenceId, new CountDownLatch(1));
-    }
-
-    public static void addWriteMessagesCompleteLatch(final String persistenceId, final int count) {
-        WRITE_MESSAGES_COMPLETE.put(persistenceId, new WriteMessagesComplete<>(count, null));
-    }
-
-    public static void addWriteMessagesCompleteLatch(final String persistenceId, final int count,
-            final Class<?> ofType) {
-        WRITE_MESSAGES_COMPLETE.put(persistenceId, new WriteMessagesComplete<>(count, requireNonNull(ofType)));
     }
 
     public static void addBlockReadMessagesLatch(final String persistenceId, final CountDownLatch latch) {
@@ -209,14 +176,6 @@ public class InMemoryJournal extends AsyncWriteJournal {
                         repr.sequenceNr(), repr.payload());
 
                     addEntry(repr.persistenceId(), repr.sequenceNr(), repr.payload());
-
-                    final var complete = WRITE_MESSAGES_COMPLETE.get(repr.persistenceId());
-                    if (complete != null) {
-                        final var type = complete.ofType;
-                        if (type == null || type.equals(repr.payload().getClass())) {
-                            complete.latch.countDown();
-                        }
-                    }
                 }
             }
 
