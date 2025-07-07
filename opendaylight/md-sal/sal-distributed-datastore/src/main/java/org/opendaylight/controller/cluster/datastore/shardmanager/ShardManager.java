@@ -48,17 +48,12 @@ import org.apache.pekko.cluster.Member;
 import org.apache.pekko.dispatch.Futures;
 import org.apache.pekko.dispatch.OnComplete;
 import org.apache.pekko.pattern.Patterns;
-import org.apache.pekko.persistence.DeleteSnapshotsFailure;
-import org.apache.pekko.persistence.DeleteSnapshotsSuccess;
-import org.apache.pekko.persistence.RecoveryCompleted;
-import org.apache.pekko.persistence.SnapshotOffer;
-import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.apache.pekko.util.Timeout;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
-import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActorWithMetering;
+import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActorWithMetering;
 import org.opendaylight.controller.cluster.common.actor.Dispatchers;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
@@ -127,7 +122,7 @@ import scala.concurrent.duration.FiniteDuration;
  * <li> Monitor the cluster members and store their addresses
  * </ul>
  */
-class ShardManager extends AbstractUntypedPersistentActorWithMetering {
+class ShardManager extends AbstractUntypedActorWithMetering {
     private static final Logger LOG = LoggerFactory.getLogger(ShardManager.class);
     @VisibleForTesting
     static final Path ODL_CLUSTER_SERVER = Path.of("odl.cluster.server");
@@ -164,10 +159,9 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     private DatastoreSnapshot restoreFromSnapshot;
     private ShardManagerSnapshot currentSnapshot;
 
-    private ShardManager(final Path stateDir, final String possiblePersistenceId,
+    private ShardManager(final String actorNameOverride, final Path stateDir,
             final AbstractShardManagerCreator<?> builder) {
-        super(possiblePersistenceId != null ? possiblePersistenceId
-            : "shard-manager-" + builder.getDatastoreContextFactory().getBaseDatastoreContext().getDataStoreName());
+        super(actorNameOverride);
 
         this.stateDir = stateDir.resolve(ODL_CLUSTER_SERVER);
 
@@ -190,6 +184,14 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 "shard-manager-" + type,
                 datastoreContextFactory.getBaseDatastoreContext().getDataStoreMXBeanType());
         shardManagerMBean.registerMBean();
+
+    }
+
+    private ShardManager(final Path stateDir, final String possiblePersistenceId,
+            final AbstractShardManagerCreator<?> builder) {
+        this(possiblePersistenceId != null ? possiblePersistenceId
+            : "shard-manager-" + builder.getDatastoreContextFactory().getBaseDatastoreContext().getDataStoreName(),
+            stateDir, builder);
     }
 
     ShardManager(final Path stateDir, final AbstractShardManagerCreator<?> builder) {
@@ -198,7 +200,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     }
 
     private String name() {
-        return persistenceId();
+        return getActorNameOverride();
     }
 
     @Override
@@ -215,6 +217,18 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         if (snapshot != null) {
             applyShardManagerSnapshot(snapshot);
         }
+
+        LOG.info("{}: Recovery complete", name());
+
+        if (currentSnapshot == null && restoreFromSnapshot != null) {
+            final var restoreSnapshot = restoreFromSnapshot.getShardManagerSnapshot();
+            if (restoreSnapshot != null) {
+                LOG.debug("{}: Restoring from ShardManagerSnapshot: {}", name(), restoreSnapshot);
+                applyShardManagerSnapshot(restoreSnapshot);
+            }
+        }
+
+        createLocalShards();
     }
 
     @Override
@@ -224,7 +238,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     }
 
     @Override
-    public void handleCommand(final Object message) throws Exception {
+    protected void handleReceive(final Object message) {
         switch (message) {
             case FindPrimary msg -> findPrimary(msg);
             case FindLocalShard msg -> findLocalShard(msg);
@@ -259,8 +273,6 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             case GetShardRole msg -> onGetShardRole(msg);
             case RunnableMessage msg -> msg.run();
             case RegisterForShardAvailabilityChanges msg -> onRegisterForShardAvailabilityChanges(msg);
-            case DeleteSnapshotsFailure msg -> LOG.warn("{}: Failed to delete prior snapshots", name(), msg.cause());
-            case DeleteSnapshotsSuccess msg -> LOG.debug("{}: Successfully deleted prior snapshots", name());
             case RegisterRoleChangeListenerReply msg ->
                 LOG.trace("{}: Received RegisterRoleChangeListenerReply", name());
             case ClusterEvent.MemberEvent msg ->
@@ -708,42 +720,6 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
             shardInformation.getActor().tell(new RegisterRoleChangeListener(), self());
         }
-    }
-
-    @Override
-    protected void handleRecover(final Object message) throws Exception {
-        switch (message) {
-            case RecoveryCompleted msg -> onRecoveryCompleted();
-            case SnapshotOffer msg -> {
-                if (currentSnapshot == null) {
-                    final var snapshot = (ShardManagerSnapshot) msg.snapshot();
-                    applyShardManagerSnapshot(snapshot);
-                    saveSnapshot(snapshot);
-                    LOG.info("{}: migrated ShardManager snapshot to local persistence", name());
-                }
-                LOG.info("{}: deleting ShardManager snapshots from Pekko persistence", name());
-                deleteSnapshots(SnapshotSelectionCriteria.create(Long.MAX_VALUE, Long.MAX_VALUE));
-            }
-            default -> {
-                LOG.debug("{}: ignored recovery message {}", name(), message);
-            }
-        }
-    }
-
-    @SuppressWarnings("checkstyle:IllegalCatch")
-    private void onRecoveryCompleted() {
-        LOG.info("{}: Recovery complete", name());
-
-        if (currentSnapshot == null && restoreFromSnapshot != null
-                && restoreFromSnapshot.getShardManagerSnapshot() != null) {
-            ShardManagerSnapshot snapshot = restoreFromSnapshot.getShardManagerSnapshot();
-
-            LOG.debug("{}: Restoring from ShardManagerSnapshot: {}", name(), snapshot);
-
-            applyShardManagerSnapshot(snapshot);
-        }
-
-        createLocalShards();
     }
 
     private void sendResponse(final ShardInformation shardInformation, final boolean doWait,
@@ -1360,19 +1336,15 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     private void updateSnapshot(final ShardManagerSnapshot newSnapshot) {
         currentSnapshot = newSnapshot;
         try {
-            saveSnapshot(newSnapshot);
+            saveSnapshot(stateDir, name(), newSnapshot);
         } catch (IOException e) {
             LOG.error("{}: SaveSnapshotFailure received for saving snapshot of shards", name(), e);
         }
     }
 
-    private Path snapshotFile() {
-        return stateDir.resolve(name());
-    }
-
     @VisibleForTesting
     @Nullable ShardManagerSnapshot loadSnapshot() throws IOException {
-        try (var dis = new DataInputStream(Files.newInputStream(snapshotFile()))) {
+        try (var dis = new DataInputStream(Files.newInputStream(stateDir.resolve(name())))) {
             final var size = dis.readInt();
             final var builder = ImmutableList.<String>builderWithExpectedSize(size);
             for (int i = 0; i < size; ++i) {
@@ -1388,8 +1360,9 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         }
     }
 
-    private void saveSnapshot(final ShardManagerSnapshot snapshot) throws IOException {
-        final var fileName = name();
+    @VisibleForTesting
+    static final void saveSnapshot(final Path stateDir, final String fileName, final ShardManagerSnapshot snapshot)
+            throws IOException {
         final var tmp = Files.createTempFile(stateDir, fileName, null);
         try (var dos = new DataOutputStream(new BufferedOutputStream(Files.newOutputStream(tmp, SYNC)))) {
             final var shardList = snapshot.getShardList();
@@ -1399,7 +1372,7 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             }
         }
 
-        Files.move(tmp, snapshotFile(), ATOMIC_MOVE, REPLACE_EXISTING);
+        Files.move(tmp, stateDir.resolve(fileName), ATOMIC_MOVE, REPLACE_EXISTING);
     }
 
     private void applyShardManagerSnapshot(final ShardManagerSnapshot snapshot) {
