@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.messaging;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -16,11 +15,13 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalNotification;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.time.Duration;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import org.apache.pekko.actor.ActorRef;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.raft.spi.FileBackedOutputStreamFactory;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.slf4j.Logger;
@@ -30,26 +31,26 @@ import org.slf4j.LoggerFactory;
  * This class re-assembles messages sliced into smaller chunks by {@link MessageSlicer}.
  *
  * @author Thomas Pantelis
- * @see MessageSlicer
  */
 public final  class MessageAssembler implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(MessageAssembler.class);
 
-    private final Cache<Identifier, AssembledMessageState> stateCache;
-    private final FileBackedOutputStreamFactory fileBackedStreamFactory;
-    private final BiConsumer<Object, ActorRef> assembledMessageCallback;
-    private final String logContext;
+    private final @NonNull Cache<Identifier, AssembledMessageState> stateCache;
+    private final @NonNull FileBackedOutputStreamFactory streamFactory;
+    private final @NonNull BiConsumer<Object, ActorRef> callback;
+    private final @NonNull String logContext;
 
-    MessageAssembler(final Builder builder) {
-        fileBackedStreamFactory = requireNonNull(builder.fileBackedStreamFactory,
-                "FiledBackedStreamFactory cannot be null");
-        assembledMessageCallback = requireNonNull(builder.assembledMessageCallback,
-                "assembledMessageCallback cannot be null");
-        logContext = builder.logContext;
+    @NonNullByDefault
+    private MessageAssembler(final String logContext, final FileBackedOutputStreamFactory streamFactory,
+            final BiConsumer<Object, ActorRef> callback, final Duration expireAfterInactivity) {
+        this.logContext = requireNonNull(logContext);
+        this.streamFactory = requireNonNull(streamFactory);
+        this.callback = requireNonNull(callback);
 
         stateCache = CacheBuilder.newBuilder()
-                .expireAfterAccess(builder.expireStateAfterInactivityDuration, builder.expireStateAfterInactivityUnit)
-                .removalListener(this::stateRemoved).build();
+            .expireAfterAccess(expireAfterInactivity)
+            .removalListener(this::stateRemoved)
+            .build();
     }
 
     /**
@@ -93,20 +94,25 @@ public final  class MessageAssembler implements AutoCloseable {
      *
      * @param message the message
      * @param sendTo the reference of the actor to which subsequent message slices should be sent
-     * @return true if the message was handled, false otherwise
+     * @return {@code true} if the message was handled, {@code false} otherwise
+     * @throws NullPointerException if {@code message} is {@code null} or if the message is recognized and
+     *         {@code sendTo} is {@code null}
      */
-    public boolean handleMessage(final Object message, final @NonNull ActorRef sendTo) {
-        if (message instanceof MessageSlice messageSlice) {
-            LOG.debug("{}: handleMessage: {}", logContext, messageSlice);
-            onMessageSlice(messageSlice, sendTo);
-            return true;
-        } else if (message instanceof AbortSlicing abortSlicing) {
-            LOG.debug("{}: handleMessage: {}", logContext, abortSlicing);
-            onAbortSlicing(abortSlicing);
-            return true;
-        }
-
-        return false;
+    @NonNullByDefault
+    public boolean handleMessage(final Object message, final ActorRef sendTo) {
+        return switch (message) {
+            case AbortSlicing abortSlicing -> {
+                LOG.debug("{}: handleMessage: {}", logContext, abortSlicing);
+                onAbortSlicing(abortSlicing);
+                yield true;
+            }
+            case MessageSlice messageSlice -> {
+                LOG.debug("{}: handleMessage: {}", logContext, messageSlice);
+                onMessageSlice(messageSlice, sendTo);
+                yield true;
+            }
+            default -> false;
+        };
     }
 
     private void onMessageSlice(final MessageSlice messageSlice, final ActorRef sendTo) {
@@ -128,8 +134,7 @@ public final  class MessageAssembler implements AutoCloseable {
         final Identifier identifier = messageSlice.getIdentifier();
         if (messageSlice.getSliceIndex() == SlicedMessageState.FIRST_SLICE_INDEX) {
             LOG.debug("{}: Received first slice for {} - creating AssembledMessageState", logContext, identifier);
-            return new AssembledMessageState(identifier, messageSlice.getTotalSlices(),
-                    fileBackedStreamFactory, logContext);
+            return new AssembledMessageState(identifier, messageSlice.getTotalSlices(), streamFactory, logContext);
         }
 
         LOG.debug("{}: AssembledMessageState not found for {} - returning failed reply", logContext, identifier);
@@ -167,7 +172,7 @@ public final  class MessageAssembler implements AutoCloseable {
 
         if (reAssembledMessage != null) {
             LOG.debug("{}: Notifying callback of re-assembled message {}", logContext, reAssembledMessage);
-            assembledMessageCallback.accept(reAssembledMessage, replyTo);
+            callback.accept(reAssembledMessage, replyTo);
         }
     }
 
@@ -213,9 +218,8 @@ public final  class MessageAssembler implements AutoCloseable {
     public static class Builder {
         private FileBackedOutputStreamFactory fileBackedStreamFactory;
         private BiConsumer<Object, ActorRef> assembledMessageCallback;
-        private long expireStateAfterInactivityDuration = 1;
-        private TimeUnit expireStateAfterInactivityUnit = TimeUnit.MINUTES;
-        private String logContext = "<no-context>";
+        private @NonNull Duration expireStateAfterInactivity = Duration.ofMinutes(1);
+        private @NonNull String logContext = "<no-context>";
 
         /**
          * Sets the factory for creating FileBackedOutputStream instances used for streaming messages.
@@ -250,9 +254,10 @@ public final  class MessageAssembler implements AutoCloseable {
          * @return this Builder
          */
         public Builder expireStateAfterInactivity(final long duration, final TimeUnit unit) {
-            checkArgument(duration > 0, "duration must be > 0");
-            expireStateAfterInactivityDuration = duration;
-            expireStateAfterInactivityUnit = unit;
+            if (duration <= 0) {
+                throw new IllegalArgumentException("duration must be > 0");
+            }
+            expireStateAfterInactivity = Duration.of(duration, unit.toChronoUnit());
             return this;
         }
 
@@ -263,7 +268,7 @@ public final  class MessageAssembler implements AutoCloseable {
          * @return this Builder
          */
         public Builder logContext(final String newLogContext) {
-            logContext = newLogContext;
+            logContext = requireNonNull(newLogContext);
             return this;
         }
 
@@ -271,9 +276,13 @@ public final  class MessageAssembler implements AutoCloseable {
          * Builds a new MessageAssembler instance.
          *
          * @return a new MessageAssembler
+         * @throws NullPointerException if one of the mandatory fields is not set
          */
         public MessageAssembler build() {
-            return new MessageAssembler(this);
+            return new MessageAssembler(logContext,
+                requireNonNull(fileBackedStreamFactory, "FiledBackedStreamFactory cannot be null"),
+                requireNonNull(assembledMessageCallback, "assembledMessageCallback cannot be null"),
+                expireStateAfterInactivity);
         }
     }
 }
