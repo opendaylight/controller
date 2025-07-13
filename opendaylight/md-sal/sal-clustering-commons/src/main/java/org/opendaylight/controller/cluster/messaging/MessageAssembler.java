@@ -215,20 +215,14 @@ public final class MessageAssembler implements AutoCloseable {
         return exists;
     }
 
-    public static class Builder {
+    public static final class Builder {
         private FileBackedOutputStreamFactory fileBackedStreamFactory;
         private BiConsumer<Object, ActorRef> assembledMessageCallback;
         private @NonNull Duration expireStateAfterInactivity = Duration.ofMinutes(1);
         private @NonNull String logContext = "<no-context>";
 
-        /**
-         * Default constructor.
-         *
-         * @deprecated Use {@link MessageAssembler#builder()} instead.
-         */
-        @Deprecated(since = "11.0.1", forRemoval = true)
-        public Builder() {
-            // No-op
+        private Builder() {
+            // Hidden on purpose
         }
 
         /**
