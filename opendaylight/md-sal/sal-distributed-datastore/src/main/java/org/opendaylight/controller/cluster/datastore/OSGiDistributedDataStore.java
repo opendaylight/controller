@@ -157,7 +157,7 @@ public final class OSGiDistributedDataStore {
 
         Futures.addCallback(datastore.initialSettleFuture(), state,
             // Note we are invoked from shard manager and therefore could block it, hence the round-trip to executor
-            datastore.getActorUtils().getClientDispatcher()::execute);
+            datastore.getActorUtils().getClientDispatcher());
         return state;
     }
 }
