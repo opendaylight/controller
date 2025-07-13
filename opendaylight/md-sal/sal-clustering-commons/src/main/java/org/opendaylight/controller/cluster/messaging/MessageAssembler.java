@@ -218,6 +218,16 @@ public final  class MessageAssembler implements AutoCloseable {
         private String logContext = "<no-context>";
 
         /**
+         * Default constructor.
+         *
+         * @deprecated Use {@link MessageAssembler#builder()} instead.
+         */
+        @Deprecated(since = "11.0.1", forRemoval = true)
+        public Builder() {
+            // No-op
+        }
+
+        /**
          * Sets the factory for creating FileBackedOutputStream instances used for streaming messages.
          *
          * @param newFileBackedStreamFactory the factory for creating FileBackedOutputStream instances
