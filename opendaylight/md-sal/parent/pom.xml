@@ -11,7 +11,7 @@
   <parent>
     <groupId>org.opendaylight.mdsal</groupId>
     <artifactId>binding-parent</artifactId>
-    <version>13.0.7</version>
+    <version>13.0.9</version>
     <relativePath/>
   </parent>
 
