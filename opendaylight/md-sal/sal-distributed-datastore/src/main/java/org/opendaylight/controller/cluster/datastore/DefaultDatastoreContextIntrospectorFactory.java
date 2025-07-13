@@ -8,10 +8,14 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.annotations.Beta;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer;
 
 @Beta
+@Singleton
 public final class DefaultDatastoreContextIntrospectorFactory extends AbstractDatastoreContextIntrospectorFactory {
+    @Inject
     public DefaultDatastoreContextIntrospectorFactory(final BindingNormalizedNodeSerializer serializer) {
         super(serializer);
     }

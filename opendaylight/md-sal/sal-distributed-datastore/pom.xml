@@ -22,6 +22,11 @@
       <optional>true</optional>
     </dependency>
     <dependency>
+      <groupId>com.guicedee.services</groupId>
+      <artifactId>javax.inject</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
       <groupId>org.checkerframework</groupId>
       <artifactId>checker-qual</artifactId>
       <optional>true</optional>
@@ -260,6 +265,10 @@
                 org.opendaylight.controller.cluster.sharding;
                 org.opendaylight.controller.cluster.databroker.actors.dds;
             </Export-Package>
+            <Import-Package>
+                !javax.inject,
+                *
+            </Import-Package>
           </instructions>
         </configuration>
       </plugin>
