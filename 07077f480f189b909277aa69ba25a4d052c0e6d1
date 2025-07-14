@@ -16,6 +16,24 @@
       "message": "CONTROLLER-2130",
       "revId": "07077f480f189b909277aa69ba25a4d052c0e6d1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "10765c57_ef7eda81",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2025-07-14T10:12:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3e10cd86_e574028b",
+      "revId": "07077f480f189b909277aa69ba25a4d052c0e6d1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
