@@ -270,7 +270,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
 
         // Verify the leader's persisted snapshot.
         verifySnapshot("Persisted", firstSnapshot, currentTerm, 2);
-        final var unAppliedEntry = firstSnapshot.readRaftSnapshot().unappliedEntries();
+        final var unAppliedEntry = firstSnapshot.readRaftSnapshot(OBJECT_STREAMS).unappliedEntries();
         assertEquals(List.of(), unAppliedEntry);
 
         // Verify follower 1's log and snapshot indexes.
@@ -382,7 +382,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         // Verify the leader's persisted snapshot.
 
         verifySnapshot("Persisted", secondSnapshot, currentTerm, 6);
-        final var unAppliedEntry = secondSnapshot.readRaftSnapshot().unappliedEntries();
+        final var unAppliedEntry = secondSnapshot.readRaftSnapshot(OBJECT_STREAMS).unappliedEntries();
         assertEquals(List.of(), unAppliedEntry);
 
         expSnapshotState.add(payload7);
@@ -547,7 +547,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
 
         // Verify the leader's persisted snapshot.
         verifySnapshot("Persisted", snapshotFile, currentTerm, 1);
-        final var unAppliedEntry = snapshotFile.readRaftSnapshot().unappliedEntries();
+        final var unAppliedEntry = snapshotFile.readRaftSnapshot(OBJECT_STREAMS).unappliedEntries();
         assertEquals(List.of(), unAppliedEntry);
 
         expSnapshotState.add(payload2);
@@ -686,7 +686,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         verifyLeadersTrimmedLog(lastAppliedIndex);
 
         if (expServerConfig != null) {
-            final var raftSnapshot = secondSnapshot.readRaftSnapshot();
+            final var raftSnapshot = secondSnapshot.readRaftSnapshot(OBJECT_STREAMS);
             final var expServerInfo = Set.copyOf(expServerConfig.serverInfo());
             final var leaderConfig = raftSnapshot.votingConfig();
             assertNotNull(leaderConfig);
@@ -729,7 +729,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         // Verify the leader's last persisted snapshot (previous ones may not be purged yet).
         // The last (fourth) payload may or may not have been applied when the snapshot is captured depending on the
         // timing when the async persistence completes.
-        final var unAppliedEntry = secondSnapshot.readRaftSnapshot().unappliedEntries();
+        final var unAppliedEntry = secondSnapshot.readRaftSnapshot(OBJECT_STREAMS).unappliedEntries();
         final long leadersSnapshotIndex = 3;
         verifySnapshot("Persisted", secondSnapshot, currentTerm, 3);
         assertEquals(List.of(), unAppliedEntry);

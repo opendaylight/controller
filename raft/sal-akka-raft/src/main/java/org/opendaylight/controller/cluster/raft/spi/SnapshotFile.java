@@ -14,6 +14,7 @@ import java.time.Instant;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.raft.spi.InstallableSnapshot;
+import org.opendaylight.raft.spi.RestrictedObjectStreams;
 
 /**
  * Access to the contents of a RAFT snapshot file.
@@ -35,12 +36,12 @@ public interface SnapshotFile extends InstallableSnapshot {
     /**
      * Returns the {@link RaftSnapshot} stored in this file.
      *
+     * @param objectStreams the {@link RestrictedObjectStreams} context
      * @return the {@link RaftSnapshot}
      * @throws IOException if an I/O error occurs
      */
     @Beta
-    // FIXME: note: we need data dictionary to interpret ByteStream to Payload for ReplicatedLogEntry.getData()
-    RaftSnapshot readRaftSnapshot() throws IOException;
+    RaftSnapshot readRaftSnapshot(RestrictedObjectStreams objectStreams) throws IOException;
 
     default <T extends StateSnapshot> @Nullable T readSnapshot(final StateSnapshot.Reader<? extends T> reader)
             throws IOException {

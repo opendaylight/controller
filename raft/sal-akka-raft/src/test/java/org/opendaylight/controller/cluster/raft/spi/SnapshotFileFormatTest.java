@@ -21,6 +21,7 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.HexFormat;
 import java.util.List;
+import org.eclipse.jdt.annotation.NonNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -34,6 +35,7 @@ import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.raft.spi.CompressionType;
+import org.opendaylight.raft.spi.RestrictedObjectStreams;
 
 class SnapshotFileFormatTest {
     // see https://www.trcp.org/2011/01/18/it-is-not-the-critic-who-counts/
@@ -54,6 +56,8 @@ class SnapshotFileFormatTest {
         new DefaultLogEntry(0, 0, SERVER_CONFIG),
         new DefaultLogEntry(1, 0, new VotingConfig(List.of(
             new ServerInfo("member-1", true), new ServerInfo("member-2", false)))));
+    private static final @NonNull RestrictedObjectStreams OBJECT_STREAMS =
+        RestrictedObjectStreams.ofClassLoaders(SnapshotFileFormatTest.class);
 
     @TempDir
     private Path tempDir;
@@ -105,7 +109,7 @@ class SnapshotFileFormatTest {
         assertEquals(EntryInfo.of(-1, -1), open.lastIncluded());
         assertEquals(TIMESTAMP, open.timestamp());
 
-        assertEquals(new RaftSnapshot(SERVER_CONFIG, ENTRIES), open.readRaftSnapshot());
+        assertEquals(new RaftSnapshot(SERVER_CONFIG, ENTRIES), open.readRaftSnapshot(OBJECT_STREAMS));
 
         assertEquals(STATE, open.readSnapshot(ByteState.SUPPORT.reader()));
     }
