@@ -96,6 +96,7 @@ import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.raft.api.RaftRole;
+import org.opendaylight.raft.spi.RestrictedObjectStreams;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev250130.DataStoreProperties.ExportOnRecovery;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
@@ -137,6 +138,9 @@ public class Shard extends RaftActor {
     };
 
     private static final Logger LOG = LoggerFactory.getLogger(Shard.class);
+
+    private static final @NonNull RestrictedObjectStreams OBJECT_STREAMS =
+        RestrictedObjectStreams.ofClassLoaders(Shard.class, RaftActor.class);
 
     @VisibleForTesting
     static final Path STATE_PATH = Path.of("shards");
@@ -268,6 +272,11 @@ public class Shard extends RaftActor {
     private void setTransactionCommitTimeout() {
         transactionCommitTimeout = TimeUnit.MILLISECONDS.convert(
                 datastoreContext.getShardTransactionCommitTimeoutInSeconds(), TimeUnit.SECONDS) / 2;
+    }
+
+    @Override
+    protected final RestrictedObjectStreams objectStreams() {
+        return OBJECT_STREAMS;
     }
 
     @Override

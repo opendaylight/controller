@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Props;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
@@ -36,6 +37,7 @@ import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.Support;
+import org.opendaylight.raft.spi.RestrictedObjectStreams;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,6 +84,11 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         snapshotMessageSupport = builder.snapshotMessageSupport;
         restoreFromSnapshot = builder.restoreFromSnapshot;
         pauseLeaderFunction = builder.pauseLeaderFunction;
+    }
+
+    @Override
+    protected final @NonNull RestrictedObjectStreams objectStreams() {
+        return AbstractActorTest.OBJECT_STREAMS;
     }
 
     void setRaftActorRecoverySupport(final PekkoRecoverySupport<?> support) {

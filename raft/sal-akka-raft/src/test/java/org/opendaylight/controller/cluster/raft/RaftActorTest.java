@@ -1035,8 +1035,9 @@ public class RaftActorTest extends AbstractActorTest {
         final var snapshotFile = mockRaftActor.lastSnapshot();
         assertNotNull(snapshotFile);
 
-        final var savedSnapshot = Snapshot.ofRaft(new TermInfo(1, "member-1"), snapshotFile.readRaftSnapshot(),
-            snapshotFile.lastIncluded(), snapshotFile.readSnapshot(MockSnapshotState.SUPPORT.reader()));
+        final var savedSnapshot = Snapshot.ofRaft(new TermInfo(1, "member-1"),
+            snapshotFile.readRaftSnapshot(OBJECT_STREAMS), snapshotFile.lastIncluded(),
+            snapshotFile.readSnapshot(MockSnapshotState.SUPPORT.reader()));
 
         assertEquals("getElectionTerm", snapshot.termInfo(), savedSnapshot.termInfo());
         assertEquals("getLastAppliedIndex", snapshot.getLastAppliedIndex(), savedSnapshot.getLastAppliedIndex());
