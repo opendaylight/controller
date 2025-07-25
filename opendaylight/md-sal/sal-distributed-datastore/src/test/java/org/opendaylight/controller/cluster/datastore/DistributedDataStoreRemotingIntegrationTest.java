@@ -53,6 +53,7 @@ import org.apache.pekko.cluster.Cluster;
 import org.apache.pekko.cluster.Member;
 import org.apache.pekko.pattern.Patterns;
 import org.apache.pekko.testkit.javadsl.TestKit;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.After;
 import org.junit.Before;
@@ -106,6 +107,7 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.raft.api.EntryMeta;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.api.TermInfo;
+import org.opendaylight.raft.spi.RestrictedObjectStreams;
 import org.opendaylight.yangtools.yang.common.Uint64;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
@@ -155,6 +157,9 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     private static final String MODULE_SHARDS_CARS_PEOPLE_1_2 = "module-shards-member1-and-2.conf";
     private static final String MODULE_SHARDS_CARS_PEOPLE_1_2_3 = "module-shards-member1-and-2-and-3.conf";
     private static final String MODULE_SHARDS_CARS_1_2_3 = "module-shards-cars-member-1-and-2-and-3.conf";
+
+    private static final @NonNull RestrictedObjectStreams OBJECT_STREAMS =
+        RestrictedObjectStreams.ofClassLoaders(DistributedDataStoreRemotingIntegrationTest.class);
 
     private ActorSystem leaderSystem;
     private ActorSystem followerSystem;
@@ -1314,7 +1319,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         EntryMeta last = actual.lastIncluded();
         assertEquals(expected.lastApplied(), last);
 
-        for (var entry : actual.readRaftSnapshot().unappliedEntries()) {
+        for (var entry : actual.readRaftSnapshot(OBJECT_STREAMS).unappliedEntries()) {
             last = entry;
         }
         assertEquals("Snapshot getLastTerm", expected.getLastTerm(), last.term());

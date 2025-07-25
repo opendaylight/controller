@@ -14,12 +14,12 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.raft.api.EntryMeta;
 import org.opendaylight.raft.journal.RaftJournal;
 import org.opendaylight.raft.spi.CompressionType;
+import org.opendaylight.raft.spi.RestrictedObjectStreams;
 import org.opendaylight.yangtools.concepts.Immutable;
 
 /**
@@ -77,12 +77,13 @@ public interface EntryJournal extends AutoCloseable {
          * a stream comtaining {@link LogEntry#command()} serialized via Java serialization of its
          * {@link StateMachineCommand#toSerialForm()}.
          *
+         * @param objectStreams the {@link RestrictedObjectStreams} context
          * @return the {@link LogEntry} equivalent
          * @throws IOException if an I/O error occurs or the corresponding class cannot be resolver
          */
-        public final LogEntry toLogEntry() throws IOException {
+        public final LogEntry toLogEntry(final RestrictedObjectStreams objectStreams) throws IOException {
             final StateMachineCommand command;
-            try (var ois = new ObjectInputStream(openCommandStream())) {
+            try (var ois = objectStreams.newObjectInputStream(openCommandStream())) {
                 try {
                     command = requireNonNull((StateMachineCommand) ois.readObject());
                 } catch (ClassNotFoundException e) {

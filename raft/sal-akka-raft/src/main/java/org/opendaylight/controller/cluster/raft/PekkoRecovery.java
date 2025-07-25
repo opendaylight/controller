@@ -115,7 +115,8 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
         origTermInfo = termInfoStore().loadAndSetTerm();
         final var loaded = snapshotStore().lastSnapshot();
         if (loaded != null) {
-            initializeLog(loaded.timestamp(), Snapshot.ofRaft(origTermInfo, loaded.readRaftSnapshot(),
+            initializeLog(loaded.timestamp(),
+                Snapshot.ofRaft(origTermInfo, loaded.readRaftSnapshot(actor.objectStreams()),
                 loaded.lastIncluded(), loaded.readSnapshot(snapshotCohort.support().reader())));
         }
         origSnapshot = loaded;
