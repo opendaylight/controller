@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -15,10 +14,8 @@ import static org.opendaylight.controller.cluster.raft.RaftActorTestKit.assertJo
 import static org.opendaylight.controller.cluster.raft.RaftActorTestKit.awaitLastApplied;
 import static org.opendaylight.controller.cluster.raft.RaftActorTestKit.awaitSnapshot;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
@@ -266,8 +263,7 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         assertEquals("Follower1 Snapshot getLastTerm", currentTerm, last.term());
         assertEquals("Follower1 Snapshot getLastIndex", 3, last.index());
 
-        await().atMost(Duration.ofSeconds(2))
-            .until(() -> follower2Actor.underlyingActor().lastSnapshot(), Objects::nonNull);
+        awaitSnapshot(follower2Actor);
 
         MessageCollectorActor.clearMessages(leaderCollectorActor);
         MessageCollectorActor.clearMessages(follower1CollectorActor);
