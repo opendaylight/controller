@@ -33,6 +33,7 @@ import org.opendaylight.controller.cluster.raft.spi.RaftStorageCompleter;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
+import org.opendaylight.raft.spi.RestrictedObjectStreams;
 
 @ExtendWith(MockitoExtension.class)
 class PekkoRecoveryTest {
@@ -47,12 +48,14 @@ class PekkoRecoveryTest {
     @Mock
     private PersistenceProvider persistenceProvider;
 
+    private RestrictedObjectStreams objectStreams;
     private LocalAccess localAccess;
     private EnabledRaftStorage raftStorage;
     private PekkoRecovery<@NonNull MockSnapshotState> recovery;
 
     @BeforeEach
     void beforeEach() throws Exception {
+        objectStreams = RestrictedObjectStreams.ofClassLoaders(PekkoRecoveryTest.class);
         localAccess = new LocalAccess("test", stateDir);
         raftStorage = new EnabledRaftStorage(new RaftStorageCompleter("test", Runnable::run), stateDir,
             CompressionType.NONE, new Configuration(0, stateDir), true);
@@ -60,6 +63,7 @@ class PekkoRecoveryTest {
         doReturn("test").when(raftActor).memberId();
         doReturn(localAccess).when(raftActor).localAccess();
         doReturn(persistenceProvider).when(raftActor).persistence();
+        doReturn(objectStreams).when(raftActor).objectStreams();
         doReturn(raftStorage).when(persistenceProvider).snapshotStore();
         doReturn(MockSnapshotState.SUPPORT).when(snapshotCohort).support();
         doReturn(new PeerInfos("test", Map.of())).when(raftActor).peerInfos();
@@ -90,7 +94,7 @@ class PekkoRecoveryTest {
         assertNotNull(snapshot);
         assertEquals(EntryInfo.of(snapshotIndex, snapshotTerm), snapshot.lastIncluded());
 
-        final var raftSnapshot = snapshot.readRaftSnapshot();
+        final var raftSnapshot = snapshot.readRaftSnapshot(objectStreams);
         assertEquals(votingConfig, raftSnapshot.votingConfig());
         assertEquals(List.of(entries), raftSnapshot.unappliedEntries());
 

@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,6 +71,7 @@ import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.raft.spi.FileBackedOutputStream;
+import org.opendaylight.raft.spi.RestrictedObjectStreams;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.concepts.Immutable;
 import org.slf4j.Logger;
@@ -112,6 +114,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     private static final long APPLY_STATE_DELAY_THRESHOLD_IN_NANOS = TimeUnit.MILLISECONDS.toNanos(50);
 
     private final @NonNull BehaviorStateTracker behaviorStateTracker = new BehaviorStateTracker();
+    private final @NonNull RestrictedObjectStreams objectStreams;
     private final @NonNull PersistenceControl persistenceControl;
     private final @NonNull RaftStorageCompleter completer;
     // This context should NOT be passed directly to any other actor it is  only to be consumed
@@ -143,6 +146,16 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         context = new RaftActorContextImpl(self(), getContext(), localAccess, peerInfos, config, payloadVersion,
             persistenceControl, this::applyCommand, this::executeInSelf);
+
+        // Examine the class hierarchy to discover all class loaders involved in the class hierarchy. We use those to
+        // de-serialize both state snapshots and state machine commands.
+        final var classes = new ArrayList<Class<?>>();
+        for (Class<?> cls = getClass(); cls != RaftActor.class; cls = cls.getSuperclass()) {
+            classes.addLast(cls);
+        }
+        classes.addLast(RaftActor.class);
+        // FIXME: classes.reversed() once we do not use DynamicImport-Package
+        objectStreams = RestrictedObjectStreams.ofClassLoaders(classes);
     }
 
     /**
@@ -160,6 +173,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     final @NonNull PeerInfos peerInfos() {
         return peerInfos;
+    }
+
+    protected final @NonNull RestrictedObjectStreams objectStreams() {
+        return objectStreams;
     }
 
     @Override
