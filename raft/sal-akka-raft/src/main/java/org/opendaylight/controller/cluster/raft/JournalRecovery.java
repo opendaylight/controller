@@ -123,7 +123,7 @@ final class JournalRecovery<T extends State> extends Recovery<T> {
             // pekkoLog past this point.
             var lastApplied = recoveryLog.getLastApplied();
             while (journalEntry != null) {
-                final var logEntry = journalEntry.toLogEntry();
+                final var logEntry = journalEntry.toLogEntry(actor.objectStreams());
 
                 if (recoveryLog.isInSnapshot(logEntry.index())) {
                     LOG.debug("{}: entry {} implied by snapshot, adjusting replayFrom/applyTo to at least {}",

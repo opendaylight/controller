@@ -16,6 +16,7 @@ import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
  * Atomic information retained in a snapshot file. Unapplied entries are those that have been known to have been
  * stored in the journal -- which allows for transitioning from non-persistent to persistent state.
  */
+// FIXME: remove unappliedEntries once we remove PekkoRecovery
 @NonNullByDefault
 public record RaftSnapshot(@Nullable VotingConfig votingConfig, List<LogEntry> unappliedEntries) {
     public RaftSnapshot {

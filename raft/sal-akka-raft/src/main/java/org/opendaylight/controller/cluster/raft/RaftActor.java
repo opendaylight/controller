@@ -67,9 +67,11 @@ import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.controller.cluster.raft.spi.RaftCommand;
 import org.opendaylight.controller.cluster.raft.spi.RaftStorageCompleter;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
+import org.opendaylight.controller.cluster.raft.spi.StateMachineCommand;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.raft.spi.FileBackedOutputStream;
+import org.opendaylight.raft.spi.RestrictedObjectStreams;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.concepts.Immutable;
 import org.slf4j.Logger;
@@ -161,6 +163,11 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     final @NonNull PeerInfos peerInfos() {
         return peerInfos;
     }
+
+    /**
+     * {@return the {@link RestrictedObjectStreams} instance to use for {@link StateMachineCommand} serialization}
+     */
+    protected abstract @NonNull RestrictedObjectStreams objectStreams();
 
     @Override
     @Deprecated(since = "11.0.0", forRemoval = true)

@@ -33,6 +33,7 @@ import org.opendaylight.controller.cluster.raft.spi.RaftStorageCompleter;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
+import org.opendaylight.raft.spi.RestrictedObjectStreams;
 
 @ExtendWith(MockitoExtension.class)
 class PekkoRecoveryTest {
@@ -90,7 +91,8 @@ class PekkoRecoveryTest {
         assertNotNull(snapshot);
         assertEquals(EntryInfo.of(snapshotIndex, snapshotTerm), snapshot.lastIncluded());
 
-        final var raftSnapshot = snapshot.readRaftSnapshot();
+        final var raftSnapshot = snapshot.readRaftSnapshot(
+            RestrictedObjectStreams.ofClassLoaders(PekkoRecoveryTest.class));
         assertEquals(votingConfig, raftSnapshot.votingConfig());
         assertEquals(List.of(entries), raftSnapshot.unappliedEntries());
 

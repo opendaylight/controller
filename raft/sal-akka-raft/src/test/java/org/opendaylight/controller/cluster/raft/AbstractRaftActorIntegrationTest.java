@@ -338,7 +338,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
                 if (entry == null) {
                     break;
                 }
-                actorJournal.add(entry.toLogEntry());
+                actorJournal.add(entry.toLogEntry(OBJECT_STREAMS));
             }
         } catch (IOException e) {
             throw new AssertionError(e);
