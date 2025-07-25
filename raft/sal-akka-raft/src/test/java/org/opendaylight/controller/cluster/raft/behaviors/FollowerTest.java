@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.raft.behaviors;
 
-import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -21,13 +20,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.opendaylight.controller.cluster.raft.RaftActorTestKit.awaitSnapshot;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -1101,8 +1100,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         followerActorRef.tell(appendEntries, leaderActor);
 
-        final var snapshotFile = await().atMost(Duration.ofSeconds(2))
-            .until(() -> followerRaftActor.lastSnapshot(), Objects::nonNull);
+        final var snapshotFile = awaitSnapshot(followerRaftActor);
 
         final var raftSnapshot = snapshotFile.readRaftSnapshot();
         assertEquals(List.of(), raftSnapshot.unappliedEntries());
@@ -1155,8 +1153,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
         assertTrue("isSuccess", reply.isSuccess());
 
-        final var snapshotFile = await().atMost(Duration.ofSeconds(2))
-            .until(() -> followerRaftActor.lastSnapshot(), Objects::nonNull);
+        final var snapshotFile = awaitSnapshot(followerRaftActor);
         final var raftSnapshot = snapshotFile.readRaftSnapshot();
         assertEquals(List.of(), raftSnapshot.unappliedEntries());
         assertEquals(EntryInfo.of(2, 1), snapshotFile.lastIncluded());
@@ -1225,8 +1222,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         final var reply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
         assertTrue("isSuccess", reply.isSuccess());
 
-        final var snapshotFile = await().atMost(Duration.ofSeconds(2))
-            .until(() -> followerRaftActor.lastSnapshot(), Objects::nonNull);
+        final var snapshotFile = awaitSnapshot(followerRaftActor);
         final var raftSnapshot = snapshotFile.readRaftSnapshot();
 
         assertEquals(List.of(), raftSnapshot.unappliedEntries());
