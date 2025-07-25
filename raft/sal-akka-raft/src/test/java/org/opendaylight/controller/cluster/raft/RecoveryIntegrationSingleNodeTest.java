@@ -74,7 +74,7 @@ public class RecoveryIntegrationSingleNodeTest extends AbstractRaftActorIntegrat
             assertEquals(5, reader.nextJournalIndex());
             var journalEntry = reader.nextEntry();
             assertNotNull(journalEntry);
-            var logEntry = journalEntry.toLogEntry();
+            var logEntry = journalEntry.toLogEntry(OBJECT_STREAMS);
             assertEquals(4, logEntry.index());
             assertEquals(1, logEntry.term());
             assertEquals(payload4, logEntry.command());
@@ -82,7 +82,7 @@ public class RecoveryIntegrationSingleNodeTest extends AbstractRaftActorIntegrat
             assertEquals(6, reader.nextJournalIndex());
             journalEntry = reader.nextEntry();
             assertNotNull(journalEntry);
-            logEntry = journalEntry.toLogEntry();
+            logEntry = journalEntry.toLogEntry(OBJECT_STREAMS);
             assertEquals(5, logEntry.index());
             assertEquals(1, logEntry.term());
             assertEquals(payload5, logEntry.command());

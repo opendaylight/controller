@@ -18,6 +18,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
+import org.eclipse.jdt.annotation.NonNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,9 +32,12 @@ import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
+import org.opendaylight.raft.spi.RestrictedObjectStreams;
 
 @ExtendWith(MockitoExtension.class)
 class DisabledRaftStorageTest {
+    private static final @NonNull RestrictedObjectStreams OBJECT_STREAMS =
+        RestrictedObjectStreams.ofClassLoaders(DisabledRaftStorageTest.class);
     private static final VotingConfig PERSISTENT_PAYLOAD = new VotingConfig(new ServerInfo("foo", true));
     private static final AbstractStateCommand NON_PERSISTENT_PAYLOAD = new AbstractStateCommand() {
         @java.io.Serial
@@ -87,7 +91,7 @@ class DisabledRaftStorageTest {
         assertEquals(EntryInfo.of(-1, -1), snapshot.lastIncluded());
         assertNull(snapshot.source());
 
-        final var raftSnapshot = snapshot.readRaftSnapshot();
+        final var raftSnapshot = snapshot.readRaftSnapshot(OBJECT_STREAMS);
         assertEquals(List.of(), raftSnapshot.unappliedEntries());
         assertEquals(PERSISTENT_PAYLOAD, raftSnapshot.votingConfig());
     }

@@ -14,14 +14,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.eclipse.jdt.annotation.NonNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.opendaylight.controller.cluster.raft.MockCommand;
 import org.opendaylight.raft.spi.CompressionType;
+import org.opendaylight.raft.spi.RestrictedObjectStreams;
 
 class EntryJournalTest {
+    private static final @NonNull RestrictedObjectStreams OBJECT_STREAMS =
+        RestrictedObjectStreams.ofClassLoaders(EntryJournalTest.class);
+
     @TempDir
     private Path directory;
 
@@ -71,12 +76,12 @@ class EntryJournalTest {
             assertEquals(1, reader.nextJournalIndex());
             final var je1 = reader.nextEntry();
             assertNotNull(je1);
-            assertEquals(entry1, je1.toLogEntry());
+            assertEquals(entry1, je1.toLogEntry(OBJECT_STREAMS));
 
             assertEquals(2, reader.nextJournalIndex());
             final var je2 = reader.nextEntry();
             assertNotNull(je2);
-            assertEquals(entry2, je2.toLogEntry());
+            assertEquals(entry2, je2.toLogEntry(OBJECT_STREAMS));
 
             assertEquals(3, reader.nextJournalIndex());
             assertNull(reader.nextEntry());
@@ -98,7 +103,7 @@ class EntryJournalTest {
             assertEquals(1, reader.nextJournalIndex());
             final var je = reader.nextEntry();
             assertNotNull(je);
-            assertEquals(entry, je.toLogEntry());
+            assertEquals(entry, je.toLogEntry(OBJECT_STREAMS));
 
             assertEquals(2, reader.nextJournalIndex());
             assertNull(reader.nextEntry());

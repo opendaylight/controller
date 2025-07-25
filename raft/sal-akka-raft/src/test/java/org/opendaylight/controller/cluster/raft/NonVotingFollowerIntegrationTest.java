@@ -78,7 +78,7 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
         assertNotNull(leaderSnapshot);
         assertEquals(EntryInfo.of(-1, -1), leaderSnapshot.lastIncluded());
         assertNull(leaderSnapshot.source());
-        final var leaderRaftSnapshot = leaderSnapshot.readRaftSnapshot();
+        final var leaderRaftSnapshot = leaderSnapshot.readRaftSnapshot(OBJECT_STREAMS);
         assertEquals(List.of(), leaderRaftSnapshot.unappliedEntries());
         assertEquals(new VotingConfig(new ServerInfo(follower1Id, false), new ServerInfo(leaderId, true)),
             leaderRaftSnapshot.votingConfig());
