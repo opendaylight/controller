@@ -17,10 +17,12 @@ import java.util.Comparator;
 import org.apache.commons.io.FileUtils;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.testkit.javadsl.TestKit;
+import org.eclipse.jdt.annotation.NonNull;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.opendaylight.raft.spi.RestrictedObjectStreams;
 import org.opendaylight.yangtools.util.AbstractStringIdentifier;
 
 public abstract class AbstractActorTest {
@@ -32,6 +34,9 @@ public abstract class AbstractActorTest {
             super(string);
         }
     }
+
+    protected static final @NonNull RestrictedObjectStreams OBJECT_STREAMS =
+        RestrictedObjectStreams.ofClassLoaders(AbstractRaftActorIntegrationTest.class);
 
     private static ActorSystem ACTOR_SYSTEM;
 

@@ -234,7 +234,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         final var lastLeaderSnapshot = leaderRaftActor.lastSnapshot();
         assertNotNull(lastLeaderSnapshot);
         assertEquals(new VotingConfig(votingServer(FOLLOWER_ID), votingServer(NEW_SERVER_ID), votingServer(LEADER_ID)),
-            lastLeaderSnapshot.readRaftSnapshot().votingConfig());
+            lastLeaderSnapshot.readRaftSnapshot(OBJECT_STREAMS).votingConfig());
 
         assertEquals("New follower persisted ReplicatedLogImplEntry entries", List.of(),
                 InMemoryJournal.get(NEW_SERVER_ID, SimpleReplicatedLogEntry.class));
@@ -245,7 +245,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         assertNotNull(lastNewFollowerSnapshot);
 
         assertEquals(new VotingConfig(votingServer(FOLLOWER_ID), votingServer(NEW_SERVER_ID), votingServer(LEADER_ID)),
-            lastNewFollowerSnapshot.readRaftSnapshot().votingConfig());
+            lastNewFollowerSnapshot.readRaftSnapshot(OBJECT_STREAMS).votingConfig());
 
         LOG.info("testAddServerWithExistingFollower ending");
     }

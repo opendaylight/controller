@@ -15,7 +15,6 @@ import com.google.common.collect.ImmutableList;
 import java.io.Closeable;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -40,6 +39,7 @@ import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.FileStreamSource;
+import org.opendaylight.raft.spi.RestrictedObjectStreams;
 import org.opendaylight.raft.spi.SnapshotSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -367,7 +367,7 @@ final class SnapshotFileV1 implements SnapshotFile {
     }
 
     @Override
-    public RaftSnapshot readRaftSnapshot() throws IOException {
+    public RaftSnapshot readRaftSnapshot(final RestrictedObjectStreams objectStreams) throws IOException {
         try (var dis = serverStream.openDataInput()) {
             dis.skipNBytes(HEADER_SIZE);
 
@@ -395,7 +395,7 @@ final class SnapshotFileV1 implements SnapshotFile {
             }
 
             final var uaBuilder = ImmutableList.<LogEntry>builderWithExpectedSize(uaCount);
-            try (var ois = new ObjectInputStream(entryCompress.decodeInput(dis))) {
+            try (var ois = objectStreams.newObjectInputStream(entryCompress.decodeInput(dis))) {
                 long prevIndex = lastIncluded.index();
                 long prevTerm = lastIncluded.term();
                 for (int i = 0; i < uaCount; i++) {

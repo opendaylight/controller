@@ -24,6 +24,7 @@ import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.EntryJournal;
 import org.opendaylight.controller.cluster.raft.spi.EntryJournalV1;
 import org.opendaylight.raft.spi.CompressionType;
+import org.opendaylight.raft.spi.RestrictedObjectStreams;
 
 @ExtendWith(MockitoExtension.class)
 class JournalRecoveryTest {
@@ -67,6 +68,8 @@ class JournalRecoveryTest {
         input.setSnapshotTerm(FIRST_ENTRY.term());
         input.setCommitIndex(FIRST_ENTRY.index());
         input.setLastApplied(FIRST_ENTRY.index());
+
+        doReturn(RestrictedObjectStreams.ofClassLoaders(JournalRecoveryTest.class)).when(actor).objectStreams();
 
         final var output = recovery.recoverJournal(input);
         assertEquals(0, output.getSnapshotIndex());
