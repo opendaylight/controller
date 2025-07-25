@@ -1102,7 +1102,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         final var snapshotFile = awaitSnapshot(followerRaftActor);
 
-        final var raftSnapshot = snapshotFile.readRaftSnapshot();
+        final var raftSnapshot = snapshotFile.readRaftSnapshot(OBJECT_STREAMS);
         assertEquals(List.of(), raftSnapshot.unappliedEntries());
         assertEquals(EntryInfo.of(1, 1), snapshotFile.lastIncluded());
         assertEquals("Snapshot state", List.of(entries.get(0).command(), entries.get(1).command()),
@@ -1154,7 +1154,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertTrue("isSuccess", reply.isSuccess());
 
         final var snapshotFile = awaitSnapshot(followerRaftActor);
-        final var raftSnapshot = snapshotFile.readRaftSnapshot();
+        final var raftSnapshot = snapshotFile.readRaftSnapshot(OBJECT_STREAMS);
         assertEquals(List.of(), raftSnapshot.unappliedEntries());
         assertEquals(EntryInfo.of(2, 1), snapshotFile.lastIncluded());
         assertEquals(List.of(entries.get(0).command(), entries.get(1).command(), entries.get(2).command()),
@@ -1223,7 +1223,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         assertTrue("isSuccess", reply.isSuccess());
 
         final var snapshotFile = awaitSnapshot(followerRaftActor);
-        final var raftSnapshot = snapshotFile.readRaftSnapshot();
+        final var raftSnapshot = snapshotFile.readRaftSnapshot(OBJECT_STREAMS);
 
         assertEquals(List.of(), raftSnapshot.unappliedEntries());
         assertEquals("Snapshot getLastAppliedTerm", EntryInfo.of(0, 1), snapshotFile.lastIncluded());

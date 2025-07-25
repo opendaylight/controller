@@ -33,6 +33,7 @@ import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.Reader;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.Support;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.Writer;
+import org.opendaylight.raft.spi.RestrictedObjectStreams;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.util.AbstractStringIdentifier;
 import org.slf4j.Logger;
@@ -55,6 +56,8 @@ public final class ExampleActor extends RaftActor
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(ExampleActor.class);
+    private static final RestrictedObjectStreams OBJECT_STREAMS =
+        RestrictedObjectStreams.ofClassLoaders(ExampleActor.class, RaftActor.class);
 
     private final HashMap<String, String> state = new HashMap<>();
     private final ActorRef roleChangeNotifier;
@@ -71,6 +74,11 @@ public final class ExampleActor extends RaftActor
     public static Props props(final Path stateDir, final String id, final Map<String, String> peerAddresses,
             final Optional<ConfigParams> configParams) {
         return Props.create(ExampleActor.class, stateDir, id, peerAddresses, configParams);
+    }
+
+    @Override
+    protected RestrictedObjectStreams objectStreams() {
+        return OBJECT_STREAMS;
     }
 
     @Override

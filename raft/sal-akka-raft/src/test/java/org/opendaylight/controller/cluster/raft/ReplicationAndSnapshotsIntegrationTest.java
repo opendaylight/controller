@@ -200,7 +200,7 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         var snapshotFile = leaderActor.underlyingActor().lastSnapshot();
         assertNotNull(snapshotFile);
 
-        final var raftSnapshot = snapshotFile.readRaftSnapshot();
+        final var raftSnapshot = snapshotFile.readRaftSnapshot(OBJECT_STREAMS);
         assertEquals(List.of(), raftSnapshot.unappliedEntries());
 
         verifySnapshot("Persisted", snapshotFile, initialTerm, 2);
@@ -248,7 +248,7 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         // The last applied index in the snapshot may or may not be the last log entry depending on
         // timing so to avoid intermittent test failures, we'll just verify the snapshot's/journal's last term/index.
         EntryMeta last = snapshotFile.lastIncluded();
-        assertEquals(List.of(), snapshotFile.readRaftSnapshot().unappliedEntries());
+        assertEquals(List.of(), snapshotFile.readRaftSnapshot(OBJECT_STREAMS).unappliedEntries());
         // ... but then this should contain some more
         try (var reader = assertJournal(leaderActor).openReader()) {
             while (true) {
@@ -391,13 +391,13 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
 
         verifySnapshot("Persisted", snapshotFile, currentTerm, 6);
         verifySnapshot("Persisted",snapshotFile, currentTerm, 6);
-        assertEquals(List.of(), snapshotFile.readRaftSnapshot().unappliedEntries());
+        assertEquals(List.of(), snapshotFile.readRaftSnapshot(OBJECT_STREAMS).unappliedEntries());
 
         // The leader's persisted journal log should be cleared since we did a snapshot.
         try (var reader = assertJournal(leaderActor).openReader()) {
             final var entry = reader.nextEntry();
             assertNotNull(entry);
-            verifyReplicatedLogEntry(entry.toLogEntry(), currentTerm, 7, payload7);
+            verifyReplicatedLogEntry(entry.toLogEntry(OBJECT_STREAMS), currentTerm, 7, payload7);
             assertNull(reader.nextEntry());
         }
 
