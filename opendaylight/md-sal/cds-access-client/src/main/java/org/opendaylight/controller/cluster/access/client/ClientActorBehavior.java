@@ -224,7 +224,8 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
             if (conn instanceof ReconnectingClientConnection) {
                 // Already reconnecting, do not churn the logs
                 return this;
-            } else if (conn != null) {
+            }
+            if (conn != null) {
                 LOG.info("{}: connection {} indicated no leadership, reconnecting it", persistenceId(), conn, cause);
                 return conn.reconnect(this, cause);
             }
@@ -233,7 +234,8 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
             if (conn instanceof ReconnectingClientConnection) {
                 // Already reconnecting, do not churn the logs
                 return this;
-            } else if (conn != null) {
+            }
+            if (conn != null) {
                 LOG.info("{}: connection {} indicated sequencing mismatch on {} sequence {} ({}), reconnecting it",
                     persistenceId(), conn, failure.getTarget(), failure.getSequence(), command.getTxSequence(), cause);
                 return conn.reconnect(this, cause);
