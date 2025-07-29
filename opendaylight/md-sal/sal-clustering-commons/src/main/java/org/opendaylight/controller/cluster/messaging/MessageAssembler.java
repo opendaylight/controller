@@ -14,7 +14,6 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalNotification;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.time.Duration;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -22,7 +21,9 @@ import java.util.function.BiConsumer;
 import org.apache.pekko.actor.ActorRef;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.opendaylight.raft.spi.FileBackedOutputStream;
 import org.opendaylight.raft.spi.FileBackedOutputStreamFactory;
+import org.opendaylight.raft.spi.RestrictedObjectStreams;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,12 +39,15 @@ public final class MessageAssembler implements AutoCloseable {
     private final @NonNull Cache<Identifier, AssembledMessageState> stateCache;
     private final @NonNull FileBackedOutputStreamFactory streamFactory;
     private final @NonNull BiConsumer<Object, ActorRef> callback;
+    private final @NonNull RestrictedObjectStreams objectStreams;
     private final @NonNull String logContext;
 
     @NonNullByDefault
-    private MessageAssembler(final String logContext, final FileBackedOutputStreamFactory streamFactory,
-            final BiConsumer<Object, ActorRef> callback, final Duration expireAfterInactivity) {
+    private MessageAssembler(final String logContext, final RestrictedObjectStreams objectStreams,
+            final FileBackedOutputStreamFactory streamFactory, final BiConsumer<Object, ActorRef> callback,
+            final Duration expireAfterInactivity) {
         this.logContext = requireNonNull(logContext);
+        this.objectStreams = requireNonNull(objectStreams);
         this.streamFactory = requireNonNull(streamFactory);
         this.callback = requireNonNull(callback);
 
@@ -155,7 +159,7 @@ public final class MessageAssembler implements AutoCloseable {
                 if (state.addSlice(sliceIndex, messageSlice.getData(), messageSlice.getLastSliceHashCode())) {
                     LOG.debug("{}: Received last slice for {}", logContext, identifier);
 
-                    reAssembledMessage = reAssembleMessage(state);
+                    reAssembledMessage = reAssembleMessage(objectStreams, state);
 
                     replyTo.tell(successReply, ActorRef.noSender());
                     removeState(identifier);
@@ -176,10 +180,11 @@ public final class MessageAssembler implements AutoCloseable {
         }
     }
 
-    private static Object reAssembleMessage(final AssembledMessageState state) throws MessageSliceException {
+    private static Object reAssembleMessage(final RestrictedObjectStreams objectStreams,
+            final AssembledMessageState state) throws MessageSliceException {
         try {
             final var assembledBytes = state.getAssembledBytes();
-            try (var in = new ObjectInputStream(assembledBytes.openStream())) {
+            try (var in = objectStreams.newObjectInputStream(assembledBytes.openStream())) {
                 return in.readObject();
             }
         } catch (IOException | ClassNotFoundException e) {
@@ -218,6 +223,7 @@ public final class MessageAssembler implements AutoCloseable {
     public static class Builder {
         private FileBackedOutputStreamFactory fileBackedStreamFactory;
         private BiConsumer<Object, ActorRef> assembledMessageCallback;
+        private RestrictedObjectStreams objectStreams;
         private @NonNull Duration expireStateAfterInactivity = Duration.ofMinutes(1);
         private @NonNull String logContext = "<no-context>";
 
@@ -232,9 +238,9 @@ public final class MessageAssembler implements AutoCloseable {
         }
 
         /**
-         * Sets the factory for creating FileBackedOutputStream instances used for streaming messages.
+         * Sets the factory for creating {@link FileBackedOutputStream} instances used for streaming messages.
          *
-         * @param newFileBackedStreamFactory the factory for creating FileBackedOutputStream instances
+         * @param newFileBackedStreamFactory the factory for creating {@link FileBackedOutputStream} instances
          * @return this Builder
          */
         public Builder fileBackedStreamFactory(final FileBackedOutputStreamFactory newFileBackedStreamFactory) {
@@ -243,14 +249,25 @@ public final class MessageAssembler implements AutoCloseable {
         }
 
         /**
-         * Sets the Consumer callback for assembled messages. The callback takes the assembled message and the
-         * original sender ActorRef as arguments.
+         * Sets the {@link BiConsumer} callback for assembled messages. The callback takes the assembled message and the
+         * original sender {@link ActorRef} as arguments.
          *
-         * @param newAssembledMessageCallback the Consumer callback
+         * @param newAssembledMessageCallback the {@link BiConsumer} callback
          * @return this Builder
          */
         public Builder assembledMessageCallback(final BiConsumer<Object, ActorRef> newAssembledMessageCallback) {
             assembledMessageCallback = newAssembledMessageCallback;
+            return this;
+        }
+
+        /**
+         * Sets the {@link RestrictedObjectStreams} to use for object de-serialization.
+         *
+         * @param newObjectStreams the {@link RestrictedObjectStreams} use
+         * @return this Builder
+         */
+        public Builder objectStreams(final RestrictedObjectStreams newObjectStreams) {
+            objectStreams = requireNonNull(newObjectStreams);
             return this;
         }
 
@@ -290,6 +307,7 @@ public final class MessageAssembler implements AutoCloseable {
          */
         public MessageAssembler build() {
             return new MessageAssembler(logContext,
+                requireNonNull(objectStreams, "RestrictedObjectStreams cannot be null"),
                 requireNonNull(fileBackedStreamFactory, "FiledBackedStreamFactory cannot be null"),
                 requireNonNull(assembledMessageCallback, "assembledMessageCallback cannot be null"),
                 expireStateAfterInactivity);
