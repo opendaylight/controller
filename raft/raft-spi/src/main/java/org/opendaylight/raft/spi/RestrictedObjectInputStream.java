@@ -39,7 +39,7 @@ final class RestrictedObjectInputStream extends ObjectInputStream {
         final var length = interfaces.length;
         final var classes = new Class<?>[length];
         for (int i = 0; i < length; i++) {
-            classes[i] = classLoader.loadClass(interfaces[i]);
+            classes[i] = Class.forName(interfaces[i], false, classLoader);
         }
 
         try {

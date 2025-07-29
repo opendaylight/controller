@@ -57,7 +57,7 @@ final class RestrictedClassLoader extends ClassLoader {
         List<ClassNotFoundException> failures = null;
         for (var delegate : delegates) {
             try {
-                return delegate.loadClass(name);
+                return Class.forName(name, false, delegate);
             } catch (ClassNotFoundException e) {
                 if (failures == null) {
                     failures = new ArrayList<>();
