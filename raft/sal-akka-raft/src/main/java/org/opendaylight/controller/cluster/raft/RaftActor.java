@@ -144,7 +144,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             config.getPreferredCompression(), streamConfig);
 
         context = new RaftActorContextImpl(self(), getContext(), localAccess, peerInfos, config, payloadVersion,
-            persistenceControl, this::applyCommand, this::executeInSelf);
+            persistenceControl, this::applyCommand);
     }
 
     /**

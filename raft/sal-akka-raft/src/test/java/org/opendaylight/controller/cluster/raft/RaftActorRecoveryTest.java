@@ -20,7 +20,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-import com.google.common.util.concurrent.MoreExecutors;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
@@ -109,7 +108,7 @@ class RaftActorRecoveryTest {
 
     private RaftActorContext createContext() {
         final var ret = new RaftActorContextImpl(mockActorRef, null, localAccess, peerInfos, configParams, (short) 0,
-            persistence, (identifier, entry) -> { }, MoreExecutors.directExecutor());
+            persistence, (identifier, entry) -> { });
         ret.getReplicatedLog().resetToLog(recovery.recoveryLog);
         return ret;
     }

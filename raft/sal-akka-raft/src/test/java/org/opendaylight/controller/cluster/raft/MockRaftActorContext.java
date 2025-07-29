@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.google.common.util.concurrent.MoreExecutors;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,8 +38,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
 
     public MockRaftActorContext(final Path stateDir, final int payloadVersion) {
         super(null, null, newLocalAccess("test", stateDir), new HashMap<>(), new DefaultConfigParamsImpl(),
-            (short) payloadVersion, new TestPersistenceProvider(), (identifier, entry) -> { },
-            MoreExecutors.directExecutor());
+            (short) payloadVersion, new TestPersistenceProvider(), (identifier, entry) -> { });
         resetReplicatedLog(new Builder().build());
     }
 
@@ -49,8 +47,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
             final int payloadVersion) {
         super(actor, null, newLocalAccess(id, stateDir), new HashMap<>(), new DefaultConfigParamsImpl(),
             (short) payloadVersion, new TestPersistenceProvider(),
-            (identifier, entry) -> actor.tell(new ApplyState(identifier, entry), actor),
-            MoreExecutors.directExecutor());
+            (identifier, entry) -> actor.tell(new ApplyState(identifier, entry), actor));
         this.system = system;
         initReplicatedLog();
     }
