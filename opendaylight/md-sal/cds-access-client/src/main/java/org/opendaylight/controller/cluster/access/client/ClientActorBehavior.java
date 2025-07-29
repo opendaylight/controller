@@ -35,6 +35,7 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 import org.opendaylight.controller.cluster.common.actor.Dispatchers.DispatcherType;
 import org.opendaylight.controller.cluster.messaging.MessageAssembler;
 import org.opendaylight.raft.spi.FileBackedOutputStreamFactory;
+import org.opendaylight.raft.spi.RestrictedObjectStreams;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.concepts.Registration;
@@ -82,13 +83,14 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
     private final Registration staleBackendInfoReg;
 
     protected ClientActorBehavior(final @NonNull ClientActorContext context,
-            final @NonNull BackendInfoResolver<T> resolver) {
+            final @NonNull BackendInfoResolver<T> resolver, final @NonNull RestrictedObjectStreams objectStreams) {
         super(context);
         this.resolver = requireNonNull(resolver);
 
         final var config = context.config();
         responseMessageAssembler = MessageAssembler.builder()
             .logContext(persistenceId())
+            .objectStreams(objectStreams)
             .fileBackedStreamFactory(new FileBackedOutputStreamFactory(config.getFileBackedStreamingThreshold(),
                         config.getTempFileDirectory()))
             .assembledMessageCallback((message, sender) -> context.self().tell(message, sender))
