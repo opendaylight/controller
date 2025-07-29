@@ -22,6 +22,30 @@
       },
       "revId": "2507f5d8111ac24419d54ef0ac5a7db69436de27",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "091bfd8b_1dc799d0",
+        "filename": "raft/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/spi/SnapshotFile.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2025-07-29T12:15:42Z",
+      "side": 1,
+      "message": "Actually, no -- when we remove PekkoRecovery, this will just not be needed, as unapplied entries will always be empty.",
+      "parentUuid": "526407b6_f2241612",
+      "range": {
+        "startLine": 45,
+        "startChar": 34,
+        "endLine": 45,
+        "endChar": 71
+      },
+      "revId": "2507f5d8111ac24419d54ef0ac5a7db69436de27",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
