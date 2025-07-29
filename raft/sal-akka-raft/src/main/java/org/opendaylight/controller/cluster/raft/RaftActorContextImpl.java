@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.Executor;
 import java.util.function.LongSupplier;
 import org.apache.pekko.actor.ActorContext;
 import org.apache.pekko.actor.ActorRef;
@@ -47,8 +46,6 @@ public class RaftActorContextImpl implements RaftActorContext {
     private final ActorRef actor;
 
     private final ActorContext context;
-
-    private final @NonNull Executor executor;
 
     // Cached from LocalAccess instance
     private final @NonNull String id;
@@ -83,13 +80,11 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     RaftActorContextImpl(final ActorRef actor, final ActorContext context, final @NonNull LocalAccess localStore,
             final @NonNull PeerInfos peerInfos, final @NonNull ConfigParams configParams, final short payloadVersion,
-            final @NonNull PersistenceProvider persistenceProvider, final @NonNull ApplyEntryMethod applyEntryMethod,
-            final @NonNull Executor executor) {
+            final @NonNull PersistenceProvider persistenceProvider, final @NonNull ApplyEntryMethod applyEntryMethod) {
         this.actor = actor;
         this.context = context;
         id = localStore.memberId();
         termInformation = localStore.termInfoStore();
-        this.executor = requireNonNull(executor);
         this.configParams = requireNonNull(configParams);
         this.payloadVersion = payloadVersion;
         this.persistenceProvider = requireNonNull(persistenceProvider);
@@ -106,9 +101,9 @@ public class RaftActorContextImpl implements RaftActorContext {
     public RaftActorContextImpl(final ActorRef actor, final ActorContext context, final @NonNull LocalAccess localStore,
             final @NonNull Map<String, String> peerAddresses, final @NonNull ConfigParams configParams,
             final short payloadVersion, final @NonNull PersistenceProvider persistenceProvider,
-            final @NonNull ApplyEntryMethod applyEntryMethod, final @NonNull Executor executor) {
+            final @NonNull ApplyEntryMethod applyEntryMethod) {
         this(actor, context, localStore, new PeerInfos(localStore.memberId(), peerAddresses), configParams,
-            payloadVersion, persistenceProvider, applyEntryMethod, executor);
+            payloadVersion, persistenceProvider, applyEntryMethod);
     }
 
     @Override
@@ -132,11 +127,6 @@ public class RaftActorContextImpl implements RaftActorContext {
     @Override
     public ActorRef getActor() {
         return actor;
-    }
-
-    @Override
-    public final Executor getExecutor() {
-        return executor;
     }
 
     @Override

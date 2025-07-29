@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.raft;
 import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.concurrent.Executor;
 import java.util.function.LongSupplier;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
@@ -48,13 +47,6 @@ public interface RaftActorContext {
      * @return the reference to the RaftActor itself. This can be used to send messages to the RaftActor
      */
     ActorRef getActor();
-
-    /**
-     * Return an Executor which is guaranteed to run tasks in the context of {@link #getActor()}.
-     *
-     * @return An executor.
-     */
-    @NonNull Executor getExecutor();
 
     /**
      * The Pekko {@link Cluster} singleton for the actor system if one is configured.

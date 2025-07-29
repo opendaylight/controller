@@ -21,7 +21,6 @@ import static org.opendaylight.controller.cluster.raft.MessageCollectorActor.exp
 import static org.opendaylight.controller.cluster.raft.RaftActorTestKit.awaitLastApplied;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.util.concurrent.MoreExecutors;
 import java.io.ObjectInputStream;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -1528,8 +1527,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         return new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
             new LocalAccess(id, stateDir(), new FailingTermInfoStore(1, LEADER_ID)), Map.of(LEADER_ID, ""),
             configParams, (short) 0, new TestPersistenceProvider(),
-            (identifier, entry) -> actor.tell(new ApplyState(identifier, entry), actor),
-            MoreExecutors.directExecutor());
+            (identifier, entry) -> actor.tell(new ApplyState(identifier, entry), actor));
     }
 
     abstract static class AbstractMockRaftActor extends MockRaftActor {

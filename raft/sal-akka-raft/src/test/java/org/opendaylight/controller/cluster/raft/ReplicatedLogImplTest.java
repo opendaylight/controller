@@ -16,7 +16,6 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-import com.google.common.util.concurrent.MoreExecutors;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -61,7 +60,7 @@ class ReplicatedLogImplTest {
     @BeforeEach
     public void setup() {
         context = new RaftActorContextImpl(null, null, new LocalAccess("test", stateDir), Map.of(), configParams,
-            (short) 0, persistence, (identifier, entry) -> { }, MoreExecutors.directExecutor());
+            (short) 0, persistence, (identifier, entry) -> { });
     }
 
     @Test
