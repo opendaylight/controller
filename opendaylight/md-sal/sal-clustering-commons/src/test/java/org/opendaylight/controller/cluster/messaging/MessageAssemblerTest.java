@@ -33,6 +33,7 @@ import org.mockito.Mock;
 import org.opendaylight.controller.cluster.messaging.MessageAssembler.Builder;
 import org.opendaylight.raft.spi.FileBackedOutputStream;
 import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
+import org.opendaylight.raft.spi.RestrictedObjectStreams;
 
 /**
  * Unit tests for MessageAssembler.
@@ -40,6 +41,8 @@ import org.opendaylight.raft.spi.FileBackedOutputStream.Configuration;
  * @author Thomas Pantelis
  */
 public class MessageAssemblerTest extends AbstractMessagingTest {
+    private static final RestrictedObjectStreams OBJECT_STREAMS =
+        RestrictedObjectStreams.ofClassLoaders(MessageAssemblerTest.class);
 
     @Mock
     private BiConsumer<Object, ActorRef> mockAssembledMessageCallback;
@@ -179,7 +182,10 @@ public class MessageAssemblerTest extends AbstractMessagingTest {
     }
 
     private Builder newMessageAssemblerBuilder(final String logContext) {
-        return MessageAssembler.builder().fileBackedStreamFactory(mockFiledBackedStreamFactory)
-                .assembledMessageCallback(mockAssembledMessageCallback).logContext(logContext);
+        return MessageAssembler.builder()
+            .fileBackedStreamFactory(mockFiledBackedStreamFactory)
+            .assembledMessageCallback(mockAssembledMessageCallback)
+            .objectStreams(OBJECT_STREAMS)
+            .logContext(logContext);
     }
 }

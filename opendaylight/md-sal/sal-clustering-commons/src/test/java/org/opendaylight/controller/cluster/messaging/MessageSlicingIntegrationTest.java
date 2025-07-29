@@ -38,6 +38,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opendaylight.raft.spi.FileBackedOutputStreamFactory;
+import org.opendaylight.raft.spi.RestrictedObjectStreams;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +51,8 @@ import org.slf4j.LoggerFactory;
 @ExtendWith(MockitoExtension.class)
 class MessageSlicingIntegrationTest {
     private static final Logger LOG = LoggerFactory.getLogger(MessageSlicingIntegrationTest.class);
+    private static final RestrictedObjectStreams OBJECT_STREAMS =
+        RestrictedObjectStreams.ofClassLoaders(MessageSlicingIntegrationTest.class);
 
     private static final ActorSystem ACTOR_SYSTEM = ActorSystem.create("test");
     private static final Identifier IDENTIFIER = new StringIdentifier("stringId");
@@ -74,6 +77,7 @@ class MessageSlicingIntegrationTest {
         assembler = MessageAssembler.builder()
             .assembledMessageCallback(mockAssembledMessageCallback)
             .fileBackedStreamFactory(streamFactory)
+            .objectStreams(OBJECT_STREAMS)
             .logContext("test")
             .build();
     }
