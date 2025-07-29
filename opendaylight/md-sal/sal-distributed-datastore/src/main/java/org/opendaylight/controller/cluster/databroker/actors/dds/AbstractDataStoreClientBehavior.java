@@ -25,6 +25,7 @@ import org.opendaylight.controller.cluster.access.client.ConnectionEntry;
 import org.opendaylight.controller.cluster.access.client.ReconnectForwarder;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
+import org.opendaylight.raft.spi.RestrictedObjectStreams;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +57,8 @@ import org.slf4j.LoggerFactory;
 abstract class AbstractDataStoreClientBehavior extends ClientActorBehavior<ShardBackendInfo>
         implements DataStoreClient {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractDataStoreClientBehavior.class);
+    private static final RestrictedObjectStreams OBJECT_STREAMS = RestrictedObjectStreams.ofClassLoaders(
+        LocalHistoryIdentifier.class, ClientActorBehavior.class, AbstractDataStoreClientBehavior.class);
 
     private final Map<LocalHistoryIdentifier, ClientLocalHistory> histories = new ConcurrentHashMap<>();
     private final AtomicLong nextHistoryId = new AtomicLong(1);
@@ -66,7 +69,7 @@ abstract class AbstractDataStoreClientBehavior extends ClientActorBehavior<Shard
 
     AbstractDataStoreClientBehavior(final ClientActorContext context,
             final AbstractShardBackendResolver resolver) {
-        super(context, resolver);
+        super(context, resolver, OBJECT_STREAMS);
         singleHistory = new SingleClientHistory(this, new LocalHistoryIdentifier(getIdentifier(), 0));
     }
 
