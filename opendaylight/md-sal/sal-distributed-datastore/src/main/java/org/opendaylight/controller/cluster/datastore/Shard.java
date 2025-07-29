@@ -261,6 +261,7 @@ public class Shard extends RaftActor {
                 .expireStateAfterInactivity(2, TimeUnit.MINUTES).build();
 
         requestMessageAssembler = MessageAssembler.builder().logContext(name)
+                .objectStreams(OBJECT_STREAMS)
                 .fileBackedStreamFactory(getRaftActorContext().getFileBackedOutputStreamFactory())
                 .assembledMessageCallback((message, sender) -> self().tell(message, sender))
                 .expireStateAfterInactivity(datastoreContext.getRequestTimeout(), TimeUnit.NANOSECONDS).build();

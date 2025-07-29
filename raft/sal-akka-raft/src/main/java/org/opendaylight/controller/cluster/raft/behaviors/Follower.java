@@ -83,6 +83,7 @@ public class Follower extends RaftActorBehavior {
 
         appendEntriesMessageAssembler = MessageAssembler.builder()
             .logContext(logName)
+            .objectStreams(context.objectStreams())
             .fileBackedStreamFactory(context.getFileBackedOutputStreamFactory())
             .assembledMessageCallback((message, sender) -> handleMessage(sender, message))
             .build();
