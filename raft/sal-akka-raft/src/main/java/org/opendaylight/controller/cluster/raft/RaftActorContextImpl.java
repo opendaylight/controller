@@ -29,6 +29,7 @@ import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
 import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.raft.spi.FileBackedOutputStreamFactory;
+import org.opendaylight.raft.spi.RestrictedObjectStreams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,6 +65,8 @@ public class RaftActorContextImpl implements RaftActorContext {
     // be passed to it in the constructor
     private SnapshotManager snapshotManager;
 
+    private final @NonNull RestrictedObjectStreams objectStreams;
+
     private final @NonNull PersistenceProvider persistenceProvider;
 
     private final short payloadVersion;
@@ -80,6 +83,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     RaftActorContextImpl(final ActorRef actor, final ActorContext context, final @NonNull LocalAccess localStore,
             final @NonNull PeerInfos peerInfos, final @NonNull ConfigParams configParams, final short payloadVersion,
+            final @NonNull RestrictedObjectStreams objectStreams,
             final @NonNull PersistenceProvider persistenceProvider, final @NonNull ApplyEntryMethod applyEntryMethod) {
         this.actor = actor;
         this.context = context;
@@ -87,6 +91,7 @@ public class RaftActorContextImpl implements RaftActorContext {
         termInformation = localStore.termInfoStore();
         this.configParams = requireNonNull(configParams);
         this.payloadVersion = payloadVersion;
+        this.objectStreams = requireNonNull(objectStreams);
         this.persistenceProvider = requireNonNull(persistenceProvider);
         this.applyEntryMethod = requireNonNull(applyEntryMethod);
         this.peerInfos = requireNonNull(peerInfos);
@@ -100,10 +105,10 @@ public class RaftActorContextImpl implements RaftActorContext {
     @VisibleForTesting
     public RaftActorContextImpl(final ActorRef actor, final ActorContext context, final @NonNull LocalAccess localStore,
             final @NonNull Map<String, String> peerAddresses, final @NonNull ConfigParams configParams,
-            final short payloadVersion, final @NonNull PersistenceProvider persistenceProvider,
-            final @NonNull ApplyEntryMethod applyEntryMethod) {
+            final short payloadVersion, final @NonNull RestrictedObjectStreams objectStreams,
+            final @NonNull PersistenceProvider persistenceProvider, final @NonNull ApplyEntryMethod applyEntryMethod) {
         this(actor, context, localStore, new PeerInfos(localStore.memberId(), peerAddresses), configParams,
-            payloadVersion, persistenceProvider, applyEntryMethod);
+            payloadVersion, objectStreams, persistenceProvider, applyEntryMethod);
     }
 
     @Override
@@ -276,6 +281,11 @@ public class RaftActorContextImpl implements RaftActorContext {
     @Override
     public SnapshotStore snapshotStore() {
         return persistenceProvider.snapshotStore();
+    }
+
+    @Override
+    public RestrictedObjectStreams objectStreams() {
+        return objectStreams;
     }
 
     @Override

@@ -26,6 +26,7 @@ import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
 import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.raft.spi.FileBackedOutputStreamFactory;
+import org.opendaylight.raft.spi.RestrictedObjectStreams;
 
 /**
  * The RaftActorContext contains that portion of the RaftActors state that
@@ -219,6 +220,11 @@ public interface RaftActorContext {
      * @return the {@link SnapshotStore}
      */
     @NonNull SnapshotStore snapshotStore();
+
+    /**
+     * {@return the {@link RestrictedObjectStreams}}
+     */
+    @NonNull RestrictedObjectStreams objectStreams();
 
     /**
      * Determines if there are any peer followers.

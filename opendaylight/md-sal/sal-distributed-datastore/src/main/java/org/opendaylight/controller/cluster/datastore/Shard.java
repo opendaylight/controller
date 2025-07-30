@@ -204,7 +204,8 @@ public class Shard extends RaftActor {
 
     Shard(final Path stateDir, final AbstractBuilder<?, ?> builder) {
         super(stateDir.resolve(STATE_PATH), builder.getId().toString(), builder.getPeerAddresses(),
-            Optional.of(builder.getDatastoreContext().getShardRaftConfig()), DataStoreVersions.CURRENT_VERSION);
+            Optional.of(builder.getDatastoreContext().getShardRaftConfig()), DataStoreVersions.CURRENT_VERSION,
+            OBJECT_STREAMS);
 
         shardName = builder.getId().getShardName();
         datastoreContext = builder.getDatastoreContext();
@@ -272,11 +273,6 @@ public class Shard extends RaftActor {
     private void setTransactionCommitTimeout() {
         transactionCommitTimeout = TimeUnit.MILLISECONDS.convert(
                 datastoreContext.getShardTransactionCommitTimeoutInSeconds(), TimeUnit.SECONDS) / 2;
-    }
-
-    @Override
-    protected final RestrictedObjectStreams objectStreams() {
-        return OBJECT_STREAMS;
     }
 
     @Override

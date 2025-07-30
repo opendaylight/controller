@@ -1526,7 +1526,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
 
         return new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
             new LocalAccess(id, stateDir(), new FailingTermInfoStore(1, LEADER_ID)), Map.of(LEADER_ID, ""),
-            configParams, (short) 0, new TestPersistenceProvider(),
+            configParams, (short) 0, OBJECT_STREAMS, new TestPersistenceProvider(),
             (identifier, entry) -> actor.tell(new ApplyState(identifier, entry), actor));
     }
 

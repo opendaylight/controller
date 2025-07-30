@@ -60,7 +60,7 @@ class ReplicatedLogImplTest {
     @BeforeEach
     public void setup() {
         context = new RaftActorContextImpl(null, null, new LocalAccess("test", stateDir), Map.of(), configParams,
-            (short) 0, persistence, (identifier, entry) -> { });
+            (short) 0, AbstractActorTest.OBJECT_STREAMS, persistence, (identifier, entry) -> { });
     }
 
     @Test
