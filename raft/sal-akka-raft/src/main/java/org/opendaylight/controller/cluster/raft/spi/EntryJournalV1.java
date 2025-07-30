@@ -561,7 +561,7 @@ public final class EntryJournalV1 implements EntryJournal, AutoCloseable {
         final var metaIndex = writer.nextIndex();
         writer.append(META_ENTRY_WRITER, meta);
         writer.commit(metaIndex);
-        entryJournal.compact(metaIndex);
+        metaJournal.compact(metaIndex);
         LOG.debug("{}: updated meta to {}", memberId, meta);
     }
 
