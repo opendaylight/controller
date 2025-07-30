@@ -109,7 +109,7 @@ class RaftActorRecoveryTest {
 
     private RaftActorContext createContext() {
         final var ret = new RaftActorContextImpl(mockActorRef, null, localAccess, peerInfos, configParams, (short) 0,
-            persistence, (identifier, entry) -> { }, MoreExecutors.directExecutor());
+            AbstractActorTest.OBJECT_STREAMS, persistence, (identifier, entry) -> { }, MoreExecutors.directExecutor());
         ret.getReplicatedLog().resetToLog(recovery.recoveryLog);
         return ret;
     }

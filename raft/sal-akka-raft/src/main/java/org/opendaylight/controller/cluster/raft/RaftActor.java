@@ -115,6 +115,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     private final @NonNull BehaviorStateTracker behaviorStateTracker = new BehaviorStateTracker();
     private final @NonNull PersistenceControl persistenceControl;
+    private final @NonNull RestrictedObjectStreams objectStreams;
     private final @NonNull RaftStorageCompleter completer;
     // This context should NOT be passed directly to any other actor it is  only to be consumed
     // by the RaftActorBehaviors.
@@ -131,8 +132,11 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     @NonNullByDefault
     protected RaftActor(final Path stateDir, final String memberId, final Map<String, String> peerAddresses,
-            final Optional<ConfigParams> configParams, final short payloadVersion) {
+            final Optional<ConfigParams> configParams, final short payloadVersion,
+            final RestrictedObjectStreams objectStreams) {
         super(memberId);
+        this.objectStreams = requireNonNull(objectStreams);
+
         completer = new RaftStorageCompleter(memberId, this);
         peerInfos = new PeerInfos(memberId, peerAddresses);
 
@@ -144,7 +148,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             config.getPreferredCompression(), streamConfig);
 
         context = new RaftActorContextImpl(self(), getContext(), localAccess, peerInfos, config, payloadVersion,
-            persistenceControl, this::applyCommand, this::executeInSelf);
+            objectStreams, persistenceControl, this::applyCommand, this::executeInSelf);
     }
 
     /**
@@ -167,7 +171,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     /**
      * {@return the {@link RestrictedObjectStreams} instance to use for {@link StateMachineCommand} serialization}
      */
-    protected abstract @NonNull RestrictedObjectStreams objectStreams();
+    final @NonNull RestrictedObjectStreams objectStreams() {
+        return objectStreams;
+    }
 
     @Override
     @Deprecated(since = "11.0.0", forRemoval = true)

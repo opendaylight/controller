@@ -66,7 +66,7 @@ public final class ExampleActor extends RaftActor
 
     public ExampleActor(final Path stateDir, final String id, final Map<String, String> peerAddresses,
             final Optional<ConfigParams> configParams) {
-        super(stateDir, id, peerAddresses, configParams, (short)0);
+        super(stateDir, id, peerAddresses, configParams, (short)0, OBJECT_STREAMS);
         setPersistence(true);
         roleChangeNotifier = getContext().actorOf(RoleChangeNotifier.getProps(id), id + "-notifier");
     }
@@ -74,11 +74,6 @@ public final class ExampleActor extends RaftActor
     public static Props props(final Path stateDir, final String id, final Map<String, String> peerAddresses,
             final Optional<ConfigParams> configParams) {
         return Props.create(ExampleActor.class, stateDir, id, peerAddresses, configParams);
-    }
-
-    @Override
-    protected RestrictedObjectStreams objectStreams() {
-        return OBJECT_STREAMS;
     }
 
     @Override
