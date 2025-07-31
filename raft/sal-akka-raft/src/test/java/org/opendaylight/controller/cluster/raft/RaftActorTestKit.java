@@ -110,8 +110,12 @@ public class RaftActorTestKit extends TestKit {
 
     public static final @NonNull SnapshotFile awaitSnapshotNewerThan(final TestActorRef<? extends RaftActor> actorRef,
             final Instant timestamp) {
+        return awaitSnapshotNewerThan(actorRef.underlyingActor(), timestamp);
+    }
+
+    public static final @NonNull SnapshotFile awaitSnapshotNewerThan(final RaftActor actor, final Instant timestamp) {
         return defaultAwait()
-            .until(() -> awaitSnapshot(actorRef), snapshot -> timestamp.compareTo(snapshot.timestamp()) < 0);
+            .until(() -> awaitSnapshot(actor), snapshot -> timestamp.compareTo(snapshot.timestamp()) < 0);
     }
 
     // Wait for 5 seconds mostly due to slow build machines (like Vexxhost or on a single-threaded control group.
