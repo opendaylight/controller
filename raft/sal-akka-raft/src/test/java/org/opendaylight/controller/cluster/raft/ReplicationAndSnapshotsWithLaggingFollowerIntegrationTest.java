@@ -189,6 +189,8 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
 
         setup();
 
+        final var leaderRecoverySnapshot = awaitSnapshot(leaderActor);
+
         sendInitialPayloadsReplicatedToAllFollowers("zero", "one");
 
         // Configure follower 2 to drop messages and lag.
@@ -211,7 +213,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         // Send another payload - this should cause a snapshot due to snapshotBatchCount reached.
         MockCommand payload3 = sendPayloadData(leaderActor, "three");
 
-        final var firstSnapshot = awaitSnapshot(leaderActor);
+        final var firstSnapshot = awaitSnapshotNewerThan(leaderActor, leaderRecoverySnapshot.timestamp());
 
         testLog.info("testLeaderSnapshotWithLaggingFollowerCaughtUpViaAppendEntries: sending 2 more payloads");
 
