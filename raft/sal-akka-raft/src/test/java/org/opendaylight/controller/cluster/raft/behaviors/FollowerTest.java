@@ -21,6 +21,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.opendaylight.controller.cluster.raft.RaftActorTestKit.awaitSnapshot;
+import static org.opendaylight.controller.cluster.raft.RaftActorTestKit.awaitSnapshotNewerThan;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -1094,13 +1095,15 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         followerRaftActorRef.set(followerRaftActor);
         followerRaftActor.waitForInitializeBehaviorComplete();
 
+        final var followerRecoverySnapshot = awaitSnapshot(followerRaftActor);
+
         final var entries = List.of(newLogEntry(1, 0, "one"), newLogEntry(1, 1, "two"));
 
         AppendEntries appendEntries = new AppendEntries(1, "leader", -1, -1, entries, 1, -1, (short)0);
 
         followerActorRef.tell(appendEntries, leaderActor);
 
-        final var snapshotFile = awaitSnapshot(followerRaftActor);
+        final var snapshotFile = awaitSnapshotNewerThan(followerRaftActor, followerRecoverySnapshot.timestamp());
 
         final var raftSnapshot = snapshotFile.readRaftSnapshot(OBJECT_STREAMS);
         assertEquals(List.of(), raftSnapshot.unappliedEntries());
@@ -1144,6 +1147,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         followerRaftActorRef.set(followerRaftActor);
         followerRaftActor.waitForInitializeBehaviorComplete();
 
+        final var followerRecoverySnapshot = awaitSnapshot(followerRaftActor);
+
         final var entries = List.of(newLogEntry(1, 0, "one"), newLogEntry(1, 1, "two"), newLogEntry(1, 2, "three"));
 
         AppendEntries appendEntries = new AppendEntries(1, "leader", -1, -1, entries, 2, -1, (short)0);
@@ -1153,7 +1158,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
         assertTrue("isSuccess", reply.isSuccess());
 
-        final var snapshotFile = awaitSnapshot(followerRaftActor);
+        final var snapshotFile = awaitSnapshotNewerThan(followerRaftActor, followerRecoverySnapshot.timestamp());
         final var raftSnapshot = snapshotFile.readRaftSnapshot(OBJECT_STREAMS);
         assertEquals(List.of(), raftSnapshot.unappliedEntries());
         assertEquals(EntryInfo.of(2, 1), snapshotFile.lastIncluded());
