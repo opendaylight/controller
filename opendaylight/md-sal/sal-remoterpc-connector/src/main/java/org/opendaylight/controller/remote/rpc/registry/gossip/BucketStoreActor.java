@@ -36,14 +36,9 @@ import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Address;
 import org.apache.pekko.actor.Terminated;
 import org.apache.pekko.cluster.ClusterActorRefProvider;
-import org.apache.pekko.persistence.DeleteSnapshotsFailure;
-import org.apache.pekko.persistence.DeleteSnapshotsSuccess;
-import org.apache.pekko.persistence.RecoveryCompleted;
-import org.apache.pekko.persistence.SnapshotOffer;
-import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActorWithMetering;
+import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActorWithMetering;
 import org.opendaylight.controller.remote.rpc.RemoteOpsProviderConfig;
 import org.opendaylight.controller.remote.rpc.registry.gossip.BucketStoreAccess.Singletons;
 import org.slf4j.Logger;
@@ -56,8 +51,7 @@ import org.slf4j.Logger;
  * <p>Buckets are sync'ed across nodes using Gossip protocol (http://en.wikipedia.org/wiki/Gossip_protocol).
  * This store uses a {@link org.opendaylight.controller.remote.rpc.registry.gossip.Gossiper}.
  */
-public abstract class BucketStoreActor<T extends BucketData<T>> extends
-        AbstractUntypedPersistentActorWithMetering {
+public abstract class BucketStoreActor<T extends BucketData<T>> extends AbstractUntypedActorWithMetering {
     // Internal marker interface for messages which are just bridges to execute a method
     @FunctionalInterface
     private interface ExecuteInActor {
@@ -96,7 +90,7 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
      */
     private LocalBucket<T> localBucket;
     private T initialData;
-    private Integer incarnation;
+    private int incarnation;
 
     @NonNullByDefault
     protected BucketStoreActor(final RemoteOpsProviderConfig config, final Path directory, final String persistenceId,
@@ -147,30 +141,39 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
         return versions;
     }
 
+    private String persistenceId() {
+        return getActorNameOverride();
+    }
+
     @Override
     public void preStart() throws IOException {
-        // Ensure directory and try to load the incarnation
-        Files.createDirectories(directory);
-        try (var dis = new DataInputStream(Files.newInputStream(directory.resolve(INCARNATION_FILE)))) {
-            incarnation = dis.readInt();
-        } catch (NoSuchFileException e) {
-            final var log = log();
-            if (!log.isTraceEnabled()) {
-                e = null;
-            }
-            log.debug("{}: no incarnation file found", persistenceId(), e);
-        }
-
         final var provider = getContext().provider();
         selfAddress = provider.getDefaultAddress();
 
         if (provider instanceof ClusterActorRefProvider) {
             getContext().actorOf(Gossiper.props(config).withMailbox(config.getMailBoxName()), "gossiper");
         }
+
+        // Ensure directory and try to load the incarnation
+        Files.createDirectories(directory);
+        try (var dis = new DataInputStream(Files.newInputStream(directory.resolve(INCARNATION_FILE)))) {
+            incarnation = dis.readInt() + 1;
+        } catch (NoSuchFileException e) {
+            final var log = log();
+            if (!log.isTraceEnabled()) {
+                e = null;
+            }
+            log.debug("{}: no incarnation file found", persistenceId(), e);
+            incarnation = 0;
+        }
+
+        localBucket = new LocalBucket<>(incarnation, initialData);
+        initialData = null;
+        persistIncarnation();
     }
 
     @Override
-    protected void handleCommand(final Object message) throws Exception {
+    protected void handleReceive(final Object message) {
         switch (message) {
             // FIXME: we should use direct values, but that translates to duplicate instanceof cases, which SpotBugs
             //        does not like
@@ -187,34 +190,10 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
             }
             case ExecuteInActor execute -> execute.accept(this);
             case Terminated terminated -> actorTerminated(terminated);
-            case DeleteSnapshotsSuccess deleteSuccess ->
-                log().debug("{}: got command: {}", persistenceId(), deleteSuccess);
-            case DeleteSnapshotsFailure deleteFailure ->
-                log().warn("{}: failed to delete prior snapshots", persistenceId(), deleteFailure.cause());
             default -> {
                 log().debug("Unhandled message [{}]", message);
                 unhandled(message);
             }
-        }
-    }
-
-    @Override
-    protected final void handleRecover(final Object message) throws IOException {
-        switch (message) {
-            case RecoveryCompleted msg -> {
-                final var prev = incarnation;
-                final var current = prev != null ? prev + 1 : 0;
-                localBucket = new LocalBucket<>(current, initialData);
-                incarnation = current;
-                initialData = null;
-                persistIncarnation();
-                deleteSnapshots(SnapshotSelectionCriteria.create(Long.MAX_VALUE, Long.MAX_VALUE));
-            }
-            case SnapshotOffer msg -> {
-                incarnation = (Integer) msg.snapshot();
-                log().debug("{}: recovered Pekko incarnation {}", persistenceId(), incarnation);
-            }
-            default -> log().warn("{}: ignoring recovery message {}", persistenceId(), message);
         }
     }
 
@@ -237,12 +216,6 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
         }
 
         log().debug("{}: new incarnation {} persisted", persistenceId(), snapshot);
-    }
-
-    @Override
-    @Deprecated(since = "11.0.0", forRemoval = true)
-    public final void saveSnapshot(final Object snapshot) {
-        throw new UnsupportedOperationException();
     }
 
     protected final RemoteOpsProviderConfig getConfig() {
