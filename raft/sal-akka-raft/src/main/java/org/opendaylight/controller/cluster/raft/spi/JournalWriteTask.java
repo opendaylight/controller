@@ -330,7 +330,7 @@ public final class JournalWriteTask implements Runnable {
         return batchSize;
     }
 
-    // Called with with ququeLock held
+    // Called with with queueLock held
     private int lockedFillBatch(final ArrayDeque<Action> batch) throws InterruptedException {
         int queueSize = queue.size();
         if (queueSize == 0) {
