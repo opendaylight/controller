@@ -88,14 +88,14 @@ public class ActionRegistry extends BucketStoreActor<ActionRoutingTable> {
     }
 
     @Override
-    protected void handleCommand(final Object message) throws Exception {
+    protected void handleReceive(final Object message) {
         if (message instanceof UpdateActions msg) {
             LOG.debug("handling updatesActionRoutes message");
             LOG.debug("addedActions: {}", msg.getAddedActions());
             LOG.debug("removedActions: {}", msg.getRemovedActions());
             updateLocalBucket(getLocalData().updateActions(msg.getAddedActions(), msg.getRemovedActions()));
         } else {
-            super.handleCommand(message);
+            super.handleReceive(message);
         }
     }
 

@@ -88,11 +88,11 @@ public class RpcRegistry extends BucketStoreActor<RoutingTable> {
     }
 
     @Override
-    protected void handleCommand(final Object message) throws Exception {
+    protected void handleReceive(final Object message) {
         switch (message) {
             case AddOrUpdateRoutes addRoutes -> receiveAddRoutes(addRoutes);
             case RemoveRoutes removeRoutes -> receiveRemoveRoutes(removeRoutes);
-            default -> super.handleCommand(message);
+            default -> super.handleReceive(message);
         }
     }
 
