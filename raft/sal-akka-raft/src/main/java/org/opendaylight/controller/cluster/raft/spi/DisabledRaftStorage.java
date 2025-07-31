@@ -14,7 +14,6 @@ import com.google.common.base.MoreObjects.ToStringHelper;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Instant;
-import java.util.List;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.RaftActor;
@@ -71,7 +70,7 @@ public final class DisabledRaftStorage extends RaftStorage implements ImmediateE
     @Override
     public void startPersistEntry(final ReplicatedLogEntry entry, final RaftCallback<Long> callback) {
         if (entry.command() instanceof VotingConfig votingConfig) {
-            saveSnapshot(new RaftSnapshot(votingConfig, List.of()), EntryInfo.of(-1, -1), null,
+            saveSnapshot(new RaftSnapshot(votingConfig), EntryInfo.of(-1, -1), null,
                 new PersistEntryCallback(callback));
         } else {
             ImmediateEntryStore.super.startPersistEntry(entry, callback);
@@ -88,6 +87,6 @@ public final class DisabledRaftStorage extends RaftStorage implements ImmediateE
     public void saveVotingConfig(final @Nullable VotingConfig votingConfig, final Instant timestamp)
             throws IOException {
         // We always persist an empty snapshot
-        super.saveSnapshot(new RaftSnapshot(votingConfig, List.of()), EntryInfo.of(-1, -1), null, timestamp);
+        super.saveSnapshot(new RaftSnapshot(votingConfig), EntryInfo.of(-1, -1), null, timestamp);
     }
 }
