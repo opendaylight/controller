@@ -391,7 +391,7 @@ final class SnapshotFileV1 implements SnapshotFile {
                 throw new IOException("Invalid ReplicatedLogEntry count " + uaCount);
             }
             if (uaCount == 0) {
-                return new RaftSnapshot(votingConfig, ImmutableList.of());
+                return new RaftSnapshot(votingConfig);
             }
 
             final var uaBuilder = ImmutableList.<LogEntry>builderWithExpectedSize(uaCount);

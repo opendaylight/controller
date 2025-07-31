@@ -22,4 +22,8 @@ public record RaftSnapshot(@Nullable VotingConfig votingConfig, List<LogEntry> u
     public RaftSnapshot {
         unappliedEntries = List.copyOf(unappliedEntries);
     }
+
+    public RaftSnapshot(@Nullable VotingConfig votingConfig) {
+        this(votingConfig, List.of());
+    }
 }

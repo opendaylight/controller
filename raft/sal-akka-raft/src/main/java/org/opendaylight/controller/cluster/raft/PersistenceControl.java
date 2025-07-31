@@ -13,7 +13,6 @@ import com.google.common.base.MoreObjects.ToStringHelper;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Instant;
-import java.util.List;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
@@ -110,8 +109,7 @@ final class PersistenceControl extends PersistenceProvider {
     }
 
     void saveVotingConfig(final @Nullable VotingConfig votingConfig) throws IOException {
-        enabledStorage.saveSnapshot(new RaftSnapshot(votingConfig, List.of()), EntryInfo.of(-1, -1), null,
-            Instant.now());
+        enabledStorage.saveSnapshot(new RaftSnapshot(votingConfig), EntryInfo.of(-1, -1), null, Instant.now());
     }
 
     @Override

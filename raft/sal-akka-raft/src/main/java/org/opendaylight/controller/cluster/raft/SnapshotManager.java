@@ -427,7 +427,7 @@ public final class SnapshotManager {
         task = new PersistApply(lastJournalIndex, snapshot, callback);
         LOG.debug("{}: last applied journal index prior to persisting applied snapshot: {}", memberId(),
             lastJournalIndex);
-        saveSnapshot(new RaftSnapshot(snapshot.votingConfig(), List.of()), snapshot.lastApplied(), snapshot.state(),
+        saveSnapshot(new RaftSnapshot(snapshot.votingConfig()), snapshot.lastApplied(), snapshot.state(),
             lastJournalIndex);
     }
 
@@ -467,8 +467,8 @@ public final class SnapshotManager {
         LOG.info("{}: Persising snapshot at {}/{}", memberId(), request.lastApplied(), request.lastEntry());
 
         // Note: we ignore unapplied entries, as that is not what we want to trim
-        saveSnapshot(new RaftSnapshot(context.getPeerServerInfo(true), List.of()), request.lastApplied(),
-            snapshotState, lastJournalIndex);
+        saveSnapshot(new RaftSnapshot(context.getPeerServerInfo(true)), request.lastApplied(), snapshotState,
+            lastJournalIndex);
 
         final var config = context.getConfigParams();
         final long absoluteThreshold = config.getSnapshotDataThreshold();
