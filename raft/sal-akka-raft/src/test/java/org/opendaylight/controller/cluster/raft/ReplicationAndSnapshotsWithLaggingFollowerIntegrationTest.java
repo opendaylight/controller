@@ -308,6 +308,8 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
 
         setup();
 
+        final var leaderRecoverySnapshot = awaitSnapshot(leaderActor);
+
         sendInitialPayloadsReplicatedToAllFollowers("zero", "one");
 
         // Configure follower 2 to drop messages and lag.
@@ -324,7 +326,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         final var payload5 = sendPayloadData(leaderActor, "five");
         final var payload6 = sendPayloadData(leaderActor, "six");
 
-        final var firstSnapshot = awaitSnapshot(leaderActor);
+        final var firstSnapshot = awaitSnapshotNewerThan(leaderActor, leaderRecoverySnapshot.timestamp());
 
         // Verify the leader got consensus and applies each log entry even though follower 2 didn't respond.
         var applyStates = MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyState.class, 5);
