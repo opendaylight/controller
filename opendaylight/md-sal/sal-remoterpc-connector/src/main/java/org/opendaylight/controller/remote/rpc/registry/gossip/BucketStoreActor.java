@@ -154,7 +154,11 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends
         try (var dis = new DataInputStream(Files.newInputStream(directory.resolve(INCARNATION_FILE)))) {
             incarnation = dis.readInt();
         } catch (NoSuchFileException e) {
-            log().debug("{}: no incarnation file found", persistenceId(), e);
+            final var log = log();
+            if (!log.isTraceEnabled()) {
+                e = null;
+            }
+            log.debug("{}: no incarnation file found", persistenceId(), e);
         }
 
         final var provider = getContext().provider();

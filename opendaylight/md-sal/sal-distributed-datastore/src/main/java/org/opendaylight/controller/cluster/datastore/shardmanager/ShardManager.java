@@ -1380,6 +1380,9 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             }
             return new ShardManagerSnapshot(builder.build());
         } catch (NoSuchFileException e) {
+            if (!LOG.isTraceEnabled()) {
+                e = null;
+            }
             LOG.debug("{}: snapshot not present", name(), e);
             return null;
         }
