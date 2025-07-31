@@ -379,11 +379,7 @@ public final class JournalWriteTask implements Runnable {
                         try {
                             completion = switch (action) {
                                 case JournalAppendEntry appendEntry -> {
-                                    final long journalIndex = journal.nextToWrite();
-                                    // FIXME: record returned size to messageSize, which really is
-                                    // 'serialized command size'
-                                    journal.appendEntry(appendEntry.entry);
-                                    yield completeAction(appendEntry, journalIndex);
+                                    yield completeAction(appendEntry, journal.appendEntry(appendEntry.entry));
                                 }
                                 case JournalDiscardHead discardHead -> {
                                     journal.discardHead(discardHead.firstRetainedIndex);

@@ -47,9 +47,9 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog<JournaledLogEntry> {
         /**
          * Invoke the callback.
          *
-         * @param journalIndex the {@code journalIndex} at which the entry is stored.
+         * @param serializedCommandSize the serialized size of the command
          */
-        abstract void invoke(long journalIndex);
+        abstract void invoke(long serializedCommandSize);
     }
 
     @NonNullByDefault
@@ -79,7 +79,7 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog<JournaledLogEntry> {
         }
 
         @Override
-        void invoke(final long journalIndex) {
+        void invoke(final long serializedCommandSize) {
             invokeSync(entry, () -> callback.accept(userEntry));
         }
     }
@@ -91,7 +91,7 @@ final class ReplicatedLogImpl extends AbstractReplicatedLog<JournaledLogEntry> {
         }
 
         @Override
-        void invoke(final long journalIndex) {
+        void invoke(final long serializedCommandSize) {
             invokeSync(entry, () -> {
                 entry.clearPersistencePending();
                 callback.accept(entry);
