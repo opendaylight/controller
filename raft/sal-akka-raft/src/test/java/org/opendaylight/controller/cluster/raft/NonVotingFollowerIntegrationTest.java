@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import org.apache.pekko.actor.ActorRef;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.raft.AbstractRaftActorIntegrationTest.TestRaftActor.Builder;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.SnapshotComplete;
@@ -39,7 +39,7 @@ import org.opendaylight.raft.api.EntryInfo;
  *
  * @author Thomas Pantelis
  */
-public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrationTest {
+class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrationTest {
     private TestRaftActor followerInstance;
     private TestRaftActor leaderInstance;
     private final Builder follower1Builder = TestRaftActor.newBuilder();
@@ -50,7 +50,7 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
      * data in memory. The leader must force an install snapshot to re-sync the follower's state.
      */
     @Test
-    public void testFollowerResyncWithEmptyLeaderLogAfterNonPersistentLeaderRestart() throws Exception {
+    void testFollowerResyncWithEmptyLeaderLogAfterNonPersistentLeaderRestart() throws Exception {
         testLog.info("testFollowerResyncWithEmptyLeaderLogAfterNonPersistentLeaderRestart starting");
 
         setupLeaderAndNonVotingFollower();
@@ -126,7 +126,7 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
      * follower's state.
      */
     @Test
-    public void testFollowerResyncWithLessLeaderLogEntriesAfterNonPersistentLeaderRestart() {
+    void testFollowerResyncWithLessLeaderLogEntriesAfterNonPersistentLeaderRestart() {
         testLog.info("testFollowerResyncWithLessLeaderLogEntriesAfterNonPersistentLeaderRestart starting");
 
         setupLeaderAndNonVotingFollower();
@@ -198,7 +198,7 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
      * leader should force an install snapshot to re-sync the follower's state.
      */
     @Test
-    public void testFollowerResyncWithOneMoreLeaderLogEntryAfterNonPersistentLeaderRestart() {
+    void testFollowerResyncWithOneMoreLeaderLogEntryAfterNonPersistentLeaderRestart() {
         testLog.info("testFollowerResyncWithOneMoreLeaderLogEntryAfterNonPersistentLeaderRestart starting");
 
         setupLeaderAndNonVotingFollower();
@@ -270,8 +270,7 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
      * Eventually the follower should force the leader to install snapshot to re-sync its state.
      */
     @Test
-    public void testFollowerResyncWithMoreLeaderLogEntriesAndDownPeerAfterNonPersistentLeaderRestart()
-            throws Exception {
+    void testFollowerResyncWithMoreLeaderLogEntriesAndDownPeerAfterNonPersistentLeaderRestart() throws Exception {
         testLog.info("testFollowerResyncWithMoreLeaderLogEntriesAndDownPeerAfterNonPersistentLeaderRestart starting");
 
         setupLeaderAndNonVotingFollower();
@@ -384,7 +383,7 @@ public class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrati
     }
 
     @Test
-    public void testFollowerLeaderStateChanges() {
+    void testFollowerLeaderStateChanges() {
         testLog.info("testFollowerLeaderStateChanges");
 
         ActorRef roleChangeNotifier = factory.createActor(

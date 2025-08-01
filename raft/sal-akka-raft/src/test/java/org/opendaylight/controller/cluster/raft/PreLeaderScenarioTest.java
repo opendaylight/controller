@@ -16,7 +16,7 @@ import com.google.common.collect.ImmutableMap;
 import java.time.Duration;
 import java.util.List;
 import org.apache.pekko.actor.ActorRef;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.notifications.RoleChanged;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
@@ -30,13 +30,12 @@ import org.opendaylight.raft.api.RaftRole;
  *
  * @author Thomas Pantelis
  */
-public class PreLeaderScenarioTest extends AbstractRaftActorIntegrationTest {
-
+class PreLeaderScenarioTest extends AbstractRaftActorIntegrationTest {
     private ActorRef follower1NotifierActor;
     private DefaultConfigParamsImpl followerConfigParams;
 
     @Test
-    public void testUnComittedEntryOnLeaderChange() {
+    void testUnComittedEntryOnLeaderChange() {
         testLog.info("testUnComittedEntryOnLeaderChange starting");
 
         createRaftActors();

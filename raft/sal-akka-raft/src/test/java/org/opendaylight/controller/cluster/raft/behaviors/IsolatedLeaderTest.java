@@ -7,15 +7,15 @@
  */
 package org.opendaylight.controller.cluster.raft.behaviors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.pekko.actor.ActorRef;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.MessageCollectorActor;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
@@ -23,24 +23,22 @@ import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.raft.api.RaftRole;
 
-public class IsolatedLeaderTest extends AbstractLeaderTest<IsolatedLeader> {
-
+class IsolatedLeaderTest extends AbstractLeaderTest<IsolatedLeader> {
     private final ActorRef leaderActor = actorFactory.createActor(
             MessageCollectorActor.props(), actorFactory.generateActorId("leader"));
-
     private final ActorRef senderActor = actorFactory.createActor(
             MessageCollectorActor.props(), actorFactory.generateActorId("sender"));
 
     private AbstractLeader isolatedLeader;
 
     @Override
-    @After
-    public void tearDown() {
+    @AfterEach
+    void afterEach() {
         if (isolatedLeader != null) {
             isolatedLeader.close();
         }
 
-        super.tearDown();
+        super.afterEach();
     }
 
     @Override
@@ -55,16 +53,15 @@ public class IsolatedLeaderTest extends AbstractLeaderTest<IsolatedLeader> {
 
     @Override
     protected MockRaftActorContext createActorContext(final ActorRef actor, final int payloadVersion) {
-        DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
+        final var configParams = new DefaultConfigParamsImpl();
         configParams.setElectionTimeoutFactor(100000);
-        MockRaftActorContext context = new MockRaftActorContext("isolated-leader", stateDir.getRoot().toPath(),
-            getSystem(), actor, payloadVersion);
+        final var context = new MockRaftActorContext("isolated-leader", stateDir, getSystem(), actor, payloadVersion);
         context.setConfigParams(configParams);
         return context;
     }
 
     @Test
-    public void testHandleMessageWithThreeMembers() {
+    void testHandleMessageWithThreeMembers() {
         String followerAddress1 = "pekko://test/user/$a";
         String followerAddress2 = "pekko://test/user/$b";
 
@@ -91,7 +88,7 @@ public class IsolatedLeaderTest extends AbstractLeaderTest<IsolatedLeader> {
     }
 
     @Test
-    public void testHandleMessageWithFiveMembers() {
+    void testHandleMessageWithFiveMembers() {
         String followerAddress1 = "pekko://test/user/$a";
         String followerAddress2 = "pekko://test/user/$b";
         String followerAddress3 = "pekko://test/user/$c";
@@ -126,7 +123,7 @@ public class IsolatedLeaderTest extends AbstractLeaderTest<IsolatedLeader> {
     }
 
     @Test
-    public void testHandleMessageFromAnotherLeader() {
+    void testHandleMessageFromAnotherLeader() {
         String followerAddress1 = "pekko://test/user/$a";
         String followerAddress2 = "pekko://test/user/$b";
 
@@ -137,7 +134,7 @@ public class IsolatedLeaderTest extends AbstractLeaderTest<IsolatedLeader> {
         leaderActorContext.setPeerAddresses(peerAddresses);
 
         isolatedLeader = new IsolatedLeader(leaderActorContext);
-        assertEquals("Raft state", RaftRole.IsolatedLeader, isolatedLeader.raftRole());
+        assertEquals(RaftRole.IsolatedLeader, isolatedLeader.raftRole());
 
         // if an append-entries reply is received by the isolated-leader, and that reply
         // has a term  > than its own term, then IsolatedLeader switches to Follower

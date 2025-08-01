@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.opendaylight.controller.cluster.raft.RaftActorTestKit.assertJournal;
@@ -16,7 +17,7 @@ import static org.opendaylight.controller.cluster.raft.RaftActorTestKit.awaitSna
 
 import java.util.List;
 import java.util.Map;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
@@ -32,7 +33,6 @@ import org.opendaylight.raft.spi.CompressionType;
  * @author Thomas Pantelis
  */
 public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorIntegrationTest {
-
     private List<SimpleReplicatedLogEntry> origLeaderJournal;
 
     private MockCommand recoveredPayload0;
@@ -45,7 +45,7 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
     private MockCommand payload7;
 
     @Test
-    public void runTest() throws Exception {
+    void runTest() throws Exception {
         testLog.info("testReplicationAndSnapshots starting");
 
         // Setup the persistent journal for the leader. We'll start up with 3 journal log entries (one less
@@ -118,7 +118,7 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         waitUntilLeader(leaderActor);
 
         currentTerm = leaderContext.currentTerm();
-        assertEquals("Current term > " + initialTerm, true, currentTerm > initialTerm);
+        assertTrue("Current term > " + initialTerm, currentTerm > initialTerm);
 
         leader = leaderActor.underlyingActor().getCurrentBehavior();
 
