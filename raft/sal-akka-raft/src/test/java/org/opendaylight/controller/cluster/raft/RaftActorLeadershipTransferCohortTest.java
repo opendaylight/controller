@@ -14,8 +14,8 @@ import static org.mockito.Mockito.verify;
 
 import java.util.function.Function;
 import org.apache.pekko.dispatch.Dispatchers;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.raft.RaftActorLeadershipTransferCohort.OnComplete;
 import org.opendaylight.controller.cluster.raft.behaviors.Leader;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
@@ -25,7 +25,7 @@ import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolic
  *
  * @author Thomas Pantelis
  */
-public class RaftActorLeadershipTransferCohortTest extends AbstractActorTest {
+class RaftActorLeadershipTransferCohortTest extends AbstractActorTest {
     private final TestActorFactory factory = new TestActorFactory(getSystem());
     private MockRaftActor mockRaftActor;
     private RaftActorLeadershipTransferCohort cohort;
@@ -33,8 +33,8 @@ public class RaftActorLeadershipTransferCohortTest extends AbstractActorTest {
     private final DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
     private Function<Runnable, Void> pauseLeaderFunction;
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void afterEach() {
         factory.close();
     }
 
@@ -50,7 +50,7 @@ public class RaftActorLeadershipTransferCohortTest extends AbstractActorTest {
     }
 
     @Test
-    public void testOnNewLeader() {
+    void testOnNewLeader() {
         setup("testOnNewLeader");
         cohort.setNewLeaderTimeoutInMillis(20000);
 
@@ -67,7 +67,7 @@ public class RaftActorLeadershipTransferCohortTest extends AbstractActorTest {
     }
 
     @Test
-    public void testNewLeaderTimeout() {
+    void testNewLeaderTimeout() {
         setup("testNewLeaderTimeout");
         cohort.setNewLeaderTimeoutInMillis(200);
         cohort.transferComplete();
@@ -75,21 +75,21 @@ public class RaftActorLeadershipTransferCohortTest extends AbstractActorTest {
     }
 
     @Test
-    public void testNotLeaderOnDoTransfer() {
+    void testNotLeaderOnDoTransfer() {
         setup("testNotLeaderOnDoTransfer");
         cohort.doTransfer();
         verify(onComplete).onSuccess(mockRaftActor.self());
     }
 
     @Test
-    public void testAbortTransfer() {
+    void testAbortTransfer() {
         setup("testAbortTransfer");
         cohort.abortTransfer();
         verify(onComplete).onFailure(mockRaftActor.self());
     }
 
     @Test
-    public void testPauseLeaderTimeout() {
+    void testPauseLeaderTimeout() {
         pauseLeaderFunction = input -> null;
         setup("testPauseLeaderTimeout");
 

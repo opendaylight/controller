@@ -20,14 +20,14 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
 import com.google.common.util.concurrent.MoreExecutors;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.pekko.actor.Props;
 import org.apache.pekko.testkit.TestActorRef;
-import org.junit.After;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.spi.TestTermInfoStore;
@@ -37,29 +37,28 @@ import org.opendaylight.controller.cluster.raft.spi.TestTermInfoStore;
  *
  * @author Thomas Pantelis
  */
-public class RaftActorContextImplTest extends AbstractActorTest {
+class RaftActorContextImplTest extends AbstractActorTest {
     private final TestActorFactory actorFactory = new TestActorFactory(getSystem());
     private final TestActorRef<DoNothingActor> actor = actorFactory.createTestActor(
             Props.create(DoNothingActor.class), actorFactory.generateActorId("actor"));
 
-    @Rule
-    public TemporaryFolder stateDir = TemporaryFolder.builder().assureDeletion().build();
+    @TempDir
+    private Path stateDir;
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void afterEach() {
         actorFactory.close();
     }
 
     @Test
-    public void testGetPeerAddress() {
+    void testGetPeerAddress() {
         final var peerMap = new HashMap<String, String>();
         peerMap.put("peer1", "peerAddress1");
         peerMap.put("peer2", null);
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         RaftActorContextImpl context = new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
-            new LocalAccess("test", stateDir.getRoot().toPath(), new TestTermInfoStore()), peerMap, configParams,
-            (short) 0, OBJECT_STREAMS, new TestPersistenceProvider(), (identifier, entry) -> { },
-            MoreExecutors.directExecutor());
+            new LocalAccess("test", stateDir, new TestTermInfoStore()), peerMap, configParams, (short) 0,
+            OBJECT_STREAMS, new TestPersistenceProvider(), (identifier, entry) -> { }, MoreExecutors.directExecutor());
 
         assertEquals("getPeerAddress", "peerAddress1", context.getPeerAddress("peer1"));
         assertEquals("getPeerAddress", null, context.getPeerAddress("peer2"));
@@ -79,12 +78,12 @@ public class RaftActorContextImplTest extends AbstractActorTest {
     }
 
     @Test
-    public void testSetPeerAddress() {
+    void testSetPeerAddress() {
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         RaftActorContextImpl context = new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
-            new LocalAccess("test", stateDir.getRoot().toPath(), new TestTermInfoStore()),
-            Map.of("peer1", "peerAddress1"), configParams, (short) 0, OBJECT_STREAMS, new TestPersistenceProvider(),
-            (identifier, entry) -> { }, MoreExecutors.directExecutor());
+            new LocalAccess("test", stateDir, new TestTermInfoStore()), Map.of("peer1", "peerAddress1"), configParams,
+            (short) 0, OBJECT_STREAMS, new TestPersistenceProvider(), (identifier, entry) -> { },
+            MoreExecutors.directExecutor());
 
         context.setPeerAddress("peer1", "peerAddress1_1");
         assertEquals("getPeerAddress", "peerAddress1_1", context.getPeerAddress("peer1"));
@@ -94,11 +93,11 @@ public class RaftActorContextImplTest extends AbstractActorTest {
     }
 
     @Test
-    public void testUpdatePeerIds() {
+    void testUpdatePeerIds() {
         RaftActorContextImpl context = new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
-            new LocalAccess("self", stateDir.getRoot().toPath(), new TestTermInfoStore()),
-            Map.of("peer1", "peerAddress1"), new DefaultConfigParamsImpl(), (short) 0, OBJECT_STREAMS,
-            new TestPersistenceProvider(), (identifier, entry) -> { }, MoreExecutors.directExecutor());
+            new LocalAccess("self", stateDir, new TestTermInfoStore()), Map.of("peer1", "peerAddress1"),
+            new DefaultConfigParamsImpl(), (short) 0, OBJECT_STREAMS, new TestPersistenceProvider(),
+            (identifier, entry) -> { }, MoreExecutors.directExecutor());
 
         context.updateVotingConfig(new VotingConfig(
             new ServerInfo("self", false), new ServerInfo("peer2", true), new ServerInfo("peer3", false)));

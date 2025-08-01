@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.opendaylight.controller.cluster.raft.RaftActorTestKit.awaitSnapshot;
 
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -19,9 +19,9 @@ import java.util.function.Consumer;
 import org.apache.pekko.dispatch.Dispatchers;
 import org.apache.pekko.testkit.TestActorRef;
 import org.eclipse.jdt.annotation.NonNull;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
@@ -36,25 +36,25 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Pantelis
  */
-public class MigratedMessagesTest extends AbstractActorTest {
-    static final Logger TEST_LOG = LoggerFactory.getLogger(MigratedMessagesTest.class);
+class MigratedMessagesTest extends AbstractActorTest {
+    private static final Logger TEST_LOG = LoggerFactory.getLogger(MigratedMessagesTest.class);
 
     private TestActorFactory factory;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void beforeEach() {
         factory = new TestActorFactory(getSystem());
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void afterEach() {
         factory.close();
         InMemoryJournal.clear();
         InMemorySnapshotStore.clear();
     }
 
     @Test
-    public void testNoSnapshotAfterStartupWithNoMigratedMessages() {
+    void testNoSnapshotAfterStartupWithNoMigratedMessages() {
         TEST_LOG.info("testNoSnapshotAfterStartupWithNoMigratedMessages starting");
         String id = factory.generateActorId("test-actor-");
 
@@ -79,7 +79,7 @@ public class MigratedMessagesTest extends AbstractActorTest {
         Uninterruptibles.sleepUninterruptibly(750, TimeUnit.MILLISECONDS);
 
         final var snapshots = InMemorySnapshotStore.getSnapshots(id, Snapshot.class);
-        assertEquals("Snapshots", 0, snapshots.size());
+        assertEquals(List.of(), snapshots);
 
         TEST_LOG.info("testNoSnapshotAfterStartupWithNoMigratedMessages ending");
     }
@@ -107,7 +107,7 @@ public class MigratedMessagesTest extends AbstractActorTest {
 
         InMemoryJournal.waitForDeleteMessagesComplete(persistenceId);
 
-        assertEquals("InMemoryJournal size", 0, InMemoryJournal.get(persistenceId).size());
+        assertEquals(List.of(), InMemoryJournal.get(persistenceId).size());
 
         return raftActorRef;
     }

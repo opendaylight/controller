@@ -28,7 +28,7 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.apache.pekko.actor.ActorRef;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.ApplyLeaderSnapshot;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
@@ -52,7 +52,7 @@ import org.opendaylight.raft.api.TermInfo;
  *
  * @author Thomas Pantelis
  */
-public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends AbstractRaftActorIntegrationTest {
+class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends AbstractRaftActorIntegrationTest {
 
     private void setup() {
         leaderId = factory.generateActorId("leader");
@@ -112,7 +112,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
      * caught up via AppendEntries.
      */
     @Test
-    public void testReplicationsWithLaggingFollowerCaughtUpViaAppendEntries() {
+    void testReplicationsWithLaggingFollowerCaughtUpViaAppendEntries() {
         testLog.info("testReplicationsWithLaggingFollowerCaughtUpViaAppendEntries starting: sending 2 new payloads");
 
         setup();
@@ -184,7 +184,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
      * sent by the leader.
      */
     @Test
-    public void testLeaderSnapshotWithLaggingFollowerCaughtUpViaAppendEntries() throws Exception {
+    void testLeaderSnapshotWithLaggingFollowerCaughtUpViaAppendEntries() throws Exception {
         testLog.info("testLeaderSnapshotWithLaggingFollowerCaughtUpViaAppendEntries starting");
 
         setup();
@@ -303,7 +303,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
      * installed by the leader.
      */
     @Test
-    public void testLeaderSnapshotWithLaggingFollowerCaughtUpViaInstallSnapshot() throws Exception {
+    void testLeaderSnapshotWithLaggingFollowerCaughtUpViaInstallSnapshot() throws Exception {
         testLog.info("testLeaderSnapshotWithLaggingFollowerCaughtUpViaInstallSnapshot starting");
 
         setup();
@@ -401,7 +401,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
      * InstallSnapshotReply after the last chunk has been sent.
      */
     @Test
-    public void testLeaderInstallsSnapshotWithRestartedFollowerDuringSnapshotInstallation() throws Exception {
+    void testLeaderInstallsSnapshotWithRestartedFollowerDuringSnapshotInstallation() throws Exception {
         testLog.info("testLeaderInstallsSnapshotWithRestartedFollowerDuringSnapshotInstallation starting");
 
         setup();
@@ -486,7 +486,7 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
      * by the leader.
      */
     @Test
-    public void testLeaderSnapshotTriggeredByMemoryThresholdExceededWithLaggingFollower() throws Exception {
+    void testLeaderSnapshotTriggeredByMemoryThresholdExceededWithLaggingFollower() throws Exception {
         testLog.info("testLeaderSnapshotTriggeredByMemoryThresholdExceededWithLaggingFollower starting");
 
         snapshotBatchCount = 5;

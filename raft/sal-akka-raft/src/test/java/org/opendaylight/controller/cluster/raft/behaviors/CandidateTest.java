@@ -22,8 +22,8 @@ import java.util.concurrent.TimeUnit;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.dispatch.Dispatchers;
 import org.apache.pekko.testkit.TestActorRef;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.raft.MessageCollectorActor;
 import org.opendaylight.controller.cluster.raft.MockCommand;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
@@ -41,7 +41,7 @@ import org.opendaylight.raft.api.TermInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
+class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     static final Logger LOG = LoggerFactory.getLogger(CandidateTest.class);
 
     private final TestActorRef<MessageCollectorActor> candidateActor = actorFactory.createTestActor(
@@ -52,17 +52,17 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     private RaftActorBehavior candidate;
 
     @Override
-    @After
-    public void tearDown() {
+    @AfterEach
+    void afterEach() {
         if (candidate != null) {
             candidate.close();
         }
 
-        super.tearDown();
+        super.afterEach();
     }
 
     @Test
-    public void testWhenACandidateIsCreatedItIncrementsTheCurrentTermAndVotesForItself() {
+    void testWhenACandidateIsCreatedItIncrementsTheCurrentTermAndVotesForItself() {
         RaftActorContext raftActorContext = createActorContext();
         long expectedTerm = raftActorContext.currentTerm();
 
@@ -72,7 +72,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     }
 
     @Test
-    public void testThatAnElectionTimeoutIsTriggered() {
+    void testThatAnElectionTimeoutIsTriggered() {
         MockRaftActorContext actorContext = createActorContext();
         candidate = new Candidate(actorContext);
 
@@ -81,7 +81,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     }
 
     @Test
-    public void testHandleElectionTimeoutWhenThereAreZeroPeers() {
+    void testHandleElectionTimeoutWhenThereAreZeroPeers() {
         RaftActorContext raftActorContext = createActorContext();
         candidate = new Candidate(raftActorContext);
 
@@ -89,7 +89,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     }
 
     @Test
-    public void testHandleElectionTimeoutWhenThereAreTwoNodeCluster() {
+    void testHandleElectionTimeoutWhenThereAreTwoNodeCluster() {
         MockRaftActorContext raftActorContext = createActorContext();
         raftActorContext.setPeerAddresses(setupPeers(1));
         candidate = new Candidate(raftActorContext);
@@ -98,7 +98,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     }
 
     @Test
-    public void testBecomeLeaderOnReceivingMajorityVotesInThreeNodeCluster() {
+    void testBecomeLeaderOnReceivingMajorityVotesInThreeNodeCluster() {
         MockRaftActorContext raftActorContext = createActorContext();
         final var log = raftActorContext.getReplicatedLog();
         log.setLastApplied(log.lastIndex());
@@ -110,7 +110,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     }
 
     @Test
-    public void testBecomePreLeaderOnReceivingMajorityVotesInThreeNodeCluster() {
+    void testBecomePreLeaderOnReceivingMajorityVotesInThreeNodeCluster() {
         MockRaftActorContext raftActorContext = createActorContext();
         raftActorContext.getReplicatedLog().setLastApplied(-1);
         raftActorContext.setPeerAddresses(setupPeers(2));
@@ -122,7 +122,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     }
 
     @Test
-    public void testBecomeLeaderOnReceivingMajorityVotesInFiveNodeCluster() {
+    void testBecomeLeaderOnReceivingMajorityVotesInFiveNodeCluster() {
         MockRaftActorContext raftActorContext = createActorContext();
         raftActorContext.setTermInfo(new TermInfo(2L, "other"));
         final var log = new MockRaftActorContext.Builder().createEntries(0, 5, 1).build();
@@ -151,7 +151,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     }
 
     @Test
-    public void testBecomeLeaderOnReceivingMajorityVotesWithNonVotingPeers() {
+    void testBecomeLeaderOnReceivingMajorityVotesWithNonVotingPeers() {
         final var raftActorContext = createActorContext();
         raftActorContext.setPeerAddresses(setupPeers(4));
         raftActorContext.resetReplicatedLog(new MockRaftActorContext.Builder().build());
@@ -171,7 +171,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     }
 
     @Test
-    public void testResponseToHandleAppendEntriesWithLowerTerm() {
+    void testResponseToHandleAppendEntriesWithLowerTerm() {
         candidate = new Candidate(createActorContext());
 
         setupPeers(1);
@@ -185,7 +185,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     }
 
     @Test
-    public void testResponseToHandleAppendEntriesWithHigherTerm() {
+    void testResponseToHandleAppendEntriesWithHigherTerm() {
         candidate = new Candidate(createActorContext());
 
         setupPeers(1);
@@ -196,7 +196,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     }
 
     @Test
-    public void testResponseToHandleAppendEntriesWithEqualTerm() {
+    void testResponseToHandleAppendEntriesWithEqualTerm() {
         MockRaftActorContext actorContext = createActorContext();
 
         candidate = new Candidate(actorContext);
@@ -210,7 +210,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     }
 
     @Test
-    public void testResponseToRequestVoteWithLowerTerm() {
+    void testResponseToRequestVoteWithLowerTerm() {
         candidate = new Candidate(createActorContext());
 
         setupPeers(1);
@@ -222,7 +222,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     }
 
     @Test
-    public void testHandleRequestVoteWhenSenderTermEqualToCurrentTermAndVotedForMatches() {
+    void testHandleRequestVoteWhenSenderTermEqualToCurrentTermAndVotedForMatches() {
         MockRaftActorContext context = createActorContext();
         context.setTermInfo(new TermInfo(1000, null));
 
@@ -239,7 +239,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     }
 
     @Test
-    public void testHandleRequestVoteWhenSenderTermEqualToCurrentTermAndVotedForDoesNotMatch() {
+    void testHandleRequestVoteWhenSenderTermEqualToCurrentTermAndVotedForDoesNotMatch() {
         MockRaftActorContext context = createActorContext();
         context.setTermInfo(new TermInfo(1000, null));
 
@@ -259,7 +259,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
     }
 
     @Test
-    public void testCandidateSchedulesElectionTimeoutImmediatelyWhenItHasNoPeers() {
+    void testCandidateSchedulesElectionTimeoutImmediatelyWhenItHasNoPeers() {
         MockRaftActorContext context = createActorContext();
 
         Stopwatch stopwatch = Stopwatch.createStarted();
@@ -275,7 +275,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
 
     @Test
     @Override
-    public void testHandleAppendEntriesAddSameEntryToLog() {
+    void testHandleAppendEntriesAddSameEntryToLog() {
         MockRaftActorContext context = createActorContext();
 
         context.setTermInfo(new TermInfo(2, "test"));
@@ -316,8 +316,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
 
     @Override
     protected MockRaftActorContext createActorContext(final int payloadVersion) {
-        return new MockRaftActorContext("candidate", stateDir.getRoot().toPath(), getSystem(), candidateActor,
-            payloadVersion);
+        return new MockRaftActorContext("candidate", stateDir, getSystem(), candidateActor, payloadVersion);
     }
 
     private Map<String, String> setupPeers(final int count) {

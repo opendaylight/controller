@@ -18,16 +18,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.protobuf.ByteString;
 import org.eclipse.jdt.annotation.NonNull;
-import org.junit.After;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.opendaylight.controller.cluster.raft.AbstractActorTest;
 import org.opendaylight.controller.cluster.raft.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.InMemorySnapshotStore;
@@ -52,19 +52,19 @@ import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.raft.api.TermInfo;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior> extends AbstractActorTest {
-    protected final TestActorFactory actorFactory = new TestActorFactory(getSystem());
+abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior> extends AbstractActorTest {
+    final TestActorFactory actorFactory = new TestActorFactory(getSystem());
 
     private final ActorRef behaviorActor = actorFactory.createActor(MessageCollectorActor.props(),
         actorFactory.generateActorId("behavior"));
 
-    @Rule
-    public TemporaryFolder stateDir = TemporaryFolder.builder().assureDeletion().build();
+    @TempDir
+    Path stateDir;
 
     RaftActorBehavior behavior;
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void afterEach() {
         if (behavior != null) {
             behavior.close();
         }
@@ -80,7 +80,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
      * term the RaftActor gets into the Follower state.
      */
     @Test
-    public void testHandleRaftRPCWithNewerTerm() {
+    void testHandleRaftRPCWithNewerTerm() {
         MockRaftActorContext actorContext = createActorContext();
 
         assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(actorContext, behaviorActor,
@@ -96,14 +96,13 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
                 createRequestVoteReplyWithNewerTerm());
     }
 
-
     /**
      * This test verifies that when an AppendEntries is received with a term that
      * is less that the currentTerm of the RaftActor then the RaftActor does not
      * change it's state and it responds back with a failure.
      */
     @Test
-    public void testHandleAppendEntriesSenderTermLessThanReceiverTerm() {
+    void testHandleAppendEntriesSenderTermLessThanReceiverTerm() {
         MockRaftActorContext context = createActorContext(5);
 
         // First set the receivers term to a high number (1000)
@@ -124,7 +123,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
     }
 
     @Test
-    public void testHandleAppendEntriesAddSameEntryToLog() {
+    void testHandleAppendEntriesAddSameEntryToLog() {
         MockRaftActorContext context = createActorContext();
 
         context.setTermInfo(new TermInfo(2, "test"));
@@ -162,7 +161,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
      * the vote to the sender.
      */
     @Test
-    public void testHandleRequestVoteWhenSenderLogMoreUpToDate() {
+    void testHandleRequestVoteWhenSenderLogMoreUpToDate() {
         MockRaftActorContext context = createActorContext();
 
         behavior = createBehavior(context);
@@ -181,7 +180,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
      * log then the receiving RaftActor will not grant the vote to the sender.
      */
     @Test
-    public void testHandleRequestVoteWhenSenderLogLessUptoDate() {
+    void testHandleRequestVoteWhenSenderLogLessUptoDate() {
         MockRaftActorContext context = createActorContext();
 
         behavior = createBehavior(context);
@@ -204,7 +203,7 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
      * recipient RaftActor.
      */
     @Test
-    public void testHandleRequestVoteWhenSenderTermLessThanCurrentTerm() {
+    void testHandleRequestVoteWhenSenderTermLessThanCurrentTerm() {
         MockRaftActorContext context = createActorContext();
 
         context.setTermInfo(new TermInfo(1000, null));
@@ -218,8 +217,8 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
     }
 
     @Test
-    public void testPerformSnapshot() {
-        final var context = new MockRaftActorContext("test", stateDir.getRoot().toPath(), getSystem(), behaviorActor);
+    void testPerformSnapshot() {
+        final var context = new MockRaftActorContext("test", stateDir, getSystem(), behaviorActor);
         RaftActorBehavior abstractBehavior = createBehavior(context);
         if (abstractBehavior instanceof Candidate) {
             return;
@@ -269,7 +268,6 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
         assertEquals(1, context.getReplicatedLog().size());
     }
 
-
     protected void assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(final MockRaftActorContext actorContext,
             final ActorRef actorRef, final RaftRPC rpc) {
 
@@ -316,15 +314,15 @@ public abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior>
     }
 
     protected @NonNull MockRaftActorContext createActorContext(final int payloadVersion) {
-        return new MockRaftActorContext(stateDir.getRoot().toPath(), payloadVersion);
+        return new MockRaftActorContext(stateDir, payloadVersion);
     }
 
     protected final @NonNull MockRaftActorContext createActorContext(final ActorRef actor) {
-        return new MockRaftActorContext("test", stateDir.getRoot().toPath(), getSystem(), actor, 0);
+        return new MockRaftActorContext("test", stateDir, getSystem(), actor, 0);
     }
 
     protected @NonNull MockRaftActorContext createActorContext(final ActorRef actor, final int payloadVersion) {
-        return new MockRaftActorContext("test", stateDir.getRoot().toPath(), getSystem(), actor, payloadVersion);
+        return new MockRaftActorContext("test", stateDir, getSystem(), actor, payloadVersion);
     }
 
     protected AppendEntries createAppendEntriesWithNewerTerm() {

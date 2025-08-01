@@ -20,7 +20,7 @@ import com.google.common.collect.ImmutableMap;
 import java.time.Duration;
 import java.util.List;
 import org.apache.pekko.actor.ActorRef;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.notifications.RoleChanged;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
@@ -35,7 +35,7 @@ import org.opendaylight.raft.api.RaftRole;
  *
  * @author Thomas Pantelis
  */
-public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
+class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
     private ActorRef follower1NotifierActor;
     private ActorRef leaderNotifierActor;
 
@@ -46,7 +46,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
      * appropriately.
      */
     @Test
-    public void testLeaderIsolationWithAllPriorEntriesCommitted() {
+    void testLeaderIsolationWithAllPriorEntriesCommitted() {
         testLog.info("testLeaderIsolationWithAllPriorEntriesCommitted starting");
 
         createRaftActors();
@@ -131,7 +131,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
      * sides should reconcile their logs appropriately.
      */
     @Test
-    public void testLeaderIsolationWithPriorUncommittedEntryAndOneConflictingEntry() {
+    void testLeaderIsolationWithPriorUncommittedEntryAndOneConflictingEntry() {
         testLog.info("testLeaderIsolationWithPriorUncommittedEntryAndOneConflictingEntry starting");
 
         createRaftActors();
@@ -252,7 +252,7 @@ public class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
      * and both sides should reconcile their logs appropriately.
      */
     @Test
-    public void testLeaderIsolationWithPriorUncommittedEntryAndMultipleConflictingEntries() {
+    void testLeaderIsolationWithPriorUncommittedEntryAndMultipleConflictingEntries() {
         testLog.info("testLeaderIsolationWithPriorUncommittedEntryAndMultipleConflictingEntries starting");
 
         createRaftActors();

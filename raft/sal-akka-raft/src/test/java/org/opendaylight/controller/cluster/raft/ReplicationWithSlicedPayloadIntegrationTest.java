@@ -11,7 +11,7 @@ import static org.opendaylight.controller.cluster.raft.MessageCollectorActor.exp
 
 import java.util.List;
 import java.util.Map;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 
 /**
@@ -20,10 +20,9 @@ import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
  *
  * @author Thomas Pantelis
  */
-public class ReplicationWithSlicedPayloadIntegrationTest extends AbstractRaftActorIntegrationTest {
-
+class ReplicationWithSlicedPayloadIntegrationTest extends AbstractRaftActorIntegrationTest {
     @Test
-    public void runTest() {
+    void runTest() {
         testLog.info("ReplicationWithSlicedPayloadIntegrationTest starting");
 
         // Create the leader and 2 follower actors.

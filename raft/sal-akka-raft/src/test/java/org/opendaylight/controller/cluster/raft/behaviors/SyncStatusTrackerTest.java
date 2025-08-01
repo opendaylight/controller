@@ -15,26 +15,26 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.pekko.actor.ActorRef;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.raft.AbstractActorTest;
 import org.opendaylight.controller.cluster.raft.MessageCollectorActor;
 import org.opendaylight.controller.cluster.raft.TestActorFactory;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
 
-public class SyncStatusTrackerTest extends AbstractActorTest {
-    protected final TestActorFactory actorFactory = new TestActorFactory(getSystem());
+class SyncStatusTrackerTest extends AbstractActorTest {
+    private final TestActorFactory actorFactory = new TestActorFactory(getSystem());
 
     private final ActorRef listener = actorFactory.createActor(
             MessageCollectorActor.props(), actorFactory.generateActorId("listener"));
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void afterEach() {
         actorFactory.close();
     }
 
     @Test
-    public void testUpdate() {
+    void testUpdate() {
         SyncStatusTracker tracker = new SyncStatusTracker(listener, "commit-tracker", 10);
 
         // When leader-1 sends the first update message the listener should receive a syncStatus notification
@@ -109,19 +109,19 @@ public class SyncStatusTrackerTest extends AbstractActorTest {
     }
 
     @Test
-    public void testConstructorActorShouldNotBeNull() {
+    void testConstructorActorShouldNotBeNull() {
         final var ex = assertThrows(NullPointerException.class, () -> new SyncStatusTracker(null, "commit-tracker", 1));
         assertEquals("actor should not be null", ex.getMessage());
     }
 
     @Test
-    public void testConstructorIdShouldNotBeNull() {
+    void testConstructorIdShouldNotBeNull() {
         final var ex = assertThrows(NullPointerException.class, () -> new SyncStatusTracker(listener, null, 1));
         assertEquals("memberId should not be null", ex.getMessage());
     }
 
     @Test
-    public void testConstructorSyncThresholdShouldNotBeNegative() {
+    void testConstructorSyncThresholdShouldNotBeNegative() {
         final var ex = assertThrows(IllegalArgumentException.class,
             () -> new SyncStatusTracker(listener, "commit-tracker", -1));
         assertEquals("syncThreshold should be greater than or equal to 0", ex.getMessage());

@@ -9,19 +9,15 @@ package org.opendaylight.controller.cluster.raft;
 
 import static java.util.Objects.requireNonNull;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Comparator;
 import org.apache.commons.io.FileUtils;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.testkit.javadsl.TestKit;
 import org.eclipse.jdt.annotation.NonNull;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.io.TempDir;
 import org.opendaylight.raft.spi.RestrictedObjectStreams;
 import org.opendaylight.yangtools.util.AbstractStringIdentifier;
 
@@ -40,33 +36,21 @@ public abstract class AbstractActorTest {
 
     private static ActorSystem ACTOR_SYSTEM;
 
-    // FIXME: @TempDir when we have JUnit5
+    @TempDir
     private Path stateDir;
 
-    @BeforeClass
-    public static void setUpClass() throws Exception {
+    @BeforeAll
+    public static final void beforeAll() throws Exception {
         deleteJournal();
         System.setProperty("shard.persistent", "false");
         ACTOR_SYSTEM = ActorSystem.create("test");
     }
 
-    @AfterClass
-    public static void tearDownClass() throws Exception {
+    @AfterAll
+    public static final void afterAll() throws Exception {
         deleteJournal();
         TestKit.shutdownActorSystem(ACTOR_SYSTEM);
         ACTOR_SYSTEM = null;
-    }
-
-    @Before
-    public void beforeEach() throws Exception {
-        stateDir = Files.createTempDirectory(getClass().getName());
-    }
-
-    @After
-    public void afterEach() throws Exception {
-        try (var paths = Files.walk(stateDir)) {
-            paths.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
-        }
     }
 
     protected static final ActorSystem getSystem() {
@@ -77,7 +61,7 @@ public abstract class AbstractActorTest {
         return requireNonNull(stateDir);
     }
 
-    protected static void deleteJournal() throws IOException {
+    protected static final void deleteJournal() throws IOException {
         FileUtils.deleteDirectory(Path.of("journal").toFile());
     }
 }

@@ -19,8 +19,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import org.apache.pekko.actor.ActorRef;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.ApplyLeaderSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 
@@ -29,12 +29,12 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
  *
  * @author Thomas Pantelis
  */
-public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
+class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
     private MockCommand payload0;
     private MockCommand payload1;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void beforeEach() {
         follower1Actor = newTestRaftActor(follower1Id, Map.of(leaderId, testActorPath(leaderId)),
                 newFollowerConfigParams());
 
@@ -49,7 +49,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
     }
 
     @Test
-    public void testStatePersistedBetweenSnapshotCaptureAndPersist() {
+    void testStatePersistedBetweenSnapshotCaptureAndPersist() {
 
         send2InitialPayloads();
 
@@ -92,7 +92,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
     }
 
     @Test
-    public void testStatePersistedAfterSnapshotPersisted() {
+    void testStatePersistedAfterSnapshotPersisted() {
 
         send2InitialPayloads();
 
@@ -132,7 +132,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
     }
 
     @Test
-    public void testFollowerRecoveryAfterInstallSnapshot() throws Exception {
+    void testFollowerRecoveryAfterInstallSnapshot() throws Exception {
 
         send2InitialPayloads();
 
@@ -202,7 +202,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
     }
 
     @Test
-    public void testRecoveryDeleteEntries() {
+    void testRecoveryDeleteEntries() {
         send2InitialPayloads();
 
         sendPayloadData(leaderActor, "two");

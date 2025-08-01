@@ -34,7 +34,7 @@ import org.apache.pekko.testkit.TestActorRef;
 import org.apache.pekko.testkit.javadsl.TestKit;
 import org.apache.pekko.util.Timeout;
 import org.eclipse.jdt.annotation.NonNull;
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
@@ -58,7 +58,7 @@ import scala.concurrent.Await;
  *
  * @author Thomas Pantelis
  */
-public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest {
+abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest {
     private static final class MockIdentifier extends AbstractStringIdentifier<MockIdentifier> {
         @java.io.Serial
         private static final long serialVersionUID = 1L;
@@ -68,20 +68,20 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         }
     }
 
-    public static class SetPeerAddress {
+    static class SetPeerAddress {
         private final String peerId;
         private final String peerAddress;
 
-        public SetPeerAddress(final String peerId, final String peerAddress) {
+        SetPeerAddress(final String peerId, final String peerAddress) {
             this.peerId = peerId;
             this.peerAddress = peerAddress;
         }
 
-        public String getPeerId() {
+        String getPeerId() {
             return peerId;
         }
 
-        public String getPeerAddress() {
+        String getPeerAddress() {
             return peerAddress;
         }
     }
@@ -89,7 +89,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
     /**
      * Message intended for testing to allow triggering persistData via the mailbox.
      */
-    public static final class TestPersist {
+    static final class TestPersist {
         private final ActorRef actorRef;
         private final @NonNull Identifier identifier;
         private final MockCommand payload;
@@ -100,20 +100,20 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
             this.payload = payload;
         }
 
-        public ActorRef getActorRef() {
+        ActorRef getActorRef() {
             return actorRef;
         }
 
-        public @NonNull Identifier getIdentifier() {
+        @NonNull Identifier getIdentifier() {
             return identifier;
         }
 
-        public MockCommand getPayload() {
+        MockCommand getPayload() {
             return payload;
         }
     }
 
-    public static class TestRaftActor extends MockRaftActor {
+    static class TestRaftActor extends MockRaftActor {
         private final ConcurrentHashMap<Class<?>, Predicate<?>> dropMessages = new ConcurrentHashMap<>();
         private final ActorRef collectorActor;
 
@@ -122,7 +122,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
             collectorActor = builder.collectorActor;
         }
 
-        public void startDropMessages(final Class<?> msgClass) {
+        void startDropMessages(final Class<?> msgClass) {
             dropMessages.put(msgClass, msg -> true);
         }
 
@@ -130,7 +130,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
             dropMessages.put(msgClass, filter);
         }
 
-        public void stopDropMessages(final Class<?> msgClass) {
+        void stopDropMessages(final Class<?> msgClass) {
             dropMessages.remove(msgClass);
         }
 
@@ -176,18 +176,18 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
             return new MockSnapshotState(List.copyOf(getState()));
         }
 
-        public ActorRef collectorActor() {
+        ActorRef collectorActor() {
             return collectorActor;
         }
 
-        public static Builder newBuilder() {
+        static Builder newBuilder() {
             return new Builder();
         }
 
-        public static class Builder extends AbstractBuilder<Builder, TestRaftActor> {
+        static final class Builder extends AbstractBuilder<Builder, TestRaftActor> {
             private ActorRef collectorActor;
 
-            Builder() {
+            private Builder() {
                 super(TestRaftActor.class);
             }
 
@@ -234,8 +234,8 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
 
     protected List<MockCommand> expSnapshotState = new ArrayList<>();
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void afterEach() {
         InMemoryJournal.clear();
         InMemorySnapshotStore.clear();
         factory.close();

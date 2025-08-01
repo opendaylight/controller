@@ -13,7 +13,6 @@ import static org.opendaylight.controller.cluster.raft.MessageCollectorActor.cle
 import static org.opendaylight.controller.cluster.raft.MessageCollectorActor.expectFirstMatching;
 import static org.opendaylight.controller.cluster.raft.MessageCollectorActor.expectMatching;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -22,7 +21,7 @@ import org.apache.pekko.actor.Status;
 import org.apache.pekko.pattern.Patterns;
 import org.apache.pekko.testkit.TestActorRef;
 import org.apache.pekko.testkit.javadsl.TestKit;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.LeaderTransitioning;
@@ -44,7 +43,7 @@ import scala.concurrent.duration.FiniteDuration;
  *
  * @author Thomas Pantelis
  */
-public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrationTest {
+class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrationTest {
     private final String follower3Id = factory.generateActorId("follower");
 
     private ActorRef leaderNotifierActor;
@@ -56,7 +55,7 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
     private ActorRef requestLeadershipResultCollectorActor;
 
     @Test
-    public void testLeaderTransferOnShutDown() throws Exception {
+    void testLeaderTransferOnShutDown() throws Exception {
         testLog.info("testLeaderTransferOnShutDown starting");
 
         createRaftActors();
@@ -204,15 +203,14 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
             final String... expLeaderIds) {
         final var leaderStateChanges = expectMatching(notifierActor, LeaderStateChanged.class, expLeaderIds.length);
 
-        Collections.reverse(leaderStateChanges);
-        final var actual = leaderStateChanges.iterator();
+        final var actual = leaderStateChanges.reversed().iterator();
         for (int i = expLeaderIds.length - 1; i >= 0; i--) {
             assertEquals("getLeaderId", expLeaderIds[i], actual.next().leaderId());
         }
     }
 
     @Test
-    public void testLeaderTransferAborted() throws Exception {
+    void testLeaderTransferAborted() throws Exception {
         testLog.info("testLeaderTransferAborted starting");
 
         createRaftActors();
@@ -229,7 +227,7 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
     }
 
     @Test
-    public void testLeaderTransferSkippedOnShutdownWithNoFollowers() throws Exception {
+    void testLeaderTransferSkippedOnShutdownWithNoFollowers() throws Exception {
         testLog.info("testLeaderTransferSkippedOnShutdownWithNoFollowers starting");
 
         leaderActor = newTestRaftActor(leaderId, TestRaftActor.newBuilder().config(newLeaderConfigParams()));
@@ -258,7 +256,7 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
     }
 
     @Test
-    public void testSuccessfulRequestLeadershipTransferToFollower2() {
+    void testSuccessfulRequestLeadershipTransferToFollower2() {
         testLog.info("testSuccessfulRequestLeadershipTransferToFollower2 starting");
 
         createRaftActors();
@@ -274,7 +272,7 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
     }
 
     @Test
-    public void testRequestLeadershipTransferToFollower2WithFollower2Lagging() {
+    void testRequestLeadershipTransferToFollower2WithFollower2Lagging() {
         testLog.info("testRequestLeadershipTransferToFollower2WithFollower2Lagging starting");
 
         createRaftActors();
@@ -294,9 +292,8 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
         testLog.info("testRequestLeadershipTransferToFollower2WithFollower2Lagging ending");
     }
 
-
     @Test
-    public void testRequestLeadershipTransferToFollower2WithFollower2Shutdown() throws Exception {
+    void testRequestLeadershipTransferToFollower2WithFollower2Shutdown() throws Exception {
         testLog.info("testRequestLeadershipTransferToFollower2WithFollower2Shutdown starting");
 
         createRaftActors();
@@ -316,7 +313,7 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
     }
 
     @Test
-    public void testRequestLeadershipTransferToFollower2WithOtherFollowersDown() {
+    void testRequestLeadershipTransferToFollower2WithOtherFollowersDown() {
         testLog.info("testRequestLeadershipTransferToFollower2WithOtherFollowersDown starting");
 
         createRaftActors();

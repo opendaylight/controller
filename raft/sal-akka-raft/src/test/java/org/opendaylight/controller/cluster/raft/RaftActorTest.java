@@ -51,10 +51,14 @@ import org.apache.pekko.protobuf.ByteString;
 import org.apache.pekko.testkit.TestActorRef;
 import org.apache.pekko.testkit.javadsl.TestKit;
 import org.eclipse.jdt.annotation.NonNull;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RoleChanged;
 import org.opendaylight.controller.cluster.raft.AbstractRaftActorIntegrationTest.TestPersist;
@@ -97,37 +101,40 @@ import org.opendaylight.raft.spi.PlainSnapshotSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RaftActorTest extends AbstractActorTest {
+@ExtendWith(MockitoExtension.class)
+//FIXME: remove this line
+@MockitoSettings(strictness = Strictness.LENIENT)
+class RaftActorTest extends AbstractActorTest {
     private static final Logger TEST_LOG = LoggerFactory.getLogger(RaftActorTest.class);
     private static final Duration ONE_DAY = Duration.ofDays(1);
 
     private TestActorFactory factory;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void beforeEach() {
         factory = new TestActorFactory(getSystem());
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void afterEach() {
         factory.close();
         InMemoryJournal.clear();
         InMemorySnapshotStore.clear();
     }
 
     @Test
-    public void testConstruction() {
+    void testConstruction() {
         new RaftActorTestKit(stateDir(), getSystem(), "testConstruction").waitUntilLeader();
     }
 
     @Test
-    public void testFindLeaderWhenLeaderIsSelf() {
+    void testFindLeaderWhenLeaderIsSelf() {
         final var kit = new RaftActorTestKit(stateDir(), getSystem(), "testFindLeader");
         kit.waitUntilLeader();
     }
 
     @Test
-    public void testRaftActorRecoveryWithPersistenceEnabled() {
+    void testRaftActorRecoveryWithPersistenceEnabled() {
         TEST_LOG.info("testRaftActorRecoveryWithPersistenceEnabled starting");
 
         final var kit = new TestKit(getSystem());
@@ -203,7 +210,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testRaftActorRecoveryWithPersistenceDisabled() {
+    void testRaftActorRecoveryWithPersistenceDisabled() {
         String persistenceId = factory.generateActorId("follower-");
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
@@ -223,7 +230,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testUpdateElectionTermPersistedWithPersistenceDisabled() {
+    void testUpdateElectionTermPersistedWithPersistenceDisabled() {
         final TestKit kit = new TestKit(getSystem());
         String persistenceId = factory.generateActorId("follower-");
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
@@ -258,7 +265,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testRaftActorForwardsToRaftActorRecoverySupport() throws Exception {
+    void testRaftActorForwardsToRaftActorRecoverySupport() throws Exception {
         String persistenceId = factory.generateActorId("leader-");
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
@@ -302,7 +309,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testRaftActorForwardsToRaftActorSnapshotMessageSupport() throws Exception {
+    void testRaftActorForwardsToRaftActorSnapshotMessageSupport() throws Exception {
         String persistenceId = factory.generateActorId("leader-");
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
@@ -344,7 +351,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testApplyJournalEntriesCallsDataPersistence() throws Exception {
+    void testApplyJournalEntriesCallsDataPersistence() throws Exception {
         final var persistenceId = factory.generateActorId("leader-");
         final var config = new DefaultConfigParamsImpl();
         config.setHeartBeatInterval(ONE_DAY);
@@ -358,7 +365,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testApplyState() {
+    void testApplyState() {
         final var persistenceId = factory.generateActorId("leader-");
         final var config = new DefaultConfigParamsImpl();
         config.setHeartBeatInterval(ONE_DAY);
@@ -384,7 +391,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testRaftRoleChangeNotifierWhenRaftActorHasNoPeers() throws Exception {
+    void testRaftRoleChangeNotifierWhenRaftActorHasNoPeers() throws Exception {
         final var notifierActor = factory.createActor(MessageCollectorActor.props());
         MessageCollectorActor.waitUntilReady(notifierActor);
 
@@ -469,7 +476,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testRaftRoleChangeNotifierWhenRaftActorHasPeers() throws Exception {
+    void testRaftRoleChangeNotifierWhenRaftActorHasPeers() throws Exception {
         final var notifierActor = factory.createActor(MessageCollectorActor.props());
         MessageCollectorActor.waitUntilReady(notifierActor);
 
@@ -514,7 +521,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testFakeSnapshotsForLeaderWithInRealSnapshots() throws Exception {
+    void testFakeSnapshotsForLeaderWithInRealSnapshots() throws Exception {
         final var persistenceId = factory.generateActorId("leader-");
         final var follower1Id = factory.generateActorId("follower-");
 
@@ -619,7 +626,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testFakeSnapshotsForFollowerWithInRealSnapshots() throws Exception {
+    void testFakeSnapshotsForFollowerWithInRealSnapshots() throws Exception {
         final var persistenceId = factory.generateActorId("follower-");
         final var leaderId = factory.generateActorId("leader-");
 
@@ -700,7 +707,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testFakeSnapshotsForLeaderWithInInitiateSnapshots() throws Exception {
+    void testFakeSnapshotsForLeaderWithInInitiateSnapshots() throws Exception {
         final var persistenceId = factory.generateActorId("leader-");
         final var follower1Id = factory.generateActorId("follower-");
         final var follower2Id = factory.generateActorId("follower-");
@@ -783,7 +790,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testRealSnapshotWhenReplicatedToAllIndexMinusOne() throws Exception {
+    void testRealSnapshotWhenReplicatedToAllIndexMinusOne() throws Exception {
         final var persistenceId = factory.generateActorId("leader-");
         final var config = new DefaultConfigParamsImpl();
         config.setHeartBeatInterval(ONE_DAY);
@@ -821,7 +828,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testRealSnapshotWhenReplicatedToAllIndexNotInReplicatedLog() throws Exception {
+    void testRealSnapshotWhenReplicatedToAllIndexNotInReplicatedLog() throws Exception {
         final var persistenceId = factory.generateActorId("leader-");
         final var config = new DefaultConfigParamsImpl();
         config.setHeartBeatInterval(ONE_DAY);
@@ -859,7 +866,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testSwitchBehavior() throws Exception {
+    void testSwitchBehavior() throws Exception {
         final var persistenceId = factory.generateActorId("leader-");
         final var config = new DefaultConfigParamsImpl();
         config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
@@ -906,7 +913,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testUpdateConfigParam() {
+    void testUpdateConfigParam() {
         final var emptyConfig = new DefaultConfigParamsImpl();
         final var persistenceId = factory.generateActorId("follower-");
         final var actorRef = factory.<MockRaftActor>createTestActor(MockRaftActor.props(persistenceId, stateDir(),
@@ -940,7 +947,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testGetSnapshot() {
+    void testGetSnapshot() {
         TEST_LOG.info("testGetSnapshot starting");
 
         final var kit = new TestKit(getSystem());
@@ -1007,7 +1014,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testRestoreFromSnapshot() throws Exception {
+    void testRestoreFromSnapshot() throws Exception {
         TEST_LOG.info("testRestoreFromSnapshot starting");
 
         var persistenceId = factory.generateActorId("test-actor-");
@@ -1078,7 +1085,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testRestoreFromSnapshotWithRecoveredData() throws Exception {
+    void testRestoreFromSnapshotWithRecoveredData() throws Exception {
         TEST_LOG.info("testRestoreFromSnapshotWithRecoveredData starting");
 
         final var persistenceId = factory.generateActorId("test-actor-");
@@ -1113,7 +1120,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testNonVotingOnRecovery() {
+    void testNonVotingOnRecovery() {
         TEST_LOG.info("testNonVotingOnRecovery starting");
 
         final var config = new DefaultConfigParamsImpl();
@@ -1139,7 +1146,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testLeaderTransitioning() {
+    void testLeaderTransitioning() {
         TEST_LOG.info("testLeaderTransitioning starting");
 
         final var notifierActor = factory.createActor(MessageCollectorActor.props());
@@ -1172,7 +1179,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testReplicateWithPersistencePending() throws Exception {
+    void testReplicateWithPersistencePending() throws Exception {
         final var leaderId = factory.generateActorId("leader-");
         final var followerId = factory.generateActorId("follower-");
 
@@ -1218,7 +1225,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testReplicateWithBatchHint() throws Exception {
+    void testReplicateWithBatchHint() throws Exception {
         final var leaderId = factory.generateActorId("leader-");
         final var followerId = factory.generateActorId("follower-");
         final var followerActor = factory.createActor(MessageCollectorActor.props());
@@ -1255,7 +1262,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testApplyStateRace() throws Exception {
+    void testApplyStateRace() throws Exception {
         final var leaderId = factory.generateActorId("leader-");
         final var followerId = factory.generateActorId("follower-");
         final var config = new DefaultConfigParamsImpl();
