@@ -8,9 +8,8 @@
 package org.opendaylight.controller.cluster.access.concepts;
 
 import static java.util.Objects.requireNonNull;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.common.base.MoreObjects;
 import org.apache.commons.lang3.SerializationUtils;
@@ -19,8 +18,8 @@ import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.actor.ExtendedActorSystem;
 import org.apache.pekko.serialization.JavaSerializer;
 import org.apache.pekko.testkit.TestProbe;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public abstract class AbstractRequestTest<T extends Request<?, T>> {
     private static final ActorSystem SYSTEM = ActorSystem.create("test");
@@ -32,31 +31,31 @@ public abstract class AbstractRequestTest<T extends Request<?, T>> {
 
     protected AbstractRequestTest(final T object, final int baseSize) {
         this.object = requireNonNull(object);
-        this.expectedSize = baseSize + ACTOR_REF_SIZE;
+        expectedSize = baseSize + ACTOR_REF_SIZE;
     }
 
     protected final T object() {
         return object;
     }
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void beforeEach() {
         JavaSerializer.currentSystem().value_$eq((ExtendedActorSystem) SYSTEM);
     }
 
     @Test
-    public void getReplyToTest() {
+    void getReplyToTest() {
         assertEquals(ACTOR_REF, object.getReplyTo());
     }
 
     @Test
-    public void addToStringAttributesCommonTest() {
+    void addToStringAttributesCommonTest() {
         final var result = object.addToStringAttributes(MoreObjects.toStringHelper(object));
-        assertThat(result.toString(), containsString("replyTo=" + ACTOR_REF));
+        assertThat(result.toString()).contains("replyTo=" + ACTOR_REF);
     }
 
     @Test
-    public void serializationTest() {
+    protected void serializationTest() {
         final byte[] bytes = SerializationUtils.serialize(object);
         assertEquals(expectedSize, bytes.length);
         @SuppressWarnings("unchecked")

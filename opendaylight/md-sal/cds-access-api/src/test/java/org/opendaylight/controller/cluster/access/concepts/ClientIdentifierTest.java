@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
-public class ClientIdentifierTest extends AbstractIdentifierTest<ClientIdentifier> {
+class ClientIdentifierTest extends AbstractIdentifierTest<ClientIdentifier> {
     private static final FrontendIdentifier FRONTEND =
             new FrontendIdentifier(MemberName.forName("test"), FrontendIdentifierTest.ONE_FRONTEND_TYPE);
 

@@ -7,36 +7,35 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.common.base.MoreObjects;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
-public abstract class AbstractReadTransactionRequestTest<T extends AbstractReadPathTransactionRequest<T>>
+abstract class AbstractReadTransactionRequestTest<T extends AbstractReadPathTransactionRequest<T>>
         extends AbstractTransactionRequestTest<T> {
-    protected static final YangInstanceIdentifier PATH = YangInstanceIdentifier.of();
-    protected static final boolean SNAPSHOT_ONLY = true;
+    static final YangInstanceIdentifier PATH = YangInstanceIdentifier.of();
+    static final boolean SNAPSHOT_ONLY = true;
 
-    protected AbstractReadTransactionRequestTest(final T object, final int baseSize) {
+    AbstractReadTransactionRequestTest(final T object, final int baseSize) {
         super(object, baseSize);
     }
 
     @Test
-    public void getPathTest() {
+    void getPathTest() {
         assertEquals(PATH, object().getPath());
     }
 
     @Test
-    public void isSnapshotOnlyTest() {
+    void isSnapshotOnlyTest() {
         assertEquals(SNAPSHOT_ONLY, object().isSnapshotOnly());
     }
 
     @Test
-    public void addToStringAttributesTest() {
+    void addToStringAttributesTest() {
         final var result = object().addToStringAttributes(MoreObjects.toStringHelper(object())).toString();
-        assertThat(result, containsString("path=" + PATH));
+        assertThat(result).contains("path=" + PATH);
     }
 }

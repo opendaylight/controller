@@ -7,12 +7,11 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.common.base.MoreObjects;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
@@ -22,8 +21,7 @@ import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 
-public class CommitLocalTransactionRequestTest
-        extends AbstractLocalTransactionRequestTest<CommitLocalTransactionRequest> {
+class CommitLocalTransactionRequestTest extends AbstractLocalTransactionRequestTest<CommitLocalTransactionRequest> {
     private static final FrontendIdentifier FRONTEND = FrontendIdentifier.create(
             MemberName.forName("test"), FrontendType.forName("one"));
     private static final ClientIdentifier CLIENT = ClientIdentifier.create(FRONTEND, 0);
@@ -36,24 +34,24 @@ public class CommitLocalTransactionRequestTest
     private static final CommitLocalTransactionRequest OBJECT = new CommitLocalTransactionRequest(TRANSACTION, 0,
         ACTOR_REF, MODIFICATION, null, COORDINATED);
 
-    public CommitLocalTransactionRequestTest() {
+    CommitLocalTransactionRequestTest() {
         super(OBJECT);
     }
 
     @Test
-    public void getModificationTest() {
+    void getModificationTest() {
         assertEquals(MODIFICATION, OBJECT.getModification());
     }
 
     @Test
-    public void isCoordinatedTest() {
+    void isCoordinatedTest() {
         assertEquals(COORDINATED, OBJECT.isCoordinated());
     }
 
     @Test
-    public void addToStringAttributesTest() {
+    void addToStringAttributesTest() {
         final var result = OBJECT.addToStringAttributes(MoreObjects.toStringHelper(OBJECT)).toString();
-        assertThat(result, containsString("coordinated=" + COORDINATED));
+        assertThat(result).contains("coordinated=" + COORDINATED);
     }
 
     @Override

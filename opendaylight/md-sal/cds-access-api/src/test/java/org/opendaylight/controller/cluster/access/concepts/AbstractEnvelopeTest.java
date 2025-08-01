@@ -11,11 +11,11 @@ import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.apache.commons.lang3.SerializationUtils;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public abstract class AbstractEnvelopeTest<E extends Envelope<?>> {
-    protected record EnvelopeDetails<E extends Envelope<?>>(E envelope, int expectedSize) {
+abstract class AbstractEnvelopeTest<E extends Envelope<?>> {
+    record EnvelopeDetails<E extends Envelope<?>>(E envelope, int expectedSize) {
         // Nothing else
     }
 
@@ -23,20 +23,21 @@ public abstract class AbstractEnvelopeTest<E extends Envelope<?>> {
             new FrontendIdentifier(MemberName.forName("test"), FrontendIdentifierTest.ONE_FRONTEND_TYPE);
     private static final ClientIdentifier CLIENT = new ClientIdentifier(FRONTEND, 0);
     private static final LocalHistoryIdentifier HISTORY = new LocalHistoryIdentifier(CLIENT, 0);
-    protected static final TransactionIdentifier OBJECT = new TransactionIdentifier(HISTORY, 0);
+
+    static final TransactionIdentifier OBJECT = new TransactionIdentifier(HISTORY, 0);
 
     private E envelope;
     private int expectedSize;
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeEach
+    void beforeEach() throws Exception {
         final var details = createEnvelope();
         envelope = requireNonNull(details.envelope);
         expectedSize = details.expectedSize;
     }
 
     @Test
-    public void testProxySerializationDeserialization() {
+    void testProxySerializationDeserialization() {
         final byte[] serializedBytes = SerializationUtils.serialize(envelope);
         assertEquals(expectedSize, serializedBytes.length);
         @SuppressWarnings("unchecked")
@@ -56,7 +57,7 @@ public abstract class AbstractEnvelopeTest<E extends Envelope<?>> {
         doAdditionalAssertions(envelope, deserializedEnvelope);
     }
 
-    protected abstract EnvelopeDetails<E> createEnvelope();
+    abstract EnvelopeDetails<E> createEnvelope();
 
-    protected abstract void doAdditionalAssertions(E envelope, E resolvedObject);
+    abstract void doAdditionalAssertions(E envelope, E resolvedObject);
 }

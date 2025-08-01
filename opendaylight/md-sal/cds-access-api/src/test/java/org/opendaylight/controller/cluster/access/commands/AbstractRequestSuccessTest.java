@@ -8,11 +8,11 @@
 package org.opendaylight.controller.cluster.access.commands;
 
 import static java.util.Objects.requireNonNull;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.eclipse.jdt.annotation.NonNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
@@ -20,22 +20,22 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.access.concepts.RequestSuccess;
 
-public abstract class AbstractRequestSuccessTest<T extends RequestSuccess<?, T>> {
+abstract class AbstractRequestSuccessTest<T extends RequestSuccess<?, T>> {
     private static final FrontendIdentifier FRONTEND_IDENTIFIER = FrontendIdentifier.create(
             MemberName.forName("test"), FrontendType.forName("one"));
-    protected static final ClientIdentifier CLIENT_IDENTIFIER = ClientIdentifier.create(FRONTEND_IDENTIFIER, 0);
-    protected static final LocalHistoryIdentifier HISTORY_IDENTIFIER = new LocalHistoryIdentifier(CLIENT_IDENTIFIER, 0);
+    static final ClientIdentifier CLIENT_IDENTIFIER = ClientIdentifier.create(FRONTEND_IDENTIFIER, 0);
+    static final LocalHistoryIdentifier HISTORY_IDENTIFIER = new LocalHistoryIdentifier(CLIENT_IDENTIFIER, 0);
 
     private final @NonNull T object;
     private final int expectedSize;
 
-    protected AbstractRequestSuccessTest(final T object, final int expectedSize) {
+    AbstractRequestSuccessTest(final T object, final int expectedSize) {
         this.object = requireNonNull(object);
         this.expectedSize = expectedSize;
     }
 
     @Test
-    public void serializationTest() {
+    void serializationTest() {
         final var bytes = SerializationUtils.serialize(object);
         assertEquals(expectedSize, bytes.length);
 
@@ -48,7 +48,7 @@ public abstract class AbstractRequestSuccessTest<T extends RequestSuccess<?, T>>
         doAdditionalAssertions(deserialize);
     }
 
-    protected void doAdditionalAssertions(final T deserialize) {
+    void doAdditionalAssertions(final T deserialize) {
         // No-op by default
     }
 }

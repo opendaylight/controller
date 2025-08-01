@@ -7,17 +7,16 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.testkit.TestProbe;
 import org.opendaylight.controller.cluster.access.commands.CreateLocalHistoryRequest;
 
-public class UnsupportedRequestExceptionTest extends RequestExceptionTest<UnsupportedRequestException> {
-
+class UnsupportedRequestExceptionTest extends RequestExceptionTest<UnsupportedRequestException> {
     private static final FrontendIdentifier FRONTEND =
             new FrontendIdentifier(MemberName.forName("test"), FrontendIdentifierTest.ONE_FRONTEND_TYPE);
     private static final ClientIdentifier CLIENT = new ClientIdentifier(FRONTEND, 0);
@@ -35,11 +34,9 @@ public class UnsupportedRequestExceptionTest extends RequestExceptionTest<Unsupp
 
     @Override
     protected void checkMessage() {
-        final String message = OBJECT.getMessage();
-        final String checkMessage = "Unsupported request class org.opendaylight.controller"
-                + ".cluster.access.commands.CreateLocalHistoryRequest";
-        assertTrue(checkMessage.equals(message));
+        assertEquals("""
+            Unsupported request class org.opendaylight.controller.cluster.access.commands.CreateLocalHistoryRequest""",
+            OBJECT.getMessage());
         assertNull(OBJECT.getCause());
     }
-
 }

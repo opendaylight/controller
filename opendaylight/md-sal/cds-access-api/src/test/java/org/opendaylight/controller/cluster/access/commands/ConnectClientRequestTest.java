@@ -7,14 +7,13 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableRangeSet;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.controller.cluster.access.concepts.AbstractRequestTest;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
@@ -22,7 +21,7 @@ import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 
-public class ConnectClientRequestTest extends AbstractRequestTest<ConnectClientRequest> {
+class ConnectClientRequestTest extends AbstractRequestTest<ConnectClientRequest> {
     private static final FrontendIdentifier FRONTEND_IDENTIFIER = FrontendIdentifier.create(
             MemberName.forName("member"), FrontendType.forName("frontend"));
     private static final ClientIdentifier CLIENT_IDENTIFIER = ClientIdentifier.create(FRONTEND_IDENTIFIER, 0);
@@ -33,39 +32,39 @@ public class ConnectClientRequestTest extends AbstractRequestTest<ConnectClientR
     private static final ConnectClientRequest OBJECT = new ConnectClientRequest(
             CLIENT_IDENTIFIER, 0, ACTOR_REF, MIN_VERSION, MAX_VERSION);
 
-    public ConnectClientRequestTest() {
+    ConnectClientRequestTest() {
         super(OBJECT, 112);
     }
 
     @Test
-    public void getMinVersionTest() {
+    void getMinVersionTest() {
         assertEquals(MIN_VERSION, OBJECT.getMinVersion());
     }
 
     @Test
-    public void getMaxVersionTest() {
+    void getMaxVersionTest() {
         assertEquals(MAX_VERSION, OBJECT.getMaxVersion());
     }
 
     @Test
-    public void toRequestFailureTest() {
+    void toRequestFailureTest() {
         final var exception = new DeadTransactionException(ImmutableRangeSet.of());
         final var failure = OBJECT.toRequestFailure(exception);
         assertNotNull(failure);
     }
 
     @Test
-    public void cloneAsVersionTest() {
+    void cloneAsVersionTest() {
         final var clone = OBJECT.cloneAsVersion(ABIVersion.TEST_FUTURE_VERSION);
         assertNotNull(clone);
         assertEquals(ABIVersion.TEST_FUTURE_VERSION, clone.getVersion());
     }
 
     @Test
-    public void addToStringAttributesTest() {
+    void addToStringAttributesTest() {
         final var result = OBJECT.addToStringAttributes(MoreObjects.toStringHelper(OBJECT)).toString();
-        assertThat(result, containsString("minVersion=" + MIN_VERSION));
-        assertThat(result, containsString("maxVersion=" + MAX_VERSION));
+        assertThat(result).contains("minVersion=" + MIN_VERSION);
+        assertThat(result).contains("maxVersion=" + MAX_VERSION);
     }
 
     @Override

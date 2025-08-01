@@ -7,31 +7,30 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.common.base.MoreObjects;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 
-public class ExistsTransactionSuccessTest extends AbstractTransactionSuccessTest<ExistsTransactionSuccess> {
+class ExistsTransactionSuccessTest extends AbstractTransactionSuccessTest<ExistsTransactionSuccess> {
     private static final boolean EXISTS = true;
 
     private static final ExistsTransactionSuccess OBJECT = new ExistsTransactionSuccess(TRANSACTION_IDENTIFIER, 0,
         EXISTS);
 
-    public ExistsTransactionSuccessTest() {
+    ExistsTransactionSuccessTest() {
         super(OBJECT, 99);
     }
 
     @Test
-    public void getExistsTest() {
+    void getExistsTest() {
         assertEquals(EXISTS, OBJECT.getExists());
     }
 
     @Test
-    public void cloneAsVersionTest() {
+    void cloneAsVersionTest() {
         final var clone = OBJECT.cloneAsVersion(ABIVersion.TEST_FUTURE_VERSION);
         assertEquals(OBJECT.getSequence(), clone.getSequence());
         assertEquals(OBJECT.getTarget(), clone.getTarget());
@@ -39,13 +38,13 @@ public class ExistsTransactionSuccessTest extends AbstractTransactionSuccessTest
     }
 
     @Test
-    public void addToStringAttributesTest() {
+    void addToStringAttributesTest() {
         final var result = OBJECT.addToStringAttributes(MoreObjects.toStringHelper(OBJECT)).toString();
-        assertThat(result, containsString("exists=" + EXISTS));
+        assertThat(result).contains("exists=" + EXISTS);
     }
 
     @Override
-    protected void doAdditionalAssertions(final ExistsTransactionSuccess deserialize) {
+    void doAdditionalAssertions(final ExistsTransactionSuccess deserialize) {
         assertEquals(OBJECT.getExists(), deserialize.getExists());
     }
 }

@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
@@ -16,8 +16,7 @@ import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifie
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
-public class AbortLocalTransactionRequestTest
-        extends AbstractLocalTransactionRequestTest<AbortLocalTransactionRequest> {
+class AbortLocalTransactionRequestTest extends AbstractLocalTransactionRequestTest<AbortLocalTransactionRequest> {
     private static final FrontendIdentifier FRONTEND = FrontendIdentifier.create(
             MemberName.forName("test"), FrontendType.forName("one"));
     private static final ClientIdentifier CLIENT = ClientIdentifier.create(FRONTEND, 0);
@@ -26,7 +25,7 @@ public class AbortLocalTransactionRequestTest
 
     private static final AbortLocalTransactionRequest OBJECT = new AbortLocalTransactionRequest(TRANSACTION, ACTOR_REF);
 
-    public AbortLocalTransactionRequestTest() {
+    AbortLocalTransactionRequestTest() {
         super(OBJECT);
     }
 

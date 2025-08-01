@@ -7,14 +7,14 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RequestExceptionTest;
 
-public class UnknownHistoryExceptionTest extends RequestExceptionTest<UnknownHistoryException> {
-
+class UnknownHistoryExceptionTest extends RequestExceptionTest<UnknownHistoryException> {
     private static final RequestException OBJECT = new UnknownHistoryException(100L);
     private static final RequestException OBJECT_NULL_PARAM = new UnknownHistoryException(null);
 
@@ -25,11 +25,8 @@ public class UnknownHistoryExceptionTest extends RequestExceptionTest<UnknownHis
 
     @Override
     protected void checkMessage() {
-        String message = OBJECT.getMessage();
-        assertTrue("Last known history is 100".equals(message));
-        message = OBJECT_NULL_PARAM.getMessage();
-        assertTrue("Last known history is null".equals(message));
+        assertEquals("Last known history is 100", OBJECT.getMessage());
         assertNull(OBJECT.getCause());
+        assertEquals("Last known history is null", OBJECT_NULL_PARAM.getMessage());
     }
-
 }

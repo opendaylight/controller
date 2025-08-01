@@ -7,12 +7,11 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class RetiredGenerationExceptionTest extends RequestExceptionTest<RetiredGenerationException> {
-
+class RetiredGenerationExceptionTest extends RequestExceptionTest<RetiredGenerationException> {
     private static final RequestException OBJECT = new RetiredGenerationException(99, 100);
 
     @Override
@@ -22,8 +21,7 @@ public class RetiredGenerationExceptionTest extends RequestExceptionTest<Retired
 
     @Override
     protected void checkMessage() {
-        final String message = OBJECT.getMessage();
-        assertTrue("Originating generation 99 was superseded by 100".equals(message));
+        assertEquals("Originating generation 99 was superseded by 100", OBJECT.getMessage());
         assertNull(OBJECT.getCause());
     }
 }

@@ -7,14 +7,14 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class RuntimeRequestExceptionTest extends RequestExceptionTest<RuntimeRequestException> {
-
+class RuntimeRequestExceptionTest extends RequestExceptionTest<RuntimeRequestException> {
     private static final RequestException OBJECT = new RuntimeRequestException(
             "RuntimeRequestExeption dummy message", new Throwable("throwable dummy message"));
 
@@ -25,22 +25,16 @@ public class RuntimeRequestExceptionTest extends RequestExceptionTest<RuntimeReq
 
     @Override
     protected void checkMessage() {
-        String message = OBJECT.getMessage();
-        assertTrue("RuntimeRequestExeption dummy message".equals(message));
-        message = OBJECT.getCause().getMessage();
-        assertTrue("throwable dummy message".equals(message));
-        assertNotNull(OBJECT.getCause());
+        assertEquals("RuntimeRequestExeption dummy message", OBJECT.getMessage());
+        final var cause = OBJECT.getCause();
+        assertNotNull(cause);
+        assertEquals("throwable dummy message", cause.getMessage());
     }
 
-    @Test(expected = NullPointerException.class)
-    public void testFail() {
-        try {
-            //check cause can not be null
-            new RuntimeRequestException("dummy message", null);
-        } catch (final NullPointerException ex) {
-            //check message can not be null
-            new RuntimeRequestException(null, new Throwable("dummy throwable"));
-        }
+    @Test
+    void testFail() {
+        assertThrows(NullPointerException.class, () -> new RuntimeRequestException("dummy message", null));
+        assertThrows(NullPointerException.class,
+            () -> new RuntimeRequestException(null, new Throwable("dummy throwable")));
     }
-
 }

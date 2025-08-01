@@ -7,16 +7,15 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.opendaylight.controller.cluster.access.commands.TransactionModification.TYPE_WRITE;
 
 import com.google.common.base.MoreObjects;
 import java.util.List;
 import java.util.Optional;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -24,7 +23,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdent
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 
-public class ModifyTransactionRequestTest extends AbstractTransactionRequestTest<ModifyTransactionRequest> {
+class ModifyTransactionRequestTest extends AbstractTransactionRequestTest<ModifyTransactionRequest> {
     private static final ContainerNode NODE = ImmutableNodes.newContainerBuilder()
         .withNodeIdentifier(new NodeIdentifier(QName.create("namespace", "localName")))
         .build();
@@ -37,29 +36,29 @@ public class ModifyTransactionRequestTest extends AbstractTransactionRequestTest
     private static final ModifyTransactionRequest OBJECT = new ModifyTransactionRequest(TRANSACTION_IDENTIFIER, 0,
         ACTOR_REF, MODIFICATIONS, PROTOCOL);
 
-    public ModifyTransactionRequestTest() {
+    ModifyTransactionRequestTest() {
         super(OBJECT, 140);
     }
 
     @Test
-    public void getPersistenceProtocolTest() {
+    void getPersistenceProtocolTest() {
         assertEquals(Optional.of(PROTOCOL), OBJECT.getPersistenceProtocol());
     }
 
     @Test
-    public void getModificationsTest() {
+    void getModificationsTest() {
         assertEquals(MODIFICATIONS, OBJECT.getModifications());
     }
 
     @Test
-    public void addToStringAttributesTest() {
+    void addToStringAttributesTest() {
         final var result = OBJECT.addToStringAttributes(MoreObjects.toStringHelper(OBJECT)).toString();
-        assertThat(result, containsString("modifications=1"));
-        assertThat(result, containsString("protocol=" + PROTOCOL));
+        assertThat(result).contains("modifications=1");
+        assertThat(result).contains("protocol=" + PROTOCOL);
     }
 
     @Test
-    public void cloneAsVersionTest() {
+    void cloneAsVersionTest() {
         final var clone = OBJECT.cloneAsVersion(ABIVersion.TEST_FUTURE_VERSION);
         assertEquals(OBJECT.getSequence(), clone.getSequence());
         assertEquals(OBJECT.getTarget(), clone.getTarget());

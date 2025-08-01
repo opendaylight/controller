@@ -7,21 +7,21 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 
-public class TransactionDoCommitRequestTest extends AbstractTransactionRequestTest<TransactionDoCommitRequest> {
+class TransactionDoCommitRequestTest extends AbstractTransactionRequestTest<TransactionDoCommitRequest> {
     private static final TransactionDoCommitRequest OBJECT = new TransactionDoCommitRequest(TRANSACTION_IDENTIFIER, 0,
         ACTOR_REF);
 
-    public TransactionDoCommitRequestTest() {
+    TransactionDoCommitRequestTest() {
         super(OBJECT, 102);
     }
 
     @Test
-    public void cloneAsVersionTest() {
+    void cloneAsVersionTest() {
         final var clone = OBJECT.cloneAsVersion(ABIVersion.TEST_FUTURE_VERSION);
         assertEquals(OBJECT.getSequence(), clone.getSequence());
         assertEquals(OBJECT.getTarget(), clone.getTarget());

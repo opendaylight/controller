@@ -7,15 +7,14 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RequestExceptionTest;
 
-public class OutOfOrderRequestExceptionTest extends RequestExceptionTest<OutOfOrderRequestException> {
-
+class OutOfOrderRequestExceptionTest extends RequestExceptionTest<OutOfOrderRequestException> {
     private static final RequestException OBJECT = new OutOfOrderRequestException(100);
 
     @Override
@@ -25,9 +24,7 @@ public class OutOfOrderRequestExceptionTest extends RequestExceptionTest<OutOfOr
 
     @Override
     protected void checkMessage() {
-        final String message = OBJECT.getMessage();
-        assertTrue("Expecting request 100".equals(message));
+        assertEquals("Expecting request 100", OBJECT.getMessage());
         assertNull(OBJECT.getCause());
     }
-
 }

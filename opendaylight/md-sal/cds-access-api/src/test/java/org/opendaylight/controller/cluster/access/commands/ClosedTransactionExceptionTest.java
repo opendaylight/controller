@@ -7,16 +7,15 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.access.concepts.RequestExceptionTest;
 
-public class ClosedTransactionExceptionTest extends RequestExceptionTest<ClosedTransactionException> {
-
+class ClosedTransactionExceptionTest extends RequestExceptionTest<ClosedTransactionException> {
     private static final ClosedTransactionException OBJECT = new ClosedTransactionException(true);
 
     @Override
@@ -32,8 +31,7 @@ public class ClosedTransactionExceptionTest extends RequestExceptionTest<ClosedT
     }
 
     @Test
-    public void testIsSuccessful() {
-        Assert.assertEquals(true, OBJECT.isSuccessful());
+    void testIsSuccessful() {
+        assertTrue(OBJECT.isSuccessful());
     }
-
 }

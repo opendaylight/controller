@@ -7,17 +7,16 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class FrontendTypeTest extends AbstractIdentifierTest<FrontendType> {
-
+class FrontendTypeTest extends AbstractIdentifierTest<FrontendType> {
     @Override
     FrontendType object() {
         return FrontendType.forName("type-1");
@@ -39,21 +38,21 @@ public class FrontendTypeTest extends AbstractIdentifierTest<FrontendType> {
     }
 
     @Test
-    public void testWriteToReadFrom() throws Exception {
-        final FrontendType type = FrontendType.forName("type");
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        final DataOutputStream dos = new DataOutputStream(baos);
+    void testWriteToReadFrom() throws Exception {
+        final var type = FrontendType.forName("type");
+        final var baos = new ByteArrayOutputStream();
+        final var dos = new DataOutputStream(baos);
         type.writeTo(dos);
 
         final byte[] bytes = baos.toByteArray();
         assertEquals(8, bytes.length);
-        final FrontendType read = FrontendType.readFrom(new DataInputStream(new ByteArrayInputStream(bytes)));
-        Assert.assertEquals(type, read);
+        final var read = FrontendType.readFrom(new DataInputStream(new ByteArrayInputStream(bytes)));
+        assertEquals(type, read);
     }
 
     @Test
-    public void testCompareTo() {
-        Assert.assertTrue(object().compareTo(equalObject()) == 0);
-        Assert.assertTrue(object().compareTo(differentObject()) < 0);
+    void testCompareTo() {
+        assertEquals(0, object().compareTo(equalObject()));
+        assertThat(object().compareTo(differentObject())).isLessThan(0);
     }
 }

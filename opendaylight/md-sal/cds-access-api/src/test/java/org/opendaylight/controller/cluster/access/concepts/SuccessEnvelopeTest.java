@@ -7,18 +7,18 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.opendaylight.controller.cluster.access.commands.TransactionAbortSuccess;
 
-public class SuccessEnvelopeTest extends AbstractEnvelopeTest<SuccessEnvelope> {
+class SuccessEnvelopeTest extends AbstractEnvelopeTest<SuccessEnvelope> {
     @Override
-    protected EnvelopeDetails<SuccessEnvelope> createEnvelope() {
+    EnvelopeDetails<SuccessEnvelope> createEnvelope() {
         return new EnvelopeDetails<>(new SuccessEnvelope(new TransactionAbortSuccess(OBJECT, 2L), 1L, 2L, 11L), 180);
     }
 
     @Override
-    protected void doAdditionalAssertions(final SuccessEnvelope envelope, final SuccessEnvelope resolvedObject) {
+    void doAdditionalAssertions(final SuccessEnvelope envelope, final SuccessEnvelope resolvedObject) {
         assertEquals(envelope.getExecutionTimeNanos(), resolvedObject.getExecutionTimeNanos());
     }
 }

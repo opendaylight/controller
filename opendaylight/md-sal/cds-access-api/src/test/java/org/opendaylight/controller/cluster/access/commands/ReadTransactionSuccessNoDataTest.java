@@ -7,27 +7,27 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Optional;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 
-public class ReadTransactionSuccessNoDataTest extends AbstractTransactionSuccessTest<ReadTransactionSuccess> {
+class ReadTransactionSuccessNoDataTest extends AbstractTransactionSuccessTest<ReadTransactionSuccess> {
     private static final ReadTransactionSuccess OBJECT = new ReadTransactionSuccess(TRANSACTION_IDENTIFIER, 0,
         Optional.empty());
 
-    public ReadTransactionSuccessNoDataTest() {
+    ReadTransactionSuccessNoDataTest() {
         super(OBJECT, 99);
     }
 
     @Test
-    public void getDataTest() {
+    void getDataTest() {
         assertEquals(Optional.empty(), OBJECT.getData());
     }
 
     @Test
-    public void cloneAsVersionTest() {
+    void cloneAsVersionTest() {
         final var clone = OBJECT.cloneAsVersion(ABIVersion.TEST_FUTURE_VERSION);
         assertEquals(OBJECT.getSequence(), clone.getSequence());
         assertEquals(OBJECT.getTarget(), clone.getTarget());
@@ -35,7 +35,7 @@ public class ReadTransactionSuccessNoDataTest extends AbstractTransactionSuccess
     }
 
     @Override
-    protected void doAdditionalAssertions(final ReadTransactionSuccess deserialize) {
+    void doAdditionalAssertions(final ReadTransactionSuccess deserialize) {
         assertEquals(OBJECT.getData(), deserialize.getData());
     }
 }

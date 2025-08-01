@@ -7,17 +7,17 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Optional;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 
-public class ReadTransactionSuccessTest extends AbstractTransactionSuccessTest<ReadTransactionSuccess> {
+class ReadTransactionSuccessTest extends AbstractTransactionSuccessTest<ReadTransactionSuccess> {
     private static final ContainerNode NODE = ImmutableNodes.newContainerBuilder()
         .withNodeIdentifier(new NodeIdentifier(QName.create("namespace", "localName")))
         .build();
@@ -25,17 +25,17 @@ public class ReadTransactionSuccessTest extends AbstractTransactionSuccessTest<R
     private static final ReadTransactionSuccess OBJECT = new ReadTransactionSuccess(TRANSACTION_IDENTIFIER, 0,
         Optional.of(NODE));
 
-    public ReadTransactionSuccessTest() {
+    ReadTransactionSuccessTest() {
         super(OBJECT, 129);
     }
 
     @Test
-    public void getDataTest() {
+    void getDataTest() {
         assertEquals(Optional.of(NODE), OBJECT.getData());
     }
 
     @Test
-    public void cloneAsVersionTest() {
+    void cloneAsVersionTest() {
         final var clone = OBJECT.cloneAsVersion(ABIVersion.TEST_FUTURE_VERSION);
         assertEquals(OBJECT.getSequence(), clone.getSequence());
         assertEquals(OBJECT.getTarget(), clone.getTarget());
@@ -43,7 +43,7 @@ public class ReadTransactionSuccessTest extends AbstractTransactionSuccessTest<R
     }
 
     @Override
-    protected void doAdditionalAssertions(final ReadTransactionSuccess deserialize) {
+    void doAdditionalAssertions(final ReadTransactionSuccess deserialize) {
         assertEquals(OBJECT.getData(), deserialize.getData());
     }
 }

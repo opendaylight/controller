@@ -7,34 +7,29 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.CoreMatchers.endsWith;
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.apache.commons.lang3.SerializationUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 
-public abstract class AbstractLocalTransactionRequestTest<T extends AbstractLocalTransactionRequest<T>>
+abstract class AbstractLocalTransactionRequestTest<T extends AbstractLocalTransactionRequest<T>>
         extends AbstractTransactionRequestTest<T> {
-    protected AbstractLocalTransactionRequestTest(final T object) {
+    AbstractLocalTransactionRequestTest(final T object) {
         super(object, -1);
     }
 
     @Test
-    public void cloneAsVersionTest() {
+    void cloneAsVersionTest() {
         assertSame(object(), object().cloneAsVersion(ABIVersion.TEST_FUTURE_VERSION));
     }
 
-    @Override
     @Test
-    public void serializationTest() {
+    @Override
+    protected void serializationTest() {
         final var ex = assertThrows(UnsupportedOperationException.class, () -> SerializationUtils.clone(object()));
-        assertThat(ex.getMessage(), allOf(
-            startsWith("Local transaction request "),
-            endsWith(" should never be serialized")));
+        assertThat(ex.getMessage()).startsWith("Local transaction request ").endsWith(" should never be serialized");
     }
 }

@@ -7,15 +7,14 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.google.common.collect.ImmutableRangeSet;
 import org.opendaylight.controller.cluster.access.concepts.RequestExceptionTest;
 
-public class DeadHistoryExceptionTest extends RequestExceptionTest<DeadHistoryException> {
-
+class DeadHistoryExceptionTest extends RequestExceptionTest<DeadHistoryException> {
     private static final DeadHistoryException OBJECT = new DeadHistoryException(ImmutableRangeSet.of());
 
     @Override
@@ -29,5 +28,4 @@ public class DeadHistoryExceptionTest extends RequestExceptionTest<DeadHistoryEx
         assertEquals("Histories [] have been purged", message);
         assertNull(OBJECT.getCause());
     }
-
 }

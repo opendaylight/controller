@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public abstract class RequestExceptionTest<T extends RequestException> {
 
@@ -16,13 +16,12 @@ public abstract class RequestExceptionTest<T extends RequestException> {
     protected abstract void checkMessage();
 
     @Test
-    public void testIsRetriable() {
+    final void testIsRetriable() {
         isRetriable();
     }
 
     @Test
-    public void testExceptionMessage() {
+    final void testExceptionMessage() {
         checkMessage();
     }
-
 }

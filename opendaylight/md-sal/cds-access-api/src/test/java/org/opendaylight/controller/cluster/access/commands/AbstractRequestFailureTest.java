@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.apache.commons.lang3.SerializationUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
@@ -23,37 +23,36 @@ import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
 import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestException;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 
-public abstract class AbstractRequestFailureTest<T extends RequestFailure<?, T>> {
+abstract class AbstractRequestFailureTest<T extends RequestFailure<?, T>> {
     private static final FrontendIdentifier FRONTEND_IDENTIFIER = FrontendIdentifier.create(
             MemberName.forName("member"), FrontendType.forName("frontend"));
 
-    protected static final ClientIdentifier CLIENT_IDENTIFIER = ClientIdentifier.create(FRONTEND_IDENTIFIER, 0);
-    protected static final LocalHistoryIdentifier HISTORY_IDENTIFIER = new LocalHistoryIdentifier(CLIENT_IDENTIFIER, 0);
-    protected static final TransactionIdentifier TRANSACTION_IDENTIFIER = new TransactionIdentifier(
-            HISTORY_IDENTIFIER, 0);
-    protected static final RequestException CAUSE = new RuntimeRequestException("fail", new Throwable());
+    static final ClientIdentifier CLIENT_IDENTIFIER = ClientIdentifier.create(FRONTEND_IDENTIFIER, 0);
+    static final LocalHistoryIdentifier HISTORY_IDENTIFIER = new LocalHistoryIdentifier(CLIENT_IDENTIFIER, 0);
+    static final TransactionIdentifier TRANSACTION_IDENTIFIER = new TransactionIdentifier(HISTORY_IDENTIFIER, 0);
+    static final RequestException CAUSE = new RuntimeRequestException("fail", new Throwable());
     private static final int CAUSE_SIZE = SerializationUtils.serialize(CAUSE).length;
 
     private final T object;
     private final int expectedSize;
 
-    protected AbstractRequestFailureTest(final T object, final int baseSize) {
+    AbstractRequestFailureTest(final T object, final int baseSize) {
         this.object = requireNonNull(object);
-        this.expectedSize = baseSize + CAUSE_SIZE;
+        expectedSize = baseSize + CAUSE_SIZE;
     }
 
     @Test
-    public void getCauseTest() {
+    void getCauseTest() {
         assertEquals(CAUSE, object.getCause());
     }
 
     @Test
-    public void isHardFailureTest() {
+    void isHardFailureTest() {
         assertTrue(object.isHardFailure());
     }
 
     @Test
-    public void serializationTest() {
+    void serializationTest() {
         final var bytes = SerializationUtils.serialize(object);
         assertEquals(expectedSize, bytes.length);
 

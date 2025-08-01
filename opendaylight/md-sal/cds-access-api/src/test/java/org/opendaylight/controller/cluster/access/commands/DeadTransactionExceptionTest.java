@@ -7,16 +7,15 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.google.common.collect.ImmutableRangeSet;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
 import org.opendaylight.controller.cluster.access.concepts.RequestExceptionTest;
 
-public class DeadTransactionExceptionTest extends RequestExceptionTest<DeadTransactionException> {
-
+class DeadTransactionExceptionTest extends RequestExceptionTest<DeadTransactionException> {
     private static final RequestException OBJECT = new DeadTransactionException(ImmutableRangeSet.of());
 
     @Override
@@ -30,5 +29,4 @@ public class DeadTransactionExceptionTest extends RequestExceptionTest<DeadTrans
         assertEquals("Transactions [] have been purged", message);
         assertNull(OBJECT.getCause());
     }
-
 }

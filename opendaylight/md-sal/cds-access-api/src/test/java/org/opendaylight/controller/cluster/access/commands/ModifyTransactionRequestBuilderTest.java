@@ -7,15 +7,15 @@
  */
 package org.opendaylight.controller.cluster.access.commands;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.actor.Props;
 import org.apache.pekko.testkit.TestActors;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FrontendType;
@@ -28,7 +28,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdent
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 
-public class ModifyTransactionRequestBuilderTest {
+class ModifyTransactionRequestBuilderTest {
     private final MemberName memberName = MemberName.forName("member-1");
     private final FrontendType frontendType = FrontendType.forName("test");
     private final FrontendIdentifier frontendId = FrontendIdentifier.create(memberName, frontendType);
@@ -44,21 +44,20 @@ public class ModifyTransactionRequestBuilderTest {
     private final ModifyTransactionRequestBuilder modifyTransactionRequestBuilder =
             ModifyTransactionRequest.builder(transactionIdentifier, actorRef);
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void beforeEach() {
         modifyTransactionRequestBuilder.setSequence(0L);
         modifyTransactionRequestBuilder.addModification(transactionModification);
         assertEquals(1, modifyTransactionRequestBuilder.size());
     }
 
     @Test
-    public void testGetIdentifier() {
-        final var identifier = modifyTransactionRequestBuilder.getIdentifier();
-        assertEquals(transactionIdentifier, identifier);
+    void testGetIdentifier() {
+        assertEquals(transactionIdentifier, modifyTransactionRequestBuilder.getIdentifier());
     }
 
     @Test
-    public void testBuildReady() {
+    void testBuildReady() {
         modifyTransactionRequestBuilder.setReady();
         final var modifyTransactionRequest = modifyTransactionRequestBuilder.build();
         assertEquals(PersistenceProtocol.READY, modifyTransactionRequest.getPersistenceProtocol().orElseThrow());
@@ -66,7 +65,7 @@ public class ModifyTransactionRequestBuilderTest {
     }
 
     @Test
-    public void testBuildAbort() {
+    void testBuildAbort() {
         modifyTransactionRequestBuilder.setAbort();
         final var modifyTransactionRequest = modifyTransactionRequestBuilder.build();
         assertEquals(PersistenceProtocol.ABORT, modifyTransactionRequest.getPersistenceProtocol().orElseThrow());
@@ -74,14 +73,14 @@ public class ModifyTransactionRequestBuilderTest {
     }
 
     @Test
-    public void testBuildCommitTrue() {
+    void testBuildCommitTrue() {
         modifyTransactionRequestBuilder.setCommit(true);
         final var modifyTransactionRequest = modifyTransactionRequestBuilder.build();
         assertEquals(PersistenceProtocol.THREE_PHASE, modifyTransactionRequest.getPersistenceProtocol().orElseThrow());
     }
 
     @Test
-    public void testBuildCommitFalse() {
+    void testBuildCommitFalse() {
         modifyTransactionRequestBuilder.setCommit(false);
         final var modifyTransactionRequest = modifyTransactionRequestBuilder.build();
         assertEquals(PersistenceProtocol.SIMPLE, modifyTransactionRequest.getPersistenceProtocol().orElseThrow());
