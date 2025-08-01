@@ -17,21 +17,21 @@ import static org.opendaylight.controller.cluster.raft.RaftActorTestKit.awaitSna
 import java.util.List;
 import java.util.Map;
 import org.apache.pekko.testkit.TestActorRef;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
 
 /**
  * Recovery Integration Test for single node.
  */
-public class RecoveryIntegrationSingleNodeTest extends AbstractRaftActorIntegrationTest {
-    @Before
-    public void setup() {
+class RecoveryIntegrationSingleNodeTest extends AbstractRaftActorIntegrationTest {
+    @BeforeEach
+    void beforeEach() {
         leaderConfigParams = newLeaderConfigParams();
     }
 
     @Test
-    public void testJournalReplayAfterSnapshotWithSingleNode() throws Exception {
+    void testJournalReplayAfterSnapshotWithSingleNode() throws Exception {
         String persistenceId = factory.generateActorId("singleNode");
         TestActorRef<AbstractRaftActorIntegrationTest.TestRaftActor> singleNodeActorRef =
                 newTestRaftActor(persistenceId, Map.of(), leaderConfigParams);

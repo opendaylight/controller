@@ -38,9 +38,9 @@ import org.apache.pekko.testkit.TestActorRef;
 import org.apache.pekko.testkit.javadsl.TestKit;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.ApplyLeaderSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.InitiateCaptureSnapshot;
@@ -86,7 +86,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Pantelis
  */
-public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
+class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     private static final Logger LOG = LoggerFactory.getLogger(RaftActorVotingConfigSupportTest.class);
     private static final String LEADER_ID = "leader";
     private static final String FOLLOWER_ID = "follower";
@@ -108,8 +108,8 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
 
     private final TestKit testKit = new TestKit(getSystem());
 
-    @Before
-    public void setup() throws Exception {
+    @BeforeEach
+    void beforeEach() throws Exception {
         InMemoryJournal.clear();
         InMemorySnapshotStore.clear();
     }
@@ -141,13 +141,13 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         return configParams;
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void afterEach() {
         actorFactory.close();
     }
 
     @Test
-    public void testAddServerWithExistingFollower() throws Exception {
+    void testAddServerWithExistingFollower() throws Exception {
         LOG.info("testAddServerWithExistingFollower starting");
         setupNewFollower();
         final var followerActorContext = newFollowerContext(FOLLOWER_ID, followerActor);
@@ -250,7 +250,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     }
 
     @Test
-    public void testAddServerWithNoExistingFollower() throws Exception {
+    void testAddServerWithNoExistingFollower() throws Exception {
         LOG.info("testAddServerWithNoExistingFollower starting");
 
         setupNewFollower();
@@ -312,7 +312,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     }
 
     @Test
-    public void testAddServersAsNonVoting() {
+    void testAddServersAsNonVoting() {
         LOG.info("testAddServersAsNonVoting starting");
 
         setupNewFollower();
@@ -383,7 +383,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     }
 
     @Test
-    public void testAddServerWithOperationInProgress() {
+    void testAddServerWithOperationInProgress() {
         LOG.info("testAddServerWithOperationInProgress starting");
 
         setupNewFollower();
@@ -446,7 +446,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     }
 
     @Test
-    public void testAddServerWithPriorSnapshotInProgress() {
+    void testAddServerWithPriorSnapshotInProgress() {
         LOG.info("testAddServerWithPriorSnapshotInProgress starting");
 
         setupNewFollower();
@@ -493,7 +493,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     }
 
     @Test
-    public void testAddServerWithPriorSnapshotCompleteTimeout() {
+    void testAddServerWithPriorSnapshotCompleteTimeout() {
         LOG.info("testAddServerWithPriorSnapshotCompleteTimeout starting");
 
         setupNewFollower();
@@ -536,7 +536,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     }
 
     @Test
-    public void testAddServerWithLeaderChangeBeforePriorSnapshotComplete() {
+    void testAddServerWithLeaderChangeBeforePriorSnapshotComplete() {
         LOG.info("testAddServerWithLeaderChangeBeforePriorSnapshotComplete starting");
 
         setupNewFollower();
@@ -592,7 +592,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     }
 
     @Test
-    public void testAddServerWithLeaderChangeDuringInstallSnapshot() {
+    void testAddServerWithLeaderChangeDuringInstallSnapshot() {
         LOG.info("testAddServerWithLeaderChangeDuringInstallSnapshot starting");
 
         setupNewFollower();
@@ -637,7 +637,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     }
 
     @Test
-    public void testAddServerWithInstallSnapshotTimeout() {
+    void testAddServerWithInstallSnapshotTimeout() {
         LOG.info("testAddServerWithInstallSnapshotTimeout starting");
 
         setupNewFollower();
@@ -670,7 +670,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     }
 
     @Test
-    public void testAddServerWithNoLeader() {
+    void testAddServerWithNoLeader() {
         LOG.info("testAddServerWithNoLeader starting");
 
         setupNewFollower();
@@ -693,7 +693,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     }
 
     @Test
-    public void testAddServerWithNoConsensusReached() {
+    void testAddServerWithNoConsensusReached() {
         LOG.info("testAddServerWithNoConsensusReached starting");
 
         setupNewFollower();
@@ -754,7 +754,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     }
 
     @Test
-    public void testAddServerWithExistingServer() {
+    void testAddServerWithExistingServer() {
         LOG.info("testAddServerWithExistingServer starting");
 
         RaftActorContext initialActorContext = new MockRaftActorContext(stateDir());
@@ -773,7 +773,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     }
 
     @Test
-    public void testAddServerForwardedToLeader() {
+    void testAddServerForwardedToLeader() {
         LOG.info("testAddServerForwardedToLeader starting");
 
         setupNewFollower();
@@ -800,7 +800,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     }
 
     @Test
-    public void testOnApplyState() {
+    void testOnApplyState() {
         LOG.info("testOnApplyState starting");
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
@@ -826,7 +826,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     }
 
     @Test
-    public void testRemoveServerWithNoLeader() {
+    void testRemoveServerWithNoLeader() {
         LOG.info("testRemoveServerWithNoLeader starting");
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
@@ -847,7 +847,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     }
 
     @Test
-    public void testRemoveServerNonExistentServer() {
+    void testRemoveServerNonExistentServer() {
         LOG.info("testRemoveServerNonExistentServer starting");
 
         RaftActorContext initialActorContext = new MockRaftActorContext(stateDir());
@@ -865,7 +865,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     }
 
     @Test
-    public void testRemoveServerForwardToLeader() {
+    void testRemoveServerForwardToLeader() {
         LOG.info("testRemoveServerForwardToLeader starting");
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
@@ -890,7 +890,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     }
 
     @Test
-    public void testRemoveServer() {
+    void testRemoveServer() {
         LOG.info("testRemoveServer starting");
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
@@ -954,7 +954,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     }
 
     @Test
-    public void testRemoveServerLeader() {
+    void testRemoveServerLeader() {
         LOG.info("testRemoveServerLeader starting");
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
@@ -995,7 +995,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     }
 
     @Test
-    public void testRemoveServerLeaderWithNoFollowers() {
+    void testRemoveServerLeaderWithNoFollowers() {
         LOG.info("testRemoveServerLeaderWithNoFollowers starting");
 
         TestActorRef<MockLeaderRaftActor> leaderActor = actorFactory.createTestActor(
@@ -1010,7 +1010,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     }
 
     @Test
-    public void testChangeServersVotingStatus() {
+    void testChangeServersVotingStatus() {
         LOG.info("testChangeServersVotingStatus starting");
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
@@ -1090,7 +1090,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     }
 
     @Test
-    public void testChangeLeaderToNonVoting() {
+    void testChangeLeaderToNonVoting() {
         LOG.info("testChangeLeaderToNonVoting starting");
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
@@ -1149,7 +1149,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     }
 
     @Test
-    public void testChangeLeaderToNonVotingInSingleNode() {
+    void testChangeLeaderToNonVotingInSingleNode() {
         LOG.info("testChangeLeaderToNonVotingInSingleNode starting");
 
         TestActorRef<MockLeaderRaftActor> leaderActor = actorFactory.createTestActor(
@@ -1164,7 +1164,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     }
 
     @Test
-    public void testChangeToVotingWithNoLeader() {
+    void testChangeToVotingWithNoLeader() {
         LOG.info("testChangeToVotingWithNoLeader starting");
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
@@ -1280,7 +1280,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     }
 
     @Test
-    public void testChangeToVotingWithNoLeaderAndElectionTimeout() {
+    void testChangeToVotingWithNoLeaderAndElectionTimeout() {
         LOG.info("testChangeToVotingWithNoLeaderAndElectionTimeout starting");
 
         final String node1ID = "node1";
@@ -1341,7 +1341,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     }
 
     @Test
-    public void testChangeToVotingWithNoLeaderAndForwardedToOtherNodeAfterElectionTimeout() {
+    void testChangeToVotingWithNoLeaderAndForwardedToOtherNodeAfterElectionTimeout() {
         LOG.info("testChangeToVotingWithNoLeaderAndForwardedToOtherNodeAfterElectionTimeout starting");
 
         final String node1ID = "node1";
@@ -1406,7 +1406,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     }
 
     @Test
-    public void testChangeToVotingWithNoLeaderAndOtherLeaderElected() {
+    void testChangeToVotingWithNoLeaderAndOtherLeaderElected() {
         LOG.info("testChangeToVotingWithNoLeaderAndOtherLeaderElected starting");
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
@@ -1578,7 +1578,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     public static class MockLeaderRaftActor extends AbstractMockRaftActor {
         private final @NonNull ReplicatedLog fromLog;
 
-        public MockLeaderRaftActor(final Path stateDir, final Map<String, String> peerAddresses,
+        MockLeaderRaftActor(final Path stateDir, final Map<String, String> peerAddresses,
                 final ConfigParams config, final RaftActorContext fromContext) {
             super(stateDir, LEADER_ID, peerAddresses, Optional.of(config), NO_PERSISTENCE, null);
             fromLog = fromContext.getReplicatedLog();
@@ -1613,7 +1613,7 @@ public class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     }
 
     public static class MockNewFollowerRaftActor extends AbstractMockRaftActor {
-        public MockNewFollowerRaftActor(final Path stateDir, final ConfigParams config, final ActorRef collectorActor) {
+        MockNewFollowerRaftActor(final Path stateDir, final ConfigParams config, final ActorRef collectorActor) {
             super(stateDir, NEW_SERVER_ID, Map.of(), Optional.of(config), NO_PERSISTENCE, collectorActor);
             setPersistence(false);
         }

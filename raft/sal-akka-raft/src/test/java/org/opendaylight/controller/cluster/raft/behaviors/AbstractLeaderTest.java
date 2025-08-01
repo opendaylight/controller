@@ -7,31 +7,30 @@
  */
 package org.opendaylight.controller.cluster.raft.behaviors;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.time.Duration;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.testkit.TestActorRef;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.ForwardMessageToBehaviorActor;
 import org.opendaylight.controller.cluster.raft.MessageCollectorActor;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader.SendHeartBeat;
 
-public abstract class AbstractLeaderTest<T extends AbstractLeader> extends AbstractRaftActorBehaviorTest<T> {
+abstract class AbstractLeaderTest<T extends AbstractLeader> extends AbstractRaftActorBehaviorTest<T> {
     /**
      * When we removed scheduling of heartbeat in the AbstractLeader constructor we ended up with a situation where
      * if no follower responded to an initial AppendEntries heartbeats would not be sent to it. This test verifies
      * that regardless of whether followers respond or not we schedule heartbeats.
      */
     @Test
-    public void testLeaderSchedulesHeartbeatsEvenWhenNoFollowersRespondToInitialAppendEntries() {
+    void testLeaderSchedulesHeartbeatsEvenWhenNoFollowersRespondToInitialAppendEntries() {
         logStart("testLeaderSchedulesHeartbeatsEvenWhenNoFollowersRespondToInitialAppendEntries");
 
         String leaderActorId = actorFactory.generateActorId("leader");
@@ -43,8 +42,7 @@ public abstract class AbstractLeaderTest<T extends AbstractLeader> extends Abstr
         final ActorRef follower1Actor = actorFactory.createActor(MessageCollectorActor.props(), follower1ActorId);
         final ActorRef follower2Actor = actorFactory.createActor(MessageCollectorActor.props(), follower2ActorId);
 
-        final var leaderActorContext = new MockRaftActorContext(leaderActorId, stateDir.getRoot().toPath(), getSystem(),
-            leaderActor);
+        final var leaderActorContext = new MockRaftActorContext(leaderActorId, stateDir, getSystem(), leaderActor);
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         configParams.setHeartBeatInterval(Duration.ofMillis(200));
@@ -52,17 +50,11 @@ public abstract class AbstractLeaderTest<T extends AbstractLeader> extends Abstr
 
         leaderActorContext.setConfigParams(configParams);
 
-        leaderActorContext.resetReplicatedLog(
-                new MockRaftActorContext.Builder().createEntries(1,5,1).build());
+        leaderActorContext.resetReplicatedLog(new MockRaftActorContext.Builder().createEntries(1, 5, 1).build());
 
-        Map<String, String> peerAddresses = new HashMap<>();
-        peerAddresses.put(follower1ActorId,
-                follower1Actor.path().toString());
-        peerAddresses.put(follower2ActorId,
-                follower2Actor.path().toString());
-
-
-        leaderActorContext.setPeerAddresses(peerAddresses);
+        leaderActorContext.setPeerAddresses(Map.of(
+            follower1ActorId, follower1Actor.path().toString(),
+            follower2ActorId, follower2Actor.path().toString()));
 
         RaftActorBehavior leader = createBehavior(leaderActorContext);
 
@@ -73,7 +65,6 @@ public abstract class AbstractLeaderTest<T extends AbstractLeader> extends Abstr
         List<SendHeartBeat> allMessages = MessageCollectorActor.getAllMatching(leaderActor, SendHeartBeat.class);
 
         // Need more than 1 heartbeat to be delivered because we waited for 1 second with heartbeat interval 200ms
-        assertTrue(String.format("%s messages is less than expected", allMessages.size()),
-                allMessages.size() > 1);
+        assertThat(allMessages.size()).isGreaterThan(1);
     }
 }
