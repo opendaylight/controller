@@ -43,10 +43,6 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
-            <artifactId>yang-data-spi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.yangtools</groupId>
             <artifactId>yang-data-codec-binfmt</artifactId>
         </dependency>
         <dependency>
@@ -69,17 +65,22 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.apache.pekko</groupId>
+            <artifactId>pekko-testkit_2.13</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
             <artifactId>mockito-configuration</artifactId>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
-            <artifactId>yang-data-tree-ri</artifactId>
+            <artifactId>yang-data-spi</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.pekko</groupId>
-            <artifactId>pekko-testkit_2.13</artifactId>
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>yang-data-tree-ri</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
