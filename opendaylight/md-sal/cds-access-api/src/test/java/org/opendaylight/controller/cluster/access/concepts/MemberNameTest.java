@@ -7,12 +7,12 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class MemberNameTest extends AbstractIdentifierTest<MemberName> {
+class MemberNameTest extends AbstractIdentifierTest<MemberName> {
     private static final MemberName OBJECT = MemberName.forName("test1");
     private static final MemberName DIFFERENT_OBJECT = MemberName.forName("test2");
     private static final MemberName EQUAL_OBJECT = MemberName.forName("test1");
@@ -38,15 +38,15 @@ public class MemberNameTest extends AbstractIdentifierTest<MemberName> {
     }
 
     @Test
-    public void testCompareTo() {
+    void testCompareTo() {
         assertEquals(0, object().compareTo(object()));
         assertEquals(0, object().compareTo(equalObject()));
-        assertTrue(object().compareTo(differentObject()) < 0);
-        assertTrue(differentObject().compareTo(object()) > 0);
+        assertThat(object().compareTo(differentObject())).isLessThan(0);
+        assertThat(differentObject().compareTo(object())).isGreaterThan(0);
     }
 
     @Test
-    public void testGetName() {
+    void testGetName() {
         assertEquals("test1", OBJECT.getName());
     }
 }

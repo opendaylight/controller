@@ -7,19 +7,19 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.opendaylight.yangtools.concepts.Identifier;
 
-public abstract class AbstractIdentifierTest<T extends Identifier> {
+abstract class AbstractIdentifierTest<T extends Identifier> {
     abstract T object();
 
     abstract T differentObject();
@@ -29,7 +29,7 @@ public abstract class AbstractIdentifierTest<T extends Identifier> {
     abstract int expectedSize();
 
     @Test
-    public final void testEquals() {
+    final void testEquals() {
         assertTrue(object().equals(object()));
         assertTrue(object().equals(equalObject()));
         assertFalse(object().equals(null));
@@ -38,12 +38,12 @@ public abstract class AbstractIdentifierTest<T extends Identifier> {
     }
 
     @Test
-    public final void testHashCode() {
+    final void testHashCode() {
         assertEquals(object().hashCode(), equalObject().hashCode());
     }
 
     @Test
-    public final void testSerialization() throws Exception {
+    final void testSerialization() throws Exception {
         assertTrue(object().equals(copy(object())));
         assertTrue(object().equals(copy(equalObject())));
         assertFalse(differentObject().equals(copy(object())));
@@ -51,15 +51,15 @@ public abstract class AbstractIdentifierTest<T extends Identifier> {
 
     @SuppressWarnings("unchecked")
     private T copy(final T obj) throws IOException, ClassNotFoundException {
-        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        try (ObjectOutputStream oos = new ObjectOutputStream(bos)) {
+        final var bos = new ByteArrayOutputStream();
+        try (var oos = new ObjectOutputStream(bos)) {
             oos.writeObject(obj);
         }
 
         final byte[] bytes = bos.toByteArray();
         assertEquals(expectedSize(), bytes.length);
 
-        try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes))) {
+        try (var ois = new ObjectInputStream(new ByteArrayInputStream(bytes))) {
             return (T) ois.readObject();
         }
     }

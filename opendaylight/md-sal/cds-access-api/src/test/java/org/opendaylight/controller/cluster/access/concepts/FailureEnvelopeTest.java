@@ -9,7 +9,7 @@ package org.opendaylight.controller.cluster.access.concepts;
 
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -17,9 +17,9 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.opendaylight.controller.cluster.access.ABIVersion;
 import org.opendaylight.yangtools.concepts.WritableIdentifier;
 
-public class FailureEnvelopeTest extends AbstractEnvelopeTest<FailureEnvelope> {
+class FailureEnvelopeTest extends AbstractEnvelopeTest<FailureEnvelope> {
     @Override
-    protected EnvelopeDetails<FailureEnvelope> createEnvelope() {
+    EnvelopeDetails<FailureEnvelope> createEnvelope() {
         final var cause = new RuntimeRequestException("msg", new RuntimeException());
         final int causeSize = SerializationUtils.serialize(cause).length;
         return new EnvelopeDetails<>(new FailureEnvelope(new MockFailure(OBJECT, cause, 42), 1L, 2L, 11L),
@@ -27,7 +27,7 @@ public class FailureEnvelopeTest extends AbstractEnvelopeTest<FailureEnvelope> {
     }
 
     @Override
-    protected void doAdditionalAssertions(final FailureEnvelope envelope, final FailureEnvelope resolvedObject) {
+    void doAdditionalAssertions(final FailureEnvelope envelope, final FailureEnvelope resolvedObject) {
         assertEquals(envelope.getExecutionTimeNanos(), resolvedObject.getExecutionTimeNanos());
         final var expectedCause = envelope.getMessage().getCause();
         final var actualCause = resolvedObject.getMessage().getCause();

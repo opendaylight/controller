@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.access.concepts;
 
-public class FrontendIdentifierTest extends AbstractIdentifierTest<FrontendIdentifier> {
+class FrontendIdentifierTest extends AbstractIdentifierTest<FrontendIdentifier> {
     static final FrontendType ONE_FRONTEND_TYPE = FrontendType.forName("one");
     static final FrontendType OTHER_FRONTEND_TYPE = FrontendType.forName("two");
 
