@@ -35,7 +35,7 @@ final class JournalRecovery<T extends State> extends Recovery<T> {
         this.journal = requireNonNull(journal);
     }
 
-    RecoveryLog recoverJournal(final RecoveryLog pekkoLog) throws IOException {
+    RecoveryResult recoverJournal(final RecoveryLog pekkoLog) throws IOException {
         startRecoveryTimers();
 
         // First up: reconcile recoveryLog state w.r.t. recoveryCohort. We must always prove continuity of
