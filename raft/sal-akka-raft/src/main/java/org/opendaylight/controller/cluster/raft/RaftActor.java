@@ -222,7 +222,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             LOG.debug("{}: Pekko recovery completed and {} restore from snapshot", memberId(),
                 result.canRestoreFromSnapshot() ? "can" : "cannot");
             pekkoRecovery = null;
-            replicatedLog().resetToLog(recoverJournal(overridePekkoRecoveredLog(result.recoveryLog())));
+            replicatedLog().resetToLog(overridePekkoRecoveredLog(recoverJournal(result.recoveryLog())));
             finishRecovery();
         }
     }
@@ -234,7 +234,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     @NonNullByDefault
-    private ReplicatedLog recoverJournal(final ReplicatedLog recoveredLog) {
+    private RecoveryLog recoverJournal(final RecoveryLog recoveredLog) {
         final var journal = persistenceControl.journal();
         if (journal == null) {
             LOG.debug("{}: no journal: skipping journal recovery", memberId());
