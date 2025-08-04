@@ -122,7 +122,7 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
         origSnapshot = loaded;
     }
 
-    final @Nullable PekkoRecoveryResult handleRecoveryMessage(final Object message) {
+    final @Nullable RecoveryResult handleRecoveryMessage(final Object message) {
         LOG.trace("{}: handleRecoveryMessage: {}", memberId(), message);
 
         anyDataRecovered = anyDataRecovered || !(message instanceof RecoveryCompleted);
@@ -154,7 +154,7 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
                     saveFinalSnapshot();
                 }
 
-                return new PekkoRecoveryResult(recoveryLog, canRecoverFromSnapshot);
+                return new RecoveryResult(recoveryLog, canRecoverFromSnapshot);
             }
             default -> LOG.debug("{}: ignoring unhandled message {}", memberId(), message);
         }

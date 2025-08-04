@@ -79,7 +79,7 @@ class PekkoRecoveryTest {
         assertNull(assertSnapshot(-1, -1, null));
     }
 
-    private @NonNull PekkoRecoveryResult assertFinishRecovery() {
+    private @NonNull RecoveryResult assertFinishRecovery() {
         final var result = recovery.handleRecoveryMessage(RecoveryCompleted.getInstance());
         assertNotNull(result);
         return result;

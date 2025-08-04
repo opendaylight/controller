@@ -217,12 +217,15 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             pekkoRecovery = isRecoveryApplicable() ? support.recoverToPersistent() : support.recoverToTransient();
         }
 
-        final var result = pekkoRecovery.handleRecoveryMessage(message);
-        if (result != null) {
+        final var pekkoResult = pekkoRecovery.handleRecoveryMessage(message);
+        if (pekkoResult != null) {
             LOG.debug("{}: Pekko recovery completed and {} restore from snapshot", memberId(),
-                result.canRestoreFromSnapshot() ? "can" : "cannot");
+                pekkoResult.canRestoreFromSnapshot() ? "can" : "cannot");
             pekkoRecovery = null;
-            replicatedLog().resetToLog(overridePekkoRecoveredLog(recoverJournal(result.recoveryLog())));
+
+            final var journalResult = recoverJournal(pekkoResult);
+            // FIXME: apply restore as needed
+            replicatedLog().resetToLog(overridePekkoRecoveredLog(journalResult.recoveryLog()));
             finishRecovery();
         }
     }
@@ -234,18 +237,18 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     @NonNullByDefault
-    private RecoveryLog recoverJournal(final RecoveryLog recoveredLog) {
+    private RecoveryResult recoverJournal(final RecoveryResult pekkoResult) {
         final var journal = persistenceControl.journal();
         if (journal == null) {
             LOG.debug("{}: no journal: skipping journal recovery", memberId());
-            return recoveredLog;
+            return pekkoResult;
         }
 
         final var recovery = new JournalRecovery<>(this, getRaftActorSnapshotCohort(), getRaftActorRecoveryCohort(),
             context.getConfigParams(), journal);
         LOG.debug("{}: starting journal recovery", memberId());
         try {
-            return recovery.recoverJournal(recoveredLog);
+            return recovery.recoverJournal(pekkoResult);
         } catch (IOException e) {
             throw new UncheckedIOException("Journal recovery failed", e);
         }

@@ -12,11 +12,11 @@ import static java.util.Objects.requireNonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * Result of a {@link PekkoRecovery} run.
+ * Result of a {@link Recovery} run.
  */
 @NonNullByDefault
-record PekkoRecoveryResult(RecoveryLog recoveryLog, boolean canRestoreFromSnapshot) {
-    PekkoRecoveryResult {
+record RecoveryResult(RecoveryLog recoveryLog, boolean canRestoreFromSnapshot) {
+    RecoveryResult {
         requireNonNull(recoveryLog);
     }
 }
