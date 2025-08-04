@@ -35,7 +35,9 @@ final class JournalRecovery<T extends State> extends Recovery<T> {
         this.journal = requireNonNull(journal);
     }
 
-    RecoveryLog recoverJournal(final RecoveryLog pekkoLog) throws IOException {
+    RecoveryResult recoverJournal(final RecoveryResult pekkoResult) throws IOException {
+        final var pekkoLog = pekkoResult.recoveryLog();
+
         startRecoveryTimers();
 
         // First up: reconcile recoveryLog state w.r.t. recoveryCohort. We must always prove continuity of
@@ -54,7 +56,10 @@ final class JournalRecovery<T extends State> extends Recovery<T> {
         final var recoveryTime = stopRecoveryTimers();
         LOG.debug("{}: journal recovery completed{} with journalIndex={}", memberId(), recoveryTime,
             recoveryLog.firstJournalIndex());
-        return recoveryLog;
+
+        // FIXME: any data recovered et al.
+
+        return new RecoveryResult(recoveryLog, pekkoResult.canRestoreFromSnapshot());
     }
 
     private void reconcileAndRecover(final RecoveryLog pekkoLog) throws IOException {
