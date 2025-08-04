@@ -28,14 +28,12 @@ import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.PoisonPill;
 import org.apache.pekko.actor.Status;
-import org.apache.pekko.japi.Procedure;
 import org.apache.pekko.persistence.JournalProtocol;
 import org.apache.pekko.persistence.SnapshotProtocol;
-import org.apache.pekko.persistence.SnapshotSelectionCriteria;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActor;
+import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.controller.cluster.mgmt.api.FollowerInfo;
 import org.opendaylight.controller.cluster.notifications.DefaultLeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
@@ -109,7 +107,7 @@ import org.slf4j.LoggerFactory;
  * <li> when a snapshot should be saved </li>
  * </ul>
  */
-public abstract class RaftActor extends AbstractUntypedPersistentActor {
+public abstract class RaftActor extends AbstractUntypedActor {
     private static final Logger LOG = LoggerFactory.getLogger(RaftActor.class);
     private static final long APPLY_STATE_DELAY_THRESHOLD_IN_NANOS = TimeUnit.MILLISECONDS.toNanos(50);
 
@@ -121,11 +119,11 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     // by the RaftActorBehaviors.
     private final @NonNull LocalAccess localAccess;
     private final @NonNull PeerInfos peerInfos;
+    private final @NonNull String memberId;
 
     // FIXME: should be valid only after recovery
     private final @NonNull RaftActorContextImpl context;
 
-    private PekkoRecovery<?> pekkoRecovery;
     private RaftActorSnapshotMessageSupport snapshotSupport;
     private RaftActorVotingConfigSupport votingConfigSupport;
     private boolean shuttingDown;
@@ -134,7 +132,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     protected RaftActor(final Path stateDir, final String memberId, final Map<String, String> peerAddresses,
             final Optional<ConfigParams> configParams, final short payloadVersion,
             final RestrictedObjectStreams objectStreams) {
-        super(memberId);
+        this.memberId = requireNonNull(memberId);
         this.objectStreams = requireNonNull(objectStreams);
 
         completer = new RaftStorageCompleter(memberId, this);
@@ -157,7 +155,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
      * @return The member name
      */
     public final @NonNull String memberId() {
-        return persistenceId();
+        return memberId;
     }
 
     final @NonNull LocalAccess localAccess() {
@@ -192,6 +190,30 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         context.getSnapshotManager().setSnapshotCohort(getRaftActorSnapshotCohort());
         snapshotSupport = newRaftActorSnapshotMessageSupport();
         votingConfigSupport = new RaftActorVotingConfigSupport(this);
+
+        final var recoveredLog = overridePekkoRecoveredLog(recoverJournal());
+        if (recoveredLog != null) {
+            replicatedLog().resetToLog(recoveredLog);
+        }
+        finishRecovery();
+    }
+
+    @NonNullByDefault
+    private ReplicatedLog recoverJournal() {
+        final var journal = persistenceControl.journal();
+        if (journal == null) {
+            LOG.debug("{}: no journal: skipping journal recovery", memberId());
+            return null;
+        }
+
+        final var recovery = new JournalRecovery<>(this, getRaftActorSnapshotCohort(), getRaftActorRecoveryCohort(),
+            context.getConfigParams(), journal);
+        LOG.debug("{}: starting journal recovery", memberId());
+        try {
+            return recovery.recoverJournal();
+        } catch (IOException e) {
+            throw new UncheckedIOException("Journal recovery failed", e);
+        }
     }
 
     @Override
@@ -210,57 +232,15 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         super.postStop();
     }
 
-    @Override
-    protected void handleRecover(final Object message) throws Exception {
-        if (pekkoRecovery == null) {
-            final var support = newRaftActorRecoverySupport();
-            pekkoRecovery = isRecoveryApplicable() ? support.recoverToPersistent() : support.recoverToTransient();
-        }
-
-        final var result = pekkoRecovery.handleRecoveryMessage(message);
-        if (result != null) {
-            LOG.debug("{}: Pekko recovery completed and {} restore from snapshot", memberId(),
-                result.canRestoreFromSnapshot() ? "can" : "cannot");
-            pekkoRecovery = null;
-            replicatedLog().resetToLog(recoverJournal(overridePekkoRecoveredLog(result.recoveryLog())));
-            finishRecovery();
-        }
-    }
-
-    @NonNullByDefault
     @VisibleForTesting
-    protected ReplicatedLog overridePekkoRecoveredLog(final ReplicatedLog recoveredLog) {
+    protected @Nullable ReplicatedLog overridePekkoRecoveredLog(final @Nullable ReplicatedLog recoveredLog) {
         return recoveredLog;
-    }
-
-    @NonNullByDefault
-    private ReplicatedLog recoverJournal(final ReplicatedLog recoveredLog) {
-        final var journal = persistenceControl.journal();
-        if (journal == null) {
-            LOG.debug("{}: no journal: skipping journal recovery", memberId());
-            return recoveredLog;
-        }
-
-        final var recovery = new JournalRecovery<>(this, getRaftActorSnapshotCohort(), getRaftActorRecoveryCohort(),
-            context.getConfigParams(), journal);
-        LOG.debug("{}: starting journal recovery", memberId());
-        try {
-            return recovery.recoverJournal(recoveredLog);
-        } catch (IOException e) {
-            throw new UncheckedIOException("Journal recovery failed", e);
-        }
     }
 
     @NonNullByDefault
     private void finishRecovery() {
         onRecoveryComplete();
         initializeBehavior();
-    }
-
-    @VisibleForTesting
-    PekkoRecoverySupport<?> newRaftActorRecoverySupport() {
-        return new PekkoRecoverySupport<>(this, getRaftActorSnapshotCohort(), getRaftActorRecoveryCohort(),
-            context.getConfigParams());
     }
 
     @VisibleForTesting
@@ -297,13 +277,18 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     @Override
-    protected final void handleCommand(final Object message) throws InterruptedException {
+    protected final void handleReceive(final Object message) {
         // dispatch any pending completions first ...
         completer.completeUntilEmpty();
         // ... then handle the message ...
         handleCommandImpl(requireNonNull(message));
         // ... and finally wait for deferred tasks
-        completer.completeUntilSynchronized();
+        try {
+            completer.completeUntilSynchronized();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Interrupted while waiting for synchronous callbacks", e);
+        }
     }
 
     /**
@@ -501,8 +486,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         final var roleChangeNotifier = roleChangeNotifier();
         if (roleChangeNotifier != null && getRaftState() == RaftRole.Follower
                 && leaderTransitioning.getLeaderId().equals(getCurrentBehavior().getLeaderId())) {
-            roleChangeNotifier.tell(newLeaderStateChanged(memberId(), null,
-                getCurrentBehavior().getLeaderPayloadVersion()), self());
+            roleChangeNotifier.tell(newLeaderStateChanged(null, getCurrentBehavior().getLeaderPayloadVersion()),
+                self());
         }
     }
 
@@ -619,8 +604,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         if (!Objects.equals(lastLeaderId, leaderId)
                 || oldBehaviorState.getLeaderPayloadVersion() != currentBehavior.getLeaderPayloadVersion()) {
             if (roleChangeNotifier != null) {
-                roleChangeNotifier.tell(newLeaderStateChanged(memberId(), leaderId,
-                    currentBehavior.getLeaderPayloadVersion()), self());
+                roleChangeNotifier.tell(newLeaderStateChanged(leaderId, currentBehavior.getLeaderPayloadVersion()),
+                    self());
             }
 
             onLeaderChanged(lastValidLeaderId, leaderId);
@@ -689,8 +674,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     protected abstract void applyCommand(@Nullable Identifier identifier, StateCommand command);
 
     @NonNullByDefault
-    final LeaderStateChanged newLeaderStateChanged(final String memberId, final @Nullable String leaderId,
-            final short leaderPayloadVersion) {
+    final LeaderStateChanged newLeaderStateChanged(final @Nullable String leaderId, final short leaderPayloadVersion) {
         return wrapLeaderStateChanged(new DefaultLeaderStateChanged(memberId, leaderId, leaderPayloadVersion));
     }
 
@@ -1036,60 +1020,15 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         }
     }
 
-    @Override
-    @Deprecated(since = "11.0.0", forRemoval = true)
-    public final <A> void persist(final A entry, final Procedure<A> callback) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    @Deprecated(since = "11.0.0", forRemoval = true)
-    public final <A> void persistAsync(final A entry, final Procedure<A> callback) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    @Deprecated(since = "11.0.0", forRemoval = true)
-    public final void loadSnapshot(final String persistenceId, final SnapshotSelectionCriteria criteria,
-            final long toSequenceNr) {
-        super.loadSnapshot(persistenceId, criteria, toSequenceNr);
-    }
-
-    @Override
-    @Deprecated(since = "11.0.0", forRemoval = true)
-    public final void saveSnapshot(final Object snapshot) {
-        throw new UnsupportedOperationException();
-    }
-
     final void saveEmptySnapshot() throws IOException {
         persistenceControl.saveVotingConfig(context.getPeerServerInfo(true));
-    }
-
-    @Override
-    @Deprecated(since = "11.0.0", forRemoval = true)
-    public final void deleteSnapshot(final long sequenceNr) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    @Deprecated(since = "11.0.0", forRemoval = true)
-    public final void deleteSnapshots(final SnapshotSelectionCriteria criteria) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Deletes all snapshots from Pekko persistence. Called only from {@link PekkoRecovery}.
-     */
-    @Deprecated(since = "11.0.0", forRemoval = true)
-    final void nukePekkoSnapshots() {
-        // Note: no constant for criteria as this happens once on startup, hence we do not want to retain it
-        super.deleteSnapshots(SnapshotSelectionCriteria.create(Long.MAX_VALUE, Long.MAX_VALUE));
     }
 
     /**
      * A point-in-time capture of {@link RaftActorBehavior} state critical for transitioning between behaviors.
      */
     private abstract static class BehaviorState implements Immutable {
+
         @Nullable abstract RaftActorBehavior getBehavior();
 
         @Nullable abstract String getLastValidLeaderId();

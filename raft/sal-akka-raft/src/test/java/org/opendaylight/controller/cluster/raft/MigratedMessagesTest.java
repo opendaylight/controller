@@ -22,10 +22,8 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
-import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
 import org.slf4j.Logger;
@@ -49,8 +47,6 @@ class MigratedMessagesTest extends AbstractActorTest {
     @AfterEach
     void afterEach() {
         factory.close();
-        InMemoryJournal.clear();
-        InMemorySnapshotStore.clear();
     }
 
     @Test
