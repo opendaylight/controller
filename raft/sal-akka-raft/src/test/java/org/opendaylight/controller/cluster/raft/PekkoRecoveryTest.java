@@ -25,7 +25,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.spi.EnabledRaftStorage;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;

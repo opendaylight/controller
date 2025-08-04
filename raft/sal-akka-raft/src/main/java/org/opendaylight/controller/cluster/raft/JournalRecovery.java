@@ -35,7 +35,7 @@ final class JournalRecovery<T extends State> extends Recovery<T> {
         this.journal = requireNonNull(journal);
     }
 
-    // FIXME: require RecoveryLog here
+    // FIXME: snapshot
     RecoveryLog recoverJournal(final ReplicatedLog pekkoLog) throws IOException {
         startRecoveryTimers();
 
