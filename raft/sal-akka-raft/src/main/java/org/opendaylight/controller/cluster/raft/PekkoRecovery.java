@@ -111,6 +111,10 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
         super(actor, snapshotCohort, recoveryCohort, configParams);
 
         origTermInfo = termInfoStore().loadAndSetTerm();
+        if (origTermInfo != null) {
+            setDataRecovered();
+        }
+
         final var loaded = snapshotStore().lastSnapshot();
         if (loaded != null) {
             initializeLog(loaded.timestamp(),
