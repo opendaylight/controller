@@ -140,21 +140,13 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
             case UpdateElectionTerm(var termInfo) -> termInfoStore().setTerm(termInfo);
             case RecoveryCompleted msg -> {
                 final var canRecoverFromSnapshot = onRecoveryCompletedMessage();
-                if (canRecoverFromSnapshot) {
-                    // FIXME: move this to JournalRecovery and RaftActor
-                    final var snapshot = recoveryCohort.getRestoreFromSnapshot();
-                    if (snapshot != null) {
-                        restoreFrom(snapshot);
-                    }
-                }
-
                 final var lastSeq = actor.lastSequenceNr();
                 if (lastSeq > lastDeletedSequenceNr) {
                     LOG.info("{}: taking snapshot to clear Pekko persistence to {}", memberId(), lastSeq);
                     saveFinalSnapshot();
                 }
 
-                return new RecoveryResult(recoveryLog, canRecoverFromSnapshot);
+                return new RecoveryResult(recoveryLog, canRecoverFromSnapshot && !dataRecovered());
             }
             default -> LOG.debug("{}: ignoring unhandled message {}", memberId(), message);
         }
@@ -353,27 +345,6 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
             return false;
         }
         return true;
-    }
-
-    @NonNullByDefault
-    private void restoreFrom(final Snapshot snapshot) {
-        if (dataRecovered()) {
-            LOG.warn("{}: The provided restore snapshot was not applied because the persistence store is not empty",
-                memberId());
-            return;
-        }
-
-        LOG.debug("{}: Restoring snapshot: {}", memberId(), snapshot);
-        final var timestamp = Instant.now();
-        initializeLog(timestamp, snapshot);
-
-        try {
-            snapshotStore().saveSnapshot(
-                new RaftSnapshot(actor.peerInfos().votingConfig(true), snapshot.getUnAppliedEntries()),
-                snapshot.lastApplied(), toStorage(snapshot.state()), timestamp);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
     }
 
     // Either data persistence is disabled and we recovered some data entries (i.e. we must have just transitioned
