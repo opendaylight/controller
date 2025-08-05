@@ -8,9 +8,9 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 
 import java.nio.file.Path;
@@ -74,7 +74,7 @@ class PekkoRecoveryTest {
 
         doReturn(1L).when(raftActor).lastSequenceNr();
         final var result = assertFinishRecovery();
-        assertTrue(result.canRestoreFromSnapshot());
+        assertFalse(result.canRestoreFromSnapshot());
 
         assertNull(assertSnapshot(-1, -1, null));
     }

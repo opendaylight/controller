@@ -27,7 +27,6 @@ import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
-import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
 import org.opendaylight.raft.api.TermInfo;
 import org.slf4j.Logger;
@@ -140,21 +139,13 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
             case UpdateElectionTerm(var termInfo) -> termInfoStore().setTerm(termInfo);
             case RecoveryCompleted msg -> {
                 final var canRecoverFromSnapshot = onRecoveryCompletedMessage();
-                if (canRecoverFromSnapshot) {
-                    // FIXME: move this to JournalRecovery and RaftActor
-                    final var snapshot = recoveryCohort.getRestoreFromSnapshot();
-                    if (snapshot != null) {
-                        restoreFrom(snapshot);
-                    }
-                }
-
                 final var lastSeq = actor.lastSequenceNr();
                 if (lastSeq > lastDeletedSequenceNr) {
                     LOG.info("{}: taking snapshot to clear Pekko persistence to {}", memberId(), lastSeq);
                     saveFinalSnapshot();
                 }
 
-                return new RecoveryResult(recoveryLog, canRecoverFromSnapshot);
+                return new RecoveryResult(recoveryLog, canRecoverFromSnapshot && !dataRecovered());
             }
             default -> LOG.debug("{}: ignoring unhandled message {}", memberId(), message);
         }
@@ -185,7 +176,7 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
         final var sw = Stopwatch.createStarted();
         try {
             snapshotStore().saveSnapshot(new RaftSnapshot(snapshot.votingConfig(), snapshot.getUnAppliedEntries()),
-                snapshot.lastApplied(), toStorage(snapshot.state()), timestamp);
+                snapshot.lastApplied(), RaftActor.toStorage(support(), snapshot.state()), timestamp);
         } catch (IOException e) {
             LOG.error("{}: failed to save local snapshot", memberId(), e);
             throw new UncheckedIOException(e);
@@ -193,11 +184,6 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
 
         LOG.info("{}: local snapshot saved in {}, deleting Pekko-persisted snapshots", memberId(), sw.stop());
         actor.nukePekkoSnapshots();
-    }
-
-    private @Nullable ToStorage<T> toStorage(final @Nullable State state) {
-        final var support = support();
-        return ToStorage.ofNullable(support.writer(), support.snapshotType().cast(state));
     }
 
     private void initializeLog(final Instant timestamp, final Snapshot recovered) {
@@ -353,27 +339,6 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
             return false;
         }
         return true;
-    }
-
-    @NonNullByDefault
-    private void restoreFrom(final Snapshot snapshot) {
-        if (dataRecovered()) {
-            LOG.warn("{}: The provided restore snapshot was not applied because the persistence store is not empty",
-                memberId());
-            return;
-        }
-
-        LOG.debug("{}: Restoring snapshot: {}", memberId(), snapshot);
-        final var timestamp = Instant.now();
-        initializeLog(timestamp, snapshot);
-
-        try {
-            snapshotStore().saveSnapshot(
-                new RaftSnapshot(actor.peerInfos().votingConfig(true), snapshot.getUnAppliedEntries()),
-                snapshot.lastApplied(), toStorage(snapshot.state()), timestamp);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
     }
 
     // Either data persistence is disabled and we recovered some data entries (i.e. we must have just transitioned
