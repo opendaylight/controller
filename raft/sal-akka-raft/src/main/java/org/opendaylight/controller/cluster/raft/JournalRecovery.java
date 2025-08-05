@@ -139,6 +139,9 @@ final class JournalRecovery<T extends State> extends Recovery<T> {
                 } else {
                     LOG.debug("{}: recovered journal {}", memberId(), logEntry);
                     recoverEntry(logEntry);
+                    if (isMigratedPayload(logEntry)) {
+                        setMigratedDataRecovered();
+                    }
 
                     if (journalIndex <= applyToIndex) {
                         applyEntry(logEntry);
@@ -176,6 +179,7 @@ final class JournalRecovery<T extends State> extends Recovery<T> {
         if (!recoveryLog.append(entry)) {
             throw new IOException("Failed to append entry " + entry);
         }
+        setDataRecovered();
     }
 
     private void writeEntry(final LogEntry entry) throws IOException {
