@@ -222,10 +222,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             LOG.debug("{}: Pekko recovery completed and {} restore from snapshot", memberId(),
                 pekkoResult.canRestoreFromSnapshot() ? "can" : "cannot");
             pekkoRecovery = null;
-
-            final var journalResult = recoverJournal(pekkoResult);
-            // FIXME: apply restore as needed
-            replicatedLog().resetToLog(overridePekkoRecoveredLog(journalResult.recoveryLog()));
+            replicatedLog().resetToLog(overridePekkoRecoveredLog(recoverJournal(pekkoResult)));
             finishRecovery();
         }
     }
@@ -237,11 +234,11 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     @NonNullByDefault
-    private RecoveryResult recoverJournal(final RecoveryResult pekkoResult) {
+    private RecoveryLog recoverJournal(final RecoveryResult pekkoResult) {
         final var journal = persistenceControl.journal();
         if (journal == null) {
             LOG.debug("{}: no journal: skipping journal recovery", memberId());
-            return pekkoResult;
+            return pekkoResult.recoveryLog();
         }
 
         final var recovery = new JournalRecovery<>(this, getRaftActorSnapshotCohort(), getRaftActorRecoveryCohort(),

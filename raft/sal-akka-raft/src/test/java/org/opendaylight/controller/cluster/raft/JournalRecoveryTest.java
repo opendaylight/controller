@@ -71,7 +71,7 @@ class JournalRecoveryTest {
 
         doReturn(RestrictedObjectStreams.ofClassLoaders(JournalRecoveryTest.class)).when(actor).objectStreams();
 
-        final var output = recovery.recoverJournal(new RecoveryResult(input, true)).recoveryLog();
+        final var output = recovery.recoverJournal(new RecoveryResult(input, true));
         assertEquals(0, output.getSnapshotIndex());
         assertEquals(1, output.getSnapshotTerm());
         assertEquals(2, output.size());
@@ -89,7 +89,7 @@ class JournalRecoveryTest {
         input.setLastApplied(SECOND_ENTRY.index());
         assertTrue(input.append(THIRD_ENTRY));
 
-        final var output = recovery.recoverJournal(new RecoveryResult(input, true)).recoveryLog();
+        final var output = recovery.recoverJournal(new RecoveryResult(input, true));
         assertEquals(1, output.getSnapshotIndex());
         assertEquals(2, output.getSnapshotTerm());
         assertEquals(1, output.size());

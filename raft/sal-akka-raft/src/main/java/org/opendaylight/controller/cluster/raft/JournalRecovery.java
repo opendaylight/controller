@@ -35,7 +35,7 @@ final class JournalRecovery<T extends State> extends Recovery<T> {
         this.journal = requireNonNull(journal);
     }
 
-    RecoveryResult recoverJournal(final RecoveryResult pekkoResult) throws IOException {
+    RecoveryLog recoverJournal(final RecoveryResult pekkoResult) throws IOException {
         final var pekkoLog = pekkoResult.recoveryLog();
 
         startRecoveryTimers();
@@ -59,7 +59,7 @@ final class JournalRecovery<T extends State> extends Recovery<T> {
 
         // FIXME: any data recovered et al.
 
-        return new RecoveryResult(recoveryLog, pekkoResult.canRestoreFromSnapshot());
+        return recoveryLog;
     }
 
     private void reconcileAndRecover(final RecoveryLog pekkoLog) throws IOException {
