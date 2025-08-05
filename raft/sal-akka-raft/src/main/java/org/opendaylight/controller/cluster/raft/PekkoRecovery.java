@@ -103,8 +103,6 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
     private final @Nullable TermInfo origTermInfo;
     private final @Nullable SnapshotFile origSnapshot;
 
-    private boolean anyDataRecovered;
-    private boolean hasMigratedDataRecovered;
     private long lastDeletedSequenceNr;
 
     @NonNullByDefault
@@ -129,10 +127,8 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
     final @Nullable RecoveryResult handleRecoveryMessage(final Object message) {
         LOG.trace("{}: handleRecoveryMessage: {}", memberId(), message);
 
-        anyDataRecovered = anyDataRecovered || !(message instanceof RecoveryCompleted);
-
         if (isMigratedSerializable(message)) {
-            hasMigratedDataRecovered = true;
+            setMigratedDataRecovered();
         }
 
         switch (message) {
@@ -162,6 +158,8 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
             }
             default -> LOG.debug("{}: ignoring unhandled message {}", memberId(), message);
         }
+
+        setDataRecovered();
         return null;
     }
 
@@ -205,11 +203,11 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
     private void initializeLog(final Instant timestamp, final Snapshot recovered) {
         LOG.debug("{}: initializing from snapshot taken at {}", memberId(), timestamp);
         startRecoveryTimers();
-        anyDataRecovered = true;
+        setDataRecovered();
 
         for (var entry : recovered.getUnAppliedEntries()) {
             if (isMigratedPayload(entry)) {
-                hasMigratedDataRecovered = true;
+                setMigratedDataRecovered();
             }
         }
 
@@ -232,7 +230,7 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
         final var snapshotState = toApply.state();
         if (snapshotState != null) {
             if (snapshotState.needsMigration()) {
-                hasMigratedDataRecovered = true;
+                setMigratedDataRecovered();
             }
             recoveryCohort.applyRecoveredSnapshot(snapshotState);
         }
@@ -255,7 +253,7 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
 
         final var command = logEntry.command();
         if (isMigratedSerializable(command)) {
-            hasMigratedDataRecovered = true;
+            setMigratedDataRecovered();
         }
 
         if (command instanceof VotingConfig newVotingConfig) {
@@ -349,7 +347,7 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
     }
 
     boolean completeRecovery() {
-        if (hasMigratedDataRecovered) {
+        if (migratedDataRecovered()) {
             LOG.info("{}: Snapshot capture initiated after recovery due to migrated messages", memberId());
             saveFinalSnapshot();
             return false;
@@ -359,7 +357,7 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
 
     @NonNullByDefault
     private void restoreFrom(final Snapshot snapshot) {
-        if (anyDataRecovered) {
+        if (dataRecovered()) {
             LOG.warn("{}: The provided restore snapshot was not applied because the persistence store is not empty",
                 memberId());
             return;
