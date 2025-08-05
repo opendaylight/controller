@@ -54,6 +54,10 @@ abstract sealed class Recovery<T extends @NonNull State> permits JournalRecovery
     // the number of commands we have submitted to recoveryCohort
     private int currentBatchSize;
 
+    // tracking of whether we have recovered any data and whether there was a migrated payload
+    private boolean dataRecovered;
+    private boolean migratedDataRecovered;
+
     @NonNullByDefault
     Recovery(final RaftActor actor, final RaftActorSnapshotCohort<T> snapshotCohort,
             final RaftActorRecoveryCohort recoveryCohort, final ConfigParams configParams) {
@@ -217,6 +221,22 @@ abstract sealed class Recovery<T extends @NonNull State> permits JournalRecovery
     abstract List<LogEntry> filterSnapshotUnappliedEntries(List<LogEntry> unappliedEntries);
 
     abstract void discardSnapshottedEntries() throws IOException;
+
+    final boolean dataRecovered() {
+        return dataRecovered;
+    }
+
+    final void setDataRecovered() {
+        dataRecovered = true;
+    }
+
+    final boolean migratedDataRecovered() {
+        return migratedDataRecovered;
+    }
+
+    final void setMigratedDataRecovered() {
+        migratedDataRecovered = true;
+    }
 
     @Override
     public final String toString() {
