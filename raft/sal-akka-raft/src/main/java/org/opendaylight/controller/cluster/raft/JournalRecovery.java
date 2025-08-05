@@ -57,9 +57,7 @@ final class JournalRecovery<T extends State> extends Recovery<T> {
         LOG.debug("{}: journal recovery completed{} with journalIndex={}", memberId(), recoveryTime,
             recoveryLog.firstJournalIndex());
 
-        // FIXME: any data recovered et al.
-
-        return new RecoveryResult(recoveryLog, pekkoResult.canRestoreFromSnapshot());
+        return new RecoveryResult(recoveryLog, pekkoResult.canRestoreFromSnapshot() && !dataRecovered());
     }
 
     private void reconcileAndRecover(final RecoveryLog pekkoLog) throws IOException {

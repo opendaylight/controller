@@ -36,7 +36,7 @@ public abstract class AbstractActorTest {
     }
 
     protected static final @NonNull RestrictedObjectStreams OBJECT_STREAMS =
-        RestrictedObjectStreams.ofClassLoaders(AbstractRaftActorIntegrationTest.class);
+        RestrictedObjectStreams.ofClassLoaders(AbstractActorTest.class);
 
     private static ActorSystem ACTOR_SYSTEM;
 
