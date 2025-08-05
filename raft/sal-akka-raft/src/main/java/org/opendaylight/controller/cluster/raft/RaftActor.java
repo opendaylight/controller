@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,9 +66,11 @@ import org.opendaylight.controller.cluster.raft.spi.AbstractRaftCommand;
 import org.opendaylight.controller.cluster.raft.spi.AbstractStateCommand;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.controller.cluster.raft.spi.RaftCommand;
+import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.RaftStorageCompleter;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.controller.cluster.raft.spi.StateMachineCommand;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.raft.spi.FileBackedOutputStream;
@@ -219,15 +222,47 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         final var pekkoResult = pekkoRecovery.handleRecoveryMessage(message);
         if (pekkoResult != null) {
-            LOG.debug("{}: Pekko recovery completed and {} restore from snapshot", memberId(),
-                pekkoResult.canRestoreFromSnapshot() ? "can" : "cannot");
-            pekkoRecovery = null;
-
-            final var journalResult = recoverJournal(pekkoResult);
-            // FIXME: apply restore as needed
-            replicatedLog().resetToLog(overridePekkoRecoveredLog(journalResult.recoveryLog()));
-            finishRecovery();
+            pekkoRecoveryCompeleted(pekkoResult);
         }
+    }
+
+    @NonNullByDefault
+    private void pekkoRecoveryCompeleted(final RecoveryResult pekkoResult) {
+        LOG.debug("{}: Pekko recovery completed and {} restore from snapshot", memberId(),
+            pekkoResult.canRestoreFromSnapshot() ? "can" : "cannot");
+        pekkoRecovery = null;
+
+        final var journalResult = recoverJournal(pekkoResult);
+        final var restoreFrom = getRaftActorRecoveryCohort().getRestoreFromSnapshot();
+        if (restoreFrom != null) {
+            if (journalResult.canRestoreFromSnapshot()) {
+                LOG.debug("{}: Restoring snapshot: {}", memberId(), restoreFrom);
+                final var timestamp = Instant.now();
+                //              initializeLog(timestamp, snapshot);
+
+                try {
+                    persistenceControl.snapshotStore().saveSnapshot(
+                        new RaftSnapshot(peerInfos().votingConfig(true), restoreFrom.getUnAppliedEntries()),
+                        restoreFrom.lastApplied(), toStorage(getRaftActorSnapshotCohort(), restoreFrom.state()),
+                        timestamp);
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            } else {
+                LOG.warn("{}: The provided restore snapshot was not applied because the persistence store is not empty",
+                    memberId());
+            }
+        }
+
+        replicatedLog().resetToLog(overridePekkoRecoveredLog(journalResult.recoveryLog()));
+        finishRecovery();
+    }
+
+    @NonNullByDefault
+    private static <T extends Snapshot.State> @Nullable ToStorage<?> toStorage(
+            final RaftActorSnapshotCohort<T> cohort, final Snapshot.@Nullable State state) {
+        final var support = cohort.support();
+        return ToStorage.ofNullable(support.writer(), support.snapshotType().cast(state));
     }
 
     @NonNullByDefault
@@ -247,11 +282,17 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         final var recovery = new JournalRecovery<>(this, getRaftActorSnapshotCohort(), getRaftActorRecoveryCohort(),
             context.getConfigParams(), journal);
         LOG.debug("{}: starting journal recovery", memberId());
+
+        final RecoveryResult journalResult;
         try {
-            return recovery.recoverJournal(pekkoResult);
+            journalResult = recovery.recoverJournal(pekkoResult);
         } catch (IOException e) {
             throw new UncheckedIOException("Journal recovery failed", e);
         }
+
+        LOG.debug("{}: Journal recovery completed and {} restore from snapshot", memberId(),
+            journalResult.canRestoreFromSnapshot() ? "can" : "cannot");
+        return journalResult;
     }
 
     @NonNullByDefault
