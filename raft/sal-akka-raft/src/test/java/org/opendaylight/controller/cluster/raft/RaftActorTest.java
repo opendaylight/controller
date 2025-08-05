@@ -1303,4 +1303,28 @@ class RaftActorTest extends AbstractActorTest {
         await("Persistence callback.").atMost(500, TimeUnit.SECONDS)
             .untilAsserted(() -> assertEquals(100, leaderActor.getState().size()));
     }
+
+    @Test
+    void recoveryRestoresAndSnapshots() throws Exception {
+        final var persistenceId = factory.generateActorId("recover-");
+        final var config = new DefaultConfigParamsImpl();
+        config.setHeartBeatInterval(ONE_DAY);
+        final var ref = factory.<MockRaftActor>createTestActor(MockRaftActor.builder()
+            .id(persistenceId)
+            .config(config)
+            .persistent(Optional.of(true))
+            .restoreFromSnapshot(Snapshot.ofTermLeader(new MockSnapshotState(List.of(3, 14, 42)), EntryInfo.of(3, 1),
+                new TermInfo(3), null))
+            .props(stateDir()));
+
+        final var actor = ref.underlyingActor();
+        actor.waitForRecoveryComplete();
+
+        final var snapshot = actor.lastSnapshot();
+        assertNotNull(snapshot);
+
+        assertEquals(EntryInfo.of(3, 1), snapshot.lastIncluded());
+        assertEquals(new MockSnapshotState(List.of(3, 14, 42)),
+            snapshot.readSnapshot(MockSnapshotState.SUPPORT.reader()));
+    }
 }
