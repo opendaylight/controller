@@ -385,6 +385,7 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-        actor.deleteMessages(actor.lastSequenceNr());
+        lastDeletedSequenceNr = actor.lastSequenceNr();
+        actor.deleteMessages(lastDeletedSequenceNr);
     }
 }
