@@ -29,6 +29,11 @@ import org.opendaylight.yangtools.concepts.WritableObjects;
  * A more efficient equivalent of {@code ImmutableMap<UnsignedLong, Boolean>}.
  */
 public abstract sealed class UnsignedLongBitmap implements Immutable {
+    // flag bit 4 == 0001 0000
+    private static final int HAVE_VALUE = 0x10;
+    // flag bit 5 == 0010 0000
+    private static final int VALUE_TRUE = 0x20;
+
     @VisibleForTesting
     static final class Regular extends UnsignedLongBitmap {
         private static final @NonNull UnsignedLongBitmap EMPTY = new Regular(new long[0], new boolean[0]);
@@ -187,15 +192,24 @@ public abstract sealed class UnsignedLongBitmap implements Immutable {
     }
 
     public static @NonNull UnsignedLongBitmap readFrom(final @NonNull DataInput in, final int size) throws IOException {
+        // Reader supports both formats:
+        // - legacy: boolean follows the varint
+        // - compact: boolean embedded in header flags
         return switch (size) {
             case 0 -> of();
-            case 1 -> new Singleton(WritableObjects.readLong(in), in.readBoolean());
+            case 1 -> {
+                final var header = WritableObjects.readLongHeader(in);
+                final var key = WritableObjects.readLongBody(in, header);
+                final var value = (header & HAVE_VALUE) != 0 ? (header & VALUE_TRUE) != 0 : in.readBoolean();
+                yield new Singleton(key, value);
+            }
             default -> {
                 final var keys = new long[size];
                 final var values = new boolean[size];
                 for (int i = 0; i < size; ++i) {
-                    keys[i] = WritableObjects.readLong(in);
-                    values[i] = in.readBoolean();
+                    final var header = WritableObjects.readLongHeader(in);
+                    keys[i] = WritableObjects.readLongBody(in, header);
+                    values[i] = (header & HAVE_VALUE) != 0 ? (header & VALUE_TRUE) != 0 : in.readBoolean();
                 }
 
                 // There should be no duplicates and the IDs need to be increasing
