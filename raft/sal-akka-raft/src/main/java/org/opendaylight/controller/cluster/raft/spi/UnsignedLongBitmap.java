@@ -32,6 +32,10 @@ public abstract sealed class UnsignedLongBitmap implements Immutable {
     @VisibleForTesting
     static final class Regular extends UnsignedLongBitmap {
         private static final @NonNull UnsignedLongBitmap EMPTY = new Regular(new long[0], new boolean[0]);
+        // flag bit 0 == 1
+        private static final int HAVE_VALUE = 0x01;
+        // flag bit 1 == 1
+        private static final int VALUE_TRUE = 0x02;
 
         private final long[] keys;
         private final boolean[] values;
@@ -254,5 +258,19 @@ public abstract sealed class UnsignedLongBitmap implements Immutable {
         //        benefitial.
         WritableObjects.writeLong(out, key);
         out.writeBoolean(value);
+    }
+
+    private static void writeEntryNewFormat(final @NonNull DataOutput out, final long key, final boolean value)
+            throws IOException {
+        final var flags = Regular.HAVE_VALUE | (value ? Regular.VALUE_TRUE : 0);
+        WritableObjects.writeLong(out, key, flags);
+    }
+
+    private static Map.Entry<Long, Boolean> readEntryFrom(final @NonNull DataInput in)
+            throws IOException {
+        final var header = WritableObjects.readLongHeader(in);
+        final var key = WritableObjects.readLongBody(in, header);
+        final var value = (header & Regular.VALUE_TRUE) != 0;
+        return Map.entry(key, value);
     }
 }
