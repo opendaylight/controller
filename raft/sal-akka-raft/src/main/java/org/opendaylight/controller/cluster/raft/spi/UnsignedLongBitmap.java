@@ -29,6 +29,17 @@ import org.opendaylight.yangtools.concepts.WritableObjects;
  * A more efficient equivalent of {@code ImmutableMap<UnsignedLong, Boolean>}.
  */
 public abstract sealed class UnsignedLongBitmap implements Immutable {
+    // We have four bits available when using WritableObject.writeLong() to write the entry key. Historically we have
+    // not taken advantage of so they were all set to zero and the actual entry value is encoded as a separate byte.
+    //
+    // We allocate the two least significant bits to store the entry value inline with the entry key. The bottom-most
+    // bit, bit 4, is used as an indicator: when set to 1, the entry value is present in bit 5.
+    //
+    // flag bit 4 == 0001 0000
+    private static final int HAVE_VALUE = 0x10;
+    // flag bit 5 == 0010 0000
+    private static final int VALUE_TRUE = 0x20;
+
     @VisibleForTesting
     static final class Regular extends UnsignedLongBitmap {
         private static final @NonNull UnsignedLongBitmap EMPTY = new Regular(new long[0], new boolean[0]);
@@ -189,13 +200,17 @@ public abstract sealed class UnsignedLongBitmap implements Immutable {
     public static @NonNull UnsignedLongBitmap readFrom(final @NonNull DataInput in, final int size) throws IOException {
         return switch (size) {
             case 0 -> of();
-            case 1 -> new Singleton(WritableObjects.readLong(in), in.readBoolean());
+            case 1 -> {
+                final var header = WritableObjects.readLongHeader(in);
+                yield new Singleton(WritableObjects.readLongBody(in, header), readValue(in, header));
+            }
             default -> {
                 final var keys = new long[size];
                 final var values = new boolean[size];
                 for (int i = 0; i < size; ++i) {
-                    keys[i] = WritableObjects.readLong(in);
-                    values[i] = in.readBoolean();
+                    final var header = WritableObjects.readLongHeader(in);
+                    keys[i] = WritableObjects.readLongBody(in, header);
+                    values[i] = readValue(in, header);
                 }
 
                 // There should be no duplicates and the IDs need to be increasing
@@ -212,6 +227,14 @@ public abstract sealed class UnsignedLongBitmap implements Immutable {
                 yield new Regular(keys, values);
             }
         };
+    }
+
+    private static boolean readValue(final @NonNull DataInput in, final byte header) throws IOException {
+        return (header & HAVE_VALUE) != 0
+            // - compact: boolean embedded in header flags
+            ? (header & VALUE_TRUE) != 0
+            // - legacy: boolean is a separate byte
+            : in.readBoolean();
     }
 
     public void writeEntriesTo(final @NonNull DataOutput out, final int size) throws IOException {
@@ -249,9 +272,7 @@ public abstract sealed class UnsignedLongBitmap implements Immutable {
 
     private static void writeEntry(final @NonNull DataOutput out, final long key, final boolean value)
             throws IOException {
-        // FIXME: This serialization format is what we inherited. We could do better by storing the boolean in
-        //        writeLong()'s flags. On the other had, we could also be writing longs by twos, which might be
-        //        benefitial.
+        // FIXME: We are emitting the old format with a separate by value here for backwards compatibility.
         WritableObjects.writeLong(out, key);
         out.writeBoolean(value);
     }
