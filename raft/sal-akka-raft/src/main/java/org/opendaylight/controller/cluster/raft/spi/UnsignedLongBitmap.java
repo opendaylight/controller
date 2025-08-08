@@ -12,6 +12,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.primitives.UnsignedLong;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
@@ -29,6 +30,11 @@ import org.opendaylight.yangtools.concepts.WritableObjects;
  * A more efficient equivalent of {@code ImmutableMap<UnsignedLong, Boolean>}.
  */
 public abstract sealed class UnsignedLongBitmap implements Immutable {
+    // flag bit 4 == 0001 0000
+    private static final int HAVE_VALUE = 0x10;
+    // flag bit 5 == 0010 0000
+    private static final int VALUE_TRUE = 0x20;
+
     @VisibleForTesting
     static final class Regular extends UnsignedLongBitmap {
         private static final @NonNull UnsignedLongBitmap EMPTY = new Regular(new long[0], new boolean[0]);
@@ -254,5 +260,21 @@ public abstract sealed class UnsignedLongBitmap implements Immutable {
         //        benefitial.
         WritableObjects.writeLong(out, key);
         out.writeBoolean(value);
+    }
+
+    @SuppressFBWarnings("UPM_UNCALLED_PRIVATE_METHOD")
+    private static void writeEntryNewFormat(final @NonNull DataOutput out, final long key, final boolean value)
+            throws IOException {
+        final var flags = HAVE_VALUE | (value ? VALUE_TRUE : 0);
+        WritableObjects.writeLong(out, key, flags);
+    }
+
+    @SuppressFBWarnings("UPM_UNCALLED_PRIVATE_METHOD")
+    private static Map.Entry<Long, Boolean> readEntryFrom(final @NonNull DataInput in)
+            throws IOException {
+        final var header = WritableObjects.readLongHeader(in);
+        final var key = WritableObjects.readLongBody(in, header);
+        final var value = (header & VALUE_TRUE) != 0;
+        return Map.entry(key, value);
     }
 }
