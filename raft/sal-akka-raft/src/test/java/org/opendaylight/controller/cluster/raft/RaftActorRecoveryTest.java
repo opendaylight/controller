@@ -371,7 +371,7 @@ class RaftActorRecoveryTest {
         verify(recoveryCohort, never()).getRestoreFromSnapshot();
         verifyNoMoreInteractions(recoveryCohort);
 
-//        verify(mockPersistentProvider).deleteMessages(10L);
+        verify(raftActor).deleteMessages(10L);
     }
 
     @Test
