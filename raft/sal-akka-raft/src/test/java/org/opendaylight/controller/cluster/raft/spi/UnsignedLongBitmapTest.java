@@ -148,4 +148,60 @@ class UnsignedLongBitmapTest {
     void testInvalidArrays() {
         assertThrows(VerifyException.class, () -> new Regular(new long[0], new boolean[] { false, false }));
     }
+
+    @Test
+    void testReadNewFormatSingleton() throws Exception {
+        // New compact format: boolean embedded in header flags.
+        // HAVE_VALUE = 0x10, VALUE_TRUE = 0x20  (use only HAVE_VALUE for 'false')
+        final var out = ByteStreams.newDataOutput();
+        WritableObjects.writeLong(out, 0L, 0x10);
+
+        final var in = ByteStreams.newDataInput(out.toByteArray());
+        final var bitmap = UnsignedLongBitmap.readFrom(in, 1);
+
+        assertEquals(UnsignedLongBitmap.of(0L, false), bitmap);
+        // no trailing bytes expected
+        assertThrows(IllegalStateException.class, () -> in.readByte());
+    }
+
+    @Test
+    void testReadNewFormatRegular() throws Exception {
+        // Entry 0: key=0, value=false  -> HAVE_VALUE (0x10)
+        // Entry 1: key=1, value=true   -> HAVE_VALUE|VALUE_TRUE (0x10|0x20)
+        final var out = ByteStreams.newDataOutput();
+        WritableObjects.writeLong(out, 0L, 0x10);
+        WritableObjects.writeLong(out, 1L, 0x10 | 0x20);
+
+        final var in = ByteStreams.newDataInput(out.toByteArray());
+        final var bitmap = UnsignedLongBitmap.readFrom(in, 2);
+
+        assertEquals(UnsignedLongBitmap.copyOf(Map.of(UnsignedLong.ZERO, false, UnsignedLong.ONE, true)),
+            bitmap);
+        // no trailing bytes expected
+        assertThrows(IllegalStateException.class, () -> in.readByte());
+    }
+
+    @Test
+    void testReadMixedEncodedBitmap() throws Exception {
+        final var out = ByteStreams.newDataOutput();
+        // #1 legacy: (0,true)
+        WritableObjects.writeLong(out, 0L);
+        out.writeBoolean(true);
+        // #2 compact: (1,false)
+        WritableObjects.writeLong(out, 1L, 0x10);
+        // #3 legacy: (300,true)
+        WritableObjects.writeLong(out, 300L);
+        out.writeBoolean(true);
+
+        final var in = ByteStreams.newDataInput(out.toByteArray());
+        final var bmp = UnsignedLongBitmap.readFrom(in, 3);
+
+        final var expected = UnsignedLongBitmap.copyOf(Map.of(
+            UnsignedLong.valueOf(0L), true,
+            UnsignedLong.valueOf(1L), false,
+            UnsignedLong.valueOf(300L), true
+        ));
+        assertEquals(expected, bmp);
+        assertThrows(IllegalStateException.class, () -> in.readByte());
+    }
 }
