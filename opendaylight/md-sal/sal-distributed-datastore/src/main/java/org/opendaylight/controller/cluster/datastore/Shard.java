@@ -96,7 +96,6 @@ import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.spi.RestrictedObjectStreams;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev250130.DataStoreProperties.ExportOnRecovery;
 import org.opendaylight.yangtools.concepts.Identifier;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
 import org.opendaylight.yangtools.yang.data.tree.api.DataValidationFailedException;
@@ -196,9 +195,7 @@ public class Shard extends RaftActor {
 
     private final MessageAssembler requestMessageAssembler;
 
-    private final ExportOnRecovery exportOnRecovery;
-
-    private final ActorRef exportActor;
+    private ActorRef exportActor;
 
     Shard(final Path stateDir, final AbstractBuilder<?, ?> builder) {
         super(stateDir.resolve(STATE_PATH), builder.getId().toString(), builder.getPeerAddresses(),
@@ -211,9 +208,8 @@ public class Shard extends RaftActor {
 
         final var name = memberId();
         frontendMetadata = new FrontendMetadata(name);
-        exportOnRecovery = datastoreContext.getExportOnRecovery();
 
-        exportActor = switch (exportOnRecovery) {
+        exportActor = switch (datastoreContext.getExportOnRecovery()) {
             case Json -> getContext().actorOf(JsonExportActor.props(builder.getSchemaContext(),
                 datastoreContext.getRecoveryExportBaseDir()));
             case Off -> null;
@@ -289,25 +285,28 @@ public class Shard extends RaftActor {
     @Override
     protected final void handleRecover(final Object message) throws Exception {
         LOG.debug("{}: onReceiveRecover: Received message {} from {}", memberId(), message.getClass(), getSender());
-
         super.handleRecover(message);
 
-        switch (exportOnRecovery) {
-            case Json:
-                if (message instanceof SnapshotOffer) {
-                    exportActor.tell(
-                        new JsonExportActor.ExportSnapshot(store.readCurrentData().orElseThrow(), memberId()),
-                        ActorRef.noSender());
-                } else if (message instanceof LogEntry entry) {
-                    exportActor.tell(new JsonExportActor.ExportJournal(entry), ActorRef.noSender());
-                } else if (message instanceof RecoveryCompleted) {
-                    exportActor.tell(new JsonExportActor.FinishExport(memberId()), ActorRef.noSender());
-                    exportActor.tell(PoisonPill.getInstance(), ActorRef.noSender());
-                }
-                break;
-            case Off:
-            default:
-                break;
+        final var local = exportActor;
+        if (local != null) {
+            export(local, message);
+        }
+    }
+
+    private void export(final ActorRef actor, final Object message) {
+        switch (message) {
+            case SnapshotOffer msg ->
+                actor.tell(new JsonExportActor.ExportSnapshot(store.readCurrentData().orElseThrow(), memberId()),
+                    ActorRef.noSender());
+            case LogEntry msg -> actor.tell(new JsonExportActor.ExportJournal(msg), ActorRef.noSender());
+            case RecoveryCompleted msg -> {
+                actor.tell(new JsonExportActor.FinishExport(memberId()), ActorRef.noSender());
+                actor.tell(PoisonPill.getInstance(), ActorRef.noSender());
+                exportActor = null;
+            }
+            default -> {
+                // No-op
+            }
         }
     }
 
