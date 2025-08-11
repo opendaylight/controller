@@ -220,8 +220,8 @@ public class IntegrationTestKit extends ShardTestKit {
         AssertionError lastError = null;
         Stopwatch sw = Stopwatch.createStarted();
         while (sw.elapsed(TimeUnit.SECONDS) <= 5) {
-            final var shardStats = (ShardStatsMXBean) actorUtils
-                    .executeOperation(shardActor, Shard.GET_SHARD_MBEAN_MESSAGE);
+            final var shardStats = (ShardStatsMXBean) actorUtils.executeOperation(shardActor,
+                Shard.GetShardMBean.INSTANCE);
 
             try {
                 verifier.verify(shardStats);
