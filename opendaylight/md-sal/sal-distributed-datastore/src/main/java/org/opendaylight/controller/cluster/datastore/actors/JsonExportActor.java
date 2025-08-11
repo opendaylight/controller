@@ -165,21 +165,14 @@ public final class JsonExportActor extends AbstractUntypedActor {
     private static void doWriteNode(final JsonWriter writer, final YangInstanceIdentifier path,
             final DataTreeCandidateNode node) throws IOException {
         switch (node.modificationType()) {
-            case APPEARED:
-            case DISAPPEARED:
-            case SUBTREE_MODIFIED:
-                NodeIterator iterator = new NodeIterator(null, path, node.childNodes().iterator());
+            case null -> throw new NullPointerException();
+            case APPEARED, DISAPPEARED, SUBTREE_MODIFIED -> {
+                var iterator = new NodeIterator(null, path, node.childNodes().iterator());
                 do {
                     iterator = iterator.next(writer);
                 } while (iterator != null);
-                break;
-            case DELETE:
-            case UNMODIFIED:
-            case WRITE:
-                outputNodeInfo(writer, path, node);
-                break;
-            default:
-                outputDefault(writer, path, node);
+            }
+            case DELETE, UNMODIFIED, WRITE -> outputNodeInfo(writer, path, node);
         }
     }
 
@@ -194,17 +187,6 @@ public final class JsonExportActor extends AbstractUntypedActor {
         if (modificationType == ModificationType.WRITE) {
             writer.beginObject().name("Data").value(node.getDataAfter().body().toString()).endObject();
         }
-        writer.endArray();
-        writer.endObject();
-    }
-
-    private static void outputDefault(final JsonWriter writer, final YangInstanceIdentifier path,
-                                      final DataTreeCandidateNode node) throws IOException {
-        writer.beginObject().name("Node");
-        writer.beginArray();
-        writer.beginObject().name("Path").value(path.toString()).endObject();
-        writer.beginObject().name("ModificationType")
-                .value("UNSUPPORTED MODIFICATION: " + node.modificationType()).endObject();
         writer.endArray();
         writer.endObject();
     }
@@ -235,17 +217,11 @@ public final class JsonExportActor extends AbstractUntypedActor {
                 final var child = path.node(node.name());
 
                 switch (node.modificationType()) {
-                    case APPEARED:
-                    case DISAPPEARED:
-                    case SUBTREE_MODIFIED:
+                    case null -> throw new NullPointerException();
+                    case APPEARED, DISAPPEARED, SUBTREE_MODIFIED -> {
                         return new NodeIterator(this, child, node.childNodes().iterator());
-                    case DELETE:
-                    case UNMODIFIED:
-                    case WRITE:
-                        outputNodeInfo(writer, path, node);
-                        break;
-                    default:
-                        outputDefault(writer, child, node);
+                    }
+                    case DELETE, UNMODIFIED, WRITE -> outputNodeInfo(writer, path, node);
                 }
             }
 
