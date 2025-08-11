@@ -37,6 +37,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActor;
+import org.opendaylight.controller.cluster.common.actor.MessageTracker;
 import org.opendaylight.controller.cluster.mgmt.api.FollowerInfo;
 import org.opendaylight.controller.cluster.notifications.DefaultLeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
@@ -58,6 +59,7 @@ import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshot;
 import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshotReply;
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.client.messages.Shutdown;
+import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.messages.RequestLeadership;
 import org.opendaylight.controller.cluster.raft.persisted.NoopPayload;
@@ -125,6 +127,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     // by the RaftActorBehaviors.
     private final @NonNull LocalAccess localAccess;
     private final @NonNull PeerInfos peerInfos;
+    private final @NonNull MessageTracker appendEntriesReplyTracker;
 
     // FIXME: should be valid only after recovery
     private final @NonNull RaftActorContextImpl context;
@@ -153,6 +156,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         context = new RaftActorContextImpl(self(), getContext(), localAccess, peerInfos, config, payloadVersion,
             objectStreams, persistenceControl, this::applyCommand);
+
+        appendEntriesReplyTracker = new MessageTracker(AppendEntriesReply.class,
+            config.getIsolatedCheckIntervalInMillis());
     }
 
     /**
@@ -314,6 +320,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     @NonNullByDefault
     private void finishRecovery() {
         onRecoveryComplete();
+        if (LOG.isTraceEnabled()) {
+            appendEntriesReplyTracker.begin();
+        }
         initializeBehavior();
     }
 
@@ -358,12 +367,20 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     @Override
     protected final void handleCommand(final Object message) throws InterruptedException {
-        // dispatch any pending completions first ...
-        completer.completeUntilEmpty();
-        // ... then handle the message ...
-        handleCommandImpl(requireNonNull(message));
-        // ... and finally wait for deferred tasks
-        completer.completeUntilSynchronized();
+        try (var context = appendEntriesReplyTracker.received(message)) {
+            final var maybeError = context.error();
+            if (maybeError.isPresent()) {
+                LOG.trace("{} : AppendEntriesReply failed to arrive at the expected interval {}", memberId(),
+                    maybeError.orElseThrow());
+            }
+
+            // dispatch any pending completions first ...
+            completer.completeUntilEmpty();
+            // ... then handle the message ...
+            handleCommandImpl(requireNonNull(message));
+            // ... and finally wait for deferred tasks
+            completer.completeUntilSynchronized();
+        }
     }
 
     /**
