@@ -63,7 +63,6 @@ import org.opendaylight.controller.cluster.access.concepts.UnsupportedRequestExc
 import org.opendaylight.controller.cluster.common.actor.CommonConfig;
 import org.opendaylight.controller.cluster.common.actor.Dispatchers;
 import org.opendaylight.controller.cluster.common.actor.Dispatchers.DispatcherType;
-import org.opendaylight.controller.cluster.common.actor.MessageTracker;
 import org.opendaylight.controller.cluster.common.actor.MeteringBehavior;
 import org.opendaylight.controller.cluster.datastore.actors.JsonExportActor;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
@@ -105,7 +104,6 @@ import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
-import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.messages.RequestLeadership;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
@@ -188,8 +186,6 @@ public class Shard extends RaftActor {
 
     private final Optional<ActorRef> roleChangeNotifier;
 
-    private final MessageTracker appendEntriesReplyTracker;
-
     @Deprecated(since = "9.0.0", forRemoval = true)
     private final ShardTransactionActorFactory transactionActorFactory;
 
@@ -263,9 +259,6 @@ public class Shard extends RaftActor {
 
         // create a notifier actor for each cluster member
         roleChangeNotifier = createRoleChangeNotifier(name);
-
-        appendEntriesReplyTracker = new MessageTracker(AppendEntriesReply.class,
-                getRaftActorContext().getConfigParams().getIsolatedCheckIntervalInMillis());
 
         dispatchers = new Dispatchers(context().system().dispatchers());
         transactionActorFactory = new ShardTransactionActorFactory(store, datastoreContext,
@@ -344,84 +337,72 @@ public class Shard extends RaftActor {
             default:
                 break;
         }
-
-        if (LOG.isTraceEnabled()) {
-            appendEntriesReplyTracker.begin();
-        }
     }
 
     @Override
     // non-final for TestShard
     protected void handleNonRaftCommand(final Object message) {
-        try (var context = appendEntriesReplyTracker.received(message)) {
-            final var maybeError = context.error();
-            if (maybeError.isPresent()) {
-                LOG.trace("{} : AppendEntriesReply failed to arrive at the expected interval {}", persistenceId(),
-                    maybeError.orElseThrow());
-            }
+        store.resetTransactionBatch();
 
-            store.resetTransactionBatch();
-
-            if (message instanceof RequestEnvelope request) {
-                handleRequestEnvelope(request);
-            } else if (MessageAssembler.isHandledMessage(message)) {
-                handleRequestAssemblerMessage(message);
-            } else if (message instanceof ConnectClientRequest request) {
-                handleConnectClient(request);
-            } else if (message instanceof DataTreeChangedReply) {
-                // Ignore reply
-            } else if (message instanceof RegisterDataTreeChangeListener request) {
-                treeChangeSupport.onMessage(request, isLeader(), hasLeader());
-            } else if (message instanceof UpdateSchemaContext request) {
-                updateSchemaContext(request);
-            } else if (message instanceof PeerAddressResolved resolved) {
-                setPeerAddress(resolved.getPeerId(), resolved.getPeerAddress());
-            } else if (TX_COMMIT_TIMEOUT_CHECK_MESSAGE.equals(message)) {
-                commitTimeoutCheck();
-            } else if (message instanceof DatastoreContext request) {
-                onDatastoreContext(request);
-            } else if (message instanceof RegisterRoleChangeListener) {
-                roleChangeNotifier.orElseThrow().forward(message, context());
-            } else if (message instanceof FollowerInitialSyncUpStatus request) {
-                shardMBean.setFollowerInitialSyncStatus(request.isInitialSyncDone());
-                context().parent().tell(message, self());
-            } else if (GET_SHARD_MBEAN_MESSAGE.equals(message)) {
-                sender().tell(getShardMBean(), self());
-            } else if (message instanceof GetShardDataTree) {
-                sender().tell(store.getDataTree(), self());
-            } else if (message instanceof ServerRemoved) {
-                context().parent().forward(message, context());
-            } else if (message instanceof DataTreeCohortActorRegistry.CohortRegistryCommand request) {
-                store.processCohortRegistryCommand(getSender(), request);
-            } else if (message instanceof MakeLeaderLocal) {
-                onMakeLeaderLocal();
-            } else if (RESUME_NEXT_PENDING_TRANSACTION.equals(message)) {
-                store.resumeNextPendingTransaction();
-            } else if (GetKnownClients.INSTANCE.equals(message)) {
-                handleGetKnownClients();
-            } else if (!responseMessageSlicer.handleMessage(message)) {
-                // Ask-based protocol messages
-                if (CreateTransaction.isSerializedType(message)) {
-                    handleCreateTransaction(message);
-                } else if (message instanceof BatchedModifications request) {
-                    handleBatchedModifications(request);
-                } else if (message instanceof ForwardedReadyTransaction request) {
-                    handleForwardedReadyTransaction(request);
-                } else if (message instanceof ReadyLocalTransaction request) {
-                    handleReadyLocalTransaction(request);
-                } else if (CanCommitTransaction.isSerializedType(message)) {
-                    handleCanCommitTransaction(CanCommitTransaction.fromSerializable(message));
-                } else if (CommitTransaction.isSerializedType(message)) {
-                    handleCommitTransaction(CommitTransaction.fromSerializable(message));
-                } else if (AbortTransaction.isSerializedType(message)) {
-                    handleAbortTransaction(AbortTransaction.fromSerializable(message));
-                } else if (CloseTransactionChain.isSerializedType(message)) {
-                    closeTransactionChain(CloseTransactionChain.fromSerializable(message));
-                } else if (ShardTransactionMessageRetrySupport.TIMER_MESSAGE_CLASS.isInstance(message)) {
-                    messageRetrySupport.onTimerMessage(message);
-                } else {
-                    super.handleNonRaftCommand(message);
-                }
+        if (message instanceof RequestEnvelope request) {
+            handleRequestEnvelope(request);
+        } else if (MessageAssembler.isHandledMessage(message)) {
+            handleRequestAssemblerMessage(message);
+        } else if (message instanceof ConnectClientRequest request) {
+            handleConnectClient(request);
+        } else if (message instanceof DataTreeChangedReply) {
+            // Ignore reply
+        } else if (message instanceof RegisterDataTreeChangeListener request) {
+            treeChangeSupport.onMessage(request, isLeader(), hasLeader());
+        } else if (message instanceof UpdateSchemaContext request) {
+            updateSchemaContext(request);
+        } else if (message instanceof PeerAddressResolved resolved) {
+            setPeerAddress(resolved.getPeerId(), resolved.getPeerAddress());
+        } else if (TX_COMMIT_TIMEOUT_CHECK_MESSAGE.equals(message)) {
+            commitTimeoutCheck();
+        } else if (message instanceof DatastoreContext request) {
+            onDatastoreContext(request);
+        } else if (message instanceof RegisterRoleChangeListener) {
+            roleChangeNotifier.orElseThrow().forward(message, context());
+        } else if (message instanceof FollowerInitialSyncUpStatus request) {
+            shardMBean.setFollowerInitialSyncStatus(request.isInitialSyncDone());
+            context().parent().tell(message, self());
+        } else if (GET_SHARD_MBEAN_MESSAGE.equals(message)) {
+            sender().tell(getShardMBean(), self());
+        } else if (message instanceof GetShardDataTree) {
+            sender().tell(store.getDataTree(), self());
+        } else if (message instanceof ServerRemoved) {
+            context().parent().forward(message, context());
+        } else if (message instanceof DataTreeCohortActorRegistry.CohortRegistryCommand request) {
+            store.processCohortRegistryCommand(getSender(), request);
+        } else if (message instanceof MakeLeaderLocal) {
+            onMakeLeaderLocal();
+        } else if (RESUME_NEXT_PENDING_TRANSACTION.equals(message)) {
+            store.resumeNextPendingTransaction();
+        } else if (GetKnownClients.INSTANCE.equals(message)) {
+            handleGetKnownClients();
+        } else if (!responseMessageSlicer.handleMessage(message)) {
+            // Ask-based protocol messages
+            if (CreateTransaction.isSerializedType(message)) {
+                handleCreateTransaction(message);
+            } else if (message instanceof BatchedModifications request) {
+                handleBatchedModifications(request);
+            } else if (message instanceof ForwardedReadyTransaction request) {
+                handleForwardedReadyTransaction(request);
+            } else if (message instanceof ReadyLocalTransaction request) {
+                handleReadyLocalTransaction(request);
+            } else if (CanCommitTransaction.isSerializedType(message)) {
+                handleCanCommitTransaction(CanCommitTransaction.fromSerializable(message));
+            } else if (CommitTransaction.isSerializedType(message)) {
+                handleCommitTransaction(CommitTransaction.fromSerializable(message));
+            } else if (AbortTransaction.isSerializedType(message)) {
+                handleAbortTransaction(AbortTransaction.fromSerializable(message));
+            } else if (CloseTransactionChain.isSerializedType(message)) {
+                closeTransactionChain(CloseTransactionChain.fromSerializable(message));
+            } else if (ShardTransactionMessageRetrySupport.TIMER_MESSAGE_CLASS.isInstance(message)) {
+                messageRetrySupport.onTimerMessage(message);
+            } else {
+                super.handleNonRaftCommand(message);
             }
         }
     }

@@ -33,6 +33,7 @@ import org.opendaylight.controller.cluster.DelegatingPersistentDataProvider;
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
 import org.opendaylight.controller.cluster.PersistentDataProvider;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActor;
+import org.opendaylight.controller.cluster.common.actor.MessageTracker;
 import org.opendaylight.controller.cluster.mgmt.api.FollowerInfo;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RoleChanged;
@@ -51,6 +52,7 @@ import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
 import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.client.messages.Shutdown;
+import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.messages.RequestLeadership;
 import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
@@ -107,6 +109,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     private final BehaviorStateTracker behaviorStateTracker = new BehaviorStateTracker();
 
+    private final @NonNull MessageTracker appendEntriesReplyTracker;
+
     private RaftActorRecoverySupport raftRecovery;
 
     private RaftActorSnapshotMessageSupport snapshotSupport;
@@ -122,13 +126,17 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         persistentProvider = new PersistentDataProvider(this);
         delegatingPersistenceProvider = new RaftActorDelegatingPersistentDataProvider(null, persistentProvider);
 
+        final var config = configParams.orElseGet(DefaultConfigParamsImpl::new);
+
         context = new RaftActorContextImpl(getSelf(), getContext(), id,
-            new ElectionTermImpl(persistentProvider, id, LOG), -1, -1, peerAddresses,
-            configParams.isPresent() ? configParams.orElseThrow() : new DefaultConfigParamsImpl(),
+            new ElectionTermImpl(persistentProvider, id, LOG), -1, -1, peerAddresses, config,
             delegatingPersistenceProvider, this::handleApplyState, LOG, this::executeInSelf);
 
         context.setPayloadVersion(payloadVersion);
         context.setReplicatedLog(ReplicatedLogImpl.newInstance(context));
+
+        appendEntriesReplyTracker = new MessageTracker(AppendEntriesReply.class,
+            config.getIsolatedCheckIntervalInMillis());
     }
 
     @Override
@@ -157,6 +165,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         boolean recoveryComplete = raftRecovery.handleRecoveryMessage(message, persistentProvider);
         if (recoveryComplete) {
             onRecoveryComplete();
+
+            if (LOG.isTraceEnabled()) {
+                appendEntriesReplyTracker.begin();
+            }
 
             initializeBehavior();
 
@@ -201,6 +213,19 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         unhandled(message);
     }
 
+    @Override
+    protected final void handleCommand(final Object message) {
+        try (var context = appendEntriesReplyTracker.received(message)) {
+            final var maybeError = context.error();
+            if (maybeError.isPresent()) {
+                LOG.trace("{} : AppendEntriesReply failed to arrive at the expected interval {}", persistenceId(),
+                    maybeError.orElseThrow());
+            }
+
+            handleCommandImpl(message);
+        }
+    }
+
     /**
      * Handles a message.
      *
@@ -208,9 +233,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
      *             {@link #handleNonRaftCommand(Object)} instead.
      */
     @Deprecated
-    @Override
     // FIXME: make this method final once our unit tests do not need to override it
-    protected void handleCommand(final Object message) {
+    protected void handleCommandImpl(final Object message) {
         if (serverConfigurationSupport.handleMessage(message, getSender())) {
             return;
         }

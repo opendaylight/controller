@@ -145,7 +145,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
 
         @SuppressWarnings({ "rawtypes", "unchecked", "checkstyle:IllegalCatch" })
         @Override
-        public void handleCommand(final Object message) {
+        public void handleCommandImpl(final Object message) {
             if (message instanceof MockPayload payload) {
                 super.persistData(collectorActor, new MockIdentifier(payload.toString()), payload, false);
                 return;
@@ -169,7 +169,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
             try {
                 Predicate drop = dropMessages.get(message.getClass());
                 if (drop == null || !drop.test(message)) {
-                    super.handleCommand(message);
+                    super.handleCommandImpl(message);
                 }
             } finally {
                 if (!(message instanceof SendHeartBeat)) {

@@ -1490,9 +1490,9 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         }
 
         @Override
-        public void handleCommand(final Object message) {
+        public void handleCommandImpl(final Object message) {
             if (dropMessageOfType == null || !dropMessageOfType.equals(message.getClass())) {
-                super.handleCommand(message);
+                super.handleCommandImpl(message);
             }
 
             if (collectorActor != null) {

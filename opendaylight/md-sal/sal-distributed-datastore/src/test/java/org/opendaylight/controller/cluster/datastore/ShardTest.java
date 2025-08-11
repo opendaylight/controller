@@ -180,7 +180,7 @@ public class ShardTest extends AbstractShardTest {
             public Shard create() {
                 return new Shard(newShardBuilder()) {
                     @Override
-                    public void handleCommand(final Object message) {
+                    public void handleCommandImpl(final Object message) {
                         if (message instanceof ElectionTimeout && firstElectionTimeout) {
                             firstElectionTimeout = false;
                             final ActorRef self = getSelf();
@@ -192,7 +192,7 @@ public class ShardTest extends AbstractShardTest {
 
                             onFirstElectionTimeout.countDown();
                         } else {
-                            super.handleCommand(message);
+                            super.handleCommandImpl(message);
                         }
                     }
                 };
@@ -1724,8 +1724,8 @@ public class ShardTest extends AbstractShardTest {
             }
 
             @Override
-            public void handleCommand(final Object message) {
-                super.handleCommand(message);
+            public void handleCommandImpl(final Object message) {
+                super.handleCommandImpl(message);
 
                 // XXX:  commit_snapshot equality check references RaftActorSnapshotMessageSupport.COMMIT_SNAPSHOT
                 if (message instanceof SaveSnapshotSuccess || "commit_snapshot".equals(message.toString())) {

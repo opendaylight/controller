@@ -67,7 +67,7 @@ public class TestShard extends Shard {
     }
 
     @Override
-    protected void handleCommand(Object message) {
+    protected void handleCommandImpl(Object message) {
         if (message instanceof StartDropMessages) {
             startDropMessages(((StartDropMessages<?>) message).getMsgClass());
         } else if (message instanceof StopDropMessages) {
@@ -80,7 +80,7 @@ public class TestShard extends Shard {
     private <T> void dropOrHandle(T message) {
         Predicate<T> drop = (Predicate<T>) dropMessages.get(message.getClass());
         if (drop == null || !drop.test(message)) {
-            super.handleCommand(message);
+            super.handleCommandImpl(message);
         }
     }
 

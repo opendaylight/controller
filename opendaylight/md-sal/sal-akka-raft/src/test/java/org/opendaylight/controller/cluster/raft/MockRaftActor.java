@@ -222,11 +222,11 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     }
 
     @Override
-    protected void handleCommand(final Object message) {
+    protected void handleCommandImpl(final Object message) {
         if (message instanceof RaftActorBehavior) {
             super.changeCurrentBehavior((RaftActorBehavior)message);
         } else {
-            super.handleCommand(message);
+            super.handleCommandImpl(message);
 
             if (RaftActorSnapshotMessageSupport.COMMIT_SNAPSHOT.equals(message)) {
                 snapshotCommitted.countDown();
