@@ -60,6 +60,7 @@ import org.opendaylight.controller.cluster.common.actor.CommonConfig;
 import org.opendaylight.controller.cluster.common.actor.Dispatchers;
 import org.opendaylight.controller.cluster.common.actor.Dispatchers.DispatcherType;
 import org.opendaylight.controller.cluster.common.actor.MeteringBehavior;
+import org.opendaylight.controller.cluster.datastore.DataTreeCohortActorRegistry.CohortRegistryCommand;
 import org.opendaylight.controller.cluster.datastore.actors.JsonExportActor;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStatsMXBean;
@@ -328,45 +329,36 @@ public class Shard extends RaftActor {
     protected void handleNonRaftCommand(final Object message) {
         store.resetTransactionBatch();
 
-        if (message instanceof RequestEnvelope request) {
-            handleRequestEnvelope(request);
-        } else if (MessageAssembler.isHandledMessage(message)) {
-            handleRequestAssemblerMessage(message);
-        } else if (message instanceof ConnectClientRequest request) {
-            handleConnectClient(request);
-        } else if (message instanceof DataTreeChangedReply) {
-            // Ignore reply
-        } else if (message instanceof RegisterDataTreeChangeListener request) {
-            treeChangeSupport.onMessage(request, isLeader(), hasLeader());
-        } else if (message instanceof UpdateSchemaContext request) {
-            updateSchemaContext(request);
-        } else if (message instanceof PeerAddressResolved resolved) {
-            setPeerAddress(resolved.getPeerId(), resolved.getPeerAddress());
-        } else if (message instanceof TxCommitTimeoutCheck) {
-            commitTimeoutCheck();
-        } else if (message instanceof DatastoreContext request) {
-            onDatastoreContext(request);
-        } else if (message instanceof RegisterRoleChangeListener) {
-            roleChangeNotifier.forward(message, context());
-        } else if (message instanceof FollowerInitialSyncUpStatus request) {
-            shardMBean.setFollowerInitialSyncStatus(request.initialSyncDone());
-            context().parent().tell(message, self());
-        } else if (message instanceof GetShardMBean) {
-            getSender().tell(getShardMBean(), self());
-        } else if (message instanceof GetShardDataTree) {
-            getSender().tell(store.getDataTree(), self());
-        } else if (message instanceof ServerRemoved) {
-            context().parent().forward(message, context());
-        } else if (message instanceof DataTreeCohortActorRegistry.CohortRegistryCommand request) {
-            store.processCohortRegistryCommand(getSender(), request);
-        } else if (message instanceof MakeLeaderLocal) {
-            onMakeLeaderLocal();
-        } else if (message instanceof ResumeNextPendingTransaction) {
-            store.resumeNextPendingTransaction();
-        } else if (message instanceof GetKnownClients) {
-            handleGetKnownClients();
-        } else if (!responseMessageSlicer.handleMessage(message)) {
-            super.handleNonRaftCommand(message);
+        switch (message) {
+            case RequestEnvelope msg -> handleRequestEnvelope(msg);
+            case ConnectClientRequest msg -> handleConnectClient(msg);
+            case DataTreeChangedReply msg -> {
+                // No-op
+            }
+            case RegisterDataTreeChangeListener msg -> treeChangeSupport.onMessage(msg, isLeader(), hasLeader());
+            case UpdateSchemaContext msg -> updateSchemaContext(msg);
+            case PeerAddressResolved msg -> setPeerAddress(msg.getPeerId(), msg.getPeerAddress());
+            case TxCommitTimeoutCheck msg -> commitTimeoutCheck();
+            case DatastoreContext msg -> onDatastoreContext(msg);
+            case RegisterRoleChangeListener msg -> roleChangeNotifier.forward(message, context());
+            case FollowerInitialSyncUpStatus msg -> {
+                shardMBean.setFollowerInitialSyncStatus(msg.initialSyncDone());
+                context().parent().tell(message, self());
+            }
+            case GetShardMBean msg -> getSender().tell(getShardMBean(), self());
+            case GetShardDataTree msg -> getSender().tell(store.getDataTree(), self());
+            case ServerRemoved msg -> context().parent().forward(message, context());
+            case CohortRegistryCommand msg -> store.processCohortRegistryCommand(getSender(), msg);
+            case MakeLeaderLocal msg -> onMakeLeaderLocal();
+            case ResumeNextPendingTransaction msg -> store.resumeNextPendingTransaction();
+            case GetKnownClients msg -> handleGetKnownClients();
+            default -> {
+                if (MessageAssembler.isHandledMessage(message)) {
+                    handleRequestAssemblerMessage(message);
+                } else if (!responseMessageSlicer.handleMessage(message)) {
+                    super.handleNonRaftCommand(message);
+                }
+            }
         }
     }
 
