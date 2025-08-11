@@ -33,7 +33,6 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidateNode;
 import org.opendaylight.yangtools.yang.data.tree.api.ModificationType;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
-import org.opendaylight.yangtools.yang.model.util.SchemaInferenceStack;
 
 public final class JsonExportActor extends AbstractUntypedActor {
     // Internal messages
@@ -65,11 +64,11 @@ public final class JsonExportActor extends AbstractUntypedActor {
     }
 
     private final List<LogEntry> entries = new ArrayList<>();
-    private final @NonNull EffectiveModelContext schemaContext;
+    private final @NonNull EffectiveModelContext modelContext;
     private final @NonNull Path baseDirPath;
 
-    private JsonExportActor(final EffectiveModelContext schemaContext, final Path dirPath) {
-        this.schemaContext = requireNonNull(schemaContext);
+    private JsonExportActor(final EffectiveModelContext modelContext, final Path dirPath) {
+        this.modelContext = requireNonNull(modelContext);
         baseDirPath = requireNonNull(dirPath);
     }
 
@@ -122,9 +121,7 @@ public final class JsonExportActor extends AbstractUntypedActor {
             jsonWriter.beginObject();
 
             try (var nnWriter = NormalizedNodeWriter.forStreamWriter(JSONNormalizedNodeStreamWriter.createNestedWriter(
-                    JSONCodecFactorySupplier.RFC7951.getShared(schemaContext),
-                    SchemaInferenceStack.of(schemaContext).toInference(), null, jsonWriter),
-                true)) {
+                    JSONCodecFactorySupplier.RFC7951.getShared(modelContext), jsonWriter, null), true)) {
                 for (NormalizedNode node : root.body()) {
                     nnWriter.write(node);
                 }
