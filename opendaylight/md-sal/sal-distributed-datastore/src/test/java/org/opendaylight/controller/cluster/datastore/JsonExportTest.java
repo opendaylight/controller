@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.datastore;
 import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -100,25 +99,67 @@ public class JsonExportTest extends AbstractShardTest {
     }
 
     private void verifyJournalExport() throws IOException {
-        final String expectedJournalData = readExpectedFile("expectedJournalExport.json");
-        final String actualJournalData = readActualFile(actualJournalFilePath);
-        assertEquals("Exported journal is not expected ", expectedJournalData, actualJournalData);
+        assertEquals("Exported journal is not expected ", """
+            {"Entries":[{"Entry":[{"Node":[{"Path":"/"},{"ModificationType":"UNMODIFIED"}]}]},{"Entry":[{"Node":[{"Path\
+            ":"/(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test/outer-\
+            list"},{"ModificationType":"WRITE"},{"Data":"[ImmutableLeafNode{name=(urn:opendaylight:params:xml:ns:yang:\
+            controller:md:sal:dom:store:test?revision=2014-03-13)id, body=1}]"}]}]},{"Entry":[{"Node":[{"Path":"/(urn:\
+            opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test/outer-list"},{"\
+            ModificationType":"WRITE"},{"Data":"[ImmutableLeafNode{name=(urn:opendaylight:params:xml:ns:yang:controller\
+            :md:sal:dom:store:test?revision=2014-03-13)id, body=2}]"}]}]},{"Entry":[{"Node":[{"Path":"/(urn:\
+            opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test/outer-list"},{"\
+            ModificationType":"WRITE"},{"Data":"[ImmutableLeafNode{name=(urn:opendaylight:params:xml:ns:yang:controller\
+            :md:sal:dom:store:test?revision=2014-03-13)id, body=3}]"}]}]},{"Entry":[{"Node":[{"Path":"/(urn:\
+            opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test/outer-list"},{"\
+            ModificationType":"WRITE"},{"Data":"[ImmutableLeafNode{name=(urn:opendaylight:params:xml:ns:yang:controller\
+            :md:sal:dom:store:test?revision=2014-03-13)id, body=4}]"}]}]},{"Entry":[{"Node":[{"Path":"/(urn:\
+            opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test/outer-list"},{"\
+            ModificationType":"WRITE"},{"Data":"[ImmutableLeafNode{name=(urn:opendaylight:params:xml:ns:yang:controller\
+            :md:sal:dom:store:test?revision=2014-03-13)id, body=5}]"}]}]},{"Entry":[{"Node":[{"Path":"/(urn:\
+            opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test/outer-list"},{"\
+            ModificationType":"WRITE"},{"Data":"[ImmutableLeafNode{name=(urn:opendaylight:params:xml:ns:yang:controller\
+            :md:sal:dom:store:test?revision=2014-03-13)id, body=6}]"}]}]},{"Entry":[{"Node":[{"Path":"/(urn:\
+            opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test/outer-list"},{"\
+            ModificationType":"WRITE"},{"Data":"[ImmutableLeafNode{name=(urn:opendaylight:params:xml:ns:yang:controller\
+            :md:sal:dom:store:test?revision=2014-03-13)id, body=7}]"}]}]},{"Entry":[{"Node":[{"Path":"/(urn:\
+            opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test/outer-list"},{"\
+            ModificationType":"WRITE"},{"Data":"[ImmutableLeafNode{name=(urn:opendaylight:params:xml:ns:yang:controller\
+            :md:sal:dom:store:test?revision=2014-03-13)id, body=8}]"}]}]},{"Entry":[{"Node":[{"Path":"/(urn:\
+            opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test/outer-list"},{"\
+            ModificationType":"WRITE"},{"Data":"[ImmutableLeafNode{name=(urn:opendaylight:params:xml:ns:yang:controller\
+            :md:sal:dom:store:test?revision=2014-03-13)id, body=9}]"}]}]},{"Entry":[{"Node":[{"Path":"/(urn:\
+            opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test/outer-list"},{"\
+            ModificationType":"WRITE"},{"Data":"[ImmutableLeafNode{name=(urn:opendaylight:params:xml:ns:yang:controller\
+            :md:sal:dom:store:test?revision=2014-03-13)id, body=10}]"}]}]},{"Entry":[{"Node":[{"Path":"/(urn:\
+            opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test/outer-list"},{\
+            "ModificationType":"WRITE"},{"Data":"[ImmutableLeafNode{name=(urn:opendaylight:params:xml:ns:yang:\
+            controller:md:sal:dom:store:test?revision=2014-03-13)id, body=11}]"}]}]},{"Entry":[{"Node":[{"Path":"/(urn:\
+            opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test/outer-list"},{"\
+            ModificationType":"WRITE"},{"Data":"[ImmutableLeafNode{name=(urn:opendaylight:params:xml:ns:yang:controller\
+            :md:sal:dom:store:test?revision=2014-03-13)id, body=12}]"}]}]},{"Entry":[{"Node":[{"Path":"/(urn:\
+            opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test/outer-list"},{\
+            "ModificationType":"WRITE"},{"Data":"[ImmutableLeafNode{name=(urn:opendaylight:params:xml:ns:yang:\
+            controller:md:sal:dom:store:test?revision=2014-03-13)id, body=13}]"}]}]},{"Entry":[{"Node":[{"Path":"/(urn\
+            :opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test/outer-list"},{"\
+            ModificationType":"WRITE"},{"Data":"[ImmutableLeafNode{name=(urn:opendaylight:params:xml:ns:yang:controller\
+            :md:sal:dom:store:test?revision=2014-03-13)id, body=14}]"}]}]},{"Entry":[{"Node":[{"Path":"/(urn:\
+            opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test/outer-list"},{"\
+            ModificationType":"WRITE"},{"Data":"[ImmutableLeafNode{name=(urn:opendaylight:params:xml:ns:yang:controller\
+            :md:sal:dom:store:test?revision=2014-03-13)id, body=15}]"}]}]},{"Entry":[{"Node":[{"Path":"/(urn:\
+            opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test/outer-list"},{\
+            "ModificationType":"WRITE"},{"Data":"[ImmutableLeafNode{name=(urn:opendaylight:params:xml:ns:yang:\
+            controller:md:sal:dom:store:test?revision=2014-03-13)id, body=16}]"}]}]}]}""",
+            readActualFile(actualJournalFilePath));
     }
 
     private void verifySnapshotExport() throws IOException {
-        final String expectedSnapshotData = readExpectedFile("expectedSnapshotExport.json");
-        final String actualSnapshotData = readActualFile(actualSnapshotFilePath);
-        assertEquals("Exported snapshot is not expected ", expectedSnapshotData, actualSnapshotData);
-    }
-
-    private static String readExpectedFile(final String filePath) throws IOException {
-        final File exportFile = new File(JsonExportTest.class.getClassLoader().getResource(filePath).getFile());
-        return new String(Files.readAllBytes(Path.of(exportFile.getPath())));
+        assertEquals("Exported snapshot is not expected ", """
+            {"odl-datastore-test:test":{}}""", readActualFile(actualSnapshotFilePath));
     }
 
     private static String readActualFile(final String filePath) throws IOException {
-        final File exportFile = new File(filePath);
-        await().atMost(10, TimeUnit.SECONDS).until(exportFile::exists);
-        return new String(Files.readAllBytes(Path.of(filePath)));
+        final var exportFile = Path.of(filePath);
+        await().atMost(10, TimeUnit.SECONDS).until(() -> Files.exists(exportFile));
+        return Files.readString(exportFile);
     }
 }
