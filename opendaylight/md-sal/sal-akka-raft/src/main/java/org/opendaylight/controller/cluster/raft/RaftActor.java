@@ -216,10 +216,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     @Override
     protected final void handleCommand(final Object message) {
         try (var context = appendEntriesReplyTracker.received(message)) {
-            final var maybeError = context.error();
-            if (maybeError.isPresent()) {
+            final var error = context.error();
+            if (error != null) {
                 LOG.trace("{} : AppendEntriesReply failed to arrive at the expected interval {}", persistenceId(),
-                    maybeError.orElseThrow());
+                    error);
             }
 
             handleCommandImpl(message);

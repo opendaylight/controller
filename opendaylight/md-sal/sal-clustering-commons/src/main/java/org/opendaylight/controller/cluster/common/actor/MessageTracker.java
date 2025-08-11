@@ -20,7 +20,7 @@ import com.google.common.base.Ticker;
 import com.google.common.collect.ImmutableList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
+import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,7 +63,7 @@ public final class MessageTracker {
             // Hidden to prevent outside instantiation
         }
 
-        public abstract Optional<Error> error();
+        public abstract @Nullable Error error();
 
         @Override
         public abstract void close();
@@ -111,21 +111,16 @@ public final class MessageTracker {
         }
 
         @Override
-        public Optional<Error> error() {
-            return Optional.empty();
+        public Error error() {
+            return null;
         }
     };
 
     private final List<MessageProcessingTime> messagesSinceLastExpectedMessage = new LinkedList<>();
-
     private final CurrentMessageContext currentMessageContext;
-
     private final Stopwatch expectedMessageWatch;
-
     private final Class<?> expectedMessageClass;
-
     private final long expectedArrivalInterval;
-
     private final Ticker ticker;
 
     private Object lastExpectedMessage;
@@ -135,10 +130,10 @@ public final class MessageTracker {
             final Ticker ticker) {
         checkArgument(expectedArrivalIntervalInMillis >= 0);
         this.expectedMessageClass = requireNonNull(expectedMessageClass);
-        this.expectedArrivalInterval = MILLISECONDS.toNanos(expectedArrivalIntervalInMillis);
+        expectedArrivalInterval = MILLISECONDS.toNanos(expectedArrivalIntervalInMillis);
         this.ticker = requireNonNull(ticker);
-        this.expectedMessageWatch = Stopwatch.createUnstarted(ticker);
-        this.currentMessageContext = new CurrentMessageContext();
+        expectedMessageWatch = Stopwatch.createUnstarted(ticker);
+        currentMessageContext = new CurrentMessageContext();
     }
 
     /**
@@ -201,10 +196,10 @@ public final class MessageTracker {
                 final List<MessageProcessingTime> messagesSinceLastExpectedMessage, final long expectedTimeNanos,
                 final long actualTimeNanos) {
             this.lastExpectedMessage = lastExpectedMessage;
-            this.currentExpectedMessage = message;
+            currentExpectedMessage = message;
             this.messagesSinceLastExpectedMessage = ImmutableList.copyOf(messagesSinceLastExpectedMessage);
-            this.expectedTimeInMillis = NANOSECONDS.toMillis(expectedTimeNanos);
-            this.actualTimeInMillis = NANOSECONDS.toMillis(actualTimeNanos);
+            expectedTimeInMillis = NANOSECONDS.toMillis(expectedTimeNanos);
+            actualTimeInMillis = NANOSECONDS.toMillis(actualTimeNanos);
         }
 
         @Override
@@ -252,7 +247,7 @@ public final class MessageTracker {
         private Object message;
 
         void reset(final Object newMessage) {
-            this.message = requireNonNull(newMessage);
+            message = requireNonNull(newMessage);
             checkState(!stopwatch.isRunning(), "Trying to reset a context that is not done (%s). currentMessage = %s",
                 this, newMessage);
             stopwatch.start();
@@ -269,8 +264,8 @@ public final class MessageTracker {
         }
 
         @Override
-        public Optional<Error> error() {
-            return Optional.empty();
+        public Error error() {
+            return null;
         }
     }
 
@@ -295,8 +290,8 @@ public final class MessageTracker {
         }
 
         @Override
-        public Optional<Error> error() {
-            return Optional.of(error);
+        public Error error() {
+            return error;
         }
     }
 }
