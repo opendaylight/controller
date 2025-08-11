@@ -368,10 +368,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     @Override
     protected final void handleCommand(final Object message) throws InterruptedException {
         try (var context = appendEntriesReplyTracker.received(message)) {
-            final var maybeError = context.error();
-            if (maybeError.isPresent()) {
-                LOG.trace("{} : AppendEntriesReply failed to arrive at the expected interval {}", memberId(),
-                    maybeError.orElseThrow());
+            final var error = context.error();
+            if (error != null) {
+                LOG.trace("{} : AppendEntriesReply failed to arrive at the expected interval {}", memberId(), error);
             }
 
             // dispatch any pending completions first ...

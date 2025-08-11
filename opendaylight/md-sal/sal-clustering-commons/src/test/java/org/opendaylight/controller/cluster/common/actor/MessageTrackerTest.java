@@ -5,13 +5,14 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.common.actor;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.common.testing.FakeTicker;
 import java.util.List;
@@ -56,8 +57,9 @@ public class MessageTrackerTest {
         ticker.advance(20, MILLISECONDS);
 
         MessageTracker.Context context2 = messageTracker.received(new Foo());
-        assertEquals(true, context2.error().isPresent());
-        assertEquals(0, context2.error().orElseThrow().getMessageProcessingTimesSinceLastExpectedMessage().size());
+        final var error = context2.error();
+        assertNotNull(error);
+        assertEquals(List.of(), error.getMessageProcessingTimesSinceLastExpectedMessage());
     }
 
     @Test
@@ -77,9 +79,9 @@ public class MessageTrackerTest {
 
         MessageTracker.Context context2 = messageTracker.received(new Foo());
 
-        assertEquals(true, context2.error().isPresent());
 
-        MessageTracker.Error error = context2.error().orElseThrow();
+        MessageTracker.Error error = context2.error();
+        assertNotNull(error);
 
         List<MessageTracker.MessageProcessingTime> messageProcessingTimes =
                 error.getMessageProcessingTimesSinceLastExpectedMessage();
@@ -100,13 +102,14 @@ public class MessageTrackerTest {
     public void testMetExpectationOnTracking() {
         messageTracker.begin();
 
-        MessageTracker.Context context1 = messageTracker.received(new Foo());
-        context1.close();
+        try (var context1 = messageTracker.received(new Foo())) {
+            // nothing else
+        }
 
         ticker.advance(1, MILLISECONDS);
 
         MessageTracker.Context context2 = messageTracker.received(new Foo());
-        assertEquals(false, context2.error().isPresent());
+        assertNull(context2.error());
     }
 
     @Test
@@ -132,9 +135,8 @@ public class MessageTrackerTest {
 
         MessageTracker.Context context = messageTracker.received(new Foo());
 
-        assertEquals(true, context.error().isPresent());
-
-        MessageTracker.Error error = context.error().orElseThrow();
+        MessageTracker.Error error = context.error();
+        assertNotNull(error);
 
         assertEquals(null, error.getLastExpectedMessage());
         assertEquals(Foo.class, error.getCurrentExpectedMessage().getClass());
@@ -154,8 +156,8 @@ public class MessageTrackerTest {
         messageTracker.begin();
 
         MessageTracker.Context context = messageTracker.received(new Foo());
-
-        assertEquals(true, context.error().isPresent());
+        MessageTracker.Error error = context.error();
+        assertNotNull(error);
     }
 
     @Test
@@ -164,10 +166,10 @@ public class MessageTrackerTest {
         messageTracker.begin();
 
         try (MessageTracker.Context ctx = messageTracker.received(45)) {
-            assertEquals(false, ctx.error().isPresent());
+            assertNull(ctx.error());
         }
         try (MessageTracker.Context ctx = messageTracker.received(45L)) {
-            assertEquals(false, ctx.error().isPresent());
+            assertNull(ctx.error());
         }
 
         List<MessageTracker.MessageProcessingTime> processingTimeList =
