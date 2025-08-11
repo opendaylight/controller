@@ -59,7 +59,6 @@ import org.opendaylight.controller.cluster.access.concepts.UnsupportedRequestExc
 import org.opendaylight.controller.cluster.common.actor.CommonConfig;
 import org.opendaylight.controller.cluster.common.actor.Dispatchers;
 import org.opendaylight.controller.cluster.common.actor.Dispatchers.DispatcherType;
-import org.opendaylight.controller.cluster.common.actor.MessageTracker;
 import org.opendaylight.controller.cluster.common.actor.MeteringBehavior;
 import org.opendaylight.controller.cluster.datastore.actors.JsonExportActor;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
@@ -89,7 +88,6 @@ import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.RaftActorRecoveryCohort;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
-import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.messages.RequestLeadership;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
@@ -179,8 +177,6 @@ public class Shard extends RaftActor {
 
     private final ActorRef roleChangeNotifier;
 
-    private final MessageTracker appendEntriesReplyTracker;
-
     private final @NonNull ShardSnapshotCohort snapshotCohort;
 
     private final DataTreeChangeListenerSupport treeChangeSupport = new DataTreeChangeListenerSupport(this);
@@ -248,9 +244,6 @@ public class Shard extends RaftActor {
         // create a notifier actor for each cluster member
         roleChangeNotifier = getContext().actorOf(RoleChangeNotifier.getProps(name), name + "-notifier");
 
-        appendEntriesReplyTracker = new MessageTracker(AppendEntriesReply.class,
-                getRaftActorContext().getConfigParams().getIsolatedCheckIntervalInMillis());
-
         dispatchers = new Dispatchers(getContext().system().dispatchers());
 
         snapshotCohort = new ShardSnapshotCohort(store, name);
@@ -313,64 +306,52 @@ public class Shard extends RaftActor {
             default:
                 break;
         }
-
-        if (LOG.isTraceEnabled()) {
-            appendEntriesReplyTracker.begin();
-        }
     }
 
     @Override
     // non-final for TestShard
     protected void handleNonRaftCommand(final Object message) {
-        try (var context = appendEntriesReplyTracker.received(message)) {
-            final var maybeError = context.error();
-            if (maybeError.isPresent()) {
-                LOG.trace("{} : AppendEntriesReply failed to arrive at the expected interval {}", memberId(),
-                    maybeError.orElseThrow());
-            }
+        store.resetTransactionBatch();
 
-            store.resetTransactionBatch();
-
-            if (message instanceof RequestEnvelope request) {
-                handleRequestEnvelope(request);
-            } else if (MessageAssembler.isHandledMessage(message)) {
-                handleRequestAssemblerMessage(message);
-            } else if (message instanceof ConnectClientRequest request) {
-                handleConnectClient(request);
-            } else if (message instanceof DataTreeChangedReply) {
-                // Ignore reply
-            } else if (message instanceof RegisterDataTreeChangeListener request) {
-                treeChangeSupport.onMessage(request, isLeader(), hasLeader());
-            } else if (message instanceof UpdateSchemaContext request) {
-                updateSchemaContext(request);
-            } else if (message instanceof PeerAddressResolved resolved) {
-                setPeerAddress(resolved.getPeerId(), resolved.getPeerAddress());
-            } else if (TX_COMMIT_TIMEOUT_CHECK_MESSAGE.equals(message)) {
-                commitTimeoutCheck();
-            } else if (message instanceof DatastoreContext request) {
-                onDatastoreContext(request);
-            } else if (message instanceof RegisterRoleChangeListener) {
-                roleChangeNotifier.forward(message, context());
-            } else if (message instanceof FollowerInitialSyncUpStatus request) {
-                shardMBean.setFollowerInitialSyncStatus(request.initialSyncDone());
-                context().parent().tell(message, self());
-            } else if (GET_SHARD_MBEAN_MESSAGE.equals(message)) {
-                getSender().tell(getShardMBean(), self());
-            } else if (message instanceof GetShardDataTree) {
-                getSender().tell(store.getDataTree(), self());
-            } else if (message instanceof ServerRemoved) {
-                context().parent().forward(message, context());
-            } else if (message instanceof DataTreeCohortActorRegistry.CohortRegistryCommand request) {
-                store.processCohortRegistryCommand(getSender(), request);
-            } else if (message instanceof MakeLeaderLocal) {
-                onMakeLeaderLocal();
-            } else if (RESUME_NEXT_PENDING_TRANSACTION.equals(message)) {
-                store.resumeNextPendingTransaction();
-            } else if (GetKnownClients.INSTANCE.equals(message)) {
-                handleGetKnownClients();
-            } else if (!responseMessageSlicer.handleMessage(message)) {
-                super.handleNonRaftCommand(message);
-            }
+        if (message instanceof RequestEnvelope request) {
+            handleRequestEnvelope(request);
+        } else if (MessageAssembler.isHandledMessage(message)) {
+            handleRequestAssemblerMessage(message);
+        } else if (message instanceof ConnectClientRequest request) {
+            handleConnectClient(request);
+        } else if (message instanceof DataTreeChangedReply) {
+            // Ignore reply
+        } else if (message instanceof RegisterDataTreeChangeListener request) {
+            treeChangeSupport.onMessage(request, isLeader(), hasLeader());
+        } else if (message instanceof UpdateSchemaContext request) {
+            updateSchemaContext(request);
+        } else if (message instanceof PeerAddressResolved resolved) {
+            setPeerAddress(resolved.getPeerId(), resolved.getPeerAddress());
+        } else if (TX_COMMIT_TIMEOUT_CHECK_MESSAGE.equals(message)) {
+            commitTimeoutCheck();
+        } else if (message instanceof DatastoreContext request) {
+            onDatastoreContext(request);
+        } else if (message instanceof RegisterRoleChangeListener) {
+            roleChangeNotifier.forward(message, context());
+        } else if (message instanceof FollowerInitialSyncUpStatus request) {
+            shardMBean.setFollowerInitialSyncStatus(request.initialSyncDone());
+            context().parent().tell(message, self());
+        } else if (GET_SHARD_MBEAN_MESSAGE.equals(message)) {
+            getSender().tell(getShardMBean(), self());
+        } else if (message instanceof GetShardDataTree) {
+            getSender().tell(store.getDataTree(), self());
+        } else if (message instanceof ServerRemoved) {
+            context().parent().forward(message, context());
+        } else if (message instanceof DataTreeCohortActorRegistry.CohortRegistryCommand request) {
+            store.processCohortRegistryCommand(getSender(), request);
+        } else if (message instanceof MakeLeaderLocal) {
+            onMakeLeaderLocal();
+        } else if (RESUME_NEXT_PENDING_TRANSACTION.equals(message)) {
+            store.resumeNextPendingTransaction();
+        } else if (GetKnownClients.INSTANCE.equals(message)) {
+            handleGetKnownClients();
+        } else if (!responseMessageSlicer.handleMessage(message)) {
+            super.handleNonRaftCommand(message);
         }
     }
 
