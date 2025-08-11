@@ -795,7 +795,7 @@ public class ShardTest extends AbstractShardTest {
         inOrder.verify(dataTree).commit(any(DataTreeCandidate.class));
 
         // Use MBean for verification
-        shard.tell(Shard.GET_SHARD_MBEAN_MESSAGE, testKit.getRef());
+        shard.tell(Shard.GetShardMBean.INSTANCE, testKit.getRef());
         final var shardStats = testKit.expectMsgClass(Duration.ofSeconds(5), ShardStatsMXBean.class);
         // Committed transaction count should increase as usual
         assertEquals(1, shardStats.getCommittedTransactionsCount());

@@ -110,29 +110,45 @@ import org.slf4j.LoggerFactory;
  */
 // FIXME: non-final for testing?
 public class Shard extends RaftActor {
+    private static final class TxCommitTimeoutCheck {
+        static final @NonNull TxCommitTimeoutCheck INSTANCE = new TxCommitTimeoutCheck();
 
-    @VisibleForTesting
-    static final Object TX_COMMIT_TIMEOUT_CHECK_MESSAGE = new Object() {
+        private TxCommitTimeoutCheck() {
+            // Hidden on purpose
+        }
+
         @Override
         public String toString() {
             return "txCommitTimeoutCheck";
         }
-    };
+    }
 
     @VisibleForTesting
-    static final Object GET_SHARD_MBEAN_MESSAGE = new Object() {
+    static final class GetShardMBean {
+        static final @NonNull GetShardMBean INSTANCE = new GetShardMBean();
+
+        private GetShardMBean() {
+            // Hidden on purpose
+        }
+
         @Override
         public String toString() {
             return "getShardMBeanMessage";
         }
-    };
+    }
 
-    static final Object RESUME_NEXT_PENDING_TRANSACTION = new Object() {
+    private static final class ResumeNextPendingTransaction {
+        static final @NonNull ResumeNextPendingTransaction INSTANCE = new ResumeNextPendingTransaction();
+
+        private ResumeNextPendingTransaction() {
+            // Hidden on purpose
+        }
+
         @Override
         public String toString() {
             return "resumeNextPendingTransaction";
         }
-    };
+    }
 
     private static final Logger LOG = LoggerFactory.getLogger(Shard.class);
 
@@ -326,7 +342,7 @@ public class Shard extends RaftActor {
             updateSchemaContext(request);
         } else if (message instanceof PeerAddressResolved resolved) {
             setPeerAddress(resolved.getPeerId(), resolved.getPeerAddress());
-        } else if (TX_COMMIT_TIMEOUT_CHECK_MESSAGE.equals(message)) {
+        } else if (message instanceof TxCommitTimeoutCheck) {
             commitTimeoutCheck();
         } else if (message instanceof DatastoreContext request) {
             onDatastoreContext(request);
@@ -335,7 +351,7 @@ public class Shard extends RaftActor {
         } else if (message instanceof FollowerInitialSyncUpStatus request) {
             shardMBean.setFollowerInitialSyncStatus(request.initialSyncDone());
             context().parent().tell(message, self());
-        } else if (GET_SHARD_MBEAN_MESSAGE.equals(message)) {
+        } else if (message instanceof GetShardMBean) {
             getSender().tell(getShardMBean(), self());
         } else if (message instanceof GetShardDataTree) {
             getSender().tell(store.getDataTree(), self());
@@ -345,9 +361,9 @@ public class Shard extends RaftActor {
             store.processCohortRegistryCommand(getSender(), request);
         } else if (message instanceof MakeLeaderLocal) {
             onMakeLeaderLocal();
-        } else if (RESUME_NEXT_PENDING_TRANSACTION.equals(message)) {
+        } else if (message instanceof ResumeNextPendingTransaction) {
             store.resumeNextPendingTransaction();
-        } else if (GetKnownClients.INSTANCE.equals(message)) {
+        } else if (message instanceof GetKnownClients) {
             handleGetKnownClients();
         } else if (!responseMessageSlicer.handleMessage(message)) {
             super.handleNonRaftCommand(message);
@@ -634,7 +650,7 @@ public class Shard extends RaftActor {
             final var period = Duration.ofMillis(transactionCommitTimeout / 3);
             txCommitTimeoutCheckSchedule = getContext().system().scheduler()
                 // withFixedDelay to avoid bursts
-                .scheduleWithFixedDelay(period, period, self(), TX_COMMIT_TIMEOUT_CHECK_MESSAGE,
+                .scheduleWithFixedDelay(period, period, self(), TxCommitTimeoutCheck.INSTANCE,
                     getContext().dispatcher(), ActorRef.noSender());
         }
     }
@@ -881,6 +897,6 @@ public class Shard extends RaftActor {
     }
 
     void scheduleNextPendingTransaction() {
-        self().tell(RESUME_NEXT_PENDING_TRANSACTION, ActorRef.noSender());
+        self().tell(ResumeNextPendingTransaction.INSTANCE, ActorRef.noSender());
     }
 }
