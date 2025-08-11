@@ -79,14 +79,11 @@ public final class JsonExportActor extends AbstractUntypedActor {
 
     @Override
     protected void handleReceive(final Object message) {
-        if (message instanceof ExportSnapshot) {
-            onExportSnapshot((ExportSnapshot) message);
-        } else if (message instanceof ExportJournal) {
-            onExportJournal((ExportJournal) message);
-        } else if (message instanceof FinishExport) {
-            onFinishExport((FinishExport)message);
-        } else {
-            unknownMessage(message);
+        switch (message) {
+            case ExportJournal msg -> onExportJournal(msg);
+            case ExportSnapshot msg -> onExportSnapshot(msg);
+            case FinishExport msg -> onFinishExport(msg);
+            default -> unknownMessage(message);
         }
     }
 
