@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.datastore.utils;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -37,6 +36,7 @@ public final class NormalizedNodeXMLOutput {
     }
 
     private NormalizedNodeXMLOutput() {
+        // Hidden on purpose
     }
 
     public static void toStream(final OutputStream outStream, final NormalizedNode node)
@@ -55,10 +55,5 @@ public final class NormalizedNodeXMLOutput {
         } catch (IOException | XMLStreamException e) {
             LOG.error("Error writing NormalizedNode to file {}", file, e);
         }
-    }
-
-    @Deprecated
-    public static void toFile(final File file, final NormalizedNode node) {
-        toFile(file.toPath(), node);
     }
 }
