@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.datastore;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
-import java.io.File;
+import java.nio.file.Path;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
 import org.opendaylight.controller.cluster.datastore.utils.NormalizedNodeXMLOutput;
 import org.opendaylight.controller.cluster.raft.RaftActorRecoveryCohort;
@@ -105,9 +105,9 @@ abstract class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
         open = false;
     }
 
-    private File writeRoot(final String kind, final NormalizedNode node) {
-        final var file = new File(System.getProperty("karaf.data", "."),
-            "failed-recovery-" + kind + "-" + memberId + ".xml");
+    private Path writeRoot(final String kind, final NormalizedNode node) {
+        final var file = Path.of(System.getProperty("karaf.data", "."))
+            .resolve("failed-recovery-" + kind + "-" + memberId + ".xml");
         NormalizedNodeXMLOutput.toFile(file, node);
         return file;
     }
