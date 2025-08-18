@@ -50,14 +50,14 @@ public class FrontendShardDataTreeSnapshotMetadataTest {
     @Test
     public void testSerializeMetadataSnapshotWithOneClient() throws Exception {
         final FrontendShardDataTreeSnapshotMetadata origSnapshot = createMetadataSnapshot(1);
-        final FrontendShardDataTreeSnapshotMetadata copySnapshot = copy(origSnapshot, 121);
+        final FrontendShardDataTreeSnapshotMetadata copySnapshot = copy(origSnapshot, 120);
         testMetadataSnapshotEqual(origSnapshot, copySnapshot);
     }
 
     @Test
     public void testSerializeMetadataSnapshotWithMoreClients() throws Exception {
         final FrontendShardDataTreeSnapshotMetadata origSnapshot = createMetadataSnapshot(5);
-        final FrontendShardDataTreeSnapshotMetadata copySnapshot = copy(origSnapshot, 273);
+        final FrontendShardDataTreeSnapshotMetadata copySnapshot = copy(origSnapshot, 268);
         testMetadataSnapshotEqual(origSnapshot, copySnapshot);
     }
 
