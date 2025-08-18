@@ -272,8 +272,7 @@ public abstract sealed class UnsignedLongBitmap implements Immutable {
 
     private static void writeEntry(final @NonNull DataOutput out, final long key, final boolean value)
             throws IOException {
-        // FIXME: We are emitting the old format with a separate by value here for backwards compatibility.
-        WritableObjects.writeLong(out, key);
-        out.writeBoolean(value);
+        // New-style entry format: the value is encoded in the header
+        WritableObjects.writeLong(out, key, value ? HAVE_VALUE | VALUE_TRUE : HAVE_VALUE);
     }
 }
