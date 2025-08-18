@@ -263,10 +263,7 @@ public abstract sealed class UnsignedLongBitmap implements Immutable {
 
     private static void writeEntry(final @NonNull DataOutput out, final long key, final boolean value)
             throws IOException {
-        // FIXME: This serialization format is what we inherited. We could do better by storing the boolean in
-        //        writeLong()'s flags. On the other had, we could also be writing longs by twos, which might be
-        //        benefitial.
-        WritableObjects.writeLong(out, key);
-        out.writeBoolean(value);
+        final var flags = HAVE_VALUE | (value ? VALUE_TRUE : 0);
+        WritableObjects.writeLong(out, key, flags);
     }
 }
