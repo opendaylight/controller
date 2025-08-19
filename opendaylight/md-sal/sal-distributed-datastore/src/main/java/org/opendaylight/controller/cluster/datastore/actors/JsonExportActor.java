@@ -13,7 +13,6 @@ import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -73,7 +72,7 @@ public final class JsonExportActor extends AbstractUntypedActor {
     }
 
     public static Props props(final EffectiveModelContext schemaContext, final String dirPath) {
-        return Props.create(JsonExportActor.class, schemaContext, Paths.get(dirPath));
+        return Props.create(JsonExportActor.class, schemaContext, Path.of(dirPath));
     }
 
     @Override
