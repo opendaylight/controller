@@ -178,6 +178,7 @@ final class JournalRecovery<T extends State> extends Recovery<T> {
             throw new IOException("Failed to append entry " + entry);
         }
         setDataRecovered();
+        actor.recoveryObserver().onCommandRecovered(entry.command());
     }
 
     private void writeEntry(final LogEntry entry) throws IOException {

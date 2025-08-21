@@ -219,6 +219,7 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
                 setMigratedDataRecovered();
             }
             recoveryCohort.applyRecoveredSnapshot(snapshotState);
+            actor.recoveryObserver().onSnapshotRecovered(snapshotState);
         }
 
         LOG.info("Recovery snapshot applied for {} in {}: snapshotIndex={}, snapshotTerm={}, journal-size={}",
@@ -252,6 +253,7 @@ non-sealed class PekkoRecovery<T extends @NonNull State> extends Recovery<T> {
     @NonNullByDefault
     void appendRecoveredEntry(final ReplicatedLogEntry logEntry) {
         recoveryLog.append(logEntry);
+        actor.recoveryObserver().onCommandRecovered(logEntry.command());
     }
 
     void onRecoveredApplyLogEntries(final long toIndex) {

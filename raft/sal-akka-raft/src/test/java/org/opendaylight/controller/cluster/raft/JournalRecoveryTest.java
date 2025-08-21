@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doReturn;
 
 import java.nio.file.Path;
@@ -70,6 +71,7 @@ class JournalRecoveryTest {
         input.setLastApplied(FIRST_ENTRY.index());
 
         doReturn(RestrictedObjectStreams.ofClassLoaders(JournalRecoveryTest.class)).when(actor).objectStreams();
+        doCallRealMethod().when(actor).recoveryObserver();
 
         final var output = recovery.recoverJournal(new RecoveryResult(input, true)).recoveryLog();
         assertEquals(0, output.getSnapshotIndex());
@@ -88,6 +90,8 @@ class JournalRecoveryTest {
         input.setCommitIndex(SECOND_ENTRY.index());
         input.setLastApplied(SECOND_ENTRY.index());
         assertTrue(input.append(THIRD_ENTRY));
+
+        doCallRealMethod().when(actor).recoveryObserver();
 
         final var output = recovery.recoverJournal(new RecoveryResult(input, true)).recoveryLog();
         assertEquals(1, output.getSnapshotIndex());
