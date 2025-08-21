@@ -49,7 +49,7 @@ public class ShardRecoveryCoordinatorTest extends AbstractTest {
         final Shard mockShard = Mockito.mock(Shard.class);
 
         peopleDataTree = new ShardDataTree(mockShard, peopleSchemaContext, TreeType.OPERATIONAL);
-        coordinator = ShardRecoveryCoordinator.create(peopleDataTree, "foobar");
+        coordinator = new ShardRecoveryCoordinator(peopleDataTree, "foobar");
         coordinator.startLogRecoveryBatch(10);
     }
 

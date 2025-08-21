@@ -8,8 +8,6 @@
 package org.opendaylight.controller.cluster.raft;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 
@@ -59,11 +57,4 @@ public interface RaftActorRecoveryCohort {
      * called after {@link #appendRecoveredCommand(StateCommand)}.
      */
     void applyCurrentLogRecoveryBatch();
-
-    /**
-     * Returns the snapshot to restore from on recovery.
-     *
-     * @return the snapshot or null if there's no snapshot to restore
-     */
-    @Nullable Snapshot getRestoreFromSnapshot();
 }

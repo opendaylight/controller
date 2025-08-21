@@ -14,7 +14,6 @@ import java.nio.file.Path;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
 import org.opendaylight.controller.cluster.datastore.utils.NormalizedNodeXMLOutput;
 import org.opendaylight.controller.cluster.raft.RaftActorRecoveryCohort;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -30,32 +29,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Pantelis
  */
-abstract class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
-    private static final class Simple extends ShardRecoveryCoordinator {
-        Simple(final ShardDataTree store, final String memberId) {
-            super(store, memberId);
-        }
-
-        @Override
-        public Snapshot getRestoreFromSnapshot() {
-            return null;
-        }
-    }
-
-    private static final class WithSnapshot extends ShardRecoveryCoordinator {
-        private final Snapshot restoreFromSnapshot;
-
-        WithSnapshot(final ShardDataTree store, final String memberId, final Snapshot snapshot) {
-            super(store, memberId);
-            restoreFromSnapshot = requireNonNull(snapshot);
-        }
-
-        @Override
-        public Snapshot getRestoreFromSnapshot() {
-            return restoreFromSnapshot;
-        }
-    }
-
+final class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
     private static final Logger LOG = LoggerFactory.getLogger(ShardRecoveryCoordinator.class);
 
     private final ShardDataTree store;
@@ -66,15 +40,6 @@ abstract class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
     ShardRecoveryCoordinator(final ShardDataTree store, final String memberId) {
         this.store = requireNonNull(store);
         this.memberId = requireNonNull(memberId);
-    }
-
-    static ShardRecoveryCoordinator create(final ShardDataTree store, final String memberId) {
-        return new Simple(store, memberId);
-    }
-
-    static ShardRecoveryCoordinator forSnapshot(final ShardDataTree store, final String memberId,
-            final Snapshot snapshot) {
-        return new WithSnapshot(store, memberId, snapshot);
     }
 
     @Override
