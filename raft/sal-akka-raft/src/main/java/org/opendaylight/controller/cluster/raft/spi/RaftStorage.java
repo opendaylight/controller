@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft.spi;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import java.io.IOException;
@@ -239,7 +240,16 @@ public abstract sealed class RaftStorage implements EntryStore, SnapshotStore
     @Override
     public void saveSnapshot(final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
             final @Nullable ToStorage<?> snapshot, final Instant timestamp) throws IOException {
-        final var format = SnapshotFileFormat.latest();
+        saveSnapshot(memberId(), directory, SnapshotFileFormat.latest(), compression, raftSnapshot, lastIncluded,
+            snapshot, timestamp);
+        retainSnapshots(timestamp);
+    }
+
+    @NonNullByDefault
+    @VisibleForTesting
+    public static final void saveSnapshot(final String memberId, final Path directory, final SnapshotFileFormat format,
+            final CompressionType compression, final RaftSnapshot raftSnapshot, final EntryInfo lastIncluded,
+            final @Nullable ToStorage<?> snapshot, final Instant timestamp) throws IOException {
         final var baseName = new StringBuilder()
             .append(FILENAME_START_STR)
             .append(HF.toHexDigits(timestamp.getEpochSecond()))
@@ -249,7 +259,7 @@ public abstract sealed class RaftStorage implements EntryStore, SnapshotStore
         final var tmpPath = directory.resolve(baseName + ".tmp");
         final var filePath = directory.resolve(baseName + format.extension());
 
-        LOG.debug("{}: starting snapshot writeout to {}", memberId(), tmpPath);
+        LOG.debug("{}: starting snapshot writeout to {}", memberId, tmpPath);
 
         try {
             format.createNew(tmpPath, timestamp, lastIncluded, raftSnapshot.votingConfig(), compression,
@@ -260,8 +270,7 @@ public abstract sealed class RaftStorage implements EntryStore, SnapshotStore
             throw e;
         }
 
-        LOG.debug("{}: finished snapshot writeout to {}", memberId(), filePath);
-        retainSnapshots(timestamp);
+        LOG.debug("{}: finished snapshot writeout to {}", memberId, filePath);
     }
 
     private void retainSnapshots(final Instant firstRetained) {

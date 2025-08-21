@@ -34,10 +34,8 @@ public class JsonExportTest extends AbstractShardTest {
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    @Override
     @Before
     public void setUp() throws Exception {
-        super.setUp();
         final var exportTmpFolder = temporaryFolder.newFolder("persistence-export");
         actualJournalFilePath = exportTmpFolder.getAbsolutePath() + "/journals/"
             + "member-1-shard-inventory-config" + nextShardNum + "-journal.json";
@@ -61,7 +59,7 @@ public class JsonExportTest extends AbstractShardTest {
     @Test
     public void testJsonExport() throws Exception {
         // Set up the InMemorySnapshotStore.
-        final var source = setupInMemorySnapshotStore();
+        final var source = setupWithSnapshot();
 
         final var writeMod = source.takeSnapshot().newModification();
         writeMod.write(TestModel.OUTER_LIST_PATH, TestModel.EMPTY_OUTER_LIST);
@@ -101,7 +99,7 @@ public class JsonExportTest extends AbstractShardTest {
 
     private void verifyJournalExport() throws IOException {
         assertEquals("Exported journal is not expected ", """
-            {"Entries":[{"Entry":[{"Node":[{"Path":"/"},{"ModificationType":"UNMODIFIED"}]}]},{"Entry":[{"Node":[{"Path\
+            {"Entries":[{"Entry":[{"Node":[{"Path\
             ":"/(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?revision=2014-03-13)test/outer-\
             list"},{"ModificationType":"WRITE"},{"Data":"[ImmutableLeafNode{name=(urn:opendaylight:params:xml:ns:yang:\
             controller:md:sal:dom:store:test?revision=2014-03-13)id, body=1}]"}]}]},{"Entry":[{"Node":[{"Path":"/(urn:\
