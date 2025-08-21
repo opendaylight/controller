@@ -34,10 +34,8 @@ public class JsonExportTest extends AbstractShardTest {
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    @Override
     @Before
     public void setUp() throws Exception {
-        super.setUp();
         final var exportTmpFolder = temporaryFolder.newFolder("persistence-export");
         actualJournalFilePath = exportTmpFolder.getAbsolutePath() + "/journals/"
             + "member-1-shard-inventory-config" + nextShardNum + "-journal.json";
