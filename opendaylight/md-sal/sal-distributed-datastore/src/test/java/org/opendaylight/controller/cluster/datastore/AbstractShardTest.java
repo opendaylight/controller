@@ -45,7 +45,6 @@ import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier
 import org.opendaylight.controller.cluster.datastore.persisted.CommitTransactionPayload;
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
-import org.opendaylight.controller.cluster.raft.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.TestActorFactory;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
@@ -96,13 +95,11 @@ public abstract class AbstractShardTest extends AbstractActorTest {
     @Before
     public void setUp() throws Exception {
         InMemorySnapshotStore.clear();
-        InMemoryJournal.clear();
     }
 
     @After
     public void tearDown() {
         InMemorySnapshotStore.clear();
-        InMemoryJournal.clear();
         actorFactory.close();
     }
 
