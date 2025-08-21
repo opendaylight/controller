@@ -23,7 +23,8 @@ import static org.opendaylight.controller.cluster.datastore.ShardDataTreeMocking
 
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.IOException;
-import java.util.List;
+import java.nio.file.Files;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -37,7 +38,6 @@ import org.apache.pekko.japi.Creator;
 import org.apache.pekko.testkit.TestActorRef;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
@@ -45,13 +45,16 @@ import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier
 import org.opendaylight.controller.cluster.datastore.persisted.CommitTransactionPayload;
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
-import org.opendaylight.controller.cluster.raft.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.TestActorFactory;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
+import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
+import org.opendaylight.controller.cluster.raft.spi.RaftStorage;
+import org.opendaylight.controller.cluster.raft.spi.SnapshotFileFormat;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
-import org.opendaylight.raft.api.TermInfo;
+import org.opendaylight.raft.api.EntryInfo;
+import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
@@ -92,14 +95,8 @@ public abstract class AbstractShardTest extends AbstractActorTest {
     protected final ShardIdentifier shardID = ShardIdentifier.create("inventory", MemberName.forName("member-1"),
         "config" + nextShardNum);
 
-    @Before
-    public void setUp() throws Exception {
-        InMemorySnapshotStore.clear();
-    }
-
     @After
     public void tearDown() {
-        InMemorySnapshotStore.clear();
         actorFactory.close();
     }
 
@@ -246,17 +243,21 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         return commitTransaction(store, mod);
     }
 
-    DataTree setupInMemorySnapshotStore() throws DataValidationFailedException {
-        final DataTree testStore = new InMemoryDataTreeFactory().create(
-            DataTreeConfiguration.DEFAULT_OPERATIONAL, SCHEMA_CONTEXT);
+    final DataTree setupWithSnapshot() throws DataValidationFailedException, IOException {
+        final var testStore = new InMemoryDataTreeFactory().create(DataTreeConfiguration.DEFAULT_OPERATIONAL,
+            SCHEMA_CONTEXT);
 
         writeToStore(testStore, TestModel.TEST_PATH, TestModel.EMPTY_TEST);
 
-        final NormalizedNode root = readStore(testStore, YangInstanceIdentifier.of());
+        final var root = readStore(testStore, YangInstanceIdentifier.of());
+        final var memberId = shardID.toString();
+        final var dir = stateDir().resolve("shards").resolve(memberId);
+        Files.createDirectories(dir);
 
-        InMemorySnapshotStore.addSnapshot(shardID.toString(), Snapshot.create(
-                new ShardSnapshotState(new MetadataShardDataTreeSnapshot(root)),
-                List.of(), 0, 1, -1, -1, new TermInfo(1), null));
+        RaftStorage.saveSnapshot(memberId, dir, SnapshotFileFormat.latest(), CompressionType.NONE,
+            new RaftSnapshot(null), EntryInfo.of(0, 1), ToStorage.of(ShardSnapshotState.SUPPORT.writer(),
+                new ShardSnapshotState(new MetadataShardDataTreeSnapshot(root))), Instant.now());
+
         return testStore;
     }
 
