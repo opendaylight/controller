@@ -19,16 +19,14 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.opendaylight.controller.cluster.raft.InMemoryJournal;
-import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
-import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
+import org.opendaylight.controller.cluster.raft.spi.EntryJournalV1;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
+import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev250130.DataStoreProperties.ExportOnRecovery;
 
 public class JsonExportTest extends AbstractShardTest {
-    private static final String DUMMY_DATA = "Dummy data as snapshot sequence number is set to 0 in "
-            + "InMemorySnapshotStore and journal recovery seq number will start from 1";
     private String actualJournalFilePath;
     private String actualSnapshotFilePath;
     private DatastoreContext datastoreContext;
@@ -68,29 +66,32 @@ public class JsonExportTest extends AbstractShardTest {
         final var writeMod = source.takeSnapshot().newModification();
         writeMod.write(TestModel.OUTER_LIST_PATH, TestModel.EMPTY_OUTER_LIST);
         writeMod.ready();
-        InMemoryJournal.addEntry(shardID.toString(), 0, DUMMY_DATA);
 
-        // Set up the InMemoryJournal.
-        InMemoryJournal.addEntry(shardID.toString(), 1, new SimpleReplicatedLogEntry(0, 1,
-                payloadForModification(source, writeMod, nextTransactionId())));
-
-        final int nListEntries = 16;
         final var listEntryKeys = new HashSet<Integer>();
 
-        // Add some ModificationPayload entries
-        for (int i = 1; i <= nListEntries; i++) {
-            listEntryKeys.add(i);
+        // Setup journal
+        try (var journal = new EntryJournalV1("test", stateDir().resolve("shards").resolve(shardID.toString()),
+                CompressionType.NONE, false)) {
+            journal.appendEntry(new DefaultLogEntry(0, 1,
+                payloadForModification(source, writeMod, nextTransactionId())));
 
-            final var mod = source.takeSnapshot().newModification();
-            mod.merge(TestModel.outerEntryPath(i), TestModel.outerEntry(i));
-            mod.ready();
 
-            InMemoryJournal.addEntry(shardID.toString(), i + 1, new SimpleReplicatedLogEntry(i, 1,
+            final int nListEntries = 16;
+
+            // Add some ModificationPayload entries
+            for (int i = 1; i <= nListEntries; i++) {
+                listEntryKeys.add(i);
+
+                final var mod = source.takeSnapshot().newModification();
+                mod.merge(TestModel.outerEntryPath(i), TestModel.outerEntry(i));
+                mod.ready();
+
+                journal.appendEntry(new DefaultLogEntry(i, 1,
                     payloadForModification(source, mod, nextTransactionId())));
-        }
+            }
 
-        InMemoryJournal.addEntry(shardID.toString(), nListEntries + 2,
-                new ApplyJournalEntries(nListEntries));
+            journal.setApplyTo(journal.nextToWrite() - 1);
+        }
 
         testRecovery(listEntryKeys, false);
 
