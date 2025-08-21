@@ -198,7 +198,7 @@ public class ShardTest extends AbstractShardTest {
             }
         };
 
-        setupInMemorySnapshotStore();
+        setupWithSnapshot();
 
         final YangInstanceIdentifier path = TestModel.TEST_PATH;
         final MockDataTreeChangeListener listener = new MockDataTreeChangeListener(1);
@@ -299,7 +299,7 @@ public class ShardTest extends AbstractShardTest {
         final var path = stateDir().resolve("shards").resolve(memberId);
 
         // Set up the InMemorySnapshotStore.
-        final DataTree source = setupInMemorySnapshotStore();
+        final DataTree source = setupWithSnapshot();
 
         // Set up the segmented journal
         try (var journal = new EntryJournalV1(memberId, path, CompressionType.NONE, true)) {
@@ -307,7 +307,7 @@ public class ShardTest extends AbstractShardTest {
             writeMod.write(TestModel.OUTER_LIST_PATH, TestModel.EMPTY_OUTER_LIST);
             writeMod.ready();
 
-            journal.appendEntry(new DefaultLogEntry(0, 1,
+            journal.appendEntry(new DefaultLogEntry(1, 1,
                 payloadForModification(source, writeMod, nextTransactionId())));
 
             final int nListEntries = 16;
@@ -320,7 +320,7 @@ public class ShardTest extends AbstractShardTest {
                 mod.merge(TestModel.outerEntryPath(i), TestModel.outerEntry(i));
                 mod.ready();
 
-                journal.appendEntry(new DefaultLogEntry(i, 1,
+                journal.appendEntry(new DefaultLogEntry(i + 1, 1,
                     payloadForModification(source, mod, nextTransactionId())));
             }
 
@@ -1673,7 +1673,7 @@ public class ShardTest extends AbstractShardTest {
         final ActorRef dclActor = actorFactory.createActor(DataTreeChangeListenerActor.props(listener,
             TestModel.TEST_PATH), actorFactory.generateActorId(testName + "-DataTreeChangeListener"));
 
-        setupInMemorySnapshotStore();
+        setupWithSnapshot();
 
         final TestActorRef<Shard> shard = actorFactory.createTestActor(
             newShardBuilder().props(stateDir()).withDispatcher(Dispatchers.DefaultDispatcherId()),
@@ -1703,7 +1703,7 @@ public class ShardTest extends AbstractShardTest {
         final ActorRef dclActor = actorFactory.createActor(DataTreeChangeListenerActor.props(listener,
             TestModel.TEST_PATH), actorFactory.generateActorId(testName + "-DataTreeChangeListener"));
 
-        setupInMemorySnapshotStore();
+        setupWithSnapshot();
 
         final TestActorRef<Shard> shard = actorFactory.createTestActor(
             newShardBuilder().props(stateDir()).withDispatcher(Dispatchers.DefaultDispatcherId()),

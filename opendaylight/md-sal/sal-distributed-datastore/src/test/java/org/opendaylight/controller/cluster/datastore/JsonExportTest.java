@@ -34,10 +34,8 @@ public class JsonExportTest extends AbstractShardTest {
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    @Override
     @Before
     public void setUp() throws Exception {
-        super.setUp();
         final var exportTmpFolder = temporaryFolder.newFolder("persistence-export");
         actualJournalFilePath = exportTmpFolder.getAbsolutePath() + "/journals/"
             + "member-1-shard-inventory-config" + nextShardNum + "-journal.json";
@@ -61,7 +59,7 @@ public class JsonExportTest extends AbstractShardTest {
     @Test
     public void testJsonExport() throws Exception {
         // Set up the InMemorySnapshotStore.
-        final var source = setupInMemorySnapshotStore();
+        final var source = setupWithSnapshot();
 
         final var writeMod = source.takeSnapshot().newModification();
         writeMod.write(TestModel.OUTER_LIST_PATH, TestModel.EMPTY_OUTER_LIST);
@@ -72,7 +70,7 @@ public class JsonExportTest extends AbstractShardTest {
         // Setup journal
         try (var journal = new EntryJournalV1("test", stateDir().resolve("shards").resolve(shardID.toString()),
                 CompressionType.NONE, false)) {
-            journal.appendEntry(new DefaultLogEntry(0, 1,
+            journal.appendEntry(new DefaultLogEntry(1, 1,
                 payloadForModification(source, writeMod, nextTransactionId())));
 
 
@@ -86,11 +84,11 @@ public class JsonExportTest extends AbstractShardTest {
                 mod.merge(TestModel.outerEntryPath(i), TestModel.outerEntry(i));
                 mod.ready();
 
-                journal.appendEntry(new DefaultLogEntry(i, 1,
+                journal.appendEntry(new DefaultLogEntry(i + 1, 1,
                     payloadForModification(source, mod, nextTransactionId())));
             }
 
-            journal.setApplyTo(journal.nextToWrite() - 1);
+            journal.setApplyTo(nListEntries + 1);
         }
 
         testRecovery(listEntryKeys, false);
