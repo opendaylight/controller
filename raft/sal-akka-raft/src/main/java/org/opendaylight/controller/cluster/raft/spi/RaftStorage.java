@@ -193,6 +193,7 @@ public abstract sealed class RaftStorage implements EntryStore, SnapshotStore
 
     protected abstract void preStop();
 
+    @Override
     public final @NonNull RaftStorageCompleter completer() {
         return completer;
     }
