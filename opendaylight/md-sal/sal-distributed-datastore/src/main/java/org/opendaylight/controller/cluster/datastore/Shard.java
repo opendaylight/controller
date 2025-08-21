@@ -91,6 +91,7 @@ import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftStat
 import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.messages.RequestLeadership;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
+import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.raft.api.RaftRole;
@@ -178,6 +179,7 @@ public class Shard extends RaftActor {
     private final ActorRef roleChangeNotifier;
 
     private final @NonNull ShardSnapshotCohort snapshotCohort;
+    private final @NonNull ShardRecoveryCoordinator recoveryCohort;
 
     private final DataTreeChangeListenerSupport treeChangeSupport = new DataTreeChangeListenerSupport(this);
 
@@ -247,6 +249,7 @@ public class Shard extends RaftActor {
         dispatchers = new Dispatchers(getContext().system().dispatchers());
 
         snapshotCohort = new ShardSnapshotCohort(store, name);
+        recoveryCohort = new ShardRecoveryCoordinator(store, memberId());
 
         responseMessageSlicer = MessageSlicer.builder().logContext(name)
                 .messageSliceSize(datastoreContext.getMaximumMessageSliceSize())
@@ -615,8 +618,13 @@ public class Shard extends RaftActor {
 
     @Override
     protected final RaftActorRecoveryCohort getRaftActorRecoveryCohort() {
-        return restoreFromSnapshot == null ? ShardRecoveryCoordinator.create(store, memberId())
-            : ShardRecoveryCoordinator.forSnapshot(store, memberId(), restoreFromSnapshot.getSnapshot());
+        return recoveryCohort;
+    }
+
+    @Override
+    protected final Snapshot getRestoreFromSnapshot() {
+        final var local = restoreFromSnapshot;
+        return local == null ? null : local.getSnapshot();
     }
 
     @Override

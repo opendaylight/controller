@@ -357,7 +357,7 @@ class PekkoRecoverySupportTest {
         sendRecoveryCompleted();
 
         verify(recoveryCohort, never()).applyRecoveredSnapshot(any());
-        verify(recoveryCohort, never()).getRestoreFromSnapshot();
+        verify(raftActor, never()).getRestoreFromSnapshot();
         verifyNoMoreInteractions(recoveryCohort);
 
         verify(raftActor).deleteMessages(10L);

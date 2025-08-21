@@ -241,7 +241,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         final var journalResult = recoverJournal(pekkoResult);
         final var recoveryCohort = getRaftActorRecoveryCohort();
-        final var restoreFrom = recoveryCohort.getRestoreFromSnapshot();
+        final var restoreFrom = getRestoreFromSnapshot();
 
         final RecoveryLog recoveredLog;
         if (restoreFrom != null) {
@@ -978,6 +978,13 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
      * Returns the RaftActorRecoveryCohort to participate in persistence recovery.
      */
     protected abstract @NonNull RaftActorRecoveryCohort getRaftActorRecoveryCohort();
+
+    /**
+     * Returns the snapshot to restore from on recovery.
+     *
+     * @return the snapshot or null if there's no snapshot to restore
+     */
+    protected abstract @Nullable Snapshot getRestoreFromSnapshot();
 
     /**
      * This method is called when recovery is complete.
