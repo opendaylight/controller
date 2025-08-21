@@ -31,12 +31,9 @@ import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.Cancellable;
 import org.apache.pekko.actor.ExtendedActorSystem;
-import org.apache.pekko.actor.PoisonPill;
 import org.apache.pekko.actor.Props;
 import org.apache.pekko.actor.Status;
 import org.apache.pekko.actor.Status.Failure;
-import org.apache.pekko.persistence.RecoveryCompleted;
-import org.apache.pekko.persistence.SnapshotOffer;
 import org.apache.pekko.serialization.JavaSerializer;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -61,7 +58,6 @@ import org.opendaylight.controller.cluster.common.actor.Dispatchers;
 import org.opendaylight.controller.cluster.common.actor.Dispatchers.DispatcherType;
 import org.opendaylight.controller.cluster.common.actor.MeteringBehavior;
 import org.opendaylight.controller.cluster.datastore.DataTreeCohortActorRegistry.CohortRegistryCommand;
-import org.opendaylight.controller.cluster.datastore.actors.JsonExportActor;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStatsMXBean;
 import org.opendaylight.controller.cluster.datastore.messages.ActorInitialized;
@@ -93,7 +89,8 @@ import org.opendaylight.controller.cluster.raft.messages.Payload;
 import org.opendaylight.controller.cluster.raft.messages.RequestLeadership;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
-import org.opendaylight.controller.cluster.raft.spi.LogEntry;
+import org.opendaylight.controller.cluster.raft.spi.NoopRecoveryObserver;
+import org.opendaylight.controller.cluster.raft.spi.RecoveryObserver;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.spi.RestrictedObjectStreams;
@@ -212,7 +209,7 @@ public class Shard extends RaftActor {
 
     private final MessageAssembler requestMessageAssembler;
 
-    private ActorRef exportActor;
+    private final @NonNull RecoveryObserver recoveryObserver;
 
     Shard(final Path stateDir, final AbstractBuilder<?, ?> builder) {
         super(stateDir.resolve(STATE_PATH), builder.getId().toString(), builder.getPeerAddresses(),
@@ -225,12 +222,6 @@ public class Shard extends RaftActor {
 
         final var name = memberId();
         frontendMetadata = new FrontendMetadata(name);
-
-        exportActor = switch (datastoreContext.getExportOnRecovery()) {
-            case Json -> getContext().actorOf(JsonExportActor.props(builder.getSchemaContext(),
-                datastoreContext.getRecoveryExportBaseDir()));
-            case Off -> null;
-        };
 
         setPersistence(datastoreContext.isPersistent());
 
@@ -247,6 +238,12 @@ public class Shard extends RaftActor {
                     builder.getDatastoreContext().getStoreRoot(), treeChangeListenerPublisher, name,
                     frontendMetadata);
         }
+
+        recoveryObserver = switch (datastoreContext.getExportOnRecovery()) {
+            case Json -> new JsonRecoveryObserver(memberId(), Path.of(datastoreContext.getRecoveryExportBaseDir()),
+                store);
+            case Off -> NoopRecoveryObserver.INSTANCE;
+        };
 
         shardMBean = DefaultShardStatsMXBean.create(name, datastoreContext.getDataStoreMXBeanType(), this);
 
@@ -300,31 +297,8 @@ public class Shard extends RaftActor {
     }
 
     @Override
-    protected final void handleRecover(final Object message) throws Exception {
-        LOG.debug("{}: onReceiveRecover: Received message {} from {}", memberId(), message.getClass(), getSender());
-        super.handleRecover(message);
-
-        final var local = exportActor;
-        if (local != null) {
-            export(local, message);
-        }
-    }
-
-    private void export(final ActorRef actor, final Object message) {
-        switch (message) {
-            case SnapshotOffer msg ->
-                actor.tell(new JsonExportActor.ExportSnapshot(store.readCurrentData().orElseThrow(), memberId()),
-                    ActorRef.noSender());
-            case LogEntry msg -> actor.tell(new JsonExportActor.ExportJournal(msg), ActorRef.noSender());
-            case RecoveryCompleted msg -> {
-                actor.tell(new JsonExportActor.FinishExport(memberId()), ActorRef.noSender());
-                actor.tell(PoisonPill.getInstance(), ActorRef.noSender());
-                exportActor = null;
-            }
-            default -> {
-                // No-op
-            }
-        }
+    protected final RecoveryObserver recoveryObserver() {
+        return recoveryObserver;
     }
 
     @Override

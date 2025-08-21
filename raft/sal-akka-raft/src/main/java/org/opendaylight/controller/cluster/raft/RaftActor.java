@@ -65,9 +65,11 @@ import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.spi.AbstractRaftCommand;
 import org.opendaylight.controller.cluster.raft.spi.AbstractStateCommand;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
+import org.opendaylight.controller.cluster.raft.spi.NoopRecoveryObserver;
 import org.opendaylight.controller.cluster.raft.spi.RaftCommand;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.RaftStorageCompleter;
+import org.opendaylight.controller.cluster.raft.spi.RecoveryObserver;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.controller.cluster.raft.spi.StateMachineCommand;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot;
@@ -215,7 +217,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     @Override
-    protected void handleRecover(final Object message) throws Exception {
+    protected final void handleRecover(final Object message) throws IOException {
         if (pekkoRecovery == null) {
             final var support = newRaftActorRecoverySupport();
             pekkoRecovery = isRecoveryApplicable() ? support.recoverToPersistent() : support.recoverToTransient();
@@ -313,6 +315,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     @NonNullByDefault
     private void finishRecovery() {
+        recoveryObserver().onRecoveryCompleted();
         onRecoveryComplete();
         initializeBehavior();
     }
@@ -956,6 +959,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
      */
     protected void setPeerAddress(final String peerId, final String peerAddress) {
         context.setPeerAddress(peerId, peerAddress);
+    }
+
+    protected @NonNull RecoveryObserver recoveryObserver() {
+        return NoopRecoveryObserver.INSTANCE;
     }
 
     /**
