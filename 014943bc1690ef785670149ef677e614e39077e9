@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0c6d50ed_c1a06a20",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/JsonExportTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2025-08-21T20:02:57Z",
+      "side": 0,
+      "message": "should be retained",
+      "range": {
+        "startLine": 104,
+        "startChar": 77,
+        "endLine": 104,
+        "endChar": 87
+      },
+      "revId": "014943bc1690ef785670149ef677e614e39077e9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
