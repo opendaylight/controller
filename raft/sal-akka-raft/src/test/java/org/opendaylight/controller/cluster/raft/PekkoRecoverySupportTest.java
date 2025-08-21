@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -122,6 +123,8 @@ class PekkoRecoverySupportTest {
 
     @Test
     void testOnReplicatedLogEntry() throws Exception {
+        doCallRealMethod().when(raftActor).recoveryObserver();
+
         recovery = support.recoverToPersistent();
 
         final var logEntry = new SimpleReplicatedLogEntry(1, 1, new MockCommand("1", 5));
@@ -220,6 +223,8 @@ class PekkoRecoverySupportTest {
     @Test
     void testOnSnapshotOffer() throws Exception {
         doReturn(MockSnapshotState.SUPPORT).when(snapshotCohort).support();
+        doCallRealMethod().when(raftActor).recoveryObserver();
+
         recovery = support.recoverToPersistent();
 
         final var recoveryLog = recovery.recoveryLog;
@@ -385,6 +390,7 @@ class PekkoRecoverySupportTest {
         peerInfos.addPeer(follower1, null, VotingState.VOTING);
         peerInfos.addPeer(follower2, null, VotingState.VOTING);
         doReturn(peerInfos).when(raftActor).peerInfos();
+        doCallRealMethod().when(raftActor).recoveryObserver();
         recovery = support.recoverToPersistent();
 
         // add new Server
@@ -434,6 +440,7 @@ class PekkoRecoverySupportTest {
     void testOnSnapshotOfferWithServerConfiguration() throws Exception {
         doReturn(peerInfos).when(raftActor).peerInfos();
         doReturn(MockSnapshotState.SUPPORT).when(snapshotCohort).support();
+        doCallRealMethod().when(raftActor).recoveryObserver();
         recovery = support.recoverToPersistent();
 
         final var electionTerm = 2;
