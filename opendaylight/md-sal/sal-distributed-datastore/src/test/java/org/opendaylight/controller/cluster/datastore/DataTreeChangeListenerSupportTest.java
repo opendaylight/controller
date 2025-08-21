@@ -53,10 +53,8 @@ public class DataTreeChangeListenerSupportTest extends AbstractShardTest {
     private Shard shard;
     private TestActorRef<Shard> shardActor;
 
-    @Override
     @Before
     public void setUp() throws Exception {
-        super.setUp();
         createShard();
     }
 
