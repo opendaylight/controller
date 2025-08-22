@@ -16,8 +16,6 @@ import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.ConfigFactory;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -30,10 +28,6 @@ import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
-import org.opendaylight.controller.cluster.databroker.TestClientBackedDataStore;
 import org.opendaylight.controller.cluster.raft.InMemorySnapshotStore;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
@@ -48,17 +42,8 @@ import org.opendaylight.yangtools.yang.data.api.schema.SystemMapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.builder.CollectionNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 
-@RunWith(Parameterized.class)
 public class DistributedDataStoreWithSegmentedJournalIntegrationTest
         extends AbstractDistributedDataStoreIntegrationTest {
-
-    @Parameters(name = "{0}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][] {
-                { TestClientBackedDataStore.class }
-        });
-    }
-
     @Before
     public void setUp() {
         InMemorySnapshotStore.clear();
@@ -96,7 +81,7 @@ public class DistributedDataStoreWithSegmentedJournalIntegrationTest
         final var testKit = new IntegrationTestKit(stateDir(), getSystem(), datastoreContextBuilder);
         CollectionNodeBuilder<MapEntryNode, SystemMapNode> carMapBuilder = ImmutableNodes.mapNodeBuilder(CAR_QNAME);
 
-        try (var dataStore = testKit.setupDataStore(testParameter, "testManyWritesDeletes",
+        try (var dataStore = testKit.setupDataStore(DS_CLASS, "testManyWritesDeletes",
             "module-shards-cars-member-1.conf", true, "cars")) {
 
             DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
@@ -155,7 +140,7 @@ public class DistributedDataStoreWithSegmentedJournalIntegrationTest
         }
 
         // test restoration from journal and verify data matches
-        try (var dataStore = testKit.setupDataStore(testParameter, "testManyWritesDeletes",
+        try (var dataStore = testKit.setupDataStore(DS_CLASS, "testManyWritesDeletes",
             "module-shards-cars-member-1.conf", true, "cars")) {
 
             DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
