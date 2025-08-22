@@ -17,6 +17,7 @@ package org.opendaylight.raft.journal;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.netty.buffer.AbstractReferenceCountedByteBuf;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
@@ -30,6 +31,7 @@ import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
+import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.nio.channels.GatheringByteChannel;
@@ -45,7 +47,8 @@ final class MappedByteBuf extends AbstractReferenceCountedByteBuf implements Flu
     private MappedByteBuffer byteBuffer;
     private ByteBuffer internalNio;
 
-    private MappedByteBuf(final ByteBufAllocator alloc, final MappedByteBuffer byteBuffer) {
+    @VisibleForTesting
+    MappedByteBuf(final ByteBufAllocator alloc, final MappedByteBuffer byteBuffer) {
         super(byteBuffer.limit());
         this.alloc = requireNonNull(alloc);
         this.byteBuffer = requireNonNull(byteBuffer);
@@ -360,18 +363,19 @@ final class MappedByteBuf extends AbstractReferenceCountedByteBuf implements Flu
 
     @Override
     public ByteBuf getBytes(final int index, final OutputStream out, final int length) throws IOException {
-        throw new UnsupportedOperationException();
+        Channels.newChannel(out).write(internalNioBuffer(index, length));
+        return this;
     }
 
     @Override
     public int getBytes(final int index, final GatheringByteChannel out, final int length) throws IOException {
-        throw new UnsupportedOperationException();
+        return out.write(internalNioBuffer(index, length));
     }
 
     @Override
     public int getBytes(final int index, final FileChannel out, final long position, final int length)
             throws IOException {
-        throw new UnsupportedOperationException();
+        return out.write(internalNioBuffer(index, length), position);
     }
 
     @Override
