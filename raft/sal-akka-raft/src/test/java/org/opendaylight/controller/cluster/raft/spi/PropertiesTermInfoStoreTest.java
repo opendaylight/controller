@@ -5,16 +5,14 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.raft;
+package org.opendaylight.controller.cluster.raft.spi;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.opendaylight.raft.api.TermInfo;
 
 /**
@@ -23,28 +21,20 @@ import org.opendaylight.raft.api.TermInfo;
  * @author Thomas Pantelis
  */
 class PropertiesTermInfoStoreTest {
-    private Path stateFile;
-
-    @BeforeEach
-    void beforeEach() throws Exception {
-        stateFile = Files.createTempFile(PropertiesTermInfoStoreTest.class.getName(), null);
-    }
-
-    @AfterEach
-    void afterEach() throws Exception {
-        Files.deleteIfExists(stateFile);
-    }
+    @TempDir
+    private Path directory;
 
     @Test
     void testUpdateAndPersist() throws Exception {
-        final var first = new PropertiesTermInfoStore("test", stateFile);
+        final var first = new PropertiesTermInfoStore("test", directory);
         final var termInfo = new TermInfo(10, "member-1");
         first.storeAndSetTerm(termInfo);
 
         assertEquals(termInfo, first.currentTerm());
 
-        assertTrue(Files.exists(stateFile));
-        final var second = new PropertiesTermInfoStore("test", stateFile);
+        assertThat(directory.resolve("TermInfo.properties")).isRegularFile();
+
+        final var second = new PropertiesTermInfoStore("test", directory);
         assertEquals(termInfo, second.loadAndSetTerm());
         assertEquals(termInfo, second.currentTerm());
     }

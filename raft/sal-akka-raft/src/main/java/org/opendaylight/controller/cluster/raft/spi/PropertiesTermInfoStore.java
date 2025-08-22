@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.raft;
+package org.opendaylight.controller.cluster.raft.spi;
 
 import static java.util.Objects.requireNonNull;
 
@@ -19,7 +19,6 @@ import java.nio.file.StandardOpenOption;
 import java.util.Properties;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
 import org.opendaylight.raft.api.TermInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,8 +27,9 @@ import org.slf4j.LoggerFactory;
  * A {@link TermInfoStore} based on an atomic {@link Properties} file.
  */
 @NonNullByDefault
-final class PropertiesTermInfoStore implements TermInfoStore {
+public final class PropertiesTermInfoStore implements TermInfoStore {
     private static final Logger LOG = LoggerFactory.getLogger(PropertiesTermInfoStore.class);
+    private static final Path TERM_INFO_PROPS = Path.of("TermInfo.properties");
     private static final String PROP_TERM = "term";
     private static final String PROP_VOTED_FOR = "votedFor";
 
@@ -38,9 +38,9 @@ final class PropertiesTermInfoStore implements TermInfoStore {
 
     private TermInfo currentTerm = TermInfo.INITIAL;
 
-    PropertiesTermInfoStore(final String logId, final Path propFile) {
+    public PropertiesTermInfoStore(final String logId, final Path directory) {
         this.logId = requireNonNull(logId);
-        this.propFile = requireNonNull(propFile);
+        propFile = directory.resolve(TERM_INFO_PROPS);
     }
 
     @Override

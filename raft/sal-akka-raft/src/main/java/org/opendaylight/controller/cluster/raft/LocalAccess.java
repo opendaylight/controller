@@ -13,6 +13,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import java.nio.file.Path;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.opendaylight.controller.cluster.raft.spi.PropertiesTermInfoStore;
 import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
 
 /**
@@ -20,7 +21,6 @@ import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
  */
 @NonNullByDefault
 public final class LocalAccess {
-    private static final Path TERM_INFO_PROPS = Path.of("TermInfo.properties");
 
     private final String memberId;
     private final TermInfoStore termInfoStore;
@@ -34,7 +34,7 @@ public final class LocalAccess {
     }
 
     public LocalAccess(final String memberId, final Path stateDir) {
-        this(memberId, stateDir, new PropertiesTermInfoStore(memberId, stateDir.resolve(TERM_INFO_PROPS)));
+        this(memberId, stateDir, new PropertiesTermInfoStore(memberId, stateDir));
     }
 
     String memberId() {
