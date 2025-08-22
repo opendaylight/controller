@@ -17,8 +17,6 @@ import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.ConfigFactory;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -32,10 +30,6 @@ import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
-import org.opendaylight.controller.cluster.databroker.TestClientBackedDataStore;
 import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedException;
 import org.opendaylight.controller.cluster.raft.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.InMemorySnapshotStore;
@@ -47,16 +41,7 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-@RunWith(Parameterized.class)
 public class DistributedDataStoreIntegrationTest extends AbstractDistributedDataStoreIntegrationTest {
-
-    @Parameters(name = "{0}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][] {
-            { TestClientBackedDataStore.class }
-        });
-    }
-
     @Before
     public void setUp() {
         InMemorySnapshotStore.clear();
@@ -85,7 +70,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
         final CountDownLatch blockRecoveryLatch = new CountDownLatch(1);
         InMemoryJournal.addBlockReadMessagesLatch(persistentID, blockRecoveryLatch);
 
-        try (var dataStore = testKit.setupDataStore(testParameter, testName, false, shardName)) {
+        try (var dataStore = testKit.setupDataStore(DS_CLASS, testName, false, shardName)) {
             // Create the write Tx
             final DOMStoreWriteTransaction writeTx = writeOnly ? dataStore.newWriteOnlyTransaction()
                     : dataStore.newReadWriteTransaction();
@@ -173,7 +158,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
         final CountDownLatch blockRecoveryLatch = new CountDownLatch(1);
         InMemoryJournal.addBlockReadMessagesLatch(persistentID, blockRecoveryLatch);
 
-        try (var dataStore = testKit.setupDataStore(testParameter, testName, false, shardName)) {
+        try (var dataStore = testKit.setupDataStore(DS_CLASS, testName, false, shardName)) {
             // Create the read-write Tx
             final DOMStoreReadWriteTransaction readWriteTx = dataStore.newReadWriteTransaction();
             assertNotNull("newReadWriteTransaction returned null", readWriteTx);
@@ -238,7 +223,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
 
         InMemoryJournal.addEntry(persistentID, 1, "Dummy data so akka will read from persistence");
 
-        final var dataStore = testKit.setupDataStore(testParameter, testName, false, shardName);
+        final var dataStore = testKit.setupDataStore(DS_CLASS, testName, false, shardName);
 
         // Create the write Tx
         final DOMStoreWriteTransaction writeTx = dataStore.newWriteOnlyTransaction();
@@ -304,7 +289,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
 
         InMemoryJournal.addEntry(persistentID, 1, "Dummy data so akka will read from persistence");
 
-        try (var dataStore = testKit.setupDataStore(testParameter, testName, false, shardName)) {
+        try (var dataStore = testKit.setupDataStore(DS_CLASS, testName, false, shardName)) {
             // Create the read-write Tx
             final DOMStoreReadWriteTransaction readWriteTx = dataStore.newReadWriteTransaction();
             assertNotNull("newReadWriteTransaction returned null", readWriteTx);
