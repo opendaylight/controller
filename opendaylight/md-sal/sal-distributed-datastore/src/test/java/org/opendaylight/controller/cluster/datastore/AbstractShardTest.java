@@ -31,7 +31,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.pekko.actor.ActorRef;
-import org.apache.pekko.actor.PoisonPill;
 import org.apache.pekko.actor.Props;
 import org.apache.pekko.dispatch.Dispatchers;
 import org.apache.pekko.japi.Creator;
@@ -113,7 +112,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
             .schemaContextProvider(() -> SCHEMA_CONTEXT);
     }
 
-    protected void testRecovery(final Set<Integer> listEntryKeys, final boolean stopActorOnFinish) throws Exception {
+    final ActorRef testRecovery(final Set<Integer> listEntryKeys) throws Exception {
         // Create the actor and wait for recovery complete.
 
         final int nListEntries = listEntryKeys.size();
@@ -163,9 +162,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         assertEquals("Last applied", nListEntries + 1,
                 shard.underlyingActor().getShardMBean().getLastApplied());
 
-        if (stopActorOnFinish) {
-            shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
-        }
+        return shard;
     }
 
     protected void verifyLastApplied(final TestActorRef<Shard> shard, final long expectedValue) {

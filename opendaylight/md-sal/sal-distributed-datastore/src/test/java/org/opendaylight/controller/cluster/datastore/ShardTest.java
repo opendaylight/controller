@@ -37,6 +37,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
+import org.apache.pekko.actor.PoisonPill;
 import org.apache.pekko.actor.Props;
 import org.apache.pekko.actor.Status.Failure;
 import org.apache.pekko.dispatch.Dispatchers;
@@ -327,7 +328,7 @@ public class ShardTest extends AbstractShardTest {
             journal.setApplyTo(nListEntries + 1);
         }
 
-        testRecovery(listEntryKeys, true);
+        testRecovery(listEntryKeys).tell(PoisonPill.getInstance(), ActorRef.noSender());
     }
 
     @Test

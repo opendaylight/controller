@@ -91,7 +91,7 @@ public class JsonExportTest extends AbstractShardTest {
             journal.setApplyTo(nListEntries + 1);
         }
 
-        testRecovery(listEntryKeys, false);
+        testRecovery(listEntryKeys);
 
         verifyJournalExport();
         verifySnapshotExport();
