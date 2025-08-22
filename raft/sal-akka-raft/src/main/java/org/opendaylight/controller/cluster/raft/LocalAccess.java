@@ -13,6 +13,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import java.nio.file.Path;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.opendaylight.controller.cluster.raft.spi.PropertiesTermInfoStore;
 import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
 
 /**
