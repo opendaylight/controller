@@ -72,7 +72,6 @@ import org.opendaylight.controller.cluster.datastore.persisted.FrontendClientMet
 import org.opendaylight.controller.cluster.datastore.persisted.FrontendShardDataTreeSnapshotMetadata;
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
-import org.opendaylight.controller.cluster.raft.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
 import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
@@ -166,7 +165,6 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
     @Before
     public void setUp() {
-        InMemoryJournal.clear();
         InMemorySnapshotStore.clear();
 
         leaderSystem = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig("Member1"));
@@ -192,7 +190,6 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         TestKit.shutdownActorSystem(followerSystem, true);
         TestKit.shutdownActorSystem(follower2System,true);
 
-        InMemoryJournal.clear();
         InMemorySnapshotStore.clear();
     }
 
