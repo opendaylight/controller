@@ -32,6 +32,7 @@ import com.typesafe.config.ConfigFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -60,7 +61,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.cluster.access.client.RequestTimeoutException;
-import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.databroker.ClientBackedDataStore;
 import org.opendaylight.controller.cluster.databroker.ConcurrentDOMDataBroker;
 import org.opendaylight.controller.cluster.databroker.TestClientBackedDataStore;
@@ -72,7 +72,6 @@ import org.opendaylight.controller.cluster.datastore.persisted.FrontendClientMet
 import org.opendaylight.controller.cluster.datastore.persisted.FrontendShardDataTreeSnapshotMetadata;
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
-import org.opendaylight.controller.cluster.raft.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.base.messages.TimeoutNow;
 import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
@@ -81,8 +80,11 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
+import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
+import org.opendaylight.controller.cluster.raft.spi.RaftStorage;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFileFormat;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.controller.cluster.raft.spi.UnsignedLongBitmap;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.PeopleModel;
@@ -102,6 +104,7 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.raft.api.EntryMeta;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.api.TermInfo;
+import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.RestrictedObjectStreams;
 import org.opendaylight.yangtools.yang.common.Uint64;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -155,8 +158,6 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     private final DatastoreContext.Builder followerDatastoreContextBuilder =
             DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(5)
                 .customRaftPolicyImplementation(DisableElectionsRaftPolicy.class.getName());
-    private final TransactionIdentifier tx1 = nextTransactionId();
-    private final TransactionIdentifier tx2 = nextTransactionId();
 
     private ClientBackedDataStore followerDistributedDataStore;
     private ClientBackedDataStore leaderDistributedDataStore;
@@ -165,8 +166,6 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
     @Before
     public void setUp() {
-        InMemorySnapshotStore.clear();
-
         leaderSystem = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig("Member1"));
         Cluster.get(leaderSystem).join(MEMBER_1_ADDRESS);
 
@@ -189,8 +188,6 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         TestKit.shutdownActorSystem(leaderSystem, true);
         TestKit.shutdownActorSystem(followerSystem, true);
         TestKit.shutdownActorSystem(follower2System,true);
-
-        InMemorySnapshotStore.clear();
     }
 
     private void initDatastoresWithCars(final String type) throws Exception {
@@ -1111,15 +1108,20 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         DataTree tree = new InMemoryDataTreeFactory().create(DataTreeConfiguration.DEFAULT_CONFIGURATION,
             SchemaContextHelper.full());
 
-        final ContainerNode carsNode = CarsModel.newCarsNode(
-                CarsModel.newCarsMapNode(CarsModel.newCarEntry("optima", Uint64.valueOf(20000))));
+        final var carsNode = CarsModel.newCarsNode(CarsModel.newCarsMapNode(CarsModel.newCarEntry(
+            "optima", Uint64.valueOf(20000))));
         AbstractShardTest.writeToStore(tree, CarsModel.BASE_PATH, carsNode);
 
-        final NormalizedNode snapshotRoot = AbstractShardTest.readStore(tree, YangInstanceIdentifier.of());
-        final Snapshot initialSnapshot = Snapshot.create(
-                new ShardSnapshotState(new MetadataShardDataTreeSnapshot(snapshotRoot)),
-                List.of(), 5, 1, 5, 1, new TermInfo(1), null);
-        InMemorySnapshotStore.addSnapshot(leaderCarShardName, initialSnapshot);
+        final var snapshotRoot = AbstractShardTest.readStore(tree, YangInstanceIdentifier.of());
+        final var snapshotState = new ShardSnapshotState(new MetadataShardDataTreeSnapshot(snapshotRoot));
+        final var initialSnapshot = Snapshot.create(snapshotState, List.of(), 5, 1, 5, 1, new TermInfo(1), null);
+
+        final var leaderCarStateDir = stateDir().resolve("odl.cluster.server").resolve(Shard.STATE_PATH)
+            .resolve(leaderCarShardName);
+        Files.createDirectories(leaderCarStateDir);
+        RaftStorage.saveSnapshot(leaderCarShardName, leaderCarStateDir, SnapshotFileFormat.latest(),
+            CompressionType.NONE, new RaftSnapshot(initialSnapshot.votingConfig()), initialSnapshot.lastApplied(),
+            ToStorage.of(ShardSnapshotState.SUPPORT.writer(), snapshotState), Instant.now());
 
         initDatastoresWithCars(testName);
 
@@ -1288,11 +1290,11 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         verifySnapshot("member-2-shard-cars-testSnapshotOnRootOverwrite", 12);
     }
 
-    private static void verifySnapshot(final String persistenceId, final long lastAppliedIndex) {
+    private void verifySnapshot(final String persistenceId, final long lastAppliedIndex) {
         await().atMost(Duration.ofSeconds(5)).untilAsserted(() -> {
-            final var snap = InMemorySnapshotStore.getSnapshots(persistenceId, Snapshot.class);
-            assertEquals(1, snap.size());
-            assertEquals(lastAppliedIndex, snap.get(0).getLastAppliedIndex());
+            final var snapshot = awaitSnapshot(persistenceId);
+            assertNotNull(snapshot);
+            assertEquals(lastAppliedIndex, snapshot.lastIncluded().index());
         });
     }
 
