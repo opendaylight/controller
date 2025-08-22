@@ -42,7 +42,6 @@ import org.apache.pekko.actor.PoisonPill;
 import org.apache.pekko.actor.Status.Success;
 import org.apache.pekko.cluster.Cluster;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
@@ -56,14 +55,15 @@ import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfigura
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.CreateShard;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
-import org.opendaylight.controller.cluster.raft.InMemoryJournal;
-import org.opendaylight.controller.cluster.raft.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
-import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
+import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
+import org.opendaylight.controller.cluster.raft.spi.EntryJournalV1;
+import org.opendaylight.controller.cluster.raft.spi.PropertiesTermInfoStore;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.raft.api.RaftRole;
+import org.opendaylight.raft.api.TermInfo;
+import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.AddReplicasForAllShardsInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.AddShardReplicaInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev250131.BackupDatastoreInputBuilder;
@@ -119,12 +119,6 @@ class ClusterAdminRpcServiceTest {
 
     @TempDir
     private Path stateDir;
-
-    @BeforeEach
-    void beforeEach() {
-        InMemoryJournal.clear();
-        InMemorySnapshotStore.clear();
-    }
 
     @AfterEach
     void afterEach() {
@@ -992,8 +986,8 @@ class ClusterAdminRpcServiceTest {
         });
     }
 
-    private static void setupPersistedServerConfigPayload(final VotingConfig votingConfig,
-            final String member, final String datastoreTypeSuffix, final String... shards) {
+    private void setupPersistedServerConfigPayload(final VotingConfig votingConfig, final String member,
+            final String datastoreTypeSuffix, final String... shards) throws IOException {
         String[] datastoreTypes = { "config_", "oper_" };
         for (String type : datastoreTypes) {
             for (String shard : shards) {
@@ -1005,9 +999,14 @@ class ClusterAdminRpcServiceTest {
 
                 final String shardID = ShardIdentifier.create(shard, MemberName.forName(member),
                         type + datastoreTypeSuffix).toString();
-                InMemoryJournal.addEntry(shardID, 1, new UpdateElectionTerm(1, null));
-                InMemoryJournal.addEntry(shardID, 2,
-                    new SimpleReplicatedLogEntry(0, 1, new VotingConfig(newServerInfo)));
+                final var dir = stateDir.resolve("odl.cluster.server").resolve("shards").resolve(shardID);
+                Files.createDirectories(dir);
+
+                new PropertiesTermInfoStore(shardID, dir).storeAndSetTerm(new TermInfo(1));
+
+                try (var journal = new EntryJournalV1(shardID, dir, CompressionType.NONE, false)) {
+                    journal.appendEntry(new DefaultLogEntry(0, 1, new VotingConfig(newServerInfo)));
+                }
             }
         }
     }
