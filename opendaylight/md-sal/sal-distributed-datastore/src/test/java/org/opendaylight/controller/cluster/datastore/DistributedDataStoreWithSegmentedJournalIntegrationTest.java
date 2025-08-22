@@ -28,7 +28,6 @@ import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.raft.InMemorySnapshotStore;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionChain;
@@ -46,9 +45,7 @@ public class DistributedDataStoreWithSegmentedJournalIntegrationTest
         extends AbstractDistributedDataStoreIntegrationTest {
     @Before
     public void setUp() {
-        InMemorySnapshotStore.clear();
-        system = ActorSystem.create("cluster-test",
-                ConfigFactory.load("segmented.conf").getConfig("Member1"));
+        system = ActorSystem.create("cluster-test", ConfigFactory.load("segmented.conf").getConfig("Member1"));
         cleanSnapshotDir(system);
 
         Address member1Address = AddressFromURIString.parse("pekko://cluster-test@127.0.0.1:2558");

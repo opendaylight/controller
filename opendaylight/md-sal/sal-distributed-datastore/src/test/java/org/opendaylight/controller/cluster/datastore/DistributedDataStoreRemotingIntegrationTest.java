@@ -29,7 +29,6 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.ConfigFactory;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.time.Duration;
 import java.time.Instant;
@@ -38,7 +37,6 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -55,7 +53,6 @@ import org.apache.pekko.cluster.Member;
 import org.apache.pekko.pattern.Patterns;
 import org.apache.pekko.testkit.javadsl.TestKit;
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.jdt.annotation.Nullable;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -1130,33 +1127,6 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
         verifySnapshot(awaitSnapshot(leaderCarShardName), initialSnapshot, snapshotRoot);
         verifySnapshot(awaitSnapshot(followerCarShardName), initialSnapshot, snapshotRoot);
-    }
-
-    private @Nullable SnapshotFile awaitSnapshot(final String persistenceId) {
-        // Note: first entry needs to mach ShardManager.ODL_CLUSTER_SERVER
-        final var stateDir = stateDir().resolve("odl.cluster.server").resolve(Shard.STATE_PATH).resolve(persistenceId);
-        return await().atMost(Duration.ofSeconds(5)).until(() -> {
-            if (!Files.isDirectory(stateDir)) {
-                return null;
-            }
-
-            try (var stream = Files.list(stateDir)) {
-                return stream
-                    .filter(path -> {
-                        final var str = path.getFileName().toString();
-                        return str.startsWith("snapshot-") && str.endsWith(".v1");
-                    })
-                    .map(path -> {
-                        try {
-                            return SnapshotFileFormat.SNAPSHOT_V1.open(path);
-                        } catch (IOException e) {
-                            throw new AssertionError(e);
-                        }
-                    })
-                    .findFirst()
-                    .orElse(null);
-            }
-        }, Objects::nonNull);
     }
 
     @Test

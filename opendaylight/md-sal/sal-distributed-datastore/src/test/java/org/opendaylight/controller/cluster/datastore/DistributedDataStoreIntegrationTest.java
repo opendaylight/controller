@@ -32,7 +32,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedException;
 import org.opendaylight.controller.cluster.raft.InMemoryJournal;
-import org.opendaylight.controller.cluster.raft.InMemorySnapshotStore;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
@@ -44,7 +43,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 public class DistributedDataStoreIntegrationTest extends AbstractDistributedDataStoreIntegrationTest {
     @Before
     public void setUp() {
-        InMemorySnapshotStore.clear();
         InMemoryJournal.clear();
         system = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig("Member1"));
         Address member1Address = AddressFromURIString.parse("pekko://cluster-test@127.0.0.1:2558");

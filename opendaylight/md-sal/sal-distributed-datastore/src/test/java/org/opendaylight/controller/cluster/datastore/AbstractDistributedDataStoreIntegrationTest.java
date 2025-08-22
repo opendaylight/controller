@@ -50,7 +50,6 @@ import org.opendaylight.controller.cluster.datastore.persisted.FrontendShardData
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.ShardSnapshotState;
 import org.opendaylight.controller.cluster.datastore.utils.MockDataTreeChangeListener;
-import org.opendaylight.controller.cluster.raft.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.PeopleModel;
@@ -67,6 +66,7 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionChain;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
+import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.yangtools.yang.common.Uint64;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -865,14 +865,10 @@ public abstract class AbstractDistributedDataStoreIntegrationTest extends Abstra
         }
     }
 
-    private static void verifySnapshot(final String persistenceId, final long lastAppliedIndex,
+    private void verifySnapshot(final String persistenceId, final long lastAppliedIndex,
             final long lastAppliedTerm) {
-        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
-                List<Snapshot> snap = InMemorySnapshotStore.getSnapshots(persistenceId, Snapshot.class);
-                assertEquals(1, snap.size());
-                assertEquals(lastAppliedIndex, snap.get(0).getLastAppliedIndex());
-                assertEquals(lastAppliedTerm, snap.get(0).getLastAppliedTerm());
-            }
-        );
+        final var snapshot = awaitSnapshot(persistenceId);
+        assertNotNull(snapshot);
+        assertEquals(EntryInfo.of(lastAppliedIndex, lastAppliedTerm), snapshot.lastIncluded());
     }
 }
