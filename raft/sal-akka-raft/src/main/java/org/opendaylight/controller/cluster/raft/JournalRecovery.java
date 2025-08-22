@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.List;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
+import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.spi.EntryJournal;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.slf4j.Logger;
@@ -178,6 +179,11 @@ final class JournalRecovery<T extends State> extends Recovery<T> {
             throw new IOException("Failed to append entry " + entry);
         }
         setDataRecovered();
+
+        if (entry.command() instanceof VotingConfig newVotingConfig) {
+            actor.peerInfos().updateVotingConfig(newVotingConfig);
+        }
+
         actor.recoveryObserver().onCommandRecovered(entry.command());
     }
 
