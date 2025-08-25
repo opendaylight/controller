@@ -20,14 +20,14 @@ final class ChainedCommitCohort extends CommitCohort {
     private static final Logger LOG = LoggerFactory.getLogger(ChainedCommitCohort.class);
 
     private final ReadWriteShardDataTreeTransaction transaction;
-    private final ShardDataTreeTransactionChain chain;
+    private final ChainedTransactionParent parent;
 
-    ChainedCommitCohort(final ShardDataTree dataTree, final ShardDataTreeTransactionChain chain,
+    ChainedCommitCohort(final ShardDataTree dataTree, final ChainedTransactionParent parent,
             final ReadWriteShardDataTreeTransaction transaction, final CompositeDataTreeCohort userCohorts,
             final @Nullable SortedSet<String> participatingShardNames) {
         super(dataTree, transaction, userCohorts, participatingShardNames);
         this.transaction = requireNonNull(transaction);
-        this.chain = requireNonNull(chain);
+        this.parent = requireNonNull(parent);
     }
 
     @Override
@@ -35,7 +35,7 @@ final class ChainedCommitCohort extends CommitCohort {
         super.commit(new FutureCallback<>() {
             @Override
             public void onSuccess(final UnsignedLong result) {
-                chain.clearTransaction(transaction);
+                parent.clearTransaction(transaction);
                 LOG.debug("Committed transaction {}", transaction);
                 callback.onSuccess(result);
             }

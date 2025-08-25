@@ -15,7 +15,7 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 
 public final class ReadWriteShardDataTreeTransaction extends AbstractShardDataTreeTransaction<DataTreeModification> {
-    ReadWriteShardDataTreeTransaction(final ShardDataTreeTransactionParent parent, final TransactionIdentifier id,
+    ReadWriteShardDataTreeTransaction(final TransactionParent parent, final TransactionIdentifier id,
             final DataTreeModification modification) {
         super(parent, id, modification);
     }

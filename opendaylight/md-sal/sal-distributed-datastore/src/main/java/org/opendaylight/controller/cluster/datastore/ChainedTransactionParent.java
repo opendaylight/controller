@@ -13,6 +13,7 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.base.MoreObjects;
 import java.util.SortedSet;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -23,22 +24,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A transaction chain attached to a Shard. This class is NOT thread-safe.
+ * A {@link TransactionParent} of inter-dependent transactions. Transactions are submitted in-order and a transaction
+ * failure causes all subsequent transactions to fail as well.
  */
-final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
-        implements Identifiable<LocalHistoryIdentifier> {
-    private static final Logger LOG = LoggerFactory.getLogger(ShardDataTreeTransactionChain.class);
+final class ChainedTransactionParent extends TransactionParent implements Identifiable<LocalHistoryIdentifier> {
+    private static final Logger LOG = LoggerFactory.getLogger(ChainedTransactionParent.class);
 
     private final @NonNull LocalHistoryIdentifier chainId;
-    private final @NonNull ShardDataTree dataTree;
 
     private ReadWriteShardDataTreeTransaction previousTx;
     private ReadWriteShardDataTreeTransaction openTransaction;
     private boolean closed;
 
-    ShardDataTreeTransactionChain(final LocalHistoryIdentifier localHistoryIdentifier, final ShardDataTree dataTree) {
+    @NonNullByDefault
+    ChainedTransactionParent(final LocalHistoryIdentifier localHistoryIdentifier, final ShardDataTree dataTree) {
+        super(dataTree);
         chainId = requireNonNull(localHistoryIdentifier);
-        this.dataTree = requireNonNull(dataTree);
     }
 
     @Override
@@ -46,14 +47,16 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
         return chainId;
     }
 
-    @NonNull ReadOnlyShardDataTreeTransaction newReadOnlyTransaction(final TransactionIdentifier txId) {
+    @Override
+    ReadOnlyShardDataTreeTransaction newReadOnlyTransaction(final TransactionIdentifier txId) {
         final var snapshot = getSnapshot();
         LOG.debug("Allocated read-only transaction {} snapshot {}", txId, snapshot);
 
         return new ReadOnlyShardDataTreeTransaction(this, txId, snapshot);
     }
 
-    @NonNull ReadWriteShardDataTreeTransaction newReadWriteTransaction(final TransactionIdentifier txId) {
+    @Override
+    ReadWriteShardDataTreeTransaction newReadWriteTransaction(final TransactionIdentifier txId) {
         final var snapshot = getSnapshot();
         LOG.debug("Allocated read-write transaction {} snapshot {}", txId, snapshot);
 
@@ -75,7 +78,7 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
             LOG.debug("Aborted open transaction {}", transaction);
             openTransaction = null;
         }
-        dataTree.abortTransaction(transaction, callback);
+        super.abortTransaction(transaction, callback);
     }
 
     @Override
@@ -90,12 +93,14 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
         return createReadyCohort(transaction, userCohorts, participatingShardNames);
     }
 
-    // TODO: this is not nice: we should handle this in ChainedCommitCohort -- we just do not have an underlying
-    //       ReadWriteShardDataTreeTransaction
     @Override
     CommitCohort createFailedCohort(final TransactionIdentifier txId, final DataTreeModification mod,
             final Exception failure) {
-        return dataTree.createFailedCohort(txId, mod, failure);
+        // FIXME: this is not nice: we should handle this in ChainedCommitCohort -- we just do not have an underlying
+        //        ReadWriteShardDataTreeTransaction
+        final var cohort = new SimpleCommitCohort(dataTree, mod, txId, failure);
+        dataTree.enqueueReadyTransaction(cohort);
+        return cohort;
     }
 
     @Override
@@ -104,7 +109,7 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
         checkState(openTransaction == null, "Attempted to finish transaction %s while %s is outstanding", txId,
             openTransaction);
 
-        final var transaction = new ReadWriteShardDataTreeTransaction(dataTree, txId, mod);
+        final var transaction = new ReadWriteShardDataTreeTransaction(this, txId, mod);
         transaction.close();
         return createReadyCohort(transaction, dataTree.newUserCohorts(txId), participatingShardNames);
     }

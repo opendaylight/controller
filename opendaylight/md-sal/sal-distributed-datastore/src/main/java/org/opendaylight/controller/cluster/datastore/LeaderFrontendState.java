@@ -180,7 +180,7 @@ abstract sealed class LeaderFrontendState implements Identifiable<ClientIdentifi
             }
 
             // We have to send the response only after persistence has completed
-            final var chain = tree().ensureTransactionChain(historyId, () -> {
+            final var chain = tree().ensureChainedParent(historyId, () -> {
                 LOG.debug("{}: persisted history {}", persistenceId(), historyId);
                 envelope.sendSuccess(new LocalHistorySuccess(historyId, request.getSequence()),
                     tree().readTime() - now);
