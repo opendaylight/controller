@@ -11,6 +11,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeSnapshot;
@@ -22,13 +23,13 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataTreeSnapshot;
  */
 abstract class AbstractShardDataTreeTransaction<T extends DataTreeSnapshot>
         implements Identifiable<TransactionIdentifier> {
-    private final ShardDataTreeTransactionParent parent;
-    private final TransactionIdentifier id;
-    private final T snapshot;
+    private final @NonNull TransactionParent parent;
+    private final @NonNull TransactionIdentifier id;
+    private final @NonNull T snapshot;
 
     private boolean closed;
 
-    AbstractShardDataTreeTransaction(final ShardDataTreeTransactionParent parent, final TransactionIdentifier id,
+    AbstractShardDataTreeTransaction(final TransactionParent parent, final TransactionIdentifier id,
         final T snapshot) {
         this.parent = requireNonNull(parent);
         this.snapshot = requireNonNull(snapshot);
@@ -40,11 +41,11 @@ abstract class AbstractShardDataTreeTransaction<T extends DataTreeSnapshot>
         return id;
     }
 
-    final ShardDataTreeTransactionParent getParent() {
+    final @NonNull TransactionParent getParent() {
         return parent;
     }
 
-    final T getSnapshot() {
+    final @NonNull T getSnapshot() {
         return snapshot;
     }
 
