@@ -63,8 +63,7 @@ public final class FindLeaderReply implements Serializable {
      * @return the actor reference to the leader, or empty if no leader is known
      * @deprecated Use {@link #leaderActorPath()} instead.
      */
-    // Use leaderActorRef
-    @Deprecated(since = "1.0.0", forRemoval = true)
+    @Deprecated(since = "11.0.0", forRemoval = true)
     public @NonNull Optional<String> getLeaderActor() {
         return Optional.ofNullable(leaderActorPath);
     }
