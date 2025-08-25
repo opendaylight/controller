@@ -110,10 +110,9 @@ public class ShardDataTreeTest extends AbstractTest {
 
         assertEquals(fullSchema, shardDataTree.modelContext());
 
-        final ReadWriteShardDataTreeTransaction transaction =
-                shardDataTree.newReadWriteTransaction(nextTransactionId());
-
-        final DataTreeModification snapshot = transaction.getSnapshot();
+        final var queue = shardDataTree.unorderedQueue();
+        final var transaction = queue.newReadWriteTransaction(nextTransactionId());
+        final var snapshot = transaction.getSnapshot();
 
         assertNotNull(snapshot);
 
@@ -125,22 +124,21 @@ public class ShardDataTreeTest extends AbstractTest {
             snapshot.write(PeopleModel.BASE_PATH, PeopleModel.create());
         }
 
-        final CommitCohort cohort = shardDataTree.finishTransaction(transaction, null);
+        final var cohort = queue.finishTransaction(transaction, null);
 
         immediateCanCommit(cohort);
         immediatePreCommit(cohort);
         immediateCommit(cohort);
 
-        final ReadOnlyShardDataTreeTransaction readOnlyShardDataTreeTransaction =
-                shardDataTree.newReadOnlyTransaction(nextTransactionId());
+        final var readOnlyShardDataTreeTransaction = queue.newReadOnlyTransaction(nextTransactionId());
 
-        final DataTreeSnapshot snapshot1 = readOnlyShardDataTreeTransaction.getSnapshot();
+        final var snapshot1 = readOnlyShardDataTreeTransaction.getSnapshot();
 
-        final Optional<NormalizedNode> optional = snapshot1.readNode(CarsModel.BASE_PATH);
+        final var optional = snapshot1.readNode(CarsModel.BASE_PATH);
 
         assertEquals(expectedCarsPresent, optional.isPresent());
 
-        final Optional<NormalizedNode> optional1 = snapshot1.readNode(PeopleModel.BASE_PATH);
+        final var optional1 = snapshot1.readNode(PeopleModel.BASE_PATH);
 
         assertEquals(expectedPeoplePresent, optional1.isPresent());
     }
@@ -556,8 +554,8 @@ public class ShardDataTreeTest extends AbstractTest {
     }
 
     private void assertCarsUint64() {
-        final DataTreeSnapshot snapshot = shardDataTree.newReadOnlyTransaction(nextTransactionId()).getSnapshot();
-        final NormalizedNode cars = snapshot.readNode(CarsModel.CAR_LIST_PATH).orElseThrow();
+        final var snapshot = shardDataTree.unorderedQueue().newReadOnlyTransaction(nextTransactionId()).getSnapshot();
+        final var cars = snapshot.readNode(CarsModel.CAR_LIST_PATH).orElseThrow();
 
         assertEquals(ImmutableNodes.newSystemMapBuilder()
             .withNodeIdentifier(new NodeIdentifier(CarsModel.CAR_QNAME))
@@ -589,10 +587,11 @@ public class ShardDataTreeTest extends AbstractTest {
     }
 
     private CommitCohort newShardDataTreeCohort(final DataTreeOperation operation) {
-        final var transaction = shardDataTree.newReadWriteTransaction(nextTransactionId());
+        final var queue = shardDataTree.unorderedQueue();
+        final var transaction = queue.newReadWriteTransaction(nextTransactionId());
         final var snapshot = transaction.getSnapshot();
         operation.execute(snapshot);
-        return shardDataTree.finishTransaction(transaction, null);
+        return queue.finishTransaction(transaction, null);
     }
 
     private static void verifyOnDataTreeChanged(final DOMDataTreeChangeListener listener,
@@ -609,11 +608,11 @@ public class ShardDataTreeTest extends AbstractTest {
     }
 
     private static NormalizedNode getCars(final ShardDataTree shardDataTree) {
-        final ReadOnlyShardDataTreeTransaction readOnlyShardDataTreeTransaction =
-                shardDataTree.newReadOnlyTransaction(nextTransactionId());
-        final DataTreeSnapshot snapshot1 = readOnlyShardDataTreeTransaction.getSnapshot();
+        final var readOnlyShardDataTreeTransaction =
+                shardDataTree.unorderedQueue().newReadOnlyTransaction(nextTransactionId());
+        final var snapshot1 = readOnlyShardDataTreeTransaction.getSnapshot();
 
-        final Optional<NormalizedNode> optional = snapshot1.readNode(CarsModel.BASE_PATH);
+        final var optional = snapshot1.readNode(CarsModel.BASE_PATH);
 
         assertTrue(optional.isPresent());
 
@@ -643,10 +642,11 @@ public class ShardDataTreeTest extends AbstractTest {
 
     private static DataTreeCandidate doTransaction(final ShardDataTree shardDataTree,
             final DataTreeOperation operation) {
-        final var transaction = shardDataTree.newReadWriteTransaction(nextTransactionId());
+        final var queue = shardDataTree.unorderedQueue();
+        final var transaction = queue.newReadWriteTransaction(nextTransactionId());
         final var snapshot = transaction.getSnapshot();
         operation.execute(snapshot);
-        final var cohort = shardDataTree.finishTransaction(transaction, null);
+        final var cohort = queue.finishTransaction(transaction, null);
 
         immediateCanCommit(cohort);
         immediatePreCommit(cohort);
@@ -658,12 +658,13 @@ public class ShardDataTreeTest extends AbstractTest {
 
     private static DataTreeCandidate applyCandidates(final ShardDataTree shardDataTree,
             final List<DataTreeCandidate> candidates) {
-        final var transaction = shardDataTree.newReadWriteTransaction(nextTransactionId());
+        final var queue = shardDataTree.unorderedQueue();
+        final var transaction = queue.newReadWriteTransaction(nextTransactionId());
         final var snapshot = transaction.getSnapshot();
         for (var candidateTip : candidates) {
             DataTreeCandidates.applyToModification(snapshot, candidateTip);
         }
-        final var cohort = shardDataTree.finishTransaction(transaction, null);
+        final var cohort = queue.finishTransaction(transaction, null);
 
         immediateCanCommit(cohort);
         immediatePreCommit(cohort);
