@@ -56,9 +56,9 @@ public class ShardTestKit extends TestKit {
         for (int i = 0; i < 20 * 5; i++) {
             Future<Object> future = Patterns.ask(shard, FindLeader.INSTANCE, new Timeout(duration));
             try {
-                final var maybeLeader = ((FindLeaderReply) Await.result(future, duration)).getLeaderActor();
-                if (maybeLeader.isPresent()) {
-                    return maybeLeader.orElseThrow();
+                final var maybeLeader = ((FindLeaderReply) Await.result(future, duration)).leaderActorPath();
+                if (maybeLeader != null) {
+                    return maybeLeader;
                 }
             } catch (TimeoutException e) {
                 LOG.trace("FindLeader timed out", e);
@@ -80,12 +80,12 @@ public class ShardTestKit extends TestKit {
         for (int i = 0; i < 20 * 5; i++) {
             Future<Object> future = Patterns.ask(shard, FindLeader.INSTANCE, new Timeout(duration));
             try {
-                final var maybeLeader = ((FindLeaderReply) Await.result(future, duration)).getLeaderActor();
-                if (!maybeLeader.isPresent()) {
+                final var maybeLeader = ((FindLeaderReply) Await.result(future, duration)).leaderActorPath();
+                if (maybeLeader == null) {
                     return;
                 }
 
-                lastResponse = maybeLeader.orElseThrow();
+                lastResponse = maybeLeader;
             } catch (TimeoutException e) {
                 lastResponse = e;
             } catch (Exception e) {
