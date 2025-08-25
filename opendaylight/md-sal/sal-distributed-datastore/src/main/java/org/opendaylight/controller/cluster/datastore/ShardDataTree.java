@@ -174,12 +174,9 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     private static DataTree createDataTree(final TreeType treeType, final YangInstanceIdentifier root) {
-        final DataTreeConfiguration baseConfig = DataTreeConfiguration.getDefault(treeType);
-        return new InMemoryDataTreeFactory().create(new DataTreeConfiguration.Builder(baseConfig.getTreeType())
-                .setMandatoryNodesValidation(baseConfig.isMandatoryNodesValidationEnabled())
-                .setUniqueIndexes(baseConfig.isUniqueIndexEnabled())
-                .setRootPath(root)
-                .build());
+        return new InMemoryDataTreeFactory().create(DataTreeConfiguration.getDefault(treeType).toBuilder()
+            .setRootPath(root)
+            .build());
     }
 
     @VisibleForTesting
