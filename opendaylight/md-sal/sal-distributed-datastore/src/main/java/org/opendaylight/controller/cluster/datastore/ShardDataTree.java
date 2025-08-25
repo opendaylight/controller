@@ -25,7 +25,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
@@ -783,28 +782,6 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     @VisibleForTesting
     final DataTreeModification newModification() {
         return takeSnapshot().newModification();
-    }
-
-    final Collection<CommitCohort> getAndClearPendingTransactions() {
-        final var ret = new ArrayList<CommitCohort>(getQueueSize());
-
-        for (var entry : pendingFinishCommits) {
-            ret.add(entry);
-        }
-
-        for (var entry : pendingCommits) {
-            ret.add(entry);
-        }
-
-        for (var entry : pendingTransactions) {
-            ret.add(entry);
-        }
-
-        pendingFinishCommits.clear();
-        pendingCommits.clear();
-        pendingTransactions.clear();
-        tip = dataTree;
-        return ret;
     }
 
     /**
