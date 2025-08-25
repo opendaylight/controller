@@ -220,7 +220,7 @@ public class ShardTest extends AbstractShardTest {
 
         shard.tell(FindLeader.INSTANCE, testKit.getRef());
         final FindLeaderReply findLeadeReply = testKit.expectMsgClass(Duration.ofSeconds(5), FindLeaderReply.class);
-        assertFalse("Expected the shard not to be the leader", findLeadeReply.getLeaderActor().isPresent());
+        assertNull("Expected the shard not to be the leader", findLeadeReply.leaderActorPath());
 
         onChangeListenerRegistered.countDown();
 
