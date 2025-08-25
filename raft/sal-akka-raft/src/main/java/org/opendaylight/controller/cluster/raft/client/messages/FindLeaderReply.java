@@ -8,9 +8,7 @@
 package org.opendaylight.controller.cluster.raft.client.messages;
 
 import com.google.common.annotations.VisibleForTesting;
-import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.Serializable;
-import java.util.Optional;
 import org.apache.pekko.actor.ActorPath;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -55,16 +53,5 @@ public final class FindLeaderReply implements Serializable {
      */
     public @Nullable String leaderActorPath() {
         return leaderActorPath;
-    }
-
-    /**
-     * return the actor reference to the leader, or empty if no leader is known.
-     *
-     * @return the actor reference to the leader, or empty if no leader is known
-     * @deprecated Use {@link #leaderActorPath()} instead.
-     */
-    @Deprecated(since = "11.0.0", forRemoval = true)
-    public @NonNull Optional<String> getLeaderActor() {
-        return Optional.ofNullable(leaderActorPath);
     }
 }
