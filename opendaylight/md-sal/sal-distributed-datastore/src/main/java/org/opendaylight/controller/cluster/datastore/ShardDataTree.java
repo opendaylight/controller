@@ -44,6 +44,7 @@ import java.util.function.UnaryOperator;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.util.Timeout;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
@@ -108,7 +109,7 @@ import scala.concurrent.duration.FiniteDuration;
  */
 // non-final for mocking
 @VisibleForTesting
-public class ShardDataTree extends ShardDataTreeTransactionParent {
+public class ShardDataTree {
     private static final Timeout COMMIT_STEP_TIMEOUT = new Timeout(FiniteDuration.create(5, TimeUnit.SECONDS));
     private static final Logger LOG = LoggerFactory.getLogger(ShardDataTree.class);
 
@@ -120,7 +121,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
      */
     private static final int MAX_TRANSACTION_BATCH = 100;
 
-    private final Map<LocalHistoryIdentifier, ShardDataTreeTransactionChain> transactionChains = new HashMap<>();
+    private final @NonNull UnorderedTransactionQueue unorderedQueue = new UnorderedTransactionQueue(this);
+    private final Map<LocalHistoryIdentifier, OrderedTransactionQueue> orderedQueues = new HashMap<>();
     private final DataTreeCohortActorRegistry cohortRegistry = new DataTreeCohortActorRegistry();
     private final Deque<CommitCohort> pendingTransactions = new ArrayDeque<>();
     private final Queue<CommitCohort> pendingCommits = new ArrayDeque<>();
@@ -211,7 +213,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         currentTransactionBatch = 0;
     }
 
-    private int initialPayloadBufferSize() {
+    final int initialPayloadBufferSize() {
         return shard.getDatastoreContext().getInitialPayloadSerializedBufferCapacity();
     }
 
@@ -486,7 +488,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         }
     }
 
-    private void replicatePayload(final @NonNull Identifier id, final AbstractStateCommand payload,
+    final void replicatePayload(final @NonNull Identifier id, final AbstractStateCommand payload,
             final @Nullable Runnable callback) {
         requireNonNull(id);
         if (callback != null) {
@@ -577,52 +579,43 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
      * @param closed True if the chain should be created in closed state (i.e. pending purge)
      * @return Transaction chain handle
      */
-    final ShardDataTreeTransactionChain recreateTransactionChain(final LocalHistoryIdentifier historyId,
+    final OrderedTransactionQueue recreateTransactionChain(final LocalHistoryIdentifier historyId,
             final boolean closed) {
-        final var ret = new ShardDataTreeTransactionChain(historyId, this);
-        final var existing = transactionChains.putIfAbsent(historyId, ret);
+        final var ret = new OrderedTransactionQueue(historyId, this);
+        final var existing = orderedQueues.putIfAbsent(historyId, ret);
         checkState(existing == null, "Attempted to recreate chain %s, but %s already exists", historyId, existing);
         return ret;
     }
 
-    final ShardDataTreeTransactionChain ensureTransactionChain(final LocalHistoryIdentifier historyId,
+    @NonNullByDefault
+    final OrderedTransactionQueue ensureTransactionQueue(final LocalHistoryIdentifier historyId,
             final @Nullable Runnable callback) {
-        var chain = transactionChains.get(historyId);
-        if (chain == null) {
-            chain = new ShardDataTreeTransactionChain(historyId, this);
-            transactionChains.put(historyId, chain);
+        var queue = orderedQueues.get(historyId);
+        if (queue == null) {
+            queue = new OrderedTransactionQueue(historyId, this);
+            orderedQueues.put(historyId, queue);
             replicatePayload(historyId, CreateLocalHistoryPayload.create(historyId, initialPayloadBufferSize()),
                 callback);
         } else if (callback != null) {
             callback.run();
         }
 
-        return chain;
+        return queue;
     }
 
     final @NonNull ReadOnlyShardDataTreeTransaction newReadOnlyTransaction(final TransactionIdentifier txId) {
         getStats().incrementReadOnlyTransactionCount();
-
-        final var historyId = txId.getHistoryId();
-        return historyId.getHistoryId() == 0 ? newStandaloneReadOnlyTransaction(txId)
-            : ensureTransactionChain(historyId, null).newReadOnlyTransaction(txId);
-    }
-
-    final @NonNull ReadOnlyShardDataTreeTransaction newStandaloneReadOnlyTransaction(final TransactionIdentifier txId) {
-        return new ReadOnlyShardDataTreeTransaction(this, txId, takeSnapshot());
+        return queueForTransaction(txId).newReadOnlyTransaction(txId);
     }
 
     final @NonNull ReadWriteShardDataTreeTransaction newReadWriteTransaction(final TransactionIdentifier txId) {
         getStats().incrementReadWriteTransactionCount();
-
-        final var historyId = txId.getHistoryId();
-        return historyId.getHistoryId() == 0 ? newStandaloneReadWriteTransaction(txId)
-            : ensureTransactionChain(historyId, null).newReadWriteTransaction(txId);
+        return queueForTransaction(txId).newReadWriteTransaction(txId);
     }
 
-    final @NonNull ReadWriteShardDataTreeTransaction newStandaloneReadWriteTransaction(
-            final TransactionIdentifier txId) {
-        return new ReadWriteShardDataTreeTransaction(this, txId, newModification());
+    private @NonNull TransactionQueue queueForTransaction(final TransactionIdentifier txId) {
+        final var historyId = txId.getHistoryId();
+        return historyId.getHistoryId() == 0 ? unorderedQueue : ensureTransactionQueue(historyId, null);
     }
 
     @VisibleForTesting
@@ -635,8 +628,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
      * replication callbacks.
      */
     final void purgeLeaderState() {
-        transactionChains.forEach((id, chain) -> chain.close());
-        transactionChains.clear();
+        orderedQueues.forEach((id, chain) -> chain.close());
+        orderedQueues.clear();
         replicationCallbacks.clear();
     }
 
@@ -662,8 +655,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     private boolean commonCloseTransactionChain(final LocalHistoryIdentifier id, final @Nullable Runnable callback) {
-        final var chain = transactionChains.get(id);
-        if (chain == null) {
+        final var queue = orderedQueues.get(id);
+        if (queue == null) {
             LOG.debug("{}: Closing non-existent transaction chain {}", logContext, id);
             if (callback != null) {
                 callback.run();
@@ -671,7 +664,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             return false;
         }
 
-        chain.close();
+        queue.close();
         return true;
     }
 
@@ -682,8 +675,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
      * @param callback Callback to invoke upon completion, may be null
      */
     final void purgeTransactionChain(final LocalHistoryIdentifier id, final @Nullable Runnable callback) {
-        final var chain = transactionChains.remove(id);
-        if (chain == null) {
+        final var queue = orderedQueues.remove(id);
+        if (queue == null) {
             LOG.debug("{}: Purging non-existent transaction chain {}", logContext, id);
             if (callback != null) {
                 callback.run();
@@ -696,8 +689,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     final void skipTransactions(final LocalHistoryIdentifier id, final ImmutableUnsignedLongSet transactionIds,
             final Runnable callback) {
-        final var chain = transactionChains.get(id);
-        if (chain == null) {
+        final var queue = orderedQueues.get(id);
+        if (queue == null) {
             LOG.debug("{}: Skipping on non-existent transaction chain {}", logContext, id);
             if (callback != null) {
                 callback.run();
@@ -725,22 +718,6 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     final void enqueueReadyTransaction(final @NonNull CommitCohort cohort) {
         cohort.setLastAccess(readTime());
         pendingTransactions.add(cohort);
-    }
-
-    @Override
-    final void abortTransaction(final AbstractShardDataTreeTransaction<?> transaction, final Runnable callback) {
-        final var id = transaction.getIdentifier();
-        LOG.debug("{}: aborting transaction {}", logContext, id);
-        replicatePayload(id, AbortTransactionPayload.create(id, initialPayloadBufferSize()), callback);
-    }
-
-    @Override
-    final SimpleCommitCohort finishTransaction(final ReadWriteShardDataTreeTransaction transaction,
-            final SortedSet<String> participatingShardNames) {
-        final var userCohorts = finishTransaction(transaction);
-        final var cohort = new SimpleCommitCohort(this, transaction, userCohorts, participatingShardNames);
-        enqueueReadyTransaction(cohort);
-        return cohort;
     }
 
     final CompositeDataTreeCohort finishTransaction(final ReadWriteShardDataTreeTransaction transaction) {
@@ -1129,22 +1106,6 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         cohortRegistry.process(sender, message);
     }
 
-    @Override
-    final SimpleCommitCohort createFailedCohort(final TransactionIdentifier txId, final DataTreeModification mod,
-            final Exception failure) {
-        final var cohort = new SimpleCommitCohort(this, mod, txId, failure);
-        enqueueReadyTransaction(cohort);
-        return cohort;
-    }
-
-    @Override
-    final SimpleCommitCohort createReadyCohort(final TransactionIdentifier txId, final DataTreeModification mod,
-            final SortedSet<String> participatingShardNames) {
-        final var cohort = new SimpleCommitCohort(this, mod, txId, newUserCohorts(txId), participatingShardNames);
-        enqueueReadyTransaction(cohort);
-        return cohort;
-    }
-
     @SuppressFBWarnings(value = "DB_DUPLICATE_SWITCH_CLAUSES", justification = "See inline comments below.")
     final void checkForExpiredTransactions(final long transactionCommitTimeoutMillis,
             final Function<CommitCohort, OptionalLong> accessTimeUpdater) {
@@ -1361,8 +1322,12 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     final void removeTransactionChain(final LocalHistoryIdentifier id) {
-        if (transactionChains.remove(id) != null) {
+        if (orderedQueues.remove(id) != null) {
             LOG.debug("{}: Removed transaction chain {}", logContext, id);
         }
+    }
+
+    final @NonNull UnorderedTransactionQueue unorderedQueue() {
+        return unorderedQueue;
     }
 }
