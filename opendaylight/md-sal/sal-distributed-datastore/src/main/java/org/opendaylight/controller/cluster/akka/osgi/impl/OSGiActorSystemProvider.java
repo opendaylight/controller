@@ -9,11 +9,13 @@ package org.opendaylight.controller.cluster.akka.osgi.impl;
 
 import java.util.concurrent.TimeoutException;
 import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.osgi.BundleDelegatingClassLoader;
 import org.opendaylight.controller.cluster.ActorSystemProvider;
 import org.opendaylight.controller.cluster.ActorSystemProviderListener;
 import org.opendaylight.controller.cluster.akka.impl.ActorSystemProviderImpl;
 import org.opendaylight.controller.cluster.akka.impl.AkkaConfigFactory;
 import org.opendaylight.controller.cluster.common.actor.AkkaConfigurationReader;
+import org.opendaylight.yangtools.concepts.AccessControllerCompat;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
@@ -35,7 +37,10 @@ public final class OSGiActorSystemProvider implements ActorSystemProvider {
     public OSGiActorSystemProvider(@Reference final AkkaConfigurationReader reader, final BundleContext bundleContext) {
         LOG.info("Actor System provider starting");
         final var akkaConfig = AkkaConfigFactory.createAkkaConfig(reader);
-        delegate = new ActorSystemProviderImpl(BundleClassLoaderFactory.createClassLoader(bundleContext),
+        final var bundle = bundleContext.getBundle();
+        delegate = new ActorSystemProviderImpl(
+            AccessControllerCompat.get(() ->
+                new BundleDelegatingClassLoader(bundle, Thread.currentThread().getContextClassLoader())),
             QuarantinedMonitorActorPropsFactory.createProps(bundleContext, akkaConfig), akkaConfig);
         LOG.info("Actor System provider started");
     }
