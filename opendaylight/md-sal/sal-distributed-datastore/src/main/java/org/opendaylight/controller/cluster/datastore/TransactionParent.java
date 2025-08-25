@@ -7,15 +7,33 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.SortedSet;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 
 // Non-sealed for mocking
-abstract class ShardDataTreeTransactionParent {
+abstract class TransactionParent {
+    final @NonNull ShardDataTree dataTree;
 
-    abstract void abortTransaction(AbstractShardDataTreeTransaction<?> transaction, Runnable callback);
+    @NonNullByDefault
+    TransactionParent(final ShardDataTree dataTree) {
+        this.dataTree = requireNonNull(dataTree);
+    }
+
+    @NonNullByDefault
+    abstract ReadOnlyShardDataTreeTransaction newReadOnlyTransaction(TransactionIdentifier txId);
+
+    @NonNullByDefault
+    abstract ReadWriteShardDataTreeTransaction newReadWriteTransaction(TransactionIdentifier txId);
+
+    void abortTransaction(final AbstractShardDataTreeTransaction<?> transaction, final Runnable callback) {
+        dataTree.abortTransaction(transaction.getIdentifier(), callback);
+    }
 
     abstract CommitCohort finishTransaction(ReadWriteShardDataTreeTransaction transaction,
         @Nullable SortedSet<String> participatingShardNames);
