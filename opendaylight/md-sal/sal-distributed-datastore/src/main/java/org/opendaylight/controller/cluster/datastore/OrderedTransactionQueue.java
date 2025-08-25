@@ -13,6 +13,7 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.base.MoreObjects;
 import java.util.SortedSet;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -23,22 +24,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A transaction chain attached to a Shard. This class is NOT thread-safe.
+ * A {@link TransactionQueue} of inter-dependent transactions. Transactions are submitted in-order and a transaction
+ * failure causes all subsequent transactions to fail as well.
  */
-final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
+final class OrderedTransactionQueue extends TransactionQueue
         implements Identifiable<LocalHistoryIdentifier> {
-    private static final Logger LOG = LoggerFactory.getLogger(ShardDataTreeTransactionChain.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OrderedTransactionQueue.class);
 
     private final @NonNull LocalHistoryIdentifier chainId;
-    private final @NonNull ShardDataTree dataTree;
-
     private ReadWriteShardDataTreeTransaction previousTx;
     private ReadWriteShardDataTreeTransaction openTransaction;
     private boolean closed;
 
-    ShardDataTreeTransactionChain(final LocalHistoryIdentifier localHistoryIdentifier, final ShardDataTree dataTree) {
+    @NonNullByDefault
+    OrderedTransactionQueue(final LocalHistoryIdentifier localHistoryIdentifier, final ShardDataTree dataTree) {
+        super(dataTree);
         chainId = requireNonNull(localHistoryIdentifier);
-        this.dataTree = requireNonNull(dataTree);
     }
 
     @Override
@@ -46,14 +47,16 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
         return chainId;
     }
 
-    @NonNull ReadOnlyShardDataTreeTransaction newReadOnlyTransaction(final TransactionIdentifier txId) {
+    @Override
+    ReadOnlyShardDataTreeTransaction newReadOnlyTransaction(final TransactionIdentifier txId) {
         final var snapshot = getSnapshot();
         LOG.debug("Allocated read-only transaction {} snapshot {}", txId, snapshot);
 
         return new ReadOnlyShardDataTreeTransaction(this, txId, snapshot);
     }
 
-    @NonNull ReadWriteShardDataTreeTransaction newReadWriteTransaction(final TransactionIdentifier txId) {
+    @Override
+    ReadWriteShardDataTreeTransaction newReadWriteTransaction(final TransactionIdentifier txId) {
         final var snapshot = getSnapshot();
         LOG.debug("Allocated read-write transaction {} snapshot {}", txId, snapshot);
 
