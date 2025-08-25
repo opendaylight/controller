@@ -25,22 +25,22 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
  * @author Robert Varga
  */
 final class LocalFrontendHistory extends AbstractFrontendHistory {
-    private final ShardDataTreeTransactionChain chain;
+    private final ChainedTransactionParent parent;
 
     private LocalFrontendHistory(final String persistenceId, final ShardDataTree tree,
-            final ShardDataTreeTransactionChain chain, final Map<UnsignedLong, Boolean> closedTransactions,
+            final ChainedTransactionParent chain, final Map<UnsignedLong, Boolean> closedTransactions,
             final MutableUnsignedLongSet purgedTransactions) {
         super(persistenceId, tree, closedTransactions, purgedTransactions);
-        this.chain = requireNonNull(chain);
+        this.parent = requireNonNull(chain);
     }
 
     static LocalFrontendHistory create(final String persistenceId, final ShardDataTree tree,
-            final ShardDataTreeTransactionChain chain) {
+            final ChainedTransactionParent chain) {
         return new LocalFrontendHistory(persistenceId, tree, chain, ImmutableMap.of(), MutableUnsignedLongSet.of());
     }
 
     static LocalFrontendHistory recreate(final String persistenceId, final ShardDataTree tree,
-            final ShardDataTreeTransactionChain chain, final Map<UnsignedLong, Boolean> closedTransactions,
+            final ChainedTransactionParent chain, final Map<UnsignedLong, Boolean> closedTransactions,
             final MutableUnsignedLongSet purgedTransactions) {
         return new LocalFrontendHistory(persistenceId, tree, chain, new HashMap<>(closedTransactions),
             purgedTransactions.mutableCopy());
@@ -48,17 +48,17 @@ final class LocalFrontendHistory extends AbstractFrontendHistory {
 
     @Override
     public LocalHistoryIdentifier getIdentifier() {
-        return chain.getIdentifier();
+        return parent.getIdentifier();
     }
 
     @Override
     FrontendTransaction createOpenSnapshot(final TransactionIdentifier id) {
-        return FrontendReadOnlyTransaction.create(this, chain.newReadOnlyTransaction(id));
+        return FrontendReadOnlyTransaction.create(this, parent.newReadOnlyTransaction(id));
     }
 
     @Override
     FrontendTransaction createOpenTransaction(final TransactionIdentifier id) {
-        return FrontendReadWriteTransaction.createOpen(this, chain.newReadWriteTransaction(id));
+        return FrontendReadWriteTransaction.createOpen(this, parent.newReadWriteTransaction(id));
     }
 
     @Override
@@ -69,12 +69,12 @@ final class LocalFrontendHistory extends AbstractFrontendHistory {
     @Override
     CommitCohort createFailedCohort(final TransactionIdentifier id, final DataTreeModification mod,
             final Exception failure) {
-        return chain.createFailedCohort(id, mod, failure);
+        return parent.createFailedCohort(id, mod, failure);
     }
 
     @Override
     CommitCohort createReadyCohort(final TransactionIdentifier id, final DataTreeModification mod,
             final SortedSet<String> participatingShardNames) {
-        return chain.createReadyCohort(id, mod, participatingShardNames);
+        return parent.createReadyCohort(id, mod, participatingShardNames);
     }
 }

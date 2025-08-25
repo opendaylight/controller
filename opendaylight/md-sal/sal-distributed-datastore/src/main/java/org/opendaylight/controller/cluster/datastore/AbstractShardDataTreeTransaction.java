@@ -22,13 +22,13 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataTreeSnapshot;
  */
 abstract class AbstractShardDataTreeTransaction<T extends DataTreeSnapshot>
         implements Identifiable<TransactionIdentifier> {
-    private final ShardDataTreeTransactionParent parent;
+    private final TransactionParent parent;
     private final TransactionIdentifier id;
     private final T snapshot;
 
     private boolean closed;
 
-    AbstractShardDataTreeTransaction(final ShardDataTreeTransactionParent parent, final TransactionIdentifier id,
+    AbstractShardDataTreeTransaction(final TransactionParent parent, final TransactionIdentifier id,
         final T snapshot) {
         this.parent = requireNonNull(parent);
         this.snapshot = requireNonNull(snapshot);
@@ -40,7 +40,7 @@ abstract class AbstractShardDataTreeTransaction<T extends DataTreeSnapshot>
         return id;
     }
 
-    final ShardDataTreeTransactionParent getParent() {
+    final TransactionParent getParent() {
         return parent;
     }
 

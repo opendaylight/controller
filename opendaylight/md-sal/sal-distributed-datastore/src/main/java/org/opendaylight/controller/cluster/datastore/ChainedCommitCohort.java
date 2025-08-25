@@ -20,9 +20,9 @@ final class ChainedCommitCohort extends CommitCohort {
     private static final Logger LOG = LoggerFactory.getLogger(ChainedCommitCohort.class);
 
     private final ReadWriteShardDataTreeTransaction transaction;
-    private final ShardDataTreeTransactionChain chain;
+    private final ChainedTransactionParent chain;
 
-    ChainedCommitCohort(final ShardDataTree dataTree, final ShardDataTreeTransactionChain chain,
+    ChainedCommitCohort(final ShardDataTree dataTree, final ChainedTransactionParent chain,
             final ReadWriteShardDataTreeTransaction transaction, final CompositeDataTreeCohort userCohorts,
             final @Nullable SortedSet<String> participatingShardNames) {
         super(dataTree, transaction, userCohorts, participatingShardNames);
