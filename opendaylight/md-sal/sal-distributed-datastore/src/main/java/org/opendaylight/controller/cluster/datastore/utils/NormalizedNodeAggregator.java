@@ -26,13 +26,15 @@ public final class NormalizedNodeAggregator {
     private final DataTree dataTree;
 
     private NormalizedNodeAggregator(final YangInstanceIdentifier rootIdentifier,
-            final List<Optional<NormalizedNode>> nodes, final EffectiveModelContext schemaContext,
+            final List<Optional<NormalizedNode>> nodes, final EffectiveModelContext modelContext,
             final LogicalDatastoreType logicalDatastoreType) {
         this.rootIdentifier = rootIdentifier;
         this.nodes = nodes;
-        dataTree = new InMemoryDataTreeFactory().create(logicalDatastoreType == LogicalDatastoreType.CONFIGURATION
-            ? DataTreeConfiguration.DEFAULT_CONFIGURATION : DataTreeConfiguration.DEFAULT_OPERATIONAL);
-        dataTree.setEffectiveModelContext(schemaContext);
+        dataTree = new InMemoryDataTreeFactory().create(
+            switch (logicalDatastoreType) {
+                case CONFIGURATION -> DataTreeConfiguration.DEFAULT_CONFIGURATION;
+                case OPERATIONAL -> DataTreeConfiguration.DEFAULT_OPERATIONAL;
+            }, modelContext);
     }
 
     /**
