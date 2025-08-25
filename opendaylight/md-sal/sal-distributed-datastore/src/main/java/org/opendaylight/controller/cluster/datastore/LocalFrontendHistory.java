@@ -25,22 +25,22 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
  * @author Robert Varga
  */
 final class LocalFrontendHistory extends AbstractFrontendHistory {
-    private final ShardDataTreeTransactionChain chain;
+    private final OrderedTransactionQueue chain;
 
     private LocalFrontendHistory(final String persistenceId, final ShardDataTree tree,
-            final ShardDataTreeTransactionChain chain, final Map<UnsignedLong, Boolean> closedTransactions,
+            final OrderedTransactionQueue chain, final Map<UnsignedLong, Boolean> closedTransactions,
             final MutableUnsignedLongSet purgedTransactions) {
         super(persistenceId, tree, closedTransactions, purgedTransactions);
         this.chain = requireNonNull(chain);
     }
 
     static LocalFrontendHistory create(final String persistenceId, final ShardDataTree tree,
-            final ShardDataTreeTransactionChain chain) {
+            final OrderedTransactionQueue chain) {
         return new LocalFrontendHistory(persistenceId, tree, chain, ImmutableMap.of(), MutableUnsignedLongSet.of());
     }
 
     static LocalFrontendHistory recreate(final String persistenceId, final ShardDataTree tree,
-            final ShardDataTreeTransactionChain chain, final Map<UnsignedLong, Boolean> closedTransactions,
+            final OrderedTransactionQueue chain, final Map<UnsignedLong, Boolean> closedTransactions,
             final MutableUnsignedLongSet purgedTransactions) {
         return new LocalFrontendHistory(persistenceId, tree, chain, new HashMap<>(closedTransactions),
             purgedTransactions.mutableCopy());
