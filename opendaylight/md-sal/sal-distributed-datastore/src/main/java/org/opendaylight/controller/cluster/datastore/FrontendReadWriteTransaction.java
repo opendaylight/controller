@@ -295,7 +295,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
                     case PRE_COMMIT_COMPLETE -> {
                         ready.stage = CommitStage.COMMIT_PENDING;
                         LOG.debug("{}: Transaction {} initiating commit", persistenceId(), getIdentifier());
-                        ready.readyCohort.commit(new FutureCallback<UnsignedLong>() {
+                        ready.readyCohort.commit(new FutureCallback<>() {
                             @Override
                             public void onSuccess(final UnsignedLong result) {
                                 successfulCommit(envelope, now);
