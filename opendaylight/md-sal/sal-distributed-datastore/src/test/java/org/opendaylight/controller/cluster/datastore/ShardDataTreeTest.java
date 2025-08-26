@@ -109,7 +109,7 @@ public class ShardDataTreeTest extends AbstractTest {
     private void modify(final boolean merge, final boolean expectedCarsPresent, final boolean expectedPeoplePresent) {
         immediatePayloadReplication(shardDataTree, mockShard);
 
-        assertEquals(fullSchema, shardDataTree.getSchemaContext());
+        assertEquals(fullSchema, shardDataTree.modelContext());
 
         final ReadWriteShardDataTreeTransaction transaction =
                 shardDataTree.newReadWriteTransaction(nextTransactionId());
