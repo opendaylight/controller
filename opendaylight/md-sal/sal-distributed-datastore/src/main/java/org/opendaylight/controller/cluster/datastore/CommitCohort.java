@@ -13,7 +13,6 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.base.MoreObjects;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
-import java.util.Optional;
 import java.util.SortedSet;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -114,8 +113,8 @@ abstract class CommitCohort {
         return modification;
     }
 
-    final Optional<SortedSet<String>> getParticipatingShardNames() {
-        return Optional.ofNullable(participatingShardNames);
+    final @Nullable SortedSet<String> getParticipatingShardNames() {
+        return participatingShardNames;
     }
 
     // FIXME: Should return rebased DataTreeCandidateTip
