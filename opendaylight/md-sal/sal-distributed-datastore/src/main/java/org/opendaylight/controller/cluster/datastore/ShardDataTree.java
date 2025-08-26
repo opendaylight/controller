@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayDeque;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -865,7 +864,7 @@ public class ShardDataTree {
             // canCommmit for this tx was requested before tx A, honor that request. If this tx is moved to the head of
             // the queue as a result, then proceed with canCommit.
 
-            Collection<String> precedingShardNames = extractPrecedingShardNames(cohort.getParticipatingShardNames());
+            final var precedingShardNames = extractPrecedingShardNames(cohort.getParticipatingShardNames());
             if (precedingShardNames.isEmpty()) {
                 LOG.debug("{}: Tx {} is scheduled for canCommit step", logContext, cohort.transactionId());
                 return;
@@ -948,9 +947,8 @@ public class ShardDataTree {
         tempStack.forEach(queue::addFirst);
     }
 
-    private Collection<String> extractPrecedingShardNames(final Optional<SortedSet<String>> participatingShardNames) {
-        return participatingShardNames.map((Function<SortedSet<String>, Collection<String>>)
-            set -> set.headSet(shard.getShardName())).orElse(Collections.<String>emptyList());
+    private Collection<String> extractPrecedingShardNames(final @Nullable SortedSet<String> participatingShardNames) {
+        return participatingShardNames == null ? List.of() : participatingShardNames.headSet(shard.getShardName());
     }
 
     private void failPreCommit(final Throwable cause) {
