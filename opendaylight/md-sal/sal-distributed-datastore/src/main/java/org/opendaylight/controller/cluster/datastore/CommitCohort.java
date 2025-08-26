@@ -45,6 +45,7 @@ abstract class CommitCohort {
     private final ShardDataTree dataTree;
     private final @NonNull TransactionIdentifier transactionId;
     private final CompositeDataTreeCohort userCohorts;
+    // FIXME: moved to CommitStage.Ready
     private final @Nullable SortedSet<String> participatingShardNames;
 
     private State state = State.READY;
