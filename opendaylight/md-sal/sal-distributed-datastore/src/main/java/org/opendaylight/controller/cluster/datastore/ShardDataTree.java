@@ -211,6 +211,10 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         currentTransactionBatch = 0;
     }
 
+    private int initialPayloadBufferSize() {
+        return shard.getDatastoreContext().getInitialPayloadSerializedBufferCapacity();
+    }
+
     /**
      * Take a snapshot of current state for later recovery.
      *
@@ -587,8 +591,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         if (chain == null) {
             chain = new ShardDataTreeTransactionChain(historyId, this);
             transactionChains.put(historyId, chain);
-            replicatePayload(historyId, CreateLocalHistoryPayload.create(
-                    historyId, shard.getDatastoreContext().getInitialPayloadSerializedBufferCapacity()), callback);
+            replicatePayload(historyId, CreateLocalHistoryPayload.create(historyId, initialPayloadBufferSize()),
+                callback);
         } else if (callback != null) {
             callback.run();
         }
@@ -644,8 +648,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
      */
     final void closeTransactionChain(final LocalHistoryIdentifier id, final @Nullable Runnable callback) {
         if (commonCloseTransactionChain(id, callback)) {
-            replicatePayload(id, CloseLocalHistoryPayload.create(id,
-                shard.getDatastoreContext().getInitialPayloadSerializedBufferCapacity()), callback);
+            replicatePayload(id, CloseLocalHistoryPayload.create(id, initialPayloadBufferSize()), callback);
         }
     }
 
@@ -688,8 +691,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             return;
         }
 
-        replicatePayload(id, PurgeLocalHistoryPayload.create(
-                id, shard.getDatastoreContext().getInitialPayloadSerializedBufferCapacity()), callback);
+        replicatePayload(id, PurgeLocalHistoryPayload.create(id, initialPayloadBufferSize()), callback);
     }
 
     final void skipTransactions(final LocalHistoryIdentifier id, final ImmutableUnsignedLongSet transactionIds,
@@ -703,8 +705,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             return;
         }
 
-        replicatePayload(id, SkipTransactionsPayload.create(id, transactionIds,
-            shard.getDatastoreContext().getInitialPayloadSerializedBufferCapacity()), callback);
+        replicatePayload(id, SkipTransactionsPayload.create(id, transactionIds, initialPayloadBufferSize()), callback);
     }
 
     final Optional<DataTreeCandidate> readCurrentData() {
@@ -730,8 +731,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     final void abortTransaction(final AbstractShardDataTreeTransaction<?> transaction, final Runnable callback) {
         final var id = transaction.getIdentifier();
         LOG.debug("{}: aborting transaction {}", logContext, id);
-        replicatePayload(id, AbortTransactionPayload.create(
-                id, shard.getDatastoreContext().getInitialPayloadSerializedBufferCapacity()), callback);
+        replicatePayload(id, AbortTransactionPayload.create(id, initialPayloadBufferSize()), callback);
     }
 
     @Override
@@ -758,8 +758,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     final void purgeTransaction(final TransactionIdentifier id, final Runnable callback) {
         LOG.debug("{}: purging transaction {}", logContext, id);
-        replicatePayload(id, PurgeTransactionPayload.create(
-                id, shard.getDatastoreContext().getInitialPayloadSerializedBufferCapacity()), callback);
+        replicatePayload(id, PurgeTransactionPayload.create(id, initialPayloadBufferSize()), callback);
     }
 
     @VisibleForTesting
@@ -1085,7 +1084,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         final CommitTransactionPayload payload;
         try {
             payload = CommitTransactionPayload.create(txId, candidate, PayloadVersion.current(),
-                    shard.getDatastoreContext().getInitialPayloadSerializedBufferCapacity());
+                initialPayloadBufferSize());
         } catch (IOException e) {
             LOG.error("{}: Failed to encode transaction {} candidate {}", logContext, txId, candidate, e);
             pendingCommits.poll().failedCommit(e);
