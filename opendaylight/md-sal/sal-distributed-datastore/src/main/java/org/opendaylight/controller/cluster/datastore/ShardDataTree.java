@@ -47,7 +47,13 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.controller.cluster.datastore.CommitCohort.State;
+import org.opendaylight.controller.cluster.datastore.CommitPhase.CanCommit;
+import org.opendaylight.controller.cluster.datastore.CommitPhase.Concluded;
+import org.opendaylight.controller.cluster.datastore.CommitPhase.DoCommit;
+import org.opendaylight.controller.cluster.datastore.CommitPhase.NeedCanCommit;
+import org.opendaylight.controller.cluster.datastore.CommitPhase.NeedPreCommit;
+import org.opendaylight.controller.cluster.datastore.CommitPhase.Pending;
+import org.opendaylight.controller.cluster.datastore.CommitPhase.PreCommit;
 import org.opendaylight.controller.cluster.datastore.DataTreeCohortActorRegistry.CohortRegistryCommand;
 import org.opendaylight.controller.cluster.datastore.node.utils.transformer.ReusableNormalizedNodePruner;
 import org.opendaylight.controller.cluster.datastore.persisted.AbortTransactionPayload;
@@ -762,9 +768,9 @@ public class ShardDataTree {
             return;
         }
 
-        final var entry = findFirstEntry(pendingTransactions, State.CAN_COMMIT_PENDING);
+        final var entry = findFirstEntry(pendingTransactions);
         try {
-            if (entry != null) {
+            if (entry != null && entry.phase() instanceof NeedCanCommit) {
                 canCommitEntry(entry);
             }
         } finally {
@@ -812,28 +818,21 @@ public class ShardDataTree {
         processNextPendingTransaction();
     }
 
-    private @Nullable CommitCohort findFirstEntry(final Queue<CommitCohort> queue, final State allowedState) {
+    private @Nullable CommitCohort findFirstEntry(final Queue<CommitCohort> queue) {
         while (true) {
             final var entry = queue.peek();
-            if (entry == null) {
-                // Empty queue
-                return null;
+            if (entry == null || !entry.isFailed()) {
+                return entry;
             }
-
-            if (entry.isFailed()) {
-                LOG.debug("{}: Removing failed transaction {}", logContext, entry.transactionId());
-                queue.remove();
-                continue;
-            }
-
-            return entry.getState() == allowedState ? entry : null;
+            LOG.debug("{}: Removing failed transaction {}", logContext, entry.transactionId());
+            queue.remove();
         }
     }
 
     private void processNextPendingCommit() {
-        final var entry = findFirstEntry(pendingCommits, State.COMMIT_PENDING);
+        final var entry = findFirstEntry(pendingCommits);
         try {
-            if (entry != null) {
+            if (entry != null && entry.phase() instanceof DoCommit) {
                 startCommit(entry, entry.getCandidate());
             }
         } finally {
@@ -843,7 +842,7 @@ public class ShardDataTree {
 
     private boolean peekNextPendingCommit() {
         final var first = pendingCommits.peek();
-        return first != null && first.getState() == State.COMMIT_PENDING;
+        return first != null && first.phase() instanceof DoCommit;
     }
 
     // non-final for mocking
@@ -1044,28 +1043,23 @@ public class ShardDataTree {
         }
 
         final long deltaMillis = TimeUnit.NANOSECONDS.toMillis(delta);
-        final var state = currentTx.getState();
+        final var phase = currentTx.phase();
 
         LOG.warn("{}: Current transaction {} has timed out after {} ms in state {}", logContext,
-            currentTx.transactionId(), deltaMillis, state);
+            currentTx.transactionId(), deltaMillis, phase);
         boolean processNext = true;
-        final var cohortFailure = new TimeoutException("Backend timeout in state " + state + " after " + deltaMillis
-            + "ms");
+        final var cohortFailure = new TimeoutException("Backend timeout in state " + phase.getClass().getSimpleName()
+            + " after " + deltaMillis + "ms");
 
-        switch (state) {
-            case CAN_COMMIT_PENDING:
-                currentQueue.remove().failedCanCommit(cohortFailure);
-                break;
-            case CAN_COMMIT_COMPLETE:
+        switch (phase) {
+            case NeedCanCommit ph -> currentQueue.remove().failedCanCommit(cohortFailure);
+            case CanCommit ph ->
                 // The suppression of the FindBugs "DB_DUPLICATE_SWITCH_CLAUSES" warning pertains to this clause
                 // whose code is duplicated with PRE_COMMIT_COMPLETE. The clauses aren't combined in case the code
                 // in PRE_COMMIT_COMPLETE is changed.
                 currentQueue.remove().reportFailure(cohortFailure);
-                break;
-            case PRE_COMMIT_PENDING:
-                currentQueue.remove().failedPreCommit(cohortFailure);
-                break;
-            case PRE_COMMIT_COMPLETE:
+            case NeedPreCommit ph -> currentQueue.remove().failedPreCommit(cohortFailure);
+            case PreCommit ph ->
                 // FIXME: this is a legacy behavior problem. Three-phase commit protocol specifies that after we
                 //        are ready we should commit the transaction, not abort it. Our current software stack does
                 //        not allow us to do that consistently, because we persist at the time of commit, hence
@@ -1084,20 +1078,13 @@ public class ShardDataTree {
                 //        a per-shard cluster-wide monotonic time, so a follower becoming the leader can accurately
                 //        restart the timer.
                 currentQueue.remove().reportFailure(cohortFailure);
-                break;
-            case COMMIT_PENDING:
+            case DoCommit ph -> {
                 LOG.warn("{}: Transaction {} is still committing, cannot abort", logContext, currentTx.transactionId());
                 currentTx.setLastAccess(now);
                 processNext = false;
-                return;
-            case READY:
-                currentQueue.remove().reportFailure(cohortFailure);
-                break;
-            case ABORTED:
-            case COMMITTED:
-            case FAILED:
-            default:
-                currentQueue.remove();
+            }
+            case Pending ph -> currentQueue.remove().reportFailure(cohortFailure);
+            case Concluded ph -> currentQueue.remove();
         }
 
         if (processNext) {
@@ -1116,9 +1103,9 @@ public class ShardDataTree {
         // First entry is special, as it may already be committing
         final var first = it.next();
         if (cohort.equals(first)) {
-            if (cohort.getState() != State.COMMIT_PENDING) {
-                LOG.debug("{}: aborting head of queue {} in state {}", logContext, cohort.transactionId(),
-                    cohort.transactionId());
+            final var phase = cohort.phase();
+            if (!(phase instanceof DoCommit)) {
+                LOG.debug("{}: aborting head of queue {} in state {}", logContext, cohort.transactionId(), phase);
 
                 it.remove();
                 if (cohort.getCandidate() != null) {
@@ -1160,27 +1147,34 @@ public class ShardDataTree {
         tip = requireNonNull(newTip);
         while (iter.hasNext()) {
             final var cohort = iter.next();
-            if (cohort.getState() == State.CAN_COMMIT_COMPLETE) {
-                LOG.debug("{}: Revalidating queued transaction {}", logContext, cohort.transactionId());
+            switch (cohort.phase()) {
+                case CanCommit phase -> {
+                    LOG.debug("{}: Revalidating queued transaction {}", logContext, cohort.transactionId());
 
-                try {
-                    tip.validate(cohort.getDataTreeModification());
-                } catch (DataValidationFailedException | RuntimeException e) {
-                    LOG.debug("{}: Failed to revalidate queued transaction {}", logContext, cohort.transactionId(), e);
-                    cohort.reportFailure(e);
+                    try {
+                        tip.validate(cohort.getDataTreeModification());
+                    } catch (DataValidationFailedException | RuntimeException e) {
+                        LOG.debug("{}: Failed to revalidate queued transaction {}", logContext, cohort.transactionId(),
+                            e);
+                        cohort.reportFailure(e);
+                    }
                 }
-            } else if (cohort.getState() == State.PRE_COMMIT_COMPLETE) {
-                LOG.debug("{}: Repreparing queued transaction {}", logContext, cohort.transactionId());
+                case PreCommit phase -> {
+                    LOG.debug("{}: Repreparing queued transaction {}", logContext, cohort.transactionId());
 
-                try {
-                    tip.validate(cohort.getDataTreeModification());
-                    DataTreeCandidateTip candidate = tip.prepare(cohort.getDataTreeModification());
-
-                    cohort.setNewCandidate(candidate);
-                    tip = candidate;
-                } catch (RuntimeException | DataValidationFailedException e) {
-                    LOG.debug("{}: Failed to reprepare queued transaction {}", logContext, cohort.transactionId(), e);
-                    cohort.reportFailure(e);
+                    try {
+                        tip.validate(cohort.getDataTreeModification());
+                        final var candidate = tip.prepare(cohort.getDataTreeModification());
+                        cohort.setNewCandidate(candidate);
+                        tip = candidate;
+                    } catch (RuntimeException | DataValidationFailedException e) {
+                        LOG.debug("{}: Failed to reprepare queued transaction {}", logContext, cohort.transactionId(),
+                            e);
+                        cohort.reportFailure(e);
+                    }
+                }
+                default -> {
+                    // No-op
                 }
             }
         }
@@ -1212,7 +1206,7 @@ public class ShardDataTree {
             final var cohort = it.next();
             final var transactionId = cohort.transactionId();
             if (clientId.equals(transactionId.getHistoryId().getClientId())) {
-                if (cohort.getState() != State.COMMIT_PENDING) {
+                if (!(cohort.phase() instanceof DoCommit)) {
                     LOG.debug("{}: Retiring transaction {}", logContext, transactionId);
                     it.remove();
                 } else {
