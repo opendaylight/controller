@@ -8,9 +8,8 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import static org.apache.pekko.actor.ActorRef.noSender;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -1139,7 +1138,7 @@ public class ShardTest extends AbstractShardTest {
         final var cause = assertInstanceOf(RuntimeRequestException.class, failure.getCause());
         assertEquals("Precommit failed", cause.getMessage());
         final var unwrapped = assertInstanceOf(TimeoutException.class, cause.unwrap());
-        assertThat(unwrapped.getMessage(), startsWith("Backend timeout in state CAN_COMMIT_COMPLETE after "));
+        assertThat(unwrapped.getMessage()).startsWith("Backend timeout in state CanCommit after ");
         assertEquals(1, shard.underlyingActor().getShardMBean().getFailedTransactionsCount());
         assertEquals(1, shard.underlyingActor().getShardMBean().getCommittedTransactionsCount());
 
