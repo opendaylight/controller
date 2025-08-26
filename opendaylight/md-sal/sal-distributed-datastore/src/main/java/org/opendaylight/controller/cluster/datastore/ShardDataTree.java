@@ -146,17 +146,17 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
      */
     private DataTreeTip tip;
 
-    private EffectiveModelContext schemaContext;
+    private EffectiveModelContext modelContext;
     private DataSchemaContextTree dataSchemaContext;
 
     private int currentTransactionBatch;
 
-    ShardDataTree(final Shard shard, final EffectiveModelContext schemaContext, final DataTree dataTree,
+    ShardDataTree(final Shard shard, final EffectiveModelContext modelContext, final DataTree dataTree,
             final ShardDataTreeChangeListenerPublisher treeChangeListenerPublisher,
             final String logContext,
             final ShardDataTreeMetadata<?>... metadata) {
         this.dataTree = requireNonNull(dataTree);
-        updateSchemaContext(schemaContext);
+        updateSchemaContext(modelContext);
 
         this.shard = requireNonNull(shard);
         this.treeChangeListenerPublisher = requireNonNull(treeChangeListenerPublisher);
@@ -197,15 +197,14 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         return dataTree;
     }
 
-    @VisibleForTesting
-    final EffectiveModelContext getSchemaContext() {
-        return schemaContext;
+    final EffectiveModelContext modelContext() {
+        return modelContext;
     }
 
-    final void updateSchemaContext(final @NonNull EffectiveModelContext newSchemaContext) {
-        dataTree.setEffectiveModelContext(newSchemaContext);
-        schemaContext = newSchemaContext;
-        dataSchemaContext = DataSchemaContextTree.from(newSchemaContext);
+    final void updateSchemaContext(final @NonNull EffectiveModelContext newModelContext) {
+        dataTree.setEffectiveModelContext(newModelContext);
+        modelContext = newModelContext;
+        dataSchemaContext = DataSchemaContextTree.from(newModelContext);
     }
 
     final void resetTransactionBatch() {
@@ -238,7 +237,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     private void applySnapshot(final @NonNull ShardDataTreeSnapshot snapshot,
             final UnaryOperator<DataTreeModification> wrapper) throws DataValidationFailedException {
-        final Stopwatch elapsed = Stopwatch.createStarted();
+        final var elapsed = Stopwatch.createStarted();
 
         if (anyPendingTransactions()) {
             LOG.warn("{}: applying state snapshot with pending transactions", logContext);
@@ -256,8 +255,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             }
         }
 
-        final DataTreeModification unwrapped = newModification();
-        final DataTreeModification mod = wrapper.apply(unwrapped);
+        final var unwrapped = newModification();
+        final var mod = wrapper.apply(unwrapped);
         // delete everything first
         mod.delete(YangInstanceIdentifier.of());
 
@@ -269,7 +268,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         mod.ready();
 
         dataTree.validate(unwrapped);
-        DataTreeCandidateTip candidate = dataTree.prepare(unwrapped);
+        final var candidate = dataTree.prepare(unwrapped);
         dataTree.commit(candidate);
         notifyListeners(candidate);
 
@@ -297,10 +296,9 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
      */
     final void applyRecoverySnapshot(final @NonNull ShardSnapshotState snapshot) throws DataValidationFailedException {
         // TODO: we should be able to reuse the pruner, provided we are not reentrant
-        final ReusableNormalizedNodePruner pruner = ReusableNormalizedNodePruner.forDataSchemaContext(
-            dataSchemaContext);
+        final var pruner = ReusableNormalizedNodePruner.forDataSchemaContext(dataSchemaContext);
         if (snapshot.needsMigration()) {
-            final ReusableNormalizedNodePruner uintPruner = pruner.withUintAdaption();
+            final var uintPruner = pruner.withUintAdaption();
             applySnapshot(snapshot.getSnapshot(),
                 delegate -> new PruningDataTreeModification.Proactive(delegate, dataTree, uintPruner));
         } else {
@@ -467,7 +465,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     private void checkRootOverwrite(final DataTreeCandidate candidate) {
-        final DatastoreContext datastoreContext = shard.getDatastoreContext();
+        final var datastoreContext = shard.getDatastoreContext();
         if (!datastoreContext.isSnapshotOnRootOverwrite()) {
             return;
         }
@@ -494,7 +492,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     private void payloadReplicationComplete(final AbstractIdentifiablePayload<?> payload) {
-        final Runnable callback = replicationCallbacks.remove(payload);
+        final var callback = replicationCallbacks.remove(payload);
         if (callback != null) {
             LOG.debug("{}: replication of {} completed, invoking {}", logContext, payload.getIdentifier(), callback);
             callback.run();
@@ -524,37 +522,37 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     private void allMetadataAbortedTransaction(final TransactionIdentifier txId) {
-        for (ShardDataTreeMetadata<?> m : metadata) {
+        for (var m : metadata) {
             m.onTransactionAborted(txId);
         }
     }
 
     private void allMetadataCommittedTransaction(final TransactionIdentifier txId) {
-        for (ShardDataTreeMetadata<?> m : metadata) {
+        for (var m : metadata) {
             m.onTransactionCommitted(txId);
         }
     }
 
     private void allMetadataPurgedTransaction(final TransactionIdentifier txId) {
-        for (ShardDataTreeMetadata<?> m : metadata) {
+        for (var m : metadata) {
             m.onTransactionPurged(txId);
         }
     }
 
     private void allMetadataCreatedLocalHistory(final LocalHistoryIdentifier historyId) {
-        for (ShardDataTreeMetadata<?> m : metadata) {
+        for (var m : metadata) {
             m.onHistoryCreated(historyId);
         }
     }
 
     private void allMetadataClosedLocalHistory(final LocalHistoryIdentifier historyId) {
-        for (ShardDataTreeMetadata<?> m : metadata) {
+        for (var m : metadata) {
             m.onHistoryClosed(historyId);
         }
     }
 
     private void allMetadataPurgedLocalHistory(final LocalHistoryIdentifier historyId) {
-        for (ShardDataTreeMetadata<?> m : metadata) {
+        for (var m : metadata) {
             m.onHistoryPurged(historyId);
         }
     }
@@ -562,7 +560,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     private void allMetadataSkipTransactions(final SkipTransactionsPayload payload) {
         final var historyId = payload.getIdentifier();
         final var txIds = payload.getTransactionIds();
-        for (ShardDataTreeMetadata<?> m : metadata) {
+        for (var m : metadata) {
             m.onTransactionsSkipped(historyId, txIds);
         }
     }
@@ -577,15 +575,15 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
      */
     final ShardDataTreeTransactionChain recreateTransactionChain(final LocalHistoryIdentifier historyId,
             final boolean closed) {
-        final ShardDataTreeTransactionChain ret = new ShardDataTreeTransactionChain(historyId, this);
-        final ShardDataTreeTransactionChain existing = transactionChains.putIfAbsent(historyId, ret);
+        final var ret = new ShardDataTreeTransactionChain(historyId, this);
+        final var existing = transactionChains.putIfAbsent(historyId, ret);
         checkState(existing == null, "Attempted to recreate chain %s, but %s already exists", historyId, existing);
         return ret;
     }
 
     final ShardDataTreeTransactionChain ensureTransactionChain(final LocalHistoryIdentifier historyId,
             final @Nullable Runnable callback) {
-        ShardDataTreeTransactionChain chain = transactionChains.get(historyId);
+        var chain = transactionChains.get(historyId);
         if (chain == null) {
             chain = new ShardDataTreeTransactionChain(historyId, this);
             transactionChains.put(historyId, chain);
@@ -633,10 +631,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
      * replication callbacks.
      */
     final void purgeLeaderState() {
-        for (ShardDataTreeTransactionChain chain : transactionChains.values()) {
-            chain.close();
-        }
-
+        transactionChains.forEach((id, chain) -> chain.close());
         transactionChains.clear();
         replicationCallbacks.clear();
     }
@@ -664,7 +659,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     private boolean commonCloseTransactionChain(final LocalHistoryIdentifier id, final @Nullable Runnable callback) {
-        final ShardDataTreeTransactionChain chain = transactionChains.get(id);
+        final var chain = transactionChains.get(id);
         if (chain == null) {
             LOG.debug("{}: Closing non-existent transaction chain {}", logContext, id);
             if (callback != null) {
@@ -684,7 +679,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
      * @param callback Callback to invoke upon completion, may be null
      */
     final void purgeTransactionChain(final LocalHistoryIdentifier id, final @Nullable Runnable callback) {
-        final ShardDataTreeTransactionChain chain = transactionChains.remove(id);
+        final var chain = transactionChains.remove(id);
         if (chain == null) {
             LOG.debug("{}: Purging non-existent transaction chain {}", logContext, id);
             if (callback != null) {
@@ -699,7 +694,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     final void skipTransactions(final LocalHistoryIdentifier id, final ImmutableUnsignedLongSet transactionIds,
             final Runnable callback) {
-        final ShardDataTreeTransactionChain chain = transactionChains.get(id);
+        final var chain = transactionChains.get(id);
         if (chain == null) {
             LOG.debug("{}: Skipping on non-existent transaction chain {}", logContext, id);
             if (callback != null) {
@@ -733,7 +728,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     @Override
     final void abortTransaction(final AbstractShardDataTreeTransaction<?> transaction, final Runnable callback) {
-        final TransactionIdentifier id = transaction.getIdentifier();
+        final var id = transaction.getIdentifier();
         LOG.debug("{}: aborting transaction {}", logContext, id);
         replicatePayload(id, AbortTransactionPayload.create(
                 id, shard.getDatastoreContext().getInitialPayloadSerializedBufferCapacity()), callback);
@@ -758,7 +753,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     final CompositeDataTreeCohort newUserCohorts(final TransactionIdentifier txId) {
-        return cohortRegistry.createCohort(schemaContext, txId, shard::executeInSelf, COMMIT_STEP_TIMEOUT);
+        return cohortRegistry.createCohort(modelContext, txId, shard::executeInSelf, COMMIT_STEP_TIMEOUT);
     }
 
     final void purgeTransaction(final TransactionIdentifier id, final Runnable callback) {
@@ -846,7 +841,6 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         processNextPendingCommit();
         processNextPendingTransaction();
     }
-
 
     private @Nullable CommitCohort findFirstEntry(final Queue<CommitCohort> queue, final State allowedState) {
         while (true) {
@@ -1087,7 +1081,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
         LOG.debug("{}: Starting commit for transaction {}", logContext, current.transactionId());
 
-        final TransactionIdentifier txId = cohort.transactionId();
+        final var txId = cohort.transactionId();
         final CommitTransactionPayload payload;
         try {
             payload = CommitTransactionPayload.create(txId, candidate, PayloadVersion.current(),
@@ -1194,8 +1188,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         LOG.warn("{}: Current transaction {} has timed out after {} ms in state {}", logContext,
             currentTx.transactionId(), deltaMillis, state);
         boolean processNext = true;
-        final TimeoutException cohortFailure = new TimeoutException("Backend timeout in state " + state + " after "
-                + deltaMillis + "ms");
+        final var cohortFailure = new TimeoutException("Backend timeout in state " + state + " after " + deltaMillis
+            + "ms");
 
         switch (state) {
             case CAN_COMMIT_PENDING:
