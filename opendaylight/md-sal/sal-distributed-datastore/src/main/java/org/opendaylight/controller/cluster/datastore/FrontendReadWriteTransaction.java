@@ -515,10 +515,10 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             throw new UnsupportedRequestException(request);
         }
 
-        final var optFailure = request.getDelayedFailure();
-        final var ready = new Ready(optFailure.isEmpty()
+        final var optFailure = request.delayedFailure();
+        final var ready = new Ready(optFailure == null
             ? history().createReadyCohort(getIdentifier(), sealedModification, null)
-            : history().createFailedCohort(getIdentifier(), sealedModification, optFailure.orElseThrow()));
+            : history().createFailedCohort(getIdentifier(), sealedModification, optFailure));
         state = ready;
         if (request.isCoordinated()) {
             coordinatedCommit(envelope, now, ready);
