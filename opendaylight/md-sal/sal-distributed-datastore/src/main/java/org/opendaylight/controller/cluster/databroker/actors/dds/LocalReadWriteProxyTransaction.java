@@ -403,17 +403,18 @@ final class LocalReadWriteProxyTransaction extends LocalProxyTransaction {
         final var mod = getModification();
 
         if (!(mod instanceof FailedDataTreeModification)) {
-            request.getDelayedFailure().ifPresentOrElse(failure -> {
+            final var failure = request.delayedFailure();
+            if (failure != null) {
                 if (recordedFailure == null) {
                     recordedFailure = failure;
                 } else {
                     recordedFailure.addSuppressed(failure);
                 }
-            }, () -> {
+            } else {
                 try (var cursor = mod.openCursor()) {
                     request.getModification().applyToCursor(cursor);
                 }
-            });
+            }
         }
 
         if (markSealed()) {

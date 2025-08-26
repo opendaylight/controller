@@ -17,6 +17,7 @@ import java.io.ObjectStreamException;
 import java.util.Optional;
 import org.apache.pekko.actor.ActorRef;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
@@ -30,13 +31,14 @@ public final class CommitLocalTransactionRequest
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
-    private final DataTreeModification mod;
-    private final Exception delayedFailure;
+    private final @NonNull DataTreeModification mod;
+    private final @Nullable Exception delayedFailure;
     private final boolean coordinated;
 
-    public CommitLocalTransactionRequest(final @NonNull TransactionIdentifier identifier, final long sequence,
-            final @NonNull ActorRef replyTo, final @NonNull DataTreeModification mod,
-            final @Nullable Exception delayedFailure, final boolean coordinated) {
+    @NonNullByDefault
+    public CommitLocalTransactionRequest(final TransactionIdentifier identifier, final long sequence,
+            final ActorRef replyTo, final DataTreeModification mod, final @Nullable Exception delayedFailure,
+            final boolean coordinated) {
         super(identifier, sequence, replyTo);
         this.mod = requireNonNull(mod);
         this.delayedFailure = delayedFailure;
@@ -47,13 +49,25 @@ public final class CommitLocalTransactionRequest
      * Return the delayed error detected on the frontend. If this error is present, it will be reported as the result
      * of the first step of the commit process.
      *
-     * @return Delayed failure, if present.
+     * @return Delayed failure, of present
      */
+    public @Nullable Exception delayedFailure() {
+        return delayedFailure;
+    }
+
+    /**
+     * Return the delayed error detected on the frontend. If this error is present, it will be reported as the result
+     * of the first step of the commit process.
+     *
+     * @return Delayed failure, if present.
+     * @deprecated Use {@link #delayedFailure()} instead.
+     */
+    @Deprecated(since = "11.0.2", forRemoval = true)
     public Optional<Exception> getDelayedFailure() {
         return Optional.ofNullable(delayedFailure);
     }
 
-    public DataTreeModification getModification() {
+    public @NonNull DataTreeModification getModification() {
         return mod;
     }
 
@@ -71,8 +85,9 @@ public final class CommitLocalTransactionRequest
 
     @Override
     protected ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
-        return super.addToStringAttributes(toStringHelper).add("coordinated", coordinated)
-                .add("delayedError", delayedFailure);
+        return super.addToStringAttributes(toStringHelper)
+            .add("coordinated", coordinated)
+            .add("delayedError", delayedFailure);
     }
 
     @java.io.Serial
