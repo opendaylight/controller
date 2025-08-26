@@ -8,10 +8,10 @@
 package org.opendaylight.controller.cluster.raft.client.messages;
 
 import com.google.common.annotations.VisibleForTesting;
-import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.Serializable;
 import java.util.Optional;
 import org.apache.pekko.actor.ActorPath;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
