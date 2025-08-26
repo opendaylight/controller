@@ -49,6 +49,14 @@ import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.CommitCohort.State;
+import org.opendaylight.controller.cluster.datastore.CommitPhase.CanCommit;
+import org.opendaylight.controller.cluster.datastore.CommitPhase.Concluded;
+import org.opendaylight.controller.cluster.datastore.CommitPhase.DoCommit;
+import org.opendaylight.controller.cluster.datastore.CommitPhase.Failing;
+import org.opendaylight.controller.cluster.datastore.CommitPhase.NeedCanCommit;
+import org.opendaylight.controller.cluster.datastore.CommitPhase.NeedPreCommit;
+import org.opendaylight.controller.cluster.datastore.CommitPhase.Pending;
+import org.opendaylight.controller.cluster.datastore.CommitPhase.PreCommit;
 import org.opendaylight.controller.cluster.datastore.DataTreeCohortActorRegistry.CohortRegistryCommand;
 import org.opendaylight.controller.cluster.datastore.node.utils.transformer.ReusableNormalizedNodePruner;
 import org.opendaylight.controller.cluster.datastore.persisted.AbortTransactionPayload;
@@ -123,9 +131,9 @@ public class ShardDataTree {
     private final @NonNull SimpleTransactionParent unorderedParent = new SimpleTransactionParent(this);
     private final Map<LocalHistoryIdentifier, ChainedTransactionParent> transactionChains = new HashMap<>();
     private final DataTreeCohortActorRegistry cohortRegistry = new DataTreeCohortActorRegistry();
-    private final Deque<CommitCohort> pendingTransactions = new ArrayDeque<>();
-    private final Queue<CommitCohort> pendingCommits = new ArrayDeque<>();
-    private final Queue<CommitCohort> pendingFinishCommits = new ArrayDeque<>();
+    private final Deque<CommitEntry> pendingTransactions = new ArrayDeque<>();
+    private final Queue<CommitEntry> pendingCommits = new ArrayDeque<>();
+    private final Queue<CommitEntry> pendingFinishCommits = new ArrayDeque<>();
 
     /**
      * Callbacks that need to be invoked once a payload is replicated.
@@ -1135,28 +1143,28 @@ public class ShardDataTree {
         }
 
         final long deltaMillis = TimeUnit.NANOSECONDS.toMillis(delta);
-        final var state = currentTx.getState();
+        final var phase = currentTx.phase();
 
         LOG.warn("{}: Current transaction {} has timed out after {} ms in state {}", logContext,
-            currentTx.transactionId(), deltaMillis, state);
+            currentTx.transactionId(), deltaMillis, phase);
         boolean processNext = true;
-        final var cohortFailure = new TimeoutException("Backend timeout in state " + state + " after " + deltaMillis
+        final var cohortFailure = new TimeoutException("Backend timeout in state " + phase + " after " + deltaMillis
             + "ms");
 
-        switch (state) {
-            case CAN_COMMIT_PENDING:
+        switch (phase) {
+            case NeedCanCommit ncc -> {
                 currentQueue.remove().failedCanCommit(cohortFailure);
-                break;
-            case CAN_COMMIT_COMPLETE:
+            }
+            case CanCommit cc -> {
                 // The suppression of the FindBugs "DB_DUPLICATE_SWITCH_CLAUSES" warning pertains to this clause
                 // whose code is duplicated with PRE_COMMIT_COMPLETE. The clauses aren't combined in case the code
                 // in PRE_COMMIT_COMPLETE is changed.
                 currentQueue.remove().reportFailure(cohortFailure);
-                break;
-            case PRE_COMMIT_PENDING:
+            }
+            case NeedPreCommit npc -> {
                 currentQueue.remove().failedPreCommit(cohortFailure);
-                break;
-            case PRE_COMMIT_COMPLETE:
+            }
+            case PreCommit pc -> {
                 // FIXME: this is a legacy behavior problem. Three-phase commit protocol specifies that after we
                 //        are ready we should commit the transaction, not abort it. Our current software stack does
                 //        not allow us to do that consistently, because we persist at the time of commit, hence
@@ -1175,20 +1183,19 @@ public class ShardDataTree {
                 //        a per-shard cluster-wide monotonic time, so a follower becoming the leader can accurately
                 //        restart the timer.
                 currentQueue.remove().reportFailure(cohortFailure);
-                break;
-            case COMMIT_PENDING:
+            }
+            case DoCommit dc -> {
                 LOG.warn("{}: Transaction {} is still committing, cannot abort", logContext, currentTx.transactionId());
                 currentTx.setLastAccess(now);
                 processNext = false;
-                return;
-            case READY:
+            }
+            case Pending pending -> {
                 currentQueue.remove().reportFailure(cohortFailure);
-                break;
-            case ABORTED:
-            case COMMITTED:
-            case FAILED:
-            default:
-                currentQueue.remove();
+            }
+            case Failing failing -> {
+                // FIXME: what do we want to do here?
+            }
+            case Concluded concluded -> currentQueue.remove();
         }
 
         if (processNext) {
