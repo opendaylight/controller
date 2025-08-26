@@ -37,7 +37,6 @@ import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -596,14 +595,13 @@ public class ShardDataTreeTest extends AbstractTest {
         return shardDataTree.finishTransaction(transaction, null);
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     private static void verifyOnDataTreeChanged(final DOMDataTreeChangeListener listener,
             final Consumer<DataTreeCandidate> callback) {
-        ArgumentCaptor<List> changes = ArgumentCaptor.forClass(List.class);
+        final var changes = ArgumentCaptor.<List<DataTreeCandidate>>captor();
         verify(listener, atLeastOnce()).onDataTreeChanged(changes.capture());
-        for (Collection list : changes.getAllValues()) {
-            for (Object dtc : list) {
-                callback.accept((DataTreeCandidate)dtc);
+        for (var list : changes.getAllValues()) {
+            for (var dtc : list) {
+                callback.accept(dtc);
             }
         }
 
