@@ -98,7 +98,7 @@ final class JsonRecoveryObserver implements RecoveryObserver {
             jsonWriter.beginObject();
 
             try (var nnWriter = NormalizedNodeWriter.forStreamWriter(JSONNormalizedNodeStreamWriter.createNestedWriter(
-                    JSONCodecFactorySupplier.RFC7951.getShared(store.getSchemaContext()), jsonWriter, null), true)) {
+                    JSONCodecFactorySupplier.RFC7951.getShared(store.modelContext()), jsonWriter, null), true)) {
                 for (var node : container.body()) {
                     nnWriter.write(node);
                 }
