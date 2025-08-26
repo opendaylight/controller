@@ -16,6 +16,15 @@ import com.google.common.util.concurrent.FutureCallback;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.opendaylight.controller.cluster.datastore.CommitPhase.Aborted;
+import org.opendaylight.controller.cluster.datastore.CommitPhase.CanCommit;
+import org.opendaylight.controller.cluster.datastore.CommitPhase.Committed;
+import org.opendaylight.controller.cluster.datastore.CommitPhase.DoCommit;
+import org.opendaylight.controller.cluster.datastore.CommitPhase.Failed;
+import org.opendaylight.controller.cluster.datastore.CommitPhase.NeedCanCommit;
+import org.opendaylight.controller.cluster.datastore.CommitPhase.NeedPreCommit;
+import org.opendaylight.controller.cluster.datastore.CommitPhase.Pending;
+import org.opendaylight.controller.cluster.datastore.CommitPhase.PreCommit;
 import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidateTip;
@@ -25,19 +34,6 @@ import org.slf4j.LoggerFactory;
 
 // Non-sealed for mocking
 abstract class CommitCohort {
-    public enum State {
-        READY,
-        CAN_COMMIT_PENDING,
-        CAN_COMMIT_COMPLETE,
-        PRE_COMMIT_PENDING,
-        PRE_COMMIT_COMPLETE,
-        COMMIT_PENDING,
-
-        ABORTED,
-        COMMITTED,
-        FAILED,
-    }
-
     private static final Logger LOG = LoggerFactory.getLogger(CommitCohort.class);
 
     private final DataTreeModification modification;
@@ -45,7 +41,7 @@ abstract class CommitCohort {
     private final @NonNull TransactionIdentifier transactionId;
     private final CompositeDataTreeCohort userCohorts;
 
-    private State state = State.READY;
+    private @NonNull CommitPhase phase = new Pending();
     private DataTreeCandidateTip candidate;
     private FutureCallback<?> callback;
     private Exception nextFailure;
@@ -88,12 +84,12 @@ abstract class CommitCohort {
         lastAccess = newLastAccess;
     }
 
-    final State getState() {
-        return state;
+    final @NonNull CommitPhase phase() {
+        return phase;
     }
 
     final boolean isFailed() {
-        return state == State.FAILED || nextFailure != null;
+        return phase instanceof Failed || nextFailure != null;
     }
 
     // FIXME: This leaks internal state generated in preCommit,
@@ -103,7 +99,10 @@ abstract class CommitCohort {
     }
 
     final void setNewCandidate(final DataTreeCandidateTip dataTreeCandidate) {
-        checkState(State.PRE_COMMIT_COMPLETE);
+        if (!(phase instanceof PreCommit)) {
+            throw new IllegalStateException("State %s does not match expected statePreCommit for %s".formatted(
+                phase, transactionId));
+        }
         candidate = verifyNotNull(dataTreeCandidate);
     }
 
@@ -113,46 +112,55 @@ abstract class CommitCohort {
 
     // FIXME: Should return rebased DataTreeCandidateTip
     final void canCommit(final FutureCallback<Empty> newCallback) {
-        if (state == State.CAN_COMMIT_PENDING) {
-            return;
-        }
+        switch (phase) {
+            case NeedCanCommit ph -> {
+                // No-op
+            }
+            case Pending ph -> {
+                callback = requireNonNull(newCallback);
+                phase = new NeedCanCommit();
 
-        checkState(State.READY);
-        callback = requireNonNull(newCallback);
-        state = State.CAN_COMMIT_PENDING;
-
-        if (nextFailure == null) {
-            dataTree.startCanCommit(this);
-        } else {
-            failedCanCommit(nextFailure);
+                if (nextFailure == null) {
+                    dataTree.startCanCommit(this);
+                } else {
+                    failedCanCommit(nextFailure);
+                }
+            }
+            default -> throw new IllegalStateException(
+                "State %s does not match expected Pending for %s".formatted(phase, transactionId));
         }
     }
 
     final void successfulCanCommit() {
-        switchState(State.CAN_COMMIT_COMPLETE).onSuccess(Empty.value());
+        switchState(new CanCommit()).onSuccess(Empty.value());
     }
 
     final void failedCanCommit(final Exception cause) {
         dataTree.getStats().incrementFailedTransactionsCount();
-        switchState(State.FAILED).onFailure(cause);
+        switchState(new Failed()).onFailure(cause);
     }
 
     final void preCommit(final FutureCallback<DataTreeCandidate> newCallback) {
-        checkState(State.CAN_COMMIT_COMPLETE);
-        callback = requireNonNull(newCallback);
-        state = State.PRE_COMMIT_PENDING;
+        switch (phase) {
+            case CanCommit ph -> {
+                callback = requireNonNull(newCallback);
+                phase = new NeedPreCommit();
 
-        if (nextFailure == null) {
-            dataTree.startPreCommit(this);
-        } else {
-            failedPreCommit(nextFailure);
+                if (nextFailure == null) {
+                    dataTree.startPreCommit(this);
+                } else {
+                    failedPreCommit(nextFailure);
+                }
+            }
+            default -> throw new IllegalStateException(
+                "State %s does not match expected CanCommit for %s".formatted(phase, transactionId));
         }
     }
 
     final void successfulPreCommit(final DataTreeCandidateTip dataTreeCandidate) {
         LOG.trace("Transaction {} prepared candidate {}", modification, dataTreeCandidate);
         candidate = verifyNotNull(dataTreeCandidate);
-        switchState(State.PRE_COMMIT_COMPLETE).onSuccess(dataTreeCandidate);
+        switchState(new PreCommit()).onSuccess(dataTreeCandidate);
     }
 
     final void failedPreCommit(final Throwable cause) {
@@ -164,7 +172,7 @@ abstract class CommitCohort {
 
         userCohorts.abort();
         dataTree.getStats().incrementFailedTransactionsCount();
-        switchState(State.FAILED).onFailure(cause);
+        switchState(new Failed()).onFailure(cause);
     }
 
     /**
@@ -214,7 +222,7 @@ abstract class CommitCohort {
 
         candidate = null;
         dataTree.getStats().incrementAbortTransactionsCount();
-        state = State.ABORTED;
+        phase = new Aborted();
 
         final var userAbort = userCohorts.abort();
         if (userAbort != null) {
@@ -248,7 +256,7 @@ abstract class CommitCohort {
         final var stats = dataTree.getStats();
         stats.incrementCommittedTransactionCount();
 
-        switchState(State.COMMITTED).onSuccess(journalIndex);
+        switchState(new Committed()).onSuccess(journalIndex);
         onComplete.run();
     }
 
@@ -261,18 +269,23 @@ abstract class CommitCohort {
 
         userCohorts.abort();
         dataTree.getStats().incrementFailedTransactionsCount();
-        switchState(State.FAILED).onFailure(cause);
+        switchState(new Failed()).onFailure(cause);
     }
 
     void commit(final FutureCallback<UnsignedLong> newCallback) {
-        checkState(State.PRE_COMMIT_COMPLETE);
-        callback = requireNonNull(newCallback);
-        state = State.COMMIT_PENDING;
+        switch (phase) {
+            case PreCommit ph -> {
+                callback = requireNonNull(newCallback);
+                phase = new DoCommit();
 
-        if (nextFailure == null) {
-            dataTree.startCommit(this, candidate);
-        } else {
-            failedCommit(nextFailure);
+                if (nextFailure == null) {
+                    dataTree.startCommit(this, candidate);
+                } else {
+                    failedCommit(nextFailure);
+                }
+            }
+            default -> throw new IllegalStateException(
+                "State %s does not match expected PreCommit for %s".formatted(phase, transactionId));
         }
     }
 
@@ -289,24 +302,17 @@ abstract class CommitCohort {
     public final String toString() {
         return MoreObjects.toStringHelper(this).omitNullValues()
             .add("id", transactionId)
-            .add("state", state)
+            .add("phase", phase)
             .add("nextFailure", nextFailure)
             .toString();
     }
 
-    private void checkState(final State expected) {
-        if (state != expected) {
-            throw new IllegalStateException("State %s does not match expected state %s for %s".formatted(
-                state, expected, transactionId));
-        }
-    }
-
-    private <T> FutureCallback<T> switchState(final State newState) {
+    private <T> FutureCallback<T> switchState(final @NonNull CommitPhase newPhase) {
         @SuppressWarnings("unchecked")
         final var ret = (FutureCallback<T>) callback;
         callback = null;
-        LOG.debug("Transaction {} changing state from {} to {}", transactionId, state, newState);
-        state = newState;
+        LOG.debug("Transaction {} changing state from {} to {}", transactionId, phase, newPhase);
+        phase = requireNonNull(newPhase);
         return ret;
     }
 }
