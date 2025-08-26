@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.datastore;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
@@ -27,8 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 // Non-sealed for mocking
-@VisibleForTesting
-public abstract class CommitCohort {
+abstract class CommitCohort {
     public enum State {
         READY,
         CAN_COMMIT_PENDING,
@@ -93,11 +91,11 @@ public abstract class CommitCohort {
         lastAccess = newLastAccess;
     }
 
-    public final State getState() {
+    final State getState() {
         return state;
     }
 
-    public final boolean isFailed() {
+    final boolean isFailed() {
         return state == State.FAILED || nextFailure != null;
     }
 
@@ -121,8 +119,7 @@ public abstract class CommitCohort {
     }
 
     // FIXME: Should return rebased DataTreeCandidateTip
-    @VisibleForTesting
-    public final void canCommit(final FutureCallback<Empty> newCallback) {
+    final void canCommit(final FutureCallback<Empty> newCallback) {
         if (state == State.CAN_COMMIT_PENDING) {
             return;
         }
@@ -147,8 +144,7 @@ public abstract class CommitCohort {
         switchState(State.FAILED).onFailure(cause);
     }
 
-    @VisibleForTesting
-    public final void preCommit(final FutureCallback<DataTreeCandidate> newCallback) {
+    final void preCommit(final FutureCallback<DataTreeCandidate> newCallback) {
         checkState(State.CAN_COMMIT_COMPLETE);
         callback = requireNonNull(newCallback);
         state = State.PRE_COMMIT_PENDING;
@@ -217,8 +213,7 @@ public abstract class CommitCohort {
         }
     }
 
-    @VisibleForTesting
-    public final void abort(final FutureCallback<Empty> abortCallback) {
+    final void abort(final FutureCallback<Empty> abortCallback) {
         if (!dataTree.startAbort(this)) {
             abortCallback.onSuccess(Empty.value());
             return;
@@ -276,8 +271,7 @@ public abstract class CommitCohort {
         switchState(State.FAILED).onFailure(cause);
     }
 
-    @VisibleForTesting
-    public void commit(final FutureCallback<UnsignedLong> newCallback) {
+    void commit(final FutureCallback<UnsignedLong> newCallback) {
         checkState(State.PRE_COMMIT_COMPLETE);
         callback = requireNonNull(newCallback);
         state = State.COMMIT_PENDING;
