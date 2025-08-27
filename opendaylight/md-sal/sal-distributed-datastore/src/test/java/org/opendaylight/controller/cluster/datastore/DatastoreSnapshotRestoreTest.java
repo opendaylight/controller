@@ -11,17 +11,17 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
-import java.io.File;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import org.apache.commons.lang3.SerializationUtils;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshotList;
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
@@ -45,21 +45,19 @@ import org.opendaylight.yangtools.yang.data.tree.impl.di.InMemoryDataTreeFactory
  *
  * @author Thomas Pantelis
  */
-public class DatastoreSnapshotRestoreTest {
-    String restoreDirectoryPath = "target/DatastoreSnapshotRestoreTest-" + System.nanoTime();
-    File restoreDirectoryFile = new File(restoreDirectoryPath);
-    File backupFile = new File(restoreDirectoryFile, "backup");
+class DatastoreSnapshotRestoreTest {
+    @TempDir
+    private Path restoreDirectory;
 
-    @After
-    public void tearDown() {
-        backupFile.delete();
-        restoreDirectoryFile.delete();
+    private Path backupFile;
+
+    @BeforeEach
+    void beforeEach() throws Exception {
+        backupFile = restoreDirectory.resolve("backup");
     }
 
     @Test
-    public void test() throws Exception {
-        assertTrue("Failed to mkdir " + restoreDirectoryPath, restoreDirectoryFile.mkdirs());
-
+    void test() throws Exception {
         final DatastoreSnapshot configSnapshot = new DatastoreSnapshot("config",
                 newShardManagerSnapshot("config-one", "config-two"),
                 Arrays.asList(new DatastoreSnapshot.ShardSnapshot("config-one", newSnapshot(CarsModel.BASE_PATH,
@@ -74,11 +72,11 @@ public class DatastoreSnapshotRestoreTest {
 
         DatastoreSnapshotList snapshotList = new DatastoreSnapshotList(Arrays.asList(configSnapshot, operSnapshot));
 
-        try (var fos = Files.newOutputStream(backupFile.toPath())) {
+        try (var fos = Files.newOutputStream(backupFile)) {
             SerializationUtils.serialize(snapshotList, fos);
         }
 
-        DefaultDatastoreSnapshotRestore instance = new DefaultDatastoreSnapshotRestore(restoreDirectoryPath);
+        DefaultDatastoreSnapshotRestore instance = new DefaultDatastoreSnapshotRestore(restoreDirectory.toString());
         instance.activate();
 
         assertDatastoreSnapshotEquals(configSnapshot, instance.getAndRemove("config").orElse(null));
@@ -86,7 +84,7 @@ public class DatastoreSnapshotRestoreTest {
 
         assertEquals("DatastoreSnapshot was not removed", Optional.empty(), instance.getAndRemove("config"));
 
-        assertFalse(backupFile + " was not deleted", backupFile.exists());
+        assertFalse(backupFile + " was not deleted", Files.exists(backupFile));
     }
 
     private static void assertDatastoreSnapshotEquals(final DatastoreSnapshot expected,
