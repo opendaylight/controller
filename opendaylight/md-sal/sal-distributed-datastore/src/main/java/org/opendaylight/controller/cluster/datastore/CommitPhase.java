@@ -7,7 +7,13 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static java.util.Objects.requireNonNull;
+
+import com.google.common.primitives.UnsignedLong;
+import com.google.common.util.concurrent.FutureCallback;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.opendaylight.yangtools.yang.common.Empty;
+import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 
 /**
  * A stage in transaction commit process. It mirrors the
@@ -26,9 +32,10 @@ sealed interface CommitPhase {
     /**
      * The transaction can start committing, i.e. it should transition to {@link CanCommit} as soon as practicable.
      */
-    // FIXME: add state
-    record NeedCanCommit() implements CommitPhase {
-        // FIXME: add state
+    record NeedCanCommit(FutureCallback<Empty> callback) implements CommitPhase {
+        public NeedCanCommit {
+            requireNonNull(callback);
+        }
     }
 
     /**
@@ -42,10 +49,11 @@ sealed interface CommitPhase {
      * All of transaction's participants have indicated that transaction can be committed, i.e. it should transition
      * to {@link PreCommit} as soon as practicable.
      */
-    record NeedPreCommit() implements CommitPhase {
-        // FIXME: add state
+    record NeedPreCommit(FutureCallback<DataTreeCandidate> callback) implements CommitPhase {
+        public NeedPreCommit {
+            requireNonNull(callback);
+        }
     }
-
 
     /**
      * The transaction is in the {@code PreCommit phase}, gathering participant responses.
@@ -57,9 +65,11 @@ sealed interface CommitPhase {
     /**
      * The transaction is in the {@code DoCommit phase}.
      */
-    record DoCommit() implements CommitPhase {
-        // FIXME: add state
-    }
+    record DoCommit(FutureCallback<UnsignedLong> callback) implements CommitPhase {
+        public DoCommit {
+            requireNonNull(callback);
+        }
+   }
 
     /**
      * Marker interface for all states that represent a concluded transaction, irrespective of whether or not it was
