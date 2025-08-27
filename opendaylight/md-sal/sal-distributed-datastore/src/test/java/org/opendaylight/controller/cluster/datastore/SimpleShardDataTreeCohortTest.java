@@ -59,8 +59,7 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
         doReturn(null).when(mockUserCohorts).abort();
         doReturn(stats).when(mockShardDataTree).getStats();
 
-        cohort = new SimpleCommitCohort(mockShardDataTree, mockModification, nextTransactionId(), mockUserCohorts,
-            null);
+        cohort = new SimpleCommitCohort(mockShardDataTree, mockModification, nextTransactionId(), mockUserCohorts);
     }
 
     @Test

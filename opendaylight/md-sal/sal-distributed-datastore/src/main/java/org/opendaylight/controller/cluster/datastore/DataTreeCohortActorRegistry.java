@@ -21,6 +21,7 @@ import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.PoisonPill;
 import org.apache.pekko.actor.Status;
 import org.apache.pekko.util.Timeout;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.mdsal.dom.api.DOMDataTreeCandidate;
@@ -204,6 +205,7 @@ class DataTreeCohortActorRegistry extends AbstractRegistrationTree<ActorRef> {
         }
     }
 
+    @NonNullByDefault
     CompositeDataTreeCohort createCohort(final EffectiveModelContext schemaContext, final TransactionIdentifier txId,
             final Executor callbackExecutor, final Timeout commitStepTimeout) {
         return new CompositeDataTreeCohort(this, txId, schemaContext, callbackExecutor, commitStepTimeout);

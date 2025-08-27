@@ -11,7 +11,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.UnsignedLong;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.SortedSet;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
@@ -79,8 +78,7 @@ final class StandaloneFrontendHistory extends AbstractFrontendHistory {
     }
 
     @Override
-    CommitCohort createReadyCohort(final TransactionIdentifier id, final DataTreeModification mod,
-            final SortedSet<String> participatingShardNames) {
-        return parent.createReadyCohort(id, mod, participatingShardNames);
+    CommitCohort createReadyCohort(final TransactionIdentifier id, final DataTreeModification mod) {
+        return parent.createReadyCohort(id, mod);
     }
 }

@@ -34,7 +34,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Queue;
-import java.util.SortedSet;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
@@ -708,6 +707,7 @@ public class ShardDataTree {
         pendingTransactions.add(cohort);
     }
 
+    @NonNullByDefault
     final CompositeDataTreeCohort finishTransaction(final ReadWriteShardDataTreeTransaction transaction) {
         final var snapshot = transaction.getSnapshot();
         final var txId = transaction.getIdentifier();
@@ -717,6 +717,7 @@ public class ShardDataTree {
         return newUserCohorts(txId);
     }
 
+    @NonNullByDefault
     final CompositeDataTreeCohort newUserCohorts(final TransactionIdentifier txId) {
         return cohortRegistry.createCohort(modelContext, txId, shard::executeInSelf, COMMIT_STEP_TIMEOUT);
     }
@@ -852,103 +853,11 @@ public class ShardDataTree {
             LOG.warn("{}: No transactions enqueued while attempting to start canCommit on {}", logContext, cohort);
             return;
         }
-        if (!cohort.equals(head)) {
-            // The tx isn't at the head of the queue so we can't start canCommit at this point. Here we check if this
-            // tx should be moved ahead of other tx's in the READY state in the pendingTransactions queue. If this tx
-            // has other participating shards, it could deadlock with other tx's accessing the same shards
-            // depending on the order the tx's are readied on each shard
-            // (see https://jira.opendaylight.org/browse/CONTROLLER-1836). Therefore, if the preceding participating
-            // shard names for a preceding pending tx, call it A, in the queue matches that of this tx, then this tx
-            // is allowed to be moved ahead of tx A in the queue so it is processed first to avoid potential deadlock
-            // if tx A is behind this tx in the pendingTransactions queue for a preceding shard. In other words, since
-            // canCommmit for this tx was requested before tx A, honor that request. If this tx is moved to the head of
-            // the queue as a result, then proceed with canCommit.
-
-            final var precedingShardNames = extractPrecedingShardNames(cohort.getParticipatingShardNames());
-            if (precedingShardNames.isEmpty()) {
-                LOG.debug("{}: Tx {} is scheduled for canCommit step", logContext, cohort.transactionId());
-                return;
-            }
-
-            LOG.debug("{}: Evaluating tx {} for canCommit -  preceding participating shard names {}",
-                    logContext, cohort.transactionId(), precedingShardNames);
-            final var iter = pendingTransactions.iterator();
-            int index = -1;
-            int moveToIndex = -1;
-            while (iter.hasNext()) {
-                final var entry = iter.next();
-                ++index;
-
-                if (cohort.equals(entry)) {
-                    if (moveToIndex < 0) {
-                        LOG.debug("{}: Not moving tx {} - cannot proceed with canCommit",
-                                logContext, cohort.transactionId());
-                        return;
-                    }
-
-                    LOG.debug("{}: Moving {} to index {} in the pendingTransactions queue",
-                            logContext, cohort.transactionId(), moveToIndex);
-                    iter.remove();
-                    insertEntry(pendingTransactions, entry, moveToIndex);
-
-                    if (!cohort.equals(pendingTransactions.peek())) {
-                        LOG.debug("{}: Tx {} is not at the head of the queue - cannot proceed with canCommit",
-                                logContext, cohort.transactionId());
-                        return;
-                    }
-
-                    LOG.debug("{}: Tx {} is now at the head of the queue - proceeding with canCommit",
-                            logContext, cohort.transactionId());
-                    break;
-                }
-
-                if (entry.getState() != State.READY) {
-                    LOG.debug("{}: Skipping pending transaction {} in state {}",
-                            logContext, entry.transactionId(), entry.getState());
-                    continue;
-                }
-
-                final var pendingPrecedingShardNames = extractPrecedingShardNames(entry.getParticipatingShardNames());
-                if (precedingShardNames.equals(pendingPrecedingShardNames)) {
-                    if (moveToIndex < 0) {
-                        LOG.debug("{}: Preceding shard names {} for pending tx {} match - saving moveToIndex {}",
-                                logContext, pendingPrecedingShardNames, entry.transactionId(), index);
-                        moveToIndex = index;
-                    } else {
-                        LOG.debug(
-                            "{}: Preceding shard names {} for pending tx {} match but moveToIndex already set to {}",
-                            logContext, pendingPrecedingShardNames, entry.transactionId(), moveToIndex);
-                    }
-                } else {
-                    LOG.debug("{}: Preceding shard names {} for pending tx {} differ - skipping",
-                        logContext, pendingPrecedingShardNames, entry.transactionId());
-                }
-            }
+        if (cohort.equals(head)) {
+            processNextPendingTransaction();
+        } else {
+            LOG.debug("{}: Tx {} is scheduled for canCommit step", logContext, cohort.transactionId());
         }
-
-        processNextPendingTransaction();
-    }
-
-    private static void insertEntry(final Deque<CommitCohort> queue, final CommitCohort entry, final int atIndex) {
-        if (atIndex == 0) {
-            queue.addFirst(entry);
-            return;
-        }
-
-        LOG.trace("Inserting into Deque at index {}", atIndex);
-
-        final var tempStack = new ArrayDeque<CommitCohort>(atIndex);
-        for (int i = 0; i < atIndex; i++) {
-            tempStack.push(queue.poll());
-        }
-
-        queue.addFirst(entry);
-
-        tempStack.forEach(queue::addFirst);
-    }
-
-    private Collection<String> extractPrecedingShardNames(final @Nullable SortedSet<String> participatingShardNames) {
-        return participatingShardNames == null ? List.of() : participatingShardNames.headSet(shard.getShardName());
     }
 
     private void failPreCommit(final Throwable cause) {

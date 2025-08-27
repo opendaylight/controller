@@ -11,8 +11,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
-import java.util.SortedSet;
-import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,10 +21,10 @@ final class ChainedCommitCohort extends CommitCohort {
     private final ReadWriteShardDataTreeTransaction transaction;
     private final ChainedTransactionParent parent;
 
+    @NonNullByDefault
     ChainedCommitCohort(final ShardDataTree dataTree, final ChainedTransactionParent parent,
-            final ReadWriteShardDataTreeTransaction transaction, final CompositeDataTreeCohort userCohorts,
-            final @Nullable SortedSet<String> participatingShardNames) {
-        super(dataTree, transaction, userCohorts, participatingShardNames);
+            final ReadWriteShardDataTreeTransaction transaction, final CompositeDataTreeCohort userCohorts) {
+        super(dataTree, transaction, userCohorts);
         this.transaction = requireNonNull(transaction);
         this.parent = requireNonNull(parent);
     }
