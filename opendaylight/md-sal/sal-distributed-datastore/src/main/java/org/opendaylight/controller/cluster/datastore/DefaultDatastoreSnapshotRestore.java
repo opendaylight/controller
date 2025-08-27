@@ -10,11 +10,11 @@ package org.opendaylight.controller.cluster.datastore;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.Beta;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -55,32 +55,43 @@ public final class DefaultDatastoreSnapshotRestore implements DatastoreSnapshotR
     @Activate
     @SuppressWarnings("checkstyle:IllegalCatch")
     void activate() {
-        final var restoreDirectoryFile = new File(restoreDirectoryPath);
-        final var files = restoreDirectoryFile.list();
-        if (files == null || files.length == 0) {
-            LOG.debug("Restore directory {} does not exist or is empty", restoreDirectoryFile);
+        final var restoreDirectory = Path.of(restoreDirectoryPath);
+
+        final Path[] files;
+        try (var stream = Files.list(restoreDirectory)) {
+            files = stream.toArray(Path[]::new);
+        } catch (NoSuchFileException e) {
+            if (!LOG.isTraceEnabled()) {
+                e = null;
+            }
+            LOG.debug("Restore directory {} does not exist", restoreDirectory, e);
+            return;
+        } catch (IOException e) {
+            LOG.warn("Could not list restore directory {}", restoreDirectory, e);
             return;
         }
 
+        if (files.length == 0) {
+            LOG.debug("Restore directory {} is empty", restoreDirectory);
+            return;
+        }
         if (files.length > 1) {
             LOG.error(
                 "Found {} files in clustered datastore restore directory {} - expected 1. No restore will be attempted",
-                files.length, restoreDirectoryFile);
+                files.length, restoreDirectory);
             return;
         }
 
-        final var restoreFile = restoreDirectoryFile.toPath().resolve(files[0]);
+        final var restoreFile = files[0];
         LOG.info("Clustered datastore will be restored from file {}", restoreFile);
 
-        try (var fis = Files.newInputStream(restoreFile)) {
-            final var snapshots = deserialize(fis);
+        final DatastoreSnapshotList snapshots;
+        try (var ois = new ObjectInputStream(Files.newInputStream(restoreFile))) {
+            snapshots = (DatastoreSnapshotList) ois.readObject();
             LOG.debug("Deserialized {} snapshots", snapshots.size());
-
-            for (var snapshot: snapshots) {
-                datastoreSnapshots.put(snapshot.getType(), snapshot);
-            }
         } catch (ClassNotFoundException | IOException e) {
             LOG.error("Error reading clustered datastore restore file {}", restoreFile, e);
+            return;
         } finally {
             try {
                 Files.delete(restoreFile);
@@ -88,12 +99,9 @@ public final class DefaultDatastoreSnapshotRestore implements DatastoreSnapshotR
                 LOG.error("Could not delete clustered datastore restore file {}", restoreFile, e);
             }
         }
-    }
 
-    private static DatastoreSnapshotList deserialize(final InputStream inputStream)
-            throws IOException, ClassNotFoundException {
-        try (ObjectInputStream ois = new ObjectInputStream(inputStream)) {
-            return (DatastoreSnapshotList) ois.readObject();
+        for (var snapshot : snapshots) {
+            datastoreSnapshots.put(snapshot.getType(), snapshot);
         }
     }
 }
