@@ -14,8 +14,9 @@ import static org.opendaylight.controller.md.cluster.datastore.model.CarsModel.C
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.ConfigFactory;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -59,17 +60,14 @@ public class DistributedDataStoreWithSegmentedJournalIntegrationTest
     }
 
     private static void cleanSnapshotDir(final ActorSystem system) {
-        File journalDir = new File(system.settings().config()
+        final var journalDir = Path.of(system.settings().config()
                 .getString("pekko.persistence.journal.segmented-file.root-directory"));
-
-        if (!journalDir.exists()) {
-            return;
-        }
-
-        try {
-            FileUtils.cleanDirectory(journalDir);
-        } catch (IOException e) {
-            // Ignore
+        if (Files.exists(journalDir)) {
+            try {
+                FileUtils.cleanDirectory(journalDir.toFile());
+            } catch (IOException e) {
+                // Ignore
+            }
         }
     }
 
