@@ -16,6 +16,7 @@ import static org.apache.pekko.actor.ActorRef.noSender;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
+import com.google.common.base.VerifyException;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
@@ -50,6 +51,7 @@ import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier
 import org.opendaylight.controller.cluster.datastore.CommitPhase.CanCommit;
 import org.opendaylight.controller.cluster.datastore.CommitPhase.Concluded;
 import org.opendaylight.controller.cluster.datastore.CommitPhase.DoCommit;
+import org.opendaylight.controller.cluster.datastore.CommitPhase.Failed;
 import org.opendaylight.controller.cluster.datastore.CommitPhase.NeedCanCommit;
 import org.opendaylight.controller.cluster.datastore.CommitPhase.NeedPreCommit;
 import org.opendaylight.controller.cluster.datastore.CommitPhase.Pending;
@@ -770,16 +772,17 @@ public class ShardDataTree {
 
         final var entry = findFirstEntry(pendingTransactions);
         try {
-            if (entry != null && entry.phase() instanceof NeedCanCommit) {
-                canCommitEntry(entry);
+            if (entry != null && entry.phase() instanceof NeedCanCommit needCanCommit) {
+                canCommitEntry(entry, needCanCommit);
             }
         } finally {
             maybeRunOperationOnPendingTransactionsComplete();
         }
     }
 
+    @NonNullByDefault
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private void canCommitEntry(final CommitCohort cohort) {
+    private void canCommitEntry(final CommitCohort cohort, final NeedCanCommit needCanCommit) {
         final var modification = cohort.getDataTreeModification();
 
         LOG.debug("{}: Validating transaction {}", logContext, cohort.transactionId());
@@ -787,7 +790,8 @@ public class ShardDataTree {
         try {
             tip.validate(modification);
             LOG.debug("{}: Transaction {} validated", logContext, cohort.transactionId());
-            cohort.successfulCanCommit();
+            cohort.setPhase(new CanCommit());
+            needCanCommit.callback().onSuccess(Empty.value());
             return;
         } catch (ConflictingModificationAppliedException e) {
             LOG.warn("{}: Store Tx {}: Conflicting modification for path {}.", logContext, cohort.transactionId(),
@@ -810,7 +814,14 @@ public class ShardDataTree {
         }
 
         // Failure path: propagate the failure, remove the transaction from the queue and loop to the next one
-        pendingTransactions.poll().failedCanCommit(cause);
+        failTransaction(pendingTransactions, needCanCommit.callback(), cause);
+    }
+
+    private void failTransaction(final Queue<CommitCohort> queue, final FutureCallback<?> callback,
+            final Throwable cause) {
+        queue.remove().setPhase(new Failed());
+        getStats().incrementFailedTransactionsCount();
+        callback.onFailure(cause);
     }
 
     private void processNextPending() {
@@ -859,8 +870,8 @@ public class ShardDataTree {
         }
     }
 
-    private void failPreCommit(final Throwable cause) {
-        pendingTransactions.poll().failedPreCommit(cause);
+    private void failPreCommit(final FutureCallback<?> callback, final Throwable cause) {
+        failTransaction(pendingTransactions, callback, cause);
         processNextPendingTransaction();
     }
 
@@ -871,6 +882,9 @@ public class ShardDataTree {
         checkState(current != null, "Attempted to pre-commit of %s when no transactions pending", cohort);
 
         verify(cohort.equals(current), "Attempted to pre-commit %s while %s is pending", cohort, current);
+        if (!(cohort.phase() instanceof NeedPreCommit needPreCommit)) {
+            throw new VerifyException("Unexpected state " + cohort.phase() + " in cohort " + cohort);
+        }
 
         final var currentId = current.transactionId();
         LOG.debug("{}: Preparing transaction {}", logContext, currentId);
@@ -880,7 +894,7 @@ public class ShardDataTree {
             candidate = tip.prepare(cohort.getDataTreeModification());
             LOG.debug("{}: Transaction {} candidate ready", logContext, currentId);
         } catch (DataValidationFailedException | RuntimeException e) {
-            failPreCommit(e);
+            failPreCommit(needPreCommit.callback(), e);
             return;
         }
 
@@ -896,15 +910,16 @@ public class ShardDataTree {
                 pendingCommits.add(current);
 
                 LOG.debug("{}: Transaction {} prepared", logContext, currentId);
-
-                cohort.successfulPreCommit(candidate);
+                cohort.setPhase(new PreCommit());
+                cohort.setNewCandidate(candidate);
+                needPreCommit.callback().onSuccess(candidate);
 
                 processNextPendingTransaction();
             }
 
             @Override
             public void onFailure(final Throwable failure) {
-                failPreCommit(failure);
+                failPreCommit(needPreCommit.callback(), failure);
             }
         });
     }
@@ -947,9 +962,12 @@ public class ShardDataTree {
 
     // non-final for mocking
     void startCommit(final CommitCohort cohort, final DataTreeCandidate candidate) {
+        if (!(cohort.phase() instanceof DoCommit doCommit)) {
+            throw new VerifyException("Unexpected state " + cohort.phase() + " in cohort " + cohort);
+        }
+
         final var current = pendingCommits.peek();
         checkState(current != null, "Attempted to start commit of %s when no transactions pending", cohort);
-
         if (!cohort.equals(current)) {
             LOG.debug("{}: Transaction {} scheduled for commit step", logContext, cohort.transactionId());
             return;
@@ -964,7 +982,7 @@ public class ShardDataTree {
                 initialPayloadBufferSize());
         } catch (IOException e) {
             LOG.error("{}: Failed to encode transaction {} candidate {}", logContext, txId, candidate, e);
-            pendingCommits.poll().failedCommit(e);
+            failTransaction(pendingCommits, doCommit.callback(), e);
             processNextPending();
             return;
         }
@@ -1052,13 +1070,13 @@ public class ShardDataTree {
             + " after " + deltaMillis + "ms");
 
         switch (phase) {
-            case NeedCanCommit ph -> currentQueue.remove().failedCanCommit(cohortFailure);
+            case NeedCanCommit ph -> failTransaction(currentQueue, ph.callback(), cohortFailure);
+            case NeedPreCommit ph -> failTransaction(currentQueue, ph.callback(), cohortFailure);
             case CanCommit ph ->
                 // The suppression of the FindBugs "DB_DUPLICATE_SWITCH_CLAUSES" warning pertains to this clause
                 // whose code is duplicated with PRE_COMMIT_COMPLETE. The clauses aren't combined in case the code
                 // in PRE_COMMIT_COMPLETE is changed.
                 currentQueue.remove().reportFailure(cohortFailure);
-            case NeedPreCommit ph -> currentQueue.remove().failedPreCommit(cohortFailure);
             case PreCommit ph ->
                 // FIXME: this is a legacy behavior problem. Three-phase commit protocol specifies that after we
                 //        are ready we should commit the transaction, not abort it. Our current software stack does

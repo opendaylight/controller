@@ -43,7 +43,6 @@ abstract class CommitCohort {
 
     private @NonNull CommitPhase phase = new Pending();
     private DataTreeCandidateTip candidate;
-    private FutureCallback<?> callback;
     private Exception nextFailure;
     private long lastAccess;
 
@@ -88,6 +87,10 @@ abstract class CommitCohort {
         return phase;
     }
 
+    final void setPhase(final @NonNull CommitPhase phase) {
+        this.phase = requireNonNull(phase);
+    }
+
     final boolean isFailed() {
         return phase instanceof Failed || nextFailure != null;
     }
@@ -111,19 +114,20 @@ abstract class CommitCohort {
     }
 
     // FIXME: Should return rebased DataTreeCandidateTip
-    final void canCommit(final FutureCallback<Empty> newCallback) {
+    @NonNullByDefault
+    final void canCommit(final FutureCallback<Empty> callback) {
         switch (phase) {
             case NeedCanCommit ph -> {
                 // No-op
             }
             case Pending ph -> {
-                callback = requireNonNull(newCallback);
-                phase = new NeedCanCommit();
-
-                if (nextFailure == null) {
-                    dataTree.startCanCommit(this);
+                if (nextFailure != null) {
+                    phase = new Failed();
+                    dataTree.getStats().incrementFailedTransactionsCount();
+                    callback.onFailure(nextFailure);
                 } else {
-                    failedCanCommit(nextFailure);
+                    phase = new NeedCanCommit(callback);
+                    dataTree.startCanCommit(this);
                 }
             }
             default -> throw new IllegalStateException(
@@ -131,48 +135,43 @@ abstract class CommitCohort {
         }
     }
 
+    @Deprecated(forRemoval = true)
     final void successfulCanCommit() {
-        switchState(new CanCommit()).onSuccess(Empty.value());
-    }
+        throw new UnsupportedOperationException();
+   }
 
+    @Deprecated(forRemoval = true)
     final void failedCanCommit(final Exception cause) {
-        dataTree.getStats().incrementFailedTransactionsCount();
-        switchState(new Failed()).onFailure(cause);
+        throw new UnsupportedOperationException();
     }
 
-    final void preCommit(final FutureCallback<DataTreeCandidate> newCallback) {
+    @NonNullByDefault
+    final void preCommit(final FutureCallback<DataTreeCandidate> callback) {
         switch (phase) {
             case CanCommit ph -> {
-                callback = requireNonNull(newCallback);
-                phase = new NeedPreCommit();
-
-                if (nextFailure == null) {
+                if (nextFailure != null) {
+                    phase = new Failed();
+                    userCohorts.abort();
+                    dataTree.getStats().incrementFailedTransactionsCount();
+                    callback.onFailure(nextFailure);
+               } else {
+                    phase = new NeedPreCommit(callback);
                     dataTree.startPreCommit(this);
-                } else {
-                    failedPreCommit(nextFailure);
-                }
+               }
             }
             default -> throw new IllegalStateException(
                 "State %s does not match expected CanCommit for %s".formatted(phase, transactionId));
         }
     }
 
+    @Deprecated(forRemoval = true)
     final void successfulPreCommit(final DataTreeCandidateTip dataTreeCandidate) {
-        LOG.trace("Transaction {} prepared candidate {}", modification, dataTreeCandidate);
-        candidate = verifyNotNull(dataTreeCandidate);
-        switchState(new PreCommit()).onSuccess(dataTreeCandidate);
+        throw new UnsupportedOperationException();
     }
 
+    @Deprecated(forRemoval = true)
     final void failedPreCommit(final Throwable cause) {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Transaction {} failed to prepare", modification, cause);
-        } else {
-            LOG.error("Transaction {} failed to prepare", transactionId, cause);
-        }
-
-        userCohorts.abort();
-        dataTree.getStats().incrementFailedTransactionsCount();
-        switchState(new Failed()).onFailure(cause);
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -253,8 +252,7 @@ abstract class CommitCohort {
     }
 
     private void finishSuccessfulCommit(final UnsignedLong journalIndex, final Runnable onComplete) {
-        final var stats = dataTree.getStats();
-        stats.incrementCommittedTransactionCount();
+        dataTree.getStats().incrementCommittedTransactionCount();
 
         switchState(new Committed()).onSuccess(journalIndex);
         onComplete.run();
@@ -272,16 +270,18 @@ abstract class CommitCohort {
         switchState(new Failed()).onFailure(cause);
     }
 
-    void commit(final FutureCallback<UnsignedLong> newCallback) {
+    @NonNullByDefault
+    void commit(final FutureCallback<UnsignedLong> callback) {
         switch (phase) {
             case PreCommit ph -> {
-                callback = requireNonNull(newCallback);
-                phase = new DoCommit();
-
-                if (nextFailure == null) {
-                    dataTree.startCommit(this, candidate);
+                if (nextFailure != null) {
+                    phase = new Failed();
+                    userCohorts.abort();
+                    dataTree.getStats().incrementFailedTransactionsCount();
+                    callback.onFailure(nextFailure);
                 } else {
-                    failedCommit(nextFailure);
+                    phase = new DoCommit(callback);
+                    dataTree.startCommit(this, candidate);
                 }
             }
             default -> throw new IllegalStateException(
@@ -307,12 +307,12 @@ abstract class CommitCohort {
             .toString();
     }
 
-    private <T> FutureCallback<T> switchState(final @NonNull CommitPhase newPhase) {
-        @SuppressWarnings("unchecked")
-        final var ret = (FutureCallback<T>) callback;
-        callback = null;
-        LOG.debug("Transaction {} changing state from {} to {}", transactionId, phase, newPhase);
-        phase = requireNonNull(newPhase);
-        return ret;
-    }
+//    private <T> FutureCallback<T> switchState(final @NonNull CommitPhase newPhase) {
+//        @SuppressWarnings("unchecked")
+//        final var ret = (FutureCallback<T>) callback;
+//        callback = null;
+//        LOG.debug("Transaction {} changing state from {} to {}", transactionId, phase, newPhase);
+//        phase = requireNonNull(newPhase);
+//        return ret;
+//    }
 }
