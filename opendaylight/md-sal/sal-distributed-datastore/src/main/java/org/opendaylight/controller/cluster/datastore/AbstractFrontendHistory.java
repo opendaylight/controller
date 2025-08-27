@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.SortedSet;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.commands.AbstractReadTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ClosedTransactionException;
@@ -81,7 +80,8 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
             final RequestEnvelope envelope, final long now) throws RequestException {
         if (request instanceof TransactionPurgeRequest purgeRequest) {
             return handleTransactionPurgeRequest(purgeRequest, envelope, now);
-        } else if (request instanceof SkipTransactionsRequest skipRequest) {
+        }
+        if (request instanceof SkipTransactionsRequest skipRequest) {
             return handleSkipTransactionsRequest(skipRequest, envelope, now);
         }
 
@@ -251,8 +251,7 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
 
     abstract CommitCohort createFailedCohort(TransactionIdentifier id, DataTreeModification mod, Exception failure);
 
-    abstract CommitCohort createReadyCohort(TransactionIdentifier id, DataTreeModification mod,
-            @Nullable SortedSet<String> participatingShardNames);
+    abstract CommitCohort createReadyCohort(TransactionIdentifier id, DataTreeModification mod);
 
     @Override
     public final String toString() {

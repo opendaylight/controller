@@ -517,7 +517,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
 
         final var optFailure = request.delayedFailure();
         final var ready = new Ready(optFailure == null
-            ? history().createReadyCohort(getIdentifier(), sealedModification, null)
+            ? history().createReadyCohort(getIdentifier(), sealedModification)
             : history().createFailedCohort(getIdentifier(), sealedModification, optFailure));
         state = ready;
         if (request.isCoordinated()) {
@@ -608,7 +608,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             case Open open -> {
                 final var transaction = open.openTransaction;
                 applyModifications(transaction.getSnapshot(), modifications);
-                final var ready = new Ready(transaction.ready(null));
+                final var ready = new Ready(transaction.ready());
                 state = ready;
                 LOG.debug("{}: transitioned {} to ready", persistenceId(), getIdentifier());
                 yield ready;

@@ -9,10 +9,8 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.SortedSet;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 
@@ -35,12 +33,13 @@ abstract class TransactionParent {
         dataTree.abortTransaction(transaction.getIdentifier(), callback);
     }
 
-    abstract CommitCohort finishTransaction(ReadWriteShardDataTreeTransaction transaction,
-        @Nullable SortedSet<String> participatingShardNames);
+    @NonNullByDefault
+    abstract CommitCohort finishTransaction(ReadWriteShardDataTreeTransaction transaction);
 
-    abstract CommitCohort createReadyCohort(TransactionIdentifier txId, DataTreeModification mod,
-        @Nullable SortedSet<String> participatingShardNames);
+    @NonNullByDefault
+    abstract CommitCohort createReadyCohort(TransactionIdentifier txId, DataTreeModification mod);
 
+    @NonNullByDefault
     abstract CommitCohort createFailedCohort(TransactionIdentifier txId, DataTreeModification mod,
             Exception failure);
 }

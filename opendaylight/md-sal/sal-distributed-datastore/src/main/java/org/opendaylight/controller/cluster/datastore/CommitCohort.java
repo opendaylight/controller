@@ -13,9 +13,8 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.base.MoreObjects;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
-import java.util.SortedSet;
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
@@ -45,7 +44,6 @@ abstract class CommitCohort {
     private final @NonNull ShardDataTree dataTree;
     private final @NonNull TransactionIdentifier transactionId;
     private final CompositeDataTreeCohort userCohorts;
-    private final @Nullable SortedSet<String> participatingShardNames;
 
     private State state = State.READY;
     private DataTreeCandidateTip candidate;
@@ -53,28 +51,28 @@ abstract class CommitCohort {
     private Exception nextFailure;
     private long lastAccess;
 
+    @NonNullByDefault
     CommitCohort(final ShardDataTree dataTree, final ReadWriteShardDataTreeTransaction transaction,
-            final CompositeDataTreeCohort userCohorts, final @Nullable SortedSet<String> participatingShardNames) {
-        this(dataTree, transaction.getSnapshot(), transaction.getIdentifier(), userCohorts, participatingShardNames);
+            final CompositeDataTreeCohort userCohorts) {
+        this(dataTree, transaction.getSnapshot(), transaction.getIdentifier(), userCohorts);
     }
 
+    @NonNullByDefault
     CommitCohort(final ShardDataTree dataTree, final DataTreeModification modification,
-            final TransactionIdentifier transactionId, final CompositeDataTreeCohort userCohorts,
-            final @Nullable SortedSet<String> participatingShardNames) {
+            final TransactionIdentifier transactionId, final CompositeDataTreeCohort userCohorts) {
         this.dataTree = requireNonNull(dataTree);
         this.modification = requireNonNull(modification);
         this.transactionId = requireNonNull(transactionId);
         this.userCohorts = requireNonNull(userCohorts);
-        this.participatingShardNames = participatingShardNames;
     }
 
+    @NonNullByDefault
     CommitCohort(final ShardDataTree dataTree, final DataTreeModification modification,
             final TransactionIdentifier transactionId, final Exception nextFailure) {
         this.dataTree = requireNonNull(dataTree);
         this.modification = requireNonNull(modification);
         this.transactionId = requireNonNull(transactionId);
         userCohorts = null;
-        participatingShardNames = null;
         this.nextFailure = requireNonNull(nextFailure);
     }
 
@@ -111,10 +109,6 @@ abstract class CommitCohort {
 
     final DataTreeModification getDataTreeModification() {
         return modification;
-    }
-
-    final @Nullable SortedSet<String> getParticipatingShardNames() {
-        return participatingShardNames;
     }
 
     // FIXME: Should return rebased DataTreeCandidateTip

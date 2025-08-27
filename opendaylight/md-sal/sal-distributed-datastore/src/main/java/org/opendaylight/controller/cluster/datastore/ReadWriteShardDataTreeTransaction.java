@@ -9,8 +9,6 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import java.util.SortedSet;
-import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 
@@ -20,8 +18,8 @@ public final class ReadWriteShardDataTreeTransaction extends AbstractShardDataTr
         super(parent, id, modification);
     }
 
-    CommitCohort ready(final @Nullable SortedSet<String> participatingShardNames) {
+    CommitCohort ready() {
         checkState(close(), "Transaction is already closed");
-        return getParent().finishTransaction(this, participatingShardNames);
+        return getParent().finishTransaction(this);
     }
 }

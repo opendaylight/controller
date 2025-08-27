@@ -123,7 +123,7 @@ public class ShardDataTreeTest extends AbstractTest {
             snapshot.write(PeopleModel.BASE_PATH, PeopleModel.create());
         }
 
-        final var cohort = queue.finishTransaction(transaction, null);
+        final var cohort = queue.finishTransaction(transaction);
 
         immediateCanCommit(cohort);
         immediatePreCommit(cohort);
@@ -567,7 +567,7 @@ public class ShardDataTreeTest extends AbstractTest {
         final var transaction = queue.newReadWriteTransaction(nextTransactionId());
         final var snapshot = transaction.getSnapshot();
         operation.execute(snapshot);
-        return queue.finishTransaction(transaction, null);
+        return queue.finishTransaction(transaction);
     }
 
     private static void verifyOnDataTreeChanged(final DOMDataTreeChangeListener listener,
@@ -616,7 +616,7 @@ public class ShardDataTreeTest extends AbstractTest {
         final var transaction = queue.newReadWriteTransaction(nextTransactionId());
         final var snapshot = transaction.getSnapshot();
         operation.execute(snapshot);
-        final var cohort = queue.finishTransaction(transaction, null);
+        final var cohort = queue.finishTransaction(transaction);
 
         immediateCanCommit(cohort);
         immediatePreCommit(cohort);
@@ -634,7 +634,7 @@ public class ShardDataTreeTest extends AbstractTest {
         for (var candidateTip : candidates) {
             DataTreeCandidates.applyToModification(snapshot, candidateTip);
         }
-        final var cohort = queue.finishTransaction(transaction, null);
+        final var cohort = queue.finishTransaction(transaction);
 
         immediateCanCommit(cohort);
         immediatePreCommit(cohort);

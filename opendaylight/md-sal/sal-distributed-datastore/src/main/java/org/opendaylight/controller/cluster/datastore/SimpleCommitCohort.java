@@ -7,21 +7,20 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import java.util.SortedSet;
-import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 
+@NonNullByDefault
 final class SimpleCommitCohort extends CommitCohort {
     SimpleCommitCohort(final ShardDataTree dataTree, final ReadWriteShardDataTreeTransaction transaction,
-            final CompositeDataTreeCohort userCohorts, final @Nullable SortedSet<String> participatingShardNames) {
-        super(dataTree, transaction, userCohorts, participatingShardNames);
+            final CompositeDataTreeCohort userCohorts) {
+        super(dataTree, transaction, userCohorts);
     }
 
     SimpleCommitCohort(final ShardDataTree dataTree, final DataTreeModification modification,
-            final TransactionIdentifier transactionId, final CompositeDataTreeCohort userCohorts,
-            final @Nullable SortedSet<String> participatingShardNames) {
-        super(dataTree, modification, transactionId, userCohorts, participatingShardNames);
+            final TransactionIdentifier transactionId, final CompositeDataTreeCohort userCohorts) {
+        super(dataTree, modification, transactionId, userCohorts);
     }
 
     SimpleCommitCohort(final ShardDataTree dataTree, final DataTreeModification modification,

@@ -11,10 +11,8 @@ import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
-import java.util.SortedSet;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.concepts.Identifiable;
@@ -82,15 +80,14 @@ final class ChainedTransactionParent extends TransactionParent implements Identi
     }
 
     @Override
-    ChainedCommitCohort finishTransaction(final ReadWriteShardDataTreeTransaction transaction,
-            final SortedSet<String> participatingShardNames) {
+    ChainedCommitCohort finishTransaction(final ReadWriteShardDataTreeTransaction transaction) {
         checkState(openTransaction != null, "Attempted to finish transaction %s while none is outstanding",
                 transaction);
 
         // dataTree is finalizing ready the transaction, we just record it for the next transaction in chain
         final var userCohorts = dataTree.finishTransaction(transaction);
         openTransaction = null;
-        return createReadyCohort(transaction, userCohorts, participatingShardNames);
+        return createReadyCohort(transaction, userCohorts);
     }
 
     @Override
@@ -104,21 +101,21 @@ final class ChainedTransactionParent extends TransactionParent implements Identi
     }
 
     @Override
-    ChainedCommitCohort createReadyCohort(final TransactionIdentifier txId, final DataTreeModification mod,
-            final SortedSet<String> participatingShardNames) {
+    ChainedCommitCohort createReadyCohort(final TransactionIdentifier txId, final DataTreeModification mod) {
         checkState(openTransaction == null, "Attempted to finish transaction %s while %s is outstanding", txId,
             openTransaction);
 
         final var transaction = new ReadWriteShardDataTreeTransaction(this, txId, mod);
         transaction.close();
-        return createReadyCohort(transaction, dataTree.newUserCohorts(txId), participatingShardNames);
+        return createReadyCohort(transaction, dataTree.newUserCohorts(txId));
     }
 
+    @NonNullByDefault
     private ChainedCommitCohort createReadyCohort(final ReadWriteShardDataTreeTransaction transaction,
-            final CompositeDataTreeCohort userCohorts, final @Nullable SortedSet<String> participatingShardNames) {
+            final CompositeDataTreeCohort userCohorts) {
         previousTx = transaction;
         LOG.debug("Committing transaction {}", transaction);
-        final var cohort = new ChainedCommitCohort(dataTree, this, transaction, userCohorts, participatingShardNames);
+        final var cohort = new ChainedCommitCohort(dataTree, this, transaction, userCohorts);
         dataTree.enqueueReadyTransaction(cohort);
         return cohort;
     }

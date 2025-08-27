@@ -12,7 +12,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -62,7 +61,7 @@ public class FrontendReadWriteTransactionTest {
         shardTransaction = new ReadWriteShardDataTreeTransaction(mockParent, TX_ID, mockModification);
         openTx = FrontendReadWriteTransaction.createOpen(mockHistory, shardTransaction);
 
-        when(mockParent.finishTransaction(same(shardTransaction), isNull())).thenReturn(mockCohort);
+        when(mockParent.finishTransaction(same(shardTransaction))).thenReturn(mockCohort);
     }
 
     private TransactionSuccess<?> handleRequest(final TransactionRequest<?> request) throws RequestException {
@@ -90,7 +89,7 @@ public class FrontendReadWriteTransactionTest {
             .build();
 
         assertNotNull(handleRequest(readyReq));
-        verify(mockParent).finishTransaction(same(shardTransaction), isNull());
+        verify(mockParent).finishTransaction(same(shardTransaction));
 
         assertNotNull(handleRequest(readyReq));
         verifyNoMoreInteractions(mockParent);
@@ -104,7 +103,7 @@ public class FrontendReadWriteTransactionTest {
             .build();
 
         assertNull(handleRequest(readyReq));
-        verify(mockParent).finishTransaction(same(shardTransaction), isNull());
+        verify(mockParent).finishTransaction(same(shardTransaction));
 
         assertNull(handleRequest(readyReq));
         verifyNoMoreInteractions(mockParent);
@@ -118,7 +117,7 @@ public class FrontendReadWriteTransactionTest {
             .build();
 
         assertNull(handleRequest(readyReq));
-        verify(mockParent).finishTransaction(same(shardTransaction), isNull());
+        verify(mockParent).finishTransaction(same(shardTransaction));
 
         assertNull(handleRequest(readyReq));
         verifyNoMoreInteractions(mockParent);
@@ -132,7 +131,7 @@ public class FrontendReadWriteTransactionTest {
             .build();
 
         assertNotNull(handleRequest(readyReq));
-        verify(mockParent).finishTransaction(same(shardTransaction), isNull());
+        verify(mockParent).finishTransaction(same(shardTransaction));
 
         final var req = new ReadTransactionRequest(TX_ID, 0, mock(ActorRef.class), YangInstanceIdentifier.of(), true);
         final var ex = assertThrows(IllegalStateException.class, () -> handleRequest(req));
@@ -147,7 +146,7 @@ public class FrontendReadWriteTransactionTest {
         final var readyReq = builder.build();
 
         assertNotNull(handleRequest(readyReq));
-        verify(mockParent).finishTransaction(same(shardTransaction), isNull());
+        verify(mockParent).finishTransaction(same(shardTransaction));
 
         final var req = builder.setSequence(1).addModification(mock(TransactionDelete.class)).build();
         final var ex = assertThrows(IllegalStateException.class, () -> handleRequest(req));
