@@ -11,7 +11,6 @@ import static com.google.common.base.Preconditions.checkState;
 import static org.opendaylight.controller.clustering.it.provider.impl.AbstractTransactionHandler.ITEM;
 
 import com.google.common.util.concurrent.SettableFuture;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -77,7 +76,6 @@ public final class IdIntsListener implements DOMDataTreeChangeListener {
         return localCopy.equals(expected);
     }
 
-    @SuppressFBWarnings("BC_UNCONFIRMED_CAST")
     public String diffWithLocalCopy(final NormalizedNode expected) {
         return diffNodes((MapNode)expected, (MapNode)localCopy);
     }

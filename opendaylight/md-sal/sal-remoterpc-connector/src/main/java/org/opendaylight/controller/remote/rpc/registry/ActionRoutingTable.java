@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.remote.rpc.registry;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.InvalidObjectException;
@@ -36,7 +35,6 @@ public final class ActionRoutingTable extends AbstractRoutingTable<ActionRouting
         private static final long serialVersionUID = 1L;
         private static final Logger LOG = LoggerFactory.getLogger(ActionRoutingTable.class);
 
-        @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "We deal with the field in serialization methods.")
         private Collection<DOMActionInstance> actions;
         private ActorRef opsInvoker;
 

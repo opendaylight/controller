@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.remote.rpc.registry;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -29,7 +28,6 @@ public final class RoutingTable extends AbstractRoutingTable<RoutingTable, DOMRp
     private static final class Proxy implements Externalizable {
         private static final long serialVersionUID = 1L;
 
-        @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "We deal with the field in serialization methods.")
         private Collection<DOMRpcIdentifier> rpcs;
         private ActorRef opsInvoker;
 
