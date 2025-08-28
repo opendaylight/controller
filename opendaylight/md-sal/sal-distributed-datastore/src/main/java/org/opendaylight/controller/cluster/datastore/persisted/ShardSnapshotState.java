@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.datastore.persisted;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import org.eclipse.jdt.annotation.NonNull;
@@ -52,10 +51,6 @@ public final class ShardSnapshotState implements Snapshot.State {
         }
     };
 
-    @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = """
-        This field is not Serializable but this class \
-        implements writeReplace to delegate serialization to a Proxy class and thus instances of this class \
-        aren't serialized. FindBugs does not recognize this.""")
     private final @NonNull ShardDataTreeSnapshot snapshot;
     private final boolean migrated;
 

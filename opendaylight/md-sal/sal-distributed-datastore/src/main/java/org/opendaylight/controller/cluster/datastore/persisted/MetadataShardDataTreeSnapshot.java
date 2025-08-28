@@ -28,12 +28,10 @@ public final class MetadataShardDataTreeSnapshot extends AbstractVersionedShardD
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
+    private final Map<Class<? extends ShardDataTreeSnapshotMetadata<?>>, ShardDataTreeSnapshotMetadata<?>> metadata;
     @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "This field is not Serializable but this class "
             + "implements writeReplace to delegate serialization to a Proxy class and thus instances of this class "
             + "aren't serialized. FindBugs does not recognize this.")
-    private final Map<Class<? extends ShardDataTreeSnapshotMetadata<?>>, ShardDataTreeSnapshotMetadata<?>> metadata;
-
-    @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = "See above justification.")
     private final NormalizedNode rootNode;
 
     public MetadataShardDataTreeSnapshot(final NormalizedNode rootNode) {

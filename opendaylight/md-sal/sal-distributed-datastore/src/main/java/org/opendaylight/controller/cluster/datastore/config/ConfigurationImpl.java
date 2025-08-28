@@ -11,7 +11,6 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -37,7 +36,6 @@ public class ConfigurationImpl implements Configuration {
         this(new FileModuleShardConfigProvider(moduleShardsConfigPath, modulesConfigPath));
     }
 
-    @SuppressFBWarnings(value = "MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", justification = "Subclassed for testing")
     public ConfigurationImpl(final ModuleShardConfigProvider provider) {
         ImmutableMap.Builder<String, ModuleConfig> mapBuilder = ImmutableMap.builder();
         for (Entry<String, ModuleConfig.Builder> e: provider.retrieveModuleConfigs(this).entrySet()) {
