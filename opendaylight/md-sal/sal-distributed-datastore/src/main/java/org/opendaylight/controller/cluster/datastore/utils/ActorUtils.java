@@ -68,7 +68,7 @@ public class ActorUtils {
         private LongAdder ateExceptions = new LongAdder();
 
         @Override
-        public void onComplete(final Throwable failure, final Object success) throws Throwable {
+        public void onComplete(final Throwable failure, final Object success) {
             if (failure instanceof AskTimeoutException) {
                 ateExceptions.increment();
             }
