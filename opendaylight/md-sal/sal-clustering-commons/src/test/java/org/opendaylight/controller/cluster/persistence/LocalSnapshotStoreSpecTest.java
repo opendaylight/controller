@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.persistence;
 
-import akka.persistence.snapshot.SnapshotStoreSpec;
+import akka.persistence.japi.snapshot.JavaSnapshotStoreSpec;
 import com.typesafe.config.ConfigFactory;
 import java.io.File;
 import java.io.IOException;
@@ -23,7 +23,7 @@ import org.scalatestplus.junit.JUnitRunner;
  * @author Thomas Pantelis
  */
 @RunWith(JUnitRunner.class)
-public class LocalSnapshotStoreSpecTest extends SnapshotStoreSpec {
+public class LocalSnapshotStoreSpecTest extends JavaSnapshotStoreSpec {
     private static final long serialVersionUID = 1L;
     static final File SNAPSHOT_DIR = new File("target/snapshots");
 
