@@ -12,7 +12,6 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
@@ -385,8 +384,6 @@ public abstract sealed class AbstractClientConnection<T extends BackendInfo>
      * - if there is a timeout to schedule, return a non-empty optional
      * - if this connections has timed out, return null
      */
-    @SuppressFBWarnings(value = "NP_OPTIONAL_RETURN_NULL",
-            justification = "Returning null Optional is documented in the API contract.")
     @GuardedBy("lock")
     private OptionalLong lockedCheckTimeout(final long now) {
         if (queue.isEmpty()) {
