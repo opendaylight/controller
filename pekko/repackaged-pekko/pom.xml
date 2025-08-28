@@ -19,6 +19,14 @@
     <artifactId>repackaged-pekko</artifactId>
     <packaging>bundle</packaging>
     <name>${project.artifactId}</name>
+    <description>Apache Pekko repackaged for OpenDaylight</description>
+
+    <licenses>
+        <license>
+            <name>Apache-2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
 
     <properties>
         <!-- We are just juggling classes here -->
