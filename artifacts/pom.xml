@@ -25,7 +25,7 @@
 
     <dependencyManagement>
         <dependencies>
-            <!-- Repackaged Akka -->
+            <!-- Repackaged Apache Pekko -->
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>repackaged-pekko</artifactId>
