@@ -134,7 +134,8 @@
                                 <artifactItem>
                                     <groupId>com.hierynomus</groupId>
                                     <artifactId>asn-one</artifactId>
-                                    <version>0.5.0</version>
+                                    <!-- Note: aligned to Pekko's dependency -->
+                                    <version>0.6.0</version>
                                 </artifactItem>
                             </artifactItems>
                             <overWriteReleases>false</overWriteReleases>
