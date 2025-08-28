@@ -277,7 +277,7 @@ public final class ClusterAdminRpcService {
         final var ret = SettableFuture.<RpcResult<LocateShardOutput>>create();
         actorUtils.findPrimaryShardAsync(input.requireShardName().getValue()).onComplete(new OnComplete<>() {
             @Override
-            public void onComplete(final Throwable failure, final PrimaryShardInfo success) throws Throwable {
+            public void onComplete(final Throwable failure, final PrimaryShardInfo success) {
                 if (failure != null) {
                     LOG.debug("Failed to find shard for {}", input, failure);
                     ret.setException(failure);
