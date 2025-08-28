@@ -19,6 +19,7 @@
     <artifactId>repackaged-pekko</artifactId>
     <packaging>bundle</packaging>
     <name>${project.artifactId}</name>
+    <description>Apache Pekko repackaged for OpenDaylight</description>
 
     <properties>
         <!-- We are just juggling classes here -->
