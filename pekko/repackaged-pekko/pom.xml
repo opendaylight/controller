@@ -212,10 +212,10 @@
                         <Automatic-Module-Name>org.opendaylight.controller.repackaged.pekko</Automatic-Module-Name>
                         <Export-Package>
                             org.apache.pekko.*,
-                            com.typesafe.sslconfig.akka.*,
-                            jdk.jfr,
+                            com.typesafe.sslconfig.akka.*
                         </Export-Package>
                         <Import-Package>
+                            jdk.jfr;resolution:=optional,
                             sun.misc;resolution:=optional,
                             sun.reflect;resolution:=optional,
                             org.fusesource.leveldbjni;resolution:=optional,
