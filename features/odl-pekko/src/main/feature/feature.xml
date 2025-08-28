@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.6.0" name="odl-pekko">
+    <feature name="odl-pekko">
+        <feature version="[14,15)">odl-netty-4</feature>
+    </feature>
+</features>

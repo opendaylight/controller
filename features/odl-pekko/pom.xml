@@ -15,7 +15,7 @@
         <relativePath>../single-feature-parent/pom.xml</relativePath>
     </parent>
 
-    <artifactId>odl-controller-pekko</artifactId>
+    <artifactId>odl-pekko</artifactId>
     <packaging>feature</packaging>
     <name>Apache Pekko for OpenDaylight</name>
 

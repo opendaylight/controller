@@ -23,7 +23,7 @@
     <dependencies>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
-            <artifactId>odl-controller-pekko</artifactId>
+            <artifactId>odl-pekko</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>

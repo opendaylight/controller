@@ -43,7 +43,7 @@
         <module>odl-mdsal-benchmark</module>
 
         <!-- Combined Scala/Pekko feature -->
-        <module>odl-controller-pekko</module>
+        <module>odl-pekko</module>
 
         <module>odl-lz4</module>
         <module>odl-raft-api</module>

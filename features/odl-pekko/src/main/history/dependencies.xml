@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<features xmlns="http://karaf.apache.org/xmlns/features/v1.6.0" name="odl-controller-pekko">
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.6.0" name="odl-pekko">
     <feature version="0.0.0">
         <feature>odl-netty-4</feature>
         <bundle>mvn:com.typesafe/config/1.4.3</bundle>
