@@ -26,12 +26,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>odl-controller-scala</artifactId>
-            <type>xml</type>
-            <classifier>features</classifier>
-        </dependency>
-        <dependency>
             <groupId>org.opendaylight.odlparent</groupId>
             <artifactId>odl-netty-4</artifactId>
             <type>xml</type>
@@ -40,6 +34,14 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>repackaged-pekko</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.scala-lang.modules</groupId>
+            <artifactId>scala-parser-combinators_2.13</artifactId>
         </dependency>
     </dependencies>
 </project>

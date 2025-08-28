@@ -42,8 +42,7 @@
         <module>odl-clustering-test-app</module>
         <module>odl-mdsal-benchmark</module>
 
-        <!-- Scala/Akka features -->
-        <module>odl-controller-scala</module>
+        <!-- Combined Scala/Akka feature -->
         <module>odl-controller-akka</module>
 
         <module>odl-lz4</module>

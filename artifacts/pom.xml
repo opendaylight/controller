@@ -300,14 +300,6 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <!-- FIXME: 'odl-scala' -->
-                <artifactId>odl-controller-scala</artifactId>
-                <version>${project.version}</version>
-                <type>xml</type>
-                <classifier>features</classifier>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
                 <artifactId>odl-mdsal-broker</artifactId>
                 <version>${project.version}</version>
                 <type>xml</type>

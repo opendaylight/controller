@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.6.0" name="odl-controller-akka">
     <feature version="0.0.0">
-        <feature>odl-controller-scala</feature>
         <feature>odl-netty-4</feature>
         <bundle>mvn:com.typesafe/config/1.4.3</bundle>
         <bundle>mvn:com.typesafe/ssl-config-core_2.13/0.6.1</bundle>
@@ -11,6 +10,8 @@
         <bundle>mvn:org.agrona/agrona/1.22.0</bundle>
         <bundle>mvn:org.opendaylight.controller/repackaged-pekko/${project.version}</bundle>
         <bundle>mvn:org.reactivestreams/reactive-streams/1.0.4</bundle>
+        <bundle>mvn:org.scala-lang/scala-library/2.13.16</bundle>
+        <bundle>mvn:org.scala-lang.modules/scala-parser-combinators_2.13/1.1.2</bundle>
         <feature>wrap</feature>
         <bundle>wrap:mvn:org.lmdbjava/lmdbjava/0.7.0</bundle>
     </feature>
