@@ -292,8 +292,7 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <!-- FIXME: 'odl-pekko' -->
-                <artifactId>odl-controller-akka</artifactId>
+                <artifactId>odl-controller-pekko</artifactId>
                 <version>${project.version}</version>
                 <type>xml</type>
                 <classifier>features</classifier>
