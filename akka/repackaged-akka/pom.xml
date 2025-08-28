@@ -210,9 +210,9 @@
                         <Export-Package>
                             akka.*,
                             com.typesafe.sslconfig.akka.*,
-                            jdk.jfr,
                         </Export-Package>
                         <Import-Package>
+                            jdk.jfr;resolution:=optional,
                             sun.misc;resolution:=optional,
                             sun.reflect;resolution:=optional,
                             org.fusesource.leveldbjni;resolution:=optional,
