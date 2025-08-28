@@ -25,10 +25,15 @@
 
     <dependencyManagement>
         <dependencies>
-            <!-- Repackaged Apache Pekko -->
+            <!-- Repackaged Apache Pekko and Scala 3 -->
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>repackaged-pekko</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>scala3-library</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
