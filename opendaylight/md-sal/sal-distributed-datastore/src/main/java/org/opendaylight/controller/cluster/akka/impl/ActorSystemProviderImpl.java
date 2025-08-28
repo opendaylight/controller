@@ -62,7 +62,7 @@ public class ActorSystemProviderImpl implements ActorSystemProvider, AutoCloseab
         final Future<Terminated> ret = actorSystem.terminate();
         ret.onComplete(new OnComplete<Terminated>() {
             @Override
-            public void onComplete(final Throwable failure, final Terminated success) throws Throwable {
+            public void onComplete(final Throwable failure, final Terminated success) {
                 if (failure != null) {
                     LOG.warn("ActorSystem failed to shut down", failure);
                 } else {

@@ -137,7 +137,7 @@ abstract sealed class AbstractShardBackendResolver extends BackendInfoResolver<S
         final var future = new CompletableFuture<ShardBackendInfo>();
         actorUtils.findPrimaryShardAsync(shardName).onComplete(new OnComplete<>() {
             @Override
-            public void onComplete(final Throwable failure, final PrimaryShardInfo success) throws Throwable {
+            public void onComplete(final Throwable failure, final PrimaryShardInfo success) {
                 if (failure != null) {
                     LOG.debug("Shard {} failed to resolve", shardName, failure);
                     switch (failure) {
