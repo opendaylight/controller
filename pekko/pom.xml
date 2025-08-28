@@ -26,7 +26,9 @@
     </properties>
 
     <modules>
-        <module>repackaged-pekko-jar</module>
+        <module>repackaged-scala3-library</module>
+        <module>repackaged-scala3-library-jar</module>
         <module>repackaged-pekko</module>
+        <module>repackaged-pekko-jar</module>
     </modules>
 </project>

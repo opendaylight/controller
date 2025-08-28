@@ -1,0 +1,3 @@
+Automatic-Module-Name: org.opendaylight.controller.scala3.library
+Export-Package: scala.*;-split-package:=first;version=3.3.6
+Import-Package: sun.misc;resolution:=optional,*
