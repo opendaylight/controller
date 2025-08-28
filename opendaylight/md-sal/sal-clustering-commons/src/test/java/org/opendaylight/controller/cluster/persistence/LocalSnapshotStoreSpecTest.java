@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.apache.commons.io.FileUtils;
-import org.apache.pekko.persistence.snapshot.SnapshotStoreSpec;
+import org.apache.pekko.persistence.japi.snapshot.JavaSnapshotStoreSpec;
 import org.junit.runner.RunWith;
 import org.scalatestplus.junit.JUnitRunner;
 
@@ -25,7 +25,7 @@ import org.scalatestplus.junit.JUnitRunner;
  */
 @RunWith(JUnitRunner.class)
 @Deprecated(since = "11.0.0", forRemoval = true)
-public class LocalSnapshotStoreSpecTest extends SnapshotStoreSpec {
+public class LocalSnapshotStoreSpecTest extends JavaSnapshotStoreSpec {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
