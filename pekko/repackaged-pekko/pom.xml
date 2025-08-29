@@ -76,7 +76,7 @@
         <dependency>
             <groupId>org.lmdbjava</groupId>
             <artifactId>lmdbjava</artifactId>
-            <version>0.7.0</version>
+            <version>0.9.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.github.jnr</groupId>
