@@ -25,12 +25,7 @@
 
     <dependencyManagement>
         <dependencies>
-            <!-- Repackaged Apache Pekko and Scala 3 -->
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>repackaged-pekko</artifactId>
-                <version>${project.version}</version>
-            </dependency>
+            <!-- Repackaged Scala 3 libraries -->
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>scala3-library</artifactId>
