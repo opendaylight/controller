@@ -40,10 +40,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>atomix-storage</artifactId>
         </dependency>
-        <dependency>
+        <!--dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>repackaged-pekko</artifactId>
-        </dependency>
+        </dependency-->
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>scala3-library</artifactId>
