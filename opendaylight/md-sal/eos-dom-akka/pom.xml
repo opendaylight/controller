@@ -41,8 +41,24 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>repackaged-pekko</artifactId>
+            <groupId>org.apache.pekko</groupId>
+            <artifactId>pekko-actor_3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.pekko</groupId>
+            <artifactId>pekko-actor-typed_3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.pekko</groupId>
+            <artifactId>pekko-cluster_3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.pekko</groupId>
+            <artifactId>pekko-cluster-typed_3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.pekko</groupId>
+            <artifactId>pekko-distributed-data_3</artifactId>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>

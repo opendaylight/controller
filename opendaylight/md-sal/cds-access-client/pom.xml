@@ -22,6 +22,14 @@
            <artifactId>guava</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.apache.pekko</groupId>
+            <artifactId>pekko-actor_3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.pekko</groupId>
+            <artifactId>pekko-persistence_3</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.checkerframework</groupId>
             <artifactId>checker-qual</artifactId>
             <optional>true</optional>
@@ -37,10 +45,6 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>raft-spi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>repackaged-pekko</artifactId>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>

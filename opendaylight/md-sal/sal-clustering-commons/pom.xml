@@ -51,6 +51,22 @@
             <artifactId>metrics-jmx</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.apache.pekko</groupId>
+            <artifactId>pekko-actor_3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.pekko</groupId>
+            <artifactId>pekko-cluster_3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.pekko</groupId>
+            <artifactId>pekko-persistence_3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.pekko</groupId>
+            <artifactId>pekko-remote_3</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.jdt</groupId>
             <artifactId>org.eclipse.jdt.annotation</artifactId>
         </dependency>
@@ -61,10 +77,6 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>raft-spi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>repackaged-pekko</artifactId>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>

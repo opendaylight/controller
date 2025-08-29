@@ -8,10 +8,24 @@
         <bundle>mvn:io.aeron/aeron-client/1.45.1</bundle>
         <bundle>mvn:io.aeron/aeron-driver/1.45.1</bundle>
         <bundle>mvn:org.agrona/agrona/1.22.0</bundle>
-        <bundle>mvn:org.opendaylight.controller/repackaged-pekko/${project.version}</bundle>
+        <bundle>mvn:org.apache.pekko/pekko-actor_3/1.1.5</bundle>
+        <bundle>mvn:org.apache.pekko/pekko-actor-typed_3/1.1.5</bundle>
+        <bundle>mvn:org.apache.pekko/pekko-cluster_3/1.1.5</bundle>
+        <bundle>mvn:org.apache.pekko/pekko-cluster-tools_3/1.1.5</bundle>
+        <bundle>mvn:org.apache.pekko/pekko-coordination_3/1.1.5</bundle>
+        <bundle>mvn:org.apache.pekko/pekko-distributed-data_3/1.1.5</bundle>
+        <bundle>mvn:org.apache.pekko/pekko-osgi_3/1.1.5</bundle>
+        <bundle>mvn:org.apache.pekko/pekko-persistence_3/1.1.5</bundle>
+        <bundle>mvn:org.apache.pekko/pekko-protobuf-v3_3/1.1.5</bundle>
+        <bundle>mvn:org.apache.pekko/pekko-remote_3/1.1.5</bundle>
+        <bundle>mvn:org.apache.pekko/pekko-slf4j_3/1.1.5</bundle>
+        <bundle>mvn:org.apache.pekko/pekko-stream_3/1.1.5</bundle>
         <bundle>mvn:org.opendaylight.controller/scala3-library/${project.version}</bundle>
         <bundle>mvn:org.reactivestreams/reactive-streams/1.0.4</bundle>
         <feature>wrap</feature>
+        <bundle>wrap:mvn:com.hierynomus/asn-one/0.6.0</bundle>
+        <bundle>wrap:mvn:org.apache.pekko/pekko-cluster-typed_3/1.1.5</bundle>
+        <bundle>wrap:mvn:org.apache.pekko/pekko-pki_3/1.1.5</bundle>
         <bundle>wrap:mvn:org.lmdbjava/lmdbjava/0.9.1</bundle>
     </feature>
 </features>
