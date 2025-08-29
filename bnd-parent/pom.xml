@@ -47,8 +47,7 @@
                 </exclusions>
             </dependency>
 
-            <!-- Configuration library -->
-            <!-- This needs to be kept in sync with the version used by pekko -->
+            <!-- These needs to be kept in sync with versions used by pekko -->
             <dependency>
                 <groupId>com.typesafe</groupId>
                 <artifactId>config</artifactId>
@@ -65,18 +64,156 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+            <dependency>
+                <groupId>org.lmdbjava</groupId>
+                <artifactId>lmdbjava</artifactId>
+                <version>0.9.1</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.github.jnr</groupId>
+                        <artifactId>jffi</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.github.jnr</groupId>
+                        <artifactId>jnr-ffi</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.github.jnr</groupId>
+                        <artifactId>jnr-constants</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
 
-            <!-- Pekko testkit -->
+            <!-- Pekko -->
+            <dependency>
+                <groupId>org.apache.pekko</groupId>
+                <artifactId>pekko-actor_3</artifactId>
+                <version>1.1.5</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.scala-lang</groupId>
+                        <artifactId>scala3-library_3</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.pekko</groupId>
+                <artifactId>pekko-actor-typed_3</artifactId>
+                <version>1.1.5</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.scala-lang</groupId>
+                        <artifactId>scala3-library_3</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.pekko</groupId>
+                <artifactId>pekko-cluster_3</artifactId>
+                <version>1.1.5</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.scala-lang</groupId>
+                        <artifactId>scala3-library_3</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.pekko</groupId>
+                <artifactId>pekko-cluster-typed_3</artifactId>
+                <version>1.1.5</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.scala-lang</groupId>
+                        <artifactId>scala3-library_3</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.pekko</groupId>
+                <artifactId>pekko-distributed-data_3</artifactId>
+                <version>1.1.5</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.scala-lang</groupId>
+                        <artifactId>scala3-library_3</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.pekko</groupId>
+                <artifactId>pekko-osgi_3</artifactId>
+                <version>1.1.5</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.osgi</groupId>
+                        <artifactId>org.osgi.compendium</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.osgi</groupId>
+                        <artifactId>org.osgi.core</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.scala-lang</groupId>
+                        <artifactId>scala3-library_3</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.pekko</groupId>
+                <artifactId>pekko-persistence_3</artifactId>
+                <version>1.1.5</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.scala-lang</groupId>
+                        <artifactId>scala3-library_3</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.pekko</groupId>
+                <artifactId>pekko-protobuf-v3_3</artifactId>
+                <version>1.1.5</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.pekko</groupId>
+                <artifactId>pekko-remote_3</artifactId>
+                <version>1.1.5</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.scala-lang</groupId>
+                        <artifactId>scala3-library_3</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.pekko</groupId>
+                <artifactId>pekko-slf4j_3</artifactId>
+                <version>1.1.5</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.scala-lang</groupId>
+                        <artifactId>scala3-library_3</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.pekko</groupId>
+                <artifactId>pekko-stream_3</artifactId>
+                <version>1.1.5</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.scala-lang</groupId>
+                        <artifactId>scala3-library_3</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
             <dependency>
                 <groupId>org.apache.pekko</groupId>
                 <artifactId>pekko-testkit_3</artifactId>
                 <version>1.1.5</version>
                 <scope>test</scope>
                 <exclusions>
-                    <exclusion>
-                        <groupId>org.apache.pekko</groupId>
-                        <artifactId>pekko-actor_3</artifactId>
-                    </exclusion>
                     <exclusion>
                         <groupId>org.scala-lang</groupId>
                         <artifactId>scala3-library_3</artifactId>
@@ -90,14 +227,6 @@
                 <scope>test</scope>
                 <exclusions>
                     <exclusion>
-                        <groupId>org.apache.pekko</groupId>
-                        <artifactId>pekko-actor-typed_3</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.apache.pekko</groupId>
-                        <artifactId>pekko-slf4j_3</artifactId>
-                    </exclusion>
-                    <exclusion>
                         <groupId>org.scala-lang</groupId>
                         <artifactId>scala3-library_3</artifactId>
                     </exclusion>
@@ -109,10 +238,6 @@
                 <version>1.1.5</version>
                 <scope>test</scope>
                 <exclusions>
-                    <exclusion>
-                        <groupId>org.apache.pekko</groupId>
-                        <artifactId>pekko-persistence_3</artifactId>
-                    </exclusion>
                     <exclusion>
                         <groupId>org.scala-lang</groupId>
                         <artifactId>scala3-library_3</artifactId>
