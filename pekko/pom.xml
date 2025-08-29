@@ -30,5 +30,7 @@
         <module>repackaged-pekko-jar</module>
         <module>scala3-library</module>
         <module>scala3-library-jar</module>
+        <module>ssl-config-core</module>
+        <module>ssl-config-core-jar</module>
     </modules>
 </project>
