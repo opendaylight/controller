@@ -36,6 +36,11 @@
                 <artifactId>scala3-library</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>ssl-config-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <!-- RAFT -->
             <dependency>
