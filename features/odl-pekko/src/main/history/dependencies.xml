@@ -11,7 +11,6 @@
         <bundle>mvn:org.opendaylight.controller/repackaged-pekko/${project.version}</bundle>
         <bundle>mvn:org.reactivestreams/reactive-streams/1.0.4</bundle>
         <bundle>mvn:org.scala-lang/scala-library/2.13.16</bundle>
-        <bundle>mvn:org.scala-lang.modules/scala-parser-combinators_2.13/1.1.2</bundle>
         <feature>wrap</feature>
         <bundle>wrap:mvn:org.lmdbjava/lmdbjava/0.7.0</bundle>
     </feature>
