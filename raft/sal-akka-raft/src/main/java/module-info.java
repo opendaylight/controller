@@ -21,14 +21,14 @@ module org.opendaylight.controller.cluster.raft {
 
     // Normally only end users would needs to expose their actors to Pekko for Props-based instantiation.
     // Our test suite needs this as well.
-    opens org.opendaylight.controller.cluster.raft to org.opendaylight.controller.repackaged.pekko;
+    opens org.opendaylight.controller.cluster.raft to pekko.actor;
 
     requires transitive org.opendaylight.raft.api;
     requires transitive org.opendaylight.raft.spi;
     requires transitive org.opendaylight.yangtools.concepts;
-    requires transitive org.opendaylight.controller.repackaged.pekko;
     requires transitive org.opendaylight.controller.cluster.commons;
     requires transitive org.opendaylight.controller.cluster.mgmt.api;
+    requires transitive pekko.actor;
     requires com.google.common;
     requires io.netty.buffer;
     requires org.apache.commons.lang3;
@@ -36,6 +36,8 @@ module org.opendaylight.controller.cluster.raft {
     requires org.opendaylight.raft.journal;
     requires org.opendaylight.yangtools.util;
     requires org.slf4j;
+    requires pekko.cluster;
+    requires pekko.persistence;
 
     // Constants only
     requires static org.osgi.framework;
