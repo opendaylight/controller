@@ -9,7 +9,7 @@ package org.opendaylight.controller.cluster.access.client;
 
 import static java.util.Objects.requireNonNull;
 
-import java.io.Serial;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -17,9 +17,10 @@ import java.util.concurrent.CountDownLatch;
  * to complete using {@link #awaitResolution()}.
  */
 public final class InversibleLockException extends RuntimeException {
-    @Serial
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
+    @SuppressFBWarnings(value = "SE_TRANSIENT_FIELD_NOT_RESTORED", justification = "Default value is fine")
     private final transient CountDownLatch latch;
 
     InversibleLockException(final CountDownLatch latch) {
