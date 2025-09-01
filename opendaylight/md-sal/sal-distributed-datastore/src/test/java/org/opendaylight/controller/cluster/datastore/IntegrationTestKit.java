@@ -140,12 +140,10 @@ public class IntegrationTestKit extends ShardTestKit {
     }
 
     private void setDataStoreName(final String typeName) {
-        if ("config".equals(typeName)) {
-            datastoreContextBuilder.logicalStoreType(LogicalDatastoreType.CONFIGURATION);
-        } else if ("operational".equals(typeName)) {
-            datastoreContextBuilder.logicalStoreType(LogicalDatastoreType.OPERATIONAL);
-        } else {
-            datastoreContextBuilder.dataStoreName(typeName);
+        switch (typeName) {
+            case "config" -> datastoreContextBuilder.logicalStoreType(LogicalDatastoreType.CONFIGURATION);
+            case "operational" -> datastoreContextBuilder.logicalStoreType(LogicalDatastoreType.OPERATIONAL);
+            default -> datastoreContextBuilder.dataStoreName(typeName);
         }
     }
 
