@@ -21,8 +21,9 @@ import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
-import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.EntryJournalV1;
+import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.raft.api.EntryMeta;
 import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.raft.spi.CompressionType;
@@ -33,7 +34,7 @@ import org.opendaylight.raft.spi.CompressionType;
  * @author Thomas Pantelis
  */
 public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorIntegrationTest {
-    private List<SimpleReplicatedLogEntry> origLeaderJournal;
+    private List<LogEntry> origLeaderJournal;
 
     private MockCommand recoveredPayload0;
     private MockCommand recoveredPayload1;
@@ -60,9 +61,9 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         recoveredPayload2 = new MockCommand("two");
 
         origLeaderJournal = List.of(
-            new SimpleReplicatedLogEntry(0, initialTerm, recoveredPayload0),
-            new SimpleReplicatedLogEntry(1, initialTerm, recoveredPayload1),
-            new SimpleReplicatedLogEntry(2, initialTerm, recoveredPayload2));
+            new DefaultLogEntry(0, initialTerm, recoveredPayload0),
+            new DefaultLogEntry(1, initialTerm, recoveredPayload1),
+            new DefaultLogEntry(2, initialTerm, recoveredPayload2));
 
         try (var journal = new EntryJournalV1(leaderId, leaderDir, CompressionType.NONE, true)) {
             for (var entry : origLeaderJournal) {
@@ -207,9 +208,6 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
 
         // The leader's persisted journal log should contain a single entry, as everything else has been snapshotted
 //      verifyReplicatedLogEntry(unAppliedEntry.getFirst(), currentTerm, 3, payload3);
-
-        final var persistedLeaderJournal = InMemoryJournal.get(leaderId, SimpleReplicatedLogEntry.class);
-        assertEquals("Persisted journal log size", 0, persistedLeaderJournal.size());
 
         // Allow AppendEntries to both followers to proceed. This should catch up the followers and cause a
         // "fake" snapshot in the leader to advance the snapshot index to 2. Also the state should be applied
