@@ -35,12 +35,11 @@ import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionChain;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.common.Uint64;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.api.schema.SystemMapNode;
-import org.opendaylight.yangtools.yang.data.api.schema.builder.CollectionNodeBuilder;
-import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 
 public class DistributedDataStoreWithSegmentedJournalIntegrationTest
         extends AbstractDistributedDataStoreIntegrationTest {
@@ -74,7 +73,8 @@ public class DistributedDataStoreWithSegmentedJournalIntegrationTest
     @Test
     public void testManyWritesDeletes() throws Exception {
         final var testKit = new IntegrationTestKit(stateDir(), getSystem(), datastoreContextBuilder);
-        CollectionNodeBuilder<MapEntryNode, SystemMapNode> carMapBuilder = ImmutableNodes.mapNodeBuilder(CAR_QNAME);
+        final var carMapBuilder = ImmutableNodes.newSystemMapBuilder()
+            .withNodeIdentifier(new NodeIdentifier(CAR_QNAME));
 
         try (var dataStore = testKit.setupDataStore(DS_CLASS, "testManyWritesDeletes",
             "module-shards-cars-member-1.conf", true, "cars")) {
