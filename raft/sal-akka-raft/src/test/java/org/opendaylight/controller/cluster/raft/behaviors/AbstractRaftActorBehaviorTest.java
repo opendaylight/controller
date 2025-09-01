@@ -29,8 +29,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.opendaylight.controller.cluster.raft.AbstractActorTest;
-import org.opendaylight.controller.cluster.raft.InMemoryJournal;
-import org.opendaylight.controller.cluster.raft.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.MessageCollectorActor;
 import org.opendaylight.controller.cluster.raft.MockCommand;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
@@ -70,9 +68,6 @@ abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior> extend
         }
 
         actorFactory.close();
-
-        InMemoryJournal.clear();
-        InMemorySnapshotStore.clear();
     }
 
     /**

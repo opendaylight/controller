@@ -21,7 +21,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.opendaylight.controller.cluster.raft.RaftActorTestKit.awaitSnapshot;
-import static org.opendaylight.controller.cluster.raft.RaftActorTestKit.awaitSnapshotNewerThan;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -40,7 +39,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
-import org.opendaylight.controller.cluster.raft.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.MessageCollectorActor;
 import org.opendaylight.controller.cluster.raft.MockCommand;
 import org.opendaylight.controller.cluster.raft.MockRaftActor;
@@ -65,11 +63,11 @@ import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
-import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
+import org.opendaylight.controller.cluster.raft.spi.PropertiesTermInfoStore;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.TermInfo;
 
@@ -1076,7 +1074,7 @@ class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         String id = "testCaptureSnapshotOnLastEntryInAppendEntries";
         logStart(id);
 
-        InMemoryJournal.addEntry(id, 1, new UpdateElectionTerm(1, null));
+        new PropertiesTermInfoStore(id, stateDir.resolve(id)).storeAndSetTerm(new TermInfo(1));
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
         config.setSnapshotBatchCount(2);
@@ -1093,7 +1091,7 @@ class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         followerRaftActorRef.set(followerRaftActor);
         followerRaftActor.waitForInitializeBehaviorComplete();
 
-        final var followerRecoverySnapshot = awaitSnapshot(followerRaftActor);
+        assertNull(followerRaftActor.lastSnapshot());
 
         final var entries = List.of(newLogEntry(1, 0, "one"), newLogEntry(1, 1, "two"));
 
@@ -1101,7 +1099,7 @@ class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         followerActorRef.tell(appendEntries, leaderActor);
 
-        final var snapshotFile = awaitSnapshotNewerThan(followerRaftActor, followerRecoverySnapshot.timestamp());
+        final var snapshotFile = awaitSnapshot(followerRaftActor);
 
         final var raftSnapshot = snapshotFile.readRaftSnapshot(OBJECT_STREAMS);
         assertEquals(List.of(), raftSnapshot.unappliedEntries());
@@ -1129,7 +1127,7 @@ class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         String id = "testCaptureSnapshotOnMiddleEntryInAppendEntries";
         logStart(id);
 
-        InMemoryJournal.addEntry(id, 1, new UpdateElectionTerm(1, null));
+        new PropertiesTermInfoStore(id, stateDir.resolve(id)).storeAndSetTerm(new TermInfo(1));
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
         config.setSnapshotBatchCount(2);
@@ -1145,7 +1143,7 @@ class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         followerRaftActorRef.set(followerRaftActor);
         followerRaftActor.waitForInitializeBehaviorComplete();
 
-        final var followerRecoverySnapshot = awaitSnapshot(followerRaftActor);
+        assertNull(followerRaftActor.lastSnapshot());
 
         final var entries = List.of(newLogEntry(1, 0, "one"), newLogEntry(1, 1, "two"), newLogEntry(1, 2, "three"));
 
@@ -1156,7 +1154,7 @@ class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
         assertTrue("isSuccess", reply.isSuccess());
 
-        final var snapshotFile = awaitSnapshotNewerThan(followerRaftActor, followerRecoverySnapshot.timestamp());
+        final var snapshotFile = awaitSnapshot(followerRaftActor);
         final var raftSnapshot = snapshotFile.readRaftSnapshot(OBJECT_STREAMS);
         assertEquals(List.of(), raftSnapshot.unappliedEntries());
         assertEquals(EntryInfo.of(2, 1), snapshotFile.lastIncluded());
@@ -1200,7 +1198,7 @@ class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         String id = "testCaptureSnapshotOnAppendEntriesWithUnapplied";
         logStart(id);
 
-        InMemoryJournal.addEntry(id, 1, new UpdateElectionTerm(1, null));
+        new PropertiesTermInfoStore(id, stateDir.resolve(id)).storeAndSetTerm(new TermInfo(1));
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
         config.setSnapshotBatchCount(1);
