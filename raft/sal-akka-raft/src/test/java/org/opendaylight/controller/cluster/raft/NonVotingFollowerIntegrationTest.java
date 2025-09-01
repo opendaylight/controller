@@ -13,8 +13,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import java.nio.file.Files;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -28,11 +28,15 @@ import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
-import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
+import org.opendaylight.controller.cluster.raft.spi.PropertiesTermInfoStore;
+import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
+import org.opendaylight.controller.cluster.raft.spi.RaftStorage;
+import org.opendaylight.controller.cluster.raft.spi.SnapshotFileFormat;
 import org.opendaylight.raft.api.EntryInfo;
+import org.opendaylight.raft.api.TermInfo;
+import org.opendaylight.raft.spi.CompressionType;
 
 /**
  * Integration test for various scenarios involving non-voting followers.
@@ -80,7 +84,7 @@ class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrationTest 
         assertNull(leaderSnapshot.source());
         final var leaderRaftSnapshot = leaderSnapshot.readRaftSnapshot(OBJECT_STREAMS);
         assertEquals(List.of(), leaderRaftSnapshot.unappliedEntries());
-        assertEquals(new VotingConfig(new ServerInfo(follower1Id, false), new ServerInfo(leaderId, true)),
+        assertEquals(new VotingConfig(new ServerInfo(leaderId, true), new ServerInfo(follower1Id, false)),
             leaderRaftSnapshot.votingConfig());
 
         // Restart the leader
@@ -126,7 +130,7 @@ class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrationTest 
      * follower's state.
      */
     @Test
-    void testFollowerResyncWithLessLeaderLogEntriesAfterNonPersistentLeaderRestart() {
+    void testFollowerResyncWithLessLeaderLogEntriesAfterNonPersistentLeaderRestart() throws Exception {
         testLog.info("testFollowerResyncWithLessLeaderLogEntriesAfterNonPersistentLeaderRestart starting");
 
         setupLeaderAndNonVotingFollower();
@@ -198,7 +202,7 @@ class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrationTest 
      * leader should force an install snapshot to re-sync the follower's state.
      */
     @Test
-    void testFollowerResyncWithOneMoreLeaderLogEntryAfterNonPersistentLeaderRestart() {
+    void testFollowerResyncWithOneMoreLeaderLogEntryAfterNonPersistentLeaderRestart() throws Exception {
         testLog.info("testFollowerResyncWithOneMoreLeaderLogEntryAfterNonPersistentLeaderRestart starting");
 
         setupLeaderAndNonVotingFollower();
@@ -319,15 +323,13 @@ class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrationTest 
         final var persistedServerConfig = new VotingConfig(
                 new ServerInfo(leaderId, true), new ServerInfo(follower1Id, false),
                 new ServerInfo(follower2Id, true), new ServerInfo("downPeer", false));
-        SimpleReplicatedLogEntry persistedServerConfigEntry = new SimpleReplicatedLogEntry(0, currentTerm,
-                persistedServerConfig);
 
-        // Leader operates in non-persistent mode, hence serverConfig is stored in a snapshot. Delete the snapshot,
-        // so the leader picks up the configuration.
-        Files.delete(leaderSnapshot.path());
-        InMemoryJournal.clear();
-        InMemoryJournal.addEntry(leaderId, 1, persistedServerConfigEntry);
-        InMemoryJournal.addEntry(follower2Id, 1, persistedServerConfigEntry);
+        // Leader operates in non-persistent mode, hence serverConfig is stored in a snapshot. We store a newer
+        // snapshot, which should be picked up during recovery.
+        RaftStorage.saveSnapshot(leaderId, stateDir().resolve(leaderId), SnapshotFileFormat.latest(),
+            CompressionType.NONE, new RaftSnapshot(persistedServerConfig), EntryInfo.of(-1, -1), null, Instant.now());
+        RaftStorage.saveSnapshot(follower2Id, stateDir().resolve(leaderId), SnapshotFileFormat.latest(),
+            CompressionType.NONE, new RaftSnapshot(persistedServerConfig), EntryInfo.of(-1, -1), null, Instant.now());
 
         DefaultConfigParamsImpl follower2ConfigParams = newFollowerConfigParams();
         follower2ConfigParams.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
@@ -383,7 +385,7 @@ class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrationTest 
     }
 
     @Test
-    void testFollowerLeaderStateChanges() {
+    void testFollowerLeaderStateChanges() throws Exception {
         testLog.info("testFollowerLeaderStateChanges");
 
         ActorRef roleChangeNotifier = factory.createActor(
@@ -420,20 +422,27 @@ class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrationTest 
         leaderContext = leaderInstance.getRaftActorContext();
     }
 
-    private void setupLeaderAndNonVotingFollower() {
+    private void setupLeaderAndNonVotingFollower() throws Exception {
         snapshotBatchCount = 100;
         int persistedTerm = 1;
 
         // Set up a persisted ServerConfigurationPayload with the leader voting and the follower non-voting.
+        final var leaderDir = stateDir().resolve(leaderId);
+        final var followerDir = stateDir().resolve(follower1Id);
+
+        // TermInfo
+        final var termInfo = new TermInfo(persistedTerm, leaderId);
+        new PropertiesTermInfoStore(leaderId, leaderDir).storeAndSetTerm(termInfo);
+        new PropertiesTermInfoStore(follower1Id, followerDir).storeAndSetTerm(termInfo);
 
         final var persistedServerConfig = new VotingConfig(
                 new ServerInfo(leaderId, true), new ServerInfo(follower1Id, false));
-        final var persistedServerConfigEntry = new SimpleReplicatedLogEntry(0, persistedTerm, persistedServerConfig);
 
-        InMemoryJournal.addEntry(leaderId, 1, new UpdateElectionTerm(persistedTerm, leaderId));
-        InMemoryJournal.addEntry(leaderId, 2, persistedServerConfigEntry);
-        InMemoryJournal.addEntry(follower1Id, 1, new UpdateElectionTerm(persistedTerm, leaderId));
-        InMemoryJournal.addEntry(follower1Id, 2, persistedServerConfigEntry);
+        // Note: non-persistent, hence we use snapshot store
+        RaftStorage.saveSnapshot(leaderId, leaderDir, SnapshotFileFormat.latest(), CompressionType.NONE,
+            new RaftSnapshot(persistedServerConfig), EntryInfo.of(-1, -1), null, Instant.now());
+        RaftStorage.saveSnapshot(follower1Id, followerDir, SnapshotFileFormat.latest(), CompressionType.NONE,
+            new RaftSnapshot(persistedServerConfig), EntryInfo.of(-1, -1), null, Instant.now());
 
         DefaultConfigParamsImpl followerConfigParams = newFollowerConfigParams();
         follower1Actor = newTestRaftActor(follower1Id, follower1Builder.peerAddresses(
@@ -456,7 +465,6 @@ class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrationTest 
         follower1Context = followerInstance.getRaftActorContext();
 
         waitUntilLeader(leaderActor);
-        assertEquals("Leader persisted journal size", 0, InMemoryJournal.get(leaderId).size());
 
         // Verify leader's context after startup
 
