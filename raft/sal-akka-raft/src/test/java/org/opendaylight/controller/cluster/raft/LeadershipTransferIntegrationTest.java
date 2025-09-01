@@ -13,6 +13,7 @@ import static org.opendaylight.controller.cluster.raft.MessageCollectorActor.cle
 import static org.opendaylight.controller.cluster.raft.MessageCollectorActor.expectFirstMatching;
 import static org.opendaylight.controller.cluster.raft.MessageCollectorActor.expectMatching;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -30,10 +31,16 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.RequestLeadership;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
+import org.opendaylight.controller.cluster.raft.spi.PropertiesTermInfoStore;
+import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
+import org.opendaylight.controller.cluster.raft.spi.RaftStorage;
+import org.opendaylight.controller.cluster.raft.spi.SnapshotFileFormat;
+import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
+import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.api.TermInfo;
+import org.opendaylight.raft.spi.CompressionType;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
@@ -137,18 +144,32 @@ class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrationTest
         testLog.info("sendPayloadWithFollower2Lagging ending");
     }
 
-    private void createRaftActors() {
+    private void createRaftActors() throws Exception {
         testLog.info("createRaftActors starting");
 
-        final Snapshot snapshot = Snapshot.create(new MockSnapshotState(List.of()), List.of(), -1, -1, -1, -1,
-            new TermInfo(1), new VotingConfig(
-                new ServerInfo(leaderId, true), new ServerInfo(follower1Id, true),
-                new ServerInfo(follower2Id, true), new ServerInfo(follower3Id, false)));
+        final var raftSnapshot = new RaftSnapshot(new VotingConfig(
+            new ServerInfo(leaderId, true), new ServerInfo(follower1Id, true),
+            new ServerInfo(follower2Id, true), new ServerInfo(follower3Id, false)));
+        final var storageSnapshot = ToStorage.of(MockSnapshotState.SUPPORT.writer(), new MockSnapshotState(List.of()));
 
-        InMemorySnapshotStore.addSnapshot(leaderId, snapshot);
-        InMemorySnapshotStore.addSnapshot(follower1Id, snapshot);
-        InMemorySnapshotStore.addSnapshot(follower2Id, snapshot);
-        InMemorySnapshotStore.addSnapshot(follower3Id, snapshot);
+        final var leaderDir = stateDir().resolve(leaderId);
+        final var follower1Dir = stateDir().resolve(follower1Id);
+        final var follower2Dir = stateDir().resolve(follower2Id);
+        final var follower3Dir = stateDir().resolve(follower3Id);
+
+        new PropertiesTermInfoStore(leaderId, leaderDir).storeAndSetTerm(new TermInfo(1));
+        new PropertiesTermInfoStore(follower1Id, follower1Dir).storeAndSetTerm(new TermInfo(1));
+        new PropertiesTermInfoStore(follower2Id, follower2Dir).storeAndSetTerm(new TermInfo(1));
+        new PropertiesTermInfoStore(follower3Id, follower3Dir).storeAndSetTerm(new TermInfo(1));
+
+        RaftStorage.saveSnapshot(leaderId, leaderDir, SnapshotFileFormat.latest(), CompressionType.LZ4, raftSnapshot,
+            EntryInfo.of(-1, -1), storageSnapshot, Instant.now());
+        RaftStorage.saveSnapshot(follower1Id, follower1Dir, SnapshotFileFormat.latest(), CompressionType.LZ4,
+            raftSnapshot, EntryInfo.of(-1, -1), storageSnapshot, Instant.now());
+        RaftStorage.saveSnapshot(follower2Id, follower2Dir, SnapshotFileFormat.latest(), CompressionType.LZ4,
+            raftSnapshot, EntryInfo.of(-1, -1), storageSnapshot, Instant.now());
+        RaftStorage.saveSnapshot(follower3Id, follower3Dir, SnapshotFileFormat.latest(), CompressionType.LZ4,
+            raftSnapshot, EntryInfo.of(-1, -1), storageSnapshot, Instant.now());
 
         follower1NotifierActor = factory.createActor(MessageCollectorActor.props(),
                 factory.generateActorId(follower1Id + "-notifier"));
@@ -256,7 +277,7 @@ class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrationTest
     }
 
     @Test
-    void testSuccessfulRequestLeadershipTransferToFollower2() {
+    void testSuccessfulRequestLeadershipTransferToFollower2() throws Exception {
         testLog.info("testSuccessfulRequestLeadershipTransferToFollower2 starting");
 
         createRaftActors();
@@ -272,7 +293,7 @@ class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrationTest
     }
 
     @Test
-    void testRequestLeadershipTransferToFollower2WithFollower2Lagging() {
+    void testRequestLeadershipTransferToFollower2WithFollower2Lagging() throws Exception {
         testLog.info("testRequestLeadershipTransferToFollower2WithFollower2Lagging starting");
 
         createRaftActors();
@@ -313,7 +334,7 @@ class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrationTest
     }
 
     @Test
-    void testRequestLeadershipTransferToFollower2WithOtherFollowersDown() {
+    void testRequestLeadershipTransferToFollower2WithOtherFollowersDown() throws Exception {
         testLog.info("testRequestLeadershipTransferToFollower2WithOtherFollowersDown starting");
 
         createRaftActors();

@@ -236,8 +236,6 @@ abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest {
 
     @AfterEach
     void afterEach() {
-        InMemoryJournal.clear();
-        InMemorySnapshotStore.clear();
         factory.close();
     }
 
