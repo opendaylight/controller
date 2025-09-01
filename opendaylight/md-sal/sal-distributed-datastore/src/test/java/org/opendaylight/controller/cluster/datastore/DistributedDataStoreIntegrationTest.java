@@ -11,9 +11,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.ConfigFactory;
@@ -30,6 +31,7 @@ import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestException;
 import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedException;
 import org.opendaylight.controller.cluster.raft.InMemoryJournal;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
@@ -203,7 +205,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
         }
     }
 
-    @Test(expected = NotInitializedException.class)
+    @Test
     @SuppressWarnings("checkstyle:IllegalCatch")
     public void testTransactionCommitFailureWithShardNotInitialized() throws Exception {
         final var testKit = new IntegrationTestKit(stateDir(), getSystem(), datastoreContextBuilder);
@@ -216,7 +218,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
         // Setup the InMemoryJournal to block shard recovery
         // indefinitely.
         final String persistentID = String.format("member-1-shard-%s-%s", shardName, testName);
-        final CountDownLatch blockRecoveryLatch = new CountDownLatch(1);
+        final var blockRecoveryLatch = new CountDownLatch(1);
         InMemoryJournal.addBlockReadMessagesLatch(persistentID, blockRecoveryLatch);
 
         InMemoryJournal.addEntry(persistentID, 1, "Dummy data so akka will read from persistence");
@@ -229,10 +231,10 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
 
         // Do some modifications and ready the Tx on a separate
         // thread.
-        final AtomicReference<DOMStoreThreePhaseCommitCohort> txCohort = new AtomicReference<>();
-        final AtomicReference<Exception> caughtEx = new AtomicReference<>();
-        final CountDownLatch txReady = new CountDownLatch(1);
-        final Thread txThread = new Thread(() -> {
+        final var txCohort = new AtomicReference<DOMStoreThreePhaseCommitCohort>();
+        final var caughtEx = new AtomicReference<Exception>();
+        final var txReady = new CountDownLatch(1);
+        final var txThread = new Thread(() -> {
             try {
                 writeTx.write(TestModel.TEST_PATH, TestModel.EMPTY_TEST);
 
@@ -248,28 +250,28 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
 
         // Wait for the Tx operations to complete.
         boolean done = Uninterruptibles.awaitUninterruptibly(txReady, 5, TimeUnit.SECONDS);
-        if (caughtEx.get() != null) {
-            throw caughtEx.get();
-        }
+        assertNull(caughtEx.get());
 
         assertTrue("Tx ready", done);
 
         // Wait for the commit to complete. Since the shard never
         // initialized, the Tx should
         // have timed out and throw an appropriate exception cause.
+
+        final ExecutionException ee;
         try {
-            txCohort.get().canCommit().get(5, TimeUnit.SECONDS);
-            fail("Expected NotInitializedException");
-        } catch (final Exception e) {
-            final Throwable root = Throwables.getRootCause(e);
-            Throwables.throwIfUnchecked(root);
-            throw new RuntimeException(root);
+            ee = assertThrows(ExecutionException.class, () -> txCohort.get().canCommit().get(5, TimeUnit.SECONDS));
         } finally {
             blockRecoveryLatch.countDown();
         }
+
+        final var nie = assertInstanceOf(NotInitializedException.class, ee.getCause());
+        assertEquals("""
+            Found primary shard member-1-shard-test-1-testTransactionCommitFailureWithShardNotInitialized but it's \
+            not initialized yet. Please try again later""", nie.getMessage());
     }
 
-    @Test(expected = NotInitializedException.class)
+    @Test
     @SuppressWarnings("checkstyle:IllegalCatch")
     public void testTransactionReadFailureWithShardNotInitialized() throws Exception {
         final var testKit = new IntegrationTestKit(stateDir(), getSystem(), datastoreContextBuilder);
@@ -293,10 +295,10 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
             assertNotNull("newReadWriteTransaction returned null", readWriteTx);
 
             // Do a read on the Tx on a separate thread.
-            final AtomicReference<FluentFuture<Optional<NormalizedNode>>> txReadFuture = new AtomicReference<>();
-            final AtomicReference<Exception> caughtEx = new AtomicReference<>();
-            final CountDownLatch txReadDone = new CountDownLatch(1);
-            final Thread txThread = new Thread(() -> {
+            final var txReadFuture = new AtomicReference<FluentFuture<Optional<NormalizedNode>>>();
+            final var caughtEx = new AtomicReference<Exception>();
+            final var txReadDone = new CountDownLatch(1);
+            final var txThread = new Thread(() -> {
                 try {
                     readWriteTx.write(TestModel.TEST_PATH, TestModel.EMPTY_TEST);
 
@@ -323,18 +325,24 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
             // Wait for the read to complete. Since the shard never
             // initialized, the Tx should
             // have timed out and throw an appropriate exception cause.
+
+            final ExecutionException ee;
             try {
-                txReadFuture.get().get(5, TimeUnit.SECONDS);
-            } catch (ExecutionException e) {
-                assertTrue("Expected ReadFailedException cause: " + e.getCause(),
-                    e.getCause() instanceof ReadFailedException);
-                final Throwable root = Throwables.getRootCause(e);
-                Throwables.throwIfUnchecked(root);
-                throw new RuntimeException(root);
+                ee = assertThrows(ExecutionException.class, () -> txReadFuture.get().get(5, TimeUnit.SECONDS));
             } finally {
                 blockRecoveryLatch.countDown();
             }
+
+            final var rfe = assertInstanceOf(ReadFailedException.class, ee.getCause());
+            assertEquals("""
+                Error reading data for path /(urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test?\
+                revision=2014-03-13)test""", rfe.getMessage());
+            final var rre = assertInstanceOf(RuntimeRequestException.class, rfe.getCause());
+            assertEquals("Failed to resolve shard 1", rre.getMessage());
+            final var nie = assertInstanceOf(NotInitializedException.class, rre.getCause());
+            assertEquals("""
+                Found primary shard member-1-shard-test-1-testTransactionReadFailureWithShardNotInitialized but it's \
+                not initialized yet. Please try again later""", nie.getMessage());
         }
     }
-
 }
