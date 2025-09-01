@@ -32,6 +32,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestException;
+import org.opendaylight.controller.cluster.databroker.TestClientBackedDataStore;
 import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedException;
 import org.opendaylight.controller.cluster.raft.InMemoryJournal;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
@@ -70,7 +71,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
         final CountDownLatch blockRecoveryLatch = new CountDownLatch(1);
         InMemoryJournal.addBlockReadMessagesLatch(persistentID, blockRecoveryLatch);
 
-        try (var dataStore = testKit.setupDataStore(DS_CLASS, testName, false, shardName)) {
+        try (var dataStore = testKit.setupDataStore(TestClientBackedDataStore.class, testName, false, shardName)) {
             // Create the write Tx
             final DOMStoreWriteTransaction writeTx = writeOnly ? dataStore.newWriteOnlyTransaction()
                     : dataStore.newReadWriteTransaction();
@@ -158,7 +159,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
         final CountDownLatch blockRecoveryLatch = new CountDownLatch(1);
         InMemoryJournal.addBlockReadMessagesLatch(persistentID, blockRecoveryLatch);
 
-        try (var dataStore = testKit.setupDataStore(DS_CLASS, testName, false, shardName)) {
+        try (var dataStore = testKit.setupDataStore(TestClientBackedDataStore.class, testName, false, shardName)) {
             // Create the read-write Tx
             final DOMStoreReadWriteTransaction readWriteTx = dataStore.newReadWriteTransaction();
             assertNotNull("newReadWriteTransaction returned null", readWriteTx);
@@ -223,7 +224,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
 
         InMemoryJournal.addEntry(persistentID, 1, "Dummy data so akka will read from persistence");
 
-        final var dataStore = testKit.setupDataStore(DS_CLASS, testName, false, shardName);
+        final var dataStore = testKit.setupDataStore(TestClientBackedDataStore.class, testName, false, shardName);
 
         // Create the write Tx
         final DOMStoreWriteTransaction writeTx = dataStore.newWriteOnlyTransaction();
@@ -289,7 +290,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
 
         InMemoryJournal.addEntry(persistentID, 1, "Dummy data so akka will read from persistence");
 
-        try (var dataStore = testKit.setupDataStore(DS_CLASS, testName, false, shardName)) {
+        try (var dataStore = testKit.setupDataStore(TestClientBackedDataStore.class, testName, false, shardName)) {
             // Create the read-write Tx
             final DOMStoreReadWriteTransaction readWriteTx = dataStore.newReadWriteTransaction();
             assertNotNull("newReadWriteTransaction returned null", readWriteTx);

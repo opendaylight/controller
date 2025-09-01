@@ -29,6 +29,7 @@ import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.databroker.TestClientBackedDataStore;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.yangtools.yang.common.Uint64;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
@@ -69,7 +70,7 @@ public class DistributedDataStoreWithSegmentedJournalIntegrationTest
         final var carMapBuilder = ImmutableNodes.newSystemMapBuilder()
             .withNodeIdentifier(new NodeIdentifier(CAR_QNAME));
 
-        try (var dataStore = testKit.setupDataStore(DS_CLASS, "testManyWritesDeletes",
+        try (var dataStore = testKit.setupDataStore(TestClientBackedDataStore.class, "testManyWritesDeletes",
             "module-shards-cars-member-1.conf", true, "cars")) {
 
             try (var txChain = dataStore.createTransactionChain()) {
@@ -123,7 +124,7 @@ public class DistributedDataStoreWithSegmentedJournalIntegrationTest
         }
 
         // test restoration from journal and verify data matches
-        try (var dataStore = testKit.setupDataStore(DS_CLASS, "testManyWritesDeletes",
+        try (var dataStore = testKit.setupDataStore(TestClientBackedDataStore.class, "testManyWritesDeletes",
             "module-shards-cars-member-1.conf", true, "cars")) {
 
             try (var txChain = dataStore.createTransactionChain()) {
