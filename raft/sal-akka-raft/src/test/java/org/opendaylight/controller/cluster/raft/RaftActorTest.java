@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -40,8 +41,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.apache.pekko.actor.ActorRef;
-import org.apache.pekko.actor.PoisonPill;
-import org.apache.pekko.actor.Terminated;
 import org.apache.pekko.dispatch.Dispatchers;
 import org.apache.pekko.persistence.SaveSnapshotFailure;
 import org.apache.pekko.persistence.SaveSnapshotSuccess;
@@ -86,15 +85,21 @@ import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
+import org.opendaylight.controller.cluster.raft.spi.EntryJournalV1;
 import org.opendaylight.controller.cluster.raft.spi.EntryStore;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
+import org.opendaylight.controller.cluster.raft.spi.PropertiesTermInfoStore;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
+import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
+import org.opendaylight.controller.cluster.raft.spi.RaftStorage;
+import org.opendaylight.controller.cluster.raft.spi.SnapshotFileFormat;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.raft.spi.ByteArray;
+import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.InstallableSnapshot;
 import org.opendaylight.raft.spi.InstallableSnapshotSource;
 import org.opendaylight.raft.spi.PlainSnapshotSource;
@@ -118,8 +123,6 @@ class RaftActorTest extends AbstractActorTest {
     @AfterEach
     void afterEach() {
         factory.close();
-        InMemoryJournal.clear();
-        InMemorySnapshotStore.clear();
     }
 
     @Test
@@ -134,10 +137,9 @@ class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    void testRaftActorRecoveryWithPersistenceEnabled() {
+    void testRaftActorRecoveryWithPersistenceEnabled() throws Exception {
         TEST_LOG.info("testRaftActorRecoveryWithPersistenceEnabled starting");
 
-        final var kit = new TestKit(getSystem());
         final var persistenceId = factory.generateActorId("follower-");
 
         final var config = new DefaultConfigParamsImpl();
@@ -148,41 +150,29 @@ class RaftActorTest extends AbstractActorTest {
         config.setHeartBeatInterval(ONE_DAY);
 
         final var peerAddresses = Map.of("member1", "address");
-        final var followerActor = factory.createActor(
-            MockRaftActor.props(persistenceId, stateDir(), peerAddresses, config), persistenceId);
-
-        kit.watch(followerActor);
-
-        int lastAppliedDuringSnapshotCapture = 3;
-        int lastIndexDuringSnapshotCapture = 4;
+        final var actorDir = stateDir().resolve(persistenceId);
+        Files.createDirectories(actorDir);
 
         // 4 messages as part of snapshot, which are applied to state
-        final var snapshotState = new MockSnapshotState(List.of(
-            new MockCommand("A"), new MockCommand("B"), new MockCommand("C"), new MockCommand("D")));
-
-        final var snapshot = Snapshot.create(snapshotState, List.of(new DefaultLogEntry(4, 1, new MockCommand("E"))),
-            lastIndexDuringSnapshotCapture, 1, lastAppliedDuringSnapshotCapture, 1, new TermInfo(-1), null);
-        InMemorySnapshotStore.addSnapshot(persistenceId, snapshot);
+        RaftStorage.saveSnapshot(persistenceId, actorDir, SnapshotFileFormat.latest(), CompressionType.NONE,
+            new RaftSnapshot(null, List.of()), EntryInfo.of(3, 1),
+            ToStorage.of(MockSnapshotState.SUPPORT.writer(), new MockSnapshotState(List.of(
+                new MockCommand("A"), new MockCommand("B"), new MockCommand("C"), new MockCommand("D")))),
+            Instant.now());
 
         // add more entries after snapshot is taken
-        final var entry2 = new SimpleReplicatedLogEntry(5, 1, new MockCommand("F", 2));
-        final var entry3 = new SimpleReplicatedLogEntry(6, 1, new MockCommand("G", 3));
-        final var entry4 = new SimpleReplicatedLogEntry(7, 1, new MockCommand("H", 4));
 
         final int lastAppliedToState = 5;
         final int lastIndex = 7;
 
-        InMemoryJournal.addEntry(persistenceId, 5, entry2);
-        // 2 entries are applied to state besides the 4 entries in snapshot
-        InMemoryJournal.addEntry(persistenceId, 6, new ApplyJournalEntries(lastAppliedToState));
-        InMemoryJournal.addEntry(persistenceId, 7, entry3);
-        InMemoryJournal.addEntry(persistenceId, 8, entry4);
-
-        // kill the actor
-        followerActor.tell(PoisonPill.getInstance(), null);
-        kit.expectMsgClass(Duration.ofSeconds(5), Terminated.class);
-
-        kit.unwatch(followerActor);
+        try (var journal = new EntryJournalV1(persistenceId, actorDir, CompressionType.NONE, true)) {
+            journal.appendEntry(new DefaultLogEntry(4, 1, new MockCommand("E")));
+            journal.appendEntry(new DefaultLogEntry(5, 1, new MockCommand("F", 2)));
+            journal.appendEntry(new DefaultLogEntry(6, 1, new MockCommand("G", 3)));
+            journal.appendEntry(new DefaultLogEntry(7, 1, new MockCommand("H", 4)));
+            // 2 entries are applied to state besides the 4 entries in snapshot
+            journal.setApplyTo(2);
+        }
 
         //reinstate the actor
         final var ref = factory.<MockRaftActor>createTestActor(MockRaftActor.props(persistenceId, stateDir(),
@@ -193,10 +183,8 @@ class RaftActorTest extends AbstractActorTest {
 
         final var context = mockRaftActor.getRaftActorContext();
         final var log = context.getReplicatedLog();
-        assertEquals("Journal log size", 2, log.size());
-        // FIXME: Pekko recovery takes a snapshot and thus applies all but the last two entries, leading 7 being the
-        //        datasize. Once we have just journal, that snapshot will not be taken and we'll have 10 here
-        assertEquals("Journal data size", 7, log.dataSize());
+        assertEquals("Journal log size", 4, log.size());
+        assertEquals("Journal data size", 10, log.dataSize());
         assertEquals("Last index", lastIndex, log.lastIndex());
         assertEquals("Last applied", lastAppliedToState, log.getLastApplied());
         assertEquals("Commit index", lastAppliedToState, log.getCommitIndex());
@@ -242,10 +230,7 @@ class RaftActorTest extends AbstractActorTest {
                 .withDispatcher(Dispatchers.DefaultDispatcherId()), persistenceId);
         ref.underlyingActor().waitForRecoveryComplete();
 
-        assertEquals("UpdateElectionTerm entries", List.of(),
-            InMemoryJournal.get(persistenceId, UpdateElectionTerm.class));
-
-        assertTrue(Files.exists(stateDir().resolve(persistenceId).resolve("TermInfo.properties")));
+        assertThat(stateDir().resolve(persistenceId).resolve("TermInfo.properties")).isRegularFile();
 
         factory.killActor(ref, kit);
 
@@ -259,12 +244,10 @@ class RaftActorTest extends AbstractActorTest {
 
         RaftActorContext newContext = actor.getRaftActorContext();
         assertEquals("electionTerm", new TermInfo(0), newContext.termInfo());
-
-        assertEquals("UpdateElectionTerm entries", List.of(),
-            InMemoryJournal.get(persistenceId, UpdateElectionTerm.class));
     }
 
     @Test
+    @Deprecated(forRemoval = true)
     void testRaftActorForwardsToRaftActorRecoverySupport() throws Exception {
         String persistenceId = factory.generateActorId("leader-");
 
@@ -947,7 +930,7 @@ class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    void testGetSnapshot() {
+    void testGetSnapshot() throws Exception {
         TEST_LOG.info("testGetSnapshot starting");
 
         final var kit = new TestKit(getSystem());
@@ -956,13 +939,16 @@ class RaftActorTest extends AbstractActorTest {
         final var config = new DefaultConfigParamsImpl();
         config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
 
-        long term = 3;
-        long seqN = 1;
-        InMemoryJournal.addEntry(persistenceId, seqN++, new UpdateElectionTerm(term, "member-1"));
-        InMemoryJournal.addEntry(persistenceId, seqN++, new SimpleReplicatedLogEntry(0, term, new MockCommand("A")));
-        InMemoryJournal.addEntry(persistenceId, seqN++, new SimpleReplicatedLogEntry(1, term, new MockCommand("B")));
-        InMemoryJournal.addEntry(persistenceId, seqN++, new ApplyJournalEntries(1));
-        InMemoryJournal.addEntry(persistenceId, seqN++, new SimpleReplicatedLogEntry(2, term, new MockCommand("C")));
+        final long term = 3;
+
+        final var actorDir = stateDir().resolve(persistenceId);
+        new PropertiesTermInfoStore(persistenceId, actorDir).storeAndSetTerm(new TermInfo(term, "member-1"));
+        try (var journal = new EntryJournalV1(persistenceId, actorDir, CompressionType.LZ4, false)) {
+            journal.appendEntry(new DefaultLogEntry(0, term, new MockCommand("A")));
+            journal.appendEntry(new DefaultLogEntry(1, term, new MockCommand("B")));
+            journal.appendEntry(new DefaultLogEntry(2, term, new MockCommand("C")));
+            journal.setApplyTo(2);
+       }
 
         TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.props(persistenceId,
             stateDir(), Map.of("member1", "address"), config)
@@ -1096,7 +1082,10 @@ class RaftActorTest extends AbstractActorTest {
         final var snapshot = Snapshot.create(ByteState.of(fromObject(state).toByteArray()),
                 List.of(), 5, 2, 5, 2, new TermInfo(2, "member-1"), null);
 
-        InMemoryJournal.addEntry(persistenceId, 1, new SimpleReplicatedLogEntry(0, 1, new MockCommand("B")));
+        try (var journal = new EntryJournalV1(persistenceId, stateDir().resolve(persistenceId), CompressionType.NONE,
+                false)) {
+            journal.appendEntry(new DefaultLogEntry(0, 1, new MockCommand("B")));
+        }
 
         final var raftActorRef = factory.<MockRaftActor>createTestActor(MockRaftActor.builder().id(persistenceId)
             .config(config).restoreFromSnapshot(snapshot).props(stateDir())
@@ -1120,7 +1109,7 @@ class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    void testNonVotingOnRecovery() {
+    void testNonVotingOnRecovery() throws Exception {
         TEST_LOG.info("testNonVotingOnRecovery starting");
 
         final var config = new DefaultConfigParamsImpl();
@@ -1128,8 +1117,11 @@ class RaftActorTest extends AbstractActorTest {
         config.setHeartBeatInterval(Duration.ofMillis(1));
 
         final var persistenceId = factory.generateActorId("test-actor-");
-        InMemoryJournal.addEntry(persistenceId, 1,  new SimpleReplicatedLogEntry(0, 1,
-                new VotingConfig(new ServerInfo(persistenceId, false))));
+
+        try (var journal = new EntryJournalV1(persistenceId, stateDir().resolve(persistenceId), CompressionType.NONE,
+                true)) {
+            journal.appendEntry(new DefaultLogEntry(0, 1, new VotingConfig(new ServerInfo(persistenceId, false))));
+        }
 
         final var raftActorRef = factory.<MockRaftActor>createTestActor(MockRaftActor.builder().id(persistenceId)
             .config(config).props(stateDir()).withDispatcher(Dispatchers.DefaultDispatcherId()), persistenceId);
