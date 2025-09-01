@@ -33,6 +33,7 @@ import org.apache.pekko.cluster.Member;
 import org.apache.pekko.cluster.MemberStatus;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.databroker.ClientBackedDataStore;
+import org.opendaylight.controller.cluster.databroker.TestClientBackedDataStore;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
@@ -81,6 +82,15 @@ public class IntegrationTestKit extends ShardTestKit {
 
     public DatastoreContext.Builder getDatastoreContextBuilder() {
         return datastoreContextBuilder;
+    }
+
+    public ClientBackedDataStore setupTestDataStore(final String typeName, final String... shardNames)
+            throws Exception {
+        return setupDataStore(TestClientBackedDataStore.class, typeName, shardNames);
+   }
+
+    public ClientBackedDataStore setupDataStore(final String typeName, final String... shardNames) throws Exception {
+        return setupDataStore(ClientBackedDataStore.class, typeName, shardNames);
     }
 
     public ClientBackedDataStore setupDataStore(final Class<? extends ClientBackedDataStore> implementation,
