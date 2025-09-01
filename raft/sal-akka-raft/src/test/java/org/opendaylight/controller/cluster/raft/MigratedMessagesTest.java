@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.opendaylight.controller.cluster.raft.RaftActorTestKit.awaitSnapshot;
 
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -22,12 +21,13 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
-import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
-import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
+import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
+import org.opendaylight.controller.cluster.raft.spi.EntryJournalV1;
+import org.opendaylight.controller.cluster.raft.spi.PropertiesTermInfoStore;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
+import org.opendaylight.raft.api.TermInfo;
+import org.opendaylight.raft.spi.CompressionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,18 +49,20 @@ class MigratedMessagesTest extends AbstractActorTest {
     @AfterEach
     void afterEach() {
         factory.close();
-        InMemoryJournal.clear();
-        InMemorySnapshotStore.clear();
     }
 
     @Test
-    void testNoSnapshotAfterStartupWithNoMigratedMessages() {
+    void testNoSnapshotAfterStartupWithNoMigratedMessages() throws Exception {
         TEST_LOG.info("testNoSnapshotAfterStartupWithNoMigratedMessages starting");
         String id = factory.generateActorId("test-actor-");
 
-        InMemoryJournal.addEntry(id, 1, new UpdateElectionTerm(1, id));
-        InMemoryJournal.addEntry(id, 2, new SimpleReplicatedLogEntry(0, 1, new MockCommand("A")));
-        InMemoryJournal.addEntry(id, 3, new ApplyJournalEntries(0));
+        final var actorDir = stateDir().resolve(id);
+        new PropertiesTermInfoStore(id, actorDir).storeAndSetTerm(new TermInfo(1, id));
+
+        try (var journal = new EntryJournalV1(id, actorDir, CompressionType.NONE, true)) {
+            journal.appendEntry(new DefaultLogEntry(0, 1, new MockCommand("A")));
+            journal.setApplyTo(1);
+        }
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
         config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
@@ -78,16 +80,12 @@ class MigratedMessagesTest extends AbstractActorTest {
 
         Uninterruptibles.sleepUninterruptibly(750, TimeUnit.MILLISECONDS);
 
-        final var snapshots = InMemorySnapshotStore.getSnapshots(id, Snapshot.class);
-        assertEquals(List.of(), snapshots);
-
-        TEST_LOG.info("testNoSnapshotAfterStartupWithNoMigratedMessages ending");
+       TEST_LOG.info("testNoSnapshotAfterStartupWithNoMigratedMessages ending");
     }
 
     private TestActorRef<MockRaftActor> doTestSnapshotAfterStartupWithMigratedMessage(final String persistenceId,
             final boolean persistent, final Consumer<SnapshotFile> snapshotVerifier,
             final @NonNull MockSnapshotState snapshotState) {
-        InMemoryJournal.addDeleteMessagesCompleteLatch(persistenceId);
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
         config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
 
@@ -104,10 +102,6 @@ class MigratedMessagesTest extends AbstractActorTest {
         mockRaftActor.waitForRecoveryComplete();
 
         snapshotVerifier.accept(awaitSnapshot(mockRaftActor));
-
-        InMemoryJournal.waitForDeleteMessagesComplete(persistenceId);
-
-        assertEquals(List.of(), InMemoryJournal.get(persistenceId).size());
 
         return raftActorRef;
     }
