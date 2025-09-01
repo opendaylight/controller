@@ -40,9 +40,9 @@ import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
-import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
+import org.opendaylight.controller.cluster.raft.spi.PropertiesTermInfoStore;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
 import org.opendaylight.raft.api.TermInfo;
 
@@ -54,13 +54,14 @@ import org.opendaylight.raft.api.TermInfo;
  */
 class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends AbstractRaftActorIntegrationTest {
 
-    private void setup() {
+    private void setup() throws Exception {
         leaderId = factory.generateActorId("leader");
         follower1Id = factory.generateActorId("follower");
         follower2Id = factory.generateActorId("follower");
 
         // Setup the persistent journal for the leader - just an election term and no journal/snapshots.
-        InMemoryJournal.addEntry(leaderId, 1, new UpdateElectionTerm(initialTerm, leaderId));
+        new PropertiesTermInfoStore(leaderId, stateDir().resolve(leaderId))
+            .storeAndSetTerm(new TermInfo(initialTerm, leaderId));
 
         // Create the leader and 2 follower actors.
         follower1Actor = newTestRaftActor(follower1Id, Map.of(leaderId, testActorPath(leaderId),
@@ -112,7 +113,7 @@ class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends Abstract
      * caught up via AppendEntries.
      */
     @Test
-    void testReplicationsWithLaggingFollowerCaughtUpViaAppendEntries() {
+    void testReplicationsWithLaggingFollowerCaughtUpViaAppendEntries() throws Exception {
         testLog.info("testReplicationsWithLaggingFollowerCaughtUpViaAppendEntries starting: sending 2 new payloads");
 
         setup();
@@ -189,8 +190,6 @@ class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends Abstract
 
         setup();
 
-        final var leaderRecoverySnapshot = awaitSnapshot(leaderActor);
-
         sendInitialPayloadsReplicatedToAllFollowers("zero", "one");
 
         // Configure follower 2 to drop messages and lag.
@@ -213,7 +212,7 @@ class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends Abstract
         // Send another payload - this should cause a snapshot due to snapshotBatchCount reached.
         MockCommand payload3 = sendPayloadData(leaderActor, "three");
 
-        final var firstSnapshot = awaitSnapshotNewerThan(leaderActor, leaderRecoverySnapshot.timestamp());
+        final var firstSnapshot = awaitSnapshot(leaderActor);
 
         testLog.info("testLeaderSnapshotWithLaggingFollowerCaughtUpViaAppendEntries: sending 2 more payloads");
 
@@ -308,8 +307,6 @@ class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends Abstract
 
         setup();
 
-        final var leaderRecoverySnapshot = awaitSnapshot(leaderActor);
-
         sendInitialPayloadsReplicatedToAllFollowers("zero", "one");
 
         // Configure follower 2 to drop messages and lag.
@@ -326,7 +323,7 @@ class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends Abstract
         final var payload5 = sendPayloadData(leaderActor, "five");
         final var payload6 = sendPayloadData(leaderActor, "six");
 
-        final var firstSnapshot = awaitSnapshotNewerThan(leaderActor, leaderRecoverySnapshot.timestamp());
+        final var firstSnapshot = awaitSnapshot(leaderActor);
 
         // Verify the leader got consensus and applies each log entry even though follower 2 didn't respond.
         var applyStates = MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyState.class, 5);
@@ -492,8 +489,7 @@ class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends Abstract
         snapshotBatchCount = 5;
         setup();
 
-        final var leaderRecoverySnapshot = leaderActor.underlyingActor().lastSnapshot();
-        assertNotNull(leaderRecoverySnapshot);
+        assertNull(leaderActor.underlyingActor().lastSnapshot());
 
         sendInitialPayloadsReplicatedToAllFollowers("zero");
 
@@ -520,7 +516,7 @@ class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends Abstract
         Uninterruptibles.sleepUninterruptibly(2, TimeUnit.SECONDS);
 
         // Verify a snapshot is not triggered.
-        assertEquals(leaderRecoverySnapshot.timestamp(), leaderActor.underlyingActor().lastSnapshot().timestamp());
+        assertNull(leaderActor.underlyingActor().lastSnapshot());
 
         expSnapshotState.add(payload1);
 
@@ -533,7 +529,7 @@ class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends Abstract
         MockCommand payload2 = sendPayloadData(leaderActor, "two", 201);
 
         // A snapshot should've occurred - wait for it to complete.
-        final var snapshotFile = awaitSnapshotNewerThan(leaderActor, leaderRecoverySnapshot.timestamp());
+        final var snapshotFile = awaitSnapshot(leaderActor);
 
         // Verify the leader applies the last log entry.
         applyStates = MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyState.class, 2);
@@ -757,8 +753,6 @@ class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends Abstract
 
         // Verify the leader's final state.
         verifyLeadersTrimmedLog(6);
-
-        InMemoryJournal.dumpJournal(leaderId);
 
         // Verify the leaders's persisted journal log - it should only contain the last 2 ReplicatedLogEntries
         // added after the snapshot as the persisted journal should've been purged to the snapshot
