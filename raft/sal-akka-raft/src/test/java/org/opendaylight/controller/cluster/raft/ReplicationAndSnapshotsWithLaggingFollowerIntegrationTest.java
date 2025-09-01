@@ -39,10 +39,10 @@ import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
-import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
+import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
 import org.opendaylight.raft.api.TermInfo;
 
@@ -764,9 +764,9 @@ class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends Abstract
         // added after the snapshot as the persisted journal should've been purged to the snapshot
         // sequence number.
         verifyPersistedJournal(leaderActor, List.of(
-            new SimpleReplicatedLogEntry(4, currentTerm, payload4),
-            new SimpleReplicatedLogEntry(5, currentTerm, payload5),
-            new SimpleReplicatedLogEntry(6, currentTerm, payload6)));
+            new DefaultLogEntry(4, currentTerm, payload4),
+            new DefaultLogEntry(5, currentTerm, payload5),
+            new DefaultLogEntry(6, currentTerm, payload6)));
 
         // Verify the leaders's persisted journal contains an ApplyJournalEntries for at least the last entry index.
         assertEquals(7, assertJournal(leaderActor).applyToJournalIndex());
