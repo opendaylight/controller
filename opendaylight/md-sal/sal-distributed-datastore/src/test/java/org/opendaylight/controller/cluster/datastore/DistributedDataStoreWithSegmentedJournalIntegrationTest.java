@@ -30,17 +30,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
-import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
-import org.opendaylight.mdsal.dom.spi.store.DOMStoreTransactionChain;
-import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.common.Uint64;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
-import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.api.schema.SystemMapNode;
-import org.opendaylight.yangtools.yang.data.api.schema.builder.CollectionNodeBuilder;
-import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 
 public class DistributedDataStoreWithSegmentedJournalIntegrationTest
         extends AbstractDistributedDataStoreIntegrationTest {
@@ -74,48 +66,44 @@ public class DistributedDataStoreWithSegmentedJournalIntegrationTest
     @Test
     public void testManyWritesDeletes() throws Exception {
         final var testKit = new IntegrationTestKit(stateDir(), getSystem(), datastoreContextBuilder);
-        CollectionNodeBuilder<MapEntryNode, SystemMapNode> carMapBuilder = ImmutableNodes.mapNodeBuilder(CAR_QNAME);
+        final var carMapBuilder = ImmutableNodes.newSystemMapBuilder()
+            .withNodeIdentifier(new NodeIdentifier(CAR_QNAME));
 
         try (var dataStore = testKit.setupDataStore(DS_CLASS, "testManyWritesDeletes",
             "module-shards-cars-member-1.conf", true, "cars")) {
 
-            DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
+            try (var txChain = dataStore.createTransactionChain()) {
+                final var writeTx = txChain.newWriteOnlyTransaction();
+                writeTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
+                writeTx.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
+                testKit.doCommit(writeTx.ready());
 
-            DOMStoreWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
-            writeTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
-            writeTx.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
-            testKit.doCommit(writeTx.ready());
+                int numCars = 20;
+                for (int i = 0; i < numCars; ++i) {
+                    var rwTx = txChain.newReadWriteTransaction();
 
-            int numCars = 20;
-            for (int i = 0; i < numCars; ++i) {
-                DOMStoreReadWriteTransaction rwTx = txChain.newReadWriteTransaction();
+                    final var path = CarsModel.newCarPath("car" + i);
+                    final var data = CarsModel.newCarEntry("car" + i, Uint64.valueOf(20000));
 
-                YangInstanceIdentifier path = CarsModel.newCarPath("car" + i);
-                MapEntryNode data = CarsModel.newCarEntry("car" + i, Uint64.valueOf(20000));
+                    rwTx.merge(path, data);
+                    carMapBuilder.withChild(data);
 
-                rwTx.merge(path, data);
-                carMapBuilder.withChild(data);
-
-                testKit.doCommit(rwTx.ready());
-
-                if (i % 5 == 0) {
-                    rwTx = txChain.newReadWriteTransaction();
-
-                    rwTx.delete(path);
-                    carMapBuilder.withoutChild(path.getLastPathArgument());
                     testKit.doCommit(rwTx.ready());
+
+                    if (i % 5 == 0) {
+                        rwTx = txChain.newReadWriteTransaction();
+
+                        rwTx.delete(path);
+                        carMapBuilder.withoutChild(path.getLastPathArgument());
+                        testKit.doCommit(rwTx.ready());
+                    }
+                }
+
+                try (var readTx = txChain.newReadOnlyTransaction()) {
+                    assertEquals("cars not matching result", Optional.of(carMapBuilder.build()),
+                        readTx.read(CarsModel.CAR_LIST_PATH).get(5, TimeUnit.SECONDS));
                 }
             }
-
-            final Optional<NormalizedNode> optional = txChain.newReadOnlyTransaction()
-                    .read(CarsModel.CAR_LIST_PATH).get(5, TimeUnit.SECONDS);
-            assertTrue("isPresent", optional.isPresent());
-
-            MapNode cars = carMapBuilder.build();
-
-            assertEquals("cars not matching result", cars, optional.orElseThrow());
-
-            txChain.close();
 
 
             // wait until the journal is actually persisted, killing the datastore early results in missing entries
@@ -138,14 +126,12 @@ public class DistributedDataStoreWithSegmentedJournalIntegrationTest
         try (var dataStore = testKit.setupDataStore(DS_CLASS, "testManyWritesDeletes",
             "module-shards-cars-member-1.conf", true, "cars")) {
 
-            DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
-            MapNode cars = carMapBuilder.build();
-
-            final Optional<NormalizedNode> optional = txChain.newReadOnlyTransaction()
-                    .read(CarsModel.CAR_LIST_PATH).get(5, TimeUnit.SECONDS);
-            assertEquals("restored cars do not match snapshot", Optional.of(cars), optional);
-
-            txChain.close();
+            try (var txChain = dataStore.createTransactionChain()) {
+                try (var readTx = txChain.newReadOnlyTransaction()) {
+                    assertEquals("restored cars do not match snapshot", Optional.of(carMapBuilder.build()),
+                        readTx.read(CarsModel.CAR_LIST_PATH).get(5, TimeUnit.SECONDS));
+                }
+            }
         }
     }
 }
