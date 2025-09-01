@@ -40,7 +40,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
-import org.opendaylight.controller.cluster.raft.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.MessageCollectorActor;
 import org.opendaylight.controller.cluster.raft.MockCommand;
 import org.opendaylight.controller.cluster.raft.MockRaftActor;
@@ -65,11 +64,11 @@ import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
-import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
+import org.opendaylight.controller.cluster.raft.spi.PropertiesTermInfoStore;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.TermInfo;
 
@@ -1076,7 +1075,7 @@ class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         String id = "testCaptureSnapshotOnLastEntryInAppendEntries";
         logStart(id);
 
-        InMemoryJournal.addEntry(id, 1, new UpdateElectionTerm(1, null));
+        new PropertiesTermInfoStore(id, stateDir.resolve(id)).storeAndSetTerm(new TermInfo(1));
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
         config.setSnapshotBatchCount(2);
@@ -1129,7 +1128,7 @@ class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         String id = "testCaptureSnapshotOnMiddleEntryInAppendEntries";
         logStart(id);
 
-        InMemoryJournal.addEntry(id, 1, new UpdateElectionTerm(1, null));
+        new PropertiesTermInfoStore(id, stateDir.resolve(id)).storeAndSetTerm(new TermInfo(1));
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
         config.setSnapshotBatchCount(2);
@@ -1200,7 +1199,7 @@ class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         String id = "testCaptureSnapshotOnAppendEntriesWithUnapplied";
         logStart(id);
 
-        InMemoryJournal.addEntry(id, 1, new UpdateElectionTerm(1, null));
+        new PropertiesTermInfoStore(id, stateDir.resolve(id)).storeAndSetTerm(new TermInfo(1));
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
         config.setSnapshotBatchCount(1);
