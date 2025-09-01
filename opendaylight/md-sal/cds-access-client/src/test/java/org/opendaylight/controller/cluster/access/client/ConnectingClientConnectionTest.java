@@ -7,12 +7,15 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -32,6 +35,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -55,6 +59,7 @@ import scala.concurrent.duration.FiniteDuration;
 @RunWith(MockitoJUnitRunner.class)
 public class ConnectingClientConnectionTest {
     private static class MockFailure extends RequestFailure<WritableIdentifier, MockFailure> {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
         MockFailure(final WritableIdentifier target, final RequestException cause) {
@@ -73,6 +78,7 @@ public class ConnectingClientConnectionTest {
     }
 
     private static class MockRequest extends Request<WritableIdentifier, MockRequest> {
+        @java.io.Serial
         private static final long serialVersionUID = 1L;
 
         MockRequest(final WritableIdentifier target, final ActorRef replyTo) {
@@ -139,7 +145,7 @@ public class ConnectingClientConnectionTest {
         ticker.advance(ThreadLocalRandom.current().nextLong());
         doReturn(ticker).when(mockContext).ticker();
 
-        final ClientActorConfig mockConfig = AccessClientUtil.newMockClientActorConfig();
+        final var mockConfig = AccessClientUtil.newMockClientActorConfig();
         doReturn(mockConfig).when(mockContext).config();
 
         doReturn(mock(MessageSlicer.class)).when(mockContext).messageSlicer();
@@ -170,18 +176,19 @@ public class ConnectingClientConnectionTest {
         queue.sendRequest(mockRequest, mockCallback);
         queue.poison(mockCause);
 
-        final ArgumentCaptor<MockFailure> captor = ArgumentCaptor.forClass(MockFailure.class);
+        final var captor = ArgumentCaptor.forClass(MockFailure.class);
         verify(mockCallback).accept(captor.capture());
         assertSame(mockCause, captor.getValue().getCause());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testPoisonPerformsClose() {
         // Implies close()
         queue.poison(mockCause);
 
         // Kaboom
-        queue.sendRequest(mockRequest, mockCallback);
+        final var ise = assertThrows(IllegalStateException.class, () -> queue.sendRequest(mockRequest, mockCallback));
+        assertThat(ise.getMessage()).endsWith(" has been poisoned");
     }
 
     @Test
@@ -193,7 +200,7 @@ public class ConnectingClientConnectionTest {
     @Test
     public void testSendRequestNeedsBackend() {
         queue.sendRequest(mockRequest, mockCallback);
-        final OptionalLong ret = queue.checkTimeout(ticker.read());
+        final var ret = queue.checkTimeout(ticker.read());
         assertNotNull(ret);
         assertTrue(ret.isPresent());
     }
@@ -209,7 +216,7 @@ public class ConnectingClientConnectionTest {
         setupBackend();
 
         queue.sendRequest(mockRequest, mockCallback);
-        final OptionalLong ret = queue.checkTimeout(ticker.read());
+        final var ret = queue.checkTimeout(ticker.read());
         assertNotNull(ret);
         assertTrue(ret.isPresent());
         assertTransmit(mockRequest, 0);
@@ -217,7 +224,7 @@ public class ConnectingClientConnectionTest {
 
     @Test
     public void testRunTimeoutEmpty() {
-        OptionalLong ret = queue.checkTimeout(ticker.read());
+        var ret = queue.checkTimeout(ticker.read());
         assertNotNull(ret);
         assertFalse(ret.isPresent());
     }
@@ -225,7 +232,7 @@ public class ConnectingClientConnectionTest {
     @Test
     public void testRunTimeoutWithoutShift() {
         queue.sendRequest(mockRequest, mockCallback);
-        OptionalLong ret = queue.checkTimeout(ticker.read());
+        var ret = queue.checkTimeout(ticker.read());
         assertNotNull(ret);
         assertTrue(ret.isPresent());
     }
@@ -236,7 +243,7 @@ public class ConnectingClientConnectionTest {
 
         ticker.advance(AbstractClientConnection.DEFAULT_BACKEND_ALIVE_TIMEOUT_NANOS - 1);
 
-        OptionalLong ret = queue.checkTimeout(ticker.read());
+        var ret = queue.checkTimeout(ticker.read());
         assertNotNull(ret);
         assertTrue(ret.isPresent());
     }
@@ -249,7 +256,7 @@ public class ConnectingClientConnectionTest {
 
         ticker.advance(AbstractClientConnection.DEFAULT_BACKEND_ALIVE_TIMEOUT_NANOS);
 
-        OptionalLong ret = queue.checkTimeout(ticker.read());
+        var ret = queue.checkTimeout(ticker.read());
         assertNull(ret);
     }
 
@@ -264,7 +271,8 @@ public class ConnectingClientConnectionTest {
         assertNull(queue.checkTimeout(ticker.read()));
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Test
+    @Ignore
     public void testRunTimeoutWithoutProgressExact() {
         queue.sendRequest(mockRequest, mockCallback);
 
@@ -275,7 +283,7 @@ public class ConnectingClientConnectionTest {
         assertNotNull(queue.poisoned());
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Test
     public void testRunTimeoutWithoutProgressMore() {
         queue.sendRequest(mockRequest, mockCallback);
 
@@ -363,9 +371,7 @@ public class ConnectingClientConnectionTest {
     }
 
     private static void assertRequestEquals(final Request<?, ?> expected, final long sequence, final Object obj) {
-        assertTrue(obj instanceof RequestEnvelope);
-
-        final RequestEnvelope actual = (RequestEnvelope) obj;
+        final var actual = assertInstanceOf(RequestEnvelope.class, obj);
         assertEquals(0, actual.getSessionId());
         assertEquals(sequence, actual.getTxSequence());
         assertSame(expected, actual.getMessage());
