@@ -211,9 +211,19 @@
                         <link>https://junit.org/junit4/javadoc/4.13/</link>
                         <link>https://hamcrest.org/JavaHamcrest/javadoc/3.0/</link>
                         <link>https://www.slf4j.org/apidocs/</link>
+<<<<<<< Updated upstream
                         <link>https://guava.dev/releases/33.4.8-jre/api/docs/</link>
                         <link>https://pekko.apache.org/japi/pekko/1.1.5/</link>
                         <link>https://netty.io/4.2/api/</link>
+||||||| Stash base
+                        <link>https://guava.dev/releases/33.3.1-jre/api/docs/</link>
+                        <link>https://doc.akka.io/japi/akka/2.6/</link>
+                        <link>https://netty.io/4.1/api/</link>
+=======
+                        <link>https://guava.dev/releases/33.3.1-jre/api/docs/</link>
+                        <link>https://pekko.apache.org/japi/pekko/1.0.3/</link>
+                        <link>https://netty.io/4.1/api/</link>
+>>>>>>> Stashed changes
                         <link>https://commons.apache.org/proper/commons-lang/javadocs/api-release/</link>
 
                         <link>https://www.javadoc.io/doc/org.opendaylight.odlparent/odlparent-docs/14.1.1/</link>

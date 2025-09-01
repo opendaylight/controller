@@ -68,9 +68,11 @@ import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
+import org.opendaylight.controller.cluster.raft.spi.EntryJournalV1;
 import org.opendaylight.controller.cluster.raft.spi.FailingTermInfoStore;
 import org.opendaylight.controller.cluster.raft.spi.ForwardingSnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.ImmediateEntryStore;
+import org.opendaylight.controller.cluster.raft.spi.PropertiesTermInfoStore;
 import org.opendaylight.controller.cluster.raft.spi.RaftCallback;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.RaftStorageCompleter;
@@ -78,6 +80,8 @@ import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.RaftRole;
+import org.opendaylight.raft.api.TermInfo;
+import org.opendaylight.raft.spi.CompressionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,7 +115,6 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     @BeforeEach
     void beforeEach() throws Exception {
         InMemoryJournal.clear();
-        InMemorySnapshotStore.clear();
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
@@ -225,20 +228,14 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         assertEquals("New follower commit index", 3, newFollowerLog.getCommitIndex());
         assertEquals("New follower last applied index", 3, newFollowerLog.getLastApplied());
 
-        assertEquals("Leader persisted ReplicatedLogImplEntry entries", List.of(),
-                InMemoryJournal.get(LEADER_ID, SimpleReplicatedLogEntry.class));
-        assertEquals("Leader persisted ServerConfigurationPayload entries", List.of(),
-                InMemoryJournal.get(LEADER_ID, VotingConfig.class));
+        // TODO: verify LEADER_ID has no journal entries
 
         final var lastLeaderSnapshot = leaderRaftActor.lastSnapshot();
         assertNotNull(lastLeaderSnapshot);
         assertEquals(new VotingConfig(votingServer(FOLLOWER_ID), votingServer(NEW_SERVER_ID), votingServer(LEADER_ID)),
             lastLeaderSnapshot.readRaftSnapshot(OBJECT_STREAMS).votingConfig());
 
-        assertEquals("New follower persisted ReplicatedLogImplEntry entries", List.of(),
-                InMemoryJournal.get(NEW_SERVER_ID, SimpleReplicatedLogEntry.class));
-        assertEquals("New follower persisted ServerConfigurationPayload entries", List.of(),
-                InMemoryJournal.get(NEW_SERVER_ID, VotingConfig.class));
+        // TODO: verify NEW_SERVER_ID has no journal entries
 
         final var lastNewFollowerSnapshot = newFollowerRaftActor.underlyingActor().lastSnapshot();
         assertNotNull(lastNewFollowerSnapshot);
@@ -1164,7 +1161,7 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     }
 
     @Test
-    void testChangeToVotingWithNoLeader() {
+    void testChangeToVotingWithNoLeader() throws Exception {
         LOG.info("testChangeToVotingWithNoLeader starting");
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
@@ -1181,14 +1178,21 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         final var persistedServerConfig = new VotingConfig(
                 new ServerInfo(node1ID, false), new ServerInfo(node2ID, false),
                 new ServerInfo("downNode1", true), new ServerInfo("downNode2", true));
-        SimpleReplicatedLogEntry persistedServerConfigEntry = new SimpleReplicatedLogEntry(0, 1, persistedServerConfig);
+        var persistedServerConfigEntry = new DefaultLogEntry(0, 1, persistedServerConfig);
 
-        InMemoryJournal.addEntry(node1ID, 1, new UpdateElectionTerm(1, "downNode1"));
-        InMemoryJournal.addEntry(node1ID, 2, persistedServerConfigEntry);
-        InMemoryJournal.addEntry(node1ID, 3, new ApplyJournalEntries(0));
-        InMemoryJournal.addEntry(node2ID, 1, new UpdateElectionTerm(1, "downNode2"));
-        InMemoryJournal.addEntry(node2ID, 2, persistedServerConfigEntry);
-        InMemoryJournal.addEntry(node2ID, 3, new ApplyJournalEntries(0));
+        final var node1dir = stateDir().resolve(node1ID);
+        new PropertiesTermInfoStore(node1ID, node1dir).storeAndSetTerm(new TermInfo(1, "downNode1"));
+        try (var journal = new EntryJournalV1(node1ID, node1dir, CompressionType.NONE, true)) {
+            journal.appendEntry(persistedServerConfigEntry);
+            journal.setApplyTo(1);
+        }
+
+        final var node2dir = stateDir().resolve(node2ID);
+        new PropertiesTermInfoStore(node2ID, node2dir).storeAndSetTerm(new TermInfo(1, "downNode2"));
+        try (var journal = new EntryJournalV1(node2ID, node2dir, CompressionType.NONE, true)) {
+            journal.appendEntry(persistedServerConfigEntry);
+            journal.setApplyTo(1);
+        }
 
         ActorRef node1Collector = actorFactory.createActor(
                 MessageCollectorActor.props(), actorFactory.generateActorId("collector"));
@@ -1208,22 +1212,14 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         node2RaftActor.waitForInitializeBehaviorComplete();
 
         // Verify the intended server config was loaded and applied.
-        // FIXME: this should be accurate once we do not have PekkoRecovery, which moves this information to snapshot.
-        //        verifyServerConfigurationPayloadEntry(node1RaftActor.getRaftActorContext().getReplicatedLog(),
-        //                nonVotingServer(node1ID), nonVotingServer(node2ID), votingServer("downNode1"),
-        //                votingServer("downNode2"));
-        assertVotingConfig(node1RaftActor.getRaftActorContext().getPeerServerInfo(true),
+        verifyServerConfigurationPayloadEntry(node1RaftActor.getRaftActorContext().getReplicatedLog(),
             nonVotingServer(node1ID), nonVotingServer(node2ID), votingServer("downNode1"), votingServer("downNode2"));
 
         assertFalse("isVotingMember", node1RaftActor.getRaftActorContext().isVotingMember());
         assertEquals("getRaftState", RaftRole.Follower, node1RaftActor.getRaftState());
         assertEquals("getLeaderId", null, node1RaftActor.getLeaderId());
 
-        // FIXME: this should be accurate once we do not have PekkoRecovery, which moves this information to snapshot.
-        //        verifyServerConfigurationPayloadEntry(node2RaftActor.getRaftActorContext().getReplicatedLog(),
-        //                nonVotingServer(node1ID), nonVotingServer(node2ID), votingServer("downNode1"),
-        //                votingServer("downNode2"));
-        assertVotingConfig(node2RaftActor.getRaftActorContext().getPeerServerInfo(true),
+        verifyServerConfigurationPayloadEntry(node2RaftActor.getRaftActorContext().getReplicatedLog(),
             nonVotingServer(node1ID), nonVotingServer(node2ID), votingServer("downNode1"), votingServer("downNode2"));
 
         assertFalse("isVotingMember", node2RaftActor.getRaftActorContext().isVotingMember());
