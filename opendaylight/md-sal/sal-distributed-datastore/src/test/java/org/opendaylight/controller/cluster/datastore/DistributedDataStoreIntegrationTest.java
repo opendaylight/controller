@@ -30,11 +30,11 @@ import org.apache.pekko.cluster.Cluster;
 import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestException;
 import org.opendaylight.controller.cluster.databroker.TestClientBackedDataStore;
 import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedException;
-import org.opendaylight.controller.cluster.raft.InMemoryJournal;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
@@ -46,7 +46,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 public class DistributedDataStoreIntegrationTest extends AbstractDistributedDataStoreIntegrationTest {
     @Before
     public void setUp() {
-        InMemoryJournal.clear();
         system = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig("Member1"));
         Address member1Address = AddressFromURIString.parse("pekko://cluster-test@127.0.0.1:2558");
         Cluster.get(system).join(member1Address);
@@ -64,12 +63,11 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
         final var testKit = new IntegrationTestKit(stateDir(), getSystem(), datastoreContextBuilder);
         final String shardName = "test-1";
 
-        // Setup the InMemoryJournal to block shard recovery to ensure
-        // the shard isn't
-        // initialized until we create and submit the write the Tx.
-        final String persistentID = String.format("member-1-shard-%s-%s", shardName, testName);
+        // Setup the InMemoryJournal to block shard recovery to ensure the shard is not initialized until we create and
+        // submit the write the Tx.
         final CountDownLatch blockRecoveryLatch = new CountDownLatch(1);
-        InMemoryJournal.addBlockReadMessagesLatch(persistentID, blockRecoveryLatch);
+        // InMemoryJournal.addBlockReadMessagesLatch(String.format("member-1-shard-%s-%s", shardName, testName),
+        //    blockRecoveryLatch);
 
         try (var dataStore = testKit.setupDataStore(TestClientBackedDataStore.class, testName, false, shardName)) {
             // Create the write Tx
@@ -135,29 +133,31 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
     }
 
     @Test
+    @Ignore("FIXME: CONTROLLER-2073: figure out blocking based on ShardManager")
     public void testWriteOnlyTransactionWithShardNotInitiallyReady() throws Exception {
         datastoreContextBuilder.writeOnlyTransactionOptimizationsEnabled(true);
         testTransactionWritesWithShardNotInitiallyReady("testWriteOnlyTransactionWithShardNotInitiallyReady", true);
     }
 
     @Test
+    @Ignore("FIXME: CONTROLLER-2073: figure out blocking based on ShardManager")
     public void testReadWriteTransactionWithShardNotInitiallyReady() throws Exception {
         testTransactionWritesWithShardNotInitiallyReady("testReadWriteTransactionWithShardNotInitiallyReady", false);
     }
 
     @Test
+    @Ignore("FIXME: CONTROLLER-2073: figure out blocking based on ShardManager")
     @SuppressWarnings("checkstyle:IllegalCatch")
     public void testTransactionReadsWithShardNotInitiallyReady() throws Exception {
         final var testKit = new IntegrationTestKit(stateDir(), getSystem(), datastoreContextBuilder);
         final String testName = "testTransactionReadsWithShardNotInitiallyReady";
         final String shardName = "test-1";
 
-        // Setup the InMemoryJournal to block shard recovery to ensure
-        // the shard isn't
-        // initialized until we create the Tx.
-        final String persistentID = String.format("member-1-shard-%s-%s", shardName, testName);
+        // Setup the InMemoryJournal to block shard recovery to ensure the shard is not initialized until we create the
+        // Tx.
         final CountDownLatch blockRecoveryLatch = new CountDownLatch(1);
-        InMemoryJournal.addBlockReadMessagesLatch(persistentID, blockRecoveryLatch);
+        // InMemoryJournal.addBlockReadMessagesLatch(String.format("member-1-shard-%s-%s", shardName, testName),
+        //     blockRecoveryLatch);
 
         try (var dataStore = testKit.setupDataStore(TestClientBackedDataStore.class, testName, false, shardName)) {
             // Create the read-write Tx
@@ -207,6 +207,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
     }
 
     @Test
+    @Ignore("FIXME: CONTROLLER-2073: figure out blocking based on ShardManager")
     @SuppressWarnings("checkstyle:IllegalCatch")
     public void testTransactionCommitFailureWithShardNotInitialized() throws Exception {
         final var testKit = new IntegrationTestKit(stateDir(), getSystem(), datastoreContextBuilder);
@@ -216,13 +217,10 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
         // Set the shard initialization timeout low for the test.
         datastoreContextBuilder.shardInitializationTimeout(300, TimeUnit.MILLISECONDS);
 
-        // Setup the InMemoryJournal to block shard recovery
-        // indefinitely.
-        final String persistentID = String.format("member-1-shard-%s-%s", shardName, testName);
+        // Setup the InMemoryJournal to block shard recovery indefinitely.
         final var blockRecoveryLatch = new CountDownLatch(1);
-        InMemoryJournal.addBlockReadMessagesLatch(persistentID, blockRecoveryLatch);
-
-        InMemoryJournal.addEntry(persistentID, 1, "Dummy data so akka will read from persistence");
+        // InMemoryJournal.addBlockReadMessagesLatch(String.format("member-1-shard-%s-%s", shardName, testName),
+        //    blockRecoveryLatch);
 
         final var dataStore = testKit.setupDataStore(TestClientBackedDataStore.class, testName, false, shardName);
 
@@ -273,6 +271,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
     }
 
     @Test
+    @Ignore("FIXME: CONTROLLER-2073: figure out blocking based on ShardManager")
     @SuppressWarnings("checkstyle:IllegalCatch")
     public void testTransactionReadFailureWithShardNotInitialized() throws Exception {
         final var testKit = new IntegrationTestKit(stateDir(), getSystem(), datastoreContextBuilder);
@@ -284,11 +283,9 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
 
         // Setup the InMemoryJournal to block shard recovery
         // indefinitely.
-        final String persistentID = String.format("member-1-shard-%s-%s", shardName, testName);
         final CountDownLatch blockRecoveryLatch = new CountDownLatch(1);
-        InMemoryJournal.addBlockReadMessagesLatch(persistentID, blockRecoveryLatch);
-
-        InMemoryJournal.addEntry(persistentID, 1, "Dummy data so akka will read from persistence");
+        // InMemoryJournal.addBlockReadMessagesLatch(String.format("member-1-shard-%s-%s", shardName, testName),
+        //    blockRecoveryLatch);
 
         try (var dataStore = testKit.setupDataStore(TestClientBackedDataStore.class, testName, false, shardName)) {
             // Create the read-write Tx

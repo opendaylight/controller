@@ -87,7 +87,7 @@ public class IntegrationTestKit extends ShardTestKit {
     public ClientBackedDataStore setupTestDataStore(final String typeName, final String... shardNames)
             throws Exception {
         return setupDataStore(TestClientBackedDataStore.class, typeName, shardNames);
-   }
+    }
 
     public ClientBackedDataStore setupDataStore(final String typeName, final String... shardNames) throws Exception {
         return setupDataStore(ClientBackedDataStore.class, typeName, shardNames);
