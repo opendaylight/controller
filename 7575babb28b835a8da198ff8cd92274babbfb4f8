@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4b155cb0_63b83f77",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2025-09-02T10:37:07Z",
+      "side": 1,
+      "message": "this should actually plug the read-side of the new format\nalso needs explicit tests of the read side accepting both old and new format",
+      "revId": "7575babb28b835a8da198ff8cd92274babbfb4f8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
