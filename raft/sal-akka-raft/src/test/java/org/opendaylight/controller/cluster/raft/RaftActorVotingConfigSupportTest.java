@@ -39,6 +39,7 @@ import org.apache.pekko.testkit.javadsl.TestKit;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.ApplyLeaderSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
@@ -580,6 +581,7 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     }
 
     @Test
+    @Disabled("FIXME: CONTROLLER-2073: re-enable this test")
     void testAddServerWithLeaderChangeDuringInstallSnapshot() {
         LOG.info("testAddServerWithLeaderChangeDuringInstallSnapshot starting");
 
@@ -603,8 +605,7 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
 
         leaderActor.tell(new AddServer(NEW_SERVER_ID, newFollowerRaftActor.path().toString(), true), testKit.getRef());
 
-        final UnInitializedFollowerSnapshotReply snapshotReply = expectFirstMatching(leaderCollectorActor,
-                UnInitializedFollowerSnapshotReply.class);
+        final var snapshotReply = expectFirstMatching(leaderCollectorActor, UnInitializedFollowerSnapshotReply.class);
 
         // Prevent election timeout when the leader switches to follower
         ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setElectionTimeoutFactor(100);

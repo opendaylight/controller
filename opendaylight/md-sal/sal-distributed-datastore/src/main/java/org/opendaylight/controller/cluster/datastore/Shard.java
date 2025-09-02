@@ -162,9 +162,6 @@ public class Shard extends RaftActor {
 
     private static final List<ABIVersion> SUPPORTED_ABIVERSIONS;
 
-    // Make sure to keep this in sync with the journal configuration in factory-pekko.conf
-    public static final String NON_PERSISTENT_JOURNAL_ID = "pekko.persistence.non-persistent.journal";
-
     static {
         final var values = ABIVersion.values();
         final var real = Arrays.copyOfRange(values, 1, values.length - 1);
@@ -713,16 +710,6 @@ public class Shard extends RaftActor {
         return new OnDemandShardState.Builder()
             .treeChangeListenerActors(treeChangeSupport.getListenerActors())
             .commitCohortActors(store.getCohortActors());
-    }
-
-    @Override
-    public final String journalPluginId() {
-        // This method may be invoked from super constructor (wonderful), hence we also need to handle the case of
-        // the field being uninitialized because our constructor is not finished.
-        if (datastoreContext != null && !datastoreContext.isPersistent()) {
-            return NON_PERSISTENT_JOURNAL_ID;
-        }
-        return super.journalPluginId();
     }
 
     // non-final for mocking
