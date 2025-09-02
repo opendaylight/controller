@@ -56,7 +56,7 @@ class ActorBehaviorTest {
     void beforeEach() throws Exception {
         //persistenceId() in AbstractClientActorBehavior is final and can't be mocked
         //use reflection to work around this
-        final var context = AbstractClientActorBehavior.class.getDeclaredField("context");
+        final var context = ClientActorBehavior.class.getDeclaredField("context");
         context.setAccessible(true);
         context.set(initialBehavior, ctx);
         final var persistenceId = AbstractClientActorContext.class.getDeclaredField("persistenceId");

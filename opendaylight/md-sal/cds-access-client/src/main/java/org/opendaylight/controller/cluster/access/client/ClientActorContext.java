@@ -33,11 +33,11 @@ import scala.concurrent.ExecutionContext;
  */
 public class ClientActorContext extends AbstractClientActorContext implements Identifiable<ClientIdentifier> {
     private final ExecutionContext executionContext;
-    private final ClientIdentifier identifier;
+    private final @NonNull ClientIdentifier identifier;
     private final Scheduler scheduler;
-    private final Dispatchers dispatchers;
-    private final ClientActorConfig config;
-    private final MessageSlicer messageSlicer;
+    private final @NonNull Dispatchers dispatchers;
+    private final @NonNull ClientActorConfig config;
+    private final @NonNull MessageSlicer messageSlicer;
 
     // Hidden to avoid subclassing
     ClientActorContext(final ActorRef self, final String persistenceId, final ActorSystem system,
@@ -49,10 +49,13 @@ public class ClientActorContext extends AbstractClientActorContext implements Id
         dispatchers = new Dispatchers(system.dispatchers());
         this.config = requireNonNull(config);
 
-        messageSlicer = MessageSlicer.builder().messageSliceSize(config.getMaximumMessageSliceSize())
-            .logContext(persistenceId).expireStateAfterInactivity(config.getRequestTimeout(), TimeUnit.NANOSECONDS)
-                .fileBackedStreamFactory(new FileBackedOutputStreamFactory(config.getFileBackedStreamingThreshold(),
-                    config.getTempFileDirectory())).build();
+        messageSlicer = MessageSlicer.builder()
+            .messageSliceSize(config.getMaximumMessageSliceSize())
+            .logContext(persistenceId)
+            .expireStateAfterInactivity(config.getRequestTimeout(), TimeUnit.NANOSECONDS)
+            .fileBackedStreamFactory(new FileBackedOutputStreamFactory(config.getFileBackedStreamingThreshold(),
+                config.getTempFileDirectory()))
+            .build();
     }
 
     @Override

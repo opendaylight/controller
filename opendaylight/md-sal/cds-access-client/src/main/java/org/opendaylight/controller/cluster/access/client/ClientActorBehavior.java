@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
+import org.apache.pekko.actor.ActorRef;
 import org.checkerframework.checker.lock.qual.Holding;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -45,8 +46,8 @@ import org.slf4j.LoggerFactory;
 /**
  * A behavior, which handles messages sent to a {@link AbstractClientActor}.
  */
-public abstract class ClientActorBehavior<T extends BackendInfo> extends
-        RecoveredClientActorBehavior<ClientActorContext> implements Identifiable<ClientIdentifier> {
+public abstract class ClientActorBehavior<T extends BackendInfo>
+        implements AutoCloseable, Identifiable<ClientIdentifier> {
     /**
      * Connection reconnect cohort, driven by this class.
      */
@@ -78,13 +79,14 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
     // TODO: it should be possible to move these two into ClientActorContext
     private final Map<Long, AbstractClientConnection<T>> connections = new ConcurrentHashMap<>();
     private final InversibleLock connectionsLock = new InversibleLock();
+    private final @NonNull ClientActorContext context;
     private final BackendInfoResolver<T> resolver;
     private final MessageAssembler responseMessageAssembler;
     private final Registration staleBackendInfoReg;
 
     protected ClientActorBehavior(final @NonNull ClientActorContext context,
             final @NonNull BackendInfoResolver<T> resolver, final @NonNull RestrictedObjectStreams objectStreams) {
-        super(context);
+        this.context = requireNonNull(context);
         this.resolver = requireNonNull(resolver);
 
         final var config = context.config();
@@ -105,6 +107,34 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
         }));
     }
 
+    /**
+     * Return the {@link ClientActorContext} associated with this {@link AbstractClientActor}.
+     *
+     * @return A client actor context instance.
+     */
+    protected final @NonNull ClientActorContext context() {
+        return context;
+    }
+
+    /**
+     * Return the persistence identifier associated with this {@link AbstractClientActor}. This identifier should be
+     * used in logging to identify this actor.
+     *
+     * @return Persistence identifier
+     */
+    protected final @NonNull String persistenceId() {
+        return context.persistenceId();
+    }
+
+    /**
+     * Return an {@link ActorRef} of this ClientActor.
+     *
+     * @return Actor associated with this behavior
+     */
+    public final @NonNull ActorRef self() {
+        return context.self();
+    }
+
     @Override
     public final ClientIdentifier getIdentifier() {
         return context().getIdentifier();
@@ -112,7 +142,6 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
 
     @Override
     public void close() {
-        super.close();
         responseMessageAssembler.close();
         staleBackendInfoReg.close();
     }
@@ -140,9 +169,14 @@ public abstract class ClientActorBehavior<T extends BackendInfo> extends
         return connections.get(extractCookie(response.getMessage().getTarget()));
     }
 
+    /**
+     * Implementation-internal method for handling an incoming command message.
+     *
+     * @param command Command message
+     * @return Behavior which should be used with the next message. Return null if this actor should shut down.
+     */
     @SuppressWarnings("unchecked")
-    @Override
-    final ClientActorBehavior<T> onReceiveCommand(final Object command) {
+    final @Nullable ClientActorBehavior<T> onReceiveCommand(final Object command) {
         if (command instanceof InternalCommand) {
             return ((InternalCommand<T>) command).execute(this);
         }
