@@ -45,7 +45,6 @@ import org.apache.pekko.dispatch.Dispatchers;
 import org.apache.pekko.persistence.SaveSnapshotFailure;
 import org.apache.pekko.persistence.SaveSnapshotSuccess;
 import org.apache.pekko.persistence.SnapshotMetadata;
-import org.apache.pekko.persistence.SnapshotOffer;
 import org.apache.pekko.protobufv3.internal.ByteString;
 import org.apache.pekko.testkit.TestActorRef;
 import org.apache.pekko.testkit.javadsl.TestKit;
@@ -74,14 +73,10 @@ import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshot;
 import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshotReply;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
-import org.opendaylight.controller.cluster.raft.persisted.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ByteState;
 import org.opendaylight.controller.cluster.raft.persisted.ByteStateSnapshotCohort;
-import org.opendaylight.controller.cluster.raft.persisted.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
-import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
-import org.opendaylight.controller.cluster.raft.persisted.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
@@ -247,51 +242,6 @@ class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    @Deprecated(forRemoval = true)
-    void testRaftActorForwardsToRaftActorRecoverySupport() throws Exception {
-        String persistenceId = factory.generateActorId("leader-");
-
-        DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
-
-        config.setHeartBeatInterval(ONE_DAY);
-
-        TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(MockRaftActor.props(persistenceId,
-            stateDir(), Map.of(), config), persistenceId);
-
-        MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
-
-        // Wait for akka's recovery to complete so it doesn't interfere.
-        mockRaftActor.waitForRecoveryComplete();
-
-        final var mockSupport = mock(PekkoRecoverySupport.class);
-        final var mockRecovery = mock(PekkoRecovery.class);
-        doReturn(mockRecovery).when(mockSupport).recoverToPersistent();
-        mockRaftActor.setRaftActorRecoverySupport(mockSupport);
-
-        Snapshot snapshot = Snapshot.create(ByteState.of(new byte[]{1}), List.of(), 3, 1, 3, 1, new TermInfo(-1), null);
-        SnapshotOffer snapshotOffer = new SnapshotOffer(new SnapshotMetadata("test", 6, 12345), snapshot);
-        mockRaftActor.handleRecover(snapshotOffer);
-
-        ReplicatedLogEntry logEntry = new SimpleReplicatedLogEntry(1, 1, new MockCommand("1", 5));
-        mockRaftActor.handleRecover(logEntry);
-
-        final var applyJournalEntries = new ApplyJournalEntries(2);
-        mockRaftActor.handleRecover(applyJournalEntries);
-
-        final var deleteEntries = new DeleteEntries(1);
-        mockRaftActor.handleRecover(deleteEntries);
-
-        final var updateElectionTerm = new UpdateElectionTerm(5, "member2");
-        mockRaftActor.handleRecover(updateElectionTerm);
-
-        verify(mockRecovery).handleRecoveryMessage(same(snapshotOffer));
-        verify(mockRecovery).handleRecoveryMessage(same(logEntry));
-        verify(mockRecovery).handleRecoveryMessage(same(applyJournalEntries));
-        verify(mockRecovery).handleRecoveryMessage(same(deleteEntries));
-        verify(mockRecovery).handleRecoveryMessage(same(updateElectionTerm));
-    }
-
-    @Test
     void testRaftActorForwardsToRaftActorSnapshotMessageSupport() throws Exception {
         String persistenceId = factory.generateActorId("leader-");
 
@@ -313,19 +263,19 @@ class RaftActorTest extends AbstractActorTest {
             new PlainSnapshotSource(ByteArray.wrap(new byte[1])), null, mock(ApplyLeaderSnapshot.Callback.class));
 
         when(mockSupport.handleSnapshotMessage(same(applySnapshot))).thenReturn(true);
-        mockRaftActor.handleCommand(applySnapshot);
+        mockRaftActor.handleReceive(applySnapshot);
 
         SaveSnapshotSuccess saveSnapshotSuccess = new SaveSnapshotSuccess(new SnapshotMetadata("", 0L, 0L));
         when(mockSupport.handleSnapshotMessage(same(saveSnapshotSuccess))).thenReturn(true);
-        mockRaftActor.handleCommand(saveSnapshotSuccess);
+        mockRaftActor.handleReceive(saveSnapshotSuccess);
 
         SaveSnapshotFailure saveSnapshotFailure = new SaveSnapshotFailure(new SnapshotMetadata("", 0L, 0L),
                 new Throwable());
         when(mockSupport.handleSnapshotMessage(same(saveSnapshotFailure))).thenReturn(true);
-        mockRaftActor.handleCommand(saveSnapshotFailure);
+        mockRaftActor.handleReceive(saveSnapshotFailure);
 
         when(mockSupport.handleSnapshotMessage(same(GetSnapshot.INSTANCE))).thenReturn(true);
-        mockRaftActor.handleCommand(GetSnapshot.INSTANCE);
+        mockRaftActor.handleReceive(GetSnapshot.INSTANCE);
 
         verify(mockSupport).handleSnapshotMessage(same(applySnapshot));
         verify(mockSupport).handleSnapshotMessage(same(saveSnapshotSuccess));
@@ -442,7 +392,7 @@ class RaftActorTest extends AbstractActorTest {
 
         MessageCollectorActor.clearMessages(notifierActor);
 
-        raftActor.handleCommand("any");
+        raftActor.handleReceive("any");
 
         leaderStateChange = MessageCollectorActor.expectFirstMatching(notifierActor, LeaderStateChanged.class);
         assertEquals(persistenceId, leaderStateChange.memberId());
@@ -451,7 +401,7 @@ class RaftActorTest extends AbstractActorTest {
 
         MessageCollectorActor.clearMessages(notifierActor);
 
-        raftActor.handleCommand("any");
+        raftActor.handleReceive("any");
 
         Uninterruptibles.sleepUninterruptibly(505, TimeUnit.MILLISECONDS);
         leaderStateChange = MessageCollectorActor.getFirstMatching(notifierActor, LeaderStateChanged.class);
@@ -563,13 +513,13 @@ class RaftActorTest extends AbstractActorTest {
 
         assertSame(leader, leaderActor.getCurrentBehavior());
         //fake snapshot on index 5
-        leaderActor.handleCommand(new AppendEntriesReply(follower1Id, 1, true, 5, 1, (short)0));
+        leaderActor.handleReceive(new AppendEntriesReply(follower1Id, 1, true, 5, 1, (short)0));
 
         assertEquals(8, leaderLog.size());
 
         //fake snapshot on index 6
         assertSame(leader, leaderActor.getCurrentBehavior());
-        leaderActor.handleCommand(new AppendEntriesReply(follower1Id, 1, true, 6, 1, (short)0));
+        leaderActor.handleReceive(new AppendEntriesReply(follower1Id, 1, true, 6, 1, (short)0));
         assertEquals(8, leaderLog.size());
 
         assertSame(leader, leaderActor.getCurrentBehavior());
@@ -595,7 +545,7 @@ class RaftActorTest extends AbstractActorTest {
         leaderLog.append(new DefaultLogEntry(8, 1, new MockCommand("foo-8")));
 
         //fake snapshot on index 7, since lastApplied = 7 , we would keep the last applied
-        leaderActor.handleCommand(new AppendEntriesReply(follower1Id, 1, true, 7, 1, (short)0));
+        leaderActor.handleReceive(new AppendEntriesReply(follower1Id, 1, true, 7, 1, (short)0));
         assertEquals(2, leaderLog.size());
         assertEquals(8, leaderLog.lastIndex());
     }
@@ -659,14 +609,14 @@ class RaftActorTest extends AbstractActorTest {
 
         //fake snapshot on index 6
         var entries = List.<LogEntry>of(new DefaultLogEntry(6, 1, new MockCommand("foo-6")));
-        followerActor.handleCommand(new AppendEntries(1, leaderId, 5, 1, entries, 5, 5, (short)0));
+        followerActor.handleReceive(new AppendEntries(1, leaderId, 5, 1, entries, 5, 5, (short)0));
         assertEquals(7, followerLog.size());
 
         //fake snapshot on index 7
         assertInstanceOf(Follower.class, followerActor.getCurrentBehavior());
 
         entries = List.of(new DefaultLogEntry(7, 1, new MockCommand("foo-7")));
-        followerActor.handleCommand(new AppendEntries(1, leaderId, 6, 1, entries, 6, 6, (short) 0));
+        followerActor.handleReceive(new AppendEntries(1, leaderId, 6, 1, entries, 6, 6, (short) 0));
         assertEquals(8, followerLog.size());
 
         assertInstanceOf(Follower.class, followerActor.getCurrentBehavior());
@@ -683,7 +633,7 @@ class RaftActorTest extends AbstractActorTest {
 
         entries = List.of(new DefaultLogEntry(8, 1, new MockCommand("foo-7")));
         // send an additional entry 8 with leaderCommit = 7
-        followerActor.handleCommand(new AppendEntries(1, leaderId, 7, 1, entries, 7, 7, (short) 0));
+        followerActor.handleReceive(new AppendEntries(1, leaderId, 7, 1, entries, 7, 7, (short) 0));
 
         // 7 and 8, as lastapplied is 7
         assertEquals(2, followerLog.size());
@@ -732,7 +682,7 @@ class RaftActorTest extends AbstractActorTest {
         assertEquals(5, leaderLog.size());
         assertSame(leader, leaderActor.getCurrentBehavior());
 
-        leaderActor.handleCommand(new AppendEntriesReply(follower1Id, 1, true, 9, 1, (short) 0));
+        leaderActor.handleReceive(new AppendEntriesReply(follower1Id, 1, true, 9, 1, (short) 0));
         assertEquals(5, leaderLog.size());
         assertSame(leader, leaderActor.getCurrentBehavior());
 
@@ -747,19 +697,19 @@ class RaftActorTest extends AbstractActorTest {
         dataPersistenceProvider.setActor(runnables::add);
 
         // set the 2nd follower nextIndex to 1 which has been snapshotted
-        leaderActor.handleCommand(new AppendEntriesReply(follower2Id, 1, true, 0, 1, (short) 0));
+        leaderActor.handleReceive(new AppendEntriesReply(follower2Id, 1, true, 0, 1, (short) 0));
         assertEquals(5, leaderLog.size());
         assertSame(leader, leaderActor.getCurrentBehavior());
         assertEquals(1, runnables.size());
         dataPersistenceProvider.setActor(Runnable::run);
 
         // simulate a real snapshot
-        leaderActor.handleCommand(SendHeartBeat.INSTANCE);
+        leaderActor.handleReceive(SendHeartBeat.INSTANCE);
         assertEquals(5, leaderLog.size());
         assertSame(leader, leaderActor.getCurrentBehavior());
 
         //reply from a slow follower does not initiate a fake snapshot
-        leaderActor.handleCommand(new AppendEntriesReply(follower2Id, 1, true, 9, 1, (short) 0));
+        leaderActor.handleReceive(new AppendEntriesReply(follower2Id, 1, true, 9, 1, (short) 0));
         assertEquals("Fake snapshot should not happen when Initiate is in progress", 5, leaderLog.size());
 
         runnables.getFirst().run();
@@ -768,7 +718,7 @@ class RaftActorTest extends AbstractActorTest {
         assertEquals("Real snapshot didn't clear the log till replicatedToAllIndex", 0, leaderLog.size());
 
         //reply from a slow follower after should not raise errors
-        leaderActor.handleCommand(new AppendEntriesReply(follower2Id, 1, true, 5, 1, (short) 0));
+        leaderActor.handleReceive(new AppendEntriesReply(follower2Id, 1, true, 5, 1, (short) 0));
         assertEquals(0, leaderLog.size());
     }
 
@@ -864,12 +814,12 @@ class RaftActorTest extends AbstractActorTest {
 
         leaderActor.waitForRecoveryComplete();
 
-        leaderActor.handleCommand(new BecomeFollower(100));
+        leaderActor.handleReceive(new BecomeFollower(100));
 
         assertEquals(100, leaderActor.getRaftActorContext().currentTerm());
         assertInstanceOf(Follower.class, leaderActor.getCurrentBehavior());
 
-        leaderActor.handleCommand(new BecomeLeader(110));
+        leaderActor.handleReceive(new BecomeLeader(110));
 
         assertEquals(110, leaderActor.getRaftActorContext().currentTerm());
         assertInstanceOf(Leader.class, leaderActor.getCurrentBehavior());
@@ -1201,7 +1151,7 @@ class RaftActorTest extends AbstractActorTest {
         assertFalse(storedMeta.durable());
         assertEquals(-1, leaderLog.getCommitIndex());
 
-        leaderActor.handleCommand(new AppendEntriesReply(followerId, 1, true, 0, 1, (short)0));
+        leaderActor.handleReceive(new AppendEntriesReply(followerId, 1, true, 0, 1, (short)0));
         assertEquals("getCommitIndex", -1, leaderLog.getCommitIndex());
 
         final var entryCaptor = ArgumentCaptor.forClass(ReplicatedLogEntry.class);
@@ -1240,7 +1190,7 @@ class RaftActorTest extends AbstractActorTest {
         MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
         MessageCollectorActor.clearMessages(followerActor);
 
-        leaderActor.handleCommand(new AppendEntriesReply(followerId, 1, true, -1, -1, (short)0));
+        leaderActor.handleReceive(new AppendEntriesReply(followerId, 1, true, -1, -1, (short)0));
 
         leaderActor.submitCommand(new MockIdentifier("1"), new MockCommand("1"), true);
         MessageCollectorActor.assertNoneMatching(followerActor, AppendEntries.class, 500);
