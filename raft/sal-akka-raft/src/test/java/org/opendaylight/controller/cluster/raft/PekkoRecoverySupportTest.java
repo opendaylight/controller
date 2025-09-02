@@ -89,8 +89,7 @@ class PekkoRecoverySupportTest {
 
     private PeerInfos peerInfos;
 
-    private PekkoRecoverySupport<?> support;
-    private PekkoRecovery<?> recovery;
+    private Recovery<?> recovery;
 
     @BeforeEach
     void setup() {
@@ -102,10 +101,7 @@ class PekkoRecoverySupportTest {
 
         mockActorSystem = ActorSystem.create();
         mockActorRef = mockActorSystem.actorOf(Props.create(DoNothingActor.class));
-
         peerInfos = new PeerInfos(localId, Map.of());
-
-        support = new PekkoRecoverySupport<>(raftActor, snapshotCohort, recoveryCohort, configParams);
     }
 
     private RaftActorContext createContext() {
@@ -294,7 +290,7 @@ class PekkoRecoverySupportTest {
 
     @Test
     void testOnRecoveryCompletedWithNoRemainingBatch() throws Exception {
-        recovery = support.recoverToTransient();
+        recovery = new TransientRecovery<>(raftActor, snapshotCohort, recoveryCohort, configParams);
 
         final var result = sendRecoveryCompleted();
         assertTrue(result.canRestoreFromSnapshot());
@@ -319,7 +315,7 @@ class PekkoRecoverySupportTest {
 
     @Test
     void testUpdateElectionTerm() throws Exception {
-        recovery = support.recoverToTransient();
+        recovery = new TransientRecovery<>(raftActor, snapshotCohort, recoveryCohort, configParams);
 
         sendRecoveryMessage(new UpdateElectionTerm(5, "member2"));
 
@@ -329,7 +325,7 @@ class PekkoRecoverySupportTest {
     @Test
     void testDataRecoveredWithPersistenceDisabled() throws Exception {
         doReturn(MockSnapshotState.SUPPORT).when(snapshotCohort).support();
-        recovery = support.recoverToTransient();
+        recovery = new TransientRecovery<>(raftActor, snapshotCohort, recoveryCohort, configParams);
 
         doReturn(10L).when(raftActor).lastSequenceNr();
 
@@ -369,7 +365,7 @@ class PekkoRecoverySupportTest {
 
     @Test
     void testNoDataRecoveredWithPersistenceDisabled() throws Exception {
-        recovery = support.recoverToTransient();
+        recovery = new TransientRecovery<>(raftActor, snapshotCohort, recoveryCohort, configParams);
 
         sendRecoveryMessage(new UpdateElectionTerm(5, "member2"));
 
@@ -425,7 +421,7 @@ class PekkoRecoverySupportTest {
     @Test
     void testServerConfigurationPayloadAppliedWithPersistenceDisabled() throws Exception {
         doReturn(peerInfos).when(raftActor).peerInfos();
-        recovery = support.recoverToTransient();
+        recovery = new TransientRecovery<>(raftActor, snapshotCohort, recoveryCohort, configParams);
 
         final var obj = new VotingConfig(new ServerInfo(localId, true), new ServerInfo("follower", true));
 

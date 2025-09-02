@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static com.google.common.base.Verify.verify;
 import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.persisted.MigratedSerializable;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
@@ -27,8 +29,10 @@ import org.opendaylight.controller.cluster.raft.spi.SnapshotStore;
 import org.opendaylight.controller.cluster.raft.spi.StateCommand;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.Support;
 import org.opendaylight.controller.cluster.raft.spi.StateSnapshot.ToStorage;
+import org.opendaylight.controller.cluster.raft.spi.TermInfoStore;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.EntryMeta;
+import org.opendaylight.raft.api.TermInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +41,7 @@ import org.slf4j.LoggerFactory;
  *
  * @param <T> {@link State} type
  */
-abstract sealed class Recovery<T extends @NonNull State> permits JournalRecovery, PekkoRecovery {
+abstract sealed class Recovery<T extends @NonNull State> permits JournalRecovery, TransientRecovery {
     private static final Logger LOG = LoggerFactory.getLogger(Recovery.class);
 
     final @NonNull RaftActorRecoveryCohort recoveryCohort;
@@ -70,6 +74,85 @@ abstract sealed class Recovery<T extends @NonNull State> permits JournalRecovery
     }
 
     @NonNullByDefault
+    final RecoveryResult recover() throws IOException {
+        startRecoveryTimers();
+
+        // TermInfo first
+        var termInfo = termInfoStore().loadAndSetTerm();
+        if (termInfo != null) {
+            setDataRecovered();
+        }
+
+        // Snapshot next
+        final var loaded = snapshotStore().lastSnapshot();
+        if (loaded != null) {
+            LOG.debug("{}: initializing from snapshot taken at {}", memberId(), loaded.timestamp());
+            setDataRecovered();
+
+            final var lastIncluded = loaded.lastIncluded();
+            if (termInfo == null) {
+                termInfo = new TermInfo(lastIncluded.term());
+                LOG.warn("{}: recovered snapshot without TermInfo, assuming {}", memberId(), termInfo);
+            }
+
+            final var raftSnapshot = loaded.readRaftSnapshot(actor.objectStreams());
+            final var votingConfig = raftSnapshot.votingConfig();
+            if (votingConfig != null) {
+                actor.peerInfos().updateVotingConfig(votingConfig);
+            }
+            final var unappliedEntries = raftSnapshot.unappliedEntries();
+            for (var entry : unappliedEntries) {
+                if (isMigratedPayload(entry)) {
+                    setMigratedDataRecovered();
+                }
+            }
+
+            doRecover(loaded.lastIncluded(), loaded.readSnapshot(snapshotCohort.support().reader()), unappliedEntries);
+        } else {
+            doRecover(EntryInfo.of(-1, -1), null, List.of());
+        }
+
+        // flush everything we recovered
+        applyRecoveredCommands();
+
+        final var recoveryTime = stopRecoveryTimers();
+        LOG.info("{}: Recovery completed in {}: last log index = {}, last log term = {}, napshot index = {}, "
+            + "snapshot term = {}, journal size = {}", memberId(), recoveryTime, recoveryLog.lastIndex(),
+            recoveryLog.lastTerm(), recoveryLog.getSnapshotIndex(), recoveryLog.getSnapshotTerm(), recoveryLog.size());
+
+        if (migratedDataRecovered()) {
+            LOG.info("{}: Snapshot capture initiated after recovery due to migrated messages", memberId());
+            saveFinalSnapshot();
+            return new RecoveryResult(recoveryLog, false);
+        }
+        return new RecoveryResult(recoveryLog, !dataRecovered());
+    }
+
+    @NonNullByDefault
+    abstract void doRecover(EntryInfo lastIncluded, @Nullable State state, List<LogEntry> entries)
+        throws IOException;
+
+    @NonNullByDefault
+    final void initializeState(final EntryInfo lastIncluded, final @Nullable State state) {
+        if (state != null) {
+            if (state.needsMigration()) {
+                setMigratedDataRecovered();
+            }
+            recoveryCohort.applyRecoveredSnapshot(state);
+            actor.recoveryObserver().onSnapshotRecovered(state);
+        }
+
+        // Safety check
+        verify(recoveryLog.size() == 0, "Non-empty recovery log %s", recoveryLog);
+
+        final var snapshotIndex = lastIncluded.index();
+        recoveryLog.setSnapshotIndex(snapshotIndex);
+        recoveryLog.setLastApplied(snapshotIndex);
+        recoveryLog.setCommitIndex(snapshotIndex);
+        recoveryLog.setSnapshotTerm(lastIncluded.term());
+    }
+
+    @NonNullByDefault
     final String memberId() {
         return actor.memberId();
     }
@@ -77,6 +160,11 @@ abstract sealed class Recovery<T extends @NonNull State> permits JournalRecovery
     @NonNullByDefault
     final SnapshotStore snapshotStore() {
         return actor.persistence().snapshotStore();
+    }
+
+    @NonNullByDefault
+    final TermInfoStore termInfoStore() {
+        return actor.localAccess().termInfoStore();
     }
 
     @NonNullByDefault
@@ -164,6 +252,18 @@ abstract sealed class Recovery<T extends @NonNull State> permits JournalRecovery
         takeSnapshot(lastApplied);
     }
 
+    // Either data persistence is disabled and we recovered some data entries (i.e. we must have just transitioned
+    // to disabled or a persistence backup was restored) or we recovered migrated messages. Either way, we persist
+    // a snapshot and delete all the messages from the Pekko journal to clean out unwanted messages.
+    final void saveEmptySnapshot() {
+        try {
+            actor.saveEmptySnapshot();
+            discardSnapshottedEntries();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
     /**
      * Take an intermediate recovery snapshot. This serves two functions:
      * <ol>
@@ -217,8 +317,11 @@ abstract sealed class Recovery<T extends @NonNull State> permits JournalRecovery
         LOG.info("{}: Snapshot completed in {}, resetting timer for the next recovery snapshot", memberId(), sw.stop());
     }
 
+    @Deprecated(forRemoval = true)
     @NonNullByDefault
-    abstract List<LogEntry> filterSnapshotUnappliedEntries(List<LogEntry> unappliedEntries);
+    List<LogEntry> filterSnapshotUnappliedEntries(List<LogEntry> unappliedEntries) {
+        return List.of();
+    }
 
     abstract void discardSnapshottedEntries() throws IOException;
 

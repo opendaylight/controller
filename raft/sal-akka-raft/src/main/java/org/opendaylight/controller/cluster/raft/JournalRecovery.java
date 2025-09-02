@@ -12,15 +12,17 @@ import static java.util.Objects.requireNonNull;
 import java.io.IOException;
 import java.util.List;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
 import org.opendaylight.controller.cluster.raft.spi.EntryJournal;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
+import org.opendaylight.raft.api.EntryInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A single attempt at recovering {@link EntryJournal} state, replaying into a {@link PekkoReplicatedLog}.
+ * A single attempt at recovering {@link EntryJournal} state, replaying into a {@link RecoveryLog}.
  *
  * @param <T> {@link State} type
  */
@@ -36,39 +38,17 @@ final class JournalRecovery<T extends State> extends Recovery<T> {
         this.journal = requireNonNull(journal);
     }
 
-    RecoveryResult recoverJournal(final RecoveryResult pekkoResult) throws IOException {
-        final var pekkoLog = pekkoResult.recoveryLog();
+    @Override
+    void doRecover(final EntryInfo lastIncluded, final @Nullable State state, final List<LogEntry> entries)
+            throws IOException {
+        initializeState(lastIncluded, state);
 
-        startRecoveryTimers();
-
-        // First up: reconcile recoveryLog state w.r.t. recoveryCohort. We must always prove continuity of
-        //           EntryJournal's contents, perhaps trimming it to match.
-        recoveryLog.setSnapshotIndex(pekkoLog.getSnapshotIndex());
-        recoveryLog.setSnapshotTerm(pekkoLog.getSnapshotTerm());
-        recoveryLog.setCommitIndex(pekkoLog.getCommitIndex());
-        recoveryLog.setLastApplied(pekkoLog.getLastApplied());
-
-        // Next up: reconcile the contents of pekkoLog with journal
-        reconcileAndRecover(pekkoLog);
-
-        // Finally: flush everything we recovered
-        applyRecoveredCommands();
-
-        final var recoveryTime = stopRecoveryTimers();
-        LOG.debug("{}: journal recovery completed{} with journalIndex={}", memberId(), recoveryTime,
-            recoveryLog.firstJournalIndex());
-
-        return new RecoveryResult(recoveryLog, pekkoResult.canRestoreFromSnapshot() && !dataRecovered());
-    }
-
-    private void reconcileAndRecover(final RecoveryLog pekkoLog) throws IOException {
         try (var reader = journal.openReader()) {
-            // If pekkoLog contains any entries, it has come from Pekko persistence and we need to do some more work to
-            // ensure migrate those entries into the EntryJournal. This can occur during multiple recoveries, as we may
-            // get interrupted while populating the journal or while we were taking the snapshot.
+            // If entries is non-empty, it has come from a snapshot and we need to do some more work to ensure migrate
+            // those entries into the EntryJournal. This can occur during multiple recoveries, as we may get interrupted
+            // while populating the journal or while we were taking the snapshot.
             //
             // What we need to prove here is that all journal-recovered entries leading match unapplied entries.
-            final var pekkoSize = pekkoLog.size();
 
             // If the journal has no entries, hence it should have no other metadata as well. Ditch the reader and
             // initialize the journal to the entries contained in prevPekkoLog. We also defensively initialize
@@ -79,20 +59,18 @@ final class JournalRecovery<T extends State> extends Recovery<T> {
             var journalIndex = firstIndex;
             var journalEntry = reader.nextEntry();
             if (journalIndex == 1 && journalEntry == null) {
-                LOG.debug("{}: empty journal: appending {} entries", memberId(), pekkoSize);
+                LOG.debug("{}: empty journal: appending {} entries", memberId(), entries.size());
                 reader.close();
                 journal.setApplyTo(0);
-                for (long i = 0; i < pekkoSize; ++i) {
-                    final var entry = pekkoLog.entryAt(i);
+                for (var entry : entries) {
                     writeEntry(entry);
                     recoverEntry(entry);
                 }
                 return;
             }
 
-            // Iterate over both pekkoLog and reader to ensure any entries match.
-            for (long i = 0; i < pekkoSize; ++i) {
-                final var pekkoEntry = pekkoLog.entryAt(i);
+            // Iterate over both entries and reader to ensure any entries match.
+            for (var pekkoEntry : entries) {
                 if (journalEntry != null) {
                     // present in both: check index/term equality, but do not compare commands, e.g. trust them same
                     // serialization to save CPU/memory of deserializing a potentially large object.
@@ -158,14 +136,13 @@ final class JournalRecovery<T extends State> extends Recovery<T> {
                     + ", encountered entries only to " + (journalIndex - 1));
             }
 
-            // Guard against time travel w.r.t. Pekko-recovered state
-            final var pekkoCommitIndex = pekkoLog.getCommitIndex();
-            if (pekkoCommitIndex > lastApplied) {
-                throw new IOException("Cannot move commitIndex from " + pekkoCommitIndex + " to " + lastApplied);
+            // Guard against time travel w.r.t. lastIncluded
+            final var lastIncludedIndex = lastIncluded.index();
+            if (lastIncludedIndex > lastApplied) {
+                throw new IOException("Cannot move commitIndex from " + lastIncludedIndex + " to " + lastApplied);
             }
-            final var pekkoLastApplied = pekkoLog.getLastApplied();
-            if (pekkoLastApplied > lastApplied) {
-                throw new IOException("Cannot move lastApplied from " + pekkoLastApplied + " to " + lastApplied);
+            if (lastIncludedIndex > lastApplied) {
+                throw new IOException("Cannot move lastApplied from " + lastIncludedIndex + " to " + lastApplied);
             }
 
             // Recover commitIndex is implied to be at least, we will discover the actual value as part of RAFT join
@@ -190,11 +167,6 @@ final class JournalRecovery<T extends State> extends Recovery<T> {
     private void writeEntry(final LogEntry entry) throws IOException {
         final var bodySize = journal.appendEntry(entry);
         LOG.trace("{}: journal entry body size {}", memberId(), bodySize);
-    }
-
-    @Override
-    List<LogEntry> filterSnapshotUnappliedEntries(final List<LogEntry> unappliedEntries) {
-        return List.of();
     }
 
     @Override
