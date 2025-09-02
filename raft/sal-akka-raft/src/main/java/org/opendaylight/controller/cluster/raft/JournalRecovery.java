@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.raft;
 import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
-import java.util.List;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot.State;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
@@ -190,11 +189,6 @@ final class JournalRecovery<T extends State> extends Recovery<T> {
     private void writeEntry(final LogEntry entry) throws IOException {
         final var bodySize = journal.appendEntry(entry);
         LOG.trace("{}: journal entry body size {}", memberId(), bodySize);
-    }
-
-    @Override
-    List<LogEntry> filterSnapshotUnappliedEntries(final List<LogEntry> unappliedEntries) {
-        return List.of();
     }
 
     @Override

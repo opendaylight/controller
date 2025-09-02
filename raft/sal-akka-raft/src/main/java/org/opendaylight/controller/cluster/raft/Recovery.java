@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  *
  * @param <T> {@link State} type
  */
-abstract sealed class Recovery<T extends @NonNull State> permits JournalRecovery, PekkoRecovery {
+abstract sealed class Recovery<T extends @NonNull State> permits JournalRecovery, PekkoRecovery, TransientRecovery {
     private static final Logger LOG = LoggerFactory.getLogger(Recovery.class);
 
     final @NonNull RaftActorRecoveryCohort recoveryCohort;
@@ -217,8 +217,11 @@ abstract sealed class Recovery<T extends @NonNull State> permits JournalRecovery
         LOG.info("{}: Snapshot completed in {}, resetting timer for the next recovery snapshot", memberId(), sw.stop());
     }
 
+    @Deprecated(forRemoval = true)
     @NonNullByDefault
-    abstract List<LogEntry> filterSnapshotUnappliedEntries(List<LogEntry> unappliedEntries);
+    List<LogEntry> filterSnapshotUnappliedEntries(List<LogEntry> unappliedEntries) {
+        return List.of();
+    }
 
     abstract void discardSnapshottedEntries() throws IOException;
 
