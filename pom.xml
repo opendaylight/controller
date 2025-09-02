@@ -25,6 +25,8 @@
     <module>docs</module>
     <module>features</module>
     <module>karaf</module>
+    <module>karaf-scripts</module>
+    <module>karaf4-parent</module>
 
     <module>atomix-storage</module>
     <module>benchmark</module>
