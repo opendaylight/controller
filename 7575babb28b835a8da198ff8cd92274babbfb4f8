@@ -16,6 +16,29 @@
       "message": "this should actually plug the read-side of the new format\nalso needs explicit tests of the read side accepting both old and new format",
       "revId": "7575babb28b835a8da198ff8cd92274babbfb4f8",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "49a8c3f0_49509813",
+        "filename": "raft/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/spi/UnsignedLongBitmap.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2025-09-02T10:38:02Z",
+      "side": 1,
+      "message": "can we do this without allocating a temporary object, please?",
+      "range": {
+        "startLine": 278,
+        "startChar": 15,
+        "endLine": 278,
+        "endChar": 24
+      },
+      "revId": "7575babb28b835a8da198ff8cd92274babbfb4f8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
