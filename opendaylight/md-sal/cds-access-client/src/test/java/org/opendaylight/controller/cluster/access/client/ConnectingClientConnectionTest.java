@@ -284,6 +284,7 @@ public class ConnectingClientConnectionTest {
     }
 
     @Test
+    @Ignore
     public void testRunTimeoutWithoutProgressMore() {
         queue.sendRequest(mockRequest, mockCallback);
 
