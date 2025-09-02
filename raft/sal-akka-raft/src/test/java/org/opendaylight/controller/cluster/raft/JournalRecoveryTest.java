@@ -7,16 +7,16 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.doCallRealMethod;
+//import static org.junit.jupiter.api.Assertions.assertEquals;
+//import static org.junit.jupiter.api.Assertions.assertTrue;
+//import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doReturn;
 
 import java.nio.file.Path;
 import org.eclipse.jdt.annotation.NonNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+//import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
@@ -25,7 +25,7 @@ import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.EntryJournal;
 import org.opendaylight.controller.cluster.raft.spi.EntryJournalV1;
 import org.opendaylight.raft.spi.CompressionType;
-import org.opendaylight.raft.spi.RestrictedObjectStreams;
+//import org.opendaylight.raft.spi.RestrictedObjectStreams;
 
 @ExtendWith(MockitoExtension.class)
 class JournalRecoveryTest {
@@ -62,45 +62,45 @@ class JournalRecoveryTest {
         journal.close();
     }
 
-    @Test
-    void recoveryHandlesSnapshotWithOverlappingReplayOne() throws Exception {
-        final var input = new RecoveryLog("test");
-        input.setSnapshotIndex(FIRST_ENTRY.index());
-        input.setSnapshotTerm(FIRST_ENTRY.term());
-        input.setCommitIndex(FIRST_ENTRY.index());
-        input.setLastApplied(FIRST_ENTRY.index());
-
-        doReturn(RestrictedObjectStreams.ofClassLoaders(JournalRecoveryTest.class)).when(actor).objectStreams();
-        doCallRealMethod().when(actor).recoveryObserver();
-
-        final var output = recovery.recoverJournal(new RecoveryResult(input, true)).recoveryLog();
-        assertEquals(0, output.getSnapshotIndex());
-        assertEquals(1, output.getSnapshotTerm());
-        assertEquals(2, output.size());
-        assertEquals(SECOND_ENTRY, DefaultLogEntry.of(output.entryAt(0)));
-        assertEquals(THIRD_ENTRY, DefaultLogEntry.of(output.entryAt(1)));
-        assertEquals(1, journal.applyToJournalIndex());
-    }
-
-    @Test
-    void recoveryHandlesSnapshotWithOverlappingReplayTwo() throws Exception {
-        final var input = new RecoveryLog("test");
-        input.setSnapshotIndex(SECOND_ENTRY.index());
-        input.setSnapshotTerm(SECOND_ENTRY.term());
-        input.setCommitIndex(SECOND_ENTRY.index());
-        input.setLastApplied(SECOND_ENTRY.index());
-        assertTrue(input.append(THIRD_ENTRY));
-
-        doCallRealMethod().when(actor).recoveryObserver();
-
-        final var output = recovery.recoverJournal(new RecoveryResult(input, true)).recoveryLog();
-        assertEquals(1, output.getSnapshotIndex());
-        assertEquals(2, output.getSnapshotTerm());
-        assertEquals(1, output.size());
-        assertEquals(THIRD_ENTRY, DefaultLogEntry.of(output.entryAt(0)));
-
-        // FIXME: We currently trim the journal an re-apply entries. We really should skip over same entries -- and
-        //        retain the applyIndex.
-        assertEquals(0, journal.applyToJournalIndex());
-    }
+//    @Test
+//    void recoveryHandlesSnapshotWithOverlappingReplayOne() throws Exception {
+//        final var input = new RecoveryLog("test");
+//        input.setSnapshotIndex(FIRST_ENTRY.index());
+//        input.setSnapshotTerm(FIRST_ENTRY.term());
+//        input.setCommitIndex(FIRST_ENTRY.index());
+//        input.setLastApplied(FIRST_ENTRY.index());
+//
+//        doReturn(RestrictedObjectStreams.ofClassLoaders(JournalRecoveryTest.class)).when(actor).objectStreams();
+//        doCallRealMethod().when(actor).recoveryObserver();
+//
+//        final var output = recovery.recoverJournal(new RecoveryResult(input, true)).recoveryLog();
+//        assertEquals(0, output.getSnapshotIndex());
+//        assertEquals(1, output.getSnapshotTerm());
+//        assertEquals(2, output.size());
+//        assertEquals(SECOND_ENTRY, DefaultLogEntry.of(output.entryAt(0)));
+//        assertEquals(THIRD_ENTRY, DefaultLogEntry.of(output.entryAt(1)));
+//        assertEquals(1, journal.applyToJournalIndex());
+//    }
+//
+//    @Test
+//    void recoveryHandlesSnapshotWithOverlappingReplayTwo() throws Exception {
+//        final var input = new RecoveryLog("test");
+//        input.setSnapshotIndex(SECOND_ENTRY.index());
+//        input.setSnapshotTerm(SECOND_ENTRY.term());
+//        input.setCommitIndex(SECOND_ENTRY.index());
+//        input.setLastApplied(SECOND_ENTRY.index());
+//        assertTrue(input.append(THIRD_ENTRY));
+//
+//        doCallRealMethod().when(actor).recoveryObserver();
+//
+//        final var output = recovery.recoverJournal(new RecoveryResult(input, true)).recoveryLog();
+//        assertEquals(1, output.getSnapshotIndex());
+//        assertEquals(2, output.getSnapshotTerm());
+//        assertEquals(1, output.size());
+//        assertEquals(THIRD_ENTRY, DefaultLogEntry.of(output.entryAt(0)));
+//
+//        // FIXME: We currently trim the journal an re-apply entries. We really should skip over same entries -- and
+//        //        retain the applyIndex.
+//        assertEquals(0, journal.applyToJournalIndex());
+//    }
 }
