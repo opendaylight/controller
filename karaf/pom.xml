@@ -26,6 +26,7 @@
     </properties>
 
     <modules>
+        <module>karaf4-parent</module>
         <module>test-distribution</module>
     </modules>
 </project>

@@ -25,6 +25,7 @@
     <module>docs</module>
     <module>features</module>
     <module>karaf</module>
+    <module>karaf-clustering-scripts</module>
 
     <module>benchmark</module>
     <module>bnd-parent</module>
