@@ -268,6 +268,13 @@
                 <classifier>datastore</classifier>
             </dependency>
 
+            <!-- Scripts -->
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>scripts</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
             <!-- Production Features -->
             <dependency>
                 <groupId>${project.groupId}</groupId>
