@@ -33,7 +33,7 @@ public abstract class AbstractClientActor extends AbstractPersistentActor {
     }
 
     @VisibleForTesting
-    protected AbstractClientActor(final Path statePath, final FrontendIdentifier frontendId) {
+    AbstractClientActor(final Path statePath, final FrontendIdentifier frontendId) {
         persistenceId = frontendId.toPersistentId();
         currentBehavior = new RecoveringClientActorBehavior(statePath, this, persistenceId, frontendId);
     }
@@ -44,11 +44,16 @@ public abstract class AbstractClientActor extends AbstractPersistentActor {
     }
 
     @Override
-    public void postStop() throws Exception {
+    public final void preStart() throws Exception {
+        super.preStart();
+    }
+
+    @Override
+    public final void postStop() throws Exception {
         if (currentBehavior != null) {
             currentBehavior.close();
+            currentBehavior = null;
         }
-
         super.postStop();
     }
 
@@ -67,12 +72,12 @@ public abstract class AbstractClientActor extends AbstractPersistentActor {
     }
 
     @Override
-    public Receive createReceive() {
+    public final Receive createReceive() {
         return receiveBuilder().matchAny(this::onReceiveCommand).build();
     }
 
     @Override
-    public Receive createReceiveRecover() {
+    public final Receive createReceiveRecover() {
         return receiveBuilder().matchAny(this::onReceiveRecover).build();
     }
 
