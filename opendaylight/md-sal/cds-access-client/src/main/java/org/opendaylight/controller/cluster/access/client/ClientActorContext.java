@@ -31,28 +31,34 @@ import scala.concurrent.ExecutionContext;
  * same as {@link System#nanoTime()}, but it is not tied to that particular clock. Actor clock is exposed as
  * a {@link Ticker}, which can be obtained via {@link #ticker()}. This class is thread-safe.
  */
-public class ClientActorContext extends AbstractClientActorContext implements Identifiable<ClientIdentifier> {
+public class ClientActorContext implements Identifiable<ClientIdentifier> {
     private final ExecutionContext executionContext;
-    private final ClientIdentifier identifier;
+    private final @NonNull ClientIdentifier identifier;
     private final Scheduler scheduler;
-    private final Dispatchers dispatchers;
-    private final ClientActorConfig config;
-    private final MessageSlicer messageSlicer;
+    private final @NonNull Dispatchers dispatchers;
+    private final @NonNull ClientActorConfig config;
+    private final @NonNull MessageSlicer messageSlicer;
+    private final @NonNull String persistenceId;
+    private final @NonNull ActorRef self;
 
     // Hidden to avoid subclassing
     ClientActorContext(final ActorRef self, final String persistenceId, final ActorSystem system,
             final ClientIdentifier identifier, final ClientActorConfig config) {
-        super(self, persistenceId);
+        this.persistenceId = requireNonNull(persistenceId);
+        this.self = requireNonNull(self);
         this.identifier = requireNonNull(identifier);
         scheduler = requireNonNull(system).scheduler();
         executionContext = system.dispatcher();
         dispatchers = new Dispatchers(system.dispatchers());
         this.config = requireNonNull(config);
 
-        messageSlicer = MessageSlicer.builder().messageSliceSize(config.getMaximumMessageSliceSize())
-            .logContext(persistenceId).expireStateAfterInactivity(config.getRequestTimeout(), TimeUnit.NANOSECONDS)
-                .fileBackedStreamFactory(new FileBackedOutputStreamFactory(config.getFileBackedStreamingThreshold(),
-                    config.getTempFileDirectory())).build();
+        messageSlicer = MessageSlicer.builder()
+            .messageSliceSize(config.getMaximumMessageSliceSize())
+            .logContext(persistenceId)
+            .expireStateAfterInactivity(config.getRequestTimeout(), TimeUnit.NANOSECONDS)
+            .fileBackedStreamFactory(new FileBackedOutputStreamFactory(config.getFileBackedStreamingThreshold(),
+                config.getTempFileDirectory()))
+            .build();
     }
 
     @Override
@@ -90,12 +96,21 @@ public class ClientActorContext extends AbstractClientActorContext implements Id
      * @param <T> BackendInfo type
      */
     public <T extends BackendInfo> void executeInActor(final @NonNull InternalCommand<T> command) {
-        self().tell(requireNonNull(command), ActorRef.noSender());
+        self.tell(requireNonNull(command), ActorRef.noSender());
     }
 
     public <T extends BackendInfo> Cancellable executeInActor(final @NonNull InternalCommand<T> command,
             final Duration delay) {
         return scheduler.scheduleOnce(requireNonNull(delay), self(), requireNonNull(command),
             executionContext, ActorRef.noSender());
+    }
+
+    // TODO: rename this to logContext()
+    final @NonNull String persistenceId() {
+        return persistenceId;
+    }
+
+    public final @NonNull ActorRef self() {
+        return self;
     }
 }

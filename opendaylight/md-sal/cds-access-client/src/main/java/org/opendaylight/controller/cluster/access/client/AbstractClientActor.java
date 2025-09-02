@@ -51,7 +51,7 @@ public abstract class AbstractClientActor extends AbstractActor {
     private final @NonNull String persistenceId;
     private final @NonNull Path statePath;
 
-    private AbstractClientActorBehavior<?> currentBehavior;
+    private ClientActorBehavior<?> currentBehavior;
 
     protected AbstractClientActor(final FrontendIdentifier frontendId) {
         this(STATE_PATH, frontendId);
@@ -104,7 +104,7 @@ public abstract class AbstractClientActor extends AbstractActor {
         }
     }
 
-    private void switchBehavior(final AbstractClientActorBehavior<?> nextBehavior) {
+    private void switchBehavior(final ClientActorBehavior<?> nextBehavior) {
         if (!currentBehavior.equals(nextBehavior)) {
             if (nextBehavior == null) {
                 LOG.debug("{}: shutting down", persistenceId);
