@@ -7,18 +7,15 @@
  */
 package org.opendaylight.controller.cluster.access.client;
 
+import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.base.Verify;
 import java.time.Duration;
 import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
 import org.apache.pekko.actor.ActorRef;
-import org.checkerframework.checker.lock.qual.Holding;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.commands.NotLeaderException;
@@ -27,7 +24,6 @@ import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.FailureEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.RequestException;
-import org.opendaylight.controller.cluster.access.concepts.RequestFailure;
 import org.opendaylight.controller.cluster.access.concepts.ResponseEnvelope;
 import org.opendaylight.controller.cluster.access.concepts.RetiredGenerationException;
 import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestException;
@@ -62,6 +58,20 @@ public abstract class ClientActorBehavior<T extends BackendInfo>
         @NonNull ReconnectForwarder finishReconnect(@NonNull Collection<ConnectionEntry> enqueuedEntries);
     }
 
+    private static class BackendStaleException extends RequestException {
+        @java.io.Serial
+        private static final long serialVersionUID = 1L;
+
+        BackendStaleException(final Long shard) {
+            super("Backend for shard " + shard + " is stale");
+        }
+
+        @Override
+        public boolean isRetriable() {
+            return false;
+        }
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(ClientActorBehavior.class);
     private static final Duration RESOLVE_RETRY_DURATION = Duration.ofSeconds(1);
 
@@ -77,10 +87,10 @@ public abstract class ClientActorBehavior<T extends BackendInfo>
      * before retrying the operation.
      */
     // TODO: it should be possible to move these two into ClientActorContext
-    private final Map<Long, AbstractClientConnection<T>> connections = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Long, AbstractClientConnection<T>> connections = new ConcurrentHashMap<>();
     private final InversibleLock connectionsLock = new InversibleLock();
     private final @NonNull ClientActorContext context;
-    private final BackendInfoResolver<T> resolver;
+    private final @NonNull BackendInfoResolver<T> resolver;
     private final MessageAssembler responseMessageAssembler;
     private final Registration staleBackendInfoReg;
 
@@ -156,7 +166,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo>
     public final AbstractClientConnection<T> getConnection(final Long shard) {
         while (true) {
             final long stamp = connectionsLock.optimisticRead();
-            final AbstractClientConnection<T> conn = connections.computeIfAbsent(shard, this::createConnection);
+            final var conn = connections.computeIfAbsent(shard, this::createConnection);
             if (connectionsLock.validate(stamp)) {
                 // No write-lock in-between, return success
                 return conn;
@@ -175,30 +185,24 @@ public abstract class ClientActorBehavior<T extends BackendInfo>
      * @param command Command message
      * @return Behavior which should be used with the next message. Return null if this actor should shut down.
      */
-    @SuppressWarnings("unchecked")
-    final @Nullable ClientActorBehavior<T> onReceiveCommand(final Object command) {
-        if (command instanceof InternalCommand) {
-            return ((InternalCommand<T>) command).execute(this);
-        }
-
-        if (command instanceof SuccessEnvelope successEnvelope) {
-            return onRequestSuccess(successEnvelope);
-        }
-        if (command instanceof FailureEnvelope failureEnvelope) {
-            return internalOnRequestFailure(failureEnvelope);
-        }
-
-        if (MessageAssembler.isHandledMessage(command)) {
-            context().dispatchers().getDispatcher(DispatcherType.Serialization).execute(
-                () -> responseMessageAssembler.handleMessage(command, context().self()));
-            return this;
-        }
-
-        if (context().messageSlicer().handleMessage(command)) {
-            return this;
-        }
-
-        return onCommand(command);
+    final @Nullable ClientActorBehavior<T> onReceiveCommand(final @NonNull Object command) {
+        return switch (command) {
+            case InternalCommand<?> cmd -> {
+                @SuppressWarnings("unchecked")
+                final var cast = (InternalCommand<T>) cmd;
+                yield cast.execute(this);
+            }
+            case SuccessEnvelope successEnvelope -> onRequestSuccess(successEnvelope);
+            case FailureEnvelope failureEnvelope -> internalOnRequestFailure(failureEnvelope);
+            default -> {
+                if (MessageAssembler.isHandledMessage(command)) {
+                    context().dispatchers().getDispatcher(DispatcherType.Serialization).execute(
+                        () -> responseMessageAssembler.handleMessage(command, context().self()));
+                    yield this;
+                }
+                yield context().messageSlicer().handleMessage(command) ? this : onCommand(command);
+            }
+        };
     }
 
     private static long extractCookie(final Identifier id) {
@@ -210,7 +214,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo>
     }
 
     private void onResponse(final ResponseEnvelope<?> response) {
-        final AbstractClientConnection<T> connection = getConnection(response);
+        final var connection = getConnection(response);
         if (connection != null) {
             connection.receiveResponse(response);
         } else {
@@ -229,7 +233,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo>
     }
 
     private ClientActorBehavior<T> internalOnRequestFailure(final FailureEnvelope command) {
-        final AbstractClientConnection<T> conn = getConnection(command);
+        final var conn = getConnection(command);
         if (conn != null) {
             /*
              * We are talking to multiple actors, which may be lagging behind our state significantly. This has
@@ -240,7 +244,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo>
              * connection -- for example NotLeaderException, which must not cause a new reconnect. Check the envelope's
              * sessionId and if it does not match our current connection just ignore it.
              */
-            final Optional<T> optBackend = conn.getBackendInfo();
+            final var optBackend = conn.getBackendInfo();
             if (optBackend.isPresent() && optBackend.orElseThrow().getSessionId() != command.getSessionId()) {
                 LOG.debug("{}: Mismatched current connection {} and envelope {}, ignoring response", persistenceId(),
                     conn, command);
@@ -248,8 +252,8 @@ public abstract class ClientActorBehavior<T extends BackendInfo>
             }
         }
 
-        final RequestFailure<?, ?> failure = command.getMessage();
-        final RequestException cause = failure.getCause();
+        final var failure = command.getMessage();
+        final var cause = failure.getCause();
         if (cause instanceof RetiredGenerationException) {
             LOG.error("{}: current generation {} has been superseded", persistenceId(), getIdentifier(), cause);
             haltClient(cause);
@@ -284,10 +288,9 @@ public abstract class ClientActorBehavior<T extends BackendInfo>
     private void poison(final RequestException cause) {
         final long stamp = connectionsLock.writeLock();
         try {
-            for (AbstractClientConnection<T> q : connections.values()) {
-                q.poison(cause);
+            for (var connection : connections.values()) {
+                connection.poison(cause);
             }
-
             connections.clear();
         } finally {
             connectionsLock.unlockWrite(stamp);
@@ -329,7 +332,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo>
      * @param newConn New connection
      * @return ConnectionConnectCohort which will be used to complete the process of bringing the connection up.
      */
-    @Holding("connectionsLock")
+    // Note: called with connectionsLock write-locked
     protected abstract @NonNull ConnectionConnectCohort connectionUp(@NonNull ConnectedClientConnection<T> newConn);
 
     private void backendConnectFinished(final Long shard, final AbstractClientConnection<T> oldConn,
@@ -354,13 +357,8 @@ public abstract class ClientActorBehavior<T extends BackendInfo>
             }
 
             LOG.error("{}: failed to resolve shard {}", persistenceId(), shard, failure);
-            final RequestException cause;
-            if (failure instanceof RequestException requestException) {
-                cause = requestException;
-            } else {
-                cause = new RuntimeRequestException("Failed to resolve shard " + shard, failure);
-            }
-
+            final var cause = failure instanceof RequestException requestException ? requestException
+                : new RuntimeRequestException("Failed to resolve shard " + shard, failure);
             oldConn.poison(cause);
             return;
         }
@@ -368,20 +366,20 @@ public abstract class ClientActorBehavior<T extends BackendInfo>
         LOG.info("{}: resolved shard {} to {}", persistenceId(), shard, backend);
         final long stamp = connectionsLock.writeLock();
         try {
-            final Stopwatch sw = Stopwatch.createStarted();
+            final var sw = Stopwatch.createStarted();
 
             // Create a new connected connection
-            final ConnectedClientConnection<T> newConn = new ConnectedClientConnection<>(oldConn, backend);
+            final var newConn = new ConnectedClientConnection<>(oldConn, backend);
             LOG.info("{}: resolving connection {} to {}", persistenceId(), oldConn, newConn);
 
             // Start reconnecting without the old connection lock held
-            final ConnectionConnectCohort cohort = Verify.verifyNotNull(connectionUp(newConn));
+            final var cohort = verifyNotNull(connectionUp(newConn));
 
             // Lock the old connection and get a reference to its entries
-            final Collection<ConnectionEntry> replayIterable = oldConn.startReplay();
+            final var replayIterable = oldConn.startReplay();
 
             // Finish the connection attempt
-            final ReconnectForwarder forwarder = Verify.verifyNotNull(cohort.finishReconnect(replayIterable));
+            final var forwarder = verifyNotNull(cohort.finishReconnect(replayIterable));
 
             // Cancel sleep debt after entries were replayed, before new connection starts receiving.
             newConn.cancelDebt();
@@ -391,7 +389,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo>
 
             // Make sure new lookups pick up the new connection
             if (!connections.replace(shard, oldConn, newConn)) {
-                final AbstractClientConnection<T> existing = connections.get(oldConn.cookie());
+                final var existing = connections.get(oldConn.cookie());
                 LOG.warn("{}: old connection {} does not match existing {}, new connection {} in limbo",
                     persistenceId(), oldConn, existing, newConn);
             } else {
@@ -406,7 +404,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo>
         final long stamp = connectionsLock.writeLock();
         try {
             if (!connections.remove(conn.cookie(), conn)) {
-                final AbstractClientConnection<T> existing = connections.get(conn.cookie());
+                final var existing = connections.get(conn.cookie());
                 if (existing != null) {
                     LOG.warn("{}: failed to remove connection {}, as it was superseded by {}", persistenceId(), conn,
                         existing);
@@ -422,22 +420,20 @@ public abstract class ClientActorBehavior<T extends BackendInfo>
         }
     }
 
-    @SuppressWarnings("unchecked")
-    void reconnectConnection(final ConnectedClientConnection<?> oldConn,
-            final ReconnectingClientConnection<?> newConn) {
-        final ReconnectingClientConnection<T> conn = (ReconnectingClientConnection<T>)newConn;
+    void reconnectConnection(final ConnectedClientConnection<T> oldConn,
+            final ReconnectingClientConnection<T> newConn) {
         LOG.info("{}: connection {} reconnecting as {}", persistenceId(), oldConn, newConn);
 
         final long stamp = connectionsLock.writeLock();
         try {
-            final boolean replaced = connections.replace(oldConn.cookie(), (AbstractClientConnection<T>)oldConn, conn);
+            final boolean replaced = connections.replace(oldConn.cookie(), oldConn, newConn);
             if (!replaced) {
-                final AbstractClientConnection<T> existing = connections.get(oldConn.cookie());
+                final var existing = connections.get(oldConn.cookie());
                 if (existing != null) {
-                    LOG.warn("{}: failed to replace connection {}, as it was superseded by {}", persistenceId(), conn,
-                        existing);
+                    LOG.warn("{}: failed to replace connection {}, as it was superseded by {}", persistenceId(),
+                        newConn, existing);
                 } else {
-                    LOG.warn("{}: failed to replace connection {}, as it was not tracked", persistenceId(), conn);
+                    LOG.warn("{}: failed to replace connection {}, as it was not tracked", persistenceId(), newConn);
                 }
             } else {
                 cancelSlicing(oldConn.cookie());
@@ -448,9 +444,9 @@ public abstract class ClientActorBehavior<T extends BackendInfo>
 
         final Long shard = oldConn.cookie();
         LOG.info("{}: refreshing backend for shard {}", persistenceId(), shard);
-        resolver().refreshBackendInfo(shard, conn.getBackendInfo().orElseThrow()).whenComplete(
+        resolver().refreshBackendInfo(shard, newConn.getBackendInfo().orElseThrow()).whenComplete(
             (backend, failure) -> context().executeInActor(behavior -> {
-                backendConnectFinished(shard, conn, backend, failure);
+                backendConnectFinished(shard, newConn, backend, failure);
                 return behavior;
             }));
     }
@@ -467,8 +463,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo>
     }
 
     private ConnectingClientConnection<T> createConnection(final Long shard) {
-        final ConnectingClientConnection<T> conn = new ConnectingClientConnection<>(context(), shard,
-                resolver().resolveCookieName(shard));
+        final var conn = new ConnectingClientConnection<T>(context(), shard, resolver().resolveCookieName(shard));
         resolveConnection(shard, conn);
         return conn;
     }
@@ -479,18 +474,5 @@ public abstract class ClientActorBehavior<T extends BackendInfo>
             backendConnectFinished(shard, conn, backend, failure);
             return behavior;
         }));
-    }
-
-    private static class BackendStaleException extends RequestException {
-        private static final long serialVersionUID = 1L;
-
-        BackendStaleException(final Long shard) {
-            super("Backend for shard " + shard + " is stale");
-        }
-
-        @Override
-        public boolean isRetriable() {
-            return false;
-        }
     }
 }
