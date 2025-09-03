@@ -9,18 +9,25 @@ package org.opendaylight.controller.cluster.access.client;
 
 import static java.util.Objects.requireNonNull;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
+
 /**
  * Forwarder class responsible for routing requests from the previous connection incarnation back to the originator,
  * which can then convert them as appropriate.
- *
- * @author Robert Varga
  */
 public abstract class ReconnectForwarder {
-    // Visible for subclass method handle
-    private final AbstractReceivingClientConnection<?> successor;
+    private final @NonNull AbstractReceivingClientConnection<?> successor;
 
-    protected ReconnectForwarder(final AbstractReceivingClientConnection<?> successor) {
+    ReconnectForwarder(final AbstractReceivingClientConnection<?> successor) {
         this.successor = requireNonNull(successor);
+    }
+
+    protected ReconnectForwarder(final ConnectedClientConnection<?> successor) {
+        this((AbstractReceivingClientConnection<?>) successor);
+    }
+
+    protected ReconnectForwarder(final ReconnectingClientConnection<?> successor) {
+        this((AbstractReceivingClientConnection<?>) successor);
     }
 
     protected final void sendToSuccessor(final ConnectionEntry entry) {
@@ -35,7 +42,7 @@ public abstract class ReconnectForwarder {
 
     protected abstract void replayEntry(ConnectionEntry entry, long now);
 
-    final AbstractReceivingClientConnection<?> successor() {
+    final @NonNull AbstractReceivingClientConnection<?> successor() {
         return successor;
     }
 }
