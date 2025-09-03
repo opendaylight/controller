@@ -54,13 +54,6 @@
                 <version>${project.version}</version>
             </dependency>
 
-            <!-- Atomix -->
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>atomix-storage</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
             <!-- Core API/implementation -->
             <dependency>
                 <groupId>${project.groupId}</groupId>
