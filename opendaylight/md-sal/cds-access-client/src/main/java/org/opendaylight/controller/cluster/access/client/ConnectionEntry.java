@@ -20,7 +20,7 @@ import org.opendaylight.yangtools.concepts.Immutable;
  * Single entry in a {@link AbstractClientConnection}. Tracks the request, the associated callback and time when
  * the request was first enqueued.
  */
-public class ConnectionEntry implements Immutable {
+public sealed class ConnectionEntry implements Immutable permits TransmittedConnectionEntry {
     private final Consumer<Response<?, ?>> callback;
     private final Request<?, ?> request;
     private final long enqueuedTicks;
@@ -54,7 +54,7 @@ public class ConnectionEntry implements Immutable {
      *
      * @param response the response.
      */
-    public void complete(final Response<?, ?> response) {
+    public final void complete(final Response<?, ?> response) {
         callback.accept(response);
     }
 
@@ -70,7 +70,7 @@ public class ConnectionEntry implements Immutable {
         return addToStringAttributes(MoreObjects.toStringHelper(this)).toString();
     }
 
-    ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
-        return toStringHelper.add("request", request).add("enqueuedTicks", enqueuedTicks);
+    ToStringHelper addToStringAttributes(final ToStringHelper helper) {
+        return helper.add("request", request).add("enqueuedTicks", enqueuedTicks);
     }
 }

@@ -11,8 +11,6 @@ import com.google.common.base.MoreObjects.ToStringHelper;
 
 /**
  * A {@link ConnectionEntry} which has been transmitted. It holds additional information about the last transmission.
- *
- * @author Robert Varga
  */
 final class TransmittedConnectionEntry extends ConnectionEntry {
     private final long sessionId;
@@ -20,11 +18,11 @@ final class TransmittedConnectionEntry extends ConnectionEntry {
     private final long txTicks;
 
     TransmittedConnectionEntry(final ConnectionEntry entry, final long sessionId, final long txSequence,
-        final long now) {
+            final long txTicks) {
         super(entry);
         this.sessionId = sessionId;
         this.txSequence = txSequence;
-        this.txTicks = now;
+        this.txTicks = txTicks;
     }
 
     long getSessionId() {
@@ -40,7 +38,7 @@ final class TransmittedConnectionEntry extends ConnectionEntry {
     }
 
     @Override
-    ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
-        return super.addToStringAttributes(toStringHelper).add("sessionId", sessionId).add("txSequence", txSequence);
+    ToStringHelper addToStringAttributes(final ToStringHelper helper) {
+        return super.addToStringAttributes(helper).add("sessionId", sessionId).add("txSequence", txSequence);
     }
 }
