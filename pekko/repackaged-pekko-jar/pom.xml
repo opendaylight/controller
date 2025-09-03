@@ -79,11 +79,6 @@
         </dependency>
         <dependency>
             <groupId>org.apache.pekko</groupId>
-            <artifactId>pekko-persistence_3</artifactId>
-            <version>1.1.5</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.pekko</groupId>
             <artifactId>pekko-protobuf-v3_3</artifactId>
             <version>1.1.5</version>
         </dependency>
