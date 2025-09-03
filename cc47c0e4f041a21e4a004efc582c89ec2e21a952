@@ -16,6 +16,24 @@
       "message": "Requires removing all users first, notably cds-access-client.",
       "revId": "cc47c0e4f041a21e4a004efc582c89ec2e21a952",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "0f5e353d_62659427",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2025-09-03T15:10:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8425e6f6_fc6b610e",
+      "revId": "cc47c0e4f041a21e4a004efc582c89ec2e21a952",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
