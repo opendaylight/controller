@@ -48,7 +48,7 @@ public abstract class AbstractClientActor extends AbstractActor {
     private static final String PROP_GENERATION = "generation";
 
     private final @NonNull FrontendIdentifier frontendId;
-    private final @NonNull String persistenceId;
+    private final @NonNull String logContext;
     private final @NonNull Path statePath;
 
     private ClientActorBehavior<?> currentBehavior;
@@ -66,11 +66,7 @@ public abstract class AbstractClientActor extends AbstractActor {
     AbstractClientActor(final Path statePath, final FrontendIdentifier frontendId) {
         this.statePath = requireNonNull(statePath);
         this.frontendId = requireNonNull(frontendId);
-        persistenceId = frontendId.toPersistentId();
-    }
-
-    public final @NonNull String persistenceId() {
-        return persistenceId;
+        logContext = frontendId.toPersistentId();
     }
 
     @Override
@@ -82,7 +78,7 @@ public abstract class AbstractClientActor extends AbstractActor {
         final ClientIdentifier clientId;
         final var fromFile = loadStateFile(filePath);
         if (fromFile != null) {
-            LOG.debug("{}: recovered identifier {} from {}", persistenceId, fromFile, filePath);
+            LOG.debug("{}: recovered identifier {} from {}", logContext, fromFile, filePath);
 
             // increment generation and refuse to wraparound
             final var nextGeneration = fromFile.getGeneration() + 1;
@@ -94,10 +90,10 @@ public abstract class AbstractClientActor extends AbstractActor {
             clientId = ClientIdentifier.create(frontendId, initialGeneration());
         }
 
-        LOG.debug("{}: saving new identifier {} to {}", persistenceId, clientId, filePath);
+        LOG.debug("{}: saving new identifier {} to {}", logContext, clientId, filePath);
         createStateFile(filePath, clientId);
 
-        currentBehavior = initialBehavior(new ClientActorContext(self(), persistenceId(), getContext().system(),
+        currentBehavior = initialBehavior(new ClientActorContext(self(), logContext, getContext().system(),
             clientId, getClientActorConfig()));
     }
 
@@ -112,10 +108,10 @@ public abstract class AbstractClientActor extends AbstractActor {
     private void switchBehavior(final ClientActorBehavior<?> nextBehavior) {
         if (!currentBehavior.equals(nextBehavior)) {
             if (nextBehavior == null) {
-                LOG.debug("{}: shutting down", persistenceId);
+                LOG.debug("{}: shutting down", logContext);
                 self().tell(PoisonPill.getInstance(), ActorRef.noSender());
             } else {
-                LOG.debug("{}: switched from {} to {}", persistenceId, currentBehavior, nextBehavior);
+                LOG.debug("{}: switched from {} to {}", logContext, currentBehavior, nextBehavior);
             }
 
             currentBehavior.close();
@@ -130,14 +126,14 @@ public abstract class AbstractClientActor extends AbstractActor {
 
     private void onReceiveCommand(final Object command) {
         if (command == null) {
-            LOG.debug("{}: ignoring null command", persistenceId);
+            LOG.debug("{}: ignoring null command", logContext);
             return;
         }
 
         if (currentBehavior != null) {
             switchBehavior(currentBehavior.onReceiveCommand(command));
         } else {
-            LOG.debug("{}: shutting down, ignoring command {}", persistenceId, command);
+            LOG.debug("{}: shutting down, ignoring command {}", logContext, command);
         }
     }
 
@@ -149,7 +145,7 @@ public abstract class AbstractClientActor extends AbstractActor {
         final String propName = GENERATION_OVERRIDE_PROP_BASE + frontendId.getClientType().getName();
         final String propValue = System.getProperty(propName);
         if (propValue == null) {
-            LOG.debug("{}: no initial generation override, starting from 0", persistenceId());
+            LOG.debug("{}: no initial generation override, starting from 0", logContext);
             return 0;
         }
 
@@ -157,12 +153,11 @@ public abstract class AbstractClientActor extends AbstractActor {
         try {
             ret = Long.parseUnsignedLong(propValue);
         } catch (NumberFormatException e) {
-            LOG.warn("{}: failed to parse initial generation override '{}', starting from 0", persistenceId(),
-                propValue, e);
+            LOG.warn("{}: failed to parse initial generation override '{}', starting from 0", logContext, propValue, e);
             return 0;
         }
 
-        LOG.info("{}: initial generation set to {}", persistenceId(), ret);
+        LOG.info("{}: initial generation set to {}", logContext, ret);
         return ret;
     }
 
