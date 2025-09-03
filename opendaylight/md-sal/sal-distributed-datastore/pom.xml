@@ -114,11 +114,6 @@
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-common-util</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-akka-segmented-journal</artifactId>
-      <scope>test</scope>
-    </dependency>
 
     <dependency>
       <groupId>org.opendaylight.mdsal</groupId>
