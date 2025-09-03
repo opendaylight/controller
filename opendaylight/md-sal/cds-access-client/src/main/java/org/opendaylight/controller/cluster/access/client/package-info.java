@@ -7,7 +7,6 @@
  */
 /**
  * This package contains the baseline client infrastructure required to implement clients accessing the data store.
- *
- * @author Robert Varga
  */
+@org.osgi.annotation.bundle.Export
 package org.opendaylight.controller.cluster.access.client;
