@@ -18,6 +18,24 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "1b81f464_e07a8526",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 9173
+      },
+      "writtenOn": "2025-09-03T07:37:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4b155cb0_63b83f77",
+      "revId": "7575babb28b835a8da198ff8cd92274babbfb4f8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "49a8c3f0_49509813",
@@ -31,6 +49,30 @@
       "writtenOn": "2025-09-02T10:38:02Z",
       "side": 1,
       "message": "can we do this without allocating a temporary object, please?",
+      "range": {
+        "startLine": 278,
+        "startChar": 15,
+        "endLine": 278,
+        "endChar": 24
+      },
+      "revId": "7575babb28b835a8da198ff8cd92274babbfb4f8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "42bd1a41_7e088066",
+        "filename": "raft/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/spi/UnsignedLongBitmap.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 9173
+      },
+      "writtenOn": "2025-09-03T07:37:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "49a8c3f0_49509813",
       "range": {
         "startLine": 278,
         "startChar": 15,
