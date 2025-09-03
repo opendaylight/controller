@@ -14,7 +14,9 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.opendaylight.controller.md.cluster.datastore.model.CarsModel.CAR_QNAME;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.ConfigFactory;
@@ -22,6 +24,7 @@ import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.actor.Address;
@@ -35,13 +38,17 @@ import org.junit.Test;
 import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestException;
 import org.opendaylight.controller.cluster.databroker.TestClientBackedDataStore;
 import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedException;
+import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.mdsal.common.api.ReadFailedException;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreReadWriteTransaction;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.mdsal.dom.spi.store.DOMStoreWriteTransaction;
+import org.opendaylight.yangtools.yang.common.Uint64;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 
 public class DistributedDataStoreIntegrationTest extends AbstractDistributedDataStoreIntegrationTest {
     @Before
@@ -343,4 +350,77 @@ public class DistributedDataStoreIntegrationTest extends AbstractDistributedData
                 not initialized yet. Please try again later""", nie.getMessage());
         }
     }
+
+    @Test
+    public void testManyWritesDeletes() throws Exception {
+        final var testKit = new IntegrationTestKit(stateDir(), getSystem(), datastoreContextBuilder);
+        final var carMapBuilder = ImmutableNodes.newSystemMapBuilder()
+            .withNodeIdentifier(new NodeIdentifier(CAR_QNAME));
+
+        try (var dataStore = testKit.setupDataStore(TestClientBackedDataStore.class, "testManyWritesDeletes",
+            "module-shards-cars-member-1.conf", true, "cars")) {
+
+            try (var txChain = dataStore.createTransactionChain()) {
+                final var writeTx = txChain.newWriteOnlyTransaction();
+                writeTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
+                writeTx.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
+                testKit.doCommit(writeTx.ready());
+
+                int numCars = 20;
+                for (int i = 0; i < numCars; ++i) {
+                    var rwTx = txChain.newReadWriteTransaction();
+
+                    final var path = CarsModel.newCarPath("car" + i);
+                    final var data = CarsModel.newCarEntry("car" + i, Uint64.valueOf(20000));
+
+                    rwTx.merge(path, data);
+                    carMapBuilder.withChild(data);
+
+                    testKit.doCommit(rwTx.ready());
+
+                    if (i % 5 == 0) {
+                        rwTx = txChain.newReadWriteTransaction();
+
+                        rwTx.delete(path);
+                        carMapBuilder.withoutChild(path.getLastPathArgument());
+                        testKit.doCommit(rwTx.ready());
+                    }
+                }
+
+                try (var readTx = txChain.newReadOnlyTransaction()) {
+                    assertEquals("cars not matching result", Optional.of(carMapBuilder.build()),
+                        readTx.read(CarsModel.CAR_LIST_PATH).get(5, TimeUnit.SECONDS));
+                }
+            }
+
+
+            // wait until the journal is actually persisted, killing the datastore early results in missing entries
+            Stopwatch sw = Stopwatch.createStarted();
+            AtomicBoolean done = new AtomicBoolean(false);
+            while (!done.get()) {
+                MemberNode.verifyRaftState(dataStore, "cars", raftState -> {
+                    if (raftState.getLastApplied() == raftState.getLastLogIndex()) {
+                        done.set(true);
+                    }
+                });
+
+                assertTrue("Shard did not persist all journal entries in time.", sw.elapsed(TimeUnit.SECONDS) <= 5);
+
+                Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
+            }
+        }
+
+        // test restoration from journal and verify data matches
+        try (var dataStore = testKit.setupDataStore(TestClientBackedDataStore.class, "testManyWritesDeletes",
+            "module-shards-cars-member-1.conf", true, "cars")) {
+
+            try (var txChain = dataStore.createTransactionChain()) {
+                try (var readTx = txChain.newReadOnlyTransaction()) {
+                    assertEquals("restored cars do not match snapshot", Optional.of(carMapBuilder.build()),
+                        readTx.read(CarsModel.CAR_LIST_PATH).get(5, TimeUnit.SECONDS));
+                }
+            }
+        }
+    }
+
 }
