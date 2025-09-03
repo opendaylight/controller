@@ -78,11 +78,5 @@
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-akka-raft</artifactId>
         </dependency>
-
-        <!-- Segmented Journal for Akka, including Kryo and asm-5.2 -->
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>sal-akka-segmented-journal</artifactId>
-        </dependency>
     </dependencies>
 </project>

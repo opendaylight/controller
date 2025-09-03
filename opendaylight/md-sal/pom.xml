@@ -35,7 +35,6 @@
     <module>cds-access-client</module>
     <module>cds-dom-api</module>
     <module>cds-mgmt-api</module>
-    <module>sal-akka-segmented-journal</module>
 
     <!-- sal clustering configuration -->
     <module>sal-clustering-config</module>
