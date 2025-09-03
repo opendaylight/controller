@@ -15,7 +15,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * This interface is used to pass the unit of work via the actors mailbox. The command can alter behavior of the actor
  * by returning a new behavior. This work will be prioritized before other messages.
  *
- * @author Robert Varga
+ * @param <T> the type of associated {@link BackendInfo}
  */
 @FunctionalInterface
 public interface InternalCommand<T extends BackendInfo> extends ControlMessage {

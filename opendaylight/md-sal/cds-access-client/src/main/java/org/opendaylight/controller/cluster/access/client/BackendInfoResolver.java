@@ -24,6 +24,8 @@ import org.opendaylight.yangtools.concepts.Registration;
  * outstanding requests towards the leader. If it fails with a {@link java.util.concurrent.TimeoutException},
  * resolution process will be retried. If it fails with any other cause, it will we wrapped as a
  * {@link org.opendaylight.controller.cluster.access.concepts.RuntimeRequestException} wrapping that cause.
+ *
+ * @param <T> the type of associated {@link BackendInfo}
  */
 public abstract class BackendInfoResolver<T extends BackendInfo> implements AutoCloseable {
     /**

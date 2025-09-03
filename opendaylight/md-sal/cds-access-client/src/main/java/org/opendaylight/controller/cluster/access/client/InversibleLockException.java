@@ -27,6 +27,11 @@ public final class InversibleLockException extends RuntimeException {
         this.latch = requireNonNull(latch);
     }
 
+    /**
+     * Block until the write that cause this exception completes.
+     *
+     * @throws IllegalStateException if the blocking is interrupted
+     */
     public void awaitResolution() {
         // latch can be null after deserialization
         if (latch != null) {

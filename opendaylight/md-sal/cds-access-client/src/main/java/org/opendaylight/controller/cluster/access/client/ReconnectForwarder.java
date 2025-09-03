@@ -10,6 +10,8 @@ package org.opendaylight.controller.cluster.access.client;
 import static java.util.Objects.requireNonNull;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
+import java.util.function.Consumer;
+import org.opendaylight.controller.cluster.access.concepts.Request;
 
 /**
  * Forwarder class responsible for routing requests from the previous connection incarnation back to the originator,
@@ -22,18 +24,40 @@ public abstract class ReconnectForwarder {
         this.successor = requireNonNull(successor);
     }
 
+    /**
+     * Constructor for forwarding towards a connected connection.
+     *
+     * @param successor the successor {@link ConnectedClientConnection}
+     */
     protected ReconnectForwarder(final ConnectedClientConnection<?> successor) {
         this((AbstractReceivingClientConnection<?>) successor);
     }
 
+    /**
+     * Constructor for forwarding towards a reconnecting connection.
+     *
+     * @param successor the successor {@link ReconnectingClientConnection}
+     */
     protected ReconnectForwarder(final ReconnectingClientConnection<?> successor) {
         this((AbstractReceivingClientConnection<?>) successor);
     }
 
+    /**
+     * Forward a {@link ConnectionEntry} to the successor via
+     * {@link AbstractClientConnection#sendRequest(Request, Consumer)}.
+     *
+     * @param entry the {@link ConnectionEntry}
+     */
     protected final void sendToSuccessor(final ConnectionEntry entry) {
         successor.sendRequest(entry.getRequest(), entry.getCallback());
     }
 
+    /**
+     * Forward a {@link ConnectionEntry} to the successor via
+     * {@link AbstractClientConnection#enqueueRequest(Request, Consumer, long)}.
+     *
+     * @param entry the {@link ConnectionEntry}
+     */
     protected final void replayToSuccessor(final ConnectionEntry entry) {
         successor.enqueueRequest(entry.getRequest(), entry.getCallback(), entry.getEnqueuedTicks());
     }

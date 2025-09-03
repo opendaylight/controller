@@ -41,6 +41,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A behavior, which handles messages sent to a {@link AbstractClientActor}.
+ *
+ * @param <T> the type of associated {@link BackendInfo}
  */
 public abstract class ClientActorBehavior<T extends BackendInfo>
         implements AutoCloseable, Identifiable<ClientIdentifier> {

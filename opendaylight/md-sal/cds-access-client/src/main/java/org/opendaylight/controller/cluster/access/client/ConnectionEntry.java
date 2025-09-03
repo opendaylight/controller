@@ -35,18 +35,32 @@ public class ConnectionEntry implements Immutable {
         this(entry.request, entry.callback, entry.enqueuedTicks);
     }
 
+    /**
+     * {@return the callback}
+     */
     public final Consumer<Response<?, ?>> getCallback() {
         return callback;
     }
 
+    /**
+     * {@return the request}
+     */
     public final Request<?, ?> getRequest() {
         return request;
     }
 
+    /**
+     * Invoke the callback with specified response.
+     *
+     * @param response the response.
+     */
     public void complete(final Response<?, ?> response) {
         callback.accept(response);
     }
 
+    /**
+     * {@return the logical time when this entry was first enqueued}
+     */
     public final long getEnqueuedTicks() {
         return enqueuedTicks;
     }

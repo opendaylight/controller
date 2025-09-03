@@ -32,7 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Frontend actor which takes care of persisting generations and creates an appropriate ClientIdentifier.
+ * Frontend actor which takes care of persisting generations and creates an appropriate {@link ClientIdentifier}.
  */
 public abstract class AbstractClientActor extends AbstractActor {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractClientActor.class);
@@ -53,6 +53,11 @@ public abstract class AbstractClientActor extends AbstractActor {
 
     private ClientActorBehavior<?> currentBehavior;
 
+    /**
+     * Default constructor.
+     *
+     * @param frontendId the {@link FrontendIdentifier}
+     */
     protected AbstractClientActor(final FrontendIdentifier frontendId) {
         this(STATE_PATH, frontendId);
     }

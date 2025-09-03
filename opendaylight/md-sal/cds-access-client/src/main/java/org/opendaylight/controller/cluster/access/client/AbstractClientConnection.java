@@ -39,6 +39,8 @@ import org.slf4j.LoggerFactory;
  * Base class for a connection to the backend. Responsible to queueing and dispatch of requests toward the backend.
  * Can be in three conceptual states: Connecting, Connected and Reconnecting, which are represented by public final
  * classes exposed from this package. This class NOT thread-safe, not are its subclasses expected to be thread-safe.
+ *
+ * @param <T> the type of associated {@link BackendInfo}
  */
 public abstract sealed class AbstractClientConnection<T extends BackendInfo>
         permits AbstractReceivingClientConnection, ConnectingClientConnection {
@@ -127,18 +129,30 @@ public abstract sealed class AbstractClientConnection<T extends BackendInfo>
             requireNonNull(oldConn.context).messageSlicer()), newBackend.getName());
     }
 
+    /**
+     * {@return the {@link ClientActorContext}}
+     */
     public final @NonNull ClientActorContext context() {
         return context;
     }
 
+    /**
+     * {@return the cookie}
+     */
     public final @NonNull Long cookie() {
         return cookie;
     }
 
+    /**
+     * {@return the local actor}
+     */
     public final @NonNull ActorRef localActor() {
         return context.self();
     }
 
+    /**
+     * {@return current logical time, in nanoseconds}
+     */
     public final long currentTime() {
         return context.ticker().read();
     }

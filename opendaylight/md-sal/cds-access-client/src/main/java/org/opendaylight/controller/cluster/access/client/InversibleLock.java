@@ -39,6 +39,13 @@ public final class InversibleLock {
     private volatile CountDownLatch latch;
 
     /**
+     * Creates a new unlocked lock.
+     */
+    public InversibleLock() {
+        // Nothing else
+    }
+
+    /**
      * Return a stamp for read validation.
      *
      * @return A stamp, which can be used with {@link #validate(long)}.
