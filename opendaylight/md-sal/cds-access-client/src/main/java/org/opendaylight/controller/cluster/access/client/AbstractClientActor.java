@@ -69,7 +69,7 @@ public abstract class AbstractClientActor extends AbstractActor {
     }
 
     @Override
-    public final void preStart() throws IOException, RecoveryException {
+    public final void preStart() throws Exception {
         final var filePath = statePath.resolve("odl.cluster.client")
             .resolve(frontendId.getMemberName().getName())
             .resolve(frontendId.getClientType().getName() + ".properties");
