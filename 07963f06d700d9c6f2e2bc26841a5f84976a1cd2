@@ -20,6 +20,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "85367086_62f9529e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 8907
+      },
+      "writtenOn": "2025-09-03T10:48:02Z",
+      "side": 1,
+      "message": "Hi Robert, I would like to ask which files are expected to be moved to the controller project, is it only the `configure_cluster.sh` script and `karaf4-parent`?",
+      "parentUuid": "59295d27_3085c7bb",
+      "revId": "07963f06d700d9c6f2e2bc26841a5f84976a1cd2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "9d4400ca_3e0b4612",
         "filename": "karaf-scripts/src/main/assembly/bin/configure_cluster.sh",
         "patchSetId": 2
@@ -54,6 +72,30 @@
       "writtenOn": "2025-09-02T12:52:42Z",
       "side": 1,
       "message": "copy\u0026paste from somewhere instead proper inheritance?",
+      "range": {
+        "startLine": 3,
+        "startChar": 1,
+        "endLine": 3,
+        "endChar": 25
+      },
+      "revId": "07963f06d700d9c6f2e2bc26841a5f84976a1cd2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9d357fec_4019d0bb",
+        "filename": "karaf4-parent/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 8907
+      },
+      "writtenOn": "2025-09-03T10:48:02Z",
+      "side": 1,
+      "message": "I would like to ask if this is a good approach to copy this file from original `karaf4-parent` (same way as https://jira.linuxfoundation.org/plugins/servlet/desk/portal/2/IT-27674) and then to make some modifications like updating the groupId, adding logic for handling `karaf-scripts`, checking used plugins, etc.",
+      "parentUuid": "d6e16d79_c0b1faf5",
       "range": {
         "startLine": 3,
         "startChar": 1,
