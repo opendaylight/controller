@@ -23,7 +23,6 @@ import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
-import org.opendaylight.controller.cluster.datastore.exceptions.ShardLeaderNotRespondingException;
 import org.opendaylight.mdsal.common.api.CommitInfo;
 import org.opendaylight.mdsal.common.api.DataStoreUnavailableException;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
@@ -179,7 +178,7 @@ public class ConcurrentDOMDataBroker extends AbstractDOMDataBroker {
 
         // Propagate the original exception
         final Exception e;
-        if (throwable instanceof NoShardLeaderException || throwable instanceof ShardLeaderNotRespondingException) {
+        if (throwable instanceof NoShardLeaderException) {
             e = new DataStoreUnavailableException(throwable.getMessage(), throwable);
         } else if (throwable instanceof Exception ex) {
             e = ex;
