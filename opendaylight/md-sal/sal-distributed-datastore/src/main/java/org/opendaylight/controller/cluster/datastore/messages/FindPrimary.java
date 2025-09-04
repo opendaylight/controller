@@ -14,7 +14,7 @@ import java.io.Serializable;
 /**
  * The FindPrimary message is used to locate the primary of any given shard.
  */
-public sealed class FindPrimary implements Serializable permits RemoteFindPrimary {
+public final class FindPrimary implements Serializable {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
