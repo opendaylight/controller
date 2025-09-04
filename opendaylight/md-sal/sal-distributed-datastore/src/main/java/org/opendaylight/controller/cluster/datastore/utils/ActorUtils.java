@@ -283,17 +283,17 @@ public class ActorUtils {
         return executeOperationAsync(shardManager, new FindLocalShard(shardName, true), shardInitializationTimeout)
             .map(new Mapper<>() {
                 @Override
-                public ActorRef checkedApply(final Object response) throws Throwable {
+                public ActorRef checkedApply(final Object response) throws UnknownMessageException {
                     if (response instanceof LocalShardFound found) {
                         LOG.debug("Local shard found {}", found.getPath());
                         return found.getPath();
-                    } else if (response instanceof NotInitializedException) {
-                        throw (NotInitializedException)response;
-                    } else if (response instanceof LocalShardNotFound) {
-                        throw new LocalShardNotFoundException(
-                            String.format("Local shard for %s does not exist.", shardName));
                     }
-
+                    if (response instanceof LocalShardNotFound) {
+                        throw new LocalShardNotFoundException("Local shard for " + shardName + " does not exist.");
+                    }
+                    if (response instanceof NotInitializedException notInitialized) {
+                        throw notInitialized;
+                    }
                     throw new UnknownMessageException("FindLocalShard returned unkown response: " + response);
                 }
             }, getClientDispatcher());
