@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore.shardmanager;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -14,6 +15,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -429,9 +431,8 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
 
         LocalPrimaryShardFound primaryFound = kit.expectMsgClass(Duration.ofSeconds(5),
             LocalPrimaryShardFound.class);
-        assertTrue("Unexpected primary path " + primaryFound.getPrimaryPath(),
-            primaryFound.getPrimaryPath().contains("member-1-shard-default"));
-        assertSame("getLocalShardDataTree", mockDataTree, primaryFound.getLocalShardDataTree());
+        assertThat(primaryFound.primaryPath()).contains("member-1-shard-default");
+        assertSame("getLocalShardDataTree", mockDataTree, primaryFound.localShardDataTree());
 
         LOG.info("testOnReceiveFindPrimaryForLocalLeaderShard ending");
     }
@@ -480,9 +481,8 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME, false), kit.getRef());
 
         RemotePrimaryShardFound primaryFound = kit.expectMsgClass(Duration.ofSeconds(5), RemotePrimaryShardFound.class);
-        assertTrue("Unexpected primary path " + primaryFound.getPrimaryPath(),
-            primaryFound.getPrimaryPath().contains("member-2-shard-default"));
-        assertEquals("getPrimaryVersion", leaderVersion, primaryFound.getPrimaryVersion());
+        assertThat(primaryFound.primaryPath()).contains("member-2-shard-default");
+        assertEquals("getPrimaryVersion", leaderVersion, primaryFound.primaryVersion());
 
         LOG.info("testOnReceiveFindPrimaryForNonLocalLeaderShard ending");
     }
@@ -535,9 +535,8 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
 
         LocalPrimaryShardFound primaryFound = kit.expectMsgClass(Duration.ofSeconds(5),
             LocalPrimaryShardFound.class);
-        assertTrue("Unexpected primary path " + primaryFound.getPrimaryPath(),
-            primaryFound.getPrimaryPath().contains("member-1-shard-default"));
-        assertSame("getLocalShardDataTree", mockDataTree, primaryFound.getLocalShardDataTree());
+        assertThat(primaryFound.primaryPath()).contains("member-1-shard-default");
+        assertSame("getLocalShardDataTree", mockDataTree, primaryFound.localShardDataTree());
 
         LOG.info("testOnReceiveFindPrimaryForFollowerShardWithNoInitialLeaderId starting");
     }
@@ -574,9 +573,8 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
             DataStoreVersions.CURRENT_VERSION), mockShardActor);
 
         LocalPrimaryShardFound primaryFound = kit.expectMsgClass(Duration.ofSeconds(5), LocalPrimaryShardFound.class);
-        assertTrue("Unexpected primary path " + primaryFound.getPrimaryPath(),
-            primaryFound.getPrimaryPath().contains("member-1-shard-default"));
-        assertSame("getLocalShardDataTree", mockDataTree, primaryFound.getLocalShardDataTree());
+        assertThat(primaryFound.primaryPath()).contains("member-1-shard-default");
+        assertSame("getLocalShardDataTree", mockDataTree, primaryFound.localShardDataTree());
 
         kit.expectNoMessage(Duration.ofMillis(200));
 
@@ -706,9 +704,8 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         shardManager1.tell(new FindPrimary("astronauts", false), kit.getRef());
 
         RemotePrimaryShardFound found = kit.expectMsgClass(Duration.ofSeconds(5), RemotePrimaryShardFound.class);
-        String path = found.getPrimaryPath();
-        assertTrue("Unexpected primary path " + path, path.contains("member-2-shard-astronauts-config"));
-        assertEquals("getPrimaryVersion", leaderVersion, found.getPrimaryVersion());
+        assertThat(found.primaryPath()).contains("member-2-shard-astronauts-config");
+        assertEquals("getPrimaryVersion", leaderVersion, found.primaryVersion());
 
         shardManager2.underlyingActor().verifyFindPrimary();
 
@@ -778,8 +775,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         shardManager1.tell(new FindPrimary("default", true), kit.getRef());
 
         RemotePrimaryShardFound found = kit.expectMsgClass(Duration.ofSeconds(5), RemotePrimaryShardFound.class);
-        String path = found.getPrimaryPath();
-        assertTrue("Unexpected primary path " + path, path.contains("member-2-shard-default-config"));
+        assertThat(found.primaryPath()).contains("member-2-shard-default-config");
 
         shardManager1.tell(MockClusterWrapper.createUnreachableMember("member-2",
             "pekko://cluster-test@127.0.0.1:2558"), kit.getRef());
@@ -802,8 +798,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         shardManager1.tell(new FindPrimary("default", true), kit.getRef());
 
         RemotePrimaryShardFound found1 = kit.expectMsgClass(Duration.ofSeconds(5), RemotePrimaryShardFound.class);
-        String path1 = found1.getPrimaryPath();
-        assertTrue("Unexpected primary path " + path1, path1.contains("member-2-shard-default-config"));
+        assertThat(found1.primaryPath()).contains("member-2-shard-default-config");
 
         shardManager1.tell(MockClusterWrapper.createMemberUp("member-2", "pekko://cluster-test@127.0.0.1:2558"),
             kit.getRef());
@@ -820,8 +815,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
             MockClusterWrapper.createReachableMember("member-2", "pekko://cluster-test@127.0.0.1:2558"), kit.getRef());
 
         RemotePrimaryShardFound found2 = kit.expectMsgClass(Duration.ofSeconds(5), RemotePrimaryShardFound.class);
-        String path2 = found2.getPrimaryPath();
-        assertTrue("Unexpected primary path " + path2, path2.contains("member-2-shard-default-config"));
+        assertThat(found2.primaryPath()).contains("member-2-shard-default-config");
 
         LOG.info("testShardAvailabilityOnChangeOfMemberReachability ending");
     }
@@ -881,8 +875,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         shardManager1.tell(new FindPrimary("default", true), kit.getRef());
 
         RemotePrimaryShardFound found = kit.expectMsgClass(Duration.ofSeconds(5), RemotePrimaryShardFound.class);
-        String path = found.getPrimaryPath();
-        assertTrue("Unexpected primary path " + path, path.contains("member-2-shard-default-config"));
+        assertThat(found.primaryPath()).contains("member-2-shard-default-config");
 
         primaryShardInfoCache.putSuccessful("default", new PrimaryShardInfo(
             system1.actorSelection(mockShardActor1.path()), DataStoreVersions.CURRENT_VERSION));
@@ -907,8 +900,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         shardManager1.tell(new FindPrimary("default", true), kit.getRef());
 
         LocalPrimaryShardFound found1 = kit.expectMsgClass(Duration.ofSeconds(5), LocalPrimaryShardFound.class);
-        String path1 = found1.getPrimaryPath();
-        assertTrue("Unexpected primary path " + path1, path1.contains("member-1-shard-default-config"));
+        assertThat(found1.primaryPath()).contains("member-1-shard-default-config");
 
         LOG.info("testShardAvailabilityChangeOnMemberUnreachableAndLeadershipChange ending");
     }
@@ -973,9 +965,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         shardManager256.tell(new FindPrimary("default", true), kit256.getRef());
 
         LocalPrimaryShardFound found = kit256.expectMsgClass(Duration.ofSeconds(5), LocalPrimaryShardFound.class);
-        String path = found.getPrimaryPath();
-        assertTrue("Unexpected primary path " + path + " which must on member-256",
-            path.contains("member-256-shard-default-config"));
+        assertThat(found.primaryPath()).contains("member-256-shard-default-config");
 
         PrimaryShardInfo primaryShardInfo = new PrimaryShardInfo(
             system256.actorSelection(mockShardActor256.path()), DataStoreVersions.CURRENT_VERSION);
@@ -989,9 +979,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         // Make sure leader shard on member-256 is still leader and still in the cache.
         shardManager256.tell(new FindPrimary("default", true), kit256.getRef());
         found = kit256.expectMsgClass(Duration.ofSeconds(5), LocalPrimaryShardFound.class);
-        path = found.getPrimaryPath();
-        assertTrue("Unexpected primary path " + path + " which must still not on member-256",
-            path.contains("member-256-shard-default-config"));
+        assertThat(found.primaryPath()).contains("member-256-shard-default-config");
         Future<PrimaryShardInfo> futurePrimaryShard = primaryShardInfoCache.getIfPresent("default");
         futurePrimaryShard.onComplete(new OnComplete<PrimaryShardInfo>() {
             @Override
@@ -1034,8 +1022,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
 
         LocalShardFound found = kit.expectMsgClass(Duration.ofSeconds(5), LocalShardFound.class);
 
-        assertTrue("Found path contains " + found.getPath().path().toString(),
-            found.getPath().path().toString().contains("member-1-shard-default-config"));
+        assertThat(found.getPath().path().toString()).contains("member-1-shard-default-config");
     }
 
     @Test
@@ -1064,9 +1051,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
 
         shardManager.tell(new ActorInitialized(mockShardActor), ActorRef.noSender());
 
-        Object resp = Await.result(future, kit.duration("5 seconds"));
-        assertTrue("Expected: LocalShardFound, Actual: " + resp, resp instanceof LocalShardFound);
-
+        assertInstanceOf(LocalShardFound.class,Await.result(future, kit.duration("5 seconds")));
         LOG.info("testOnReceiveFindLocalShardWaitForShardInitialized starting");
     }
 
@@ -1268,8 +1253,8 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         kit.expectMsgClass(Duration.ofSeconds(5), LocalShardFound.class);
 
         assertFalse("isRecoveryApplicable", shardBuilder.getDatastoreContext().isPersistent());
-        assertTrue("Epxected ShardPeerAddressResolver", shardBuilder.getDatastoreContext().getShardRaftConfig()
-            .getPeerAddressResolver() instanceof ShardPeerAddressResolver);
+        assertInstanceOf(ShardPeerAddressResolver.class, shardBuilder.getDatastoreContext().getShardRaftConfig()
+            .getPeerAddressResolver());
         assertEquals("peerMembers", Set.of(
             ShardIdentifier.create("foo", MemberName.forName("member-5"), shardMrgIDSuffix).toString(),
             ShardIdentifier.create("foo", MemberName.forName("member-6"), shardMrgIDSuffix).toString()),
@@ -1456,7 +1441,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         shardManager.tell(new AddShardReplica("model-inventory"), kit.getRef());
         Status.Failure resp = kit.expectMsgClass(Duration.ofSeconds(2), Status.Failure.class);
 
-        assertTrue("Failure obtained", resp.cause() instanceof IllegalArgumentException);
+        assertInstanceOf(IllegalArgumentException.class, resp.cause());
     }
 
     @Test
@@ -1676,7 +1661,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
 
         newReplicaShardManager.tell(new AddShardReplica("astronauts"), kit.getRef());
         Status.Failure resp = kit.expectMsgClass(Duration.ofSeconds(5), Status.Failure.class);
-        assertTrue("Failure obtained", resp.cause() instanceof RuntimeException);
+        assertInstanceOf(RuntimeException.class, resp.cause());
 
         LOG.info("testAddShardReplicaWithFindPrimaryTimeout ending");
     }
@@ -1690,7 +1675,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
 
         shardManager.tell(new RemoveShardReplica("model-inventory", MEMBER_1), kit.getRef());
         Status.Failure resp = kit.expectMsgClass(Duration.ofSeconds(10), Status.Failure.class);
-        assertTrue("Failure obtained", resp.cause() instanceof PrimaryNotFoundException);
+        assertInstanceOf(PrimaryNotFoundException.class, resp.cause());
     }
 
     @Test
@@ -2043,7 +2028,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         MessageCollectorActor.expectFirstMatching(respondActor, ChangeServersVotingStatus.class);
 
         Status.Failure resp = kit.expectMsgClass(Duration.ofSeconds(5), Status.Failure.class);
-        assertTrue("Failure resposnse", resp.cause() instanceof NoShardLeaderException);
+        assertInstanceOf(NoShardLeaderException.class, resp.cause());
     }
 
     @SuppressWarnings("unchecked")
