@@ -1001,8 +1001,8 @@ class ShardManager extends AbstractUntypedActorWithMetering {
             LOG.debug("{}: findPrimary for {} forwarding to remote ShardManager {}, visitedAddresses: {}",
                     name(), shardName, address, visitedAddresses);
 
-            getContext().actorSelection(address).forward(new RemoteFindPrimary(shardName,
-                    message.isWaitUntilReady(), visitedAddresses), getContext());
+            final var context = getContext();
+            context.actorSelection(address).forward(new ForwardedFindPrimary(message, visitedAddresses), context);
             return;
         }
 
