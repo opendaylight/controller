@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore.exceptions;
 
-public class AlreadyExistsException extends RuntimeException {
+public class AlreadyExistsException extends Exception {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 

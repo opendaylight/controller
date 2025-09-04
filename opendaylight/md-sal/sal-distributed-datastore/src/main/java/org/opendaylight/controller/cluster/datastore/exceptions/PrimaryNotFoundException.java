@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore.exceptions;
 
-public class PrimaryNotFoundException extends RuntimeException {
+public class PrimaryNotFoundException extends Exception {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 

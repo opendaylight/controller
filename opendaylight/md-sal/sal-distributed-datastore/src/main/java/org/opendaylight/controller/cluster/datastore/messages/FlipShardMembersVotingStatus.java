@@ -9,24 +9,16 @@ package org.opendaylight.controller.cluster.datastore.messages;
 
 import static java.util.Objects.requireNonNull;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * A local message sent to the ShardManager to flip the raft voting states for members of a shard.
  *
  * @author Thomas Pantelis
  */
-public class FlipShardMembersVotingStatus {
-    private final String shardName;
-
-    public FlipShardMembersVotingStatus(final String shardName) {
-        this.shardName = requireNonNull(shardName);
-    }
-
-    public String getShardName() {
-        return shardName;
-    }
-
-    @Override
-    public String toString() {
-        return "FlipShardMembersVotingStatus [shardName=" + shardName + "]";
+@NonNullByDefault
+public record FlipShardMembersVotingStatus(String shardName) {
+    public FlipShardMembersVotingStatus {
+        requireNonNull(shardName);
     }
 }

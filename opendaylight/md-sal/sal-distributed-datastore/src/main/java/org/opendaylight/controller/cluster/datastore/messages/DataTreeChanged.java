@@ -10,27 +10,21 @@ package org.opendaylight.controller.cluster.datastore.messages;
 import static java.util.Objects.requireNonNull;
 
 import java.util.List;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 
 /**
- * A message about a DataTree having been changed. The message is not
- * serializable on purpose. For delegating the change across cluster nodes,
- * this needs to be intercepted by a local agent and forwarded as reconstructed
- * candidate.
+ * A message about a DataTree having been changed. The message is not serializable on purpose. For delegating the change
+ * across cluster nodes, this needs to be intercepted by a local agent and forwarded as reconstructed candidate.
  */
-public final class DataTreeChanged {
-    private final List<DataTreeCandidate> changes;
-
-    public DataTreeChanged(final List<DataTreeCandidate> changes) {
-        this.changes = requireNonNull(changes);
+@NonNullByDefault
+public record DataTreeChanged(List<DataTreeCandidate> changes) {
+    public DataTreeChanged {
+        requireNonNull(changes);
     }
 
-    /**
-     * Return the data changes.
-     *
-     * @return Change events
-     */
-    public List<DataTreeCandidate> getChanges() {
-        return changes;
+    @Override
+    public String toString() {
+        return "DataTreeChanged [changes=" + changes.size() + "]";
     }
 }
