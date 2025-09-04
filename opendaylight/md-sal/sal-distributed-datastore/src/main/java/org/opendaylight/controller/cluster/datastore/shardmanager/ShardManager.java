@@ -226,7 +226,8 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     @Override
     public void handleCommand(final Object message) throws Exception {
         switch (message) {
-            case FindPrimary msg -> findPrimary(msg);
+            case RemoteFindPrimary msg -> findPrimary(msg, msg.getVisitedAddresses());
+            case FindPrimary msg -> findPrimary(msg, null);
             case FindLocalShard msg -> findLocalShard(msg);
             case UpdateSchemaContext msg -> updateSchemaContext(msg);
             case ActorInitialized msg -> onActorInitialized(msg);
@@ -988,15 +989,16 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 info.getShardId().toString());
     }
 
-    private void findPrimary(final FindPrimary message) {
+    // FIXME: non-null prevAddresses and update checks below once we have removed RemoteFindPrimary
+    private void findPrimary(final FindPrimary message, final @Nullable Set<String> previousActorPaths) {
         LOG.debug("{}: In findPrimary: {}", name(), message);
 
         final String shardName = message.getShardName();
-        final boolean canReturnLocalShardState = !(message instanceof RemoteFindPrimary);
 
         // First see if the there is a local replica for the shard
         final var info = localShards.get(shardName);
         if (info != null && info.isActiveMember()) {
+            final boolean canReturnLocalShardState = previousActorPaths == null;
             sendResponse(info, message.isWaitUntilReady(), true, () -> {
                 String primaryPath = info.getSerializedLeaderActor();
                 Object found = canReturnLocalShardState && info.isLeader()
@@ -1010,9 +1012,8 @@ class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             return;
         }
 
-        final var visitedAddresses = message instanceof RemoteFindPrimary msg ? msg.getVisitedAddresses()
-            : new ArrayList<String>(1);
-
+        final var visitedAddresses = previousActorPaths != null ? new HashSet<>(previousActorPaths)
+            : HashSet.<String>newHashSet(1);
         visitedAddresses.add(peerAddressResolver.getShardManagerActorPathBuilder(cluster.getSelfAddress()).toString());
 
         for (var address : peerAddressResolver.getShardManagerPeerActorAddresses()) {
