@@ -24,7 +24,7 @@ import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DataTreeCohortRegistrationProxy<C extends DOMDataTreeCommitCohort> extends AbstractObjectRegistration<C> {
+final class DataTreeCohortRegistrationProxy<C extends DOMDataTreeCommitCohort> extends AbstractObjectRegistration<C> {
     private static final Logger LOG = LoggerFactory.getLogger(DataTreeCohortRegistrationProxy.class);
     // FIXME: hard-coded
     private static final Duration REGISTER_ASK_TIMEOUT = Duration.ofSeconds(5);
