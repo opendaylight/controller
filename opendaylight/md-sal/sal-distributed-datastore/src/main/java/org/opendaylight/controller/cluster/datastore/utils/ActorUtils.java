@@ -264,6 +264,7 @@ public class ActorUtils {
      * @return a reference to a local shard actor which represents the shard
      *         specified by the shardName
      */
+    @Deprecated(since = "11.0.2", forRemoval = true)
     public Optional<ActorRef> findLocalShard(final String shardName) {
         final var result = executeOperation(shardManager, new FindLocalShard(shardName, false));
         if (result instanceof LocalShardFound found) {
