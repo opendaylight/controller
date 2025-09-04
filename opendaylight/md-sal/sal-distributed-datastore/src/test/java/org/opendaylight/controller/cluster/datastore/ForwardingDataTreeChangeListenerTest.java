@@ -18,7 +18,6 @@ import org.opendaylight.controller.cluster.raft.MessageCollectorActor;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 
 public class ForwardingDataTreeChangeListenerTest extends AbstractActorTest {
-
     @Test
     public void testOnDataChanged() {
         final ActorRef actorRef = getSystem().actorOf(MessageCollectorActor.props());
@@ -30,6 +29,6 @@ public class ForwardingDataTreeChangeListenerTest extends AbstractActorTest {
         forwardingListener.onDataTreeChanged(expected);
 
         DataTreeChanged actual = MessageCollectorActor.expectFirstMatching(actorRef, DataTreeChanged.class, 5000);
-        assertSame(expected, actual.getChanges());
+        assertSame(expected, actual.changes());
     }
 }

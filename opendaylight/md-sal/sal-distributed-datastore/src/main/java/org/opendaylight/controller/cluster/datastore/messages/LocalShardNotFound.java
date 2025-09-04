@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.messages;
 
 /**
@@ -13,7 +12,8 @@ package org.opendaylight.controller.cluster.datastore.messages;
  * org.opendaylight.controller.cluster.datastore.shardmanager.ShardManager
  * when it cannot locate a shard in it's local registry with the shardName specified.
  */
-public class LocalShardNotFound {
+// FIXME: nullable?
+public final class LocalShardNotFound {
     private final String shardName;
 
     /**

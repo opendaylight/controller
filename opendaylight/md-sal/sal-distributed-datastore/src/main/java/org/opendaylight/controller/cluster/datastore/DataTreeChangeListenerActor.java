@@ -82,7 +82,7 @@ class DataTreeChangeListenerActor extends AbstractUntypedActor {
             return;
         }
 
-        final var changes = message.getChanges();
+        final var changes = message.changes();
         LOG.debug("{}: Sending {} change notification(s) to listener {}", logContext, changes.size(), listener);
         if (LOG.isTraceEnabled() && !changes.isEmpty()) {
             LOG.trace("{}: detailed change follow", logContext);
@@ -106,7 +106,7 @@ class DataTreeChangeListenerActor extends AbstractUntypedActor {
         //        success, so that we have reliable DTCL delivery via TransmitQueue.
         final var sender = getSender();
         if (sender != null && !sender.equals(getContext().system().deadLetters())) {
-            sender.tell(DataTreeChangedReply.getInstance(), self());
+            sender.tell(DataTreeChangedReply.INSTANCE, self());
         }
     }
 

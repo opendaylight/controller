@@ -12,24 +12,27 @@ import static java.util.Objects.requireNonNull;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  * A remote message sent to locate the primary shard.
  *
  * @author Thomas Pantelis
  */
-public class RemoteFindPrimary extends FindPrimary {
+@NonNullByDefault
+public final class RemoteFindPrimary extends FindPrimary {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private final Set<String> visitedAddresses;
 
-    public RemoteFindPrimary(String shardName, boolean waitUntilReady, @NonNull Collection<String> visitedAddresses) {
+    public RemoteFindPrimary(final String shardName, final boolean waitUntilReady,
+            final Collection<String> visitedAddresses) {
         super(shardName, waitUntilReady);
         this.visitedAddresses = new HashSet<>(requireNonNull(visitedAddresses));
     }
 
-    public @NonNull Set<String> getVisitedAddresses() {
+    public Set<String> getVisitedAddresses() {
         return visitedAddresses;
     }
 }

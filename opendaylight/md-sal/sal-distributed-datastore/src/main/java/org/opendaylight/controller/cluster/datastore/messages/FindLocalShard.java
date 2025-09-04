@@ -5,28 +5,18 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import static java.util.Objects.requireNonNull;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
- * FindLocalShard is a message that should be sent to the
- * org.opendaylight.controller.cluster.datastore.shardmanager.ShardManager when we need to find a reference
- * to a LocalShard.
+ * FindLocalShard is a message that should be sent to the ShardManager when we need to find a reference to a LocalShard.
  */
-public class FindLocalShard {
-    private final String shardName;
-    private final boolean waitUntilInitialized;
-
-    public FindLocalShard(final String shardName, final boolean waitUntilInitialized) {
-        this.shardName = shardName;
-        this.waitUntilInitialized = waitUntilInitialized;
-    }
-
-    public String getShardName() {
-        return shardName;
-    }
-
-    public boolean isWaitUntilInitialized() {
-        return waitUntilInitialized;
+@NonNullByDefault
+public record FindLocalShard(String shardName, boolean waitUntilInitialized) {
+    public FindLocalShard {
+        requireNonNull(shardName);
     }
 }

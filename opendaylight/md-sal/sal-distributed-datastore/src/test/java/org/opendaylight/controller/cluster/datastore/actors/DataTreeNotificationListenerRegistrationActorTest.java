@@ -46,9 +46,9 @@ public class DataTreeNotificationListenerRegistrationActorTest extends AbstractA
                 "testOnReceiveCloseListenerRegistrationAfterSetRegistration");
         kit.watch(subject);
 
-        subject.tell(new DataTreeNotificationListenerRegistrationActor.SetRegistration(mockListenerReg,
-            mockOnClose), ActorRef.noSender());
-        subject.tell(CloseDataTreeNotificationListenerRegistration.getInstance(), kit.getRef());
+        subject.tell(new DataTreeNotificationListenerRegistrationActor.SetRegistration(mockListenerReg, mockOnClose),
+            ActorRef.noSender());
+        subject.tell(CloseDataTreeNotificationListenerRegistration.INSTANCE, kit.getRef());
 
         kit.expectMsgClass(Duration.ofSeconds(5), CloseDataTreeNotificationListenerRegistrationReply.class);
 
@@ -64,11 +64,11 @@ public class DataTreeNotificationListenerRegistrationActorTest extends AbstractA
                 "testOnReceiveSetRegistrationAfterPriorClose");
         kit.watch(subject);
 
-        subject.tell(CloseDataTreeNotificationListenerRegistration.getInstance(), kit.getRef());
+        subject.tell(CloseDataTreeNotificationListenerRegistration.INSTANCE, kit.getRef());
         kit.expectMsgClass(Duration.ofSeconds(5), CloseDataTreeNotificationListenerRegistrationReply.class);
 
-        subject.tell(new DataTreeNotificationListenerRegistrationActor.SetRegistration(mockListenerReg,
-            mockOnClose), ActorRef.noSender());
+        subject.tell(new DataTreeNotificationListenerRegistrationActor.SetRegistration(mockListenerReg, mockOnClose),
+            ActorRef.noSender());
 
         verify(mockListenerReg, timeout(5000)).close();
         verify(mockOnClose, timeout(5000)).run();
@@ -86,9 +86,9 @@ public class DataTreeNotificationListenerRegistrationActorTest extends AbstractA
             "testOnReceiveSetRegistrationAfterPriorClose");
         kit.watch(subject);
 
-        subject.tell(new DataTreeNotificationListenerRegistrationActor.SetRegistration(mockListenerReg,
-            mockOnClose), ActorRef.noSender());
-        subject.tell(CloseDataTreeNotificationListenerRegistration.getInstance(), ActorRef.noSender());
+        subject.tell(new DataTreeNotificationListenerRegistrationActor.SetRegistration(mockListenerReg, mockOnClose),
+            ActorRef.noSender());
+        subject.tell(CloseDataTreeNotificationListenerRegistration.INSTANCE, ActorRef.noSender());
         subject.tell(new DataTreeNotificationListenerRegistrationActor.SetRegistration(mockListenerReg2,
             mockOnClose2), ActorRef.noSender());
 

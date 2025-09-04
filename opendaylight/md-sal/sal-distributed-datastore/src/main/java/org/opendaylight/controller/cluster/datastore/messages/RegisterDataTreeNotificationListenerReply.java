@@ -18,7 +18,8 @@ import org.apache.pekko.actor.ActorRef;
  *
  * @author Thomas Pantelis
  */
-public class RegisterDataTreeNotificationListenerReply implements Serializable {
+public final class RegisterDataTreeNotificationListenerReply implements Serializable {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private final ActorRef listenerRegistrationPath;

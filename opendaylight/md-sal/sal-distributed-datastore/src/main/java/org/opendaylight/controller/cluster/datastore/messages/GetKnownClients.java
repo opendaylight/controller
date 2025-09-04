@@ -20,7 +20,7 @@ public final class GetKnownClients implements Serializable {
     public static final @NonNull GetKnownClients INSTANCE = new GetKnownClients();
 
     private GetKnownClients() {
-
+        // Hidden on purpose
     }
 
     @java.io.Serial

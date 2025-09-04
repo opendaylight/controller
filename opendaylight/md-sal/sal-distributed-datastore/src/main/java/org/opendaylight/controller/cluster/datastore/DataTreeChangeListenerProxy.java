@@ -93,8 +93,7 @@ final class DataTreeChangeListenerProxy extends AbstractObjectRegistration<DOMDa
     @Override
     protected synchronized void removeRegistration() {
         if (listenerRegistrationActor != null) {
-            listenerRegistrationActor.tell(CloseDataTreeNotificationListenerRegistration.getInstance(),
-                    ActorRef.noSender());
+            listenerRegistrationActor.tell(CloseDataTreeNotificationListenerRegistration.INSTANCE, ActorRef.noSender());
             listenerRegistrationActor = null;
         }
 
@@ -115,7 +114,7 @@ final class DataTreeChangeListenerProxy extends AbstractObjectRegistration<DOMDa
         }
 
         // This registration has already been closed, notify the actor
-        actor.tell(CloseDataTreeNotificationListenerRegistration.getInstance(), null);
+        actor.tell(CloseDataTreeNotificationListenerRegistration.INSTANCE, ActorRef.noSender());
     }
 
     private void doRegistration(final ActorRef shard) {

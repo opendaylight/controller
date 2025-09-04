@@ -102,7 +102,7 @@ final class RootDataTreeChangeListenerActor extends DataTreeChangeListenerActor 
                 .withNodeIdentifier(NodeIdentifier.create(SchemaContext.NAME));
         for (Object message : initialMessages.values()) {
             if (message instanceof DataTreeChanged dtc) {
-                final var changes = dtc.getChanges();
+                final var changes = dtc.changes();
                 final DataTreeCandidate initial;
                 if (changes.size() != 1) {
                     final Iterator<DataTreeCandidate> it = changes.iterator();

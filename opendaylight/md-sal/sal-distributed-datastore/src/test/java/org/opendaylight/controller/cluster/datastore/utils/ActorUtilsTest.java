@@ -97,7 +97,7 @@ public class ActorUtilsTest extends AbstractActorTest {
             if (found) {
                 getSender().tell(new LocalShardFound(actorRef), self());
             } else {
-                getSender().tell(new LocalShardNotFound(((FindLocalShard) message).getShardName()), self());
+                getSender().tell(new LocalShardNotFound(((FindLocalShard) message).shardName()), self());
             }
         }
 
@@ -328,7 +328,7 @@ public class ActorUtilsTest extends AbstractActorTest {
         PrimaryShardInfo actual = Await.result(foobar, FiniteDuration.apply(5000, TimeUnit.MILLISECONDS));
 
         assertNotNull(actual);
-        assertFalse("LocalShardDataTree present", actual.getLocalShardDataTree().isPresent());
+        assertNull("LocalShardDataTree present", actual.getLocalShardDataTree());
         assertTrue("Unexpected PrimaryShardActor path " + actual.getPrimaryShardActor().path(),
                 expPrimaryPath.endsWith(actual.getPrimaryShardActor().pathString()));
         assertEquals("getPrimaryShardVersion", expPrimaryVersion, actual.getPrimaryShardVersion());
@@ -369,8 +369,7 @@ public class ActorUtilsTest extends AbstractActorTest {
         PrimaryShardInfo actual = Await.result(foobar, FiniteDuration.apply(5000, TimeUnit.MILLISECONDS));
 
         assertNotNull(actual);
-        assertTrue("LocalShardDataTree present", actual.getLocalShardDataTree().isPresent());
-        assertSame("LocalShardDataTree", mockDataTree, actual.getLocalShardDataTree().orElseThrow());
+        assertSame("LocalShardDataTree", mockDataTree, actual.getLocalShardDataTree());
         assertTrue("Unexpected PrimaryShardActor path " + actual.getPrimaryShardActor().path(),
                 expPrimaryPath.endsWith(actual.getPrimaryShardActor().pathString()));
         assertEquals("getPrimaryShardVersion", DataStoreVersions.CURRENT_VERSION, actual.getPrimaryShardVersion());

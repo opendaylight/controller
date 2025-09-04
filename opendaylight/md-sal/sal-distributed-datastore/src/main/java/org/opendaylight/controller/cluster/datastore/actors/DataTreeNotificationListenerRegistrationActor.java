@@ -49,7 +49,7 @@ public final class DataTreeNotificationListenerRegistrationActor extends Abstrac
 
                 final var sender = getSender();
                 if (isValidSender(sender)) {
-                    sender.tell(CloseDataTreeNotificationListenerRegistrationReply.getInstance(), self());
+                    sender.tell(CloseDataTreeNotificationListenerRegistrationReply.INSTANCE, self());
                 }
             }
             case SetRegistration msg -> {

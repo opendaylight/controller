@@ -232,8 +232,8 @@ public class ActorUtils {
                         return onPrimaryShardFound(shardName, found.getPrimaryPath(), found.getPrimaryVersion(), null);
                     } else if (response instanceof LocalPrimaryShardFound found) {
                         LOG.debug("findPrimaryShardAsync received: {}", found);
-                        return onPrimaryShardFound(shardName, found.getPrimaryPath(), DataStoreVersions.CURRENT_VERSION,
-                            found.getLocalShardDataTree());
+                        return onPrimaryShardFound(shardName, found.primaryPath(), DataStoreVersions.CURRENT_VERSION,
+                            found.localShardDataTree());
                     } else if (response instanceof NotInitializedException notInitialized) {
                         throw notInitialized;
                     } else if (response instanceof PrimaryNotFoundException primaryNotFound) {

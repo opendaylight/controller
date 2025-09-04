@@ -65,7 +65,7 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
 
         final var timeout = Duration.ofSeconds(5);
         final var findLocalShard = kit.expectMsgClass(timeout, FindLocalShard.class);
-        assertEquals("shard-1", findLocalShard.getShardName());
+        assertEquals("shard-1", findLocalShard.shardName());
 
         kit.reply(new LocalShardFound(kit.getRef()));
 
@@ -107,7 +107,7 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
 
         final var timeout = Duration.ofSeconds(5);
         final var findLocalShard = kit.expectMsgClass(timeout, FindLocalShard.class);
-        assertEquals("shard-1", findLocalShard.getShardName());
+        assertEquals("shard-1", findLocalShard.shardName());
 
         kit.reply(new LocalShardFound(kit.getRef()));
 
@@ -129,7 +129,7 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
 
         final var timeout = Duration.ofSeconds(5);
         final var findLocalShard = kit.expectMsgClass(timeout, FindLocalShard.class);
-        assertEquals("shard-1", findLocalShard.getShardName());
+        assertEquals("shard-1", findLocalShard.shardName());
 
         kit.reply(new LocalShardNotFound("shard-1"));
 
@@ -149,7 +149,7 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
 
         final var timeout = Duration.ofSeconds(5);
         final var findLocalShard = kit.expectMsgClass(timeout, FindLocalShard.class);
-        assertEquals("shard-1", findLocalShard.getShardName());
+        assertEquals("shard-1", findLocalShard.shardName());
 
         kit.reply(new NotInitializedException("not initialized"));
 

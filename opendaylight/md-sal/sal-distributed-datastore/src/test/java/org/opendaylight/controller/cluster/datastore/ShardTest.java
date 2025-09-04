@@ -1718,7 +1718,7 @@ public class ShardTest extends AbstractShardTest {
         assertNotNull("getListenerRegistrationPath", reply.getListenerRegistrationPath());
 
         final ActorSelection regActor = getSystem().actorSelection(reply.getListenerRegistrationPath());
-        regActor.tell(CloseDataTreeNotificationListenerRegistration.getInstance(), testKit.getRef());
+        regActor.tell(CloseDataTreeNotificationListenerRegistration.INSTANCE, testKit.getRef());
         testKit.expectMsgClass(CloseDataTreeNotificationListenerRegistrationReply.class);
 
         shard.tell(DatastoreContext.newBuilderFrom(dataStoreContextBuilder.build())

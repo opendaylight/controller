@@ -8,19 +8,18 @@
 package org.opendaylight.controller.cluster.datastore.messages;
 
 import java.io.Serializable;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
+@NonNullByDefault
 public final class CloseDataTreeNotificationListenerRegistrationReply implements Serializable {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
-    private static final CloseDataTreeNotificationListenerRegistrationReply INSTANCE =
+
+    public static final CloseDataTreeNotificationListenerRegistrationReply INSTANCE =
             new CloseDataTreeNotificationListenerRegistrationReply();
 
     private CloseDataTreeNotificationListenerRegistrationReply() {
-        // Use getInstance() instead
-    }
-
-    public static CloseDataTreeNotificationListenerRegistrationReply getInstance() {
-        return INSTANCE;
+        // Hidden on purpose
     }
 
     @java.io.Serial

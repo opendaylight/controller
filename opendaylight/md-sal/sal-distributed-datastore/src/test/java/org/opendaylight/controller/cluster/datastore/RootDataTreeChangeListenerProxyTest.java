@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -57,8 +58,8 @@ public class RootDataTreeChangeListenerProxyTest extends AbstractActorTest {
         kit.reply(new LocalShardFound(kit.getRef()));
         FindLocalShard findLocalShard2 = kit.expectMsgClass(FindLocalShard.class);
         kit.reply(new LocalShardFound(kit.getRef()));
-        assertTrue(List.of(findLocalShard1.getShardName(), findLocalShard2.getShardName())
-            .containsAll(List.of("shard-2", "shard-1")));
+        assertThat(List.of(findLocalShard1.shardName(), findLocalShard2.shardName()))
+            .containsAll(List.of("shard-2", "shard-1"));
 
         RegisterDataTreeChangeListener registerForShard1 = kit.expectMsgClass(timeout,
             RegisterDataTreeChangeListener.class);

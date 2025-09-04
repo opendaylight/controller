@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.mgmt.api.DataTreeListenerInfo;
 
 /**
@@ -14,9 +15,11 @@ import org.opendaylight.controller.cluster.mgmt.api.DataTreeListenerInfo;
  *
  * @author Thomas Pantelis
  */
+@NonNullByDefault
 public final class GetInfo {
     public static final GetInfo INSTANCE = new GetInfo();
 
     private GetInfo() {
+        // Hidden on purpose
     }
 }

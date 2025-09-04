@@ -9,36 +9,18 @@ package org.opendaylight.controller.cluster.datastore.messages;
 
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.collect.ImmutableMap;
 import java.util.Map;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  * A local message sent to the ShardManager to change the raft voting status for members of a shard.
  *
  * @author Thomas Pantelis
  */
-public class ChangeShardMembersVotingStatus {
-    private final String shardName;
-    private final Map<String, Boolean> meberVotingStatusMap;
-
-    public ChangeShardMembersVotingStatus(final String shardName, final Map<String, Boolean> meberVotingStatusMap) {
-        this.shardName = requireNonNull(shardName);
-        this.meberVotingStatusMap = ImmutableMap.copyOf(meberVotingStatusMap);
+@NonNullByDefault
+public record ChangeShardMembersVotingStatus(String shardName, Map<String, Boolean> memberVotingStatusMap) {
+    public ChangeShardMembersVotingStatus {
+        requireNonNull(shardName);
+        memberVotingStatusMap = Map.copyOf(memberVotingStatusMap);
     }
-
-    public String getShardName() {
-        return shardName;
-    }
-
-    public Map<String, Boolean> getMeberVotingStatusMap() {
-        return meberVotingStatusMap;
-    }
-
-    @Override
-    public String toString() {
-        return "ChangeShardMembersVotingStatus [shardName=" + shardName + ", meberVotingStatusMap="
-                + meberVotingStatusMap + "]";
-    }
-
-
 }

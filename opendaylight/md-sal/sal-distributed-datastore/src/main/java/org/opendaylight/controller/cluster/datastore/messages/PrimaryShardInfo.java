@@ -9,9 +9,9 @@ package org.opendaylight.controller.cluster.datastore.messages;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.Optional;
 import org.apache.pekko.actor.ActorSelection;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.yangtools.yang.data.tree.api.ReadOnlyDataTree;
 
 /**
@@ -19,10 +19,10 @@ import org.opendaylight.yangtools.yang.data.tree.api.ReadOnlyDataTree;
  *
  * @author Thomas Pantelis
  */
-public class PrimaryShardInfo {
-    private final ActorSelection primaryShardActor;
+public final class PrimaryShardInfo {
+    private final @NonNull ActorSelection primaryShardActor;
     private final short primaryShardVersion;
-    private final ReadOnlyDataTree localShardDataTree;
+    private final @Nullable ReadOnlyDataTree localShardDataTree;
 
     public PrimaryShardInfo(final @NonNull ActorSelection primaryShardActor, final short primaryShardVersion,
             final @NonNull ReadOnlyDataTree localShardDataTree) {
@@ -55,7 +55,7 @@ public class PrimaryShardInfo {
      * Returns an Optional whose value contains the primary shard's DataTree if the primary shard is local
      * to the caller. Otherwise the Optional value is absent.
      */
-    public @NonNull Optional<ReadOnlyDataTree> getLocalShardDataTree() {
-        return Optional.ofNullable(localShardDataTree);
+    public @Nullable ReadOnlyDataTree getLocalShardDataTree() {
+        return localShardDataTree;
     }
 }

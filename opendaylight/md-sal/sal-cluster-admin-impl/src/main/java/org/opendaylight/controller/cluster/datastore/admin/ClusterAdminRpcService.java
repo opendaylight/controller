@@ -285,7 +285,7 @@ public final class ClusterAdminRpcService {
                 }
 
                 // Data tree implies local leak
-                if (success.getLocalShardDataTree().isPresent()) {
+                if (success.getLocalShardDataTree() != null) {
                     ret.set(LOCAL_SHARD_RESULT);
                     return;
                 }
@@ -396,8 +396,7 @@ public final class ClusterAdminRpcService {
         }
 
         final var changeVotingStatus = toChangeShardMembersVotingStatus(shardName, memberVotingStates);
-        LOG.info("Change member voting states for shard {}: {}", shardName,
-                changeVotingStatus.getMeberVotingStatusMap());
+        LOG.info("Change member voting states for shard {}: {}", shardName, changeVotingStatus.memberVotingStatusMap());
 
         final var ret = SettableFuture.<RpcResult<ChangeMemberVotingStatesForShardOutput>>create();
         Futures.addCallback(
