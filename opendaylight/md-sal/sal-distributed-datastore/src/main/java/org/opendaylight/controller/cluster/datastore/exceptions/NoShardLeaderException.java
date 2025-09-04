@@ -16,6 +16,7 @@ import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier
  * @author Thomas Pantelis
  */
 public class NoShardLeaderException extends RuntimeException {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     public NoShardLeaderException(final String message) {

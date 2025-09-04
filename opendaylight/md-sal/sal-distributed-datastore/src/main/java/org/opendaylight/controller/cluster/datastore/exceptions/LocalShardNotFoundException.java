@@ -13,9 +13,10 @@ package org.opendaylight.controller.cluster.datastore.exceptions;
  * @author Thomas Pantelis
  */
 public class LocalShardNotFoundException extends RuntimeException {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
-    public LocalShardNotFoundException(String message) {
+    public LocalShardNotFoundException(final String message) {
         super(message);
     }
 }
