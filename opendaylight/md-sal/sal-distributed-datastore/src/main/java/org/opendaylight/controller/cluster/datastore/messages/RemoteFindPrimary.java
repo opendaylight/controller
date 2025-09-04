@@ -19,16 +19,19 @@ import org.eclipse.jdt.annotation.NonNull;
  *
  * @author Thomas Pantelis
  */
-public class RemoteFindPrimary extends FindPrimary {
+public final class RemoteFindPrimary extends FindPrimary {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private final Set<String> visitedAddresses;
 
-    public RemoteFindPrimary(String shardName, boolean waitUntilReady, @NonNull Collection<String> visitedAddresses) {
+    public RemoteFindPrimary(final String shardName, final boolean waitUntilReady,
+            final @NonNull Collection<String> visitedAddresses) {
         super(shardName, waitUntilReady);
         this.visitedAddresses = new HashSet<>(requireNonNull(visitedAddresses));
     }
 
+    // FIXME: leaks mutable state
     public @NonNull Set<String> getVisitedAddresses() {
         return visitedAddresses;
     }
