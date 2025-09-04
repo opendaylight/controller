@@ -11,11 +11,14 @@ package org.opendaylight.controller.cluster.datastore.exceptions;
  * Exception indicating a shard leader is not responding to messages.
  *
  * @author Thomas Pantelis
+ * @deprecated This exception is not reported from anywhere and will be removed in the next major release.
  */
+@Deprecated(since = "11.0.2", forRemoval = true)
 public class ShardLeaderNotRespondingException extends RuntimeException {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
-    public ShardLeaderNotRespondingException(String message, Throwable cause) {
+    public ShardLeaderNotRespondingException(final String message, final Throwable cause) {
         super(message, cause);
     }
 }
