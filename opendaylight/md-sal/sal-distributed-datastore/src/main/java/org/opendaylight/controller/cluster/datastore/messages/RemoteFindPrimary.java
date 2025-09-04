@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.datastore.messages;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -19,12 +20,14 @@ import org.eclipse.jdt.annotation.NonNull;
  *
  * @author Thomas Pantelis
  */
+@Deprecated(since = "12.0.0", forRemoval = true)
 public final class RemoteFindPrimary extends FindPrimary {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private final Set<String> visitedAddresses;
 
+    @VisibleForTesting
     public RemoteFindPrimary(final String shardName, final boolean waitUntilReady,
             final @NonNull Collection<String> visitedAddresses) {
         super(shardName, waitUntilReady);
