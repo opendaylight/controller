@@ -11,6 +11,7 @@ package org.opendaylight.controller.cluster.datastore.messages;
 /**
  * Reply to GetShardRole, containing the current role of the shard if present on the ShardManager.
  */
+// FIXME: nullable?
 public class GetShardRoleReply {
 
     private final String role;

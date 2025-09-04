@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.datastore.messages;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Objects;
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.yangtools.yang.data.tree.api.ReadOnlyDataTree;
 
 /**
@@ -18,27 +18,16 @@ import org.opendaylight.yangtools.yang.data.tree.api.ReadOnlyDataTree;
  *
  * @author Thomas Pantelis
  */
-public class LocalPrimaryShardFound {
-    private final String primaryPath;
-    private final ReadOnlyDataTree localShardDataTree;
-
-    public LocalPrimaryShardFound(final @NonNull String primaryPath,
-            final @NonNull ReadOnlyDataTree localShardDataTree) {
-        this.primaryPath = requireNonNull(primaryPath);
-        this.localShardDataTree = requireNonNull(localShardDataTree);
-    }
-
-    public @NonNull String getPrimaryPath() {
-        return primaryPath;
-    }
-
-    public @NonNull ReadOnlyDataTree getLocalShardDataTree() {
-        return localShardDataTree;
+@NonNullByDefault
+public record LocalPrimaryShardFound(String primaryPath, ReadOnlyDataTree localShardDataTree) {
+    public LocalPrimaryShardFound {
+        requireNonNull(primaryPath);
+        requireNonNull(localShardDataTree);
     }
 
     @Override
     public String toString() {
-        return "LocalPrimaryShardFound [primaryPath=" + primaryPath
-                + ", localShardDataTree=" + Objects.toIdentityString(localShardDataTree) + "]";
+        return "LocalPrimaryShardFound [primaryPath=" + primaryPath + ", localShardDataTree="
+            + Objects.toIdentityString(localShardDataTree) + "]";
     }
 }

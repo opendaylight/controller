@@ -89,7 +89,7 @@ public class DataTreeChangeListenerSupportTest extends AbstractShardTest {
 
         listener.reset(1);
         final var kit = new TestKit(getSystem());
-        entry.getValue().tell(CloseDataTreeNotificationListenerRegistration.getInstance(), kit.getRef());
+        entry.getValue().tell(CloseDataTreeNotificationListenerRegistration.INSTANCE, kit.getRef());
         kit.expectMsgClass(Duration.ofSeconds(5), CloseDataTreeNotificationListenerRegistrationReply.class);
 
         writeToStore(shard.getDataStore(), TEST_PATH, EMPTY_TEST);

@@ -18,6 +18,7 @@ import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
  * Reply to {@link GetKnownClients}.
  */
 public final class GetKnownClientsReply implements Serializable {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private final @NonNull ImmutableSet<ClientIdentifier> clients;
