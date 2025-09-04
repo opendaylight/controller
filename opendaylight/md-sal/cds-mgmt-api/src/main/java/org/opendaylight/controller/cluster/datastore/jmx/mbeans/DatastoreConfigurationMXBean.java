@@ -48,11 +48,6 @@ public interface DatastoreConfigurationMXBean {
 
     boolean isPersistent();
 
-    @Deprecated(since = "11.0.0", forRemoval = true)
-    default long getTransactionCreationInitialRateLimit() {
-        return 100;
-    }
-
     boolean getTransactionContextDebugEnabled();
 
     int getMaximumMessageSliceSize();
