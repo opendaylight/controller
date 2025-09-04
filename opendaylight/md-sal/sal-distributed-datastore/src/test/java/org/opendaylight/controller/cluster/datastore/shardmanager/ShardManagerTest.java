@@ -2152,7 +2152,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
                     super.handleCommand(message);
                 }
             } finally {
-                if (message instanceof FindPrimary) {
+                if (message instanceof FindPrimary || message instanceof ForwardedFindPrimary) {
                     findPrimaryMessageReceived.countDown();
                 } else if (message instanceof ClusterEvent.MemberUp msg) {
                     countDownIfOther(msg.member(), memberUpReceived);
