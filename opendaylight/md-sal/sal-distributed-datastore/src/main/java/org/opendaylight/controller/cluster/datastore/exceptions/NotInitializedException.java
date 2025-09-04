@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore.exceptions;
 
-public class NotInitializedException extends RuntimeException {
+public final class NotInitializedException extends RuntimeException {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 

@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore.exceptions;
 
-public class UnknownMessageException extends Exception {
+public final class UnknownMessageException extends Exception {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
