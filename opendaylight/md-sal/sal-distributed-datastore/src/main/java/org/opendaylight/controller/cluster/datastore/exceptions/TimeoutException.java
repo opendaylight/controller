@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore.exceptions;
 
-public class TimeoutException extends RuntimeException {
+@Deprecated(since = "12.0.0", forRemoval = true)
+public final class TimeoutException extends RuntimeException {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
 
