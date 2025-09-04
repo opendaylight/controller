@@ -11,9 +11,11 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.common.util.concurrent.UncheckedTimeoutException;
 import java.lang.invoke.VarHandle;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.LongAdder;
 import org.apache.pekko.actor.ActorPath;
 import org.apache.pekko.actor.ActorRef;
@@ -35,7 +37,6 @@ import org.opendaylight.controller.cluster.datastore.exceptions.LocalShardNotFou
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedException;
 import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException;
-import org.opendaylight.controller.cluster.datastore.exceptions.TimeoutException;
 import org.opendaylight.controller.cluster.datastore.exceptions.UnknownMessageException;
 import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
 import org.opendaylight.controller.cluster.datastore.messages.FindPrimary;
@@ -312,8 +313,8 @@ public class ActorUtils {
 
         try {
             return Await.result(future, operationDuration);
-        } catch (Exception e) {
-            throw new TimeoutException("Sending message " + message.getClass().toString()
+        } catch (InterruptedException | TimeoutException e) {
+            throw new UncheckedTimeoutException("Sending message " + message.getClass().toString()
                     + " to actor " + actor.toString() + " failed. Try again later.", e);
         }
     }
@@ -331,8 +332,8 @@ public class ActorUtils {
 
         try {
             return Await.result(future, operationDuration);
-        } catch (Exception e) {
-            throw new TimeoutException("Sending message " + message.getClass().toString()
+        } catch (InterruptedException | TimeoutException e) {
+            throw new UncheckedTimeoutException("Sending message " + message.getClass().toString()
                     + " to actor " + actor.toString() + " failed. Try again later.", e);
         }
     }
