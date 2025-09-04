@@ -2141,6 +2141,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
             } finally {
                 switch (message) {
                     case FindPrimary msg -> findPrimaryMessageReceived.countDown();
+                    case ForwardedFindPrimary msg -> findPrimaryMessageReceived.countDown();
                     case ClusterEvent.MemberUp msg -> countDownIfOther(msg.member(), memberUpReceived);
                     case ClusterEvent.MemberRemoved msg -> countDownIfOther(msg.member(), memberRemovedReceived);
                     case ClusterEvent.ReachableMember msg -> countDownIfOther(msg.member(), memberReachableReceived);

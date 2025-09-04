@@ -242,6 +242,7 @@ class ShardManager extends AbstractUntypedActorWithMetering {
         switch (message) {
             case RemoteFindPrimary msg -> findPrimary(msg, msg.getVisitedAddresses());
             case FindPrimary msg -> findPrimary(msg, null);
+            case ForwardedFindPrimary(var msg, var previousActorPaths) -> findPrimary(msg, previousActorPaths);
             case FindLocalShard msg -> findLocalShard(msg);
             case UpdateSchemaContext msg -> updateSchemaContext(msg);
             case ActorInitialized msg -> onActorInitialized(msg);
