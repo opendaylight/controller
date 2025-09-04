@@ -7,16 +7,22 @@
  */
 package org.opendaylight.controller.cluster.datastore.utils;
 
+import static java.util.Objects.requireNonNull;
+
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.util.concurrent.UncheckedTimeoutException;
 import java.lang.invoke.VarHandle;
+import java.time.Duration;
 import java.util.Optional;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.LongAdder;
+import java.util.function.Function;
 import org.apache.pekko.actor.ActorPath;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
@@ -255,6 +261,13 @@ public class ActorUtils {
             new PrimaryShardInfo(actorSelection, primaryVersion, localShardDataTree);
         primaryShardInfoCache.putSuccessful(shardName, info);
         return info;
+    }
+
+    @Beta
+    public final <T> CompletionStage<T> askShardManager(final Duration timeout, final Class<T> responseClass,
+            final Function<ActorRef, ?> requestFactory) {
+        requireNonNull(responseClass);
+        return Patterns.askWithReplyTo(shardManager, requestFactory::apply, timeout).thenApply(responseClass::cast);
     }
 
     /**
