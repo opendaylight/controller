@@ -73,8 +73,6 @@ import org.opendaylight.controller.cluster.datastore.messages.CreateShard;
 import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
 import org.opendaylight.controller.cluster.datastore.messages.FindPrimary;
 import org.opendaylight.controller.cluster.datastore.messages.FlipShardMembersVotingStatus;
-import org.opendaylight.controller.cluster.datastore.messages.GetShardRole;
-import org.opendaylight.controller.cluster.datastore.messages.GetShardRoleReply;
 import org.opendaylight.controller.cluster.datastore.messages.LocalPrimaryShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardNotFound;
@@ -270,7 +268,7 @@ class ShardManager extends AbstractUntypedActorWithMetering {
             case FlipShardMembersVotingStatus msg -> onFlipShardMembersVotingStatus(msg);
             case Shutdown msg -> onShutDown();
             case GetLocalShardIds msg -> onGetLocalShardIds();
-            case GetShardRole msg -> onGetShardRole(msg);
+            case GetShardRole(var shardName, var replyTo) -> onGetShardRole(shardName, replyTo);
             case RunnableMessage msg -> msg.run();
             case RegisterForShardAvailabilityChanges msg -> onRegisterForShardAvailabilityChanges(msg);
             case RegisterRoleChangeListenerReply msg ->
@@ -291,21 +289,18 @@ class ShardManager extends AbstractUntypedActorWithMetering {
             () -> executeInSelf(() -> shardAvailabilityCallbacks.remove(callback))), self());
     }
 
-    private void onGetShardRole(final GetShardRole message) {
-        LOG.debug("{}: onGetShardRole for shard: {}", name(), message.getName());
+    private void onGetShardRole(final String shardName, final ActorRef replyTo) {
+        LOG.debug("{}: onGetShardRole for shard: {}", name(), shardName);
 
-        final String name = message.getName();
-
-        final ShardInformation shardInformation = localShards.get(name);
-
+        final var shardInformation = localShards.get(shardName);
+        final Object reply;
         if (shardInformation == null) {
-            LOG.info("{}: no shard information for {} found", name(), name);
-            getSender().tell(new Status.Failure(
-                    new IllegalArgumentException("Shard with name " + name + " not present.")), ActorRef.noSender());
-            return;
+            LOG.info("{}: no shard information for {} found", name(), shardName);
+            reply = new Status.Failure(new IllegalArgumentException("Shard with name " + shardName + " not present."));
+        } else {
+            reply = new GetShardRoleReply(shardInformation.getRole());
         }
-
-        getSender().tell(new GetShardRoleReply(shardInformation.getRole()), ActorRef.noSender());
+        replyTo.tell(reply, ActorRef.noSender());
     }
 
     void onShutDown() {

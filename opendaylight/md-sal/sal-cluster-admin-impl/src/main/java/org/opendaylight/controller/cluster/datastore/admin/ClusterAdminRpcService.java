@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -46,13 +47,13 @@ import org.opendaylight.controller.cluster.datastore.messages.ChangeShardMembers
 import org.opendaylight.controller.cluster.datastore.messages.FlipShardMembersVotingStatus;
 import org.opendaylight.controller.cluster.datastore.messages.GetKnownClients;
 import org.opendaylight.controller.cluster.datastore.messages.GetKnownClientsReply;
-import org.opendaylight.controller.cluster.datastore.messages.GetShardRole;
-import org.opendaylight.controller.cluster.datastore.messages.GetShardRoleReply;
 import org.opendaylight.controller.cluster.datastore.messages.MakeLeaderLocal;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.opendaylight.controller.cluster.datastore.messages.RemoveShardReplica;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.DatastoreSnapshotList;
+import org.opendaylight.controller.cluster.datastore.shardmanager.GetShardRole;
+import org.opendaylight.controller.cluster.datastore.shardmanager.GetShardRoleReply;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshot;
 import org.opendaylight.controller.eos.akka.DataCenterControl;
@@ -142,6 +143,7 @@ import scala.concurrent.Future;
 public final class ClusterAdminRpcService {
     private static final Logger LOG = LoggerFactory.getLogger(ClusterAdminRpcService.class);
     private static final @NonNull Timeout SHARD_MGR_TIMEOUT = new Timeout(1, TimeUnit.MINUTES);
+    private static final @NonNull Duration SHARD_MGR_DURATION = Duration.ofMinutes(1);
     private static final @NonNull RpcResult<LocateShardOutput> LOCAL_SHARD_RESULT =
             RpcResultBuilder.success(new LocateShardOutputBuilder()
                 .setMemberNode(new LocalCaseBuilder().setLocal(new LocalBuilder().build()).build())
@@ -457,29 +459,25 @@ public final class ClusterAdminRpcService {
         LOG.info("Getting role for shard {}, datastore type {}", shardName, dataStoreType);
 
         final var ret = SettableFuture.<RpcResult<GetShardRoleOutput>>create();
-        Futures.addCallback(
-            this.<GetShardRoleReply>sendMessageToShardManager(dataStoreType, new GetShardRole(shardName.getValue())),
-            new FutureCallback<>() {
-                @Override
-                public void onSuccess(final GetShardRoleReply reply) {
-                    if (reply == null) {
-                        ret.set(ClusterAdminRpcService.<GetShardRoleOutput>newFailedRpcResultBuilder(
-                            "No Shard role present. Please retry..").build());
-                        return;
-                    }
-
-                    final var role = reply.getRole();
-                    LOG.info("Successfully received role:{} for shard {}", role, shardName);
-                    ret.set(newSuccessfulResult(new GetShardRoleOutputBuilder().setRole(role).build()));
-                }
-
-                @Override
-                public void onFailure(final Throwable failure) {
+        final var utils = actorUtils(dataStoreType);
+        utils.askShardManager(SHARD_MGR_DURATION, GetShardRoleReply.class,
+            replyTo -> new GetShardRole(shardName.getValue(), replyTo)).whenCompleteAsync((reply, failure) -> {
+                if (failure != null) {
                     ret.set(ClusterAdminRpcService.<GetShardRoleOutput>newFailedRpcResultBuilder(
                         "Failed to get shard role.", failure).build());
+                    return;
                 }
-            }, MoreExecutors.directExecutor());
 
+                final var role = reply.role();
+                if (role == null) {
+                    ret.set(ClusterAdminRpcService.<GetShardRoleOutput>newFailedRpcResultBuilder(
+                        "No Shard role present. Please retry..").build());
+                    return;
+                }
+
+                LOG.info("Successfully received role:{} for shard {}", role, shardName);
+                ret.set(newSuccessfulResult(new GetShardRoleOutputBuilder().setRole(role).build()));
+            }, utils.getClientDispatcher());
         return ret;
     }
 
