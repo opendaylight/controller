@@ -8,8 +8,8 @@
 package org.opendaylight.controller.md.cluster.datastore.model;
 
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntryBuilder;
-import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapNodeBuilder;
 
+import java.util.List;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.Uint64;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -68,12 +68,10 @@ public final class CarsModel {
     }
 
     public static MapNode newCarsMapNode(final MapEntryNode... carEntries) {
-        var builder = ImmutableNodes.newSystemMapBuilder().withNodeIdentifier(new NodeIdentifier(CAR_QNAME));
-        for (MapEntryNode e : carEntries) {
-            builder.withChild(e);
-        }
-
-        return builder.build();
+        return ImmutableNodes.newSystemMapBuilder()
+            .withNodeIdentifier(new NodeIdentifier(CAR_QNAME))
+            .withValue(List.of(carEntries))
+            .build();
     }
 
     public static ContainerNode emptyContainer() {
@@ -81,7 +79,7 @@ public final class CarsModel {
     }
 
     public static SystemMapNode newCarMapNode() {
-        return mapNodeBuilder(CAR_QNAME).build();
+        return ImmutableNodes.newSystemMapBuilder().withNodeIdentifier(new NodeIdentifier(CAR_QNAME)).build();
     }
 
     public static MapEntryNode newCarEntry(final String name, final Uint64 price) {
