@@ -14,7 +14,8 @@ import java.io.Serializable;
 /**
  * The FindPrimary message is used to locate the primary of any given shard.
  */
-public class FindPrimary implements Serializable {
+public sealed class FindPrimary implements Serializable permits RemoteFindPrimary {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private final String shardName;
@@ -35,7 +36,6 @@ public class FindPrimary implements Serializable {
 
     @Override
     public String toString() {
-        return getClass().getName() + " [shardName=" + shardName
-                + ", waitUntilReady=" + waitUntilReady + "]";
+        return getClass().getName() + " [shardName=" + shardName + ", waitUntilReady=" + waitUntilReady + "]";
     }
 }
