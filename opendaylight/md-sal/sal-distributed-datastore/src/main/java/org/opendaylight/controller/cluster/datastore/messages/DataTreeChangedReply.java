@@ -8,18 +8,17 @@
 package org.opendaylight.controller.cluster.datastore.messages;
 
 import java.io.Serializable;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
+@NonNullByDefault
 public final class DataTreeChangedReply implements Serializable {
     @java.io.Serial
     private static final long serialVersionUID = 1L;
-    private static final DataTreeChangedReply INSTANCE = new DataTreeChangedReply();
+
+    public static final DataTreeChangedReply INSTANCE = new DataTreeChangedReply();
 
     private DataTreeChangedReply() {
-        // Use getInstance() instead
-    }
-
-    public static DataTreeChangedReply getInstance() {
-        return INSTANCE;
+        // Hiddeon in purpose
     }
 
     @java.io.Serial

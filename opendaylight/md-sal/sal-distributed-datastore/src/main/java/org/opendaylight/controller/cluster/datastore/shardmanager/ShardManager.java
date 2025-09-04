@@ -382,7 +382,7 @@ class ShardManager extends AbstractUntypedActorWithMetering {
 
         shardReplicaOperationsInProgress.add(shardName);
 
-        final ShardIdentifier shardId = getShardIdentifier(contextMessage.getMemberName(), shardName);
+        final ShardIdentifier shardId = getShardIdentifier(contextMessage.memberName(), shardName);
 
         final DatastoreContext datastoreContext = newShardDatastoreContextBuilder(shardName).build();
 
@@ -1128,7 +1128,7 @@ class ShardManager extends AbstractUntypedActorWithMetering {
     }
 
     private void onAddShardReplica(final AddShardReplica shardReplicaMsg) {
-        final String shardName = shardReplicaMsg.getShardName();
+        final String shardName = shardReplicaMsg.shardName();
 
         LOG.debug("{}: onAddShardReplica: {}", name(), shardReplicaMsg);
 
@@ -1302,8 +1302,8 @@ class ShardManager extends AbstractUntypedActorWithMetering {
     private void onRemoveShardReplica(final RemoveShardReplica shardReplicaMsg) {
         LOG.debug("{}: onRemoveShardReplica: {}", name(), shardReplicaMsg);
 
-        findPrimary(shardReplicaMsg.getShardName(), new AutoFindPrimaryFailureResponseHandler(getSender(),
-                shardReplicaMsg.getShardName(), name(), self()) {
+        findPrimary(shardReplicaMsg.shardName(), new AutoFindPrimaryFailureResponseHandler(getSender(),
+                shardReplicaMsg.shardName(), name(), self()) {
             @Override
             public void onRemotePrimaryShardFound(final RemotePrimaryShardFound response) {
                 doRemoveShardReplicaAsync(response.getPrimaryPath());
@@ -1311,7 +1311,7 @@ class ShardManager extends AbstractUntypedActorWithMetering {
 
             @Override
             public void onLocalPrimaryFound(final LocalPrimaryShardFound response) {
-                doRemoveShardReplicaAsync(response.getPrimaryPath());
+                doRemoveShardReplicaAsync(response.primaryPath());
             }
 
             private void doRemoveShardReplicaAsync(final String primaryPath) {
@@ -1400,11 +1400,11 @@ class ShardManager extends AbstractUntypedActorWithMetering {
     private void onChangeShardServersVotingStatus(final ChangeShardMembersVotingStatus changeMembersVotingStatus) {
         LOG.debug("{}: onChangeShardServersVotingStatus: {}", name(), changeMembersVotingStatus);
 
-        String shardName = changeMembersVotingStatus.getShardName();
+        String shardName = changeMembersVotingStatus.shardName();
         Map<String, Boolean> serverVotingStatusMap = new HashMap<>();
-        for (Entry<String, Boolean> e: changeMembersVotingStatus.getMeberVotingStatusMap().entrySet()) {
-            serverVotingStatusMap.put(getShardIdentifier(MemberName.forName(e.getKey()), shardName).toString(),
-                    e.getValue());
+        for (var entry : changeMembersVotingStatus.memberVotingStatusMap().entrySet()) {
+            serverVotingStatusMap.put(getShardIdentifier(MemberName.forName(entry.getKey()), shardName).toString(),
+                    entry.getValue());
         }
 
         ChangeServersVotingStatus changeServersVotingStatus = new ChangeServersVotingStatus(serverVotingStatusMap);
@@ -1418,7 +1418,7 @@ class ShardManager extends AbstractUntypedActorWithMetering {
         LOG.debug("{}: onFlipShardMembersVotingStatus: {}", name(), flipMembersVotingStatus);
 
         ActorRef sender = getSender();
-        final String shardName = flipMembersVotingStatus.getShardName();
+        final String shardName = flipMembersVotingStatus.shardName();
         findLocalShard(shardName, sender, localShardFound -> {
             Future<Object> future = Patterns.ask(localShardFound.getPath(), GetOnDemandRaftState.INSTANCE,
                     Timeout.apply(30, TimeUnit.SECONDS));
@@ -1449,19 +1449,19 @@ class ShardManager extends AbstractUntypedActorWithMetering {
     }
 
     private void findLocalShard(final FindLocalShard message) {
-        LOG.debug("{}: findLocalShard : {}", name(), message.getShardName());
+        LOG.debug("{}: findLocalShard : {}", name(), message.shardName());
 
-        final ShardInformation shardInformation = localShards.get(message.getShardName());
+        final ShardInformation shardInformation = localShards.get(message.shardName());
 
         if (shardInformation == null) {
             LOG.debug("{}: Local shard {} not found - shards present: {}",
-                    name(), message.getShardName(), localShards.keySet());
+                    name(), message.shardName(), localShards.keySet());
 
-            getSender().tell(new LocalShardNotFound(message.getShardName()), self());
+            getSender().tell(new LocalShardNotFound(message.shardName()), self());
             return;
         }
 
-        sendResponse(shardInformation, message.isWaitUntilInitialized(), false,
+        sendResponse(shardInformation, message.waitUntilInitialized(), false,
             () -> new LocalShardFound(shardInformation.getActor()));
     }
 

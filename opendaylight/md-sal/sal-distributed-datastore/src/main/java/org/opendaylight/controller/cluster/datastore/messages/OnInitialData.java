@@ -7,11 +7,14 @@
  */
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Message sent to a data tree change listener actor to indicate there is no initial data.
  *
  * @author Thomas Pantelis
  */
+@NonNullByDefault
 public final class OnInitialData {
     public static final OnInitialData INSTANCE = new OnInitialData();
 
