@@ -18,7 +18,7 @@
 
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>sal-clustering-config</artifactId>
-  <version>10.0.12-SNAPSHOT</version>
+  <version>10.0.12</version>
   <packaging>jar</packaging>
   <description>Configuration files for md-sal clustering</description>
 

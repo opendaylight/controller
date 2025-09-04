@@ -20,7 +20,7 @@
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>repackaged-akka-jar</artifactId>
     <packaging>jar</packaging>
-    <version>10.0.12-SNAPSHOT</version>
+    <version>10.0.12</version>
     <name>${project.artifactId}</name>
 
     <properties>
