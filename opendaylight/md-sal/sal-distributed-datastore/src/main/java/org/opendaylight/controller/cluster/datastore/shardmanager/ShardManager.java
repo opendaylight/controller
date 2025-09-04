@@ -1215,27 +1215,27 @@ class ShardManager extends AbstractUntypedActorWithMetering {
                 peerAddressResolver.getShardActorAddress(shardName, cluster.getCurrentMemberName());
 
         //inform ShardLeader to add this shard as a replica by sending an AddServer message
-        LOG.debug("{}: Sending AddServer message to peer {} for shard {}", name(),
-                response.getPrimaryPath(), shardInfo.getShardId());
+        LOG.debug("{}: Sending AddServer message to peer {} for shard {}", name(), response.primaryPath(),
+            shardInfo.getShardId());
 
-        final Timeout addServerTimeout = new Timeout(shardInfo.getDatastoreContext()
-                .getShardLeaderElectionTimeout().duration());
-        final Future<Object> futureObj = Patterns.ask(getContext().actorSelection(response.getPrimaryPath()),
-                new AddServer(shardInfo.getShardId().toString(), localShardAddress, true), addServerTimeout);
+        final var addServerTimeout = new Timeout(shardInfo.getDatastoreContext()
+            .getShardLeaderElectionTimeout().duration());
+        final var futureObj = Patterns.ask(getContext().actorSelection(response.primaryPath()),
+            new AddServer(shardInfo.getShardId().toString(), localShardAddress, true), addServerTimeout);
 
         futureObj.onComplete(new OnComplete<>() {
             @Override
             public void onComplete(final Throwable failure, final Object addServerResponse) {
                 if (failure != null) {
-                    LOG.debug("{}: AddServer request to {} for {} failed", name(),
-                            response.getPrimaryPath(), shardName, failure);
+                    LOG.debug("{}: AddServer request to {} for {} failed", name(), response.primaryPath(), shardName,
+                        failure);
 
                     final String msg = String.format("AddServer request to leader %s for shard %s failed",
-                            response.getPrimaryPath(), shardName);
+                            response.primaryPath(), shardName);
                     self().tell(new ForwardedAddServerFailure(shardName, msg, failure, removeShardOnFailure), sender);
                 } else {
-                    self().tell(new ForwardedAddServerReply(shardInfo, (AddServerReply)addServerResponse,
-                            response.getPrimaryPath(), removeShardOnFailure), sender);
+                    self().tell(new ForwardedAddServerReply(shardInfo, (AddServerReply) addServerResponse,
+                        response.primaryPath(), removeShardOnFailure), sender);
                 }
             }
         }, new Dispatchers(context().system().dispatchers()).getDispatcher(Dispatchers.DispatcherType.Client));
@@ -1308,12 +1308,12 @@ class ShardManager extends AbstractUntypedActorWithMetering {
                 shardReplicaMsg.getShardName(), name(), self()) {
             @Override
             public void onRemotePrimaryShardFound(final RemotePrimaryShardFound response) {
-                doRemoveShardReplicaAsync(response.getPrimaryPath());
+                doRemoveShardReplicaAsync(response.primaryPath());
             }
 
             @Override
             public void onLocalPrimaryFound(final LocalPrimaryShardFound response) {
-                doRemoveShardReplicaAsync(response.getPrimaryPath());
+                doRemoveShardReplicaAsync(response.primaryPath());
             }
 
             private void doRemoveShardReplicaAsync(final String primaryPath) {
