@@ -5,13 +5,13 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.exceptions;
 
 public class TimeoutException extends RuntimeException {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
-    public TimeoutException(String message, Exception cause) {
+    public TimeoutException(final String message, final Exception cause) {
         super(message, cause);
     }
 }

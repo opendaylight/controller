@@ -5,13 +5,13 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.exceptions;
 
 public class PrimaryNotFoundException extends RuntimeException {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
-    public PrimaryNotFoundException(String message) {
+    public PrimaryNotFoundException(final String message) {
         super(message);
     }
 }
