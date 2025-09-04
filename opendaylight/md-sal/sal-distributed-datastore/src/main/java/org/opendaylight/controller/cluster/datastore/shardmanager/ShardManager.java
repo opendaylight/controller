@@ -35,6 +35,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Address;
 import org.apache.pekko.actor.Cancellable;
@@ -78,7 +80,6 @@ import org.opendaylight.controller.cluster.datastore.messages.GetShardRoleReply;
 import org.opendaylight.controller.cluster.datastore.messages.LocalPrimaryShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardNotFound;
-import org.opendaylight.controller.cluster.datastore.messages.RemoteFindPrimary;
 import org.opendaylight.controller.cluster.datastore.messages.RemotePrimaryShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.RemoveShardReplica;
 import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderStateChanged;
@@ -240,8 +241,7 @@ class ShardManager extends AbstractUntypedActorWithMetering {
     @Override
     protected void handleReceive(final Object message) {
         switch (message) {
-            case RemoteFindPrimary msg -> findPrimary(msg, msg.getVisitedAddresses());
-            case FindPrimary msg -> findPrimary(msg, null);
+            case FindPrimary msg -> findPrimary(msg, Set.of());
             case ForwardedFindPrimary(var msg, var previousActorPaths) -> findPrimary(msg, previousActorPaths);
             case FindLocalShard msg -> findLocalShard(msg);
             case UpdateSchemaContext msg -> updateSchemaContext(msg);
@@ -966,8 +966,7 @@ class ShardManager extends AbstractUntypedActorWithMetering {
                 info.getShardId().toString());
     }
 
-    // FIXME: non-null prevAddresses and update checks below once we have removed RemoteFindPrimary
-    private void findPrimary(final FindPrimary message, final @Nullable Set<String> previousActorPaths) {
+    private void findPrimary(final FindPrimary message, final Set<String> previousActorPaths) {
         LOG.debug("{}: In findPrimary: {}", name(), message);
 
         final String shardName = message.getShardName();
@@ -975,7 +974,7 @@ class ShardManager extends AbstractUntypedActorWithMetering {
         // First see if the there is a local replica for the shard
         final var info = localShards.get(shardName);
         if (info != null && info.isActiveMember()) {
-            final boolean canReturnLocalShardState = previousActorPaths == null;
+            final boolean canReturnLocalShardState = previousActorPaths.isEmpty();
             sendResponse(info, message.isWaitUntilReady(), true, () -> {
                 String primaryPath = info.getSerializedLeaderActor();
                 Object found = canReturnLocalShardState && info.isLeader()
@@ -989,9 +988,10 @@ class ShardManager extends AbstractUntypedActorWithMetering {
             return;
         }
 
-        final var visitedAddresses = previousActorPaths != null ? new HashSet<>(previousActorPaths)
-            : HashSet.<String>newHashSet(1);
-        visitedAddresses.add(peerAddressResolver.getShardManagerActorPathBuilder(cluster.getSelfAddress()).toString());
+        // Extend previousActorPaths with our address
+        final var visitedAddresses = Stream.concat(previousActorPaths.stream(),
+            Stream.of(peerAddressResolver.getShardManagerActorPathBuilder(cluster.getSelfAddress()).toString()))
+            .collect(Collectors.toUnmodifiableSet());
 
         for (var address : peerAddressResolver.getShardManagerPeerActorAddresses()) {
             if (visitedAddresses.contains(address)) {
