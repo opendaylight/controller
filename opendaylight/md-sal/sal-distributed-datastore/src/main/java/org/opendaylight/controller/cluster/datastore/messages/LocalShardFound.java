@@ -5,7 +5,6 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.messages;
 
 import org.apache.pekko.actor.ActorRef;
@@ -15,7 +14,8 @@ import org.apache.pekko.actor.ActorRef;
  * org.opendaylight.controller.cluster.datastore.shardmanager.ShardManager
  * when it finds a shard with the specified name in it's local shard registry.
  */
-public class LocalShardFound {
+// FIXME: nullable?
+public final class LocalShardFound {
     private final ActorRef path;
 
     public LocalShardFound(final ActorRef path) {

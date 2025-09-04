@@ -7,14 +7,18 @@
  */
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Local message sent to a Shard to retrieve its data tree instance.
  *
  * @author Thomas Pantelis
  */
+@NonNullByDefault
 public final class GetShardDataTree {
     public static final GetShardDataTree INSTANCE = new GetShardDataTree();
 
     private GetShardDataTree() {
+        // Hidden on purpose
     }
 }

@@ -13,13 +13,14 @@ import java.io.Serializable;
 /**
  * Local or remote message sent in reply to FindPrimaryShard to indicate the primary shard is remote to the caller.
  */
-public class RemotePrimaryShardFound implements Serializable {
+public final class RemotePrimaryShardFound implements Serializable {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private final String primaryPath;
     private final short primaryVersion;
 
-    public RemotePrimaryShardFound(final String primaryPath, short primaryVersion) {
+    public RemotePrimaryShardFound(final String primaryPath, final short primaryVersion) {
         this.primaryPath = primaryPath;
         this.primaryVersion = primaryVersion;
     }

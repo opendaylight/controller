@@ -196,7 +196,7 @@ final class RootDataTreeChangeListenerProxy<L extends DOMDataTreeChangeListener>
         current.dtclActor.tell(PoisonPill.getInstance(), ActorRef.noSender());
         // Terminate all subscriptions
         for (ActorSelection regActor : current.subscriptions) {
-            regActor.tell(CloseDataTreeNotificationListenerRegistration.getInstance(), ActorRef.noSender());
+            regActor.tell(CloseDataTreeNotificationListenerRegistration.INSTANCE, ActorRef.noSender());
         }
         state = new Terminated();
     }
@@ -208,7 +208,7 @@ final class RootDataTreeChangeListenerProxy<L extends DOMDataTreeChangeListener>
                 ((RegisterDataTreeNotificationListenerReply) result).getListenerRegistrationPath());
             LOG.debug("{}: Shard {} registered late, terminating subscription at {}", logContext(), shardName,
                 regActor);
-            regActor.tell(CloseDataTreeNotificationListenerRegistration.getInstance(), ActorRef.noSender());
+            regActor.tell(CloseDataTreeNotificationListenerRegistration.INSTANCE, ActorRef.noSender());
         } else {
             LOG.debug("{}: Shard {} reported late failure", logContext(), shardName, failure);
         }
