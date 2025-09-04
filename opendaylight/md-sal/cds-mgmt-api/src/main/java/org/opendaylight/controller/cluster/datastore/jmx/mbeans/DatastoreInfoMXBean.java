@@ -18,12 +18,6 @@ import javax.management.MXBean;
 // FIXME: this only holds obsolete and Pekko-specfic information. When moving to new package also address below.
 //        of AskTimeoutException: something along the lines 'transport-timeout'?
 public interface DatastoreInfoMXBean {
-    // FIXME: remove as soon as possible
-    @Deprecated(since = "11.0.0", forRemoval = true)
-    default double getTransactionCreationRateLimit() {
-        return Double.NaN;
-    }
-
     // FIXME: AskTimeoutException is a Pekko-specific term. Rename to TransportTimeouts, which can be explained to
     //        non-Java people.
     /**
