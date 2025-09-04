@@ -229,11 +229,11 @@ public class ActorUtils {
                 public PrimaryShardInfo checkedApply(final Object response) throws UnknownMessageException {
                     if (response instanceof RemotePrimaryShardFound found) {
                         LOG.debug("findPrimaryShardAsync received: {}", found);
-                        return onPrimaryShardFound(shardName, found.getPrimaryPath(), found.getPrimaryVersion(), null);
+                        return onPrimaryShardFound(shardName, found.primaryPath(), found.primaryVersion(), null);
                     } else if (response instanceof LocalPrimaryShardFound found) {
                         LOG.debug("findPrimaryShardAsync received: {}", found);
-                        return onPrimaryShardFound(shardName, found.getPrimaryPath(), DataStoreVersions.CURRENT_VERSION,
-                            found.getLocalShardDataTree());
+                        return onPrimaryShardFound(shardName, found.primaryPath(), DataStoreVersions.CURRENT_VERSION,
+                            found.localShardDataTree());
                     } else if (response instanceof NotInitializedException notInitialized) {
                         throw notInitialized;
                     } else if (response instanceof PrimaryNotFoundException primaryNotFound) {
