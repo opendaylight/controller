@@ -1,0 +1,17 @@
+# If this file has entries, they will be used to configure the module
+# shards that will be available.  Otherwise, the default shards will
+# be used.  Below, the commented lines are the current default shards
+# (inventory, network-topology, and toaster)
+#
+# These configurations are an array and the indexes need to increment
+# from 1,2,3...
+#
+# There is a FRIENDLY_MODULE_NAME[$index] that will map to the
+# MODULE_NAMESPACES[$index]
+#
+FRIENDLY_MODULE_NAMES[1]='inventory'
+MODULE_NAMESPACES[1]='urn:opendaylight:inventory'
+FRIENDLY_MODULE_NAMES[2]='topology'
+MODULE_NAMESPACES[2]='urn:TBD:params:xml:ns:yang:network-topology'
+FRIENDLY_MODULE_NAMES[3]='toaster'
+MODULE_NAMESPACES[3]='http://netconfcentral.org/ns/toaster'
