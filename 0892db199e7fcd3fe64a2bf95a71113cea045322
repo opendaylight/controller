@@ -24,6 +24,30 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "179e2257_46a604cb",
+        "filename": "raft/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/spi/UnsignedLongBitmapTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 9173
+      },
+      "writtenOn": "2025-09-05T10:25:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f58593a3_e1939c2b",
+      "range": {
+        "startLine": 108,
+        "startChar": 38,
+        "endLine": 108,
+        "endChar": 39
+      },
+      "revId": "0892db199e7fcd3fe64a2bf95a71113cea045322",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "0ade670c_65d605fe",
@@ -37,6 +61,24 @@
       "writtenOn": "2025-09-05T09:22:36Z",
       "side": 1,
       "message": "if I\u0027m not mistaken you don\u0027t actually test read of legacy singleton",
+      "revId": "0892db199e7fcd3fe64a2bf95a71113cea045322",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8f0af1f9_58537254",
+        "filename": "raft/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/spi/UnsignedLongBitmapTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 9173
+      },
+      "writtenOn": "2025-09-05T10:25:44Z",
+      "side": 1,
+      "message": "it is done in https://git.opendaylight.org/gerrit/c/controller/+/117587/7/raft/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/spi/UnsignedLongBitmapTest.java#53",
+      "parentUuid": "0ade670c_65d605fe",
       "revId": "0892db199e7fcd3fe64a2bf95a71113cea045322",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
