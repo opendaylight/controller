@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "990ef5ce_26820533",
+        "filename": "raft/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/spi/UnsignedLongBitmap.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 266,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2025-09-08T20:06:01Z",
+      "side": 1,
+      "message": "1. do not use local variable for this\n2. value ? HAVE_VALUE | VALUE_TRUE : HAVE_VALUE\n\nbytecode before:\n\n\n         0: bipush        16\n         2: iload_3\n         3: ifeq          11\n         6: bipush        32\n         8: goto          12\n        11: iconst_0\n        12: ior\n        13: istore        4\n        15: aload_0\n        16: lload_1\n        17: iload         4\n        19: invokestatic  #178                // Method org/opendaylight/yangtools/concepts/WritableObjects.writeLong:(Ljava/io/DataOutput;JI)V\n        22: return\n\nbytecode after:\n\n         0: aload_0\n         1: lload_1\n         2: iload_3\n         3: ifeq          11\n         6: bipush        48\n         8: goto          13\n        11: bipush        16\n        13: invokestatic  #252                // Method org/opendaylight/yangtools/concepts/WritableObjects.writeLong:(Ljava/io/DataOutput;JI)V\n        16: return",
+      "range": {
+        "startLine": 266,
+        "startChar": 8,
+        "endLine": 266,
+        "endChar": 64
+      },
+      "revId": "ee75bf22597deded97b543f2641359c80227f827",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
