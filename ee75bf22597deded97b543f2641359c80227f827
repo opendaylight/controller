@@ -22,6 +22,30 @@
       },
       "revId": "ee75bf22597deded97b543f2641359c80227f827",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "86ca779b_65491a0d",
+        "filename": "raft/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/spi/UnsignedLongBitmap.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 266,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2025-09-08T20:22:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "990ef5ce_26820533",
+      "range": {
+        "startLine": 266,
+        "startChar": 8,
+        "endLine": 266,
+        "endChar": 64
+      },
+      "revId": "ee75bf22597deded97b543f2641359c80227f827",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
   ]
 }
