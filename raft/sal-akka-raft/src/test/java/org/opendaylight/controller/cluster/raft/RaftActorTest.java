@@ -42,9 +42,6 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.dispatch.Dispatchers;
-import org.apache.pekko.persistence.SaveSnapshotFailure;
-import org.apache.pekko.persistence.SaveSnapshotSuccess;
-import org.apache.pekko.persistence.SnapshotMetadata;
 import org.apache.pekko.protobufv3.internal.ByteString;
 import org.apache.pekko.testkit.TestActorRef;
 import org.apache.pekko.testkit.javadsl.TestKit;
@@ -265,21 +262,10 @@ class RaftActorTest extends AbstractActorTest {
         when(mockSupport.handleSnapshotMessage(same(applySnapshot))).thenReturn(true);
         mockRaftActor.handleReceive(applySnapshot);
 
-        SaveSnapshotSuccess saveSnapshotSuccess = new SaveSnapshotSuccess(new SnapshotMetadata("", 0L, 0L));
-        when(mockSupport.handleSnapshotMessage(same(saveSnapshotSuccess))).thenReturn(true);
-        mockRaftActor.handleReceive(saveSnapshotSuccess);
-
-        SaveSnapshotFailure saveSnapshotFailure = new SaveSnapshotFailure(new SnapshotMetadata("", 0L, 0L),
-                new Throwable());
-        when(mockSupport.handleSnapshotMessage(same(saveSnapshotFailure))).thenReturn(true);
-        mockRaftActor.handleReceive(saveSnapshotFailure);
-
         when(mockSupport.handleSnapshotMessage(same(GetSnapshot.INSTANCE))).thenReturn(true);
         mockRaftActor.handleReceive(GetSnapshot.INSTANCE);
 
         verify(mockSupport).handleSnapshotMessage(same(applySnapshot));
-        verify(mockSupport).handleSnapshotMessage(same(saveSnapshotSuccess));
-        verify(mockSupport).handleSnapshotMessage(same(saveSnapshotFailure));
         verify(mockSupport).handleSnapshotMessage(same(GetSnapshot.INSTANCE));
     }
 
