@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.6.0" name="odl-toaster">
+    <repository>mvn:org.opendaylight.controller/odl-mdsal-broker/{{versionAsInProject}}/xml/features</repository>
+    <repository>mvn:org.opendaylight.mdsal/odl-mdsal-binding-runtime/{{versionAsInProject}}/xml/features</repository>
+    <feature name="odl-toaster">
+        <feature version="{{semVerRange}}">odl-mdsal-binding-runtime</feature>
+        <feature version="{{semVerRange}}">odl-mdsal-broker</feature>
+        <bundle>mvn:org.opendaylight.controller.samples/sample-toaster/{{versionAsInProject}}</bundle>
+        <bundle>mvn:org.opendaylight.controller.samples/sample-toaster-consumer/{{versionAsInProject}}</bundle>
+        <bundle>mvn:org.opendaylight.controller.samples/sample-toaster-provider/{{versionAsInProject}}</bundle>
+    </feature>
+</features>

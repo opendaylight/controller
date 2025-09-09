@@ -10,25 +10,26 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.opendaylight.controller</groupId>
-        <artifactId>single-feature-parent</artifactId>
+        <artifactId>feature-parent</artifactId>
         <version>12.0.0-SNAPSHOT</version>
-        <relativePath>../single-feature-parent/pom.xml</relativePath>
+        <relativePath>../parent/pom.xml</relativePath>
     </parent>
 
     <artifactId>odl-toaster</artifactId>
     <packaging>feature</packaging>
-    <name>OpenDaylight :: Toaster</name>
+    <name>OpenDaylight Toaster</name>
+    <description>The venerable Toaster</description>
 
     <dependencies>
         <dependency>
-            <groupId>org.opendaylight.mdsal</groupId>
-            <artifactId>odl-mdsal-binding-runtime</artifactId>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>odl-mdsal-broker</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
         <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>odl-mdsal-broker</artifactId>
+            <groupId>org.opendaylight.mdsal</groupId>
+            <artifactId>odl-mdsal-binding-runtime</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
