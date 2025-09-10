@@ -38,6 +38,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "2cf47446_2058b6f7",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 8907
+      },
+      "writtenOn": "2025-09-10T08:15:57Z",
+      "side": 1,
+      "message": "Updated to only use \n```\n- configure-cluster-ipdetect.sh\n- configure_cluster.sh\n- custom_shard_config.txt\n- set_persistence.sh\n```",
+      "parentUuid": "85367086_62f9529e",
+      "revId": "07963f06d700d9c6f2e2bc26841a5f84976a1cd2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "9d4400ca_3e0b4612",
         "filename": "karaf-scripts/src/main/assembly/bin/configure_cluster.sh",
         "patchSetId": 2
@@ -49,6 +67,30 @@
       "writtenOn": "2025-09-02T12:54:39Z",
       "side": 1,
       "message": "this loses history of the file\nonce minimized and prototyped, open an IT ticket to have required files imported with history -- like done in https://jira.linuxfoundation.org/plugins/servlet/desk/portal/2/IT-27674",
+      "range": {
+        "startLine": 3,
+        "startChar": 2,
+        "endLine": 3,
+        "endChar": 52
+      },
+      "revId": "07963f06d700d9c6f2e2bc26841a5f84976a1cd2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "509493b7_b1bb4935",
+        "filename": "karaf-scripts/src/main/assembly/bin/configure_cluster.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 8907
+      },
+      "writtenOn": "2025-09-10T08:15:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9d4400ca_3e0b4612",
       "range": {
         "startLine": 3,
         "startChar": 2,
@@ -96,6 +138,30 @@
       "side": 1,
       "message": "I would like to ask if this is a good approach to copy this file from original `karaf4-parent` (same way as https://jira.linuxfoundation.org/plugins/servlet/desk/portal/2/IT-27674) and then to make some modifications like updating the groupId, adding logic for handling `karaf-scripts`, checking used plugins, etc.",
       "parentUuid": "d6e16d79_c0b1faf5",
+      "range": {
+        "startLine": 3,
+        "startChar": 1,
+        "endLine": 3,
+        "endChar": 25
+      },
+      "revId": "07963f06d700d9c6f2e2bc26841a5f84976a1cd2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b43e18b6_764abd2c",
+        "filename": "karaf4-parent/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 8907
+      },
+      "writtenOn": "2025-09-10T08:15:57Z",
+      "side": 1,
+      "message": "Updated to inherit from `org.opendaylight.odlparen` `karaf4-parent`",
+      "parentUuid": "9d357fec_4019d0bb",
       "range": {
         "startLine": 3,
         "startChar": 1,
