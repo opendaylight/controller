@@ -7,16 +7,25 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import com.google.common.annotations.Beta;
+import static java.util.Objects.requireNonNull;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer;
 
-@Beta
 @Singleton
+@NonNullByDefault
 public final class DefaultDatastoreContextIntrospectorFactory extends AbstractDatastoreContextIntrospectorFactory {
+    private final BindingNormalizedNodeSerializer serializer;
+
     @Inject
     public DefaultDatastoreContextIntrospectorFactory(final BindingNormalizedNodeSerializer serializer) {
-        super(serializer);
+        this.serializer = requireNonNull(serializer);
+    }
+
+    @Override
+    BindingNormalizedNodeSerializer serializer() {
+        return serializer;
     }
 }

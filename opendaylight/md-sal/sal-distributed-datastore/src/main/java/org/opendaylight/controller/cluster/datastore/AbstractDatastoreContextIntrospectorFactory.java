@@ -7,11 +7,9 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import static java.util.Objects.requireNonNull;
-
 import com.google.common.annotations.VisibleForTesting;
 import java.util.Map;
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev250130.DataStorePropertiesContainer;
 import org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer;
@@ -19,15 +17,11 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes;
 
-abstract class AbstractDatastoreContextIntrospectorFactory implements DatastoreContextIntrospectorFactory {
-    private final BindingNormalizedNodeSerializer serializer;
-
-    AbstractDatastoreContextIntrospectorFactory(final BindingNormalizedNodeSerializer serializer) {
-        this.serializer = requireNonNull(serializer);
-    }
-
+@NonNullByDefault
+abstract sealed class AbstractDatastoreContextIntrospectorFactory implements DatastoreContextIntrospectorFactory
+        permits DefaultDatastoreContextIntrospectorFactory, OSGiDatastoreContextIntrospectorFactory {
     @Override
-    public final DatastoreContextIntrospector newInstance(final LogicalDatastoreType datastoreType,
+    public DatastoreContextIntrospector newInstance(final LogicalDatastoreType datastoreType,
             final Map<String, Object> properties) {
         final DatastoreContextIntrospector inst = newInstance(datastoreType);
         inst.update(properties);
@@ -43,11 +37,14 @@ abstract class AbstractDatastoreContextIntrospectorFactory implements DatastoreC
     }
 
     @VisibleForTesting
-    final @NonNull DatastoreContextIntrospector newInstance(final DatastoreContext context) {
-        return new DatastoreContextIntrospector(context, (DataStorePropertiesContainer) serializer.fromNormalizedNode(
-            YangInstanceIdentifier.of(DataStorePropertiesContainer.QNAME),
-            ImmutableNodes.newContainerBuilder()
-                .withNodeIdentifier(new NodeIdentifier(DataStorePropertiesContainer.QNAME))
-                .build()).getValue());
+    final DatastoreContextIntrospector newInstance(final DatastoreContext context) {
+        return new DatastoreContextIntrospector(context, (DataStorePropertiesContainer) serializer()
+            .fromNormalizedNode(YangInstanceIdentifier.of(DataStorePropertiesContainer.QNAME),
+                ImmutableNodes.newContainerBuilder()
+                    .withNodeIdentifier(new NodeIdentifier(DataStorePropertiesContainer.QNAME))
+                .build())
+            .getValue());
     }
+
+    abstract BindingNormalizedNodeSerializer serializer();
 }
