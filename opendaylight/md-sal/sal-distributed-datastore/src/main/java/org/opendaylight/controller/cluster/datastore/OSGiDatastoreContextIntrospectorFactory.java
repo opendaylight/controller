@@ -7,23 +7,34 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import com.google.common.annotations.Beta;
+import static com.google.common.base.Verify.verifyNotNull;
+import static java.util.Objects.requireNonNull;
+
+import com.google.common.base.MoreObjects;
+import java.util.concurrent.atomic.AtomicReference;
 import org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Beta
 @Component(service = DatastoreContextIntrospectorFactory.class)
 public final class OSGiDatastoreContextIntrospectorFactory extends AbstractDatastoreContextIntrospectorFactory {
     private static final Logger LOG = LoggerFactory.getLogger(OSGiDatastoreContextIntrospectorFactory.class);
 
+    private final AtomicReference<BindingNormalizedNodeSerializer> serializer = new AtomicReference<>();
+
+    public OSGiDatastoreContextIntrospectorFactory() {
+        // Nothing else
+    }
+
     @Activate
-    public OSGiDatastoreContextIntrospectorFactory(@Reference final BindingNormalizedNodeSerializer serializer) {
-        super(serializer);
+    void activate() {
+        serializer();
         LOG.info("Datastore Context Introspector activated");
     }
 
@@ -31,5 +42,28 @@ public final class OSGiDatastoreContextIntrospectorFactory extends AbstractDatas
     @SuppressWarnings("static-method")
     void deactivate() {
         LOG.info("Datastore Context Introspector deactivated");
+    }
+
+    @Override
+    BindingNormalizedNodeSerializer serializer() {
+        return verifyNotNull(serializer.getAcquire());
+    }
+
+    @Reference(policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
+    void bindSerializer(final BindingNormalizedNodeSerializer newSerializer) {
+        serializer.setRelease(requireNonNull(newSerializer));
+        LOG.debug("Using new serializer {}", newSerializer);
+    }
+
+    void unbindSerializer(final BindingNormalizedNodeSerializer oldSerializer) {
+        final var witness = serializer.compareAndExchangeRelease(oldSerializer, null);
+        if (witness == oldSerializer) {
+            LOG.debug("Relinquished final serializer {}", oldSerializer);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this).add("serializer", serializer).toString();
     }
 }
