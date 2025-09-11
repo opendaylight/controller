@@ -54,6 +54,24 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "37b4d870_86f9dafb",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 8907
+      },
+      "writtenOn": "2025-09-11T15:31:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2cf47446_2058b6f7",
+      "revId": "07963f06d700d9c6f2e2bc26841a5f84976a1cd2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "9d4400ca_3e0b4612",
@@ -162,6 +180,30 @@
       "side": 1,
       "message": "Updated to inherit from `org.opendaylight.odlparen` `karaf4-parent`",
       "parentUuid": "9d357fec_4019d0bb",
+      "range": {
+        "startLine": 3,
+        "startChar": 1,
+        "endLine": 3,
+        "endChar": 25
+      },
+      "revId": "07963f06d700d9c6f2e2bc26841a5f84976a1cd2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4f847a9c_efcdd578",
+        "filename": "karaf4-parent/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 8907
+      },
+      "writtenOn": "2025-09-11T15:31:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b43e18b6_764abd2c",
       "range": {
         "startLine": 3,
         "startChar": 1,
