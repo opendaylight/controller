@@ -7,12 +7,12 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
 import java.util.concurrent.atomic.AtomicReference;
 import org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer;
+import org.opendaylight.yangtools.binding.data.codec.osgi.OSGiBindingDOMCodecServices;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 public final class OSGiDatastoreContextIntrospectorFactory extends AbstractDatastoreContextIntrospectorFactory {
     private static final Logger LOG = LoggerFactory.getLogger(OSGiDatastoreContextIntrospectorFactory.class);
 
-    private final AtomicReference<BindingNormalizedNodeSerializer> serializer = new AtomicReference<>();
+    private final AtomicReference<OSGiBindingDOMCodecServices> serializer = new AtomicReference<>();
 
     @Activate
     void activate() {
@@ -42,16 +42,16 @@ public final class OSGiDatastoreContextIntrospectorFactory extends AbstractDatas
 
     @Override
     BindingNormalizedNodeSerializer serializer() {
-        return verifyNotNull(serializer.getAcquire());
+        return serializer.getAcquire().service();
     }
 
     @Reference(policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
-    void bindSerializer(final BindingNormalizedNodeSerializer newSerializer) {
+    void bindSerializer(final OSGiBindingDOMCodecServices newSerializer) {
         serializer.setRelease(requireNonNull(newSerializer));
         LOG.debug("Using new serializer {}", newSerializer);
     }
 
-    void unbindSerializer(final BindingNormalizedNodeSerializer oldSerializer) {
+    void unbindSerializer(final OSGiBindingDOMCodecServices oldSerializer) {
         if (serializer.compareAndExchangeRelease(oldSerializer, null) == oldSerializer) {
             LOG.debug("Relinquished final serializer {}", oldSerializer);
         }
