@@ -34,7 +34,7 @@ import org.opendaylight.yangtools.binding.runtime.spi.BindingRuntimeHelpers;
  * @author Thomas Pantelis
  */
 public class DatastoreContextIntrospectorTest {
-    static final DefaultDatastoreContextIntrospectorFactory INTROSPECTOR_FACTORY =
+    static final AbstractDatastoreContextIntrospectorFactory INTROSPECTOR_FACTORY =
         new DefaultDatastoreContextIntrospectorFactory(new DefaultBindingDOMCodecFactory()
             .newBindingDataCodec(BindingRuntimeHelpers.createRuntimeContext(DataStorePropertiesContainer.class))
             .nodeSerializer());
