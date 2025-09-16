@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>bundle-parent</artifactId>
-        <version>10.0.14-SNAPSHOT</version>
+        <version>10.0.14</version>
         <relativePath>../bundle-parent</relativePath>
     </parent>
 
