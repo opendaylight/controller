@@ -19,22 +19,7 @@ import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
  * initialized before each use through {@link #initializeForPath(YangInstanceIdentifier)}.
  */
 @Beta
-public abstract class ReusableNormalizedNodePruner extends AbstractNormalizedNodePruner {
-    private static final class SimplePruner extends ReusableNormalizedNodePruner {
-        SimplePruner(final EffectiveModelContext schemaContext) {
-            super(schemaContext);
-        }
-
-        SimplePruner(final DataSchemaContextTree tree) {
-            super(tree);
-        }
-
-        @Override
-        public ReusableNormalizedNodePruner duplicate() {
-            return new SimplePruner(getTree());
-        }
-    }
-
+public final class ReusableNormalizedNodePruner extends AbstractNormalizedNodePruner {
     ReusableNormalizedNodePruner(final EffectiveModelContext schemaContext) {
         super(schemaContext);
     }
@@ -51,7 +36,7 @@ public abstract class ReusableNormalizedNodePruner extends AbstractNormalizedNod
      * @throws NullPointerException if {@code schemaContext} is null
      */
     public static @NonNull ReusableNormalizedNodePruner forSchemaContext(final EffectiveModelContext schemaContext) {
-        return new SimplePruner(schemaContext);
+        return new ReusableNormalizedNodePruner(schemaContext);
     }
 
     /**
@@ -63,7 +48,7 @@ public abstract class ReusableNormalizedNodePruner extends AbstractNormalizedNod
      * @throws NullPointerException if {@code schemaContext} is null
      */
     public static @NonNull ReusableNormalizedNodePruner forDataSchemaContext(final DataSchemaContextTree tree) {
-        return new SimplePruner(tree);
+        return new ReusableNormalizedNodePruner(tree);
     }
 
     /**
@@ -73,7 +58,9 @@ public abstract class ReusableNormalizedNodePruner extends AbstractNormalizedNod
      *
      * @return A new uninitialized pruner bound to the same SchemaContext as this one.
      */
-    public abstract @NonNull ReusableNormalizedNodePruner duplicate();
+    public @NonNull ReusableNormalizedNodePruner duplicate() {
+        return new ReusableNormalizedNodePruner(getTree());
+    }
 
     /**
      * Initialize this pruner for processing a node at specified path.
@@ -81,11 +68,7 @@ public abstract class ReusableNormalizedNodePruner extends AbstractNormalizedNod
      * @param path Path that will be processed next
      * @throws NullPointerException if {@code path} is null
      */
-    public final void initializeForPath(final YangInstanceIdentifier path) {
+    public void initializeForPath(final YangInstanceIdentifier path) {
         initialize(path);
-    }
-
-    public final @NonNull ReusableNormalizedNodePruner withUintAdaption() {
-        return new UintAdaptingPruner(getTree());
     }
 }
