@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.opendaylight.mdsal</groupId>
         <artifactId>bundle-parent</artifactId>
-        <version>14.0.17</version>
+        <version>14.0.18</version>
         <relativePath/>
     </parent>
 
