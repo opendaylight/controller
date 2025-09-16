@@ -9,16 +9,14 @@ package org.opendaylight.controller.cluster.datastore.persisted;
 
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.annotations.Beta;
 import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * Abstract base exception used for reporting version mismatches from {@link PayloadVersion}.
- *
- * @author Robert Varga
  */
-@Beta
-public abstract class AbstractVersionException extends Exception {
+public abstract sealed class AbstractVersionException extends Exception
+        permits FutureVersionException, PastVersionException {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     private final @NonNull PayloadVersion closestVersion;
