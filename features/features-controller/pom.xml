@@ -17,7 +17,7 @@
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>features-controller</artifactId>
-    <version>11.0.2</version>
+    <version>11.0.3-SNAPSHOT</version>
     <packaging>feature</packaging>
     <name>OpenDaylight :: Controller :: Features</name>
     <description>Controller Production Features</description>

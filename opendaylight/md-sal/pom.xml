@@ -11,7 +11,7 @@
 
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>mdsal-aggregator</artifactId>
-  <version>11.0.2</version>
+  <version>11.0.3-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <properties>

@@ -18,7 +18,7 @@
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>bnd-parent</artifactId>
-    <version>11.0.2</version>
+    <version>11.0.3-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
     <description>Bundle parent (bnd-based)</description>
@@ -28,7 +28,7 @@
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>controller-artifacts</artifactId>
-                <version>11.0.2</version>
+                <version>11.0.3-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

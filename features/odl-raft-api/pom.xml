@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>feature-parent</artifactId>
-        <version>11.0.2</version>
+        <version>11.0.3-SNAPSHOT</version>
         <relativePath>../parent/pom.xml</relativePath>
     </parent>
 
