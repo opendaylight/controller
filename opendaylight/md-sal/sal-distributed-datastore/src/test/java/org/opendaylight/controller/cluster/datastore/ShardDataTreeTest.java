@@ -368,7 +368,6 @@ public class ShardDataTreeTest extends AbstractTest {
         assertTrue("Car node present", shardDataTree.takeSnapshot().readNode(CarsModel.BASE_PATH).isPresent());
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testAbortWithPendingCommits() throws Exception {
         final CommitCohort cohort1 = newShardDataTreeCohort(snapshot ->
@@ -393,6 +392,7 @@ public class ShardDataTreeTest extends AbstractTest {
         coordinatedPreCommit(cohort2);
         coordinatedPreCommit(cohort3);
 
+        @SuppressWarnings("unchecked")
         FutureCallback<Empty> mockAbortCallback = mock(FutureCallback.class);
         doNothing().when(mockAbortCallback).onSuccess(Empty.value());
         cohort2.abort(mockAbortCallback);
@@ -421,7 +421,6 @@ public class ShardDataTreeTest extends AbstractTest {
         assertEquals("Car node", Optional.of(carNode), shardDataTree.takeSnapshot().readNode(carPath));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testAbortWithFailedRebase() {
         immediatePayloadReplication(shardDataTree, mockShard);
@@ -442,6 +441,7 @@ public class ShardDataTreeTest extends AbstractTest {
         coordinatedPreCommit(cohort1);
         verify(canCommitCallback2).onSuccess(Empty.value());
 
+        @SuppressWarnings("unchecked")
         FutureCallback<Empty> mockAbortCallback = mock(FutureCallback.class);
         doNothing().when(mockAbortCallback).onSuccess(Empty.value());
         cohort1.abort(mockAbortCallback);
@@ -464,15 +464,10 @@ public class ShardDataTreeTest extends AbstractTest {
             DataTreeCandidates.fromNormalizedNode(YangInstanceIdentifier.of(), bigIntegerRoot()),
             PayloadVersion.POTASSIUM));
 
-        assertCarsUint64();
-    }
-
-    @Test
-    public void testUintSnapshot() throws IOException, DataValidationFailedException {
-        shardDataTree.applyRecoverySnapshot(new ShardSnapshotState(new MetadataShardDataTreeSnapshot(bigIntegerRoot()),
-            true));
-
-        assertCarsUint64();
+        assertEquals(Optional.of(ImmutableNodes.newSystemMapBuilder()
+            .withNodeIdentifier(new NodeIdentifier(CarsModel.CAR_QNAME))
+            .withChild(createCar("foo", Uint64.ONE))
+            .build()), shardDataTree.takeSnapshot().readNode(CarsModel.CAR_LIST_PATH));
     }
 
     @Test
@@ -515,7 +510,7 @@ public class ShardDataTreeTest extends AbstractTest {
 
         // Apply first candidate as a snapshot
         shardDataTree.applyRecoverySnapshot(new ShardSnapshotState(
-            new MetadataShardDataTreeSnapshot(first.getRootNode().getDataAfter()), true));
+            new MetadataShardDataTreeSnapshot(first.getRootNode().getDataAfter())));
         // Apply the other two snapshots as transactions
         shardDataTree.applyRecoveryCommand(CommitTransactionPayload.create(nextTransactionId(), second,
             PayloadVersion.POTASSIUM));
@@ -529,14 +524,6 @@ public class ShardDataTreeTest extends AbstractTest {
             .withChild(createCar("one", Uint64.ONE))
             .withChild(createCar("two", Uint64.TWO))
             .withChild(createCar("three", Uint64.TEN))
-            .build()), shardDataTree.takeSnapshot().readNode(CarsModel.CAR_LIST_PATH));
-    }
-
-    private void assertCarsUint64() {
-        assertEquals(Optional.of(ImmutableNodes.newSystemMapBuilder()
-            .withNodeIdentifier(new NodeIdentifier(CarsModel.CAR_QNAME))
-            // Note: Uint64
-            .withChild(createCar("foo", Uint64.ONE))
             .build()), shardDataTree.takeSnapshot().readNode(CarsModel.CAR_LIST_PATH));
     }
 

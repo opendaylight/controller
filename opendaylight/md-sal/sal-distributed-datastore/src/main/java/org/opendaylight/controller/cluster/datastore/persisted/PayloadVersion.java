@@ -45,24 +45,8 @@ public enum PayloadVersion implements WritableObject {
             throw new UnsupportedOperationException();
         }
     },
-
     /**
-     * ABI version shipped enabled {@code 2022.09 Chlorine SR2}. This version revises the serialization format of
-     * payloads proxies to reduce their size. Otherwise this format is equivalent to {@code #MAGNESIUM}.
-     *
-     * @deprecated Use {@link #POTASSIUM} instead.
-     */
-    @Deprecated(since = "8.0.0", forRemoval = true)
-    CHLORINE_SR2(9) {
-        @Override
-        public NormalizedNodeStreamVersion getStreamVersion() {
-            return NormalizedNodeStreamVersion.MAGNESIUM;
-        }
-    },
-
-    /**
-     * ABI version shipped enabled {@code 2023.09 Potassium}. This version removes Augmentation identifier and nodes.
-     * Otherwise this format is equivalent to {@link #CHLORINE_SR2}.
+     * ABI version shipped enabled {@code 2023.09 Potassium}.
      */
     POTASSIUM(10) {
         @Override
@@ -70,7 +54,6 @@ public enum PayloadVersion implements WritableObject {
             return NormalizedNodeStreamVersion.POTASSIUM;
         }
     },
-
     /**
      * Version which is newer than any other version. This version exists purely for testing purposes.
      */
@@ -127,8 +110,7 @@ public enum PayloadVersion implements WritableObject {
     public static @NonNull PayloadVersion valueOf(final short version)
             throws FutureVersionException, PastVersionException {
         return switch (Short.toUnsignedInt(version)) {
-            case 0, 1, 2, 3, 4, 5, 6, 7, 8 -> throw new PastVersionException(version, CHLORINE_SR2);
-            case 9 -> CHLORINE_SR2;
+            case 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 -> throw new PastVersionException(version, POTASSIUM);
             case 10 -> POTASSIUM;
             default -> throw new FutureVersionException(version, POTASSIUM);
         };

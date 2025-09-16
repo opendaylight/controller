@@ -19,10 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * An internally-versioned {@link ShardDataTreeSnapshot}. This class is an intermediate implementation-private
- * class.
- *
- * @author Robert Varga
+ * An internally-versioned {@link ShardDataTreeSnapshot}. This class is an intermediate implementation-private class.
  */
 abstract class AbstractVersionedShardDataTreeSnapshot extends ShardDataTreeSnapshot {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractVersionedShardDataTreeSnapshot.class);
@@ -31,12 +28,9 @@ abstract class AbstractVersionedShardDataTreeSnapshot extends ShardDataTreeSnaps
     static @NonNull ShardSnapshotState versionedDeserialize(final ObjectInput in) throws IOException {
         final PayloadVersion version = PayloadVersion.readFrom(in);
         switch (version) {
-            case CHLORINE_SR2:
-                return new ShardSnapshotState(readSnapshot(in), true);
             case POTASSIUM:
-                return new ShardSnapshotState(readSnapshot(in), false);
-            case TEST_FUTURE_VERSION:
-            case TEST_PAST_VERSION:
+                return new ShardSnapshotState(readSnapshot(in));
+            case TEST_FUTURE_VERSION, TEST_PAST_VERSION:
                 // These versions are never returned and this code is effectively dead
             default:
                 // Not included as default in above switch to ensure we get warnings when new versions are added
@@ -75,24 +69,18 @@ abstract class AbstractVersionedShardDataTreeSnapshot extends ShardDataTreeSnaps
 
     private void versionedSerialize(final ObjectOutput out, final PayloadVersion version) throws IOException {
         switch (version) {
-            case CHLORINE_SR2:
-            case POTASSIUM:
+            case null -> throw new NullPointerException();
+            case POTASSIUM ->
                 // Sodium onwards snapshots use Java Serialization, but differ in stream format
                 out.writeObject(this);
-                return;
-            case TEST_FUTURE_VERSION:
-            case TEST_PAST_VERSION:
-                break;
-            default:
-                throw new IOException("Invalid payload version in snapshot");
+            case TEST_FUTURE_VERSION, TEST_PAST_VERSION ->
+                throw new IOException("Encountered unhandled version" + version);
         }
-
-        throw new IOException("Encountered unhandled version" + version);
     }
 
     @Override
     public void serialize(final ObjectOutput out) throws IOException {
-        final PayloadVersion version = version();
+        final var version = version();
         version.writeTo(out);
         versionedSerialize(out, version);
     }
