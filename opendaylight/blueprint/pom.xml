@@ -20,7 +20,7 @@
   <artifactId>blueprint</artifactId>
   <packaging>bundle</packaging>
   <name>${project.artifactId}</name>
-  <version>10.0.13</version>
+  <version>10.0.14-SNAPSHOT</version>
 
   <properties>
     <odlparent.modernizer.enforce>false</odlparent.modernizer.enforce>

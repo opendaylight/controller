@@ -10,7 +10,7 @@
 
   <groupId>org.opendaylight.controller.samples</groupId>
   <artifactId>samples-aggregator</artifactId>
-  <version>10.0.13</version>
+  <version>10.0.14-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <properties>
