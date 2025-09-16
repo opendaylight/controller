@@ -130,7 +130,7 @@ public enum PayloadVersion implements WritableObject {
             case 0, 1, 2, 3, 4, 5, 6, 7, 8 -> throw new PastVersionException(version, CHLORINE_SR2);
             case 9 -> CHLORINE_SR2;
             case 10 -> POTASSIUM;
-            default -> throw new FutureVersionException(version, CHLORINE_SR2);
+            default -> throw new FutureVersionException(version, POTASSIUM);
         };
     }
 
