@@ -53,16 +53,13 @@ public final class ShardSnapshotState implements Snapshot.State {
     };
 
     @SuppressFBWarnings(value = "SE_BAD_FIELD", justification = """
-        This field is not Serializable but this class \
-        implements writeReplace to delegate serialization to a Proxy class and thus instances of this class \
-        aren't serialized. FindBugs does not recognize this.""")
+        This field is not Serializable but this class implements writeReplace() to delegate serialization to a Proxy \
+        class and thus instances of this class are not serialized. FindBugs does not recognize this.""")
     private final @NonNull ShardDataTreeSnapshot snapshot;
-    private final boolean migrated;
 
     @VisibleForTesting
     public ShardSnapshotState(final @NonNull ShardDataTreeSnapshot snapshot, final boolean migrated) {
         this.snapshot = requireNonNull(snapshot);
-        this.migrated = migrated;
     }
 
     public ShardSnapshotState(final @NonNull ShardDataTreeSnapshot snapshot) {
@@ -71,11 +68,6 @@ public final class ShardSnapshotState implements Snapshot.State {
 
     public @NonNull ShardDataTreeSnapshot getSnapshot() {
         return snapshot;
-    }
-
-    @Override
-    public boolean needsMigration() {
-        return migrated;
     }
 
     @java.io.Serial

@@ -79,7 +79,6 @@ import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.codec.binfmt.NormalizedNodeStreamVersion;
 import org.opendaylight.yangtools.yang.data.tree.api.ConflictingModificationAppliedException;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTree;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
@@ -301,21 +300,14 @@ public class ShardDataTree {
     final void applyRecoverySnapshot(final @NonNull ShardSnapshotState snapshot) throws DataValidationFailedException {
         // TODO: we should be able to reuse the pruner, provided we are not reentrant
         final var pruner = ReusableNormalizedNodePruner.forDataSchemaContext(dataSchemaContext);
-        if (snapshot.needsMigration()) {
-            final var uintPruner = pruner.withUintAdaption();
-            applySnapshot(snapshot.getSnapshot(),
-                delegate -> new PruningDataTreeModification.Proactive(delegate, dataTree, uintPruner));
-        } else {
-            applySnapshot(snapshot.getSnapshot(),
-                delegate -> new PruningDataTreeModification.Reactive(delegate, dataTree, pruner));
-        }
+        applySnapshot(snapshot.getSnapshot(),
+            delegate -> new PruningDataTreeModification.Reactive(delegate, dataTree, pruner));
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
     private void applyRecoveredCandidate(final CandidateTransaction transaction) throws IOException {
         final var unwrapped = newModification();
-        final var pruningMod = createPruningModification(unwrapped,
-            NormalizedNodeStreamVersion.MAGNESIUM.compareTo(transaction.streamVersion()) > 0);
+        final var pruningMod = createPruningModification(unwrapped);
 
         DataTreeCandidates.applyToModification(pruningMod, transaction.candidate());
         pruningMod.ready();
@@ -340,12 +332,10 @@ public class ShardDataTree {
         allMetadataCommittedTransaction(transaction.transactionId());
     }
 
-    private PruningDataTreeModification createPruningModification(final DataTreeModification unwrapped,
-            final boolean uintAdapting) {
+    private PruningDataTreeModification createPruningModification(final DataTreeModification unwrapped) {
         // TODO: we should be able to reuse the pruner, provided we are not reentrant
         final var pruner = ReusableNormalizedNodePruner.forDataSchemaContext(dataSchemaContext);
-        return uintAdapting ? new PruningDataTreeModification.Proactive(unwrapped, dataTree, pruner.withUintAdaption())
-                : new PruningDataTreeModification.Reactive(unwrapped, dataTree, pruner);
+        return new PruningDataTreeModification.Reactive(unwrapped, dataTree, pruner);
     }
 
     /**
