@@ -18,7 +18,7 @@
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>feature-parent</artifactId>
-    <version>11.0.2-SNAPSHOT</version>
+    <version>11.0.2</version>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
     <description>Feature parent (based on template-feature-parent)</description>
@@ -28,7 +28,7 @@
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>bnd-parent</artifactId>
-                <version>11.0.2-SNAPSHOT</version>
+                <version>11.0.2</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
