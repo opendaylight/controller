@@ -27,7 +27,7 @@
         <dependencies>
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
-                <artifactId>controller-artifacts</artifactId>
+                <artifactId>bnd-parent</artifactId>
                 <version>${project.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
@@ -74,7 +74,7 @@
             <artifactId>cds-dom-api</artifactId>
         </dependency>
 
-        <!-- Third-party dependencies -->
+        <!-- Additional dependencies -->
         <dependency>
             <groupId>com.github.spotbugs</groupId>
             <artifactId>spotbugs-annotations</artifactId>
@@ -95,6 +95,10 @@
         <dependency>
             <groupId>org.kohsuke.metainf-services</groupId>
             <artifactId>metainf-services</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.yangtools</groupId>
+            <artifactId>binding-data-codec-osgi</artifactId>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
