@@ -9,19 +9,18 @@ package org.opendaylight.controller.cluster.datastore.persisted;
 
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.annotations.Beta;
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  * Abstract base exception used for reporting version mismatches from {@link PayloadVersion}.
- *
- * @author Robert Varga
  */
-@Beta
-public abstract class AbstractVersionException extends Exception {
+@NonNullByDefault
+public abstract sealed class AbstractVersionException extends Exception
+        permits FutureVersionException, PastVersionException {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
-    private final @NonNull PayloadVersion closestVersion;
+    private final PayloadVersion closestVersion;
     private final int version;
 
     AbstractVersionException(final String message, final short version, final PayloadVersion closestVersion) {
@@ -31,20 +30,16 @@ public abstract class AbstractVersionException extends Exception {
     }
 
     /**
-     * Return the numeric version which has caused this exception.
-     *
-     * @return Numeric version
+     * {@return the numeric version which has caused this exception}
      */
     public final int getVersion() {
         return version;
     }
 
     /**
-     * Return the closest version supported by this codebase.
-     *
-     * @return Closest supported {@link PayloadVersion}
+     * {@return the closest version supported by this codebase}
      */
-    public final @NonNull PayloadVersion getClosestVersion() {
+    public final PayloadVersion getClosestVersion() {
         return closestVersion;
     }
 }

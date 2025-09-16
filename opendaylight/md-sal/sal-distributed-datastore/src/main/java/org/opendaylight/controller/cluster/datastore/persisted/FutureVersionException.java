@@ -7,19 +7,18 @@
  */
 package org.opendaylight.controller.cluster.datastore.persisted;
 
-import com.google.common.annotations.Beta;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  * Exception thrown from {@link PayloadVersion#valueOf(short)} when the specified version is too new to be supported
  * by the codebase.
- *
- * @author Robert Varga
  */
-@Beta
+@NonNullByDefault
 public final class FutureVersionException extends AbstractVersionException {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
-    FutureVersionException(final short version, PayloadVersion closest) {
+    FutureVersionException(final short version, final PayloadVersion closest) {
         super("Version " + Short.toUnsignedInt(version) + " is too new", version, closest);
     }
 }

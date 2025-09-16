@@ -7,16 +7,15 @@
  */
 package org.opendaylight.controller.cluster.datastore.persisted;
 
-import com.google.common.annotations.Beta;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  * Exception thrown from {@link PayloadVersion#valueOf(short)} when the specified version is too old and no longer
  * supported by the codebase.
- *
- * @author Robert Varga
  */
-@Beta
+@NonNullByDefault
 public final class PastVersionException extends AbstractVersionException {
+    @java.io.Serial
     private static final long serialVersionUID = 1L;
 
     PastVersionException(final short version, final PayloadVersion closest) {
