@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>mdsal-parent</artifactId>
-        <version>10.0.14</version>
+        <version>10.0.15-SNAPSHOT</version>
         <relativePath>../parent</relativePath>
     </parent>
 
