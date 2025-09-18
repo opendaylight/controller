@@ -35,7 +35,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 import org.opendaylight.mdsal.binding.api.DataBroker;
 import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
-import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.mdsal.binding.api.NotificationPublishService;
 import org.opendaylight.mdsal.binding.api.ReadWriteTransaction;
@@ -63,8 +62,8 @@ import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterOutOfBreadBuilder;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterRestocked;
 import org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.toaster.rev091120.ToasterRestockedBuilder;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.concepts.Registration;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.ErrorTag;
 import org.opendaylight.yangtools.yang.common.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcError;
@@ -102,7 +101,8 @@ public final class OpendaylightToaster extends AbstractMXBean
 
     private static final Logger LOG = LoggerFactory.getLogger(OpendaylightToaster.class);
 
-    private static final InstanceIdentifier<Toaster> TOASTER_IID = InstanceIdentifier.builder(Toaster.class).build();
+    private static final DataObjectIdentifier<Toaster> TOASTER_IID =
+        DataObjectIdentifier.builder(Toaster.class).build();
     private static final String TOASTER_MANUFACTURER = "Opendaylight";
     private static final String TOASTER_MODEL_NUMBER = "Model 1 - Binding Aware";
 
@@ -145,7 +145,7 @@ public final class OpendaylightToaster extends AbstractMXBean
         LOG.info("Initializing...");
 
         dataTreeChangeListenerRegistration = requireNonNull(dataBroker, "dataBroker must be set")
-            .registerTreeChangeListener(DataTreeIdentifier.of(CONFIGURATION, TOASTER_IID), this);
+            .registerTreeChangeListener(CONFIGURATION, TOASTER_IID, this);
         try {
             setToasterStatusUp(null).get();
         } catch (InterruptedException | ExecutionException e) {
@@ -231,7 +231,7 @@ public final class OpendaylightToaster extends AbstractMXBean
                     final var oldToaster = rootNode.dataBefore();
                     final var newToaster = rootNode.dataAfter();
                     LOG.info("onDataTreeChanged - Toaster config with path {} was added or replaced: old Toaster: {}, "
-                        + "new Toaster: {}", change.getRootPath().path(), oldToaster, newToaster);
+                        + "new Toaster: {}", change.path(), oldToaster, newToaster);
 
                     final var darkness = newToaster.getDarknessFactor();
                     if (darkness != null) {
@@ -239,7 +239,7 @@ public final class OpendaylightToaster extends AbstractMXBean
                     }
                 }
                 case DELETE -> LOG.info("onDataTreeChanged - Toaster config with path {} was deleted: old Toaster: {}",
-                        change.getRootPath().path(), rootNode.dataBefore());
+                        change.path(), rootNode.dataBefore());
                 default -> {
                     // No-op
                 }
