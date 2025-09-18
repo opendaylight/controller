@@ -18,7 +18,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchm
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput.DataStore;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.TestExec;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.test.exec.OuterList;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +48,7 @@ public class SimpletxBaWrite extends DatastoreAbstractWriter {
         long writeCnt = 0;
 
         for (var element : list) {
-            final var iid = InstanceIdentifier.create(TestExec.class).child(OuterList.class, element.key());
+            final var iid = DataObjectIdentifier.builder(TestExec.class).child(OuterList.class, element.key()).build();
             if (oper == StartTestInput.Operation.PUT) {
                 tx.put(dsType, iid, element);
             } else {

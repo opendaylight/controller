@@ -12,18 +12,17 @@ import static java.util.Objects.requireNonNull;
 import java.util.ArrayList;
 import java.util.List;
 import org.opendaylight.mdsal.binding.api.DataBroker;
-import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.TestExec;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.concepts.Registration;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DsbenchmarkListenerProvider {
     private static final Logger LOG = LoggerFactory.getLogger(DsbenchmarkListenerProvider.class);
-    private static final InstanceIdentifier<TestExec> TEST_EXEC_IID =
-            InstanceIdentifier.builder(TestExec.class).build();
+    private static final DataObjectIdentifier<TestExec> TEST_EXEC_IID =
+        DataObjectIdentifier.builder(TestExec.class).build();
     private final List<DsbenchmarkListener> listeners = new ArrayList<>();
     private final List<Registration> registrations = new ArrayList<>();
     private final DataBroker dataBroker;
@@ -38,9 +37,9 @@ public class DsbenchmarkListenerProvider {
             var listener = new DsbenchmarkListener();
             listeners.add(listener);
             registrations.add(dataBroker.registerTreeChangeListener(
-                    DataTreeIdentifier.of(LogicalDatastoreType.CONFIGURATION, TEST_EXEC_IID), listener));
+                    LogicalDatastoreType.CONFIGURATION, TEST_EXEC_IID, listener));
             registrations.add(dataBroker.registerTreeChangeListener(
-                    DataTreeIdentifier.of(LogicalDatastoreType.OPERATIONAL, TEST_EXEC_IID), listener));
+                    LogicalDatastoreType.OPERATIONAL, TEST_EXEC_IID, listener));
 
         }
         LOG.debug("DsbenchmarkListenerProvider created {} listeneres", numListeners);

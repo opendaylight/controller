@@ -17,7 +17,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchm
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.TestExec;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.test.exec.OuterList;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.test.exec.OuterListKey;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,9 +55,9 @@ public class SimpletxBaDelete extends DatastoreAbstractWriter {
         long putCnt = 0;
 
         for (long l = 0; l < outerListElem; l++) {
-            InstanceIdentifier<OuterList> iid = InstanceIdentifier.create(TestExec.class)
-                                                        .child(OuterList.class, new OuterListKey((int)l));
-            tx.delete(dsType, iid);
+            tx.delete(dsType, DataObjectIdentifier.builder(TestExec.class)
+                .child(OuterList.class, new OuterListKey((int) l))
+                .build());
             putCnt++;
             if (putCnt == writesPerTx) {
                 try {
