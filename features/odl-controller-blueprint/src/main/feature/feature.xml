@@ -9,9 +9,9 @@
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" name="odl-controller-blueprint-${project.version}">
     <feature name="odl-controller-blueprint" version="${project.version}">
         <feature version="[14,15)">odl-yangtools-codec</feature>
-        <feature version="[14,15)">odl-mdsal-binding-api</feature>
-        <feature version="[14,15)">odl-mdsal-binding-runtime</feature>
-        <feature version="[14,15)">odl-mdsal-dom-api</feature>
+        <feature version="[15,16)">odl-mdsal-binding-api</feature>
+        <feature version="[15,16)">odl-mdsal-binding-runtime</feature>
+        <feature version="[15,16)">odl-mdsal-dom-api</feature>
         <bundle start-level="40">mvn:org.opendaylight.controller/blueprint/${project.version}</bundle>
     </feature>
 </features>

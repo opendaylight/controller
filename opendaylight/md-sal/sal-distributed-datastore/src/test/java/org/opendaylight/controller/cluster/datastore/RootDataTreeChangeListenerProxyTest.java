@@ -31,7 +31,7 @@ import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeCh
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeNotificationListenerReply;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.controller.md.cluster.datastore.model.PeopleModel;
-import org.opendaylight.mdsal.dom.api.ClusteredDOMDataTreeChangeListener;
+import org.opendaylight.mdsal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.tree.spi.DataTreeCandidates;
@@ -44,11 +44,10 @@ public class RootDataTreeChangeListenerProxyTest extends AbstractActorTest {
         ActorUtils actorUtils = new ActorUtils(getSystem(), kit.getRef(), mock(ClusterWrapper.class),
             mock(Configuration.class));
 
-        ClusteredDOMDataTreeChangeListener mockClusteredListener = mock(
-            ClusteredDOMDataTreeChangeListener.class);
+        DOMDataTreeChangeListener mockClusteredListener = mock(DOMDataTreeChangeListener.class);
 
         final YangInstanceIdentifier path = YangInstanceIdentifier.of();
-        final RootDataTreeChangeListenerProxy<ClusteredDOMDataTreeChangeListener> rootListenerProxy =
+        final RootDataTreeChangeListenerProxy<DOMDataTreeChangeListener> rootListenerProxy =
             new RootDataTreeChangeListenerProxy<>(actorUtils, mockClusteredListener,
             Set.of("shard-1", "shard-2"));
 
@@ -95,10 +94,9 @@ public class RootDataTreeChangeListenerProxyTest extends AbstractActorTest {
         ActorUtils actorUtils = new ActorUtils(getSystem(), kit.getRef(), mock(ClusterWrapper.class),
             mock(Configuration.class));
 
-        ClusteredDOMDataTreeChangeListener mockClusteredListener = mock(
-            ClusteredDOMDataTreeChangeListener.class);
+        DOMDataTreeChangeListener mockClusteredListener = mock(DOMDataTreeChangeListener.class);
 
-        final RootDataTreeChangeListenerProxy<ClusteredDOMDataTreeChangeListener> rootListenerProxy =
+        final RootDataTreeChangeListenerProxy<DOMDataTreeChangeListener> rootListenerProxy =
             new RootDataTreeChangeListenerProxy<>(actorUtils, mockClusteredListener, Set.of("shard-1", "shard-2"));
 
         Duration timeout = Duration.ofSeconds(5);
@@ -117,10 +115,9 @@ public class RootDataTreeChangeListenerProxyTest extends AbstractActorTest {
         ActorUtils actorUtils = new ActorUtils(getSystem(), kit.getRef(), mock(ClusterWrapper.class),
             mock(Configuration.class));
 
-        ClusteredDOMDataTreeChangeListener mockClusteredListener = mock(
-            ClusteredDOMDataTreeChangeListener.class);
+        DOMDataTreeChangeListener mockClusteredListener = mock(DOMDataTreeChangeListener.class);
 
-        final RootDataTreeChangeListenerProxy<ClusteredDOMDataTreeChangeListener> rootListenerProxy =
+        final RootDataTreeChangeListenerProxy<DOMDataTreeChangeListener> rootListenerProxy =
             new RootDataTreeChangeListenerProxy<>(actorUtils, mockClusteredListener, Set.of("shard-1"));
 
         Duration timeout = Duration.ofSeconds(5);
