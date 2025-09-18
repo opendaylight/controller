@@ -48,8 +48,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchm
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.TestStatus;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.TestStatus.ExecStatus;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.TestStatusBuilder;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.concepts.Registration;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.common.Uint32;
@@ -66,8 +66,10 @@ import org.slf4j.LoggerFactory;
 @RequireServiceComponentRuntime
 public final class DsbenchmarkProvider implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(DsbenchmarkProvider.class);
-    private static final InstanceIdentifier<TestExec> TEST_EXEC_IID = InstanceIdentifier.create(TestExec.class);
-    private static final InstanceIdentifier<TestStatus> TEST_STATUS_IID = InstanceIdentifier.create(TestStatus.class);
+    private static final DataObjectIdentifier<TestExec> TEST_EXEC_IID =
+        DataObjectIdentifier.builder(TestExec.class).build();
+    private static final DataObjectIdentifier<TestStatus> TEST_STATUS_IID =
+        DataObjectIdentifier.builder(TestStatus.class).build();
 
     private final AtomicReference<ExecStatus> execStatus = new AtomicReference<>(ExecStatus.Idle);
     private final DsbenchmarkListenerProvider listenerProvider;

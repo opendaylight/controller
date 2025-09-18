@@ -20,7 +20,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchm
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.test.exec.OuterList;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.test.exec.OuterListKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.test.exec.outer.list.InnerList;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,8 +57,9 @@ public class SimpletxBaRead extends DatastoreAbstractWriter {
         try (ReadTransaction tx = dataBroker.newReadOnlyTransaction()) {
             for (long l = 0; l < outerListElem; l++) {
 
-                InstanceIdentifier<OuterList> iid = InstanceIdentifier.create(TestExec.class)
-                        .child(OuterList.class, new OuterListKey((int)l));
+                final var iid = DataObjectIdentifier.builder(TestExec.class)
+                    .child(OuterList.class, new OuterListKey((int) l))
+                    .build();
                 Optional<OuterList> optionalDataObject;
                 FluentFuture<Optional<OuterList>> submitFuture = tx.read(dsType, iid);
                 try {
@@ -66,16 +67,16 @@ public class SimpletxBaRead extends DatastoreAbstractWriter {
                     if (optionalDataObject != null && optionalDataObject.isPresent()) {
                         OuterList outerList = optionalDataObject.orElseThrow();
 
-                        String[] objectsArray = new String[outerList.getInnerList().size()];
+                        String[] objectsArray = new String[outerList.nonnullInnerList().size()];
 
-                        for (InnerList innerList : outerList.getInnerList().values()) {
+                        for (InnerList innerList : outerList.nonnullInnerList().values()) {
                             if (objectsArray[innerList.getName()] != null) {
                                 LOG.error("innerList: DUPLICATE name: {}, value: {}", innerList.getName(),
                                     innerList.getValue());
                             }
                             objectsArray[innerList.getName()] = innerList.getValue();
                         }
-                        for (int i = 0; i < outerList.getInnerList().size(); i++) {
+                        for (int i = 0; i < outerList.nonnullInnerList().size(); i++) {
                             String itemStr = objectsArray[i];
                             if (!itemStr.contentEquals("Item-" + l + "-" + i)) {
                                 LOG.error("innerList: name: {}, value: {}", i, itemStr);
