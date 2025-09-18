@@ -74,6 +74,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.UnregisterOwnershipOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.cars.CarEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.cars.CarEntryBuilder;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -190,8 +191,8 @@ public final class CarProvider {
         failureCounter.set(0);
 
         WriteTransaction tx = dataProvider.newWriteOnlyTransaction();
-        InstanceIdentifier<Cars> carsId = InstanceIdentifier.create(Cars.class);
-        tx.merge(LogicalDatastoreType.CONFIGURATION, carsId, new CarsBuilder().build());
+        tx.merge(LogicalDatastoreType.CONFIGURATION, DataObjectIdentifier.builder(Cars.class).build(),
+            new CarsBuilder().build());
         try {
             tx.commit().get(5, TimeUnit.SECONDS);
         } catch (TimeoutException | InterruptedException | ExecutionException e) {
@@ -210,7 +211,7 @@ public final class CarProvider {
                 WriteTransaction tx1 = dataProvider.newWriteOnlyTransaction();
                 CarEntry car = new CarEntryBuilder().setId(new CarId("car" + id)).build();
                 tx1.put(LogicalDatastoreType.CONFIGURATION,
-                        InstanceIdentifier.<Cars>builder(Cars.class).child(CarEntry.class, car.key()).build(), car);
+                        DataObjectIdentifier.builder(Cars.class).child(CarEntry.class, car.key()).build(), car);
                 tx1.commit().addCallback(new FutureCallback<CommitInfo>() {
 
                     @Override

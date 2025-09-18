@@ -24,8 +24,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.people.rev140818.car.people.CarPersonBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.people.rev140818.car.people.CarPersonKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.purchase.rev140818.CarBought;
+import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.concepts.Registration;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -63,11 +63,9 @@ public final class CarBoughtListener implements Listener<CarBought> {
 
         LOG.info("Car bought, adding car-person entry: [{}]", carPerson);
 
-        final var carPersonIId = InstanceIdentifier.builder(CarPeople.class)
-                .child(CarPerson.class, carPerson.key()).build();
-
         final var tx = dataProvider.newWriteOnlyTransaction();
-        tx.put(LogicalDatastoreType.CONFIGURATION, carPersonIId, carPerson);
+        tx.put(LogicalDatastoreType.CONFIGURATION,
+            DataObjectIdentifier.builder(CarPeople.class).child(CarPerson.class, carPerson.key()).build(), carPerson);
 
         tx.commit().addCallback(new FutureCallback<CommitInfo>() {
             @Override
