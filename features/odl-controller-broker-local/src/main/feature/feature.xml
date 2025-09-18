@@ -8,9 +8,9 @@
  -->
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" name="odl-mdsal-${project.version}">
     <feature name="odl-controller-broker-local" version="${project.version}">
-        <feature version="[14,15)">odl-mdsal-dom</feature>
-        <feature version="[14,15)">odl-mdsal-eos-binding</feature>
-        <feature version="[14,15)">odl-mdsal-eos-dom</feature>
-        <feature version="[14,15)">odl-mdsal-singleton-dom</feature>
+        <feature version="[15,16)">odl-mdsal-dom</feature>
+        <feature version="[15,16)">odl-mdsal-eos-binding</feature>
+        <feature version="[15,16)">odl-mdsal-eos-dom</feature>
+        <feature version="[15,16)">odl-mdsal-singleton-dom</feature>
     </feature>
 </features>

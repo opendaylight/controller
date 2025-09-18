@@ -8,6 +8,6 @@
  -->
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" name="odl-clustering-test-app-${project.version}">
     <feature name="odl-clustering-test-app" version="${project.version}">
-        <feature version="[14,15)">odl-mdsal-model-rfc6991</feature>
+        <feature version="[1,2)">odl-ietf-model-rfc6991</feature>
     </feature>
 </features>
