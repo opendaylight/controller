@@ -275,7 +275,7 @@ public class OnDemandRaftState {
             return self();
         }
 
-        public final @NonNull B customRaftPolicyClassName(final String className) {
+        public final @NonNull B raftPolicySymbolicName(final String className) {
             customRaftPolicyClassName = className;
             return self();
         }
