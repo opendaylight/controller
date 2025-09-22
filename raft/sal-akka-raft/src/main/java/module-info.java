@@ -23,6 +23,10 @@ module org.opendaylight.controller.cluster.raft {
     // Our test suite needs this as well.
     opens org.opendaylight.controller.cluster.raft to org.opendaylight.controller.repackaged.pekko;
 
+    provides org.opendaylight.controller.cluster.raft.policy.RaftPolicy with
+        org.opendaylight.controller.cluster.raft.policy.DefaultRaftPolicy,
+        org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
+
     requires transitive org.opendaylight.raft.api;
     requires transitive org.opendaylight.raft.spi;
     requires transitive org.opendaylight.yangtools.concepts;
@@ -41,7 +45,10 @@ module org.opendaylight.controller.cluster.raft {
     requires static org.osgi.framework;
 
     // Annotations
+    requires static transitive javax.inject;
     requires static transitive org.eclipse.jdt.annotation;
     requires static com.github.spotbugs.annotations;
+    requires static org.kohsuke.metainf_services;
     requires static org.osgi.annotation.bundle;
+    requires static org.osgi.service.component.annotations;
 }

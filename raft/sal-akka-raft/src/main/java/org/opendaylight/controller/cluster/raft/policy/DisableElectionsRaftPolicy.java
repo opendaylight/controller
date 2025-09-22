@@ -5,16 +5,26 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.raft.policy;
 
-/**
- * DisableElectionsRaftPolicy can be used for actors that does not
- * participate in shard election. Modification to state would
- * still require consensus.
- */
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import org.kohsuke.MetaInfServices;
+import org.osgi.service.component.annotations.Component;
 
-public class DisableElectionsRaftPolicy implements RaftPolicy {
+/**
+ * {@link DisableElectionsRaftPolicy} can be used for actors that does not participate in shard election. Modification
+ * to state would still require consensus.
+ */
+@Singleton
+@Component
+@MetaInfServices
+public final class DisableElectionsRaftPolicy implements RaftPolicy {
+    @Inject
+    public DisableElectionsRaftPolicy() {
+        // Nothing else
+    }
+
     @Override
     public boolean automaticElectionsEnabled() {
         return false;
