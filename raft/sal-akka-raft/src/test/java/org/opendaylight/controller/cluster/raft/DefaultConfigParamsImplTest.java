@@ -10,9 +10,9 @@ package org.opendaylight.controller.cluster.raft;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-import org.opendaylight.controller.cluster.raft.policy.DefaultRaftPolicy;
-import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.policy.TestRaftPolicy;
+import org.opendaylight.raft.spi.RaftPolicy;
+import org.opendaylight.raft.spi.WellKnownRaftPolicy;
 
 public class DefaultConfigParamsImplTest {
 
@@ -20,7 +20,7 @@ public class DefaultConfigParamsImplTest {
     public void testGetRaftPolicyWithDefault() {
         DefaultConfigParamsImpl params = new DefaultConfigParamsImpl();
 
-        assertEquals("Default instance", DefaultRaftPolicy.INSTANCE, params.getRaftPolicy());
+        assertEquals("Default instance", WellKnownRaftPolicy.NORMAL, params.getRaftPolicy());
     }
 
     @Test
@@ -58,6 +58,4 @@ public class DefaultConfigParamsImplTest {
         assertEquals("Default instance", DefaultRaftPolicy.INSTANCE, params2.getRaftPolicy());
 
     }
-
-
 }
