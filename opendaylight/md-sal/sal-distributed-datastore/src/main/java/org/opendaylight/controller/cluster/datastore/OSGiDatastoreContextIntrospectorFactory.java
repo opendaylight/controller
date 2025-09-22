@@ -7,10 +7,12 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import static com.google.common.base.Verify.verifyNotNull;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
 import java.util.concurrent.atomic.AtomicReference;
+import org.opendaylight.raft.spi.RaftPolicyResolver;
 import org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.binding.data.codec.osgi.OSGiBindingDOMCodecServices;
 import org.osgi.service.component.annotations.Activate;
@@ -28,6 +30,9 @@ public final class OSGiDatastoreContextIntrospectorFactory extends AbstractDatas
 
     private final AtomicReference<OSGiBindingDOMCodecServices> serializer = new AtomicReference<>();
 
+    @Reference
+    RaftPolicyResolver raftPolicyResolver;
+
     @Activate
     void activate() {
         serializer();
@@ -38,6 +43,11 @@ public final class OSGiDatastoreContextIntrospectorFactory extends AbstractDatas
     @SuppressWarnings("static-method")
     void deactivate() {
         LOG.info("Datastore Context Introspector deactivated");
+    }
+
+    @Override
+    RaftPolicyResolver raftPolicyResolver() {
+        return verifyNotNull(raftPolicyResolver);
     }
 
     @Override

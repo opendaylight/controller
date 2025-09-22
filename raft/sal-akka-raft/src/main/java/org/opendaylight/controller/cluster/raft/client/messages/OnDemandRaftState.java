@@ -34,7 +34,7 @@ public class OnDemandRaftState {
     private final RaftRole raftState;
     private final String votedFor;
     private final boolean isSnapshotCaptureInitiated;
-    private final String customRaftPolicyClassName;
+    private final String raftPolicySymbolicName;
     private final boolean isVoting;
 
     private final List<FollowerInfo> followerInfoList;
@@ -59,7 +59,7 @@ public class OnDemandRaftState {
         raftState = builder.raftState;
         votedFor = builder.votedFor;
         isSnapshotCaptureInitiated = builder.isSnapshotCaptureInitiated;
-        customRaftPolicyClassName = builder.customRaftPolicyClassName;
+        raftPolicySymbolicName = builder.raftPolicySymbolicName;
         isVoting = builder.isVoting;
         followerInfoList = builder.followerInfoList;
         peerAddresses = builder.peerAddresses;
@@ -148,8 +148,8 @@ public class OnDemandRaftState {
         return peerVotingStates;
     }
 
-    public final String getCustomRaftPolicyClassName() {
-        return customRaftPolicyClassName;
+    public final String getRaftPolicySymbolicName() {
+        return raftPolicySymbolicName;
     }
 
     public abstract static class AbstractBuilder<B extends AbstractBuilder<B, T>, T extends OnDemandRaftState> {
@@ -172,7 +172,7 @@ public class OnDemandRaftState {
         private RaftRole raftState;
         private String votedFor;
         private boolean isSnapshotCaptureInitiated;
-        private String customRaftPolicyClassName;
+        private String raftPolicySymbolicName;
         private boolean isVoting;
 
         public final @NonNull B lastLogIndex(final long value) {
@@ -275,8 +275,8 @@ public class OnDemandRaftState {
             return self();
         }
 
-        public final @NonNull B customRaftPolicyClassName(final String className) {
-            customRaftPolicyClassName = className;
+        public final @NonNull B raftPolicySymbolicName(final String symbolicName) {
+            raftPolicySymbolicName = symbolicName;
             return self();
         }
 

@@ -51,6 +51,7 @@ import org.opendaylight.controller.cluster.raft.PeerAddressResolver;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.ApplyLeaderSnapshot;
+import org.opendaylight.controller.cluster.raft.TestRaftPolicy;
 import org.opendaylight.controller.cluster.raft.VotingState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
@@ -64,12 +65,12 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
-import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.controller.cluster.raft.spi.PropertiesTermInfoStore;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.TermInfo;
+import org.opendaylight.raft.spi.WellKnownRaftPolicy;
 
 class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     private final short ourPayloadVersion = 5;
@@ -668,7 +669,7 @@ class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
         // is created it increments the term
         AppendEntries appendEntries = new AppendEntries(2, "leader", 1, 1, entries, 3, -1, (short)0);
 
-        context.setRaftPolicy(createRaftPolicy(false, true));
+        context.setRaftPolicy(new TestRaftPolicy(false, true));
         follower = createBehavior(context);
 
         RaftActorBehavior newBehavior = follower.handleMessage(leaderActor, appendEntries);
@@ -1027,7 +1028,7 @@ class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
             }
         });
 
-        context.setRaftPolicy(createRaftPolicy(false, false));
+        context.setRaftPolicy(WellKnownRaftPolicy.DISABLE_ELECTIONS);
 
         follower = createBehavior(context);
 
@@ -1078,7 +1079,7 @@ class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
         config.setSnapshotBatchCount(2);
-        config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
+        config.setRaftPolicy(WellKnownRaftPolicy.DISABLE_ELECTIONS);
 
         final var followerRaftActorRef = new AtomicReference<MockRaftActor>();
         final var snapshotCohort = newRaftActorSnapshotCohort(followerRaftActorRef);
@@ -1131,7 +1132,7 @@ class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
         config.setSnapshotBatchCount(2);
-        config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
+        config.setRaftPolicy(WellKnownRaftPolicy.DISABLE_ELECTIONS);
 
         final var followerRaftActorRef = new AtomicReference<MockRaftActor>();
         final var snapshotCohort = newRaftActorSnapshotCohort(followerRaftActorRef);
@@ -1202,7 +1203,7 @@ class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
         config.setSnapshotBatchCount(1);
-        config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
+        config.setRaftPolicy(WellKnownRaftPolicy.DISABLE_ELECTIONS);
 
         final var followerRaftActorRef = new AtomicReference<MockRaftActor>();
         final var snapshotCohort = newRaftActorSnapshotCohort(followerRaftActorRef);

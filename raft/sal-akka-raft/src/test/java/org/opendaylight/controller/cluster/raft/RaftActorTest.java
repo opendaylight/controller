@@ -75,7 +75,6 @@ import org.opendaylight.controller.cluster.raft.persisted.ByteStateSnapshotCohor
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
-import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.EntryJournalV1;
 import org.opendaylight.controller.cluster.raft.spi.EntryStore;
@@ -95,6 +94,7 @@ import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.InstallableSnapshot;
 import org.opendaylight.raft.spi.InstallableSnapshotSource;
 import org.opendaylight.raft.spi.PlainSnapshotSource;
+import org.opendaylight.raft.spi.WellKnownRaftPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -788,7 +788,7 @@ class RaftActorTest extends AbstractActorTest {
     void testSwitchBehavior() throws Exception {
         final var persistenceId = factory.generateActorId("leader-");
         final var config = new DefaultConfigParamsImpl();
-        config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
+        config.setRaftPolicy(WellKnownRaftPolicy.DISABLE_ELECTIONS);
         config.setHeartBeatInterval(ONE_DAY);
         config.setIsolatedLeaderCheckInterval(ONE_DAY);
         config.setSnapshotBatchCount(5);
@@ -845,8 +845,7 @@ class RaftActorTest extends AbstractActorTest {
         assertSame("Same Behavior", behavior, mockRaftActor.getCurrentBehavior());
 
         final var disableConfig = new DefaultConfigParamsImpl();
-        disableConfig.setCustomRaftPolicyImplementationClass(
-            "org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy");
+        disableConfig.setRaftPolicy(WellKnownRaftPolicy.DISABLE_ELECTIONS);
         mockRaftActor.updateConfigParams(disableConfig);
         assertNotSame("Different Behavior", behavior, mockRaftActor.getCurrentBehavior());
         behavior = assertInstanceOf(Follower.class, mockRaftActor.getCurrentBehavior());
@@ -855,8 +854,7 @@ class RaftActorTest extends AbstractActorTest {
         assertSame("Same Behavior", behavior, mockRaftActor.getCurrentBehavior());
 
         final var defaultConfig = new DefaultConfigParamsImpl();
-        defaultConfig.setCustomRaftPolicyImplementationClass(
-            "org.opendaylight.controller.cluster.raft.policy.DefaultRaftPolicy");
+        defaultConfig.setRaftPolicy(WellKnownRaftPolicy.NORMAL);
         mockRaftActor.updateConfigParams(defaultConfig);
         assertNotSame("Different Behavior", behavior, mockRaftActor.getCurrentBehavior());
         behavior = assertInstanceOf(Follower.class, mockRaftActor.getCurrentBehavior());
@@ -873,7 +871,7 @@ class RaftActorTest extends AbstractActorTest {
 
         final var persistenceId = factory.generateActorId("test-actor-");
         final var config = new DefaultConfigParamsImpl();
-        config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
+        config.setRaftPolicy(WellKnownRaftPolicy.DISABLE_ELECTIONS);
 
         final long term = 3;
 
@@ -941,7 +939,7 @@ class RaftActorTest extends AbstractActorTest {
 
         var persistenceId = factory.generateActorId("test-actor-");
         final var config = new DefaultConfigParamsImpl();
-        config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
+        config.setRaftPolicy(WellKnownRaftPolicy.DISABLE_ELECTIONS);
 
         var snapshotUnappliedEntries = List.<LogEntry>of(new DefaultLogEntry(4, 1, new MockCommand("E")));
 
@@ -1012,7 +1010,7 @@ class RaftActorTest extends AbstractActorTest {
 
         final var persistenceId = factory.generateActorId("test-actor-");
         final var config = new DefaultConfigParamsImpl();
-        config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
+        config.setRaftPolicy(WellKnownRaftPolicy.DISABLE_ELECTIONS);
 
         final var state = List.of(new MockCommand("A"));
         final var snapshot = Snapshot.create(ByteState.of(fromObject(state).toByteArray()),
@@ -1080,7 +1078,7 @@ class RaftActorTest extends AbstractActorTest {
         final var notifierActor = factory.createActor(MessageCollectorActor.props());
 
         final var config = new DefaultConfigParamsImpl();
-        config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
+        config.setRaftPolicy(WellKnownRaftPolicy.DISABLE_ELECTIONS);
 
         final var persistenceId = factory.generateActorId("test-actor-");
 
@@ -1195,7 +1193,7 @@ class RaftActorTest extends AbstractActorTest {
         final var followerId = factory.generateActorId("follower-");
         final var config = new DefaultConfigParamsImpl();
         config.setIsolatedLeaderCheckInterval(ONE_DAY);
-        config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
+        config.setRaftPolicy(WellKnownRaftPolicy.DISABLE_ELECTIONS);
 
         final var mockFollowerActorRef = factory.createActor(MessageCollectorActor.props());
 
