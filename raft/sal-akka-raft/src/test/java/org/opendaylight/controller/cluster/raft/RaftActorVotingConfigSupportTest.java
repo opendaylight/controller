@@ -63,7 +63,6 @@ import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.controller.cluster.raft.messages.UnInitializedFollowerSnapshotReply;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
-import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.EntryJournalV1;
 import org.opendaylight.controller.cluster.raft.spi.FailingTermInfoStore;
@@ -79,6 +78,7 @@ import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.raft.spi.CompressionType;
+import org.opendaylight.raft.spi.WellKnownRaftPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,7 +132,7 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         configParams.setHeartBeatInterval(Duration.ofMillis(100));
         configParams.setElectionTimeoutFactor(100000);
-        configParams.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
+        configParams.setRaftPolicy(WellKnownRaftPolicy.DISABLE_ELECTIONS);
         return configParams;
     }
 
@@ -884,7 +884,7 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         configParams.setHeartBeatInterval(Duration.ofDays(1));
-        configParams.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
+        configParams.setRaftPolicy(WellKnownRaftPolicy.DISABLE_ELECTIONS);
 
         final String follower1ActorId = actorFactory.generateActorId(FOLLOWER_ID);
         final String follower1ActorPath = actorFactory.createTestActorPath(follower1ActorId);
@@ -948,7 +948,7 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         configParams.setHeartBeatInterval(Duration.ofDays(1));
-        configParams.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
+        configParams.setRaftPolicy(WellKnownRaftPolicy.DISABLE_ELECTIONS);
 
         final String followerActorId = actorFactory.generateActorId(FOLLOWER_ID);
         final String followerActorPath = actorFactory.createTestActorPath(followerActorId);
@@ -1004,7 +1004,7 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
 
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         configParams.setHeartBeatInterval(Duration.ofDays(1));
-        configParams.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
+        configParams.setRaftPolicy(WellKnownRaftPolicy.DISABLE_ELECTIONS);
 
         final String follower1ActorId = actorFactory.generateActorId(FOLLOWER_ID);
         final String follower1ActorPath = actorFactory.createTestActorPath(follower1ActorId);

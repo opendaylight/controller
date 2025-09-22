@@ -96,7 +96,6 @@ import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftStat
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
-import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DecoratingRaftCallback;
 import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.EntryJournalV1;
@@ -113,6 +112,7 @@ import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.EntryMeta;
 import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.raft.spi.CompressionType;
+import org.opendaylight.raft.spi.WellKnownRaftPolicy;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
@@ -602,7 +602,7 @@ public class ShardTest extends AbstractShardTest {
     public void testConnectToNotLeader() {
         final ShardTestKit testKit = new ShardTestKit(getSystem());
         dataStoreContextBuilder
-            .customRaftPolicyImplementation(DisableElectionsRaftPolicy.class.getName())
+            .customRaftPolicyImplementation(WellKnownRaftPolicy.DISABLE_ELECTIONS.symbolicName())
             .shardHeartbeatIntervalInMillis(50)
             .shardElectionTimeoutFactor(1);
         final TestActorRef<Shard> shard = actorFactory.createTestActor(
@@ -1668,7 +1668,7 @@ public class ShardTest extends AbstractShardTest {
         final ShardTestKit testKit = new ShardTestKit(getSystem());
         final String testName = "testClusteredDataTreeChangeListenerWithDelayedRegistration";
         dataStoreContextBuilder.shardElectionTimeoutFactor(1000)
-            .customRaftPolicyImplementation(DisableElectionsRaftPolicy.class.getName());
+            .customRaftPolicyImplementation(WellKnownRaftPolicy.DISABLE_ELECTIONS.symbolicName());
 
         final MockDataTreeChangeListener listener = new MockDataTreeChangeListener(1);
         final ActorRef dclActor = actorFactory.createActor(DataTreeChangeListenerActor.props(listener,
@@ -1698,7 +1698,7 @@ public class ShardTest extends AbstractShardTest {
         final ShardTestKit testKit = new ShardTestKit(getSystem());
         final String testName = "testClusteredDataTreeChangeListenerWithDelayedRegistrationClosed";
         dataStoreContextBuilder.shardElectionTimeoutFactor(1000)
-            .customRaftPolicyImplementation(DisableElectionsRaftPolicy.class.getName());
+            .customRaftPolicyImplementation(WellKnownRaftPolicy.DISABLE_ELECTIONS.symbolicName());
 
         final MockDataTreeChangeListener listener = new MockDataTreeChangeListener(0);
         final ActorRef dclActor = actorFactory.createActor(DataTreeChangeListenerActor.props(listener,
