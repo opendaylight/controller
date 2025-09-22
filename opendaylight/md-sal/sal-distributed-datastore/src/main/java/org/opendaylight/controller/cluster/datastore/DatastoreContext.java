@@ -272,7 +272,6 @@ public class DatastoreContext implements ClientActorConfig {
         raftConfig.setJournalRecoveryLogBatchSize(shardJournalRecoveryLogBatchSize);
     }
 
-
     private void setIsolatedLeaderCheckInterval(final long shardIsolatedLeaderCheckIntervalInMillis) {
         raftConfig.setIsolatedLeaderCheckInterval(Duration.ofMillis(shardIsolatedLeaderCheckIntervalInMillis));
     }

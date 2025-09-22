@@ -76,7 +76,6 @@ import org.opendaylight.controller.cluster.raft.client.messages.Shutdown;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.persisted.Snapshot;
-import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.RaftStorage;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
@@ -103,6 +102,7 @@ import org.opendaylight.raft.api.RaftRole;
 import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.raft.spi.RestrictedObjectStreams;
+import org.opendaylight.raft.spi.WellKnownRaftPolicy;
 import org.opendaylight.yangtools.yang.common.Uint64;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
@@ -149,12 +149,14 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
     private ActorSystem followerSystem;
     private ActorSystem follower2System;
 
-    private final DatastoreContext.Builder leaderDatastoreContextBuilder =
-            DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(2);
+    private final DatastoreContext.Builder leaderDatastoreContextBuilder = DatastoreContext.newBuilder()
+        .shardHeartbeatIntervalInMillis(100)
+        .shardElectionTimeoutFactor(2);
 
-    private final DatastoreContext.Builder followerDatastoreContextBuilder =
-            DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(5)
-                .customRaftPolicyImplementation(DisableElectionsRaftPolicy.class.getName());
+    private final DatastoreContext.Builder followerDatastoreContextBuilder = DatastoreContext.newBuilder()
+        .shardHeartbeatIntervalInMillis(100)
+        .shardElectionTimeoutFactor(5)
+        .customRaftPolicyImplementation(WellKnownRaftPolicy.DISABLE_ELECTIONS.symbolicName());
 
     private ClientBackedDataStore followerDistributedDataStore;
     private ClientBackedDataStore leaderDistributedDataStore;
@@ -771,7 +773,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
         // Disable elections on the leader so it switches to follower.
 
         sendDatastoreContextUpdate(leaderDistributedDataStore, leaderDatastoreContextBuilder
-                .customRaftPolicyImplementation(DisableElectionsRaftPolicy.class.getName())
+                .customRaftPolicyImplementation(WellKnownRaftPolicy.DISABLE_ELECTIONS.symbolicName())
                 .shardElectionTimeoutFactor(10));
 
         leaderTestKit.waitUntilNoLeader(leaderDistributedDataStore.getActorUtils(), "cars");

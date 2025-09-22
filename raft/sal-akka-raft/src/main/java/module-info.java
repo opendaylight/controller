@@ -16,7 +16,6 @@ module org.opendaylight.controller.cluster.raft {
     exports org.opendaylight.controller.cluster.raft.client.messages;
     exports org.opendaylight.controller.cluster.raft.messages;
     exports org.opendaylight.controller.cluster.raft.persisted;
-    exports org.opendaylight.controller.cluster.raft.policy;
     exports org.opendaylight.controller.cluster.raft.spi;
 
     // Normally only end users would needs to expose their actors to Pekko for Props-based instantiation.
