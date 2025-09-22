@@ -29,7 +29,6 @@ import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
-import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.PropertiesTermInfoStore;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.RaftStorage;
@@ -37,6 +36,7 @@ import org.opendaylight.controller.cluster.raft.spi.SnapshotFileFormat;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.raft.spi.CompressionType;
+import org.opendaylight.raft.spi.DisableElectionsRaftPolicy;
 
 /**
  * Integration test for various scenarios involving non-voting followers.

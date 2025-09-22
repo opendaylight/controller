@@ -10,9 +10,9 @@ package org.opendaylight.controller.cluster.raft;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-import org.opendaylight.controller.cluster.raft.policy.DefaultRaftPolicy;
-import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.policy.TestRaftPolicy;
+import org.opendaylight.raft.spi.DefaultRaftPolicy;
+import org.opendaylight.raft.spi.RaftPolicy;
 
 public class DefaultConfigParamsImplTest {
 
