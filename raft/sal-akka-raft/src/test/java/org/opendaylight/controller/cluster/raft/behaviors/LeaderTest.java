@@ -55,6 +55,7 @@ import org.opendaylight.controller.cluster.raft.RaftActorLeadershipTransferCohor
 import org.opendaylight.controller.cluster.raft.RaftVersions;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.TestPersistenceProvider;
+import org.opendaylight.controller.cluster.raft.TestRaftPolicy;
 import org.opendaylight.controller.cluster.raft.VotingState;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
@@ -70,14 +71,14 @@ import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.ByteState;
 import org.opendaylight.controller.cluster.raft.persisted.ByteStateSnapshotCohort;
-import org.opendaylight.controller.cluster.raft.policy.DefaultRaftPolicy;
-import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
 import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.raft.spi.ByteArray;
 import org.opendaylight.raft.spi.InstallableSnapshot;
 import org.opendaylight.raft.spi.InstallableSnapshotSource;
 import org.opendaylight.raft.spi.PlainSnapshotSource;
+import org.opendaylight.raft.spi.RaftPolicy;
+import org.opendaylight.raft.spi.WellKnownRaftPolicy;
 import org.opendaylight.yangtools.concepts.Identifier;
 
 class LeaderTest extends AbstractLeaderTest<Leader> {
@@ -270,7 +271,7 @@ class LeaderTest extends AbstractLeaderTest<Leader> {
         logStart("testHandleReplicateMessageCommitIndexIncrementedBeforeConsensus");
 
         MockRaftActorContext actorContext = createActorContextWithFollower();
-        actorContext.setRaftPolicy(createRaftPolicy(true, true));
+        actorContext.setRaftPolicy(new TestRaftPolicy(true, true));
 
         long term = 1;
         actorContext.setTermInfo(new TermInfo(term, ""));
@@ -1640,7 +1641,7 @@ class LeaderTest extends AbstractLeaderTest<Leader> {
 
         leaderActorContext.resetReplicatedLog(
                 new MockRaftActorContext.Builder().createEntries(0, 2, 2).build());
-        leaderActorContext.setRaftPolicy(createRaftPolicy(false, false));
+        leaderActorContext.setRaftPolicy(WellKnownRaftPolicy.DISABLE_ELECTIONS);
 
         leader = new Leader(leaderActorContext);
         leaderActor.underlyingActor().setBehavior(leader);
@@ -1887,7 +1888,7 @@ class LeaderTest extends AbstractLeaderTest<Leader> {
     void testIsolatedLeaderCheckTwoFollowers() {
         logStart("testIsolatedLeaderCheckTwoFollowers");
 
-        assertInstanceOf(IsolatedLeader.class, setupIsolatedLeaderCheckTestWithTwoFollowers(DefaultRaftPolicy.INSTANCE),
+        assertInstanceOf(IsolatedLeader.class, setupIsolatedLeaderCheckTestWithTwoFollowers(WellKnownRaftPolicy.NORMAL),
             "Behavior not instance of IsolatedLeader when majority followers are inactive");
     }
 
@@ -1895,7 +1896,7 @@ class LeaderTest extends AbstractLeaderTest<Leader> {
     void testIsolatedLeaderCheckTwoFollowersWhenElectionsAreDisabled() {
         logStart("testIsolatedLeaderCheckTwoFollowersWhenElectionsAreDisabled");
 
-        assertInstanceOf(Leader.class, setupIsolatedLeaderCheckTestWithTwoFollowers(createRaftPolicy(false, true)),
+        assertInstanceOf(Leader.class, setupIsolatedLeaderCheckTestWithTwoFollowers(new TestRaftPolicy(false, true)),
             "Behavior should not switch to IsolatedLeader because elections are disabled");
     }
 

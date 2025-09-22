@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.datastore.utils;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.util.concurrent.UncheckedTimeoutException;
@@ -134,6 +135,7 @@ public class ActorUtils {
     private final PrimaryShardInfoFutureCache primaryShardInfoCache;
     private final ShardStrategyFactory shardStrategyFactory;
 
+    @VisibleForTesting
     public ActorUtils(final ActorSystem actorSystem, final ActorRef shardManager,
             final ClusterWrapper clusterWrapper, final Configuration configuration) {
         this(actorSystem, shardManager, clusterWrapper, configuration,
@@ -227,23 +229,22 @@ public class ActorUtils {
             .transform(new Mapper<>() {
                 @Override
                 public PrimaryShardInfo checkedApply(final Object response) throws UnknownMessageException {
-                    if (response instanceof RemotePrimaryShardFound found) {
-                        LOG.debug("findPrimaryShardAsync received: {}", found);
-                        return onPrimaryShardFound(shardName, found.primaryPath(), found.primaryVersion(), null);
-                    } else if (response instanceof LocalPrimaryShardFound found) {
-                        LOG.debug("findPrimaryShardAsync received: {}", found);
-                        return onPrimaryShardFound(shardName, found.primaryPath(), DataStoreVersions.CURRENT_VERSION,
-                            found.localShardDataTree());
-                    } else if (response instanceof NotInitializedException notInitialized) {
-                        throw notInitialized;
-                    } else if (response instanceof PrimaryNotFoundException primaryNotFound) {
-                        throw primaryNotFound;
-                    } else if (response instanceof NoShardLeaderException noShardLeader) {
-                        throw noShardLeader;
-                    }
-
-                    throw new UnknownMessageException(String.format(
-                        "FindPrimary returned unkown response: %s", response));
+                    return switch (response) {
+                        case RemotePrimaryShardFound found -> {
+                            LOG.debug("findPrimaryShardAsync received: {}", found);
+                            yield onPrimaryShardFound(shardName, found.primaryPath(), found.primaryVersion(), null);
+                        }
+                        case LocalPrimaryShardFound found -> {
+                            LOG.debug("findPrimaryShardAsync received: {}", found);
+                            yield onPrimaryShardFound(shardName, found.primaryPath(), DataStoreVersions.CURRENT_VERSION,
+                                                        found.localShardDataTree());
+                        }
+                        case NotInitializedException notInitialized -> throw notInitialized;
+                        case PrimaryNotFoundException primaryNotFound -> throw primaryNotFound;
+                        case NoShardLeaderException noShardLeader -> throw noShardLeader;
+                        case null, default -> throw new UnknownMessageException(String.format(
+                            "FindPrimary returned unkown response: %s", response));
+                    };
                 }
             }, FIND_PRIMARY_FAILURE_TRANSFORMER, getClientDispatcher());
     }
@@ -427,7 +428,11 @@ public class ActorUtils {
             //if the path is of local format, then its local and is co-located
             return true;
 
-        } else if (selfAddressHostPort != null) {
+        } else {
+            if (selfAddressHostPort == null) {
+                // self address is local format and tx actor path is remote format
+                return false;
+            }
             // self-address and tx actor path, both are of remote path format
             int slashIndex = path.indexOf('/', pathAtIndex);
 
@@ -437,11 +442,8 @@ public class ActorUtils {
 
             final var hostPort = path.substring(pathAtIndex + 1, slashIndex);
             return hostPort.equals(selfAddressHostPort);
-
-        } else {
-            // self address is local format and tx actor path is remote format
-            return false;
         }
+
     }
 
     /**

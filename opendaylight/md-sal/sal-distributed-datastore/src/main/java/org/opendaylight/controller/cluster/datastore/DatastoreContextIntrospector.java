@@ -29,6 +29,7 @@ import javax.management.ConstructorParameters;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 import org.checkerframework.checker.lock.qual.GuardedBy;
+import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev250130.DataStoreProperties;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev250130.DataStorePropertiesContainer;
@@ -272,7 +273,7 @@ public class DatastoreContextIntrospector {
      * @param properties the properties to apply
      * @return true if the cached DatastoreContext was updated, false otherwise.
      */
-    public synchronized boolean update(final Map<String, Object> properties) {
+    public synchronized boolean update(final @Nullable Map<String, Object> properties) {
         currentProperties = null;
         if (properties == null || properties.isEmpty()) {
             return false;
