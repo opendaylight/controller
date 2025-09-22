@@ -6,10 +6,12 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 /**
- * RAFT APIs.
+ * RAFT service provider APIs.
  */
 module org.opendaylight.raft.spi {
     exports org.opendaylight.raft.spi;
+
+    provides org.opendaylight.raft.spi.RaftPolicyResolver with org.opendaylight.raft.spi.DefaultRaftPolicyResolver;
 
     requires transitive io.netty.buffer;
     requires transitive org.opendaylight.raft.api;
@@ -19,6 +21,9 @@ module org.opendaylight.raft.spi {
 
     // Annotations
     requires static transitive org.eclipse.jdt.annotation;
+    requires static javax.inject;
+    requires static org.kohsuke.metainf_services;
     requires static org.checkerframework.checker.qual;
     requires static org.osgi.annotation.bundle;
+    requires static org.osgi.service.component.annotations;
 }

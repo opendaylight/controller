@@ -18,7 +18,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.raft.RaftActorLeadershipTransferCohort.OnComplete;
 import org.opendaylight.controller.cluster.raft.behaviors.Leader;
-import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
+import org.opendaylight.raft.spi.WellKnownRaftPolicy;
 
 /**
  * Unit tests for RaftActorLeadershipTransferCohort.
@@ -40,7 +40,7 @@ class RaftActorLeadershipTransferCohortTest extends AbstractActorTest {
 
     private void setup(final String testName) {
         String persistenceId = factory.generateActorId(testName + "-leader-");
-        config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
+        config.setRaftPolicy(WellKnownRaftPolicy.DISABLE_ELECTIONS);
         mockRaftActor = factory.<MockRaftActor>createTestActor(MockRaftActor.builder().id(persistenceId)
             .config(config).pauseLeaderFunction(pauseLeaderFunction).props(stateDir())
             .withDispatcher(Dispatchers.DefaultDispatcherId()), persistenceId).underlyingActor();

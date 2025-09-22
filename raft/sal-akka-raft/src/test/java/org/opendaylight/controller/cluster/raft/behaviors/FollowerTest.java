@@ -64,12 +64,12 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
-import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.controller.cluster.raft.spi.PropertiesTermInfoStore;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.TermInfo;
+import org.opendaylight.raft.spi.WellKnownRaftPolicy;
 
 class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
     private final short ourPayloadVersion = 5;
@@ -1078,7 +1078,7 @@ class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
         config.setSnapshotBatchCount(2);
-        config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
+        config.setRaftPolicy(WellKnownRaftPolicy.DISABLE_ELECTIONS);
 
         final var followerRaftActorRef = new AtomicReference<MockRaftActor>();
         final var snapshotCohort = newRaftActorSnapshotCohort(followerRaftActorRef);
@@ -1131,7 +1131,7 @@ class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
         config.setSnapshotBatchCount(2);
-        config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
+        config.setRaftPolicy(WellKnownRaftPolicy.DISABLE_ELECTIONS);
 
         final var followerRaftActorRef = new AtomicReference<MockRaftActor>();
         final var snapshotCohort = newRaftActorSnapshotCohort(followerRaftActorRef);
@@ -1202,7 +1202,7 @@ class FollowerTest extends AbstractRaftActorBehaviorTest<Follower> {
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
         config.setSnapshotBatchCount(1);
-        config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
+        config.setRaftPolicy(WellKnownRaftPolicy.DISABLE_ELECTIONS);
 
         final var followerRaftActorRef = new AtomicReference<MockRaftActor>();
         final var snapshotCohort = newRaftActorSnapshotCohort(followerRaftActorRef);
