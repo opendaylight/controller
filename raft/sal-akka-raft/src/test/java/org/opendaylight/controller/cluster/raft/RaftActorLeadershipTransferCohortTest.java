@@ -18,7 +18,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.raft.RaftActorLeadershipTransferCohort.OnComplete;
 import org.opendaylight.controller.cluster.raft.behaviors.Leader;
-import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
+import org.opendaylight.raft.spi.DisableElectionsRaftPolicy;
 
 /**
  * Unit tests for RaftActorLeadershipTransferCohort.

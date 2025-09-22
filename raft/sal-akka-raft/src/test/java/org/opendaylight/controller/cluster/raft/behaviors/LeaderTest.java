@@ -70,14 +70,14 @@ import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.ByteState;
 import org.opendaylight.controller.cluster.raft.persisted.ByteStateSnapshotCohort;
-import org.opendaylight.controller.cluster.raft.policy.DefaultRaftPolicy;
-import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
 import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.raft.spi.ByteArray;
+import org.opendaylight.raft.spi.DefaultRaftPolicy;
 import org.opendaylight.raft.spi.InstallableSnapshot;
 import org.opendaylight.raft.spi.InstallableSnapshotSource;
 import org.opendaylight.raft.spi.PlainSnapshotSource;
+import org.opendaylight.raft.spi.RaftPolicy;
 import org.opendaylight.yangtools.concepts.Identifier;
 
 class LeaderTest extends AbstractLeaderTest<Leader> {

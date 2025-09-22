@@ -41,7 +41,10 @@ module org.opendaylight.controller.cluster.raft {
     requires static org.osgi.framework;
 
     // Annotations
+    requires static transitive javax.inject;
     requires static transitive org.eclipse.jdt.annotation;
     requires static com.github.spotbugs.annotations;
+    requires static org.kohsuke.metainf_services;
     requires static org.osgi.annotation.bundle;
+    requires static org.osgi.service.component.annotations;
 }

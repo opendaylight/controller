@@ -16,9 +16,9 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.function.Supplier;
 import org.eclipse.jdt.annotation.NonNull;
-import org.opendaylight.controller.cluster.raft.policy.DefaultRaftPolicy;
-import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.raft.spi.CompressionType;
+import org.opendaylight.raft.spi.DefaultRaftPolicy;
+import org.opendaylight.raft.spi.RaftPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -136,8 +136,8 @@ public class DefaultConfigParamsImpl implements ConfigParams {
         this.fileBackedStreamingThreshold = fileBackedStreamingThreshold;
     }
 
-    public void setCustomRaftPolicyImplementationClass(final String customRaftPolicyImplementationClass) {
-        this.customRaftPolicyImplementationClass = customRaftPolicyImplementationClass;
+    public void setRaftPolicy(final RaftPolicy newRaftPolicy) {
+        raftPolicy = requireNonNull(newRaftPolicy);
     }
 
     @Override
@@ -249,7 +249,7 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     }
 
     public void setPreferredCompression(final CompressionType preferredFileFormat) {
-        this.preferredCompression = requireNonNull(preferredFileFormat);
+        preferredCompression = requireNonNull(preferredFileFormat);
     }
 
     private RaftPolicy getPolicy() {
