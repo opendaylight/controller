@@ -130,10 +130,10 @@ import org.opendaylight.controller.cluster.raft.messages.RemoveServerReply;
 import org.opendaylight.controller.cluster.raft.messages.ServerChangeReply;
 import org.opendaylight.controller.cluster.raft.messages.ServerChangeStatus;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
-import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.raft.api.RaftRole;
+import org.opendaylight.raft.spi.WellKnownRaftPolicy;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.common.XMLNamespace;
@@ -1297,8 +1297,8 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         kit.expectMsgClass(Duration.ofSeconds(5), LocalShardFound.class);
 
         assertEquals("peerMembers size", 0, shardBuilder.getPeerAddresses().size());
-        assertEquals("schemaContext", DisableElectionsRaftPolicy.class.getName(), shardBuilder
-            .getDatastoreContext().getShardRaftConfig().getCustomRaftPolicyImplementationClass());
+        assertEquals("raft policy", WellKnownRaftPolicy.DISABLE_ELECTIONS, shardBuilder
+            .getDatastoreContext().getShardRaftConfig().getRaftPolicy());
 
         LOG.info("testOnCreateShardWithLocalMemberNotInShardConfig ending");
     }

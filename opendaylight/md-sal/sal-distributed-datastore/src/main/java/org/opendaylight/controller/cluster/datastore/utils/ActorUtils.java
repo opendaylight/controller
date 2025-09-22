@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.datastore.utils;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.util.concurrent.UncheckedTimeoutException;
@@ -134,6 +135,7 @@ public class ActorUtils {
     private final PrimaryShardInfoFutureCache primaryShardInfoCache;
     private final ShardStrategyFactory shardStrategyFactory;
 
+    @VisibleForTesting
     public ActorUtils(final ActorSystem actorSystem, final ActorRef shardManager,
             final ClusterWrapper clusterWrapper, final Configuration configuration) {
         this(actorSystem, shardManager, clusterWrapper, configuration,

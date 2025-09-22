@@ -104,7 +104,7 @@ import org.opendaylight.controller.cluster.raft.messages.RemoveServerReply;
 import org.opendaylight.controller.cluster.raft.messages.ServerChangeReply;
 import org.opendaylight.controller.cluster.raft.messages.ServerChangeStatus;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
-import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
+import org.opendaylight.raft.spi.WellKnownRaftPolicy;
 import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
@@ -570,7 +570,7 @@ class ShardManager extends AbstractUntypedActorWithMetering {
             isActiveMember = false;
             peerAddresses = Map.of();
             shardDatastoreContext = DatastoreContext.newBuilderFrom(shardDatastoreContext)
-                    .customRaftPolicyImplementation(DisableElectionsRaftPolicy.class.getName()).build();
+                    .customRaftPolicyImplementation(WellKnownRaftPolicy.DISABLE_ELECTIONS.symbolicName()).build();
         }
 
         LOG.debug("{} doCreateShard: shardId: {}, memberNames: {}, peerAddresses: {}, isActiveMember: {}",
@@ -1189,7 +1189,7 @@ class ShardManager extends AbstractUntypedActorWithMetering {
             ShardIdentifier shardId = getShardIdentifier(cluster.getCurrentMemberName(), shardName);
 
             DatastoreContext datastoreContext = newShardDatastoreContextBuilder(shardName)
-                    .customRaftPolicyImplementation(DisableElectionsRaftPolicy.class.getName()).build();
+                    .customRaftPolicyImplementation(WellKnownRaftPolicy.DISABLE_ELECTIONS.symbolicName()).build();
 
             shardInfo = new ShardInformation(stateDir, shardName, shardId, getPeerAddresses(shardName),
                 datastoreContext, Shard.builder(), peerAddressResolver);

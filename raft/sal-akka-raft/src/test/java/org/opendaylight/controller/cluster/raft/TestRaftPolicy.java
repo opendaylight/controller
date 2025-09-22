@@ -5,18 +5,14 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
+package org.opendaylight.controller.cluster.raft;
 
-package org.opendaylight.controller.cluster.raft.policy;
+import org.opendaylight.raft.spi.RaftPolicy;
 
-public class TestRaftPolicy implements RaftPolicy {
-
+public record TestRaftPolicy(boolean automaticElectionsEnabled, boolean applyModificationToStateBeforeConsensus)
+        implements RaftPolicy {
     @Override
-    public boolean automaticElectionsEnabled() {
-        return false;
-    }
-
-    @Override
-    public boolean applyModificationToStateBeforeConsensus() {
-        return false;
+    public String symbolicName() {
+        return "test";
     }
 }

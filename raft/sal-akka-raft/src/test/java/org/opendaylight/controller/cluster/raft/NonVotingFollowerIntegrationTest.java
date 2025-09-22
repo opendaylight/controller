@@ -29,7 +29,6 @@ import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.persisted.ServerInfo;
 import org.opendaylight.controller.cluster.raft.persisted.VotingConfig;
-import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.PropertiesTermInfoStore;
 import org.opendaylight.controller.cluster.raft.spi.RaftSnapshot;
 import org.opendaylight.controller.cluster.raft.spi.RaftStorage;
@@ -37,6 +36,7 @@ import org.opendaylight.controller.cluster.raft.spi.SnapshotFileFormat;
 import org.opendaylight.raft.api.EntryInfo;
 import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.raft.spi.CompressionType;
+import org.opendaylight.raft.spi.WellKnownRaftPolicy;
 
 /**
  * Integration test for various scenarios involving non-voting followers.
@@ -332,7 +332,7 @@ class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrationTest 
             CompressionType.NONE, new RaftSnapshot(persistedServerConfig), EntryInfo.of(-1, -1), null, Instant.now());
 
         DefaultConfigParamsImpl follower2ConfigParams = newFollowerConfigParams();
-        follower2ConfigParams.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
+        follower2ConfigParams.setRaftPolicy(WellKnownRaftPolicy.DISABLE_ELECTIONS);
         follower2Actor = newTestRaftActor(follower2Id, TestRaftActor.newBuilder().peerAddresses(
                 Map.of(leaderId, testActorPath(leaderId), follower1Id, follower1Actor.path().toString()))
                     .config(follower2ConfigParams).persistent(Optional.of(Boolean.FALSE)));

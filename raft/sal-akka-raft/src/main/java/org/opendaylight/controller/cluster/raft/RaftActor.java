@@ -598,7 +598,7 @@ public abstract class RaftActor extends AbstractUntypedActor {
                 .isVoting(context.isVotingMember())
                 .peerAddresses(peerAddresses)
                 .peerVotingStates(peerVotingStates)
-                .customRaftPolicyClassName(context.getConfigParams().getCustomRaftPolicyImplementationClass());
+                .raftPolicySymbolicName(context.getConfigParams().getRaftPolicy().symbolicName());
 
         final var lastLogEntry = replicatedLog().lastMeta();
         if (lastLogEntry != null) {
@@ -874,8 +874,8 @@ public abstract class RaftActor extends AbstractUntypedActor {
     protected void updateConfigParams(final ConfigParams configParams) {
 
         // obtain the RaftPolicy for oldConfigParams and the updated one.
-        String oldRaftPolicy = context.getConfigParams().getCustomRaftPolicyImplementationClass();
-        String newRaftPolicy = configParams.getCustomRaftPolicyImplementationClass();
+        final var oldRaftPolicy = context.getConfigParams().getRaftPolicy();
+        final var newRaftPolicy = configParams.getRaftPolicy();
 
         LOG.debug("{}: RaftPolicy used with prev.config {}, RaftPolicy used with newConfig {}", memberId(),
             oldRaftPolicy, newRaftPolicy);
