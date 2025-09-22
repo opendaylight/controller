@@ -10,23 +10,17 @@ package org.opendaylight.controller.cluster.raft;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.base.Strings;
-import com.google.common.base.Suppliers;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.function.Supplier;
 import org.eclipse.jdt.annotation.NonNull;
-import org.opendaylight.controller.cluster.raft.policy.DefaultRaftPolicy;
-import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.raft.spi.CompressionType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.opendaylight.raft.spi.RaftPolicy;
+import org.opendaylight.raft.spi.WellKnownRaftPolicy;
 
 /**
  * Default implementation of the ConfigParams.
  */
 public class DefaultConfigParamsImpl implements ConfigParams {
-    private static final Logger LOG = LoggerFactory.getLogger(DefaultConfigParamsImpl.class);
     private static final Path EMPTY_PATH = Path.of("");
 
     private static final int SNAPSHOT_BATCH_COUNT = 20000;
@@ -52,7 +46,7 @@ public class DefaultConfigParamsImpl implements ConfigParams {
      */
     public static final Duration HEART_BEAT_INTERVAL = Duration.ofMillis(100);
 
-    private final Supplier<RaftPolicy> policySupplier = Suppliers.memoize(this::getPolicy);
+    private @NonNull RaftPolicy raftPolicy = WellKnownRaftPolicy.NORMAL;
 
     private Duration heartBeatInterval = HEART_BEAT_INTERVAL;
     private long snapshotBatchCount = SNAPSHOT_BATCH_COUNT;
@@ -73,7 +67,6 @@ public class DefaultConfigParamsImpl implements ConfigParams {
 
     private long electionTimeoutFactor = 2;
     private long candidateElectionTimeoutDivisor = 1;
-    private String customRaftPolicyImplementationClass;
 
     private PeerAddressResolver peerAddressResolver = NoopPeerAddressResolver.INSTANCE;
 
@@ -136,13 +129,8 @@ public class DefaultConfigParamsImpl implements ConfigParams {
         this.fileBackedStreamingThreshold = fileBackedStreamingThreshold;
     }
 
-    public void setCustomRaftPolicyImplementationClass(final String customRaftPolicyImplementationClass) {
-        this.customRaftPolicyImplementationClass = customRaftPolicyImplementationClass;
-    }
-
-    @Override
-    public String getCustomRaftPolicyImplementationClass() {
-        return customRaftPolicyImplementationClass;
+    public void setRaftPolicy(final RaftPolicy newRaftPolicy) {
+        raftPolicy = requireNonNull(newRaftPolicy);
     }
 
     @Override
@@ -210,7 +198,7 @@ public class DefaultConfigParamsImpl implements ConfigParams {
 
     @Override
     public RaftPolicy getRaftPolicy() {
-        return policySupplier.get();
+        return raftPolicy;
     }
 
     @Override
@@ -249,27 +237,6 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     }
 
     public void setPreferredCompression(final CompressionType preferredFileFormat) {
-        this.preferredCompression = requireNonNull(preferredFileFormat);
-    }
-
-    private RaftPolicy getPolicy() {
-        if (Strings.isNullOrEmpty(DefaultConfigParamsImpl.this.customRaftPolicyImplementationClass)) {
-            LOG.debug("No custom RaftPolicy specified. Using DefaultRaftPolicy");
-            return DefaultRaftPolicy.INSTANCE;
-        }
-
-        try {
-            String className = DefaultConfigParamsImpl.this.customRaftPolicyImplementationClass;
-            LOG.info("Trying to use custom RaftPolicy {}", className);
-            return (RaftPolicy)Class.forName(className).getDeclaredConstructor().newInstance();
-        } catch (ClassCastException | ReflectiveOperationException e) {
-            if (LOG.isDebugEnabled()) {
-                LOG.error("Could not create custom raft policy, will stick with default", e);
-            } else {
-                LOG.error("Could not create custom raft policy, will stick with default : cause = {}",
-                    e.getMessage());
-            }
-        }
-        return DefaultRaftPolicy.INSTANCE;
+        preferredCompression = requireNonNull(preferredFileFormat);
     }
 }

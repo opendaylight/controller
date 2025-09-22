@@ -21,13 +21,13 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.EntryJournalV1;
 import org.opendaylight.controller.cluster.raft.spi.PropertiesTermInfoStore;
 import org.opendaylight.controller.cluster.raft.spi.SnapshotFile;
 import org.opendaylight.raft.api.TermInfo;
 import org.opendaylight.raft.spi.CompressionType;
+import org.opendaylight.raft.spi.WellKnownRaftPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +65,7 @@ class MigratedMessagesTest extends AbstractActorTest {
         }
 
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
-        config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
+        config.setRaftPolicy(WellKnownRaftPolicy.DISABLE_ELECTIONS);
 
         TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.builder()
             .id(id)
@@ -87,7 +87,7 @@ class MigratedMessagesTest extends AbstractActorTest {
             final boolean persistent, final Consumer<SnapshotFile> snapshotVerifier,
             final @NonNull MockSnapshotState snapshotState) {
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
-        config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
+        config.setRaftPolicy(WellKnownRaftPolicy.DISABLE_ELECTIONS);
 
         TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.builder()
             .id(persistenceId)
