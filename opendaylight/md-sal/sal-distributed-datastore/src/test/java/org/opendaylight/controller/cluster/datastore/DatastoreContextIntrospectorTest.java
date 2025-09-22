@@ -23,6 +23,7 @@ import static org.opendaylight.mdsal.common.api.LogicalDatastoreType.OPERATIONAL
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Test;
+import org.opendaylight.raft.spi.DefaultRaftPolicyResolver;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev250130.DataStoreProperties.ExportOnRecovery;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev250130.DataStorePropertiesContainer;
 import org.opendaylight.yangtools.binding.data.codec.impl.di.DefaultBindingDOMCodecFactory;
@@ -35,9 +36,10 @@ import org.opendaylight.yangtools.binding.runtime.spi.BindingRuntimeHelpers;
  */
 public class DatastoreContextIntrospectorTest {
     static final AbstractDatastoreContextIntrospectorFactory INTROSPECTOR_FACTORY =
-        new DefaultDatastoreContextIntrospectorFactory(new DefaultBindingDOMCodecFactory()
-            .newBindingDataCodec(BindingRuntimeHelpers.createRuntimeContext(DataStorePropertiesContainer.class))
-            .nodeSerializer());
+        new DefaultDatastoreContextIntrospectorFactory(new DefaultRaftPolicyResolver(),
+            new DefaultBindingDOMCodecFactory()
+                .newBindingDataCodec(BindingRuntimeHelpers.createRuntimeContext(DataStorePropertiesContainer.class))
+                .nodeSerializer());
 
     @Test
     public void testYangDefaults() {

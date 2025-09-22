@@ -44,7 +44,6 @@ import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.persisted.SimpleReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.spi.DefaultLogEntry;
 import org.opendaylight.controller.cluster.raft.spi.LogEntry;
 import org.opendaylight.raft.api.TermInfo;
@@ -348,21 +347,6 @@ abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior> extend
 
     protected void logStart(final String name) {
         LoggerFactory.getLogger(getClass()).info("Starting " + name);
-    }
-
-    protected RaftPolicy createRaftPolicy(final boolean automaticElectionsEnabled,
-                                          final boolean applyModificationToStateBeforeConsensus) {
-        return new RaftPolicy() {
-            @Override
-            public boolean automaticElectionsEnabled() {
-                return automaticElectionsEnabled;
-            }
-
-            @Override
-            public boolean applyModificationToStateBeforeConsensus() {
-                return applyModificationToStateBeforeConsensus;
-            }
-        };
     }
 
     protected static final void assertLogEntry(final @NonNull LogEntry expected, final LogEntry actual) {

@@ -13,6 +13,7 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.annotations.VisibleForTesting;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.ServiceLoader;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.text.WordUtils;
 import org.apache.pekko.util.Timeout;
@@ -25,8 +26,12 @@ import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.PeerAddressResolver;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.raft.spi.CompressionType;
+import org.opendaylight.raft.spi.RaftPolicyResolver;
+import org.opendaylight.raft.spi.WellKnownRaftPolicy;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev250130.DataStoreProperties.ExportOnRecovery;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Contains contextual data for a data store.
@@ -35,6 +40,8 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
  */
 // Non-final for mocking
 public class DatastoreContext implements ClientActorConfig {
+    private static final Logger LOG = LoggerFactory.getLogger(DatastoreContext.class);
+
     public static final String METRICS_DOMAIN = "org.opendaylight.controller.cluster.datastore";
 
     public static final Duration DEFAULT_SHARD_TRANSACTION_IDLE_TIMEOUT = Duration.ofMinutes(10);
@@ -69,6 +76,7 @@ public class DatastoreContext implements ClientActorConfig {
     public static final long DEFAULT_SYNC_INDEX_THRESHOLD = 10;
 
     private final DefaultConfigParamsImpl raftConfig = new DefaultConfigParamsImpl();
+    private final RaftPolicyResolver raftPolicyResolver;
 
     private Duration shardTransactionIdleTimeout = DatastoreContext.DEFAULT_SHARD_TRANSACTION_IDLE_TIMEOUT;
     private long operationTimeoutInMillis = DEFAULT_OPERATION_TIMEOUT_IN_MS;
@@ -98,7 +106,8 @@ public class DatastoreContext implements ClientActorConfig {
     private ExportOnRecovery exportOnRecovery = DEFAULT_EXPORT_ON_RECOVERY;
     private String recoveryExportBaseDir = DEFAULT_RECOVERY_EXPORT_BASE_DIR;
 
-    DatastoreContext() {
+    DatastoreContext(final RaftPolicyResolver raftPolicyResolver) {
+        this.raftPolicyResolver = requireNonNull(raftPolicyResolver);
         setShardJournalRecoveryLogBatchSize(DEFAULT_JOURNAL_RECOVERY_BATCH_SIZE);
         setSnapshotBatchCount(DEFAULT_SNAPSHOT_BATCH_COUNT);
         setRecoverySnapshotIntervalSeconds(DEFAULT_RECOVERY_SNAPSHOT_INTERVAL_SECONDS);
@@ -113,6 +122,7 @@ public class DatastoreContext implements ClientActorConfig {
     }
 
     private DatastoreContext(final DatastoreContext other) {
+        raftPolicyResolver = other.raftPolicyResolver;
         shardTransactionIdleTimeout = other.shardTransactionIdleTimeout;
         operationTimeoutInMillis = other.operationTimeoutInMillis;
         dataStoreMXBeanType = other.dataStoreMXBeanType;
@@ -150,7 +160,7 @@ public class DatastoreContext implements ClientActorConfig {
         setSnapshotDataThreshold(other.raftConfig.getSnapshotDataThreshold());
         setElectionTimeoutFactor(other.raftConfig.getElectionTimeoutFactor());
         setCandidateElectionTimeoutDivisor(other.raftConfig.getCandidateElectionTimeoutDivisor());
-        setCustomRaftPolicyImplementation(other.raftConfig.getCustomRaftPolicyImplementationClass());
+        raftConfig.setRaftPolicy(other.raftConfig.getRaftPolicy());
         setMaximumMessageSliceSize(other.getMaximumMessageSliceSize());
         setPeerAddressResolver(other.raftConfig.getPeerAddressResolver());
         setTempFileDirectory(other.getTempFileDirectory());
@@ -158,11 +168,16 @@ public class DatastoreContext implements ClientActorConfig {
         setSyncIndexThreshold(other.raftConfig.getSyncIndexThreshold());
     }
 
-    public static Builder newBuilder() {
-        return new Builder(new DatastoreContext());
+    @VisibleForTesting
+    public static final Builder newBuilder() {
+        return newBuilder(ServiceLoader.load(RaftPolicyResolver.class).findFirst().orElseThrow());
     }
 
-    public static Builder newBuilderFrom(final DatastoreContext context) {
+    public static final Builder newBuilder(final RaftPolicyResolver raftPolicyResolver) {
+        return new Builder(new DatastoreContext(raftPolicyResolver));
+    }
+
+    public static final Builder newBuilderFrom(final DatastoreContext context) {
         return new Builder(new DatastoreContext(context));
     }
 
@@ -270,7 +285,6 @@ public class DatastoreContext implements ClientActorConfig {
         raftConfig.setJournalRecoveryLogBatchSize(shardJournalRecoveryLogBatchSize);
     }
 
-
     private void setIsolatedLeaderCheckInterval(final long shardIsolatedLeaderCheckIntervalInMillis) {
         raftConfig.setIsolatedLeaderCheckInterval(Duration.ofMillis(shardIsolatedLeaderCheckIntervalInMillis));
     }
@@ -284,7 +298,12 @@ public class DatastoreContext implements ClientActorConfig {
     }
 
     private void setCustomRaftPolicyImplementation(final String customRaftPolicyImplementation) {
-        raftConfig.setCustomRaftPolicyImplementationClass(customRaftPolicyImplementation);
+        final var raftPolicy = customRaftPolicyImplementation == null ? WellKnownRaftPolicy.NORMAL
+            : raftPolicyResolver.findRaftPolicy(customRaftPolicyImplementation).orElseGet(() -> {
+                LOG.warn("Cannot find policy {}, will stick with normal", customRaftPolicyImplementation);
+                return WellKnownRaftPolicy.NORMAL;
+            });
+        raftConfig.setRaftPolicy(raftPolicy);
     }
 
     private void setSnapshotDataThresholdPercentage(final int shardSnapshotDataThresholdPercentage) {

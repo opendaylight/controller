@@ -209,12 +209,9 @@ module distributed-datastore-provider {
         leaf custom-raft-policy-implementation {
             default "";
             type string;
-            description "A fully qualified java class name. The class should implement
-                         org.opendaylight.controller.cluster.raft.policy.RaftPolicy. This java class should be
-                         accessible to the distributed data store OSGi module so that it can be dynamically loaded via
-                         reflection. For now let's assume that these classes to customize raft behaviors should be
-                         present in the distributed data store module itself. If this property is set to a class which
-                         cannot be found then the default raft behavior will be applied";
+            description "A symbolic name for the RaftPolicy implementation to use. An instance with this name should
+                         be made available as a service. If this property is set to a name that cannot be resolved,
+                         then the normal RAFT behavior will be used.";
         }
 
         leaf maximum-message-slice-size {

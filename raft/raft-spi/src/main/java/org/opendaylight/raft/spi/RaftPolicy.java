@@ -5,7 +5,9 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.raft.policy;
+package org.opendaylight.raft.spi;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  * The RaftPolicy is intended to change the default behavior of Raft. For example we may want to be able to determine
@@ -18,7 +20,13 @@ package org.opendaylight.controller.cluster.raft.policy;
  * a modification to the state before consensus would be useful in scenarios where you have only 2 nodes in a Raft
  * cluster and one of them is down but you still want the RaftActor to apply a modification to the state.
  */
+@NonNullByDefault
 public interface RaftPolicy {
+    /**
+     * {@return this policy's symbolic name}
+     */
+    String symbolicName();
+
     /**
      * According to Raft a Follower which does not receive a heartbeat (aka AppendEntries) in a given period should
      * become a Candidate and trigger an election.

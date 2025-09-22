@@ -10,8 +10,8 @@ package org.opendaylight.controller.cluster.raft;
 import java.nio.file.Path;
 import java.time.Duration;
 import org.eclipse.jdt.annotation.NonNull;
-import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.raft.spi.CompressionType;
+import org.opendaylight.raft.spi.RaftPolicy;
 
 /**
  * Configuration Parameter interface for configuring the Raft consensus system. Any component using this implementation
@@ -114,7 +114,7 @@ public interface ConfigParams {
     /**
      * Returns the RaftPolicy used to determine certain Raft behaviors.
      *
-     * @return an instance of RaftPolicy, if set, or an instance of the DefaultRaftPolicy.
+     * @return an instance of {@link RaftPolicy}
      */
     @NonNull RaftPolicy getRaftPolicy();
 
@@ -124,13 +124,6 @@ public interface ConfigParams {
      * @return the PeerAddressResolver instance.
      */
     @NonNull PeerAddressResolver getPeerAddressResolver();
-
-    /**
-     * Returns the custom RaftPolicy class name.
-     *
-     * @return the RaftPolicy class name or null if none set.
-     */
-    String getCustomRaftPolicyImplementationClass();
 
     /**
      * Returns the directory in which to create temp files.
