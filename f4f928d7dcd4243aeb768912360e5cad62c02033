@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "449963e0_b85567e9",
+        "filename": "karaf-clustering-scripts/pom.xml",
+        "patchSetId": 11
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 8449
+      },
+      "writtenOn": "2025-09-23T10:27:05Z",
+      "side": 1,
+      "message": "Keep formatting same as in other pom files in this project.\n- \u003cproject\u003e tag in one line.\n- 2 empty space in one tab.\n- empty line after \u003c/parent\u003e tag",
+      "revId": "f4f928d7dcd4243aeb768912360e5cad62c02033",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c93c102b_4ab55cf5",
+        "filename": "karaf/pom.xml",
+        "patchSetId": 11
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 8449
+      },
+      "writtenOn": "2025-09-23T10:27:05Z",
+      "side": 1,
+      "message": "Probably we should keep previous copyright.\n\nhttps://docs.opendaylight.org/en/latest/contributor-guides/copyright.html",
+      "revId": "f4f928d7dcd4243aeb768912360e5cad62c02033",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "67bbc55f_34d2659f",
+        "filename": "karaf4-parent/pom.xml",
+        "patchSetId": 11
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 8449
+      },
+      "writtenOn": "2025-09-23T10:27:05Z",
+      "side": 1,
+      "message": "Keep formatting same as in other pom files in this project.\n- 2 empty space in one tab.",
+      "revId": "f4f928d7dcd4243aeb768912360e5cad62c02033",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    }
+  ]
+}
