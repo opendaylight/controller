@@ -27,7 +27,6 @@ import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
 import org.opendaylight.raft.spi.CompressionType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.distributed.datastore.provider.rev250130.DataStoreProperties.ExportOnRecovery;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Contains contextual data for a data store.
@@ -38,8 +37,7 @@ import scala.concurrent.duration.FiniteDuration;
 public class DatastoreContext implements ClientActorConfig {
     public static final String METRICS_DOMAIN = "org.opendaylight.controller.cluster.datastore";
 
-    public static final FiniteDuration DEFAULT_SHARD_TRANSACTION_IDLE_TIMEOUT = FiniteDuration.create(10,
-        TimeUnit.MINUTES);
+    public static final Duration DEFAULT_SHARD_TRANSACTION_IDLE_TIMEOUT = Duration.ofMinutes(10);
     public static final int DEFAULT_OPERATION_TIMEOUT_IN_MS = 5000;
     public static final int DEFAULT_SHARD_TX_COMMIT_TIMEOUT_IN_SECONDS = 30;
     public static final int DEFAULT_JOURNAL_RECOVERY_BATCH_SIZE = 1;
@@ -72,7 +70,7 @@ public class DatastoreContext implements ClientActorConfig {
 
     private final DefaultConfigParamsImpl raftConfig = new DefaultConfigParamsImpl();
 
-    private FiniteDuration shardTransactionIdleTimeout = DatastoreContext.DEFAULT_SHARD_TRANSACTION_IDLE_TIMEOUT;
+    private Duration shardTransactionIdleTimeout = DatastoreContext.DEFAULT_SHARD_TRANSACTION_IDLE_TIMEOUT;
     private long operationTimeoutInMillis = DEFAULT_OPERATION_TIMEOUT_IN_MS;
     private String dataStoreMXBeanType;
     private int shardTransactionCommitTimeoutInSeconds = DEFAULT_SHARD_TX_COMMIT_TIMEOUT_IN_SECONDS;
@@ -168,7 +166,7 @@ public class DatastoreContext implements ClientActorConfig {
         return new Builder(new DatastoreContext(context));
     }
 
-    public FiniteDuration getShardTransactionIdleTimeout() {
+    public Duration getShardTransactionIdleTimeout() {
         return shardTransactionIdleTimeout;
     }
 
@@ -391,7 +389,7 @@ public class DatastoreContext implements ClientActorConfig {
 
 
         public Builder shardTransactionIdleTimeout(final long timeout, final TimeUnit unit) {
-            datastoreContext.shardTransactionIdleTimeout = FiniteDuration.create(timeout, unit);
+            datastoreContext.shardTransactionIdleTimeout = Duration.of(timeout, unit.toChronoUnit());
             return this;
         }
 
