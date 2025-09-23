@@ -68,7 +68,6 @@ public final class SharedFileBackedOutputStream extends FileBackedOutputStream {
      * Overridden to decrement the usage count.
      */
     // FIXME: decRef(), really
-    @SuppressWarnings("unchecked")
     @Override
     public void cleanup() {
         if (usageCount.get() <= 0) {
