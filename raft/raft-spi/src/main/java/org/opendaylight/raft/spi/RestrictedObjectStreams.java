@@ -27,7 +27,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 public final class RestrictedObjectStreams {
     // Note: we use 'List', de-deuplicated below, to retain iteration order
     private static final LoadingCache<List<ClassLoader>, RestrictedObjectStreams> CACHE =
-        CacheBuilder.<List<ClassLoader>, RestrictedObjectStreams>newBuilder().weakValues().build(new CacheLoader<>() {
+        CacheBuilder.newBuilder().weakValues().build(new CacheLoader<>() {
             @Override
             public RestrictedObjectStreams load(final List<ClassLoader> key) {
                 return new RestrictedObjectStreams(key);
