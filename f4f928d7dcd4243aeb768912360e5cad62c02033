@@ -18,6 +18,24 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "1d062665_9859cb19",
+        "filename": "karaf-clustering-scripts/pom.xml",
+        "patchSetId": 11
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 8907
+      },
+      "writtenOn": "2025-09-23T11:35:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "449963e0_b85567e9",
+      "revId": "f4f928d7dcd4243aeb768912360e5cad62c02033",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "c93c102b_4ab55cf5",
@@ -35,6 +53,24 @@
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "e8dd2801_e3b732c0",
+        "filename": "karaf/pom.xml",
+        "patchSetId": 11
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 8907
+      },
+      "writtenOn": "2025-09-23T11:35:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c93c102b_4ab55cf5",
+      "revId": "f4f928d7dcd4243aeb768912360e5cad62c02033",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "67bbc55f_34d2659f",
@@ -48,6 +84,24 @@
       "writtenOn": "2025-09-23T10:27:05Z",
       "side": 1,
       "message": "Keep formatting same as in other pom files in this project.\n- 2 empty space in one tab.",
+      "revId": "f4f928d7dcd4243aeb768912360e5cad62c02033",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4999df69_dd0612fd",
+        "filename": "karaf4-parent/pom.xml",
+        "patchSetId": 11
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 8907
+      },
+      "writtenOn": "2025-09-23T11:35:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "67bbc55f_34d2659f",
       "revId": "f4f928d7dcd4243aeb768912360e5cad62c02033",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81"
     }
