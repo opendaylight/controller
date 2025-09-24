@@ -552,8 +552,7 @@ public class DatastoreContext implements ClientActorConfig {
         }
 
         public Builder shardCommitQueueExpiryTimeoutInSeconds(final long value) {
-            datastoreContext.shardCommitQueueExpiryTimeoutInMillis = TimeUnit.MILLISECONDS.convert(
-                    value, TimeUnit.SECONDS);
+            datastoreContext.shardCommitQueueExpiryTimeoutInMillis = TimeUnit.SECONDS.toMillis(value);
             return this;
         }
 
