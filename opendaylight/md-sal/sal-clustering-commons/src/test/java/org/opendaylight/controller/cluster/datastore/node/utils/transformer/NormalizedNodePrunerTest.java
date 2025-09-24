@@ -13,7 +13,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntry;
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntryBuilder;
-import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapNodeBuilder;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -285,7 +284,8 @@ public class NormalizedNodePrunerTest {
 
         NormalizedNodeWriter.forStreamWriter(pruner)
             .write(mapEntryBuilder(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1)
-                .withChild(mapNodeBuilder(TestModel.INNER_LIST_QNAME)
+                .withChild(ImmutableNodes.newSystemMapBuilder()
+                    .withNodeIdentifier(new NodeIdentifier(TestModel.INNER_LIST_QNAME))
                     .withChild(mapEntryBuilder(TestModel.INNER_LIST_QNAME, TestModel.NAME_QNAME, "one")
                         .withChild(ImmutableNodes.newContainerBuilder()
                             .withNodeIdentifier(new NodeIdentifier(TestModel.INVALID_QNAME))
@@ -295,7 +295,8 @@ public class NormalizedNodePrunerTest {
                 .build());
 
         assertEquals(mapEntryBuilder(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1)
-            .withChild(mapNodeBuilder(TestModel.INNER_LIST_QNAME)
+            .withChild(ImmutableNodes.newSystemMapBuilder()
+                .withNodeIdentifier(new NodeIdentifier(TestModel.INNER_LIST_QNAME))
                 .withChild(mapEntryBuilder(TestModel.INNER_LIST_QNAME, TestModel.NAME_QNAME, "one").build())
                 .build())
             .build(), pruner.getResult().orElseThrow());
@@ -308,7 +309,8 @@ public class NormalizedNodePrunerTest {
                 .node(TestModel.INNER_LIST_QNAME).build();
         AbstractNormalizedNodePruner pruner = prunerFullSchema(path);
 
-        SystemMapNode input = mapNodeBuilder(TestModel.INNER_LIST_QNAME)
+        SystemMapNode input = ImmutableNodes.newSystemMapBuilder()
+            .withNodeIdentifier(new NodeIdentifier(TestModel.INNER_LIST_QNAME))
             .withChild(mapEntryBuilder(TestModel.INNER_LIST_QNAME, TestModel.NAME_QNAME, "one")
                 .withChild(ImmutableNodes.newContainerBuilder()
                     .withNodeIdentifier(new NodeIdentifier(TestModel.INNER_CONTAINER_QNAME))
@@ -327,7 +329,8 @@ public class NormalizedNodePrunerTest {
                 .node(TestModel.INVALID_QNAME).build();
         AbstractNormalizedNodePruner pruner = prunerFullSchema(path);
 
-        NormalizedNodeWriter.forStreamWriter(pruner).write(mapNodeBuilder(TestModel.INVALID_QNAME)
+        NormalizedNodeWriter.forStreamWriter(pruner).write(ImmutableNodes.newSystemMapBuilder()
+            .withNodeIdentifier(new NodeIdentifier(TestModel.INVALID_QNAME))
             .withChild(mapEntryBuilder(TestModel.INVALID_QNAME, TestModel.NAME_QNAME, "one")
                 .withChild(ImmutableNodes.newContainerBuilder()
                     .withNodeIdentifier(new NodeIdentifier(TestModel.INNER_CONTAINER_QNAME))
@@ -347,7 +350,8 @@ public class NormalizedNodePrunerTest {
 
         NormalizedNodeWriter.forStreamWriter(pruner)
             .write(mapEntryBuilder(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1)
-                .withChild(mapNodeBuilder(TestModel.INVALID_QNAME)
+                .withChild(ImmutableNodes.newSystemMapBuilder()
+                    .withNodeIdentifier(new NodeIdentifier(TestModel.INVALID_QNAME))
                     .withChild(mapEntryBuilder(TestModel.INVALID_QNAME, TestModel.NAME_QNAME, "one")
                         .withChild(ImmutableNodes.newContainerBuilder()
                             .withNodeIdentifier(new NodeIdentifier(TestModel.INNER_CONTAINER_QNAME))
