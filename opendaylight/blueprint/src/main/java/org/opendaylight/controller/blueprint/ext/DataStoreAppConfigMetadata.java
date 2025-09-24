@@ -23,9 +23,8 @@ import org.apache.aries.blueprint.services.ExtendedBlueprintContainer;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.mdsal.binding.api.DataBroker;
-import org.opendaylight.mdsal.binding.api.DataObjectModification;
-import org.opendaylight.mdsal.binding.api.DataObjectModification.ModificationType;
-import org.opendaylight.mdsal.binding.api.DataTreeIdentifier;
+import org.opendaylight.mdsal.binding.api.DataObjectDeleted;
+import org.opendaylight.mdsal.binding.api.DataObjectModification.WithDataAfter;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.mdsal.binding.api.ReadTransaction;
 import org.opendaylight.mdsal.common.api.LogicalDatastoreType;
@@ -146,8 +145,7 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
         // data is present then both the read and initial DTCN update will return it. If the the data isn't present, we
         // will not get an initial DTCN update so the read will indicate the data is not present.
         appConfigChangeListenerReg = dataBroker.registerTreeChangeListener(
-            DataTreeIdentifier.of(LogicalDatastoreType.CONFIGURATION, bindingContext.appConfigPath),
-            this::onAppConfigChanged);
+            LogicalDatastoreType.CONFIGURATION, bindingContext.appConfigPath, this::onAppConfigChanged);
 
         readInitialAppConfig(dataBroker);
     }
@@ -181,30 +179,27 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
     }
 
     private void onAppConfigChanged(final Collection<DataTreeModification<DataObject>> changes) {
-        for (DataTreeModification<DataObject> change: changes) {
-            DataObjectModification<DataObject> changeRoot = change.getRootNode();
-            ModificationType type = changeRoot.modificationType();
+        for (var change : changes) {
+            switch (change.getRootNode()) {
+                case WithDataAfter<DataObject> present -> {
+                    final var newAppConfig = present.dataAfter();
+                    LOG.debug("New app config instance: {}, previous: {}", newAppConfig, currentAppConfig);
 
-            LOG.debug("{}: onAppConfigChanged: {}, {}", logName(), type, change.getRootPath());
+                    if (!setInitialAppConfig(Optional.of(newAppConfig))
+                            && !Objects.equals(currentAppConfig, newAppConfig)) {
+                        LOG.debug("App config was updated");
 
-            if (type == ModificationType.SUBTREE_MODIFIED || type == ModificationType.WRITE) {
-                DataObject newAppConfig = changeRoot.dataAfter();
-
-                LOG.debug("New app config instance: {}, previous: {}", newAppConfig, currentAppConfig);
-
-                if (!setInitialAppConfig(Optional.of(newAppConfig))
-                        && !Objects.equals(currentAppConfig, newAppConfig)) {
-                    LOG.debug("App config was updated");
+                        if (appConfigUpdateStrategy == UpdateStrategy.RELOAD) {
+                            restartContainer();
+                        }
+                    }
+                }
+                case DataObjectDeleted<DataObject> deleted -> {
+                    LOG.debug("App config was deleted");
 
                     if (appConfigUpdateStrategy == UpdateStrategy.RELOAD) {
                         restartContainer();
                     }
-                }
-            } else if (type == ModificationType.DELETE) {
-                LOG.debug("App config was deleted");
-
-                if (appConfigUpdateStrategy == UpdateStrategy.RELOAD) {
-                    restartContainer();
                 }
             }
         }
@@ -249,13 +244,12 @@ public class DataStoreAppConfigMetadata extends AbstractDependentComponentFactor
                 });
             return reader.createDefaultInstance(dataSchema -> {
                 // Fallback if file cannot be read, try XML from Config
-                NormalizedNode dataNode = parsePossibleDefaultAppConfigElement(dataSchema);
-                if (dataNode == null) {
-                    // or, as last resort, defaults from the model
-                    return bindingContext.newDefaultNode(dataSchema);
-                } else {
+                final var dataNode = parsePossibleDefaultAppConfigElement(dataSchema);
+                if (dataNode != null) {
                     return dataNode;
                 }
+                // or, as last resort, defaults from the model
+                return bindingContext.newDefaultNode(dataSchema);
             });
 
         } catch (ConfigXMLReaderException | IOException | SAXException | XMLStreamException | URISyntaxException e) {
