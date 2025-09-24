@@ -11,7 +11,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
-import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.containerNode;
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntry;
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntryBuilder;
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapNodeBuilder;
@@ -253,7 +252,10 @@ public class NormalizedNodePrunerTest {
                 .node(TestModel.INNER_CONTAINER_QNAME).build();
         AbstractNormalizedNodePruner pruner = prunerFullSchema(path);
 
-        ContainerNode input = containerNode(TestModel.INNER_CONTAINER_QNAME);
+        ContainerNode input = ImmutableNodes.newContainerBuilder()
+            .withNodeIdentifier(new NodeIdentifier(TestModel.INNER_CONTAINER_QNAME))
+            .build();
+
         NormalizedNodeWriter.forStreamWriter(pruner).write(input);
 
         assertEquals(input, pruner.getResult().orElseThrow());
@@ -267,7 +269,9 @@ public class NormalizedNodePrunerTest {
                 .node(TestModel.INVALID_QNAME).build();
         AbstractNormalizedNodePruner pruner = prunerFullSchema(path);
 
-        NormalizedNodeWriter.forStreamWriter(pruner).write(containerNode(TestModel.INVALID_QNAME));
+        NormalizedNodeWriter.forStreamWriter(pruner).write(ImmutableNodes.newContainerBuilder()
+            .withNodeIdentifier(new NodeIdentifier(TestModel.INVALID_QNAME))
+            .build());
 
         assertEquals(Optional.empty(), pruner.getResult());
     }
@@ -283,7 +287,9 @@ public class NormalizedNodePrunerTest {
             .write(mapEntryBuilder(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1)
                 .withChild(mapNodeBuilder(TestModel.INNER_LIST_QNAME)
                     .withChild(mapEntryBuilder(TestModel.INNER_LIST_QNAME, TestModel.NAME_QNAME, "one")
-                        .withChild(containerNode(TestModel.INVALID_QNAME))
+                        .withChild(ImmutableNodes.newContainerBuilder()
+                            .withNodeIdentifier(new NodeIdentifier(TestModel.INVALID_QNAME))
+                            .build())
                         .build())
                     .build())
                 .build());
@@ -304,7 +310,9 @@ public class NormalizedNodePrunerTest {
 
         SystemMapNode input = mapNodeBuilder(TestModel.INNER_LIST_QNAME)
             .withChild(mapEntryBuilder(TestModel.INNER_LIST_QNAME, TestModel.NAME_QNAME, "one")
-                .withChild(containerNode(TestModel.INNER_CONTAINER_QNAME))
+                .withChild(ImmutableNodes.newContainerBuilder()
+                    .withNodeIdentifier(new NodeIdentifier(TestModel.INNER_CONTAINER_QNAME))
+                    .build())
                 .build())
             .build();
         NormalizedNodeWriter.forStreamWriter(pruner).write(input);
@@ -321,7 +329,9 @@ public class NormalizedNodePrunerTest {
 
         NormalizedNodeWriter.forStreamWriter(pruner).write(mapNodeBuilder(TestModel.INVALID_QNAME)
             .withChild(mapEntryBuilder(TestModel.INVALID_QNAME, TestModel.NAME_QNAME, "one")
-                .withChild(containerNode(TestModel.INNER_CONTAINER_QNAME))
+                .withChild(ImmutableNodes.newContainerBuilder()
+                    .withNodeIdentifier(new NodeIdentifier(TestModel.INNER_CONTAINER_QNAME))
+                    .build())
                 .build())
             .build());
 
@@ -339,7 +349,9 @@ public class NormalizedNodePrunerTest {
             .write(mapEntryBuilder(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1)
                 .withChild(mapNodeBuilder(TestModel.INVALID_QNAME)
                     .withChild(mapEntryBuilder(TestModel.INVALID_QNAME, TestModel.NAME_QNAME, "one")
-                        .withChild(containerNode(TestModel.INNER_CONTAINER_QNAME))
+                        .withChild(ImmutableNodes.newContainerBuilder()
+                            .withNodeIdentifier(new NodeIdentifier(TestModel.INNER_CONTAINER_QNAME))
+                            .build())
                         .build())
                     .build())
                 .build());
