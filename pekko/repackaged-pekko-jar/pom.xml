@@ -45,27 +45,27 @@
         <dependency>
             <groupId>org.apache.pekko</groupId>
             <artifactId>pekko-actor_3</artifactId>
-            <version>1.1.5</version>
+            <version>1.2.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.pekko</groupId>
             <artifactId>pekko-actor-typed_3</artifactId>
-            <version>1.1.5</version>
+            <version>1.2.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.pekko</groupId>
             <artifactId>pekko-cluster_3</artifactId>
-            <version>1.1.5</version>
+            <version>1.2.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.pekko</groupId>
             <artifactId>pekko-cluster-typed_3</artifactId>
-            <version>1.1.5</version>
+            <version>1.2.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.pekko</groupId>
             <artifactId>pekko-osgi_3</artifactId>
-            <version>1.1.5</version>
+            <version>1.2.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.osgi</groupId>
@@ -80,22 +80,22 @@
         <dependency>
             <groupId>org.apache.pekko</groupId>
             <artifactId>pekko-protobuf-v3_3</artifactId>
-            <version>1.1.5</version>
+            <version>1.2.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.pekko</groupId>
             <artifactId>pekko-remote_3</artifactId>
-            <version>1.1.5</version>
+            <version>1.2.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.pekko</groupId>
             <artifactId>pekko-slf4j_3</artifactId>
-            <version>1.1.5</version>
+            <version>1.2.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.pekko</groupId>
             <artifactId>pekko-stream_3</artifactId>
-            <version>1.1.5</version>
+            <version>1.2.1</version>
         </dependency>
     </dependencies>
 

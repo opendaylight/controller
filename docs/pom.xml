@@ -216,7 +216,7 @@
                         <link>https://hamcrest.org/JavaHamcrest/javadoc/3.0/</link>
                         <link>https://www.slf4j.org/apidocs/</link>
                         <link>https://guava.dev/releases/33.4.8-jre/api/docs/</link>
-                        <link>https://pekko.apache.org/japi/pekko/1.1.5/</link>
+                        <link>https://pekko.apache.org/japi/pekko/1.2.1/</link>
                         <link>https://netty.io/4.2/api/</link>
                         <link>https://commons.apache.org/proper/commons-lang/javadocs/api-release/</link>
 
