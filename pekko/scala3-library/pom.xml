@@ -79,6 +79,18 @@
                             <outputDirectory>${project.build.directory}/shaded-sources</outputDirectory>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>copy-javadoc</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <classifier>javadoc</classifier>
+                            <includeArtifactIds>scala3-library_3</includeArtifactIds>
+                            <stripVersion>true</stripVersion>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -93,6 +105,22 @@
                         </goals>
                         <configuration>
                             <sources>${project.build.directory}/shaded-sources</sources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>shaded-javadoc</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>attach-artifact</goal>
+                        </goals>
+                        <configuration>
+                            <artifacts>
+                                <artifact>
+                                    <file>${project.build.directory}/dependency/scala3-library_3-javadoc.jar</file>
+                                    <type>jar</type>
+                                    <classifier>javadoc</classifier>
+                                </artifact>
+                            </artifacts>
                         </configuration>
                     </execution>
                 </executions>
