@@ -17,7 +17,7 @@
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>scripts</artifactId>
-    <version>12.0.0-SNAPSHOT</version>
+    <version>12.0.0</version>
     <packaging>jar</packaging>
     <name>${project.artifactId}</name>
     <description>Verious scripts for configuring a cluster</description>
