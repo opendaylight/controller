@@ -12,9 +12,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import javanet.staxutils.IndentingXMLStreamWriter;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
+import org.opendaylight.yangtools.util.xml.IndentedXML;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
 import org.opendaylight.yangtools.yang.data.codec.xml.XMLStreamNormalizedNodeStreamWriter;
@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class NormalizedNodeXMLOutput {
     private static final Logger LOG = LoggerFactory.getLogger(NormalizedNodeXMLOutput.class);
+    private static final IndentedXML INDENT = IndentedXML.of(4);
     private static final XMLOutputFactory XOF;
 
     static {
@@ -41,7 +42,7 @@ public final class NormalizedNodeXMLOutput {
 
     public static void toStream(final OutputStream outStream, final NormalizedNode node)
             throws XMLStreamException, IOException {
-        final var indenting = new IndentingXMLStreamWriter(XOF.createXMLStreamWriter(outStream));
+        final var indenting = INDENT.wrapStreamWriter(XOF.createXMLStreamWriter(outStream));
         try (var streamWriter = XMLStreamNormalizedNodeStreamWriter.createSchemaless(indenting)) {
             NormalizedNodeWriter nodeWriter = NormalizedNodeWriter.forStreamWriter(streamWriter);
             nodeWriter.write(node);

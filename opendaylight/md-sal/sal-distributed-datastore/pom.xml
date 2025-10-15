@@ -62,10 +62,6 @@
 
     <!-- OpenDaylight -->
     <dependency>
-      <groupId>net.java.dev.stax-utils</groupId>
-      <artifactId>stax-utils</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>raft-api</artifactId>
     </dependency>
