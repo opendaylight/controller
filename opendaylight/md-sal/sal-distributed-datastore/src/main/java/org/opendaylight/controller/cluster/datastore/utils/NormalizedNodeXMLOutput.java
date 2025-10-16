@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
  */
 public final class NormalizedNodeXMLOutput {
     private static final Logger LOG = LoggerFactory.getLogger(NormalizedNodeXMLOutput.class);
-    private static final IndentedXML INDENT = IndentedXML.of(4);
     private static final XMLOutputFactory XOF;
 
     static {
@@ -42,7 +41,7 @@ public final class NormalizedNodeXMLOutput {
 
     public static void toStream(final OutputStream outStream, final NormalizedNode node)
             throws XMLStreamException, IOException {
-        final var indenting = INDENT.wrapStreamWriter(XOF.createXMLStreamWriter(outStream));
+        final var indenting = IndentedXML.of().wrapStreamWriter(XOF.createXMLStreamWriter(outStream));
         try (var streamWriter = XMLStreamNormalizedNodeStreamWriter.createSchemaless(indenting)) {
             NormalizedNodeWriter nodeWriter = NormalizedNodeWriter.forStreamWriter(streamWriter);
             nodeWriter.write(node);
