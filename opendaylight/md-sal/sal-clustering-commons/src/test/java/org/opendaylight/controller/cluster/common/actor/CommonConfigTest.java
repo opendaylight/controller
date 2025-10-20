@@ -5,33 +5,31 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.common.actor;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.concurrent.TimeUnit;
-import org.junit.Test;
+import  org.junit.jupiter.api.Test;
 import scala.concurrent.duration.FiniteDuration;
 
-public class CommonConfigTest {
-
+class CommonConfigTest {
     @Test
-    public void testCommonConfigDefaults() {
+    void testCommonConfigDefaults() {
         CommonConfig config = new CommonConfig.Builder<>("testsystem").build();
 
         assertNotNull(config.getActorSystemName());
         assertNotNull(config.getMailBoxCapacity());
         assertNotNull(config.getMailBoxName());
         assertNotNull(config.getMailBoxPushTimeout());
-        assertNotNull(config.isMetricCaptureEnabled());
+        assertFalse(config.isMetricCaptureEnabled());
     }
 
     @Test
-    public void testCommonConfigOverride() {
-
+    void testCommonConfigOverride() {
         int expectedCapacity = 123;
         String timeoutValue = "1000ms";
         CommonConfig config = new CommonConfig.Builder<>("testsystem")
