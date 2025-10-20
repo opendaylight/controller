@@ -46,8 +46,7 @@ final class ModuleShardBackendResolver extends AbstractShardBackendResolver {
 
     private final Future<Registration> shardAvailabilityChangesRegFuture;
 
-    @GuardedBy("this")
-    private long nextShard = 1;
+    private @GuardedBy("this") long nextShard = 1;
 
     private volatile ImmutableBiMap<String, Long> shards = ImmutableBiMap.of(DefaultShardStrategy.DEFAULT_SHARD, 0L);
 

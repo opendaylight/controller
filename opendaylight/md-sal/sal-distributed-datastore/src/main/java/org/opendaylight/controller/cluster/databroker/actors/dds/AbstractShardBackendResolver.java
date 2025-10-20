@@ -54,8 +54,8 @@ abstract sealed class AbstractShardBackendResolver extends BackendInfoResolver<S
      */
     static final class ResolvingBackendInfo {
         private final @NonNull CompletionStage<ShardBackendInfo> stage;
-        @GuardedBy("this")
-        private ShardBackendInfo result;
+
+        private @GuardedBy("this") ShardBackendInfo result;
 
         private ResolvingBackendInfo(final CompletionStage<ShardBackendInfo> stage) {
             this.stage = requireNonNull(stage);

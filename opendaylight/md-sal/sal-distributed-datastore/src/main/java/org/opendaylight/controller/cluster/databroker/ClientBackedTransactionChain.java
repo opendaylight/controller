@@ -34,8 +34,7 @@ import org.slf4j.LoggerFactory;
 final class ClientBackedTransactionChain implements DOMStoreTransactionChain {
     private static final Logger LOG = LoggerFactory.getLogger(ClientBackedTransactionChain.class);
 
-    @GuardedBy("this")
-    private final Map<AbstractClientHandle<?>, Boolean> openSnapshots = new WeakHashMap<>();
+    private final @GuardedBy("this") Map<AbstractClientHandle<?>, Boolean> openSnapshots = new WeakHashMap<>();
 
     private final ClientLocalHistory history;
     private final boolean debugAllocation;

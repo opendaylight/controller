@@ -338,10 +338,9 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
     private final @NonNull AbstractClientConnection<ShardBackendInfo> connection;
     private final @NonNull AbstractClientHistory parent;
 
-    @GuardedBy("lock")
-    private final Map<TransactionIdentifier, AbstractProxyTransaction> proxies = new LinkedHashMap<>();
-    @GuardedBy("lock")
-    private ProxyHistory successor;
+    private final @GuardedBy("lock") Map<TransactionIdentifier, AbstractProxyTransaction> proxies =
+        new LinkedHashMap<>();
+    private @GuardedBy("lock") ProxyHistory successor;
 
     // List of transaction identifiers which were allocated by our parent history, but did not touch our shard. Each of
     // these represents a hole in otherwise-contiguous allocation of transactionIds. These holes are problematic, as
@@ -360,8 +359,7 @@ abstract class ProxyHistory implements Identifiable<LocalHistoryIdentifier> {
     // FIXME: default value deserves some explanation -- this affects depth of an RB Tree on the receiving end.
     private static final int PURGE_SKIPPED_TXID_THRESHOLD = 256;
 
-    @GuardedBy("lock")
-    private volatile List<TransactionIdentifier> skippedTransactions;
+    private volatile @GuardedBy("lock") List<TransactionIdentifier> skippedTransactions;
 
     private ProxyHistory(final AbstractClientHistory parent,
             final AbstractClientConnection<ShardBackendInfo> connection, final LocalHistoryIdentifier identifier) {

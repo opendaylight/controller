@@ -80,11 +80,9 @@ public abstract sealed class AbstractClientConnection<T extends BackendInfo>
     private final @NonNull ClientActorContext context;
     private final @NonNull Long cookie;
     private final String backendName;
-    @GuardedBy("lock")
-    private final TransmitQueue queue;
+    private final @GuardedBy("lock") TransmitQueue queue;
 
-    @GuardedBy("lock")
-    private boolean haveTimer;
+    private @GuardedBy("lock") boolean haveTimer;
 
     /**
      * Time reference when we saw any activity from the backend.

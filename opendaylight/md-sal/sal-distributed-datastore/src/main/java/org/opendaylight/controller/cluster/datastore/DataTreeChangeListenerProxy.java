@@ -42,8 +42,7 @@ final class DataTreeChangeListenerProxy extends AbstractObjectRegistration<DOMDa
     private final YangInstanceIdentifier registeredPath;
     private final boolean clustered;
 
-    @GuardedBy("this")
-    private ActorSelection listenerRegistrationActor;
+    private @GuardedBy("this") ActorSelection listenerRegistrationActor;
 
     @VisibleForTesting
     private DataTreeChangeListenerProxy(final ActorUtils actorUtils, final DOMDataTreeChangeListener listener,

@@ -206,10 +206,8 @@ public class DatastoreContextIntrospector {
                 propertyName, type));
     }
 
-    @GuardedBy(value = "this")
-    private DatastoreContext context;
-    @GuardedBy(value = "this")
-    private Map<String, Object> currentProperties;
+    private @GuardedBy("this") DatastoreContext context;
+    private @GuardedBy("this") Map<String, Object> currentProperties;
 
     public DatastoreContextIntrospector(final DatastoreContext context,
             final DataStorePropertiesContainer defaultPropsContainer) {

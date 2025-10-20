@@ -175,10 +175,8 @@ public class FileBackedOutputStream extends OutputStream {
     private final TempFileCreator fileCreator;
     private final int threshold;
 
-    @GuardedBy("this")
-    private State state = new OpenMemory(new MemoryStream());
-    @GuardedBy("this")
-    private SizedStreamSource source;
+    private @GuardedBy("this") State state = new OpenMemory(new MemoryStream());
+    private @GuardedBy("this") SizedStreamSource source;
 
     /**
      * Default constructor. Resulting instance uses the given file threshold, and does not reset the data when the

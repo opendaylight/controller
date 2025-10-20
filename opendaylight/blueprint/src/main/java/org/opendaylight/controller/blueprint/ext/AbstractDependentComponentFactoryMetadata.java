@@ -40,15 +40,13 @@ abstract class AbstractDependentComponentFactoryMetadata implements DependentCom
     private final AtomicBoolean started = new AtomicBoolean();
     private final AtomicBoolean satisfied = new AtomicBoolean();
     private final AtomicBoolean restarting = new AtomicBoolean();
-    @GuardedBy("serviceRecipes")
-    private final List<StaticServiceReferenceRecipe> serviceRecipes = new ArrayList<>();
+    private final @GuardedBy("serviceRecipes") List<StaticServiceReferenceRecipe> serviceRecipes = new ArrayList<>();
     private volatile ExtendedBlueprintContainer container;
     private volatile SatisfactionCallback satisfactionCallback;
     private volatile String failureMessage;
     private volatile Throwable failureCause;
     private volatile String dependencyDesc;
-    @GuardedBy("serviceRecipes")
-    private boolean stoppedServiceRecipes;
+    private @GuardedBy("serviceRecipes") boolean stoppedServiceRecipes;
 
     protected AbstractDependentComponentFactoryMetadata(final String id) {
         this.id = requireNonNull(id);

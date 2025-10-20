@@ -58,13 +58,12 @@ public abstract class AbstractClientHistory extends LocalAbortable implements Id
     private static final AtomicReferenceFieldUpdater<AbstractClientHistory, State> STATE_UPDATER =
             AtomicReferenceFieldUpdater.newUpdater(AbstractClientHistory.class, State.class, "state");
 
-    @GuardedBy("this")
-    private final Map<TransactionIdentifier, AbstractClientHandle<?>> openTransactions = new HashMap<>();
-    @GuardedBy("this")
-    private final Map<TransactionIdentifier, AbstractTransactionCommitCohort> readyTransactions = new HashMap<>();
+    private final @GuardedBy("this") Map<TransactionIdentifier, AbstractClientHandle<?>> openTransactions =
+        new HashMap<>();
+    private final @GuardedBy("this") Map<TransactionIdentifier, AbstractTransactionCommitCohort> readyTransactions =
+        new HashMap<>();
 
-    @GuardedBy("lock")
-    private final Map<Long, ProxyHistory> histories = new ConcurrentHashMap<>();
+    private final @GuardedBy("lock") Map<Long, ProxyHistory> histories = new ConcurrentHashMap<>();
     private final StampedLock lock = new StampedLock();
 
     private final @NonNull AbstractDataStoreClientBehavior client;

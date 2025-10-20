@@ -37,8 +37,7 @@ class VotingFuture<T> extends AbstractFuture<T> {
 
     private final T result;
 
-    @GuardedBy("failures")
-    private final Collection<Throwable> failures = new ArrayList<>(0);
+    private final @GuardedBy("failures") Collection<Throwable> failures = new ArrayList<>(0);
     @SuppressWarnings("unused")
     private volatile int neededVotes;
 

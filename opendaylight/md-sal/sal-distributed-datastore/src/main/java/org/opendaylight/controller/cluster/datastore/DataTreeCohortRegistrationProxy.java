@@ -32,8 +32,8 @@ final class DataTreeCohortRegistrationProxy<C extends DOMDataTreeCommitCohort> e
     private final DOMDataTreeIdentifier subtree;
     private final ActorRef actor;
     private final ActorUtils actorUtils;
-    @GuardedBy("this")
-    private ActorRef cohortRegistry;
+
+    private @GuardedBy("this") ActorRef cohortRegistry;
 
     DataTreeCohortRegistrationProxy(final ActorUtils actorUtils, final DOMDataTreeIdentifier subtree,
             final C cohort) {

@@ -51,10 +51,8 @@ public final class OSGiDistributedDataStore {
         private final AbstractDataStore datastore;
         private final String serviceType;
 
-        @GuardedBy("this")
-        private ComponentInstance<OSGiDOMStore> component;
-        @GuardedBy("this")
-        private boolean stopped;
+        private @GuardedBy("this") ComponentInstance<OSGiDOMStore> component;
+        private @GuardedBy("this") boolean stopped;
 
         DatastoreState(final DatastoreContextIntrospector introspector, final LogicalDatastoreType datastoreType,
                 final AbstractDataStore datastore, final String serviceType) {

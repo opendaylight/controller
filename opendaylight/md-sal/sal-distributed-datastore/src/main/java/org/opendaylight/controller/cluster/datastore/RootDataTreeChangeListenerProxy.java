@@ -67,8 +67,7 @@ final class RootDataTreeChangeListenerProxy<L extends DOMDataTreeChangeListener>
 
     private final ActorUtils actorUtils;
 
-    @GuardedBy("this")
-    private State state;
+    private @GuardedBy("this") State state;
 
     RootDataTreeChangeListenerProxy(final ActorUtils actorUtils, final @NonNull L listener,
             final Set<String> shardNames) {

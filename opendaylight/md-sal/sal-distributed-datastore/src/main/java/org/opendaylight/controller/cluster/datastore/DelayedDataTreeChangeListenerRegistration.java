@@ -16,8 +16,7 @@ class DelayedDataTreeChangeListenerRegistration implements Registration {
     private final RegisterDataTreeChangeListener registrationMessage;
     private final ActorRef registrationActor;
 
-    @GuardedBy("this")
-    private boolean closed;
+    private @GuardedBy("this") boolean closed;
 
     DelayedDataTreeChangeListenerRegistration(final RegisterDataTreeChangeListener registrationMessage,
             final ActorRef registrationActor) {
