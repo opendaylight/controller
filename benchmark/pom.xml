@@ -10,7 +10,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>odlparent-lite</artifactId>
-    <version>14.1.4</version>
+    <version>14.1.5-SNAPSHOT</version>
     <relativePath/>
   </parent>
 
