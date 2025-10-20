@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Consumer;
 import org.apache.pekko.actor.ActorRef;
-import org.checkerframework.checker.lock.qual.GuardedBy;
+import org.checkerframework.checker.lock.qual.Holding;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.client.ConnectionEntry;
@@ -790,7 +790,7 @@ abstract sealed class AbstractProxyTransaction implements Identifiable<Transacti
 
     abstract FluentFuture<Optional<NormalizedNode>> doRead(YangInstanceIdentifier path);
 
-    @GuardedBy("this")
+    @Holding("this")
     abstract Optional<ModifyTransactionRequest> flushState();
 
     abstract TransactionRequest<?> abortRequest();

@@ -398,7 +398,7 @@ public abstract sealed class AbstractClientConnection<T extends BackendInfo>
      * - if there is a timeout to schedule, return a non-empty optional
      * - if this connections has timed out, return null
      */
-    @GuardedBy("lock")
+    @Holding("lock")
     private OptionalLong lockedCheckTimeout(final long now) {
         if (queue.isEmpty()) {
             LOG.debug("{}: connection {} is empty", context.persistenceId(), this);
