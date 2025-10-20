@@ -9,7 +9,6 @@ package org.opendaylight.controller.remote.rpc.registry.gossip;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Verify.verify;
-import static com.google.common.base.Verify.verifyNotNull;
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.nio.file.StandardOpenOption.SYNC;
@@ -198,7 +197,7 @@ public abstract class BucketStoreActor<T extends BucketData<T>> extends Abstract
     }
 
     private void persistIncarnation() throws IOException {
-        final var snapshot = verifyNotNull(incarnation);
+        final var snapshot = incarnation;
         log().debug("{}: persisting new incarnation {}", persistenceId(), snapshot);
 
         final var tmpFile = Files.createTempFile(directory, INCARNATION_FILE.toString(), null);
