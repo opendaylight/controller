@@ -1088,11 +1088,12 @@ public abstract class RaftActor extends AbstractUntypedActor {
      * A point-in-time capture of {@link RaftActorBehavior} state critical for transitioning between behaviors.
      */
     private abstract static class BehaviorState implements Immutable {
-        @Nullable abstract RaftActorBehavior getBehavior();
 
-        @Nullable abstract String getLastValidLeaderId();
+        abstract @Nullable RaftActorBehavior getBehavior();
 
-        @Nullable abstract String getLastLeaderId();
+        abstract @Nullable String getLastValidLeaderId();
+
+        abstract @Nullable String getLastLeaderId();
 
         abstract short getLeaderPayloadVersion();
     }

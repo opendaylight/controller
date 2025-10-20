@@ -94,7 +94,7 @@ public final class ShardInformation {
     }
 
     @VisibleForTesting
-    @Nullable public ActorRef getActor() {
+    public @Nullable ActorRef getActor() {
         return actor;
     }
 

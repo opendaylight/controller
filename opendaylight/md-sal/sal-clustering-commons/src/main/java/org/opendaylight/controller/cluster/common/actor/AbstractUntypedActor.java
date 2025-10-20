@@ -11,7 +11,6 @@ package org.opendaylight.controller.cluster.common.actor;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.pekko.actor.AbstractActor;
 import org.apache.pekko.actor.ActorRef;
-import org.eclipse.jdt.annotation.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +31,7 @@ public abstract class AbstractUntypedActor extends AbstractActor implements Exec
     }
 
     @Override
-    public final void executeInSelf(@NonNull final Runnable runnable) {
+    public final void executeInSelf(final Runnable runnable) {
         final ExecuteInSelfMessage message = new ExecuteInSelfMessage(runnable);
         self().tell(message, ActorRef.noSender());
     }

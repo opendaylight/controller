@@ -31,7 +31,7 @@ final class ForwardingDataTreeChangeListener implements DOMDataTreeChangeListene
     private final ActorSelection actor;
     private final ActorRef sendingActor;
 
-    ForwardingDataTreeChangeListener(final ActorSelection actor, @Nullable final ActorRef sendingActor) {
+    ForwardingDataTreeChangeListener(final ActorSelection actor, final @Nullable ActorRef sendingActor) {
         this.actor = requireNonNull(actor, "actor should not be null");
         this.sendingActor = sendingActor;
     }

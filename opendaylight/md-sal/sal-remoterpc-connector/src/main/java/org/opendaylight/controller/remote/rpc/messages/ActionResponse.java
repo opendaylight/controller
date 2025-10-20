@@ -29,7 +29,7 @@ public class ActionResponse extends AbstractResponse<ContainerNode> {
 
     private final transient @NonNull ImmutableList<@NonNull RpcError> errors;
 
-    public ActionResponse(final @Nullable ContainerNode output, @NonNull final Collection<? extends RpcError> errors) {
+    public ActionResponse(final @Nullable ContainerNode output, final @NonNull Collection<? extends RpcError> errors) {
         super(output);
         this.errors = ImmutableList.copyOf(errors);
     }

@@ -37,7 +37,7 @@ public final class ExecuteAction extends AbstractExecute<Absolute, @NonNull Cont
         this.path = requireNonNull(path);
     }
 
-    public static @NonNull ExecuteAction from(final @NonNull Absolute type, @NonNull final DOMDataTreeIdentifier path,
+    public static @NonNull ExecuteAction from(final @NonNull Absolute type, final @NonNull DOMDataTreeIdentifier path,
             final @NonNull ContainerNode input) {
         return new ExecuteAction(type, path, input);
     }

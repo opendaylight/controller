@@ -60,8 +60,8 @@ public final class AppendEntries extends RaftRPC {
 
     private final String leaderAddress;
 
-    AppendEntries(final long term, @NonNull final String leaderId, final long prevLogIndex,
-            final long prevLogTerm, @NonNull final List<@NonNull LogEntry> entries, final long leaderCommit,
+    AppendEntries(final long term, final @NonNull String leaderId, final long prevLogIndex,
+            final long prevLogTerm, final @NonNull List<@NonNull LogEntry> entries, final long leaderCommit,
             final long replicatedToAllIndex, final short payloadVersion, final short recipientRaftVersion,
             final short leaderRaftVersion, final @Nullable String leaderAddress) {
         super(term);
