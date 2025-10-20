@@ -419,6 +419,7 @@ public final class OpendaylightToaster extends AbstractMXBean
                 notifyCallback(false);
             }
 
+            @SuppressWarnings("ReturnValueIgnored")
             void notifyCallback(final boolean result) {
                 if (resultCallback != null) {
                     resultCallback.apply(result);
