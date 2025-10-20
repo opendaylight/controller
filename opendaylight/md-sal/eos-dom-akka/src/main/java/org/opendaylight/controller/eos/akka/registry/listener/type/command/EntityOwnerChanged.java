@@ -28,7 +28,7 @@ public final class EntityOwnerChanged extends TypeListenerCommand {
             final boolean inJeopardy) {
         this.entity = requireNonNull(entity);
         this.change = requireNonNull(change);
-        this.inJeopardy = requireNonNull(inJeopardy);
+        this.inJeopardy = inJeopardy;
     }
 
     public DOMEntity entity() {
