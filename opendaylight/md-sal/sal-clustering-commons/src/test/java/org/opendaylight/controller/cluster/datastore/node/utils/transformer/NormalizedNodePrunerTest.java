@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.cluster.datastore.node.utils.transformer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntry;
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntryBuilder;
@@ -75,7 +76,7 @@ public class NormalizedNodePrunerTest {
         assertEquals(expected, actual);
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testReusePruner() throws IOException {
         AbstractNormalizedNodePruner pruner = prunerFullSchema(TestModel.TEST_PATH);
 
@@ -89,7 +90,8 @@ public class NormalizedNodePrunerTest {
 
         assertEquals(expected, actual);
 
-        NormalizedNodeWriter.forStreamWriter(pruner).write(expected);
+        final var nw = NormalizedNodeWriter.forStreamWriter(pruner);
+        assertThrows(IllegalStateException.class, () -> nw.write(expected));
     }
 
     @Test
@@ -150,7 +152,7 @@ public class NormalizedNodePrunerTest {
         NormalizedNode input = ImmutableNodes.leafNode(TestModel.DESC_QNAME, "test");
         NormalizedNodeWriter.forStreamWriter(pruner).write(input);
 
-        assertEquals("normalizedNode", input, pruner.getResult().orElseThrow());
+        assertEquals(input, pruner.getResult().orElseThrow());
     }
 
     @Test
@@ -168,8 +170,7 @@ public class NormalizedNodePrunerTest {
         LeafSetEntryNode<?> input = ImmutableNodes.leafSetEntry(TestModel.SHOE_QNAME, "puma");
         NormalizedNodeWriter.forStreamWriter(pruner).write(input);
 
-        NormalizedNode actual = pruner.getResult().orElseThrow();
-        assertEquals("normalizedNode", input, actual);
+        assertEquals(input, pruner.getResult().orElseThrow());
     }
 
     @Test
@@ -181,8 +182,7 @@ public class NormalizedNodePrunerTest {
             .build();
         NormalizedNodeWriter.forStreamWriter(pruner).write(input);
 
-        NormalizedNode actual = pruner.getResult().orElseThrow();
-        assertEquals("normalizedNode", input, actual);
+        assertEquals(input, pruner.getResult().orElseThrow());
     }
 
     @Test
