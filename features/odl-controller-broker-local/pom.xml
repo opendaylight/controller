@@ -30,13 +30,13 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.mdsal</groupId>
-            <artifactId>odl-mdsal-eos-dom</artifactId>
+            <artifactId>odl-mdsal-eos-binding</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.mdsal</groupId>
-            <artifactId>odl-mdsal-eos-binding</artifactId>
+            <artifactId>odl-mdsal-eos-single</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
@@ -45,12 +45,6 @@
             <artifactId>odl-mdsal-singleton-dom</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
-        </dependency>
-
-        <!-- Single-node Entity Ownership Service -->
-        <dependency>
-            <groupId>org.opendaylight.mdsal</groupId>
-            <artifactId>mdsal-eos-dom-simple</artifactId>
         </dependency>
 
         <dependency>
