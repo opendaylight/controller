@@ -101,6 +101,7 @@ public record SegmentDescriptor(
      *
      * @return The segment version.
      */
+    @Override
     public int version() {
         return version;
     }
@@ -111,6 +112,7 @@ public record SegmentDescriptor(
      *
      * @return The segment identifier.
      */
+    @Override
     public long id() {
         return id;
     }
@@ -121,6 +123,7 @@ public record SegmentDescriptor(
      *
      * @return The segment index.
      */
+    @Override
     public long index() {
         return index;
     }
@@ -130,6 +133,7 @@ public record SegmentDescriptor(
      *
      * @return The maximum allowed count of the segment.
      */
+    @Override
     public int maxSegmentSize() {
         return maxSegmentSize;
     }
@@ -139,6 +143,7 @@ public record SegmentDescriptor(
      *
      * @return The maximum number of entries allowed in the segment.
      */
+    @Override
     public int maxEntries() {
         return maxEntries;
     }
@@ -152,6 +157,7 @@ public record SegmentDescriptor(
      *
      * @return The last time the segment was updated in terms of milliseconds since the epoch.
      */
+    @Override
     public long updated() {
         return updated;
     }
