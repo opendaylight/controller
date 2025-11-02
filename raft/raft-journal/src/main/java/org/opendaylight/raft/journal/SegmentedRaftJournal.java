@@ -259,7 +259,7 @@ public final class SegmentedRaftJournal implements RaftJournal {
      *
      * @param segmentId the segment ID
      * @param firstIndex index of first entry
-     * @param A new segment
+     * @return A new segment
      * @throws IOException when an I/O error occurs
      */
     private @NonNull Segment createSegment(final long segmentId, final long firstIndex) throws IOException {
