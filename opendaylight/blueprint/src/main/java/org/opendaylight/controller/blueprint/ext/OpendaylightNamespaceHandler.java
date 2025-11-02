@@ -88,16 +88,16 @@ public final class OpendaylightNamespaceHandler implements NamespaceHandler {
 
     @Override
     public ComponentMetadata decorate(final Node node, final ComponentMetadata component, final ParserContext context) {
-        if (node instanceof Attr) {
+        if (node instanceof Attr attr) {
             if (nodeNameEquals(node, RESTART_DEPENDENTS_ON_UPDATES)) {
-                return decorateRestartDependentsOnUpdates((Attr) node, component, context);
+                return decorateRestartDependentsOnUpdates(attr, component, context);
             } else if (nodeNameEquals(node, USE_DEFAULT_FOR_REFERENCE_TYPES)) {
-                return decorateUseDefaultForReferenceTypes((Attr) node, component, context);
+                return decorateUseDefaultForReferenceTypes(attr, component, context);
             } else if (nodeNameEquals(node, TYPE_ATTR)) {
                 if (component instanceof ServiceReferenceMetadata) {
-                    return decorateServiceReferenceType((Attr) node, component, context);
+                    return decorateServiceReferenceType(attr, component, context);
                 } else if (component instanceof ServiceMetadata) {
-                    return decorateServiceType((Attr)node, component, context);
+                    return decorateServiceType(attr, component, context);
                 }
 
                 throw new ComponentDefinitionException("Attribute " + node.getNodeName()
@@ -124,7 +124,7 @@ public final class OpendaylightNamespaceHandler implements NamespaceHandler {
 
     private static ComponentMetadata decorateServiceReferenceType(final Attr attr, final ComponentMetadata component,
             final ParserContext context) {
-        if (!(component instanceof MutableServiceReferenceMetadata)) {
+        if (!(component instanceof MutableServiceReferenceMetadata serviceRef)) {
             throw new ComponentDefinitionException("Expected an instanceof MutableServiceReferenceMetadata");
         }
 
@@ -136,7 +136,6 @@ public final class OpendaylightNamespaceHandler implements NamespaceHandler {
         // but as long as there's at least one processor registered, it correctly uses the extended filter.
         registerComponentProcessor(context);
 
-        MutableServiceReferenceMetadata serviceRef = (MutableServiceReferenceMetadata)component;
         String oldFilter = serviceRef.getExtendedFilter() == null ? null :
             serviceRef.getExtendedFilter().getStringValue();
 

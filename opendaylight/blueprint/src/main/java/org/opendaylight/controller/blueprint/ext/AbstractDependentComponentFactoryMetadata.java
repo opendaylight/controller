@@ -165,9 +165,9 @@ abstract class AbstractDependentComponentFactoryMetadata implements DependentCom
         executionContext.removePartialObject(id);
 
         Recipe myRecipe = executionContext.getRecipe(id);
-        if (myRecipe instanceof AbstractRecipe) {
+        if (myRecipe instanceof AbstractRecipe ar) {
             log.debug("{}: setPrototype to false", logName());
-            ((AbstractRecipe)myRecipe).setPrototype(false);
+            ar.setPrototype(false);
         } else {
             log.warn("{}: Recipe is null or not an AbstractRecipe", logName());
         }

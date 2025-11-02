@@ -46,10 +46,8 @@ public class ThreadExecutorStatsMXBeanImpl extends AbstractMXBean
 
     private static ThreadExecutorStatsMXBeanImpl createInternal(final Executor executor,
             final String beanName, final String beanType, final String beanCategory) {
-        if (executor instanceof ThreadPoolExecutor) {
-            final ThreadExecutorStatsMXBeanImpl ret = new ThreadExecutorStatsMXBeanImpl(
-                    (ThreadPoolExecutor) executor, beanName, beanType, beanCategory);
-            return ret;
+        if (executor instanceof ThreadPoolExecutor tpe) {
+            return new ThreadExecutorStatsMXBeanImpl(tpe, beanName, beanType, beanCategory);
         }
 
         LOG.info("Executor {} is not supported", executor);
@@ -155,11 +153,9 @@ public class ThreadExecutorStatsMXBeanImpl extends AbstractMXBean
     @Override
     public Long getRejectedTaskCount() {
         RejectedExecutionHandler rejectedHandler = executor.getRejectedExecutionHandler();
-        if (rejectedHandler instanceof CountingRejectedExecutionHandler) {
-            return Long.valueOf(((CountingRejectedExecutionHandler)rejectedHandler)
-                                                                     .getRejectedTaskCount());
+        if (rejectedHandler instanceof CountingRejectedExecutionHandler creh) {
+            return Long.valueOf(creh.getRejectedTaskCount());
         }
-
         return null;
     }
 
