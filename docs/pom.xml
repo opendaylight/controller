@@ -130,7 +130,6 @@
                             <goal>unpack-dependencies</goal>
                         </goals>
                         <configuration>
-                            <silent>true</silent>
                             <classifier>sources</classifier>
                             <includes>org/opendaylight/**</includes>
                             <includeGroupIds>org.opendaylight.controller</includeGroupIds>
