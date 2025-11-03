@@ -498,7 +498,8 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             }
             case Ready ready -> {
                 startAbort();
-                ready.readyCohort.abort(new FutureCallback<>() {
+
+                final var callback = new FutureCallback<Empty>() {
                     @Override
                     public void onSuccess(final Empty result) {
                         recordAndSendSuccess(envelope, now, new TransactionAbortSuccess(getIdentifier(), sequence));
@@ -511,7 +512,15 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
                         LOG.warn("{}: Transaction {} abort failed", persistenceId(), getIdentifier(), failure);
                         finishAbort();
                     }
-                });
+                };
+                final var cohort = ready.readyCohort;
+                final var tree = history().tree();
+                if (tree.startAbort(cohort)) {
+                    tree.getStats().incrementAbortTransactionsCount();
+                    cohort.abort(callback);
+                } else {
+                    callback.onSuccess(Empty.value());
+                }
                 yield null;
             }
             default -> throw new IllegalStateException(getIdentifier() + " cannot be aborted in state " + state);
