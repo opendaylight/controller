@@ -1137,7 +1137,7 @@ public class ShardTest extends AbstractShardTest {
         assertEquals(tx1, failure.getTarget());
         assertTrue(failure.isHardFailure());
         final var cause = assertInstanceOf(RuntimeRequestException.class, failure.getCause());
-        assertEquals("Precommit failed", cause.getMessage());
+        assertEquals("PreCommit failed", cause.getMessage());
         final var unwrapped = assertInstanceOf(TimeoutException.class, cause.unwrap());
         assertThat(unwrapped.getMessage(), startsWith("Backend timeout in state CAN_COMMIT_COMPLETE after "));
         assertEquals(1, shard.underlyingActor().getShardMBean().getFailedTransactionsCount());

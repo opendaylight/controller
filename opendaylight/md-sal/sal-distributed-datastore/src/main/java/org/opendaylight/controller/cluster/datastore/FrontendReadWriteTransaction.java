@@ -9,10 +9,12 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
 import java.util.Collection;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ClosedTransactionException;
@@ -162,6 +164,168 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         }
     }
 
+    /**
+     * Abstract base class for callbacks towards {@link CommitCohort}.
+     */
+    private abstract static sealed class AbstractCallback<T> implements FutureCallback<T>
+            permits AbstractCanCommitCallback, AbstractPreCommitCallback, DoCommitCallback {
+        private final @NonNull FrontendReadWriteTransaction transaction;
+        private final @NonNull RequestEnvelope envelope;
+        private final long startTime;
+
+        @NonNullByDefault
+        AbstractCallback(final FrontendReadWriteTransaction transaction, final RequestEnvelope envelope,
+                final long startTime) {
+            this.transaction = requireNonNull(transaction);
+            this.envelope = requireNonNull(envelope);
+            this.startTime = startTime;
+        }
+
+        @Override
+        public final void onSuccess(final T result) {
+            onSuccess(transaction, envelope, startTime);
+        }
+
+        @NonNullByDefault
+        abstract void onSuccess(FrontendReadWriteTransaction transaction, RequestEnvelope envelope, long startTime);
+
+        @Override
+        public final void onFailure(final Throwable failure) {
+            transaction.failTransaction(envelope, startTime, new RuntimeRequestException(failureMessage(), failure));
+        }
+
+        abstract @NonNull String failureMessage();
+
+        @Override
+        public final String toString() {
+            return MoreObjects.toStringHelper(this).add("transaction", transaction).toString();
+        }
+    }
+
+    /**
+     * Abstract base class for a callback for {@link CommitCohort#canCommit(FutureCallback)}.
+     */
+    private abstract static sealed class AbstractCanCommitCallback extends AbstractCallback<Empty>
+            permits CoordinatedCanCommitCallback, DirectCanCommitCallback {
+        @NonNullByDefault
+        AbstractCanCommitCallback(final FrontendReadWriteTransaction transaction, final RequestEnvelope envelope,
+                final long startTime) {
+            super(transaction, envelope, startTime);
+        }
+
+        @Override
+        final String failureMessage() {
+            return "CanCommit failed";
+        }
+    }
+
+    /**
+     * Callback for {@link CommitCohort#canCommit(FutureCallback)} invoked during coordinated commit.
+     */
+    private static final class CoordinatedCanCommitCallback extends AbstractCanCommitCallback {
+        @NonNullByDefault
+        CoordinatedCanCommitCallback(final FrontendReadWriteTransaction transaction, final RequestEnvelope envelope,
+                final long startTime) {
+            super(transaction, envelope, startTime);
+        }
+
+        @Override
+        void onSuccess(final FrontendReadWriteTransaction transaction, final RequestEnvelope envelope,
+                final long startTime) {
+            transaction.successfulCanCommit(envelope, startTime);
+        }
+    }
+
+    /**
+     * Callback for {@link CommitCohort#canCommit(FutureCallback)} invoked during direct commit.
+     */
+    private static final class DirectCanCommitCallback extends AbstractCanCommitCallback {
+        @NonNullByDefault
+        DirectCanCommitCallback(final FrontendReadWriteTransaction transaction, final RequestEnvelope envelope,
+                final long startTime) {
+            super(transaction, envelope, startTime);
+        }
+
+        @Override
+        void onSuccess(final FrontendReadWriteTransaction transaction, final RequestEnvelope envelope,
+                final long startTime) {
+            transaction.successfulDirectCanCommit(envelope, startTime);
+        }
+    }
+
+    /**
+     * Abstract base class for a callback for {@link CommitCohort#preCommit(FutureCallback)}.
+     */
+    private abstract static sealed class AbstractPreCommitCallback extends AbstractCallback<DataTreeCandidate>
+            permits CoordinatedPreCommitCallback, DirectPreCommitCallback {
+        @NonNullByDefault
+        AbstractPreCommitCallback(final FrontendReadWriteTransaction transaction, final RequestEnvelope envelope,
+                final long startTime) {
+            super(transaction, envelope, startTime);
+        }
+
+        @Override
+        final String failureMessage() {
+            return "PreCommit failed";
+        }
+    }
+
+    /**
+     * Callback for {@link CommitCohort#preCommit(FutureCallback)} invoked during coordinated commit.
+     */
+    private static final class CoordinatedPreCommitCallback extends AbstractPreCommitCallback {
+        @NonNullByDefault
+        CoordinatedPreCommitCallback(final FrontendReadWriteTransaction transaction, final RequestEnvelope envelope,
+                final long startTime) {
+            super(transaction, envelope, startTime);
+        }
+
+        @Override
+        void onSuccess(final FrontendReadWriteTransaction transaction, final RequestEnvelope envelope,
+                final long startTime) {
+            transaction.successfulPreCommit(envelope, startTime);
+        }
+    }
+
+    /**
+     * Callback for {@link CommitCohort#preCommit(FutureCallback)} invoked during direct commit.
+     */
+    private static final class DirectPreCommitCallback extends AbstractPreCommitCallback {
+        @NonNullByDefault
+        DirectPreCommitCallback(final FrontendReadWriteTransaction transaction, final RequestEnvelope envelope,
+                final long startTime) {
+            super(transaction, envelope, startTime);
+        }
+
+        @Override
+        void onSuccess(final FrontendReadWriteTransaction transaction, final RequestEnvelope envelope,
+                final long startTime) {
+            transaction.successfulDirectPreCommit(envelope, startTime);
+        }
+    }
+
+    /**
+     * A callback for {@link CommitCohort#commit(FutureCallback)}, initiated either in coordinated or direct fashion.
+     */
+    private static final class DoCommitCallback extends AbstractCallback<UnsignedLong> {
+        @NonNullByDefault
+        DoCommitCallback(final FrontendReadWriteTransaction transaction, final RequestEnvelope envelope,
+                final long startTime) {
+            super(transaction, envelope, startTime);
+        }
+
+        @Override
+        void onSuccess(final FrontendReadWriteTransaction transaction, final RequestEnvelope envelope,
+                final long startTime) {
+            transaction.successfulCommit(envelope, startTime);
+        }
+
+        @Override
+        String failureMessage() {
+            return "DoCommit failed";
+        }
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(FrontendReadWriteTransaction.class);
 
     private State state;
@@ -224,18 +388,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
                     case CAN_COMMIT_COMPLETE -> {
                         ready.stage = CommitStage.PRE_COMMIT_PENDING;
                         LOG.debug("{}: Transaction {} initiating preCommit", persistenceId(), getIdentifier());
-                        ready.readyCohort.preCommit(new FutureCallback<DataTreeCandidate>() {
-                            @Override
-                            public void onSuccess(final DataTreeCandidate result) {
-                                successfulPreCommit(envelope, now);
-                            }
-
-                            @Override
-                            public void onFailure(final Throwable failure) {
-                                failTransaction(envelope, now,
-                                    new RuntimeRequestException("Precommit failed", failure));
-                            }
-                        });
+                        ready.readyCohort.preCommit(new CoordinatedPreCommitCallback(this, envelope, now));
                     }
                     default -> throw new IllegalStateException("Attempted to preCommit in stage " + ready.stage);
                 }
@@ -295,17 +448,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
                     case PRE_COMMIT_COMPLETE -> {
                         ready.stage = CommitStage.COMMIT_PENDING;
                         LOG.debug("{}: Transaction {} initiating commit", persistenceId(), getIdentifier());
-                        ready.readyCohort.commit(new FutureCallback<>() {
-                            @Override
-                            public void onSuccess(final UnsignedLong result) {
-                                successfulCommit(envelope, now);
-                            }
-
-                            @Override
-                            public void onFailure(final Throwable failure) {
-                                failTransaction(envelope, now, new RuntimeRequestException("Commit failed", failure));
-                            }
-                        });
+                        ready.readyCohort.commit(new DoCommitCallback(this, envelope, now));
                     }
                     default -> throw new IllegalStateException("Attempted to doCommit in stage " + ready.stage);
                 }
@@ -383,17 +526,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             case READY -> {
                 ready.stage = CommitStage.CAN_COMMIT_PENDING;
                 LOG.debug("{}: Transaction {} initiating canCommit", persistenceId(), getIdentifier());
-                ready.readyCohort.canCommit(new FutureCallback<>() {
-                    @Override
-                    public void onSuccess(final Empty result) {
-                        successfulCanCommit(envelope, now);
-                    }
-
-                    @Override
-                    public void onFailure(final Throwable failure) {
-                        failTransaction(envelope, now, new RuntimeRequestException("CanCommit failed", failure));
-                    }
-                });
+                ready.readyCohort.canCommit(new CoordinatedCanCommitCallback(this, envelope, now));
             }
             default -> throw new IllegalStateException("Attempted to canCommit in stage " + ready.stage);
         }
@@ -422,17 +555,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             case READY -> {
                 ready.stage = CommitStage.CAN_COMMIT_PENDING;
                 LOG.debug("{}: Transaction {} initiating direct canCommit", persistenceId(), getIdentifier());
-                ready.readyCohort.canCommit(new FutureCallback<>() {
-                    @Override
-                    public void onSuccess(final Empty result) {
-                        successfulDirectCanCommit(envelope, now);
-                    }
-
-                    @Override
-                    public void onFailure(final Throwable failure) {
-                        failTransaction(envelope, now, new RuntimeRequestException("CanCommit failed", failure));
-                    }
-                });
+                ready.readyCohort.canCommit(new DirectCanCommitCallback(this, envelope, now));
             }
             default ->
                 LOG.debug("{}: Transaction {} in state {}, not initiating direct commit for {}", persistenceId(),
@@ -448,17 +571,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             case Ready ready -> {
                 ready.stage = CommitStage.PRE_COMMIT_PENDING;
                 LOG.debug("{}: Transaction {} initiating direct preCommit", persistenceId(), getIdentifier());
-                ready.readyCohort.preCommit(new FutureCallback<>() {
-                    @Override
-                    public void onSuccess(final DataTreeCandidate result) {
-                        successfulDirectPreCommit(envelope, startTime);
-                    }
-
-                    @Override
-                    public void onFailure(final Throwable failure) {
-                        failTransaction(envelope, startTime, new RuntimeRequestException("PreCommit failed", failure));
-                    }
-                });
+                ready.readyCohort.preCommit(new DirectPreCommitCallback(this, envelope, startTime));
             }
             default -> throw new IllegalStateException(
                 getIdentifier() + " cannot complete canCommit in state " + state);
@@ -472,17 +585,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             case Ready ready -> {
                 ready.stage = CommitStage.COMMIT_PENDING;
                 LOG.debug("{}: Transaction {} initiating direct commit", persistenceId(), getIdentifier());
-                ready.readyCohort.commit(new FutureCallback<UnsignedLong>() {
-                    @Override
-                    public void onSuccess(final UnsignedLong result) {
-                        successfulCommit(envelope, startTime);
-                    }
-
-                    @Override
-                    public void onFailure(final Throwable failure) {
-                        failTransaction(envelope, startTime, new RuntimeRequestException("DoCommit failed", failure));
-                    }
-                });
+                ready.readyCohort.commit(new DoCommitCallback(this, envelope, startTime));
             }
             default -> throw new IllegalStateException(
                 getIdentifier() + " cannot complete preCommit in state " + state);
