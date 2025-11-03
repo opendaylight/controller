@@ -49,6 +49,9 @@
         <module>odl-raft-api</module>
         <module>odl-raft-spi</module>
 
+        <!-- Pekko-based Entity Ownership Service -->
+        <module>odl-controller-eos-pekko</module>
+
         <!-- Single features, to be cleaned up -->
         <module>odl-controller-blueprint</module>
         <module>odl-controller-broker-local</module>
