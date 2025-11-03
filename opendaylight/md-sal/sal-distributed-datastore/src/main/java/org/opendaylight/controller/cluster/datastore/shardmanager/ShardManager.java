@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
@@ -45,7 +46,7 @@ import org.apache.pekko.actor.SupervisorStrategy;
 import org.apache.pekko.cluster.ClusterEvent;
 import org.apache.pekko.cluster.ClusterEvent.MemberWeaklyUp;
 import org.apache.pekko.cluster.Member;
-import org.apache.pekko.dispatch.Futures;
+import org.apache.pekko.dispatch.CompletionStages;
 import org.apache.pekko.dispatch.OnComplete;
 import org.apache.pekko.pattern.Patterns;
 import org.apache.pekko.util.Timeout;
@@ -311,12 +312,12 @@ class ShardManager extends AbstractUntypedActorWithMetering {
     }
 
     void onShutDown() {
-        final var stopFutures = new ArrayList<Future<Boolean>>(localShards.size());
+        final var stopFutures = new ArrayList<CompletionStage<Boolean>>(localShards.size());
         for (var info : localShards.values()) {
             if (info.getActor() != null) {
                 LOG.debug("{}: Issuing gracefulStop to shard {}", name(), info.getShardId());
-                stopFutures.add(Patterns.gracefulStop(info.getActor(), FiniteDuration.fromNanos(
-                    info.getDatastoreContext().getShardRaftConfig().getElectionTimeOutInterval().toNanos()).$times(2),
+                stopFutures.add(Patterns.gracefulStop(info.getActor(),
+                    info.getDatastoreContext().getShardRaftConfig().getElectionTimeOutInterval().multipliedBy(2),
                     Shutdown.INSTANCE));
             }
         }
@@ -325,28 +326,25 @@ class ShardManager extends AbstractUntypedActorWithMetering {
 
         final var dispatcher = new Dispatchers(context().system().dispatchers())
                 .getDispatcher(Dispatchers.DispatcherType.Client);
-        Futures.sequence(stopFutures, dispatcher).onComplete(new OnComplete<Iterable<Boolean>>() {
-            @Override
-            public void onComplete(final Throwable failure, final Iterable<Boolean> results) {
-                LOG.debug("{}: All shards shutdown - sending PoisonPill to self", name());
+        CompletionStages.sequence(stopFutures, dispatcher).whenCompleteAsync((results, failure) -> {
+            LOG.debug("{}: All shards shutdown - sending PoisonPill to self", name());
 
-                self().tell(PoisonPill.getInstance(), self());
+            self().tell(PoisonPill.getInstance(), self());
 
-                if (failure != null) {
-                    LOG.warn("{}: An error occurred attempting to shut down the shards", name(), failure);
-                    return;
+            if (failure != null) {
+                LOG.warn("{}: An error occurred attempting to shut down the shards", name(), failure);
+                return;
+            }
+
+            int nfailed = 0;
+            for (var result : results) {
+                if (!result) {
+                    nfailed++;
                 }
+            }
 
-                int nfailed = 0;
-                for (Boolean result : results) {
-                    if (!result) {
-                        nfailed++;
-                    }
-                }
-
-                if (nfailed > 0) {
-                    LOG.warn("{}: {} shards did not shut down gracefully", name(), nfailed);
-                }
+            if (nfailed > 0) {
+                LOG.warn("{}: {} shards did not shut down gracefully", name(), nfailed);
             }
         }, dispatcher);
     }
