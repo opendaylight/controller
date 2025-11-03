@@ -14,7 +14,7 @@ import org.apache.pekko.actor.Props;
 import org.apache.pekko.actor.UntypedAbstractActor;
 import org.apache.pekko.cluster.Cluster;
 import org.apache.pekko.cluster.ClusterEvent;
-import org.apache.pekko.japi.Effect;
+import org.apache.pekko.japi.function.Effect;
 import org.apache.pekko.remote.AssociationErrorEvent;
 import org.apache.pekko.remote.RemotingLifecycleEvent;
 import org.apache.pekko.remote.artery.ThisActorSystemQuarantinedEvent;

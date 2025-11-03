@@ -15,7 +15,7 @@ import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.actor.Address;
 import org.apache.pekko.event.Logging;
-import org.apache.pekko.japi.Effect;
+import org.apache.pekko.japi.function.Effect;
 import org.apache.pekko.remote.AssociationErrorEvent;
 import org.apache.pekko.remote.InvalidAssociation;
 import org.apache.pekko.remote.UniqueAddress;
