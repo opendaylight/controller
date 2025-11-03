@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.example;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -38,7 +39,7 @@ public class ExampleRoleChangeListener extends AbstractUntypedActor implements A
     // the akka url should be set to the notifiers actor-system and domain.
     private static final String NOTIFIER_AKKA_URL = "pekko://raft-test@127.0.0.1:2550/user/";
     private static final FiniteDuration DURATION = new FiniteDuration(100, TimeUnit.MILLISECONDS);
-    private static final FiniteDuration SCHEDULER_DURATION = new FiniteDuration(1, TimeUnit.SECONDS);
+    private static final Duration SCHEDULER_DURATION = Duration.ofSeconds(1);
     private static final String[] SHARDS_TO_MONITOR = new String[] {"example"};
 
     private final Map<String, Boolean> notifierRegistrationStatus = new HashMap<>();
@@ -80,11 +81,10 @@ public class ExampleRoleChangeListener extends AbstractUntypedActor implements A
         }
     }
 
-    private void scheduleRegistrationListener(final FiniteDuration interval) {
+    private void scheduleRegistrationListener(final Duration interval) {
         LOG.debug("--->scheduleRegistrationListener called.");
-        registrationSchedule = getContext().system().scheduler()
-            .schedule(interval, interval, self(), new RegisterListener(), getContext().system().dispatcher(), self());
-
+        registrationSchedule = getContext().system().scheduler().scheduleAtFixedRate(interval, interval, self(),
+            new RegisterListener(), getContext().system().dispatcher(), self());
     }
 
     private void populateRegistry(final String memberName) {
@@ -103,7 +103,7 @@ public class ExampleRoleChangeListener extends AbstractUntypedActor implements A
     @SuppressWarnings("checkstyle:IllegalCatch")
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     private void sendRegistrationRequests() {
-        for (Map.Entry<String, Boolean> entry : notifierRegistrationStatus.entrySet()) {
+        for (var entry : notifierRegistrationStatus.entrySet()) {
             if (!entry.getValue()) {
                 try {
                     LOG.debug("{} registering with {}", self().path().toString(), entry.getKey());
