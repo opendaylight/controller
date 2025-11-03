@@ -13,7 +13,6 @@ import java.util.concurrent.TimeoutException;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.actor.Props;
 import org.apache.pekko.actor.Terminated;
-import org.apache.pekko.dispatch.OnComplete;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.ActorSystemProvider;
 import org.opendaylight.controller.cluster.ActorSystemProviderListener;
@@ -24,7 +23,6 @@ import org.opendaylight.yangtools.util.ObjectRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
-import scala.concurrent.ExecutionContext;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
 
@@ -59,18 +57,15 @@ public class ActorSystemProviderImpl implements ActorSystemProvider, AutoCloseab
     public Future<Terminated> asyncClose() {
         LOG.info("Shutting down ActorSystem");
 
-        final Future<Terminated> ret = actorSystem.terminate();
-        ret.onComplete(new OnComplete<Terminated>() {
-            @Override
-            public void onComplete(final Throwable failure, final Terminated success) {
-                if (failure != null) {
-                    LOG.warn("ActorSystem failed to shut down", failure);
-                } else {
-                    LOG.info("ActorSystem shut down");
-                }
+        actorSystem.getWhenTerminated().whenComplete((success, failure) -> {
+            if (failure != null) {
+                LOG.warn("ActorSystem failed to shut down", failure);
+            } else {
+                LOG.info("ActorSystem shut down");
             }
-        }, ExecutionContext.global());
-        return ret;
+        });
+
+        return actorSystem.terminate();
     }
 
     public void close(final FiniteDuration wait) throws TimeoutException, InterruptedException {
