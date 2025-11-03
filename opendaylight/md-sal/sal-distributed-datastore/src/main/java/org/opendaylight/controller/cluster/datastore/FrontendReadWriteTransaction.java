@@ -9,10 +9,12 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
 import java.util.Collection;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.commands.AbortLocalTransactionRequest;
 import org.opendaylight.controller.cluster.access.commands.ClosedTransactionException;
@@ -162,6 +164,69 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         }
     }
 
+    /**
+     * Abstract base class for a callback for {@link CommitCohort#preCommit(FutureCallback)}.
+     */
+    private abstract sealed class AbstractPreCommitCallback implements FutureCallback<DataTreeCandidate>
+            permits CoordinatedPreCommitCallback, DirectPreCommitCallback {
+        private final @NonNull RequestEnvelope envelope;
+        private final long startTime;
+
+        @NonNullByDefault
+        AbstractPreCommitCallback(final RequestEnvelope envelope, final long startTime) {
+            this.envelope = requireNonNull(envelope);
+            this.startTime = startTime;
+        }
+
+        @Override
+        public final void onSuccess(final DataTreeCandidate result) {
+            onSuccess(envelope, startTime);
+        }
+
+        @NonNullByDefault
+        abstract void onSuccess(final RequestEnvelope envelope, final long startTime);
+
+        @Override
+        public final void onFailure(final Throwable failure) {
+            failTransaction(envelope, startTime, new RuntimeRequestException("Precommit failed", failure));
+        }
+
+        @Override
+        public final String toString() {
+            return MoreObjects.toStringHelper(this).add("transaction", getIdentifier()).toString();
+        }
+    }
+
+    /**
+     * Callback for {@link CommitCohort#preCommit(FutureCallback)} invoked during coordinated commit.
+     */
+    private final class CoordinatedPreCommitCallback extends AbstractPreCommitCallback {
+        @NonNullByDefault
+        CoordinatedPreCommitCallback(final RequestEnvelope envelope, final long startTime) {
+            super(envelope, startTime);
+        }
+
+        @Override
+        void onSuccess(final RequestEnvelope envelope, final long startTime) {
+            successfulPreCommit(envelope, startTime);
+        }
+    }
+
+    /**
+     * Callback for {@link CommitCohort#preCommit(FutureCallback)} invoked during direct commit.
+     */
+    private final class DirectPreCommitCallback extends AbstractPreCommitCallback {
+        @NonNullByDefault
+        DirectPreCommitCallback(final RequestEnvelope envelope, final long startTime) {
+            super(envelope, startTime);
+        }
+
+        @Override
+        void onSuccess(final RequestEnvelope envelope, final long startTime) {
+            successfulDirectPreCommit(envelope, startTime);
+        }
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(FrontendReadWriteTransaction.class);
 
     private State state;
@@ -224,18 +289,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
                     case CAN_COMMIT_COMPLETE -> {
                         ready.stage = CommitStage.PRE_COMMIT_PENDING;
                         LOG.debug("{}: Transaction {} initiating preCommit", persistenceId(), getIdentifier());
-                        ready.readyCohort.preCommit(new FutureCallback<DataTreeCandidate>() {
-                            @Override
-                            public void onSuccess(final DataTreeCandidate result) {
-                                successfulPreCommit(envelope, now);
-                            }
-
-                            @Override
-                            public void onFailure(final Throwable failure) {
-                                failTransaction(envelope, now,
-                                    new RuntimeRequestException("Precommit failed", failure));
-                            }
-                        });
+                        ready.readyCohort.preCommit(new CoordinatedPreCommitCallback(envelope, now));
                     }
                     default -> throw new IllegalStateException("Attempted to preCommit in stage " + ready.stage);
                 }
@@ -448,17 +502,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
             case Ready ready -> {
                 ready.stage = CommitStage.PRE_COMMIT_PENDING;
                 LOG.debug("{}: Transaction {} initiating direct preCommit", persistenceId(), getIdentifier());
-                ready.readyCohort.preCommit(new FutureCallback<>() {
-                    @Override
-                    public void onSuccess(final DataTreeCandidate result) {
-                        successfulDirectPreCommit(envelope, startTime);
-                    }
-
-                    @Override
-                    public void onFailure(final Throwable failure) {
-                        failTransaction(envelope, startTime, new RuntimeRequestException("PreCommit failed", failure));
-                    }
-                });
+                ready.readyCohort.preCommit(new DirectPreCommitCallback(envelope, startTime));
             }
             default -> throw new IllegalStateException(
                 getIdentifier() + " cannot complete canCommit in state " + state);
