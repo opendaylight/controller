@@ -62,7 +62,7 @@ import org.apache.pekko.cluster.ClusterEvent;
 import org.apache.pekko.cluster.Member;
 import org.apache.pekko.dispatch.Dispatchers;
 import org.apache.pekko.dispatch.OnComplete;
-import org.apache.pekko.japi.Creator;
+import org.apache.pekko.japi.function.Creator;
 import org.apache.pekko.pattern.Patterns;
 import org.apache.pekko.serialization.Serialization;
 import org.apache.pekko.testkit.TestActorRef;

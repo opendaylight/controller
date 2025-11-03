@@ -33,7 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Props;
 import org.apache.pekko.dispatch.Dispatchers;
-import org.apache.pekko.japi.Creator;
+import org.apache.pekko.japi.function.Creator;
 import org.apache.pekko.testkit.TestActorRef;
 import org.junit.After;
 import org.junit.Assert;
