@@ -35,12 +35,6 @@
         </dependency>
         <dependency>
             <groupId>org.opendaylight.mdsal</groupId>
-            <artifactId>odl-mdsal-eos-dom</artifactId>
-            <type>xml</type>
-            <classifier>features</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.mdsal</groupId>
             <artifactId>odl-mdsal-dom-broker</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
@@ -78,10 +72,6 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-distributed-datastore</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>eos-dom-akka</artifactId>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
