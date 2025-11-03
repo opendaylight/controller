@@ -14,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * An OnComplete implementation that aggrgates other OnComplete tasks.
+ * An OnComplete implementation that aggregates other OnComplete tasks.
  *
  * @param <T> the result type
  * @author Thomas Pantelis
