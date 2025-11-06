@@ -66,6 +66,7 @@ import scala.jdk.javaapi.DurationConverters;
  * with actors a little more easily. An ActorContext can be freely passed around to local object instances but should
  * not be passed to actors especially remote actors.
  */
+// Non-final for testing
 public class ActorUtils {
     private static final class AskTimeoutCounter extends OnComplete<Object> {
         private LongAdder ateExceptions = new LongAdder();
@@ -437,13 +438,14 @@ public class ActorUtils {
         return shardStrategyFactory;
     }
 
-    protected Future<Object> doAsk(final ActorRef actorRef, final Object message, final Timeout timeout) {
+    public PrimaryShardInfoFutureCache getPrimaryShardInfoCache() {
+        return primaryShardInfoCache;
+    }
+
+    @VisibleForTesting
+    Future<Object> doAsk(final ActorRef actorRef, final Object message, final Timeout timeout) {
         final var ret = Patterns.ask(actorRef, message, timeout);
         ret.onComplete(askTimeoutCounter, ExecutionContexts.parasitic());
         return ret;
-    }
-
-    public PrimaryShardInfoFutureCache getPrimaryShardInfoCache() {
-        return primaryShardInfoCache;
     }
 }
