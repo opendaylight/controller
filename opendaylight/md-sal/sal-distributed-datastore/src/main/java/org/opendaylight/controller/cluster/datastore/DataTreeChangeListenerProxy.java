@@ -118,19 +118,16 @@ final class DataTreeChangeListenerProxy extends AbstractObjectRegistration<DOMDa
     }
 
     private void doRegistration(final ActorRef shard) {
-        actorUtils.executeOperationAsync(shard,
-            new RegisterDataTreeChangeListener(registeredPath, dataChangeListenerActor, clustered),
-            actorUtils.getDatastoreContext().getShardInitializationTimeout()).onComplete(new OnComplete<>() {
-                @Override
-                public void onComplete(final Throwable failure, final Object result) {
-                    if (failure != null) {
-                        LOG.error("{}: Failed to register DataTreeChangeListener {} at path {}", logContext(),
-                            getInstance(), registeredPath, failure);
-                    } else {
-                        setListenerRegistrationActor(actorUtils.actorSelection(
-                            ((RegisterDataTreeNotificationListenerReply) result).getListenerRegistrationPath()));
-                    }
+        actorUtils.ask(shard, new RegisterDataTreeChangeListener(registeredPath, dataChangeListenerActor, clustered),
+            actorUtils.getDatastoreContext().getShardInitializationTimeout()).whenCompleteAsync((result, failure) -> {
+                if (failure != null) {
+                    LOG.error("{}: Failed to register DataTreeChangeListener {} at path {}", logContext(),
+                        getInstance(), registeredPath, failure);
+                    return;
                 }
+
+                setListenerRegistrationActor(actorUtils.actorSelection(
+                    ((RegisterDataTreeNotificationListenerReply) result).getListenerRegistrationPath()));
             }, actorUtils.getClientDispatcher());
     }
 
