@@ -160,7 +160,7 @@ final class MappedByteBuf extends AbstractReferenceCountedByteBuf implements Flu
     @Override
     public ByteBuffer internalNioBuffer(final int index, final int length) {
         checkIndex(index, length);
-        return internalNio().position(index).limit(index + length);
+        return internalNio().limit(index + length).position(index);
     }
 
     private ByteBuffer internalNio() {
