@@ -116,9 +116,6 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataTreeConfiguration;
 import org.opendaylight.yangtools.yang.data.tree.impl.di.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.collection.Set;
-import scala.concurrent.Await;
-import scala.concurrent.Future;
-import scala.concurrent.duration.FiniteDuration;
 
 /**
  * End-to-end distributed data store tests that exercise remote shards and transactions.
@@ -859,11 +856,10 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
             sendDatastoreContextUpdate(leaderDistributedDataStore, leaderDatastoreContextBuilder
                 .shardElectionTimeoutFactor(100));
 
-            final FiniteDuration duration = FiniteDuration.create(5, TimeUnit.SECONDS);
-            final Future<ActorRef> future = leaderDistributedDataStore.getActorUtils().findLocalShardAsync("cars");
-            final ActorRef leaderActor = Await.result(future, duration);
+            final ActorRef leaderActor = leaderDistributedDataStore.getActorUtils().findLocalShardAsync("cars")
+                .toCompletableFuture().get(5, TimeUnit.SECONDS);
 
-            final Future<Boolean> stopFuture = Patterns.gracefulStop(leaderActor, duration, Shutdown.INSTANCE);
+            final var stopFuture = Patterns.gracefulStop(leaderActor, Duration.ofSeconds(5), Shutdown.INSTANCE);
 
             // Commit the 2 transactions. They should finish and succeed.
 
@@ -872,8 +868,7 @@ public class DistributedDataStoreRemotingIntegrationTest extends AbstractTest {
 
             // Wait for the leader actor stopped.
 
-            final Boolean stopped = Await.result(stopFuture, duration);
-            assertEquals("Stopped", Boolean.TRUE, stopped);
+            assertEquals("Stopped", Boolean.TRUE, stopFuture.toCompletableFuture().get(5, TimeUnit.SECONDS));
 
             // Verify leadership was transferred by reading the committed data from the other nodes.
 

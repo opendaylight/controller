@@ -16,6 +16,7 @@ import com.google.common.util.concurrent.UncheckedTimeoutException;
 import java.lang.invoke.VarHandle;
 import java.time.Duration;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -26,7 +27,6 @@ import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.dispatch.ExecutionContexts;
-import org.apache.pekko.dispatch.Mapper;
 import org.apache.pekko.dispatch.OnComplete;
 import org.apache.pekko.pattern.AskTimeoutException;
 import org.apache.pekko.pattern.Patterns;
@@ -98,18 +98,6 @@ public class ActorUtils {
     private static final Logger LOG = LoggerFactory.getLogger(ActorUtils.class);
     private static final String DISTRIBUTED_DATA_STORE_METRIC_REGISTRY = "distributed-data-store";
     private static final String METRIC_RATE = "rate";
-    private static final Mapper<Throwable, Throwable> FIND_PRIMARY_FAILURE_TRANSFORMER = new Mapper<>() {
-        @Override
-        public Throwable apply(final Throwable failure) {
-            if (failure instanceof AskTimeoutException) {
-                // A timeout exception most likely means the shard isn't initialized.
-                return new NotInitializedException(
-                        "Timed out trying to find the primary shard. Most likely cause is the "
-                        + "shard is not initialized yet.");
-            }
-            return failure;
-        }
-    };
     public static final String BOUNDED_MAILBOX = "bounded-mailbox";
     public static final String COMMIT = "commit";
 
@@ -124,7 +112,7 @@ public class ActorUtils {
     private DatastoreContext datastoreContext;
     private FiniteDuration operationDuration;
     private Timeout operationTimeout;
-    private Timeout shardInitializationTimeout;
+    private Duration shardInitializationTimeout;
 
     private volatile EffectiveModelContext schemaContext;
 
@@ -167,7 +155,7 @@ public class ActorUtils {
         operationDuration = FiniteDuration.create(datastoreContext.getOperationTimeoutInMillis(),
             TimeUnit.MILLISECONDS);
         operationTimeout = new Timeout(operationDuration);
-        shardInitializationTimeout = Timeout.create(datastoreContext.getShardInitializationTimeout().multipliedBy(2));
+        shardInitializationTimeout = datastoreContext.getShardInitializationTimeout().multipliedBy(2);
     }
 
     public DatastoreContext getDatastoreContext() {
@@ -233,34 +221,45 @@ public class ActorUtils {
         return ret;
     }
 
-    public Future<PrimaryShardInfo> findPrimaryShardAsync(final String shardName) {
-        final var ret = primaryShardInfoCache.getIfPresent(shardName);
-        if (ret != null) {
-            return ret;
+    public CompletionStage<PrimaryShardInfo> findPrimaryShardAsync(final String shardName) {
+        final var existing = primaryShardInfoCache.getIfPresent(shardName);
+        if (existing != null) {
+            return existing;
         }
 
-        return executeOperationAsync(shardManager, new FindPrimary(shardName, true), shardInitializationTimeout)
-            .transform(new Mapper<>() {
-                @Override
-                public PrimaryShardInfo checkedApply(final Object response) throws UnknownMessageException {
-                    return switch (response) {
-                        case LocalPrimaryShardFound found -> {
-                            LOG.debug("findPrimaryShardAsync received: {}", found);
-                            yield onPrimaryShardFound(shardName, found.primaryPath(), DataStoreVersions.CURRENT_VERSION,
-                                found.localShardDataTree());
-                        }
-                        case RemotePrimaryShardFound found -> {
-                            LOG.debug("findPrimaryShardAsync received: {}", found);
-                            yield onPrimaryShardFound(shardName, found.primaryPath(), found.primaryVersion(), null);
-                        }
-                        case NotInitializedException notInitialized -> throw notInitialized;
-                        case PrimaryNotFoundException primaryNotFound -> throw primaryNotFound;
-                        case NoShardLeaderException noShardLeader -> throw noShardLeader;
-                        case null, default ->
-                            throw new UnknownMessageException("FindPrimary returned unkown response: " + response);
-                    };
+        final var ret = new CompletableFuture<PrimaryShardInfo>();
+
+        ask(shardManager, new FindPrimary(shardName, true), shardInitializationTimeout).whenCompleteAsync(
+            (response, failure) -> {
+                if (failure != null) {
+                    ret.completeExceptionally(failure instanceof AskTimeoutException
+                        // A timeout exception most likely means the shard isn't initialized.
+                        ? new NotInitializedException("Timed out trying to find the primary shard. Most likely cause " +
+                            " is the shard is not initialized yet.")
+                        : failure);
+                    return;
                 }
-            }, FIND_PRIMARY_FAILURE_TRANSFORMER, getClientDispatcher());
+
+                switch (response) {
+                    case LocalPrimaryShardFound found -> {
+                        LOG.debug("findPrimaryShardAsync received: {}", found);
+                        ret.complete(onPrimaryShardFound(shardName, found.primaryPath(),
+                            DataStoreVersions.CURRENT_VERSION, found.localShardDataTree()));
+                    }
+                    case RemotePrimaryShardFound found -> {
+                        LOG.debug("findPrimaryShardAsync received: {}", found);
+                        ret.complete(onPrimaryShardFound(shardName, found.primaryPath(), found.primaryVersion(), null));
+                    }
+                    case NotInitializedException notInitialized -> ret.completeExceptionally(notInitialized);
+                    case PrimaryNotFoundException primaryNotFound -> ret.completeExceptionally(primaryNotFound);
+                    case NoShardLeaderException noShardLeader -> ret.completeExceptionally(noShardLeader);
+                    case null, default ->
+                        ret.completeExceptionally(
+                            new UnknownMessageException("FindPrimary returned unkown response: " + response));
+                }
+            }, getClientDispatcher());
+
+        return ret;
     }
 
     private PrimaryShardInfo onPrimaryShardFound(final String shardName, final String primaryActorPath,
@@ -291,29 +290,34 @@ public class ActorUtils {
     }
 
     /**
-     * Finds a local shard async given its shard name and return a Future from which to obtain the
-     * ActorRef.
+     * Finds a local shard async given its shard name and return a Future from which to obtain the ActorRef.
      *
      * @param shardName the name of the local shard that needs to be found
      */
-    public Future<ActorRef> findLocalShardAsync(final String shardName) {
-        return executeOperationAsync(shardManager, new FindLocalShard(shardName, true), shardInitializationTimeout)
-            .map(new Mapper<>() {
-                @Override
-                public ActorRef checkedApply(final Object response) throws UnknownMessageException {
-                    return switch (response) {
-                        case LocalShardFound found -> {
-                            LOG.debug("Local shard found {}", found.getPath());
-                            yield found.getPath();
-                        }
-                        case LocalShardNotFound notFound ->
-                            throw new LocalShardNotFoundException("Local shard for " + shardName + " does not exist.");
-                        case NotInitializedException notInitialized -> throw notInitialized;
-                        case null, default ->
-                            throw new UnknownMessageException("FindLocalShard returned unkown response: " + response);
-                    };
+    public CompletionStage<ActorRef> findLocalShardAsync(final String shardName) {
+        final var ret = new CompletableFuture<ActorRef>();
+
+        ask(shardManager, new FindLocalShard(shardName, true), shardInitializationTimeout).whenCompleteAsync(
+            (response, failure) -> {
+                if (failure != null) {
+                    ret.completeExceptionally(failure);
+                    return;
+                }
+
+                switch (response) {
+                    case LocalShardFound found -> {
+                        LOG.debug("Local shard found {}", found.getPath());
+                        ret.complete(found.getPath());
+                    }
+                    case LocalShardNotFound notFound -> ret.completeExceptionally(
+                        new LocalShardNotFoundException("Local shard for " + shardName + " does not exist."));
+                    case NotInitializedException notInitialized -> ret.completeExceptionally(notInitialized);
+                    case null, default -> ret.completeExceptionally(
+                        new UnknownMessageException("FindLocalShard returned unkown response: " + response));
                 }
             }, getClientDispatcher());
+
+        return ret;
     }
 
     /**

@@ -61,7 +61,6 @@ import org.apache.pekko.cluster.Cluster;
 import org.apache.pekko.cluster.ClusterEvent;
 import org.apache.pekko.cluster.Member;
 import org.apache.pekko.dispatch.Dispatchers;
-import org.apache.pekko.dispatch.OnComplete;
 import org.apache.pekko.japi.Creator;
 import org.apache.pekko.pattern.Patterns;
 import org.apache.pekko.serialization.Serialization;
@@ -980,16 +979,13 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         shardManager256.tell(new FindPrimary("default", true), kit256.getRef());
         found = kit256.expectMsgClass(Duration.ofSeconds(5), LocalPrimaryShardFound.class);
         assertThat(found.primaryPath()).contains("member-256-shard-default-config");
-        Future<PrimaryShardInfo> futurePrimaryShard = primaryShardInfoCache.getIfPresent("default");
-        futurePrimaryShard.onComplete(new OnComplete<PrimaryShardInfo>() {
-            @Override
-            public void onComplete(final Throwable failure, final PrimaryShardInfo futurePrimaryShardInfo) {
+        final var futurePrimaryShard = primaryShardInfoCache.getIfPresent("default");
+        assertNotNull(futurePrimaryShard);
+        futurePrimaryShard.whenCompleteAsync((futurePrimaryShardInfo, failure) -> {
                 if (failure != null) {
                     assertTrue("Primary shard info is unexpectedly removed from primaryShardInfoCache", false);
                 } else {
-                    assertEquals("Expected primaryShardInfoCache entry",
-                        primaryShardInfo, futurePrimaryShardInfo);
-                }
+                    assertEquals("Expected primaryShardInfoCache entry", primaryShardInfo, futurePrimaryShardInfo);
             }
         }, system256.dispatchers().defaultGlobalDispatcher());
 
