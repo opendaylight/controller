@@ -165,7 +165,7 @@ public class ActorUtilsTest extends AbstractActorTest {
     }
 
     @Test
-    public void testExecuteRemoteOperation() {
+    public void testExecuteRemoteOperation() throws Exception {
         ActorRef shardActorRef = getSystem().actorOf(Props.create(EchoActor.class));
 
         ActorRef shardManagerActorRef = getSystem().actorOf(MockShardManager.props(true, shardActorRef));
@@ -175,7 +175,8 @@ public class ActorUtilsTest extends AbstractActorTest {
 
         ActorSelection actor = actorUtils.actorSelection(shardActorRef.path());
 
-        Object out = actorUtils.executeOperation(actor, "hello");
+        Object out = Await.result(actorUtils.executeOperationAsync(actor, "hello"),
+            actorUtils.getOperationDuration());
 
         assertEquals("hello", out);
     }

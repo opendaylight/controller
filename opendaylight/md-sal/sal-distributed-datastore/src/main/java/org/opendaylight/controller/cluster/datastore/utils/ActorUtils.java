@@ -321,24 +321,6 @@ public class ActorUtils {
         }
     }
 
-    /**
-     * Execute an operation on a remote actor and wait for it's response.
-     *
-     * @param actor the actor
-     * @param message the message
-     * @return the response message
-     */
-    public Object executeOperation(final ActorSelection actor, final Object message) {
-        final var future = executeOperationAsync(actor, message);
-
-        try {
-            return Await.result(future, operationDuration);
-        } catch (InterruptedException | TimeoutException e) {
-            throw new UncheckedTimeoutException("Sending message " + message.getClass().toString()
-                    + " to actor " + actor.toString() + " failed. Try again later.", e);
-        }
-    }
-
     public Future<Object> executeOperationAsync(final ActorRef actor, final Object message, final Timeout timeout) {
         Preconditions.checkArgument(actor != null, "actor must not be null");
         Preconditions.checkArgument(message != null, "message must not be null");
