@@ -167,7 +167,7 @@ public class ActorUtils {
         operationDuration = FiniteDuration.create(datastoreContext.getOperationTimeoutInMillis(),
             TimeUnit.MILLISECONDS);
         operationTimeout = new Timeout(operationDuration);
-        shardInitializationTimeout = new Timeout(datastoreContext.getShardInitializationTimeout().duration().$times(2));
+        shardInitializationTimeout = Timeout.create(datastoreContext.getShardInitializationTimeout().multipliedBy(2));
     }
 
     public DatastoreContext getDatastoreContext() {

@@ -157,13 +157,9 @@ final class RootDataTreeChangeListenerProxy<L extends DOMDataTreeChangeListener>
             final String shardName = entry.getKey();
             final ActorRef shard = (ActorRef) entry.getValue();
 
-            actorUtils.executeOperationAsync(shard, regMessage,
-                actorUtils.getDatastoreContext().getShardInitializationTimeout()).onComplete(new OnComplete<>() {
-                    @Override
-                    public void onComplete(final Throwable failure, final Object result) {
-                        onShardSubscribed(shardName, failure, result);
-                    }
-                }, actorUtils.getClientDispatcher());
+            actorUtils.ask(shard, regMessage, actorUtils.getDatastoreContext().getShardInitializationTimeout())
+                .whenCompleteAsync((result, failure) -> onShardSubscribed(shardName, failure, result),
+                    actorUtils.getClientDispatcher());
         }
     }
 

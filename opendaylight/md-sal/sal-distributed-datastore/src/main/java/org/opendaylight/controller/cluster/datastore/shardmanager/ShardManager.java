@@ -112,7 +112,6 @@ import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
-import scala.concurrent.duration.FiniteDuration;
 
 /**
  * Manages the shards for a data store. The ShardManager has the following jobs:
@@ -483,7 +482,7 @@ class ShardManager extends AbstractUntypedActorWithMetering {
 
         ActorRef replyActor = getContext().actorOf(ShardManagerGetSnapshotReplyActor.props(
                 new ArrayList<>(localShards.keySet()), type, currentSnapshot , getSender(), name(),
-                datastoreContextFactory.getBaseDatastoreContext().getShardInitializationTimeout().duration()));
+                datastoreContextFactory.getBaseDatastoreContext().getShardInitializationTimeout()));
 
         for (var shardInfo : localShards.values()) {
             shardInfo.getActor().tell(getSnapshot, replyActor);
@@ -732,14 +731,14 @@ class ShardManager extends AbstractUntypedActorWithMetering {
 
                 shardInformation.addOnShardInitialized(onShardInitialized);
 
-                final FiniteDuration timeout;
+                final Duration timeout;
                 if (shardInformation.isShardInitialized()) {
                     // If the shard is already initialized then we'll wait enough time for the shard to
                     // elect a leader, ie 2 times the election timeout.
-                    timeout = FiniteDuration.create(shardInformation.getDatastoreContext().getShardRaftConfig()
-                            .getElectionTimeOutInterval().toMillis() * 2, TimeUnit.MILLISECONDS);
+                    timeout = shardInformation.getDatastoreContext().getShardRaftConfig().getElectionTimeOutInterval()
+                        .multipliedBy(2);
                 } else {
-                    timeout = shardInformation.getDatastoreContext().getShardInitializationTimeout().duration();
+                    timeout = shardInformation.getDatastoreContext().getShardInitializationTimeout();
                 }
 
                 LOG.debug("{}: Scheduling {} ms timer to wait for shard {}", name(), timeout.toMillis(),
@@ -960,6 +959,10 @@ class ShardManager extends AbstractUntypedActorWithMetering {
                 info.getShardId().toString());
     }
 
+    private Duration findTimeout() {
+        return datastoreContextFactory.getBaseDatastoreContext().getShardInitializationTimeout().multipliedBy(2);
+    }
+
     // FIXME: non-null prevAddresses and update checks below once we have removed RemoteFindPrimary
     private void findPrimary(final FindPrimary message, final @Nullable Set<String> previousActorPaths) {
         LOG.debug("{}: In findPrimary: {}", name(), message);
@@ -1007,13 +1010,8 @@ class ShardManager extends AbstractUntypedActorWithMetering {
     }
 
     private void findPrimary(final String shardName, final FindPrimaryResponseHandler handler) {
-        Timeout findPrimaryTimeout = new Timeout(datastoreContextFactory.getBaseDatastoreContext()
-                .getShardInitializationTimeout().duration().$times(2));
-
-        Future<Object> futureObj = Patterns.ask(self(), new FindPrimary(shardName, true), findPrimaryTimeout);
-        futureObj.onComplete(new OnComplete<>() {
-            @Override
-            public void onComplete(final Throwable failure, final Object response) {
+        Patterns.ask(self(), new FindPrimary(shardName, true), findTimeout()).whenCompleteAsync(
+            (response, failure) -> {
                 if (failure != null) {
                     handler.onFailure(failure);
                     return;
@@ -1023,8 +1021,7 @@ class ShardManager extends AbstractUntypedActorWithMetering {
                     case LocalPrimaryShardFound msg -> handler.onLocalPrimaryFound(msg);
                     default -> handler.onUnknownResponse(response);
                 }
-            }
-        }, new Dispatchers(context().system().dispatchers()).getDispatcher(Dispatchers.DispatcherType.Client));
+            }, new Dispatchers(context().system().dispatchers()).getDispatcher(Dispatchers.DispatcherType.Client));
     }
 
     /**
@@ -1459,13 +1456,8 @@ class ShardManager extends AbstractUntypedActorWithMetering {
 
     private void findLocalShard(final String shardName, final ActorRef sender,
             final Consumer<LocalShardFound> onLocalShardFound) {
-        Timeout findLocalTimeout = new Timeout(datastoreContextFactory.getBaseDatastoreContext()
-                .getShardInitializationTimeout().duration().$times(2));
-
-        Future<Object> futureObj = Patterns.ask(self(), new FindLocalShard(shardName, true), findLocalTimeout);
-        futureObj.onComplete(new OnComplete<>() {
-            @Override
-            public void onComplete(final Throwable failure, final Object response) {
+        Patterns.ask(self(), new FindLocalShard(shardName, true), findTimeout()).whenCompleteAsync(
+            (response, failure) -> {
                 if (failure != null) {
                     LOG.debug("{}: Received failure from FindLocalShard for shard {}", name(), shardName,
                         failure);
@@ -1490,8 +1482,7 @@ class ShardManager extends AbstractUntypedActorWithMetering {
                                 shardName, response))), self());
                     }
                 }
-            }
-        }, new Dispatchers(context().system().dispatchers()).getDispatcher(Dispatchers.DispatcherType.Client));
+            }, new Dispatchers(context().system().dispatchers()).getDispatcher(Dispatchers.DispatcherType.Client));
     }
 
     private void changeShardMembersVotingStatus(final ChangeServersVotingStatus changeServersVotingStatus,
