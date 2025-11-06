@@ -229,23 +229,22 @@ public class ActorUtils {
             .transform(new Mapper<>() {
                 @Override
                 public PrimaryShardInfo checkedApply(final Object response) throws UnknownMessageException {
-                    if (response instanceof RemotePrimaryShardFound found) {
-                        LOG.debug("findPrimaryShardAsync received: {}", found);
-                        return onPrimaryShardFound(shardName, found.primaryPath(), found.primaryVersion(), null);
-                    } else if (response instanceof LocalPrimaryShardFound found) {
-                        LOG.debug("findPrimaryShardAsync received: {}", found);
-                        return onPrimaryShardFound(shardName, found.primaryPath(), DataStoreVersions.CURRENT_VERSION,
-                            found.localShardDataTree());
-                    } else if (response instanceof NotInitializedException notInitialized) {
-                        throw notInitialized;
-                    } else if (response instanceof PrimaryNotFoundException primaryNotFound) {
-                        throw primaryNotFound;
-                    } else if (response instanceof NoShardLeaderException noShardLeader) {
-                        throw noShardLeader;
-                    }
-
-                    throw new UnknownMessageException(String.format(
-                        "FindPrimary returned unkown response: %s", response));
+                    return switch (response) {
+                        case LocalPrimaryShardFound found -> {
+                            LOG.debug("findPrimaryShardAsync received: {}", found);
+                            yield onPrimaryShardFound(shardName, found.primaryPath(), DataStoreVersions.CURRENT_VERSION,
+                                found.localShardDataTree());
+                        }
+                        case RemotePrimaryShardFound found -> {
+                            LOG.debug("findPrimaryShardAsync received: {}", found);
+                            yield onPrimaryShardFound(shardName, found.primaryPath(), found.primaryVersion(), null);
+                        }
+                        case NotInitializedException notInitialized -> throw notInitialized;
+                        case PrimaryNotFoundException primaryNotFound -> throw primaryNotFound;
+                        case NoShardLeaderException noShardLeader -> throw noShardLeader;
+                        case null, default ->
+                            throw new UnknownMessageException("FindPrimary returned unkown response: " + response);
+                    };
                 }
             }, FIND_PRIMARY_FAILURE_TRANSFORMER, getClientDispatcher());
     }
