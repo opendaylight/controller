@@ -22,6 +22,7 @@ import org.apache.pekko.actor.ActorPath;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.dispatch.ExecutionContexts;
 import org.apache.pekko.dispatch.Mapper;
 import org.apache.pekko.dispatch.OnComplete;
 import org.apache.pekko.pattern.AskTimeoutException;
@@ -66,7 +67,7 @@ import scala.jdk.javaapi.DurationConverters;
  * not be passed to actors especially remote actors.
  */
 public class ActorUtils {
-    private static final class AskTimeoutCounter extends OnComplete<Object> implements ExecutionContextExecutor {
+    private static final class AskTimeoutCounter extends OnComplete<Object> {
         private LongAdder ateExceptions = new LongAdder();
 
         @Override
@@ -82,17 +83,6 @@ public class ActorUtils {
 
         long sum() {
             return ateExceptions.sum();
-        }
-
-        @Override
-        public void execute(final Runnable runnable) {
-            // Yes, we are this ugly, but then we are just doing a check + an increment
-            runnable.run();
-        }
-
-        @Override
-        public void reportFailure(final Throwable cause) {
-            LOG.warn("Unexpected failure updating counters", cause);
         }
     }
 
@@ -489,7 +479,7 @@ public class ActorUtils {
 
     protected Future<Object> doAsk(final ActorSelection actorRef, final Object message, final Timeout timeout) {
         final var ret = Patterns.ask(actorRef, message, timeout);
-        ret.onComplete(askTimeoutCounter, askTimeoutCounter);
+        ret.onComplete(askTimeoutCounter, ExecutionContexts.parasitic());
         return ret;
     }
 
