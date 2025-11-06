@@ -50,8 +50,8 @@ public class DatastoreContextTest {
         assertEquals(DEFAULT_HEARTBEAT_INTERVAL_IN_MILLIS,
                 context.getShardRaftConfig().getHeartBeatInterval().toMillis());
         assertEquals(DEFAULT_SHARD_TX_COMMIT_QUEUE_CAPACITY, context.getShardTransactionCommitQueueCapacity());
-        assertEquals(DEFAULT_SHARD_INITIALIZATION_TIMEOUT.duration().toMillis(),
-                context.getShardInitializationTimeout().duration().toMillis());
+        assertEquals(DEFAULT_SHARD_INITIALIZATION_TIMEOUT.toMillis(),
+                context.getShardInitializationTimeout().toMillis());
         assertEquals(DEFAULT_SHARD_LEADER_ELECTION_TIMEOUT.toMillis(),
                 context.getShardLeaderElectionTimeout().toMillis());
         assertEquals(DEFAULT_INITIAL_SETTLE_TIMEOUT_MULTIPLIER,
@@ -84,10 +84,7 @@ public class DatastoreContextTest {
         builder.recoverySnapshotIntervalSeconds(DEFAULT_RECOVERY_SNAPSHOT_INTERVAL_SECONDS + 1);
         builder.shardHeartbeatIntervalInMillis(DEFAULT_HEARTBEAT_INTERVAL_IN_MILLIS + 1);
         builder.shardTransactionCommitQueueCapacity(DEFAULT_SHARD_TX_COMMIT_QUEUE_CAPACITY + 1);
-        builder.shardInitializationTimeout(DEFAULT_SHARD_INITIALIZATION_TIMEOUT
-                .duration().toMillis() + 1, TimeUnit.MILLISECONDS);
-        builder.shardInitializationTimeout(DEFAULT_SHARD_INITIALIZATION_TIMEOUT.duration().toMillis() + 1,
-                TimeUnit.MILLISECONDS);
+        builder.shardInitializationTimeout(DEFAULT_SHARD_INITIALIZATION_TIMEOUT.toMillis() + 1, TimeUnit.MILLISECONDS);
         builder.shardLeaderElectionTimeout(DEFAULT_SHARD_LEADER_ELECTION_TIMEOUT.toMillis() + 1, TimeUnit.MILLISECONDS);
         builder.initialSettleTimeoutMultiplier(DEFAULT_INITIAL_SETTLE_TIMEOUT_MULTIPLIER + 1);
         builder.persistent(!DEFAULT_PERSISTENT);
@@ -129,8 +126,8 @@ public class DatastoreContextTest {
         assertEquals(DEFAULT_HEARTBEAT_INTERVAL_IN_MILLIS + 1,
                 context.getShardRaftConfig().getHeartBeatInterval().toMillis());
         assertEquals(DEFAULT_SHARD_TX_COMMIT_QUEUE_CAPACITY + 1, context.getShardTransactionCommitQueueCapacity());
-        assertEquals(DEFAULT_SHARD_INITIALIZATION_TIMEOUT.duration().toMillis() + 1,
-                context.getShardInitializationTimeout().duration().toMillis());
+        assertEquals(DEFAULT_SHARD_INITIALIZATION_TIMEOUT.toMillis() + 1,
+                context.getShardInitializationTimeout().toMillis());
         assertEquals(DEFAULT_SHARD_LEADER_ELECTION_TIMEOUT.toMillis() + 1,
                 context.getShardLeaderElectionTimeout().toMillis());
         assertEquals(DEFAULT_INITIAL_SETTLE_TIMEOUT_MULTIPLIER + 1,
