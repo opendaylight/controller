@@ -15,7 +15,6 @@ import java.util.concurrent.Executor;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.PoisonPill;
-import org.apache.pekko.dispatch.OnComplete;
 import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.datastore.exceptions.LocalShardNotFoundException;
@@ -71,18 +70,15 @@ final class DataTreeChangeListenerProxy extends AbstractObjectRegistration<DOMDa
         final var ret = new DataTreeChangeListenerProxy(actorUtils, listener, registeredPath, clustered, shardName);
         executor.execute(() -> {
             LOG.debug("{}: Starting discovery of shard {}", ret.logContext(), shardName);
-            actorUtils.findLocalShardAsync(shardName).onComplete(new OnComplete<>() {
-                @Override
-                public void onComplete(final Throwable failure, final ActorRef shard) {
-                    if (failure instanceof LocalShardNotFoundException) {
+            actorUtils.findLocalShardAsync(shardName).whenCompleteAsync((shard, failure) -> {
+                switch (failure) {
+                    case null -> ret.doRegistration(shard);
+                    case LocalShardNotFoundException notFound ->
                         LOG.debug("{}: No local shard found for {} - DataTreeChangeListener {} at path {} cannot be "
                             + "registered", ret.logContext(), shardName, listener, registeredPath);
-                    } else if (failure != null) {
+                    default ->
                         LOG.error("{}: Failed to find local shard {} - DataTreeChangeListener {} at path {} cannot be "
                             + "registered", ret.logContext(), shardName, listener, registeredPath, failure);
-                    } else {
-                        ret.doRegistration(shard);
-                    }
                 }
             }, actorUtils.getClientDispatcher());
         });

@@ -11,7 +11,6 @@ import static java.util.Objects.requireNonNull;
 
 import java.time.Duration;
 import org.apache.pekko.actor.ActorRef;
-import org.apache.pekko.dispatch.OnComplete;
 import org.apache.pekko.pattern.Patterns;
 import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.opendaylight.controller.cluster.datastore.DataTreeCohortActorRegistry.RegisterCohort;
@@ -46,19 +45,16 @@ final class DataTreeCohortRegistrationProxy<C extends DOMDataTreeCommitCohort> e
 
     public void init(final String shardName) {
         // FIXME: Add late binding to shard.
-        actorUtils.findLocalShardAsync(shardName).onComplete(new OnComplete<>() {
-            @Override
-            public void onComplete(final Throwable failure, final ActorRef shard) {
-                if (failure instanceof LocalShardNotFoundException) {
+        actorUtils.findLocalShardAsync(shardName).whenCompleteAsync((shard, failure) -> {
+            switch (failure) {
+                case null -> performRegistration(shard);
+                case LocalShardNotFoundException notFound ->
                     LOG.debug("No local shard found for {} - DataTreeChangeListener {} at path {} cannot be registered",
                         shardName, getInstance(), subtree);
-                } else if (failure != null) {
+                default ->
                     LOG.error(
                         "Failed to find local shard {} - DataTreeChangeListener {} at path {} cannot be registered",
                         shardName, getInstance(), subtree, failure);
-                } else {
-                    performRegistration(shard);
-                }
             }
         }, actorUtils.getClientDispatcher());
     }
