@@ -91,7 +91,7 @@ public class DatastoreContextIntrospectorTest {
         assertEquals(101, context.getShardRaftConfig().getHeartBeatInterval().toMillis());
         assertEquals(567, context.getShardTransactionCommitQueueCapacity());
         assertEquals(82, context.getShardInitializationTimeout().duration().toSeconds());
-        assertEquals(66, context.getShardLeaderElectionTimeout().duration().toSeconds());
+        assertEquals(66, context.getShardLeaderElectionTimeout().toSeconds());
         assertEquals(5, context.getInitialSettleTimeoutMultiplier());
         assertEquals(360, context.getShardRaftConfig().getRecoverySnapshotIntervalSeconds());
         assertEquals(123, context.getShardRaftConfig().getIsolatedCheckIntervalInMillis());
@@ -125,7 +125,7 @@ public class DatastoreContextIntrospectorTest {
         assertEquals(102, context.getShardRaftConfig().getHeartBeatInterval().toMillis());
         assertEquals(567, context.getShardTransactionCommitQueueCapacity());
         assertEquals(82, context.getShardInitializationTimeout().duration().length());
-        assertEquals(66, context.getShardLeaderElectionTimeout().duration().toSeconds());
+        assertEquals(66, context.getShardLeaderElectionTimeout().toSeconds());
         assertEquals(6, context.getInitialSettleTimeoutMultiplier());
         assertEquals(123, context.getShardRaftConfig().getIsolatedCheckIntervalInMillis());
         assertEquals(100, context.getShardRaftConfig().getSnapshotDataThresholdPercentage());

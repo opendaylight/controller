@@ -15,9 +15,9 @@ import static org.mockito.Mockito.verify;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.time.Duration;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
-import org.apache.pekko.util.Timeout;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,7 +36,6 @@ import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.utils.ActorUtils;
 import org.opendaylight.yangtools.yang.common.Empty;
-import scala.concurrent.duration.FiniteDuration;
 
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class ClientBackedDataStoreTest {
@@ -55,8 +54,6 @@ public class ClientBackedDataStoreTest {
     private DataStoreClient clientActor;
     @Mock
     private DatastoreContext datastoreContext;
-    @Mock
-    private Timeout shardElectionTimeout;
     @Mock
     private ActorUtils actorUtils;
     @Mock
@@ -113,9 +110,8 @@ public class ClientBackedDataStoreTest {
     @Test
     public void testWaitTillReadyBlocking() {
         doReturn(datastoreContext).when(actorUtils).getDatastoreContext();
-        doReturn(shardElectionTimeout).when(datastoreContext).getShardLeaderElectionTimeout();
+        doReturn(Duration.ofMillis(50)).when(datastoreContext).getShardLeaderElectionTimeout();
         doReturn(1).when(datastoreContext).getInitialSettleTimeoutMultiplier();
-        doReturn(FiniteDuration.apply(50, TimeUnit.MILLISECONDS)).when(shardElectionTimeout).duration();
         try (var clientBackedDataStore = new ClientBackedDataStore(actorUtils, UNKNOWN_ID, clientActor)) {
             final var sw = Stopwatch.createStarted();
             clientBackedDataStore.waitTillReady();

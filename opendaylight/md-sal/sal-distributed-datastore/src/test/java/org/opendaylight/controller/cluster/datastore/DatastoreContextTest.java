@@ -52,8 +52,8 @@ public class DatastoreContextTest {
         assertEquals(DEFAULT_SHARD_TX_COMMIT_QUEUE_CAPACITY, context.getShardTransactionCommitQueueCapacity());
         assertEquals(DEFAULT_SHARD_INITIALIZATION_TIMEOUT.duration().toMillis(),
                 context.getShardInitializationTimeout().duration().toMillis());
-        assertEquals(DEFAULT_SHARD_LEADER_ELECTION_TIMEOUT.duration().toMillis(),
-                context.getShardLeaderElectionTimeout().duration().toMillis());
+        assertEquals(DEFAULT_SHARD_LEADER_ELECTION_TIMEOUT.toMillis(),
+                context.getShardLeaderElectionTimeout().toMillis());
         assertEquals(DEFAULT_INITIAL_SETTLE_TIMEOUT_MULTIPLIER,
                 context.getInitialSettleTimeoutMultiplier());
         assertEquals(DEFAULT_PERSISTENT, context.isPersistent());
@@ -88,8 +88,7 @@ public class DatastoreContextTest {
                 .duration().toMillis() + 1, TimeUnit.MILLISECONDS);
         builder.shardInitializationTimeout(DEFAULT_SHARD_INITIALIZATION_TIMEOUT.duration().toMillis() + 1,
                 TimeUnit.MILLISECONDS);
-        builder.shardLeaderElectionTimeout(DEFAULT_SHARD_LEADER_ELECTION_TIMEOUT.duration().toMillis() + 1,
-                TimeUnit.MILLISECONDS);
+        builder.shardLeaderElectionTimeout(DEFAULT_SHARD_LEADER_ELECTION_TIMEOUT.toMillis() + 1, TimeUnit.MILLISECONDS);
         builder.initialSettleTimeoutMultiplier(DEFAULT_INITIAL_SETTLE_TIMEOUT_MULTIPLIER + 1);
         builder.persistent(!DEFAULT_PERSISTENT);
         builder.shardIsolatedLeaderCheckIntervalInMillis(DEFAULT_ISOLATED_LEADER_CHECK_INTERVAL_IN_MILLIS + 1);
@@ -132,8 +131,8 @@ public class DatastoreContextTest {
         assertEquals(DEFAULT_SHARD_TX_COMMIT_QUEUE_CAPACITY + 1, context.getShardTransactionCommitQueueCapacity());
         assertEquals(DEFAULT_SHARD_INITIALIZATION_TIMEOUT.duration().toMillis() + 1,
                 context.getShardInitializationTimeout().duration().toMillis());
-        assertEquals(DEFAULT_SHARD_LEADER_ELECTION_TIMEOUT.duration().toMillis() + 1,
-                context.getShardLeaderElectionTimeout().duration().toMillis());
+        assertEquals(DEFAULT_SHARD_LEADER_ELECTION_TIMEOUT.toMillis() + 1,
+                context.getShardLeaderElectionTimeout().toMillis());
         assertEquals(DEFAULT_INITIAL_SETTLE_TIMEOUT_MULTIPLIER + 1,
                 context.getInitialSettleTimeoutMultiplier());
         assertEquals(!DEFAULT_PERSISTENT, context.isPersistent());
