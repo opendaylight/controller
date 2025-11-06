@@ -467,7 +467,9 @@ public class ActorUtils {
     }
 
     protected Future<Object> doAsk(final ActorRef actorRef, final Object message, final Timeout timeout) {
-        return Patterns.ask(actorRef, message, timeout);
+        final var ret = Patterns.ask(actorRef, message, timeout);
+        ret.onComplete(askTimeoutCounter, ExecutionContexts.parasitic());
+        return ret;
     }
 
     protected Future<Object> doAsk(final ActorSelection actorRef, final Object message, final Timeout timeout) {
