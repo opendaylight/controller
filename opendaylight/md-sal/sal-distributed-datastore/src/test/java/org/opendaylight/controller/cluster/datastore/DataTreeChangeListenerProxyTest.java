@@ -22,17 +22,16 @@ import com.google.common.util.concurrent.Uninterruptibles;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.actor.Props;
 import org.apache.pekko.actor.Terminated;
 import org.apache.pekko.dispatch.ExecutionContexts;
 import org.apache.pekko.dispatch.Futures;
 import org.apache.pekko.testkit.javadsl.TestKit;
-import org.apache.pekko.util.Timeout;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -179,8 +178,8 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
 
         doReturn(kit.duration("5 seconds")).when(actorUtils).getOperationDuration();
         doReturn(Futures.successful(kit.getRef())).when(actorUtils).findLocalShardAsync("shard-1");
-        doReturn(Futures.failed(new RuntimeException("mock"))).when(actorUtils).executeOperationAsync(
-            any(ActorRef.class), any(Object.class), any(Timeout.class));
+        doReturn(CompletableFuture.failedStage(new RuntimeException("mock"))).when(actorUtils)
+            .ask(any(), any(), any());
 
         final var proxy = DataTreeChangeListenerProxy.of(actorUtils, mockListener, path, true, "shard-1");
         assertNull(proxy.getListenerRegistrationActor());
@@ -207,8 +206,8 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
 
         doAnswer(invocation -> {
             instance.close();
-            return Futures.successful(new RegisterDataTreeNotificationListenerReply(kit.getRef()));
-        }).when(actorUtils).executeOperationAsync(any(ActorRef.class), any(Object.class), any(Timeout.class));
+            return CompletableFuture.completedStage(new RegisterDataTreeNotificationListenerReply(kit.getRef()));
+        }).when(actorUtils).ask(any(), any(), any());
         proxy.getValue().run();
 
         kit.expectMsgClass(Duration.ofSeconds(5), CloseDataTreeNotificationListenerRegistration.class);
