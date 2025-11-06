@@ -405,26 +405,19 @@ public class ActorUtils {
             return false;
         }
 
-        int pathAtIndex = path.indexOf('@');
+        final int pathAtIndex = path.indexOf('@');
         if (pathAtIndex == -1) {
             //if the path is of local format, then its local and is co-located
             return true;
-
-        } else if (selfAddressHostPort != null) {
-            // self-address and tx actor path, both are of remote path format
-            int slashIndex = path.indexOf('/', pathAtIndex);
-
-            if (slashIndex == -1) {
-                return false;
-            }
-
-            final var hostPort = path.substring(pathAtIndex + 1, slashIndex);
-            return hostPort.equals(selfAddressHostPort);
-
-        } else {
+        }
+        if (selfAddressHostPort == null) {
             // self address is local format and tx actor path is remote format
             return false;
         }
+
+        // self-address and tx actor path, both are of remote path format
+        final int slashIndex = path.indexOf('/', pathAtIndex);
+        return slashIndex != -1 && selfAddressHostPort.equals(path.substring(pathAtIndex + 1, slashIndex));
     }
 
     /**
