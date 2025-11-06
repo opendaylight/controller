@@ -14,10 +14,13 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.util.concurrent.UncheckedTimeoutException;
 import java.lang.invoke.VarHandle;
+import java.time.Duration;
 import java.util.Optional;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.LongAdder;
+import java.util.function.BiConsumer;
 import org.apache.pekko.actor.ActorPath;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
@@ -68,11 +71,16 @@ import scala.jdk.javaapi.DurationConverters;
  */
 // Non-final for testing
 public class ActorUtils {
-    private static final class AskTimeoutCounter extends OnComplete<Object> {
+    private static final class AskTimeoutCounter extends OnComplete<Object> implements BiConsumer<Object, Throwable> {
         private LongAdder ateExceptions = new LongAdder();
 
         @Override
         public void onComplete(final Throwable failure, final Object success) {
+            accept(success, failure);
+        }
+
+        @Override
+        public void accept(final Object success, final Throwable failure) {
             if (failure instanceof AskTimeoutException) {
                 ateExceptions.increment();
             }
@@ -208,6 +216,21 @@ public class ActorUtils {
 
     public EffectiveModelContext getSchemaContext() {
         return schemaContext;
+    }
+
+    /**
+     * Issue a {@link Patterns#ask(ActorRef, Object, Duration)} and update {@link #getAskTimeoutExceptionCount()} if
+     * the request results in {@link AskTimeoutException}.
+     *
+     * @param actor the actor
+     * @param message the message
+     * @param timeout the timeout.
+     * @return the resulting CompletionStage
+     */
+    public CompletionStage<Object> ask(final ActorRef actor, final Object message, final Duration timeout) {
+        final var ret = Patterns.ask(actor, message, timeout);
+        ret.whenComplete(askTimeoutCounter);
+        return ret;
     }
 
     public Future<PrimaryShardInfo> findPrimaryShardAsync(final String shardName) {
