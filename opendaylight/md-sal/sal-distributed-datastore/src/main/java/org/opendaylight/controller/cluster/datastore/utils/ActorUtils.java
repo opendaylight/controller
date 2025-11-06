@@ -319,22 +319,6 @@ public class ActorUtils {
         return doAsk(actor, message, timeout);
     }
 
-    /**
-     * Sends an operation to be executed by a remote actor asynchronously without waiting for a
-     * reply (essentially set and forget).
-     *
-     * @param actor the ActorSelection
-     * @param message the message to send
-     */
-    public void sendOperationAsync(final ActorSelection actor, final Object message) {
-        Preconditions.checkArgument(actor != null, "actor must not be null");
-        Preconditions.checkArgument(message != null, "message must not be null");
-
-        LOG.debug("Sending message {} to {}", message.getClass(), actor);
-
-        actor.tell(message, ActorRef.noSender());
-    }
-
     @SuppressWarnings("checkstyle:IllegalCatch")
     public void shutdown() {
         final var duration = DurationConverters.toScala(
