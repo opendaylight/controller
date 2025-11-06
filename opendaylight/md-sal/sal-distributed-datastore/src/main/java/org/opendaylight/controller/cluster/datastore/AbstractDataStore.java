@@ -50,6 +50,7 @@ import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.Duration;
+import scala.jdk.javaapi.DurationConverters;
 
 /**
  * Base implementation of a distributed DOMStore.
@@ -361,6 +362,7 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
     private Duration initialSettleTime() {
         final DatastoreContext context = actorUtils.getDatastoreContext();
         final int multiplier = context.getInitialSettleTimeoutMultiplier();
-        return multiplier == 0 ? Duration.Inf() : context.getShardLeaderElectionTimeout().duration().$times(multiplier);
+        return multiplier == 0 ? Duration.Inf()
+            : DurationConverters.toScala(context.getShardLeaderElectionTimeout().multipliedBy(multiplier));
     }
 }

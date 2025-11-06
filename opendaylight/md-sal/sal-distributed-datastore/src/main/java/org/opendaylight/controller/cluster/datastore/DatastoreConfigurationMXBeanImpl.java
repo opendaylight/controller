@@ -96,7 +96,7 @@ final class DatastoreConfigurationMXBeanImpl extends AbstractMXBean implements D
 
     @Override
     public long getShardLeaderElectionTimeoutInSeconds() {
-        return context.getShardLeaderElectionTimeout().duration().toSeconds();
+        return context.getShardLeaderElectionTimeout().toSeconds();
     }
 
     @Override
