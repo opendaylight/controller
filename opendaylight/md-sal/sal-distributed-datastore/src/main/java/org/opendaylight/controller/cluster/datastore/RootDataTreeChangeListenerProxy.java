@@ -21,7 +21,6 @@ import java.util.Set;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.PoisonPill;
-import org.apache.pekko.dispatch.OnComplete;
 import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.checkerframework.checker.lock.qual.Holding;
 import org.eclipse.jdt.annotation.NonNull;
@@ -76,12 +75,9 @@ final class RootDataTreeChangeListenerProxy<L extends DOMDataTreeChangeListener>
         state = new ResolveShards(shardNames.size());
 
         for (String shardName : shardNames) {
-            actorUtils.findLocalShardAsync(shardName).onComplete(new OnComplete<ActorRef>() {
-                @Override
-                public void onComplete(final Throwable failure, final ActorRef success) {
-                    onFindLocalShardComplete(shardName, failure, success);
-                }
-            }, actorUtils.getClientDispatcher());
+            actorUtils.findLocalShardAsync(shardName).whenCompleteAsync(
+                (success, failure) -> onFindLocalShardComplete(shardName, failure, success),
+                actorUtils.getClientDispatcher());
         }
     }
 
