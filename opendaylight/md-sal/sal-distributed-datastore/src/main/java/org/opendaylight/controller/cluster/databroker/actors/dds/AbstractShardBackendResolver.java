@@ -18,7 +18,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
-import org.apache.pekko.dispatch.OnComplete;
 import org.apache.pekko.pattern.Patterns;
 import org.checkerframework.checker.lock.qual.GuardedBy;
 import org.eclipse.jdt.annotation.NonNull;
@@ -135,28 +134,26 @@ abstract sealed class AbstractShardBackendResolver extends BackendInfoResolver<S
         LOG.debug("Resolving cookie {} to shard {}", cookie, shardName);
 
         final var future = new CompletableFuture<ShardBackendInfo>();
-        actorUtils.findPrimaryShardAsync(shardName).onComplete(new OnComplete<>() {
-            @Override
-            public void onComplete(final Throwable failure, final PrimaryShardInfo success) {
-                if (failure != null) {
-                    LOG.debug("Shard {} failed to resolve", shardName, failure);
-                    switch (failure) {
-                        case NoShardLeaderException ex -> future.completeExceptionally(
-                            wrap("Shard has no current leader", ex));
-                        case NotInitializedException ex -> {
-                            // FIXME: this actually is an exception we can retry on
-                            LOG.info("Shard {} has not initialized yet", shardName);
-                            future.completeExceptionally(ex);
-                        }
-                        case PrimaryNotFoundException ex -> {
-                            LOG.info("Failed to find primary for shard {}", shardName);
-                            future.completeExceptionally(ex);
-                        }
-                        default -> future.completeExceptionally(failure);
-                    }
-                } else {
-                    connectShard(shardName, cookie, success, future);
+        actorUtils.findPrimaryShardAsync(shardName).whenCompleteAsync((success, failure) -> {
+            if (failure == null) {
+                connectShard(shardName, cookie, success, future);
+                return;
+            }
+
+            LOG.debug("Shard {} failed to resolve", shardName, failure);
+            switch (failure) {
+                case NoShardLeaderException ex -> future.completeExceptionally(
+                    wrap("Shard has no current leader", ex));
+                case NotInitializedException ex -> {
+                    // FIXME: this actually is an exception we can retry on
+                    LOG.info("Shard {} has not initialized yet", shardName);
+                    future.completeExceptionally(ex);
                 }
+                case PrimaryNotFoundException ex -> {
+                    LOG.info("Failed to find primary for shard {}", shardName);
+                    future.completeExceptionally(ex);
+                }
+                default -> future.completeExceptionally(failure);
             }
         }, actorUtils.getClientDispatcher());
 
@@ -195,12 +192,11 @@ abstract sealed class AbstractShardBackendResolver extends BackendInfoResolver<S
         }
 
         LOG.debug("Resolved backend information to {}", response);
-        if (response instanceof ConnectClientSuccess success) {
-            future.complete(new ShardBackendInfo(success.getBackend(), nextSessionId.getAndIncrement(),
-                success.getVersion(), shardName, UnsignedLong.fromLongBits(cookie), success.getDataTree(),
-                success.getMaxMessages()));
-        } else {
+        if (!(response instanceof ConnectClientSuccess success)) {
             throw new IllegalArgumentException("Unhandled response " + response);
         }
+        future.complete(new ShardBackendInfo(success.getBackend(), nextSessionId.getAndIncrement(),
+            success.getVersion(), shardName, UnsignedLong.fromLongBits(cookie), success.getDataTree(),
+            success.getMaxMessages()));
     }
 }
