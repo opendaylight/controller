@@ -59,6 +59,18 @@ class MappedByteBufTest {
     }
 
     @Test
+    void testGetBytesStreamMultiple() throws Exception {
+        final var first = new ByteArrayOutputStream();
+        assertSame(buf, buf.getBytes(1, first, 4));
+        assertArrayEquals(Arrays.copyOfRange(bytes, 1, 5), first.toByteArray());
+
+        // Repeat the operation with position beyond the first read
+        final var second = new ByteArrayOutputStream();
+        assertSame(buf, buf.getBytes(8, second, 4));
+        assertArrayEquals(Arrays.copyOfRange(bytes, 8, 12), second.toByteArray());
+    }
+
+    @Test
     void testGetBytesGathering() throws Exception {
         final var tmp = Files.createTempFile(dir, "foo", null);
         try (var channel = FileChannel.open(tmp, StandardOpenOption.WRITE)) {
