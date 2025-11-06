@@ -57,7 +57,7 @@ public class DatastoreContext implements ClientActorConfig {
             DEFAULT_HEARTBEAT_INTERVAL_IN_MILLIS * 10;
     public static final int DEFAULT_SHARD_TX_COMMIT_QUEUE_CAPACITY = 50000;
     public static final Timeout DEFAULT_SHARD_INITIALIZATION_TIMEOUT = new Timeout(5, TimeUnit.MINUTES);
-    public static final Timeout DEFAULT_SHARD_LEADER_ELECTION_TIMEOUT = new Timeout(30, TimeUnit.SECONDS);
+    public static final Duration DEFAULT_SHARD_LEADER_ELECTION_TIMEOUT = Duration.ofSeconds(30);
     public static final int DEFAULT_INITIAL_SETTLE_TIMEOUT_MULTIPLIER = 3;
     public static final boolean DEFAULT_PERSISTENT = true;
     public static final boolean DEFAULT_SNAPSHOT_ON_ROOT_OVERWRITE = false;
@@ -86,7 +86,7 @@ public class DatastoreContext implements ClientActorConfig {
     private int shardTransactionCommitTimeoutInSeconds = DEFAULT_SHARD_TX_COMMIT_TIMEOUT_IN_SECONDS;
     private int shardTransactionCommitQueueCapacity = DEFAULT_SHARD_TX_COMMIT_QUEUE_CAPACITY;
     private Timeout shardInitializationTimeout = DEFAULT_SHARD_INITIALIZATION_TIMEOUT;
-    private Timeout shardLeaderElectionTimeout = DEFAULT_SHARD_LEADER_ELECTION_TIMEOUT;
+    private Duration shardLeaderElectionTimeout = DEFAULT_SHARD_LEADER_ELECTION_TIMEOUT;
     private int initialSettleTimeoutMultiplier = DEFAULT_INITIAL_SETTLE_TIMEOUT_MULTIPLIER;
     private boolean persistent = DEFAULT_PERSISTENT;
     private boolean snapshotOnRootOverwrite = DEFAULT_SNAPSHOT_ON_ROOT_OVERWRITE;
@@ -211,7 +211,7 @@ public class DatastoreContext implements ClientActorConfig {
         return shardInitializationTimeout;
     }
 
-    public Timeout getShardLeaderElectionTimeout() {
+    public Duration getShardLeaderElectionTimeout() {
         return shardLeaderElectionTimeout;
     }
 
@@ -499,7 +499,7 @@ public class DatastoreContext implements ClientActorConfig {
         }
 
         public Builder shardLeaderElectionTimeout(final long timeout, final TimeUnit unit) {
-            datastoreContext.shardLeaderElectionTimeout = new Timeout(timeout, unit);
+            datastoreContext.shardLeaderElectionTimeout = Duration.of(timeout, unit.toChronoUnit());
             return this;
         }
 

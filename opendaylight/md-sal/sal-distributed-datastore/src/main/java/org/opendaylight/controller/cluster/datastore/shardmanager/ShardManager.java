@@ -390,27 +390,23 @@ class ShardManager extends AbstractUntypedActorWithMetering {
         LOG.debug("{}: Sending RemoveServer message to peer {} for shard {}", name(),
                 primaryPath, shardId);
 
-        Timeout removeServerTimeout = new Timeout(datastoreContext.getShardLeaderElectionTimeout().duration());
-        Future<Object> futureObj = Patterns.ask(getContext().actorSelection(primaryPath),
-                new RemoveServer(shardId.toString()), removeServerTimeout);
+        final var futureObj = Patterns.ask(getContext().actorSelection(primaryPath),
+                new RemoveServer(shardId.toString()), datastoreContext.getShardLeaderElectionTimeout());
 
-        futureObj.onComplete(new OnComplete<>() {
-            @Override
-            public void onComplete(final Throwable failure, final Object response) {
-                if (failure != null) {
-                    shardReplicaOperationsInProgress.remove(shardName);
-                    LOG.debug("{}: RemoveServer request to leader {} for shard {} failed", name(), primaryPath,
-                        shardName, failure);
-
-                    // FAILURE
-                    sender.tell(new Status.Failure(new RuntimeException(
-                        String.format("RemoveServer request to leader %s for shard %s failed", primaryPath, shardName),
-                        failure)), self());
-                } else {
-                    // SUCCESS
-                    self().tell(new WrappedShardResponse(shardId, response, primaryPath), sender);
-                }
+        futureObj.whenCompleteAsync((response, failure) -> {
+            if (failure == null) {
+                self().tell(new WrappedShardResponse(shardId, response, primaryPath), sender);
+                return;
             }
+
+            shardReplicaOperationsInProgress.remove(shardName);
+            LOG.debug("{}: RemoveServer request to leader {} for shard {} failed", name(), primaryPath, shardName,
+                failure);
+
+            // FAILURE
+            sender.tell(new Status.Failure(new RuntimeException(
+                "RemoveServer request to leader %s for shard %s failed".formatted(primaryPath, shardName), failure)),
+                self());
         }, new Dispatchers(context().system().dispatchers()).getDispatcher(Dispatchers.DispatcherType.Client));
     }
 
@@ -1216,26 +1212,22 @@ class ShardManager extends AbstractUntypedActorWithMetering {
         LOG.debug("{}: Sending AddServer message to peer {} for shard {}", name(), response.primaryPath(),
             shardInfo.getShardId());
 
-        final var addServerTimeout = new Timeout(shardInfo.getDatastoreContext()
-            .getShardLeaderElectionTimeout().duration());
         final var futureObj = Patterns.ask(getContext().actorSelection(response.primaryPath()),
-            new AddServer(shardInfo.getShardId().toString(), localShardAddress, true), addServerTimeout);
+            new AddServer(shardInfo.getShardId().toString(), localShardAddress, true),
+            shardInfo.getDatastoreContext().getShardLeaderElectionTimeout());
 
-        futureObj.onComplete(new OnComplete<>() {
-            @Override
-            public void onComplete(final Throwable failure, final Object addServerResponse) {
-                if (failure != null) {
-                    LOG.debug("{}: AddServer request to {} for {} failed", name(), response.primaryPath(), shardName,
-                        failure);
-
-                    final String msg = String.format("AddServer request to leader %s for shard %s failed",
-                            response.primaryPath(), shardName);
-                    self().tell(new ForwardedAddServerFailure(shardName, msg, failure, removeShardOnFailure), sender);
-                } else {
-                    self().tell(new ForwardedAddServerReply(shardInfo, (AddServerReply) addServerResponse,
-                        response.primaryPath(), removeShardOnFailure), sender);
-                }
+        futureObj.whenCompleteAsync((addServerResponse, failure) -> {
+            if (failure == null) {
+                self().tell(new ForwardedAddServerReply(shardInfo, (AddServerReply) addServerResponse,
+                    response.primaryPath(), removeShardOnFailure), sender);
+                return;
             }
+
+            LOG.debug("{}: AddServer request to {} for {} failed", name(), response.primaryPath(), shardName, failure);
+
+            self().tell(new ForwardedAddServerFailure(shardName,
+                "AddServer request to leader %s for shard %s failed".formatted(response.primaryPath(), shardName),
+                failure, removeShardOnFailure), sender);
         }, new Dispatchers(context().system().dispatchers()).getDispatcher(Dispatchers.DispatcherType.Client));
     }
 
@@ -1517,38 +1509,33 @@ class ShardManager extends AbstractUntypedActorWithMetering {
             changeServersVotingStatus, shardActorRef.path());
 
         Patterns.ask(shardActorRef, changeServersVotingStatus,
-            new Timeout(datastoreContext.getShardLeaderElectionTimeout().duration().$times(2)))
-            .onComplete(new OnComplete<>() {
-                @Override
-                public void onComplete(final Throwable failure, final Object response) {
-                    shardReplicaOperationsInProgress.remove(shardName);
-                    if (failure != null) {
-                        LOG.debug("{}: ChangeServersVotingStatus request to local shard {} failed", name(),
-                            shardActorRef.path(), failure);
-                        sender.tell(new Status.Failure(new RuntimeException(
-                            String.format("ChangeServersVotingStatus request to local shard %s failed",
-                                shardActorRef.path()), failure)), self());
-                        return;
-                    }
+            datastoreContext.getShardLeaderElectionTimeout().multipliedBy(2)).whenCompleteAsync((response, failure) -> {
+                shardReplicaOperationsInProgress.remove(shardName);
+                if (failure != null) {
+                    LOG.debug("{}: ChangeServersVotingStatus request to local shard {} failed", name(),
+                        shardActorRef.path(), failure);
+                    sender.tell(new Status.Failure(new RuntimeException(
+                        "ChangeServersVotingStatus request to local shard %s failed".formatted(
+                            shardActorRef.path()), failure)), self());
+                    return;
+                }
 
-                    LOG.debug("{}: Received {} from local shard {}", name(), response, shardActorRef.path());
+                LOG.debug("{}: Received {} from local shard {}", name(), response, shardActorRef.path());
+                final var replyMsg = (ServerChangeReply) response;
+                if (replyMsg.getStatus() == ServerChangeStatus.OK) {
+                    LOG.debug("{}: ChangeServersVotingStatus succeeded for shard {}", name(), shardName);
+                    sender.tell(new Status.Success(null), self());
+                } else if (replyMsg.getStatus() == ServerChangeStatus.INVALID_REQUEST) {
+                    sender.tell(new Status.Failure(new IllegalArgumentException(String.format(
+                        "The requested voting state change for shard %s is invalid. At least one member "
+                            + "must be voting", shardId.getShardName()))), self());
+                } else {
+                    LOG.warn("{}: ChangeServersVotingStatus failed for shard {} with status {}",
+                        name(), shardName, replyMsg.getStatus());
 
-                    final var replyMsg = (ServerChangeReply) response;
-                    if (replyMsg.getStatus() == ServerChangeStatus.OK) {
-                        LOG.debug("{}: ChangeServersVotingStatus succeeded for shard {}", name(), shardName);
-                        sender.tell(new Status.Success(null), self());
-                    } else if (replyMsg.getStatus() == ServerChangeStatus.INVALID_REQUEST) {
-                        sender.tell(new Status.Failure(new IllegalArgumentException(String.format(
-                            "The requested voting state change for shard %s is invalid. At least one member "
-                                + "must be voting", shardId.getShardName()))), self());
-                    } else {
-                        LOG.warn("{}: ChangeServersVotingStatus failed for shard {} with status {}",
-                            name(), shardName, replyMsg.getStatus());
-
-                        Exception error = getServerChangeException(ChangeServersVotingStatus.class,
-                            replyMsg.getStatus(), shardActorRef.path().toString(), shardId);
-                        sender.tell(new Status.Failure(error), self());
-                    }
+                    Exception error = getServerChangeException(ChangeServersVotingStatus.class,
+                        replyMsg.getStatus(), shardActorRef.path().toString(), shardId);
+                    sender.tell(new Status.Failure(error), self());
                 }
             }, new Dispatchers(context().system().dispatchers()).getDispatcher(Dispatchers.DispatcherType.Client));
     }

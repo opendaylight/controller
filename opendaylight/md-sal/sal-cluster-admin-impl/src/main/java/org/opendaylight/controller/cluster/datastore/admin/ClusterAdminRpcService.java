@@ -159,9 +159,8 @@ public final class ClusterAdminRpcService {
         this.configDataStore = configDataStore;
         this.operDataStore = operDataStore;
 
-        makeLeaderLocalTimeout =
-                new Timeout(configDataStore.getActorUtils().getDatastoreContext()
-                        .getShardLeaderElectionTimeout().duration().$times(2));
+        makeLeaderLocalTimeout = Timeout.create(
+            configDataStore.getActorUtils().getDatastoreContext().getShardLeaderElectionTimeout().multipliedBy(2));
 
         this.dataCenterControl = dataCenterControl;
     }
