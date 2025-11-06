@@ -319,35 +319,6 @@ public class ActorUtils {
     }
 
     /**
-     * Execute an operation on a remote actor asynchronously.
-     *
-     * @param actor the ActorSelection
-     * @param message the message to send
-     * @param timeout the operation timeout
-     * @return a Future containing the eventual result
-     */
-    public Future<Object> executeOperationAsync(final ActorSelection actor, final Object message,
-            final Timeout timeout) {
-        Preconditions.checkArgument(actor != null, "actor must not be null");
-        Preconditions.checkArgument(message != null, "message must not be null");
-
-        LOG.debug("Sending message {} to {}", message.getClass(), actor);
-
-        return doAsk(actor, message, timeout);
-    }
-
-    /**
-     * Execute an operation on a remote actor asynchronously.
-     *
-     * @param actor the ActorSelection
-     * @param message the message to send
-     * @return a Future containing the eventual result
-     */
-    public Future<Object> executeOperationAsync(final ActorSelection actor, final Object message) {
-        return executeOperationAsync(actor, message, operationTimeout);
-    }
-
-    /**
      * Sends an operation to be executed by a remote actor asynchronously without waiting for a
      * reply (essentially set and forget).
      *
@@ -467,12 +438,6 @@ public class ActorUtils {
     }
 
     protected Future<Object> doAsk(final ActorRef actorRef, final Object message, final Timeout timeout) {
-        final var ret = Patterns.ask(actorRef, message, timeout);
-        ret.onComplete(askTimeoutCounter, ExecutionContexts.parasitic());
-        return ret;
-    }
-
-    protected Future<Object> doAsk(final ActorSelection actorRef, final Object message, final Timeout timeout) {
         final var ret = Patterns.ask(actorRef, message, timeout);
         ret.onComplete(askTimeoutCounter, ExecutionContexts.parasitic());
         return ret;

@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.apache.pekko.actor.ActorRef;
-import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.actor.Address;
 import org.apache.pekko.actor.Props;
@@ -173,10 +172,8 @@ public class ActorUtilsTest extends AbstractActorTest {
         ActorUtils actorUtils = new ActorUtils(getSystem(), shardManagerActorRef,
             mock(ClusterWrapper.class), mock(Configuration.class));
 
-        ActorSelection actor = actorUtils.actorSelection(shardActorRef.path());
-
-        Object out = Await.result(actorUtils.executeOperationAsync(actor, "hello"),
-            actorUtils.getOperationDuration());
+        Object out = Await.result(actorUtils.executeOperationAsync(shardActorRef, "hello",
+            actorUtils.getOperationTimeout()), actorUtils.getOperationDuration());
 
         assertEquals("hello", out);
     }
@@ -190,9 +187,8 @@ public class ActorUtilsTest extends AbstractActorTest {
         ActorUtils actorUtils = new ActorUtils(getSystem(), shardManagerActorRef,
             mock(ClusterWrapper.class), mock(Configuration.class));
 
-        ActorSelection actor = actorUtils.actorSelection(shardActorRef.path());
-
-        Future<Object> future = actorUtils.executeOperationAsync(actor, "hello");
+        Future<Object> future = actorUtils.executeOperationAsync(shardActorRef, "hello",
+            actorUtils.getOperationTimeout());
 
         Object result = Await.result(future, FiniteDuration.create(3, TimeUnit.SECONDS));
         assertEquals("Result", "hello", result);
