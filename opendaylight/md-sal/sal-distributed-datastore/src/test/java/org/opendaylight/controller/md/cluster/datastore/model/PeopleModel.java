@@ -7,11 +7,10 @@
  */
 package org.opendaylight.controller.md.cluster.datastore.model;
 
-import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntryBuilder;
-
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.SystemMapNode;
@@ -39,12 +38,14 @@ public final class PeopleModel {
             .withChild(ImmutableNodes.newSystemMapBuilder()
                 .withNodeIdentifier(new NodeIdentifier(PERSON_QNAME))
                 // Create an entry for the person jack
-                .withChild(mapEntryBuilder(PERSON_QNAME, PERSON_NAME_QNAME, "jack")
+                .withChild(ImmutableNodes.newMapEntryBuilder()
+                    .withNodeIdentifier(NodeIdentifierWithPredicates.of(PERSON_QNAME, PERSON_NAME_QNAME, "jack"))
                     .withChild(ImmutableNodes.leafNode(PERSON_NAME_QNAME, "jack"))
                     .withChild(ImmutableNodes.leafNode(PERSON_AGE_QNAME, 100L))
                     .build())
                 // Create an entry for the person jill
-                .withChild(mapEntryBuilder(PERSON_QNAME, PERSON_NAME_QNAME, "jill")
+                .withChild(ImmutableNodes.newMapEntryBuilder()
+                    .withNodeIdentifier(NodeIdentifierWithPredicates.of(PERSON_QNAME, PERSON_NAME_QNAME, "jill"))
                     .withChild(ImmutableNodes.leafNode(PERSON_NAME_QNAME, "jill"))
                     .withChild(ImmutableNodes.leafNode(PERSON_AGE_QNAME, 200L))
                     .build())
@@ -61,7 +62,8 @@ public final class PeopleModel {
     }
 
     public static MapEntryNode newPersonEntry(final String name) {
-        return mapEntryBuilder(PERSON_QNAME, PERSON_NAME_QNAME, name)
+        return ImmutableNodes.newMapEntryBuilder()
+            .withNodeIdentifier(NodeIdentifierWithPredicates.of(PERSON_QNAME, PERSON_NAME_QNAME, name))
             .withChild(ImmutableNodes.leafNode(PERSON_NAME_QNAME, name))
             .build();
     }

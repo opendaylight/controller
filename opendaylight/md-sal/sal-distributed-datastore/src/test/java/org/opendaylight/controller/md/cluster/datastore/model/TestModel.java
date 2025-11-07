@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.md.cluster.datastore.model;
 
-import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntry;
-
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -75,7 +73,10 @@ public final class TestModel {
     public static SystemMapNode outerNode(final int... ids) {
         var outer = ImmutableNodes.newSystemMapBuilder().withNodeIdentifier(new NodeIdentifier(OUTER_LIST_QNAME));
         for (int id: ids) {
-            outer.addChild(mapEntry(OUTER_LIST_QNAME, ID_QNAME, id));
+            outer.addChild(ImmutableNodes.newMapEntryBuilder()
+                .withNodeIdentifier(NodeIdentifierWithPredicates.of(OUTER_LIST_QNAME, ID_QNAME, id))
+                .withChild(ImmutableNodes.leafNode(ID_QNAME, id))
+                .build());
         }
 
         return outer.build();
@@ -93,7 +94,10 @@ public final class TestModel {
     public static SystemMapNode innerNode(final String... names) {
         var outer = ImmutableNodes.newSystemMapBuilder().withNodeIdentifier(new NodeIdentifier(INNER_LIST_QNAME));
         for (var name : names) {
-            outer.addChild(mapEntry(INNER_LIST_QNAME, NAME_QNAME, name));
+            outer.addChild(ImmutableNodes.newMapEntryBuilder()
+                .withNodeIdentifier(NodeIdentifierWithPredicates.of(INNER_LIST_QNAME, NAME_QNAME, name))
+                .withChild(ImmutableNodes.leafNode(NAME_QNAME, name))
+                .build());
         }
         return outer.build();
     }

@@ -7,13 +7,12 @@
  */
 package org.opendaylight.controller.md.cluster.datastore.model;
 
-import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntryBuilder;
-
 import java.util.List;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.Uint64;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
@@ -43,12 +42,14 @@ public final class CarsModel {
             .withChild(ImmutableNodes.newSystemMapBuilder()
                 .withNodeIdentifier(new NodeIdentifier(CAR_QNAME))
                 // Create an entry for the car altima
-                .withChild(mapEntryBuilder(CAR_QNAME, CAR_NAME_QNAME, "altima")
+                .withChild(ImmutableNodes.newMapEntryBuilder()
+                    .withNodeIdentifier(NodeIdentifierWithPredicates.of(CAR_QNAME, CAR_NAME_QNAME, "altima"))
                     .withChild(ImmutableNodes.leafNode(CAR_NAME_QNAME, "altima"))
                     .withChild(ImmutableNodes.leafNode(CAR_PRICE_QNAME, Uint64.valueOf(1000)))
                     .build())
                 // Create an entry for the car accord
-                .withChild(mapEntryBuilder(CAR_QNAME, CAR_NAME_QNAME, "accord")
+                .withChild(ImmutableNodes.newMapEntryBuilder()
+                    .withNodeIdentifier(NodeIdentifierWithPredicates.of(CAR_QNAME, CAR_NAME_QNAME, "accord"))
                     .withChild(ImmutableNodes.leafNode(CAR_NAME_QNAME, "accord"))
                     .withChild(ImmutableNodes.leafNode(CAR_PRICE_QNAME, Uint64.valueOf("2000")))
                     .build())
@@ -83,7 +84,8 @@ public final class CarsModel {
     }
 
     public static MapEntryNode newCarEntry(final String name, final Uint64 price) {
-        return mapEntryBuilder(CAR_QNAME, CAR_NAME_QNAME, name)
+        return ImmutableNodes.newMapEntryBuilder()
+            .withNodeIdentifier(NodeIdentifierWithPredicates.of(CAR_QNAME, CAR_NAME_QNAME, name))
             .withChild(ImmutableNodes.leafNode(CAR_NAME_QNAME, name))
             .withChild(ImmutableNodes.leafNode(CAR_PRICE_QNAME, price)).build();
     }
