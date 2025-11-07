@@ -17,6 +17,7 @@ import org.apache.pekko.dispatch.MessageDispatcher;
 import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.common.actor.Dispatchers.DispatcherType;
 
+@SuppressWarnings("removal")
 class DispatchersTest {
     @Test
     void testGetDefaultDispatcherPath() {
