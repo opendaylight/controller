@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.datastore.util;
 
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntryBuilder;
-import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapNodeBuilder;
 import static org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes.leafNode;
 
 import com.google.common.collect.ImmutableSet;
@@ -122,7 +121,8 @@ public final class TestModel {
     private static final String SECOND_GRAND_CHILD_NAME = "second grand child";
 
     private static final MapEntryNode BAR_NODE = mapEntryBuilder(OUTER_LIST_QNAME, ID_QNAME, TWO_ID)
-        .withChild(mapNodeBuilder(INNER_LIST_QNAME)
+        .withChild(ImmutableNodes.newSystemMapBuilder()
+            .withNodeIdentifier(new NodeIdentifier(INNER_LIST_QNAME))
             .withChild(ImmutableNodes.newMapEntryBuilder()
                 .withNodeIdentifier(NodeIdentifierWithPredicates.of(INNER_LIST_QNAME, NAME_QNAME, TWO_ONE_NAME))
                 .withChild(leafNode(NAME_QNAME, TWO_ONE_NAME))
@@ -224,11 +224,13 @@ public final class TestModel {
                     .withChildValue(DESC_QNAME)
                     .build())
                 .build())
-            .withChild(mapNodeBuilder(AUGMENTED_LIST_QNAME)
+            .withChild(ImmutableNodes.newSystemMapBuilder()
+                .withNodeIdentifier(new NodeIdentifier(AUGMENTED_LIST_QNAME))
                 // Create augmentations
                 .withChild(createAugmentedListEntry(1, "First Test"))
                 .build())
-            .withChild(mapNodeBuilder(OUTER_LIST_QNAME)
+            .withChild(ImmutableNodes.newSystemMapBuilder()
+                .withNodeIdentifier(new NodeIdentifier(OUTER_LIST_QNAME))
                 .withChild(ImmutableNodes.newMapEntryBuilder()
                     .withNodeIdentifier(NodeIdentifierWithPredicates.of(OUTER_LIST_QNAME, ID_QNAME, ONE_ID))
                     .withChild(leafNode(ID_QNAME, ONE_ID))
@@ -265,14 +267,16 @@ public final class TestModel {
                 .withChild(mapEntryBuilder(CHILDREN_QNAME, CHILD_NUMBER_QNAME, FIRST_CHILD_ID)
                     .withChild(leafNode(CHILD_NUMBER_QNAME, FIRST_CHILD_ID))
                     .withChild(leafNode(CHILD_NAME_QNAME, FIRST_CHILD_NAME))
-                    .withChild(mapNodeBuilder(GRAND_CHILDREN_QNAME)
+                    .withChild(ImmutableNodes.newSystemMapBuilder()
+                        .withNodeIdentifier(new NodeIdentifier(GRAND_CHILDREN_QNAME))
                         .withChild(firstGrandChildBuilder.build())
                         .build())
                     .build())
                 .withChild(mapEntryBuilder(CHILDREN_QNAME, CHILD_NUMBER_QNAME, SECOND_CHILD_ID)
                     .withChild(leafNode(CHILD_NUMBER_QNAME, SECOND_CHILD_ID))
                     .withChild(leafNode(CHILD_NAME_QNAME, SECOND_CHILD_NAME))
-                    .withChild(mapNodeBuilder(GRAND_CHILDREN_QNAME)
+                    .withChild(ImmutableNodes.newSystemMapBuilder()
+                        .withNodeIdentifier(new NodeIdentifier(GRAND_CHILDREN_QNAME))
                         .withChild(firstGrandChildBuilder.build())
                         .build())
                     .build())
