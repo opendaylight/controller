@@ -24,7 +24,8 @@ public class Dispatchers {
         Notification("notification-dispatcher"),
         Serialization("serialization-dispatcher");
 
-        public static final @NonNull String DEFAULT_DISPATCHER_PATH = "pekko.actor.default-dispatcher";
+        public static final @NonNull String DEFAULT_DISPATCHER_PATH =
+            org.apache.pekko.dispatch.Dispatchers.DefaultDispatcherId();
 
         private final @NonNull String path;
 
