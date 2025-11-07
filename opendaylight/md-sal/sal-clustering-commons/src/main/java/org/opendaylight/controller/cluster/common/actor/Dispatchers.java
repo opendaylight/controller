@@ -9,55 +9,68 @@ package org.opendaylight.controller.cluster.common.actor;
 
 import static java.util.Objects.requireNonNull;
 
+import org.apache.pekko.dispatch.MessageDispatcher;
+import org.eclipse.jdt.annotation.NonNull;
 import scala.concurrent.ExecutionContextExecutor;
 
+// FIXME: 13.0.0: remove this class
 public class Dispatchers {
-    public static final String DEFAULT_DISPATCHER_PATH = "pekko.actor.default-dispatcher";
-    public static final String CLIENT_DISPATCHER_PATH = "client-dispatcher";
-    public static final String TXN_DISPATCHER_PATH = "txn-dispatcher";
-    public static final String SHARD_DISPATCHER_PATH = "shard-dispatcher";
-    public static final String NOTIFICATION_DISPATCHER_PATH = "notification-dispatcher";
-    public static final String SERIALIZATION_DISPATCHER_PATH = "serialization-dispatcher";
-
-    private final org.apache.pekko.dispatch.Dispatchers dispatchers;
-
     public enum DispatcherType {
-        Client(CLIENT_DISPATCHER_PATH),
-        Transaction(TXN_DISPATCHER_PATH),
-        Shard(SHARD_DISPATCHER_PATH),
-        Notification(NOTIFICATION_DISPATCHER_PATH),
-        Serialization(SERIALIZATION_DISPATCHER_PATH);
+        Client("client-dispatcher"),
+        Transaction("txn-dispatcher"),
+        Shard("shard-dispatcher"),
+        Notification("notification-dispatcher"),
+        Serialization("serialization-dispatcher");
 
-        private final String path;
+        public static final @NonNull String DEFAULT_DISPATCHER_PATH = "pekko.actor.default-dispatcher";
 
-        DispatcherType(final String path) {
-            this.path = path;
+        private final @NonNull String path;
+
+        DispatcherType(final @NonNull String path) {
+            this.path = requireNonNull(path);
         }
 
-        String path(final org.apache.pekko.dispatch.Dispatchers knownDispatchers) {
-            if (knownDispatchers.hasDispatcher(path)) {
-                return path;
-            }
-            return DEFAULT_DISPATCHER_PATH;
+        public @NonNull String path() {
+            return path;
         }
 
-        ExecutionContextExecutor dispatcher(final org.apache.pekko.dispatch.Dispatchers knownDispatchers) {
-            if (knownDispatchers.hasDispatcher(path)) {
-                return knownDispatchers.lookup(path);
-            }
-            return knownDispatchers.defaultGlobalDispatcher();
+        public String dispatcherPathIn(final org.apache.pekko.dispatch.Dispatchers knownDispatchers) {
+            return knownDispatchers.hasDispatcher(path) ? path : DEFAULT_DISPATCHER_PATH;
+        }
+
+        public MessageDispatcher dispatcherIn(final org.apache.pekko.dispatch.Dispatchers knownDispatchers) {
+            return knownDispatchers.hasDispatcher(path) ? knownDispatchers.lookup(path)
+                : knownDispatchers.defaultGlobalDispatcher();
         }
     }
 
+    @Deprecated(since = "12.0.2", forRemoval = true)
+    public static final @NonNull String DEFAULT_DISPATCHER_PATH = DispatcherType.DEFAULT_DISPATCHER_PATH;
+    @Deprecated(since = "12.0.2", forRemoval = true)
+    public static final @NonNull String CLIENT_DISPATCHER_PATH = DispatcherType.Client.path();
+    @Deprecated(since = "12.0.2", forRemoval = true)
+    public static final @NonNull String TXN_DISPATCHER_PATH = DispatcherType.Transaction.path();
+    @Deprecated(since = "12.0.2", forRemoval = true)
+    public static final @NonNull String SHARD_DISPATCHER_PATH = DispatcherType.Shard.path();
+    @Deprecated(since = "12.0.2", forRemoval = true)
+    public static final @NonNull String NOTIFICATION_DISPATCHER_PATH = DispatcherType.Notification.path();
+    @Deprecated(since = "12.0.2", forRemoval = true)
+    public static final @NonNull String SERIALIZATION_DISPATCHER_PATH = DispatcherType.Serialization.path();
+
+    private final org.apache.pekko.dispatch.Dispatchers dispatchers;
+
+    @Deprecated(since = "12.0.2", forRemoval = true)
     public Dispatchers(final org.apache.pekko.dispatch.Dispatchers dispatchers) {
         this.dispatchers = requireNonNull(dispatchers, "dispatchers should not be null");
     }
 
+    @Deprecated(since = "12.0.2", forRemoval = true)
     public ExecutionContextExecutor getDispatcher(final DispatcherType dispatcherType) {
-        return dispatcherType.dispatcher(dispatchers);
+        return dispatcherType.dispatcherIn(dispatchers);
     }
 
+    @Deprecated(since = "12.0.2", forRemoval = true)
     public String getDispatcherPath(final DispatcherType dispatcherType) {
-        return dispatcherType.path(dispatchers);
+        return dispatcherType.dispatcherPathIn(dispatchers);
     }
 }

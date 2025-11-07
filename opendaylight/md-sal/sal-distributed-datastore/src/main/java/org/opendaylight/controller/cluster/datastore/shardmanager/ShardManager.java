@@ -52,7 +52,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActorWithMetering;
-import org.opendaylight.controller.cluster.common.actor.Dispatchers;
+import org.opendaylight.controller.cluster.common.actor.Dispatchers.DispatcherType;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DatastoreContextFactory;
@@ -165,8 +165,7 @@ class ShardManager extends AbstractUntypedActorWithMetering {
         configuration = builder.getConfiguration();
         datastoreContextFactory = builder.getDatastoreContextFactory();
         type = datastoreContextFactory.getBaseDatastoreContext().getDataStoreName();
-        shardDispatcherPath = new Dispatchers(getContext().system().dispatchers())
-            .getDispatcherPath(Dispatchers.DispatcherType.Shard);
+        shardDispatcherPath = DispatcherType.Shard.dispatcherPathIn(getContext().system().dispatchers());
         readinessFuture = builder.getReadinessFuture();
         primaryShardInfoCache = builder.getPrimaryShardInfoCache();
         restoreFromSnapshot = builder.getRestoreFromSnapshot();
@@ -319,8 +318,7 @@ class ShardManager extends AbstractUntypedActorWithMetering {
 
         LOG.info("Shutting down ShardManager {} - waiting on {} shards", name(), stopFutures.size());
 
-        final var dispatcher = new Dispatchers(context().system().dispatchers())
-                .getDispatcher(Dispatchers.DispatcherType.Client);
+        final var dispatcher = DispatcherType.Client.dispatcherIn(context().system().dispatchers());
         CompletionStages.sequence(stopFutures, dispatcher).whenCompleteAsync((results, failure) -> {
             LOG.debug("{}: All shards shutdown - sending PoisonPill to self", name());
 
@@ -402,7 +400,7 @@ class ShardManager extends AbstractUntypedActorWithMetering {
             sender.tell(new Status.Failure(new RuntimeException(
                 "RemoveServer request to leader %s for shard %s failed".formatted(primaryPath, shardName), failure)),
                 self());
-        }, new Dispatchers(context().system().dispatchers()).getDispatcher(Dispatchers.DispatcherType.Client));
+        }, DispatcherType.Client.dispatcherIn(context().system().dispatchers()));
     }
 
     private void onShardReplicaRemoved(final ServerRemoved message) {
@@ -448,8 +446,8 @@ class ShardManager extends AbstractUntypedActorWithMetering {
             };
 
             shardActorsStopping.put(shardName, onComplete);
-            stopFuture.whenCompleteAsync(onComplete, new Dispatchers(context().system().dispatchers())
-                    .getDispatcher(Dispatchers.DispatcherType.Client));
+            stopFuture.whenCompleteAsync(onComplete,
+                DispatcherType.Client.dispatcherIn(context().system().dispatchers()));
         }
 
         LOG.debug("{} : Local Shard replica for shard {} has been removed", name(), shardName);
@@ -1017,7 +1015,7 @@ class ShardManager extends AbstractUntypedActorWithMetering {
                     case LocalPrimaryShardFound msg -> handler.onLocalPrimaryFound(msg);
                     default -> handler.onUnknownResponse(response);
                 }
-            }, new Dispatchers(context().system().dispatchers()).getDispatcher(Dispatchers.DispatcherType.Client));
+            }, DispatcherType.Client.dispatcherIn(context().system().dispatchers()));
     }
 
     /**
@@ -1221,7 +1219,7 @@ class ShardManager extends AbstractUntypedActorWithMetering {
             self().tell(new ForwardedAddServerFailure(shardName,
                 "AddServer request to leader %s for shard %s failed".formatted(response.primaryPath(), shardName),
                 failure, removeShardOnFailure), sender);
-        }, new Dispatchers(context().system().dispatchers()).getDispatcher(Dispatchers.DispatcherType.Client));
+        }, DispatcherType.Client.dispatcherIn(context().system().dispatchers()));
     }
 
     private void onAddServerFailure(final String shardName, final String message, final Throwable failure,
@@ -1424,7 +1422,7 @@ class ShardManager extends AbstractUntypedActorWithMetering {
 
                     changeShardMembersVotingStatus(new ChangeServersVotingStatus(serverVotingStatusMap), shardName,
                         localShardFound.getPath(), sender);
-                }, new Dispatchers(context().system().dispatchers()).getDispatcher(Dispatchers.DispatcherType.Client)));
+                }, DispatcherType.Client.dispatcherIn(context().system().dispatchers())));
     }
 
     private void findLocalShard(final FindLocalShard message) {
@@ -1472,7 +1470,7 @@ class ShardManager extends AbstractUntypedActorWithMetering {
                                 shardName, response))), self());
                     }
                 }
-            }, new Dispatchers(context().system().dispatchers()).getDispatcher(Dispatchers.DispatcherType.Client));
+            }, DispatcherType.Client.dispatcherIn(context().system().dispatchers()));
     }
 
     private void changeShardMembersVotingStatus(final ChangeServersVotingStatus changeServersVotingStatus,
@@ -1518,7 +1516,7 @@ class ShardManager extends AbstractUntypedActorWithMetering {
                         replyMsg.getStatus(), shardActorRef.path().toString(), shardId);
                     sender.tell(new Status.Failure(error), self());
                 }
-            }, new Dispatchers(context().system().dispatchers()).getDispatcher(Dispatchers.DispatcherType.Client));
+            }, DispatcherType.Client.dispatcherIn(context().system().dispatchers()));
     }
 
     private static final class ForwardedAddServerReply {

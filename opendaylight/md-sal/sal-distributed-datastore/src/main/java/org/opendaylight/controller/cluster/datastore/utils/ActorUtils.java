@@ -25,6 +25,7 @@ import org.apache.pekko.actor.ActorPath;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSelection;
 import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.dispatch.Dispatchers;
 import org.apache.pekko.dispatch.ExecutionContexts;
 import org.apache.pekko.dispatch.Mapper;
 import org.apache.pekko.dispatch.OnComplete;
@@ -32,7 +33,7 @@ import org.apache.pekko.pattern.AskTimeoutException;
 import org.apache.pekko.pattern.Patterns;
 import org.apache.pekko.util.Timeout;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
-import org.opendaylight.controller.cluster.common.actor.Dispatchers;
+import org.opendaylight.controller.cluster.common.actor.Dispatchers.DispatcherType;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
@@ -149,7 +150,7 @@ public class ActorUtils {
         this.clusterWrapper = clusterWrapper;
         this.configuration = configuration;
         this.datastoreContext = datastoreContext;
-        dispatchers = new Dispatchers(actorSystem.dispatchers());
+        dispatchers = actorSystem.dispatchers();
         this.primaryShardInfoCache = primaryShardInfoCache;
         shardStrategyFactory = new ShardStrategyFactory(configuration);
 
@@ -430,11 +431,11 @@ public class ActorUtils {
      * @return the dispatcher
      */
     public ExecutionContextExecutor getClientDispatcher() {
-        return dispatchers.getDispatcher(Dispatchers.DispatcherType.Client);
+        return DispatcherType.Client.dispatcherIn(dispatchers);
     }
 
     public String getNotificationDispatcherPath() {
-        return dispatchers.getDispatcherPath(Dispatchers.DispatcherType.Notification);
+        return DispatcherType.Notification.dispatcherPathIn(dispatchers);
     }
 
     public Configuration getConfiguration() {
