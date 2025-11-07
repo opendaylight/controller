@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.datastore.util;
 
-import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntryBuilder;
 import static org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes.leafNode;
 
 import com.google.common.collect.ImmutableSet;
@@ -120,7 +119,9 @@ public final class TestModel {
     private static final String FIRST_GRAND_CHILD_NAME = "first grand child";
     private static final String SECOND_GRAND_CHILD_NAME = "second grand child";
 
-    private static final MapEntryNode BAR_NODE = mapEntryBuilder(OUTER_LIST_QNAME, ID_QNAME, TWO_ID)
+    private static final MapEntryNode BAR_NODE = ImmutableNodes.newMapEntryBuilder()
+        .withNodeIdentifier(NodeIdentifierWithPredicates.of(OUTER_LIST_QNAME, ID_QNAME, TWO_ID))
+        .withChild(leafNode(ID_QNAME, TWO_ID))
         .withChild(ImmutableNodes.newSystemMapBuilder()
             .withNodeIdentifier(new NodeIdentifier(INNER_LIST_QNAME))
             .withChild(ImmutableNodes.newMapEntryBuilder()
@@ -203,8 +204,16 @@ public final class TestModel {
             .withChild(ImmutableNodes.newUserMapBuilder()
                 .withNodeIdentifier(new NodeIdentifier(ORDERED_LIST_QNAME))
                 .withValue(List.of(
-                    mapEntryBuilder(ORDERED_LIST_QNAME, ORDERED_LIST_ENTRY_QNAME, "1").build(),
-                    mapEntryBuilder(ORDERED_LIST_QNAME, ORDERED_LIST_ENTRY_QNAME, "2").build()))
+                    ImmutableNodes.newMapEntryBuilder()
+                        .withNodeIdentifier(NodeIdentifierWithPredicates.of(ORDERED_LIST_QNAME,
+                            ORDERED_LIST_ENTRY_QNAME, "1"))
+                        .withChild(leafNode(ORDERED_LIST_ENTRY_QNAME, "1"))
+                        .build(),
+                    ImmutableNodes.newMapEntryBuilder()
+                        .withNodeIdentifier(NodeIdentifierWithPredicates.of(ORDERED_LIST_QNAME,
+                            ORDERED_LIST_ENTRY_QNAME, "2"))
+                        .withChild(leafNode(ORDERED_LIST_ENTRY_QNAME, "2"))
+                    .build()))
                 .build())
             .withChild(ImmutableNodes.newSystemLeafSetBuilder()
                 .withNodeIdentifier(new NodeIdentifier(SHOE_QNAME))
@@ -255,16 +264,19 @@ public final class TestModel {
     }
 
     public static ContainerNode createFamily() {
-        final var firstGrandChildBuilder = mapEntryBuilder(
-                GRAND_CHILDREN_QNAME, GRAND_CHILD_NUMBER_QNAME, FIRST_GRAND_CHILD_ID)
-            .withChild(leafNode(GRAND_CHILD_NUMBER_QNAME,FIRST_GRAND_CHILD_ID))
+        final var firstGrandChildBuilder = ImmutableNodes.newMapEntryBuilder()
+            .withNodeIdentifier(NodeIdentifierWithPredicates.of(GRAND_CHILDREN_QNAME,
+                GRAND_CHILD_NUMBER_QNAME, FIRST_GRAND_CHILD_ID))
+            .withChild(leafNode(GRAND_CHILD_NUMBER_QNAME, FIRST_GRAND_CHILD_ID))
             .withChild(leafNode(GRAND_CHILD_NAME_QNAME, FIRST_GRAND_CHILD_NAME));
 
         return ImmutableNodes.newContainerBuilder()
             .withNodeIdentifier(new NodeIdentifier(FAMILY_QNAME))
             .withChild(ImmutableNodes.newSystemMapBuilder()
                 .withNodeIdentifier(new NodeIdentifier(CHILDREN_QNAME))
-                .withChild(mapEntryBuilder(CHILDREN_QNAME, CHILD_NUMBER_QNAME, FIRST_CHILD_ID)
+                .withChild(ImmutableNodes.newMapEntryBuilder()
+                    .withNodeIdentifier(NodeIdentifierWithPredicates.of(CHILDREN_QNAME,
+                        CHILD_NUMBER_QNAME, FIRST_CHILD_ID))
                     .withChild(leafNode(CHILD_NUMBER_QNAME, FIRST_CHILD_ID))
                     .withChild(leafNode(CHILD_NAME_QNAME, FIRST_CHILD_NAME))
                     .withChild(ImmutableNodes.newSystemMapBuilder()
@@ -272,7 +284,9 @@ public final class TestModel {
                         .withChild(firstGrandChildBuilder.build())
                         .build())
                     .build())
-                .withChild(mapEntryBuilder(CHILDREN_QNAME, CHILD_NUMBER_QNAME, SECOND_CHILD_ID)
+                .withChild(ImmutableNodes.newMapEntryBuilder()
+                    .withNodeIdentifier(NodeIdentifierWithPredicates.of(CHILDREN_QNAME,
+                        CHILD_NUMBER_QNAME, SECOND_CHILD_ID))
                     .withChild(leafNode(CHILD_NUMBER_QNAME, SECOND_CHILD_ID))
                     .withChild(leafNode(CHILD_NAME_QNAME, SECOND_CHILD_NAME))
                     .withChild(ImmutableNodes.newSystemMapBuilder()
