@@ -36,7 +36,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.rpcbench
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.rpcbenchmark.rev150702.TestStatusOutputBuilder;
 import org.opendaylight.yangtools.binding.DataObjectIdentifier;
 import org.opendaylight.yangtools.concepts.Registration;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.common.Uint32;
@@ -91,9 +90,9 @@ public final class RpcbenchmarkProvider implements AutoCloseable {
             case ROUTEDRTC -> {
                 final var routeIid = new ArrayList<DataObjectIdentifier<?>>();
                 for (int i = 0; i < input.getNumServers().intValue(); i++) {
-                    routeIid.add(InstanceIdentifier.create(RpcbenchRpcRoutes.class)
+                    routeIid.add(DataObjectIdentifier.builder(RpcbenchRpcRoutes.class)
                         .child(RpcRoute.class, new RpcRouteKey(Integer.toString(i)))
-                        .toIdentifier());
+                        .build());
                 }
 
                 routed = new RoutedBindingRTCServer(providerRegistry, Set.copyOf(routeIid));
