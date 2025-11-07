@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -47,9 +46,7 @@ import org.apache.pekko.cluster.ClusterEvent;
 import org.apache.pekko.cluster.ClusterEvent.MemberWeaklyUp;
 import org.apache.pekko.cluster.Member;
 import org.apache.pekko.dispatch.CompletionStages;
-import org.apache.pekko.dispatch.OnComplete;
 import org.apache.pekko.pattern.Patterns;
-import org.apache.pekko.util.Timeout;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -111,7 +108,6 @@ import org.opendaylight.yangtools.yang.common.Empty;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.concurrent.Future;
 
 /**
  * Manages the shards for a data store. The ShardManager has the following jobs:
@@ -1408,33 +1404,27 @@ class ShardManager extends AbstractUntypedActorWithMetering {
 
         ActorRef sender = getSender();
         final String shardName = flipMembersVotingStatus.getShardName();
-        findLocalShard(shardName, sender, localShardFound -> {
-            Future<Object> future = Patterns.ask(localShardFound.getPath(), GetOnDemandRaftState.INSTANCE,
-                    Timeout.apply(30, TimeUnit.SECONDS));
-
-            future.onComplete(new OnComplete<>() {
-                @Override
-                public void onComplete(final Throwable failure, final Object response) {
+        findLocalShard(shardName, sender, localShardFound ->
+            Patterns.ask(localShardFound.getPath(), GetOnDemandRaftState.INSTANCE, Duration.ofSeconds(30))
+                .whenCompleteAsync((response, failure) -> {
                     if (failure != null) {
                         sender.tell(new Status.Failure(new RuntimeException(
                                 String.format("Failed to access local shard %s", shardName), failure)), self());
                         return;
                     }
 
-                    OnDemandRaftState raftState = (OnDemandRaftState) response;
-                    Map<String, Boolean> serverVotingStatusMap = new HashMap<>();
-                    for (Entry<String, Boolean> e: raftState.getPeerVotingStates().entrySet()) {
-                        serverVotingStatusMap.put(e.getKey(), !e.getValue());
+                    final var raftState = (OnDemandRaftState) response;
+                    final var serverVotingStatusMap = new HashMap<String, Boolean>();
+                    for (var entry : raftState.getPeerVotingStates().entrySet()) {
+                        serverVotingStatusMap.put(entry.getKey(), !entry.getValue());
                     }
 
-                    serverVotingStatusMap.put(getShardIdentifier(cluster.getCurrentMemberName(), shardName)
-                            .toString(), !raftState.isVoting());
+                    serverVotingStatusMap.put(getShardIdentifier(cluster.getCurrentMemberName(), shardName).toString(),
+                        !raftState.isVoting());
 
-                    changeShardMembersVotingStatus(new ChangeServersVotingStatus(serverVotingStatusMap),
-                            shardName, localShardFound.getPath(), sender);
-                }
-            }, new Dispatchers(context().system().dispatchers()).getDispatcher(Dispatchers.DispatcherType.Client));
-        });
+                    changeShardMembersVotingStatus(new ChangeServersVotingStatus(serverVotingStatusMap), shardName,
+                        localShardFound.getPath(), sender);
+                }, new Dispatchers(context().system().dispatchers()).getDispatcher(Dispatchers.DispatcherType.Client)));
     }
 
     private void findLocalShard(final FindLocalShard message) {
