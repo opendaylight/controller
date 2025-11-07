@@ -34,6 +34,8 @@ import javax.inject.Singleton;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 import org.opendaylight.mdsal.binding.api.DataBroker;
+import org.opendaylight.mdsal.binding.api.DataObjectDeleted;
+import org.opendaylight.mdsal.binding.api.DataObjectModification.WithDataAfter;
 import org.opendaylight.mdsal.binding.api.DataTreeChangeListener;
 import org.opendaylight.mdsal.binding.api.DataTreeModification;
 import org.opendaylight.mdsal.binding.api.NotificationPublishService;
@@ -225,11 +227,13 @@ public final class OpendaylightToaster extends AbstractMXBean
     @Override
     public void onDataTreeChanged(final List<DataTreeModification<Toaster>> changes) {
         for (var change: changes) {
-            final var rootNode = change.getRootNode();
-            switch (rootNode.modificationType()) {
-                case WRITE -> {
-                    final var oldToaster = rootNode.dataBefore();
-                    final var newToaster = rootNode.dataAfter();
+            switch (change.getRootNode()) {
+                case DataObjectDeleted<Toaster> deleted ->
+                    LOG.info("onDataTreeChanged - Toaster config with path {} was deleted: old Toaster: {}",
+                        change.path(), deleted.dataBefore());
+                case WithDataAfter<Toaster> present -> {
+                    final var oldToaster = present.dataBefore();
+                    final var newToaster = present.dataAfter();
                     LOG.info("onDataTreeChanged - Toaster config with path {} was added or replaced: old Toaster: {}, "
                         + "new Toaster: {}", change.path(), oldToaster, newToaster);
 
@@ -237,11 +241,6 @@ public final class OpendaylightToaster extends AbstractMXBean
                     if (darkness != null) {
                         darknessFactor.set(darkness.toJava());
                     }
-                }
-                case DELETE -> LOG.info("onDataTreeChanged - Toaster config with path {} was deleted: old Toaster: {}",
-                        change.path(), rootNode.dataBefore());
-                default -> {
-                    // No-op
                 }
             }
         }
