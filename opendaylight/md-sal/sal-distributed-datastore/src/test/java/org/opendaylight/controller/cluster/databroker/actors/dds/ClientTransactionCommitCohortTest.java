@@ -193,9 +193,10 @@ public class ClientTransactionCommitCohortTest {
         return new TransactionTester<>(transaction, connection, backendProbe);
     }
 
-    private static <T extends TransactionTester<?>> void replySuccess(final Collection<T> transactions,
-                              final Consumer<T> expect, final Consumer<T> reply) {
-        for (final T transaction : transactions) {
+    private static <T extends AbstractProxyTransaction> void replySuccess(
+            final Collection<TransactionTester<T>> transactions, final Consumer<TransactionTester<T>> expect,
+            final Consumer<TransactionTester<T>> reply) {
+        for (final var transaction : transactions) {
             expect.accept(transaction);
             reply.accept(transaction);
         }
