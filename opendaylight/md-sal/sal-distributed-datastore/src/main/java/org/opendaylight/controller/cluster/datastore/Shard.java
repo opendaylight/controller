@@ -34,6 +34,7 @@ import org.apache.pekko.actor.ExtendedActorSystem;
 import org.apache.pekko.actor.Props;
 import org.apache.pekko.actor.Status;
 import org.apache.pekko.actor.Status.Failure;
+import org.apache.pekko.dispatch.Dispatchers;
 import org.apache.pekko.serialization.JavaSerializer;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -54,7 +55,6 @@ import org.opendaylight.controller.cluster.access.concepts.RuntimeRequestExcepti
 import org.opendaylight.controller.cluster.access.concepts.SliceableMessage;
 import org.opendaylight.controller.cluster.access.concepts.UnsupportedRequestException;
 import org.opendaylight.controller.cluster.common.actor.CommonConfig;
-import org.opendaylight.controller.cluster.common.actor.Dispatchers;
 import org.opendaylight.controller.cluster.common.actor.Dispatchers.DispatcherType;
 import org.opendaylight.controller.cluster.common.actor.MeteringBehavior;
 import org.opendaylight.controller.cluster.datastore.DataTreeCohortActorRegistry.CohortRegistryCommand;
@@ -253,7 +253,7 @@ public class Shard extends RaftActor {
         // create a notifier actor for each cluster member
         roleChangeNotifier = getContext().actorOf(RoleChangeNotifier.getProps(name), name + "-notifier");
 
-        dispatchers = new Dispatchers(getContext().system().dispatchers());
+        dispatchers = getContext().system().dispatchers();
 
         snapshotCohort = new ShardSnapshotCohort(store, name);
         recoveryCohort = new ShardRecoveryCoordinator(store, memberId());
@@ -337,7 +337,7 @@ public class Shard extends RaftActor {
     }
 
     private void handleRequestAssemblerMessage(final Object message) {
-        dispatchers.getDispatcher(DispatcherType.Serialization).execute(() -> {
+        DispatcherType.Serialization.dispatcherIn(dispatchers).execute(() -> {
             JavaSerializer.currentSystem().value_$eq((ExtendedActorSystem) context().system());
             requestMessageAssembler.handleMessage(message, self());
         });
@@ -351,7 +351,7 @@ public class Shard extends RaftActor {
             if (success != null) {
                 final long executionTimeNanos = ticker().read() - now;
                 if (success instanceof SliceableMessage) {
-                    dispatchers.getDispatcher(DispatcherType.Serialization).execute(() ->
+                    DispatcherType.Serialization.dispatcherIn(dispatchers).execute(() ->
                         responseMessageSlicer.slice(SliceOptions.builder()
                             .identifier(success.getTarget())
                             .message(envelope.newSuccessEnvelope(success, executionTimeNanos))

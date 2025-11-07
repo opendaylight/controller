@@ -11,7 +11,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.pekko.actor.ActorContext;
 import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.Props;
-import org.opendaylight.controller.cluster.common.actor.Dispatchers;
+import org.opendaylight.controller.cluster.common.actor.Dispatchers.DispatcherType;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeCandidate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,9 +56,8 @@ abstract class AbstractShardDataTreeNotificationPublisherActorProxy implements S
 
     protected final ActorRef publisherActor() {
         if (publisherActor == null) {
-            String dispatcher = new Dispatchers(actorContext.system().dispatchers()).getDispatcherPath(
-                    Dispatchers.DispatcherType.Notification);
-            publisherActor = actorContext.actorOf(props().withDispatcher(dispatcher), actorName);
+            final var dispatcherPath = DispatcherType.Notification.dispatcherPathIn(actorContext);
+            publisherActor = actorContext.actorOf(props().withDispatcher(dispatcherPath), actorName);
 
             log.debug("{}: Created publisher actor {} with name {}", logContext, publisherActor, actorName);
         }
