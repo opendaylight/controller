@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.datastore.util;
 
-import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntry;
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntryBuilder;
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapNodeBuilder;
 import static org.opendaylight.yangtools.yang.data.spi.node.ImmutableNodes.leafNode;
@@ -32,16 +31,13 @@ import org.opendaylight.yangtools.yang.test.util.YangParserTestUtils;
 public final class TestModel {
 
     public static final QName TEST_QNAME = QName.create(
-            "urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test",
-            "2014-03-13", "test");
+            "urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test", "2014-03-13", "test");
 
     public static final QName AUG_NAME_QNAME = QName.create(
-            "urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:aug",
-            "2014-03-13", "name");
+            "urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:aug", "2014-03-13", "name");
 
     public static final QName AUG_CONT_QNAME = QName.create(
-            "urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:aug",
-            "2014-03-13", "cont");
+            "urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:aug", "2014-03-13", "cont");
 
 
     public static final QName DESC_QNAME = QName.create(TEST_QNAME, "desc");
@@ -125,13 +121,18 @@ public final class TestModel {
     private static final String FIRST_GRAND_CHILD_NAME = "first grand child";
     private static final String SECOND_GRAND_CHILD_NAME = "second grand child";
 
-    private static final MapEntryNode BAR_NODE = mapEntryBuilder(
-            OUTER_LIST_QNAME, ID_QNAME, TWO_ID) //
-            .withChild(mapNodeBuilder(INNER_LIST_QNAME) //
-                    .withChild(mapEntry(INNER_LIST_QNAME, NAME_QNAME, TWO_ONE_NAME)) //
-                    .withChild(mapEntry(INNER_LIST_QNAME, NAME_QNAME, TWO_TWO_NAME)) //
-                    .build()) //
-            .build();
+    private static final MapEntryNode BAR_NODE = mapEntryBuilder(OUTER_LIST_QNAME, ID_QNAME, TWO_ID)
+        .withChild(mapNodeBuilder(INNER_LIST_QNAME)
+            .withChild(ImmutableNodes.newMapEntryBuilder()
+                .withNodeIdentifier(NodeIdentifierWithPredicates.of(INNER_LIST_QNAME, NAME_QNAME, TWO_ONE_NAME))
+                .withChild(leafNode(NAME_QNAME, TWO_ONE_NAME))
+                .build())
+            .withChild(ImmutableNodes.newMapEntryBuilder()
+                .withNodeIdentifier(NodeIdentifierWithPredicates.of(INNER_LIST_QNAME, NAME_QNAME, TWO_TWO_NAME))
+                .withChild(leafNode(NAME_QNAME, TWO_TWO_NAME))
+                .build())
+            .build())
+        .build();
 
     private TestModel() {
         throw new UnsupportedOperationException();
@@ -228,7 +229,10 @@ public final class TestModel {
                 .withChild(createAugmentedListEntry(1, "First Test"))
                 .build())
             .withChild(mapNodeBuilder(OUTER_LIST_QNAME)
-                .withChild(mapEntry(OUTER_LIST_QNAME, ID_QNAME, ONE_ID))
+                .withChild(ImmutableNodes.newMapEntryBuilder()
+                    .withNodeIdentifier(NodeIdentifierWithPredicates.of(OUTER_LIST_QNAME, ID_QNAME, ONE_ID))
+                    .withChild(leafNode(ID_QNAME, ONE_ID))
+                    .build())
                 .withChild(BAR_NODE)
                 .build());
     }
