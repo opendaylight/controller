@@ -16,9 +16,9 @@ import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.actor.ActorSystem;
 import org.apache.pekko.actor.Cancellable;
 import org.apache.pekko.actor.Scheduler;
+import org.apache.pekko.dispatch.Dispatchers;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
-import org.opendaylight.controller.cluster.common.actor.Dispatchers;
 import org.opendaylight.controller.cluster.messaging.MessageSlicer;
 import org.opendaylight.raft.spi.FileBackedOutputStreamFactory;
 import org.opendaylight.yangtools.concepts.Identifiable;
@@ -49,7 +49,7 @@ public class ClientActorContext implements Identifiable<ClientIdentifier> {
         this.identifier = requireNonNull(identifier);
         scheduler = requireNonNull(system).scheduler();
         executionContext = system.dispatcher();
-        dispatchers = new Dispatchers(system.dispatchers());
+        dispatchers = requireNonNull(system.dispatchers());
         this.config = requireNonNull(config);
 
         messageSlicer = MessageSlicer.builder()
