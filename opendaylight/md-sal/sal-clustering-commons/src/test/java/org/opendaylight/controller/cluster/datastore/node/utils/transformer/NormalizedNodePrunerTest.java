@@ -11,8 +11,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntry;
-import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntryBuilder;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -25,6 +23,7 @@ import org.opendaylight.controller.cluster.datastore.node.utils.NormalizedNodeNa
 import org.opendaylight.controller.cluster.datastore.util.TestModel;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.schema.AnyxmlNode;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
@@ -285,10 +284,15 @@ class NormalizedNodePrunerTest {
         AbstractNormalizedNodePruner pruner = prunerFullSchema(path);
 
         NormalizedNodeWriter.forStreamWriter(pruner)
-            .write(mapEntryBuilder(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1)
+            .write(ImmutableNodes.newMapEntryBuilder()
+                .withNodeIdentifier(NodeIdentifierWithPredicates.of(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1))
+                .withChild(ImmutableNodes.leafNode(TestModel.ID_QNAME, 1))
                 .withChild(ImmutableNodes.newSystemMapBuilder()
                     .withNodeIdentifier(new NodeIdentifier(TestModel.INNER_LIST_QNAME))
-                    .withChild(mapEntryBuilder(TestModel.INNER_LIST_QNAME, TestModel.NAME_QNAME, "one")
+                    .withChild(ImmutableNodes.newMapEntryBuilder()
+                        .withNodeIdentifier(NodeIdentifierWithPredicates.of(TestModel.INNER_LIST_QNAME,
+                            TestModel.NAME_QNAME, "one"))
+                        .withChild(ImmutableNodes.leafNode(TestModel.NAME_QNAME, "one"))
                         .withChild(ImmutableNodes.newContainerBuilder()
                             .withNodeIdentifier(new NodeIdentifier(TestModel.INVALID_QNAME))
                             .build())
@@ -296,10 +300,16 @@ class NormalizedNodePrunerTest {
                     .build())
                 .build());
 
-        assertEquals(mapEntryBuilder(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1)
+        assertEquals(ImmutableNodes.newMapEntryBuilder()
+            .withNodeIdentifier(NodeIdentifierWithPredicates.of(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1))
+            .withChild(ImmutableNodes.leafNode(TestModel.ID_QNAME, 1))
             .withChild(ImmutableNodes.newSystemMapBuilder()
                 .withNodeIdentifier(new NodeIdentifier(TestModel.INNER_LIST_QNAME))
-                .withChild(mapEntryBuilder(TestModel.INNER_LIST_QNAME, TestModel.NAME_QNAME, "one").build())
+                .withChild(ImmutableNodes.newMapEntryBuilder()
+                    .withNodeIdentifier(NodeIdentifierWithPredicates.of(TestModel.INNER_LIST_QNAME,
+                        TestModel.NAME_QNAME, "one"))
+                    .withChild(ImmutableNodes.leafNode(TestModel.NAME_QNAME, "one"))
+                    .build())
                 .build())
             .build(), pruner.getResult().orElseThrow());
     }
@@ -313,7 +323,10 @@ class NormalizedNodePrunerTest {
 
         SystemMapNode input = ImmutableNodes.newSystemMapBuilder()
             .withNodeIdentifier(new NodeIdentifier(TestModel.INNER_LIST_QNAME))
-            .withChild(mapEntryBuilder(TestModel.INNER_LIST_QNAME, TestModel.NAME_QNAME, "one")
+            .withChild(ImmutableNodes.newMapEntryBuilder()
+                .withNodeIdentifier(NodeIdentifierWithPredicates.of(TestModel.INNER_LIST_QNAME,
+                    TestModel.NAME_QNAME, "one"))
+                .withChild(ImmutableNodes.leafNode(TestModel.NAME_QNAME, "one"))
                 .withChild(ImmutableNodes.newContainerBuilder()
                     .withNodeIdentifier(new NodeIdentifier(TestModel.INNER_CONTAINER_QNAME))
                     .build())
@@ -333,7 +346,10 @@ class NormalizedNodePrunerTest {
 
         NormalizedNodeWriter.forStreamWriter(pruner).write(ImmutableNodes.newSystemMapBuilder()
             .withNodeIdentifier(new NodeIdentifier(TestModel.INVALID_QNAME))
-            .withChild(mapEntryBuilder(TestModel.INVALID_QNAME, TestModel.NAME_QNAME, "one")
+            .withChild(ImmutableNodes.newMapEntryBuilder()
+                .withNodeIdentifier(NodeIdentifierWithPredicates.of(TestModel.INVALID_QNAME,
+                    TestModel.NAME_QNAME, "one"))
+                .withChild(ImmutableNodes.leafNode(TestModel.NAME_QNAME, "one"))
                 .withChild(ImmutableNodes.newContainerBuilder()
                     .withNodeIdentifier(new NodeIdentifier(TestModel.INNER_CONTAINER_QNAME))
                     .build())
@@ -351,10 +367,15 @@ class NormalizedNodePrunerTest {
         AbstractNormalizedNodePruner pruner = prunerFullSchema(path);
 
         NormalizedNodeWriter.forStreamWriter(pruner)
-            .write(mapEntryBuilder(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1)
+            .write(ImmutableNodes.newMapEntryBuilder()
+                .withNodeIdentifier(NodeIdentifierWithPredicates.of(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1))
+                .withChild(ImmutableNodes.leafNode(TestModel.ID_QNAME, 1))
                 .withChild(ImmutableNodes.newSystemMapBuilder()
                     .withNodeIdentifier(new NodeIdentifier(TestModel.INVALID_QNAME))
-                    .withChild(mapEntryBuilder(TestModel.INVALID_QNAME, TestModel.NAME_QNAME, "one")
+                    .withChild(ImmutableNodes.newMapEntryBuilder()
+                        .withNodeIdentifier(NodeIdentifierWithPredicates.of(TestModel.INVALID_QNAME,
+                            TestModel.NAME_QNAME, "one"))
+                        .withChild(ImmutableNodes.leafNode(TestModel.NAME_QNAME, "one"))
                         .withChild(ImmutableNodes.newContainerBuilder()
                             .withNodeIdentifier(new NodeIdentifier(TestModel.INNER_CONTAINER_QNAME))
                             .build())
@@ -362,8 +383,10 @@ class NormalizedNodePrunerTest {
                     .build())
                 .build());
 
-        assertEquals(mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1),
-            pruner.getResult().orElseThrow());
+        assertEquals(ImmutableNodes.newMapEntryBuilder()
+            .withNodeIdentifier(NodeIdentifierWithPredicates.of(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1))
+            .withChild(ImmutableNodes.leafNode(TestModel.ID_QNAME, 1))
+            .build(), pruner.getResult().orElseThrow());
     }
 
     private static ContainerNode createTestContainer() {
