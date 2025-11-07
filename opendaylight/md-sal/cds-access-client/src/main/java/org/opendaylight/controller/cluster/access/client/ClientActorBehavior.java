@@ -198,7 +198,7 @@ public abstract class ClientActorBehavior<T extends BackendInfo>
             case FailureEnvelope failureEnvelope -> internalOnRequestFailure(failureEnvelope);
             default -> {
                 if (MessageAssembler.isHandledMessage(command)) {
-                    context().dispatchers().getDispatcher(DispatcherType.Serialization).execute(
+                    DispatcherType.Serialization.dispatcherIn(context().dispatchers()).execute(
                         () -> responseMessageAssembler.handleMessage(command, context().self()));
                     yield this;
                 }
