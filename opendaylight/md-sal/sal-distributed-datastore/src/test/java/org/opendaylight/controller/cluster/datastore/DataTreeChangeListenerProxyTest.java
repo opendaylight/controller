@@ -35,7 +35,7 @@ import org.apache.pekko.testkit.javadsl.TestKit;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.opendaylight.controller.cluster.common.actor.Dispatchers;
+import org.opendaylight.controller.cluster.common.actor.Dispatchers.DispatcherType;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedException;
 import org.opendaylight.controller.cluster.datastore.messages.CloseDataTreeNotificationListenerRegistration;
@@ -195,7 +195,7 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
         doReturn(DatastoreContext.newBuilder().build()).when(actorUtils).getDatastoreContext();
         doReturn(getSystem().dispatchers().defaultGlobalDispatcher()).when(actorUtils).getClientDispatcher();
         doReturn(getSystem()).when(actorUtils).getActorSystem();
-        doReturn(Dispatchers.DEFAULT_DISPATCHER_PATH).when(actorUtils).getNotificationDispatcherPath();
+        doReturn(DispatcherType.DEFAULT_DISPATCHER_PATH).when(actorUtils).getNotificationDispatcherPath();
         doReturn(getSystem().actorSelection(kit.getRef().path())).when(actorUtils).actorSelection(
             kit.getRef().path());
         doReturn(kit.duration("5 seconds")).when(actorUtils).getOperationDuration();
