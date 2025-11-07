@@ -27,7 +27,7 @@ import org.apache.pekko.actor.PoisonPill;
 import org.apache.pekko.actor.Props;
 import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
-import org.opendaylight.controller.cluster.common.actor.Dispatchers;
+import org.opendaylight.controller.cluster.common.actor.Dispatchers.DispatcherType;
 import org.opendaylight.controller.cluster.databroker.actors.dds.DataStoreClient;
 import org.opendaylight.controller.cluster.databroker.actors.dds.DistributedDataStoreClientActor;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
@@ -83,8 +83,7 @@ public abstract class AbstractDataStore implements DistributedDataStoreInterface
         final var shardManagerId = new ShardManagerIdentifier(baseDatastoreContext.getDataStoreName());
         LOG.info("Creating ShardManager : {}", shardManagerId);
 
-        final var shardDispatcher = new Dispatchers(actorSystem.dispatchers())
-            .getDispatcherPath(Dispatchers.DispatcherType.Shard);
+        final var shardDispatcher = DispatcherType.Shard.dispatcherPathIn(actorSystem);
         final var primaryShardInfoCache = new PrimaryShardInfoFutureCache();
         final var creator = getShardManagerCreator()
             .cluster(cluster)

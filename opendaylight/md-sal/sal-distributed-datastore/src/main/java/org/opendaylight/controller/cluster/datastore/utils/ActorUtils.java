@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore.utils;
 
+import static java.util.Objects.requireNonNull;
+
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
@@ -31,8 +33,9 @@ import org.apache.pekko.dispatch.OnComplete;
 import org.apache.pekko.pattern.AskTimeoutException;
 import org.apache.pekko.pattern.Patterns;
 import org.apache.pekko.util.Timeout;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.access.concepts.MemberName;
-import org.opendaylight.controller.cluster.common.actor.Dispatchers;
+import org.opendaylight.controller.cluster.common.actor.Dispatchers.DispatcherType;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
@@ -114,12 +117,11 @@ public class ActorUtils {
     public static final String COMMIT = "commit";
 
     private final AskTimeoutCounter askTimeoutCounter = new AskTimeoutCounter();
-    private final ActorSystem actorSystem;
+    private final @NonNull ActorSystem actorSystem;
     private final ActorRef shardManager;
     private final ClusterWrapper clusterWrapper;
     private final Configuration configuration;
     private final String selfAddressHostPort;
-    private final Dispatchers dispatchers;
 
     private DatastoreContext datastoreContext;
     private FiniteDuration operationDuration;
@@ -144,12 +146,11 @@ public class ActorUtils {
     public ActorUtils(final ActorSystem actorSystem, final ActorRef shardManager,
             final ClusterWrapper clusterWrapper, final Configuration configuration,
             final DatastoreContext datastoreContext, final PrimaryShardInfoFutureCache primaryShardInfoCache) {
-        this.actorSystem = actorSystem;
+        this.actorSystem = requireNonNull(actorSystem);
         this.shardManager = shardManager;
         this.clusterWrapper = clusterWrapper;
         this.configuration = configuration;
         this.datastoreContext = datastoreContext;
-        dispatchers = new Dispatchers(actorSystem.dispatchers());
         this.primaryShardInfoCache = primaryShardInfoCache;
         shardStrategyFactory = new ShardStrategyFactory(configuration);
 
@@ -174,7 +175,7 @@ public class ActorUtils {
         return datastoreContext;
     }
 
-    public ActorSystem getActorSystem() {
+    public @NonNull ActorSystem getActorSystem() {
         return actorSystem;
     }
 
@@ -430,11 +431,11 @@ public class ActorUtils {
      * @return the dispatcher
      */
     public ExecutionContextExecutor getClientDispatcher() {
-        return dispatchers.getDispatcher(Dispatchers.DispatcherType.Client);
+        return DispatcherType.Client.dispatcherIn(actorSystem);
     }
 
     public String getNotificationDispatcherPath() {
-        return dispatchers.getDispatcherPath(Dispatchers.DispatcherType.Notification);
+        return DispatcherType.Notification.dispatcherPathIn(actorSystem);
     }
 
     public Configuration getConfiguration() {
