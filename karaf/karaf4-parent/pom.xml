@@ -17,7 +17,7 @@
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>karaf4-parent</artifactId>
-    <version>12.0.2-SNAPSHOT</version>
+    <version>12.0.2</version>
     <packaging>pom</packaging>
     <name>ODL :: Controller :: ${project.artifactId}</name>
 
@@ -26,7 +26,7 @@
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>controller-artifacts</artifactId>
-                <version>12.0.2-SNAPSHOT</version>
+                <version>12.0.2</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
