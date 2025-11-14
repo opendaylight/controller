@@ -1,1 +1,1 @@
-Import-Package: !org.checkerframework.*, *
+Import-Package: !javax.inject, !org.checkerframework.*, *
