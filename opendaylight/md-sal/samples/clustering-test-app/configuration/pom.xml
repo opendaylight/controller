@@ -17,7 +17,7 @@
 
     <groupId>org.opendaylight.controller.samples</groupId>
     <artifactId>clustering-it-config</artifactId>
-    <version>12.0.3-SNAPSHOT</version>
+    <version>12.0.3</version>
     <packaging>jar</packaging>
 
     <build>
