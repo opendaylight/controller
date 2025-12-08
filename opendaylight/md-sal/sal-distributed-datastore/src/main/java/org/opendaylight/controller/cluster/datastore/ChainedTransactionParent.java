@@ -91,16 +91,6 @@ final class ChainedTransactionParent extends TransactionParent implements Identi
     }
 
     @Override
-    CommitCohort createFailedCohort(final TransactionIdentifier txId, final DataTreeModification mod,
-            final Exception failure) {
-        // FIXME: this is not nice: we should handle this in ChainedCommitCohort -- we just do not have an underlying
-        //        ReadWriteShardDataTreeTransaction
-        final var cohort = new SimpleCommitCohort(dataTree, mod, txId, failure);
-        dataTree.enqueueReadyTransaction(cohort);
-        return cohort;
-    }
-
-    @Override
     ChainedCommitCohort createReadyCohort(final TransactionIdentifier txId, final DataTreeModification mod) {
         checkState(openTransaction == null, "Attempted to finish transaction %s while %s is outstanding", txId,
             openTransaction);

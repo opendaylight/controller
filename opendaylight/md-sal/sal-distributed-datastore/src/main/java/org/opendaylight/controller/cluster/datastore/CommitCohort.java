@@ -60,13 +60,12 @@ abstract class CommitCohort {
     }
 
     @NonNullByDefault
-    CommitCohort(final ShardDataTree dataTree, final DataTreeModification modification,
-            final TransactionIdentifier transactionId, final Exception nextFailure) {
-        this.dataTree = requireNonNull(dataTree);
-        this.modification = requireNonNull(modification);
-        this.transactionId = requireNonNull(transactionId);
-        userCohorts = null;
+    CommitCohort(final ReadWriteShardDataTreeTransaction transaction, final Exception nextFailure) {
+        modification = transaction.getSnapshot();
+        dataTree = transaction.getParent().dataTree;
+        transactionId = transaction.getIdentifier();
         this.nextFailure = requireNonNull(nextFailure);
+        userCohorts = null;
     }
 
     final @NonNull TransactionIdentifier transactionId() {

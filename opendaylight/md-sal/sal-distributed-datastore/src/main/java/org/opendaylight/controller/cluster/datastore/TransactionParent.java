@@ -40,6 +40,13 @@ abstract class TransactionParent {
     abstract CommitCohort createReadyCohort(TransactionIdentifier txId, DataTreeModification mod);
 
     @NonNullByDefault
-    abstract CommitCohort createFailedCohort(TransactionIdentifier txId, DataTreeModification mod,
-            Exception failure);
+    final CommitCohort createFailedCohort(final TransactionIdentifier txId, final DataTreeModification mod,
+            final Exception failure) {
+        final var transaction = new ReadWriteShardDataTreeTransaction(this, txId, mod);
+        transaction.close();
+
+        final var cohort = new SimpleCommitCohort(transaction, failure);
+        dataTree.enqueueReadyTransaction(cohort);
+        return cohort;
+    }
 }
