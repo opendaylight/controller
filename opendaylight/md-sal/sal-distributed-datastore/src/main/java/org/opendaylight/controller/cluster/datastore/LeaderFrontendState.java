@@ -14,6 +14,7 @@ import com.google.common.base.MoreObjects.ToStringHelper;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.opendaylight.controller.cluster.access.commands.CreateLocalHistoryRequest;
 import org.opendaylight.controller.cluster.access.commands.DeadHistoryException;
@@ -86,28 +87,27 @@ abstract sealed class LeaderFrontendState implements Identifiable<ClientIdentifi
         }
 
         @Override
-        @Nullable LocalHistorySuccess handleLocalHistoryRequest(final LocalHistoryRequest<?> request,
+        LocalHistorySuccess handleLocalHistoryRequest(final LocalHistoryRequest<?> request,
                 final RequestEnvelope envelope, final long now) throws RequestException {
             checkRequestSequence(envelope);
 
             try {
-                if (request instanceof CreateLocalHistoryRequest req) {
-                    return handleCreateHistory(req, envelope, now);
-                } else if (request instanceof DestroyLocalHistoryRequest req) {
-                    return handleDestroyHistory(req, envelope, now);
-                } else if (request instanceof PurgeLocalHistoryRequest req) {
-                    return handlePurgeHistory(req, envelope, now);
-                } else {
-                    LOG.warn("{}: rejecting unsupported request {}", persistenceId(), request);
-                    throw new UnsupportedRequestException(request);
-                }
+                return switch (request) {
+                    case CreateLocalHistoryRequest req -> handleCreateHistory(req, envelope, now);
+                    case DestroyLocalHistoryRequest req -> handleDestroyHistory(req, envelope, now);
+                    case PurgeLocalHistoryRequest req -> handlePurgeHistory(req, envelope, now);
+                    default -> {
+                        LOG.warn("{}: rejecting unsupported request {}", persistenceId(), request);
+                        throw new UnsupportedRequestException(request);
+                    }
+                };
             } finally {
                 expectNextRequest();
             }
         }
 
         @Override
-        @Nullable TransactionSuccess<?> handleTransactionRequest(final TransactionRequest<?> request,
+        TransactionSuccess<?> handleTransactionRequest(final TransactionRequest<?> request,
                 final RequestEnvelope envelope, final long now) throws RequestException {
             checkRequestSequence(envelope);
 
@@ -281,9 +281,11 @@ abstract sealed class LeaderFrontendState implements Identifiable<ClientIdentifi
         lastSeenTicks = tree.readTime();
     }
 
+    @NonNullByDefault
     abstract @Nullable LocalHistorySuccess handleLocalHistoryRequest(LocalHistoryRequest<?> request,
             RequestEnvelope envelope, long now) throws RequestException;
 
+    @NonNullByDefault
     abstract @Nullable TransactionSuccess<?> handleTransactionRequest(TransactionRequest<?> request,
             RequestEnvelope envelope, long now) throws RequestException;
 
