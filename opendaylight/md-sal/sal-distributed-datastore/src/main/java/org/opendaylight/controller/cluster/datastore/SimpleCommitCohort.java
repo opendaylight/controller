@@ -8,8 +8,6 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
-import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 
 @NonNullByDefault
 final class SimpleCommitCohort extends CommitCohort {
@@ -17,8 +15,7 @@ final class SimpleCommitCohort extends CommitCohort {
         super(transaction, userCohorts);
     }
 
-    SimpleCommitCohort(final ShardDataTree dataTree, final DataTreeModification modification,
-            final TransactionIdentifier transactionId, final Exception nextFailure) {
-        super(dataTree, modification, transactionId, nextFailure);
+    SimpleCommitCohort(final ReadWriteShardDataTreeTransaction transaction, final Exception nextFailure) {
+        super(transaction, nextFailure);
     }
 }

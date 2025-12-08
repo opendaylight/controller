@@ -39,14 +39,6 @@ final class SimpleTransactionParent extends TransactionParent {
     }
 
     @Override
-    SimpleCommitCohort createFailedCohort(final TransactionIdentifier txId, final DataTreeModification mod,
-            final Exception failure) {
-        final var cohort = new SimpleCommitCohort(dataTree, mod, txId, failure);
-        dataTree.enqueueReadyTransaction(cohort);
-        return cohort;
-    }
-
-    @Override
     SimpleCommitCohort createReadyCohort(final TransactionIdentifier txId, final DataTreeModification mod) {
         final var transaction = new ReadWriteShardDataTreeTransaction(this, txId, mod);
         transaction.close();
