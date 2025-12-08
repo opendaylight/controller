@@ -52,9 +52,8 @@ abstract class CommitCohort {
     private long lastAccess;
 
     @NonNullByDefault
-    CommitCohort(final ShardDataTree dataTree, final ReadWriteShardDataTreeTransaction transaction,
-            final CompositeDataTreeCohort userCohorts) {
-        this(dataTree, transaction.getSnapshot(), transaction.getIdentifier(), userCohorts);
+    CommitCohort(final ReadWriteShardDataTreeTransaction transaction, final CompositeDataTreeCohort userCohorts) {
+        this(transaction.getParent().dataTree, transaction.getSnapshot(), transaction.getIdentifier(), userCohorts);
     }
 
     @NonNullByDefault

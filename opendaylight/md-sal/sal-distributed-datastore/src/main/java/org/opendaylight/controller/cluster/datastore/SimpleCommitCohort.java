@@ -13,9 +13,8 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 
 @NonNullByDefault
 final class SimpleCommitCohort extends CommitCohort {
-    SimpleCommitCohort(final ShardDataTree dataTree, final ReadWriteShardDataTreeTransaction transaction,
-            final CompositeDataTreeCohort userCohorts) {
-        super(dataTree, transaction, userCohorts);
+    SimpleCommitCohort(final ReadWriteShardDataTreeTransaction transaction, final CompositeDataTreeCohort userCohorts) {
+        super(transaction, userCohorts);
     }
 
     SimpleCommitCohort(final ShardDataTree dataTree, final DataTreeModification modification,
