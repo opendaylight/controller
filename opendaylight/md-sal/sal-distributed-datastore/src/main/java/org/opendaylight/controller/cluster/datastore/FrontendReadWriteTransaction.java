@@ -465,6 +465,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         }
     }
 
+    @NonNullByDefault
     private void successfulDirectPreCommit(final RequestEnvelope envelope, final long startTime) {
         switch (state) {
             case Retired retired ->
@@ -489,6 +490,7 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         }
     }
 
+    @NonNullByDefault
     private void successfulCommit(final RequestEnvelope envelope, final long startTime) {
         switch (state) {
             case Retired retired -> {
@@ -503,8 +505,9 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         }
     }
 
-    private TransactionSuccess<?> handleCommitLocalTransaction(final CommitLocalTransactionRequest request,
-            final RequestEnvelope envelope, final long now) throws RequestException {
+    private @Nullable TransactionSuccess<?> handleCommitLocalTransaction(
+            final @NonNull CommitLocalTransactionRequest request, final @NonNull RequestEnvelope envelope,
+            final long now) throws RequestException {
         if (!(state instanceof Sealed sealed)) {
             throw new IllegalStateException(getIdentifier() + " expect to be sealed, is in state " + state);
         }
@@ -528,18 +531,21 @@ final class FrontendReadWriteTransaction extends FrontendTransaction {
         return null;
     }
 
+    @NonNullByDefault
     private ExistsTransactionSuccess handleExistsTransaction(final ExistsTransactionRequest request) {
         final var data = checkOpen().getSnapshot().readNode(request.getPath());
         return recordSuccess(request.getSequence(), new ExistsTransactionSuccess(getIdentifier(), request.getSequence(),
             data.isPresent()));
     }
 
+    @NonNullByDefault
     private ReadTransactionSuccess handleReadTransaction(final ReadTransactionRequest request) {
         final var data = checkOpen().getSnapshot().readNode(request.getPath());
         return recordSuccess(request.getSequence(), new ReadTransactionSuccess(getIdentifier(), request.getSequence(),
             data));
     }
 
+    @NonNullByDefault
     private ModifyTransactionSuccess replyModifySuccess(final long sequence) {
         return recordSuccess(sequence, new ModifyTransactionSuccess(getIdentifier(), sequence));
     }
