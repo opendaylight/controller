@@ -23,8 +23,7 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// Non-sealed for mocking
-abstract class CommitCohort {
+final class CommitCohort {
     public enum State {
         READY,
         CAN_COMMIT_PENDING,
@@ -62,37 +61,37 @@ abstract class CommitCohort {
         userCohorts = null;
     }
 
-    final @NonNull TransactionIdentifier transactionId() {
+    @NonNull TransactionIdentifier transactionId() {
         return transaction.getIdentifier();
     }
 
-    final long lastAccess() {
+    long lastAccess() {
         return lastAccess;
     }
 
-    final void setLastAccess(final long newLastAccess) {
+    void setLastAccess(final long newLastAccess) {
         lastAccess = newLastAccess;
     }
 
-    final State getState() {
+    State getState() {
         return state;
     }
 
-    final boolean isFailed() {
+    boolean isFailed() {
         return state == State.FAILED || nextFailure != null;
     }
 
     // FIXME: This leaks internal state generated in preCommit, should be result of canCommit
-    final DataTreeCandidateTip getCandidate() {
+    DataTreeCandidateTip getCandidate() {
         return candidate;
     }
 
-    final void setNewCandidate(final DataTreeCandidateTip dataTreeCandidate) {
+    void setNewCandidate(final DataTreeCandidateTip dataTreeCandidate) {
         checkState(State.PRE_COMMIT_COMPLETE);
         candidate = verifyNotNull(dataTreeCandidate);
     }
 
-    final DataTreeModification getDataTreeModification() {
+    DataTreeModification getDataTreeModification() {
         return transaction.getSnapshot();
     }
 
@@ -101,7 +100,7 @@ abstract class CommitCohort {
     }
 
     // FIXME: Should return rebased DataTreeCandidateTip
-    final void canCommit(final FutureCallback<Empty> newCallback) {
+    void canCommit(final FutureCallback<Empty> newCallback) {
         if (state == State.CAN_COMMIT_PENDING) {
             return;
         }
@@ -117,16 +116,16 @@ abstract class CommitCohort {
         }
     }
 
-    final void successfulCanCommit() {
+    void successfulCanCommit() {
         switchState(State.CAN_COMMIT_COMPLETE).onSuccess(Empty.value());
     }
 
-    final void failedCanCommit(final Exception cause) {
+    void failedCanCommit(final Exception cause) {
         dataTree().getStats().incrementFailedTransactionsCount();
         switchState(State.FAILED).onFailure(cause);
     }
 
-    final void preCommit(final FutureCallback<DataTreeCandidate> newCallback) {
+    void preCommit(final FutureCallback<DataTreeCandidate> newCallback) {
         checkState(State.CAN_COMMIT_COMPLETE);
         callback = requireNonNull(newCallback);
         state = State.PRE_COMMIT_PENDING;
@@ -138,13 +137,13 @@ abstract class CommitCohort {
         }
     }
 
-    final void successfulPreCommit(final DataTreeCandidateTip dataTreeCandidate) {
+    void successfulPreCommit(final DataTreeCandidateTip dataTreeCandidate) {
         LOG.trace("Transaction {} prepared candidate {}", getDataTreeModification(), dataTreeCandidate);
         candidate = verifyNotNull(dataTreeCandidate);
         switchState(State.PRE_COMMIT_COMPLETE).onSuccess(dataTreeCandidate);
     }
 
-    final void failedPreCommit(final Throwable cause) {
+    void failedPreCommit(final Throwable cause) {
         if (LOG.isTraceEnabled()) {
             LOG.trace("Transaction {} failed to prepare", getDataTreeModification(), cause);
         } else {
@@ -163,7 +162,7 @@ abstract class CommitCohort {
      * @param dataTreeCandidate {@link DataTreeCandidate} under consideration
      * @param futureCallback the callback to invoke on completion, which may be immediate or async.
      */
-    final void userPreCommit(final DataTreeCandidate dataTreeCandidate, final FutureCallback<Empty> futureCallback) {
+    void userPreCommit(final DataTreeCandidate dataTreeCandidate, final FutureCallback<Empty> futureCallback) {
         userCohorts.reset();
 
         final var userCanCommit = userCohorts.canCommit(dataTreeCandidate);
@@ -195,7 +194,7 @@ abstract class CommitCohort {
         }
     }
 
-    final void abort(final FutureCallback<Empty> abortCallback) {
+    void abort(final FutureCallback<Empty> abortCallback) {
         final var dataTree = dataTree();
         if (!dataTree.startAbort(this)) {
             abortCallback.onSuccess(Empty.value());
@@ -241,7 +240,7 @@ abstract class CommitCohort {
         onComplete.run();
     }
 
-    final void failedCommit(final Exception cause) {
+    void failedCommit(final Exception cause) {
         if (LOG.isTraceEnabled()) {
             LOG.trace("Transaction {} failed to commit", getDataTreeModification(), cause);
         } else {
@@ -255,7 +254,7 @@ abstract class CommitCohort {
 
     void commit(final FutureCallback<UnsignedLong> newCallback) {
         checkState(State.PRE_COMMIT_COMPLETE);
-        callback = requireNonNull(newCallback);
+        callback = transaction.getParent().wrapCommitCallback(transaction, requireNonNull(newCallback));
         state = State.COMMIT_PENDING;
 
         if (nextFailure == null) {
@@ -265,7 +264,7 @@ abstract class CommitCohort {
         }
     }
 
-    final void reportFailure(final Exception cause) {
+    void reportFailure(final Exception cause) {
         if (nextFailure == null) {
             nextFailure = requireNonNull(cause);
         } else {
@@ -275,7 +274,7 @@ abstract class CommitCohort {
     }
 
     @Override
-    public final String toString() {
+    public String toString() {
         return MoreObjects.toStringHelper(this).omitNullValues()
             .add("id", transactionId())
             .add("state", state)

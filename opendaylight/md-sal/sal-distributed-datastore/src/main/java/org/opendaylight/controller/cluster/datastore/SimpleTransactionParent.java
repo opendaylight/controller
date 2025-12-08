@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import com.google.common.primitives.UnsignedLong;
+import com.google.common.util.concurrent.FutureCallback;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
@@ -31,20 +33,26 @@ final class SimpleTransactionParent extends TransactionParent {
     }
 
     @Override
-    SimpleCommitCohort finishTransaction(final ReadWriteShardDataTreeTransaction transaction) {
+    CommitCohort finishTransaction(final ReadWriteShardDataTreeTransaction transaction) {
         final var userCohorts = dataTree.finishTransaction(transaction);
-        final var cohort = new SimpleCommitCohort(transaction, userCohorts);
+        final var cohort = new CommitCohort(transaction, userCohorts);
         dataTree.enqueueReadyTransaction(cohort);
         return cohort;
     }
 
     @Override
-    SimpleCommitCohort createReadyCohort(final TransactionIdentifier txId, final DataTreeModification mod) {
+    CommitCohort createReadyCohort(final TransactionIdentifier txId, final DataTreeModification mod) {
         final var transaction = new ReadWriteShardDataTreeTransaction(this, txId, mod);
         transaction.close();
 
-        final var cohort = new SimpleCommitCohort(transaction, dataTree.newUserCohorts(txId));
+        final var cohort = new CommitCohort(transaction, dataTree.newUserCohorts(txId));
         dataTree.enqueueReadyTransaction(cohort);
         return cohort;
+    }
+
+    @Override
+    FutureCallback<UnsignedLong> wrapCommitCallback(final ReadWriteShardDataTreeTransaction transaction,
+            final FutureCallback<UnsignedLong> callback) {
+        return callback;
     }
 }
