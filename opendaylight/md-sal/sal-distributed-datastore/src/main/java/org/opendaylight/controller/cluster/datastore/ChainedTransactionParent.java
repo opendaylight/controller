@@ -115,7 +115,7 @@ final class ChainedTransactionParent extends TransactionParent implements Identi
             final CompositeDataTreeCohort userCohorts) {
         previousTx = transaction;
         LOG.debug("Committing transaction {}", transaction);
-        final var cohort = new ChainedCommitCohort(dataTree, transaction, userCohorts);
+        final var cohort = new ChainedCommitCohort(transaction, userCohorts);
         dataTree.enqueueReadyTransaction(cohort);
         return cohort;
     }
