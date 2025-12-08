@@ -22,9 +22,9 @@ final class ChainedCommitCohort extends CommitCohort {
     private final @NonNull ReadWriteShardDataTreeTransaction transaction;
 
     @NonNullByDefault
-    ChainedCommitCohort(final ShardDataTree dataTree, final ReadWriteShardDataTreeTransaction transaction,
+    ChainedCommitCohort(final ReadWriteShardDataTreeTransaction transaction,
             final CompositeDataTreeCohort userCohorts) {
-        super(dataTree, transaction, userCohorts);
+        super(transaction, userCohorts);
         this.transaction = requireNonNull(transaction);
     }
 
