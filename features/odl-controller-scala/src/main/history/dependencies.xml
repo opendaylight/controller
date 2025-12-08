@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.6.0" name="odl-controller-scala">
     <feature version="0.0.0">
-        <bundle>mvn:org.scala-lang/scala-library/2.13.16</bundle>
+        <bundle>mvn:org.scala-lang/scala-library/2.13.18</bundle>
     </feature>
 </features>
