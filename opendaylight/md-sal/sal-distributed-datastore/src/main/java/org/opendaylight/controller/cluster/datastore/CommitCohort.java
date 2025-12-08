@@ -40,9 +40,7 @@ abstract class CommitCohort {
 
     private static final Logger LOG = LoggerFactory.getLogger(CommitCohort.class);
 
-    private final @NonNull DataTreeModification modification;
-    private final @NonNull ShardDataTree dataTree;
-    private final @NonNull TransactionIdentifier transactionId;
+    private final @NonNull ReadWriteShardDataTreeTransaction transaction;
     private final CompositeDataTreeCohort userCohorts;
 
     private State state = State.READY;
@@ -53,23 +51,19 @@ abstract class CommitCohort {
 
     @NonNullByDefault
     CommitCohort(final ReadWriteShardDataTreeTransaction transaction, final CompositeDataTreeCohort userCohorts) {
-        modification = transaction.getSnapshot();
-        dataTree = transaction.getParent().dataTree;
-        transactionId = transaction.getIdentifier();
+        this.transaction = requireNonNull(transaction);
         this.userCohorts = requireNonNull(userCohorts);
     }
 
     @NonNullByDefault
     CommitCohort(final ReadWriteShardDataTreeTransaction transaction, final Exception nextFailure) {
-        modification = transaction.getSnapshot();
-        dataTree = transaction.getParent().dataTree;
-        transactionId = transaction.getIdentifier();
+        this.transaction = requireNonNull(transaction);
         this.nextFailure = requireNonNull(nextFailure);
         userCohorts = null;
     }
 
     final @NonNull TransactionIdentifier transactionId() {
-        return transactionId;
+        return transaction.getIdentifier();
     }
 
     final long lastAccess() {
@@ -88,8 +82,7 @@ abstract class CommitCohort {
         return state == State.FAILED || nextFailure != null;
     }
 
-    // FIXME: This leaks internal state generated in preCommit,
-    // should be result of canCommit
+    // FIXME: This leaks internal state generated in preCommit, should be result of canCommit
     final DataTreeCandidateTip getCandidate() {
         return candidate;
     }
@@ -100,7 +93,11 @@ abstract class CommitCohort {
     }
 
     final DataTreeModification getDataTreeModification() {
-        return modification;
+        return transaction.getSnapshot();
+    }
+
+    private @NonNull ShardDataTree dataTree() {
+        return transaction.getParent().dataTree;
     }
 
     // FIXME: Should return rebased DataTreeCandidateTip
@@ -114,7 +111,7 @@ abstract class CommitCohort {
         state = State.CAN_COMMIT_PENDING;
 
         if (nextFailure == null) {
-            dataTree.startCanCommit(this);
+            dataTree().startCanCommit(this);
         } else {
             failedCanCommit(nextFailure);
         }
@@ -125,7 +122,7 @@ abstract class CommitCohort {
     }
 
     final void failedCanCommit(final Exception cause) {
-        dataTree.getStats().incrementFailedTransactionsCount();
+        dataTree().getStats().incrementFailedTransactionsCount();
         switchState(State.FAILED).onFailure(cause);
     }
 
@@ -135,27 +132,27 @@ abstract class CommitCohort {
         state = State.PRE_COMMIT_PENDING;
 
         if (nextFailure == null) {
-            dataTree.startPreCommit(this);
+            dataTree().startPreCommit(this);
         } else {
             failedPreCommit(nextFailure);
         }
     }
 
     final void successfulPreCommit(final DataTreeCandidateTip dataTreeCandidate) {
-        LOG.trace("Transaction {} prepared candidate {}", modification, dataTreeCandidate);
+        LOG.trace("Transaction {} prepared candidate {}", getDataTreeModification(), dataTreeCandidate);
         candidate = verifyNotNull(dataTreeCandidate);
         switchState(State.PRE_COMMIT_COMPLETE).onSuccess(dataTreeCandidate);
     }
 
     final void failedPreCommit(final Throwable cause) {
         if (LOG.isTraceEnabled()) {
-            LOG.trace("Transaction {} failed to prepare", modification, cause);
+            LOG.trace("Transaction {} failed to prepare", getDataTreeModification(), cause);
         } else {
-            LOG.error("Transaction {} failed to prepare", transactionId, cause);
+            LOG.error("Transaction {} failed to prepare", transactionId(), cause);
         }
 
         userCohorts.abort();
-        dataTree.getStats().incrementFailedTransactionsCount();
+        dataTree().getStats().incrementFailedTransactionsCount();
         switchState(State.FAILED).onFailure(cause);
     }
 
@@ -199,6 +196,7 @@ abstract class CommitCohort {
     }
 
     final void abort(final FutureCallback<Empty> abortCallback) {
+        final var dataTree = dataTree();
         if (!dataTree.startAbort(this)) {
             abortCallback.onSuccess(Empty.value());
             return;
@@ -237,8 +235,7 @@ abstract class CommitCohort {
     }
 
     private void finishSuccessfulCommit(final UnsignedLong journalIndex, final Runnable onComplete) {
-        final var stats = dataTree.getStats();
-        stats.incrementCommittedTransactionCount();
+        dataTree().getStats().incrementCommittedTransactionCount();
 
         switchState(State.COMMITTED).onSuccess(journalIndex);
         onComplete.run();
@@ -246,13 +243,13 @@ abstract class CommitCohort {
 
     final void failedCommit(final Exception cause) {
         if (LOG.isTraceEnabled()) {
-            LOG.trace("Transaction {} failed to commit", modification, cause);
+            LOG.trace("Transaction {} failed to commit", getDataTreeModification(), cause);
         } else {
             LOG.error("Transaction failed to commit", cause);
         }
 
         userCohorts.abort();
-        dataTree.getStats().incrementFailedTransactionsCount();
+        dataTree().getStats().incrementFailedTransactionsCount();
         switchState(State.FAILED).onFailure(cause);
     }
 
@@ -262,7 +259,7 @@ abstract class CommitCohort {
         state = State.COMMIT_PENDING;
 
         if (nextFailure == null) {
-            dataTree.startCommit(this, candidate);
+            dataTree().startCommit(this, candidate);
         } else {
             failedCommit(nextFailure);
         }
@@ -273,14 +270,14 @@ abstract class CommitCohort {
             nextFailure = requireNonNull(cause);
         } else {
             // FIXME: add suppressed exception
-            LOG.debug("Transaction {} already has a set failure, not updating it", transactionId, cause);
+            LOG.debug("Transaction {} already has a set failure, not updating it", transactionId(), cause);
         }
     }
 
     @Override
     public final String toString() {
         return MoreObjects.toStringHelper(this).omitNullValues()
-            .add("id", transactionId)
+            .add("id", transactionId())
             .add("state", state)
             .add("nextFailure", nextFailure)
             .toString();
@@ -289,7 +286,7 @@ abstract class CommitCohort {
     private void checkState(final State expected) {
         if (state != expected) {
             throw new IllegalStateException("State %s does not match expected state %s for %s".formatted(
-                state, expected, transactionId));
+                state, expected, transactionId()));
         }
     }
 
@@ -297,7 +294,7 @@ abstract class CommitCohort {
         @SuppressWarnings("unchecked")
         final var ret = (FutureCallback<T>) callback;
         callback = null;
-        LOG.debug("Transaction {} changing state from {} to {}", transactionId, state, newState);
+        LOG.debug("Transaction {} changing state from {} to {}", transactionId(), state, newState);
         state = newState;
         return ret;
     }
