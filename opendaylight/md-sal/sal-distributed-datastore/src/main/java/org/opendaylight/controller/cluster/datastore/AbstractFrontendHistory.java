@@ -51,7 +51,6 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
 
     private final Map<TransactionIdentifier, FrontendTransaction> transactions = new HashMap<>();
     private final @NonNull MutableUnsignedLongSet purgedTransactions;
-    private final @NonNull LocalHistoryIdentifier identifier;
     private final @NonNull TransactionParent parent;
     private final @NonNull String persistenceId;
 
@@ -61,11 +60,9 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
      */
     private Map<UnsignedLong, Boolean> closedTransactions;
 
-    AbstractFrontendHistory(final String persistenceId, final LocalHistoryIdentifier identifier,
-            final TransactionParent parent, final Map<UnsignedLong, Boolean> closedTransactions,
-            final MutableUnsignedLongSet purgedTransactions) {
+    AbstractFrontendHistory(final String persistenceId, final TransactionParent parent,
+            final Map<UnsignedLong, Boolean> closedTransactions, final MutableUnsignedLongSet purgedTransactions) {
         this.persistenceId = requireNonNull(persistenceId);
-        this.identifier = requireNonNull(identifier);
         this.parent = requireNonNull(parent);
         this.closedTransactions = requireNonNull(closedTransactions);
         this.purgedTransactions = requireNonNull(purgedTransactions);
@@ -73,7 +70,7 @@ abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdent
 
     @Override
     public final LocalHistoryIdentifier getIdentifier() {
-        return identifier;
+        return parent.historyId;
     }
 
     final String persistenceId() {
