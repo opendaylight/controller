@@ -7,9 +7,6 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import static org.opendaylight.controller.cluster.raft.MessageCollectorActor.expectMatching;
-
-import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
@@ -44,9 +41,9 @@ class ReplicationWithSlicedPayloadIntegrationTest extends AbstractRaftActorInteg
         leaderConfigParams = newLeaderConfigParams();
         leaderActor = newTestRaftActor(leaderId, peerAddresses, leaderConfigParams);
 
-        follower1CollectorActor = follower1Actor.underlyingActor().collectorActor();
-        follower2CollectorActor = follower2Actor.underlyingActor().collectorActor();
-        leaderCollectorActor = leaderActor.underlyingActor().collectorActor();
+        follower1Collector = follower1Actor.underlyingActor().collector();
+        follower2Collector = follower2Actor.underlyingActor().collector();
+        leaderCollector = leaderActor.underlyingActor().collector();
 
         leaderContext = leaderActor.underlyingActor().getRaftActorContext();
 
@@ -62,17 +59,17 @@ class ReplicationWithSlicedPayloadIntegrationTest extends AbstractRaftActorInteg
 
         MockCommand smallPayload = sendPayloadData(leaderActor, "normal", maximumMessageSliceSize - 1);
 
-        final List<ApplyState> leaderApplyState = expectMatching(leaderCollectorActor, ApplyState.class, 2);
-        verifyApplyState(leaderApplyState.get(0), leaderCollectorActor,
+        final var leaderApplyState = leaderCollector.expectMatching(ApplyState.class, 2);
+        verifyApplyState(leaderApplyState.get(0), leaderCollector.actor(),
                 largePayload.toString(), currentTerm, 0, largePayload);
-        verifyApplyState(leaderApplyState.get(1), leaderCollectorActor,
+        verifyApplyState(leaderApplyState.get(1), leaderCollector.actor(),
                 smallPayload.toString(), currentTerm, 1, smallPayload);
 
-        final List<ApplyState> follower1ApplyState = expectMatching(follower1CollectorActor, ApplyState.class, 2);
+        final var follower1ApplyState = follower1Collector.expectMatching(ApplyState.class, 2);
         verifyApplyState(follower1ApplyState.get(0), null, null, currentTerm, 0, largePayload);
         verifyApplyState(follower1ApplyState.get(1), null, null, currentTerm, 1, smallPayload);
 
-        final List<ApplyState> follower2ApplyState = expectMatching(follower2CollectorActor, ApplyState.class, 2);
+        final var follower2ApplyState = follower2Collector.expectMatching(ApplyState.class, 2);
         verifyApplyState(follower2ApplyState.get(0), null, null, currentTerm, 0, largePayload);
         verifyApplyState(follower2ApplyState.get(1), null, null, currentTerm, 1, smallPayload);
 

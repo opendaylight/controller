@@ -9,11 +9,6 @@ package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static org.opendaylight.controller.cluster.raft.MessageCollectorActor.assertNoneMatching;
-import static org.opendaylight.controller.cluster.raft.MessageCollectorActor.clearMessages;
-import static org.opendaylight.controller.cluster.raft.MessageCollectorActor.expectFirstMatching;
-import static org.opendaylight.controller.cluster.raft.MessageCollectorActor.expectMatching;
-import static org.opendaylight.controller.cluster.raft.MessageCollectorActor.getAllMatching;
 import static org.opendaylight.controller.cluster.raft.RaftActorTestKit.awaitLastApplied;
 
 import com.google.common.collect.ImmutableMap;
@@ -36,8 +31,8 @@ import org.opendaylight.raft.api.RaftRole;
  * @author Thomas Pantelis
  */
 class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
-    private ActorRef follower1NotifierActor;
-    private ActorRef leaderNotifierActor;
+    private MessageCollector follower1Notifier;
+    private MessageCollector leaderNotifier;
 
     /**
      * Isolates the leader after all initial payload entries have been committed and applied on all nodes. While
@@ -70,7 +65,7 @@ class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         // Wait for the isolated leader to send AppendEntries to follower1 with the entry at index 2. Note the message
         // is collected but not forwarded to the follower RaftActor.
 
-        AppendEntries appendEntries = expectFirstMatching(follower1CollectorActor, AppendEntries.class);
+        AppendEntries appendEntries = follower1Collector.expectFirstMatching(AppendEntries.class);
         assertEquals("getTerm", currentTerm, appendEntries.getTerm());
         assertEquals("getLeaderId", leaderId, appendEntries.getLeaderId());
         assertEquals("getEntries().size()", 1, appendEntries.getEntries().size());
@@ -78,7 +73,7 @@ class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
 
         // The leader should transition to IsolatedLeader.
 
-        expectFirstMatching(leaderNotifierActor, RoleChanged.class, rc -> rc.newRole().equals(RaftRole.IsolatedLeader));
+        leaderNotifier.expectFirstMatching(RoleChanged.class, rc -> rc.newRole().equals(RaftRole.IsolatedLeader));
 
         forceElectionOnFollower1();
 
@@ -105,7 +100,7 @@ class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         // Previous leader should switch to follower b/c it will receive either an AppendEntries or AppendEntriesReply
         // with a higher term.
 
-        expectFirstMatching(leaderNotifierActor, RoleChanged.class, rc -> rc.newRole().equals(RaftRole.Follower));
+        leaderNotifier.expectFirstMatching(RoleChanged.class, rc -> rc.newRole().equals(RaftRole.Follower));
 
         // The previous leader has a conflicting log entry at index 2 with a different term which should get
         // replaced by the new leader's index 1 entry.
@@ -155,11 +150,11 @@ class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         // Wait for the isolated leader to send AppendEntries to the followers with the new entry with index 1. This
         // message is forwarded to the followers.
 
-        expectFirstMatching(follower1CollectorActor, AppendEntries.class, ae ->
+        follower1Collector.expectFirstMatching(AppendEntries.class, ae ->
                 ae.getEntries().size() == 1 && ae.getEntries().getFirst().index() == 1
                         && ae.getEntries().getFirst().command().equals(payload1));
 
-        expectFirstMatching(follower2CollectorActor, AppendEntries.class, ae ->
+        follower2Collector.expectFirstMatching(AppendEntries.class, ae ->
                 ae.getEntries().size() == 1 && ae.getEntries().getFirst().index() == 1
                         && ae.getEntries().getFirst().command().equals(payload1));
 
@@ -176,7 +171,7 @@ class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         // Wait for the isolated leader to send AppendEntries to follower1 with the entry at index 2. Note the message
         // is collected but not forwarded to the follower RaftActor.
 
-        AppendEntries appendEntries = expectFirstMatching(follower1CollectorActor, AppendEntries.class);
+        AppendEntries appendEntries = follower1Collector.expectFirstMatching(AppendEntries.class);
         assertEquals("getTerm", currentTerm, appendEntries.getTerm());
         assertEquals("getLeaderId", leaderId, appendEntries.getLeaderId());
         assertEquals("getEntries().size()", 1, appendEntries.getEntries().size());
@@ -184,7 +179,7 @@ class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
 
         // The leader should transition to IsolatedLeader.
 
-        expectFirstMatching(leaderNotifierActor, RoleChanged.class, rc -> rc.newRole().equals(RaftRole.IsolatedLeader));
+        leaderNotifier.expectFirstMatching(RoleChanged.class, rc -> rc.newRole().equals(RaftRole.IsolatedLeader));
 
         forceElectionOnFollower1();
 
@@ -212,7 +207,7 @@ class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         // Previous leader should switch to follower b/c it will receive either an AppendEntries or AppendEntriesReply
         // with a higher term.
 
-        expectFirstMatching(leaderNotifierActor, RoleChanged.class, rc -> rc.newRole().equals(RaftRole.Follower));
+        leaderNotifier.expectFirstMatching(RoleChanged.class, rc -> rc.newRole().equals(RaftRole.Follower));
 
         // The previous leader has a conflicting log entry at index 2 with a different term which should get
         // replaced by the new leader's entry.
@@ -231,7 +226,7 @@ class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
 
         // Ensure the prior leader didn't apply its conflicting entry with index 2, term 1.
 
-        final var applyState = getAllMatching(leaderCollectorActor, ApplyState.class);
+        final var applyState = leaderCollector.getAllMatching(ApplyState.class);
         for (var as : applyState) {
             if (as.entry().index() == 2 && as.entry().term() == 1) {
                 fail("Got unexpected ApplyState: " + as);
@@ -240,7 +235,7 @@ class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
 
         // The prior leader should not have needed a snapshot installed in order to get it synced.
 
-        assertNoneMatching(leaderCollectorActor, InstallSnapshot.class);
+        leaderCollector.assertNoneMatching(InstallSnapshot.class);
 
         testLog.info("testLeaderIsolationWithPriorUncommittedEntryAndOneConflictingEntry ending");
     }
@@ -276,11 +271,11 @@ class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         // Wait for the isolated leader to send AppendEntries to the followers with the new entry with index 1. This
         // message is forwarded to the followers.
 
-        expectFirstMatching(follower1CollectorActor, AppendEntries.class, ae ->
+        follower1Collector.expectFirstMatching(AppendEntries.class, ae ->
                 ae.getEntries().size() == 1 && ae.getEntries().getFirst().index() == 1
                         && ae.getEntries().getFirst().command().equals(payload1));
 
-        expectFirstMatching(follower2CollectorActor, AppendEntries.class, ae ->
+        follower2Collector.expectFirstMatching(AppendEntries.class, ae ->
                 ae.getEntries().size() == 1 && ae.getEntries().getFirst().index() == 1
                         && ae.getEntries().getFirst().command().equals(payload1));
 
@@ -299,7 +294,7 @@ class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         // Wait for the isolated leader to send AppendEntries to follower1 for each new entry. Note the messages
         // are collected but not forwarded to the follower RaftActor.
 
-        expectFirstMatching(follower1CollectorActor, AppendEntries.class, ae -> {
+        follower1Collector.expectFirstMatching(AppendEntries.class, ae -> {
             for (var entry : ae.getEntries()) {
                 if (entry.index() == 4) {
                     return true;
@@ -310,7 +305,7 @@ class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
 
         // The leader should transition to IsolatedLeader.
 
-        expectFirstMatching(leaderNotifierActor, RoleChanged.class, rc -> rc.newRole().equals(RaftRole.IsolatedLeader));
+        leaderNotifier.expectFirstMatching(RoleChanged.class, rc -> rc.newRole().equals(RaftRole.IsolatedLeader));
 
         forceElectionOnFollower1();
 
@@ -340,7 +335,7 @@ class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         // Previous leader should switch to follower b/c it will receive either an AppendEntries or AppendEntriesReply
         // with a higher term.
 
-        expectFirstMatching(leaderNotifierActor, RoleChanged.class, rc -> rc.newRole().equals(RaftRole.Follower));
+        leaderNotifier.expectFirstMatching(RoleChanged.class, rc -> rc.newRole().equals(RaftRole.Follower));
 
         // The previous leader has conflicting log entries starting at index 2 with different terms which should get
         // replaced by the new leader's entries.
@@ -360,7 +355,7 @@ class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
 
         // Ensure the prior leader didn't apply any of its conflicting entries with term 1.
 
-        final var applyState = getAllMatching(leaderCollectorActor, ApplyState.class);
+        final var applyState = leaderCollector.getAllMatching(ApplyState.class);
         for (var as : applyState) {
             if (as.entry().term() == 1) {
                 fail("Got unexpected ApplyState: " + as);
@@ -369,7 +364,7 @@ class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
 
         // The prior leader should not have needed a snapshot installed in order to get it synced.
 
-        assertNoneMatching(leaderCollectorActor, InstallSnapshot.class);
+        leaderCollector.assertNoneMatching(InstallSnapshot.class);
 
         testLog.info("testLeaderIsolationWithPriorUncommittedEntryAndMultipleConflictingEntries ending");
     }
@@ -377,8 +372,8 @@ class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
     private void removeIsolation() {
         testLog.info("Removing isolation");
 
-        clearMessages(leaderNotifierActor);
-        clearMessages(leaderCollectorActor);
+        leaderNotifier.clearMessages();
+        leaderCollector.clearMessages();
 
         leaderActor.underlyingActor().stopDropMessages(AppendEntries.class);
         leaderActor.underlyingActor().stopDropMessages(RequestVote.class);
@@ -393,7 +388,7 @@ class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
 
         follower1Actor.tell(TimeoutNow.INSTANCE, ActorRef.noSender());
 
-        expectFirstMatching(follower1NotifierActor, RoleChanged.class, rc -> rc.newRole().equals(RaftRole.Leader));
+        follower1Notifier.expectFirstMatching(RoleChanged.class, rc -> rc.newRole().equals(RaftRole.Leader));
 
         currentTerm = follower1Context.currentTerm();
     }
@@ -411,23 +406,22 @@ class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         follower2Actor.underlyingActor().startDropMessages(AppendEntries.class,
             ae -> ae.getLeaderId().equals(leaderId));
 
-        clearMessages(follower1CollectorActor);
-        clearMessages(follower1NotifierActor);
-        clearMessages(leaderNotifierActor);
+        follower1Collector.clearMessages();
+        follower1Notifier.clearMessages();
+        leaderNotifier.clearMessages();
     }
 
     private void createRaftActors() {
         testLog.info("createRaftActors starting");
 
-        follower1NotifierActor = factory.createActor(MessageCollectorActor.props(),
-                factory.generateActorId(follower1Id + "-notifier"));
+        follower1Notifier = MessageCollector.ofPrefix(factory, follower1Id + "-notifier");
 
         DefaultConfigParamsImpl followerConfigParams = new DefaultConfigParamsImpl();
         followerConfigParams.setHeartBeatInterval(Duration.ofMillis(100));
         followerConfigParams.setElectionTimeoutFactor(1000);
         follower1Actor = newTestRaftActor(follower1Id, TestRaftActor.newBuilder()
             .peerAddresses(ImmutableMap.of(leaderId, testActorPath(leaderId), follower2Id, testActorPath(follower2Id)))
-                .config(followerConfigParams).roleChangeNotifier(follower1NotifierActor));
+                .config(followerConfigParams).roleChangeNotifier(follower1Notifier.actor()));
 
         follower2Actor = newTestRaftActor(follower2Id, ImmutableMap.of(leaderId, testActorPath(leaderId),
                 follower1Id, testActorPath(follower1Id)), followerConfigParams);
@@ -439,24 +433,23 @@ class IsolationScenarioTest extends AbstractRaftActorIntegrationTest {
         leaderConfigParams = newLeaderConfigParams();
         leaderConfigParams.setIsolatedLeaderCheckInterval(Duration.ofMillis(500));
 
-        leaderNotifierActor = factory.createActor(MessageCollectorActor.props(),
-                factory.generateActorId(leaderId + "-notifier"));
+        leaderNotifier = MessageCollector.ofPrefix(factory, leaderId + "-notifier");
 
         leaderActor = newTestRaftActor(leaderId, TestRaftActor.newBuilder()
-            .peerAddresses(peerAddresses).config(leaderConfigParams).roleChangeNotifier(leaderNotifierActor));
+            .peerAddresses(peerAddresses).config(leaderConfigParams).roleChangeNotifier(leaderNotifier.actor()));
 
-        follower1CollectorActor = follower1Actor.underlyingActor().collectorActor();
-        follower2CollectorActor = follower2Actor.underlyingActor().collectorActor();
-        leaderCollectorActor = leaderActor.underlyingActor().collectorActor();
+        follower1Collector = follower1Actor.underlyingActor().collector();
+        follower2Collector = follower2Actor.underlyingActor().collector();
+        leaderCollector = leaderActor.underlyingActor().collector();
 
         leaderActor.tell(TimeoutNow.INSTANCE, ActorRef.noSender());
         waitUntilLeader(leaderActor);
 
-        expectMatching(leaderCollectorActor, AppendEntriesReply.class, 2);
+        leaderCollector.expectMatching(AppendEntriesReply.class, 2);
 
-        clearMessages(leaderCollectorActor);
-        clearMessages(follower1CollectorActor);
-        clearMessages(follower2CollectorActor);
+        leaderCollector.clearMessages();
+        follower1Collector.clearMessages();
+        follower2Collector.clearMessages();
 
         leaderContext = leaderActor.underlyingActor().getRaftActorContext();
         currentTerm = leaderContext.currentTerm();

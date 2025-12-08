@@ -116,6 +116,7 @@ import org.opendaylight.controller.cluster.datastore.utils.PrimaryShardInfoFutur
 import org.opendaylight.controller.cluster.notifications.DefaultLeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListener;
 import org.opendaylight.controller.cluster.notifications.RoleChangeNotification;
+import org.opendaylight.controller.cluster.raft.MessageCollector;
 import org.opendaylight.controller.cluster.raft.MessageCollectorActor;
 import org.opendaylight.controller.cluster.raft.TestActorFactory;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
@@ -2279,7 +2280,7 @@ public class ShardManagerTest extends AbstractClusterRefActorTest {
         };
     }
 
-    private static class MockRespondActor extends MessageCollectorActor {
+    private static final class MockRespondActor extends MessageCollector.Actor {
         static final String CLEAR_RESPONSE = "clear-response";
 
         private Object responseMsg;

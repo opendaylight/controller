@@ -14,12 +14,11 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.testkit.TestActorRef;
 import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.ForwardMessageToBehaviorActor;
-import org.opendaylight.controller.cluster.raft.MessageCollectorActor;
+import org.opendaylight.controller.cluster.raft.MessageCollector;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader.SendHeartBeat;
 
@@ -39,8 +38,8 @@ abstract class AbstractLeaderTest<T extends AbstractLeader> extends AbstractRaft
 
         TestActorRef<ForwardMessageToBehaviorActor> leaderActor =
                 actorFactory.createTestActor(ForwardMessageToBehaviorActor.props(), leaderActorId);
-        final ActorRef follower1Actor = actorFactory.createActor(MessageCollectorActor.props(), follower1ActorId);
-        final ActorRef follower2Actor = actorFactory.createActor(MessageCollectorActor.props(), follower2ActorId);
+        final var follower1Actor = MessageCollector.of(actorFactory, follower1ActorId);
+        final var follower2Actor = MessageCollector.of(actorFactory, follower2ActorId);
 
         final var leaderActorContext = new MockRaftActorContext(leaderActorId, stateDir, getSystem(), leaderActor);
 
@@ -62,7 +61,7 @@ abstract class AbstractLeaderTest<T extends AbstractLeader> extends AbstractRaft
 
         Uninterruptibles.sleepUninterruptibly(1, TimeUnit.SECONDS);
 
-        List<SendHeartBeat> allMessages = MessageCollectorActor.getAllMatching(leaderActor, SendHeartBeat.class);
+        List<SendHeartBeat> allMessages = MessageCollector.Actor.getAllMatching(leaderActor, SendHeartBeat.class);
 
         // Need more than 1 heartbeat to be delivered because we waited for 1 second with heartbeat interval 200ms
         assertThat(allMessages.size()).isGreaterThan(1);
