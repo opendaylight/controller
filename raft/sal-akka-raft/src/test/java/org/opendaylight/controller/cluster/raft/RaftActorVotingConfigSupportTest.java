@@ -104,7 +104,7 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
             actorFactory.generateActorId(FOLLOWER_ID));
 
     private TestActorRef<MockNewFollowerRaftActor> newFollowerRaftActor;
-    private ActorRef newFollowerCollectorActor;
+    private MessageCollector newFollowerCollector;
     private RaftActorContext newFollowerActorContext;
 
     private final TestKit testKit = new TestKit(getSystem());

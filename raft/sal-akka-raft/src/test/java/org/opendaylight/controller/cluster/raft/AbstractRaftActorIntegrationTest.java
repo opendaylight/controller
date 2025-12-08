@@ -208,19 +208,19 @@ abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest {
     protected String leaderId = factory.generateActorId("leader");
     protected DefaultConfigParamsImpl leaderConfigParams;
     protected TestActorRef<TestRaftActor> leaderActor;
-    protected ActorRef leaderCollectorActor;
+    protected MessageCollector leaderCollector;
     protected RaftActorContext leaderContext;
     protected RaftActorBehavior leader;
 
     protected String follower1Id = factory.generateActorId("follower");
     protected TestActorRef<TestRaftActor> follower1Actor;
-    protected ActorRef follower1CollectorActor;
+    protected MessageCollector follower1Collector;
     protected RaftActorBehavior follower1;
     protected RaftActorContext follower1Context;
 
     protected String follower2Id = factory.generateActorId("follower");
     protected TestActorRef<TestRaftActor> follower2Actor;
-    protected ActorRef follower2CollectorActor;
+    protected MessageCollector follower2Collector;
     protected RaftActorBehavior follower2;
     protected RaftActorContext follower2Context;
 

@@ -58,7 +58,7 @@ class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrationTest
     private ActorRef follower2NotifierActor;
     private ActorRef follower3NotifierActor;
     private TestActorRef<TestRaftActor> follower3Actor;
-    private ActorRef follower3CollectorActor;
+    private MessageCollector follower3Collector;
     private ActorRef requestLeadershipResultCollectorActor;
 
     @Test
@@ -137,9 +137,9 @@ class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrationTest
 
         sendPayloadData(leaderActor, "zero");
 
-        expectFirstMatching(leaderCollectorActor, ApplyState.class);
-        expectFirstMatching(follower1CollectorActor, ApplyState.class);
-        expectFirstMatching(follower3CollectorActor, ApplyState.class);
+        leaderCollector.expectFirstMatching(ApplyState.class);
+        follower1Collector.expectFirstMatching(ApplyState.class);
+        follower3Collector.expectFirstMatching(ApplyState.class);
 
         testLog.info("sendPayloadWithFollower2Lagging ending");
     }
@@ -171,21 +171,21 @@ class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrationTest
         RaftStorage.saveSnapshot(follower3Id, follower3Dir, SnapshotFileFormat.latest(), CompressionType.LZ4,
             raftSnapshot, EntryInfo.of(-1, -1), storageSnapshot, Instant.now());
 
-        follower1NotifierActor = factory.createActor(MessageCollectorActor.props(),
+        follower1NotifierActor = factory.createActor(MessageCollector.Actor.props(),
                 factory.generateActorId(follower1Id + "-notifier"));
         follower1Actor = newTestRaftActor(follower1Id, TestRaftActor.newBuilder().peerAddresses(
                 Map.of(leaderId, testActorPath(leaderId), follower2Id, testActorPath(follower2Id),
                         follower3Id, testActorPath(follower3Id)))
                 .config(newFollowerConfigParams()).roleChangeNotifier(follower1NotifierActor));
 
-        follower2NotifierActor = factory.createActor(MessageCollectorActor.props(),
+        follower2NotifierActor = factory.createActor(MessageCollector.Actor.props(),
                 factory.generateActorId(follower2Id + "-notifier"));
         follower2Actor = newTestRaftActor(follower2Id,TestRaftActor.newBuilder().peerAddresses(
                 Map.of(leaderId, testActorPath(leaderId), follower1Id, follower1Actor.path().toString(),
                         follower3Id, testActorPath(follower3Id)))
                 .config(newFollowerConfigParams()).roleChangeNotifier(follower2NotifierActor));
 
-        follower3NotifierActor = factory.createActor(MessageCollectorActor.props(),
+        follower3NotifierActor = factory.createActor(MessageCollector.Actor.props(),
                 factory.generateActorId(follower3Id + "-notifier"));
         follower3Actor = newTestRaftActor(follower3Id,TestRaftActor.newBuilder().peerAddresses(
                 Map.of(leaderId, testActorPath(leaderId), follower1Id, follower1Actor.path().toString(),
@@ -199,7 +199,7 @@ class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrationTest
 
         leaderConfigParams = newLeaderConfigParams();
         leaderConfigParams.setElectionTimeoutFactor(3);
-        leaderNotifierActor = factory.createActor(MessageCollectorActor.props(),
+        leaderNotifierActor = factory.createActor(MessageCollector.Actor.props(),
                 factory.generateActorId(leaderId + "-notifier"));
         leaderActor = newTestRaftActor(leaderId, TestRaftActor.newBuilder().peerAddresses(peerAddresses)
                 .config(leaderConfigParams).roleChangeNotifier(leaderNotifierActor));

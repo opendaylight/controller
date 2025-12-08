@@ -14,7 +14,7 @@ import java.util.List;
 import org.apache.pekko.actor.Props;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 
-public class ForwardMessageToBehaviorActor extends MessageCollectorActor {
+public class ForwardMessageToBehaviorActor extends MessageCollector.Actor {
     private final List<RaftActorBehavior> behaviorChanges = new ArrayList<>();
 
     private volatile RaftActorBehavior behavior;

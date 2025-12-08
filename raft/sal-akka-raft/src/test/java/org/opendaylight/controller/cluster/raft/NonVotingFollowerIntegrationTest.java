@@ -65,7 +65,7 @@ class NonVotingFollowerIntegrationTest extends AbstractRaftActorIntegrationTest 
         expSnapshotState.add(sendPayloadData(leaderActor, "one"));
         expSnapshotState.add(sendPayloadData(leaderActor, "two"));
 
-        MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyState.class, 3);
+        leaderCollector.expectMatching(ApplyState.class, 3);
         MessageCollectorActor.expectMatching(follower1CollectorActor, ApplyState.class, 3);
 
         var leaderLog = leaderContext.getReplicatedLog();
