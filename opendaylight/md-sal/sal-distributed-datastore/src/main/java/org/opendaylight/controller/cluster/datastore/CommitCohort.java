@@ -44,8 +44,8 @@ public abstract class CommitCohort {
 
     private static final Logger LOG = LoggerFactory.getLogger(CommitCohort.class);
 
-    private final DataTreeModification modification;
-    private final ShardDataTree dataTree;
+    private final @NonNull DataTreeModification modification;
+    private final @NonNull ShardDataTree dataTree;
     private final @NonNull TransactionIdentifier transactionId;
     private final CompositeDataTreeCohort userCohorts;
     private final @Nullable SortedSet<String> participatingShardNames;
