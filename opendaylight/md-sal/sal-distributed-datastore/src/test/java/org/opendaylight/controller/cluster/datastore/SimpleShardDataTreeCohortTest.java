@@ -59,7 +59,7 @@ public class SimpleShardDataTreeCohortTest extends AbstractTest {
         doReturn(null).when(mockUserCohorts).abort();
         doReturn(stats).when(mockShardDataTree).getStats();
 
-        final var parent = new SimpleTransactionParent(mockShardDataTree);
+        final var parent = new SimpleTransactionParent(mockShardDataTree, nextHistoryId());
         final var transaction = new ReadWriteShardDataTreeTransaction(parent, nextTransactionId(), mockModification);
         transaction.close();
 

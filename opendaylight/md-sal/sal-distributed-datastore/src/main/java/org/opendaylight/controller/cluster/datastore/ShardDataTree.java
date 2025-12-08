@@ -118,7 +118,6 @@ public class ShardDataTree {
      */
     private static final int MAX_TRANSACTION_BATCH = 100;
 
-    private final @NonNull SimpleTransactionParent unorderedParent = new SimpleTransactionParent(this);
     private final Map<LocalHistoryIdentifier, ChainedTransactionParent> transactionChains = new HashMap<>();
     private final DataTreeCohortActorRegistry cohortRegistry = new DataTreeCohortActorRegistry();
     private final Deque<CommitCohort> pendingTransactions = new ArrayDeque<>();
@@ -559,10 +558,6 @@ public class ShardDataTree {
         }
     }
 
-    final @NonNull SimpleTransactionParent unorderedParent() {
-        return unorderedParent;
-    }
-
     /**
      * Create a transaction chain for specified history. Unlike {@link #ensureChainedParent(LocalHistoryIdentifier)},
      * this method is used for re-establishing state when we are taking over
@@ -573,7 +568,7 @@ public class ShardDataTree {
      */
     final ChainedTransactionParent recreateChainedParent(final LocalHistoryIdentifier historyId,
             final boolean closed) {
-        final var ret = new ChainedTransactionParent(historyId, this);
+        final var ret = new ChainedTransactionParent(this, historyId);
         final var existing = transactionChains.putIfAbsent(historyId, ret);
         checkState(existing == null, "Attempted to recreate chain %s, but %s already exists", historyId, existing);
         return ret;
@@ -584,7 +579,7 @@ public class ShardDataTree {
             final @Nullable Runnable callback) {
         var parent = transactionChains.get(historyId);
         if (parent == null) {
-            parent = new ChainedTransactionParent(historyId, this);
+            parent = new ChainedTransactionParent(this, historyId);
             transactionChains.put(historyId, parent);
             replicatePayload(historyId, CreateLocalHistoryPayload.create(historyId, initialPayloadBufferSize()),
                 callback);
