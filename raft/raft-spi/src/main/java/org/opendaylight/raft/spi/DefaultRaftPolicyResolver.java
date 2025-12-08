@@ -8,7 +8,6 @@
 package org.opendaylight.raft.spi;
 
 import java.util.ServiceLoader;
-import java.util.ServiceLoader.Provider;
 import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -34,6 +33,6 @@ public final class DefaultRaftPolicyResolver extends AbstractRaftPolicyResolver 
 
     @Override
     protected Stream<RaftPolicy> streamPolicies() {
-        return loader.stream().map(Provider::get);
+        return loader.stream().map(ServiceLoader.Provider::get);
     }
 }
