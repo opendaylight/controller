@@ -333,29 +333,35 @@ public final class OpendaylightToaster extends AbstractMXBean
 
             @Override
             public void onFailure(final Throwable ex) {
-                if (ex instanceof OptimisticLockFailedException) {
+                switch (ex) {
+                    case OptimisticLockFailedException olfe -> {
+                        // Another thread is likely trying to make toast simultaneously and updated the
+                        // status before us. Try reading the status again - if another make toast is
+                        // now in progress, we should get ToasterStatus.Down and fail.
 
-                    // Another thread is likely trying to make toast simultaneously and updated the
-                    // status before us. Try reading the status again - if another make toast is
-                    // now in progress, we should get ToasterStatus.Down and fail.
-
-                    if (tries - 1 > 0) {
-                        LOG.debug("Got OptimisticLockFailedException - trying again");
-                        checkStatusAndMakeToast(input, futureResult, tries - 1);
-                    } else {
-                        futureResult.set(RpcResultBuilder.<MakeToastOutput>failed()
-                                .withError(ErrorType.APPLICATION, ex.getMessage()).build());
+                        if (tries - 1 > 0) {
+                            LOG.debug("Got OptimisticLockFailedException - trying again");
+                            checkStatusAndMakeToast(input, futureResult, tries - 1);
+                        } else {
+                            futureResult.set(RpcResultBuilder.<MakeToastOutput>failed()
+                                .withError(ErrorType.APPLICATION, olfe.getMessage())
+                                .build());
+                        }
                     }
-                } else if (ex instanceof TransactionCommitFailedException) {
-                    LOG.debug("Failed to commit Toaster status", ex);
+                    case TransactionCommitFailedException tcfe -> {
+                        LOG.debug("Failed to commit Toaster status", tcfe);
 
-                    // Probably already making toast.
-                    futureResult.set(RpcResultBuilder.<MakeToastOutput>failed()
-                            .withRpcErrors(((TransactionCommitFailedException)ex).getErrorList()).build());
-                } else {
-                    LOG.debug("Unexpected error committing Toaster status", ex);
-                    futureResult.set(RpcResultBuilder.<MakeToastOutput>failed().withError(ErrorType.APPLICATION,
-                            "Unexpected error committing Toaster status", ex).build());
+                        // Probably already making toast.
+                        futureResult.set(RpcResultBuilder.<MakeToastOutput>failed()
+                            .withRpcErrors(tcfe.getErrorList())
+                            .build());
+                    }
+                    default -> {
+                        LOG.debug("Unexpected error committing Toaster status", ex);
+                        futureResult.set(RpcResultBuilder.<MakeToastOutput>failed()
+                            .withError(ErrorType.APPLICATION, "Unexpected error committing Toaster status", ex)
+                            .build());
+                    }
                 }
             }
         }, MoreExecutors.directExecutor());
