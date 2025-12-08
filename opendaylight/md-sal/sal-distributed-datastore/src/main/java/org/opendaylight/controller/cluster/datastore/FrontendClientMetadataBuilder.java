@@ -82,7 +82,7 @@ final class FrontendClientMetadataBuilder {
      * @param shard parent shard
      * @return Leader frontend state
      */
-    LeaderFrontendState toLeaderState(final Shard shard) {
+    @NonNull LeaderFrontendState toLeaderState(final @NonNull Shard shard) {
         // Note: we have to make sure to *copy* all current state and not leak any views, otherwise leader/follower
         //       interactions would get intertwined leading to inconsistencies.
         final var histories = new HashMap<LocalHistoryIdentifier, LocalFrontendHistory>();
@@ -90,19 +90,17 @@ final class FrontendClientMetadataBuilder {
             final var historyId = historyMetaBuilder.getIdentifier();
             if (historyId.getHistoryId() != 0) {
                 final var state = historyMetaBuilder.toLeaderState(shard);
-                if (state instanceof LocalFrontendHistory localState) {
-                    histories.put(historyId, localState);
-                } else {
+                if (!(state instanceof LocalFrontendHistory localState)) {
                     throw new VerifyException("Unexpected state " + state);
                 }
+                histories.put(historyId, localState);
             }
         }
 
         final AbstractFrontendHistory singleHistory;
         final var singleHistoryMeta = currentHistories.get(new LocalHistoryIdentifier(clientId, 0));
         if (singleHistoryMeta == null) {
-            final var tree = shard.getDataStore();
-            singleHistory = StandaloneFrontendHistory.create(shard.memberId(), clientId, tree);
+            singleHistory = StandaloneFrontendHistory.create(shard.memberId(), clientId, shard.getDataStore());
         } else {
             singleHistory = singleHistoryMeta.toLeaderState(shard);
         }
