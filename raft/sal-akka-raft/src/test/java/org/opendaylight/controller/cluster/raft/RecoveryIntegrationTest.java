@@ -42,8 +42,8 @@ class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         leaderActor = newTestRaftActor(leaderId, Map.of(follower1Id, follower1Actor.path().toString(), follower2Id, ""),
             leaderConfigParams);
 
-        follower1CollectorActor = follower1Actor.underlyingActor().collectorActor();
-        leaderCollectorActor = leaderActor.underlyingActor().collectorActor();
+        follower1Collector = follower1Actor.underlyingActor().collector();
+        leaderCollector = leaderActor.underlyingActor().collector();
 
         leaderContext = leaderActor.underlyingActor().getRaftActorContext();
     }
@@ -64,7 +64,7 @@ class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         // This should trigger a snapshot.
         final MockCommand payload3 = sendPayloadData(leaderActor, "three");
 
-        MessageCollectorActor.expectMatching(follower1CollectorActor, AppendEntries.class, 3);
+        follower1Collector.expectMatching(AppendEntries.class, 3);
 
         // Send another payload.
         final MockCommand payload4 = sendPayloadData(leaderActor, "four");
@@ -107,7 +107,7 @@ class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         // Send another payload.
         final MockCommand payload4 = sendPayloadData(leaderActor, "four");
 
-        MessageCollectorActor.expectMatching(follower1CollectorActor, AppendEntries.class, 3);
+        follower1Collector.expectMatching(AppendEntries.class, 3);
 
         // Wait for snapshot complete.
         awaitSnapshot(leaderActor);
@@ -140,7 +140,7 @@ class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
 
         follower2Actor = newTestRaftActor(follower2Id,
                 Map.of(leaderId, testActorPath(leaderId)), newFollowerConfigParams());
-        follower2CollectorActor = follower2Actor.underlyingActor().collectorActor();
+        follower2Collector = follower2Actor.underlyingActor().collector();
 
         leaderActor.tell(new SetPeerAddress(follower2Id, follower2Actor.path().toString()), ActorRef.noSender());
 
@@ -166,13 +166,13 @@ class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         follower2Actor = newTestRaftActor(follower2Id,
                 Map.of(leaderId, testActorPath(leaderId)), newFollowerConfigParams());
         TestRaftActor follower2Underlying = follower2Actor.underlyingActor();
-        follower2CollectorActor = follower2Underlying.collectorActor();
+        follower2Collector = follower2Underlying.collector();
         follower2Context = follower2Underlying.getRaftActorContext();
 
         leaderActor.tell(new SetPeerAddress(follower2Id, follower2Actor.path().toString()), ActorRef.noSender());
 
         // The leader should install a snapshot so wait for the follower to receive ApplySnapshot.
-        MessageCollectorActor.expectFirstMatching(follower2CollectorActor, ApplyLeaderSnapshot.class);
+        follower2Collector.expectFirstMatching(ApplyLeaderSnapshot.class);
 
         // Wait for the follower to persist the snapshot.
         awaitSnapshot(follower2Actor);
@@ -276,7 +276,7 @@ class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
 
         assertEquals("Leader last applied", 1, leaderContext.getReplicatedLog().getLastApplied());
 
-        MessageCollectorActor.clearMessages(leaderCollectorActor);
-        MessageCollectorActor.clearMessages(follower1CollectorActor);
+        leaderCollector.clearMessages();
+        follower1Collector.clearMessages();
     }
 }

@@ -452,7 +452,7 @@ class RaftActorTest extends AbstractActorTest {
 
         final var provider = mockProvider();
         final var mockActorRef = factory.<MockRaftActor>createTestActor(MockRaftActor.props(persistenceId, stateDir(),
-            Map.of(follower1Id, followerActor1.path().toString()), config, provider), persistenceId);
+            Map.ofPrefix(follower1Id, followerActor1.path().toString()), config, provider), persistenceId);
 
         final var leaderActor = mockActorRef.underlyingActor();
         final var leaderContext = leaderActor.getRaftActorContext();
@@ -557,7 +557,7 @@ class RaftActorTest extends AbstractActorTest {
 
         final var dataPersistenceProvider = new TestPersistenceProvider();
         final var mockActorRef = factory.<MockRaftActor>createTestActor(MockRaftActor.props(persistenceId, stateDir(),
-            Map.of(leaderId, leaderActor1.path().toString()), config, dataPersistenceProvider), persistenceId);
+            Map.ofPrefix(leaderId, leaderActor1.path().toString()), config, dataPersistenceProvider), persistenceId);
 
         final var followerActor = mockActorRef.underlyingActor();
         final var followerContext = followerActor.getRaftActorContext();
@@ -1117,7 +1117,7 @@ class RaftActorTest extends AbstractActorTest {
 
         final var provider = mockProvider();
         final var leaderActorRef = factory.<MockRaftActor>createTestActor(MockRaftActor.props(leaderId, stateDir(),
-            Map.of(followerId, followerActor.path().toString()), config, provider), leaderId);
+            Map.ofPrefix(followerId, followerActor.path().toString()), config, provider), leaderId);
         final var leaderActor = leaderActorRef.underlyingActor();
         leaderActor.waitForInitializeBehaviorComplete();
 
@@ -1161,7 +1161,7 @@ class RaftActorTest extends AbstractActorTest {
         config.setIsolatedLeaderCheckInterval(ONE_DAY);
 
         final var leaderActorRef = factory.<MockRaftActor>createTestActor(MockRaftActor.props(leaderId, stateDir(),
-            Map.of(followerId, followerActor.path().toString()), config), leaderId);
+            Map.ofPrefix(followerId, followerActor.path().toString()), config), leaderId);
         final var leaderActor = leaderActorRef.underlyingActor();
         leaderActor.waitForInitializeBehaviorComplete();
 
@@ -1199,7 +1199,7 @@ class RaftActorTest extends AbstractActorTest {
 
         final var builder = TestRaftActor.newBuilder()
             .id(leaderId)
-            .peerAddresses(Map.of(followerId, mockFollowerActorRef.path().toString()))
+            .peerAddresses(Map.ofPrefix(followerId, mockFollowerActorRef.path().toString()))
             .config(config)
             .collectorActor(factory.createActor(MessageCollectorActor.props(),
                 factory.generateActorId(leaderId + "-collector")));

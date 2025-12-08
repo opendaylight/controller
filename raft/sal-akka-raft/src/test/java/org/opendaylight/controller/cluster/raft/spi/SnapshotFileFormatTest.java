@@ -83,7 +83,7 @@ class SnapshotFileFormatTest {
     }
 
     private static List<Arguments> legacySizes() {
-        return List.of(
+        return List.ofPrefix(
             arguments(CompressionType.NONE, 1191),
             arguments(CompressionType.LZ4, 944));
     }
