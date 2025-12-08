@@ -186,7 +186,7 @@ abstract sealed class LeaderFrontendState implements Identifiable<ClientIdentifi
                     tree().readTime() - now);
             });
 
-            localHistories.put(historyId, LocalFrontendHistory.create(persistenceId(), tree(), chain));
+            localHistories.put(historyId, LocalFrontendHistory.create(persistenceId(), chain));
             LOG.debug("{}: created history {}", persistenceId(), historyId);
             return null;
         }

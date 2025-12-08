@@ -7,70 +7,29 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import static java.util.Objects.requireNonNull;
-
 import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.UnsignedLong;
 import java.util.HashMap;
 import java.util.Map;
-import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
-import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
+import org.eclipse.jdt.annotation.NonNull;
 import org.opendaylight.controller.cluster.raft.spi.MutableUnsignedLongSet;
-import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 
 /**
  * Chained transaction specialization of {@link AbstractFrontendHistory}. It prevents concurrent open transactions.
  */
 final class LocalFrontendHistory extends AbstractFrontendHistory {
-    private final ChainedTransactionParent parent;
-
-    private LocalFrontendHistory(final String persistenceId, final ShardDataTree tree,
-            final ChainedTransactionParent parent, final Map<UnsignedLong, Boolean> closedTransactions,
-            final MutableUnsignedLongSet purgedTransactions) {
-        super(persistenceId, tree, closedTransactions, purgedTransactions);
-        this.parent = requireNonNull(parent);
+    private LocalFrontendHistory(final String persistenceId, final ChainedTransactionParent parent,
+            final Map<UnsignedLong, Boolean> closedTransactions, final MutableUnsignedLongSet purgedTransactions) {
+        super(persistenceId, parent.getIdentifier(), parent, closedTransactions, purgedTransactions);
     }
 
-    static LocalFrontendHistory create(final String persistenceId, final ShardDataTree tree,
-            final ChainedTransactionParent parent) {
-        return new LocalFrontendHistory(persistenceId, tree, parent, ImmutableMap.of(), MutableUnsignedLongSet.of());
+    static @NonNull LocalFrontendHistory create(final String persistenceId, final ChainedTransactionParent parent) {
+        return new LocalFrontendHistory(persistenceId, parent, ImmutableMap.of(), MutableUnsignedLongSet.of());
     }
 
-    static LocalFrontendHistory recreate(final String persistenceId, final ShardDataTree tree,
-            final ChainedTransactionParent parent, final Map<UnsignedLong, Boolean> closedTransactions,
-            final MutableUnsignedLongSet purgedTransactions) {
-        return new LocalFrontendHistory(persistenceId, tree, parent, new HashMap<>(closedTransactions),
+    static @NonNull LocalFrontendHistory recreate(final String persistenceId, final ChainedTransactionParent parent,
+            final Map<UnsignedLong, Boolean> closedTransactions, final MutableUnsignedLongSet purgedTransactions) {
+        return new LocalFrontendHistory(persistenceId, parent, new HashMap<>(closedTransactions),
             purgedTransactions.mutableCopy());
-    }
-
-    @Override
-    public LocalHistoryIdentifier getIdentifier() {
-        return parent.getIdentifier();
-    }
-
-    @Override
-    FrontendTransaction createOpenSnapshot(final TransactionIdentifier id) {
-        return FrontendReadOnlyTransaction.create(this, parent.newReadOnlyTransaction(id));
-    }
-
-    @Override
-    FrontendTransaction createOpenTransaction(final TransactionIdentifier id) {
-        return FrontendReadWriteTransaction.createOpen(this, parent.newReadWriteTransaction(id));
-    }
-
-    @Override
-    FrontendTransaction createReadyTransaction(final TransactionIdentifier id, final DataTreeModification mod) {
-        return FrontendReadWriteTransaction.createReady(this, id, mod);
-    }
-
-    @Override
-    CommitCohort createFailedCohort(final TransactionIdentifier id, final DataTreeModification mod,
-            final Exception failure) {
-        return parent.createFailedCohort(id, mod, failure);
-    }
-
-    @Override
-    CommitCohort createReadyCohort(final TransactionIdentifier id, final DataTreeModification mod) {
-        return parent.createReadyCohort(id, mod);
     }
 }
