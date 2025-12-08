@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 
@@ -18,8 +19,8 @@ import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
  */
 final class SimpleTransactionParent extends TransactionParent {
     @NonNullByDefault
-    SimpleTransactionParent(final ShardDataTree dataTree) {
-        super(dataTree);
+    SimpleTransactionParent(final ShardDataTree dataTree, final LocalHistoryIdentifier historyId) {
+        super(dataTree, historyId);
     }
 
     @Override

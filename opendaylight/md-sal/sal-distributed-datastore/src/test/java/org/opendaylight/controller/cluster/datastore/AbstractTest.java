@@ -59,19 +59,19 @@ public abstract class AbstractTest {
         TX_COUNTER.set(1L);
     }
 
-    protected static @NonNull TransactionIdentifier newTransactionId(final long txId) {
+    protected static final @NonNull TransactionIdentifier newTransactionId(final long txId) {
         return new TransactionIdentifier(HISTORY_ID, txId);
     }
 
-    protected static @NonNull TransactionIdentifier nextTransactionId() {
+    protected static final @NonNull TransactionIdentifier nextTransactionId() {
         return newTransactionId(TX_COUNTER.getAndIncrement());
     }
 
-    protected static LocalHistoryIdentifier newHistoryId(final long historyId) {
+    protected static final @NonNull LocalHistoryIdentifier newHistoryId(final long historyId) {
         return new LocalHistoryIdentifier(CLIENT_ID, historyId);
     }
 
-    protected static LocalHistoryIdentifier nextHistoryId() {
+    protected static final @NonNull LocalHistoryIdentifier nextHistoryId() {
         return newHistoryId(HISTORY_COUNTER.incrementAndGet());
     }
 
@@ -81,7 +81,7 @@ public abstract class AbstractTest {
     }
 
     @After
-    public void actorSystemCleanup() throws Exception {
+    public final void actorSystemCleanup() throws Exception {
         for (var system : actorSystems) {
             TestKit.shutdownActorSystem(system, true);
         }
@@ -94,7 +94,7 @@ public abstract class AbstractTest {
         return stateDir;
     }
 
-    protected ActorSystem newActorSystem(final String name, final String config) {
+    protected final ActorSystem newActorSystem(final String name, final String config) {
         final var system = ActorSystem.create(name, ConfigFactory.load().getConfig(config));
         actorSystems.add(system);
         return system;
@@ -126,6 +126,4 @@ public abstract class AbstractTest {
             }
         }, Objects::nonNull);
     }
-
-
 }

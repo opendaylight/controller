@@ -24,7 +24,7 @@ final class StandaloneFrontendHistory extends AbstractFrontendHistory {
     private StandaloneFrontendHistory(final String persistenceId, final ClientIdentifier clientId,
             final ShardDataTree tree, final Map<UnsignedLong, Boolean> closedTransactions,
             final MutableUnsignedLongSet purgedTransactions) {
-        super(persistenceId, identifierForClient(clientId), tree.unorderedParent(), closedTransactions,
+        super(persistenceId, new SimpleTransactionParent(tree, identifierForClient(clientId)), closedTransactions,
             purgedTransactions);
     }
 
