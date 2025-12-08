@@ -40,7 +40,7 @@ final class CommitCohort {
     private static final Logger LOG = LoggerFactory.getLogger(CommitCohort.class);
 
     private final @NonNull ReadWriteShardDataTreeTransaction transaction;
-    private final CompositeDataTreeCohort userCohorts;
+    private final UserCohorts userCohorts;
 
     private State state = State.READY;
     private DataTreeCandidateTip candidate;
@@ -49,7 +49,7 @@ final class CommitCohort {
     private long lastAccess;
 
     @NonNullByDefault
-    CommitCohort(final ReadWriteShardDataTreeTransaction transaction, final CompositeDataTreeCohort userCohorts) {
+    CommitCohort(final ReadWriteShardDataTreeTransaction transaction, final UserCohorts userCohorts) {
         this.transaction = requireNonNull(transaction);
         this.userCohorts = requireNonNull(userCohorts);
     }
@@ -91,7 +91,7 @@ final class CommitCohort {
         candidate = verifyNotNull(dataTreeCandidate);
     }
 
-    DataTreeModification getDataTreeModification() {
+    @NonNull DataTreeModification getDataTreeModification() {
         return transaction.getSnapshot();
     }
 
@@ -162,38 +162,43 @@ final class CommitCohort {
      * @param dataTreeCandidate {@link DataTreeCandidate} under consideration
      * @param futureCallback the callback to invoke on completion, which may be immediate or async.
      */
+    @NonNullByDefault
     void userPreCommit(final DataTreeCandidate dataTreeCandidate, final FutureCallback<Empty> futureCallback) {
         userCohorts.reset();
 
         final var userCanCommit = userCohorts.canCommit(dataTreeCandidate);
-        if (userCanCommit != null) {
-            userCanCommit.whenComplete((noop, failure) -> {
-                if (failure != null) {
-                    futureCallback.onFailure(failure);
-                } else {
-                    doUserPreCommit(futureCallback);
-                }
-            });
-        } else {
+        if (userCanCommit == null) {
             doUserPreCommit(futureCallback);
+            return;
         }
+
+        userCanCommit.whenComplete((noop, failure) -> {
+            if (failure != null) {
+                futureCallback.onFailure(failure);
+            } else {
+                doUserPreCommit(futureCallback);
+            }
+        });
     }
 
+    @NonNullByDefault
     private void doUserPreCommit(final FutureCallback<Empty> futureCallback) {
         final var userPreCommit = userCohorts.preCommit();
-        if (userPreCommit != null) {
-            userPreCommit.whenComplete((noop, failure) -> {
-                if (failure != null) {
-                    futureCallback.onFailure(failure);
-                } else {
-                    futureCallback.onSuccess(Empty.value());
-                }
-            });
-        } else {
+        if (userPreCommit == null) {
             futureCallback.onSuccess(Empty.value());
+            return;
         }
+
+        userPreCommit.whenComplete((noop, failure) -> {
+            if (failure != null) {
+                futureCallback.onFailure(failure);
+            } else {
+                futureCallback.onSuccess(Empty.value());
+            }
+        });
     }
 
+    @NonNullByDefault
     void abort(final FutureCallback<Empty> abortCallback) {
         final var dataTree = dataTree();
         if (!dataTree.startAbort(this)) {
@@ -206,31 +211,34 @@ final class CommitCohort {
         state = State.ABORTED;
 
         final var userAbort = userCohorts.abort();
-        if (userAbort != null) {
-            userAbort.whenComplete((noop, failure) -> {
-                if (failure != null) {
-                    abortCallback.onFailure(failure);
-                } else {
-                    abortCallback.onSuccess(Empty.value());
-                }
-            });
-        } else {
+        if (userAbort == null) {
             abortCallback.onSuccess(Empty.value());
+            return;
         }
+
+        userAbort.whenComplete((noop, failure) -> {
+            if (failure != null) {
+                abortCallback.onFailure(failure);
+            } else {
+                abortCallback.onSuccess(Empty.value());
+            }
+        });
     }
 
+    @NonNullByDefault
     void successfulCommit(final UnsignedLong journalIndex, final Runnable onComplete) {
         final var userCommit = userCohorts.commit();
-        if (userCommit != null) {
-            userCommit.whenComplete((noop, failure) -> {
-                if (failure != null) {
-                    LOG.error("User cohorts failed to commit", failure);
-                }
-                finishSuccessfulCommit(journalIndex, onComplete);
-            });
-        } else {
+        if (userCommit == null) {
             finishSuccessfulCommit(journalIndex, onComplete);
+            return;
         }
+
+        userCommit.whenComplete((noop, failure) -> {
+            if (failure != null) {
+                LOG.error("User cohorts failed to commit", failure);
+            }
+            finishSuccessfulCommit(journalIndex, onComplete);
+        });
     }
 
     private void finishSuccessfulCommit(final UnsignedLong journalIndex, final Runnable onComplete) {

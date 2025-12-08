@@ -42,8 +42,8 @@ import scala.jdk.javaapi.FutureConverters;
  * It tracks current operation and list of cohorts which successfuly finished previous phase in
  * case, if abort is necessary to invoke it only on cohort steps which are still active.
  */
-class CompositeDataTreeCohort {
-    private static final Logger LOG = LoggerFactory.getLogger(CompositeDataTreeCohort.class);
+class UserCohorts {
+    private static final Logger LOG = LoggerFactory.getLogger(UserCohorts.class);
 
     private enum State {
         /**
@@ -91,21 +91,21 @@ class CompositeDataTreeCohort {
         }
     };
 
-    private final DataTreeCohortActorRegistry registry;
-    private final TransactionIdentifier txId;
-    private final EffectiveModelContext schema;
-    private final Executor callbackExecutor;
-    private final Timeout timeout;
+    private final @NonNull DataTreeCohortActorRegistry registry;
+    private final @NonNull TransactionIdentifier txId;
+    private final @NonNull EffectiveModelContext modelContext;
+    private final @NonNull Executor callbackExecutor;
+    private final @NonNull Timeout timeout;
 
     private @NonNull List<Success> successfulFromPrevious = List.of();
     private State state = State.IDLE;
 
-    CompositeDataTreeCohort(final DataTreeCohortActorRegistry registry, final TransactionIdentifier transactionID,
-        final EffectiveModelContext schema, final Executor callbackExecutor, final Timeout timeout) {
+    UserCohorts(final DataTreeCohortActorRegistry registry, final Executor callbackExecutor,
+            final EffectiveModelContext modelContext, final TransactionIdentifier txId, final Timeout timeout) {
         this.registry = requireNonNull(registry);
-        txId = requireNonNull(transactionID);
-        this.schema = requireNonNull(schema);
         this.callbackExecutor = requireNonNull(callbackExecutor);
+        this.modelContext = requireNonNull(modelContext);
+        this.txId = requireNonNull(txId);
         this.timeout = requireNonNull(timeout);
     }
 
@@ -123,14 +123,14 @@ class CompositeDataTreeCohort {
         state = State.IDLE;
     }
 
-    @Nullable CompletionStage<Empty> canCommit(final DataTreeCandidate tip) {
+    @Nullable CompletionStage<Empty> canCommit(final @NonNull DataTreeCandidate tip) {
         if (LOG.isTraceEnabled()) {
             LOG.trace("{}: canCommit - candidate: {}", txId, tip);
         } else {
             LOG.debug("{}: canCommit - candidate rootPath: {}", txId, tip.getRootPath());
         }
 
-        final var messages = registry.createCanCommitMessages(txId, tip, schema);
+        final var messages = registry.createCanCommitMessages(txId, tip, modelContext);
         LOG.debug("{}: canCommit - messages: {}", txId, messages);
         if (messages.isEmpty()) {
             successfulFromPrevious = List.of();

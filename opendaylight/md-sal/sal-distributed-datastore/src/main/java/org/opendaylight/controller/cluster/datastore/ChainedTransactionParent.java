@@ -104,7 +104,7 @@ final class ChainedTransactionParent extends TransactionParent implements Identi
 
     @NonNullByDefault
     private CommitCohort createReadyCohort(final ReadWriteShardDataTreeTransaction transaction,
-            final CompositeDataTreeCohort userCohorts) {
+            final UserCohorts userCohorts) {
         previousTx = transaction;
         LOG.debug("Committing transaction {}", transaction);
         final var cohort = new CommitCohort(transaction, userCohorts);

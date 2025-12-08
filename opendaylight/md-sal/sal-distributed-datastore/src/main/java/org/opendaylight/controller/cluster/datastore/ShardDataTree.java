@@ -698,7 +698,7 @@ public class ShardDataTree {
     }
 
     @NonNullByDefault
-    final CompositeDataTreeCohort finishTransaction(final ReadWriteShardDataTreeTransaction transaction) {
+    final UserCohorts finishTransaction(final ReadWriteShardDataTreeTransaction transaction) {
         final var snapshot = transaction.getSnapshot();
         final var txId = transaction.getIdentifier();
         LOG.debug("{}: readying transaction {}", logContext, txId);
@@ -708,8 +708,8 @@ public class ShardDataTree {
     }
 
     @NonNullByDefault
-    final CompositeDataTreeCohort newUserCohorts(final TransactionIdentifier txId) {
-        return cohortRegistry.createCohort(modelContext, txId, shard::executeInSelf, COMMIT_STEP_TIMEOUT);
+    final UserCohorts newUserCohorts(final TransactionIdentifier txId) {
+        return new UserCohorts(cohortRegistry, shard::executeInSelf, modelContext, txId, COMMIT_STEP_TIMEOUT);
     }
 
     final void abortTransaction(final TransactionIdentifier txId, final Runnable callback) {
