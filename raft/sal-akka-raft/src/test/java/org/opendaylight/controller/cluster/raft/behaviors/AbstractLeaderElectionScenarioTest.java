@@ -36,7 +36,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
-import org.opendaylight.controller.cluster.raft.MessageCollectorActor;
+import org.opendaylight.controller.cluster.raft.MessageCollector;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.TestActorFactory;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader.SendHeartBeat;
@@ -56,7 +56,7 @@ import scala.concurrent.duration.FiniteDuration;
 public class AbstractLeaderElectionScenarioTest {
     static final int HEARTBEAT_INTERVAL = 50;
 
-    public static class MemberActor extends MessageCollectorActor {
+    public static final class MemberActor extends MessageCollector.Actor {
         private volatile RaftActorBehavior behavior;
         Map<Class<?>, CountDownLatch> messagesReceivedLatches = new ConcurrentHashMap<>();
         Map<Class<?>, Boolean> dropMessagesToBehavior = new ConcurrentHashMap<>();
@@ -70,7 +70,7 @@ public class AbstractLeaderElectionScenarioTest {
 
         @Override
         @Deprecated(since = "11.0.0", forRemoval = true)
-        public final ActorRef getSender() {
+        public ActorRef getSender() {
             return super.getSender();
         }
 
@@ -310,7 +310,7 @@ public class AbstractLeaderElectionScenarioTest {
     TestActorRef<MemberActor> newMemberActor(final String name) throws TimeoutException, InterruptedException {
         TestActorRef<MemberActor> actor = factory.createTestActor(MemberActor.props()
                 .withDispatcher(Dispatchers.DefaultDispatcherId()), name);
-        MessageCollectorActor.waitUntilReady(actor);
+        MessageCollector.Actor.waitUntilReady(actor);
         return actor;
     }
 

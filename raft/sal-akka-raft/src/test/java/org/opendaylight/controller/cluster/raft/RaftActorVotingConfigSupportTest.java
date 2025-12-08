@@ -14,10 +14,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.opendaylight.controller.cluster.raft.MessageCollectorActor.assertNoneMatching;
-import static org.opendaylight.controller.cluster.raft.MessageCollectorActor.clearMessages;
-import static org.opendaylight.controller.cluster.raft.MessageCollectorActor.expectFirstMatching;
-import static org.opendaylight.controller.cluster.raft.MessageCollectorActor.expectMatching;
+import static org.opendaylight.controller.cluster.raft.MessageCollector.Actor.clearMessages;
+import static org.opendaylight.controller.cluster.raft.MessageCollector.Actor.expectFirstMatching;
 import static org.opendaylight.controller.cluster.raft.RaftActorTestKit.awaitLastApplied;
 
 import com.google.common.base.Stopwatch;
@@ -104,7 +102,7 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
             actorFactory.generateActorId(FOLLOWER_ID));
 
     private TestActorRef<MockNewFollowerRaftActor> newFollowerRaftActor;
-    private ActorRef newFollowerCollectorActor;
+    private MessageCollector newFollowerCollector;
     private RaftActorContext newFollowerActorContext;
 
     private final TestKit testKit = new TestKit(getSystem());
@@ -113,10 +111,9 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
     private void setupNewFollower() {
         DefaultConfigParamsImpl configParams = newFollowerConfigParams();
 
-        newFollowerCollectorActor = actorFactory.createActor(MessageCollectorActor.props(),
-                actorFactory.generateActorId(NEW_SERVER_ID + "Collector"));
+        newFollowerCollector = MessageCollector.ofPrefix(actorFactory, NEW_SERVER_ID + "Collector");
         newFollowerRaftActor = actorFactory.createTestActor(MockNewFollowerRaftActor.props(stateDir(),
-                configParams, newFollowerCollectorActor).withDispatcher(Dispatchers.DefaultDispatcherId()),
+                configParams, newFollowerCollector.actor()).withDispatcher(Dispatchers.DefaultDispatcherId()),
                 actorFactory.generateActorId(NEW_SERVER_ID));
 
         final var raftActor = newFollowerRaftActor.underlyingActor();
@@ -167,13 +164,13 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         clearMessages(followerActor);
 
         MockLeaderRaftActor leaderRaftActor = leaderActor.underlyingActor();
-        final ActorRef leaderCollectorActor = newLeaderCollectorActor(leaderRaftActor);
+        final var leaderCollector = newLeaderCollector(leaderRaftActor);
 
         leaderActor.tell(new AddServer(NEW_SERVER_ID, newFollowerRaftActor.path().toString(), true), testKit.getRef());
 
         // Leader should install snapshot - capture and verify ApplySnapshot contents
 
-        final var applySnapshot = expectFirstMatching(newFollowerCollectorActor, ApplyLeaderSnapshot.class);
+        final var applySnapshot = newFollowerCollector.expectFirstMatching(ApplyLeaderSnapshot.class);
         assertEquals("leader", applySnapshot.leaderId());
         assertEquals(1, applySnapshot.term());
         assertEquals(EntryInfo.of(2, 1), applySnapshot.lastEntry());
@@ -185,7 +182,7 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
 
         // Verify ServerConfigurationPayload entry in leader's log
 
-        expectFirstMatching(leaderCollectorActor, ApplyState.class);
+        leaderCollector.expectFirstMatching(ApplyState.class);
         final var leaderActorContext = leaderRaftActor.getRaftActorContext();
         final var leaderLog = leaderActorContext.getReplicatedLog();
         assertEquals("Leader journal last index", 3, leaderLog.lastIndex());
@@ -201,7 +198,7 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         verifyServerConfigurationPayloadEntry(followerActorContext.getReplicatedLog(), votingServer(LEADER_ID),
                 votingServer(FOLLOWER_ID), votingServer(NEW_SERVER_ID));
 
-        expectFirstMatching(newFollowerCollectorActor, ApplyState.class);
+        newFollowerCollector.expectFirstMatching(ApplyState.class);
         assertEquals("New follower journal last index", 3, newFollowerActorContext.getReplicatedLog().lastIndex());
         verifyServerConfigurationPayloadEntry(newFollowerActorContext.getReplicatedLog(), votingServer(LEADER_ID),
                 votingServer(FOLLOWER_ID), votingServer(NEW_SERVER_ID));
@@ -258,13 +255,13 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         MockLeaderRaftActor leaderRaftActor = leaderActor.underlyingActor();
         final RaftActorContext leaderActorContext = leaderRaftActor.getRaftActorContext();
 
-        final ActorRef leaderCollectorActor = newLeaderCollectorActor(leaderRaftActor);
+        final var leaderCollector = newLeaderCollector(leaderRaftActor);
 
         leaderActor.tell(new AddServer(NEW_SERVER_ID, newFollowerRaftActor.path().toString(), true), testKit.getRef());
 
         // Leader should install snapshot - capture and verify ApplySnapshot contents
 
-        final var applySnapshot = expectFirstMatching(newFollowerCollectorActor, ApplyLeaderSnapshot.class);
+        final var applySnapshot = newFollowerCollector.expectFirstMatching(ApplyLeaderSnapshot.class);
         final MockSnapshotState state;
         try (var ois = new ObjectInputStream(applySnapshot.snapshot().io().openStream())) {
             state = (MockSnapshotState) ois.readObject();
@@ -279,7 +276,7 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
 
         // Verify ServerConfigurationPayload entry in leader's log
 
-        expectFirstMatching(leaderCollectorActor, ApplyState.class);
+        leaderCollector.expectFirstMatching(ApplyState.class);
         final var leaderLog = leaderActorContext.getReplicatedLog();
         assertEquals("Leader journal last index", 2, leaderLog.lastIndex());
         assertEquals("Leader commit index", 2, leaderLog.getCommitIndex());
@@ -288,7 +285,7 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
 
         // Verify ServerConfigurationPayload entry in the new follower
 
-        expectFirstMatching(newFollowerCollectorActor, ApplyState.class);
+        newFollowerCollector.expectFirstMatching(ApplyState.class);
         assertEquals("New follower journal last index", 2, newFollowerActorContext.getReplicatedLog().lastIndex());
         verifyServerConfigurationPayloadEntry(newFollowerActorContext.getReplicatedLog(), votingServer(LEADER_ID),
                 votingServer(NEW_SERVER_ID));
@@ -315,7 +312,7 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         MockLeaderRaftActor leaderRaftActor = leaderActor.underlyingActor();
         final var leaderActorContext = leaderRaftActor.getRaftActorContext();
 
-        final ActorRef leaderCollectorActor = newLeaderCollectorActor(leaderRaftActor);
+        final var leaderCollector = newLeaderCollector(leaderRaftActor);
 
         leaderActor.tell(new AddServer(NEW_SERVER_ID, newFollowerRaftActor.path().toString(), false), testKit.getRef());
 
@@ -325,7 +322,7 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
 
         // Verify ServerConfigurationPayload entry in leader's log
 
-        expectFirstMatching(leaderCollectorActor, ApplyState.class);
+        leaderCollector.expectFirstMatching(ApplyState.class);
 
         var leaderLog = leaderActorContext.getReplicatedLog();
         assertEquals("Leader journal last index", 0, leaderLog.lastIndex());
@@ -335,7 +332,7 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
 
         // Verify ServerConfigurationPayload entry in the new follower
 
-        expectFirstMatching(newFollowerCollectorActor, ApplyState.class);
+        newFollowerCollector.expectFirstMatching(ApplyState.class);
         assertEquals("New follower journal last index", 0, newFollowerActorContext.getReplicatedLog().lastIndex());
         verifyServerConfigurationPayloadEntry(newFollowerActorContext.getReplicatedLog(), votingServer(LEADER_ID),
                 nonVotingServer(NEW_SERVER_ID));
@@ -344,11 +341,11 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
 
         assertEquals("New follower peers", Set.of(LEADER_ID), newFollowerActorContext.getPeerIds());
 
-        assertNoneMatching(newFollowerCollectorActor, InstallSnapshot.class, 500);
+        newFollowerCollector.assertNoneMatching(InstallSnapshot.class, 500);
 
         // Add another non-voting server.
 
-        clearMessages(leaderCollectorActor);
+        leaderCollector.clearMessages();
 
         RaftActorContext follower2ActorContext = newFollowerContext(NEW_SERVER_ID2, followerActor);
         Follower newFollower2 = new Follower(follower2ActorContext);
@@ -360,7 +357,7 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         assertEquals("getStatus", ServerChangeStatus.OK, addServerReply.getStatus());
         assertEquals("getLeaderHint", Optional.of(LEADER_ID), addServerReply.getLeaderHint());
 
-        expectFirstMatching(leaderCollectorActor, ApplyState.class);
+        leaderCollector.expectFirstMatching(ApplyState.class);
         leaderLog = leaderActorContext.getReplicatedLog();
         assertEquals("Leader journal last index", 1, leaderLog.lastIndex());
         assertEquals("Leader commit index", 1, leaderLog.getCommitIndex());
@@ -386,7 +383,7 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         MockLeaderRaftActor leaderRaftActor = leaderActor.underlyingActor();
         final RaftActorContext leaderActorContext = leaderRaftActor.getRaftActorContext();
 
-        final ActorRef leaderCollectorActor = newLeaderCollectorActor(leaderRaftActor);
+        final var leaderCollector = newLeaderCollector(leaderRaftActor);
 
         RaftActorContext follower2ActorContext = newFollowerContext(NEW_SERVER_ID2, followerActor);
         Follower newFollower2 = new Follower(follower2ActorContext);
@@ -399,7 +396,7 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
 
         // Wait for leader's install snapshot and capture it
 
-        InstallSnapshot installSnapshot = expectFirstMatching(newFollowerCollectorActor, InstallSnapshot.class);
+        InstallSnapshot installSnapshot = newFollowerCollector.expectFirstMatching(InstallSnapshot.class);
 
         // Send a second AddServer - should get queued
         TestKit testKit2 = new TestKit(getSystem());
@@ -418,7 +415,7 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
 
         // Verify ServerConfigurationPayload entries in leader's log
 
-        expectMatching(leaderCollectorActor, ApplyState.class, 2);
+        leaderCollector.expectMatching(ApplyState.class, 2);
         final var leaderLog = leaderActorContext.getReplicatedLog();
         assertEquals("Leader journal last index", 1, leaderLog.lastIndex());
         assertEquals("Leader commit index", 1, leaderLog.getCommitIndex());
@@ -428,7 +425,7 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
 
         // Verify ServerConfigurationPayload entry in the new follower
 
-        expectMatching(newFollowerCollectorActor, ApplyState.class, 2);
+        newFollowerCollector.expectMatching(ApplyState.class, 2);
         assertEquals("New follower peers", Set.of(LEADER_ID, NEW_SERVER_ID2), newFollowerActorContext.getPeerIds());
 
         LOG.info("testAddServerWithOperationInProgress ending");
@@ -449,7 +446,7 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         MockLeaderRaftActor leaderRaftActor = leaderActor.underlyingActor();
         final RaftActorContext leaderActorContext = leaderRaftActor.getRaftActorContext();
 
-        final var leaderCollectorActor = newLeaderCollectorActor(leaderRaftActor);
+        final var leaderCollector = newLeaderCollector(leaderRaftActor);
 
         // Intercept the commit request to delay its completion
         final var leaderPersistence = leaderRaftActor.persistence().decorateSnapshotStore(CapturingSnapshotStore::new);
@@ -467,11 +464,11 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         assertEquals("getStatus", ServerChangeStatus.OK, addServerReply.getStatus());
         assertEquals("getLeaderHint", LEADER_ID, addServerReply.getLeaderHint().orElseThrow());
 
-        expectFirstMatching(newFollowerCollectorActor, ApplyLeaderSnapshot.class);
+        newFollowerCollector.expectFirstMatching(ApplyLeaderSnapshot.class);
 
         // Verify ServerConfigurationPayload entry in leader's log
 
-        expectFirstMatching(leaderCollectorActor, ApplyState.class);
+        leaderCollector.expectFirstMatching(ApplyState.class);
         final var leaderLog = leaderActorContext.getReplicatedLog();
         assertEquals("Leader journal last index", 0, leaderLog.lastIndex());
         assertEquals("Leader commit index", 0, leaderLog.getCommitIndex());
@@ -598,14 +595,14 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
 
         ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setElectionTimeoutFactor(8);
 
-        ActorRef leaderCollectorActor = newLeaderCollectorActor(leaderRaftActor);
+        final var leaderCollector = newLeaderCollector(leaderRaftActor);
 
         // Drop the UnInitializedFollowerSnapshotReply to delay it.
         leaderRaftActor.setDropMessageOfType(UnInitializedFollowerSnapshotReply.class);
 
         leaderActor.tell(new AddServer(NEW_SERVER_ID, newFollowerRaftActor.path().toString(), true), testKit.getRef());
 
-        final var snapshotReply = expectFirstMatching(leaderCollectorActor, UnInitializedFollowerSnapshotReply.class);
+        final var snapshotReply = leaderCollector.expectFirstMatching(UnInitializedFollowerSnapshotReply.class);
 
         // Prevent election timeout when the leader switches to follower
         ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setElectionTimeoutFactor(100);
@@ -696,13 +693,13 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         MockLeaderRaftActor leaderRaftActor = leaderActor.underlyingActor();
         final RaftActorContext leaderActorContext = leaderRaftActor.getRaftActorContext();
 
-        final ActorRef leaderCollectorActor = newLeaderCollectorActor(leaderRaftActor);
+        final var leaderCollector = newLeaderCollector(leaderRaftActor);
 
         // Drop UnInitializedFollowerSnapshotReply initially
         leaderRaftActor.setDropMessageOfType(UnInitializedFollowerSnapshotReply.class);
 
         MockNewFollowerRaftActor newFollowerRaftActorInstance = newFollowerRaftActor.underlyingActor();
-        newFollowerCollectorActor = newCollectorActor(newFollowerRaftActorInstance, NEW_SERVER_ID);
+        newFollowerCollector = newCollectorActor(newFollowerRaftActorInstance, NEW_SERVER_ID);
 
         // Drop AppendEntries to the new follower so consensus isn't reached
         newFollowerRaftActorInstance.setDropMessageOfType(AppendEntries.class);
@@ -710,13 +707,13 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         leaderActor.tell(new AddServer(NEW_SERVER_ID, newFollowerRaftActor.path().toString(), true), testKit.getRef());
 
         // Capture the UnInitializedFollowerSnapshotReply
-        Object snapshotReply = expectFirstMatching(leaderCollectorActor, UnInitializedFollowerSnapshotReply.class);
+        Object snapshotReply = leaderCollector.expectFirstMatching(UnInitializedFollowerSnapshotReply.class);
 
         // Send the UnInitializedFollowerSnapshotReply to resume the first request
         leaderRaftActor.setDropMessageOfType(null);
         leaderActor.tell(snapshotReply, leaderActor);
 
-        expectFirstMatching(newFollowerCollectorActor, AppendEntries.class);
+        newFollowerCollector.expectFirstMatching(AppendEntries.class);
 
         // Send a second AddServer
         leaderActor.tell(new AddServer(NEW_SERVER_ID2, "", false), testKit.getRef());
@@ -769,21 +766,20 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         configParams.setHeartBeatInterval(Duration.ofDays(1));
 
-        ActorRef leaderActor = actorFactory.createActor(
-                MessageCollectorActor.props(), actorFactory.generateActorId(LEADER_ID));
+        final var leader = MessageCollector.ofPrefix(actorFactory, LEADER_ID);
 
         TestActorRef<MockRaftActor> followerRaftActor = actorFactory.createTestActor(
                 MockRaftActor.builder().id(FOLLOWER_ID).peerAddresses(Map.of(LEADER_ID,
-                        leaderActor.path().toString())).config(configParams).persistent(Optional.of(Boolean.FALSE))
+                        leader.actor().path().toString())).config(configParams).persistent(Optional.of(Boolean.FALSE))
                         .props(stateDir()).withDispatcher(Dispatchers.DefaultDispatcherId()),
                 actorFactory.generateActorId(FOLLOWER_ID));
         followerRaftActor.underlyingActor().waitForInitializeBehaviorComplete();
 
-        followerRaftActor.tell(new AppendEntries(1, LEADER_ID, 0, 1, List.of(), -1, -1, (short)0), leaderActor);
+        followerRaftActor.tell(new AppendEntries(1, LEADER_ID, 0, 1, List.of(), -1, -1, (short)0), leader.actor());
 
         followerRaftActor.tell(new AddServer(NEW_SERVER_ID, newFollowerRaftActor.path().toString(), true),
                 testKit.getRef());
-        expectFirstMatching(leaderActor, AddServer.class);
+        leader.expectFirstMatching(AddServer.class);
 
         LOG.info("testAddServerForwardedToLeader ending");
     }
@@ -899,7 +895,7 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
                 initialActorContext).withDispatcher(Dispatchers.DefaultDispatcherId()),
                 actorFactory.generateActorId(LEADER_ID));
 
-        final ActorRef leaderCollector = newLeaderCollectorActor(leaderActor.underlyingActor());
+        final ActorRef leaderCollector = newLeaderCollector(leaderActor.underlyingActor());
 
         ActorRef follower1Collector = actorFactory.createActor(
                 MessageCollectorActor.props(), actorFactory.generateActorId("collector"));
@@ -959,7 +955,7 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
                         initialActorContext).withDispatcher(Dispatchers.DefaultDispatcherId()),
                 actorFactory.generateActorId(LEADER_ID));
 
-        final ActorRef leaderCollector = newLeaderCollectorActor(leaderActor.underlyingActor());
+        final ActorRef leaderCollector = newLeaderCollector(leaderActor.underlyingActor());
 
         final ActorRef followerCollector =
                 actorFactory.createActor(MessageCollectorActor.props(), actorFactory.generateActorId("collector"));
@@ -1015,20 +1011,18 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
                 MockLeaderRaftActor.props(stateDir(), Map.of(FOLLOWER_ID, follower1ActorPath,
                         FOLLOWER_ID2, follower2ActorPath), new MockRaftActorContext(stateDir()))
                         .withDispatcher(Dispatchers.DefaultDispatcherId()), actorFactory.generateActorId(LEADER_ID));
-        ActorRef leaderCollector = newLeaderCollectorActor(leaderActor.underlyingActor());
+        final var leaderCollector = newLeaderCollector(leaderActor.underlyingActor());
 
-        ActorRef follower1Collector = actorFactory.createActor(
-                MessageCollectorActor.props(), actorFactory.generateActorId("collector"));
+        final var follower1Collector = MessageCollector.ofPrefix(actorFactory, "collector");
         final TestActorRef<CollectingMockRaftActor> follower1RaftActor = actorFactory.createTestActor(
                 CollectingMockRaftActor.props(stateDir(), FOLLOWER_ID, Map.of(LEADER_ID, leaderActor.path().toString(),
-                        FOLLOWER_ID2, follower2ActorPath), configParams, NO_PERSISTENCE, follower1Collector)
+                        FOLLOWER_ID2, follower2ActorPath), configParams, NO_PERSISTENCE, follower1Collector.actor())
                         .withDispatcher(Dispatchers.DefaultDispatcherId()), follower1ActorId);
 
-        ActorRef follower2Collector = actorFactory.createActor(
-                MessageCollectorActor.props(), actorFactory.generateActorId("collector"));
+        final var follower2Collector = MessageCollector.ofPrefix(actorFactory, "collector");
         final TestActorRef<CollectingMockRaftActor> follower2RaftActor = actorFactory.createTestActor(
                 CollectingMockRaftActor.props(stateDir(), FOLLOWER_ID2, Map.of(LEADER_ID, leaderActor.path().toString(),
-                        FOLLOWER_ID, follower1ActorPath), configParams, NO_PERSISTENCE, follower2Collector)
+                        FOLLOWER_ID, follower1ActorPath), configParams, NO_PERSISTENCE, follower2Collector.actor())
                         .withDispatcher(Dispatchers.DefaultDispatcherId()), follower2ActorId);
 
         // Send first ChangeServersVotingStatus message
@@ -1038,24 +1032,24 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         ServerChangeReply reply = testKit.expectMsgClass(Duration.ofSeconds(5), ServerChangeReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, reply.getStatus());
 
-        final ApplyState applyState = MessageCollectorActor.expectFirstMatching(leaderCollector, ApplyState.class);
+        final ApplyState applyState = leaderCollector.expectFirstMatching(ApplyState.class);
         assertEquals(0L, applyState.entry().index());
         verifyServerConfigurationPayloadEntry(leaderActor.underlyingActor().getRaftActorContext().getReplicatedLog(),
                 votingServer(LEADER_ID), nonVotingServer(FOLLOWER_ID), nonVotingServer(FOLLOWER_ID2));
 
-        MessageCollectorActor.expectFirstMatching(follower1Collector, ApplyState.class);
+        follower1Collector.expectFirstMatching(ApplyState.class);
         verifyServerConfigurationPayloadEntry(follower1RaftActor.underlyingActor().getRaftActorContext()
                 .getReplicatedLog(), votingServer(LEADER_ID), nonVotingServer(FOLLOWER_ID),
                 nonVotingServer(FOLLOWER_ID2));
 
-        MessageCollectorActor.expectFirstMatching(follower2Collector, ApplyState.class);
+        follower2Collector.expectFirstMatching(ApplyState.class);
         verifyServerConfigurationPayloadEntry(follower2RaftActor.underlyingActor().getRaftActorContext()
                 .getReplicatedLog(), votingServer(LEADER_ID), nonVotingServer(FOLLOWER_ID),
                 nonVotingServer(FOLLOWER_ID2));
 
-        MessageCollectorActor.clearMessages(leaderCollector);
-        MessageCollectorActor.clearMessages(follower1Collector);
-        MessageCollectorActor.clearMessages(follower2Collector);
+        leaderCollector.clearMessages();
+        follower1Collector.clearMessages();
+        follower2Collector.clearMessages();
 
         // Send second ChangeServersVotingStatus message
 
@@ -1063,15 +1057,15 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         reply = testKit.expectMsgClass(Duration.ofSeconds(5), ServerChangeReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, reply.getStatus());
 
-        MessageCollectorActor.expectFirstMatching(leaderCollector, ApplyState.class);
+        leaderCollector.expectFirstMatching(ApplyState.class);
         verifyServerConfigurationPayloadEntry(leaderActor.underlyingActor().getRaftActorContext().getReplicatedLog(),
                 votingServer(LEADER_ID), votingServer(FOLLOWER_ID), nonVotingServer(FOLLOWER_ID2));
 
-        MessageCollectorActor.expectFirstMatching(follower1Collector, ApplyState.class);
+        follower1Collector.expectFirstMatching(ApplyState.class);
         verifyServerConfigurationPayloadEntry(follower1RaftActor.underlyingActor().getRaftActorContext()
                 .getReplicatedLog(), votingServer(LEADER_ID), votingServer(FOLLOWER_ID), nonVotingServer(FOLLOWER_ID2));
 
-        MessageCollectorActor.expectFirstMatching(follower2Collector, ApplyState.class);
+        follower2Collector.expectFirstMatching(ApplyState.class);
         verifyServerConfigurationPayloadEntry(follower2RaftActor.underlyingActor().getRaftActorContext()
                 .getReplicatedLog(), votingServer(LEADER_ID), votingServer(FOLLOWER_ID), nonVotingServer(FOLLOWER_ID2));
 
@@ -1095,20 +1089,18 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
                     Map.of(FOLLOWER_ID, follower1ActorPath,
                         FOLLOWER_ID2, follower2ActorPath), new MockRaftActorContext(stateDir()))
                         .withDispatcher(Dispatchers.DefaultDispatcherId()), actorFactory.generateActorId(LEADER_ID));
-        ActorRef leaderCollector = newLeaderCollectorActor(leaderActor.underlyingActor());
+        final var leaderCollector = newLeaderCollector(leaderActor.underlyingActor());
 
-        ActorRef follower1Collector = actorFactory.createActor(
-                MessageCollectorActor.props(), actorFactory.generateActorId("collector"));
+        final var follower1Collector = MessageCollector.ofPrefix(actorFactory, "collector");
         final TestActorRef<CollectingMockRaftActor> follower1RaftActor = actorFactory.createTestActor(
                 CollectingMockRaftActor.props(stateDir(), FOLLOWER_ID, Map.of(LEADER_ID, leaderActor.path().toString(),
-                        FOLLOWER_ID2, follower2ActorPath), configParams, NO_PERSISTENCE, follower1Collector)
+                        FOLLOWER_ID2, follower2ActorPath), configParams, NO_PERSISTENCE, follower1Collector.actor())
                         .withDispatcher(Dispatchers.DefaultDispatcherId()), follower1ActorId);
 
-        ActorRef follower2Collector = actorFactory.createActor(
-                MessageCollectorActor.props(), actorFactory.generateActorId("collector"));
+        final var follower2Collector = MessageCollector.ofPrefix(actorFactory, "collector");
         final TestActorRef<CollectingMockRaftActor> follower2RaftActor = actorFactory.createTestActor(
                 CollectingMockRaftActor.props(stateDir(), FOLLOWER_ID2, Map.of(LEADER_ID, leaderActor.path().toString(),
-                        FOLLOWER_ID, follower1ActorPath), configParams, NO_PERSISTENCE, follower2Collector)
+                        FOLLOWER_ID, follower1ActorPath), configParams, NO_PERSISTENCE, follower2Collector.actor())
                         .withDispatcher(Dispatchers.DefaultDispatcherId()), follower2ActorId);
 
         // Send ChangeServersVotingStatus message
@@ -1117,22 +1109,22 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         ServerChangeReply reply = testKit.expectMsgClass(Duration.ofSeconds(5), ServerChangeReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, reply.getStatus());
 
-        MessageCollectorActor.expectFirstMatching(leaderCollector, ApplyState.class);
+        leaderCollector.expectFirstMatching(ApplyState.class);
         verifyServerConfigurationPayloadEntry(leaderActor.underlyingActor().getRaftActorContext().getReplicatedLog(),
                 nonVotingServer(LEADER_ID), votingServer(FOLLOWER_ID), votingServer(FOLLOWER_ID2));
 
-        MessageCollectorActor.expectFirstMatching(follower1Collector, ApplyState.class);
+        follower1Collector.expectFirstMatching(ApplyState.class);
         verifyServerConfigurationPayloadEntry(follower1RaftActor.underlyingActor().getRaftActorContext()
                 .getReplicatedLog(), nonVotingServer(LEADER_ID), votingServer(FOLLOWER_ID), votingServer(FOLLOWER_ID2));
 
-        MessageCollectorActor.expectFirstMatching(follower2Collector, ApplyState.class);
+        follower2Collector.expectFirstMatching(ApplyState.class);
         verifyServerConfigurationPayloadEntry(follower2RaftActor.underlyingActor().getRaftActorContext()
                 .getReplicatedLog(), nonVotingServer(LEADER_ID), votingServer(FOLLOWER_ID), votingServer(FOLLOWER_ID2));
 
         verifyRaftState(RaftRole.Leader, follower1RaftActor.underlyingActor(), follower2RaftActor.underlyingActor());
         verifyRaftState(RaftRole.Follower, leaderActor.underlyingActor());
 
-        MessageCollectorActor.expectMatching(leaderCollector, AppendEntries.class, 2);
+        leaderCollector.expectMatching(AppendEntries.class, 2);
 
         LOG.info("testChangeLeaderToNonVoting ending");
     }
@@ -1506,11 +1498,11 @@ class RaftActorVotingConfigSupportTest extends AbstractActorTest {
         return new ServerInfo(id, false);
     }
 
-    private ActorRef newLeaderCollectorActor(final MockLeaderRaftActor leaderRaftActor) {
+    private MessageCollector newLeaderCollector(final MockLeaderRaftActor leaderRaftActor) {
         return newCollectorActor(leaderRaftActor, LEADER_ID);
     }
 
-    private ActorRef newCollectorActor(final AbstractMockRaftActor raftActor, final String id) {
+    private MessageCollector newCollectorActor(final AbstractMockRaftActor raftActor, final String id) {
         ActorRef collectorActor = actorFactory.createTestActor(
                 MessageCollectorActor.props(), actorFactory.generateActorId(id + "Collector"));
         raftActor.setCollectorActor(collectorActor);

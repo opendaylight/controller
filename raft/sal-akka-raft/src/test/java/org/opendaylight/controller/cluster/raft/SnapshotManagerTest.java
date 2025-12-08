@@ -27,7 +27,6 @@ import java.io.OutputStream;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.List;
-import org.apache.pekko.actor.ActorRef;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -92,7 +91,7 @@ class SnapshotManagerTest extends AbstractActorTest {
 
     private SnapshotManager snapshotManager;
     private TestActorFactory factory;
-    private ActorRef actorRef;
+    private MessageCollector actorRef;
 
     @BeforeEach
     void beforeEach() {
@@ -111,7 +110,7 @@ class SnapshotManagerTest extends AbstractActorTest {
         snapshotManager = new SnapshotManager(mockRaftActorContext);
         factory = new TestActorFactory(getSystem());
 
-        actorRef = factory.createActor(MessageCollectorActor.props(), factory.generateActorId("test-"));
+        actorRef = MessageCollector.ofPrefix(factory, "test-");
         doReturn(actorRef).when(mockRaftActorContext).getActor();
 
         snapshotManager.setSnapshotCohort(mockCohort);
@@ -149,7 +148,7 @@ class SnapshotManagerTest extends AbstractActorTest {
         //
         assertEquals(-1L, captureSnapshot.getReplicatedToAllIndex());
         assertEquals(-1L, captureSnapshot.getReplicatedToAllTerm());
-        MessageCollectorActor.clearMessages(actorRef);
+        actorRef.clearMessages();
     }
 
     @Test
@@ -175,7 +174,7 @@ class SnapshotManagerTest extends AbstractActorTest {
         assertEquals(-1L, captureSnapshot.getReplicatedToAllIndex());
         assertEquals(-1L, captureSnapshot.getReplicatedToAllTerm());
 
-        MessageCollectorActor.clearMessages(actorRef);
+        actorRef.clearMessages();
     }
 
     @Test
@@ -201,7 +200,7 @@ class SnapshotManagerTest extends AbstractActorTest {
         assertEquals(-1L, captureSnapshot.getReplicatedToAllIndex());
         assertEquals(-1L, captureSnapshot.getReplicatedToAllTerm());
 
-        MessageCollectorActor.clearMessages(actorRef);
+        actorRef.clearMessages();
     }
 
     @Test
@@ -402,7 +401,7 @@ class SnapshotManagerTest extends AbstractActorTest {
 
         verify(mockEntryStore).discardHead(1L);
 
-        MessageCollectorActor.expectFirstMatching(actorRef, SnapshotComplete.class);
+        actorRef.expectFirstMatching(SnapshotComplete.class);
     }
 
     @Test
@@ -451,7 +450,7 @@ class SnapshotManagerTest extends AbstractActorTest {
 
         verify(mockReplicatedLog).snapshotRollback();
 
-        MessageCollectorActor.expectFirstMatching(actorRef, SnapshotComplete.class);
+        actorRef.expectFirstMatching(SnapshotComplete.class);
     }
 
     @Test

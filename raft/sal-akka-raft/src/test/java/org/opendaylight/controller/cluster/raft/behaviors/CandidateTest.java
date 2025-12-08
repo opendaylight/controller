@@ -19,11 +19,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import org.apache.pekko.actor.ActorRef;
 import org.apache.pekko.dispatch.Dispatchers;
 import org.apache.pekko.testkit.TestActorRef;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.opendaylight.controller.cluster.raft.MessageCollector;
 import org.opendaylight.controller.cluster.raft.MessageCollectorActor;
 import org.opendaylight.controller.cluster.raft.MockCommand;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
@@ -48,7 +48,7 @@ class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
         MessageCollectorActor.props().withDispatcher(Dispatchers.DefaultDispatcherId()),
             actorFactory.generateActorId("candidate"));
 
-    private ActorRef[] peerActors;
+    private MessageCollector[] peerActors;
     private RaftActorBehavior candidate;
 
     @Override
@@ -159,15 +159,15 @@ class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
         raftActorContext.getPeerInfo("peer4").setVotingState(VotingState.NON_VOTING);
         candidate = new Candidate(raftActorContext);
 
-        MessageCollectorActor.expectFirstMatching(peerActors[1], RequestVote.class);
-        MessageCollectorActor.expectFirstMatching(peerActors[2], RequestVote.class);
-        MessageCollectorActor.assertNoneMatching(peerActors[0], RequestVote.class, 300);
-        MessageCollectorActor.assertNoneMatching(peerActors[3], RequestVote.class, 100);
+        peerActors[1].expectFirstMatching(RequestVote.class);
+        peerActors[2].expectFirstMatching(RequestVote.class);
+        peerActors[0].assertNoneMatching(RequestVote.class, 300);
+        peerActors[3].assertNoneMatching(RequestVote.class, 100);
 
-        assertSame(candidate, candidate.handleMessage(peerActors[1], new RequestVoteReply(1, false)));
+        assertSame(candidate, candidate.handleMessage(peerActors[1].actor(), new RequestVoteReply(1, false)));
 
         candidate = assertInstanceOf(Leader.class,
-            candidate.handleMessage(peerActors[2], new RequestVoteReply(1, true)));
+            candidate.handleMessage(peerActors[2].actor(), new RequestVoteReply(1, true)));
     }
 
     @Test
@@ -175,10 +175,10 @@ class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
         candidate = new Candidate(createActorContext());
 
         setupPeers(1);
-        RaftActorBehavior newBehavior = candidate.handleMessage(peerActors[0], new AppendEntries(1, "test", 0, 0,
-                List.of(), 0, -1, (short) 0));
+        RaftActorBehavior newBehavior = candidate.handleMessage(peerActors[0].actor(),
+            new AppendEntries(1, "test", 0, 0, List.of(), 0, -1, (short) 0));
 
-        AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(peerActors[0], AppendEntriesReply.class);
+        AppendEntriesReply reply = peerActors[0].expectFirstMatching(AppendEntriesReply.class);
         assertFalse("isSuccess", reply.isSuccess());
         assertEquals("getTerm", 2, reply.getTerm());
         assertTrue("New Behavior : " + newBehavior, newBehavior instanceof Candidate);
@@ -189,8 +189,8 @@ class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
         candidate = new Candidate(createActorContext());
 
         setupPeers(1);
-        RaftActorBehavior newBehavior = candidate.handleMessage(peerActors[0], new AppendEntries(5, "test", 0, 0,
-            List.of(), 0, -1, (short) 0));
+        RaftActorBehavior newBehavior = candidate.handleMessage(peerActors[0].actor(),
+            new AppendEntries(5, "test", 0, 0, List.of(), 0, -1, (short) 0));
 
         assertTrue("New Behavior : " + newBehavior, newBehavior instanceof Follower);
     }
@@ -202,8 +202,8 @@ class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
         candidate = new Candidate(actorContext);
 
         setupPeers(1);
-        RaftActorBehavior newBehavior = candidate.handleMessage(peerActors[0], new AppendEntries(2, "test", 0, 0,
-            List.of(), 0, -1, (short) 0));
+        RaftActorBehavior newBehavior = candidate.handleMessage(peerActors[0].actor(),
+            new AppendEntries(2, "test", 0, 0, List.of(), 0, -1, (short) 0));
 
         assertTrue("New Behavior : " + newBehavior + " term = " + actorContext.currentTerm(),
                 newBehavior instanceof Follower);
@@ -214,9 +214,9 @@ class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
         candidate = new Candidate(createActorContext());
 
         setupPeers(1);
-        candidate.handleMessage(peerActors[0], new RequestVote(1, "test", 0, 0));
+        candidate.handleMessage(peerActors[0].actor(), new RequestVote(1, "test", 0, 0));
 
-        RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(peerActors[0], RequestVoteReply.class);
+        RequestVoteReply reply = peerActors[0].expectFirstMatching(RequestVoteReply.class);
         assertFalse("isVoteGranted", reply.isVoteGranted());
         assertEquals("getTerm", 2, reply.getTerm());
     }
@@ -231,9 +231,9 @@ class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
         candidate = new Candidate(context);
 
         setupPeers(1);
-        candidate.handleMessage(peerActors[0], new RequestVote(1001, "candidate", 10000, 999));
+        candidate.handleMessage(peerActors[0].actor(), new RequestVote(1001, "candidate", 10000, 999));
 
-        RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(peerActors[0], RequestVoteReply.class);
+        RequestVoteReply reply = peerActors[0].expectFirstMatching(RequestVoteReply.class);
         assertTrue("isVoteGranted", reply.isVoteGranted());
         assertEquals("getTerm", 1001, reply.getTerm());
     }
@@ -251,9 +251,9 @@ class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
 
         // RequestVote candidate ID ("candidate2") does not match this candidate's votedFor
         // (it votes for itself)
-        candidate.handleMessage(peerActors[0], new RequestVote(1001, "candidate2", 10000, 999));
+        candidate.handleMessage(peerActors[0].actor(), new RequestVote(1001, "candidate2", 10000, 999));
 
-        RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(peerActors[0], RequestVoteReply.class);
+        RequestVoteReply reply = peerActors[0].expectFirstMatching(RequestVoteReply.class);
         assertFalse("isVoteGranted", reply.isVoteGranted());
         assertEquals("getTerm", 1001, reply.getTerm());
     }
@@ -321,11 +321,10 @@ class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
 
     private Map<String, String> setupPeers(final int count) {
         final var peerMap = new HashMap<String, String>();
-        peerActors = new ActorRef[count];
+        peerActors = new MessageCollector[count];
         for (int i = 0; i < count; i++) {
-            peerActors[i] = actorFactory.createActor(MessageCollectorActor.props(),
-                    actorFactory.generateActorId("peer"));
-            peerMap.put("peer" + (i + 1), peerActors[i].path().toString());
+            peerActors[i] = MessageCollector.ofPrefix(actorFactory, "peer");
+            peerMap.put("peer" + (i + 1), peerActors[i].actor().path().toString());
         }
 
         return peerMap;
@@ -333,7 +332,7 @@ class CandidateTest extends AbstractRaftActorBehaviorTest<Candidate> {
 
     @Override
     protected void assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(final MockRaftActorContext actorContext,
-            final ActorRef actorRef, final RaftRPC rpc) {
+            final MessageCollector actorRef, final RaftRPC rpc) {
         super.assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(actorContext, actorRef, rpc);
         if (rpc instanceof RequestVote requestVote) {
             assertEquals("New votedFor", requestVote.getCandidateId(), actorContext.termInfo().votedFor());

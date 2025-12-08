@@ -17,17 +17,15 @@ import org.apache.pekko.actor.ActorRef;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
-import org.opendaylight.controller.cluster.raft.MessageCollectorActor;
+import org.opendaylight.controller.cluster.raft.MessageCollector;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.raft.api.RaftRole;
 
 class IsolatedLeaderTest extends AbstractLeaderTest<IsolatedLeader> {
-    private final ActorRef leaderActor = actorFactory.createActor(
-            MessageCollectorActor.props(), actorFactory.generateActorId("leader"));
-    private final ActorRef senderActor = actorFactory.createActor(
-            MessageCollectorActor.props(), actorFactory.generateActorId("sender"));
+    private final MessageCollector leader = MessageCollector.ofPrefix(actorFactory, "leader");
+    private final MessageCollector sender = MessageCollector.ofPrefix(actorFactory, "sender");
 
     private AbstractLeader isolatedLeader;
 
@@ -48,7 +46,7 @@ class IsolatedLeaderTest extends AbstractLeaderTest<IsolatedLeader> {
 
     @Override
     protected MockRaftActorContext createActorContext(final int payloadVersion) {
-        return createActorContext(leaderActor, payloadVersion);
+        return createActorContext(leader.actor(), payloadVersion);
     }
 
     @Override
@@ -75,14 +73,14 @@ class IsolatedLeaderTest extends AbstractLeaderTest<IsolatedLeader> {
         leaderActorContext.setCurrentBehavior(isolatedLeader);
 
         // in a 3 node cluster, even if 1 follower is returns a reply, the isolatedLeader is not isolated
-        final var newBehavior = assertInstanceOf(Leader.class, isolatedLeader.handleMessage(senderActor,
+        final var newBehavior = assertInstanceOf(Leader.class, isolatedLeader.handleMessage(sender.actor(),
                 new AppendEntriesReply("follower-1", isolatedLeader.lastTerm() - 1, true,
                         isolatedLeader.lastIndex() - 1, isolatedLeader.lastTerm() - 1, (short)0)));
 
         isolatedLeader.close();
         isolatedLeader = newBehavior;
 
-        assertSame(isolatedLeader, isolatedLeader.handleMessage(senderActor,
+        assertSame(isolatedLeader, isolatedLeader.handleMessage(sender.actor(),
                 new AppendEntriesReply("follower-2", isolatedLeader.lastTerm() - 1, true,
                         isolatedLeader.lastIndex() - 1, isolatedLeader.lastTerm() - 1, (short) 0)));
     }
@@ -106,18 +104,18 @@ class IsolatedLeaderTest extends AbstractLeaderTest<IsolatedLeader> {
         leaderActorContext.setCurrentBehavior(isolatedLeader);
 
         // in a 5 member cluster, atleast 2 followers need to be active and return a reply
-        assertSame(isolatedLeader, isolatedLeader.handleMessage(senderActor,
+        assertSame(isolatedLeader, isolatedLeader.handleMessage(sender.actor(),
                 new AppendEntriesReply("follower-1", isolatedLeader.lastTerm() - 1, true,
                         isolatedLeader.lastIndex() - 1, isolatedLeader.lastTerm() - 1, (short) 0)));
 
-        final var newBehavior = assertInstanceOf(Leader.class, isolatedLeader.handleMessage(senderActor,
+        final var newBehavior = assertInstanceOf(Leader.class, isolatedLeader.handleMessage(sender.actor(),
                 new AppendEntriesReply("follower-2", isolatedLeader.lastTerm() - 1, true,
                         isolatedLeader.lastIndex() - 1, isolatedLeader.lastTerm() - 1, (short) 0)));
 
         isolatedLeader.close();
         isolatedLeader = newBehavior;
 
-        assertSame(isolatedLeader, isolatedLeader.handleMessage(senderActor,
+        assertSame(isolatedLeader, isolatedLeader.handleMessage(sender.actor(),
                 new AppendEntriesReply("follower-3", isolatedLeader.lastTerm() - 1, true,
                         isolatedLeader.lastIndex() - 1, isolatedLeader.lastTerm() - 1, (short) 0)));
     }
@@ -139,7 +137,7 @@ class IsolatedLeaderTest extends AbstractLeaderTest<IsolatedLeader> {
         // if an append-entries reply is received by the isolated-leader, and that reply
         // has a term  > than its own term, then IsolatedLeader switches to Follower
         // bowing itself to another leader in the cluster
-        final var newBehavior = assertInstanceOf(Follower.class, isolatedLeader.handleMessage(senderActor,
+        final var newBehavior = assertInstanceOf(Follower.class, isolatedLeader.handleMessage(sender.actor(),
                 new AppendEntriesReply("follower-1", isolatedLeader.lastTerm() + 1, true,
                         isolatedLeader.lastIndex() + 1, isolatedLeader.lastTerm() + 1, (short)0)));
         newBehavior.close();

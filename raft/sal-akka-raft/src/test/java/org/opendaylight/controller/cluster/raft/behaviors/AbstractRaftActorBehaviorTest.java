@@ -29,7 +29,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.opendaylight.controller.cluster.raft.AbstractActorTest;
-import org.opendaylight.controller.cluster.raft.MessageCollectorActor;
+import org.opendaylight.controller.cluster.raft.MessageCollector;
 import org.opendaylight.controller.cluster.raft.MockCommand;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.Builder;
@@ -52,8 +52,8 @@ import org.slf4j.LoggerFactory;
 abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior> extends AbstractActorTest {
     final TestActorFactory actorFactory = new TestActorFactory(getSystem());
 
-    private final ActorRef behaviorActor = actorFactory.createActor(MessageCollectorActor.props(),
-        actorFactory.generateActorId("behavior"));
+    private final MessageCollector behaviorActor =
+        MessageCollector.of(getSystem(), actorFactory.generateActorId("behavior"));
 
     @TempDir
     Path stateDir;
@@ -106,11 +106,11 @@ abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior> extend
 
         behavior = createBehavior(context);
 
-        assertSame(behavior, behavior.handleMessage(behaviorActor, appendEntries));
+        assertSame(behavior, behavior.handleMessage(behaviorActor.actor(), appendEntries));
 
         // Also expect an AppendEntriesReply to be sent where success is false
 
-        AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(behaviorActor, AppendEntriesReply.class);
+        AppendEntriesReply reply = behaviorActor.expectFirstMatching(AppendEntriesReply.class);
 
         assertFalse(reply.isSuccess());
         assertEquals(5, reply.getPayloadVersion());
@@ -136,17 +136,17 @@ abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior> extend
         assertFalse(behavior instanceof Candidate);
 
         // Check that the behavior does not handle unknown message
-        assertNull(behavior.handleMessage(behaviorActor, "unknown"));
+        assertNull(behavior.handleMessage(behaviorActor.actor(), "unknown"));
 
-        assertSame(behavior, behavior.handleMessage(behaviorActor, appendEntries));
+        assertSame(behavior, behavior.handleMessage(behaviorActor.actor(), appendEntries));
 
         assertEquals(1, context.getReplicatedLog().size());
 
         handleAppendEntriesAddSameEntryToLogReply(behaviorActor);
     }
 
-    protected void handleAppendEntriesAddSameEntryToLogReply(final ActorRef replyActor) {
-        assertNull(MessageCollectorActor.getFirstMatching(replyActor, AppendEntriesReply.class));
+    protected void handleAppendEntriesAddSameEntryToLogReply(final MessageCollector replyActor) {
+        assertNull(replyActor.getFirstMatching(AppendEntriesReply.class));
     }
 
     /**
@@ -162,9 +162,9 @@ abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior> extend
 
         context.setTermInfo(new TermInfo(1, "test"));
 
-        behavior.handleMessage(behaviorActor, new RequestVote(context.currentTerm(), "test", 10000, 999));
+        behavior.handleMessage(behaviorActor.actor(), new RequestVote(context.currentTerm(), "test", 10000, 999));
 
-        RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(behaviorActor, RequestVoteReply.class);
+        RequestVoteReply reply = behaviorActor.expectFirstMatching(RequestVoteReply.class);
         assertTrue(reply.isVoteGranted());
     }
 
@@ -184,10 +184,10 @@ abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior> extend
         int index = 2000;
         setLastLogEntry(context, context.currentTerm(), index, new MockCommand(""));
 
-        behavior.handleMessage(behaviorActor,
+        behavior.handleMessage(behaviorActor.actor(),
             new RequestVote(context.currentTerm(), "test", index - 1, context.currentTerm()));
 
-        RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(behaviorActor, RequestVoteReply.class);
+        RequestVoteReply reply = behaviorActor.expectFirstMatching(RequestVoteReply.class);
         assertFalse(reply.isVoteGranted());
     }
 
@@ -204,15 +204,15 @@ abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior> extend
 
         behavior = createBehavior(context);
 
-        behavior.handleMessage(behaviorActor, new RequestVote(999, "test", 10000, 999));
+        behavior.handleMessage(behaviorActor.actor(), new RequestVote(999, "test", 10000, 999));
 
-        RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(behaviorActor, RequestVoteReply.class);
+        RequestVoteReply reply = behaviorActor.expectFirstMatching(RequestVoteReply.class);
         assertFalse(reply.isVoteGranted());
     }
 
     @Test
     void testPerformSnapshot() {
-        final var context = new MockRaftActorContext("test", stateDir, getSystem(), behaviorActor);
+        final var context = new MockRaftActorContext("test", stateDir, getSystem(), behaviorActor.actor());
         RaftActorBehavior abstractBehavior = createBehavior(context);
         if (abstractBehavior instanceof Candidate) {
             return;
@@ -263,14 +263,14 @@ abstract class AbstractRaftActorBehaviorTest<T extends RaftActorBehavior> extend
     }
 
     protected void assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(final MockRaftActorContext actorContext,
-            final ActorRef actorRef, final RaftRPC rpc) {
+            final MessageCollector collector, final RaftRPC rpc) {
 
         Payload payload = new MockCommand("");
         setLastLogEntry(actorContext, 1, 0, payload);
         actorContext.setTermInfo(new TermInfo(1, "test"));
 
         final var origBehavior = createBehavior(actorContext);
-        final var raftBehavior = assertInstanceOf(Follower.class, origBehavior.handleMessage(actorRef, rpc));
+        final var raftBehavior = assertInstanceOf(Follower.class, origBehavior.handleMessage(collector.actor(), rpc));
 
         assertEquals(rpc.getTerm(), actorContext.currentTerm());
 
