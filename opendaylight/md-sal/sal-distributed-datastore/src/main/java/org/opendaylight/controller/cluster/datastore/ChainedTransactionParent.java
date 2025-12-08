@@ -8,12 +8,9 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import static com.google.common.base.Preconditions.checkState;
-import static java.util.Objects.requireNonNull;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
@@ -30,21 +27,18 @@ import org.slf4j.LoggerFactory;
 final class ChainedTransactionParent extends TransactionParent implements Identifiable<LocalHistoryIdentifier> {
     private static final Logger LOG = LoggerFactory.getLogger(ChainedTransactionParent.class);
 
-    private final @NonNull LocalHistoryIdentifier chainId;
-
     private ReadWriteShardDataTreeTransaction previousTx;
     private ReadWriteShardDataTreeTransaction openTransaction;
     private boolean closed;
 
     @NonNullByDefault
-    ChainedTransactionParent(final LocalHistoryIdentifier localHistoryIdentifier, final ShardDataTree dataTree) {
-        super(dataTree);
-        chainId = requireNonNull(localHistoryIdentifier);
+    ChainedTransactionParent(final ShardDataTree dataTree, final LocalHistoryIdentifier historyId) {
+        super(dataTree, historyId);
     }
 
     @Override
     public LocalHistoryIdentifier getIdentifier() {
-        return chainId;
+        return historyId;
     }
 
     @Override
@@ -67,7 +61,7 @@ final class ChainedTransactionParent extends TransactionParent implements Identi
 
     void close() {
         closed = true;
-        LOG.debug("Closing chain {}", chainId);
+        LOG.debug("Closing chain {}", historyId);
     }
 
     @Override
@@ -117,11 +111,11 @@ final class ChainedTransactionParent extends TransactionParent implements Identi
         checkState(openTransaction == null, "Transaction %s is open", openTransaction);
 
         if (previousTx == null) {
-            LOG.debug("Opening an unchained snapshot in {}", chainId);
+            LOG.debug("Opening an unchained snapshot in {}", historyId);
             return dataTree.takeSnapshot();
         }
 
-        LOG.debug("Reusing a chained snapshot in {}", chainId);
+        LOG.debug("Reusing a chained snapshot in {}", historyId);
         return previousTx.getSnapshot();
     }
 
@@ -144,10 +138,5 @@ final class ChainedTransactionParent extends TransactionParent implements Identi
                 callback.onFailure(failure);
             }
         };
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this).add("id", chainId).toString();
     }
 }

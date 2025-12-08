@@ -20,7 +20,7 @@ import org.opendaylight.controller.cluster.raft.spi.MutableUnsignedLongSet;
 final class LocalFrontendHistory extends AbstractFrontendHistory {
     private LocalFrontendHistory(final String persistenceId, final ChainedTransactionParent parent,
             final Map<UnsignedLong, Boolean> closedTransactions, final MutableUnsignedLongSet purgedTransactions) {
-        super(persistenceId, parent.getIdentifier(), parent, closedTransactions, purgedTransactions);
+        super(persistenceId, parent, closedTransactions, purgedTransactions);
     }
 
     static @NonNull LocalFrontendHistory create(final String persistenceId, final ChainedTransactionParent parent) {

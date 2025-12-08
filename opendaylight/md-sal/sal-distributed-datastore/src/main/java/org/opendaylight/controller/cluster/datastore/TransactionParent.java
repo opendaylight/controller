@@ -9,20 +9,24 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.yang.data.tree.api.DataTreeModification;
 
 // Non-sealed for mocking
 abstract class TransactionParent {
     final @NonNull ShardDataTree dataTree;
+    final @NonNull LocalHistoryIdentifier historyId;
 
     @NonNullByDefault
-    TransactionParent(final ShardDataTree dataTree) {
+    TransactionParent(final ShardDataTree dataTree, final LocalHistoryIdentifier historyId) {
         this.dataTree = requireNonNull(dataTree);
+        this.historyId = requireNonNull(historyId);
     }
 
     @NonNullByDefault
@@ -54,4 +58,9 @@ abstract class TransactionParent {
 
     abstract @NonNull FutureCallback<UnsignedLong> wrapCommitCallback(
         @NonNull ReadWriteShardDataTreeTransaction transaction, @NonNull FutureCallback<UnsignedLong> callback);
+
+    @Override
+    public final String toString() {
+        return MoreObjects.toStringHelper(this).add("historyId", historyId).toString();
+    }
 }
