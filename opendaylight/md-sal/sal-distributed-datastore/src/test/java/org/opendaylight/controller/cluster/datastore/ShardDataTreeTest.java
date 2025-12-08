@@ -36,7 +36,6 @@ import com.google.common.base.Ticker;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,9 +43,16 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
-import org.mockito.Mockito;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.opendaylight.controller.cluster.access.concepts.ClientIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.FrontendIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.FrontendType;
+import org.opendaylight.controller.cluster.access.concepts.LocalHistoryIdentifier;
+import org.opendaylight.controller.cluster.access.concepts.MemberName;
 import org.opendaylight.controller.cluster.datastore.persisted.CommitTransactionPayload;
 import org.opendaylight.controller.cluster.datastore.persisted.MetadataShardDataTreeSnapshot;
 import org.opendaylight.controller.cluster.datastore.persisted.PayloadVersion;
@@ -76,12 +82,22 @@ import org.opendaylight.yangtools.yang.data.tree.spi.DataTreeCandidates;
 import org.opendaylight.yangtools.yang.model.api.EffectiveModelContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
+@RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class ShardDataTreeTest extends AbstractTest {
     private static final DatastoreContext DATASTORE_CONTEXT = DatastoreContext.newBuilder().build();
 
-    private final Shard mockShard = Mockito.mock(Shard.class);
+    private static final LocalHistoryIdentifier HISTORY_ID = new LocalHistoryIdentifier(
+        ClientIdentifier.create(FrontendIdentifier.create(MemberName.forName("member-1"),
+            FrontendType.forName("type-1")), 0), 0L);
+
+    @Mock
+    private Shard mockShard;
+    @Mock
+    private DOMDataTreeChangeListener listener;
+
     private ShardDataTree shardDataTree;
     private EffectiveModelContext fullSchema;
+    private SimpleTransactionParent parent;
 
     @Before
     public void setUp() {
@@ -92,6 +108,7 @@ public class ShardDataTreeTest extends AbstractTest {
         fullSchema = SchemaContextHelper.full();
 
         shardDataTree = new ShardDataTree(mockShard, fullSchema, TreeType.OPERATIONAL);
+        parent = new SimpleTransactionParent(shardDataTree, HISTORY_ID);
     }
 
     @Test
@@ -109,8 +126,7 @@ public class ShardDataTreeTest extends AbstractTest {
 
         assertEquals(fullSchema, shardDataTree.modelContext());
 
-        final var queue = shardDataTree.unorderedParent();
-        final var transaction = queue.newReadWriteTransaction(nextTransactionId());
+        final var transaction = parent.newReadWriteTransaction(nextTransactionId());
         final var snapshot = transaction.getSnapshot();
 
         assertNotNull(snapshot);
@@ -123,7 +139,7 @@ public class ShardDataTreeTest extends AbstractTest {
             snapshot.write(PeopleModel.BASE_PATH, PeopleModel.create());
         }
 
-        final var cohort = queue.finishTransaction(transaction);
+        final var cohort = parent.finishTransaction(transaction);
 
         immediateCanCommit(cohort);
         immediatePreCommit(cohort);
@@ -138,15 +154,15 @@ public class ShardDataTreeTest extends AbstractTest {
     public void bug4359AddRemoveCarOnce() {
         immediatePayloadReplication(shardDataTree, mockShard);
 
-        final List<DataTreeCandidate> candidates = new ArrayList<>();
-        candidates.add(addCar(shardDataTree));
-        candidates.add(removeCar(shardDataTree));
+        final var candidates = List.of(
+            addCar(),
+            removeCar());
 
-        final NormalizedNode expected = getCars(shardDataTree);
+        final var expected = getCars();
 
-        applyCandidates(shardDataTree, candidates);
+        applyCandidates(candidates);
 
-        final NormalizedNode actual = getCars(shardDataTree);
+        final var actual = getCars();
 
         assertEquals(expected, actual);
     }
@@ -155,17 +171,17 @@ public class ShardDataTreeTest extends AbstractTest {
     public void bug4359AddRemoveCarTwice() {
         immediatePayloadReplication(shardDataTree, mockShard);
 
-        final List<DataTreeCandidate> candidates = new ArrayList<>();
-        candidates.add(addCar(shardDataTree));
-        candidates.add(removeCar(shardDataTree));
-        candidates.add(addCar(shardDataTree));
-        candidates.add(removeCar(shardDataTree));
+        final var candidates = List.of(
+            addCar(),
+            removeCar(),
+            addCar(),
+            removeCar());
 
-        final NormalizedNode expected = getCars(shardDataTree);
+        final var expected = getCars();
 
-        applyCandidates(shardDataTree, candidates);
+        applyCandidates(candidates);
 
-        final NormalizedNode actual = getCars(shardDataTree);
+        final var actual = getCars();
 
         assertEquals(expected, actual);
     }
@@ -174,28 +190,28 @@ public class ShardDataTreeTest extends AbstractTest {
     public void testListenerNotifiedOnApplySnapshot() throws Exception {
         immediatePayloadReplication(shardDataTree, mockShard);
 
-        DOMDataTreeChangeListener listener = mock(DOMDataTreeChangeListener.class);
         shardDataTree.registerTreeChangeListener(CarsModel.CAR_LIST_PATH.node(CarsModel.CAR_QNAME), listener,
             Optional.empty(), noop -> { });
 
-        addCar(shardDataTree, "optima");
+        addCar("optima");
 
         verifyOnDataTreeChanged(listener, dtc -> {
             assertEquals("getModificationType", ModificationType.WRITE, dtc.getRootNode().modificationType());
             assertEquals("getRootPath", CarsModel.newCarPath("optima"), dtc.getRootPath());
         });
 
-        addCar(shardDataTree, "sportage");
+        addCar("sportage");
 
         verifyOnDataTreeChanged(listener, dtc -> {
             assertEquals("getModificationType", ModificationType.WRITE, dtc.getRootNode().modificationType());
             assertEquals("getRootPath", CarsModel.newCarPath("sportage"), dtc.getRootPath());
         });
 
-        ShardDataTree newDataTree = new ShardDataTree(mockShard, fullSchema, TreeType.OPERATIONAL);
+        final var newDataTree = new ShardDataTree(mockShard, fullSchema, TreeType.OPERATIONAL);
+        final var newParent = new SimpleTransactionParent(newDataTree, HISTORY_ID);
         immediatePayloadReplication(newDataTree, mockShard);
-        addCar(newDataTree, "optima");
-        addCar(newDataTree, "murano");
+        addCar(newParent, "optima");
+        addCar(newParent, "murano");
 
         shardDataTree.applySnapshot(newDataTree.takeStateSnapshot());
 
@@ -550,11 +566,10 @@ public class ShardDataTreeTest extends AbstractTest {
     }
 
     private CommitCohort newShardDataTreeCohort(final DataTreeOperation operation) {
-        final var queue = shardDataTree.unorderedParent();
-        final var transaction = queue.newReadWriteTransaction(nextTransactionId());
+        final var transaction = parent.newReadWriteTransaction(nextTransactionId());
         final var snapshot = transaction.getSnapshot();
         operation.execute(snapshot);
-        return queue.finishTransaction(transaction);
+        return parent.finishTransaction(transaction);
     }
 
     private static void verifyOnDataTreeChanged(final DOMDataTreeChangeListener listener,
@@ -570,26 +585,30 @@ public class ShardDataTreeTest extends AbstractTest {
         reset(listener);
     }
 
-    private static NormalizedNode getCars(final ShardDataTree shardDataTree) {
+    private NormalizedNode getCars() {
         final var optional = shardDataTree.takeSnapshot().readNode(CarsModel.BASE_PATH);
         assertTrue(optional.isPresent());
         return optional.orElseThrow();
     }
 
-    private static DataTreeCandidate addCar(final ShardDataTree shardDataTree) {
-        return addCar(shardDataTree, "altima");
+    private DataTreeCandidate addCar() {
+        return addCar("altima");
     }
 
-    private static DataTreeCandidate addCar(final ShardDataTree shardDataTree, final String name) {
-        return doTransaction(shardDataTree, snapshot -> {
+    private DataTreeCandidate addCar(final String name) {
+        return addCar(parent, name);
+    }
+
+    private static DataTreeCandidate addCar(final TransactionParent parent, final String name) {
+        return doTransaction(parent, snapshot -> {
             snapshot.merge(CarsModel.BASE_PATH, CarsModel.emptyContainer());
             snapshot.merge(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
             snapshot.write(CarsModel.newCarPath(name), CarsModel.newCarEntry(name, Uint64.valueOf(100)));
         });
     }
 
-    private static DataTreeCandidate removeCar(final ShardDataTree shardDataTree) {
-        return doTransaction(shardDataTree, snapshot -> snapshot.delete(CarsModel.newCarPath("altima")));
+    private DataTreeCandidate removeCar() {
+        return doTransaction(parent, snapshot -> snapshot.delete(CarsModel.newCarPath("altima")));
     }
 
     @FunctionalInterface
@@ -597,13 +616,11 @@ public class ShardDataTreeTest extends AbstractTest {
         void execute(DataTreeModification snapshot);
     }
 
-    private static DataTreeCandidate doTransaction(final ShardDataTree shardDataTree,
-            final DataTreeOperation operation) {
-        final var queue = shardDataTree.unorderedParent();
-        final var transaction = queue.newReadWriteTransaction(nextTransactionId());
+    private static DataTreeCandidate doTransaction(final TransactionParent parent, final DataTreeOperation operation) {
+        final var transaction = parent.newReadWriteTransaction(nextTransactionId());
         final var snapshot = transaction.getSnapshot();
         operation.execute(snapshot);
-        final var cohort = queue.finishTransaction(transaction);
+        final var cohort = parent.finishTransaction(transaction);
 
         immediateCanCommit(cohort);
         immediatePreCommit(cohort);
@@ -613,15 +630,13 @@ public class ShardDataTreeTest extends AbstractTest {
         return candidate;
     }
 
-    private static DataTreeCandidate applyCandidates(final ShardDataTree shardDataTree,
-            final List<DataTreeCandidate> candidates) {
-        final var queue = shardDataTree.unorderedParent();
-        final var transaction = queue.newReadWriteTransaction(nextTransactionId());
+    private DataTreeCandidate applyCandidates(final List<DataTreeCandidate> candidates) {
+        final var transaction = parent.newReadWriteTransaction(nextTransactionId());
         final var snapshot = transaction.getSnapshot();
         for (var candidateTip : candidates) {
             DataTreeCandidates.applyToModification(snapshot, candidateTip);
         }
-        final var cohort = queue.finishTransaction(transaction);
+        final var cohort = parent.finishTransaction(transaction);
 
         immediateCanCommit(cohort);
         immediatePreCommit(cohort);
