@@ -43,10 +43,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Abstract class for providing logical tracking of frontend local histories. This class is specialized for
  * standalone transactions and chained transactions.
- *
- * @author Robert Varga
  */
-abstract class AbstractFrontendHistory implements Identifiable<LocalHistoryIdentifier> {
+abstract sealed class AbstractFrontendHistory implements Identifiable<LocalHistoryIdentifier>
+        permits LocalFrontendHistory, StandaloneFrontendHistory {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractFrontendHistory.class);
 
     private final Map<TransactionIdentifier, FrontendTransaction> transactions = new HashMap<>();
